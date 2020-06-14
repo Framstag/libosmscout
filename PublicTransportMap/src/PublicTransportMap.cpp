@@ -116,6 +116,7 @@ struct Station
 struct Route
 {
   std::string            name;
+  osmscout::Color        color;
   std::list<Station>     stations;
   std::vector<Direction> directions;
 };
@@ -200,10 +201,18 @@ std::list<Route> TransformRoutes(osmscout::Database& database,
 
   for (const auto& route : orgRoutes) {
     for (const auto& variant : route->variants) {
-      Route newRoute;
+      Route     newRoute;
       Direction direction=Direction(variant.GetFrom(),variant.GetTo());
 
-      newRoute.name=route->GetRef();
+      newRoute.name=route->GetRef().empty() ? variant.GetRef() : route->GetRef();
+      newRoute.color=osmscout::Color(0.0,0.0,0.7);
+
+      if (variant.GetColor().IsVisible()) {
+        newRoute.color=variant.GetColor();
+      }
+      else if (route->GetColor().IsVisible()) {
+        route->GetColor();
+      }
 
       for (const auto& stop : variant.stops) {
         Station station;
@@ -300,7 +309,6 @@ void WriteSVGHeader(std::ofstream& stream, size_t width, size_t height)
   stream << "           font-size: 15px;" << std::endl;
   stream << "         }" << std::endl;
   stream << "         #refLine {" << std::endl;
-  stream << "           stroke: #0000aa;" << std::endl;
   stream << "           stroke-width: 20px;" << std::endl;
   stream << "           stroke-linecap: round;" << std::endl;
   stream << "         }" << std::endl;
@@ -364,8 +372,11 @@ void WriteRouteList(std::ofstream& stream, const std::list<Route>& routes)
     }
 
     if (!route.stations.empty()) {
-      stream << "  <line id=\"refLine\" x1=\"" << x+300 << "\" y1=\"" << y-10 << "\" x2=\""
-             << x+300+(route.stations.size()-1)*35 << "\" y2=\"" << y-10 << "\"/>" << std::endl;
+      stream << "  <line id=\"refLine\" "
+             << "x1=\"" << x+300 << "\" y1=\"" << y-10 << "\" "
+             << "x2=\"" << x+300+(route.stations.size()-1)*35 << "\" y2=\"" << y-10 << "\" "
+             << "stroke=\"" << route.color.ToHexString() << "\" "
+             << "/>" << std::endl;
 
       WriteStationList(stream,
                        route,

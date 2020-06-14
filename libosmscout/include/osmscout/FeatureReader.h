@@ -278,6 +278,7 @@ namespace osmscout {
   using OperatorFeatureValueReader         = FeatureValueReader<OperatorFeature, OperatorFeatureValue>;
   using NetworkFeatureValueReader          = FeatureValueReader<NetworkFeature, NetworkFeatureValue>;
   using FromToFeatureValueReader           = FeatureValueReader<FromToFeature, FromToFeatureValue>;
+  using ColorFeatureValueReader            = FeatureValueReader<ColorFeature, ColorFeatureValue>;
 
   template <class F, class V>
   class FeatureLabelReader

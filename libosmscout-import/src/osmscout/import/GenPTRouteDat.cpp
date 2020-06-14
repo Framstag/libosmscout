@@ -31,6 +31,7 @@
 
 #include <osmscout/import/Preprocess.h>
 
+#include <osmscout/util/Color.h>
 #include <osmscout/util/File.h>
 
 namespace osmscout {
@@ -108,11 +109,13 @@ namespace osmscout {
       OperatorFeatureValueReader operatorReader(*typeConfig);
       NetworkFeatureValueReader  networkReader(*typeConfig);
       FromToFeatureValueReader   fromToReader(*typeConfig);
+      ColorFeatureValueReader    colorReader(*typeConfig);
       auto                       defaultName        =NameFeatureValue("");
       auto                       defaultRef         =RefFeatureValue("");
       auto                       defaultOperatorName=OperatorFeatureValue("");
       auto                       defaultNetworkName =NetworkFeatureValue("");
       auto                       defaultFromToName =FromToFeatureValue("","");
+      auto                       defaultColor=ColorFeatureValue(Color::LUCENT_WHITE);
 
       routeMasterScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                               Preprocess::RAWROUTEMASTER_DAT),
@@ -133,6 +136,7 @@ namespace osmscout {
         std::string ref=refReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultRef).GetRef();
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
+        Color       color=colorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultColor).GetColor();
 
         PTRouteRef route=std::make_shared<PTRoute>();
 
@@ -142,6 +146,7 @@ namespace osmscout {
         route->SetRef(ref);
         route->SetOperator(operatorName);
         route->SetNetwork(networkName);
+        route->SetColor(color);
 
         routes.push_back(route);
 
@@ -259,6 +264,7 @@ namespace osmscout {
         std::string operatorName=operatorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultOperatorName).GetOperator();
         std::string networkName=networkReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultNetworkName).GetNetwork();
         auto        fromToValue=fromToReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultFromToName);
+        Color       color=colorReader.GetValue(rawRel.GetFeatureValueBuffer(),defaultColor).GetColor();
 
         auto       routeMasterIter=idRouteMasterMap.find(rawRel.GetId());
         PTRouteRef route;
@@ -278,6 +284,7 @@ namespace osmscout {
         variant.SetNetwork(networkName);
         variant.SetFrom(fromToValue.GetFrom());
         variant.SetTo(fromToValue.GetTo());
+        variant.SetColor(color);
 
         for (const auto& member : rawRel.members) {
           if (member.role=="stop") {

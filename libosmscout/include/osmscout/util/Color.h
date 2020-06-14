@@ -38,6 +38,8 @@ namespace osmscout {
     static const Color GREEN;
     static const Color BLUE;
 
+    static const Color LUCENT_WHITE;
+
   private:
     double r=1.0;
     double g=0.0;
@@ -68,7 +70,7 @@ namespace osmscout {
     : r(r),
       g(g),
       b(b),
-      a(1)
+      a(1.0)
     {
       assert(r>=0.0 && r<=1.0);
       assert(g>=0.0 && g<=1.0);
@@ -173,7 +175,9 @@ namespace osmscout {
 
     bool operator<(const Color& other) const;
 
+    static bool IsHexString(const std::string& hexString);
     static Color FromHexString(const std::string& hexString);
+
   };
 }
 

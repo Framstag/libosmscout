@@ -30,14 +30,15 @@ namespace osmscout {
   const Color Color::GREEN(0.0,1.0,0.0);
   const Color Color::BLUE(0.0,0.0,1.0);
 
+  const Color Color::LUCENT_WHITE(1.0,1.0,1.0,1.0);
+
   static char GetHexChar(size_t value)
   {
     if (value<=9) {
       return '0'+(char)value;
     }
-    else {
-      return (char)('a'+(char)value-10);
-    }
+
+    return (char)('a'+(char)value-10);
   }
 
   static size_t GetHexValue(char digit)
@@ -45,7 +46,8 @@ namespace osmscout {
     if (digit>='0' && digit<='9') {
       return digit-'0';
     }
-    else if (digit>='a' && digit<='f') {
+
+    if (digit>='a' && digit<='f') {
       return 10+(digit-'a');
     }
 
@@ -63,24 +65,23 @@ namespace osmscout {
       hexString[3]=GetHexChar((size_t)(g*255.0/16.0));
       hexString[4]=GetHexChar((size_t)fmod(g*255.0,16));
       hexString[5]=GetHexChar((size_t)(b*255.0/16.0));
-      hexString[5]=GetHexChar((size_t)fmod(b*255.0,16));
-      hexString[6]=GetHexChar((size_t)(a*255.0/16.0));
-      hexString[7]=GetHexChar((size_t)fmod(a*255.0,16));
-
-      return hexString;
-    }
-    else {
-      std::string hexString("#      ");
-
-      hexString[1]=GetHexChar((size_t)(r*255.0/16.0));
-      hexString[2]=GetHexChar((size_t)fmod(r*255.0,16));
-      hexString[3]=GetHexChar((size_t)(g*255.0/16.0));
-      hexString[4]=GetHexChar((size_t)fmod(g*255.0,16));
-      hexString[5]=GetHexChar((size_t)(b*255.0/16.0));
       hexString[6]=GetHexChar((size_t)fmod(b*255.0,16));
+      hexString[7]=GetHexChar((size_t)(a*255.0/16.0));
+      hexString[8]=GetHexChar((size_t)fmod(a*255.0,16));
 
       return hexString;
     }
+
+    std::string hexString("#      ");
+
+    hexString[1]=GetHexChar((size_t)(r*255.0/16.0));
+    hexString[2]=GetHexChar((size_t)fmod(r*255.0,16));
+    hexString[3]=GetHexChar((size_t)(g*255.0/16.0));
+    hexString[4]=GetHexChar((size_t)fmod(g*255.0,16));
+    hexString[5]=GetHexChar((size_t)(b*255.0/16.0));
+    hexString[6]=GetHexChar((size_t)fmod(b*255.0,16));
+
+    return hexString;
   }
 
   bool Color::operator<(const Color& other) const
@@ -127,6 +128,25 @@ namespace osmscout {
     }
 
     return Color(r,g,b,a);
+  }
+
+  bool Color::IsHexString(const std::string& hexString) {
+    if (hexString.length()!=7 && hexString.length()!=9) {
+      return false;
+    }
+
+    if (hexString[0]!='#') {
+      return false;
+    }
+
+    for (size_t pos=1; pos<hexString.length(); pos++) {
+      if (!(hexString[pos]>='0' && hexString[pos]<='9') &&
+          !(hexString[pos]>='a' && hexString[pos]<='f')) {
+       return false;
+      }
+    }
+
+    return true;
   }
 }
 

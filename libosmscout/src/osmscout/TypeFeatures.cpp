@@ -3125,4 +3125,82 @@ namespace osmscout {
       }
     }
   }
+
+  void ColorFeatureValue::Read(FileScanner& scanner)
+  {
+    scanner.Read(color);
+  }
+
+  void ColorFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(color);
+  }
+
+  ColorFeatureValue& ColorFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const ColorFeatureValue&>(other);
+
+      color=otherValue.color;
+    }
+
+    return *this;
+  }
+
+  bool ColorFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const ColorFeatureValue&>(other);
+
+    return color==otherValue.color;
+  }
+
+  const char* const ColorFeature::NAME = "Color";
+  const char* const ColorFeature::NUMBER_LABEL = "color";
+  const size_t      ColorFeature::NUMBER_LABEL_INDEX = 0;
+
+  ColorFeature::ColorFeature()
+  {
+    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
+  }
+
+  void ColorFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagColor=tagRegistry.RegisterTag("colour");
+  }
+
+  std::string ColorFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t ColorFeature::GetValueSize() const
+  {
+    return sizeof(ColorFeatureValue);
+  }
+
+  FeatureValue* ColorFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) ColorFeatureValue();
+  }
+
+  void ColorFeature::Parse(TagErrorReporter& errorReporter,
+                            const TagRegistry& /*tagRegistry*/,
+                            const FeatureInstance& feature,
+                            const ObjectOSMRef& object,
+                            const TagMap& tags,
+                            FeatureValueBuffer& buffer) const
+  {
+    auto color=tags.find(tagColor);
+
+    if (color!=tags.end() && !color->second.empty()) {
+      if (!Color::IsHexString(color->second)) {
+        errorReporter.ReportTag(object,tags,"Not a valid color value");
+
+        return;
+      }
+
+      auto* value = static_cast<ColorFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+      value->SetColor(Color::FromHexString(color->second));
+    }
+  }
 }

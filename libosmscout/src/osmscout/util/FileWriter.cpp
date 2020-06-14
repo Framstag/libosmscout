@@ -507,6 +507,26 @@ namespace osmscout {
   }
 
   /**
+ *
+ * @throws IOException
+ */
+  void FileWriter::Write(const Color& color)
+  {
+    char buffer[4];
+
+    buffer[0]=char(color.GetR()*255.0);
+    buffer[1]=char(color.GetG()*255.0);
+    buffer[2]=char(color.GetB()*255.0);
+    buffer[3]=char(color.GetA()*255.0);
+
+    hasError=fwrite(buffer,1,4,file)!=4;
+
+    if (hasError) {
+      throw IOException(filename,"Cannot write Color");
+    }
+  }
+
+  /**
    *
    * @throws IOException
    */

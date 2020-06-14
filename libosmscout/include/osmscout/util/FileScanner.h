@@ -33,6 +33,7 @@
 #include <osmscout/Point.h>
 #include <osmscout/OSMScoutTypes.h>
 
+#include <osmscout/util/Color.h>
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
@@ -229,6 +230,7 @@ namespace osmscout {
     void Read(uint64_t& number, size_t bytes);
 
     void Read(ObjectFileRef& ref);
+    void Read(Color& color);
 
     void ReadFileOffset(FileOffset& offset);
     void ReadFileOffset(FileOffset& offset,
