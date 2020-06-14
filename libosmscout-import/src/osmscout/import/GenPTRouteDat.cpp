@@ -115,7 +115,7 @@ namespace osmscout {
       auto                       defaultOperatorName=OperatorFeatureValue("");
       auto                       defaultNetworkName =NetworkFeatureValue("");
       auto                       defaultFromToName =FromToFeatureValue("","");
-      auto                       defaultColor=ColorFeatureValue(Color::TRANSPARENT);
+      auto                       defaultColor=ColorFeatureValue(Color::LUCENT_WHITE);
 
       routeMasterScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                               Preprocess::RAWROUTEMASTER_DAT),

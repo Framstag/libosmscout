@@ -38,7 +38,7 @@ namespace osmscout {
     static const Color GREEN;
     static const Color BLUE;
 
-    static const Color TRANSPARENT;
+    static const Color LUCENT_WHITE;
 
   private:
     double r=1.0;

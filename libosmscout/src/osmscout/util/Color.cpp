@@ -30,7 +30,7 @@ namespace osmscout {
   const Color Color::GREEN(0.0,1.0,0.0);
   const Color Color::BLUE(0.0,0.0,1.0);
 
-  const Color Color::TRANSPARENT(0.0,0.0,0.0,1.0);
+  const Color Color::LUCENT_WHITE(1.0,1.0,1.0,1.0);
 
   static char GetHexChar(size_t value)
   {
