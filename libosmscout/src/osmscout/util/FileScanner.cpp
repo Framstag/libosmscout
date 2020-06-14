@@ -45,7 +45,6 @@
 #endif
 
 #include <osmscout/system/Assert.h>
-#include <osmscout/system/Compiler.h>
 
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Logger.h>
@@ -1420,6 +1419,50 @@ namespace osmscout {
     ReadFileOffset(fileOffset);
 
     ref.Set(fileOffset,(RefType)typeByte);
+  }
+
+  void FileScanner::Read(Color& color)
+  {
+    if (HasError()) {
+      throw IOException(filename,"Cannot read file offset","File already in error state");
+    }
+
+#if defined(HAVE_MMAP) || defined(_WIN32)
+    if (buffer!=nullptr) {
+      if (offset+4-1>=size) {
+        hasError=true;
+        throw IOException(filename,
+                          "Cannot read color",
+                          "Cannot read beyond end of file");
+      }
+
+      double r=((unsigned char)buffer[offset+0])/255.0;
+      double g=((unsigned char)buffer[offset+1])/255.0;
+      double b=((unsigned char)buffer[offset+2])/255.0;
+      double a=((unsigned char)buffer[offset+3])/255.0;
+
+      color=Color(r,g,b,a);
+
+      offset+=4;
+
+      return;
+    }
+#endif
+
+    unsigned char buffer[4];
+
+    hasError=fread(&buffer,1,4,file)!=4;
+
+    if (hasError) {
+      throw IOException(filename,"Cannot read color");
+    }
+
+    double r=buffer[0]/255.0;
+    double g=buffer[1]/255.0;
+    double b=buffer[2]/255.0;
+    double a=buffer[3]/255.0;
+
+    color=Color(r,g,b,a);
   }
 
   void FileScanner::ReadFileOffset(FileOffset& fileOffset)

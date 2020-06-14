@@ -27,6 +27,8 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeature.h>
 
+#include <osmscout/util/Color.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API NameFeatureValue : public FeatureValue
@@ -2184,6 +2186,75 @@ namespace osmscout {
 
   public:
     FromToFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
+  class OSMSCOUT_API ColorFeatureValue : public FeatureValue
+  {
+  private:
+    Color color;
+
+  public:
+    ColorFeatureValue() = default;
+    ColorFeatureValue(const ColorFeatureValue& featureValue) = default;
+
+    inline explicit ColorFeatureValue(const Color& color)
+      : color(color)
+    {
+      // no code
+    }
+
+    Color GetColor() const
+    {
+      return color;
+    }
+
+    void SetColor(const Color& color)
+    {
+      ColorFeatureValue::color=color;
+    }
+
+    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return color.ToHexString();
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    ColorFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API ColorFeature : public Feature
+  {
+  private:
+    TagId tagColor;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "number" label */
+    static const char* const NUMBER_LABEL;
+
+    /** Index of the 'number' label */
+    static const size_t      NUMBER_LABEL_INDEX;
+
+  public:
+    ColorFeature();
     void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;

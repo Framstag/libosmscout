@@ -2239,96 +2239,96 @@ TYPES
 
   TYPE routemaster_aerialway
     = RELATION ("type"=="route_master" AND "route_master"=="aerialway")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_aerialway
     = RELATION ("type"=="route" AND "route"=="aerialway")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Bus
 
   TYPE routemaster_bus
     = RELATION ("type"=="route_master" AND "route_master"=="bus")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_bus
     = RELATION ("type"=="route" AND "route"=="bus")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Ferry
 
   TYPE routemaster_ferry
     = RELATION ("type"=="route_master" AND "route_master"=="ferry")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_ferry
     = RELATION ("type"=="route" AND "route"=="ferry")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Monorail
 
   TYPE routemaster_monorail
     = RELATION ("type"=="route_master" AND "route_master"=="monorail")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_monorail
     = RELATION ("type"=="route" AND "route"=="monorail")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Subway
 
   TYPE routemaster_subway
     = RELATION ("type"=="route_master" AND "route_master"=="subway")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_subway
     = RELATION ("type"=="route" AND "route"=="subway")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Train
 
   TYPE routemaster_train
     = RELATION ("type"=="route_master" AND "route_master"=="train")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_train
     = RELATION ("type"=="route" AND "route"=="train")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Tram
 
   TYPE routemaster_tram
     = RELATION ("type"=="route_master" AND "route_master"=="tram")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_tram
     = RELATION ("type"=="route" AND "route"=="tram")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Trolleybus
 
   TYPE routemaster_trolleybus
     = RELATION ("type"=="route_master" AND "route_master"=="trolleybus")
-      {Name, Ref, Operator, Network}
+      {Name, Ref, Operator, Network, Color}
       ROUTE_MASTER
 
   TYPE route_trolleybus
     = RELATION ("type"=="route" AND "route"=="trolleybus")
-      {Name, Ref, Operator, Network, FromTo}
+      {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
   // Catch-all fallback for other types

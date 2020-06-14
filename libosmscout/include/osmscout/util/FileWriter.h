@@ -33,6 +33,7 @@
 #include <osmscout/Point.h>
 #include <osmscout/OSMScoutTypes.h>
 
+#include <osmscout/util/Color.h>
 #include <osmscout/util/Exception.h>
 
 namespace osmscout {
@@ -105,6 +106,8 @@ namespace osmscout {
     {
       Write(level.Get());
     }
+
+    void Write(const Color& color);
 
     void WriteFileOffset(FileOffset offset);
     void WriteFileOffset(FileOffset offset,

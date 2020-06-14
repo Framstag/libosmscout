@@ -72,6 +72,11 @@ namespace osmscout {
     Variant::to=to;
   }
 
+  void PTRoute::Variant::SetColor(const Color& color)
+  {
+    Variant::color=color;
+  }
+
   void PTRoute::SetType(const TypeInfoRef& type)
   {
     PTRoute::type=type;
@@ -97,6 +102,11 @@ namespace osmscout {
     PTRoute::network=network;
   }
 
+  void PTRoute::SetColor(const Color& color)
+  {
+    PTRoute::color=color;
+  }
+
   void PTRoute::Read(const TypeConfig& typeConfig,
                      FileScanner& scanner)
   {
@@ -112,6 +122,7 @@ namespace osmscout {
     scanner.Read(ref);
     scanner.Read(operatorName);
     scanner.Read(network);
+    scanner.Read(color);
 
     uint32_t variantCount;
 
@@ -126,6 +137,7 @@ namespace osmscout {
       scanner.Read(variant.network);
       scanner.Read(variant.from);
       scanner.Read(variant.to);
+      scanner.Read(variant.color);
 
       uint32_t stopCount;
       uint32_t platformCount;
@@ -167,6 +179,7 @@ namespace osmscout {
     writer.Write(ref);
     writer.Write(operatorName);
     writer.Write(network);
+    writer.Write(color);
 
     writer.WriteNumber(static_cast<uint32_t>(variants.size()));
 
@@ -177,6 +190,7 @@ namespace osmscout {
       writer.Write(variant.network);
       writer.Write(variant.from);
       writer.Write(variant.to);
+      writer.Write(variant.color);
 
       writer.WriteNumber(static_cast<uint32_t>(variant.stops.size()));
       writer.WriteNumber(static_cast<uint32_t>(variant.platforms.size()));
