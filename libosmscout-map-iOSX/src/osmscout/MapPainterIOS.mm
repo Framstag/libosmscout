@@ -469,8 +469,8 @@ namespace osmscout {
                                   const LabelData& label,
                                   const IOSLabel& layout) {
         
-        if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-            const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
+        if (const auto *style = dynamic_cast<const TextStyle*>(label.style.get());
+            style != nullptr) {
             
             if (style->GetStyle()==TextStyle::normal) {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
@@ -479,9 +479,8 @@ namespace osmscout {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
             }
             
-        } else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
-            
-            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+        } else if (const ShieldStyle* style = dynamic_cast<const ShieldStyle*>(label.style.get());
+                   style != nullptr) {
             
             CGContextSaveGState(cg);
             CGContextSetRGBFillColor(cg,
@@ -694,8 +693,9 @@ namespace osmscout {
         for (const auto& primitive : symbol.GetPrimitives()) {
             const DrawPrimitive *primitivePtr=primitive.get();
             
-            if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
-                const auto *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+            if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+                polygon != nullptr) {
+
                 FillStyleRef fillStyle=polygon->GetFillStyle();
                 BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
@@ -727,8 +727,9 @@ namespace osmscout {
 
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
-                const auto *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+            else if (const auto *rectangle = dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+                     rectangle != nullptr) {
+
                 FillStyleRef fillStyle=rectangle->GetFillStyle();
                 BorderStyleRef borderStyle=rectangle->GetBorderStyle();
                 if (fillStyle) {
@@ -749,8 +750,9 @@ namespace osmscout {
                 CGContextAddRect(cg,rect);
                 CGContextDrawPath(cg, kCGPathFillStroke);
             }
-            else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
-                const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+            else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
+                     circle != nullptr) {
+
                 FillStyleRef fillStyle=circle->GetFillStyle();
                 BorderStyleRef borderStyle=circle->GetBorderStyle();
                 if (fillStyle) {

@@ -280,8 +280,8 @@ namespace osmscout {
                                 const LabelData &label,
                                 const NativeLabel &/*layout*/)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.get());
+    if (const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get());
+        style != nullptr) {
 
       // TODO: text x, y coordinate is text baseline, our placement is not precise
 
@@ -300,8 +300,8 @@ namespace osmscout {
       stream << StrEscape(label.text);
       stream << "</text>" << std::endl;
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
-      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+    else if (const ShieldStyle* style = dynamic_cast<const ShieldStyle*>(label.style.get());
+             style != nullptr) {
 
       // Shield background
       stream << "    <rect";

@@ -561,75 +561,75 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
       if (meta.GetFeature()->HasValue()) {
         osmscout::FeatureValue *value=buffer.GetValue(idx);
 
-        if (dynamic_cast<osmscout::NameFeatureValue*>(value)!=nullptr) {
-          auto*nameValue=dynamic_cast<osmscout::NameFeatureValue*>(value);
+        if (auto* nameValue = dynamic_cast<osmscout::NameFeatureValue*>(value);
+            nameValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Name: " << nameValue->GetName() << std::endl;
         }
-        else if (dynamic_cast<osmscout::NameAltFeatureValue*>(value)!=nullptr) {
-          auto*nameAltValue=dynamic_cast<osmscout::NameAltFeatureValue*>(value);
+        else if (auto* nameAltValue = dynamic_cast<osmscout::NameAltFeatureValue*>(value);
+                 nameAltValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "NameAlt: " << nameAltValue->GetNameAlt() << std::endl;
         }
-        else if (dynamic_cast<osmscout::RefFeatureValue*>(value)!=nullptr) {
-          auto*refValue=dynamic_cast<osmscout::RefFeatureValue*>(value);
+        else if (auto* refValue = dynamic_cast<osmscout::RefFeatureValue*>(value);
+                 refValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Ref: " << refValue->GetRef() << std::endl;
         }
-        else if (dynamic_cast<osmscout::LocationFeatureValue*>(value)!=nullptr) {
-          auto*locationValue=dynamic_cast<osmscout::LocationFeatureValue*>(value);
+        else if (auto* locationValue = dynamic_cast<osmscout::LocationFeatureValue*>(value);
+                 locationValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Location: "<< locationValue->GetLocation() << std::endl;
         }
-        else if (dynamic_cast<osmscout::AddressFeatureValue*>(value)!=nullptr) {
-          auto*addressValue=dynamic_cast<osmscout::AddressFeatureValue*>(value);
+        else if (auto* addressValue = dynamic_cast<osmscout::AddressFeatureValue*>(value);
+                 addressValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Address: " << addressValue->GetAddress() << std::endl;
         }
-        else if (dynamic_cast<osmscout::AccessFeatureValue*>(value)!=nullptr) {
-          auto*accessValue=dynamic_cast<osmscout::AccessFeatureValue*>(value);
+        else if (auto* accessValue = dynamic_cast<osmscout::AccessFeatureValue*>(value);
+                 accessValue != nullptr) {
 
           DumpAccessFeatureValue(*accessValue,
                                  indent,
                                  false);
         }
-        else if (dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value)!=nullptr) {
-          auto*accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
+        else if (auto* accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
+                 accessValue != nullptr) {
 
           DumpAccessRestrictedFeatureValue(*accessValue,
                                            indent);
         }
-        else if (dynamic_cast<osmscout::LayerFeatureValue*>(value)!=nullptr) {
-          auto*layerValue=dynamic_cast<osmscout::LayerFeatureValue*>(value);
+        else if (auto* layerValue = dynamic_cast<osmscout::LayerFeatureValue*>(value);
+                 layerValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Layer: " << (int)layerValue->GetLayer() << std::endl;
         }
-        else if (dynamic_cast<osmscout::WidthFeatureValue*>(value)!=nullptr) {
-          auto*widthValue=dynamic_cast<osmscout::WidthFeatureValue*>(value);
+        else if (auto* widthValue = dynamic_cast<osmscout::WidthFeatureValue*>(value);
+                 widthValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Width: " << (int)widthValue->GetWidth() << std::endl;
         }
-        else if (dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value)!=nullptr) {
-          auto*maxSpeedValue=dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value);
+        else if (auto* maxSpeedValue = dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value);
+                 maxSpeedValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "MaxSpeed: " << (int)maxSpeedValue->GetMaxSpeed() << std::endl;
         }
-        else if (dynamic_cast<osmscout::GradeFeatureValue*>(value)!=nullptr) {
-          auto*gradeValue=dynamic_cast<osmscout::GradeFeatureValue*>(value);
+        else if (auto* gradeValue = dynamic_cast<osmscout::GradeFeatureValue*>(value);
+                 gradeValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "Grade: " << (int)gradeValue->GetGrade() << std::endl;
         }
-        else if (dynamic_cast<osmscout::AdminLevelFeatureValue*>(value)!=nullptr) {
-          auto*adminLevelValue=dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
+        else if (auto* adminLevelValue = dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
+                 adminLevelValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel();
@@ -640,19 +640,19 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           std::cout << std::endl;
         }
-        else if (dynamic_cast<osmscout::IsInFeatureValue*>(value)!=nullptr) {
-          auto*isInValue=dynamic_cast<osmscout::IsInFeatureValue*>(value);
+        else if (auto* isInValue = dynamic_cast<osmscout::IsInFeatureValue*>(value);
+                 isInValue != nullptr) {
 
           DumpIndent(indent);
           std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
         }
-        else if (dynamic_cast<osmscout::SidewayFeatureValue*>(value)!=nullptr) {
-          auto*sidewayValue=dynamic_cast<osmscout::SidewayFeatureValue*>(value);
+        else if (auto* sidewayValue = dynamic_cast<osmscout::SidewayFeatureValue*>(value);
+                 sidewayValue != nullptr) {
 
           DumpSidewayFeatureValue(*sidewayValue,indent);
         }
-        else if (dynamic_cast<osmscout::LanesFeatureValue*>(value)!=nullptr) {
-          auto*lanesValue=dynamic_cast<osmscout::LanesFeatureValue*>(value);
+        else if (auto* lanesValue = dynamic_cast<osmscout::LanesFeatureValue*>(value);
+                 lanesValue != nullptr) {
 
           DumpLanesFeatureValue(*lanesValue,
                                 indent);

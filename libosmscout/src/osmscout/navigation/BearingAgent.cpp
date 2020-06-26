@@ -41,8 +41,9 @@ namespace osmscout {
 
     auto now=message->timestamp;
 
-    if (dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get())!=nullptr) {
-      auto msg=dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
+    if (auto* msg = dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
+        msg != nullptr) {
+
       auto coord=msg->position.coord;
 
       if (!previousPointValid){

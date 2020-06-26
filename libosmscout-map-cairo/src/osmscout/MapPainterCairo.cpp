@@ -975,8 +975,9 @@ namespace osmscout {
                                   const LabelData &label,
                                   const CairoNativeLabel &layout)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
+    if (const auto *style = dynamic_cast<const TextStyle *>(label.style.get());
+        style != nullptr) {
+
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
@@ -1033,8 +1034,8 @@ namespace osmscout {
 #endif
 
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
-      const auto* style=dynamic_cast<const ShieldStyle*>(label.style.get());
+    else if (const auto* style = dynamic_cast<const ShieldStyle*>(label.style.get());
+             style != nullptr) {
 
       cairo_set_dash(draw,nullptr,0,0);
       cairo_set_line_width(draw,1);
@@ -1144,8 +1145,8 @@ namespace osmscout {
     double         centerX=(minX+maxX)/2;
     double         centerY=(minY+maxY)/2;
 
-    if (dynamic_cast<PolygonPrimitive*>(primitive)!=nullptr) {
-      const auto* polygon=dynamic_cast<const PolygonPrimitive*>(primitive);
+    if (const auto* polygon = dynamic_cast<const PolygonPrimitive*>(primitive);
+        polygon != nullptr) {
 
       for (auto pixel=polygon->GetCoords().begin();
            pixel!=polygon->GetCoords().end();
@@ -1164,8 +1165,8 @@ namespace osmscout {
 
       cairo_close_path(draw);
     }
-    else if (dynamic_cast<RectanglePrimitive*>(primitive)!=nullptr) {
-      const auto* rectangle=dynamic_cast<const RectanglePrimitive*>(primitive);
+    else if (const auto* rectangle = dynamic_cast<const RectanglePrimitive*>(primitive);
+             rectangle != nullptr) {
 
       cairo_rectangle(draw,
                       x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
@@ -1173,8 +1174,8 @@ namespace osmscout {
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
-    else if (dynamic_cast<CirclePrimitive*>(primitive)!=nullptr) {
-      const auto* circle=dynamic_cast<const CirclePrimitive*>(primitive);
+    else if (const auto* circle = dynamic_cast<const CirclePrimitive*>(primitive);
+             circle != nullptr) {
 
       cairo_arc(draw,
                 x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,

@@ -67,61 +67,72 @@ void NavigationModule::InitPlayer()
 void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto &message : messages) {
-    if (dynamic_cast<PositionAgent::PositionMessage *>(message.get()) != nullptr) {
-      auto positionMessage=static_cast<PositionAgent::PositionMessage*>(message.get());
+    if (auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+        positionMessage != nullptr) {
+
       auto &position=positionMessage->position;
       assert(position.state!=PositionAgent::Uninitialised); // unitialised position newer should be used in UI
       emit positionEstimate(position.state, position.coord, lastBearing);
     }
-    else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
-      auto bearingMessage = static_cast<osmscout::BearingChangedMessage *>(message.get());
+    else if (auto bearingMessage = dynamic_cast<osmscout::BearingChangedMessage *>(message.get());
+             bearingMessage != nullptr) {
+
       lastBearing=bearingMessage->bearing;
     }
-    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
-      auto targetReachedMessage = static_cast<osmscout::TargetReachedMessage *>(message.get());
+    else if (auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+             targetReachedMessage != nullptr) {
+
       emit targetReached(targetReachedMessage->targetBearing,targetReachedMessage->targetDistance);
     }
-    else if (dynamic_cast<RerouteRequestMessage*>(message.get())!=nullptr) {
-      auto req = static_cast<RerouteRequestMessage *>(message.get());
+    else if (auto req = dynamic_cast<RerouteRequestMessage *>(message.get());
+             req != nullptr) {
+
       emit rerouteRequest(req->from,
                           req->initialBearing,
                           req->to);
     }
-    else if (dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto instructions = static_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+    else if (auto instructions = dynamic_cast<RouteInstructionsMessage<RouteStep> *>(message.get());
+             instructions != nullptr) {
+
       emit update(instructions->instructions);
     }
-    else if (dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get())!=nullptr) {
-      auto nextInstruction = static_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+    else if (auto nextInstruction = dynamic_cast<NextRouteInstructionsMessage<RouteStep> *>(message.get());
+             nextInstruction != nullptr) {
+
       if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
         log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
                     << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
       }
       emit updateNext(nextInstruction->nextRouteInstruction);
     }
-    else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
-      auto arrivalMessage = static_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+    else if (auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+             arrivalMessage != nullptr) {
+
       using namespace std::chrono;
       emit arrivalEstimate(QDateTime::fromMSecsSinceEpoch(duration_cast<milliseconds>(arrivalMessage->arrivalEstimate.time_since_epoch()).count()),
                            arrivalMessage->remainingDistance);
     }
-    else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
-      auto currentSpeedMessage = static_cast<osmscout::CurrentSpeedMessage *>(message.get());
+    else if (auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+             currentSpeedMessage != nullptr) {
+
       emit currentSpeed(currentSpeedMessage->speed);
     }
-    else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
-      auto maxSpeedMessage = static_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+    else if (auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+             maxSpeedMessage != nullptr) {
+
       emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
-    } else if (dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get())!=nullptr) {
-      auto voiceInstructionMessage = static_cast<osmscout::VoiceInstructionMessage*>(message.get());
+    } else if (auto voiceInstructionMessage = dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get());
+               voiceInstructionMessage != nullptr) {
+
       if (!voiceDir.isEmpty()) {
         nextMessage = voiceInstructionMessage->message;
         InitPlayer();
         assert(mediaPlayer);
         playerStateChanged(mediaPlayer->state());
       }
-    } else if (dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get())!=nullptr) {
-      auto laneMessage = static_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
+    } else if (auto laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
+               laneMessage != nullptr) {
+
       emit laneUpdate(laneMessage->lane);
     }
   }

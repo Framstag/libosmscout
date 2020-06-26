@@ -338,8 +338,8 @@ bool DataLoader::loadRoutableObjects(const osmscout::GeoBox &box,
 void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>& messages)
 {
   for (const auto& message : messages) {
-    if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
-      auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
+    if (auto bearingChangedMessage = dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
+        bearingChangedMessage != nullptr) {
 
       auto bearingString=bearingChangedMessage->bearing.DisplayString();
       if (lastBearingString!=bearingString) {
@@ -357,8 +357,8 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
       << " Street name: " << streetChangedMessage->name << std::endl;
     }
     */
-    else if (dynamic_cast<osmscout::RerouteRequestMessage*>(message.get())!=nullptr) {
-      auto rerouteRequest=dynamic_cast<osmscout::RerouteRequestMessage*>(message.get());
+    else if (auto rerouteRequest = dynamic_cast<osmscout::RerouteRequestMessage*>(message.get());
+             rerouteRequest != nullptr) {
 
       std::cout << osmscout::TimestampToISO8601TimeString(rerouteRequest->timestamp)
                 << " Reroute request: " << rerouteRequest->from.GetDisplayText()
@@ -367,8 +367,8 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
                 << std::endl;
 
     }
-    else if (dynamic_cast<osmscout::TargetReachedMessage*>(message.get())!=nullptr) {
-      auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+    else if (auto targetReachedMessage = dynamic_cast<osmscout::TargetReachedMessage *>(message.get());
+             targetReachedMessage != nullptr) {
 
       if (targetReachedMessage->targetDistance < osmscout::Meters(1)){
         std::cout << osmscout::TimestampToISO8601TimeString(targetReachedMessage->timestamp)
@@ -381,8 +381,8 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
                   << std::endl;
       }
     }
-    else if (dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get())!=nullptr) {
-      auto positionMessage=dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
+    else if (auto positionMessage = dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
+             positionMessage != nullptr) {
 
       if (positionMessage->position.state!=routeState) {
 
@@ -393,18 +393,21 @@ void Simulator::ProcessMessages(const std::list<osmscout::NavigationMessageRef>&
                   << std::endl;
       }
     }
-    else if (dynamic_cast<osmscout::ArrivalEstimateMessage*>(message.get())!=nullptr) {
-      auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+    else if (auto arrivalMessage = dynamic_cast<osmscout::ArrivalEstimateMessage *>(message.get());
+             arrivalMessage != nullptr) {
+
       std::cout << "Estimated arrival: " << osmscout::TimestampToISO8601TimeString(arrivalMessage->arrivalEstimate)
                 << " remaining distance: " << arrivalMessage->remainingDistance.AsString()
                 << std::endl;
     }
-    else if (dynamic_cast<osmscout::CurrentSpeedMessage*>(message.get())!=nullptr) {
-      auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+    else if (auto currentSpeedMessage = dynamic_cast<osmscout::CurrentSpeedMessage *>(message.get());
+             currentSpeedMessage != nullptr) {
+
       std::cout << "Current speed: " << currentSpeedMessage->speed << " km/h" << std::endl;
     }
-    else if (dynamic_cast<osmscout::MaxAllowedSpeedMessage*>(message.get())!=nullptr) {
-      auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+    else if (auto maxSpeedMessage = dynamic_cast<osmscout::MaxAllowedSpeedMessage *>(message.get());
+             maxSpeedMessage != nullptr) {
+
       std::cout << "Max. allowed speed: " << maxSpeedMessage->maxAllowedSpeed << " km/h" << std::endl;
     }
   }
