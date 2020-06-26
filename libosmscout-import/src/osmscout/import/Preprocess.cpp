@@ -1079,6 +1079,8 @@ namespace osmscout {
     description.AddProvidedTemporaryFile(RAWCOASTLINE_DAT);
     description.AddProvidedTemporaryFile(RAWDATAPOLYGON_DAT);
     description.AddProvidedTemporaryFile(RAWTURNRESTR_DAT);
+    description.AddProvidedTemporaryFile(RAWROUTEMASTER_DAT);
+    description.AddProvidedTemporaryFile(RAWROUTE_DAT);
   }
 
   bool Preprocess::ProcessFiles(const TypeConfigRef& typeConfig,
