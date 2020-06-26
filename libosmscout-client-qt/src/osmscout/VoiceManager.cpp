@@ -32,6 +32,15 @@ VoiceDownloadJob::VoiceDownloadJob(QNetworkAccessManager *webCtrl,
     DownloadJob(webCtrl, target, replaceExisting), voice(voice)
 {}
 
+VoiceDownloadJob::~VoiceDownloadJob()
+{
+  if (started && !successful){
+    // delete partial voice
+    Voice dir(target);
+    dir.deleteVoice();
+  }
+}
+
 void VoiceDownloadJob::start()
 {
   if (target.exists()){
@@ -46,6 +55,7 @@ void VoiceDownloadJob::start()
     return;
   }
 
+  started=true;
   QJsonObject metadata;
   metadata["lang"] = voice.getLang();
   metadata["gender"] = voice.getGender();

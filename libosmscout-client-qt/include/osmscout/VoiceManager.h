@@ -45,6 +45,8 @@ public:
                    const QDir &target,
                    bool replaceExisting);
 
+  virtual ~VoiceDownloadJob();
+
   void start();
 
   inline size_t expectedSize() const override
