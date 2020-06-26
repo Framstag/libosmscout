@@ -571,8 +571,9 @@ namespace osmscout
                                     const DirectXTextLayout& textLayout)
 
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get()) !=nullptr) {
-      const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get());
+    if (const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get());
+        style != nullptr) {
+
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
@@ -584,8 +585,9 @@ namespace osmscout
                 Color(r,g,b,label.alpha),
                 textLayout);
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get()) != nullptr) {
-      const ShieldStyle *style = dynamic_cast<const ShieldStyle*>(label.style.get());
+    else if (const ShieldStyle *style = dynamic_cast<const ShieldStyle*>(label.style.get());
+             style != nullptr) {
+
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
@@ -719,9 +721,10 @@ namespace osmscout
       BorderStyleRef borderStyle = primitive->GetBorderStyle();
       bool hasBorder = borderStyle && borderStyle->GetWidth() > 0.0 && borderStyle->GetColor().IsVisible();
       float borderWidth = hasBorder ? float(projection.ConvertWidthToPixel(borderStyle->GetWidth())) : 0.0f;
-      if (dynamic_cast<PolygonPrimitive*>(primitive) != nullptr)
+
+      if (PolygonPrimitive* polygon = dynamic_cast<PolygonPrimitive*>(primitive);
+          polygon != nullptr)
       {
-        PolygonPrimitive* polygon = dynamic_cast<PolygonPrimitive*>(primitive);
         const std::list<osmscout::Vertex2D> data = polygon->GetCoords();
         if (data.size() > 2)
         {
@@ -764,9 +767,9 @@ namespace osmscout
           delete coords;
         }
       }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive) != nullptr)
+      else if (RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
+               rectangle != nullptr)
       {
-        RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
         D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX,
                                  y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY,
                                  x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX + projection.ConvertWidthToPixel(rectangle->GetWidth()),
@@ -774,9 +777,9 @@ namespace osmscout
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }
-      else if (dynamic_cast<CirclePrimitive*>(primitive) != nullptr)
+      else if (CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
+               circle != nullptr)
       {
-        CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
         D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), float(projection.ConvertWidthToPixel(circle->GetRadius())), float(projection.ConvertWidthToPixel(circle->GetRadius())));
         m_pRenderTarget->FillEllipse(ellipse, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));

@@ -1765,14 +1765,13 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		else if (descriptor.GetType()==StyleAttributeType::TYPE_COLOR) {
 		 if (valueType==ValueType::COLOR) {
 		   if (constant) {
-		     if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
+		     if (StyleConstantColor* colorConstant = dynamic_cast<StyleConstantColor*>(constant.get());
+		         colorConstant == nullptr) {
 		       std::string e="Constant is not of type 'COLOR'";
 		
 		       SemErr(e.c_str());
 		     }
 		     else {
-		       StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
-		
 		       color=colorConstant->GetColor();
 		     }
 		   }

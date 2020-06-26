@@ -62,20 +62,21 @@ namespace osmscout {
 
     auto now = message->timestamp;
 
-    if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
-      auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+    if (auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+        routeUpdateMessage != nullptr) {
 
       if (!routeUpdateMessage->routeDescription->Nodes().empty()) {
         target = routeUpdateMessage->routeDescription->Nodes().rbegin()->GetLocation();
         targetSetup = true;
       }
-    } else if (dynamic_cast<osmscout::BearingChangedMessage*>(message.get())!=nullptr) {
-      auto bearingChangedMessage=dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
+    } else if (auto bearingChangedMessage = dynamic_cast<osmscout::BearingChangedMessage*>(message.get());
+               bearingChangedMessage != nullptr) {
 
       bearing = bearingChangedMessage->bearing;
 
-    } else if (dynamic_cast<PositionAgent::PositionMessage*>(message.get())!=nullptr) {
-      auto positionMessage=dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+    } else if (auto positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
+               positionMessage != nullptr) {
+
       auto &position = positionMessage->position;
 
       if (position.state==state){

@@ -310,8 +310,9 @@ namespace osmscout {
       return;
     }
 
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const auto *style=dynamic_cast<const TextStyle*>(label.style.get());
+    if (const auto *style = dynamic_cast<const TextStyle*>(label.style.get());
+        style != nullptr) {
+
       double      r=style->GetTextColor().GetR();
       double      g=style->GetTextColor().GetG();
       double      b=style->GetTextColor().GetB();
@@ -348,12 +349,12 @@ namespace osmscout {
         textLayout.draw(painter, rect.topLeft());
       }
     }
-    else if (dynamic_cast<const ShieldStyle*>(label.style.get())!=nullptr) {
+    else if (const auto *style = dynamic_cast<const ShieldStyle*>(label.style.get());
+             style != nullptr) {
 
       QPointF marginMove(-5,-5);
       QSizeF marginResize(10,10);
 
-      const auto *style=dynamic_cast<const ShieldStyle*>(label.style.get());
       QColor     textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
                                             style->GetTextColor().GetG(),
                                             style->GetTextColor().GetB(),
@@ -654,8 +655,9 @@ namespace osmscout {
     for (const auto& primitive : symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
-        const auto     *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+      if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+          polygon != nullptr) {
+
         FillStyleRef   fillStyle=polygon->GetFillStyle();
         BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
@@ -711,8 +713,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
-        const auto     *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+      else if (const auto *rectangle = dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+               rectangle != nullptr) {
+
         FillStyleRef   fillStyle=rectangle->GetFillStyle();
         BorderStyleRef borderStyle=rectangle->GetBorderStyle();
 
@@ -751,8 +754,9 @@ namespace osmscout {
 
         painter->drawPath(path);
       }
-      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
-        const auto     *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+      else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
+               circle != nullptr) {
+
         FillStyleRef   fillStyle=circle->GetFillStyle();
         BorderStyleRef borderStyle=circle->GetBorderStyle();
         QPointF        center;

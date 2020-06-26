@@ -86,19 +86,22 @@ namespace osmscout {
     {
       auto result=std::list<NavigationMessageRef>();
 
-      if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
-        auto* routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+      if (auto* routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+          routeUpdateMessage != nullptr) {
+
         databaseMapping.clear();
         // build reverse mapping
         for (auto &e:routeUpdateMessage->routeDescription->GetDatabaseMapping()){
           databaseMapping[e.second]=e.first;
         }
         vehicle=routeUpdateMessage->vehicle;
-      } else if (dynamic_cast<RoutableObjectsRequestMessage*>(message.get())!=nullptr) {
+      } else if (auto* requestMessage = dynamic_cast<RoutableObjectsRequestMessage*>(message.get());
+                 requestMessage != nullptr) {
+
         if (databaseMapping.empty()){
           return result; // no route yet
         }
-        auto* requestMessage=dynamic_cast<RoutableObjectsRequestMessage*>(message.get());
+
         if (GetSphericalDistance(requestMessage->bbox.GetMinCoord(),
                                  requestMessage->bbox.GetMaxCoord()) > Kilometers(2)){
           log.Warn() << "Requested routable data from huge region: " << requestMessage->bbox.GetDisplayText();

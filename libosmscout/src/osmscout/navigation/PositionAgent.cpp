@@ -193,8 +193,9 @@ namespace osmscout {
     std::list<NavigationMessageRef> result;
     auto now=message->timestamp;
 
-    if (dynamic_cast<GPSUpdateMessage*>(message.get())!=nullptr) {
-      auto gpsUpdateMessage=dynamic_cast<GPSUpdateMessage*>(message.get());
+    if (auto gpsUpdateMessage = dynamic_cast<GPSUpdateMessage*>(message.get());
+        gpsUpdateMessage != nullptr) {
+
       // ignore gps update when we accuracy is too low and we have good data already
       if (gps.GetState(now)!=Good ||
           gpsUpdateMessage->horizontalAccuracy < Meters(100)){
@@ -202,13 +203,15 @@ namespace osmscout {
                    gpsUpdateMessage->currentPosition,
                    gpsUpdateMessage->horizontalAccuracy);
       }
-    } else if (dynamic_cast<RoutableObjectsMessage*>(message.get())!=nullptr){
-      auto msg=dynamic_cast<RoutableObjectsMessage*>(message.get());
+    } else if (auto msg = dynamic_cast<RoutableObjectsMessage*>(message.get());
+               msg != nullptr){
+
       if (Includes(msg->data,gps.GetGeoBox())){
         this->routableObjects = msg->data;
       }
-    } else if (dynamic_cast<RouteUpdateMessage*>(message.get())!=nullptr) {
-      auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+    } else if (auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage *>(message.get());
+               routeUpdateMessage != nullptr) {
+
       route=routeUpdateMessage->routeDescription;
       vehicle=routeUpdateMessage->vehicle;
       position.routeNode=route->Nodes().begin();

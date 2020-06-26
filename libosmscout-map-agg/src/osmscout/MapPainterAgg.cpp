@@ -274,8 +274,9 @@ namespace osmscout {
                                 const LabelData& label,
                                 const NativeLabel& layout)
   {
-    if (dynamic_cast<const TextStyle*>(label.style.get())!=nullptr) {
-      const TextStyle *style = dynamic_cast<const TextStyle *>(label.style.get());
+    if (const TextStyle *style = dynamic_cast<const TextStyle *>(label.style.get());
+        style != nullptr) {
+
       double r = style->GetTextColor().GetR();
       double g = style->GetTextColor().GetG();
       double b = style->GetTextColor().GetB();
@@ -478,8 +479,9 @@ namespace osmscout {
     for (const auto& primitive : symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr=primitive.get();
 
-      if (dynamic_cast<const PolygonPrimitive*>(primitivePtr)!=nullptr) {
-        const auto        *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+      if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
+          polygon != nullptr) {
+
         FillStyleRef      fillStyle=polygon->GetFillStyle();
         BorderStyleRef    borderStyle=polygon->GetBorderStyle();
         agg::path_storage path;
@@ -507,8 +509,9 @@ namespace osmscout {
                  borderStyle,
                  path);
       }
-      else if (dynamic_cast<const RectanglePrimitive*>(primitivePtr)!=nullptr) {
-        const auto        *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+      else if (const auto *rectangle = dynamic_cast<const RectanglePrimitive*>(primitivePtr);
+               rectangle != nullptr) {
+
         FillStyleRef      fillStyle=rectangle->GetFillStyle();
         BorderStyleRef    borderStyle=rectangle->GetBorderStyle();
         agg::path_storage path;
@@ -532,8 +535,9 @@ namespace osmscout {
                  borderStyle,
                  path);
       }
-      else if (dynamic_cast<const CirclePrimitive*>(primitivePtr)!=nullptr) {
-        const auto        *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
+      else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
+               circle != nullptr) {
+
         FillStyleRef      fillStyle=circle->GetFillStyle();
         BorderStyleRef    borderStyle=circle->GetBorderStyle();
         agg::path_storage path;
