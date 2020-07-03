@@ -254,18 +254,28 @@ namespace osmscout {
       AbstractRoutingProfile::ParametrizeForFoot(typeConfig, maxSpeed);
     }
 
+    /**
+     * Setup profile for bicycle, it also setup junction penalty and multiply cost limit and cost limit factor.
+     */
     void ParametrizeForBicycle(const TypeConfig& typeConfig,
                                double maxSpeed) override
     {
-      applyJunctionPenalty=true;
+      applyJunctionPenalty = true;
+      costLimitDistance *= 2;
+      costLimitFactor *= 1.5;
       AbstractRoutingProfile::ParametrizeForBicycle(typeConfig, maxSpeed);
     }
 
+    /**
+     * Setup profile for car, it also setup junction penalty and multiply cost limit and cost limit factor.
+     */
     bool ParametrizeForCar(const TypeConfig& typeConfig,
                            const std::map<std::string,double>& speedMap,
                            double maxSpeed) override
     {
-      applyJunctionPenalty=true;
+      applyJunctionPenalty = true;
+      costLimitDistance *= 2;
+      costLimitFactor *= 1.5;
       return AbstractRoutingProfile::ParametrizeForCar(typeConfig, speedMap, maxSpeed);
     }
 
