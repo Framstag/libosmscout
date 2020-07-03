@@ -141,6 +141,24 @@ namespace osmscout {
       return *this;
     }
 
+    inline Distance& operator-=(const Distance &d)
+    {
+      meters-=d.meters;
+      return *this;
+    }
+
+    inline Distance& operator*=(double d)
+    {
+      meters*=d;
+      return *this;
+    }
+
+    inline Distance& operator/=(double d)
+    {
+      meters/=d;
+      return *this;
+    }
+
     inline Distance operator-(const Distance &d) const
     {
       return Distance(meters-d.meters);

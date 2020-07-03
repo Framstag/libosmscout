@@ -904,4 +904,29 @@ namespace osmscout {
     stream << "Z";
     return stream.str();
   }
+
+  std::string DurationString(const Duration &duration)
+  {
+    using namespace std::chrono;
+
+    std::ostringstream stream;
+    double secondsVal = duration_cast<seconds>(duration).count();
+    if (secondsVal < 60){
+      stream << std::fixed << std::setprecision(1) << secondsVal << " s";
+      return stream.str();
+    }
+
+    double hours   = std::floor(secondsVal / 3600);
+    double rest    = secondsVal - (hours * 3600);
+    double minutes = std::floor(rest / 60);
+    double sec     = std::floor(rest - (minutes * 60));
+
+    stream << std::setfill('0') << std::setw(2) << hours
+           << ":"
+           << std::setfill('0') << std::setw(2) << minutes
+           << ":"
+           << std::setfill('0') << std::setw(2) << sec;
+
+    return stream.str();
+  }
 }

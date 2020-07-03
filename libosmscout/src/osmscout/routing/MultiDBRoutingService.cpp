@@ -193,6 +193,16 @@ namespace osmscout {
     return profile->GetCosts(profile->GetCostLimitDistance()) + profile->GetCosts(targetDistance) * profile->GetCostLimitFactor();
   }
 
+  std::string MultiDBRoutingService::GetCostString(const MultiDBRoutingState& /*state*/,
+                                                   DatabaseId database,
+                                                   double cost) const
+  {
+    assert(handles.size()>database);
+    RoutingProfileRef profile=handles[database].profile;
+    return profile->GetCostString(cost);
+  }
+
+
   bool MultiDBRoutingService::CanUse(const MultiDBRoutingState& /*state*/,
                                      const DatabaseId databaseId,
                                      const RouteNode& routeNode,

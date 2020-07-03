@@ -517,6 +517,7 @@ namespace osmscout {
    */
   extern OSMSCOUT_API std::string TimestampToISO8601TimeString(const Timestamp &timestamp);
 
+  extern OSMSCOUT_API std::string DurationString(const Duration &duration);
 }
 
 #endif
