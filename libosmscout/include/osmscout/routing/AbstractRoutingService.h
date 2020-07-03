@@ -212,6 +212,10 @@ namespace osmscout {
                                 DatabaseId database,
                                 const Distance &targetDistance) = 0;
 
+    virtual std::string GetCostString(const RoutingState& state,
+                                      DatabaseId database,
+                                      double cost) const = 0;
+
     virtual bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                                std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) = 0;
 

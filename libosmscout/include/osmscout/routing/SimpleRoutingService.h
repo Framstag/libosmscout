@@ -160,6 +160,10 @@ namespace osmscout {
                         DatabaseId database,
                         const Distance &targetDistance) override;
 
+    std::string GetCostString(const RoutingProfile& profile,
+                              DatabaseId database,
+                              double cost) const override;
+
     bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                        std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) override;
 

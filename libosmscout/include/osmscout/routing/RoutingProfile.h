@@ -33,6 +33,7 @@
 #include <osmscout/Area.h>
 
 #include <osmscout/util/Time.h>
+#include <osmscout/util/String.h>
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/routing/RouteNode.h>
@@ -87,6 +88,11 @@ namespace osmscout {
      * Estimated cost for distance when are no limitations (max. speed on the way)
      */
     virtual double GetCosts(const Distance &distance) const = 0;
+
+    /**
+     * Textual representation of cost
+     */
+    virtual std::string GetCostString(double cost) const = 0;
 
     virtual Duration GetTime(const Area& area,
                              const Distance &distance) const = 0;
@@ -152,6 +158,11 @@ namespace osmscout {
     inline double GetCostLimitFactor() const override
     {
       return costLimitFactor;
+    }
+
+    std::string GetCostString(double cost) const override
+    {
+      return std::to_string(cost);
     }
 
     void AddType(const TypeInfoRef& type, double speed);
@@ -227,6 +238,11 @@ namespace osmscout {
     inline double GetCosts(const Distance &distance) const override
     {
       return distance.As<Kilometer>();
+    }
+
+    std::string GetCostString(double cost) const override
+    {
+      return Kilometers(cost).AsString();
     }
   };
 
@@ -368,6 +384,12 @@ namespace osmscout {
 
       return distance.As<Kilometer>()/speed;
     }
+
+    std::string GetCostString(double cost) const override
+    {
+      return DurationString(std::chrono::duration_cast<Duration>(HourDuration(cost)));
+    }
+
   };
 
   using FastestPathRoutingProfileRef = std::shared_ptr<FastestPathRoutingProfile>;

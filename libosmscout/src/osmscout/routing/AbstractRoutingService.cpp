@@ -1191,12 +1191,12 @@ namespace osmscout {
 
       std::cout << "Time:                " << clock << std::endl;
 
-      std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance.As<Kilometer>() << "km" << std::endl;
-      std::cout << "Minimum cost:        " << overallCost << std::endl;
+      std::cout << "Air-line distance:   " << std::fixed << std::setprecision(1) << overallDistance.As<Kilometer>() << " km" << std::endl;
+      std::cout << "Minimum cost:        " << GetCostString(state, start.GetDatabaseId(), overallCost) << std::endl;
       if (targetFinalNode) {
-        std::cout << "Actual cost:         " << targetFinalNode->currentCost << std::endl;
+        std::cout << "Actual cost:         " << GetCostString(state, start.GetDatabaseId(), targetFinalNode->currentCost) << std::endl;
       }
-      std::cout << "Cost limit:          " << costLimit << std::endl;
+      std::cout << "Cost limit:          " << GetCostString(state, start.GetDatabaseId(), costLimit) << std::endl;
       std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
       std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
       std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;

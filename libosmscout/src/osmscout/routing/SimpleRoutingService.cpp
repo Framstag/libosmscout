@@ -133,6 +133,13 @@ namespace osmscout {
     return profile.GetCosts(profile.GetCostLimitDistance()) + profile.GetCosts(targetDistance)*profile.GetCostLimitFactor();
   }
 
+  std::string SimpleRoutingService::GetCostString(const RoutingProfile& profile,
+                                                  DatabaseId /*database*/,
+                                                  double cost) const
+  {
+    return profile.GetCostString(cost);
+  }
+
   bool SimpleRoutingService::GetRouteNodes(const std::set<DBId> &routeNodeIds,
                                            std::unordered_map<DBId,RouteNodeRef> &routeNodeMap)
   {
