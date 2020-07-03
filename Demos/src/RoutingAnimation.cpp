@@ -309,42 +309,30 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
 
 struct Arguments
 {
-  bool                    help;
+  bool                    help{false};
+  bool                    debug{false};
   std::string             databaseDirectory;
-  std::string             routerFilenamebase;
+  std::string             routerFilenamebase{osmscout::RoutingService::DEFAULT_FILENAME_BASE};
 
-  osmscout::Vehicle       vehicle;
+  osmscout::Vehicle       vehicle{osmscout::vehicleCar};
 
   osmscout::GeoCoord      start;
   osmscout::GeoCoord      target;
 
-  std::string             style;
-  std::string             output;
-  size_t                  width;
-  size_t                  height;
-  osmscout::GeoCoord      center;
+  std::string             style{"stylesheets/standard.oss"};
+  std::string             output{"./animation"};
+  size_t                  width{1920};
+  size_t                  height{1080};
+  osmscout::GeoCoord      center{-1000, -1000};
   osmscout::Magnification zoom;
-  double                  dpi;
+  double                  dpi{96};
 
-  size_t                  frameStep;
-  size_t                  startStep;
-  int64_t                 endStep;
-  size_t                  startFrame;
+  size_t                  frameStep{1};
+  size_t                  startStep{0};
+  int64_t                 endStep{-1};
+  size_t                  startFrame{0};
 
-  Arguments():
-    help(false),
-    routerFilenamebase(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
-    vehicle(osmscout::vehicleCar),
-    style("stylesheets/standard.oss"),
-    output("./animation"),
-    width(1920),
-    height(1080),
-    center(-1000,-1000),
-    dpi(96),
-    frameStep(1),
-    startStep(0),
-    endStep(-1),
-    startFrame(0)
+  Arguments()
   {
     zoom.SetLevel(osmscout::Magnification::magVeryClose);
   }
@@ -371,6 +359,13 @@ int main(int argc, char* argv[])
                       helpArgs,
                       "Return argument help",
                       true);
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
 
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.routerFilenamebase=value;
@@ -507,6 +502,8 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
+
+  osmscout::log.Debug(args.debug);
 
   if (args.center.GetLat()==-1000 && args.center.GetLon()==-1000){
     args.center=args.start;
