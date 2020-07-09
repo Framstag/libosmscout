@@ -23,6 +23,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
@@ -259,6 +260,7 @@ namespace osmscout {
     bool applyJunctionPenalty=true;
     Distance penaltySameType=Meters(160);
     Distance penaltyDifferentType=Meters(250);
+    HourDuration maxPenalty=std::chrono::seconds(10);
 
   public:
     explicit FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
@@ -341,6 +343,11 @@ namespace osmscout {
         junctionPenalty = minSpeed <= 0 ?
                           std::numeric_limits<double>::infinity() :
                           penaltyDistance.As<Kilometer>() / minSpeed;
+
+        junctionPenalty = std::min(junctionPenalty, maxPenalty.count());
+#if defined(DEBUG_ROUTING)
+        std::cout << "  Add junction penalty " << GetCostString(junctionPenalty) << std::endl;
+#endif
       }
 
       return outPrice + junctionPenalty;
