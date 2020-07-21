@@ -30,6 +30,7 @@
 struct Arguments
 {
   bool                   help=false;
+  bool                   debug=false;
   std::string            databaseDirectory;
   std::string            defaultAdminRegion;
   bool                   searchForLocation=true;
@@ -326,6 +327,13 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineBoolOption([&args](bool value) {
                         args.searchForLocation=value;
                       }),
@@ -411,11 +419,10 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  /*
-  osmscout::log.Debug(true);
+  osmscout::log.Debug(args.debug);
   osmscout::log.Info(true);
   osmscout::log.Warn(true);
-  osmscout::log.Error(true);*/
+  osmscout::log.Error(true);
 
   try {
     std::locale::global(std::locale(""));
