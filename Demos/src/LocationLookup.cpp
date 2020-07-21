@@ -38,7 +38,7 @@ struct Arguments
   bool                   adminRegionOnlyMatch=false;
   bool                   poiOnlyMatch=false;
   bool                   locationOnlyMatch=false;
-  bool                   addressOnlyMatch=true;
+  bool                   addressOnlyMatch=false;
   bool                   partialMatch=false;
   size_t                 limit=30;
   size_t                 repeat=1;

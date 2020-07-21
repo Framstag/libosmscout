@@ -284,16 +284,8 @@ namespace osmscout {
   }
 
   LocationStringSearchParameter::LocationStringSearchParameter(const std::string& searchString)
-    : searchForLocation(true),
-      searchForPOI(true),
-      adminRegionOnlyMatch(false),
-      poiOnlyMatch(false),
-      locationOnlyMatch(false),
-      addressOnlyMatch(true),
-      partialMatch(false),
-      searchString(searchString),
-      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
-      limit(100)
+    : searchString(searchString),
+      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>())
   {
     // no code
   }
