@@ -916,7 +916,7 @@ namespace osmscout {
                const POI& poi) override
     {
       for (const auto& pattern : patterns) {
-        osmscout::log.Debug() << pattern.tokenString->text << " vs. " << poi.name;
+        // osmscout::log.Debug() << pattern.tokenString->text << " vs. " << poi.name;
         StringMatcher::Result matchResult=pattern.matcher->Match(poi.name);
 
         if (matchResult==StringMatcher::match) {
