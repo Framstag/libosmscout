@@ -156,24 +156,24 @@ namespace osmscout {
   class OSMSCOUT_API LocationStringSearchParameter CLASS_FINAL
   {
   private:
-    AdminRegionRef          defaultAdminRegion;   //!< A default admin region to use, if no admin region was found based on the search string
+    AdminRegionRef          defaultAdminRegion;          //!< A default admin region to use, if no admin region was found based on the search string
 
-    bool                    searchForLocation;    //!< Search for a location
-    bool                    searchForPOI;         //!< Search for a POI
+    bool                    searchForLocation=true;      //!< Search for a location
+    bool                    searchForPOI=true;           //!< Search for a POI
 
-    bool                    adminRegionOnlyMatch; //!< Evaluate on direct admin region matches
-    bool                    poiOnlyMatch;         //!< Evaluate on direct poi matches
-    bool                    locationOnlyMatch;    //!< Evaluate on direct location matches
-    bool                    addressOnlyMatch;     //!< Evaluate on direct address matches
+    bool                    adminRegionOnlyMatch=false;  //!< Evaluate on direct admin region matches
+    bool                    poiOnlyMatch=false;          //!< Evaluate on direct poi matches
+    bool                    locationOnlyMatch=false;     //!< Evaluate on direct location matches
+    bool                    addressOnlyMatch=false;      //!< Evaluate on direct address matches
 
-    bool                    partialMatch;         //!< Add matches to the result, event if they do not match the complete search string
+    bool                    partialMatch=false;          //!< Add matches to the result, event if they do not match the complete search string
 
-    std::string             searchString;         //!< The search string itself, must bot be empty
-    StringMatcherFactoryRef stringMatcherFactory; //!< String matcher factory to use
+    std::string             searchString;                //!< The search string itself, must bot be empty
+    StringMatcherFactoryRef stringMatcherFactory;        //!< String matcher factory to use
 
-    size_t                  limit;                //!< The maximum number of results over all sub searches requested
+    size_t                  limit=100;                   //!< The maximum number of results over all sub searches requested
 
-    BreakerRef              breaker;              //!< Breaker for search
+    BreakerRef              breaker;                     //!< Breaker for search
 
   public:
     explicit LocationStringSearchParameter(const std::string& searchString);

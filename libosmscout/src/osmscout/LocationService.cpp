@@ -21,11 +21,11 @@
 
 #include <algorithm>
 
-#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 #include <osmscout/TypeFeatures.h>
 #include <iostream>
+
 namespace osmscout {
 
   /**
@@ -284,16 +284,8 @@ namespace osmscout {
   }
 
   LocationStringSearchParameter::LocationStringSearchParameter(const std::string& searchString)
-    : searchForLocation(true),
-      searchForPOI(true),
-      adminRegionOnlyMatch(false),
-      poiOnlyMatch(false),
-      locationOnlyMatch(false),
-      addressOnlyMatch(true),
-      partialMatch(false),
-      searchString(searchString),
-      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>()),
-      limit(100)
+    : searchString(searchString),
+      stringMatcherFactory(std::make_shared<osmscout::StringMatcherCIFactory>())
   {
     // no code
   }
@@ -744,14 +736,14 @@ namespace osmscout {
         StringMatcher::Result matchResult=pattern.matcher->Match(region.name);
 
         if (matchResult==StringMatcher::match) {
-          //std::cout << "Match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'" << std::endl;
+          osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'";
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(region),
                                region.name);
 
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          //std::cout << "Partial match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'" << std::endl;
+          osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'";
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(region),
                                       region.name);
@@ -762,14 +754,14 @@ namespace osmscout {
             matchResult=pattern.matcher->Match(alias.name);
 
             if (matchResult==StringMatcher::match) {
-              //std::cout << "Match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'" << std::endl;
+              osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'";
               matches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           alias.name);
               break;
             }
             else if (matchResult==StringMatcher::partialMatch) {
-              //std::cout << "Partial match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'" << std::endl;
+              osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'";
               partialMatches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           alias.name);
@@ -825,11 +817,11 @@ namespace osmscout {
 
     Action Visit(const AdminRegion& region) override
     {
-      //std::cout << "Visiting admin region: " << region.name << std::endl;
+      osmscout::log.Debug() << "Visiting admin region: " << region.name;
 
       for (const auto& area : region.postalAreas) {
         if (patterns.empty()) {
-          //std::cout << "Match postal area name '" << area.name << "'" << std::endl;
+          osmscout::log.Debug() << "Match postal area name '" << area.name << "'";
           matches.emplace_back(std::make_shared<TokenString>(0,0,""),
                                       std::make_shared<AdminRegion>(region),
                                       std::make_shared<PostalArea>(area),
@@ -848,7 +840,7 @@ namespace osmscout {
             }
 
             if (matchResult==StringMatcher::match) {
-              //std::cout << "Match postal area name '" << area.name << "'" << std::endl;
+              osmscout::log.Debug() << "Match postal area name '" << area.name << "'";
               matches.emplace_back(pattern.tokenString,
                                    std::make_shared<AdminRegion>(region),
                                    std::make_shared<PostalArea>(area),
@@ -856,7 +848,7 @@ namespace osmscout {
 
             }
             else if (matchResult==StringMatcher::partialMatch) {
-              //std::cout << "Partial match postal area name '" << area.name << "'" << std::endl;
+              osmscout::log.Debug() << "Partial match postal area name '" << area.name << "'";
               partialMatches.emplace_back(pattern.tokenString,
                                           std::make_shared<AdminRegion>(region),
                                           std::make_shared<PostalArea>(area),
@@ -916,17 +908,17 @@ namespace osmscout {
                const POI& poi) override
     {
       for (const auto& pattern : patterns) {
-        //std::cout << pattern.tokenString->text << " vs. " << poi.name << std::endl;
+        // osmscout::log.Debug() << pattern.tokenString->text << " vs. " << poi.name;
         StringMatcher::Result matchResult=pattern.matcher->Match(poi.name);
 
         if (matchResult==StringMatcher::match) {
-          //std::cout << " => match" << std::endl;
+          osmscout::log.Debug() << " => match";
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<POI>(poi));
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          //std::cout << " => partial match" << std::endl;
+          osmscout::log.Debug() << " => partial match";
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<POI>(poi));
@@ -982,20 +974,20 @@ namespace osmscout {
                const PostalArea& postalArea,
                const Location& location) override
     {
-      //std::cout << "Visiting " << adminRegion.name << " " << postalArea.name << "..." << std::endl;
+      // osmscout::log.Debug() << "Visiting " << adminRegion.name << " " << postalArea.name << "...";
 
       for (const auto& pattern : patterns) {
         StringMatcher::Result matchResult=pattern.matcher->Match(location.name);
 
         if (matchResult==StringMatcher::match) {
-          //std::cout << "Match location name '" << location.name << "'" << std::endl;
+          osmscout::log.Debug() << "Match location name '" << location.name << "'";
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<PostalArea>(postalArea),
                                std::make_shared<Location>(location));
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          //std::cout << "Partial match location name '" << location.name << "'" << std::endl;
+          osmscout::log.Debug() << "Partial match location name '" << location.name << "'";
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<PostalArea>(postalArea),
@@ -1057,7 +1049,7 @@ namespace osmscout {
         StringMatcher::Result matchResult=pattern.matcher->Match(address.name);
 
         if (matchResult==StringMatcher::match) {
-          //std::cout << "Match region name '" << region.name << "'" << std::endl;
+          osmscout::log.Debug() << "Match address '" << address.name << "'";
           matches.emplace_back(pattern.tokenString,
                                std::make_shared<AdminRegion>(adminRegion),
                                std::make_shared<PostalArea>(postalArea),
@@ -1065,7 +1057,7 @@ namespace osmscout {
                                std::make_shared<Address>(address));
         }
         else if (matchResult==StringMatcher::partialMatch) {
-          //std::cout << "Partial match region name '" << region.name << "'" << std::endl;
+          osmscout::log.Debug() << "Partial match address '" << address.name << "'";
           partialMatches.emplace_back(pattern.tokenString,
                                       std::make_shared<AdminRegion>(adminRegion),
                                       std::make_shared<PostalArea>(postalArea),
@@ -1212,7 +1204,7 @@ namespace osmscout {
     else {
       LocationSearchResult::Entry entry;
 
-      //std::cout << "Add location: " << locationMatch.location->name << " " << locationMatch.postalArea->name << " " << locationMatch.adminRegion->name << std::endl;
+      osmscout::log.Debug() << "Add location: " << postalAreaMatch.name << " " << postalAreaMatch.postalArea->name << " " << postalAreaMatch.adminRegion->name;
 
       entry.adminRegion=postalAreaMatch.adminRegion;
       entry.adminRegionMatchQuality=regionMatchQuality;
@@ -1241,7 +1233,7 @@ namespace osmscout {
     else {
       LocationSearchResult::Entry entry;
 
-      //std::cout << "Add location: " << locationMatch.location->name << " " << locationMatch.postalArea->name << " " << locationMatch.adminRegion->name << std::endl;
+      osmscout::log.Debug() << "Add location: " << locationMatch.location->name << " " << locationMatch.postalArea->name << " " << locationMatch.adminRegion->name;
 
       entry.adminRegion=locationMatch.adminRegion;
       entry.adminRegionMatchQuality=regionMatchQuality;
@@ -1321,10 +1313,10 @@ namespace osmscout {
 
     addressVisitTime.Stop();
 
-    //std::cout << "Address visit time: " << addressVisitTime.ResultString() << std::endl;
+    osmscout::log.Debug() << "Address visit time: " << addressVisitTime.ResultString();
 
     for (const auto& addressMatch : addressVisitor.matches) {
-      //std::cout << "Found address match '" << addressMatch.address->name << "' for pattern '" << addressMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found address match '" << addressMatch.address->name << "' for pattern '" << addressMatch.tokenString->text << "'";
       std::list<std::string> restTokens=BuildStringListFromSubToken(addressMatch.tokenString,
                                                                     addressTokens);
 
@@ -1341,7 +1333,7 @@ namespace osmscout {
 
     if (!parameter.addressOnlyMatch) {
       for (const auto& addressMatch : addressVisitor.partialMatches) {
-        //std::cout << "Found address candidate '" << addressMatch.address->name << "' for pattern '" << addressMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found address candidate '" << addressMatch.address->name << "' for pattern '" << addressMatch.tokenString->text << "'";
         std::list<std::string> restTokens=BuildStringListFromSubToken(addressMatch.tokenString,
                                                                       addressTokens);
 
@@ -1397,13 +1389,13 @@ namespace osmscout {
 
     locationVisitTime.Stop();
 
-    //std::cout << "Location (" << regionMatch.adminRegion->name << ") visit time: " << locationVisitTime.ResultString() << std::endl;
+    osmscout::log.Debug() << "Location (" << regionMatch.adminRegion->name << ") visit time: " << locationVisitTime.ResultString();
 
     for (const auto& locationMatch : locationVisitor.matches) {
       if (breaker && breaker->IsAborted()){
         return true;
       }
-      //std::cout << "Found location match '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found location match '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'";
       std::list<std::string> addressTokens=BuildStringListFromSubToken(locationMatch.tokenString,
                                                                        locationTokens);
 
@@ -1442,7 +1434,7 @@ namespace osmscout {
 
     if (!parameter.locationOnlyMatch) {
       for (const auto& locationMatch : locationVisitor.partialMatches) {
-        //std::cout << "Found location candidate '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found location candidate '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'";
         std::list<std::string> addressTokens=BuildStringListFromSubToken(locationMatch.tokenString,
                                                                          locationTokens);
 
@@ -1511,7 +1503,7 @@ namespace osmscout {
                                           locationSearchPatterns,
                                           breaker);
 
-    //std::cout << "Search for location for " << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "..." << std::endl;
+    osmscout::log.Debug() << "Search for location for " << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "...";
 
     if (!locationIndex->VisitLocations(*postalAreaMatch.adminRegion,
                                        *postalAreaMatch.postalArea,
@@ -1521,7 +1513,7 @@ namespace osmscout {
     }
 
     for (const auto& locationMatch : locationVisitor.matches) {
-      //std::cout << "Found location match '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found location match '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'";
       if (addressPattern.empty()) {
         AddLocationResult(parameter,
                           regionMatchQuality,
@@ -1561,7 +1553,7 @@ namespace osmscout {
 
     if (!parameter.locationOnlyMatch) {
       for (const auto& locationMatch : locationVisitor.partialMatches) {
-        //std::cout << "Found location candidate '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found location candidate '" << locationMatch.location->name << "' for pattern '" << locationMatch.tokenString->text << "'";
         if (addressPattern.empty()) {
           AddLocationResult(parameter,
                             regionMatchQuality,
@@ -1622,7 +1614,7 @@ namespace osmscout {
 
     // Build Location search patterns
 
-    //std::cout << "Search for postal area '" << postalAreaPattern << "'" << std::endl;
+    osmscout::log.Debug() << "Search for postal area '" << postalAreaPattern << "'";
 
     std::list<TokenStringRef> postalAreaSearchPatterns;
 
@@ -1642,7 +1634,7 @@ namespace osmscout {
     }
 
     for (const auto& postalAreaMatch : postalAreaVisitor.matches) {
-      //std::cout << "Found postal area match '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found postal area match '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'";
 
       if (locationPattern.empty() &&
           addressPattern.empty()) {
@@ -1683,7 +1675,7 @@ namespace osmscout {
 
     if (!parameter.postalAreaOnlyMatch) {
       for (const auto& postalAreaMatch : postalAreaVisitor.partialMatches) {
-        //std::cout << "Found postal area candidate '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found postal area candidate '" << postalAreaMatch.adminRegion->name << " " << postalAreaMatch.postalArea->name << "' for pattern '" << postalAreaMatch.tokenString->text << "'";
         if (locationPattern.empty() &&
             addressPattern.empty()) {
           AddPostalAreaResult(parameter,
@@ -1759,7 +1751,7 @@ namespace osmscout {
     }
 
     for (const auto& poiMatch : poiVisitor.matches) {
-      //std::cout << "Found poi match '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found poi match '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'";
       std::list<std::string> restTokens=BuildStringListFromSubToken(poiMatch.tokenString,
                                                                     poiTokens);
 
@@ -1774,7 +1766,7 @@ namespace osmscout {
 
     if (!parameter.locationOnlyMatch) {
       for (const auto& poiMatch : poiVisitor.partialMatches) {
-        //std::cout << "Found poi candidate '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found poi candidate '" << poiMatch.poi->name << "' for pattern '" << poiMatch.tokenString->text << "'";
         std::list<std::string> restTokens=BuildStringListFromSubToken(poiMatch.tokenString,
                                                                       poiTokens);
 
@@ -1957,14 +1949,14 @@ namespace osmscout {
 
     adminRegionVisitTime.Stop();
 
-    //std::cout << "Admin Region visit: " << adminRegionVisitTime.ResultString() << std::endl;
+    osmscout::log.Debug() << "Admin Region visit: " << adminRegionVisitTime.ResultString();
     if (searchParameter.IsAborted()){
       osmscout::log.Debug() << "Search aborted";
       return true;
     }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
-      //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'";
       std::list<std::string> locationTokens=BuildStringListFromSubToken(regionMatch.tokenString,
                                                                         tokens);
 
@@ -2018,7 +2010,7 @@ namespace osmscout {
 
     if (!parameter.adminRegionOnlyMatch) {
       for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
-        //std::cout << "Found region candidate '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+        osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'";
         std::list<std::string> locationTokens=BuildStringListFromSubToken(regionMatch.tokenString,
                                                                           tokens);
 
@@ -2127,7 +2119,7 @@ namespace osmscout {
     }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
-      //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPostalAreaSearchString().empty() &&
           searchParameter.GetLocationSearchString().empty() &&
@@ -2163,7 +2155,7 @@ namespace osmscout {
     }
 
     for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
-      //std::cout << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPostalAreaSearchString().empty() &&
           searchParameter.GetLocationSearchString().empty() &&
@@ -2256,7 +2248,7 @@ namespace osmscout {
     }
 
     for (const auto& regionMatch : adminRegionVisitor.matches) {
-      //std::cout << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPOISearchString().empty()) {
         AddRegionResult(parameter,
@@ -2288,7 +2280,7 @@ namespace osmscout {
     }
 
     for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
-      //std::cout << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'" << std::endl;
+      osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPOISearchString().empty()) {
         AddRegionResult(parameter,
