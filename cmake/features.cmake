@@ -154,6 +154,19 @@ if(THREADS_HAVE_PTHREAD_ARG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
 endif()
 
+if(NOT GLM_FOUND)
+  find_package(Git)
+  if(Git_FOUND)
+    set(GLM_ROOT_DIR ${CMAKE_BINARY_DIR}/glm)
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} clone https://github.com/g-truc/glm.git --recursive ${GLM_ROOT_DIR}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      RESULT_VARIABLE git_result
+      OUTPUT_VARIABLE git_output)
+	find_package(GLM)
+  endif()
+endif()
+
 find_program(HUGO_PATH hugo)
 
 # prepare cmake variables for configuration files
