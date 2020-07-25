@@ -913,7 +913,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
                                    const MapParameter &/*parameter*/,
-                                   const osmscout::PathTextStyleRef style,
+                                   const osmscout::PathTextStyleRef& style,
                                    const std::vector<CairoGlyph> &glyphs)
   {
     cairo_matrix_t matrix;
