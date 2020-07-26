@@ -199,6 +199,13 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+  // setup c++ locale
+  try {
+    std::locale::global(std::locale(""));
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
+  }
+
   // install translator
   QTranslator translator;
   QLocale locale;
