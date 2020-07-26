@@ -71,5 +71,24 @@ namespace osmscout {
   public:
     StringMatcherRef CreateMatcher(const std::string& pattern) const override;
   };
+
+  class StringMatcherTransliterate: public StringMatcher
+  {
+  private:
+    std::string pattern;
+    std::string transliteratedPattern;
+
+  public:
+    explicit StringMatcherTransliterate(const std::string &pattern);
+
+    StringMatcher::Result Match(const std::string &text) const override;
+  };
+
+  class OSMSCOUT_API StringMatcherTransliterateFactory : public StringMatcherFactory
+  {
+  public:
+    StringMatcherRef CreateMatcher(const std::string& pattern) const override;
+  };
+
 }
 #endif
