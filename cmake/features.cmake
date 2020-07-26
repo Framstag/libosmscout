@@ -155,15 +155,18 @@ if(THREADS_HAVE_PTHREAD_ARG)
 endif()
 
 if(NOT GLM_FOUND)
-  find_package(Git)
+  find_package(Git QUIET)
   if(Git_FOUND)
-    set(GLM_ROOT_DIR ${CMAKE_BINARY_DIR}/glm)
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} clone https://github.com/g-truc/glm.git --recursive ${GLM_ROOT_DIR}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      RESULT_VARIABLE git_result
-      OUTPUT_VARIABLE git_output)
-	find_package(GLM)
+    option(OSMSCOUT_DOWNLOAD_GLM_IF_NOT_FOUND "Load GLM via Git automatically if the library was not found offline" OFF)
+	if(OSMSCOUT_DOWNLOAD_GLM_IF_NOT_FOUND)
+      set(GLM_ROOT_DIR ${CMAKE_BINARY_DIR}/glm)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} clone https://github.com/g-truc/glm.git --recursive ${GLM_ROOT_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        RESULT_VARIABLE git_result
+        OUTPUT_VARIABLE git_output)
+  	find_package(GLM)
+	endif()
   endif()
 endif()
 
