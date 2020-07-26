@@ -298,6 +298,10 @@ void DumpResult(const osmscout::DatabaseRef& database,
 
       std::cout << std::endl;
 
+      for (const auto& alias : entry.adminRegion->aliases) {
+        std::cout << "   - alias " << alias.name << std::endl;
+      }
+
       if (entry.adminRegion->aliasObject.Valid()) {
         std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
       }
