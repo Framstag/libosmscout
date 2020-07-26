@@ -1,6 +1,6 @@
 /*
 libosmscoutmx - a MATLAB mex function which uses libosmscout
-Copyright (C) 2016 Transporter
+Copyright (C) 2020 Transporter
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define LIBOSMSCOUTMX_H
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
 

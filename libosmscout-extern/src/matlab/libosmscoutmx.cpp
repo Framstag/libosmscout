@@ -1,6 +1,6 @@
 /*
 libosmscoutmx - a MATLAB mex function which uses libosmscout
-Copyright (C) 2016 Transporter
+Copyright (C) 2020 Transporter
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-#include "libosmscoutmx.h"
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <cctype>
 #include <iostream>
 #include <iomanip>
@@ -26,27 +27,30 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <fstream>
 #include <string>
 #include <vector>
+#include <list>
 #include <stdio.h>
 #include <sstream>
-#ifndef _WIN32
-#include <strings.h>
-#define stringcopy(target, size, source) strcpy(target, source)
-#else
-#define strcasecmp _stricmp
-#define stringcopy(target, size, source) strcpy_s(target, size, source)
-#define snprintf _snprintf
-#endif
+#include <algorithm>
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
+#include <osmscout/LocationDescriptionService.h>
 #include <osmscout/POIService.h>
 #include <osmscout/TypeFeatures.h>
-#include <osmscout/RoutingService.h>
-#include <osmscout/RoutePostprocessor.h>
-#include <osmscout/util/Geometry.h>
 #ifdef OSMSCOUT_MAP_CAIRO
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterCairo.h>
 #endif
+#ifndef _WIN32
+#include <strings.h>
+#define stringcopy(target, size, source) strcpy(target, source)
+#else
+#include <Windows.h>
+#define strcasecmp _stricmp
+#define stringcopy(target, size, source) strcpy_s(target, size, source)
+#define snprintf _snprintf
+#endif
+
+#include <mex.h>
 
 #ifdef _WIN32
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
@@ -135,14 +139,15 @@ namespace data
 data::STRUCTURE LocationDescription(std::string map_directory, osmscout::GeoCoord location)
 {
 	osmscout::DatabaseParameter databaseParameter;
-	osmscout::DatabaseRef database(new osmscout::Database(databaseParameter));
+	osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
 	if (!database->Open(map_directory.c_str()))
 	{
 		mexErrMsgTxt("Cannot open map database");
 	}
 	osmscout::LocationServiceRef locationService(std::make_shared<osmscout::LocationService>(database));
+	osmscout::LocationDescriptionServiceRef locationDescriptionService(std::make_shared<osmscout::LocationDescriptionService>(database));
 	osmscout::LocationDescription description;
-	if (!locationService->DescribeLocation(location, description))
+	if (!locationDescriptionService->DescribeLocation(location, description))
 	{
 		database->Close();
 		mexErrMsgTxt("Error during generation of location description");
@@ -156,8 +161,8 @@ data::STRUCTURE LocationDescription(std::string map_directory, osmscout::GeoCoor
 		structure.push_back(data::parameter_bool("place", atAddressDescription->IsAtPlace()));
 		if (!atAddressDescription->IsAtPlace())
 		{
-			structure.push_back(data::parameter_double("distance", atAddressDescription->GetDistance()));
-			structure.push_back(data::parameter_double("bearing", atAddressDescription->GetBearing()));
+			structure.push_back(data::parameter_double("distance", atAddressDescription->GetDistance().AsMeter()));
+			structure.push_back(data::parameter_double("bearing", atAddressDescription->GetBearing().AsDegrees()));
 		}
 		if (atAddressDescription->GetPlace().GetPOI())
 		{
@@ -215,12 +220,12 @@ mxArray* dsLst2mxArray(std::vector<ds> list)
 void LookupPOI(std::string map_directory, osmscout::GeoBox boundingBox, std::list<std::string> typeNames, int nlhs, mxArray* plhs[])
 {
 	osmscout::DatabaseParameter databaseParameter;
-	osmscout::DatabaseRef database(new osmscout::Database(databaseParameter));
+	osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
 	if (!database->Open(map_directory.c_str()))
 	{
 		mexErrMsgTxt("Cannot open map database");
 	}
-	osmscout::POIServiceRef	poiService(new osmscout::POIService(database));
+	osmscout::POIServiceRef poiService = std::make_shared<osmscout::POIService>(database);
 	osmscout::TypeConfigRef typeConfig(database->GetTypeConfig());
 	osmscout::TypeInfoSet nodeTypes(*typeConfig);
 	osmscout::TypeInfoSet wayTypes(*typeConfig);
@@ -247,8 +252,10 @@ void LookupPOI(std::string map_directory, osmscout::GeoBox boundingBox, std::lis
 	std::vector<osmscout::NodeRef> nodes;
 	std::vector<osmscout::WayRef> ways;
 	std::vector<osmscout::AreaRef> areas;
-	if (!poiService->GetPOIsInArea(boundingBox, nodeTypes, nodes, wayTypes, ways, areaTypes, areas))
-	{
+	try {
+		poiService->GetPOIsInArea(boundingBox, nodeTypes, nodes, wayTypes, ways, areaTypes, areas);
+	}
+	catch (const std::exception&) {
 		mexErrMsgTxt("Cannot load data from database");
 	}
 	std::vector<ds> node_data;
@@ -442,7 +449,7 @@ void DrawMapCairo(std::string map_directory, std::string style_file, size_t widt
 	}
 	cairo_surface_t *surface;
 	cairo_t         *cairo;
-	surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+	surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, (int)width, (int)height);
 	if (surface != nullptr)
 	{
 		cairo = cairo_create(surface);
