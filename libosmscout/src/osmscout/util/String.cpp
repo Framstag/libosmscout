@@ -814,7 +814,10 @@ namespace osmscout {
     return WStringToUTF8String(wstr);
   }
 
-#if defined(HAVE_ICONV)
+// MacOS iconv implementation transiterate diacritics nasty way:
+// á => 'a , ü => "u ...
+// Lets use our transliterate implementation instead
+#if defined(HAVE_ICONV) && !defined(__APPLE__)
   std::string UTF8Transliterate(const std::string& text)
   {
     iconv_t handle;
@@ -847,15 +850,6 @@ namespace osmscout {
     delete [] out;
 
     iconv_close(handle);
-
-#if defined(__APPLE__)
-    // MacOS iconv implementation transiterate diacritics nasty way:
-    // á => 'a , ü => "u ...
-    // we want to avoid these extra characters
-    res.erase(std::remove_if(res.begin(), res.end(),
-                  [](char ch){ return ch == '\'' || ch == '"' || ch == '~'; }),
-              res.end());
-#endif
 
     return res;
   }
