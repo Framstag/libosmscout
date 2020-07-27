@@ -45,8 +45,8 @@ TEST_CASE("Split string by multi-character separator")
 TEST_CASE("Transliterate diacritics")
 {
   try {
-    std::locale::global(std::locale(""));
-    std::cout << "Current locale activated" << std::endl;
+    std::locale::global(std::locale("en_US.UTF-8"));
+    std::cout << "en_US.UTF-8 locale activated" << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
   }
