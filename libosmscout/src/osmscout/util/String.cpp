@@ -848,6 +848,15 @@ namespace osmscout {
 
     iconv_close(handle);
 
+#if defined(__APPLE__)
+    // MacOS iconv implementation transiterate diacritics nasty way:
+    // á => 'a , ü => "u ...
+    // we want to avoid these extra characters
+    res.erase(std::remove_if(res.begin(), res.end(),
+                  [](char ch){ return ch == '\'' || ch == '"' || ch == '~'; }),
+              res.end());
+#endif
+
     return res;
   }
 
