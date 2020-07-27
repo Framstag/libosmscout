@@ -23,6 +23,7 @@
 #include <osmscout/system/Math.h>
 
 #include <sstream>
+#include <string_view>
 
 namespace osmscout {
 
