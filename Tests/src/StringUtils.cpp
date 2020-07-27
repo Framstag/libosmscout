@@ -51,7 +51,7 @@ TEST_CASE("Transliterate diacritics")
     std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
   }
 
-  auto transformed=osmscout::UTF8Transliterate("áéíýóúůďťňěščřžüöÁÉÍÝÓÚŮĎŤŇĚŠČŘŽÜÖ");
+  auto transformed=osmscout::UTF8Transliterate("áéíýóúůďťňěščřžüöÁÉÍÝÓÚŮĎŤŇĚŠČŘŽÜÖß");
 
-  REQUIRE(transformed == "aeiyouudtnescrzuoAEIYOUUDTNESCRZUO");
+  REQUIRE(transformed == "aeiyouudtnescrzuoAEIYOUUDTNESCRZUOss");
 }

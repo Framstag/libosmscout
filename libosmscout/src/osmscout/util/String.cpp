@@ -864,90 +864,102 @@ namespace osmscout {
 
   std::string UTF8Transliterate(const std::string& text)
   {
+    using namespace std::string_view_literals;
+
+    auto transChar = [](wchar_t c) -> std::string_view {
+      switch(c){
+        case L'\u00A0': // no-break space (&nbsp;)
+        case L'\u2007': // figure space
+        case L'\u202F': // narrow no-break space
+          return " "sv;
+
+        case L'\u00E1': // á
+          return "a"sv;
+        case L'\u00E9': // é
+        case L'\u011B': // ě
+          return "e"sv;
+        case L'\u00ED': // í
+          return "i"sv;
+        case L'\u00FD': // ý
+          return "y"sv;
+        case L'\u00F6': // ö
+        case L'\u00F3': // ó
+          return "o"sv;
+        case L'\u00FA': // ú
+        case L'\u016F': // ů
+        case L'\u00FC': // ü
+          return "u"sv;
+        case L'\u010F': // ď
+          return "d"sv;
+        case L'\u0165': // ť
+          return "t"sv;
+        case L'\u0148': // ň
+          return "n"sv;
+        case L'\u0161': // š
+          return "s"sv;
+        case L'\u010D': // č
+          return "c"sv;
+        case L'\u0159': // ř
+          return "r"sv;
+        case L'\u017E': // ž
+          return "z"sv;
+
+        case L'\u00C1': // Á
+          return "A"sv;
+        case L'\u00C9': // É
+        case L'\u011A': // Ě
+          return "E"sv;
+        case L'\u00CD': // Í
+          return "I"sv;
+        case L'\u00DD': // Ý
+          return "Y"sv;
+        case L'\u00D3': // Ó
+        case L'\u00D6': // Ö
+          return "O"sv;
+        case L'\u00DA': // Ú
+        case L'\u016E': // Ů
+        case L'\u00DC': // Ü
+          return "U"sv;
+        case L'\u010E': // Ď
+          return "D"sv;
+        case L'\u0164': // Ť
+          return "T"sv;
+        case L'\u0147': // Ň
+          return "N"sv;
+        case L'\u0160': // Š
+          return "S"sv;
+        case L'\u010C': // Č
+          return "C"sv;
+        case L'\u0158': // Ř
+          return "R"sv;
+        case L'\u017D': // Ž
+          return "Z"sv;
+
+        case L'\u00DF': // ß
+          return "ss"sv;
+
+        default:
+          // std::wstring s(1, c);
+          // printf("case L'\\u%04X': // %ls\n  return \"%ls\"sv;\n", (int)c, s.c_str(), s.c_str());
+          return ""sv; // no-opt
+      }
+    };
+
     std::wstring wstr=UTF8StringToWString(text);
 
+    std::ostringstream buff;
+
     // replace SOME common (in European languages) non-ascii characters by table
-    std::transform(wstr.begin(), wstr.end(), wstr.begin(),
-                   [](wchar_t c) -> wchar_t {
-                     switch(c){
-                       case L'\u00A0': // no-break space (&nbsp;)
-                       case L'\u2007': // figure space
-                       case L'\u202F': // narrow no-break space
-                         return ' ';
+    std::for_each(wstr.begin(), wstr.end(), [&](wchar_t c) {
+      auto tch = transChar(c);
+      if (tch.empty()) {
+        buff << WStringToUTF8String(std::wstring(1, c));
+      } else {
+        buff << tch;
+      }
+    });
 
-                       case L'\u00E1': // á
-                         return 'a';
-                       case L'\u00E9': // é
-                       case L'\u011B': // ě
-                         return 'e';
-                       case L'\u00ED': // í
-                         return 'i';
-                       case L'\u00FD': // ý
-                         return 'y';
-                       case L'\u00F6': // ö
-                       case L'\u00F3': // ó
-                         return 'o';
-                       case L'\u00FA': // ú
-                       case L'\u016F': // ů
-                       case L'\u00FC': // ü
-                         return 'u';
-                       case L'\u010F': // ď
-                         return 'd';
-                       case L'\u0165': // ť
-                         return 't';
-                       case L'\u0148': // ň
-                         return 'n';
-                       case L'\u0161': // š
-                         return 's';
-                       case L'\u010D': // č
-                         return 'c';
-                       case L'\u0159': // ř
-                         return 'r';
-                       case L'\u017E': // ž
-                         return 'z';
-
-                       case L'\u00C1': // Á
-                         return 'A';
-                       case L'\u00C9': // É
-                       case L'\u011A': // Ě
-                         return 'E';
-                       case L'\u00CD': // Í
-                         return 'I';
-                       case L'\u00DD': // Ý
-                         return 'Y';
-                       case L'\u00D3': // Ó
-                       case L'\u00D6': // Ö
-                         return 'O';
-                       case L'\u00DA': // Ú
-                       case L'\u016E': // Ů
-                       case L'\u00DC': // Ü
-                         return 'U';
-                       case L'\u010E': // Ď
-                         return 'D';
-                       case L'\u0164': // Ť
-                         return 'T';
-                       case L'\u0147': // Ň
-                         return 'N';
-                       case L'\u0160': // Š
-                         return 'S';
-                       case L'\u010C': // Č
-                         return 'C';
-                       case L'\u0158': // Ř
-                         return 'R';
-                       case L'\u017D': // Ž
-                         return 'Z';
-
-                       default:
-                         // wchar_t *s;
-                         // s = (wchar_t *) malloc(sizeof(wchar_t) * 2);
-                         // s[0] = c;
-                         // s[1] = 0;
-                         // printf("case L'\\u%04X': // %ls\n  return '%ls';\n", c, s, s);
-                         // free(s);
-                         return c; // no-opt
-                     }});
-
-    return WStringToUTF8String(wstr);
+    return buff.str();
   }
 #endif
 
