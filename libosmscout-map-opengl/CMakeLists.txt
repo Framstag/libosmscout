@@ -1,13 +1,3 @@
-if(NOT ${OSMSCOUT_BUILD_MAP})
-	message(SEND_ERROR "The main map drawing interface is required for OpenGL map drawing backend")
-endif()
-if(NOT PNG_FOUND)
-	message(SEND_ERROR "libpng is required for opengl map drawing backend")
-endif()
-if(NOT FREETYPE_FOUND)
-	message(SEND_ERROR "freetype is required for opengl map drawing backend")
-endif()
-
 set(HEADER_FILES
         include/osmscout/MapOpenGLImportExport.h
 		include/osmscout/OpenGLMapData.h
@@ -34,38 +24,33 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/sweep_context.cc
 		src/poly2tri/sweep/advancing_front.cc)
 
-if(IOS)
-  add_library(OSMScoutMapOpenGL STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutMapOpenGL ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutMapOpenGL ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::MapOpenGL ALIAS OSMScoutMapOpenGL)
 set_target_properties(OSMScoutMapOpenGL PROPERTIES
-		CXX_STANDARD 17
-		OUTPUT_NAME "OSMScoutMapOpenGL")
-
-target_include_directories(OSMScoutMapOpenGL PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/include
-		${OPENGL_INCLUDE_DIR}
-		${GLEW_INCLUDE_DIRS}
-		${GLM_INCLUDE_DIRS}
-		${PNG_INCLUDE_DIRS}
-		${FREETYPE_INCLUDE_DIRS})
-
-# Public features Header
+	OUTPUT_NAME "osmscout_map_opengl"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapOpenGLFeatures.h)
-target_include_directories(OSMScoutMapOpenGL PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapOpenGL")
-target_include_directories(OSMScoutMapOpenGL PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-endif()
+target_include_directories(OSMScoutMapOpenGL PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${OPENGL_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIRS}
+	${GLM_INCLUDE_DIRS}
+	${PNG_INCLUDE_DIRS}
+	${FREETYPE_INCLUDE_DIRS}
+)
+target_include_directories(OSMScoutMapOpenGL INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-opengl/include ${CMAKE_BINARY_DIR}/libosmscout-map-opengl/include ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+target_link_libraries(OSMScoutMapOpenGL OSMScout::OSMScout OSMScout::Map ${OPENGL_LIBRARIES} GLEW::GLEW ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutMapOpenGL PROPERTIES
+	set_target_properties(OSMScoutMapOpenGL PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION C
   		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -75,16 +60,9 @@ set_target_properties(OSMScoutMapOpenGL PROPERTIES
 		OUTPUT_NAME "OSMScoutMapOpenGL")
 endif()
 
-target_link_libraries(OSMScoutMapOpenGL
-		OSMScout
-		OSMScoutMap
-		${OPENGL_LIBRARIES}
-		GLEW::GLEW
-		${PNG_LIBRARIES}
-		${FREETYPE_LIBRARIES}
-		)
-
-target_compile_definitions(OSMScoutMapOpenGL PRIVATE -DOSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScoutMapOpenGL "osmscout_map_opengl")
+endif()
 
 install(TARGETS OSMScoutMapOpenGL
 		RUNTIME DESTINATION bin

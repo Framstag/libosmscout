@@ -4,9 +4,13 @@ set(SOURCE_FILES
 
 add_executable(DumpData ${SOURCE_FILES})
 
-set_target_properties(DumpData PROPERTIES CXX_STANDARD 17)
+set_target_properties(DumpData PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
 
-target_link_libraries(DumpData OSMScout)
+target_link_libraries(DumpData OSMScout::OSMScout)
+
+if(WIN32)
+	create_win32_tool_resource(DumpData)
+endif()
 
 install(TARGETS DumpData
         RUNTIME DESTINATION bin

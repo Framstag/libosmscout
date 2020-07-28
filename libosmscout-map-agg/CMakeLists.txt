@@ -1,16 +1,3 @@
-if(NOT LIBAGG_FOUND)
-	message(SEND_ERROR "libagg is required for agg map drawing backend")
-endif()
-if(NOT LIBAGGFT2_LIBRARIES)
-	message(SEND_ERROR "libagg is required for agg map drawing backend")
-endif()
-if(NOT FREETYPE_FOUND)
-	message(SEND_ERROR "freetype2 is required for agg map drawing backend")
-endif()
-if(NOT ${OSMSCOUT_BUILD_MAP})
-	message(SEND_ERROR "The main map drawing interface is required for agg map drawing backend")
-endif()
-
 set(HEADER_FILES
     include/osmscout/MapAggImportExport.h
     include/osmscout/MapAggFeatures.h
@@ -21,42 +8,31 @@ set(SOURCE_FILES
     src/osmscout/MapPainterAgg.cpp
 )
 
-if(IOS)
-  add_library(OSMScoutMapAGG STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutMapAGG ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutMapAGG ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::MapAGG ALIAS OSMScoutMapAGG)
 set_target_properties(OSMScoutMapAGG PROPERTIES
-		CXX_STANDARD 17
-		OUTPUT_NAME "osmscout_map_agg")
-
-target_include_directories(OSMScoutMapAGG PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/include
-		${LIBAGG_INCLUDE_DIRS}
-		${FREETYPE_INCLUDE_DIRS})
-
-# Public features Header
+	OUTPUT_NAME "osmscout_map_agg"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h)
-target_include_directories(OSMScoutMapAGG PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapAGG")
-target_include_directories(OSMScoutMapAGG PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_link_libraries(OSMScoutMapAGG
-		OSMScout
-		OSMScoutMap
-		${LIBAGG_LIBRARIES}
-		${LIBAGGFT2_LIBRARIES}
-		${FREETYPE_LIBRARIES})
-
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-endif()
+target_include_directories(OSMScoutMapAGG PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${LIBAGG_INCLUDE_DIRS}
+	${FREETYPE_INCLUDE_DIR_freetype2}
+	${FREETYPE_INCLUDE_DIR_ft2build}
+)
+target_include_directories(OSMScoutMapAGG INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-agg/include ${CMAKE_BINARY_DIR}/libosmscout-map-agg/include ${LIBAGG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIR_freetype2} ${FREETYPE_INCLUDE_DIR_ft2build})
+target_link_libraries(OSMScoutMapAGG OSMScout::OSMScout OSMScout::Map ${LIBAGG_LIBRARIES} ${LIBAGGFT2_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutMapAGG PROPERTIES
+	set_target_properties(OSMScoutMapAGG PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION C
   		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -66,7 +42,9 @@ set_target_properties(OSMScoutMapAGG PROPERTIES
 		OUTPUT_NAME "OSMScoutMapAGG")
 endif()
 
-target_compile_definitions(OSMScoutMapAGG PRIVATE -DOSMSCOUT_MAP_AGG_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScoutMapAGG "osmscout_map_agg")
+endif()
 
 install(TARGETS OSMScoutMapAGG
         RUNTIME DESTINATION bin

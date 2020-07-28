@@ -1,19 +1,3 @@
-if(NOT Qt5Core_FOUND)
-  message(SEND_ERROR "Qt5Core is required for OSMScout Qt client library")
-endif()
-if(NOT Qt5Gui_FOUND)
-  message(SEND_ERROR "Qt5Gui is required for OSMScout Qt client library")
-endif()
-if(NOT Qt5Quick_FOUND)
-  message(SEND_ERROR "Qt5Quick is required for OSMScout Qt client library")
-endif()
-if(NOT Qt5Multimedia_FOUND)
-  message(SEND_ERROR "Qt5Multimedia is required for OSMScout Qt client library")
-endif()
-if(NOT ${OSMSCOUT_BUILD_MAP_QT})
-  message(SEND_ERROR "The main map drawing interface is required for Qt map drawing backend")
-endif()
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -30,7 +14,6 @@ set(HEADER_FILES
     include/osmscout/OnlineTileProviderModel.h
     include/osmscout/OsmTileDownloader.h
     include/osmscout/OSMTile.h
-    include/osmscout/private
     include/osmscout/RoutingModel.h
     include/osmscout/Router.h
     include/osmscout/SearchLocationModel.h
@@ -124,51 +107,52 @@ set(SOURCE_FILES
     src/osmscout/InstalledVoicesModel.cpp
     )
 
-if(IOS)
-  add_library(OSMScoutClientQt STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutClientQt ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutClientQt ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::ClientQt ALIAS OSMScoutClientQt)
 set_target_properties(OSMScoutClientQt PROPERTIES
-        CXX_STANDARD 17
-        OUTPUT_NAME "osmscout_client_qt")
-
-target_include_directories(OSMScoutClientQt PUBLIC include)
-
-# Public features Header
+	OUTPUT_NAME "osmscout_client_qt"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h)
-target_include_directories(OSMScoutClientQt PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutClientQt")
-target_include_directories(OSMScoutClientQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+target_include_directories(OSMScoutClientQt PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_include_directories(OSMScoutClientQt INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-client-qt/include ${CMAKE_BINARY_DIR}/libosmscout-client-qt/include)
+target_link_libraries(OSMScoutClientQt OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia)
 
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
+if(MARISA_FOUND)
+    target_include_directories(OSMScoutClientQt PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_link_libraries(OSMScoutClientQt ${MARISA_LIBRARIES})
 endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-  set_target_properties(OSMScoutClientQt PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION C
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  OUTPUT_NAME "OSMScoutClientQt")
+	set_target_properties(OSMScoutClientQt PROPERTIES
+		FRAMEWORK TRUE
+		FRAMEWORK_VERSION C
+		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+		PUBLIC_HEADER     "${HEADER_FILES}"
+		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+		OUTPUT_NAME "OSMScoutClientQt")
 endif()
 
-target_link_libraries(OSMScoutClientQt
-  OSMScout
-  OSMScoutMap
-  OSMScoutMapQt
-  Qt5::Core
-  Qt5::Gui
-  Qt5::Quick
-  Qt5::Multimedia)
-
-target_compile_definitions(OSMScoutClientQt PRIVATE -DOSMSCOUT_CLIENT_QT_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScoutClientQt "osmscout_client_qt")
+endif()
+if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt AND BUILD_SHARED_LIBS)
+	add_custom_command(TARGET OSMScoutClientQt
+        POST_BUILD
+        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScoutClientQt>/$<TARGET_FILE_NAME:OSMScoutClientQt>"
+    )
+endif()
 
 install(TARGETS OSMScoutClientQt
         RUNTIME DESTINATION bin

@@ -23,45 +23,38 @@
 #include <osmscout/MapSVGFeatures.h>
 
 // Shared library support
-#if defined(_WIN32)
-  #if defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-    #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_MAP_SVG_EXPTEMPL
-      #define OSMSCOUT_MAP_SVG_API __declspec(dllexport)
-    #else
-      #define OSMSCOUT_MAP_SVG_API
-    #endif
-  #else
-    #define OSMSCOUT_MAP_SVG_API __declspec(dllimport)
-    #define OSMSCOUT_MAP_SVG_EXPTEMPL extern
-  #endif
-
-  #define OSMSCOUT_MAP_SVG_DLLLOCAL
+#if defined _WIN32 || defined __CYGWIN__
+#  define OSMSCOUT_IMPORT __declspec(dllimport)
+#  define OSMSCOUT_EXPORT __declspec(dllexport)
+#  define OSMSCOUT_LOCAL
 #else
-  #define OSMSCOUT_MAP_SVG_IMPORT
-  #define OSMSCOUT_MAP_SVG_EXPTEMPL
-
-  #if defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-    #define OSMSCOUT_MAP_SVG_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_MAP_SVG_DLLLOCAL __attribute__ ((visibility("hidden")))
-  #else
-    #define OSMSCOUT_MAP_SVG_EXPORT
-    #define OSMSCOUT_MAP_SVG_DLLLOCAL
-  #endif
-
-  #if defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_EXPORT
-  #else
-    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_IMPORT
-  #endif
-
+#  if __GNUC__ >= 4
+#    define OSMSCOUT_IMPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_EXPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_LOCAL  __attribute__ ((visibility ("hidden")))
+#  else
+#    define OSMSCOUT_IMPORT
+#    define OSMSCOUT_EXPORT
+#    define OSMSCOUT_LOCAL
+#  endif
+#endif
+#ifndef OSMSCOUT_STATIC
+#  ifdef OSMScoutMapSVG_EXPORTS
+#    define OSMSCOUT_MAP_SVG_API OSMSCOUT_EXPORT
+#  else
+#    define OSMSCOUT_MAP_SVG_API OSMSCOUT_IMPORT
+#  endif
+#  define OSMSCOUT_MAP_SVG_DLLLOCAL OSMSCOUT_LOCAL
+#  else
+#    define OSMSCOUT_MAP_SVG_API
+#    define OSMSCOUT_MAP_SVG_DLLLOCAL
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(_WIN32)
   #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) OSMSCOUT_MAP_SVG_EXPORT
+#elif defined(OSMScoutMapSVG_EXPORTS)
+  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) OSMSCOUT_EXPORT
 #else
   #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api)
 #endif

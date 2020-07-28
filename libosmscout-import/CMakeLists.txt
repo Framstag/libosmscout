@@ -1,5 +1,3 @@
-set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
-
 set(HEADER_FILES
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
@@ -118,71 +116,59 @@ if (PROTOBUF_FOUND)
     list(APPEND SOURCE_FILES ${PROTO_SRCS})
 endif()
 
-if(IOS)
-  add_library(OSMScoutImport STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutImport ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutImport ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::Import ALIAS OSMScoutImport)
 set_target_properties(OSMScoutImport PROPERTIES
-        CXX_STANDARD 17
-        OUTPUT_NAME "osmscout_import")
-
-target_include_directories(OSMScoutImport PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf)
-
-# Public features Header
+	OUTPUT_NAME "osmscout_import"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(include/osmscout/import/ImportFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h)
-target_include_directories(OSMScoutImport PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutImport")
-target_include_directories(OSMScoutImport PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+target_include_directories(OSMScoutImport PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf
+)
+target_include_directories(OSMScoutImport INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-import/include ${CMAKE_BINARY_DIR}/libosmscout-import/include)
+target_link_libraries(OSMScoutImport OSMScout::OSMScout)
 
-target_link_libraries(OSMScoutImport OSMScout)
-
-if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
-    target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})
+if(LIBXML2_FOUND)
+	target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
+	target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})
 endif()
 
 if (PROTOBUF_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${PROTOBUF_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${PROTOBUF_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${PROTOBUF_LIBRARIES})
 endif()
 
 if (ICONV_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${ICONV_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${ICONV_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${ICONV_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${ICONV_LIBRARIES})
 endif()
 
 if (LIBLZMA_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${LIBLZMA_INCLUDE_DIRS})
-  target_link_libraries(OSMScoutImport ${LIBLZMA_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${LIBLZMA_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${LIBLZMA_LIBRARIES})
 endif()
 
 if (ZLIB_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${ZLIB_INCLUDE_DIRS})
-  target_link_libraries(OSMScoutImport ${ZLIB_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${ZLIB_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${ZLIB_LIBRARIES})
 endif()
 
 if(MARISA_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${MARISA_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
 endif()
-
-if(WIN32)
-  target_link_libraries(OSMScoutImport Ws2_32.lib)
-  target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
-endif()
-
-#if(${IOS})
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-#endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutImport PROPERTIES
+	set_target_properties(OSMScoutImport PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION C
         MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -192,7 +178,13 @@ set_target_properties(OSMScoutImport PROPERTIES
         OUTPUT_NAME "OSMScoutImport")
 endif()
 
-target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
+if(WIN32)
+	target_link_libraries(OSMScoutImport Ws2_32.lib)
+	target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
+	if(BUILD_SHARED_LIBS)
+		create_win32_dll_resource(OSMScoutImport "osmscout_import")
+	endif()
+endif()
 
 install(TARGETS OSMScoutImport
         RUNTIME DESTINATION bin

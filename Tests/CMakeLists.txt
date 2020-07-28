@@ -1,276 +1,217 @@
+macro(create_test_project)
+	set(_name)
+	set(_sources)
+	set(_targets OSMScout::OSMScout)
+	set(_includes
+		include
+		${CMAKE_SOURCE_DIR}/include
+		${CMAKE_CURRENT_BINARY_DIR}/include
+		${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+	)
+	if(MARISA_FOUND)
+		list(APPEND _includes ${MARISA_INCLUDE_DIRS})
+	endif()
+
+	set(_command)
+	set(_skiptest OFF)
+	set(cmd "_name")
+	foreach(arg ${ARGN})
+		if(arg STREQUAL "NAME")
+			set(cmd "_name")
+		elseif(arg STREQUAL "SOURCES")
+			set(cmd "_sources")
+		elseif(arg STREQUAL "TARGET")
+			set(cmd "_targets")
+		elseif(arg STREQUAL "INCLUDES")
+			set(cmd "_includes")
+		elseif(arg STREQUAL "COMMAND")
+			set(cmd "_command")
+		elseif(arg STREQUAL "SKIPTEST")
+			set(_skiptest ON)
+		else()
+			if("${cmd}" STREQUAL "_name")
+				set(_name ${arg})
+			else()
+				list(APPEND ${cmd} ${arg})
+			endif()
+		endif()
+	endforeach()
+	add_executable(${_name} ${_sources})
+	set_target_properties(${_name} PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tests")
+	target_link_libraries(${_name} ${_targets})
+	install(TARGETS ${_name} RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	target_include_directories(${_name} PRIVATE ${_includes})
+	if(WIN32)
+		create_win32_test_resource(${_name})
+	endif()
+	if(NOT _skiptest)
+		add_test(NAME ${_name} COMMAND ${_name} ${_command} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+		if(MSVC)
+			set(qt5_bin "")
+			if(Qt5_FOUND AND MSVC AND TARGET Qt5::qmake)
+				get_target_property(_qt5_qmake_location Qt5::qmake IMPORTED_LOCATION)
+				execute_process(COMMAND "${_qt5_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt5_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
+				set(qt5_bin ";${qt5_install_prefix}\\bin")
+			endif()
+			set_tests_properties(${_name} PROPERTIES ENVIRONMENT "PATH=$<TARGET_FILE_DIR:OSMScout>;$<TARGET_FILE_DIR:OSMScoutMap>;$<TARGET_FILE_DIR:OSMScoutMapAGG>;$<TARGET_FILE_DIR:OSMScoutMapQt>;$<TARGET_FILE_DIR:OSMScoutMapCairo>;$<TARGET_FILE_DIR:OSMScoutImport>;$<TARGET_FILE_DIR:OSMScoutGPX>;$<TARGET_FILE_DIR:OSMScoutClientQt>;$<TARGET_FILE_DIR:OSMScoutTest>${qt5_bin};$ENV{PATH}")
+		endif()
+	endif()
+endmacro(create_test_project)
+
 #---- AccessParse
-add_executable(AccessParse src/AccessParse.cpp)
-set_property(TARGET AccessParse PROPERTY CXX_STANDARD 17)
-target_include_directories(AccessParse PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(AccessParse OSMScout)
-add_test(NAME AccessParse COMMAND AccessParse)
+create_test_project(NAME AccessParse SOURCES src/AccessParse.cpp)
 
 #---- Bearing
-add_executable(Bearing src/Bearing.cpp)
-set_property(TARGET Bearing PROPERTY CXX_STANDARD 17)
-target_include_directories(Bearing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(Bearing OSMScout)
-add_test(NAME Bearing COMMAND Bearing)
+create_test_project(NAME Bearing SOURCES src/Bearing.cpp)
 
 #---- BitsAndBytesNeeded
-add_executable(BitsAndBytesNeeded src/BitsAndBytesNeeded.cpp)
-set_property(TARGET BitsAndBytesNeeded PROPERTY CXX_STANDARD 17)
-target_include_directories(BitsAndBytesNeeded PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(BitsAndBytesNeeded OSMScout)
-add_test(NAME BitsAndBytesNeeded COMMAND BitsAndBytesNeeded)
+create_test_project(NAME BitsAndBytesNeeded SOURCES src/BitsAndBytesNeeded.cpp)
 
 #---- CachePerformance
-add_executable(CachePerformance src/CachePerformance.cpp)
-set_property(TARGET CachePerformance PROPERTY CXX_STANDARD 17)
-target_link_libraries(CachePerformance OSMScout)
-add_test(NAME CachePerformance COMMAND CachePerformance --size 1000)
+create_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COMMAND --size 1000)
 
 #---- CalculateResolution
-add_executable(CalculateResolution src/CalculateResolution.cpp)
-set_property(TARGET CalculateResolution PROPERTY CXX_STANDARD 17)
-target_link_libraries(CalculateResolution OSMScout)
+create_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
 
 #---- CmdLineParsing
-add_executable(CmdLineParsing src/CmdLineParsing.cpp)
-set_property(TARGET CmdLineParsing PROPERTY CXX_STANDARD 17)
-target_include_directories(CmdLineParsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(CmdLineParsing OSMScout)
-add_test(NAME CmdLineParsing COMMAND CmdLineParsing)
+create_test_project(NAME CmdLineParsing SOURCES src/CmdLineParsing.cpp)
 
 #---- ColorParse
-add_executable(ColorParse src/ColorParse.cpp)
-set_property(TARGET ColorParse PROPERTY CXX_STANDARD 17)
-target_include_directories(ColorParse PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(ColorParse OSMScout)
-add_test(NAME ColorParse COMMAND ColorParse)
+create_test_project(NAME ColorParse SOURCES src/ColorParse.cpp)
 
 #---- CoordinateEncoding
-add_executable(CoordinateEncoding src/CoordinateEncoding.cpp)
-set_property(TARGET CoordinateEncoding PROPERTY CXX_STANDARD 17)
-target_link_libraries(CoordinateEncoding OSMScout)
-add_test(NAME CoordinateEncoding COMMAND CoordinateEncoding "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
+create_test_project(NAME CoordinateEncoding SOURCES src/CoordinateEncoding.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- LocationLookup
-add_executable(LocationLookupTest src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp)
-target_include_directories(LocationLookupTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set_property(TARGET LocationLookupTest PROPERTY CXX_STANDARD 17)
-target_link_libraries(LocationLookupTest OSMScoutTest OSMScoutImport OSMScout)
-add_test(NAME LocationLookupTest COMMAND LocationLookupTest)
+create_test_project(NAME LocationLookupTest SOURCES src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp TARGET OSMScout::Test OSMScout::Import)
 set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR})
 
 #---- NumberSetPerformance
-add_executable(NumberSetPerformance src/NumberSetPerformance.cpp)
-set_property(TARGET NumberSetPerformance PROPERTY CXX_STANDARD 17)
-target_link_libraries(NumberSetPerformance OSMScout)
+create_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
 
 #---- ReaderScannerPerformance
-add_executable(ReaderScannerPerformance src/ReaderScannerPerformance.cpp)
-set_property(TARGET ReaderScannerPerformance PROPERTY CXX_STANDARD 17)
-target_link_libraries(ReaderScannerPerformance OSMScout)
+create_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp)
 
 #---- MultiDBRouting
-add_executable(MultiDBRouting src/MultiDBRouting.cpp)
-set_property(TARGET MultiDBRouting PROPERTY CXX_STANDARD 17)
-target_link_libraries(MultiDBRouting OSMScout)
-add_test(NAME MultiDBRouting COMMAND MultiDBRouting 50.412 14.534  50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
+create_test_project(NAME MultiDBRouting SOURCES src/MultiDBRouting.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP})
-	add_executable(ThreadedDatabase src/ThreadedDatabase.cpp)
-	set_property(TARGET ThreadedDatabase PROPERTY CXX_STANDARD 17)
-    target_link_libraries(ThreadedDatabase OSMScout OSMScoutMap)
-    add_test(NAME ThreadedDatabase COMMAND ThreadedDatabase
-            --threads 100
-            --iterations 1000
-            "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
-            "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
+	create_test_project(NAME ThreadedDatabase SOURCES src/ThreadedDatabase.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
 else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
 
-
+#---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT})
-  set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
-  qt5_wrap_cpp(src_files include/DrawWindow.h)
-  add_executable(DrawTextQt ${src_files})
-  set_property(TARGET DrawTextQt PROPERTY CXX_STANDARD 17)
-  target_include_directories(DrawTextQt PRIVATE include ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(DrawTextQt OSMScout OSMScoutMap OSMScoutMapQt Qt5::Widgets)
+	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
+	qt5_wrap_cpp(src_files include/DrawWindow.h)
+	create_test_project(NAME DrawTextQt SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt Qt5::Widgets SKIPTEST)
 else()
-  message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
+	message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
 endif()
 
 #---- Geometry
-add_executable(Geometry src/Geometry.cpp)
-set_property(TARGET Geometry PROPERTY CXX_STANDARD 17)
-target_link_libraries(Geometry OSMScout)
-target_include_directories(Geometry PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_test(NAME Geometry COMMAND Geometry)
+create_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 
 #---- WorkQueue
-add_executable(WorkQueue src/WorkQueue.cpp)
-set_property(TARGET WorkQueue PROPERTY CXX_STANDARD 17)
-target_link_libraries(WorkQueue OSMScout)
-add_test(NAME WorkQueue COMMAND WorkQueue)
+create_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 
 #---- MapRotate
 if(${OSMSCOUT_BUILD_MAP})
-  add_executable(MapRotate src/MapRotate.cpp)
-  set_property(TARGET MapRotate PROPERTY CXX_STANDARD 17)
-  target_link_libraries(MapRotate OSMScout OSMScoutMap)
-  add_test(NAME MapRotate COMMAND MapRotate)
+	create_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
 else()
 	message("Skip MapRotate test, libosmscout-map is missing.")
 endif()
 
 #---- EncodeNumber
-add_executable(EncodeNumber src/EncodeNumber.cpp)
-set_property(TARGET EncodeNumber PROPERTY CXX_STANDARD 17)
-target_link_libraries(EncodeNumber OSMScout)
-add_test(NAME EncodeNumber COMMAND EncodeNumber)
+create_test_project(NAME EncodeNumber SOURCES src/EncodeNumber.cpp)
 
 #---- FeatureLabelTest
-add_executable(FeatureLabelTest src/FeatureLabelTest.cpp)
-set_property(TARGET FeatureLabelTest PROPERTY CXX_STANDARD 17)
-target_include_directories(FeatureLabelTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(FeatureLabelTest OSMScout)
-add_test(NAME FeatureLabelTest COMMAND FeatureLabelTest)
+create_test_project(NAME FeatureLabelTest SOURCES src/FeatureLabelTest.cpp)
 
 #---- FileScannerWriter
-add_executable(FileScannerWriter src/FileScannerWriter.cpp)
-set_property(TARGET FileScannerWriter PROPERTY CXX_STANDARD 17)
-target_link_libraries(FileScannerWriter OSMScout)
-add_test(NAME FileScannerWriter COMMAND FileScannerWriter)
+create_test_project(NAME FileScannerWriter SOURCES src/FileScannerWriter.cpp)
 
 #---- GeoCoordParse
-add_executable(GeoCoordParse src/GeoCoordParse.cpp)
-set_property(TARGET GeoCoordParse PROPERTY CXX_STANDARD 17)
-target_link_libraries(GeoCoordParse OSMScout)
-add_test(NAME GeoCoordParse COMMAND GeoCoordParse)
+create_test_project(NAME GeoCoordParse SOURCES src/GeoCoordParse.cpp)
 
 #---- NumberSet
-add_executable(NumberSet src/NumberSet.cpp)
-set_property(TARGET NumberSet PROPERTY CXX_STANDARD 17)
-target_link_libraries(NumberSet OSMScout)
-add_test(NAME NumberSet COMMAND NumberSet)
+create_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 
 #---- ScanConversion
-add_executable(ScanConversion src/ScanConversion.cpp)
-set_property(TARGET ScanConversion PROPERTY CXX_STANDARD 17)
-target_include_directories(ScanConversion PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(ScanConversion OSMScout)
-add_test(NAME ScanConversion COMMAND ScanConversion)
+create_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
 #---- StringUtils
-add_executable(StringUtils src/StringUtils.cpp)
-set_property(TARGET StringUtils PROPERTY CXX_STANDARD 17)
-target_include_directories(StringUtils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(StringUtils OSMScout)
-add_test(NAME StringUtils COMMAND StringUtils)
+create_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 
 #---- TilingTest
-add_executable(TilingTest src/TilingTest.cpp)
-set_property(TARGET TilingTest PROPERTY CXX_STANDARD 17)
-target_include_directories(TilingTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(TilingTest OSMScout)
-add_test(NAME TilingTest COMMAND TilingTest)
+create_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 
 #---- TimeParse
-add_executable(TimeParse src/TimeParse.cpp)
-set_property(TARGET TimeParse PROPERTY CXX_STANDARD 17)
-target_include_directories(TimeParse PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(TimeParse OSMScout)
-add_test(NAME TimeParse COMMAND TimeParse)
+create_test_project(NAME TimeParse SOURCES src/TimeParse.cpp)
 
 #---- WStringStringConversion
-add_executable(WStringStringConversion src/WStringStringConversion.cpp)
-set_property(TARGET WStringStringConversion PROPERTY CXX_STANDARD 17)
-target_link_libraries(WStringStringConversion OSMScout)
-add_test(NAME WStringStringConversion COMMAND WStringStringConversion)
+create_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
 
 #---- TransPolygon
-add_executable(TransPolygon src/TransPolygon.cpp include/TestWay.h)
-set_property(TARGET TransPolygon PROPERTY CXX_STANDARD 17)
-target_include_directories(TransPolygon PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(TransPolygon OSMScout)
-add_test(NAME TransPolygon COMMAND TransPolygon)
+create_test_project(NAME TransPolygon SOURCES src/TransPolygon.cpp)
 
-#---- TransPolygon
-add_executable(GeoBox src/GeoBox.cpp)
-set_property(TARGET GeoBox PROPERTY CXX_STANDARD 17)
-target_link_libraries(GeoBox OSMScout)
-target_include_directories(GeoBox PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_test(NAME GeoBox COMMAND GeoBox)
+#---- GeoBox
+create_test_project(NAME GeoBox SOURCES src/GeoBox.cpp)
 
 #---- OSTAndOSSCheck
 if(${OSMSCOUT_BUILD_MAP})
-  add_executable(OSTAndOSSCheck src/OSTAndOSSCheck.cpp)
-  set_property(TARGET OSTAndOSSCheck PROPERTY CXX_STANDARD 17)
-  target_link_libraries(OSTAndOSSCheck OSMScout OSMScoutMap)
+	create_test_project(NAME OSTAndOSSCheck SOURCES src/OSTAndOSSCheck.cpp TARGET OSMScout::Map SKIPTEST)
 
-  set(STYLESHEETS
-          standard.oss
-          winter-sports.oss
-          boundaries.oss
-          railways.oss
-          motorways.oss
-          public-transport.oss)
+	set(STYLESHEETS
+		standard.oss
+		winter-sports.oss
+		boundaries.oss
+		railways.oss
+		motorways.oss
+		public-transport.oss)
 
-  foreach(STYLESHEET ${STYLESHEETS})
-    add_test(NAME CheckStyleSheet-${STYLESHEET}
-            COMMAND OSTAndOSSCheck
-              --warning-as-error
-              ${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost
-              ${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET})
-  endforeach()
+	foreach(STYLESHEET ${STYLESHEETS})
+		add_test(NAME CheckStyleSheet-${STYLESHEET}
+			COMMAND OSTAndOSSCheck
+			--warning-as-error
+			${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost
+			${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET})
+	endforeach()
 else()
     message("Skip OSTAndOSSCheck test, libosmscout-map is missing.")
 endif()
 
 #---- LabelPathTest
 if(${OSMSCOUT_BUILD_MAP})
-  add_executable(LabelPathTest src/LabelPathTest.cpp)
-  set_property(TARGET LabelPathTest PROPERTY CXX_STANDARD 17)
-  target_include_directories(LabelPathTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(LabelPathTest OSMScout OSMScoutMap)
-  add_test(NAME LabelPathTest COMMAND LabelPathTest)
+	create_test_project(NAME LabelPathTest SOURCES src/LabelPathTest.cpp TARGET OSMScout::Map)
 else()
-  message("Skip LabelPathTest, libosmscout-map is missing.")
+	message("Skip LabelPathTest, libosmscout-map is missing.")
 endif()
 
 #---- Base64
-add_executable(Base64 src/Base64.cpp)
-set_property(TARGET Base64 PROPERTY CXX_STANDARD 17)
-target_link_libraries(Base64 OSMScout)
-target_include_directories(Base64 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_test(NAME Base64 COMMAND Base64)
+create_test_project(NAME Base64 SOURCES src/Base64.cpp)
 
 #---- CoordBufferTest
-add_executable(CoordBufferTest src/CoordBufferTest.cpp)
-set_property(TARGET CoordBufferTest PROPERTY CXX_STANDARD 17)
-target_link_libraries(CoordBufferTest OSMScout OSMScoutMap)
-target_include_directories(CoordBufferTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-add_test(NAME CoordBufferTest COMMAND CoordBufferTest)
+create_test_project(NAME CoordBufferTest SOURCES src/CoordBufferTest.cpp)
 
-
+#---- ClientQtThreading
 if(${OSMSCOUT_BUILD_CLIENT_QT})
-  set(src_files src/ClientQtThreading.cpp)
-  qt5_wrap_cpp(src_files include/ClientQtThreading.h)
-  add_executable(ClientQtThreading ${src_files})
-  set_property(TARGET ClientQtThreading PROPERTY CXX_STANDARD 17)
-  target_include_directories(ClientQtThreading PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(ClientQtThreading OSMScout OSMScoutMap OSMScoutMapQt OSMScoutClientQt Qt5::Widgets)
+	set(src_files src/ClientQtThreading.cpp)
+	qt5_wrap_cpp(src_files include/ClientQtThreading.h)
+	create_test_project(NAME ClientQtThreading SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
 else()
-  message("Skip ClientQtThreading test, libosmscout-client-qt is missing.")
+	message("Skip ClientQtThreading test, libosmscout-client-qt is missing.")
 endif()
 
+#---- QtFileDownloader
 if(${OSMSCOUT_BUILD_CLIENT_QT})
-  set(src_files src/QtFileDownloader.cpp)
-  qt5_wrap_cpp(src_files include/DownloaderTest.h)
-  add_executable(QtFileDownloader ${src_files})
-  set_property(TARGET QtFileDownloader PROPERTY CXX_STANDARD 17)
-  target_include_directories(QtFileDownloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(QtFileDownloader OSMScout OSMScoutMap OSMScoutMapQt OSMScoutClientQt Qt5::Widgets)
+	set(src_files src/QtFileDownloader.cpp)
+	qt5_wrap_cpp(src_files include/DownloaderTest.h)
+	create_test_project(NAME QtFileDownloader SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
 else()
-  message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")
+	message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")
 endif()

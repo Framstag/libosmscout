@@ -1,7 +1,3 @@
-if(NOT DOXYGEN_FOUND)
-  message(SEND_ERROR "Doxygen is required to build the documentation.")
-endif()
-
 if(DOXYGEN_DOT_FOUND)
   set(OSMSCOUT_HAVE_DOT "YES")
   set(OSMSCOUT_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}")
@@ -51,6 +47,8 @@ add_custom_target(doc ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen"
     VERBATIM)
+
+set_target_properties(doc PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Documentation")
 
 if (WIN32 OR APPLE)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION doc)

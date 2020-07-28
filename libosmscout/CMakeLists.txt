@@ -1,5 +1,3 @@
-set(OSMSCOUT_BUILD_CORE ON CACHE INTERNAL "" FORCE)
-
 set(HEADER_FILES_OST
     include/osmscout/ost/Parser.h
     include/osmscout/ost/Scanner.h)
@@ -240,28 +238,26 @@ if(MARISA_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
 endif()
 
-if(IOS)
-  add_library(OSMScout STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScout ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScout ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::OSMScout ALIAS OSMScout)
 set_target_properties(OSMScout PROPERTIES
-    CXX_STANDARD 17
-	OUTPUT_NAME "osmscout")
-
-target_include_directories(OSMScout PUBLIC include ${CMAKE_SOURCE_DIR}/include)
-
-# Public features Header
+	OUTPUT_NAME "osmscout"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h)
-target_include_directories(OSMScout PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScout")
-target_include_directories(OSMScout PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+target_include_directories(OSMScout PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+)
+target_include_directories(OSMScout INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout/include ${CMAKE_BINARY_DIR}/libosmscout/include)
 
 if(MARISA_FOUND)
-    target_include_directories(OSMScout PUBLIC ${MARISA_INCLUDE_DIRS})
+    target_include_directories(OSMScout PRIVATE ${MARISA_INCLUDE_DIRS})
     target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
@@ -274,32 +270,30 @@ if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-endif()
-
 if(APPLE AND BUILD_FRAMEWORKS)
-  set_target_properties(OSMScout PROPERTIES
-  FRAMEWORK TRUE
-  FRAMEWORK_VERSION A
-  MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-  #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     "${HEADER_FILES}"
-  CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  OUTPUT_NAME "OSMScout")
+	set_target_properties(OSMScout PROPERTIES
+		FRAMEWORK TRUE
+		FRAMEWORK_VERSION A
+		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+		PUBLIC_HEADER     "${HEADER_FILES}"
+		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+		OUTPUT_NAME "OSMScout")
 
-  set_property(SOURCE "${HEADER_FILES_OST}"
-          PROPERTY MACOSX_PACKAGE_LOCATION Headers/ost)
-  set_property(SOURCE "${HEADER_FILES_SYSTEM}"
-          PROPERTY MACOSX_PACKAGE_LOCATION Headers/system)
-  set_property(SOURCE "${HEADER_FILES_UTIL}"
-          PROPERTY MACOSX_PACKAGE_LOCATION Headers/util)
-  set_property(SOURCE "${HEADER_FILES_ROUTING}"
-          PROPERTY MACOSX_PACKAGE_LOCATION Headers/routing)
-
+		set_property(SOURCE "${HEADER_FILES_OST}"
+			  PROPERTY MACOSX_PACKAGE_LOCATION Headers/ost)
+		set_property(SOURCE "${HEADER_FILES_SYSTEM}"
+			  PROPERTY MACOSX_PACKAGE_LOCATION Headers/system)
+		set_property(SOURCE "${HEADER_FILES_UTIL}"
+			  PROPERTY MACOSX_PACKAGE_LOCATION Headers/util)
+		set_property(SOURCE "${HEADER_FILES_ROUTING}"
+			  PROPERTY MACOSX_PACKAGE_LOCATION Headers/routing)
 endif()
 
-target_compile_definitions(OSMScout PRIVATE -DOSMSCOUT_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScout "osmscout")
+endif()
+
 install(TARGETS OSMScout
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
@@ -311,5 +305,4 @@ if(MARISA_FOUND)
 else()
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE PATTERN TextSearchIndex.h EXCLUDE)
 endif()
-
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h DESTINATION include/osmscout)

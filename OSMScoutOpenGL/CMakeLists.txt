@@ -1,42 +1,28 @@
-if(NOT ${OSMSCOUT_BUILD_MAP_OPENGL})
-	message(SEND_ERROR "The OpenGL map drawing backend is required for OSMScoutOpenGL application")
-endif()
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-string(TIMESTAMP OSMSCOUT_VERSION_STRING "%Y-%m-%d")
-set(OSMSCOUT_USER_AGENT "OSMScout OpenGL demo app %1")
-
 set(SOURCE_FILES
-		src/OSMScoutOpenGL.cpp)
+	src/OSMScoutOpenGL.cpp
+)
 
 add_executable(OSMScoutOpenGL ${SOURCE_FILES})
 
+set_target_properties(OSMScoutOpenGL PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
+
 target_include_directories(OSMScoutOpenGL PRIVATE
-		${OPENGL_INCLUDE_DIR}
-		${GLEW_INCLUDE_DIRS}
-		${GLFW_INCLUDE_DIR}
-		${FREETYPE_INCLUDE_DIRS})
+	${OPENGL_INCLUDE_DIR}
+	${GLEW_INCLUDE_DIRS}
+	${GLFW_INCLUDE_DIR}
+	${FREETYPE_INCLUDE_DIRS}
+)
 
-if(MSVS OR MSYS OR MINGW)
-	target_link_libraries(OSMScoutOpenGL
-			OSMScout
-			OSMScoutMap
-			OSMScoutMapOpenGL
-			${OPENGL_LIBRARIES}
-			glfw3 # TODO: check if ${GLFW_LIBRARIES} is setup correctly on Windows
-			${FREETYPE_LIBRARIES}
-			)
-else()
-	target_link_libraries(OSMScoutOpenGL
-			OSMScout
-			OSMScoutMap
-			OSMScoutMapOpenGL
-			${OPENGL_LIBRARIES}
-			${GLFW_LIBRARIES}
-			${FREETYPE_LIBRARIES}
-			)
-endif()
+target_link_libraries(OSMScoutOpenGL
+	OSMScout::OSMScout
+	OSMScout::Map
+	OSMScout::MapOpenGL
+	${OPENGL_LIBRARIES}
+	${GLFW_LIBRARIES}
+	${FREETYPE_LIBRARIES}
+)
 
-set_property(TARGET OSMScoutOpenGL PROPERTY CXX_STANDARD 17)
+install(TARGETS OSMScoutOpenGL
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)

@@ -1,5 +1,3 @@
-set(OSMSCOUT_BUILD_MAP ON CACHE INTERNAL "" FORCE)
-
 set(HEADER_FILES
 	include/osmscout/MapImportExport.h
 	include/osmscout/oss/Parser.h
@@ -39,34 +37,28 @@ set(SOURCE_FILES
 	src/osmscout/MapPainterNoOp.cpp
 )
 
-if(IOS)
-  add_library(OSMScoutMap STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutMap ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutMap ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::Map ALIAS OSMScoutMap)
 set_target_properties(OSMScoutMap PROPERTIES
-		CXX_STANDARD 17
-		OUTPUT_NAME "osmscout_map")
-
-target_include_directories(OSMScoutMap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Public features Header
+	OUTPUT_NAME "osmscout_map"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapFeatures.h)
-target_include_directories(OSMScoutMap PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMap")
-target_include_directories(OSMScoutMap PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_link_libraries(OSMScoutMap OSMScout)
-
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-endif()
+target_include_directories(OSMScoutMap PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_include_directories(OSMScoutMap INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map/include ${CMAKE_BINARY_DIR}/libosmscout-map/include)
+target_link_libraries(OSMScoutMap OSMScout::OSMScout)
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutMap PROPERTIES
+	set_target_properties(OSMScoutMap PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION A
   		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -76,7 +68,9 @@ set_target_properties(OSMScoutMap PROPERTIES
 		OUTPUT_NAME "OSMScoutMap")
 endif()
 
-target_compile_definitions(OSMScoutMap PRIVATE -DOSMSCOUT_MAP_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScoutMap "osmscout_map")
+endif()
 
 install(TARGETS OSMScoutMap
         RUNTIME DESTINATION bin

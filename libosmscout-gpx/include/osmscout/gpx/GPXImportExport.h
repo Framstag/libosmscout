@@ -23,45 +23,38 @@
 #include <osmscout/gpx/GPXFeatures.h>
 
 // Shared library support
-#if defined(_WIN32)
-  #if defined(OSMSCOUT_GPX_EXPORT_SYMBOLS)
-    #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_GPX_EXPTEMPL
-      #define OSMSCOUT_GPX_API __declspec(dllexport)
-    #else
-      #define OSMSCOUT_GPX_API
-    #endif
-  #else
-    #define OSMSCOUT_GPX_API __declspec(dllimport)
-    #define OSMSCOUT_GPX_EXPTEMPL extern
-  #endif
-
-  #define OSMSCOUT_GPX_DLLLOCAL
+#if defined _WIN32 || defined __CYGWIN__
+#  define OSMSCOUT_IMPORT __declspec(dllimport)
+#  define OSMSCOUT_EXPORT __declspec(dllexport)
+#  define OSMSCOUT_LOCAL
 #else
-  #define OSMSCOUT_GPX_IMPORT
-  #define OSMSCOUT_GPX_EXPTEMPL
-
-  #if defined(OSMSCOUT_GPX_EXPORT_SYMBOLS)
-    #define OSMSCOUT_GPX_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_GPX_DLLLOCAL __attribute__ ((visibility("hidden")))
-  #else
-    #define OSMSCOUT_GPX_EXPORT
-    #define OSMSCOUT_GPX_DLLLOCAL
-  #endif
-
-  #if defined(OSMSCOUT_GPX_EXPORT_SYMBOLS)
-    #define OSMSCOUT_GPX_API OSMSCOUT_GPX_EXPORT
-  #else
-    #define OSMSCOUT_GPX_API OSMSCOUT_GPX_IMPORT
-  #endif
-
+#  if __GNUC__ >= 4
+#    define OSMSCOUT_IMPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_EXPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_LOCAL  __attribute__ ((visibility ("hidden")))
+#  else
+#    define OSMSCOUT_IMPORT
+#    define OSMSCOUT_EXPORT
+#    define OSMSCOUT_LOCAL
+#  endif
+#endif
+#ifndef OSMSCOUT_STATIC
+#  ifdef OSMScoutGPX_EXPORTS
+#    define OSMSCOUT_GPX_API OSMSCOUT_EXPORT
+#  else
+#    define OSMSCOUT_GPX_API OSMSCOUT_IMPORT
+#  endif
+#  define OSMSCOUT_GPX_DLLLOCAL OSMSCOUT_LOCAL
+#  else
+#    define OSMSCOUT_GPX_API
+#    define OSMSCOUT_GPX_DLLLOCAL
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(_WIN32)
   #define OSMSCOUT_GPX_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_GPX_EXPORT_SYMBOLS)
-  #define OSMSCOUT_GPX_EXCEPTIONAPI(api) OSMSCOUT_GPX_EXPORT
+#elif defined(OSMScoutGPX_EXPORTS)
+  #define OSMSCOUT_GPX_EXCEPTIONAPI(api) OSMSCOUT_EXPORT
 #else
   #define OSMSCOUT_GPX_EXCEPTIONAPI(api)
 #endif
@@ -70,4 +63,3 @@
   #define OSMSCOUT_GPX_INSTANTIATE_TEMPLATES
 #endif
 #endif
-

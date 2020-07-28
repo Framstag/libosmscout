@@ -23,45 +23,38 @@
 #include <osmscout-test/TestFeatures.h>
 
 // Shared library support
-#if defined(_WIN32)
-  #if defined(OSMSCOUT_TEST_EXPORT_SYMBOLS)
-    #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_TEST_EXPTEMPL
-      #define OSMSCOUT_TEST_API __declspec(dllexport)
-    #else
-      #define OSMSCOUT_TEST_API
-    #endif
-  #else
-    #define OSMSCOUT_TEST_API __declspec(dllimport)
-    #define OSMSCOUT_TEST_EXPTEMPL extern
-  #endif
-
-  #define OSMSCOUT_TEST_DLLLOCAL
+#if defined _WIN32 || defined __CYGWIN__
+#  define OSMSCOUT_IMPORT __declspec(dllimport)
+#  define OSMSCOUT_EXPORT __declspec(dllexport)
+#  define OSMSCOUT_LOCAL
 #else
-  #define OSMSCOUT_TEST_IMPORT
-  #define OSMSCOUT_TEST_EXPTEMPL
-
-  #if defined(OSMSCOUT_TEST_EXPORT_SYMBOLS)
-    #define OSMSCOUT_TEST_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_TEST_DLLLOCAL __attribute__ ((visibility("hidden")))
-  #else
-    #define OSMSCOUT_TEST_EXPORT
-    #define OSMSCOUT_TEST_DLLLOCAL
-  #endif
-
-  #if defined(OSMSCOUT_TEST_EXPORT_SYMBOLS)
-    #define OSMSCOUT_TEST_API OSMSCOUT_TEST_EXPORT
-  #else
-    #define OSMSCOUT_TEST_API OSMSCOUT_TEST_IMPORT
-  #endif
-
+#  if __GNUC__ >= 4
+#    define OSMSCOUT_IMPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_EXPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_LOCAL  __attribute__ ((visibility ("hidden")))
+#  else
+#    define OSMSCOUT_IMPORT
+#    define OSMSCOUT_EXPORT
+#    define OSMSCOUT_LOCAL
+#  endif
+#endif
+#ifndef OSMSCOUT_STATIC
+#  ifdef OSMScoutTest_EXPORTS
+#    define OSMSCOUT_TEST_API OSMSCOUT_EXPORT
+#  else
+#    define OSMSCOUT_TEST_API OSMSCOUT_IMPORT
+#  endif
+#  define OSMSCOUT_TEST_DLLLOCAL OSMSCOUT_LOCAL
+#  else
+#    define OSMSCOUT_TEST_API
+#    define OSMSCOUT_TEST_DLLLOCAL
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(_WIN32)
   #define OSMSCOUT_TEST_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_TEST_EXPORT_SYMBOLS)
-  #define OSMSCOUT_TEST_EXCEPTIONAPI(api) OSMSCOUT_TEST_EXPORT
+#elif defined(OSMScoutTest_EXPORTS)
+  #define OSMSCOUT_TEST_EXCEPTIONAPI(api) OSMSCOUT_EXPORT
 #else
   #define OSMSCOUT_TEST_EXCEPTIONAPI(api)
 #endif

@@ -1,7 +1,3 @@
-if(NOT ${OSMSCOUT_BUILD_MAP})
-	message(SEND_ERROR "The main map drawing interface is required for SVG map drawing backend")
-endif()
-
 set(HEADER_FILES
     include/osmscout/MapSVGImportExport.h
     include/osmscout/MapPainterSVG.h
@@ -11,25 +7,25 @@ set(SOURCE_FILES
     src/osmscout/MapPainterSVG.cpp
 )
 
-if(IOS)
-  add_library(OSMScoutMapSVG STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutMapSVG ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
+add_library(OSMScoutMapSVG ${SOURCE_FILES} ${HEADER_FILES})
+add_library(OSMScout::MapSVG ALIAS OSMScoutMapSVG)
 set_target_properties(OSMScoutMapSVG PROPERTIES
-        CXX_STANDARD 17
-        OUTPUT_NAME "osmscout_map_svg")
-
-target_include_directories(OSMScoutMapSVG PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Public features Header
+	OUTPUT_NAME "osmscout_map_svg"
+	VERSION ${OSMSCOUT_LIBRARY_VERSION}
+	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+	FOLDER "libosmscout"
+)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapSVGFeatures.h)
-target_include_directories(OSMScoutMapSVG PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
 create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapSVG")
-target_include_directories(OSMScoutMapSVG PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
+target_include_directories(OSMScoutMapSVG PRIVATE
+	include
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_include_directories(OSMScoutMapSVG INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-svg/include ${CMAKE_BINARY_DIR}/libosmscout-map-svg/include)
+target_link_libraries(OSMScoutMapSVG OSMScout::OSMScout OSMScout::Map)
 
 if(APPLE AND BUILD_FRAMEWORKS)
     set_target_properties(OSMScoutMapSVG PROPERTIES
@@ -42,10 +38,6 @@ if(APPLE AND BUILD_FRAMEWORKS)
             OUTPUT_NAME "OSMScoutMapSVG")
 endif()
 
-target_link_libraries(OSMScoutMapSVG
-		OSMScout
-		OSMScoutMap)
-
 if(PANGOFT2_FOUND)
   target_include_directories(OSMScoutMapSVG PUBLIC ${PANGOFT2_INCLUDE_DIRS})
   target_link_libraries(OSMScoutMapSVG ${PANGOFT2_LIBRARIES})
@@ -56,7 +48,9 @@ if(PANGOFT2_FOUND)
   endif()
 endif()
 
-target_compile_definitions(OSMScoutMapSVG PRIVATE -DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
+if(WIN32 AND BUILD_SHARED_LIBS)
+	create_win32_dll_resource(OSMScoutMapSVG "osmscout_map_svg")
+endif()
 
 install(TARGETS OSMScoutMapSVG
         RUNTIME DESTINATION bin
