@@ -56,13 +56,7 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
 
   osmscout::LocationStringSearchParameter searchParameter(stdSearchPattern);
 
-  // searchParameter.SetSearchForLocation(args.searchForLocation);
-  // searchParameter.SetSearchForPOI(args.searchForPOI);
-  // searchParameter.SetAdminRegionOnlyMatch(args.adminRegionOnlyMatch);
-  // searchParameter.SetPOIOnlyMatch(args.poiOnlyMatch);
-  // searchParameter.SetLocationOnlyMatch(args.locationOnlyMatch);
-  // searchParameter.SetAddressOnlyMatch(args.addressOnlyMatch);
-  // searchParameter.SetStringMatcherFactory(matcherFactory);
+  searchParameter.SetStringMatcherFactory(std::make_shared<osmscout::StringMatcherTransliterateFactory>());
   if (defaultRegion)
     searchParameter.SetDefaultAdminRegion(defaultRegion);
 

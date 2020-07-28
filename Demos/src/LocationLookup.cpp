@@ -43,6 +43,7 @@ struct Arguments
   size_t                 limit=30;
   size_t                 repeat=1;
   std::list<std::string> location;
+  bool                   transliterate=false;
 };
 
 bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService,
@@ -297,6 +298,10 @@ void DumpResult(const osmscout::DatabaseRef& database,
 
       std::cout << std::endl;
 
+      for (const auto& alias : entry.adminRegion->aliases) {
+        std::cout << "   - alias " << alias.name << std::endl;
+      }
+
       if (entry.adminRegion->aliasObject.Valid()) {
         std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
       }
@@ -394,6 +399,13 @@ int main(int argc, char* argv[])
                       "repeat",
                       "Cout of repeat for performance test");
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.transliterate=value;
+                      }),
+                      "transliterate",
+                      "Transliterate non-ascii characters for matching",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -450,8 +462,14 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::StringMatcherFactoryRef matcherFactory=std::make_shared<osmscout::StringMatcherCIFactory>();
-  osmscout::LocationServiceRef     locationService=std::make_shared<osmscout::LocationService>(database);
+  osmscout::StringMatcherFactoryRef matcherFactory;
+  if(args.transliterate) {
+    matcherFactory=std::make_shared<osmscout::StringMatcherTransliterateFactory>();
+  } else {
+    matcherFactory=std::make_shared<osmscout::StringMatcherCIFactory>();
+  }
+
+  osmscout::LocationServiceRef locationService=std::make_shared<osmscout::LocationService>(database);
 
   osmscout::LocationStringSearchParameter searchParameter(osmscout::LocaleStringToUTF8String(searchPattern));
 
@@ -507,6 +525,7 @@ int main(int argc, char* argv[])
   std::cout << "Location only match:     " << (searchParameter.GetLocationOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Address only match:      " << (searchParameter.GetAddressOnlyMatch() ? "true" : "false") << std::endl;
   std::cout << "Partial match:           " << (searchParameter.GetPartialMatch() ? "true" : "false") << std::endl;
+  std::cout << "Transliterate:           " << (args.transliterate ? "true" : "false") << std::endl;
 
   if (searchParameter.GetDefaultAdminRegion()) {
     std::cout << "Default admin region:    " << searchParameter.GetDefaultAdminRegion()->name << " (" << searchParameter.GetDefaultAdminRegion()->object.GetName() << ")" << std::endl;

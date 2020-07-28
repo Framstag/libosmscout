@@ -497,6 +497,20 @@ namespace osmscout {
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 
   /**
+   * Transliterate non-ascii characters to one or more characters that are similar to the original character.
+   * When there is no transformation available, question mark is used (iconv implementation)
+   * or original character is keep in place (translation table implementation).
+   *
+   * @param text
+   *    Text to get converted
+   * @return
+   *    Converted text
+   *
+   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
+   */
+  extern OSMSCOUT_API std::string UTF8Transliterate(const std::string& text);
+
+  /**
    * Parse time string in ISO 8601 format "2017-11-26T13:46:12.124Z" (UTC timezone)
    * to Timestamp (std::chrono::time_point with millisecond accuracy).
    *
