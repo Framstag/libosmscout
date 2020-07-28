@@ -4,6 +4,7 @@ include(CheckPrototypeDefinition)
 include(CheckCCompilerFlag)
 include(CheckTypeSize)
 include(CheckFunctionExists)
+include(CheckCXXCompilerFlag)
 
 # detect 32 or 64 bits
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)

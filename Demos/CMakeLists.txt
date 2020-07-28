@@ -220,7 +220,7 @@ endif()
 #---- DrawMapOSX
 if(APPLE)
 	if(${OSMSCOUT_BUILD_MAP_IOSX} AND NOT DEFINED IOS_PLATFORM)
-		create_demo_project(NAME DrawMapOSX SOURCES src/DrawMapOSX.mm TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapIOSX)
+		create_demo_project(NAME DrawMapOSX SOURCES src/DrawMapOSX.mm TARGET OSMScout::OSMScout OSMScout::Map OSMScoutMapIOSX)
 	else()
 		message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
 	endif()
