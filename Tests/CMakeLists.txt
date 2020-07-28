@@ -55,7 +55,13 @@ macro(create_test_project)
 				execute_process(COMMAND "${_qt5_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt5_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
 				set(qt5_bin ";${qt5_install_prefix}\\bin")
 			endif()
-			set_tests_properties(${_name} PROPERTIES ENVIRONMENT "PATH=$<TARGET_FILE_DIR:OSMScout>;$<TARGET_FILE_DIR:OSMScoutMap>;$<TARGET_FILE_DIR:OSMScoutMapAGG>;$<TARGET_FILE_DIR:OSMScoutMapQt>;$<TARGET_FILE_DIR:OSMScoutMapCairo>;$<TARGET_FILE_DIR:OSMScoutImport>;$<TARGET_FILE_DIR:OSMScoutGPX>;$<TARGET_FILE_DIR:OSMScoutClientQt>;$<TARGET_FILE_DIR:OSMScoutTest>${qt5_bin};$ENV{PATH}")
+			set(envpath "PATH=$<TARGET_FILE_DIR:OSMScout>${qt5_bin}")
+			foreach(tg IN LISTS OSMScoutMap OSMScoutMapAGG OSMScoutMapQt OSMScoutMapCairo OSMScoutImport OSMScoutGPX OSMScoutClientQt OSMScoutTest)
+				if(TARGET ${tg})
+					set(envpath "${envpath};$<TARGET_FILE_DIR:${tg}>")
+				endif()
+			endforeach()
+			set_tests_properties(${_name} PROPERTIES ENVIRONMENT "${envpath};$ENV{PATH}")
 		endif()
 	endif()
 endmacro(create_test_project)
@@ -98,14 +104,14 @@ create_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerfo
 create_test_project(NAME MultiDBRouting SOURCES src/MultiDBRouting.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- ThreadedDatabase
-if(${OSMSCOUT_BUILD_MAP})
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	create_test_project(NAME ThreadedDatabase SOURCES src/ThreadedDatabase.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
 else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
 
 #---- DrawTextQt
-if(${OSMSCOUT_BUILD_MAP_QT})
+if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
 	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
 	qt5_wrap_cpp(src_files include/DrawWindow.h)
 	create_test_project(NAME DrawTextQt SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt Qt5::Widgets SKIPTEST)
@@ -120,7 +126,7 @@ create_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 create_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 
 #---- MapRotate
-if(${OSMSCOUT_BUILD_MAP})
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	create_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
 else()
 	message("Skip MapRotate test, libosmscout-map is missing.")
@@ -163,7 +169,7 @@ create_test_project(NAME TransPolygon SOURCES src/TransPolygon.cpp)
 create_test_project(NAME GeoBox SOURCES src/GeoBox.cpp)
 
 #---- OSTAndOSSCheck
-if(${OSMSCOUT_BUILD_MAP})
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	create_test_project(NAME OSTAndOSSCheck SOURCES src/OSTAndOSSCheck.cpp TARGET OSMScout::Map SKIPTEST)
 
 	set(STYLESHEETS
@@ -186,7 +192,7 @@ else()
 endif()
 
 #---- LabelPathTest
-if(${OSMSCOUT_BUILD_MAP})
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	create_test_project(NAME LabelPathTest SOURCES src/LabelPathTest.cpp TARGET OSMScout::Map)
 else()
 	message("Skip LabelPathTest, libosmscout-map is missing.")
@@ -199,7 +205,7 @@ create_test_project(NAME Base64 SOURCES src/Base64.cpp)
 create_test_project(NAME CoordBufferTest SOURCES src/CoordBufferTest.cpp)
 
 #---- ClientQtThreading
-if(${OSMSCOUT_BUILD_CLIENT_QT})
+if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
 	set(src_files src/ClientQtThreading.cpp)
 	qt5_wrap_cpp(src_files include/ClientQtThreading.h)
 	create_test_project(NAME ClientQtThreading SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
@@ -208,7 +214,7 @@ else()
 endif()
 
 #---- QtFileDownloader
-if(${OSMSCOUT_BUILD_CLIENT_QT})
+if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
 	set(src_files src/QtFileDownloader.cpp)
 	qt5_wrap_cpp(src_files include/DownloaderTest.h)
 	create_test_project(NAME QtFileDownloader SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
