@@ -27,7 +27,7 @@ unix {
 }
 
 windows {
-    DEFINES += WIN32 OSMSCOUTMAPQTDLL DLL_EXPORT
+    DEFINES += WIN32 OSMScoutMapQt_EXPORTS DLL_EXPORT
     CONFIG(debug, debug|release): DESTDIR = ../windows/Debug
     CONFIG(release, debug|release): DESTDIR = ../windows/Release
 }

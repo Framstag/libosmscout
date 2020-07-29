@@ -1,7 +1,7 @@
 cppArgs = ['-D_UNICODE']
 
 if get_option('default_library')=='shared'
-  cppArgs += ['-DOSMSCOUT_MAP_DIRECTX_EXPORT_SYMBOLS']
+  cppArgs += ['-DOSMScoutMapDirectX_EXPORTS']
 
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']

@@ -1,7 +1,7 @@
 cppArgs = []
 
 if get_option('default_library')=='shared'
-  cppArgs += ['-DOSMSCOUT_MAP_SVG_EXPORT_SYMBOLS']
+  cppArgs += ['-DOSMScoutMapSVG_EXPORTS']
   
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']

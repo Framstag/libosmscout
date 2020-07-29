@@ -1,7 +1,7 @@
 cppArgs = []
 
 if get_option('default_library')=='shared'
-  cppArgs += ['-DOSMSCOUT_TEST_EXPORT_SYMBOLS']
+  cppArgs += ['-DOSMScoutTest_EXPORTS']
 
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']
