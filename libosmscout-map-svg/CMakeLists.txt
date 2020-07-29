@@ -7,25 +7,16 @@ set(SOURCE_FILES
     src/osmscout/MapPainterSVG.cpp
 )
 
-add_library(OSMScoutMapSVG ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::MapSVG ALIAS OSMScoutMapSVG)
-set_target_properties(OSMScoutMapSVG PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutMapSVG
+	ALIAS MapSVG
 	OUTPUT_NAME "osmscout_map_svg"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	INCLUDES ${OPENGL_INCLUDE_DIR}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapSVGFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapSVG")
-target_include_directories(OSMScoutMapSVG PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_include_directories(OSMScoutMapSVG INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-svg/include ${CMAKE_BINARY_DIR}/libosmscout-map-svg/include)
-target_link_libraries(OSMScoutMapSVG OSMScout::OSMScout OSMScout::Map)
 
 if(APPLE AND BUILD_FRAMEWORKS)
     set_target_properties(OSMScoutMapSVG PROPERTIES
@@ -47,15 +38,3 @@ if(PANGOFT2_FOUND)
       target_link_libraries(OSMScoutMapSVG ${HARFBUZZ_LIBRARIES})
   endif()
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutMapSVG "osmscout_map_svg")
-endif()
-
-install(TARGETS OSMScoutMapSVG
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapSVGFeatures.h DESTINATION include/osmscout)

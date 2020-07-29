@@ -53,7 +53,7 @@ set(HEADER_FILES
     include/osmscout/AvailableVoicesModel.h
     include/osmscout/VoiceProvider.h
     include/osmscout/InstalledVoicesModel.h
-    )
+)
 
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
@@ -105,27 +105,17 @@ set(SOURCE_FILES
     src/osmscout/AvailableVoicesModel.cpp
     src/osmscout/VoiceProvider.cpp
     src/osmscout/InstalledVoicesModel.cpp
-    )
+)
 
-add_library(OSMScoutClientQt ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::ClientQt ALIAS OSMScoutClientQt)
-set_target_properties(OSMScoutClientQt PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutClientQt
+	ALIAS ClientQt
 	OUTPUT_NAME "osmscout_client_qt"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/ClientQtFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutClientQt")
-target_include_directories(OSMScoutClientQt PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_include_directories(OSMScoutClientQt INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-client-qt/include ${CMAKE_BINARY_DIR}/libosmscout-client-qt/include)
-target_link_libraries(OSMScoutClientQt OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia)
 
 if(MARISA_FOUND)
     target_include_directories(OSMScoutClientQt PRIVATE ${MARISA_INCLUDE_DIRS})
@@ -142,22 +132,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
 		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutClientQt")
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutClientQt "osmscout_client_qt")
-endif()
-if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt AND BUILD_SHARED_LIBS)
-	add_custom_command(TARGET OSMScoutClientQt
-        POST_BUILD
-        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScoutClientQt>/$<TARGET_FILE_NAME:OSMScoutClientQt>"
-    )
-endif()
-
-install(TARGETS OSMScoutClientQt
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/ClientQtFeatures.h DESTINATION include/osmscout)

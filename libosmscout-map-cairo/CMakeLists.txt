@@ -9,27 +9,17 @@ set(SOURCE_FILES
     src/osmscout/MapPainterCairo.cpp
 )
 
-add_library(OSMScoutMapCairo ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::MapCairo ALIAS OSMScoutMapCairo)
-set_target_properties(OSMScoutMapCairo PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutMapCairo
+	ALIAS MapCairo
 	OUTPUT_NAME "osmscout_map_cairo"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	INCLUDES ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES}
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapCairoFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapCairo")
-target_include_directories(OSMScoutMapCairo PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${CAIRO_INCLUDE_DIRS}
-	${PNG_INCLUDE_DIRS}
-)
-target_include_directories(OSMScoutMapCairo INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-cairo/include ${CMAKE_BINARY_DIR}/libosmscout-map-cairo/include ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS})
-target_link_libraries(OSMScoutMapCairo OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES})
+target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})
 
 if(PANGOCAIRO_FOUND)
   target_include_directories(OSMScoutMapCairo PUBLIC ${PANGO_INCLUDE_DIRS})
@@ -53,15 +43,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutMapCairo")
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutMapCairo "osmscout_map_cairo")
-endif()
-
-install(TARGETS OSMScoutMapCairo
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapCairoFeatures.h DESTINATION include/osmscout)

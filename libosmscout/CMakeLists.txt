@@ -233,28 +233,24 @@ set(SOURCE_FILES
     src/osmscout/WayDataFile.cpp
     src/osmscout/util/CmdLineParsing.cpp)
 
+set(EXCLUDE_HEADER)
+
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/TextSearchIndex.h)
     list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
+else()
+	list(APPEND EXCLUDE_HEADER TextSearchIndex.h)
 endif()
 
-add_library(OSMScout ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::OSMScout ALIAS OSMScout)
-set_target_properties(OSMScout PROPERTIES
+osmscout_library_project(
+	NAME OSMScout
+	ALIAS OSMScout
 	OUTPUT_NAME "osmscout"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake
+	EXCLUDE ${EXCLUDE_HEADER}
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScout")
-target_include_directories(OSMScout PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-)
-target_include_directories(OSMScout INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout/include ${CMAKE_BINARY_DIR}/libosmscout/include)
 
 if(MARISA_FOUND)
     target_include_directories(OSMScout PRIVATE ${MARISA_INCLUDE_DIRS})
@@ -289,20 +285,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
 		set_property(SOURCE "${HEADER_FILES_ROUTING}"
 			  PROPERTY MACOSX_PACKAGE_LOCATION Headers/routing)
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScout "osmscout")
-endif()
-
-install(TARGETS OSMScout
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-
-if(MARISA_FOUND)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-else()
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE PATTERN TextSearchIndex.h EXCLUDE)
-endif()
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/CoreFeatures.h DESTINATION include/osmscout)

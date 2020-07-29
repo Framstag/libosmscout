@@ -288,7 +288,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef PACKAGE_STRING
-#define PACKAGE_STRING "@name@ 0.1"
+#define PACKAGE_STRING "@name@ @PROJECT_VERSION@"
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -303,7 +303,7 @@
 
 /* Define to the version of this package. */
 #ifndef PACKAGE_VERSION
-#define PACKAGE_VERSION "0.1"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */

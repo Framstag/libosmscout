@@ -37,25 +37,15 @@ set(SOURCE_FILES
 	src/osmscout/MapPainterNoOp.cpp
 )
 
-add_library(OSMScoutMap ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::Map ALIAS OSMScoutMap)
-set_target_properties(OSMScoutMap PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutMap
+	ALIAS Map
 	OUTPUT_NAME "osmscout_map"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake
+	TARGET OSMScout::OSMScout
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMap")
-target_include_directories(OSMScoutMap PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_include_directories(OSMScoutMap INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map/include ${CMAKE_BINARY_DIR}/libosmscout-map/include)
-target_link_libraries(OSMScoutMap OSMScout::OSMScout)
 
 if(APPLE AND BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMap PROPERTIES
@@ -67,15 +57,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutMap")
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutMap "osmscout_map")
-endif()
-
-install(TARGETS OSMScoutMap
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapFeatures.h DESTINATION include/osmscout)

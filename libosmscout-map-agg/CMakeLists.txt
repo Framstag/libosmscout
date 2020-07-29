@@ -8,28 +8,17 @@ set(SOURCE_FILES
     src/osmscout/MapPainterAgg.cpp
 )
 
-add_library(OSMScoutMapAGG ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::MapAGG ALIAS OSMScoutMapAGG)
-set_target_properties(OSMScoutMapAGG PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutMapAGG
+	ALIAS MapAGG
 	OUTPUT_NAME "osmscout_map_agg"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	INCLUDES ${LIBAGG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIR_freetype2} ${FREETYPE_INCLUDE_DIR_ft2build}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map ${LIBAGG_LIBRARIES} ${LIBAGGFT2_LIBRARIES} ${FREETYPE_LIBRARIES}
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapAggFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapAGG")
-target_include_directories(OSMScoutMapAGG PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${LIBAGG_INCLUDE_DIRS}
-	${FREETYPE_INCLUDE_DIR_freetype2}
-	${FREETYPE_INCLUDE_DIR_ft2build}
-)
-target_include_directories(OSMScoutMapAGG INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-agg/include ${CMAKE_BINARY_DIR}/libosmscout-map-agg/include ${LIBAGG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIR_freetype2} ${FREETYPE_INCLUDE_DIR_ft2build})
-target_link_libraries(OSMScoutMapAGG OSMScout::OSMScout OSMScout::Map ${LIBAGG_LIBRARIES} ${LIBAGGFT2_LIBRARIES} ${FREETYPE_LIBRARIES})
+target_include_directories(OSMScoutMapAGG INTERFACE ${LIBAGG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIR_freetype2} ${FREETYPE_INCLUDE_DIR_ft2build})
 
 if(APPLE AND BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMapAGG PROPERTIES
@@ -41,15 +30,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutMapAGG")
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutMapAGG "osmscout_map_agg")
-endif()
-
-install(TARGETS OSMScoutMapAGG
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapAggFeatures.h DESTINATION include/osmscout)

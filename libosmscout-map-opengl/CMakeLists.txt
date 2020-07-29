@@ -24,30 +24,17 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/sweep_context.cc
 		src/poly2tri/sweep/advancing_front.cc)
 
-add_library(OSMScoutMapOpenGL ${SOURCE_FILES} ${HEADER_FILES})
-add_library(OSMScout::MapOpenGL ALIAS OSMScoutMapOpenGL)
-set_target_properties(OSMScoutMapOpenGL PROPERTIES
+osmscout_library_project(
+	NAME OSMScoutMapOpenGL
+	ALIAS MapOpenGL
 	OUTPUT_NAME "osmscout_map_opengl"
-	VERSION ${OSMSCOUT_LIBRARY_VERSION}
-	SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
-	FOLDER "libosmscout"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	INCLUDES ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map ${OPENGL_LIBRARIES} GLEW::GLEW ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES}
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapOpenGLFeatures.h)
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMapOpenGL")
-target_include_directories(OSMScoutMapOpenGL PRIVATE
-	include
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}/privateinclude
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${OPENGL_INCLUDE_DIR}
-	${GLEW_INCLUDE_DIRS}
-	${GLM_INCLUDE_DIRS}
-	${PNG_INCLUDE_DIRS}
-	${FREETYPE_INCLUDE_DIRS}
-)
-target_include_directories(OSMScoutMapOpenGL INTERFACE ${CMAKE_SOURCE_DIR}/libosmscout-map-opengl/include ${CMAKE_BINARY_DIR}/libosmscout-map-opengl/include ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
-target_link_libraries(OSMScoutMapOpenGL OSMScout::OSMScout OSMScout::Map ${OPENGL_LIBRARIES} GLEW::GLEW ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES})
+target_include_directories(OSMScoutMapOpenGL INTERFACE ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
 
 if(APPLE AND BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMapOpenGL PROPERTIES
@@ -59,15 +46,3 @@ if(APPLE AND BUILD_FRAMEWORKS)
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutMapOpenGL")
 endif()
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-	create_win32_dll_resource(OSMScoutMapOpenGL "osmscout_map_opengl")
-endif()
-
-install(TARGETS OSMScoutMapOpenGL
-		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib
-		FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapOpenGLFeatures.h DESTINATION include/osmscout)
