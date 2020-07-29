@@ -220,7 +220,7 @@ endif()
 #---- DrawMapOSX
 if(APPLE)
 	if(${OSMSCOUT_BUILD_MAP_IOSX} AND NOT DEFINED IOS_PLATFORM)
-		create_demo_project(NAME DrawMapOSX SOURCES src/DrawMapOSX.mm TARGET OSMScout::OSMScout OSMScout::Map OSMScoutMapIOSX)
+		create_demo_project(NAME DrawMapOSX SOURCES src/DrawMapOSX.mm TARGET OSMScout::OSMScout OSMScout::Map OSMScoutMapIOSX INCLUDES ${CMAKE_SOURCE_DIR}/libosmscout-map-iOSX/include ${CMAKE_BINARY_DIR}/libosmscout-map-iOSX/include)
 	else()
 		message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
 	endif()
