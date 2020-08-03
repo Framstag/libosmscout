@@ -66,5 +66,5 @@ if(APPLE AND BUILD_FRAMEWORKS)
 		OUTPUT_NAME "OSMScoutGPX")
 endif()
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/gpx/GPXFeatures.h DESTINATION include/osmscout)
