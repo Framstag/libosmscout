@@ -12,7 +12,6 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_iosx"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	INCLUDES ${Direct2D_INCLUDE_DIRS}
 	TARGET OSMScout::OSMScout OSMScout::Map
 )
 
