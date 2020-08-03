@@ -23,7 +23,6 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_test"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	INCLUDES ${OPENGL_INCLUDE_DIR}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout-test/TestFeatures.h.cmake
 	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout-test/TestFeatures.h
 	TARGET OSMScout::OSMScout OSMScout::Import

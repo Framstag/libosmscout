@@ -13,7 +13,6 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_svg"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	INCLUDES ${OPENGL_INCLUDE_DIR}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map
 )
