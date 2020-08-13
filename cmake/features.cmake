@@ -126,7 +126,7 @@ find_package(OpenGL)
 find_package(GLEW)
 find_package(GLM)
 find_package(GLFW)
-find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
+find_package(Qt5 5.6 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
 if(Qt5_FOUND AND WIN32 AND TARGET Qt5::qmake AND NOT TARGET Qt5::windeployqt)
   get_target_property(_qt5_qmake_location Qt5::qmake IMPORTED_LOCATION)
   execute_process(
