@@ -163,10 +163,10 @@ namespace osmscout {
       double               cellWidth;  //!< With of an cell
       double               cellHeight; //!< Height of an cell
       uint32_t             cellXStart; //!< First x-axis coordinate of cells
-      uint32_t             cellXEnd;   //!< Last x-axis coordinate cells
+      uint32_t             cellXEnd;   //!< Last x-axis coordinate cells (inclusive)
       uint32_t             cellYStart; //!< First y-axis coordinate of cells
-      uint32_t             cellYEnd;   //!< Last x-axis coordinate cells
-      uint32_t             cellXCount; //!< Number of cells in horizontal direction (with of bounding box in cells)
+      uint32_t             cellYEnd;   //!< Last x-axis coordinate cells (inclusive)
+      uint32_t             cellXCount; //!< Number of cells in horizontal direction (width of bounding box in cells)
       uint32_t             cellYCount; //!< Number of cells in vertical direction (height of bounding box in cells)
       std::vector<uint8_t> area;       //!< Actual index data
 
