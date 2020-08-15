@@ -2068,6 +2068,15 @@ namespace osmscout {
 
       areaData.boundingBox.Set(minCoord,maxCoord);
 
+      // skip tiles that are completely outside projection
+      if (!projection.GetDimensions().Intersects(areaData.boundingBox)){
+#if defined(DEBUG_GROUNDTILES)
+        std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
+                  << " " << areaData.boundingBox.GetDisplayText() << std::endl;
+#endif
+        continue;
+      }
+
       if (tile.coords.empty()) {
 #if defined(DEBUG_GROUNDTILES)
         std::cout << " >= fill" << std::endl;
