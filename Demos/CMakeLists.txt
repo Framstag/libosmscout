@@ -117,7 +117,7 @@ endif()
 
 #---- DrawMapCairo
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
-	osmscout_demo_project(NAME DrawMapCairo SOURCES src/DrawMapCairo.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo INCLUDES ${CAIRO_INCLUDE_DIRS})
+	osmscout_demo_project(NAME DrawMapCairo SOURCES src/DrawMapCairo.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo INCLUDES ${CAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}/../ ${CAIRO_INCLUDE_DIRS}/cairo)
 else()
 	message("Skip DrawMapCairo demo, libosmscout-map-cairo is missing.")
 endif()
