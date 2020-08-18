@@ -41,3 +41,17 @@ TEST_CASE("Split string by multi-character separator")
   REQUIRE(*(it++) == "ground");
   REQUIRE(*(it++) == "gravel");
 }
+
+TEST_CASE("Transliterate diacritics")
+{
+  try {
+    std::locale::global(std::locale("en_US.UTF-8"));
+    std::cout << "en_US.UTF-8 locale activated" << std::endl;
+  } catch (const std::exception& e) {
+    std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
+  }
+
+  auto transformed=osmscout::UTF8Transliterate("áéíýóúůďťňěščřžüöÁÉÍÝÓÚŮĎŤŇĚŠČŘŽÜÖß");
+
+  REQUIRE(transformed == "aeiyouudtnescrzuoAEIYOUUDTNESCRZUOss");
+}

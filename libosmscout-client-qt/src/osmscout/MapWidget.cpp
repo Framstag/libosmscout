@@ -189,20 +189,10 @@ void MapWidget::touchEvent(QTouchEvent *event)
     tapRecognizer.touch(*event);
 
     event->accept();
-
-    qDebug() << "touchEvent:";
-    QList<QTouchEvent::TouchPoint> relevantTouchPoints;
-    for (QTouchEvent::TouchPoint tp: event->touchPoints()){
-      Qt::TouchPointStates state(tp.state());
-      qDebug() << "  " << state <<" " << tp.id() <<
-              " pos " << tp.pos().x() << "x" << tp.pos().y() <<
-              " @ " << tp.pressure();
-    }
  }
 
 void MapWidget::focusOutEvent(QFocusEvent *event)
 {
-    qDebug() << "focus-out event";
     if (!inputHandler->focusOutEvent(event)){
         setupInputHandler(new InputHandler(*view));
     }
@@ -578,7 +568,6 @@ void MapWidget::showLocation(LocationEntry* location)
     qWarning() << "Invalid location" << location;
     return;
   }
-  qDebug() << "Show location: " << location;
 
   osmscout::GeoCoord center;
   Distance dimension = Meters(10);
@@ -679,7 +668,6 @@ OverlayNode *MapWidget::createOverlayNode(QString type)
 
 void MapWidget::onTap(const QPoint p)
 {
-    qDebug() << "tap " << p;
     double lat;
     double lon;
     getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
@@ -688,7 +676,6 @@ void MapWidget::onTap(const QPoint p)
 
 void MapWidget::onDoubleTap(const QPoint p)
 {
-    qDebug() << "double tap " << p;
     zoomIn(2.0, p);
     double lat;
     double lon;
@@ -698,7 +685,6 @@ void MapWidget::onDoubleTap(const QPoint p)
 
 void MapWidget::onLongTap(const QPoint p)
 {
-    qDebug() << "long tap " << p;
     double lat;
     double lon;
     getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
@@ -707,7 +693,6 @@ void MapWidget::onLongTap(const QPoint p)
 
 void MapWidget::onTapLongTap(const QPoint p)
 {
-    qDebug() << "tap, long tap " << p;
     zoomOut(2.0, p);
     double lat;
     double lon;
@@ -777,7 +762,6 @@ QImage MapWidget::loadSVGIcon(const QString &directory, const QString fileName, 
     QPainter painter(&image);
     renderer.render(&painter);
     painter.end();
-    qDebug() << "Loaded icon" << iconPath;
   }else{
     qWarning() << "Cannot load icon" << iconPath;
   }

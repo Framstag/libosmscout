@@ -61,13 +61,24 @@ namespace osmscout {
     this->cellWidth=cellWidth;
     this->cellHeight=cellHeight;
 
+    // inclusive end cell coordinate
+    auto EndCell=[](double d) -> uint32_t {
+      double end=floor(d);
+      if (end == d){
+        end-=1.0;
+      }
+      return (uint32_t)end;
+    };
+
     cellXStart=(uint32_t)floor((minCoord.GetLon()+180.0)/cellWidth);
-    cellXEnd=(uint32_t)floor((maxCoord.GetLon()+180.0)/cellWidth);
+    cellXEnd=EndCell((maxCoord.GetLon()+180.0)/cellWidth);
     cellYStart=(uint32_t)floor((minCoord.GetLat()+90.0)/cellHeight);
-    cellYEnd=(uint32_t)floor((maxCoord.GetLat()+90.0)/cellHeight);
+    cellYEnd=EndCell((maxCoord.GetLat()+90.0)/cellHeight);
 
     cellXCount=cellXEnd-cellXStart+1;
     cellYCount=cellYEnd-cellYStart+1;
+    assert(cellXCount>0);
+    assert(cellYCount>0);
 
 #if defined(DEBUG_TILING)
     std::cout << "Setting state box to: " << cellXStart << " - " << cellXEnd << " x " << cellYStart << " - " << cellYEnd << std::endl;

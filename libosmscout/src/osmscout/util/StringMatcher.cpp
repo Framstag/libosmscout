@@ -21,6 +21,8 @@
 
 #include <osmscout/util/String.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
   StringMatcherCI::StringMatcherCI(const std::string& pattern)
@@ -49,4 +51,52 @@ namespace osmscout {
   {
     return std::make_shared<StringMatcherCI>(pattern);
   }
+
+  StringMatcherTransliterate::StringMatcherTransliterate(const std::string& patternArg)
+        : pattern(UTF8StringToUpper(patternArg)),
+          transliteratedPattern(UTF8Transliterate(pattern))
+  {
+    size_t unavailable=std::count(transliteratedPattern.begin(), transliteratedPattern.end(), '?');
+    if (unavailable > (transliteratedPattern.size()/2)) {
+      // if there is huge portion (more than 50%) of characters that cannot be transliterated
+      // we give up transliteration at all. It is usual for asian and arabic scripts.
+      transliteratedPattern.clear();
+    }
+  }
+
+  StringMatcher::Result StringMatcherTransliterate::Match(const std::string& text) const
+  {
+    auto transformedText=UTF8StringToUpper(text);
+    auto pos            =transformedText.find(pattern);
+
+    if (pos==std::string::npos) {
+      if (transliteratedPattern.empty()){
+        return noMatch;
+      }
+
+      auto transliterated=UTF8Transliterate(transformedText);
+      pos=transliterated.find(transliteratedPattern);
+
+      if (pos==std::string::npos) {
+        return noMatch;
+      }
+      if (pos==0 && transliteratedPattern.length()==transliterated.length()) {
+        return match;
+      }
+
+      return partialMatch;
+    }
+
+    if (pos==0 && pattern.length()==transformedText.length()) {
+      return match;
+    }
+
+    return partialMatch;
+  }
+
+  StringMatcherRef StringMatcherTransliterateFactory::CreateMatcher(const std::string& pattern) const
+  {
+    return std::make_shared<StringMatcherTransliterate>(pattern);
+  }
+
 }
