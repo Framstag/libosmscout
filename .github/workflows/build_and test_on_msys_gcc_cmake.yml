@@ -1,5 +1,8 @@
 name: MSYS using gcc and cmake
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
@@ -23,7 +26,7 @@ jobs:
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: /mingw64/bin/cmake -B build -S . -G `'MSYS Makefiles`'
+        run: /mingw64/bin/cmake -B build -S . -G 'MSYS Makefiles'
       - name: Build project
         run: /mingw64/bin/cmake --build build
 #      - name: Run tests
