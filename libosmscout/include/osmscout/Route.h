@@ -35,6 +35,24 @@ namespace osmscout {
 
   class OSMSCOUT_API Route CLASS_FINAL
   {
+  public:
+    enum class MemberDirection {
+      forward,
+      backward
+    };
+
+    struct SegmentMember {
+      MemberDirection direction{MemberDirection::forward};
+      FileOffset way;
+    };
+
+    struct Segment {
+      std::vector<SegmentMember> members;
+    };
+
+    std::vector<Segment> segments;
+    GeoBox bbox;
+
   private:
     FeatureValueBuffer featureValueBuffer;   //!< List of features
 
@@ -92,6 +110,16 @@ namespace osmscout {
     inline const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return featureValueBuffer;
+    }
+
+    inline void SetType(const TypeInfoRef& type)
+    {
+      featureValueBuffer.SetType(type);
+    }
+
+    inline void SetFeatures(const FeatureValueBuffer& buffer)
+    {
+      featureValueBuffer.Set(buffer);
     }
 
     void Read(const TypeConfig& typeConfig,
