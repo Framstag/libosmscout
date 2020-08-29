@@ -68,6 +68,8 @@
 #include <osmscout/import/GenOptimizeAreasLowZoom.h>
 #include <osmscout/import/GenOptimizeWaysLowZoom.h>
 
+#include <osmscout/import/GenRoute2Dat.h>
+
 // Routing
 #include <osmscout/import/GenRouteDat.h>
 #include <osmscout/import/GenIntersectionIndex.h>
@@ -222,6 +224,9 @@ namespace osmscout {
 
     /* 25 */
     modules.push_back(std::make_shared<PTRouteDataGenerator>());
+
+    /* 26 */
+    modules.push_back(std::make_shared<RouteDataGenerator2>());
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
     /* 26 */

@@ -18,6 +18,7 @@ set(HEADER_FILES
     include/osmscout/import/GenRawWayIndex.h
     include/osmscout/import/GenRelAreaDat.h
     include/osmscout/import/GenRouteDat.h
+    include/osmscout/import/GenRoute2Dat.h
     include/osmscout/import/GenTypeDat.h
     include/osmscout/import/GenWaterIndex.h
     include/osmscout/import/GenWayAreaDat.h
@@ -66,6 +67,7 @@ set(SOURCE_FILES
     src/osmscout/import/GenRelAreaDat.cpp
     src/osmscout/import/GenPTRouteDat.cpp
     src/osmscout/import/GenRouteDat.cpp
+    src/osmscout/import/GenRoute2Dat.cpp
     src/osmscout/import/GenTypeDat.cpp
     src/osmscout/import/GenWaterIndex.cpp
     src/osmscout/import/GenWayAreaDat.cpp

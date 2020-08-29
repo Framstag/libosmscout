@@ -2331,6 +2331,21 @@ TYPES
       {Name, Ref, Operator, Network, FromTo, Color}
       ROUTE
 
+  TYPE route_bicycle
+    = RELATION ("type"=="route" AND "route"=="bicycle")
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
+  TYPE route_mtb
+    = RELATION ("type"=="route" AND "route"=="mtb")
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
+  TYPE route_hiking
+    = RELATION ("type"=="route" AND "route"=="hiking")
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
   // Catch-all fallback for other types
 
   TYPE routemaster_any IGNORE

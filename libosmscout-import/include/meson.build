@@ -29,6 +29,7 @@ osmscoutimportHeader = [
             'osmscout/import/GenPTRouteDat.h',
             'osmscout/import/GenRelAreaDat.h',
             'osmscout/import/GenRouteDat.h',
+            'osmscout/import/GenRoute2Dat.h',
             'osmscout/import/GenTypeDat.h',
             'osmscout/import/GenWaterIndex.h',
             'osmscout/import/GenWayAreaDat.h',

@@ -90,6 +90,7 @@ osmscoutSrc = [
             'src/osmscout/POIService.cpp',
             'src/osmscout/PTRouteDataFile.cpp',
             'src/osmscout/PublicTransport.cpp',
+            'src/osmscout/Route.cpp',
             'src/osmscout/ObjectVariantDataFile.cpp',
             'src/osmscout/SRTM.cpp',
             'src/osmscout/Tag.cpp',

@@ -26,6 +26,7 @@ osmscoutimportSrc = [
             'src/osmscout/import/GenPTRouteDat.cpp',
             'src/osmscout/import/GenRelAreaDat.cpp',
             'src/osmscout/import/GenRouteDat.cpp',
+            'src/osmscout/import/GenRoute2Dat.cpp',
             'src/osmscout/import/GenTypeDat.cpp',
             'src/osmscout/import/GenWaterIndex.cpp',
             'src/osmscout/import/GenWayAreaDat.cpp',

@@ -117,6 +117,7 @@ set(HEADER_FILES
     include/osmscout/PTRouteDataFile.h
     include/osmscout/PublicTransport.h
     include/osmscout/ObjectVariantDataFile.h
+    include/osmscout/Route.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
@@ -220,6 +221,7 @@ set(SOURCE_FILES
     src/osmscout/PTRouteDataFile.cpp
     src/osmscout/PublicTransport.cpp
     src/osmscout/ObjectVariantDataFile.cpp
+    src/osmscout/Route.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp

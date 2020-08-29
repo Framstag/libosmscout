@@ -97,6 +97,7 @@ osmscoutHeader = [
             'osmscout/POIService.h',
             'osmscout/PTRouteDataFile.h',
             'osmscout/PublicTransport.h',
+            'osmscout/Route.h',
             'osmscout/ObjectVariantDataFile.h',
             'osmscout/SRTM.h',
             'osmscout/Tag.h',

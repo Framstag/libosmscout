@@ -54,10 +54,22 @@ namespace osmscout {
       std::multimap<OSMId,TurnRestrictionRef> restrictions;
     };
 
+    struct RouteMember {
+      OSMId routeId; //!< raw route offset
+      uint32_t from; //!< initial position of way in route, inclusive
+      uint32_t to; //!< terminal position of way in route, inclusive
+    };
+
+    using RouteMemberData = std::multimap<OSMId,RouteMember>;
     using WayList = std::list<RawWayRef>;
     using WayListPtr = WayList::iterator;
     using WayListPtrList = std::list<WayListPtr>;
     using WaysByNodeMap = std::unordered_map<OSMId, WayListPtrList>;
+
+    bool ReadRouteMemberData(const ImportParameter& parameter,
+                             const TypeConfig& typeConfig,
+                             Progress& progress,
+                             RouteMemberData& routeMembers);
 
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
@@ -84,7 +96,8 @@ namespace osmscout {
 
     bool MergeWays(Progress& progress,
                    std::list<RawWayRef>& ways,
-                   RestrictionData& restrictions);
+                   RestrictionData& restrictions,
+                   RouteMemberData& routeMembers);
 
     bool SplitLongWays(Progress& progress,
                        std::list<RawWayRef>& ways,
