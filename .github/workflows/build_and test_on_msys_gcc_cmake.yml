@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup MSYS/MINGW64
-        uses: msys/setup-msys2@v2
+        uses: msys2/setup-msys2@v2
         with:
           update: true
           install: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-libiconv
