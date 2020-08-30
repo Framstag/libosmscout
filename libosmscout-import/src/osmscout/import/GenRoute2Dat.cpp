@@ -168,8 +168,10 @@ namespace osmscout {
           route.segments.push_back(std::move(segment));
         }
 
-        route.Write(*typeConfig,
-                    routeWriter);
+        if (!route.segments.empty() && route.bbox.IsValid()) {
+          route.Write(*typeConfig,
+                      routeWriter);
+        }
       }
 
       progress.Info(std::string("Process ") + std::to_string(routeCount) + " routes");
