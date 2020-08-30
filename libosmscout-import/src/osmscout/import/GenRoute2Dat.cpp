@@ -48,7 +48,7 @@ namespace osmscout {
 
     std::multimap<OSMId,FileOffset> wayIdMap;
 
-    FileScanner scanner;
+    FileScanner rawRouteScanner;
     FileWriter  routeWriter;
     FileScanner wayIdScanner;
     WayDataFile wayData(200);
@@ -84,24 +84,25 @@ namespace osmscout {
 
       wayIdScanner.Close();
 
-      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   Preprocess::RAWROUTE_DAT),
-                   FileScanner::Sequential,
-                   true);
+      rawRouteScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                           Preprocess::RAWROUTE_DAT),
+                           FileScanner::Sequential,
+                           true);
 
+      uint32_t rawRouteCount=0;
       uint32_t routeCount=0;
-      scanner.Read(routeCount);
+      rawRouteScanner.Read(rawRouteCount);
 
       routeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                        ROUTE_DAT));
 
       routeWriter.Write(routeCount);
 
-      for (uint32_t r=1; r <= routeCount; r++) {
-        progress.SetProgress(r, routeCount);
+      for (uint32_t r=1; r <= rawRouteCount; r++) {
+        progress.SetProgress(r, rawRouteCount);
 
         RawRelation rawRoute;
-        rawRoute.Read(*typeConfig, scanner);
+        rawRoute.Read(*typeConfig, rawRouteScanner);
 
         Route route;
         route.SetFeatures(rawRoute.GetFeatureValueBuffer()); // setup type also
@@ -171,18 +172,22 @@ namespace osmscout {
         if (!route.segments.empty() && route.bbox.IsValid()) {
           route.Write(*typeConfig,
                       routeWriter);
+          routeCount++;
         }
       }
 
-      progress.Info(std::string("Process ") + std::to_string(routeCount) + " routes");
+      routeWriter.SetPos(0);
+      routeWriter.Write(routeCount); // write actual number of routes in file
 
-      scanner.Close();
+      progress.Info(std::string("Process ") + std::to_string(rawRouteCount) + " routes");
+
+      rawRouteScanner.Close();
       routeWriter.Close();
       wayData.Close();
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
-      scanner.CloseFailsafe();
+      rawRouteScanner.CloseFailsafe();
       routeWriter.CloseFailsafe();
       wayData.Close();
       return false;
