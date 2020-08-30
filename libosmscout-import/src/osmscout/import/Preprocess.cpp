@@ -876,8 +876,7 @@ namespace osmscout {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   BoundingBoxDataFile::BOUNDINGBOX_DAT));
 
-      writer.WriteCoord(minCoord);
-      writer.WriteCoord(maxCoord);
+      writer.WriteBox(GeoBox(minCoord, maxCoord));
 
       writer.Close();
     }
