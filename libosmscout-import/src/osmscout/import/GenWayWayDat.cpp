@@ -82,11 +82,9 @@ namespace osmscout {
         RawRelation route;
         route.Read(typeConfig, scanner);
 
-        uint32_t pos=0;
         for (const auto &member: route.members){
           if (member.type==RawRelation::memberWay){
-            routeMembers.insert(std::make_pair(member.id, RouteMember{ route.GetId(), pos, pos }));
-            pos++;
+            routeMembers.insert(std::make_pair(member.id, route.GetId()));
           }
         }
       }
@@ -401,14 +399,25 @@ namespace osmscout {
           }
 
           // check route members
-          auto aRoutes = routeMembers.lower_bound(way->GetId());
-          auto bRoutes = routeMembers.lower_bound(candidate->GetId());
-          if (aRoutes!=routeMembers.end() || bRoutes!=routeMembers.end()){
-            // TODO: check if route members can be merged
-            continue;
-            // if (aRoutes==routeMembers.end() || bRoutes==routeMembers.end()){
-            //   continue;
-            // }
+          auto aRouteFrom = routeMembers.lower_bound(way->GetId());
+          auto aRouteTo = routeMembers.upper_bound(way->GetId());
+          auto bRouteFrom = routeMembers.lower_bound(candidate->GetId());
+          auto bRouteTo = routeMembers.upper_bound(candidate->GetId());
+          if (aRouteFrom != aRouteTo || bRouteFrom != bRouteTo){
+            std::set<OSMId> aRoutes;
+            std::set<OSMId> bRoutes;
+
+            std::for_each(aRouteFrom,aRouteTo,
+                [&aRoutes](auto &pair){aRoutes.insert(pair.second);});
+
+            std::for_each(bRouteFrom,bRouteTo,
+                [&bRoutes](auto &pair){bRoutes.insert(pair.second);});
+
+            assert(!(aRoutes.empty() && bRoutes.empty()));
+
+            if (aRoutes != bRoutes) {
+              continue; // cannot merge, ways have different set of routes
+            }
           }
 
           /*

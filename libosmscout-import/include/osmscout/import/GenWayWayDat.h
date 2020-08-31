@@ -54,13 +54,7 @@ namespace osmscout {
       std::multimap<OSMId,TurnRestrictionRef> restrictions;
     };
 
-    struct RouteMember {
-      OSMId routeId; //!< raw route offset
-      uint32_t from; //!< initial position of way in route, inclusive
-      uint32_t to; //!< terminal position of way in route, inclusive
-    };
-
-    using RouteMemberData = std::multimap<OSMId,RouteMember>;
+    using RouteMemberData = std::multimap<OSMId,OSMId>; // key is way id, values are route ids
     using WayList = std::list<RawWayRef>;
     using WayListPtr = WayList::iterator;
     using WayListPtrList = std::list<WayListPtr>;
