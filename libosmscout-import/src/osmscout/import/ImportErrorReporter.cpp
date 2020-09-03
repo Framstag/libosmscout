@@ -261,10 +261,10 @@ namespace osmscout {
     DebugDatabase          database(debugDatabaseParameter);
 
     if (database.Open(destinationDirectory)) {
-      std::set<ObjectOSMRef>               ids;
-      std::set<ObjectFileRef>              fileOffsets;
-      std::map<ObjectOSMRef,ObjectFileRef> idFileOffsetMap;
-      std::map<ObjectFileRef,ObjectOSMRef> fileOffsetIdMap;
+      std::set<ObjectOSMRef>                    ids;
+      std::set<ObjectFileRef>                   fileOffsets;
+      std::multimap<ObjectOSMRef,ObjectFileRef> idFileOffsetMap;
+      std::map<ObjectFileRef,ObjectOSMRef>      fileOffsetIdMap;
 
       for (const auto& error : errors) {
         fileOffsets.insert(error.ref);

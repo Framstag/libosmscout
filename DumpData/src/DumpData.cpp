@@ -918,7 +918,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  std::map<osmscout::ObjectOSMRef,osmscout::ObjectFileRef> idFileOffsetMap;
+  std::multimap<osmscout::ObjectOSMRef,osmscout::ObjectFileRef> idFileOffsetMap;
   std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef> fileOffsetIdMap;
 
   if (!osmRefs.empty() ||
@@ -1080,40 +1080,42 @@ int main(int argc, char* argv[])
     }
 
     if (job->osmRef.GetType()!=osmscout::osmRefNone) {
-      std::map<osmscout::ObjectOSMRef,osmscout::ObjectFileRef>::const_iterator reference=idFileOffsetMap.find(job->osmRef);
+      std::map<osmscout::ObjectOSMRef,osmscout::ObjectFileRef>::const_iterator reference=idFileOffsetMap.lower_bound(job->osmRef);
 
       if (reference==idFileOffsetMap.end()) {
         std::cerr << "Cannot find '" << job->osmRef.GetTypeName() << "' with id " << job->osmRef.GetId() << std::endl;
         continue;
       }
 
-      switch (reference->second.GetType()) {
-      case osmscout::refNone:
-        break;
-      case osmscout::refNode:
-        for (auto& node : nodes) {
-          if (reference->second.GetFileOffset()==node->GetFileOffset()) {
-            DumpNode(node,reference->first.GetId());
+      for (; reference!=idFileOffsetMap.upper_bound(job->osmRef); ++reference) {
+        switch (reference->second.GetType()) {
+          case osmscout::refNone:
             break;
-          }
-        }
-        break;
-      case osmscout::refArea:
-        for (auto& area : areas) {
-          if (reference->second.GetFileOffset()==area->GetFileOffset()) {
-            DumpArea(area,reference->first.GetId());
+          case osmscout::refNode:
+            for (auto &node : nodes) {
+              if (reference->second.GetFileOffset() == node->GetFileOffset()) {
+                DumpNode(node, reference->first.GetId());
+                break;
+              }
+            }
             break;
-          }
-        }
-        break;
-      case osmscout::refWay:
-        for (auto& way : ways) {
-          if (reference->second.GetFileOffset()==way->GetFileOffset()) {
-            DumpWay(way,reference->first.GetId());
+          case osmscout::refArea:
+            for (auto &area : areas) {
+              if (reference->second.GetFileOffset() == area->GetFileOffset()) {
+                DumpArea(area, reference->first.GetId());
+                break;
+              }
+            }
             break;
-          }
+          case osmscout::refWay:
+            for (auto &way : ways) {
+              if (reference->second.GetFileOffset() == way->GetFileOffset()) {
+                DumpWay(way, reference->first.GetId());
+                break;
+              }
+            }
+            break;
         }
-        break;
       }
     }
     else if (job->fileRef.GetType()!=osmscout::refNone) {

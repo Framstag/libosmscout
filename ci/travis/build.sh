@@ -8,7 +8,7 @@ export LANG="C.UTF-8"
 echo "New locale settings:"
 locale
 
-echo "Build start time: `date`"
+echo "Build start time: $(date)"
 
 if [ "$TARGET" = "build" ]; then
   if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ] ; then
@@ -69,4 +69,4 @@ elif [ "$TARGET" = "website" ]; then
   fi
 fi
 
-echo "Build end time: `date`"
+echo "Build end time: $(date)"

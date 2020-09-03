@@ -171,22 +171,6 @@ endif
 
 # OpenGL
 openGLDep = dependency('gl', required: false)
-
-if build_machine.system()=='darwin'
-  glutDep = dependency('appleframeworks', modules: 'glut', required: false)
-else
-  glutDep = dependency('glut', required: false)
-
-  if not glutDep.found()
-    glutDep = dependency('freeglut', required: false)
-  endif
-
-  if not glutDep.found()
-   glutDep = compiler.find_library('glut', required: false)
-  endif
-endif
-
-
 glmDep = dependency('glm', required: false)
 glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
 
@@ -201,7 +185,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and glutDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
+if openGLDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
