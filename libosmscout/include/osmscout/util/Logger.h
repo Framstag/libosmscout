@@ -75,6 +75,11 @@ namespace osmscout {
       virtual void Print(const std::string& value) = 0;
 
       /**
+       * Print a std::string_view
+       */
+      virtual void Print(const std::string_view& value) = 0;
+
+      /**
        * Print a const char*
        */
       virtual void Print(const char* value) = 0;
@@ -116,6 +121,13 @@ namespace osmscout {
       virtual ~Line();
 
       inline Line& operator<<(const std::string& value)
+      {
+        destination.Print(value);
+
+        return *this;
+      }
+
+      inline Line& operator<<(const std::string_view& value)
       {
         destination.Print(value);
 
@@ -262,6 +274,11 @@ namespace osmscout {
         // no code
       }
 
+      inline void Print(const std::string_view& /*value*/) override
+      {
+        // no code
+      }
+
       inline void Print(const char* /*value*/) override
       {
         // no code
@@ -351,6 +368,7 @@ namespace osmscout {
       explicit StreamDestination(std::ostream& stream);
 
       void Print(const std::string& value) override;
+      void Print(const std::string_view& value) override;
       void Print(const char* value) override;
       void Print(bool value) override;
       void Print(short value) override;
