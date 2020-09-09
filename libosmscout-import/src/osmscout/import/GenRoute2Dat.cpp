@@ -22,10 +22,9 @@
 #include <osmscout/import/GenRoute2Dat.h>
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/WayDataFile.h>
+#include <osmscout/RouteDataFile.h>
 
 namespace osmscout {
-
-  const char* const RouteDataGenerator2::ROUTE_DAT="route.dat";
 
   void RouteDataGenerator2::GetDescription(const ImportParameter& /*parameter*/,
                                            ImportModuleDescription& description) const
@@ -37,7 +36,7 @@ namespace osmscout {
     description.AddRequiredFile(WayDataFile::WAYS_IDMAP);
     description.AddRequiredFile(WayDataFile::WAYS_DAT);
 
-    description.AddProvidedFile(ROUTE_DAT);
+    description.AddProvidedFile(RouteDataFile::ROUTE_DAT);
   }
 
   bool RouteDataGenerator2::Import(const TypeConfigRef& typeConfig,
@@ -94,7 +93,7 @@ namespace osmscout {
       rawRouteScanner.Read(rawRouteCount);
 
       routeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                       ROUTE_DAT));
+                                       RouteDataFile::ROUTE_DAT));
 
       routeWriter.Write(routeCount);
 

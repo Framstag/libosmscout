@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_IMPORT_GENGENROUTEMEMBERINDEX_H
-#define OSMSCOUT_IMPORT_GENGENROUTEMEMBERINDEX_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2020  Lukáš Karas
+  Copyright (C) 2016  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,24 +17,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/GenNumericIndex.h>
-#include <osmscout/import/RawRelation.h>
-
-#include <osmscout/system/Compiler.h>
+#include <osmscout/RouteDataFile.h>
 
 namespace osmscout {
 
-  // TODO: rename RouteDataGenerator to RouterDataGenerator, and remove "2" suffix
-  class RouteDataGenerator2 CLASS_FINAL : public ImportModule
+  const char* const RouteDataFile::ROUTE_DAT="route.dat";
+
+  RouteDataFile::RouteDataFile(size_t cacheSize)
+  : DataFile<Route>(ROUTE_DAT, cacheSize)
   {
-  public:
-    void GetDescription(const ImportParameter& parameter,
-                        ImportModuleDescription& description) const override;
-
-    bool Import(const TypeConfigRef& typeConfig,
-                const ImportParameter& parameter,
-                Progress& progress) override;
-  };
+    // no code
+  }
 }
-
-#endif

@@ -31,6 +31,7 @@
 #include <osmscout/Node.h>
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
+#include <osmscout/Route.h>
 
 #include <osmscout/TypeInfoSet.h>
 
@@ -250,6 +251,13 @@ namespace osmscout {
    */
   using TileAreaData = TileData<AreaRef>;
 
+  /**
+   * \ingroup tiledcache
+   *
+   * TileData for routes
+   */
+  using TileRouteData = TileData<RouteRef>;
+
   // Forward declaration of DataTileCache for friend declaration in Tile
   class DataTileCache;
 
@@ -268,6 +276,7 @@ namespace osmscout {
     TileNodeData  nodeData;          //!< Node data
     TileWayData   wayData;           //!< Way data
     TileAreaData  areaData;          //!< Area data
+    TileRouteData routeData;         //!< Route data
     TileWayData   optimizedWayData;  //!< Optimized way data
     TileAreaData  optimizedAreaData; //!< Optimized area data
 
@@ -328,6 +337,14 @@ namespace osmscout {
     }
 
     /**
+     * Return a read-only reference to the route data
+     */
+    inline const TileRouteData& GetRouteData() const
+    {
+      return routeData;
+    }
+
+    /**
      * Return a read-only reference to the optimized way data
      */
     inline const TileWayData& GetOptimizedWayData() const
@@ -368,6 +385,14 @@ namespace osmscout {
     }
 
     /**
+     * Return a read-write reference to the area data
+     */
+    inline TileRouteData& GetRouteData()
+    {
+      return routeData;
+    }
+
+    /**
      * Return a read-write reference to the optimized way data
      */
     inline TileWayData& GetOptimizedWayData()
@@ -391,6 +416,7 @@ namespace osmscout {
       return nodeData.IsComplete() &&
              wayData.IsComplete() &&
              areaData.IsComplete() &&
+             routeData.IsComplete() &&
              optimizedWayData.IsComplete() &&
              optimizedAreaData.IsComplete();
     }
@@ -403,6 +429,7 @@ namespace osmscout {
       return nodeData.IsEmpty() &&
              wayData.IsEmpty() &&
              areaData.IsEmpty() &&
+             routeData.IsEmpty() &&
              optimizedWayData.IsEmpty() &&
              optimizedAreaData.IsEmpty();
     }
@@ -474,6 +501,10 @@ namespace osmscout {
                                 const Tile& parentTile,
                                 const GeoBox& boundingBox,
                                 const TypeInfoSet& areaTypes);
+    void ResolveRoutesFromParent(Tile& route,
+                                 const Tile& parentTile,
+                                 const GeoBox& boundingBox,
+                                 const TypeInfoSet& routeTypes);
 
   public:
     explicit DataTileCache(size_t cacheSize);
@@ -505,6 +536,7 @@ namespace osmscout {
                               const TypeInfoSet& nodeTypes,
                               const TypeInfoSet& wayTypes,
                               const TypeInfoSet& areaTypes,
+                              const TypeInfoSet& routeTypes,
                               const TypeInfoSet& optimizedWayTypes,
                               const TypeInfoSet& optimizedAreaTypes);
   };

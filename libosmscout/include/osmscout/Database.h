@@ -36,6 +36,7 @@
 #include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
+#include <osmscout/RouteDataFile.h>
 
 #include <osmscout/OptimizeAreasLowZoom.h>
 #include <osmscout/OptimizeWaysLowZoom.h>
@@ -44,6 +45,7 @@
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/AreaWayIndex.h>
+#include <osmscout/AreaRouteIndex.h>
 
 // Location index
 #include <osmscout/LocationIndex.h>
@@ -76,42 +78,48 @@ namespace osmscout {
   class OSMSCOUT_API DatabaseParameter CLASS_FINAL
   {
   private:
-    unsigned long areaAreaIndexCacheSize;
+    unsigned long areaAreaIndexCacheSize=5000;
 
-    unsigned long nodeDataCacheSize;
-    unsigned long wayDataCacheSize;
-    unsigned long areaDataCacheSize;
+    unsigned long nodeDataCacheSize=5000;
+    unsigned long wayDataCacheSize=10000;
+    unsigned long areaDataCacheSize=5000;
+    unsigned long routeDataCacheSize=500;
 
-    bool routerDataMMap;
-    bool nodesDataMMap;
-    bool areasDataMMap;
-    bool waysDataMMap;
-    bool optimizeLowZoomMMap;
-    bool indexMMap;
+    bool routerDataMMap=true;
+    bool nodesDataMMap=true;
+    bool areasDataMMap=true;
+    bool waysDataMMap=true;
+    bool routesDataMMap=true;
+    bool optimizeLowZoomMMap=true;
+    bool indexMMap=true;
   public:
-    DatabaseParameter();
+    DatabaseParameter() = default;
 
     void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
     void SetNodeDataCacheSize(unsigned long  size);
     void SetWayDataCacheSize(unsigned long  size);
     void SetAreaDataCacheSize(unsigned long  size);
+    void SetRouteDataCacheSize(unsigned long  size);
 
     void SetRouterDataMMap(bool mmap);
     void SetNodesDataMMap(bool mmap);
     void SetAreasDataMMap(bool mmap);
     void SetWaysDataMMap(bool mmap);
+    void SetRoutesDataMMap(bool mmap);
     void SetOptimizeLowZoomMMap(bool mmap);
     void SetIndexMMap(bool mmap);
 
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetNodeDataCacheSize() const;
     unsigned long GetWayDataCacheSize() const;
+    unsigned long GetRouteDataCacheSize() const;
     unsigned long GetAreaDataCacheSize() const;
 
     bool GetRouterDataMMap() const;
     bool GetNodesDataMMap() const;
     bool GetAreasDataMMap() const;
     bool GetWaysDataMMap() const;
+    bool GetRoutesDataMMap() const;
     bool GetOptimizeLowZoomMMap() const;
     bool GetIndexMMap() const;
   };
@@ -287,11 +295,17 @@ namespace osmscout {
     mutable WayDataFileRef          wayDataFile;              //!< Cached access to the 'ways.dat' file
     mutable std::mutex              wayDataFileMutex;         //!< Mutex to make lazy initialisation of way DataFile thread-safe
 
+    mutable RouteDataFileRef        routeDataFile;            //!< Cached access to the 'routes.dat' file
+    mutable std::mutex              routeDataFileMutex;       //!< Mutex to make lazy initialisation of route DataFile thread-safe
+
     mutable AreaNodeIndexRef        areaNodeIndex;            //!< Index of nodes by containing area
     mutable std::mutex              areaNodeIndexMutex;       //!< Mutex to make lazy initialisation of area node index thread-safe
 
     mutable AreaWayIndexRef         areaWayIndex;             //!< Index of areas by containing area
     mutable std::mutex              areaWayIndexMutex;        //!< Mutex to make lazy initialisation of area way index thread-safe
+
+    mutable AreaRouteIndexRef       areaRouteIndex;           //!< Index of routes by containing area
+    mutable std::mutex              areaRouteIndexMutex;      //!< Mutex to make lazy initialisation of area route index thread-safe
 
     mutable AreaAreaIndexRef        areaAreaIndex;            //!< Index of ways by containing area
     mutable std::mutex              areaAreaIndexMutex;       //!< Mutex to make lazy initialisation of area area index thread-safe
@@ -307,6 +321,28 @@ namespace osmscout {
 
     mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;      //!< Optimized data for low zoom situations
     mutable std::mutex              optimizeWaysMutex;        //!< Mutex to make lazy initialisation of optimized ways index thread-safe
+
+  private:
+    template<typename DataFile, typename OffsetsCol, typename DataCol>
+    bool GetObjectsByOffset(DataFile dataFile,
+                            const OffsetsCol& offsets,
+                            DataCol& objects,
+                            const std::string_view &typeName) const
+    {
+      if (!dataFile) {
+        return false;
+      }
+
+      StopClock time;
+
+      bool result=dataFile->GetByOffset(offsets.begin(), offsets.end(), offsets.size(), objects);
+
+      if (time.GetMilliseconds()>100) {
+        log.Warn() << "Retrieving " << objects.size() << " " << typeName << " by offset took " << time.ResultString();
+      }
+
+      return result;
+    }
 
   public:
     explicit Database(const DatabaseParameter& parameter);
@@ -329,10 +365,12 @@ namespace osmscout {
     NodeDataFileRef GetNodeDataFile() const;
     AreaDataFileRef GetAreaDataFile() const;
     WayDataFileRef GetWayDataFile() const;
+    RouteDataFileRef GetRouteDataFile() const;
 
     AreaNodeIndexRef GetAreaNodeIndex() const;
     AreaAreaIndexRef GetAreaAreaIndex() const;
     AreaWayIndexRef GetAreaWayIndex() const;
+    AreaRouteIndexRef GetAreaRouteIndex() const;
 
     LocationIndexRef GetLocationIndex() const;
 
@@ -359,14 +397,15 @@ namespace osmscout {
 
     bool GetAreaByOffset(const FileOffset& offset,
                          AreaRef& area) const;
-    bool GetAreasByOffset(const std::vector<FileOffset>& offsets,
-                          std::vector<AreaRef>& areas) const;
-    bool GetAreasByOffset(const std::set<FileOffset>& offsets,
-                          std::vector<AreaRef>& areas) const;
-    bool GetAreasByOffset(const std::list<FileOffset>& offsets,
-                          std::vector<AreaRef>& areas) const;
-    bool GetAreasByOffset(const std::set<FileOffset>& offsets,
-                          std::unordered_map<FileOffset,AreaRef>& dataMap) const;
+
+    template<typename OffsetsCol, typename DataCol>
+    bool GetAreasByOffset(const OffsetsCol& offsets,
+                          DataCol& areas) const
+    {
+      using namespace std::string_view_literals;
+      return GetObjectsByOffset(GetAreaDataFile(), offsets, areas, "areas"sv);
+    }
+
     bool GetAreasByBlockSpan(const DataBlockSpan& span,
                              std::vector<AreaRef>& area) const;
     bool GetAreasByBlockSpans(const std::vector<DataBlockSpan>& spans,
@@ -375,14 +414,22 @@ namespace osmscout {
 
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
-    bool GetWaysByOffset(const std::vector<FileOffset>& offsets,
-                         std::vector<WayRef>& ways) const;
-    bool GetWaysByOffset(const std::set<FileOffset>& offsets,
-                         std::vector<WayRef>& ways) const;
-    bool GetWaysByOffset(const std::list<FileOffset>& offsets,
-                         std::vector<WayRef>& ways) const;
-    bool GetWaysByOffset(const std::set<FileOffset>& offsets,
-                         std::unordered_map<FileOffset,WayRef>& dataMap) const;
+
+    template<typename OffsetsCol, typename DataCol>
+    bool GetWaysByOffset(const OffsetsCol& offsets,
+                         DataCol& ways) const
+    {
+      using namespace std::string_view_literals;
+      return GetObjectsByOffset(GetWayDataFile(), offsets, ways, "ways"sv);
+    }
+
+    template<typename OffsetsCol, typename DataCol>
+    bool GetRoutesByOffset(const OffsetsCol& offsets,
+                           DataCol& routes) const
+    {
+      using namespace std::string_view_literals;
+      return GetObjectsByOffset(GetRouteDataFile(), offsets, routes, "routes"sv);
+    }
 
     /**
      * Load nodes of given types with maximum distance to the given coordinate.

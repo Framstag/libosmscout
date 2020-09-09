@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_ROUTE_H
-#define OSMSCOUT_ROUTE_H
+#ifndef OSMSCOUT_ROUTE_OBJ_H
+#define OSMSCOUT_ROUTE_OBJ_H
 
 /*
   This source is part of the libosmscout library
@@ -77,6 +77,11 @@ namespace osmscout {
     //   return {fileOffset,refRoute};
     // }
 
+    inline GeoBox GetBoundingBox() const
+    {
+      return bbox;
+    }
+
     inline TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
@@ -129,6 +134,7 @@ namespace osmscout {
                FileWriter& writer) const;
   };
 
+  using RouteRef = std::shared_ptr<Route>;
 }
 
 #endif

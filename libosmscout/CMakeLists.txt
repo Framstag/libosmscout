@@ -87,6 +87,7 @@ set(HEADER_FILES
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
     include/osmscout/AreaNodeIndex.h
+    include/osmscout/AreaRouteIndex.h
     include/osmscout/AreaWayIndex.h
     include/osmscout/CoordDataFile.h
     include/osmscout/CoverageIndex.h
@@ -118,6 +119,7 @@ set(HEADER_FILES
     include/osmscout/PublicTransport.h
     include/osmscout/ObjectVariantDataFile.h
     include/osmscout/Route.h
+    include/osmscout/RouteDataFile.h
     include/osmscout/SRTM.h
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
@@ -193,6 +195,7 @@ set(SOURCE_FILES
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
     src/osmscout/AreaNodeIndex.cpp
+    src/osmscout/AreaRouteIndex.cpp
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/CoordDataFile.cpp
     src/osmscout/CoverageIndex.cpp
@@ -222,6 +225,7 @@ set(SOURCE_FILES
     src/osmscout/PublicTransport.cpp
     src/osmscout/ObjectVariantDataFile.cpp
     src/osmscout/Route.cpp
+    src/osmscout/RouteDataFile.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
