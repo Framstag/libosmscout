@@ -208,6 +208,9 @@ namespace osmscout {
     styleConfig.GetAreaTypesWithMaxMag(magnification,
                                        typeDefinition->areaTypes);
 
+    styleConfig.GetRouteTypesWithMaxMag(magnification,
+                                        typeDefinition->routeTypes);
+
     if (parameter.GetUseLowZoomOptimization()) {
       if (optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
         optimizeAreasLowZoom->GetTypes(magnification,

@@ -34,6 +34,8 @@ FLAG
     minorBuilding   = false;
   }
 
+  routes            = true; // routes are experimental now
+
 ORDER WAYS
   GROUP _route
   GROUP highway_motorway
@@ -2209,4 +2211,17 @@ STYLE
          aeroway_runway,
          aeroway_apron] AREA.TEXT { label: Name.name; }
  }
+
+ // -------------------------------------------------------
+ //
+ // Routes
+ //
+
+  IF routes {
+    [MAG close-] {
+      [TYPE route_bicycle] ROUTE {color: #4645fa; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
+      [TYPE route_hiking] ROUTE {color: #d00000; preferColorFeature: true; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
+    }
+  }
+
 END

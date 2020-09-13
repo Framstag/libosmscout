@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 63;
-	noSym = 63;
+	maxT = 65;
+	noSym = 65;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -212,9 +212,11 @@ void Scanner::Init() {
 	keywords.set("SHIELD", 54);
 	keywords.set("BORDERTEXT", 55);
 	keywords.set("BORDERSYMBOL", 56);
-	keywords.set("name", 57);
-	keywords.set("lighten", 58);
-	keywords.set("darken", 59);
+	keywords.set("ROUTE", 57);
+	keywords.set("name", 58);
+	keywords.set("lighten", 59);
+	keywords.set("darken", 60);
+	keywords.set("alpha", 61);
 
 
   tvalLength = 128;
@@ -462,11 +464,11 @@ TokenRef Scanner::NextToken() {
 		case 29:
 			{t->kind = 48; break;}
 		case 30:
-			{t->kind = 60; break;}
-		case 31:
-			{t->kind = 61; break;}
-		case 32:
 			{t->kind = 62; break;}
+		case 31:
+			{t->kind = 63; break;}
+		case 32:
+			{t->kind = 64; break;}
 		case 33:
 			recEnd = pos; recKind = 51;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
