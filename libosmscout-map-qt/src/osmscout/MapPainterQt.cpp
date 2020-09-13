@@ -838,6 +838,7 @@ namespace osmscout {
     else {
       QVector<qreal> dashes;
 
+      dashes << 0 << 0; // skip butt?
       for (size_t i=0; i<dash.size(); i++) {
         dashes << dash[i];
       }

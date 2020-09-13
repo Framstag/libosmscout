@@ -2135,7 +2135,8 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE_ARRAY) {
 		 if (valueType==ValueType::NUMBER) {
 		   double              value;
-		   std::vector<double> valueList(numberList.size()+1);
+		   std::vector<double> valueList;
+		   valueList.reserve(numberList.size()+1);
 		
 		   if (negate) {
 		     std::string e="Negative numbers not allowed here";
