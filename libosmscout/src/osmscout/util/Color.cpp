@@ -20,6 +20,7 @@
 #include <osmscout/util/Color.h>
 
 #include <osmscout/system/Math.h>
+#include <map>
 
 namespace osmscout {
 
@@ -29,6 +30,18 @@ namespace osmscout {
   const Color Color::RED(1.0,0.0,0.0);
   const Color Color::GREEN(0.0,1.0,0.0);
   const Color Color::BLUE(0.0,0.0,1.0);
+
+  const Color Color::SILVER(192/255,192/255,192/255);
+  const Color Color::GRAY(128/255,128/255,128/255);
+  const Color Color::MAROON(128/255,0/255,0/255);
+  const Color Color::PURPLE(128/255,0/255,128/255);
+  const Color Color::FUCHSIA(255/255,0/255,255/255);
+  const Color Color::LIME(0/255,255/255,0/255);
+  const Color Color::OLIVE(128/255,128/255,0/255);
+  const Color Color::YELLOW(255/255,255/255,0/255);
+  const Color Color::NAVY(0/255,0/255,128/255);
+  const Color Color::TEAL(0/255,128/255,128/255);
+  const Color Color::AQUA(0/255,255/255,255/255);
 
   const Color Color::LUCENT_WHITE(1.0,1.0,1.0,1.0);
 
@@ -101,20 +114,9 @@ namespace osmscout {
     return a<other.a;
   }
 
-  /**
-   * Convert the given color string to a color value
-   *
-   * The string must either be of the format
-   * - #HHHHHH
-   * - #HHHHHHHH
-   *
-   * where '#' is the symbol itself and 'H' represents a hexadecimal value
-   *
-   * @param hexString
-   * @return
-   */
   Color Color::FromHexString(const std::string& hexString)
   {
+    assert(hexString.size()==7 || hexString.size()==9);
     double r=(16*GetHexValue(hexString[1])+GetHexValue(hexString[2]))/255.0;
     double g=(16*GetHexValue(hexString[3])+GetHexValue(hexString[4]))/255.0;
     double b=(16*GetHexValue(hexString[5])+GetHexValue(hexString[6]))/255.0;
@@ -128,6 +130,15 @@ namespace osmscout {
     }
 
     return Color(r,g,b,a);
+  }
+
+  bool Color::FromHexString(const std::string& hexString, Color &color)
+  {
+    if (!IsHexString(hexString)){
+      return false;
+    }
+    color=FromHexString(hexString);
+    return true;
   }
 
   bool Color::IsHexString(const std::string& hexString) {
@@ -146,6 +157,35 @@ namespace osmscout {
       }
     }
 
+    return true;
+  }
+
+  bool Color::FromW3CKeywordString(const std::string& colorKeyword, Color &color)
+  {
+    static const std::map<std::string, Color> w3cColorKeywords {
+        {"black", Color::BLACK}, // #000000
+        {"silver", Color::SILVER}, // #C0C0C0
+        {"gray", Color::GRAY}, {"grey", Color::GRAY}, // #808080
+        {"white", Color::WHITE}, // #FFFFFF
+        {"maroon", Color::MAROON}, // #800000
+        {"red", Color::RED}, // #FF0000
+        {"purple", Color::PURPLE}, // #800080
+        {"fuchsia", Color::FUCHSIA}, {"magenta", Color::FUCHSIA}, // #FF00FF
+        {"green", Color::GREEN}, // #008000
+        {"lime", Color::LIME}, // #00FF00
+        {"olive", Color::OLIVE}, // #808000
+        {"yellow", Color::YELLOW}, // #FFFF00
+        {"navy", Color::NAVY}, // #000080
+        {"blue", Color::BLUE}, // #0000FF
+        {"teal", Color::TEAL}, // #008080
+        {"aqua", Color::AQUA}, {"cyan", Color::AQUA} // #00FFFF
+    };
+
+    auto it=w3cColorKeywords.find(colorKeyword);
+    if (it == w3cColorKeywords.end()) {
+      return false;
+    }
+    color=it->second;
     return true;
   }
 }

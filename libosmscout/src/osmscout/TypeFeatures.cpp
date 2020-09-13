@@ -3166,6 +3166,7 @@ namespace osmscout {
   void ColorFeature::Initialize(TagRegistry& tagRegistry)
   {
     tagColor=tagRegistry.RegisterTag("colour");
+    tagSymbol=tagRegistry.RegisterTag("osmc:symbol");
   }
 
   std::string ColorFeature::GetName() const
@@ -3190,17 +3191,30 @@ namespace osmscout {
                             const TagMap& tags,
                             FeatureValueBuffer& buffer) const
   {
-    auto color=tags.find(tagColor);
+    using namespace std::string_literals;
 
-    if (color!=tags.end() && !color->second.empty()) {
-      if (!Color::IsHexString(color->second)) {
-        errorReporter.ReportTag(object,tags,"Not a valid color value");
+    std::string colorString;
+    if (auto color=tags.find(tagColor);
+        color!=tags.end() && !color->second.empty()) {
 
+      colorString=color->second;
+    } else if (auto symbol=tags.find(tagSymbol);
+               symbol!=tags.end() && !symbol->second.empty()) {
+
+      colorString=GetFirstInStringList(symbol->second, ":"s);
+    }
+
+    if (!colorString.empty()){
+      colorString=UTF8StringToLower(colorString);
+      Color color;
+      if (!Color::FromHexString(colorString, color) &&
+          !Color::FromW3CKeywordString(colorString, color)) {
+        errorReporter.ReportTag(object,tags,"Not a valid color value ("s + colorString + ")"s);
         return;
       }
 
       auto* value = static_cast<ColorFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-      value->SetColor(Color::FromHexString(color->second));
+      value->SetColor(color);
     }
   }
 }
