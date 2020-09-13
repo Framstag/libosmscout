@@ -221,7 +221,8 @@ with values ("`<attributeName> : <value> ;`") and a closing
   
 `Dash`
 : A sequence of one or more positive numerical values (>0) separated by a colon.
-  Size is in millimeter. Example: `3,1`
+  Size is in multiple of line width. For example dash `3,1` for line with 
+  display width 3mm will results to repeated 9mm line followed by 3mm space.
 
 `ScreenSize`
 : An (dependending on the actual attribute) a negative or positive numeric value
