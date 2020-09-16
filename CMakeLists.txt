@@ -28,6 +28,11 @@ set(OSMSCOUT_BASE_DIR_BUILD ${CMAKE_CURRENT_BINARY_DIR})
 set(OSMSCOUT_LIBRARY_VERSION ${PROJECT_VERSION})
 include_directories(${OSMSCOUT_BASE_DIR_BUILD}/include)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+if(IOS)
+  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+else()
+  option(BUILD_SHARED_LIBS "Shared libraries" ON)
+endif()
 
 # default build type
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -46,11 +51,6 @@ endif()
 include(features)
 
 # options
-if(IOS)
-  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
-else()
-  option(BUILD_SHARED_LIBS "Shared libraries" ON)
-endif()
 option(OSMSCOUT_BUILD_WITH_OPENMP "Check for OpenMP support" ${OPENMP_FOUND})
 option(OSMSCOUT_BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution" OFF)
 if(APPLE)
