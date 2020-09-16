@@ -44,25 +44,14 @@ if(ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
 	cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR})
 	set(CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARIES})
-    #check_prototype_definition("iconv"
-    #        "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
-    #        "-1"
-    #        "iconv.h"
-    #        ICONV_SECOND_ARGUMENT_IS_CONST)
-	check_cxx_source_compiles("
-	  #include <iconv.h>
-	  int main(){
-		iconv_t conv = 0;
-		const char* in = 0;
-		size_t ilen = 0;
-		char* out = 0;
-		size_t olen = 0;
-		iconv(conv, &in, &ilen, &out, &olen);
-		return 0;
-	  }
-	" ICONV_SECOND_ARGUMENT_IS_CONST)
-    set(CMAKE_REQUIRED_INCLUDES)
-	set(CMAKE_REQUIRED_LIBRARIES)
+	if(MSVC)
+		set(CMAKE_REQUIRED_FLAGS /we4028 /fp:fast /wd4251 /Oi)
+	endif()
+    check_prototype_definition("iconv"
+            "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
+            "-1"
+            "iconv.h"
+            ICONV_SECOND_ARGUMENT_IS_CONST)
 	cmake_pop_check_state()
 endif()
 

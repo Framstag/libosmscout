@@ -92,7 +92,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GN
   endif()
 endif()
 if(MSVC)
-  # Make sure C test using check_prototype_definition() will fail
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /we4028")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /wd4251 /MP")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Oi")
