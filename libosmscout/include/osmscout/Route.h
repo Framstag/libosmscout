@@ -33,6 +33,15 @@
 
 namespace osmscout {
 
+  /**
+   * Representation of route.
+   *
+   * Route is sequence of ways. Way may be part of multiple routes.
+   * It may represent hiking, cycling, public transport (...) route.
+   *
+   * It is created from OpenStreetMap relation of "route" type,
+   * as described on wiki: https://wiki.openstreetmap.org/wiki/Relation:route
+   */
   class OSMSCOUT_API Route CLASS_FINAL
   {
   public:
