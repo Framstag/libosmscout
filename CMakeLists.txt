@@ -51,7 +51,16 @@ endif()
 include(features)
 
 # options
-option(OSMSCOUT_BUILD_WITH_OPENMP "Check for OpenMP support" ${OPENMP_FOUND})
+option(OSMSCOUT_BUILD_WITH_OPENMP "Enable OpenMP support" ${OPENMP_FOUND})
+if(OSMSCOUT_BUILD_WITH_OPENMP)
+  if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  else()
+    message(FATAL_ERROR "OpenMP support enabled, but not supported")
+  endif()
+endif()
+
 option(OSMSCOUT_BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution" OFF)
 if(APPLE)
   option(OSMSCOUT_BUILD_FRAMEWORKS "Enable build of libraries as frameworks" ON)
