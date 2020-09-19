@@ -136,6 +136,11 @@ osmscout_library_project(
 	SKIP_HEADER
 )
 
+if(TBB_FOUND)
+	target_include_directories(OSMScoutImport PRIVATE ${TBB_INCLUDE_DIR})
+	target_link_libraries(OSMScoutImport ${TBB_LIBRARIES})
+endif()
+
 if(LIBXML2_FOUND)
 	target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
 	target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})

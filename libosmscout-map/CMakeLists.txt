@@ -47,6 +47,11 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout
 )
 
+if(TBB_FOUND)
+	target_include_directories(OSMScoutMap PRIVATE ${TBB_INCLUDE_DIR})
+	target_link_libraries(OSMScoutMap ${TBB_LIBRARIES})
+endif()
+
 if(APPLE AND BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMap PROPERTIES
   		FRAMEWORK TRUE
