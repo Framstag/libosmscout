@@ -19,17 +19,29 @@ if [ "$TARGET" = "build" ]; then
   fi
 
   if [ "$BUILDTOOL" = "meson" ]; then
+    if [ "$CXX" = "clang++" ]; then
+      echo ""
+    else
+      export CXX=c++-10
+    fi
+
     # Travis currently cannot build clang + OpenMP (https://github.com/travis-ci/travis-ci/issues/8613)
     if [ "$CXX" = "clang++" ]; then
       meson debug -Dopenmp=false
     else
       meson debug
     fi
-    cd debug
 
+    cd debug
     ninja
     meson test -v
   elif [ "$BUILDTOOL" = "cmake" ]; then
+    if [ "$CXX" = "clang++" ]; then
+      echo ""
+    else
+      export CXX=c++-10
+    fi
+
     mkdir build
     cd build
 
