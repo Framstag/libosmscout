@@ -1,7 +1,7 @@
 cppArgs = []
 
 if get_option('default_library')=='shared'
-  cppArgs += ['-DOSMSCOUT_GPX_EXPORT_SYMBOLS']
+  cppArgs += ['-DOSMScoutGPX_EXPORTS']
 
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']

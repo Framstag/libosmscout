@@ -1,25 +1,3 @@
-if(NOT ${OSMSCOUT_BUILD_MAP_QT})
-	message(SEND_ERROR "The Qt map drawing backend is required for StyleEditor application")
-endif()
-if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
-	message(SEND_ERROR "The Qt client lib is required for StyleEditor application")
-endif()
-if(NOT Qt5Core_FOUND)
-	message(SEND_ERROR "Qt5Core is required for StyleEditor application")
-endif()
-if(NOT Qt5Gui_FOUND)
-	message(SEND_ERROR "Qt5Gui is required for StyleEditor application")
-endif()
-if(NOT Qt5Widgets_FOUND)
-	message(SEND_ERROR "Qt5Widgets is required for StyleEditor application")
-endif()
-if(NOT Qt5Qml_FOUND)
-	message(SEND_ERROR "Qt5Qml is required for StyleEditor application")
-endif()
-if(NOT Qt5Quick_FOUND)
-	message(SEND_ERROR "Qt5Quick is required for StyleEditor application")
-endif()
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -62,21 +40,47 @@ set(RESOURCE_FILES
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
 target_link_libraries(StyleEditor
-	OSMScout
-		OSMScoutMap
-		Qt5::Core
-		Qt5::Gui
-		Qt5::Widgets
-		Qt5::Qml
-		Qt5::Quick
-		OSMScoutMapQt
-		OSMScoutClientQt
+	OSMScout::OSMScout
+	OSMScout::Map
+	OSMScout::MapQt
+	OSMScout::ClientQt
+	Qt5::Core
+	Qt5::Gui
+	Qt5::Widgets
+	Qt5::Qml
+	Qt5::Quick
 )
 
 if (Qt5Svg_FOUND)
 	target_link_libraries(StyleEditor Qt5::Svg)
 endif()
 
+if(MARISA_FOUND)
+    target_include_directories(StyleEditor PRIVATE ${MARISA_INCLUDE_DIRS})
+endif()
+
 # enable QML debuger
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
-set_property(TARGET StyleEditor PROPERTY CXX_STANDARD 17)
+if (QT_QML_DEBUG)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG")
+endif()
+
+set_target_properties(StyleEditor PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
+
+if(WIN32)
+	create_win32_tool_resource(StyleEditor)
+endif()
+if(MSVC)
+	  visual_studio_qt_helper("StyleEditor")
+endif()
+if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	add_custom_command(TARGET StyleEditor
+        POST_BUILD
+        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
+    )
+endif()
+
+install(TARGETS StyleEditor
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)

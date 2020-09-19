@@ -283,27 +283,27 @@
 
 /* Define to the full name of this package. */
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "@name@"
+#define PACKAGE_NAME "@PROJECT_NAME@"
 #endif
 
 /* Define to the full name and version of this package. */
 #ifndef PACKAGE_STRING
-#define PACKAGE_STRING "@name@ 0.1"
+#define PACKAGE_STRING "@PROJECT_NAME@ @PROJECT_VERSION@"
 #endif
 
 /* Define to the one symbol short name of this package. */
 #ifndef PACKAGE_TARNAME
-#define PACKAGE_TARNAME "@name@"
+#define PACKAGE_TARNAME "@PROJECT_NAME@"
 #endif
 
 /* Define to the home page for this package. */
 #ifndef PACKAGE_URL
-#define PACKAGE_URL ""
+#define PACKAGE_URL "http://libosmscout.sourceforge.net/"
 #endif
 
 /* Define to the version of this package. */
 #ifndef PACKAGE_VERSION
-#define PACKAGE_VERSION "0.1"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */

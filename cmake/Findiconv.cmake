@@ -8,6 +8,8 @@
 #
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
+include(CheckCSourceRuns)
+include(CMakePushCheckState)
 
 #if (ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
   # Already in cache, be silent
@@ -39,13 +41,18 @@ if(NOT ICONV_LIBRARIES AND UNIX)
 endif()
 
 if(ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
+	cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR})
+	set(CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARIES})
+	if(MSVC)
+		set(CMAKE_REQUIRED_FLAGS /we4028 /fp:fast /wd4251 /Oi)
+	endif()
     check_prototype_definition("iconv"
             "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
             "-1"
             "iconv.h"
             ICONV_SECOND_ARGUMENT_IS_CONST)
-    set(CMAKE_REQUIRED_INCLUDES)
+	cmake_pop_check_state()
 endif()
 
 include(FindPackageHandleStandardArgs)

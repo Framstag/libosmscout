@@ -1,5 +1,3 @@
-set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
-
 set(HEADER_FILES
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
@@ -95,14 +93,20 @@ set(SOURCE_FILES
     src/osmscout/import/SortWayDat.cpp
 )
 
+set(EXCLUDE_HEADER)
+
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscout/import/GenTextIndex.h)
     list(APPEND SOURCE_FILES src/osmscout/import/GenTextIndex.cpp)
+else()
+	list(APPEND EXCLUDE_HEADER GenTextIndex.h)
 endif()
 
 if(LIBXML2_FOUND)
     list(APPEND HEADER_FILES include/osmscout/import/PreprocessOSM.h)
     list(APPEND SOURCE_FILES src/osmscout/import/PreprocessOSM.cpp)
+else()
+	list(APPEND EXCLUDE_HEADER PreprocessOSM.h)
 endif()
 
 if (PROTOBUF_FOUND)
@@ -116,73 +120,57 @@ if (PROTOBUF_FOUND)
     list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
     list(APPEND HEADER_FILES ${PROTO_HDRS})
     list(APPEND SOURCE_FILES ${PROTO_SRCS})
-endif()
-
-if(IOS)
-  add_library(OSMScoutImport STATIC ${SOURCE_FILES} ${HEADER_FILES})
 else()
-  add_library(OSMScoutImport ${SOURCE_FILES} ${HEADER_FILES})
+	list(APPEND EXCLUDE_HEADER PreprocessPBF.h ${PROTO_HDRS})
 endif()
 
-set_target_properties(OSMScoutImport PROPERTIES
-        CXX_STANDARD 17
-        OUTPUT_NAME "osmscout_import")
+osmscout_library_project(
+	NAME OSMScoutImport
+	ALIAS Import
+	OUTPUT_NAME "osmscout_import"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/ImportFeatures.h.cmake
+	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h
+	TARGET OSMScout::OSMScout
+	SKIP_HEADER
+)
 
-target_include_directories(OSMScoutImport PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/pbf)
-
-# Public features Header
-configure_file(include/osmscout/import/ImportFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h)
-target_include_directories(OSMScoutImport PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutImport")
-target_include_directories(OSMScoutImport PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_link_libraries(OSMScoutImport OSMScout)
-
-if(ZLIB_FOUND AND ICONV_FOUND AND LIBXML2_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
-    target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})
+if(LIBXML2_FOUND)
+	target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
+	target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})
 endif()
 
 if (PROTOBUF_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${PROTOBUF_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${PROTOBUF_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${PROTOBUF_LIBRARIES})
+	if(WIN32)
+		target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
+	endif()
 endif()
 
 if (ICONV_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${ICONV_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${ICONV_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${ICONV_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${ICONV_LIBRARIES})
 endif()
 
 if (LIBLZMA_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${LIBLZMA_INCLUDE_DIRS})
-  target_link_libraries(OSMScoutImport ${LIBLZMA_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${LIBLZMA_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${LIBLZMA_LIBRARIES})
 endif()
 
 if (ZLIB_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${ZLIB_INCLUDE_DIRS})
-  target_link_libraries(OSMScoutImport ${ZLIB_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${ZLIB_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${ZLIB_LIBRARIES})
 endif()
 
 if(MARISA_FOUND)
-    target_include_directories(OSMScoutImport PRIVATE ${MARISA_INCLUDE_DIRS})
-    target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${MARISA_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
 endif()
-
-if(WIN32)
-  target_link_libraries(OSMScoutImport Ws2_32.lib)
-  target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
-endif()
-
-#if(${IOS})
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-#endif()
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutImport PROPERTIES
+	set_target_properties(OSMScoutImport PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION C
         MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -192,17 +180,17 @@ set_target_properties(OSMScoutImport PROPERTIES
         OUTPUT_NAME "OSMScoutImport")
 endif()
 
-target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_EXPORT_SYMBOLS ${LIBXML2_DEFINITIONS})
+if(WIN32)
+	target_link_libraries(OSMScoutImport Ws2_32.lib)
+endif()
 
-install(TARGETS OSMScoutImport
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-
-if(MARISA_FOUND)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
+if(NOT EXCLUDE_HEADER)
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
 else()
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE PATTERN GenTextIndex.h EXCLUDE)
+	set(_exclude PATTERN "private" EXCLUDE)
+	foreach(ef ${EXCLUDE_HEADER})
+		set(_exclude ${_exclude} PATTERN ${ef} EXCLUDE)
+	endforeach()
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" ${_exclude})
 endif()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h DESTINATION include/osmscout)

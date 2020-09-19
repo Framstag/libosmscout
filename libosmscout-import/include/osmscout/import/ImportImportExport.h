@@ -23,45 +23,38 @@
 #include <osmscout/import/ImportFeatures.h>
 
 // Shared library support
-#if defined(_WIN32)
-  #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
-    #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_IMPORT_EXPTEMPL
-      #define OSMSCOUT_IMPORT_API __declspec(dllexport)
-    #else
-      #define OSMSCOUT_IMPORT_API
-    #endif
-  #else
-    #define OSMSCOUT_IMPORT_API __declspec(dllimport)
-    #define OSMSCOUT_IMPORT_EXPTEMPL extern
-  #endif
-
-  #define OSMSCOUT_IMPORT_DLLLOCAL
+#if defined _WIN32 || defined __CYGWIN__
+#  define OSMSCOUT_IMPORT __declspec(dllimport)
+#  define OSMSCOUT_EXPORT __declspec(dllexport)
+#  define OSMSCOUT_LOCAL
 #else
-  #define OSMSCOUT_IMPORT_IMPORT
-  #define OSMSCOUT_IMPORT_EXPTEMPL
-
-  #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
-    #define OSMSCOUT_IMPORT_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_IMPORT_DLLLOCAL __attribute__ ((visibility("hidden")))
-  #else
-    #define OSMSCOUT_IMPORT_EXPORT
-    #define OSMSCOUT_IMPORT_DLLLOCAL
-  #endif
-
-  #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
-    #define OSMSCOUT_IMPORT_API OSMSCOUT_IMPORT_EXPORT
-  #else
-    #define OSMSCOUT_IMPORT_API OSMSCOUT_IMPORT_IMPORT
-  #endif
-
+#  if __GNUC__ >= 4
+#    define OSMSCOUT_IMPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_EXPORT __attribute__ ((visibility ("default")))
+#    define OSMSCOUT_LOCAL  __attribute__ ((visibility ("hidden")))
+#  else
+#    define OSMSCOUT_IMPORT
+#    define OSMSCOUT_EXPORT
+#    define OSMSCOUT_LOCAL
+#  endif
+#endif
+#ifndef OSMSCOUT_STATIC
+#  ifdef OSMScoutImport_EXPORTS
+#    define OSMSCOUT_IMPORT_API OSMSCOUT_EXPORT
+#  else
+#    define OSMSCOUT_IMPORT_API OSMSCOUT_IMPORT
+#  endif
+#  define OSMSCOUT_IMPORT_DLLLOCAL OSMSCOUT_LOCAL
+#  else
+#    define OSMSCOUT_IMPORT_API
+#    define OSMSCOUT_IMPORT_DLLLOCAL
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(_WIN32)
   #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
-  #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) OSMSCOUT_IMPORT_EXPORT
+#elif defined(OSMScoutImport_EXPORTS)
+  #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) OSMSCOUT_EXPORT
 #else
   #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api)
 #endif
@@ -70,4 +63,3 @@
   #define OSMSCOUT_IMPORT_INSTANTIATE_TEMPLATES
 #endif
 #endif
-

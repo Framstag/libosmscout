@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <osmscout/LocationDescriptionService.h>
 #include <osmscout/POIService.h>
 #include <osmscout/TypeFeatures.h>
+#include <osmscout/FeatureReader.h>
 #ifdef OSMSCOUT_MAP_CAIRO
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterCairo.h>

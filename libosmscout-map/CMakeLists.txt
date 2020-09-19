@@ -1,5 +1,3 @@
-set(OSMSCOUT_BUILD_MAP ON CACHE INTERNAL "" FORCE)
-
 set(HEADER_FILES
 	include/osmscout/MapImportExport.h
 	include/osmscout/oss/Parser.h
@@ -39,34 +37,18 @@ set(SOURCE_FILES
 	src/osmscout/MapPainterNoOp.cpp
 )
 
-if(IOS)
-  add_library(OSMScoutMap STATIC ${SOURCE_FILES} ${HEADER_FILES})
-else()
-  add_library(OSMScoutMap ${SOURCE_FILES} ${HEADER_FILES})
-endif()
-
-set_target_properties(OSMScoutMap PROPERTIES
-		CXX_STANDARD 17
-		OUTPUT_NAME "osmscout_map")
-
-target_include_directories(OSMScoutMap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Public features Header
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapFeatures.h)
-target_include_directories(OSMScoutMap PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-# Private config header
-create_private_config("${CMAKE_CURRENT_BINARY_DIR}/privateinclude/osmscout/private/Config.h" "OSMScoutMap")
-target_include_directories(OSMScoutMap PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/privateinclude)
-
-target_link_libraries(OSMScoutMap OSMScout)
-
-if(${IOS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
-endif()
+osmscout_library_project(
+	NAME OSMScoutMap
+	ALIAS Map
+	OUTPUT_NAME "osmscout_map"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake
+	TARGET OSMScout::OSMScout
+)
 
 if(APPLE AND BUILD_FRAMEWORKS)
-set_target_properties(OSMScoutMap PROPERTIES
+	set_target_properties(OSMScoutMap PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION A
   		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
@@ -75,13 +57,3 @@ set_target_properties(OSMScoutMap PROPERTIES
   		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 		OUTPUT_NAME "OSMScoutMap")
 endif()
-
-target_compile_definitions(OSMScoutMap PRIVATE -DOSMSCOUT_MAP_EXPORT_SYMBOLS)
-
-install(TARGETS OSMScoutMap
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        FRAMEWORK DESTINATION lib)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/MapFeatures.h DESTINATION include/osmscout)

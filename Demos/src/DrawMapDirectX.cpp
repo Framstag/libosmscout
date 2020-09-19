@@ -55,7 +55,7 @@ src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 7.465
 template<class Interface>
 inline void SafeRelease(
 	Interface **ppInterfaceToRelease
-	)
+)
 {
 	if (*ppInterfaceToRelease != NULL)
 	{
@@ -137,95 +137,88 @@ public:
 		// as the Direct2D factory.
 		hr = CreateDeviceIndependentResources();
 
-    if (!SUCCEEDED(hr))
-    {
-      MessageBox(m_hwnd, _T("Cannot create device independent resources"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-      return E_FAIL;
-    }
-    
-    std::cout << "Device independent resources created." << std::endl;
-    
-    // Register the window class.
-    WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = DrawMapDirectX::WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = sizeof(LONG_PTR);
-    wcex.hInstance = HINST_THISCOMPONENT;
-    wcex.hbrBackground = NULL;
-    wcex.lpszMenuName = NULL;
-    wcex.hCursor = LoadCursor(NULL, IDI_APPLICATION);
-    wcex.lpszClassName = _T("DemoDrawMapDirectX");
+		if (!SUCCEEDED(hr))
+		{
+			MessageBox(m_hwnd, _T("Cannot create device independent resources"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+			return E_FAIL;
+		}
 
-    RegisterClassEx(&wcex);
+		std::cout << "Device independent resources created." << std::endl;
+
+		// Register the window class.
+		WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
+		wcex.style = CS_HREDRAW | CS_VREDRAW;
+		wcex.lpfnWndProc = DrawMapDirectX::WndProc;
+		wcex.cbClsExtra = 0;
+		wcex.cbWndExtra = sizeof(LONG_PTR);
+		wcex.hInstance = HINST_THISCOMPONENT;
+		wcex.hbrBackground = NULL;
+		wcex.lpszMenuName = NULL;
+		wcex.hCursor = LoadCursor(NULL, IDI_APPLICATION);
+		wcex.lpszClassName = _T("DemoDrawMapDirectX");
+
+		RegisterClassEx(&wcex);
 
 
-    // Because the CreateWindow function takes its size in pixels,
-    // obtain the system DPI and use it to scale the window size.
-    FLOAT dpiX, dpiY;
+		// Because the CreateWindow function takes its size in pixels,
+		// obtain the system DPI and use it to scale the window size.
+		FLOAT dpiX, dpiY;
 
-    // The factory returns the current system DPI. This is also the value it will use
-    // to create its own windows.
-    m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
+		// The factory returns the current system DPI. This is also the value it will use
+		// to create its own windows.
+		m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
 
-    // Init osmscout
-    m_database = std::make_shared<osmscout::Database>(m_databaseParameter);
-    if (!m_database->Open(m_szMap.c_str()))
-    {
-      MessageBox(m_hwnd, _T("Cannot open database"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-      return E_FAIL;
-    }
-    m_mapService = std::make_shared<osmscout::MapService>(m_database);
-    m_StyleConfig = std::make_shared<osmscout::StyleConfig>(m_database->GetTypeConfig());
-    if (!m_StyleConfig->Load(m_szStyle))
-    {
-      MessageBox(m_hwnd, _T("Cannot open style"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-      return E_FAIL;
-    }
+		// Init osmscout
+		m_database = std::make_shared<osmscout::Database>(m_databaseParameter);
+		if (!m_database->Open(m_szMap.c_str()))
+		{
+			MessageBox(m_hwnd, _T("Cannot open database"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+			return E_FAIL;
+		}
+		m_mapService = std::make_shared<osmscout::MapService>(m_database);
+		m_StyleConfig = std::make_shared<osmscout::StyleConfig>(m_database->GetTypeConfig());
+		if (!m_StyleConfig->Load(m_szStyle))
+		{
+			MessageBox(m_hwnd, _T("Cannot open style"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+			return E_FAIL;
+		}
 
-    // Create the window.
-    m_hwnd = CreateWindow(
-      _T("DemoDrawMapDirectX"),
-      _T("DrawMapDirectX"),
-      WS_OPERLAPPEDWINDOW ^ WS_THICKFRAME,
-      CW_USEDEFAULT,
-      CW_USEDEFAULT,
-      static_cast<UINT>(std::ceil(800.f * dpiX / DPI)),
-      static_cast<UINT>(std::ceil(600.f * dpiY / DPI)),
-      NULL,
-      NULL,
-      HINST_THISCOMPONENT,
-      this
-      );
-      
-    hr = m_hwnd ? S_OK : E_FAIL;
-    
-    if (!SUCCEEDED(hr))
-    {
-      MessageBox(m_hwnd, _T("Cannot create window"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-      return E_FAIL;
-    } 
+		// Create the window.
+		m_hwnd = CreateWindow(
+			_T("DemoDrawMapDirectX"),
+			_T("DrawMapDirectX"),
+			WS_OPERLAPPEDWINDOW ^ WS_THICKFRAME,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			static_cast<UINT>(std::ceil(800.f * dpiX / DPI)),
+			static_cast<UINT>(std::ceil(600.f * dpiY / DPI)),
+			NULL,
+			NULL,
+			HINST_THISCOMPONENT,
+			this
+		);
 
-    std::cout << "Window created." << std::endl;
-    
-    m_DrawParameter.SetFontName("sans-serif");
-    m_DrawParameter.SetFontSize(3.0);
-    m_DrawParameter.SetDebugPerformance(true);
+		hr = m_hwnd ? S_OK : E_FAIL;
 
-	/*
-	std::list<std::string> paths;
-	paths.push_back("C:\\projects\\libosmscout\\libosmscout\\data\\icons\\14x14\\standard\\");
-	m_DrawParameter.SetIconPaths(paths);
-	m_DrawParameter.SetPatternPaths(paths);
-	*/
+		if (!SUCCEEDED(hr))
+		{
+			MessageBox(m_hwnd, _T("Cannot create window"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+			return E_FAIL;
+		}
 
-    m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
-    m_mapService->LookupTiles(m_Projection, m_Tiles);
-    m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-    m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
+		std::cout << "Window created." << std::endl;
 
-    ShowWindow(m_hwnd, SW_SHOWNORMAL);
-    UpdateWindow(m_hwnd);
+		m_DrawParameter.SetFontName("sans-serif");
+		m_DrawParameter.SetFontSize(3.0);
+		m_DrawParameter.SetDebugPerformance(true);
+
+		m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
+		m_mapService->LookupTiles(m_Projection, m_Tiles);
+		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
+		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
+
+		ShowWindow(m_hwnd, SW_SHOWNORMAL);
+		UpdateWindow(m_hwnd);
 
 		return hr;
 	}
@@ -273,14 +266,14 @@ private:
 			D2D1_SIZE_U size = D2D1::SizeU(
 				rc.right - rc.left,
 				rc.bottom - rc.top
-				);
+			);
 
 			// Create a Direct2D render target.
 			hr = m_pDirect2dFactory->CreateHwndRenderTarget(
 				D2D1::RenderTargetProperties(),
 				D2D1::HwndRenderTargetProperties(m_hwnd, size),
 				&m_pRenderTarget
-				);
+			);
 
 
 			if (SUCCEEDED(hr))
@@ -289,7 +282,7 @@ private:
 				hr = m_pRenderTarget->CreateSolidColorBrush(
 					D2D1::ColorF(D2D1::ColorF::LightSlateGray),
 					&m_pLightSlateGrayBrush
-					);
+				);
 			}
 			if (SUCCEEDED(hr))
 			{
@@ -297,7 +290,7 @@ private:
 				hr = m_pRenderTarget->CreateSolidColorBrush(
 					D2D1::ColorF(D2D1::ColorF::CornflowerBlue),
 					&m_pCornflowerBlueBrush
-					);
+				);
 			}
 		}
 
@@ -316,18 +309,18 @@ private:
 	// Draw content.
 	HRESULT OnRender()
 	{
-    std::cout << "On render..." << std::endl;
 		HRESULT hr = S_OK;
 
 		hr = CreateDeviceResources();
-    
+
 		if (SUCCEEDED(hr))
 		{
 			m_pRenderTarget->BeginDraw();
 			m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
 			m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
-      /*
+
+			/*
 			D2D1_SIZE_F rtSize = m_pRenderTarget->GetSize();
 			// Draw a grid background.
 			int width = static_cast<int>(rtSize.width);
@@ -340,7 +333,7 @@ private:
 					D2D1::Point2F(static_cast<FLOAT>(x), rtSize.height),
 					m_pLightSlateGrayBrush,
 					0.5f
-					);
+				);
 			}
 
 			for (int y = 0; y < height; y += 10)
@@ -350,7 +343,7 @@ private:
 					D2D1::Point2F(rtSize.width, static_cast<FLOAT>(y)),
 					m_pLightSlateGrayBrush,
 					0.5f
-					);
+				);
 			}
 			// Draw two rectangles.
 			D2D1_RECT_F rectangle1 = D2D1::RectF(
@@ -369,31 +362,28 @@ private:
 			// Draw a filled rectangle.
 			m_pRenderTarget->FillRectangle(&rectangle1, m_pLightSlateGrayBrush);
 			// Draw the outline of a rectangle.
-			m_pRenderTarget->DrawRectangle(&rectangle2, m_pCornflowerBlueBrush);*/
+			m_pRenderTarget->DrawRectangle(&rectangle2, m_pCornflowerBlueBrush);
+			*/
 
-			if (m_Painter != NULL) {
+			if (m_Painter != NULL)
+			{
 				m_Painter->DrawMap(m_Projection, m_DrawParameter, m_Data, m_pRenderTarget);
-      }
-      
-      hr = m_pRenderTarget->EndDraw();
+			}
+			hr = m_pRenderTarget->EndDraw();
 		}
-    
+
 		if (hr == D2DERR_RECREATE_TARGET)
 		{
 			hr = S_OK;
 			DiscardDeviceResources();
 		}
-    
-    std::cout << "On render done." << std::endl;
-    
+
 		return hr;
 	}
 
 	// Resize the render target.
 	void OnResize(UINT width, UINT height)
 	{
-    std::cout << "On resize..." << std::endl;
-    
 		if (m_pRenderTarget)
 		{
 			// Note: This method can fail, but it's okay to ignore the
@@ -408,7 +398,6 @@ private:
 			m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
 			m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 		}
-    std::cout << "On resize done." << std::endl;
 	}
 
 	// The windows procedure.
@@ -417,13 +406,12 @@ private:
 		UINT message,
 		WPARAM wParam,
 		LPARAM lParam
-		)
+	)
 	{
 		LRESULT result = 0;
 
 		if (message == WM_CREATE)
 		{
-      std::cout << "WM_CREATE..." << std::endl;
 			LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
 			DrawMapDirectX *pDemoApp = (DrawMapDirectX*)pcs->lpCreateParams;
 
@@ -431,20 +419,20 @@ private:
 				hWnd,
 				GWLP_USERDATA,
 				(LONG_PTR)pDemoApp
-				);
+			);
 
 			result = 1;
 
 			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_StyleConfig, pDemoApp->m_pDirect2dFactory, pDemoApp->m_pWriteFactory);
-      std::cout << "WM_CREATE...done" << std::endl;
 		}
 		else
 		{
 			DrawMapDirectX *pDemoApp = reinterpret_cast<DrawMapDirectX*>(static_cast<LONG_PTR>(
 				::GetWindowLongPtrW(
-				hWnd,
-				GWLP_USERDATA
-				)));
+					hWnd,
+					GWLP_USERDATA
+				)
+			));
 
 			bool wasHandled = false;
 
@@ -454,11 +442,9 @@ private:
 				{
 				case WM_SIZE:
 				{
-          std::cout << "WM_SIZE..." << std::endl;
 					UINT width = LOWORD(lParam);
 					UINT height = HIWORD(lParam);
 					pDemoApp->OnResize(width, height);
-          std::cout << "WM_SIZE...done" << std::endl;
 				}
 				result = 0;
 				wasHandled = true;
@@ -466,9 +452,7 @@ private:
 
 				case WM_DISPLAYCHANGE:
 				{
-          std::cout << "WM_DISPLAYCHANGE..." << std::endl;
 					InvalidateRect(hWnd, NULL, FALSE);
-          std::cout << "WM_DISPLAYCHANGE...done" << std::endl;
 				}
 				result = 0;
 				wasHandled = true;
@@ -476,10 +460,8 @@ private:
 
 				case WM_PAINT:
 				{
-          std::cout << "WM_PAINT..." << std::endl;
 					pDemoApp->OnRender();
 					ValidateRect(hWnd, NULL);
-          std::cout << "WM_PAINT... done" << std::endl;
 				}
 				result = 0;
 				wasHandled = true;
@@ -487,9 +469,7 @@ private:
 
 				case WM_DESTROY:
 				{
-          std::cout << "WM_DESTROY..." << std::endl;
 					PostQuitMessage(0);
-          std::cout << "WM_DESTROY...done" << std::endl;
 				}
 				result = 1;
 				wasHandled = true;
@@ -512,7 +492,7 @@ int WINAPI WinMain(
 	HINSTANCE /* hPrevInstance */,
 	LPSTR /* lpCmdLine */,
 	int /* nCmdShow */
-	)
+)
 {
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -567,14 +547,12 @@ int WINAPI WinMain(
 	{
 		{
 			DrawMapDirectX app(map, style, lon, lat, zoom);
-      
+
 			if (SUCCEEDED(app.Initialize())) {
-        std::cout << "Enter message loop..." << std::endl;
 				app.RunMessageLoop();
-        std::cout << "Left message loop." << std::endl;
 			}
 		}
-    
+
 		CoUninitialize();
 	}
 

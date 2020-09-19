@@ -46,17 +46,17 @@ if(WIN32)
 endif()
 
 FIND_PATH(Direct2D_INCLUDE_DIRS d2d1.h PATHS
+	${sdk_include}
     "$ENV{DXSDK_DIR}/Include"
     "$ENV{PROGRAMFILES}/Microsoft DirectX SDK*/Include"
-	${sdk_include}
 )
 
 GET_FILENAME_COMPONENT(DirectX_ROOT_DIR "${DirectX_INCLUDE_DIRS}/.." ABSOLUTE)
 
 SET(Direct2D_LIBRARY_PATHS
+	${sdk_lib}
 	"${DirectX_ROOT_DIR}/Lib/${subarch}"
 	"$ENV{DXSDK_DIR}/Lib/${subarch}/"
-	${sdk_lib}
 )
 
 FIND_LIBRARY(Direct2D_D2D1_LIBRARY d2d1 ${Direct2D_LIBRARY_PATHS} NO_DEFAULT_PATH)

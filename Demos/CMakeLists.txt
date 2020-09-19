@@ -1,240 +1,206 @@
 #---- Coverage
-add_executable(Coverage src/Coverage.cpp)
-set_property(TARGET Coverage PROPERTY CXX_STANDARD 17)
-target_link_libraries(Coverage OSMScout)
-install(TARGETS Coverage RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME Coverage SOURCES src/Coverage.cpp TARGET OSMScout::OSMScout)
 
 #---- DumpOSS
 if(${OSMSCOUT_BUILD_MAP})
-	add_executable(DumpOSS src/DumpOSS.cpp)
-	set_property(TARGET DumpOSS PROPERTY CXX_STANDARD 17)
-    target_link_libraries(DumpOSS OSMScout OSMScoutMap)
-	install(TARGETS DumpOSS RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+  osmscout_demo_project(NAME DumpOSS SOURCES src/DumpOSS.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 else()
-	message("Skip DumpOSS demo libosmscout-map, is missing.")
+  message("Skip DumpOSS demo libosmscout-map, is missing.")
 endif()
 
 #---- LocationDescription
-add_executable(LocationDescription src/LocationDescription.cpp)
-set_property(TARGET LocationDescription PROPERTY CXX_STANDARD 17)
-target_link_libraries(LocationDescription OSMScout)
-install(TARGETS LocationDescription RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME LocationDescription SOURCES src/LocationDescription.cpp TARGET OSMScout::OSMScout)
 
 #---- LocationLookup
-add_executable(LocationLookup src/LocationLookup.cpp)
-set_property(TARGET LocationLookup PROPERTY CXX_STANDARD 17)
-target_link_libraries(LocationLookup OSMScout)
-install(TARGETS LocationLookup RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME LocationLookup SOURCES src/LocationLookup.cpp TARGET OSMScout::OSMScout)
 
 #---- LocationLookupForm
-add_executable(LocationLookupForm src/LocationLookupForm.cpp)
-set_property(TARGET LocationLookupForm PROPERTY CXX_STANDARD 17)
-target_link_libraries(LocationLookupForm OSMScout)
-install(TARGETS LocationLookupForm RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME LocationLookupForm SOURCES src/LocationLookupForm.cpp TARGET OSMScout::OSMScout)
 
 #---- POILookupForm
-add_executable(POILookupForm src/POILookupForm.cpp)
-set_property(TARGET POILookupForm PROPERTY CXX_STANDARD 17)
-target_link_libraries(POILookupForm OSMScout)
-install(TARGETS POILookupForm RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME POILookupForm SOURCES src/POILookupForm.cpp TARGET OSMScout::OSMScout)
 
 #---- LookupPOI
-add_executable(LookupPOI src/LookupPOI.cpp)
-set_property(TARGET LookupPOI PROPERTY CXX_STANDARD 17)
-target_link_libraries(LookupPOI OSMScout)
-install(TARGETS LookupPOI RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME LookupPOI SOURCES src/LookupPOI.cpp TARGET OSMScout::OSMScout)
 
 #---- LookupText
 if(MARISA_FOUND)
-    add_executable(LookupText src/LookupText.cpp)
-    set_property(TARGET LookupText PROPERTY CXX_STANDARD 17)
-    target_link_libraries(LookupText OSMScout)
-    install(TARGETS LookupText RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+  osmscout_demo_project(NAME LookupText SOURCES src/LookupText.cpp TARGET OSMScout::OSMScout INCLUDES ${MARISA_INCLUDE_DIRS})
 else()
-	message("Skip LookupText demo, marisa dependency is missing.")
+  message("Skip LookupText demo, marisa dependency is missing.")
 endif()
 
 #---- PerformanceTest
 if(${OSMSCOUT_BUILD_MAP})
-	add_executable(PerformanceTest src/PerformanceTest.cpp)
-	set_property(TARGET PerformanceTest PROPERTY CXX_STANDARD 17)
-	target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
-    target_link_libraries(PerformanceTest OSMScout OSMScoutMap)
-	if(${OSMSCOUT_BUILD_MAP_CAIRO})
-      target_link_libraries(PerformanceTest OSMScoutMapCairo)
-      set(HAVE_LIB_OSMSCOUTMAPCAIRO 1)
+  osmscout_demo_project(NAME PerformanceTest SOURCES src/PerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map)
+  target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
+  if(${OSMSCOUT_BUILD_MAP_CAIRO})
+    target_link_libraries(PerformanceTest OSMScout::MapCairo)
+    set(HAVE_LIB_OSMSCOUTMAPCAIRO 1)
+  endif()
+  if(${OSMSCOUT_BUILD_MAP_QT})
+    target_link_libraries(PerformanceTest OSMScout::MapQt Qt5::Widgets)
+    set(HAVE_LIB_OSMSCOUTMAPQT 1)
+	if(MSVC)
+	  visual_studio_qt_helper("PerformanceTest")
 	endif()
-	if(${OSMSCOUT_BUILD_MAP_QT})
-      target_link_libraries(PerformanceTest OSMScoutMapQt Qt5::Widgets)
-      set(HAVE_LIB_OSMSCOUTMAPQT 1)
-	endif()
-    if(${OSMSCOUT_BUILD_MAP_AGG})
-      target_link_libraries(PerformanceTest OSMScoutMapAGG)
-      set(HAVE_LIB_OSMSCOUTMAPAGG 1)
-	endif()
-    if(${OSMSCOUT_BUILD_MAP_OPENGL} AND ${GLFW_FOUND})
-      target_link_libraries(PerformanceTest OSMScoutMapOpenGL ${GLFW_LIBRARIES})
-      set(HAVE_LIB_OSMSCOUTMAPOPENGL 1)
-	  target_include_directories(PerformanceTest PRIVATE ${GLFW_INCLUDE_DIR})
-	endif()
+    if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+      add_custom_command(TARGET PerformanceTest
+        POST_BUILD
+        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:PerformanceTest>/$<TARGET_FILE_NAME:PerformanceTest>"
+      )
+    endif()
+  endif()
+  if(${OSMSCOUT_BUILD_MAP_AGG})
+    target_link_libraries(PerformanceTest OSMScout::MapAGG)
+    set(HAVE_LIB_OSMSCOUTMAPAGG 1)
+  endif()
+  if(${OSMSCOUT_BUILD_MAP_OPENGL} AND ${GLFW_FOUND})
+    target_include_directories(PerformanceTest PRIVATE ${GLFW_INCLUDE_DIR})
+  	target_link_libraries(PerformanceTest OSMScout::MapOpenGL ${GLFW_LIBRARIES})
+  	set(HAVE_LIB_OSMSCOUTMAPOPENGL 1)
+  endif()
   if(${GPERFTOOLS_USAGE})
     target_include_directories(PerformanceTest PRIVATE ${GPERFTOOLS_INCLUDE_DIRS})
     target_link_libraries(PerformanceTest ${GPERFTOOLS_LIBRARIES})
   endif()
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/PerformanceTestConfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest/config.h)
-	install(TARGETS PerformanceTest RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/PerformanceTestConfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest/config.h)
 else()
-	message("Skip PerformanceTest demo, libosmscout-map is missing.")
+  message("Skip PerformanceTest demo, libosmscout-map is missing.")
 endif()
 
 #---- ResourceConsumption
 if(${OSMSCOUT_BUILD_MAP})
-	add_executable(ResourceConsumption src/ResourceConsumption.cpp)
-	set_property(TARGET ResourceConsumption PROPERTY CXX_STANDARD 17)
-    target_link_libraries(ResourceConsumption OSMScout OSMScoutMap)
-	install(TARGETS ResourceConsumption RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	osmscout_demo_project(NAME ResourceConsumption SOURCES src/ResourceConsumption.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 else()
 	message("Skip ResourceConsumption demo, libosmscout-map is missing.")
 endif()
 
 #---- ReverseLocationLookup
-add_executable(ReverseLocationLookup src/ReverseLocationLookup.cpp)
-set_property(TARGET ReverseLocationLookup PROPERTY CXX_STANDARD 17)
-target_link_libraries(ReverseLocationLookup OSMScout)
-install(TARGETS ReverseLocationLookup RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME ReverseLocationLookup SOURCES src/ReverseLocationLookup.cpp TARGET OSMScout::OSMScout)
 
 #---- Routing
-add_executable(Routing src/Routing.cpp)
-set_property(TARGET Routing PROPERTY CXX_STANDARD 17)
-target_link_libraries(Routing OSMScout)
-install(TARGETS Routing RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME Routing SOURCES src/Routing.cpp TARGET OSMScout::OSMScout)
 
+#---- RoutingAnimation
 if(${OSMSCOUT_BUILD_MAP_QT})
-  #---- RoutingAnimation
-  add_executable(RoutingAnimation src/RoutingAnimation.cpp)
-  set_property(TARGET RoutingAnimation PROPERTY CXX_STANDARD 17)
-  target_link_libraries(RoutingAnimation OSMScout OSMScoutMap OSMScoutMapQt Qt5::Widgets)
-  install(TARGETS RoutingAnimation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	osmscout_demo_project(NAME RoutingAnimation SOURCES src/RoutingAnimation.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
+	if(MSVC)
+		  visual_studio_qt_helper("RoutingAnimation")
+	endif()
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		add_custom_command(TARGET RoutingAnimation
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingAnimation>/$<TARGET_FILE_NAME:RoutingAnimation>"
+		)
+	endif()
 endif()
 
-#----
+#---- Tiler & DrawMapAgg
 if(${OSMSCOUT_BUILD_MAP_AGG})
-    add_executable(Tiler src/Tiler.cpp)
-    set_property(TARGET Tiler PROPERTY CXX_STANDARD 17)
-    target_link_libraries(Tiler OSMScout OSMScoutMap OSMScoutMapAGG)
+	#---- Tiler
+	osmscout_demo_project(NAME Tiler SOURCES src/Tiler.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapAGG)
     if(LIBAGGFT2_LIBRARIES)
         target_link_libraries(Tiler ${LIBAGGFT2_LIBRARIES})
     endif()
-    install(TARGETS Tiler RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
-    add_executable(DrawMapAgg src/DrawMapAgg.cpp)
-    set_property(TARGET DrawMapAgg PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapAgg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapAgg OSMScout OSMScoutMap OSMScoutMapAGG)
+	#---- DrawMapAgg
+	osmscout_demo_project(NAME DrawMapAgg SOURCES src/DrawMapAgg.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapAGG)
     if(LIBAGGFT2_LIBRARIES)
         target_link_libraries(DrawMapAgg ${LIBAGGFT2_LIBRARIES})
     endif()
-    install(TARGETS DrawMapAgg RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 else()
 	message("Skip Tiler and DrawMapAgg demos, libosmscout-map-agg is missing.")
 endif()
 
+#---- DrawMapCairo
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
-    add_executable(DrawMapCairo src/DrawMapCairo.cpp)
-    set_property(TARGET DrawMapCairo PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapCairo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapCairo OSMScout OSMScoutMap OSMScoutMapCairo)
-    install(TARGETS DrawMapCairo RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	osmscout_demo_project(NAME DrawMapCairo SOURCES src/DrawMapCairo.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo INCLUDES ${CAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}/../ ${CAIRO_INCLUDE_DIRS}/cairo)
 else()
 	message("Skip DrawMapCairo demo, libosmscout-map-cairo is missing.")
 endif()
 
+#---- DrawMapQt & ResourceConsumptionQt
 if(${OSMSCOUT_BUILD_MAP_QT})
-    add_executable(DrawMapQt src/DrawMapQt.cpp)
-    set_property(TARGET DrawMapQt PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapQt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapQt OSMScout OSMScoutMap OSMScoutMapQt Qt5::Widgets)
-    install(TARGETS DrawMapQt RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	#---- DrawMapQt
+    osmscout_demo_project(NAME DrawMapQt SOURCES src/DrawMapQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
     target_compile_definitions(DrawMapQt PRIVATE ${Qt5Widgets_DEFINITIONS})
+	if(MSVC)
+		  visual_studio_qt_helper("DrawMapQt")
+	endif()
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		add_custom_command(TARGET DrawMapQt
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:DrawMapQt>/$<TARGET_FILE_NAME:DrawMapQt>"
+		)
+	endif()
 
-    add_executable(ResourceConsumptionQt src/ResourceConsumptionQt.cpp)
-    set_property(TARGET ResourceConsumptionQt PROPERTY CXX_STANDARD 17)
-    target_link_libraries(ResourceConsumptionQt OSMScout OSMScoutMap OSMScoutMapQt Qt5::Widgets)
-    install(TARGETS ResourceConsumptionQt RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	#---- ResourceConsumptionQt
+    osmscout_demo_project(NAME ResourceConsumptionQt SOURCES src/ResourceConsumptionQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
     target_compile_definitions(ResourceConsumptionQt PRIVATE ${Qt5Widgets_DEFINITIONS})
+	if(MSVC)
+		  visual_studio_qt_helper("ResourceConsumptionQt")
+	endif()
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		add_custom_command(TARGET ResourceConsumptionQt
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ResourceConsumptionQt>/$<TARGET_FILE_NAME:ResourceConsumptionQt>"
+		)
+	endif()
 else()
 	message("Skip ResourceConsumptionQt and DrawMapQt demos, libosmscout-map-qt is missing.")
 endif()
 
+#---- DrawMapSVG
 if(${OSMSCOUT_BUILD_MAP_SVG})
-	add_executable(DrawMapSVG src/DrawMapSVG.cpp)
-	set_property(TARGET DrawMapSVG PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapSVG PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapSVG OSMScout OSMScoutMap OSMScoutMapSVG)
-	install(TARGETS DrawMapSVG RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+    osmscout_demo_project(NAME DrawMapSVG SOURCES src/DrawMapSVG.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSVG)
 else()
 	message("Skip DrawMapSVG demo, libosmscout-map-svg is missing.")
 endif()
 
+#---- DrawMapDirectX
 if(${OSMSCOUT_BUILD_MAP_DIRECTX})
-	add_executable(DrawMapDirectX WIN32 src/DrawMapDirectX.cpp)
-	set_property(TARGET DrawMapDirectX PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapDirectX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-	target_link_libraries(DrawMapDirectX OSMScout OSMScoutMap OSMScoutMapDirectX ${Direct2D_LIBRARIES} "Shell32.lib")
-	install(TARGETS DrawMapDirectX RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+    osmscout_demo_project(NAME DrawMapDirectX SOURCES src/DrawMapDirectX.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapDirectX ${Direct2D_LIBRARIES} "Shell32.lib")
+	set_target_properties(DrawMapDirectX PROPERTIES LINK_FLAGS /SUBSYSTEM:WINDOWS)
 else()
 	message("Skip DrawMapDirectX demo, libosmscout-map-directx is missing.")
 endif()
 
+#---- DrawMapOpenGL
 if(${OSMSCOUT_BUILD_MAP_OPENGL} AND ${GLFW_FOUND})
-	add_executable(DrawMapOpenGL src/DrawMapOpenGL.cpp)
-	set_property(TARGET DrawMapOpenGL PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapOpenGL PRIVATE ${GLFW_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapOpenGL OSMScout OSMScoutMap OSMScoutMapOpenGL ${GLFW_LIBRARIES})
-	install(TARGETS DrawMapOpenGL RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+    osmscout_demo_project(NAME DrawMapOpenGL SOURCES src/DrawMapOpenGL.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapOpenGL ${GLFW_LIBRARIES})
+    target_include_directories(DrawMapOpenGL PRIVATE ${GLFW_INCLUDE_DIR})
 else()
 	message("Skip DrawMapOpenGL demo, libosmscout-map-opengl or glfw is missing.")
 endif()
 
-if(${OSMSCOUT_BUILD_MAP_IOSX} AND NOT DEFINED IOS_PLATFORM)
-    add_executable(DrawMapOSX src/DrawMapOSX.mm)
-    set_property(TARGET DrawMapOSX PROPERTY CXX_STANDARD 17)
-    target_include_directories(DrawMapOSX PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-    target_link_libraries(DrawMapOSX OSMScout OSMScoutMap OSMScoutMapIOSX)
-    install(TARGETS DrawMapOSX RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-else()
-	message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
+#---- DrawMapOSX
+if(APPLE)
+	if(${OSMSCOUT_BUILD_MAP_IOSX} AND NOT DEFINED IOS_PLATFORM)
+		osmscout_demo_project(NAME DrawMapOSX SOURCES src/DrawMapOSX.mm TARGET OSMScout::OSMScout OSMScout::Map OSMScoutMapIOSX INCLUDES ${CMAKE_SOURCE_DIR}/libosmscout-map-iOSX/include ${CMAKE_BINARY_DIR}/libosmscout-map-iOSX/include)
+	else()
+		message("Skip DrawMapOSX demo, libosmscout-map-iosx is missing.")
+	endif()
 endif()
 
+#---- GpxPipe & ElevationProfile
 if(${LIBXML2_FOUND} AND ${OSMSCOUT_BUILD_GPX})
     #---- GpxPipe
-    add_executable(GpxPipe src/GpxPipe.cpp)
-    set_property(TARGET GpxPipe PROPERTY CXX_STANDARD 17)
-    target_link_libraries(GpxPipe OSMScout OSMScoutGPX)
-    install(TARGETS GpxPipe RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-else()
-    message("Skip GpxPipe demo, libxml is missing.")
-endif()
+    osmscout_demo_project(NAME GpxPipe SOURCES src/GpxPipe.cpp TARGET OSMScout::OSMScout OSMScout::GPX)
 
-if(${LIBXML2_FOUND} AND ${OSMSCOUT_BUILD_GPX})
     #---- ElevationProfile
-    add_executable(ElevationProfile src/ElevationProfile.cpp)
-    set_property(TARGET ElevationProfile PROPERTY CXX_STANDARD 17)
-    target_link_libraries(ElevationProfile OSMScout OSMScoutMap OSMScoutGPX)
-    install(TARGETS ElevationProfile RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+    osmscout_demo_project(NAME ElevationProfile SOURCES src/ElevationProfile.cpp TARGET OSMScout::OSMScout OSMScout::GPX)
 else()
-    message("Skip ElevationProfile demo, libxml is missing.")
+    message("Skip GpxPipe and ElevationProfile demos, libxml is missing.")
 endif()
 
 #---- Navigation
-add_executable(Navigation src/Navigation.cpp)
-set_property(TARGET Navigation PROPERTY CXX_STANDARD 17)
-target_link_libraries(Navigation OSMScout)
-install(TARGETS Navigation RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME Navigation SOURCES src/Navigation.cpp TARGET OSMScout::OSMScout)
 
 #---- NavigationSimulator
-add_executable(NavigationSimulator src/NavigationSimulator.cpp)
-set_property(TARGET NavigationSimulator PROPERTY CXX_STANDARD 17)
-target_link_libraries(NavigationSimulator OSMScout OSMScoutMap)
-install(TARGETS NavigationSimulator RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+osmscout_demo_project(NAME NavigationSimulator SOURCES src/NavigationSimulator.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 
