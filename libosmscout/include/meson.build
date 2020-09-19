@@ -68,6 +68,7 @@ osmscoutHeader = [
             'osmscout/Area.h',
             'osmscout/AreaDataFile.h',
             'osmscout/AreaAreaIndex.h',
+            'osmscout/AreaIndex.h',
             'osmscout/AreaNodeIndex.h',
             'osmscout/AreaRouteIndex.h',
             'osmscout/AreaWayIndex.h',

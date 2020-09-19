@@ -18,75 +18,25 @@
 */
 
 #include <osmscout/AreaRouteIndex.h>
-#include <osmscout/RouteDataFile.h>
-
-#include <algorithm>
 
 #include <osmscout/util/File.h>
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/StopClock.h>
-
-#include <osmscout/system/Math.h>
 
 namespace osmscout {
 
   const char* const AreaRouteIndex::AREA_ROUTE_IDX="route.idx";
 
-  AreaRouteIndex::~AreaRouteIndex()
+  AreaRouteIndex::AreaRouteIndex():
+    AreaIndex(AreaRouteIndex::AREA_ROUTE_IDX)
+  {}
+
+  void AreaRouteIndex::ReadTypeData(const TypeConfigRef& typeConfig,
+                                    TypeData &data)
   {
-    Close();
+    TypeId typeId;
+
+    scanner.ReadTypeId(typeId,
+                       typeConfig->GetRouteTypeIdBytes());
+
+    data.type=typeConfig->GetRouteTypeInfo(typeId);
   }
-
-  void AreaRouteIndex::Close()
-  {
-  }
-
-  bool AreaRouteIndex::Open(const TypeConfigRef& typeConfig,
-                            const std::string& path,
-                            bool memoryMappedData)
-  {
-    datafilename=AppendFileToDir(path,RouteDataFile::ROUTE_DAT);
-    this->memoryMappedData=memoryMappedData;
-    this->typeConfig=typeConfig;
-    return true;
-  }
-
-  bool AreaRouteIndex::GetOffsets(const GeoBox& boundingBox,
-                                  const TypeInfoSet& types,
-                                  std::vector<FileOffset>& offsets,
-                                  TypeInfoSet& loadedTypes) const
-  {
-    try {
-      // TODO: implement real index
-      FileScanner scanner;
-      scanner.Open(datafilename,FileScanner::Sequential,memoryMappedData);
-
-      uint32_t entries;
-
-      scanner.Read(entries);
-
-      offsets.reserve(entries);
-
-      for (size_t i=0; i < entries; i++) {
-        Route route;
-        route.Read(*typeConfig, scanner);
-        if (boundingBox.Intersects(route.GetBoundingBox()) &&
-            types.IsSet(route.GetType())){
-          offsets.push_back(route.GetFileOffset());
-          loadedTypes.Set(route.GetType());
-        }
-      }
-
-      bool err=!scanner.HasError();
-      scanner.Close();
-      return err;
-    }
-    catch (IOException& e) {
-      log.Error() << e.GetDescription();
-
-      return false;
-    }
-  }
-
 }

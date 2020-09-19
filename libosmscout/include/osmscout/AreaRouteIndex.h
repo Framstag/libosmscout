@@ -25,11 +25,13 @@
 #include <unordered_set>
 #include <vector>
 
+#include <osmscout/AreaIndex.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/TileId.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
@@ -40,34 +42,18 @@ namespace osmscout {
 
     Routes can be limited by type and result count.
     */
-  class OSMSCOUT_API AreaRouteIndex
+  class OSMSCOUT_API AreaRouteIndex CLASS_FINAL : public AreaIndex
   {
   public:
     static const char* const AREA_ROUTE_IDX;
 
   private:
-    std::string datafilename;   //!< Full path and name of the data file
-    bool memoryMappedData;
-    TypeConfigRef typeConfig;
+    void ReadTypeData(const TypeConfigRef& typeConfig,
+                      TypeData &data) override;
 
   public:
-    AreaRouteIndex() = default;
-    virtual ~AreaRouteIndex();
-
-    void Close();
-    bool Open(const TypeConfigRef& typeConfig,
-              const std::string& path,
-              bool memoryMappedData);
-
-    inline std::string GetFilename() const
-    {
-      return datafilename;
-    }
-
-    bool GetOffsets(const GeoBox& boundingBox,
-                    const TypeInfoSet& types,
-                    std::vector<FileOffset>& offsets,
-                    TypeInfoSet& loadedTypes) const;
+    AreaRouteIndex();
+    virtual ~AreaRouteIndex() = default;
   };
 
   using AreaRouteIndexRef = std::shared_ptr<AreaRouteIndex>;

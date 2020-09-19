@@ -62,6 +62,7 @@ osmscoutSrc = [
             'src/osmscout/Area.cpp',
             'src/osmscout/AreaDataFile.cpp',
             'src/osmscout/AreaAreaIndex.cpp',
+            'src/osmscout/AreaIndex.cpp',
             'src/osmscout/AreaNodeIndex.cpp',
             'src/osmscout/AreaRouteIndex.cpp',
             'src/osmscout/AreaWayIndex.cpp',

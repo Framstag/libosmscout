@@ -86,6 +86,7 @@ set(HEADER_FILES
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
+	include/osmscout/AreaIndex.h
     include/osmscout/AreaNodeIndex.h
     include/osmscout/AreaRouteIndex.h
     include/osmscout/AreaWayIndex.h
@@ -194,7 +195,8 @@ set(SOURCE_FILES
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
-    src/osmscout/AreaNodeIndex.cpp
+	src/osmscout/AreaIndex.cpp
+	src/osmscout/AreaNodeIndex.cpp
     src/osmscout/AreaRouteIndex.cpp
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/CoordDataFile.cpp
