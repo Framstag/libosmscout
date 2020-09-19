@@ -811,24 +811,27 @@ namespace osmscout {
 
   void StyleConfig::PostprocessRoutes()
   {
-    // TODO: evaluate route types
-    size_t maxLevel=Magnification::magHouse.Get();
+    size_t maxLevel=0;
+    GetMaxLevelInConditionals(routeLineStyleConditionals,
+                              maxLevel);
+
     routeTypeSets.reserve(maxLevel);
 
-    TypeInfoSet allRoutes(*typeConfig);
-    for (const auto &type: typeConfig->GetRouteTypes()){
-      allRoutes.Set(type);
+    for (size_t type=0; type<maxLevel; type++) {
+      routeTypeSets.emplace_back(*typeConfig);
     }
 
-    for (size_t type=0; type<maxLevel; type++) {
-      routeTypeSets.push_back(allRoutes);
-    }
+    CalculateUsedTypes(*typeConfig,
+                       routeLineStyleConditionals,
+                       maxLevel,
+                       routeTypeSets);
 
     SortInConditionalsBySlot(*typeConfig,
                              routeLineStyleConditionals,
                              maxLevel,
                              routeLineStyleSelectors);
 
+    routeLineStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessIconId()
