@@ -19,6 +19,8 @@
 
 #include <osmscout/import/GenWayWayDat.h>
 
+#include <algorithm>
+
 #include <osmscout/DataFile.h>
 #include <osmscout/TypeDistributionDataFile.h>
 
@@ -27,12 +29,9 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
-#include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/Preprocess.h>
-
-#include <algorithm>
 
 namespace osmscout {
 

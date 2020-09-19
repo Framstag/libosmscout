@@ -50,7 +50,7 @@ namespace osmscout {
     FileScanner rawRouteScanner;
     FileWriter  routeWriter;
     FileScanner wayIdScanner;
-    WayDataFile wayData(200);
+    WayDataFile wayData(parameter.GetWayDataCacheSize());
 
     if (!wayData.Open(typeConfig, parameter.GetDestinationDirectory(), true)){
       progress.Error("Cannot open way data file");
