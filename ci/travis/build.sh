@@ -22,7 +22,8 @@ if [ "$TARGET" = "build" ]; then
     if [ "$CXX" = "clang++" ]; then
       echo ""
     else
-      export CXX=c++-10
+      export CC=gcc-10
+      export CXX=g++-10
     fi
 
     # Travis currently cannot build clang + OpenMP (https://github.com/travis-ci/travis-ci/issues/8613)
@@ -39,7 +40,8 @@ if [ "$TARGET" = "build" ]; then
     if [ "$CXX" = "clang++" ]; then
       echo ""
     else
-      export CXX=c++-10
+      export CC=gcc-10
+      export CXX=g++-10
     fi
 
     mkdir build
