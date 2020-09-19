@@ -79,6 +79,7 @@ swigExe = find_program('swig', required: false)
 
 # Base
 mathDep = compiler.find_library('m', required : false)
+tbbDep =  compiler.find_library('tbb', required : false)
 threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
 marisaDep = dependency('marisa', required : false)

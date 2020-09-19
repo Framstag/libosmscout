@@ -20,6 +20,7 @@
 #include <osmscout/MapService.h>
 
 #include <algorithm>
+#include <execution>
 #include <future>
 
 #include <osmscout/system/Assert.h>
@@ -270,7 +271,9 @@ namespace osmscout {
 
       if (!offsets.empty()) {
         // Sort offsets before loading to optimize disk access
-        std::sort(offsets.begin(),offsets.end());
+        std::sort(std::execution::par_unseq,
+                  offsets.begin(),
+                  offsets.end());
 
         if (parameter.IsAborted()) {
           return false;
@@ -434,7 +437,9 @@ namespace osmscout {
 
       if (!spans.empty()) {
         // Sort spans before loading to optimize disk access
-        std::sort(spans.begin(),spans.end());
+        std::sort(std::execution::par_unseq,
+                  spans.begin(),
+                  spans.end());
 
         if (parameter.IsAborted()) {
           return false;
@@ -592,7 +597,9 @@ namespace osmscout {
 
       if (!offsets.empty()) {
         // Sort offsets before loading to optimize disk access
-        std::sort(offsets.begin(),offsets.end());
+        std::sort(std::execution::par_unseq,
+                  offsets.begin(),
+                  offsets.end());
 
         if (parameter.IsAborted()) {
           return false;

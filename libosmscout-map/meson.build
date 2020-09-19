@@ -2,7 +2,7 @@ cppArgs = []
 
 if get_option('default_library')=='shared'
   cppArgs += ['-DOSMScoutMap_EXPORTS']
-  
+
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']
   endif
@@ -17,8 +17,8 @@ osmscoutmap = library('osmscout_map',
                       osmscoutmapSrc,
                       include_directories: [osmscoutmapIncDir, osmscoutIncDir],
                       cpp_args: cppArgs,
-                      dependencies: [mathDep, threadDep],
+                      dependencies: [mathDep, tbbDep, threadDep],
                       link_with: [osmscout],
                       install: true)
-        
-# TODO: Generate PKG_CONFIG file        
+
+# TODO: Generate PKG_CONFIG file

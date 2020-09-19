@@ -19,6 +19,7 @@
 
 #include <osmscout/import/WaterIndexProcessor.h>
 
+#include <execution>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -1225,7 +1226,8 @@ namespace osmscout {
     progress.Info("Filter intersecting coastlines");
 
     // sort by the size (GeoBox::GetSize, descending)
-    std::sort(transformedCoastlines.begin(),
+    std::sort(std::execution::par_unseq,
+              transformedCoastlines.begin(),
               transformedCoastlines.end(),
               CoastlineGeoSizeSorter);
 
@@ -2396,7 +2398,8 @@ namespace osmscout {
           continue;
         }
 
-        std::sort(candidateIntersections.begin(),
+        std::sort(std::execution::par_unseq,
+                  candidateIntersections.begin(),
                   candidateIntersections.end(),
                   PathIntersectionSortA);
 
@@ -2468,7 +2471,8 @@ namespace osmscout {
         continue;
       }
 
-      std::sort(intersections.begin(),
+      std::sort(std::execution::par_unseq,
+                intersections.begin(),
                 intersections.end(),
                 PathIntersectionSortB);
 
