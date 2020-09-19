@@ -29,8 +29,6 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
-#include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/Preprocess.h>
 
@@ -799,8 +797,8 @@ namespace osmscout {
         std::set<OSMId>          nodeIds;
         CoordDataFile::ResultMap coordsMap;
 
-        for (size_t type=0; type<waysByType.size(); type++) {
-          for (const auto &rawWay : waysByType[type]) {
+        for (auto & type : waysByType) {
+          for (const auto &rawWay : type) {
             for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
               nodeIds.insert(rawWay->GetNodeId(n));
             }
