@@ -42,6 +42,8 @@ namespace osmscout {
     */
   class OSMSCOUT_API AreaRouteIndex
   {
+  public:
+    static const char* const AREA_ROUTE_IDX;
 
   private:
     std::string datafilename;   //!< Full path and name of the data file

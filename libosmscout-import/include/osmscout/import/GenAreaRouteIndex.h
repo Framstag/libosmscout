@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_IMPORT_GENAREAWAYINDEX_H
-#define OSMSCOUT_IMPORT_GENAREAWAYINDEX_H
+#ifndef OSMSCOUT_IMPORT_GENAREAROUTEINDEX_H
+#define OSMSCOUT_IMPORT_GENAREAROUTEINDEX_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2020  Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <map>
 
 #include <osmscout/Pixel.h>
-#include <osmscout/Way.h>
+#include <osmscout/Route.h>
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
@@ -37,7 +37,7 @@
 
 namespace osmscout {
 
-  class AreaWayIndexGenerator CLASS_FINAL : public AreaIndexGenerator<Way>
+  class AreaRouteIndexGenerator CLASS_FINAL : public AreaIndexGenerator<Route>
   {
   private:
     void WriteTypeId(const TypeConfigRef& typeConfig,
@@ -45,8 +45,8 @@ namespace osmscout {
                      FileWriter &writer) const override;
 
   public:
-    AreaWayIndexGenerator();
-    virtual ~AreaWayIndexGenerator() = default;
+    AreaRouteIndexGenerator();
+    virtual ~AreaRouteIndexGenerator() = default;
 
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;

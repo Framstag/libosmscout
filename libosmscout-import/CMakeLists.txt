@@ -1,4 +1,5 @@
 set(HEADER_FILES
+    include/osmscout/import/AreaIndexGenerator.h
     include/osmscout/import/GenAreaAreaIndex.h
     include/osmscout/import/GenAreaNodeIndex.h
     include/osmscout/import/GenAreaWayIndex.h
@@ -15,6 +16,7 @@ set(HEADER_FILES
     include/osmscout/import/GenPTRouteDat.h
     include/osmscout/import/GenRawNodeIndex.h
     include/osmscout/import/GenRawRelIndex.h
+    include/osmscout/import/GenAreaRouteIndex.h
     include/osmscout/import/GenRawWayIndex.h
     include/osmscout/import/GenRelAreaDat.h
     include/osmscout/import/GenRouteDat.h
@@ -48,6 +50,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    src/osmscout/import/AreaIndexGenerator.cpp
     src/osmscout/import/GenAreaAreaIndex.cpp
     src/osmscout/import/GenAreaNodeIndex.cpp
     src/osmscout/import/GenAreaWayIndex.cpp
@@ -63,6 +66,7 @@ set(SOURCE_FILES
     src/osmscout/import/GenOptimizeWaysLowZoom.cpp
     src/osmscout/import/GenRawNodeIndex.cpp
     src/osmscout/import/GenRawRelIndex.cpp
+    src/osmscout/import/GenAreaRouteIndex.cpp
     src/osmscout/import/GenRawWayIndex.cpp
     src/osmscout/import/GenRelAreaDat.cpp
     src/osmscout/import/GenPTRouteDat.cpp

@@ -67,7 +67,7 @@ osmscoutSrc = [
             'src/osmscout/AreaWayIndex.cpp',
             'src/osmscout/CoordDataFile.cpp',
             'src/osmscout/CoverageIndex.cpp',
-             'src/osmscout/BoundingBoxDataFile.cpp',
+            'src/osmscout/BoundingBoxDataFile.cpp',
             'src/osmscout/TypeDistributionDataFile.cpp',
             'src/osmscout/Database.cpp',
             'src/osmscout/DebugDatabase.cpp',
