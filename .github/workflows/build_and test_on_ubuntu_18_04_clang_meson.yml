@@ -24,14 +24,14 @@ jobs:
               freeglut3 freeglut3-dev
               libmarisa-dev"
       - name: Install clang compiler and ninja
-        run: sudo apt-get -y install clang-10 libc++abi-10-dev ccache libtool pkg-config ninja-build
+        run: sudo apt-get -y install clang-9 libc++abi-9-dev ccache libtool pkg-config ninja-build
       - name: Install meson von eoan repository
         run: sudo apt-get -y install meson
       - name: Configure build project
         run: meson setup debug
         env:
-          CXX: ccache clang++-10
-          CC: ccache clang-10
+          CXX: ccache clang++-9
+          CC: ccache clang-9
       - name: Build project
         run: ninja -C debug
       - name: Run tests
