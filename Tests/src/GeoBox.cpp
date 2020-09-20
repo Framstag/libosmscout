@@ -1,5 +1,5 @@
 /*
-  DrawTextQt - a test program for libosmscout
+  GeoBox - a test program for libosmscout
   Copyright (C) 2017  Lukas Karas
 
   This program is free software; you can redistribute it and/or modify
