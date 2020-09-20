@@ -27,7 +27,7 @@ jobs:
       - name: Install meson von eoan repository
         run: sudo apt-get -y install meson
       - name: Configure build project
-        run: meson setup debug
+        run: meson setup --buildtype debugoptimized --unity on debug
         env:
           CXX: ccache clang++-9
           CC: ccache clang-9
