@@ -1893,6 +1893,11 @@ namespace osmscout {
     }
 
     for (const auto &route:data.routes){
+      if (!projection.GetDimensions().Intersects(route->bbox)) {
+        // outside projection, end segment and continue
+        continue;
+      }
+
       styleConfig.GetRouteLineStyles(route->GetFeatureValueBuffer(),
                                      projection,
                                      lineStyles);
@@ -1943,6 +1948,11 @@ namespace osmscout {
 
               assert(member.way==it->second->GetFileOffset());
 
+              if (!projection.GetDimensions().Intersects(it->second->GetBoundingBox())){
+                // outside projection, end segment and continue
+                FlushRouteData();
+                continue;
+              }
               WayPathData pathData;
               pathData.ref=member.way;
               pathData.buffer=&(it->second->GetFeatureValueBuffer());
