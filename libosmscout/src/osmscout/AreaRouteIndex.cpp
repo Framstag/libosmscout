@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  const char* const AreaRouteIndex::AREA_ROUTE_IDX="route.idx";
+  const char* const AreaRouteIndex::AREA_ROUTE_IDX="arearoute.idx";
 
   AreaRouteIndex::AreaRouteIndex():
     AreaIndex(AreaRouteIndex::AREA_ROUTE_IDX)
