@@ -197,13 +197,13 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   osmscout::GeoBox boundingBox;
 
 #if defined(HAVE_MMAP)
-  if (sizeof(void*)<=4){
+  if (sizeof(void*)<=4 || true){
     // we are on 32 bit system probably, we have to be careful with mmap
     qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
     QStringList mmapFiles;
     mmapFiles << "bounding.dat" << "router2.dat" << "types.dat" << "textregion.dat" << "textpoi.dat"
               << "textother.dat" << "areasopt.dat" << "areanode.idx" << "textloc.dat" << "water.idx"
-              << "areaway.idx" << "waysopt.dat" << "intersections.idx" << "areaarea.idx"
+              << "areaway.idx" << "waysopt.dat" << "intersections.idx" << "areaarea.idx" << "arearoute.idx"
               << "location.idx" << "intersections.dat";
 
     for (auto &databaseDirectory:databaseDirectories){
@@ -246,6 +246,17 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       databaseParameter.SetWaysDataMMap(false);
     }else{
       mmapQuota-=waysSize;
+    }
+
+    qint64 routeSize=0;
+    for (auto &databaseDirectory:databaseDirectories){
+      routeSize+=QFileInfo(databaseDirectory, "route.dat").size();
+    }
+    if (mmapQuota-routeSize<0){
+      qWarning() << "Route data files can't be mmapped";
+      databaseParameter.SetRoutesDataMMap(false);
+    }else{
+      mmapQuota-=routeSize;
     }
 
     qint64 routerSize=0;
