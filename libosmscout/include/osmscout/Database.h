@@ -81,7 +81,7 @@ namespace osmscout {
     unsigned long areaAreaIndexCacheSize=5000;
 
     unsigned long nodeDataCacheSize=5000;
-    unsigned long wayDataCacheSize=10000;
+    unsigned long wayDataCacheSize=40000;
     unsigned long areaDataCacheSize=5000;
     unsigned long routeDataCacheSize=500;
 
