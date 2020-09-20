@@ -22,7 +22,6 @@
 #include <numeric>
 
 #include <osmscout/Node.h>
-#include <osmscout/Pixel.h>
 
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/NodeDataFile.h>
@@ -438,9 +437,9 @@ namespace osmscout {
                                                FileWriter& writer)
   {
     std::map<TileId,std::list<FileOffset>> bitmapData;
-    size_t                                 indexEntries=0;
     size_t                                 dataSize=0;
-    char                                   buffer[10];
+    std::array<char,10>                    buffer;
+    //char                                   buffer[10];
     MagnificationLevel                     magnification=GetBitmapZoomLevel(parameter,data);
 
     for (const auto& entry : data) {
@@ -455,15 +454,13 @@ namespace osmscout {
 
     // Calculate the size of the bitmap for each current node type
     for (const auto& cell : bitmapData) {
-      indexEntries+=cell.second.size();
-
-      dataSize+=EncodeNumber(cell.second.size(),buffer);
+      dataSize+=EncodeNumber(cell.second.size(),buffer.data());
 
       FileOffset previousOffset=0;
       for (auto offset : cell.second) {
         FileOffset offsetDelta=offset-previousOffset;
 
-        dataSize+=EncodeNumber(offsetDelta,buffer);
+        dataSize+=EncodeNumber(offsetDelta,buffer.data());
 
         previousOffset=offset;
       }

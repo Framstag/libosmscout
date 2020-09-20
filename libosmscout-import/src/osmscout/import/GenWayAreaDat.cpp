@@ -21,8 +21,6 @@
 
 #include <algorithm>
 
-#include <osmscout/system/Assert.h>
-
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
@@ -144,7 +142,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto &type : currentTypes) {
+        for (const auto &type : currentTypes) {
           if (!areas[type->GetIndex()].empty() &&
               (!victimType ||
                (areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size()))) {

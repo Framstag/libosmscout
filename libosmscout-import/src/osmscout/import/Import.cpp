@@ -20,18 +20,10 @@
 #include <osmscout/import/Import.h>
 
 #include <algorithm>
-#include <iostream>
-#include <iterator>
 
 #include <osmscout/OSMScoutTypes.h>
 
-#include <osmscout/routing/RoutingService.h>
-#include <osmscout/routing/RouteNode.h>
 #include <osmscout/Intersection.h>
-
-#include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawWay.h>
-#include <osmscout/import/RawRelation.h>
 
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
@@ -84,7 +76,6 @@
 
 #include <osmscout/util/MemoryMonitor.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 

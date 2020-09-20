@@ -71,7 +71,7 @@ namespace osmscout
   {
     types.Clear();
 
-    for (auto &type : typeConfig.GetAreaTypes()) {
+    for (const auto &type : typeConfig.GetAreaTypes()) {
       if (!type->GetIgnore() &&
           !type->IsInternal() &&
           type->GetOptimizeLowZoom()) {
@@ -152,7 +152,7 @@ namespace osmscout
                loadedTypes.Size()>1) {
           TypeInfoRef victimType;
 
-          for (auto &type : loadedTypes) {
+          for (const auto &type : loadedTypes) {
             if (!areas[type->GetIndex()].empty() &&
                 (!victimType ||
                  areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size())) {
@@ -188,7 +188,7 @@ namespace osmscout
 
     projection.Set(GeoCoord(0.0,0.0),magnification,dpi,width,height);
 
-    for (auto &area :areas) {
+    for (const auto &area :areas) {
       TransPolygon            polygon;
       std::vector<Area::Ring> newRings;
       double                  xmin;
@@ -406,20 +406,22 @@ namespace osmscout
       }
     }
 
-    size_t indexEntries=0;
-    size_t dataSize=1;  // Actual data will be prefixed by one empty byte
-    char   buffer[10];
+    size_t              indexEntries=0;
+    size_t              dataSize=1;  // Actual data will be prefixed by one empty byte
+    std::array<char,10> buffer;
 
     for (const auto& cell : cellOffsets) {
       indexEntries+=cell.second.size();
 
-      dataSize+=EncodeNumber(cell.second.size(),buffer);
+      dataSize+=EncodeNumber(cell.second.size(),
+                             buffer.data());
 
       FileOffset previousOffset=0;
       for (const auto& offset : cell.second) {
         FileOffset dataOffset=offset-previousOffset;
 
-        dataSize+=EncodeNumber(dataOffset,buffer);
+        dataSize+=EncodeNumber(dataOffset,
+                               buffer.data());
 
         previousOffset=offset;
       }

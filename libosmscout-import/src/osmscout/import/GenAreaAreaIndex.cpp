@@ -19,6 +19,7 @@
 
 #include <osmscout/import/GenAreaAreaIndex.h>
 
+#include <numeric>
 #include <vector>
 
 #include <osmscout/TypeFeatures.h>
@@ -26,9 +27,6 @@
 
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaDataFile.h>
-
-#include <osmscout/system/Assert.h>
-#include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
@@ -420,9 +418,12 @@ namespace osmscout {
                                                  Area& area,
                                                  bool& save)
   {
-    for (const auto &ring : area.rings) {
-      overallCount+=ring.nodes.size();
-    }
+    overallCount=std::accumulate(area.rings.begin(),
+                                 area.rings.end(),
+                                 overallCount,
+                                 [](size_t currentValue, const Area::Ring& ring) {
+      return currentValue+ring.nodes.size();
+    });
 
     if (!RemoveDuplicateNodes(progress,
                               offset,

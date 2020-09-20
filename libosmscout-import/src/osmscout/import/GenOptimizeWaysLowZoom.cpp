@@ -73,7 +73,7 @@ namespace osmscout
   void OptimizeWaysLowZoomGenerator::GetWayTypesToOptimize(const TypeConfig& typeConfig,
                                                            std::set<TypeInfoRef>& types)
   {
-    for (auto &type : typeConfig.GetWayTypes()) {
+    for (const auto &type : typeConfig.GetWayTypes()) {
       if (!type->GetIgnore() &&
           !type->IsInternal() &&
           type->GetOptimizeLowZoom()) {
@@ -164,7 +164,7 @@ namespace osmscout
              currentTypes.size()>1) {
         TypeInfoRef victimType;
 
-        for (auto &type : currentTypes) {
+        for (const auto &type : currentTypes) {
           if (!ways[type->GetIndex()].empty() &&
               (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
@@ -180,7 +180,7 @@ namespace osmscout
       }
     }
 
-    for (auto &type : currentTypes) {
+    for (const auto &type : currentTypes) {
       types.erase(type);
     }
 
@@ -442,7 +442,7 @@ namespace osmscout
 
     projection.Set(GeoCoord(0.0,0.0),magnification,dpi,width,height);
 
-    for (auto &way :ways) {
+    for (const auto &way :ways) {
       TransPolygon       polygon;
       std::vector<Point> newNodes;
       double             xmin;
@@ -532,20 +532,22 @@ namespace osmscout
       }
     }
 
-    size_t indexEntries=0;
-    size_t dataSize=1; // Actual data will be prefixed by one empty byte
-    char   buffer[10];
+    size_t              indexEntries=0;
+    size_t              dataSize=1; // Actual data will be prefixed by one empty byte
+    std::array<char,10> buffer;
 
     for (const auto& cell : cellOffsets) {
       indexEntries+=cell.second.size();
 
-      dataSize+=EncodeNumber(cell.second.size(),buffer);
+      dataSize+=EncodeNumber(cell.second.size(),
+                             buffer.data());
 
       FileOffset previousOffset=0;
       for (const auto& offset : cell.second) {
         FileOffset data=offset-previousOffset;
 
-        dataSize+=EncodeNumber(data,buffer);
+        dataSize+=EncodeNumber(data,
+                               buffer.data());
 
         previousOffset=offset;
       }

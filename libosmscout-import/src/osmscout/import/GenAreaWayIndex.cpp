@@ -19,21 +19,9 @@
 
 #include <osmscout/import/GenAreaWayIndex.h>
 
-#include <vector>
-
 #include <osmscout/Way.h>
-
 #include <osmscout/AreaWayIndex.h>
 #include <osmscout/WayDataFile.h>
-
-#include <osmscout/system/Assert.h>
-#include <osmscout/system/Math.h>
-
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/GeoBox.h>
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/Number.h>
 
 namespace osmscout {
 

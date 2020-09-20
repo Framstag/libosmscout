@@ -61,11 +61,6 @@ void ImportModuleDescription::AddRequiredFile(const std::string& requiredFile)
   requiredFiles.push_back(requiredFile);
 }
 
-ImportModule::~ImportModule()
-{
-  // no code
-}
-
 void ImportModule::GetDescription(const ImportParameter& /*parameter*/,
                                   ImportModuleDescription& /*description*/) const
 {

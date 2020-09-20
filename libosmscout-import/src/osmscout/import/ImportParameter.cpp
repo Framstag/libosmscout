@@ -44,11 +44,6 @@ size_t ImportParameter::GetDefaultEndStep()
 }
 
 
-PreprocessorFactory::~PreprocessorFactory()
-{
-
-}
-
 ImportParameter::Router::Router(uint8_t vehicleMask,
                                 const std::string& filenamebase)
     : vehicleMask(vehicleMask),

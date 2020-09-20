@@ -26,7 +26,7 @@
 
 namespace osmscout {
 
-void ImportProgress::StartImport(const ImportParameter &)
+void ImportProgress::StartImport(const ImportParameter& /*param*/)
 {
 
 }
