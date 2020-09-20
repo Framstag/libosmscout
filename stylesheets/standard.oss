@@ -34,7 +34,7 @@ FLAG
     minorBuilding   = false;
   }
 
-  routes            = true; // routes are experimental now
+  routes            = false; // routes are still a bit experimental and disrupting on standard stylesheet
 
 ORDER WAYS
   GROUP _route
