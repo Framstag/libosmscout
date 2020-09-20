@@ -1868,7 +1868,7 @@ namespace osmscout {
 
   void MapPainter::PrepareRoutes(const StyleConfig& styleConfig,
                                  const Projection& projection,
-                                 const MapParameter& /*parameter*/,
+                                 const MapParameter& parameter,
                                  const MapData& data)
   {
     if (data.routes.empty()){
@@ -1888,7 +1888,7 @@ namespace osmscout {
     for (WayPathDataIt it=wayPathData.begin(); it != wayPathData.end(); ++it){
       auto &wayRoute=wayDataMap[it->ref];
       wayRoute.wayData=it;
-      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+projection.ConvertWidthToPixel(1.0);;
+      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+projection.ConvertWidthToPixel(1.0);
       wayRoute.leftSideCarPos=wayRoute.rightSideCarPos*-1;
     }
 
@@ -1934,9 +1934,37 @@ namespace osmscout {
         for (const auto &member:segment.members){
           auto memberWay=wayDataMap.find(member.way);
           if (memberWay==wayDataMap.end()){
-            FlushRouteData(); // when route member is not rendered, it is not present in wayPathData. FIXME
-            continue;
+            // when route member is not rendered, it is not present in wayPathData
+            // but when we have it in resolved members, we may still process it
+            // and render route on it
+            Route::MemberCache resolvedMembers=route->GetResolvedMembers();
+            if (auto it=resolvedMembers.find(member.way);
+                it!=resolvedMembers.end()){
+
+              assert(member.way==it->second->GetFileOffset());
+
+              WayPathData pathData;
+              pathData.ref=member.way;
+              pathData.buffer=&(it->second->GetFeatureValueBuffer());
+              pathData.transStart=0; // Make the compiler happy
+              pathData.transEnd=0;   // Make the compiler happy
+              TransformPathData(projection, parameter, *(it->second), pathData);
+              pathData.mainSlotWidth=0.0;
+
+              wayPathData.push_back(pathData);
+              auto &wayRoute=wayDataMap[member.way];
+              wayRoute.wayData=std::prev(wayPathData.end());
+              wayRoute.rightSideCarPos=0;
+              wayRoute.leftSideCarPos=0;
+              memberWay=wayDataMap.find(member.way);
+            } else {
+              // we don't have way in data, end segment and continue
+              FlushRouteData();
+              continue;
+            }
           }
+          
+          assert(memberWay!=wayDataMap.end());
 
           // collapse colors
           auto &pathData=memberWay->second.wayData;

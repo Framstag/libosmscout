@@ -22,6 +22,17 @@
 
 namespace osmscout {
 
+  std::vector<FileOffset> Route::GetMemberOffsets() const
+  {
+    std::vector<FileOffset> offsets;
+    for (const auto &segment:segments){
+      for (const auto &member:segment.members){
+        offsets.push_back(member.way);
+      }
+    }
+    return offsets;
+  }
+
   void Route::Read(const TypeConfig& typeConfig,
                    FileScanner& scanner)
   {

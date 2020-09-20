@@ -52,19 +52,22 @@ namespace osmscout {
   class OSMSCOUT_MAP_API AreaSearchParameter
   {
   private:
-    unsigned long maxAreaLevel;
-    bool          useLowZoomOptimization;
+    unsigned long maxAreaLevel=4;
+    bool          useLowZoomOptimization=true;
     BreakerRef    breaker;
-    bool          useMultithreading;
+    bool          useMultithreading=false;
+    bool          resolveRouteMembers=true;
 
   public:
-    AreaSearchParameter();
+    AreaSearchParameter() = default;
 
     void SetMaximumAreaLevel(unsigned long maxAreaLevel);
 
     void SetUseLowZoomOptimization(bool useLowZoomOptimization);
 
     void SetUseMultithreading(bool useMultithreading);
+
+    void SetResolveRouteMembers(bool resolveRouteMembers);
 
     void SetBreaker(const BreakerRef& breaker);
 
@@ -73,6 +76,8 @@ namespace osmscout {
     bool GetUseLowZoomOptimization() const;
 
     bool GetUseMultithreading() const;
+
+    bool GetResolveRouteMembers() const;
 
     bool IsAborted() const;
   };

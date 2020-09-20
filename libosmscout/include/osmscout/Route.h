@@ -21,8 +21,11 @@
 */
 
 #include <memory>
+#include <unordered_map>
+#include <mutex>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
@@ -59,10 +62,15 @@ namespace osmscout {
       std::vector<SegmentMember> members;
     };
 
+    using MemberCache=std::unordered_map<FileOffset,WayRef> ;
+
     std::vector<Segment> segments;
     GeoBox bbox;
 
   private:
+    mutable std::mutex cacheMutex;
+    MemberCache resolvedMembers; //!< Cache of resolved members used by some algorithms
+
     FeatureValueBuffer featureValueBuffer;   //!< List of features
 
     FileOffset         fileOffset=0;         //!< Offset into the data file of this way
@@ -81,6 +89,26 @@ namespace osmscout {
       return nextFileOffset;
     }
 
+    std::vector<FileOffset> GetMemberOffsets() const;
+
+    bool HasResolvedMembers() const
+    {
+      std::lock_guard<std::mutex> lock(cacheMutex);
+      return !resolvedMembers.empty();
+    }
+
+    void SetResolvedMembers(const MemberCache &map)
+    {
+      std::lock_guard<std::mutex> lock(cacheMutex);
+      this->resolvedMembers=map;
+    }
+
+    MemberCache GetResolvedMembers() const
+    {
+      std::lock_guard<std::mutex> lock(cacheMutex);
+      return resolvedMembers;
+    }
+    
     // inline ObjectFileRef GetObjectFileRef() const
     // {
     //   return {fileOffset,refRoute};

@@ -179,7 +179,7 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API WayPathData
     {
       FileOffset               ref;
-      const FeatureValueBuffer *buffer;         //!< Features of the line segment
+      const FeatureValueBuffer *buffer;         //!< Features of the line segment. Not owned pointer.
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
       double                   mainSlotWidth;   //!< Width of main slot, used for relative positioning

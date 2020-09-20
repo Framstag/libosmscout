@@ -30,14 +30,6 @@
 
 namespace osmscout {
 
-  AreaSearchParameter::AreaSearchParameter()
-  : maxAreaLevel(4),
-    useLowZoomOptimization(true),
-    useMultithreading(false)
-  {
-    // no code
-  }
-
   void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
   {
     this->maxAreaLevel=maxAreaLevel;
@@ -51,6 +43,16 @@ namespace osmscout {
   void AreaSearchParameter::SetUseMultithreading(bool useMultithreading)
   {
     this->useMultithreading=useMultithreading;
+  }
+
+  void AreaSearchParameter::SetResolveRouteMembers(bool resolveRouteMembers)
+  {
+    this->resolveRouteMembers=resolveRouteMembers;
+  }
+
+  bool AreaSearchParameter::GetResolveRouteMembers() const
+  {
+    return resolveRouteMembers;
   }
 
   void AreaSearchParameter::SetBreaker(const BreakerRef& breaker)
@@ -588,8 +590,23 @@ namespace osmscout {
                       tile,
                       tile->GetRouteData(),
                       database->GetAreaRouteIndex(),
-                      [&db=this->database](const std::vector<FileOffset>& offsets, std::vector<RouteRef>& routes){
-                        return db->GetRoutesByOffset(offsets, routes);
+                      [&db=this->database, &parameter](const std::vector<FileOffset>& offsets, std::vector<RouteRef>& routes){
+
+                        if (!db->GetRoutesByOffset(offsets, routes)){
+                          return false;
+                        }
+                        if (parameter.GetResolveRouteMembers()){
+                          for (RouteRef &route:routes){
+                            if (!route->HasResolvedMembers()) {
+                              std::unordered_map<FileOffset,WayRef> map;
+                              if (!db->GetWaysByOffset(route->GetMemberOffsets(), map)){
+                                return false;
+                              }
+                              route->SetResolvedMembers(map);
+                            }
+                          }
+                        }
+                        return true;
                       },
                       "route"sv, "routes"sv);
   }
