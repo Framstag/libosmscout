@@ -45,8 +45,8 @@ osmconvert \
   "$TESTREGION_POLY"
 
 rm \
-  "$OUTPUT/*html" \
-  "$OUTPUT/*.idmap" \
-  "$OUTPUT/*.txt" \
+  "$OUTPUT/"*html \
+  "$OUTPUT/"*.idmap \
+  "$OUTPUT/"*.txt \
   "$OUTPUT/areaaddress.dat" \
   "$OUTPUT/coord.dat"
