@@ -25,6 +25,7 @@
 #include <osmscout/ClientQtImportExport.h>
 
 #include <QAbstractListModel>
+#include <QList>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 
