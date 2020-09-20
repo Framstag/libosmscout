@@ -46,7 +46,7 @@ InstalledVoicesModel::~InstalledVoicesModel()
 {}
 
 namespace {
-bool itemLessThan(const Voice &i1, const Voice &i2)
+bool voiceItemLessThan(const Voice &i1, const Voice &i2)
 {
   if (i1.getLang() != i2.getLang()) {
     return i1.getLang().localeAwareCompare(i2.getLang()) < 0;
@@ -61,7 +61,7 @@ void InstalledVoicesModel::update()
   voices.clear();
   voices<<Voice(); // no-voice placeholder
   QList<Voice> installedVoices=voiceManager->getInstalledVoices();
-  std::sort(installedVoices.begin(), installedVoices.end(), itemLessThan);
+  std::sort(installedVoices.begin(), installedVoices.end(), voiceItemLessThan);
   voices+=installedVoices;
   endResetModel();
 }
