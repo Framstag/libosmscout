@@ -1979,6 +1979,7 @@ namespace osmscout {
           // collapse colors
           auto &pathData=memberWay->second.wayData;
           if (memberWay->second.colors.find(color)!=memberWay->second.colors.end()){
+            FlushRouteData();
             continue;
           }
           memberWay->second.colors.insert(color);
