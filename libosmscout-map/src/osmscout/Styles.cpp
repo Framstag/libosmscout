@@ -30,6 +30,7 @@ namespace osmscout {
     {
       AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",LineStyle::attrLineColor));
       AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("gapColor",LineStyle::attrGapColor));
+      AddAttribute(std::make_shared<StyleBoolAttributeDescriptor>("preferColorFeature",LineStyle::attrPreferColorFeature));
       AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("displayWidth",LineStyle::attrDisplayWidth));
       AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("width",LineStyle::attrWidth));
       AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",LineStyle::attrDisplayOffset));
@@ -48,6 +49,7 @@ namespace osmscout {
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
      gapColor(1,0.0,0.0,0.0),
+     preferColorFeature(false),
      displayWidth(0.0),
      width(0.0),
      displayOffset(0.0),
@@ -65,6 +67,7 @@ namespace osmscout {
   : slot(style.slot),
     lineColor(style.lineColor),
     gapColor(style.gapColor),
+    preferColorFeature(style.preferColorFeature),
     displayWidth(style.displayWidth),
     width(style.width),
     displayOffset(style.displayOffset),
@@ -147,6 +150,18 @@ namespace osmscout {
     }
   }
 
+  void LineStyle::SetBoolValue(int attribute, bool value)
+  {
+    switch (attribute) {
+    case attrPreferColorFeature:
+      preferColorFeature=value;
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+
   LineStyle& LineStyle::SetSlot(const std::string& slot)
   {
     this->slot=slot;
@@ -167,6 +182,14 @@ namespace osmscout {
 
     return *this;
   }
+
+  LineStyle& LineStyle::SetPreferColorFeature(bool value)
+  {
+    preferColorFeature=value;
+
+    return *this;
+  }
+
 
   LineStyle& LineStyle::SetDisplayWidth(double value)
   {
@@ -253,6 +276,9 @@ namespace osmscout {
         break;
       case attrGapColor:
         gapColor=other.gapColor;
+        break;
+      case attrPreferColorFeature:
+        preferColorFeature=other.preferColorFeature;
         break;
       case attrDisplayWidth:
         displayWidth=other.displayWidth;

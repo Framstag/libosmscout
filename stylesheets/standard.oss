@@ -34,6 +34,8 @@ FLAG
     minorBuilding   = false;
   }
 
+  routes            = false; // routes are still a bit experimental and disrupting on standard stylesheet
+
 ORDER WAYS
   GROUP _route
   GROUP highway_motorway
@@ -233,6 +235,7 @@ CONST
 
   // Ways
   COLOR bridgeColor                = #000000; // black
+  COLOR cyclewayColor              = #ec47c7;
 
   IF daylight {
     COLOR motorwayColor            = #4440ec; // dark blue
@@ -1209,7 +1212,7 @@ STYLE
 
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
-     WAY {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
+     WAY {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
 
      [FEATURE Bridge] {
        WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
@@ -1240,18 +1243,18 @@ STYLE
 
    // Cycleways on way
    [FEATURE Sideway.cyclewayLaneLeft] {
-     WAY#cyclewayLaneLeft {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: 1mm; priority: 1;}
+     WAY#cyclewayLaneLeft {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: 1mm; priority: 1;}
    }
    [FEATURE Sideway.cyclewayLaneRight] {
-     WAY#cyclewayLaneRight {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: -1mm; priority: 1;}
+     WAY#cyclewayLaneRight {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: -1mm; priority: 1;}
    }
 
    // Cycleways besides way
    [FEATURE Sideway.cyclewayTrackLeft] {
-     WAY#cyclewayTrackLeft {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: -1mm; priority: -1;}
+     WAY#cyclewayTrackLeft {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: leftOutline; displayOffset: -1mm; priority: -1;}
    }
    [FEATURE Sideway.cyclewayTrackRight] {
-     WAY#cyclewayTrackRight {color: #4645fa; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: 1mm; priority: -1;}
+     WAY#cyclewayTrackRight {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm; offsetRel: rightOutline; displayOffset: 1mm; priority: -1;}
    }
 
    // sidewalk besides way
@@ -2209,4 +2212,17 @@ STYLE
          aeroway_runway,
          aeroway_apron] AREA.TEXT { label: Name.name; }
  }
+
+ // -------------------------------------------------------
+ //
+ // Routes
+ //
+
+  IF routes {
+    [MAG close-] {
+      [TYPE route_bicycle] ROUTE {color: @cyclewayColor; dash: 1,1; joinCap: butt; endCap: butt; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
+      [TYPE route_hiking] ROUTE {color: #ff0000; preferColorFeature: true; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
+    }
+  }
+
 END

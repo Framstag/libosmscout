@@ -34,21 +34,6 @@
 
 namespace osmscout {
 
-  DatabaseParameter::DatabaseParameter()
-  : areaAreaIndexCacheSize(5000),
-    nodeDataCacheSize(5000),
-    wayDataCacheSize(10000),
-    areaDataCacheSize(5000),
-    routerDataMMap(true),
-    nodesDataMMap(true),
-    areasDataMMap(true),
-    waysDataMMap(true),
-    optimizeLowZoomMMap(true),
-    indexMMap(true)
-  {
-    // no code
-  }
-
   void DatabaseParameter::SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize)
   {
     this->areaAreaIndexCacheSize=areaAreaIndexCacheSize;
@@ -69,6 +54,11 @@ namespace osmscout {
     this->areaDataCacheSize=size;
   }
 
+  void DatabaseParameter::SetRouteDataCacheSize(unsigned long  size)
+  {
+    this->routeDataCacheSize=size;
+  }
+
   void DatabaseParameter::SetRouterDataMMap(bool mmap)
   {
     routerDataMMap=mmap;
@@ -87,6 +77,11 @@ namespace osmscout {
   void DatabaseParameter::SetWaysDataMMap(bool mmap)
   {
     waysDataMMap=mmap;
+  }
+
+  void DatabaseParameter::SetRoutesDataMMap(bool mmap)
+  {
+    routesDataMMap=mmap;
   }
 
   void DatabaseParameter::SetOptimizeLowZoomMMap(bool mmap)
@@ -114,6 +109,11 @@ namespace osmscout {
     return wayDataCacheSize;
   }
 
+  unsigned long DatabaseParameter::GetRouteDataCacheSize() const
+  {
+    return routeDataCacheSize;
+  }
+
   unsigned long DatabaseParameter::GetAreaDataCacheSize() const
   {
     return areaDataCacheSize;
@@ -137,6 +137,11 @@ namespace osmscout {
   bool DatabaseParameter::GetWaysDataMMap() const
   {
     return waysDataMMap;
+  }
+
+  bool DatabaseParameter::GetRoutesDataMMap() const
+  {
+    return routesDataMMap;
   }
 
   bool DatabaseParameter::GetOptimizeLowZoomMMap() const
@@ -402,6 +407,36 @@ namespace osmscout {
     return wayDataFile;
   }
 
+  RouteDataFileRef Database::GetRouteDataFile() const
+  {
+    std::lock_guard<std::mutex> guard(routeDataFileMutex);
+
+    if (!IsOpen()) {
+      return nullptr;
+    }
+
+    if (!routeDataFile) {
+      routeDataFile=std::make_shared<RouteDataFile>(parameter.GetRouteDataCacheSize());
+    }
+
+    if (!routeDataFile->IsOpen()) {
+      StopClock timer;
+
+      if (!routeDataFile->Open(typeConfig,
+                             path,
+                             parameter.GetRoutesDataMMap())) {
+        log.Error() << "Cannot open 'routes.dat'!";
+        return nullptr;
+      }
+
+      timer.Stop();
+
+      log.Debug() << "Opening RouteDataFile: " << timer.ResultString();
+    }
+
+    return routeDataFile;
+  }
+
   AreaNodeIndexRef Database::GetAreaNodeIndex() const
   {
     std::lock_guard<std::mutex> guard(areaNodeIndexMutex);
@@ -486,6 +521,36 @@ namespace osmscout {
     }
 
     return areaWayIndex;
+  }
+
+  AreaRouteIndexRef Database::GetAreaRouteIndex() const
+  {
+    std::lock_guard<std::mutex> guard(areaRouteIndexMutex);
+
+    if (!IsOpen()) {
+      return nullptr;
+    }
+
+    if (!areaRouteIndex) {
+      areaRouteIndex=std::make_shared<AreaRouteIndex>();
+
+      StopClock timer;
+
+      if (!areaRouteIndex->Open(typeConfig,
+                              path,
+                              parameter.GetIndexMMap())) {
+        log.Error() << "Cannot load area way index!";
+        areaRouteIndex=nullptr;
+
+        return nullptr;
+      }
+
+      timer.Stop();
+
+      log.Debug() << "Opening AreaRouteIndex: " << timer.ResultString();
+    }
+
+    return areaRouteIndex;
   }
 
   LocationIndexRef Database::GetLocationIndex() const
@@ -776,89 +841,6 @@ namespace osmscout {
     return result;
   }
 
-  bool Database::GetAreasByOffset(const std::vector<FileOffset>& offsets,
-                                  std::vector<AreaRef>& areas) const
-  {
-    AreaDataFileRef areaDataFile=GetAreaDataFile();
-
-    if (!areaDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
-                                  std::vector<AreaRef>& areas) const
-  {
-    AreaDataFileRef areaDataFile=GetAreaDataFile();
-
-    if (!areaDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetAreasByOffset(const std::list<FileOffset>& offsets,
-                                  std::vector<AreaRef>& areas) const
-  {
-    AreaDataFileRef areaDataFile=GetAreaDataFile();
-
-    if (!areaDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=areaDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),areas);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << areas.size() << " areas by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
-                                  std::unordered_map<FileOffset,AreaRef>& dataMap) const
-  {
-    AreaDataFileRef areaDataFile=GetAreaDataFile();
-
-    if (!areaDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=areaDataFile->GetByOffset(offsets.begin(),
-                                          offsets.end(),
-                                          offsets.size(),
-                                          dataMap);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << dataMap.size() << " areas by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
   bool Database::GetAreasByBlockSpan(const DataBlockSpan& span,
                                      std::vector<AreaRef>& area) const
   {
@@ -900,89 +882,6 @@ namespace osmscout {
 
     if (time.GetMilliseconds()>100) {
       log.Warn() << "Retrieving 1 way by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
-                                 std::vector<WayRef>& ways) const
-  {
-    WayDataFileRef wayDataFile=GetWayDataFile();
-
-    if (!wayDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
-                                 std::vector<WayRef>& ways) const
-  {
-    WayDataFileRef wayDataFile=GetWayDataFile();
-
-    if (!wayDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetWaysByOffset(const std::list<FileOffset>& offsets,
-                                 std::vector<WayRef>& ways) const
-  {
-    WayDataFileRef wayDataFile=GetWayDataFile();
-
-    if (!wayDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=wayDataFile->GetByOffset(offsets.begin(),offsets.end(),offsets.size(),ways);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << ways.size() << " ways by offset took " << time.ResultString();
-    }
-
-    return result;
-  }
-
-  bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
-                                 std::unordered_map<FileOffset,WayRef>& dataMap) const
-  {
-    WayDataFileRef wayDataFile=GetWayDataFile();
-
-    if (!wayDataFile) {
-      return false;
-    }
-
-    StopClock time;
-
-    bool result=wayDataFile->GetByOffset(offsets.begin(),
-                                         offsets.end(),
-                                         offsets.size(),
-                                         dataMap);
-
-    if (time.GetMilliseconds()>100) {
-      log.Warn() << "Retrieving " << dataMap.size() << " ways by offset took " << time.ResultString();
     }
 
     return result;

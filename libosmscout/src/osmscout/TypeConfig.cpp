@@ -38,47 +38,9 @@ namespace osmscout {
   const char* TypeConfig::FILE_TYPES_DAT="types.dat";
 
   TypeInfo::TypeInfo(const std::string& name)
-    : nodeId(0),
-      wayId(0),
-      areaId(0),
-      name(name),
-      index(0),
-      internal(false),
-      featureMaskBytes(0),
-      specialFeatureMaskBytes(0),
-      valueBufferSize(0),
-      canBeNode(false),
-      canBeWay(false),
-      canBeArea(false),
-      canBeRelation(false),
-      isPath(false),
-      canRouteFoot(false),
-      canRouteBicycle(false),
-      canRouteCar(false),
-      indexAsAddress(false),
-      indexAsLocation(false),
-      indexAsRegion(false),
-      indexAsPOI(false),
-      optimizeLowZoom(false),
-      specialType(SpecialType::none),
-      pinWay(false),
-      mergeAreas(false),
-      ignoreSeaLand(false),
-      ignore(false),
-      lanes(1),
-      onewayLanes(1)
+    : name(name)
   {
 
-  }
-
-  /**
-   * We forbid copying of TypeInfo instances
-   *
-   * @param other
-   */
-  TypeInfo::TypeInfo(const TypeInfo& /*other*/)
-  {
-    // no code
   }
 
   TypeInfo& TypeInfo::SetNodeId(TypeId id)
@@ -98,6 +60,13 @@ namespace osmscout {
   TypeInfo& TypeInfo::SetAreaId(TypeId id)
   {
     this->areaId=id;
+
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::SetRouteId(TypeId id)
+  {
+    this->routeId=id;
 
     return *this;
   }
@@ -811,10 +780,6 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : nodeTypeIdBytes(1),
-     wayTypeIdBytes(1),
-     areaTypeIdBits(1),
-     areaTypeIdBytes(1)
   {
     log.Debug() << "TypeConfig::TypeConfig()";
 
@@ -1103,7 +1068,9 @@ namespace osmscout {
         !typeInfo->IsInternal() &&
         (typeInfo->CanBeNode() ||
          typeInfo->CanBeWay() ||
-         typeInfo->CanBeArea())) {
+         typeInfo->CanBeArea() ||
+         typeInfo->IsRoute())) {
+
       if (typeInfo->CanBeNode()) {
         typeInfo->SetNodeId((TypeId)(nodeTypes.size()+1));
         nodeTypes.push_back(typeInfo);
@@ -1124,6 +1091,13 @@ namespace osmscout {
 
         areaTypeIdBytes=BytesNeededToEncodeNumber(typeInfo->GetAreaId());
         areaTypeIdBits=BitsNeededToEncodeNumber(typeInfo->GetAreaId());
+      }
+
+      if (typeInfo->IsRoute()) {
+        typeInfo->SetRouteId((TypeId)(routeTypes.size()+1));
+        routeTypes.push_back(typeInfo);
+
+        routeTypeIdBytes=BytesNeededToEncodeNumber(typeInfo->GetRouteId());
       }
     }
 

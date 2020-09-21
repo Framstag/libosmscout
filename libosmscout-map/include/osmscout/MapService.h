@@ -52,19 +52,22 @@ namespace osmscout {
   class OSMSCOUT_MAP_API AreaSearchParameter
   {
   private:
-    unsigned long maxAreaLevel;
-    bool          useLowZoomOptimization;
+    unsigned long maxAreaLevel=4;
+    bool          useLowZoomOptimization=true;
     BreakerRef    breaker;
-    bool          useMultithreading;
+    bool          useMultithreading=false;
+    bool          resolveRouteMembers=true;
 
   public:
-    AreaSearchParameter();
+    AreaSearchParameter() = default;
 
     void SetMaximumAreaLevel(unsigned long maxAreaLevel);
 
     void SetUseLowZoomOptimization(bool useLowZoomOptimization);
 
     void SetUseMultithreading(bool useMultithreading);
+
+    void SetResolveRouteMembers(bool resolveRouteMembers);
 
     void SetBreaker(const BreakerRef& breaker);
 
@@ -73,6 +76,8 @@ namespace osmscout {
     bool GetUseLowZoomOptimization() const;
 
     bool GetUseMultithreading() const;
+
+    bool GetResolveRouteMembers() const;
 
     bool IsAborted() const;
   };
@@ -98,6 +103,7 @@ namespace osmscout {
       TypeInfoSet nodeTypes;
       TypeInfoSet wayTypes;
       TypeInfoSet areaTypes;
+      TypeInfoSet routeTypes;
       TypeInfoSet optimizedAreaTypes;
       TypeInfoSet optimizedWayTypes;
     };
@@ -128,6 +134,9 @@ namespace osmscout {
 
     mutable WorkQueue<bool>      areaLowZoomWorkerQueue;
     std::thread                  areaLowZoomWorkerThread;
+
+    mutable WorkQueue<bool>      routeWorkerQueue;
+    std::thread                  routeWorkerThread;
 
     CallbackId                   nextCallbackId;
     std::map<CallbackId,TileStateCallback> tileStateCallbacks;
@@ -172,11 +181,105 @@ namespace osmscout {
                  bool prefill,
                  const TileRef& tile) const;
 
+    bool GetRoutes(const AreaSearchParameter& parameter,
+                   const TypeInfoSet& routes,
+                   const GeoBox& boundingBox,
+                   bool prefill,
+                   const TileRef& tile) const;
+
+    template<typename Object, typename AreaObjectIndex, typename ObjectByOffsetFn>
+    bool GetObjects(const AreaSearchParameter& parameter,
+                    const TypeInfoSet& types,
+                    const GeoBox& boundingBox,
+                    bool prefill,
+                    const TileRef& tile,
+                    TileData<Object> &tileData,
+                    AreaObjectIndex areaObjectIndex,
+                    ObjectByOffsetFn objectByOffsetFn,
+                    const std::string_view &objectTypeName,
+                    const std::string_view &objectTypeNamePl) const
+    {
+      if (!areaObjectIndex) {
+        return false;
+      }
+
+      if (tileData.IsComplete()) {
+        return true;
+      }
+
+      if (parameter.IsAborted()) {
+        return false;
+      }
+
+      TypeInfoSet             cachedTypes(tileData.GetTypes());
+      TypeInfoSet             requestedTypes(types);
+      TypeInfoSet             loadedTypes;
+      std::vector<FileOffset> offsets;
+
+      if (!cachedTypes.Empty()) {
+        requestedTypes.Remove(cachedTypes);
+      }
+
+      if (!requestedTypes.Empty()) {
+        if (!areaObjectIndex->GetOffsets(boundingBox,
+                                         requestedTypes,
+                                         offsets,
+                                         loadedTypes)) {
+          log.Error() << "Error getting " << objectTypeNamePl << " from area " << objectTypeName << " index!";
+          return false;
+        }
+
+        if (parameter.IsAborted()) {
+          return false;
+        }
+
+        if (!offsets.empty()) {
+          // Sort offsets before loading to optimize disk access
+          std::sort(offsets.begin(),offsets.end());
+
+          if (parameter.IsAborted()) {
+            return false;
+          }
+
+          std::vector<Object> objects;
+
+          if (!objectByOffsetFn(offsets, objects)) {
+            log.Error() << "Error reading " << objectTypeNamePl << " in area!";
+            return false;
+          }
+
+          if (parameter.IsAborted()) {
+            return false;
+          }
+
+          if (prefill) {
+            tileData.AddPrefillData(loadedTypes, std::move(objects));
+          }
+          else {
+            if (cachedTypes.Empty()){
+              tileData.SetData(loadedTypes, std::move(objects));
+            }else{
+              tileData.AddData(loadedTypes, objects);
+            }
+          }
+        }
+      }
+
+      if (!prefill) {
+        tileData.SetComplete();
+      }
+
+      NotifyTileStateCallbacks(tile);
+
+      return !parameter.IsAborted();
+    }
+
     void NodeWorkerLoop();
     void WayWorkerLoop();
     void WayLowZoomWorkerLoop();
     void AreaWorkerLoop();
     void AreaLowZoomWorkerLoop();
+    void RouteWorkerLoop();
 
     std::future<bool> PushNodeTask(const AreaSearchParameter& parameter,
                                    const TypeInfoSet& nodeTypes,
@@ -210,6 +313,12 @@ namespace osmscout {
                                   const GeoBox& boundingBox,
                                   bool prefill,
                                   const TileRef& tile) const;
+
+    std::future<bool> PushRouteTask(const AreaSearchParameter& parameter,
+                                    const TypeInfoSet& routeTypes,
+                                    const GeoBox& boundingBox,
+                                    bool prefill,
+                                    const TileRef& tile) const;
 
     void NotifyTileStateCallbacks(const TileRef& tile) const;
 
@@ -263,7 +372,7 @@ namespace osmscout {
                                   const TypeDefinition& typeDefinition,
                                   std::list<TileRef>& tiles) const;
 
-    void AddTileDataToMapData(std::list<TileRef>& tiles,
+    void AddTileDataToMapData(std::list<TileRef>& route,
                               MapData& data) const;
 
     void AddTileDataToMapData(std::list<TileRef>& tiles,

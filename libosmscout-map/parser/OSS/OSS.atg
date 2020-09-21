@@ -966,6 +966,7 @@ PRODUCTIONS
               =   NODESTYLEDEF<filter,state>
                 | WAYSTYLEDEF<filter,state>
                 | AREASTYLEDEF<filter,state>
+                | ROUTESTYLEDEF<filter,state>
                 .
 
   NODESTYLEDEF<StyleFilter filter, bool state>
@@ -1232,6 +1233,34 @@ PRODUCTIONS
                 .)
                 .
 
+  ROUTESTYLEDEF<StyleFilter filter, bool state>
+                = SYNC "ROUTE"
+                (
+                  ROUTESTYLE<filter,state>
+                  /*| "."
+                  (
+                    ROUTEPATHTEXTSTYLE<filter,state>
+                  )*/
+                )
+                .
+
+  ROUTESTYLE<StyleFilter filter, bool state>
+                = (.
+                    LinePartialStyle style;
+                    std::string      slot;
+                .)
+                SYNC "{"
+                {
+                    LINESTYLEATTR<style> WEAK ";"
+                }
+                SYNC "}"
+                (.
+                    if (state) {
+                      config.AddRouteLineStyle(filter,style);
+                    }
+                .)
+                .
+
   LINESTYLEATTR<LinePartialStyle& style>
               =
                 ATTRIBUTE<style,*LineStyle::GetDescriptor()>
@@ -1299,7 +1328,7 @@ PRODUCTIONS
                  .
 
   /*
-    We have the following source types (types we actualy parse)
+    We have the following source types (types we actually parse)
     IDENT,
     STRING,
     COLOR,
@@ -1348,6 +1377,7 @@ PRODUCTIONS
                      IDENT<ident> (. valueType=ValueType::IDENT; .)
                    | "lighten"    (. ident="lighten"; valueType=ValueType::IDENT; .)
                    | "darken"     (. ident="darken"; valueType=ValueType::IDENT; .)
+                   | "alpha"      (. ident="alpha"; valueType=ValueType::IDENT; .)
                    )
                    [
                      (
@@ -1809,7 +1839,8 @@ PRODUCTIONS
                    else if (descriptor.GetType()==StyleAttributeType::TYPE_UDOUBLE_ARRAY) {
                      if (valueType==ValueType::NUMBER) {
                        double              value;
-                       std::vector<double> valueList(numberList.size()+1);
+                       std::vector<double> valueList;
+                       valueList.reserve(numberList.size()+1);
 
                        if (negate) {
                          std::string e="Negative numbers not allowed here";

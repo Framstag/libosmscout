@@ -116,6 +116,11 @@ namespace osmscout {
     stream << value;
   }
 
+  void StreamLogger::StreamDestination::Print(const std::string_view& value)
+  {
+    stream << value;
+  }
+
   void StreamLogger::StreamDestination::Print(const char* value)
   {
     stream << value;

@@ -867,7 +867,7 @@ namespace osmscout {
                                const MapParameter& /*parameter*/,
                                const Color& color,
                                double width,
-                               const std::vector<double>& /*dash*/,
+                               const std::vector<double>& dash,
                                LineStyle::CapStyle /*startCap*/,
                                LineStyle::CapStyle /*endCap*/,
                                size_t transStart, size_t transEnd)
@@ -881,6 +881,15 @@ namespace osmscout {
     }
 
     stream << " stroke-width=\"" << width << "\"";
+
+    if (!dash.empty()) {
+      stream << " style=\"stroke-dasharray:";
+      for (const auto &size:dash) {
+        stream << " " << (size*width);
+      }
+      stream << "\"";
+    }
+
     stream << std::endl;
 
     stream << "              points=\"";

@@ -735,10 +735,15 @@ namespace osmscout {
     }
   }
 
-  /**
-   *
-   * @throws IOException
-   */
+  void FileWriter::WriteBox(const GeoBox &bbox)
+  {
+    if (!bbox.IsValid()){
+      throw IOException(filename,"Cannot write geo box","Geo box is not valid");
+    }
+    WriteCoord(bbox.GetMinCoord());
+    WriteCoord(bbox.GetMaxCoord());
+  }
+
   void FileWriter::WriteCoord(const GeoCoord& coord)
   {
     if (HasError()) {

@@ -28,9 +28,9 @@ namespace osmscout {
 
 static const size_t defaultStartStep=1;
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
-static const size_t defaultEndStep=26;
+static const size_t defaultEndStep=28;
 #else
-static const size_t defaultEndStep=25;
+static const size_t defaultEndStep=27;
 #endif
 
 size_t ImportParameter::GetDefaultStartStep()

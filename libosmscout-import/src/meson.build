@@ -1,4 +1,5 @@
 osmscoutimportSrc = [
+            'src/osmscout/import/AreaIndexGenerator.cpp',
             'src/osmscout/import/RawCoastline.cpp',
             'src/osmscout/import/RawCoord.cpp',
             'src/osmscout/import/RawNode.cpp',
@@ -17,6 +18,7 @@ osmscoutimportSrc = [
             'src/osmscout/import/GenMergeAreas.cpp',
             'src/osmscout/import/GenNumericIndex.cpp',
             'src/osmscout/import/GenRawNodeIndex.cpp',
+            'src/osmscout/import/GenAreaRouteIndex.cpp',
             'src/osmscout/import/GenRawWayIndex.cpp',
             'src/osmscout/import/GenRawRelIndex.cpp',
             'src/osmscout/import/GenNodeDat.cpp',
@@ -26,6 +28,7 @@ osmscoutimportSrc = [
             'src/osmscout/import/GenPTRouteDat.cpp',
             'src/osmscout/import/GenRelAreaDat.cpp',
             'src/osmscout/import/GenRouteDat.cpp',
+            'src/osmscout/import/GenRoute2Dat.cpp',
             'src/osmscout/import/GenTypeDat.cpp',
             'src/osmscout/import/GenWaterIndex.cpp',
             'src/osmscout/import/GenWayAreaDat.cpp',

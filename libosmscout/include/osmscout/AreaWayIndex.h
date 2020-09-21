@@ -25,11 +25,13 @@
 #include <unordered_set>
 #include <vector>
 
+#include <osmscout/AreaIndex.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeInfoSet.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/TileId.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
@@ -40,66 +42,18 @@ namespace osmscout {
 
     Ways can be limited by type and result count.
     */
-  class OSMSCOUT_API AreaWayIndex
+  class OSMSCOUT_API AreaWayIndex CLASS_FINAL : public AreaIndex
   {
   public:
     static const char* const AREA_WAY_IDX;
 
   private:
-    struct TypeData
-    {
-      TypeInfoRef         type;
-      MagnificationLevel  indexLevel;
-
-      uint8_t             dataOffsetBytes;
-      FileOffset          bitmapOffset;
-
-      TileIdBox           tileBox;
-
-      GeoBox              boundingBox;
-
-      TypeData();
-
-      FileOffset GetDataOffset() const;
-      FileOffset GetCellOffset(size_t x, size_t y) const;
-    };
-
-  private:
-    std::string           datafilename;   //!< Full path and name of the data file
-    mutable FileScanner   scanner;        //!< Scanner instance for reading this file
-
-    std::vector<TypeData> wayTypeData;
-
-    mutable std::mutex    lookupMutex;
-
-  private:
-    void GetOffsets(const TypeData& typeData,
-                    const GeoBox& boundingBox,
-                    std::unordered_set<FileOffset>& offsets) const;
+    void ReadTypeData(const TypeConfigRef& typeConfig,
+                      TypeData &data) override;
 
   public:
-    AreaWayIndex() = default;
-    virtual ~AreaWayIndex();
-
-    void Close();
-    bool Open(const TypeConfigRef& typeConfig,
-              const std::string& path,
-              bool memoryMappedData);
-
-    inline bool IsOpen() const
-    {
-      return scanner.IsOpen();
-    }
-
-    inline std::string GetFilename() const
-    {
-      return datafilename;
-    }
-
-    bool GetOffsets(const GeoBox& boundingBox,
-                    const TypeInfoSet& types,
-                    std::vector<FileOffset>& offsets,
-                    TypeInfoSet& loadedTypes) const;
+    AreaWayIndex();
+    virtual ~AreaWayIndex() = default;
   };
 
   using AreaWayIndexRef = std::shared_ptr<AreaWayIndex>;

@@ -31,7 +31,7 @@ OST
     MULTIPOLYGON:
       Type should be handled as multipolygon even if type is not set to multipolygon.
     ROUTE_MASTER:
-      Type should be handled as route master relation.
+      Type should be handled as route master relation (public transport schema)..
     ROUTE:
       Type should be handled as route relation.
     ADMIN_REGION:
@@ -2329,6 +2329,21 @@ TYPES
   TYPE route_trolleybus
     = RELATION ("type"=="route" AND "route"=="trolleybus")
       {Name, Ref, Operator, Network, FromTo, Color}
+      ROUTE
+
+  TYPE route_bicycle
+    = RELATION ("type"=="route" AND "route"=="bicycle")
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
+  TYPE route_mtb
+    = RELATION ("type"=="route" AND "route"=="mtb")
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
+  TYPE route_hiking
+    = RELATION ("type"=="route" AND "route"=="hiking")
+      {Name, Ref, Operator, Network, Color}
       ROUTE
 
   // Catch-all fallback for other types
