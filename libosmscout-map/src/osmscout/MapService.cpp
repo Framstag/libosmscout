@@ -930,6 +930,8 @@ namespace osmscout {
                                                 tileBoundingBox,
                                                 false,
                                                 tile));
+        } else {
+          tile->GetOptimizedAreaData().SetComplete();
         }
 
         results.push_back(PushAreaTask(parameter,
@@ -946,6 +948,8 @@ namespace osmscout {
                                                tileBoundingBox,
                                                false,
                                                tile));
+        } else {
+          tile->GetOptimizedWayData().SetComplete();
         }
 
         results.push_back(PushWayTask(parameter,
@@ -957,7 +961,7 @@ namespace osmscout {
         results.push_back(PushRouteTask(parameter,
                                         typeDefinition->routeTypes,
                                         tileBoundingBox,
-                                        true,
+                                        false,
                                         tile));
 
         tileLoadingTime.Stop();

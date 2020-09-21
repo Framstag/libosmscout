@@ -96,7 +96,10 @@ STYLE
   [TYPE railway_funicular]  {[MAG suburb-] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}}
   
   [TYPE railway_subway] {
-    [MAG cityOver-] WAY {color: #8090c0; dash: 1.5,1.0; displayWidth: 0.6mm; joinCap: butt; endCap: butt; }
+    [MAG cityOver-] WAY {color: #8090c0; dash: 1.5,1.0; displayWidth: 0.6mm; joinCap: butt; endCap: butt; }    
+  }
+  [TYPE route_subway]  {
+    [MAG suburb-] ROUTE {color: #8090c0; preferColorFeature: true; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
   }
 
   // -------------------------------------------------------
