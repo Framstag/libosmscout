@@ -260,11 +260,11 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto &type : loadedTypes) {
-          if (!mergeJob[type->GetIndex()].areas.empty() &&
+        for (const auto &loadedType : loadedTypes) {
+          if (!mergeJob[loadedType->GetIndex()].areas.empty() &&
               (!victimType ||
-               mergeJob[type->GetIndex()].areas.size()<mergeJob[victimType->GetIndex()].areas.size())) {
-            victimType=type;
+               mergeJob[loadedType->GetIndex()].areas.size()<mergeJob[victimType->GetIndex()].areas.size())) {
+            victimType=loadedType;
           }
         }
 
@@ -290,7 +290,7 @@ namespace osmscout {
                                                 const std::list<AreaRef>& areas,
                                                 std::unordered_map<Id,std::set<AreaRef> >& idAreaMap)
   {
-    for (auto& area : areas) {
+    for (const auto& area : areas) {
       std::unordered_set<Id> nodeIds;
 
       for (const auto& ring: area->rings) {

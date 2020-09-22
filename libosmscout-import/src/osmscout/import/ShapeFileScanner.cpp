@@ -28,11 +28,6 @@
 
 namespace osmscout {
 
-  ShapeFileVisitor::~ShapeFileVisitor()
-  {
-
-  }
-
   void ShapeFileVisitor::OnFileBoundingBox(const GeoBox& /*boundingBox*/)
   {
     // no code

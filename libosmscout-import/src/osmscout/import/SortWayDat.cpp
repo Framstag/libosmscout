@@ -26,7 +26,6 @@
 
 #include <osmscout/util/Geometry.h>
 
-#include <osmscout/import/GenWayWayDat.h>
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
 
 namespace osmscout {
@@ -265,9 +264,8 @@ namespace osmscout {
         save=false;
         return true;
       }
-      else {
-        way.nodes=nodeBuffer;
-      }
+
+      way.nodes=nodeBuffer;
     }
 
     return true;

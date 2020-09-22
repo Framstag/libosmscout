@@ -20,7 +20,6 @@
 #include <osmscout/import/WaterIndexProcessor.h>
 
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
 
 #include <osmscout/TypeFeatures.h>
@@ -271,8 +270,8 @@ namespace osmscout {
     progress.Info("Calculate coast cell environment");
 
     for (const auto& tileEntry : cellGroundTileMap) {
-      Pixel coord=tileEntry.first;
-      State  state[4];      // type of the neighbouring cells: top, right, bottom, left
+      Pixel               coord=tileEntry.first;
+      std::array<State,4> state; // type of the neighbouring cells: top, right, bottom, left
 
       state[0]=unknown;
       state[1]=unknown;
@@ -796,8 +795,8 @@ namespace osmscout {
 
       groundTile.coords.reserve(coastline->points.size());
 
-      for (size_t p=0; p<coastline->points.size(); p++) {
-        groundTile.coords.push_back(Transform(coastline->points[p],
+      for (auto & point : coastline->points) {
+        groundTile.coords.push_back(Transform(point,
                                               stateMap,
                                               cellMinLat,cellMinLon,
                                               true));
@@ -849,10 +848,9 @@ namespace osmscout {
     if (cx1!=cx2 || cy1!=cy2) {
       for (uint32_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
         for (uint32_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
-
-          Pixel    coord(x,y);
-          GeoCoord borderPoints[5];
-          double   lonMin,lonMax,latMin,latMax;
+          Pixel                  coord(x,y);
+          std::array<GeoCoord,5> borderPoints;
+          double                 lonMin,lonMax,latMin,latMax;
 
           lonMin=x*stateMap.GetCellWidth()-180.0;
           lonMax=lonMin+stateMap.GetCellWidth();
@@ -923,10 +921,10 @@ namespace osmscout {
               continue;
             }
 
-            Pixel    coord(x-stateMap.GetXStart(),
-                           y-stateMap.GetYStart());
-            GeoCoord borderPoints[5];
-            double   lonMin,lonMax,latMin,latMax;
+            Pixel                  coord(x-stateMap.GetXStart(),
+                                         y-stateMap.GetYStart());
+            std::array<GeoCoord,5> borderPoints;
+            double                 lonMin,lonMax,latMin,latMax;
 
             lonMin=x*stateMap.GetCellWidth()-180.0;
             lonMax=(x+1)*stateMap.GetCellWidth()-180.0;
@@ -2587,7 +2585,7 @@ namespace osmscout {
 
           writer.WriteNumber((uint32_t) tile.coords.size());
 
-          for (auto coord : tile.coords) {
+          for (const auto& coord : tile.coords) {
             if (coord.coast) {
               uint16_t x=coord.x | uint16_t(1 << 15);
 

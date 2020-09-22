@@ -127,7 +127,7 @@ namespace osmscout {
                                          uint8_t id)
   {
     std::list<MultipolygonPart>::const_iterator sub;
-    size_t                                      subIndex;
+    size_t                                      subIndex=0;
 
 
     for (sub=FindSub(rings,topIndex,state,subIndex);
@@ -844,15 +844,14 @@ namespace osmscout {
                                     resolvedRelations,
                                     parts);
     }
-    else {
-      return ComposeAreaMembers(typeConfig,
-                                progress,
-                                coordMap,
-                                wayMap,
-                                name,
-                                rawRelation,
-                                parts);
-    }
+
+    return ComposeAreaMembers(typeConfig,
+                              progress,
+                              coordMap,
+                              wayMap,
+                              name,
+                              rawRelation,
+                              parts);
   }
 
   /**

@@ -26,7 +26,6 @@
 
 #include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/TypeDistributionDataFile.h>
-#include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/File.h>
 
@@ -36,7 +35,6 @@
 #include <osmscout/import/RawWay.h>
 
 #include <osmscout/private/Config.h>
-#include <osmscout/import/ImportFeatures.h>
 
 #if defined(HAVE_LIB_XML) || defined(OSMSCOUT_IMPORT_HAVE_XML_SUPPORT)
   #include <osmscout/import/PreprocessOSM.h>
@@ -88,10 +86,10 @@ namespace osmscout {
 
       return true;
     }
-    else if (restrictionValue->second=="no_left_turn" ||
-             restrictionValue->second=="no_right_turn" ||
-             restrictionValue->second=="no_straight_on" ||
-             restrictionValue->second=="no_u_turn") {
+    if (restrictionValue->second=="no_left_turn" ||
+        restrictionValue->second=="no_right_turn" ||
+        restrictionValue->second=="no_straight_on" ||
+        restrictionValue->second=="no_u_turn") {
       type=TurnRestriction::Forbit;
 
       return true;
@@ -189,18 +187,13 @@ namespace osmscout {
     progress.Info("Using "+std::to_string(blockWorkerCount)+" block worker threads"+" with queue size of "+std::to_string(parameter.GetProcessingQueueSize()));
 
     for (size_t t=1; t<=blockWorkerCount; t++) {
-      blockWorkerThreads.push_back(std::thread(&Preprocess::Callback::BlockWorkerLoop,this));
+      blockWorkerThreads.emplace_back(&Preprocess::Callback::BlockWorkerLoop,this);
     }
 
     nodeStat.resize(typeConfig->GetTypeCount(),0);
     areaStat.resize(typeConfig->GetTypeCount(),0);
     wayStat.resize(typeConfig->GetTypeCount(),0);
     relStat.resize(typeConfig->GetTypeCount(),0);
-  }
-
-  Preprocess::Callback::~Callback()
-  {
-    // no code
   }
 
   bool Preprocess::Callback::Initialize()
@@ -276,7 +269,7 @@ namespace osmscout {
     rawCoord.SetOSMId(data.id);
     rawCoord.SetCoord(data.coord);
 
-    processed.rawCoords.push_back(std::move(rawCoord));
+    processed.rawCoords.push_back(rawCoord);
 
     TypeInfoRef type=typeConfig->GetNodeType(data.tags);
 
@@ -631,7 +624,7 @@ namespace osmscout {
     }
   }
 
-  Preprocess::Callback::ProcessedDataRef Preprocess::Callback::BlockTask(RawBlockDataRef data)
+  Preprocess::Callback::ProcessedDataRef Preprocess::Callback::BlockTask(const RawBlockDataRef& data)
   {
     ProcessedDataRef processed(new ProcessedData());
 

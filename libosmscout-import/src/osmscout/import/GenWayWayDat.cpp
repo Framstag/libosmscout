@@ -223,7 +223,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto &type : currentTypes) {
+        for (const auto &type : currentTypes) {
           if (!ways[type->GetIndex()].empty() &&
               (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
@@ -873,8 +873,8 @@ namespace osmscout {
         std::set<OSMId>          nodeIds;
         CoordDataFile::ResultMap coordsMap;
 
-        for (size_t type=0; type<waysByType.size(); type++) {
-          for (const auto &rawWay : waysByType[type]) {
+        for (auto & type : waysByType) {
+          for (const auto &rawWay : type) {
             for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
               nodeIds.insert(rawWay->GetNodeId(n));
             }

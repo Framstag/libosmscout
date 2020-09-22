@@ -34,7 +34,7 @@ class PreprocessorCallback;
 class OSMSCOUT_IMPORT_API PreprocessorFactory
 {
 public:
-  virtual ~PreprocessorFactory();
+  virtual ~PreprocessorFactory() = default;
 
   virtual std::unique_ptr<Preprocessor> GetProcessor(const std::string& filename,
                                                      PreprocessorCallback& callback) const = 0;

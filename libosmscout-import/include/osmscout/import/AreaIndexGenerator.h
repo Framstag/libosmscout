@@ -28,7 +28,6 @@
 #include <osmscout/Pixel.h>
 
 #include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Geometry.h>
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/File.h>
@@ -158,9 +157,9 @@ namespace osmscout {
                                                const TypeData& typeData,
                                                const CoordOffsetsMap& typeCellOffsets)
   {
-    size_t indexEntries=0;
-    size_t dataSize=0;
-    char   buffer[10];
+    size_t              indexEntries=0;
+    size_t              dataSize=0;
+    std::array<char,10> buffer;
 
     //
     // Calculate the number of entries and the overall size of the data in the bitmap entries
@@ -171,14 +170,15 @@ namespace osmscout {
       indexEntries+=cell.second.size();
 
       dataSize+=EncodeNumber(cell.second.size(),
-                             buffer);
+                             buffer.data());
 
       FileOffset previousOffset=0;
 
       for (const auto& offset : cell.second) {
         FileOffset data=offset-previousOffset;
 
-        dataSize+=EncodeNumber(data,buffer);
+        dataSize+=EncodeNumber(data,
+                               buffer.data());
 
         previousOffset=offset;
       }
@@ -566,7 +566,7 @@ namespace osmscout {
         }
 
         // Check if cell fill for current type is in defined limits
-        for (auto &type : currentObjectTypes) {
+        for (const auto &type : currentObjectTypes) {
           size_t typeIndex=type->GetIndex();
 
           if (!FitsIndexCriteria(progress,
