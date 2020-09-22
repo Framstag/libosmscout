@@ -197,7 +197,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   osmscout::GeoBox boundingBox;
 
 #if defined(HAVE_MMAP)
-  if (sizeof(void*)<=4 || true){
+  if (sizeof(void*)<=4){
     // we are on 32 bit system probably, we have to be careful with mmap
     qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
     QStringList mmapFiles;
