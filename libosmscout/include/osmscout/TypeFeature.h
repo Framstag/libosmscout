@@ -129,6 +129,15 @@ namespace osmscout {
     virtual std::string GetName() const = 0;
 
     /**
+     * If feature have value object, this method returns
+     * alignment requirements of the value type (alignof( type-id )).
+     */
+    inline virtual size_t GetValueAlignment() const
+    {
+      return 0;
+    }
+
+    /**
      * A feature, if set for an object, can hold a value. If there is no value object,
      * this method returns 0, else it returns the C++ size of the value object.
      */
