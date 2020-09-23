@@ -46,6 +46,8 @@ if(WIN32)
 endif()
 
 FIND_PATH(Direct2D_INCLUDE_DIRS d2d1.h PATHS
+	"${DirectX_ROOT_DIR}/Include"
+	"/mingw64/x86_64-w64-mingw32/include"
 	${sdk_include}
     "$ENV{DXSDK_DIR}/Include"
     "$ENV{PROGRAMFILES}/Microsoft DirectX SDK*/Include"
@@ -54,9 +56,11 @@ FIND_PATH(Direct2D_INCLUDE_DIRS d2d1.h PATHS
 GET_FILENAME_COMPONENT(DirectX_ROOT_DIR "${DirectX_INCLUDE_DIRS}/.." ABSOLUTE)
 
 SET(Direct2D_LIBRARY_PATHS
-	${sdk_lib}
 	"${DirectX_ROOT_DIR}/Lib/${subarch}"
+	"/mingw64/x86_64-w64-mingw32/lib"
+	${sdk_lib}
 	"$ENV{DXSDK_DIR}/Lib/${subarch}/"
+    "$ENV{PROGRAMFILES}/Microsoft DirectX SDK*/Lib/${subarch}/"
 )
 
 FIND_LIBRARY(Direct2D_D2D1_LIBRARY d2d1 ${Direct2D_LIBRARY_PATHS} NO_DEFAULT_PATH)
