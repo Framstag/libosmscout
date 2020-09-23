@@ -100,7 +100,7 @@ public:
 class OSMSCOUT_IMPORT_API ImportModule
 {
 public:
-  virtual ~ImportModule();
+  virtual ~ImportModule() = default;
 
   virtual void GetDescription(const ImportParameter& parameter,
                               ImportModuleDescription& description) const;

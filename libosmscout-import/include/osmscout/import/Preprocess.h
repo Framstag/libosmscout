@@ -175,7 +175,7 @@ namespace osmscout {
       void RelationSubTask(const RawRelationData& data,
                            ProcessedData& processed);
 
-      ProcessedDataRef BlockTask(RawBlockDataRef data);
+      ProcessedDataRef BlockTask(const RawBlockDataRef& data);
       void BlockWorkerLoop();
 
       void WriteTask(std::shared_future<ProcessedDataRef>& processed);
@@ -185,8 +185,6 @@ namespace osmscout {
       Callback(const TypeConfigRef& typeConfig,
                const ImportParameter& parameter,
                Progress& progress);
-
-      ~Callback() override;
 
       bool Initialize();
 

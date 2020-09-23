@@ -20,18 +20,10 @@
 #include <osmscout/import/Import.h>
 
 #include <algorithm>
-#include <iostream>
-#include <iterator>
 
 #include <osmscout/OSMScoutTypes.h>
 
-#include <osmscout/routing/RoutingService.h>
-#include <osmscout/routing/RouteNode.h>
 #include <osmscout/Intersection.h>
-
-#include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawWay.h>
-#include <osmscout/import/RawRelation.h>
 
 #include <osmscout/import/GenRawWayIndex.h>
 #include <osmscout/import/GenRawRelIndex.h>
@@ -68,6 +60,9 @@
 #include <osmscout/import/GenOptimizeAreasLowZoom.h>
 #include <osmscout/import/GenOptimizeWaysLowZoom.h>
 
+#include <osmscout/import/GenRoute2Dat.h>
+#include <osmscout/import/GenAreaRouteIndex.h>
+
 // Routing
 #include <osmscout/import/GenRouteDat.h>
 #include <osmscout/import/GenIntersectionIndex.h>
@@ -81,7 +76,6 @@
 
 #include <osmscout/util/MemoryMonitor.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
@@ -223,10 +217,18 @@ namespace osmscout {
     /* 25 */
     modules.push_back(std::make_shared<PTRouteDataGenerator>());
 
-#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
     /* 26 */
+    modules.push_back(std::make_shared<RouteDataGenerator2>());
+
+    /* 27 */
+    modules.push_back(std::make_shared<AreaRouteIndexGenerator>());
+
+#if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
+    /* 28 */
     modules.push_back(std::make_shared<TextIndexGenerator>());
 #endif
+
+    assert(modules.size()==ImportParameter::GetDefaultEndStep());
   }
 
   void Importer::DumpTypeConfigData(const TypeConfig& typeConfig,

@@ -143,12 +143,8 @@ namespace osmscout {
                                       const ImportParameter& parameter,
                                       Progress& progress)
   {
-    if (!MergeAreas(parameter,
+    return MergeAreas(parameter,
                     progress,
-                    *typeConfig)) {
-      return false;
-    }
-
-    return true;
+                    *typeConfig);
   }
 }

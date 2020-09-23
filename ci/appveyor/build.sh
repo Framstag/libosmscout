@@ -25,7 +25,7 @@ if [ "${BUILDTOOL}" = "cmake" ] ; then
     make -j "$(nproc)"
 fi
 if [ "${BUILDTOOL}" = "meson" ] ; then
-    meson debug
+    meson setup --buildtype debugoptimized --unity on debug
     cd debug
     ninja
 fi

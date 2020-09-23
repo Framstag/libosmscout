@@ -385,6 +385,9 @@ namespace osmscout {
     areaBorderSymbolStyleSelectors.clear();
     areaTypeSets.clear();
 
+    routeTypeSets.clear();
+    routeLineStyleSelectors.clear();
+
     constants.clear();
   }
 
@@ -806,6 +809,31 @@ namespace osmscout {
     areaBorderSymbolStyleConditionals.clear();
   }
 
+  void StyleConfig::PostprocessRoutes()
+  {
+    size_t maxLevel=0;
+    GetMaxLevelInConditionals(routeLineStyleConditionals,
+                              maxLevel);
+
+    routeTypeSets.reserve(maxLevel);
+
+    for (size_t type=0; type<maxLevel; type++) {
+      routeTypeSets.emplace_back(*typeConfig);
+    }
+
+    CalculateUsedTypes(*typeConfig,
+                       routeLineStyleConditionals,
+                       maxLevel,
+                       routeTypeSets);
+
+    SortInConditionalsBySlot(*typeConfig,
+                             routeLineStyleConditionals,
+                             maxLevel,
+                             routeLineStyleSelectors);
+
+    routeLineStyleConditionals.clear();
+  }
+
   void StyleConfig::PostprocessIconId()
   {
     std::unordered_map<std::string,size_t> symbolIdMap;
@@ -886,6 +914,7 @@ namespace osmscout {
     PostprocessNodes();
     PostprocessWays();
     PostprocessAreas();
+    PostprocessRoutes();
 
     PostprocessIconId();
     PostprocessPatternId();
@@ -1010,6 +1039,15 @@ namespace osmscout {
     areaBorderSymbolStyleConditionals.push_back(conditional);
   }
 
+
+  void StyleConfig::AddRouteLineStyle(const StyleFilter& filter,
+                                      LinePartialStyle& style)
+  {
+    LineConditionalStyle conditional(filter,style);
+
+    routeLineStyleConditionals.push_back(conditional);
+  }
+
   void StyleConfig::GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                            TypeInfoSet& types) const
   {
@@ -1031,6 +1069,14 @@ namespace osmscout {
   {
     if (!areaTypeSets.empty()) {
       types=areaTypeSets[std::min((size_t)maxMag.GetLevel(),areaTypeSets.size()-1)];
+    }
+  }
+
+  void StyleConfig::GetRouteTypesWithMaxMag(const Magnification& maxMag,
+                                            TypeInfoSet& types) const
+  {
+    if (!routeTypeSets.empty()) {
+      types=routeTypeSets[std::min((size_t)maxMag.GetLevel(),routeTypeSets.size()-1)];
     }
   }
 
@@ -1166,6 +1212,40 @@ namespace osmscout {
                 [](const LineStyleRef& a, const LineStyleRef& b) -> bool {
                   return a->GetSlot()<b->GetSlot();
       });
+    }
+  }
+
+  void StyleConfig::GetRouteLineStyles(const FeatureValueBuffer& buffer,
+                                       const Projection& projection,
+                                       std::vector<LineStyleRef>& lineStyles) const
+  {
+    lineStyles.clear();
+    lineStyles.reserve(routeLineStyleSelectors.size());
+
+    bool requireSort=false;
+
+    for (const auto& routeLineStyleSelector : routeLineStyleSelectors) {
+      LineStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         routeLineStyleSelector[buffer.GetType()->GetIndex()],
+                                         buffer,
+                                         projection);
+
+      if (style) {
+        if (style->GetOffsetRel()!=OffsetRel::base) {
+          requireSort=true;
+        }
+
+        lineStyles.push_back(style);
+      }
+    }
+
+    if (requireSort &&
+        lineStyles.size()>1) {
+      std::sort(lineStyles.begin(),
+                lineStyles.end(),
+                [](const LineStyleRef& a, const LineStyleRef& b) -> bool {
+                  return a->GetSlot()<b->GetSlot();
+                });
     }
   }
 

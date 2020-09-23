@@ -37,7 +37,6 @@
 
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoastline.h>
-#include <osmscout/import/RawNode.h>
 
 #if !defined(DEBUG_COASTLINE)
 //#define DEBUG_COASTLINE

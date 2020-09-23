@@ -21,11 +21,13 @@
 */
 
 #include <osmscout/import/Import.h>
+#include <osmscout/import/AreaIndexGenerator.h>
 
 #include <list>
 #include <map>
 
 #include <osmscout/Pixel.h>
+#include <osmscout/Way.h>
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
@@ -35,54 +37,17 @@
 
 namespace osmscout {
 
-  class AreaWayIndexGenerator CLASS_FINAL : public ImportModule
+  class AreaWayIndexGenerator CLASS_FINAL : public AreaIndexGenerator<Way>
   {
   private:
-    typedef std::map<TileId,size_t>                 CoordCountMap;
-    typedef std::map<TileId,std::list<FileOffset> > CoordOffsetsMap;
-
-    struct TypeData
-    {
-      MagnificationLevel indexLevel;   //! magnification level of index
-      size_t             indexCells;   //! Number of filled cells in index
-      size_t             indexEntries; //! Number of entries over all cells
-
-      TileIdBox          tileBox;
-
-      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written to
-
-      TypeData();
-
-      inline bool HasEntries()
-      {
-        return indexCells>0 &&
-               indexEntries>0;
-      }
-    };
-
-  private:
-    bool FitsIndexCriteria(const ImportParameter& parameter,
-                           Progress& progress,
-                           const TypeInfo& typeInfo,
-                           const CoordCountMap& cellFillCount) const;
-
-    void CalculateStatistics(const MagnificationLevel& level,
-                             TypeData& typeData,
-                             const CoordCountMap& cellFillCount) const;
-
-    bool CalculateDistribution(const TypeConfig& typeConfig,
-                               const ImportParameter& parameter,
-                               Progress& progress,
-                               std::vector<TypeData>& wayTypeData,
-                               MagnificationLevel& maxLevel) const;
-
-    bool WriteBitmap(Progress& progress,
-                     FileWriter& writer,
-                     const TypeInfo& typeInfo,
-                     const TypeData& typeData,
-                     const CoordOffsetsMap& typeCellOffsets);
+    void WriteTypeId(const TypeConfigRef& typeConfig,
+                     const TypeInfoRef &type,
+                     FileWriter &writer) const override;
 
   public:
+    AreaWayIndexGenerator();
+    virtual ~AreaWayIndexGenerator() = default;
+
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 

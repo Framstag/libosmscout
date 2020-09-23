@@ -438,9 +438,10 @@ namespace osmscout {
   void Area::Write(const TypeConfig& typeConfig,
                    FileWriter& writer) const
   {
+    assert(!rings.empty());
     auto ring=rings.cbegin();
     bool multipleRings=rings.size()>1;
-    bool hasMaster= rings[0].IsMaster();
+    bool hasMaster=rings[0].IsMaster();
 
     // TODO: We would like to have a bit flag here, if we have a simple area,
     // an area with one master (and multiple rings) or an area with
@@ -451,6 +452,7 @@ namespace osmscout {
 
     // Outer ring
 
+    assert(ring->GetType()->CanBeArea());
     writer.WriteTypeId(ring->GetType()->GetAreaId(),
                        typeConfig.GetAreaTypeIdBytes());
 

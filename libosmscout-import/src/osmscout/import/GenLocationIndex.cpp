@@ -20,10 +20,8 @@
 #include <osmscout/import/GenLocationIndex.h>
 
 #include <algorithm>
-#include <fstream>
 #include <sstream>
 #include <limits>
-#include <locale>
 #include <list>
 #include <map>
 #include <set>
@@ -1107,9 +1105,12 @@ namespace osmscout {
           if (ring.IsTopOuter()) {
             std::vector<GeoCoord> coords;
 
-            for (const auto& node : ring.nodes) {
-              coords.push_back(node.GetCoord());
-            }
+            std::transform(ring.nodes.cbegin(),
+                           ring.nodes.cend(),
+                           std::back_inserter(coords),
+                           [] (const Point& point) {
+                             return point.GetCoord();
+            });
 
             region->areas.push_back(coords);
           }
@@ -1355,13 +1356,11 @@ namespace osmscout {
                              postalCode,
                              ObjectFileRef(area.GetFileOffset(),refArea));
 
-    for (const auto& childArea : region.areas) {
-      if (IsAreaCompletelyInArea(nodes,childArea)) {
-        return true;
-      }
-    }
-
-    return false;
+    return std::any_of(region.areas.begin(),
+                       region.areas.end(),
+                       [&nodes] (const auto& childArea) {
+                         return IsAreaCompletelyInArea(nodes,childArea);
+    });
   }
 
   /**

@@ -272,6 +272,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void NODESTYLEDEF(StyleFilter filter, bool state);
 	void WAYSTYLEDEF(StyleFilter filter, bool state);
 	void AREASTYLEDEF(StyleFilter filter, bool state);
+	void ROUTESTYLEDEF(StyleFilter filter, bool state);
 	void NODETEXTSTYLE(StyleFilter filter, bool state);
 	void NODEICONSTYLE(StyleFilter filter, bool state);
 	void TEXTSTYLEATTR(TextPartialStyle& style);
@@ -290,6 +291,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void AREABORDERSTYLE(StyleFilter filter, bool state);
 	void AREABORDERTEXTSTYLE(StyleFilter filter, bool state);
 	void AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state);
+	void ROUTESTYLE(StyleFilter filter, bool state);
 	void ATTRIBUTE(PartialStyleBase& style, const StyleDescriptor& descriptor);
 	void ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor);
 	void COLOR_VALUE(Color& color);

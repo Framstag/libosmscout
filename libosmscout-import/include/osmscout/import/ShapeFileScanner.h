@@ -41,7 +41,7 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ShapeFileVisitor
   {
   public:
-    virtual ~ShapeFileVisitor();
+    virtual ~ShapeFileVisitor() = default;
     virtual void OnFileBoundingBox(const GeoBox& boundingBox);
     virtual void OnProgress(double current, double total);
     virtual void OnPolyline(int32_t recordNumber,

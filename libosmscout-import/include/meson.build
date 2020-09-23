@@ -1,6 +1,7 @@
 osmscoutimportIncDir = include_directories('.')
 
 osmscoutimportHeader = [
+            'osmscout/import/AreaIndexGenerator.h',
             'osmscout/import/ImportImportExport.h',
             'osmscout/import/RawCoastline.h',
             'osmscout/import/RawCoord.h',
@@ -12,6 +13,7 @@ osmscoutimportHeader = [
             'osmscout/import/WaterIndexProcessor.h',
             'osmscout/import/GenAreaAreaIndex.h',
             'osmscout/import/GenAreaNodeIndex.h',
+            'osmscout/import/GenAreaRouteIndex.h',
             'osmscout/import/GenAreaWayIndex.h',
             'osmscout/import/GenCoordDat.h',
             'osmscout/import/GenCoverageIndex.h',
@@ -29,6 +31,7 @@ osmscoutimportHeader = [
             'osmscout/import/GenPTRouteDat.h',
             'osmscout/import/GenRelAreaDat.h',
             'osmscout/import/GenRouteDat.h',
+            'osmscout/import/GenRoute2Dat.h',
             'osmscout/import/GenTypeDat.h',
             'osmscout/import/GenWaterIndex.h',
             'osmscout/import/GenWayAreaDat.h',

@@ -30,14 +30,6 @@
 
 namespace osmscout {
 
-  AreaSearchParameter::AreaSearchParameter()
-  : maxAreaLevel(4),
-    useLowZoomOptimization(true),
-    useMultithreading(false)
-  {
-    // no code
-  }
-
   void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
   {
     this->maxAreaLevel=maxAreaLevel;
@@ -51,6 +43,16 @@ namespace osmscout {
   void AreaSearchParameter::SetUseMultithreading(bool useMultithreading)
   {
     this->useMultithreading=useMultithreading;
+  }
+
+  void AreaSearchParameter::SetResolveRouteMembers(bool resolveRouteMembers)
+  {
+    this->resolveRouteMembers=resolveRouteMembers;
+  }
+
+  bool AreaSearchParameter::GetResolveRouteMembers() const
+  {
+    return resolveRouteMembers;
   }
 
   void AreaSearchParameter::SetBreaker(const BreakerRef& breaker)
@@ -91,6 +93,7 @@ namespace osmscout {
      wayLowZoomWorkerThread(&MapService::WayLowZoomWorkerLoop,this),
      areaWorkerThread(&MapService::AreaWorkerLoop,this),
      areaLowZoomWorkerThread(&MapService::AreaLowZoomWorkerLoop,this),
+     routeWorkerThread(&MapService::RouteWorkerLoop,this),
      nextCallbackId(0)
   {
     // no code
@@ -102,12 +105,14 @@ namespace osmscout {
     wayWorkerQueue.Stop();
     wayLowZoomWorkerQueue.Stop();
     areaWorkerQueue.Stop();
+    routeWorkerQueue.Stop();
     areaLowZoomWorkerQueue.Stop();
 
     nodeWorkerThread.join();
     wayWorkerThread.join();
     wayLowZoomWorkerThread.join();
     areaWorkerThread.join();
+    routeWorkerThread.join();
     areaLowZoomWorkerThread.join();
   }
 
@@ -204,6 +209,9 @@ namespace osmscout {
 
     styleConfig.GetAreaTypesWithMaxMag(magnification,
                                        typeDefinition->areaTypes);
+
+    styleConfig.GetRouteTypesWithMaxMag(magnification,
+                                        typeDefinition->routeTypes);
 
     if (parameter.GetUseLowZoomOptimization()) {
       if (optimizeAreasLowZoom->HasOptimizations(magnification.GetMagnification())) {
@@ -554,82 +562,53 @@ namespace osmscout {
                            bool prefill,
                            const TileRef& tile) const
   {
-    AreaWayIndexRef areaWayIndex=database->GetAreaWayIndex();
+    using namespace std::string_view_literals;
+    return GetObjects(parameter,
+                      wayTypes,
+                      boundingBox,
+                      prefill,
+                      tile,
+                      tile->GetWayData(),
+                      database->GetAreaWayIndex(),
+                      [&db=this->database](const std::vector<FileOffset>& offsets, std::vector<WayRef>& ways){
+                        return db->GetWaysByOffset(offsets, ways);
+                      },
+                      "way"sv, "ways"sv);
+  }
 
-    if (!areaWayIndex) {
-      return false;
-    }
+  bool MapService::GetRoutes(const AreaSearchParameter& parameter,
+                             const TypeInfoSet& routeTypes,
+                             const GeoBox& boundingBox,
+                             bool prefill,
+                             const TileRef& tile) const
+  {
+    using namespace std::string_view_literals;
+    return GetObjects(parameter,
+                      routeTypes,
+                      boundingBox,
+                      prefill,
+                      tile,
+                      tile->GetRouteData(),
+                      database->GetAreaRouteIndex(),
+                      [&db=this->database, &parameter](const std::vector<FileOffset>& offsets, std::vector<RouteRef>& routes){
 
-    if (tile->GetWayData().IsComplete()) {
-      return true;
-    }
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    TypeInfoSet             cachedWayTypes(tile->GetWayData().GetTypes());
-    TypeInfoSet             requestedWayTypes(wayTypes);
-    TypeInfoSet             loadedWayTypes;
-    std::vector<FileOffset> offsets;
-
-    if (!cachedWayTypes.Empty()) {
-      requestedWayTypes.Remove(cachedWayTypes);
-    }
-
-    if (!requestedWayTypes.Empty()) {
-      if (!areaWayIndex->GetOffsets(boundingBox,
-                                    requestedWayTypes,
-                                    offsets,
-                                    loadedWayTypes)) {
-        log.Error() << "Error getting ways from area way index!";
-        return false;
-      }
-
-      if (parameter.IsAborted()) {
-        return false;
-      }
-
-      if (!offsets.empty()) {
-        // Sort offsets before loading to optimize disk access
-        std::sort(offsets.begin(),offsets.end());
-
-        if (parameter.IsAborted()) {
-          return false;
-        }
-
-        std::vector<WayRef> ways;
-
-        if (!database->GetWaysByOffset(offsets,
-                                       ways)) {
-          log.Error() << "Error reading ways in area!";
-          return false;
-        }
-
-        if (parameter.IsAborted()) {
-          return false;
-        }
-
-        if (prefill) {
-          tile->GetWayData().AddPrefillData(loadedWayTypes,std::move(ways));
-        }
-        else {
-          if (cachedWayTypes.Empty()){
-            tile->GetWayData().SetData(loadedWayTypes,std::move(ways));
-          }else{
-            tile->GetWayData().AddData(loadedWayTypes,ways);
-          }
-        }
-      }
-    }
-
-    if (!prefill) {
-      tile->GetWayData().SetComplete();
-    }
-
-    NotifyTileStateCallbacks(tile);
-
-    return !parameter.IsAborted();
+                        if (!db->GetRoutesByOffset(offsets, routes)){
+                          return false;
+                        }
+                        if (parameter.GetResolveRouteMembers()){
+                          for (RouteRef &route:routes){
+                            if (!route->HasResolvedMembers()) {
+                              std::unordered_map<FileOffset,WayRef> map;
+                              if (!db->GetWaysByOffset(route->GetMemberOffsets(), map)){
+                                return false;
+                              }
+                              route->SetResolvedMembers(map);
+                            }
+                          }
+                        }
+                        return true;
+                      },
+                      "route"sv, "routes"sv);
   }
 
   void MapService::NodeWorkerLoop()
@@ -673,6 +652,15 @@ namespace osmscout {
     std::packaged_task<bool()> task;
 
     while (areaLowZoomWorkerQueue.PopTask(task)) {
+      task();
+    }
+  }
+
+  void MapService::RouteWorkerLoop()
+  {
+    std::packaged_task<bool()> task;
+
+    while (routeWorkerQueue.PopTask(task)) {
       task();
     }
   }
@@ -780,6 +768,26 @@ namespace osmscout {
 
     wayWorkerQueue.PushTask(task);
 
+    return future;
+  }
+
+  std::future<bool> MapService::PushRouteTask(const AreaSearchParameter& parameter,
+                                              const TypeInfoSet& routeTypes,
+                                              const GeoBox& boundingBox,
+                                              bool prefill,
+                                              const TileRef& tile) const
+  {
+    std::packaged_task<bool()> task(std::bind(&MapService::GetRoutes,this,
+                                              parameter,
+                                              routeTypes,
+                                              boundingBox,
+                                              prefill,
+                                              tile));
+
+    std::future<bool> future=task.get_future();
+    
+    routeWorkerQueue.PushTask(task);
+    
     return future;
   }
 
@@ -903,6 +911,7 @@ namespace osmscout {
                                    typeDefinition->nodeTypes,
                                    typeDefinition->wayTypes,
                                    typeDefinition->areaTypes,
+                                   typeDefinition->routeTypes,
                                    typeDefinition->optimizedWayTypes,
                                    typeDefinition->optimizedAreaTypes);
 
@@ -921,6 +930,8 @@ namespace osmscout {
                                                 tileBoundingBox,
                                                 false,
                                                 tile));
+        } else {
+          tile->GetOptimizedAreaData().SetComplete();
         }
 
         results.push_back(PushAreaTask(parameter,
@@ -937,6 +948,8 @@ namespace osmscout {
                                                tileBoundingBox,
                                                false,
                                                tile));
+        } else {
+          tile->GetOptimizedWayData().SetComplete();
         }
 
         results.push_back(PushWayTask(parameter,
@@ -944,6 +957,12 @@ namespace osmscout {
                                       tileBoundingBox,
                                       false,
                                       tile));
+
+        results.push_back(PushRouteTask(parameter,
+                                        typeDefinition->routeTypes,
+                                        tileBoundingBox,
+                                        false,
+                                        tile));
 
         tileLoadingTime.Stop();
 
@@ -1007,6 +1026,7 @@ namespace osmscout {
                                    typeDefinition.nodeTypes,
                                    typeDefinition.wayTypes,
                                    typeDefinition.areaTypes,
+                                   typeDefinition.routeTypes,
                                    typeDefinition.optimizedWayTypes,
                                    typeDefinition.optimizedAreaTypes);
 
@@ -1045,6 +1065,12 @@ namespace osmscout {
 
         results.push_back(PushWayTask(parameter,
                                       typeDefinition.wayTypes,
+                                      tileBoundingBox,
+                                      true,
+                                      tile));
+
+        results.push_back(PushRouteTask(parameter,
+                                      typeDefinition.routeTypes,
                                       tileBoundingBox,
                                       true,
                                       tile));
@@ -1156,11 +1182,12 @@ namespace osmscout {
                                         MapData& data) const
   {
     // TODO: Use a set and higher level fill functions
-    std::unordered_map<FileOffset,NodeRef> nodeMap(10000);
-    std::unordered_map<FileOffset,WayRef>  wayMap(10000);
-    std::unordered_map<FileOffset,AreaRef> areaMap(10000);
-    std::unordered_map<FileOffset,WayRef>  optimizedWayMap(10000);
-    std::unordered_map<FileOffset,AreaRef> optimizedAreaMap(10000);
+    std::unordered_map<FileOffset,NodeRef>  nodeMap(10000);
+    std::unordered_map<FileOffset,WayRef>   wayMap(10000);
+    std::unordered_map<FileOffset,AreaRef>  areaMap(10000);
+    std::unordered_map<FileOffset,RouteRef> routeMap(1000);
+    std::unordered_map<FileOffset,WayRef>   optimizedWayMap(10000);
+    std::unordered_map<FileOffset,AreaRef>  optimizedAreaMap(10000);
 
     StopClock uniqueTime;
 
@@ -1188,6 +1215,11 @@ namespace osmscout {
       tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {
         areaMap[area->GetFileOffset()]=area;
       });
+
+      //---
+      tile->GetRouteData().CopyData([&routeMap](const RouteRef& route) {
+        routeMap[route->GetFileOffset()]=route;
+      });
     }
 
     uniqueTime.Stop();
@@ -1199,6 +1231,7 @@ namespace osmscout {
     data.nodes.reserve(nodeMap.size());
     data.ways.reserve(wayMap.size()+optimizedWayMap.size());
     data.areas.reserve(areaMap.size()+optimizedAreaMap.size());
+    data.routes.reserve(routeMap.size());
 
     for (const auto& nodeEntry : nodeMap) {
       data.nodes.push_back(nodeEntry.second);
@@ -1218,6 +1251,10 @@ namespace osmscout {
 
     for (const auto& areaEntry : optimizedAreaMap) {
       data.areas.push_back(areaEntry.second);
+    }
+
+    for (const auto& routeEntry : routeMap) {
+      data.routes.push_back(routeEntry.second);
     }
 
     copyTime.Stop();

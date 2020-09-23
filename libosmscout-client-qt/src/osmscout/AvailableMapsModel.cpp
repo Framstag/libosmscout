@@ -118,7 +118,7 @@ void AvailableMapsModel::append(AvailableMapsModelItem *item)
   }
 }
 
-bool itemLessThan(const AvailableMapsModelItem *i1, const AvailableMapsModelItem *i2)
+bool availableMapsModelItemLessThan(const AvailableMapsModelItem *i1, const AvailableMapsModelItem *i2)
 {
   if (i1->isDirectory() && !i2->isDirectory())
     return true;
@@ -180,9 +180,9 @@ void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkRep
     }
   }
 
-  std::sort(items.begin(), items.end(), itemLessThan);
+  std::sort(items.begin(), items.end(), availableMapsModelItemLessThan);
   reply->deleteLater();
-  
+
   emit loadingChanged();
   endResetModel();
 }
@@ -238,7 +238,7 @@ QModelIndex AvailableMapsModel::parent(const QModelIndex &index) const
   if (parentPath.isEmpty())
     return QModelIndex();
   parentDir.removeLast();
-  
+
   QList<AvailableMapsModelItem*> parentSiblings=findChildrenByPath(parentDir);
   for (int row=0;row<parentSiblings.size();row++){
     auto parentCandidate=parentSiblings[row];
@@ -246,7 +246,7 @@ QModelIndex AvailableMapsModel::parent(const QModelIndex &index) const
       return createIndex(row, 0, parentCandidate);
   }
   return QModelIndex(); // should not happen
-  
+
 }
 
 int AvailableMapsModel::rowCount(const QModelIndex &parentIndex) const
@@ -275,7 +275,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
   }
   const AvailableMapsModelItem *item=static_cast<AvailableMapsModelItem*>(index.internalPointer());
   const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(item);
-    
+
   switch (role) {
     case Qt::DisplayRole:
     case NameRole:
@@ -287,7 +287,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
     case ServerDirectoryRole:
       return map==nullptr ? QVariant(): map->getServerDirectory();// server path for this map
     case TimeRole:
-      return map==nullptr ? QVariant(): map->getCreation();// QTime of map creation 
+      return map==nullptr ? QVariant(): map->getCreation();// QTime of map creation
     case VersionRole:
       return map==nullptr ? QVariant(): map->getVersion();
     case ByteSizeRole:
@@ -302,7 +302,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
       return QVariant::fromValue(map==nullptr ? nullptr: new AvailableMapsModelMap(*map));
     default:
         break;
-  }  
+  }
   return QVariant();
 }
 

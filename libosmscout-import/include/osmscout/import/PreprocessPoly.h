@@ -64,7 +64,6 @@ namespace osmscout {
 
   public:
     explicit PreprocessPoly(PreprocessorCallback& callback);
-    ~PreprocessPoly() override;
 
     bool Import(const TypeConfigRef& typeConfig,
                 const ImportParameter& parameter,

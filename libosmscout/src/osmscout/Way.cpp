@@ -127,6 +127,7 @@ namespace osmscout {
                   FileWriter& writer) const
   {
     assert(!nodes.empty());
+    assert(featureValueBuffer.GetType()->CanBeWay());
 
     writer.WriteTypeId(featureValueBuffer.GetType()->GetWayId(),
                        typeConfig.GetWayTypeIdBytes());

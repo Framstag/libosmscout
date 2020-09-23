@@ -23,18 +23,11 @@
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawWay.h>
-
-#include <osmscout/private/Config.h>
 
 namespace osmscout {
 
   PreprocessPoly::PreprocessPoly(PreprocessorCallback& callback)
   : callback(callback)
-  {
-  }
-
-  PreprocessPoly::~PreprocessPoly()
   {
   }
 

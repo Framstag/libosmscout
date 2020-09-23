@@ -19,9 +19,8 @@
 
 #include <osmscout/import/PreprocessOSM.h>
 
-#include <algorithm>
 #include <iostream>
-#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,9 +29,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
-#include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
-#include <osmscout/import/RawWay.h>
 
 namespace osmscout {
 
@@ -73,7 +70,7 @@ namespace osmscout {
     void StartElement(const xmlChar *name, const xmlChar **atts)
     {
       if (!blockData) {
-        blockData=std::unique_ptr<PreprocessorCallback::RawBlockData>(new PreprocessorCallback::RawBlockData());
+        blockData=std::make_unique<PreprocessorCallback::RawBlockData>();
         blockDataSize=0;
         blockData->nodeData.reserve(10000);
         blockData->wayData.reserve(10000);
@@ -259,9 +256,7 @@ namespace osmscout {
           std::cerr << "Cannot parse ref '" << refValue << "' for relation " << id << std::endl;
         }
 
-        if (roleValue!=nullptr) {
-          member.role=(const char*)roleValue;
-        }
+        member.role=(const char*)roleValue;
 
         members.push_back(member);
       }

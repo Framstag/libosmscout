@@ -86,7 +86,7 @@ void AvailableVoicesModel::reload()
 }
 
 namespace {
-bool itemLessThan(const AvailableVoice *i1, const AvailableVoice *i2)
+bool availableVoiceItemLessThan(const AvailableVoice *i1, const AvailableVoice *i2)
 {
   assert(i1);
   assert(i2);
@@ -146,7 +146,7 @@ void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetwor
     }
   }
 
-  std::sort(items.begin(), items.end(), itemLessThan);
+  std::sort(items.begin(), items.end(), availableVoiceItemLessThan);
   reply->deleteLater();
 
   // TODO: add locally installed voices to be able uninstall them

@@ -34,12 +34,16 @@
 
 namespace osmscout {
 
+  /**
+   * Offset for rendered line, relative to way.
+   */
   enum class OffsetRel: int {
-    base,
-    leftOutline,
-    rightOutline,
-    laneDivider,
+    base,                       //!< way center
+    leftOutline,                //!< left side of the way
+    rightOutline,               //!< right side of the way
+    laneDivider,                //!< when way has multiple lanes, line is rendered as its divider
 
+    /** when way has explicit turns, following offsets may be used to decorate them specially */
     laneForwardLeft,
     laneForwardThroughLeft,
     laneForwardThrough,
@@ -50,6 +54,8 @@ namespace osmscout {
     laneBackwardThrough,
     laneBackwardThroughRight,
     laneBackwardRight,
+
+    sidecar                     //!< special offset for routes, line are stacked next to way, same colors are "collapsed"
   };
 
   /**
@@ -69,6 +75,7 @@ namespace osmscout {
     enum Attribute {
       attrLineColor,
       attrGapColor,
+      attrPreferColorFeature,
       attrDisplayWidth,
       attrWidth,
       attrDisplayOffset,
@@ -85,6 +92,7 @@ namespace osmscout {
     std::string         slot;
     Color               lineColor;
     Color               gapColor;
+    bool                preferColorFeature;
     double              displayWidth;
     double              width;
     double              displayOffset;
@@ -104,11 +112,13 @@ namespace osmscout {
     void SetDoubleValue(int attribute, double value) override;
     void SetDoubleArrayValue(int attribute, const std::vector<double>& value) override;
     void SetIntValue(int attribute, int value) override;
+    void SetBoolValue(int attribute, bool value) override;
 
     LineStyle& SetSlot(const std::string& slot);
 
     LineStyle& SetLineColor(const Color& color);
     LineStyle& SetGapColor(const Color& color);
+    LineStyle& SetPreferColorFeature(bool value);
     LineStyle& SetDisplayWidth(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetDisplayOffset(double value);
@@ -140,6 +150,11 @@ namespace osmscout {
     inline const Color& GetGapColor() const
     {
       return gapColor;
+    }
+
+    inline bool GetPreferColorFeature() const
+    {
+      return preferColorFeature;
     }
 
     inline double GetDisplayWidth() const
@@ -244,6 +259,8 @@ namespace osmscout {
       AddEnumValue2("laneBackwardThrough",OffsetRel::laneBackwardThrough);
       AddEnumValue2("laneBackwardThroughRight",OffsetRel::laneBackwardThroughRight);
       AddEnumValue2("laneBackwardRight",OffsetRel::laneBackwardRight);
+
+      AddEnumValue2("sidecar", OffsetRel::sidecar);
     }
 
     void AddEnumValue2(const std::string& name,

@@ -164,30 +164,26 @@ namespace osmscout
     FileScanner scanner;
 
     try {
-      FileOffset nodesFileSize=0;
-      FileOffset waysFileSize=0;
-      FileOffset areasFileSize=0;
-
       // node count
       std::string nodesDataFile=
       AppendFileToDir(parameter.GetDestinationDirectory(),
                       "nodes.dat");
 
-      nodesFileSize=GetFileSize(nodesDataFile);
+      const FileOffset nodesFileSize=GetFileSize(nodesDataFile);
 
       // way count
       std::string waysDataFile=
       AppendFileToDir(parameter.GetDestinationDirectory(),
                       "ways.dat");
 
-      waysFileSize=GetFileSize(waysDataFile);
+      const FileOffset waysFileSize=GetFileSize(waysDataFile);
 
       // area count
       std::string areasDataFile=
       AppendFileToDir(parameter.GetDestinationDirectory(),
                       "areas.dat");
 
-      areasFileSize=GetFileSize(areasDataFile);
+      const FileOffset areasFileSize=GetFileSize(areasDataFile);
 
       // Determine the number of bytes needed to store offsets
       uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);

@@ -614,6 +614,10 @@ namespace osmscout {
     std::list<PathTextConditionalStyle>        areaBorderTextStyleConditionals;
     std::list<PathSymbolConditionalStyle>      areaBorderSymbolStyleConditionals;
 
+    // Route
+    std::vector<LineStyleLookupTable>          routeLineStyleSelectors;
+    std::list<LineConditionalStyle>            routeLineStyleConditionals;
+
     FillStyleLookupTable                       areaFillStyleSelectors;
     std::vector<BorderStyleLookupTable>        areaBorderStyleSelectors;
     std::vector<TextStyleLookupTable>          areaTextStyleSelectors;
@@ -622,6 +626,9 @@ namespace osmscout {
     PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
 
     std::vector<TypeInfoSet>                   areaTypeSets;
+
+    // Route
+    std::vector<TypeInfoSet>                   routeTypeSets;
 
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
@@ -634,6 +641,7 @@ namespace osmscout {
     void PostprocessNodes();
     void PostprocessWays();
     void PostprocessAreas();
+    void PostprocessRoutes();
     void PostprocessIconId();
     void PostprocessPatternId();
 
@@ -704,12 +712,17 @@ namespace osmscout {
     void AddAreaBorderSymbolStyle(const StyleFilter& filter,
                                   PathSymbolPartialStyle& style);
 
+    void AddRouteLineStyle(const StyleFilter& filter,
+                           LinePartialStyle& style);
+
     void GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
     void GetWayTypesWithMaxMag(const Magnification& mag,
                                TypeInfoSet& types) const;
     void GetAreaTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
+    void GetRouteTypesWithMaxMag(const Magnification& maxMag,
+                                 TypeInfoSet& types) const;
 
 
     inline size_t GetWayPrio(const TypeInfoRef& type) const
@@ -745,6 +758,10 @@ namespace osmscout {
                                          const Projection& projection) const;
     PathShieldStyleRef GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const;
+
+    void GetRouteLineStyles(const FeatureValueBuffer& buffer,
+                            const Projection& projection,
+                            std::vector<LineStyleRef>& lineStyles) const;
 
     FillStyleRef GetAreaFillStyle(const TypeInfoRef& type,
                                   const FeatureValueBuffer& buffer,

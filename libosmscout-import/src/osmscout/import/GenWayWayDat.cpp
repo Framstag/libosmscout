@@ -29,7 +29,6 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
-#include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/Preprocess.h>
@@ -54,9 +53,51 @@ namespace osmscout {
     description.AddRequiredFile(TypeDistributionDataFile::DISTRIBUTION_DAT);
     description.AddRequiredFile(Preprocess::RAWWAYS_DAT);
     description.AddRequiredFile(Preprocess::RAWTURNRESTR_DAT);
+    description.AddRequiredFile(Preprocess::RAWROUTE_DAT);
 
     description.AddProvidedTemporaryFile(WAYWAY_TMP);
     description.AddProvidedTemporaryFile(TURNRESTR_DAT);
+  }
+
+  bool WayWayDataGenerator::ReadRouteMemberData(const ImportParameter& parameter,
+                                                const TypeConfig& typeConfig,
+                                                Progress& progress,
+                                                RouteMemberData& routeMembers)
+  {
+    FileScanner scanner;
+    uint32_t    routeCount=0;
+
+    try {
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   Preprocess::RAWROUTE_DAT),
+                   FileScanner::Sequential,
+                   true);
+
+      scanner.Read(routeCount);
+
+      for (uint32_t r=1; r <= routeCount; r++) {
+        progress.SetProgress(r, routeCount);
+
+        RawRelation route;
+        route.Read(typeConfig, scanner);
+
+        for (const auto &member: route.members){
+          if (member.type==RawRelation::memberWay){
+            routeMembers.insert(std::make_pair(member.id, route.GetId()));
+          }
+        }
+      }
+
+      progress.Info(std::string("Read ") + std::to_string(routeCount) + " routes");
+
+      scanner.Close();
+    }
+    catch (IOException& e) {
+      progress.Error(e.GetDescription());
+      return false;
+    }
+
+    return true;
   }
 
   bool WayWayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
@@ -182,7 +223,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (auto &type : currentTypes) {
+        for (const auto &type : currentTypes) {
           if (!ways[type->GetIndex()].empty() &&
               (!victimType ||
                ways[type->GetIndex()].size()<ways[victimType->GetIndex()].size())) {
@@ -259,7 +300,8 @@ namespace osmscout {
 
   bool WayWayDataGenerator::MergeWays(Progress& progress,
                                       std::list<RawWayRef>& ways,
-                                      RestrictionData& restrictions)
+                                      RestrictionData& restrictions,
+                                      RouteMemberData& routeMembers)
   {
     WaysByNodeMap waysByNode;
 
@@ -353,6 +395,28 @@ namespace osmscout {
           //Attributes do not match => No candidate
           if (way->GetFeatureValueBuffer()!=candidate->GetFeatureValueBuffer()) {
             continue;
+          }
+
+          // check route members
+          auto aRouteFrom = routeMembers.lower_bound(way->GetId());
+          auto aRouteTo = routeMembers.upper_bound(way->GetId());
+          auto bRouteFrom = routeMembers.lower_bound(candidate->GetId());
+          auto bRouteTo = routeMembers.upper_bound(candidate->GetId());
+          if (aRouteFrom != aRouteTo || bRouteFrom != bRouteTo){
+            std::set<OSMId> aRoutes;
+            std::set<OSMId> bRoutes;
+
+            std::for_each(aRouteFrom,aRouteTo,
+                [&aRoutes](auto &pair){aRoutes.insert(pair.second);});
+
+            std::for_each(bRouteFrom,bRouteTo,
+                [&bRoutes](auto &pair){bRoutes.insert(pair.second);});
+
+            assert(!(aRoutes.empty() && bRoutes.empty()));
+
+            if (aRoutes != bRoutes) {
+              continue; // cannot merge, ways have different set of routes
+            }
           }
 
           /*
@@ -691,6 +755,8 @@ namespace osmscout {
 
     RestrictionData                         restrictions;
 
+    RouteMemberData                         routeMembers;
+
     TypeDistributionDataFile                typeDistributionDataFile;
 
     FileScanner                             scanner;
@@ -719,6 +785,13 @@ namespace osmscout {
         }
       }
     }
+
+    progress.SetAction("Reading route members");
+
+    ReadRouteMemberData(parameter,
+                        *typeConfig,
+                        progress,
+                        routeMembers);
 
     //
     // handling of restriction relations
@@ -783,7 +856,8 @@ namespace osmscout {
           if (originalWayCount>0) {
             MergeWays(progress,
                       waysByType[typeIdx],
-                      restrictions);
+                      restrictions,
+                      routeMembers);
 
 #pragma omp critical
             if (waysByType[typeIdx].size()<originalWayCount) {
@@ -799,8 +873,8 @@ namespace osmscout {
         std::set<OSMId>          nodeIds;
         CoordDataFile::ResultMap coordsMap;
 
-        for (size_t type=0; type<waysByType.size(); type++) {
-          for (const auto &rawWay : waysByType[type]) {
+        for (auto & type : waysByType) {
+          for (const auto &rawWay : type) {
             for (size_t n=0; n<rawWay->GetNodeCount(); n++) {
               nodeIds.insert(rawWay->GetNodeId(n));
             }

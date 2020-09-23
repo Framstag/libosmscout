@@ -2242,6 +2242,7 @@ namespace osmscout {
   {
   private:
     TagId tagColor;
+    TagId tagSymbol;
 
   public:
     /** Name of this feature */

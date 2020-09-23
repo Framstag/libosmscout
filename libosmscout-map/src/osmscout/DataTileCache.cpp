@@ -233,9 +233,9 @@ namespace osmscout {
   }
 
   void DataTileCache::ResolveAreasFromParent(Tile& tile,
-                                              const Tile& parentTile,
-                                              const GeoBox& boundingBox,
-                                              const TypeInfoSet& areaTypes)
+                                             const Tile& parentTile,
+                                             const GeoBox& boundingBox,
+                                             const TypeInfoSet& areaTypes)
   {
     TypeInfoSet subset(areaTypes);
 
@@ -263,6 +263,37 @@ namespace osmscout {
     }
   }
 
+  void DataTileCache::ResolveRoutesFromParent(Tile& tile,
+                                              const Tile& parentTile,
+                                              const GeoBox& boundingBox,
+                                              const TypeInfoSet& routeTypes)
+  {
+    TypeInfoSet subset(routeTypes);
+
+    // We remove all types that are already loaded
+    subset.Remove(tile.GetRouteData().GetTypes());
+
+    if (subset.Intersects(parentTile.GetRouteData().GetTypes())) {
+      // We only retrieve types that both tiles have in common
+      subset.Intersection(parentTile.GetRouteData().GetTypes());
+
+      std::vector<RouteRef> data;
+
+      data.reserve(parentTile.GetRouteData().GetDataSize());
+
+      parentTile.GetRouteData().CopyData([&](const RouteRef& route) {
+        if (subset.IsSet(route->GetType())) {
+          if (route->GetBoundingBox().Intersects(boundingBox)) {
+            data.push_back(route);
+          }
+        }
+      });
+
+      tile.GetRouteData().AddPrefillData(subset,
+                                        data);
+    }
+  }
+
   /**
    * (Partially) prefill the given tiles with data already cached with data of the given types.
    *
@@ -273,6 +304,7 @@ namespace osmscout {
                                            const TypeInfoSet& nodeTypes,
                                            const TypeInfoSet& wayTypes,
                                            const TypeInfoSet& areaTypes,
+                                           const TypeInfoSet& routeTypes,
                                            const TypeInfoSet& /*optimizedWayTypes*/,
                                            const TypeInfoSet& /*optimizedAreaTypes*/)
   {
@@ -286,6 +318,7 @@ namespace osmscout {
         ResolveNodesFromParent(tile,*parentTile,boundingBox,nodeTypes);
         ResolveWaysFromParent(tile,*parentTile,boundingBox,wayTypes);
         ResolveAreasFromParent(tile,*parentTile,boundingBox,areaTypes);
+        ResolveRoutesFromParent(tile,*parentTile,boundingBox,routeTypes);
 
         return;
       }
