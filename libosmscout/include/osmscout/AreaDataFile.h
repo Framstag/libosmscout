@@ -38,6 +38,14 @@ namespace osmscout {
 
   public:
     explicit AreaDataFile(size_t cacheSize);
+
+    // disable copy and move
+    AreaDataFile(const AreaDataFile&) = delete;
+    AreaDataFile(AreaDataFile&&) = delete;
+    AreaDataFile& operator=(const AreaDataFile&) = delete;
+    AreaDataFile& operator=(AreaDataFile&&) = delete;
+
+    ~AreaDataFile() override = default;
   };
 
   using AreaDataFileRef = std::shared_ptr<AreaDataFile>;

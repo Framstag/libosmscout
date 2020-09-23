@@ -100,6 +100,12 @@ namespace osmscout {
   public:
     DataFile(const std::string& datafile, size_t cacheSize);
 
+    // disable copy and move
+    DataFile(const DataFile&) = delete;
+    DataFile(DataFile&&) = delete;
+    DataFile& operator=(const DataFile&) = delete;
+    DataFile& operator=(DataFile&&) = delete;
+
     virtual ~DataFile();
 
     bool Open(const TypeConfigRef& typeConfig,

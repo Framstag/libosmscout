@@ -37,6 +37,14 @@ namespace osmscout {
   
   public:
     explicit RouteDataFile(size_t cacheSize);
+
+    // disable copy and move
+    RouteDataFile(const RouteDataFile&) = delete;
+    RouteDataFile(RouteDataFile&&) = delete;
+    RouteDataFile& operator=(const RouteDataFile&) = delete;
+    RouteDataFile& operator=(RouteDataFile&&) = delete;
+
+    ~RouteDataFile() override = default;
   };
   
   using RouteDataFileRef = std::shared_ptr<RouteDataFile>;

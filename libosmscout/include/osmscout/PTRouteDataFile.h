@@ -37,6 +37,14 @@ namespace osmscout {
 
   public:
     explicit PTRouteDataFile(size_t cacheSize);
+
+    // disable copy and move
+    PTRouteDataFile(const PTRouteDataFile&) = delete;
+    PTRouteDataFile(PTRouteDataFile&&) = delete;
+    PTRouteDataFile& operator=(const PTRouteDataFile&) = delete;
+    PTRouteDataFile& operator=(PTRouteDataFile&&) = delete;
+
+    ~PTRouteDataFile() override = default;
   };
 
   using PTRouteDataFileRef = std::shared_ptr<PTRouteDataFile>;

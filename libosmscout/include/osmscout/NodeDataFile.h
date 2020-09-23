@@ -38,6 +38,14 @@ namespace osmscout {
 
   public:
     explicit NodeDataFile(size_t cacheSize);
+
+    // disable copy and move
+    NodeDataFile(const NodeDataFile&) = delete;
+    NodeDataFile(NodeDataFile&&) = delete;
+    NodeDataFile& operator=(const NodeDataFile&) = delete;
+    NodeDataFile& operator=(NodeDataFile&&) = delete;
+
+    ~NodeDataFile() override = default;
   };
 
   using NodeDataFileRef = std::shared_ptr<NodeDataFile>;

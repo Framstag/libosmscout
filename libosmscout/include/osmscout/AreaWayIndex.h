@@ -53,7 +53,14 @@ namespace osmscout {
 
   public:
     AreaWayIndex();
-    virtual ~AreaWayIndex() = default;
+
+    // disable copy and move
+    AreaWayIndex(const AreaWayIndex&) = delete;
+    AreaWayIndex(AreaWayIndex&&) = delete;
+    AreaWayIndex& operator=(const AreaWayIndex&) = delete;
+    AreaWayIndex& operator=(AreaWayIndex&&) = delete;
+
+    ~AreaWayIndex() override = default;
   };
 
   using AreaWayIndexRef = std::shared_ptr<AreaWayIndex>;

@@ -76,6 +76,14 @@ namespace osmscout {
                               TypeData &data) = 0;
 
   public:
+    AreaIndex() = default;
+
+    // disable copy and move
+    AreaIndex(const AreaIndex&) = delete;
+    AreaIndex(AreaIndex&&) = delete;
+    AreaIndex& operator=(const AreaIndex&) = delete;
+    AreaIndex& operator=(AreaIndex&&) = delete;
+
     virtual ~AreaIndex();
 
     void Close();
