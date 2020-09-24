@@ -1935,6 +1935,7 @@ namespace osmscout {
         }
       };
 
+      std::unique_ptr<Route::MemberCache> resolvedMembers;
       for (const auto &segment:route->segments){
         for (const auto &member:segment.members){
           auto memberWay=wayDataMap.find(member.way);
@@ -1942,9 +1943,12 @@ namespace osmscout {
             // when route member is not rendered, it is not present in wayPathData
             // but when we have it in resolved members, we may still process it
             // and render route on it
-            Route::MemberCache resolvedMembers=route->GetResolvedMembers();
-            if (auto it=resolvedMembers.find(member.way);
-                it!=resolvedMembers.end()){
+            if (resolvedMembers==nullptr) {
+              // load member cache lazy
+              resolvedMembers=std::make_unique<Route::MemberCache>(route->GetResolvedMembers());
+            }
+            if (auto it=resolvedMembers->find(member.way);
+                it!=resolvedMembers->end()){
 
               assert(member.way==it->second->GetFileOffset());
 
@@ -2190,7 +2194,7 @@ namespace osmscout {
       log.Info()
         << "Prep: "
         << prepareWaysTimer.ResultString() << " (sec) "
-        << prepareAreasTimer.ResultString() << " (sec)"
+        << prepareAreasTimer.ResultString() << " (sec) "
         << prepareRoutesTimer.ResultString() << " (sec)";
     }
   }
