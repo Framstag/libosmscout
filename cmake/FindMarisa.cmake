@@ -14,6 +14,8 @@ FIND_PATH(MARISA_INCLUDE_DIRS
           ${PC_MARISA_INCLUDE_DIRS}
 		  $ENV{MARISA_HOME}/include
 		  $ENV{MARISA_ROOT}/include
+		  ${MARISA_HOME}/include
+		  ${MARISA_ROOT}/include
 		  /usr/local/include
 		  /usr/include
 		  /marisa/include
@@ -26,6 +28,8 @@ FIND_LIBRARY(MARISA_LIBRARIES
           ${PC_MARISA_LIBRARY_DIRS}
 		  $ENV{MARISA_HOME}/lib
 		  $ENV{MARISA_ROOT}/lib
+		  ${MARISA_HOME}/lib
+		  ${MARISA_ROOT}/lib
 		  /usr/local/lib
 		  /usr/lib
 		  /lib
