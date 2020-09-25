@@ -32,7 +32,7 @@ osmscout_library_project(
 set_source_files_properties(${HEADER_FILES_OLT}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutTest PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION C

@@ -20,7 +20,7 @@ osmscout_library_project(
 )
 target_include_directories(OSMScoutMapAGG INTERFACE ${LIBAGG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIR_freetype2} ${FREETYPE_INCLUDE_DIR_ft2build})
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMapAGG PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION C

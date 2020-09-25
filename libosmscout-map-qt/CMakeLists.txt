@@ -21,7 +21,7 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout OSMScout::Map Qt5::Gui Qt5::Svg
 )
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMapQt PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION C

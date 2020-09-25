@@ -86,7 +86,7 @@ set(HEADER_FILES
     include/osmscout/Area.h
     include/osmscout/AreaAreaIndex.h
     include/osmscout/AreaDataFile.h
-	include/osmscout/AreaIndex.h
+    include/osmscout/AreaIndex.h
     include/osmscout/AreaNodeIndex.h
     include/osmscout/AreaRouteIndex.h
     include/osmscout/AreaWayIndex.h
@@ -195,8 +195,8 @@ set(SOURCE_FILES
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
-	src/osmscout/AreaIndex.cpp
-	src/osmscout/AreaNodeIndex.cpp
+    src/osmscout/AreaIndex.cpp
+    src/osmscout/AreaNodeIndex.cpp
     src/osmscout/AreaRouteIndex.cpp
     src/osmscout/AreaWayIndex.cpp
     src/osmscout/CoordDataFile.cpp
@@ -274,7 +274,7 @@ if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScout PROPERTIES
 		FRAMEWORK TRUE
 		FRAMEWORK_VERSION A

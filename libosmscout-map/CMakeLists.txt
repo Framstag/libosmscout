@@ -47,7 +47,7 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout
 )
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutMap PROPERTIES
   		FRAMEWORK TRUE
   		FRAMEWORK_VERSION A

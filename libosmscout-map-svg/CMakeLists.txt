@@ -17,7 +17,7 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout OSMScout::Map
 )
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_target_properties(OSMScoutMapSVG PROPERTIES
             FRAMEWORK TRUE
             FRAMEWORK_VERSION C
