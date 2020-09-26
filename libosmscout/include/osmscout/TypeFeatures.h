@@ -86,6 +86,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -152,6 +153,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -220,6 +222,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -287,6 +290,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -357,6 +361,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -434,6 +439,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -679,6 +685,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -806,6 +813,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -862,6 +870,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -918,6 +927,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -984,6 +994,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1041,6 +1052,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1111,6 +1123,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1181,6 +1194,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1346,6 +1360,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1416,6 +1431,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1507,6 +1523,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1578,6 +1595,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1634,6 +1652,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1719,6 +1738,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1824,6 +1844,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -1957,6 +1978,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -2026,6 +2048,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -2095,6 +2118,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -2190,6 +2214,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 
@@ -2260,6 +2285,7 @@ namespace osmscout {
 
     std::string GetName() const override;
 
+    size_t GetValueAlignment() const override;
     size_t GetValueSize() const override;
     FeatureValue* AllocateValue(void* buffer) override;
 

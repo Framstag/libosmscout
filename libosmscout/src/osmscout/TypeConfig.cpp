@@ -129,13 +129,13 @@ namespace osmscout {
     size_t featureBit=0;
     size_t index=0;
     size_t offset=0;
-    size_t alignment=std::max(sizeof(size_t),sizeof(void*));
 
     if (!features.empty()) {
       featureBit=features.back().GetFeatureBit()+1+feature->GetFeatureBitCount();
       index=features.back().GetIndex()+1;
       offset=features.back().GetOffset()+features.back().GetFeature()->GetValueSize();
-      if (offset%alignment!=0) {
+      size_t alignment=feature->GetValueAlignment();
+      if (alignment!=0 && (offset%alignment!=0)) {
         offset=(offset/alignment+1)*alignment;
       }
     }

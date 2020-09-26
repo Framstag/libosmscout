@@ -80,6 +80,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t NameFeature::GetValueAlignment() const
+  {
+    return alignof(NameFeatureValue);
+  }
+
   size_t NameFeature::GetValueSize() const
   {
     return sizeof(NameFeatureValue);
@@ -164,6 +169,11 @@ namespace osmscout {
   std::string NameAltFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t NameAltFeature::GetValueAlignment() const
+  {
+    return alignof(NameAltFeatureValue);
   }
 
   size_t NameAltFeature::GetValueSize() const
@@ -253,6 +263,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t NameShortFeature::GetValueAlignment() const
+  {
+    return alignof(NameShortFeatureValue);
+  }
+
   size_t NameShortFeature::GetValueSize() const
   {
     return sizeof(NameShortFeatureValue);
@@ -329,6 +344,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t RefFeature::GetValueAlignment() const
+  {
+    return alignof(RefFeatureValue);
+  }
+
   size_t RefFeature::GetValueSize() const
   {
     return sizeof(RefFeatureValue);
@@ -396,6 +416,11 @@ namespace osmscout {
   std::string LocationFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t LocationFeature::GetValueAlignment() const
+  {
+    return alignof(LocationFeatureValue);
   }
 
   size_t LocationFeature::GetValueSize() const
@@ -492,6 +517,11 @@ namespace osmscout {
   std::string AddressFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t AddressFeature::GetValueAlignment() const
+  {
+    return alignof(AddressFeatureValue);
   }
 
   size_t AddressFeature::GetValueSize() const
@@ -595,6 +625,11 @@ namespace osmscout {
   std::string AccessFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t AccessFeature::GetValueAlignment() const
+  {
+    return alignof(AccessFeatureValue);
   }
 
   size_t AccessFeature::GetValueSize() const
@@ -859,6 +894,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t AccessRestrictedFeature::GetValueAlignment() const
+  {
+    return alignof(AccessRestrictedFeatureValue);
+  }
+
   size_t AccessRestrictedFeature::GetValueSize() const
   {
     return sizeof(AccessRestrictedFeatureValue);
@@ -976,6 +1016,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t LayerFeature::GetValueAlignment() const
+  {
+    return alignof(LayerFeatureValue);
+  }
+
   size_t LayerFeature::GetValueSize() const
   {
     return sizeof(LayerFeatureValue);
@@ -1049,6 +1094,11 @@ namespace osmscout {
   std::string WidthFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t WidthFeature::GetValueAlignment() const
+  {
+    return alignof(WidthFeatureValue);
   }
 
   size_t WidthFeature::GetValueSize() const
@@ -1161,6 +1211,11 @@ namespace osmscout {
   std::string MaxSpeedFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t MaxSpeedFeature::GetValueAlignment() const
+  {
+    return alignof(MaxSpeedFeatureValue);
   }
 
   size_t MaxSpeedFeature::GetValueSize() const
@@ -1383,6 +1438,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t GradeFeature::GetValueAlignment() const
+  {
+    return alignof(GradeFeatureValue);
+  }
+
   size_t GradeFeature::GetValueSize() const
   {
     return sizeof(GradeFeatureValue);
@@ -1504,6 +1564,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t AdminLevelFeature::GetValueAlignment() const
+  {
+    return alignof(AdminLevelFeatureValue);
+  }
+
   size_t AdminLevelFeature::GetValueSize() const
   {
     return sizeof(AdminLevelFeatureValue);
@@ -1590,6 +1655,11 @@ namespace osmscout {
   std::string PostalCodeFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t PostalCodeFeature::GetValueAlignment() const
+  {
+    return alignof(PostalCodeFeatureValue);
   }
 
   size_t PostalCodeFeature::GetValueSize() const
@@ -1682,6 +1752,11 @@ namespace osmscout {
   std::string WebsiteFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t WebsiteFeature::GetValueAlignment() const
+  {
+    return alignof(WebsiteFeatureValue);
   }
 
   size_t WebsiteFeature::GetValueSize() const
@@ -1777,6 +1852,11 @@ namespace osmscout {
   std::string PhoneFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t PhoneFeature::GetValueAlignment() const
+  {
+    return alignof(PhoneFeatureValue);
   }
 
   size_t PhoneFeature::GetValueSize() const
@@ -2055,6 +2135,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t EleFeature::GetValueAlignment() const
+  {
+    return alignof(EleFeatureValue);
+  }
+
   size_t EleFeature::GetValueSize() const
   {
     return sizeof(EleFeatureValue);
@@ -2178,6 +2263,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t DestinationFeature::GetValueAlignment() const
+  {
+    return alignof(DestinationFeatureValue);
+  }
+
   size_t DestinationFeature::GetValueSize() const
   {
     return sizeof(DestinationFeatureValue);
@@ -2285,6 +2375,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t IsInFeature::GetValueAlignment() const
+  {
+    return alignof(IsInFeatureValue);
+  }
+
   size_t IsInFeature::GetValueSize() const
   {
     return sizeof(IsInFeatureValue);
@@ -2360,6 +2455,11 @@ namespace osmscout {
   std::string ConstructionYearFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t ConstructionYearFeature::GetValueAlignment() const
+  {
+    return alignof(ConstructionYearFeatureValue);
   }
 
   size_t ConstructionYearFeature::GetValueSize() const
@@ -2546,6 +2646,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t SidewayFeature::GetValueAlignment() const
+  {
+    return alignof(SidewayFeatureValue);
+  }
+
   size_t SidewayFeature::GetValueSize() const
   {
     return sizeof(SidewayFeatureValue);
@@ -2726,6 +2831,11 @@ namespace osmscout {
   std::string LanesFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t LanesFeature::GetValueAlignment() const
+  {
+    return alignof(LanesFeatureValue);
   }
 
   size_t LanesFeature::GetValueSize() const
@@ -2941,6 +3051,11 @@ namespace osmscout {
     return NAME;
   }
 
+  size_t OperatorFeature::GetValueAlignment() const
+  {
+    return alignof(OperatorFeatureValue);
+  }
+
   size_t OperatorFeature::GetValueSize() const
   {
     return sizeof(OperatorFeatureValue);
@@ -3012,6 +3127,11 @@ namespace osmscout {
   std::string NetworkFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t NetworkFeature::GetValueAlignment() const
+  {
+    return alignof(NetworkFeatureValue);
   }
 
   size_t NetworkFeature::GetValueSize() const
@@ -3090,6 +3210,11 @@ namespace osmscout {
   std::string FromToFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t FromToFeature::GetValueAlignment() const
+  {
+    return alignof(FromToFeatureValue);
   }
 
   size_t FromToFeature::GetValueSize() const
@@ -3172,6 +3297,11 @@ namespace osmscout {
   std::string ColorFeature::GetName() const
   {
     return NAME;
+  }
+
+  size_t ColorFeature::GetValueAlignment() const
+  {
+    return alignof(ColorFeatureValue);
   }
 
   size_t ColorFeature::GetValueSize() const
