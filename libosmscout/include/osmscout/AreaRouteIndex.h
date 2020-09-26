@@ -53,7 +53,14 @@ namespace osmscout {
 
   public:
     AreaRouteIndex();
-    virtual ~AreaRouteIndex() = default;
+
+    // disable copy and move
+    AreaRouteIndex(const AreaRouteIndex&) = delete;
+    AreaRouteIndex(AreaRouteIndex&&) = delete;
+    AreaRouteIndex& operator=(const AreaRouteIndex&) = delete;
+    AreaRouteIndex& operator=(AreaRouteIndex&&) = delete;
+
+    ~AreaRouteIndex() override = default;
   };
 
   using AreaRouteIndexRef = std::shared_ptr<AreaRouteIndex>;

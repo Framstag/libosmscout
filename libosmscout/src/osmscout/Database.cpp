@@ -537,8 +537,8 @@ namespace osmscout {
       StopClock timer;
 
       if (!areaRouteIndex->Open(typeConfig,
-                              path,
-                              parameter.GetIndexMMap())) {
+                                path,
+                                parameter.GetIndexMMap())) {
         log.Error() << "Cannot load area way index!";
         areaRouteIndex=nullptr;
 

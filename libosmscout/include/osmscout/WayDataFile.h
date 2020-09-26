@@ -38,6 +38,14 @@ namespace osmscout {
 
   public:
     explicit WayDataFile(size_t cacheSize);
+
+    // disable copy and move
+    WayDataFile(const WayDataFile&) = delete;
+    WayDataFile(WayDataFile&&) = delete;
+    WayDataFile& operator=(const WayDataFile&) = delete;
+    WayDataFile& operator=(WayDataFile&&) = delete;
+
+    ~WayDataFile() override = default;
   };
 
   using WayDataFileRef = std::shared_ptr<WayDataFile>;
