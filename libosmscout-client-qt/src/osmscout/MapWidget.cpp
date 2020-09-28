@@ -25,6 +25,7 @@
 #include <osmscout/InputHandler.h>
 #include <osmscout/OSMScoutQt.h>
 #include <QtSvg/QSvgRenderer>
+#include <QtGlobal>
 
 namespace osmscout {
 
@@ -210,11 +211,17 @@ void MapWidget::wheelEvent(QWheelEvent* event)
     int numDegrees =  cumulNumDegrees / 8;
     int numSteps = numDegrees / 15;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    QPoint pos = event->pos();
+#else
+    QPoint pos = QPoint((int)event->position().x(), (int)event->position().y());
+#endif
+
     if (numSteps>=0) {
-        zoomIn(numSteps*1.35, event->pos());
+        zoomIn(numSteps*1.35, pos);
     }
     else {
-        zoomOut(-numSteps*1.35, event->pos());
+        zoomOut(-numSteps*1.35, pos);
     }
     cumulNumDegrees %= 120;
 
