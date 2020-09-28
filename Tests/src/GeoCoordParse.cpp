@@ -2,6 +2,9 @@
 
 #include <osmscout/GeoCoord.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 bool CheckParseFail(const std::string& text)
 {
   osmscout::GeoCoord coord;
@@ -43,141 +46,59 @@ bool CheckParseSuccess(const std::string& text,
   return false;
 }
 
-int main()
+TEST_CASE()
 {
-  int errors=0;
+    // Empty string
+    REQUIRE(CheckParseFail(""));
 
-  // Empty string
-  if (!CheckParseFail("")) {
-    errors++;
-  }
+    // Only whitespace
+    REQUIRE(CheckParseFail(" "));
 
-  // Only whitespace
-  if (!CheckParseFail(" ")) {
-    errors++;
-  }
+    // Illegal character
+    REQUIRE(CheckParseFail("X"));
 
-  // Illegal character
-  if (!CheckParseFail("X")) {
-    errors++;
-  }
+    // Incomplete
+    REQUIRE(CheckParseFail("N"));
 
-  // Incomplete
-  if (!CheckParseFail("N")) {
-    errors++;
-  }
+    // Incomplete
+    REQUIRE(CheckParseFail("N "));
 
-  // Incomplete
-  if (!CheckParseFail("N ")) {
-    errors++;
-  }
+    // Incomplete
+    REQUIRE(CheckParseFail("N 40"));
 
-  // Incomplete
-  if (!CheckParseFail("N 40")) {
-    errors++;
-  }
+    // Incomplete
+    REQUIRE(CheckParseFail("N 40 W"));
 
-  // Incomplete
-  if (!CheckParseFail("N 40 W")) {
-    errors++;
-  }
+    // Incomplete
+    REQUIRE(CheckParseFail("N 40 X"));
 
-  // Incomplete
-  if (!CheckParseFail("N 40 X")) {
-    errors++;
-  }
+    // Simplest complete case
+    REQUIRE(CheckParseSuccess("40 7", osmscout::GeoCoord(40.0, 7.0)));
 
-  // Simplest complete case
-  if (!CheckParseSuccess("40 7",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
+    //
+    // various variants for positive/negative values
+    //
+    REQUIRE(CheckParseSuccess("40 -7", osmscout::GeoCoord(40.0, -7.0)));
+    REQUIRE(CheckParseSuccess("+40 -7", osmscout::GeoCoord(40.0, -7.0)));
+    REQUIRE(CheckParseSuccess("N40 E7", osmscout::GeoCoord(40.0, 7.0)));
+    REQUIRE(CheckParseSuccess("N 40 E 7", osmscout::GeoCoord(40.0, 7.0)));
+    REQUIRE(CheckParseSuccess("40 N E 7", osmscout::GeoCoord(40.0, 7.0)));
+    REQUIRE(CheckParseSuccess("40 N 7 E", osmscout::GeoCoord(40.0, 7.0)));
+    REQUIRE(CheckParseSuccess("40 N 7 E  ", osmscout::GeoCoord(40.0, 7.0)));
 
-  //
-  // various variants for positive/negative values
-  //
-  if (!CheckParseSuccess("40 -7",
-                         osmscout::GeoCoord(40.0,-7.0))) {
-    errors++;
-  }
+    // Trailing garbage
+    REQUIRE(CheckParseFail("40 7X"));
 
-  if (!CheckParseSuccess("+40 -7",
-                         osmscout::GeoCoord(40.0,-7.0))) {
-    errors++;
-  }
+    // Trailing garbage
+    REQUIRE(CheckParseFail("40 7 X"));
 
-  if (!CheckParseSuccess("N40 E7",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("N 40 E 7",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40 N E 7",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40 N 7 E",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40 N 7 E  ",
-                         osmscout::GeoCoord(40.0,7.0))) {
-    errors++;
-  }
-
-  // Trailing garbage
-  if (!CheckParseFail("40 7X")) {
-    errors++;
-  }
-
-  // Trailing garbage
-  if (!CheckParseFail("40 7 X")) {
-    errors++;
-  }
-
-  //
-  // Now with fraction values
-  //
-
-  if (!CheckParseSuccess("40.1 7.1",
-                         osmscout::GeoCoord(40.1,7.1))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40.12 7.12",
-                         osmscout::GeoCoord(40.12,7.12))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40,123 7,123",
-                         osmscout::GeoCoord(40.123,7.123))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("40,123 -7,123",
-                         osmscout::GeoCoord(40.123,-7.123))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess( "50°5'8.860\"N 14°24'37.592\"E",
-                         osmscout::GeoCoord(50.0857944, 14.4104422))) {
-    errors++;
-  }
-
-  if (!CheckParseSuccess("N 50°5.14767' E 14°24.62653'",
-                         osmscout::GeoCoord(50.0857944, 14.4104422))) {
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-
-  return 0;
+    //
+    // Now with fraction values
+    //
+    REQUIRE(CheckParseSuccess("40.1 7.1", osmscout::GeoCoord(40.1, 7.1)));
+    REQUIRE(CheckParseSuccess("40.12 7.12", osmscout::GeoCoord(40.12, 7.12)));
+    REQUIRE(CheckParseSuccess("40,123 7,123", osmscout::GeoCoord(40.123, 7.123)));
+    REQUIRE(CheckParseSuccess("40,123 -7,123", osmscout::GeoCoord(40.123, -7.123)));
+    REQUIRE(CheckParseSuccess("50°5'8.860\"N 14°24'37.592\"E", osmscout::GeoCoord(50.0857944, 14.4104422)));
+    REQUIRE(CheckParseSuccess("N 50°5.14767' E 14°24.62653'", osmscout::GeoCoord(50.0857944, 14.4104422)));
 }
