@@ -21,6 +21,9 @@
 
 #include <osmscout/MapPainterNoOp.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 static const double ringCoords[] = {
   50.08336917, 14.41309835,
   50.08305669, 14.41285159,
@@ -815,7 +818,7 @@ bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
                        pixelOffset);
 }
 
-int main(int /*argc*/, char** /*argv*/)
+TEST_CASE()
 {
   osmscout::TypeConfigRef typeConfig = std::make_shared<osmscout::TypeConfig>();
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
@@ -847,20 +850,7 @@ int main(int /*argc*/, char** /*argv*/)
                    dpi, width, height
                    );
     double angleDeg = (360*(angle/(2*M_PI)));
-
-    bool visible = painter.IsVisibleAreaPublic(projection, ring, 0.0);
-
-    if (!visible) {
-      problems+=1;
-      std::cerr << "angle " << angle << " (" << angleDeg << "°) => " << visible << " ERROR" << std::endl;
-    }
-    else {
-      std::cout << "angle " << angle << " (" << angleDeg << "°) => " << visible << " OK" << std::endl;
-    }
+    REQUIRE(painter.IsVisibleAreaPublic(projection, ring, 0.0));
   }
-
-  std::cout << problems << " problems found" << std::endl;
-
-  return problems;
 }
 
