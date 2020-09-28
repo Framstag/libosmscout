@@ -20,6 +20,7 @@
 #include <osmscout/util/Logger.h>
 
 #include <iostream>
+#include <string_view>
 
 #include <osmscout/system/Assert.h>
 
