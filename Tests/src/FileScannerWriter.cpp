@@ -7,49 +7,36 @@
 
 #include <osmscout/CoreFeatures.h>
 
-int errors=0;
-
-void DumpGeoCoords(const std::vector<osmscout::Point>& coords)
-{
-  std::cout << "[";
-  for (size_t i=0; i<coords.size(); i++) {
-    if (i>0) {
-      std::cout << ", ";
-    }
-
-    std::cout << coords[i].GetCoord().GetDisplayText();
-  }
-  std::cout << "]";
-}
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
 bool Equals(const std::vector<osmscout::Point>& coordsA, const std::vector<osmscout::Point>& coordsB)
 {
-  if (coordsA.size()!=coordsB.size()) {
-    return false;
-  }
-
-  for (size_t i=0; i<coordsA.size(); i++) {
-    if (coordsA[i].GetCoord().GetDisplayText()!=coordsB[i].GetCoord().GetDisplayText()) {
-      std::cerr << "Difference at offset " << i << " " << coordsA[i].GetCoord().GetDisplayText() << " <=> " << coordsB[i].GetCoord().GetDisplayText() << std::endl;
-      return false;
+    if (coordsA.size() != coordsB.size()) {
+        return false;
     }
-  }
 
-  return true;
+    for (size_t i = 0; i < coordsA.size(); i++) {
+        if (coordsA[i].GetCoord().GetDisplayText() != coordsB[i].GetCoord().GetDisplayText()) {
+            std::cerr << "Difference at offset " << i << " " << coordsA[i].GetCoord().GetDisplayText() << " <=> " << coordsB[i].GetCoord().GetDisplayText() << std::endl;
+            return false;
+        }
+    }
+
+    return true;
 }
 
-int main()
+TEST_CASE("FileScannerWriter")
 {
-  osmscout::FileWriter  writer;
-  osmscout::FileScanner scanner;
+    osmscout::FileWriter  writer;
+    osmscout::FileScanner scanner;
 
-  osmscout::FileOffset  finalWriteFileOffset;
+    osmscout::FileOffset  finalWriteFileOffset;
 
-  osmscout::FileOffset  info;
+    osmscout::FileOffset  info;
 
-  osmscout::FileOffset  finalReadFileOffset;
+    osmscout::FileOffset  finalReadFileOffset;
 
-  try {
     bool                  inBool;
     uint16_t              in16u;
     uint32_t              in32u;
@@ -69,38 +56,38 @@ int main()
     std::vector<osmscout::Point> inCoords6;
     std::vector<osmscout::Point> inCoords7;
 
-    bool                  outBool1=false;
-    bool                  outBool2=true;
+    bool                  outBool1 = false;
+    bool                  outBool2 = true;
 
-    uint16_t              out16u1=std::numeric_limits<uint16_t>::min();
-    uint16_t              out16u2=std::numeric_limits<uint16_t>::max()/2;
-    uint16_t              out16u3=std::numeric_limits<uint16_t>::max();
+    uint16_t              out16u1 = std::numeric_limits<uint16_t>::min();
+    uint16_t              out16u2 = std::numeric_limits<uint16_t>::max() / 2;
+    uint16_t              out16u3 = std::numeric_limits<uint16_t>::max();
 
-    uint32_t              out32u1=std::numeric_limits<uint32_t>::min();
-    uint32_t              out32u2=std::numeric_limits<uint32_t>::max()/2;
-    uint32_t              out32u3=std::numeric_limits<uint32_t>::max();
+    uint32_t              out32u1 = std::numeric_limits<uint32_t>::min();
+    uint32_t              out32u2 = std::numeric_limits<uint32_t>::max() / 2;
+    uint32_t              out32u3 = std::numeric_limits<uint32_t>::max();
 
-    uint64_t              out64u1=std::numeric_limits<uint64_t>::min();
-    uint64_t              out64u2=std::numeric_limits<uint64_t>::max()/2;
-    uint64_t              out64u3=std::numeric_limits<uint64_t>::max();
+    uint64_t              out64u1 = std::numeric_limits<uint64_t>::min();
+    uint64_t              out64u2 = std::numeric_limits<uint64_t>::max() / 2;
+    uint64_t              out64u3 = std::numeric_limits<uint64_t>::max();
 
-    int16_t               out16s1=std::numeric_limits<int16_t>::min();
-    int16_t               out16s2=std::numeric_limits<int16_t>::max()/2;
-    int16_t               out16s3=std::numeric_limits<int16_t>::max();
+    int16_t               out16s1 = std::numeric_limits<int16_t>::min();
+    int16_t               out16s2 = std::numeric_limits<int16_t>::max() / 2;
+    int16_t               out16s3 = std::numeric_limits<int16_t>::max();
 
-    int32_t               out32s1=std::numeric_limits<int32_t>::min();
-    int32_t               out32s2=std::numeric_limits<int32_t>::max()/2;
-    int32_t               out32s3=std::numeric_limits<int32_t>::max();
+    int32_t               out32s1 = std::numeric_limits<int32_t>::min();
+    int32_t               out32s2 = std::numeric_limits<int32_t>::max() / 2;
+    int32_t               out32s3 = std::numeric_limits<int32_t>::max();
 
-    int64_t               out64s1=std::numeric_limits<int64_t>::min();
-    int64_t               out64s2=std::numeric_limits<int64_t>::max()/2;
-    int64_t               out64s3=std::numeric_limits<int64_t>::max();
+    int64_t               out64s1 = std::numeric_limits<int64_t>::min();
+    int64_t               out64s2 = std::numeric_limits<int64_t>::max() / 2;
+    int64_t               out64s3 = std::numeric_limits<int64_t>::max();
 
-    osmscout::FileOffset  outfo1=std::numeric_limits<osmscout::FileOffset>::min();
-    osmscout::FileOffset  outfo2=std::numeric_limits<osmscout::FileOffset>::max()/2;
-    osmscout::FileOffset  outfo3=std::numeric_limits<osmscout::FileOffset>::max();
+    osmscout::FileOffset  outfo1 = std::numeric_limits<osmscout::FileOffset>::min();
+    osmscout::FileOffset  outfo2 = std::numeric_limits<osmscout::FileOffset>::max() / 2;
+    osmscout::FileOffset  outfo3 = std::numeric_limits<osmscout::FileOffset>::max();
 
-    osmscout::GeoCoord    outCoord1(51.57231,7.46418);
+    osmscout::GeoCoord    outCoord1(51.57231, 7.46418);
 
     std::vector<osmscout::Point> outCoords1;
     std::vector<osmscout::Point> outCoords2;
@@ -110,51 +97,51 @@ int main()
     std::vector<osmscout::Point> outCoords6;
     std::vector<osmscout::Point> outCoords7;
 
-    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57231,7.46418));
-    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57233,7.46430));
-    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57261,7.46563));
-    outCoords1.emplace_back(0,osmscout::GeoCoord(51.57269,7.46594));
+    outCoords1.emplace_back(0, osmscout::GeoCoord(51.57231, 7.46418));
+    outCoords1.emplace_back(0, osmscout::GeoCoord(51.57233, 7.46430));
+    outCoords1.emplace_back(0, osmscout::GeoCoord(51.57261, 7.46563));
+    outCoords1.emplace_back(0, osmscout::GeoCoord(51.57269, 7.46594));
 
-    outCoords2=outCoords1;
-    std::reverse(outCoords2.begin(),outCoords2.end());
+    outCoords2 = outCoords1;
+    std::reverse(outCoords2.begin(), outCoords2.end());
 
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55493));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55494));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58550,7.55496));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58547,7.55504));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55506));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55507));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58543,7.55508));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58542,7.55508));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55508));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58539,7.55508));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58538,7.55500));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58538,7.55498));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58539,7.55495));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55494));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58540,7.55488));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58541,7.55484));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58542,7.55484));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58544,7.55483));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58546,7.55484));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58547,7.55485));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58548,7.55488));
-    outCoords3.emplace_back(0,osmscout::GeoCoord(51.58549,7.55492));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58549, 7.55493));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58549, 7.55494));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58550, 7.55496));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58547, 7.55504));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58544, 7.55506));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58544, 7.55507));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58543, 7.55508));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58542, 7.55508));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58540, 7.55508));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58539, 7.55508));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58538, 7.55500));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58538, 7.55498));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58539, 7.55495));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58540, 7.55494));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58540, 7.55488));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58541, 7.55484));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58542, 7.55484));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58544, 7.55483));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58546, 7.55484));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58547, 7.55485));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58548, 7.55488));
+    outCoords3.emplace_back(0, osmscout::GeoCoord(51.58549, 7.55492));
 
-    outCoords4=outCoords3;
-    std::reverse(outCoords4.begin(),outCoords4.end());
+    outCoords4 = outCoords3;
+    std::reverse(outCoords4.begin(), outCoords4.end());
 
-    outCoords5.emplace_back(0,osmscout::GeoCoord(5.0,-5.0));
-    outCoords5.emplace_back(0,osmscout::GeoCoord(5.0,5.0));
-    outCoords5.emplace_back(0,osmscout::GeoCoord(-5.0,5.0));
+    outCoords5.emplace_back(0, osmscout::GeoCoord(5.0, -5.0));
+    outCoords5.emplace_back(0, osmscout::GeoCoord(5.0, 5.0));
+    outCoords5.emplace_back(0, osmscout::GeoCoord(-5.0, 5.0));
 
-    outCoords6=outCoords5;
-    std::reverse(outCoords6.begin(),outCoords6.end());
+    outCoords6 = outCoords5;
+    std::reverse(outCoords6.begin(), outCoords6.end());
 
-    uint64_t maxCoords=1000000;
+    uint64_t maxCoords = 1000000;
 
-    for (uint64_t i=1; i<=maxCoords; i++) {
-      outCoords7.emplace_back(0,osmscout::GeoCoord(51.58549,7.55493));
+    for (uint64_t i = 1; i <= maxCoords; i++) {
+        outCoords7.emplace_back(0, osmscout::GeoCoord(51.58549, 7.55493));
     }
 
     writer.Open("test.dat");
@@ -203,352 +190,154 @@ int main()
 
     writer.WriteCoord(outCoord1);
 
-    writer.Write(outCoords1,false);
-    writer.Write(outCoords2,false);
-    writer.Write(outCoords3,false);
-    writer.Write(outCoords4,false);
-    writer.Write(outCoords5,false);
-    writer.Write(outCoords6,false);
-    writer.Write(outCoords7,false);
+    writer.Write(outCoords1, false);
+    writer.Write(outCoords2, false);
+    writer.Write(outCoords3, false);
+    writer.Write(outCoords4, false);
+    writer.Write(outCoords5, false);
+    writer.Write(outCoords6, false);
+    writer.Write(outCoords7, false);
 
-    finalWriteFileOffset=writer.GetPos();
+    finalWriteFileOffset = writer.GetPos();
 
     writer.Close();
 
-    for (int mmapMode = 0; mmapMode <= 1; mmapMode++){
-      scanner.Open("test.dat",osmscout::FileScanner::Normal,(bool)mmapMode);
-
-      // Read/Write
-
-      scanner.Read(inBool);
-      if (inBool!=outBool1) {
-        std::cerr << "Read/Write(bool): Expected " << outBool1 << ", got " << inBool << std::endl;
-        errors++;
-      }
-
-      scanner.Read(inBool);
-      if (inBool!=outBool2) {
-        std::cerr << "Read/Write(bool): Expected " << outBool2 << ", got " << inBool << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in16u);
-      if (in16u!=out16u1) {
-        std::cerr << "Read/Write(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in16u);
-      if (in16u!=out16u2) {
-        std::cerr << "Read/Write(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in16u);
-      if (in16u!=out16u3) {
-        std::cerr << "Read/Write(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in32u);
-      if (in32u!=out32u1) {
-        std::cerr << "Read/Write(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in32u);
-      if (in32u!=out32u2) {
-        std::cerr << "Read/Write(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in32u);
-      if (in32u!=out32u3) {
-        std::cerr << "Read/Write(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in64u);
-      if (in64u!=out64u1) {
-        std::cerr << "Read/Write(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in64u);
-      if (in64u!=out64u2) {
-        std::cerr << "Read/Write(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      scanner.Read(in64u);
-      if (in64u!=out64u3) {
-        std::cerr << "Read/Write(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      // Read/WriteNumber
-
-      scanner.ReadNumber(in16u);
-      if (in16u!=out16u1) {
-        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u1 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in16u);
-      if (in16u!=out16u2) {
-        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u2 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in16u);
-      if (in16u!=out16u3) {
-        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16u3 << ", got " << in16u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32u);
-      if (in32u!=out32u1) {
-        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u1 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32u);
-      if (in32u!=out32u2) {
-        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u2 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32u);
-      if (in32u!=out32u3) {
-        std::cerr << "Read/WriteNumber(uint32_t): Expected " << out32u3 << ", got " << in32u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64u);
-      if (in64u!=out64u1) {
-        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u1 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64u);
-      if (in64u!=out64u2) {
-        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u2 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64u);
-      if (in64u!=out64u3) {
-        std::cerr << "Read/WriteNumber(uint64_t): Expected " << out64u3 << ", got " << in64u << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in16s);
-      if (in16s!=out16s1) {
-        std::cerr << "Read/WriteNumber(int16_t): Expected " << out16s1 << ", got " << in16s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in16s);
-      if (in16s!=out16s2) {
-        std::cerr << "Read/WriteNumber(uint16_t): Expected " << out16s2 << ", got " << in16s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in16s);
-      if (in16s!=out16s3) {
-        std::cerr << "Read/WriteNumber(int16_t): Expected " << out16s3 << ", got " << in16s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32s);
-      if (in32s!=out32s1) {
-        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s1 << ", got " << in32s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32s);
-      if (in32s!=out32s2) {
-        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s2 << ", got " << in32s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in32s);
-      if (in32s!=out32s3) {
-        std::cerr << "Read/WriteNumber(int32_t): Expected " << out32s3 << ", got " << in32s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64s);
-      if (in64s!=out64s1) {
-        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s1 << ", got " << in64s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64s);
-      if (in64s!=out64s2) {
-        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s2 << ", got " << in64s << std::endl;
-        errors++;
-      }
-
-      scanner.ReadNumber(in64s);
-      if (in64s!=out64s3) {
-        std::cerr << "Read/WriteNumber(int64_t): Expected " << out64s3 << ", got " << in64s << std::endl;
-        errors++;
-      }
+    for (int mmapMode = 0; mmapMode <= 1; mmapMode++)
+    {
+        scanner.Open("test.dat", osmscout::FileScanner::Normal, (bool)mmapMode);
 
-      // Read/WriteFileOffset
+        // Read/Write
 
-      scanner.ReadFileOffset(info);
-      if (info!=outfo1) {
-        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo1 << ", got " << info << std::endl;
-        errors++;
-      }
+        scanner.Read(inBool);
+        REQUIRE(inBool == outBool1);
 
-      scanner.ReadFileOffset(info);
-      if (info!=outfo2) {
-        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo2 << ", got " << info << std::endl;
-        errors++;
-      }
+        scanner.Read(inBool);
+        REQUIRE(inBool == outBool2);
 
-      scanner.ReadFileOffset(info);
-      if (info!=outfo3) {
-        std::cerr << "Read/WriteFileOffset(FileOffset): Expected " << outfo3 << ", got " << info << std::endl;
-        errors++;
-      }
+        scanner.Read(in16u);
+        REQUIRE(in16u == out16u1);
 
-      scanner.ReadCoord(inCoord1);
+        scanner.Read(in16u);
+        REQUIRE(in16u == out16u2);
 
-      if (inCoord1.GetDisplayText()!=outCoord1.GetDisplayText()) {
-        std::cerr << "Read/WriteCoord(GeoCoord) 1: Expected " << outCoord1.GetDisplayText() << ", got " << inCoord1.GetDisplayText() << std::endl;
-        errors++;
-      }
+        scanner.Read(in16u);
+        REQUIRE(in16u == out16u3);
 
-      osmscout::GeoBox boundingBox;
-      std::vector<osmscout::SegmentGeoBox> segments;
+        scanner.Read(in32u);
+        REQUIRE(in32u == out32u1);
 
-      scanner.Read(inCoords1,segments,boundingBox,false);
-      if (!Equals(inCoords1,outCoords1)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 1: Expected ";
+        scanner.Read(in32u);
+        REQUIRE(in32u == out32u2);
 
-        DumpGeoCoords(outCoords1);
+        scanner.Read(in32u);
+        REQUIRE(in32u == out32u3);
 
-        std::cout << ", got ";
+        scanner.Read(in64u);
+        REQUIRE(in64u == out64u1);
 
-        DumpGeoCoords(inCoords1);
+        scanner.Read(in64u);
+        REQUIRE(in64u == out64u2);
 
-        std::cout << std::endl;
-        errors++;
-      }
+        scanner.Read(in64u);
+        REQUIRE(in64u == out64u3);
 
-      scanner.Read(inCoords2,segments,boundingBox,false);
-      if (!Equals(inCoords2,outCoords2)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 2: Expected ";
+        // Read/WriteNumber
 
-        DumpGeoCoords(outCoords2);
+        scanner.ReadNumber(in16u);
+        REQUIRE(in16u == out16u1);
 
-        std::cout << ", got ";
+        scanner.ReadNumber(in16u);
+        REQUIRE(in16u == out16u2);
 
-        DumpGeoCoords(inCoords2);
+        scanner.ReadNumber(in16u);
+        REQUIRE(in16u == out16u3);
 
-        std::cout << std::endl;
-        errors++;
-      }
+        scanner.ReadNumber(in32u);
+        REQUIRE(in32u == out32u1);
 
-      scanner.Read(inCoords3,segments,boundingBox,false);
-      if (!Equals(inCoords3,outCoords3)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 3: Expected ";
+        scanner.ReadNumber(in32u);
+        REQUIRE(in32u == out32u2);
 
-        DumpGeoCoords(outCoords3);
+        scanner.ReadNumber(in32u);
+        REQUIRE(in32u == out32u3);
 
-        std::cout << ", got ";
+        scanner.ReadNumber(in64u);
+        REQUIRE(in64u == out64u1);
 
-        DumpGeoCoords(inCoords3);
+        scanner.ReadNumber(in64u);
+        REQUIRE(in64u == out64u2);
 
-        std::cout << std::endl;
-        errors++;
-      }
+        scanner.ReadNumber(in64u);
+        REQUIRE(in64u == out64u3);
 
-      scanner.Read(inCoords4,segments,boundingBox,false);
-      if (!Equals(inCoords4,outCoords4)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 4: Expected ";
+        scanner.ReadNumber(in16s);
+        REQUIRE(in16s == out16s1);
 
-        DumpGeoCoords(outCoords4);
+        scanner.ReadNumber(in16s);
+        REQUIRE(in16s == out16s2);
 
-        std::cout << ", got ";
+        scanner.ReadNumber(in16s);
+        REQUIRE(in16s == out16s3);
 
-        DumpGeoCoords(inCoords4);
+        scanner.ReadNumber(in32s);
+        REQUIRE(in32s == out32s1);
 
-        std::cout << std::endl;
-        errors++;
-      }
+        scanner.ReadNumber(in32s);
+        REQUIRE(in32s == out32s2);
 
-      scanner.Read(inCoords5,segments,boundingBox,false);
-      if (!Equals(inCoords5,outCoords5)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 5: Expected ";
+        scanner.ReadNumber(in32s);
+        REQUIRE(in32s == out32s3);
 
-        DumpGeoCoords(outCoords5);
+        scanner.ReadNumber(in64s);
+        REQUIRE(in64s == out64s1);
 
-        std::cout << ", got ";
+        scanner.ReadNumber(in64s);
+        REQUIRE(in64s == out64s2);
 
-        DumpGeoCoords(inCoords5);
+        scanner.ReadNumber(in64s);
+        REQUIRE(in64s == out64s3);
 
-        std::cout << std::endl;
-        errors++;
-      }
+        // Read/WriteFileOffset
 
-      scanner.Read(inCoords6,segments,boundingBox,false);
-      if (!Equals(inCoords6,outCoords6)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 6: Expected ";
+        scanner.ReadFileOffset(info);
+        REQUIRE(info == outfo1);
 
-        DumpGeoCoords(outCoords6);
+        scanner.ReadFileOffset(info);
+        REQUIRE(info == outfo2);
 
-        std::cout << ", got ";
+        scanner.ReadFileOffset(info);
+        REQUIRE(info == outfo3);
 
-        DumpGeoCoords(inCoords6);
+        scanner.ReadCoord(inCoord1);
+        REQUIRE(inCoord1.GetDisplayText() == outCoord1.GetDisplayText());
 
-        std::cout << std::endl;
-        errors++;
-      }
+        osmscout::GeoBox boundingBox;
+        std::vector<osmscout::SegmentGeoBox> segments;
 
-      scanner.Read(inCoords7,segments,boundingBox,false);
-      if (!Equals(inCoords7,outCoords7)) {
-        std::cerr << "Read/Write(std::vector<GeoCoord>) 7: Expected ";
+        scanner.Read(inCoords1, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords1, outCoords1));
 
-        std::cout << outCoords7.size();
+        scanner.Read(inCoords2, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords2, outCoords2));
 
-        std::cout << ", got ";
+        scanner.Read(inCoords3, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords3, outCoords3));
 
-        std::cout << inCoords7.size();
+        scanner.Read(inCoords4, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords4, outCoords4));
 
-        std::cout << std::endl;
-        errors++;
-      }
+        scanner.Read(inCoords5, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords5, outCoords5));
 
-      finalReadFileOffset=scanner.GetPos();
+        scanner.Read(inCoords6, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords6, outCoords6));
 
-      if (finalWriteFileOffset!=finalReadFileOffset) {
-        std::cerr << "Final file offset check: Expected ";
+        scanner.Read(inCoords7, segments, boundingBox, false);
+        REQUIRE(Equals(inCoords7, outCoords7));
 
-        std::cout << finalWriteFileOffset;
+        finalReadFileOffset = scanner.GetPos();
+        REQUIRE(finalWriteFileOffset == finalReadFileOffset);
 
-        std::cout << ", got ";
-
-        std::cout << finalReadFileOffset;
-
-        std::cout << std::endl;
-        errors++;
-      }
-      scanner.Close();
+        scanner.Close();
     }
-  }
-  catch (osmscout::IOException& e) {
-    std::cerr << e.GetDescription() << std::endl;
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-
-  return 0;
 }
