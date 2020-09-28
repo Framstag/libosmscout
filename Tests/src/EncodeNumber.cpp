@@ -2,7 +2,8 @@
 
 #include <osmscout/util/Number.h>
 
-int errors=0;
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
 bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)
@@ -54,91 +55,30 @@ bool CheckDecode(const char* buffer, uint64_t expected, size_t bytesExpected)
   return true;
 }
 
-int main()
+TEST_CASE("Check encode")
 {
-  if (!CheckEncode(0,"\0",1)) {
-    errors++;
-  }
+    REQUIRE(CheckEncode(0, "\0", 1));
+    REQUIRE(CheckEncode(1, "\x01", 1));
+    REQUIRE(CheckEncode(127, "\x7f", 1));
+    REQUIRE(CheckEncode(128, "\x80\x01", 2));
+    REQUIRE(CheckEncode(213, "\xd5\x01", 2));
+    REQUIRE(CheckEncode(255, "\xff\x01", 2));
+    REQUIRE(CheckEncode(256, "\x80\x02", 2));
+    REQUIRE(CheckEncode(65535, "\xff\xff\x03", 3));
+    REQUIRE(CheckEncode(3622479373539965697, "\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32", 9));
+    REQUIRE(CheckEncode(3627142814677078785, "\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32", 9));
+}
 
-  if (!CheckDecode("\0",0,1)) {
-    errors++;
-  }
-
-  if (!CheckEncode(1,"\x01",1)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x01",1,1)) {
-    errors++;
-  }
-
-  if (!CheckEncode(127,"\x7f",1)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x7f",127,1)) {
-    errors++;
-  }
-
-  if (!CheckEncode(128,"\x80\x01",2)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x80\x01",128,2)) {
-    errors++;
-  }
-
-  if (!CheckEncode(213,"\xd5\x01",2)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\xd5\x01",213,2)) {
-    errors++;
-  }
-
-  if (!CheckEncode(255,"\xff\x01",2)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\xff\x01",255,2)) {
-    errors++;
-  }
-
-  if (!CheckEncode(256,"\x80\x02",2)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x80\x02",256,2)) {
-    errors++;
-  }
-
-  if (!CheckEncode(65535,"\xff\xff\x03",3)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\xff\xff\x03",65535,3)) {
-    errors++;
-  }
-
-  if (!CheckEncode(3622479373539965697,"\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32",9)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32", 3622479373539965697,9)) {
-    errors++;
-  }
-
-  if (!CheckEncode(3627142814677078785,"\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32",9)) {
-    errors++;
-  }
-
-  if (!CheckDecode("\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32",3627142814677078785,9)) {
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-
-  return 0;
+TEST_CASE("Check decode")
+{
+    REQUIRE(CheckDecode("\0", 0, 1));
+    REQUIRE(CheckDecode("\x01", 1, 1));
+    REQUIRE(CheckDecode("\x7f", 127, 1));
+    REQUIRE(CheckDecode("\x80\x01", 128, 2));
+    REQUIRE(CheckDecode("\xd5\x01", 213, 2));
+    REQUIRE(CheckDecode("\xff\x01", 255, 2));
+    REQUIRE(CheckDecode("\x80\x02", 256, 2));
+    REQUIRE(CheckDecode("\xff\xff\x03", 65535, 3));
+    REQUIRE(CheckDecode("\x81\xf6\x9d\xd0\xc2\xb9\xe8\xa2\x32", 3622479373539965697, 9));
+    REQUIRE(CheckDecode("\x81\xa6\xc0\xd3\xc2\xe5\x8c\xab\x32", 3627142814677078785, 9));
 }
