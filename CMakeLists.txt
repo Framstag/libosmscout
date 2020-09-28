@@ -110,7 +110,7 @@ if(MSVC)
   add_definitions(-D_WIN32_WINNT=0x0A00 -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 if(MINGW)
-  add_definitions(-D_WIN32_WINNT=0x0A00)
+  add_definitions(-D_WIN32_WINNT=0x0600)
   if(NOT OSMSCOUT_PLATFORM_X64)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=i686")
     # provide more addressable memory on win 32bit builds
