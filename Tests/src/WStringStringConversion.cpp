@@ -3,95 +3,66 @@
 
 #include <osmscout/util/String.h>
 
-int errors=0;
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
-bool CheckCharsetConversion(const std::string& oText)
+TEST_CASE("Check ANSI charset conversion")
 {
-  std::cout << "Original: \"" << oText << "\"" << std::endl;
-  // Convert to std::wstring
-  std::wstring wText=osmscout::UTF8StringToWString(oText);
-  std::wcout << "WString: \"" << wText << "\"" << std::endl;
-  // ...and convert it back to UTF8
-  std::string  uText=osmscout::WStringToUTF8String(wText);
-  std::cout << "UTF8String: \"" << uText << "\"" << std::endl;
-
-  return oText==uText;
+	const std::string oText = "abcABC";
+	std::wstring wText = osmscout::UTF8StringToWString(oText);
+	std::string  uText = osmscout::WStringToUTF8String(wText);
+	REQUIRE(oText == uText);
 }
 
-bool CheckToUpper(const std::string& oText,
-                  const std::string& eText)
+TEST_CASE("Check german umlauts upper and lower case and euro-sign charset conversion")
 {
-  std::cout << "Original: \"" << oText << "\"" << std::endl;
-  // Convert to upper
-  std::string uText=osmscout::UTF8StringToUpper(oText);
-  std::cout << "Upper: \"" << uText << "\" vs \"" << eText << "\"" << std::endl;
-
-  return uText==eText;
+	try
+	{
+		std::locale::global(std::locale(""));
+	}
+	catch (const std::exception& e) {
+		std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
+	}
+	const std::string oText = "\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac";
+	std::wstring wText = osmscout::UTF8StringToWString(oText);
+	std::string  uText = osmscout::WStringToUTF8String(wText);
+	REQUIRE(oText == uText);
 }
 
-bool CheckToLower(const std::string& oText,
-                  const std::string& eText)
+TEST_CASE("Check ANSI to lower")
 {
-  std::cout << "Original: \"" << oText << "\"" << std::endl;
-  // Convert to lower
-  std::string lText=osmscout::UTF8StringToLower(oText);
-  std::cout << "Lower: \"" << lText << "\" vs \"" << eText << "\"" << std::endl;
-
-  return lText==eText;
+	std::string lText = osmscout::UTF8StringToLower("abcABC");
+	REQUIRE(lText == "abcabc");
 }
 
-int main()
+TEST_CASE("Check ANSI to upper")
 {
-  try {
-    std::locale::global(std::locale(""));
+	std::string uText = osmscout::UTF8StringToUpper("abcABC");
+	REQUIRE(uText == "ABCABC");
+}
 
-    std::cout << "Current locale activated" << std::endl;
-  }
-  catch (const std::exception& e) {
-    std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
-  }
+TEST_CASE("Check German umlauts upper and lower case and euro-sign to lower")
+{
+	try
+	{
+		std::locale::global(std::locale(""));
+	}
+	catch (const std::exception& e) {
+		std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
+	}
+	std::string lText = osmscout::UTF8StringToLower("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac");
+	REQUIRE(lText == "\xc3\xa4\xc3\xb6\xc3\xbc\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac");
+}
 
-  // ANSI
-  if (!CheckCharsetConversion("abcABC")) {
-    errors++;
-  }
-
-  // German umlauts upper and lower case and euro-sign
-  if (!CheckCharsetConversion("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac")) {
-    errors++;
-  }
-
-  // ANSI
-  if (!CheckToLower("abcABC","abcabc")) {
-    errors++;
-  }
-
-  // ANSI
-  if (!CheckToUpper("abcABC","ABCABC")) {
-    errors++;
-  }
-
-  // German umlauts upper
-  if (!CheckToUpper("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc",
-                    "\xc3\x84\xc3\x96\xc3\x9c\xc3\x84\xc3\x96\xc3\x9c")) {
-    errors++;
-  }
-
-  // German umlauts upper and lower case and euro-sign
-  if (!CheckToUpper("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac",
-                    "\xc3\x84\xc3\x96\xc3\x9c\xc3\x84\xc3\x96\xc3\x9c\xe2\x82\xac")) {
-    errors++;
-  }
-
-  if (!CheckToLower("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac",
-                    "\xc3\xa4\xc3\xb6\xc3\xbc\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac")) {
-    errors++;
-  }
-
-  if (errors!=0) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
+TEST_CASE("Check German umlauts upper and lower case and euro-sign to upper")
+{
+	try
+	{
+		std::locale::global(std::locale(""));
+	}
+	catch (const std::exception& e) {
+		std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
+	}
+	std::string uText = osmscout::UTF8StringToUpper("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac");
+	REQUIRE(uText == "\xc3\x84\xc3\x96\xc3\x9c\xc3\x84\xc3\x96\xc3\x9c\xe2\x82\xac");
 }
