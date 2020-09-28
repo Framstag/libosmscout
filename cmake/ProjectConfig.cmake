@@ -115,10 +115,10 @@ macro(osmscout_library_project)
 	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt AND BUILD_SHARED_LIBS)
 		foreach(T ${_targets})
 			if("${T}" STREQUAL "Qt5::Core" OR "${T}" STREQUAL "Qt5::Gui" OR "${T}" STREQUAL "Qt5::Widgets" OR "${T}" STREQUAL "Qt5::Svg")
-				add_custom_command(TARGET OSMScoutClientQt
+				add_custom_command(TARGET ${_name}
 					POST_BUILD
 					COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-					COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScoutClientQt>/$<TARGET_FILE_NAME:OSMScoutClientQt>"
+					COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:${_name}>/$<TARGET_FILE_NAME:${_name}>"
 				)
 				break()
 			endif()
@@ -220,15 +220,33 @@ macro(osmscout_test_project)
 			if(Qt5_FOUND AND MSVC AND TARGET Qt5::qmake)
 				get_target_property(_qt5_qmake_location Qt5::qmake IMPORTED_LOCATION)
 				execute_process(COMMAND "${_qt5_qmake_location}" -query QT_INSTALL_PREFIX RESULT_VARIABLE return_code OUTPUT_VARIABLE qt5_install_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
+				file(TO_NATIVE_PATH "${qt5_install_prefix}" qt5_install_prefix)
 				set(qt5_bin ";${qt5_install_prefix}\\bin")
 			endif()
 			set(envpath "PATH=$<TARGET_FILE_DIR:OSMScout>${qt5_bin}")
-			foreach(tg IN LISTS OSMScoutMap OSMScoutMapAGG OSMScoutMapQt OSMScoutMapCairo OSMScoutImport OSMScoutGPX OSMScoutClientQt OSMScoutTest)
+			get_target_property(envpath_user OSMScout BINARY_DIR)
+			file(TO_NATIVE_PATH "${envpath_user}" envpath_user)
+			set(envpath_user "PATH=${envpath_user}\\$(Configuration)${qt5_bin}")
+			set(OSMLIBS OSMScoutMap OSMScoutMapAGG OSMScoutMapQt OSMScoutMapCairo OSMScoutImport OSMScoutGPX OSMScoutClientQt OSMScoutTest)
+			foreach(tg IN LISTS OSMLIBS)
 				if(TARGET ${tg})
 					set(envpath "${envpath};$<TARGET_FILE_DIR:${tg}>")
+					get_target_property(TBG ${tg} BINARY_DIR)
+					file(TO_NATIVE_PATH "${TBG}" TBG)
+					set(envpath_user "${envpath_user};${TBG}\\$(Configuration)")
 				endif()
 			endforeach()
 			set_tests_properties(${_name} PROPERTIES ENVIRONMENT "${envpath};$ENV{PATH}")
+			file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}" working_directory)
+			file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${_name}.vcxproj.user "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<Project ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
+  <PropertyGroup>
+    <LocalDebuggerWorkingDirectory>${working_directory}</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment>${envpath_user};$(PATH)
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>")
 		endif()
 	endif()
 endmacro(osmscout_test_project)
