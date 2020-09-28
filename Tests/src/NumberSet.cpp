@@ -2,55 +2,32 @@
 
 #include <osmscout/util/NumberSet.h>
 
-int errors=0;
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 
-int main()
+TEST_CASE()
 {
   osmscout::NumberSet set;
 
-  if (set.IsSet(0)) {
-    std::cerr << "0 found in set!" << std::endl;
-    errors++;
-  }
+  REQUIRE_FALSE(set.IsSet(0));
 
-  if (set.IsSet(1)) {
-    std::cerr << "1 found in set!" << std::endl;
-    errors++;
-  }
+  REQUIRE_FALSE(set.IsSet(1));
 
   set.Set(1);
 
-  if (!set.IsSet(1)) {
-    std::cerr << "1 not found in set!" << std::endl;
-    errors++;
-  }
+  REQUIRE(set.IsSet(1));
 
   set.Set(255);
 
-  if (!set.IsSet(255)) {
-    std::cerr << "255 not found in set!" << std::endl;
-    errors++;
-  }
+  REQUIRE(set.IsSet(255));
 
   set.Set(256);
 
-  if (!set.IsSet(256)) {
-    std::cerr << "256 not found in set!" << std::endl;
-    errors++;
-  }
+  REQUIRE(set.IsSet(256));
 
   for (size_t i=256; i<256*256; i++) {
     set.Set(i);
 
-    if (!set.IsSet(i)) {
-      std::cerr << i << " not found in set!" << std::endl;
-      errors++;
-    }
+    REQUIRE(set.IsSet(i));
   }
-
-  if (errors!=0) {
-    return 1;
-  }
-
-  return 0;
 }
