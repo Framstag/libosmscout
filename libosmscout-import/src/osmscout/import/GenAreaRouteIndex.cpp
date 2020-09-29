@@ -58,9 +58,8 @@ namespace osmscout {
                          parameter,
                          progress,
                          typeConfig->GetRouteTypes(),
-                         // TODO: use route specific parameters
-                         parameter.GetAreaWayMinMag(),
-                         parameter.GetAreaWayIndexMaxLevel(),
+                         parameter.GetAreaRouteMinMag(),
+                         parameter.GetAreaRouteIndexMaxLevel(),
                          parameter.GetWayDataMemoryMaped());
   }
 
