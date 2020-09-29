@@ -87,6 +87,8 @@ ImportParameter::ImportParameter()
       areaNodeBitmapLimit(20),
       areaWayMinMag(11), // Should not be >= than optimizationMaxMag
       areaWayIndexMaxLevel(13),
+      areaRouteMinMag(11),
+      areaRouteIndexMaxLevel(13),
       waterIndexMinMag(6),
       waterIndexMaxMag(14),
       optimizationMaxWayCount(1000000),
@@ -299,6 +301,16 @@ MagnificationLevel ImportParameter::GetAreaWayMinMag() const
 MagnificationLevel ImportParameter::GetAreaWayIndexMaxLevel() const
 {
   return areaWayIndexMaxLevel;
+}
+
+MagnificationLevel ImportParameter::GetAreaRouteMinMag() const
+{
+  return areaRouteMinMag;
+}
+
+MagnificationLevel ImportParameter::GetAreaRouteIndexMaxLevel() const
+{
+  return areaRouteIndexMaxLevel;
 }
 
 size_t ImportParameter::GetAreaAreaIndexMaxMag() const
@@ -586,6 +598,16 @@ void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)
 void ImportParameter::SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel)
 {
   this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
+}
+
+void ImportParameter::SetAreaRouteMinMag(MagnificationLevel areaRouteMinMag)
+{
+  this->areaRouteMinMag=areaRouteMinMag;
+}
+
+void ImportParameter::SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxLevel)
+{
+  this->areaRouteIndexMaxLevel=areaRouteIndexMaxLevel;
 }
 
 void ImportParameter::SetWaterIndexMinMag(uint32_t waterIndexMinMag)

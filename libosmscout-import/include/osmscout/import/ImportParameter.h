@@ -157,6 +157,9 @@ private:
   MagnificationLevel           areaWayMinMag;            //<! Minimum magnification of index for individual type
   MagnificationLevel           areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
 
+  MagnificationLevel           areaRouteMinMag;          //<! Minimum magnification of index for individual type
+  MagnificationLevel           areaRouteIndexMaxLevel;   //<! Maximum zoom level for area route index bitmap
+
   uint32_t                     waterIndexMinMag;         //<! Minimum level of the generated water index
   uint32_t                     waterIndexMaxMag;         //<! Maximum level of the generated water index
 
@@ -243,6 +246,9 @@ private:
   MagnificationLevel GetAreaWayMinMag() const;
   MagnificationLevel GetAreaWayIndexMaxLevel() const;
 
+  MagnificationLevel GetAreaRouteMinMag() const;
+  MagnificationLevel GetAreaRouteIndexMaxLevel() const;
+
   size_t GetAreaAreaIndexMaxMag() const;
 
   uint32_t GetWaterIndexMinMag() const;
@@ -325,6 +331,9 @@ private:
 
   void SetAreaWayMinMag(MagnificationLevel areaWayMinMag);
   void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel);
+
+  void SetAreaRouteMinMag(MagnificationLevel areaRouteMinMag);
+  void SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxLevel);
 
   void SetWaterIndexMinMag(uint32_t waterIndexMinMag);
   void SetWaterIndexMaxMag(uint32_t waterIndexMaxMag);
