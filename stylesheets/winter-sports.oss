@@ -1962,4 +1962,14 @@ STYLE
          aeroway_runway,
          aeroway_apron] AREA.TEXT { label: Name.name; }
  }
+
+ // -------------------------------------------------------
+ //
+ // Routes
+ //
+
+ [MAG close-] {
+   [TYPE route_skiing_nordic] ROUTE {color: #1cb7ff; preferColorFeature: true; dash: 6,4; offsetRel: sidecar; displayWidth: 0.6mm; priority: -10; }
+ }
+
 END

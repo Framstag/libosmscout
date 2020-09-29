@@ -2346,6 +2346,11 @@ TYPES
       {Name, Ref, Operator, Network, Color}
       ROUTE
 
+  TYPE route_skiing_nordic
+    = RELATION ("type"=="route" AND ("route"=="ski" OR ("route"=="piste" AND "piste:type"=="nordic")))
+      {Name, Ref, Operator, Network, Color}
+      ROUTE
+
   // Catch-all fallback for other types
 
   TYPE routemaster_any IGNORE
