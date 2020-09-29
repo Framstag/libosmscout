@@ -64,6 +64,10 @@ namespace osmscout {
     double                              lineMinWidthPixel;         //!< Minimum width of an line to be drawn
     double                              areaMinDimensionMM;        //!< Minimum dimension (either width or height) of an area in mm
 
+    double                              sidecarMaxDistanceMM;      //!< Screen maximum distance of sidecar relative offset in mm
+    double                              sidecarDistance;           //!< Distance of sidecar relative offset in m
+    double                              sidecarMinDistanceMM;      //!< Screen minimum distance of sidecar relative offset in mm
+
     TransPolygon::OptimizeMethod        optimizeWayNodes;          //!< Try to reduce the number of nodes for
     TransPolygon::OptimizeMethod        optimizeAreaNodes;         //!< Try to reduce the number of nodes for
     double                              optimizeErrorToleranceMm;  //!< The maximum error to allow when optimizing lines, in mm
@@ -125,6 +129,10 @@ namespace osmscout {
 
     void SetLineMinWidthPixel(double lineMinWidthPixel);
     void SetAreaMinDimensionMM(double areaMinDimensionMM);
+
+    void SetSidecarMaxDistanceMM();
+    void SetSidecarDistance();
+    void SetSidecarMinDistanceMM();
 
     void SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize);
     void SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize);
@@ -207,6 +215,21 @@ namespace osmscout {
     inline double GetAreaMinDimensionMM() const
     {
       return areaMinDimensionMM;
+    }
+
+    inline double GetSidecarMaxDistanceMM() const
+    {
+      return sidecarMaxDistanceMM;
+    }
+
+    inline double GetSidecarDistance() const
+    {
+      return sidecarDistance;
+    }
+
+    inline double GetSidecarMinDistanceMM() const
+    {
+      return sidecarMinDistanceMM;
     }
 
     inline TransPolygon::OptimizeMethod GetOptimizeWayNodes() const

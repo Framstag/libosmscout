@@ -1884,11 +1884,16 @@ namespace osmscout {
       double leftSideCarPos=0;
     };
 
+    double sidecarOffset=std::min(projection.ConvertWidthToPixel(parameter.GetSidecarMaxDistanceMM()),
+                                  GetProjectedWidth(projection,
+                                                    parameter.GetSidecarDistance(),
+                                                    projection.ConvertWidthToPixel(parameter.GetSidecarMinDistanceMM())));
+
     std::map<FileOffset,WayRoutes> wayDataMap;
     for (WayPathDataIt it=wayPathData.begin(); it != wayPathData.end(); ++it){
       auto &wayRoute=wayDataMap[it->ref];
       wayRoute.wayData=it;
-      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+projection.ConvertWidthToPixel(1.0);
+      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+sidecarOffset;
       wayRoute.leftSideCarPos=wayRoute.rightSideCarPos*-1;
     }
 
