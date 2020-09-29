@@ -34,4 +34,4 @@ jobs:
       - name: Build project
         run: ninja -C debug
       - name: Run tests
-        run: meson test -C debug
+        run: meson test -C debug --print-errorlogs

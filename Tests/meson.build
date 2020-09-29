@@ -269,14 +269,31 @@ test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
-test('Check rotation of maps', MapRotate)
+
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+  warning('Test "Check rotation of maps" does not run under MSYS because of missing locale support')
+else
+  test('Check rotation of maps', MapRotate)
+endif
+
 test('Check correctness of NumberSet class', NumberSet)
 test('Check scan conversion code', ScanConversion)
-test('Check string utils', StringUtils)
+
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+  warning('Test "Check string utils" does not run under MSYS because of missing locale support')
+else
+  test('Check string utils', StringUtils)
+endif
+
 test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
-test('Check WString<=>String conversion code', WStringStringConversion)
+
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+  warning('Test "Check WString<=>String conversion code" does not run under MSYS because of missing locale support')
+else
+  test('Check WString<=>String conversion code', WStringStringConversion)
+endif  
 test('Check LabelPath code', LabelPathTest)
 test('Check Base64 code', Base64Test)
 

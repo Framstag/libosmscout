@@ -26,6 +26,5 @@ if [ "${BUILDTOOL}" = "cmake" ] ; then
 fi
 if [ "${BUILDTOOL}" = "meson" ] ; then
     meson setup --buildtype debugoptimized --unity on debug
-    cd debug
-    ninja
+    ninja -C debug
 fi
