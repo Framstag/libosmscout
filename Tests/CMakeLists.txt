@@ -58,7 +58,7 @@ osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 osmscout_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 
 #---- MapRotate
-if(NOT MINGW)
+if(NOT MINGW AND NOT MSYS)
 	if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 		osmscout_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
 	else()
@@ -85,7 +85,7 @@ osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
 #---- StringUtils
-if(NOT MINGW)
+if(NOT MINGW AND NOT MSYS)
 	osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 endif()
 
@@ -96,7 +96,7 @@ osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 osmscout_test_project(NAME TimeParse SOURCES src/TimeParse.cpp)
 
 #---- WStringStringConversion
-if(NOT MINGW)
+if(NOT MINGW AND NOT MSYS)
 	osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
 endif()
 
