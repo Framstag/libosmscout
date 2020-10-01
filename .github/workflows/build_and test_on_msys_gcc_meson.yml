@@ -32,7 +32,7 @@ jobs:
           CC: ccache gcc
       - name: Build project
         run: ninja -C debug
-#      - name: Run tests
-#        run: meson test -C debug
-#        env:
-#          LANG: en_US.utf8
+      - name: Run tests
+        run: meson test -C debug --print-errorlogs
+        env:
+          LANG: en_US.utf8

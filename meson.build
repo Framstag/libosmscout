@@ -265,7 +265,12 @@ endif
 buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
 buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
 
-message('build system:            @0@'.format(build_machine.system()))
+message('Build OS:                @0@'.format(build_machine.system()))
+message('Host OS:                 @0@'.format(host_machine.system()))
+message('Target OS:               @0@'.format(target_machine.system()))
+message('compiler id:             @0@'.format(compiler.get_id()))
+# meson >= 0.49.0
+#message('compiler arg. syntax:    @0@'.format(compiler.get_argument_syntax()))
 message('openmp support:          @0@'.format(openmpDep.found()))
 message('libosmscout:             @0@'.format(true))
 message('libosmscout-gpx:         @0@'.format(buildGpx))

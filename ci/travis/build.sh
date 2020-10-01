@@ -25,10 +25,9 @@ if [ "$TARGET" = "build" ]; then
     else
       meson setup --buildtype debugoptimized --unity on debug
     fi
-    cd debug
 
-    ninja
-    meson test -v
+    ninja -C debug
+    meson test -C debug --print-errorlogs
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     cd build
