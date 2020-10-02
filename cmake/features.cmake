@@ -1,3 +1,8 @@
+# prefer static libraries if shared are disabled
+if(NOT BUILD_SHARED_LIBS AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+endif()
+
 # detect available compiler features and libraries
 include(CheckCXXSourceCompiles)
 include(CheckPrototypeDefinition)
