@@ -1727,7 +1727,6 @@ namespace osmscout {
 
       WayData data;
 
-      data.ref=ref;
       data.lineWidth=lineWidth;
 
       if (!IsVisibleWay(projection,

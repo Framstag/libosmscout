@@ -111,7 +111,6 @@ namespace osmscout {
      */
     struct OSMSCOUT_MAP_API WayData
     {
-      FileOffset               ref;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       int8_t                   layer;           //!< Layer this way is in
       LineStyleRef             lineStyle;       //!< Line style
