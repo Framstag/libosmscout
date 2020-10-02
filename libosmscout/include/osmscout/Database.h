@@ -26,6 +26,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <string_view>
 
 // Type and style sheet configuration
 #include <osmscout/OSMScoutTypes.h>

@@ -77,7 +77,7 @@ endif
 
 EncodeNumber = executable('EncodeNumber',
              'src/EncodeNumber.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)
@@ -91,7 +91,7 @@ FeatureLabelTest = executable('FeatureLabelTest',
 
 FileScannerWriter = executable('FileScannerWriter',
              'src/FileScannerWriter.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)
@@ -105,7 +105,7 @@ GeoBox = executable('GeoBox',
 
 GeoCoordParse = executable('GeoCoordParse',
              'src/GeoCoordParse.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)
@@ -133,7 +133,7 @@ endif
 
 MapRotate = executable('MapRotate',
              'src/MapRotate.cpp',
-             include_directories: [osmscoutmapIncDir, osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
              install: false)
@@ -147,7 +147,7 @@ MultiDBRouting = executable('MultiDBRouting',
 
 NumberSet = executable('NumberSet',
              'src/NumberSet.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)
@@ -218,7 +218,7 @@ WorkQueue = executable('WorkQueue',
 
 WStringStringConversion = executable('WStringStringConversion',
              'src/WStringStringConversion.cpp',
-             include_directories: [osmscoutIncDir],
+             include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: false)

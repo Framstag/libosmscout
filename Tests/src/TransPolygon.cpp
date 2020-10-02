@@ -25,6 +25,9 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Transformation.h>
 
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+
 using namespace std;
 
 bool WayIsSimple(const std::vector<osmscout::Point> &points)
@@ -62,14 +65,11 @@ bool WayIsSimple(const std::vector<osmscout::Point> &points)
   return true;
 }
 
-int main(int /*argc*/, char** /*argv*/)
+TEST_CASE()
 {
   std::vector<osmscout::Point> testWay=GetTestWay();
 
-  if (!WayIsSimple(testWay)){
-    std::cout << "Test way is not simple" << std::endl;
-    return 1;
-  }
+  REQUIRE(WayIsSimple(testWay));
 
   osmscout::MercatorProjection projection;
   osmscout::Magnification mag;
@@ -95,10 +95,7 @@ int main(int /*argc*/, char** /*argv*/)
     }
   }
 
-  if (!WayIsSimple(optimised)){
-    std::cout << "Optimised way is not simple" << std::endl;
-    return 2;
-  }
+  REQUIRE(WayIsSimple(optimised));
 
   // try again as area
   polygon.TransformArea(projection,
@@ -114,13 +111,6 @@ int main(int /*argc*/, char** /*argv*/)
     }
   }
 
-  if (!AreaIsSimple(optimised)){
-    std::cout << "Optimised area is not simple" << std::endl;
-    return 3;
-  }
-
-  std::cout << "OK" << std::endl;
-
-  return 0;
+  REQUIRE(AreaIsSimple(optimised));
 }
 

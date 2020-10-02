@@ -19,6 +19,9 @@
 
 #include <QDebug>
 #include <QThread>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
+#include <QRandomGenerator>
+#endif
 
 #include <osmscout/OsmTileDownloader.h>
 #include <osmscout/OnlineTileProvider.h>
@@ -29,7 +32,11 @@ namespace osmscout {
 
 OsmTileDownloader::OsmTileDownloader(QString diskCacheDir,
                                      const OnlineTileProvider &provider):
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
   serverNumber(qrand()),
+#else
+  serverNumber(QRandomGenerator::global()->generate()),
+#endif
   tileProvider(provider)
 {
   /** http://wiki.openstreetmap.org/wiki/Tile_usage_policy
@@ -92,7 +99,11 @@ void OsmTileDownloader::fileDownloaded(const TileCacheKey &key, QNetworkReply *r
     
   if (reply->error() != QNetworkReply::NoError){
     qWarning() << "Downloading" << url << "failed with" << reply->errorString();
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
     serverNumber = qrand(); // try another server for future requests
+#else
+    serverNumber = QRandomGenerator::global()->generate(); // try another server for future requests
+#endif
     emit failed(key.zoomLevel, key.xtile, key.ytile, false);
   }else{
     QByteArray downloadedData = reply->readAll();
