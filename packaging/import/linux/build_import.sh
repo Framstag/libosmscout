@@ -33,7 +33,7 @@ cmake \
     -DBUILD_IMPORT_TOOL_FOR_DISTRIBUTION=ON \
     ..
 
-make $*
+VERBOSE=1 make $*
 
 echo "Check which libraries are dynamically linked"
 ldd Import/Import || true
