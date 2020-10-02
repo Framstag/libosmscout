@@ -14,8 +14,8 @@ target_include_directories(BasemapImport PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/inc
 
 target_link_libraries(BasemapImport OSMScout::Import)
 
-if(BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
-  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+if(OSMSCOUT_BUILD_IMPORT_TOOL_FOR_DISTRIBUTION AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 endif()
 if(WIN32)
 	create_win32_tool_resource(BasemapImport)

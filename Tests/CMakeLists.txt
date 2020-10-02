@@ -58,10 +58,12 @@ osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 osmscout_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 
 #---- MapRotate
-if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
-	osmscout_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
-else()
-	message("Skip MapRotate test, libosmscout-map is missing.")
+if(NOT MINGW AND NOT MSYS)
+	if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+		osmscout_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
+	else()
+		message("Skip MapRotate test, libosmscout-map is missing.")
+	endif()
 endif()
 
 #---- EncodeNumber
@@ -83,7 +85,9 @@ osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
 #---- StringUtils
-osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
+if(NOT MINGW AND NOT MSYS)
+	osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
+endif()
 
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
@@ -92,7 +96,9 @@ osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 osmscout_test_project(NAME TimeParse SOURCES src/TimeParse.cpp)
 
 #---- WStringStringConversion
-osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
+if(NOT MINGW AND NOT MSYS)
+	osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
+endif()
 
 #---- TransPolygon
 osmscout_test_project(NAME TransPolygon SOURCES src/TransPolygon.cpp)

@@ -97,6 +97,11 @@ check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
 check_function_exists(mallinfo HAVE_MALLINFO)
 
+# prefer static libraries if shared are disabled 
+if(NOT BUILD_SHARED_LIBS AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC)) 
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES}) 
+endif()
+
 # check libraries and tools
 if(NOT IOS)
   find_package(Marisa)

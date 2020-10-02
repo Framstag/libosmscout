@@ -175,7 +175,7 @@ if(MARISA_FOUND)
 	target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
 endif()
 
-if(APPLE AND BUILD_FRAMEWORKS)
+if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutImport PROPERTIES
         FRAMEWORK TRUE
         FRAMEWORK_VERSION C
