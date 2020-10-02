@@ -129,7 +129,7 @@ namespace osmscout {
         // build route segments
         while (!wayPointMap.empty()){
           // find some point where is just one way
-          Id segmentFrontId;
+          Id segmentFrontId=0;
           for (auto it:wayPointMap){
             segmentFrontId=it.first;
             if (wayPointMap.count(segmentFrontId) == 1) {
