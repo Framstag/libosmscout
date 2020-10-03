@@ -18,21 +18,15 @@ if [ "$TARGET" = "build" ]; then
     sudo apt-get -qq update
 
     if [ "$BUILDTOOL" = "meson" ]; then
-      echo "INstalling ninja..."
-      wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
-      unzip ninja-linux.zip
-      mkdir -p ~/bin
-      mv ninja ~/bin
-      export PATH=~/bin:$PATH
-
-      echo "Installing python..."
+      echo "Installing ninja, python and meson..."
       sudo apt-get update
       sudo apt-get install -y \
+        ninja-build \
         build-essential python3-pip \
         python3 python3-setuptools
 
       echo "Installing meson..."
-      pip3 install --user meson==0.46.0
+      pip3 install --user meson
     elif [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake
     fi
