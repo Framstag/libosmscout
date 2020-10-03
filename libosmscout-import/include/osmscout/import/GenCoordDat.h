@@ -30,14 +30,20 @@ namespace osmscout {
   class CoordDataGenerator CLASS_FINAL : public ImportModule
   {
   private:
+    struct PageEntry
+    {
+      bool  isSet=false;
+      Point point;
+    };
+
+  private:
     bool FindDuplicateCoordinates(const TypeConfig& typeConfig,
                                   const ImportParameter& parameter,
                                   Progress& progress,
                                   std::unordered_map<Id,uint8_t>& duplicates) const;
 
     bool DumpCurrentPage(FileWriter& writer,
-                         std::vector<bool>& isSetInPage,
-                         std::vector<Point>& page) const;
+                         std::vector<PageEntry>& page) const;
 
     bool StoreCoordinates(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,
@@ -45,8 +51,6 @@ namespace osmscout {
                           std::unordered_map<Id,uint8_t>& duplicates) const;
 
   public:
-    CoordDataGenerator();
-
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 
