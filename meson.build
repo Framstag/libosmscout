@@ -81,13 +81,26 @@ swigExe = find_program('swig', required: false)
 mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
 iconvDep = compiler.find_library('iconv', required: false)
-marisaDep = dependency('marisa', required : false)
-
 if compiler.get_id()=='clang' or compiler.get_id()=='msvc'
   openmpDep = dependency('', required: false)
 else
   openmpDep = dependency('openmp', required: false)
 endif
+
+# C++20 Execution support
+
+
+tbbDep = dependency('', required: false)
+
+stdExecutionAvailable = compiler.has_header('execution')
+if stdExecutionAvailable
+ tbbDep = compiler.find_library('tbb', required: false)
+
+ stdExecutionAvailable = tbbDep.found()
+endif
+
+# Optional
+marisaDep = dependency('marisa', required : false)
 
 # Import
 protobufDep = dependency('protobuf', required : false)
@@ -272,6 +285,7 @@ message('compiler id:             @0@'.format(compiler.get_id()))
 # meson >= 0.49.0
 #message('compiler arg. syntax:    @0@'.format(compiler.get_argument_syntax()))
 message('openmp support:          @0@'.format(openmpDep.found()))
+message('C++17 execution support: @0@'.format(stdExecutionAvailable))
 message('libosmscout:             @0@'.format(true))
 message('libosmscout-gpx:         @0@'.format(buildGpx))
 message('libosmscout-import:      @0@'.format(buildImport))
