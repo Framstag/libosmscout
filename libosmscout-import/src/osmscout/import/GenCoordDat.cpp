@@ -19,6 +19,11 @@
 
 #include <osmscout/import/GenCoordDat.h>
 
+#include <osmscout/private/Config.h>
+
+#if defined(HAVE_STD_EXECUTION)
+  #include <execution>
+#endif
 #include <limits>
 #include <map>
 
@@ -118,9 +123,16 @@ namespace osmscout {
 
         progress.Info("Sorting coordinates");
 
-        // TODO: Sort in parallel, no side effect!
         for (auto& entry : coordPages) {
-          std::sort(entry.second.begin(),entry.second.end());
+#if defined(HAVE_STD_EXECUTION)
+          std::sort(std::execution::par_unseq,
+                    entry.second.begin(),
+                    entry.second.end());
+
+#else
+          std::sort(entry.second.begin(),
+                    entry.second.end());
+#endif
         }
 
         progress.Info("Detect duplicates");
@@ -289,11 +301,18 @@ namespace osmscout {
 
         progress.Info("Sorting coordinates");
 
-        // TODO: Sort in parallel, no side effect!
         for (auto& entry : coordPages) {
+#if defined(HAVE_STD_EXECUTION)
+          std::sort(std::execution::par_unseq,
+                    entry.second.begin(),
+                    entry.second.end(),
+                    SortCoordsByOSMId);
+
+#else
           std::sort(entry.second.begin(),
                     entry.second.end(),
                     SortCoordsByOSMId);
+#endif
         }
 
         progress.Info("Write coordinates");
