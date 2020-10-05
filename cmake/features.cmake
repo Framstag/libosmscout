@@ -1,3 +1,30 @@
+# add ccache support
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+  set(CCCACHE_EXPORTS "")
+  set(CCACHE_OPTIONS "" CACHE STRING "options for ccache")
+  foreach(option ${CCACHE_OPTIONS})
+    set(CCCACHE_EXPORTS "${CCCACHE_EXPORTS}\nexport ${option}")
+  endforeach()
+  set(C_LAUNCHER "${CCACHE_PROGRAM}")
+  set(CXX_LAUNCHER "${CCACHE_PROGRAM}")
+  configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-c.in" "${CMAKE_BINARY_DIR}/launch-c")
+  configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-cxx.in" "${CMAKE_BINARY_DIR}/launch-cxx")
+  execute_process(COMMAND chmod a+rx
+    "${CMAKE_BINARY_DIR}/launch-c"
+    "${CMAKE_BINARY_DIR}/launch-cxx"
+  )
+  if(CMAKE_GENERATOR STREQUAL "Xcode")
+    set(CMAKE_XCODE_ATTRIBUTE_CC         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_CXX        "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_LD         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
+  else()
+    set(CMAKE_C_COMPILER_LAUNCHER   "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_BINARY_DIR}/launch-cxx")
+  endif()
+endif()
+
 # detect available compiler features and libraries
 include(CheckCXXSourceCompiles)
 include(CheckPrototypeDefinition)
