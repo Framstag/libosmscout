@@ -63,7 +63,11 @@ void FileIO::read()
         QVariant length = targetComponent->property("length");
         QVariant returnedValue;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
         if(length>0){
+#else
+        if (length.value<int>() > 0) {
+#endif
             QMetaObject::invokeMethod(targetComponent, "remove",
                                       Q_RETURN_ARG(QVariant, returnedValue),
                                       Q_ARG(QVariant, QVariant(0)),

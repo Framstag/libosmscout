@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(libosmscout VERSION 0.1.0 LANGUAGES C CXX)
+project(libosmscout VERSION 1.1.1 LANGUAGES C CXX)
 
 # If we are called from conan, include and activate it cmake additions
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -630,6 +630,9 @@ message(STATUS "external interfaces:")
 message(STATUS " - MATLAB mex function:          ${OSMSCOUT_BUILD_EXTERN_MATLAB}")
 message(STATUS "documentation:                   ${OSMSCOUT_BUILD_DOC_API}")
 message(STATUS "webpage:                         ${OSMSCOUT_BUILD_WEBPAGE}")
+if(CCACHE_PROGRAM)
+  message(STATUS "Using ccache:                    ${CCACHE_PROGRAM}")
+endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)
 if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
