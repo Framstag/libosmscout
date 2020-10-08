@@ -44,15 +44,14 @@ private slots:
 
 public:
   StyleAnalyser(QThread *thread,
-                   QTextDocument *doc,
-                   Highlighter *highlighter);
+                QTextDocument *doc,
+                Highlighter &highlighter);
   ~StyleAnalyser() override;
 
 private:
   QThread *thread;
   osmscout::TypeConfigRef typeConfig;
-  QTextDocument *doc;
-  Highlighter *highlighter;
+  QTextDocument *doc; // not owned
   QString lastContent;
 };
 

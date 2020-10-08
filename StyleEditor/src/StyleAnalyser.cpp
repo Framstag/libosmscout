@@ -44,8 +44,8 @@ osmscout::TypeConfigRef getTypeConfig()
 
 StyleAnalyser::StyleAnalyser(QThread *thread,
                              QTextDocument *doc,
-                             Highlighter *highlighter):
-    thread(thread), typeConfig(getTypeConfig()), doc(doc), highlighter(highlighter)
+                             Highlighter &highlighter):
+    thread(thread), typeConfig(getTypeConfig()), doc(doc)
 {
   if (typeConfig) {
     connect(doc, SIGNAL(contentsChanged()),
@@ -56,7 +56,7 @@ StyleAnalyser::StyleAnalyser(QThread *thread,
             Qt::QueuedConnection);
 
     connect(this, SIGNAL(problematicLines(QSet<int>, QSet<int>)),
-            highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
+            &highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
             Qt::QueuedConnection);
 
     onContentsChanged();

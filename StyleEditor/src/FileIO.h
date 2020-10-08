@@ -71,13 +71,11 @@ signals:
 private:
     void stopAnalyser();
     bool write(const QString &filename);
-    QString getTargetContent();
 
     QString styleSheetFile;
-    QQuickItem *targetComponent;
-    QTextDocument *doc{nullptr};
-    Highlighter *highlighter;
-    StyleAnalyser *styleAnalyser;
+    QQuickItem *targetComponent{nullptr}; // not owned
+    QTextDocument *doc{nullptr}; // not owned
+    StyleAnalyser *styleAnalyser{nullptr}; // owned, different thread
     QVector<int> lineOffsets;
 };
 
