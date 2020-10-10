@@ -1,5 +1,7 @@
 name: Ubuntu 18.04 for Qt on Android
 
+# See https://doc.qt.io/qt-5/android-getting-started.html
+
 on:
   pull_request:
     branches:
@@ -21,5 +23,22 @@ jobs:
           java-version: 1.8
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
-      - name: Run sdkmanager
-        run:  ${ANDROID_HOME}/tools/bin/sdkmanager --list
+      - name: Run sdkmanager update
+        run:  ${ANDROID_HOME}/tools/bin/sdkmanager --update
+      - name: Run sdkmanager update
+        run:  ${ANDROID_HOME}/tools/bin/sdkmanager --install "platform-tools" "platforms;android-29" "build-tools;29.0.2" "ndk-bundle"
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+      - name: Install Qt
+          uses: jurplel/install-qt-action@v2
+          with:
+            version: '5.15.1'
+            host: 'linux'
+            target: 'android'
+            arch: 'android_armv7'
+            install-deps: 'true'
+            cached: ${{ steps.cache-qt.outputs.cache-hit }}
