@@ -1,6 +1,7 @@
 name: Ubuntu 18.04 for Qt on Android
 
 # See https://doc.qt.io/qt-5/android-getting-started.html
+# See https://github.com/jurplel/install-qt-action
 
 on:
   pull_request:
@@ -34,11 +35,11 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache
       - name: Install Qt
-          uses: jurplel/install-qt-action@v2
-          with:
-            version: '5.15.1'
-            host: 'linux'
-            target: 'android'
-            arch: 'android_armv7'
-            install-deps: 'true'
-            cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.15.1'
+          host: 'linux'
+          target: 'android'
+          arch: 'android_armv7'
+          install-deps: 'true'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
