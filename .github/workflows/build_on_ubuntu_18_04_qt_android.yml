@@ -21,3 +21,5 @@ jobs:
           java-version: 1.8
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
+      - name: Run sdkmanager
+        run:  ${ANDROID_HOME}/tools/bin/sdkmanager --list
