@@ -58,7 +58,7 @@ private slots:
   void fileDownloaded(const TileCacheKey &key, QNetworkReply *reply);
 
 private:
-  int                       serverNumber;
+  quint32                   serverNumber;
   QNetworkAccessManager     webCtrl;
   QNetworkDiskCache         diskCache;
   OnlineTileProvider        tileProvider;

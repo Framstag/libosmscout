@@ -27,10 +27,8 @@
 using namespace osmscout;
 
 FileIO::FileIO(QObject *parent) :
-    QObject(parent),styleSheetFile(QString("")),targetComponent(0),
-    highlighter(nullptr), styleAnalyser(nullptr)
+    QObject(parent)
 {
-
 }
 
 FileIO::~FileIO()
@@ -51,7 +49,7 @@ void FileIO::read()
     if (styleSheetFile.isEmpty()){
         emit error("source is empty");
         return;
-    } else if (targetComponent == 0){
+    } else if (targetComponent == nullptr){
         emit error("target is not set");
         return;
     }
@@ -60,64 +58,50 @@ void FileIO::read()
     if ( file.open(QIODevice::ReadOnly) ) {
         QString line;
         QTextStream t( &file );
-        QVariant length = targetComponent->property("length");
-        QVariant returnedValue;
 
-        if(length>0){
-            QMetaObject::invokeMethod(targetComponent, "remove",
-                                      Q_RETURN_ARG(QVariant, returnedValue),
-                                      Q_ARG(QVariant, QVariant(0)),
-                                      Q_ARG(QVariant, length));
-            lineOffsets.clear();
-            lineOffsets.push_back(1);
-        }
-        do {
-            line = t.readLine();
-            line.replace("\t","        ");
-            lineOffsets.push_back(line.length()+1);
-            line.replace("<","&lt;").replace(">","&gt;").replace(" ","&nbsp;");
-            QMetaObject::invokeMethod(targetComponent, "append",
-                                      Q_RETURN_ARG(QVariant, returnedValue),
-                                      Q_ARG(QVariant, QVariant(line)));
-        } while (!t.atEnd());
+        lineOffsets.clear();
+        lineOffsets.push_back(1);
 
-        file.close();
         QVariant docComponent = targetComponent->property("textDocument");
         if (docComponent.canConvert<QQuickTextDocument*>()) {
-            QQuickTextDocument *qqdoc = docComponent.value<QQuickTextDocument*>();
-            if (qqdoc) {
-              doc = qqdoc->textDocument();
-            }
-
-            stopAnalyser();
-            highlighter = new Highlighter(doc);
-            highlighter->setStyle(12);
-
-            QThread *analyserThread = OSMScoutQt::GetInstance().makeThread("StyleAnalyser");
-            styleAnalyser = new StyleAnalyser(analyserThread, doc, highlighter);
-            styleAnalyser->moveToThread(analyserThread);
-            analyserThread->start();
+          if (QQuickTextDocument *qqdoc = docComponent.value<QQuickTextDocument *>();
+              qqdoc) {
+            doc = qqdoc->textDocument();
+          }
         }
-        if (doc) {
-            doc->setModified(false);
+        if (!doc){
+          emit error("document is not set");
+          return;
         }
+
+        QString content;
+        content.reserve(file.size()*2);
+        do {
+            line = t.readLine();
+            line.replace("\t","        "); // TODO: it is necessary?
+            lineOffsets.push_back(line.length()+1);
+            content += line + "\n";
+        } while (!t.atEnd());
+
+        doc->setPlainText(content);
+
+        file.close();
+
+        if (!styleAnalyser) {
+          Highlighter *highlighter = new Highlighter(doc); // owned by doc (parent)
+          highlighter->setStyle(12);
+
+          QThread *analyserThread = OSMScoutQt::GetInstance().makeThread("StyleAnalyser");
+          styleAnalyser = new StyleAnalyser(analyserThread, doc, *highlighter);
+          styleAnalyser->moveToThread(analyserThread);
+          analyserThread->start();
+        }
+
+        doc->setModified(false);
     } else {
         emit error("Unable to open the file");
         return;
     }
-}
-
-QString FileIO::getTargetContent()
-{
-    QVariant length = targetComponent->property("length");
-    QVariant returnedValue;
-    QMetaObject::invokeMethod(targetComponent, "getText",
-                              Q_RETURN_ARG(QVariant, returnedValue),
-                              Q_ARG(QVariant, QVariant(0)),
-                              Q_ARG(QVariant, length));
-    QString text = returnedValue.toString();
-    text.replace(QChar(0x2029),"\n").replace(QChar(0x00a0)," ");
-    return text;
 }
 
 bool FileIO::isModified()
@@ -127,23 +111,23 @@ bool FileIO::isModified()
 
 bool FileIO::write(const QString &fileName)
 {
-    if (targetComponent == 0){
+    if (!doc){
         return false;
     }
 
     QFile file(fileName);
-    if (!file.open(QFile::WriteOnly | QFile::Truncate))
+    if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
         return false;
+    }
 
-    QString text=getTargetContent();
+    QString text=doc->toPlainText();
     QTextStream out(&file);
     out << text;
 
     file.close();
 
-    if (doc) {
-        doc->setModified(false);
-    }
+    doc->setModified(false);
+
     return true;
 }
 

@@ -105,7 +105,11 @@ void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states
 
     QList<QTouchEvent::TouchPoint> points;
     points << touchPoint;
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QTouchEvent touchEvnt(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
+#else
+    QTouchEvent touchEvnt(QEvent::TouchBegin, 0, Qt::NoModifier, Qt::TouchPointStates(), points);
+#endif
     //qDebug() << "translate mouse event to touch event: "<< touchEvnt;
     touchEvent(&touchEvnt);
 }
