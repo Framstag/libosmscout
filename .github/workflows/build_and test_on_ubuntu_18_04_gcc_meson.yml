@@ -1,5 +1,12 @@
 name: Ubuntu 18.04 using gcc and meson
-on: [push, pull_request]
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 jobs:
   build:

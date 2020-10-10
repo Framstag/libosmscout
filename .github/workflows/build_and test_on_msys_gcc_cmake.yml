@@ -1,8 +1,12 @@
 name: MSYS using gcc and cmake
 
 on:
-  push:
   pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
 
 jobs:
   build:
