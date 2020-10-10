@@ -51,7 +51,7 @@ jobs:
                     -DANDROID_ABI=armeabi-v7a
                     -DANDROID_PLATFORM=android-29
                     -DANDROID_STL=c++_shared
-                    -DOSMSCOUT_BUILD_IMPORT=OFF
+                    -DOSMSCOUT_BUILD_IMPORT=ON
                     -DOSMSCOUT_BUILD_GPX=OFF
                     -DOSMSCOUT_BUILD_DEMOS=OFF
                     -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
