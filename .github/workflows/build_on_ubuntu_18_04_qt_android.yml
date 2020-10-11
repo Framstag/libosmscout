@@ -58,6 +58,7 @@ jobs:
                     -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
                     -DOSMSCOUT_BUILD_DOC_API=OFF
                     -DOSMSCOUT_BUILD_WEBPAGE=OFF
+                    -DOSMSCOUT_BUILD_TESTS=OFF
                     -Wno-dev"
       - name: Build project
         run:  cmake --build build
