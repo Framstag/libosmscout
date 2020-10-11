@@ -277,52 +277,41 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
   }
 
-  // draw base map
-  if (renderBasemap && basemapDatabase && !databases.empty()) {
-    osmscout::MapPainterQt* mapPainter=databases.front()->GetPainter();
-    osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
-
-    if (mapPainter && waterIndex) {
-      osmscout::GeoBox                boundingBox;
-      std::list<osmscout::GroundTile> tiles;
-
-      renderProjection.GetDimensions(boundingBox);
-      if (waterIndex->GetRegions(boundingBox,
-                                 renderProjection.GetMagnification(),
-                                 tiles)) {
-
-        mapPainter->DrawGroundTiles(renderProjection,
-                                    *drawParameter,
-                                    tiles,
-                                    p);
-
-        backgroundRendered=true;
-      }
-    }
-  }
-
   // prepare data for batch
   osmscout::MapPainterBatchQt batch(databases.size());
   size_t i=0;
-  bool last;
-
   for (auto &db:databases){
-    last=(i==databases.size()-1);
+    bool first=(i==0);
+    bool last=(i==databases.size()-1);
+    bool skip=true;
     ++i;
 
     std::list<osmscout::TileRef> tileList;
     if (tiles.contains(db->path)){
       auto list = tiles[db->path].values();
       tileList=std::list<osmscout::TileRef>(list.begin(), list.end());
-    }else{
-      if (!last){
-        osmscout::log.Debug() << "Skip database " << db->path.toStdString();
-        continue;
-      }
+      skip=false;
     }
 
     osmscout::MapDataRef data=std::make_shared<osmscout::MapData>();
     db->GetMapService()->AddTileDataToMapData(tileList,*data);
+
+    if (first){
+      // draw base map
+      if (renderBasemap && basemapDatabase) {
+        osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
+        if (waterIndex) {
+          osmscout::GeoBox                boundingBox;
+          renderProjection.GetDimensions(boundingBox);
+          if (waterIndex->GetRegions(boundingBox,
+                                     renderProjection.GetMagnification(),
+                                     data->baseMapTiles)) {
+          }
+          skip=false;
+        }
+      }
+    }
+
     if (last){
       osmscout::TypeConfigRef typeConfig=db->GetDatabase()->GetTypeConfig();
       for (auto const &o:overlayObjects){
@@ -353,11 +342,17 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
           }
         }
       }
+      skip&=overlayObjects.empty();
+    }
+
+    if (skip){
+      osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+      continue;
     }
 
     if (drawParameter->GetRenderSeaLand()) {
       db->GetMapService()->GetGroundTiles(renderProjection,
-                                     data->groundTiles);
+                                       data->groundTiles);
     }
 
     auto painter=db->GetPainter();
