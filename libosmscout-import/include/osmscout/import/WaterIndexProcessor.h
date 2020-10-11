@@ -383,8 +383,10 @@ namespace osmscout {
       double latMin;
       double latMax;
 
-      GroundTile::Coord borderCoords[4];
-      GeoCoord borderPoints[4];
+      using BorderCoords = std::array<GroundTile::Coord, 4>;
+      using BorderPoints = std::array<GeoCoord, 4>;
+      BorderCoords borderCoords;
+      BorderPoints borderPoints;
 
       inline CellBoundaries(const StateMap &stateMap, const Pixel &cell)
       {
@@ -450,7 +452,7 @@ namespace osmscout {
 
     /**
      * Compute all cell intersections for specific coastline (with index `coastline`, and path `points`)
-     * with index cells. Computed intesections are stored to `cellIntersections` map.
+     * with index cells. Computed intersections are stored to `cellIntersections` map.
      *
      * @param stateMap - state of index level
      * @param points - coastline way
@@ -501,7 +503,7 @@ namespace osmscout {
                       double cellMinLon,
                       const IntersectionRef& incoming,
                       const IntersectionRef& outgoing,
-                      const GroundTile::Coord borderCoords[]);
+                      const CellBoundaries::BorderCoords &borderCoords);
 
     /**
      * Return next clock wise intersection (from `current`)
