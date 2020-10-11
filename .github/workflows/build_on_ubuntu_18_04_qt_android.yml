@@ -44,6 +44,10 @@ jobs:
           arch: 'android_arm64_v8a'
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+      - name: Dump Qt installation data
+        run:  echo ${Qt5_DIR}
+      - name: List Qt installation
+        run:  ls -l ../Qt/5.12.9/android_arm64_v8a/
       - name: Configure build project
         run: "cmake -B build
                     -DCMAKE_TOOLCHAIN_FILE=${ANDROID_HOME}/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
