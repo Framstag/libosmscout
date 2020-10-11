@@ -1,7 +1,10 @@
 # CMake
 **/cmake_install.cmake
 **/CMakeFiles
+# cmake standard build directory
 /build/
+# cmake build directory for android builds
+/android/
 
 # IDEs
 **/.cproject
