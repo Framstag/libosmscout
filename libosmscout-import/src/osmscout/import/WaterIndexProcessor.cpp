@@ -42,7 +42,8 @@
 
 namespace osmscout {
 
-  void WriteGpx(const std::vector<Point> &path, const std::string& name)
+  template<typename PointSequence>
+  void WriteGpx(const PointSequence &path, const std::string& name)
   {
     WriteGpx(path.begin(), path.end(), name);
   }
@@ -414,7 +415,7 @@ namespace osmscout {
     }
 
     std::vector<GeoCoord> cellCoords;
-    cellCoords.assign(cellBoundary.borderPoints, cellBoundary.borderPoints + 4);
+    cellCoords.assign(cellBoundary.borderPoints.begin(), cellBoundary.borderPoints.end());
     for (const auto &poly:boundingPolygons){
       if (IsAreaAtLeastPartlyInArea(cellCoords,poly->coast)){
         return true;
@@ -1498,7 +1499,7 @@ namespace osmscout {
                                          double cellMinLon,
                                          const IntersectionRef& incoming,
                                          const IntersectionRef& outgoing,
-                                         const GroundTile::Coord borderCoords[])
+                                         const CellBoundaries::BorderCoords &borderCoords)
   {
 
     if (outgoing->borderIndex!=incoming->borderIndex ||
@@ -2057,19 +2058,6 @@ namespace osmscout {
 
       intersectionsCW.sort(IntersectionCWComparator());
 
-      // collect fully contained coastline paths (may be part of tripoints)
-      std::vector<size_t> containingPaths;
-
-      const auto &cellCoastlineEntry=data.cellCoveredCoastlines.find(cell);
-
-      if (cellCoastlineEntry!=data.cellCoveredCoastlines.end()) {
-        for (size_t i : cellCoastlineEntry->second) {
-          if (!data.coastlines[i]->isArea && data.coastlines[i]->isCompletelyInCell) {
-            containingPaths.push_back(i);
-          }
-        }
-      }
-
 #if defined(DEBUG_COASTLINE)
       std::cout.precision(5);
       std::cout << "    cell boundaries" <<
@@ -2086,6 +2074,42 @@ namespace osmscout {
         std::cout << ")" << std::endl;
       }
 #endif
+
+      // check if there are two intersections of the same coastline
+      // at the same point and the same direction, if yes, remove second one...
+      // it may happen when some point of the coastline lies exactly on cell edge
+      if (intersectionsCW.size()>1) {
+        IntersectionRef previous=intersectionsCW.back();
+        for (auto it = intersectionsCW.begin(); it != intersectionsCW.end(); ) {
+          IntersectionRef current=*it;
+          assert(previous);
+          assert(current);
+          if (previous.get() != current.get() &&
+              previous->coastline == current->coastline &&
+              previous->point == current->point &&
+              previous->direction == current->direction) {
+
+            progress.Warning("Remove duplicate intersection at " + previous->point.GetDisplayText() + "");
+            it=intersectionsCW.erase(it);
+            continue;
+          }
+          previous=current;
+          ++it;
+        }
+      }
+
+      // collect fully contained coastline paths (may be part of tripoints)
+      std::vector<size_t> containingPaths;
+
+      const auto &cellCoastlineEntry=data.cellCoveredCoastlines.find(cell);
+
+      if (cellCoastlineEntry!=data.cellCoveredCoastlines.end()) {
+        for (size_t i : cellCoastlineEntry->second) {
+          if (!data.coastlines[i]->isArea && data.coastlines[i]->isCompletelyInCell) {
+            containingPaths.push_back(i);
+          }
+        }
+      }
 
       for (const auto& intersection : intersectionsCW) {
         if (intersection->direction==Direction::touch) {
