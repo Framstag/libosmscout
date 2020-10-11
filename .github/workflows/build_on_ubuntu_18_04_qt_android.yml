@@ -41,21 +41,23 @@ jobs:
           version: '5.12.9'
           host: 'linux'
           target: 'android'
-          arch: 'android_armv7'
+          arch: 'android_arm64_v8a'
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
       - name: Configure build project
         run: "cmake -B build
                     -DCMAKE_TOOLCHAIN_FILE=${ANDROID_HOME}/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
                     -DANDROID_NDK=${ANDROID_HOME}/ndk/21.3.6528147/
-                    -DANDROID_ABI=armeabi-v7a
+                    -DANDROID_ABI=arm64-v8a
                     -DANDROID_PLATFORM=android-29
                     -DANDROID_STL=c++_shared
+                    -DANDROID_LD=lld
                     -DOSMSCOUT_BUILD_IMPORT=ON
                     -DOSMSCOUT_BUILD_GPX=OFF
                     -DOSMSCOUT_BUILD_DEMOS=OFF
                     -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
                     -DOSMSCOUT_BUILD_DOC_API=OFF
-                    -DOSMSCOUT_BUILD_WEBPAGE=OFF"
+                    -DOSMSCOUT_BUILD_WEBPAGE=OFF
+                    -Wno-dev"
       - name: Build project
         run:  cmake --build build
