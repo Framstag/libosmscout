@@ -49,7 +49,11 @@ struct Arguments {
   std::list<std::string> iconPaths;
 
   double fontSize{3.0};
+#ifdef _WIN32
+  std::string fontName{ "C:\\Windows\\Fonts\\arial.ttf" };
+#else
   std::string fontName{"/usr/share/fonts/TTF/LiberationSans-Regular.ttf"};
+#endif
 };
 
 class DrawMapArgParser: public osmscout::CmdLineParser
