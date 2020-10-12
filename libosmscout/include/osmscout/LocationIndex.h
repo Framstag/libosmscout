@@ -50,9 +50,9 @@ namespace osmscout {
 
   private:
     std::string                     path;
-    mutable uint8_t                 bytesForNodeFileOffset;
-    mutable uint8_t                 bytesForAreaFileOffset;
-    mutable uint8_t                 bytesForWayFileOffset;
+    uint8_t                         bytesForNodeFileOffset;
+    uint8_t                         bytesForAreaFileOffset;
+    uint8_t                         bytesForWayFileOffset;
     std::vector<std::string>        regionIgnoreTokens;
     std::unordered_set<std::string> regionIgnoreTokenSet;
     std::vector<std::string>        poiIgnoreTokens;
