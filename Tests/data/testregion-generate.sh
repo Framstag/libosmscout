@@ -22,7 +22,7 @@ function cleanup () {
 }
 
 trap cleanup EXIT TERM INT
-mkdir "$OUTPUT"
+mkdir -p "$OUTPUT"
 
 wget "http://download.geofabrik.de/europe/czech-republic-latest.osm.pbf" "-O$TMPDIR/czech-republic-latest.osm.pbf"
 
