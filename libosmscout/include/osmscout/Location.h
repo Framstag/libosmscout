@@ -70,8 +70,6 @@ namespace osmscout {
     FileOffset               parentRegionOffset; //!< Offset of the parent region index entry
     std::string              name;               //!< name of the region
     ObjectFileRef            object;             //!< The object that represents this region
-    std::string              aliasName;          //!< Additional optional alias name
-    ObjectFileRef            aliasObject;        //!< Additional optional alias reference
     std::vector<RegionAlias> aliases;            //!< The list of alias for this region
     std::vector<PostalArea>  postalAreas;        //<! The list of postal areas
     std::vector<FileOffset>  childrenOffsets;    //!< The list of child region offset

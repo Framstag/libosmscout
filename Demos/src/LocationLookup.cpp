@@ -56,14 +56,6 @@ bool GetAdminRegionHierachie(const osmscout::LocationServiceRef& locationService
     return false;
   }
 
-  if (!adminRegion->aliasName.empty()) {
-    if (!path.empty()) {
-      path.append("/");
-    }
-
-    path.append(osmscout::UTF8StringToLocaleString(adminRegion->aliasName));
-  }
-
   if (!path.empty()) {
     path.append("/");
   }
@@ -168,12 +160,7 @@ std::string GetAdminRegion(const osmscout::LocationSearchResult::Entry& entry)
     label.append("~ ");
   }
 
-  if (!entry.adminRegion->aliasName.empty()) {
-    label+="Region ("+osmscout::UTF8StringToLocaleString(entry.adminRegion->aliasName)+")";
-  }
-  else {
-    label+="Region ("+osmscout::UTF8StringToLocaleString(entry.adminRegion->name)+")";
-  }
+  label+="Region ("+osmscout::UTF8StringToLocaleString(entry.adminRegion->name)+")";
 
   return label;
 }
@@ -302,12 +289,7 @@ void DumpResult(const osmscout::DatabaseRef& database,
         std::cout << "   - alias " << alias.name << std::endl;
       }
 
-      if (entry.adminRegion->aliasObject.Valid()) {
-        std::cout << "   - " << GetObject(database,entry.adminRegion->aliasObject);
-      }
-      else {
-        std::cout << "   - " << GetObject(database,entry.adminRegion->object);
-      }
+      std::cout << "   - " << GetObject(database,entry.adminRegion->object);
 
       std::cout << std::endl;
     }

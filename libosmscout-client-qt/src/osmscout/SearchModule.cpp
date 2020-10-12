@@ -319,23 +319,10 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
     }
     else if (entry.adminRegion) {
       QString objectType;
-      if (entry.adminRegion->aliasObject.Valid()) {
-          if (!GetObjectDetails(db, entry.adminRegion->aliasObject, objectType, coordinates, bbox)){
-            return false;
-          }
+      if (!GetObjectDetails(db, entry.adminRegion->object, objectType, coordinates, bbox)){
+        return false;
       }
-      else {
-          if (!GetObjectDetails(db, entry.adminRegion->object, objectType, coordinates, bbox)){
-            return false;
-          }
-      }
-      QString name;
-      if (!entry.adminRegion->aliasName.empty()) {
-        name=QString::fromUtf8(entry.adminRegion->aliasName.c_str());
-      }
-      else {
-        name=QString::fromUtf8(entry.adminRegion->name.c_str());
-      }
+      QString name=QString::fromUtf8(entry.adminRegion->name.c_str());
 
       //=QString::fromUtf8(entry.adminRegion->name.c_str());
       LocationEntry location(LocationEntry::typeObject, name, objectType, adminRegionList,
@@ -343,12 +330,7 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
 
       osmscout::log.Debug() << "region: " << name.toStdString();
 
-      if (entry.adminRegion->aliasObject.Valid()) {
-          location.addReference(entry.adminRegion->aliasObject);
-      }
-      else {
-          location.addReference(entry.adminRegion->object);
-      }
+      location.addReference(entry.adminRegion->object);
       locations.append(location);
     }
     return true;

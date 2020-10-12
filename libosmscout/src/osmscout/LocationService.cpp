@@ -467,10 +467,6 @@ namespace osmscout {
     }
 
     if (adminRegion && other.adminRegion) {
-      if (adminRegion->aliasObject!=other.adminRegion->aliasObject) {
-        return false;
-      }
-
       if (adminRegion->object!=other.adminRegion->object) {
         return false;
       }
