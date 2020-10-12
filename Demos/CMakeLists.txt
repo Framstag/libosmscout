@@ -204,3 +204,11 @@ osmscout_demo_project(NAME Navigation SOURCES src/Navigation.cpp TARGET OSMScout
 #---- NavigationSimulator
 osmscout_demo_project(NAME NavigationSimulator SOURCES src/NavigationSimulator.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 
+#---- DrawMapGDI
+if(${OSMSCOUT_BUILD_MAP_GDI})
+    osmscout_demo_project(NAME DrawMapGDI SOURCES src/DrawMapGDI.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapGDI)
+    set_target_properties(DrawMapGDI PROPERTIES LINK_FLAGS /SUBSYSTEM:WINDOWS)
+    target_compile_definitions(DrawMapGDI PRIVATE _UNICODE UNICODE)
+else()
+	message("Skip DrawMapGDI demo, libosmscout-map-gdi is missing.")
+endif()
