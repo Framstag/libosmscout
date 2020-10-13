@@ -34,6 +34,12 @@ libosmscout-map-agg/
 libosmscout-map-cairo/
 : Library containing the cairo render backend.
 
+libosmscout-map-directx/
+: Library containing the DirectX render backend.
+
+libosmscout-map-gdi/
+: Library containing the GDI+ render backend.
+
 libosmscout-map-iOSX/
 : Library containing the Mac OS and iOS render backend.
 
@@ -114,10 +120,7 @@ libosmscout-extern/
 
 libosmscout-binding/
 : Project calling SWIG to generate stubs for interfacing libosmscout from
-  various languages (currently Java).
-
-libosmscout-extern/
-: Plugin for accesing libosmscout from Matlab.
+  various languages (currently Java, C#).
 
 libosmscout-java/
 : The target of the SWIG generation. Creates a jar containing the JNI stubs.

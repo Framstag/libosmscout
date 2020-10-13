@@ -86,6 +86,7 @@ The following backends currently exist:
   maintained)
 * OpenGL backend (current in proof of concept but will be rewritten as part of
   the GSoC 2017).
+* GDI+ backend (proof of concept)
   
 You can find more information regarding requirements for a backend 
 [here]({{< ref "/documentation/renderbackend.md" >}}). A description of the actual
