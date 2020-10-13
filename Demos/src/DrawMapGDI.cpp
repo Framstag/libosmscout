@@ -1,6 +1,6 @@
 /*
-DrawMapDirectX - a demo program for libosmscout
-Copyright (C) 2016  Tim Teulings
+DrawMapGDI - a demo program for libosmscout
+Copyright (C) 2020 Transporter
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 #include <osmscout/Database.h>
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterGDI.h>
+#include <osmscout/MapPainterGDIWindow.h>
 
 #include <Windowsx.h>
 #include <tchar.h>
@@ -37,11 +38,9 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 #define DPI 96.f
 #endif
 
-class DrawMapGDI
+class DrawMapGDI : public osmscout::MapPainterGDIWindow
 {
 private:
-	HINSTANCE                       m_hInstance;
-	HWND                            m_hWnd;
 	osmscout::DatabaseParameter		m_databaseParameter;
 	osmscout::DatabaseRef			m_database;
 	osmscout::MapServiceRef			m_mapService;
@@ -60,79 +59,21 @@ private:
 	double							m_fZoom;
 
 public:
-	DrawMapGDI(HINSTANCE hInstance, std::string map, std::string style, double lon, double lat, double zoom)
-		: m_hInstance(hInstance)
-		, m_hWnd(NULL)
-		, m_Painter(NULL)
-		, m_szMap(map)
+	DrawMapGDI(std::string map, std::string style, double lon, double lat, double zoom)
+		: m_szMap(map)
 		, m_szStyle(style)
 		, m_fLongitude(lon)
 		, m_fLatitude(lat)
 		, m_fZoom(zoom)
+		, osmscout::MapPainterGDIWindow()
 	{
 	}
 
-	static LRESULT CALLBACK _WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	~DrawMapGDI()
 	{
-		if (uMsg == WM_NCCREATE)
-		{
-			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)((LPCREATESTRUCT(lParam))->lpCreateParams));
-		}
-		DrawMapGDI* pWnd = (DrawMapGDI*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		if (pWnd)
-			return pWnd->WinMsgHandler(hwnd, uMsg, wParam, lParam);
-		else
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
-	LRESULT CALLBACK WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
-		{
-		case WM_CREATE:
-		{
-			RECT wndSize;
-			GetClientRect(hwnd, &wndSize);
-			m_Painter = new osmscout::MapPainterGDI(m_StyleConfig, m_hInstance, wndSize, hwnd, &m_Data, &m_DrawParameter, &m_Projection);
-		}
-		break;
-
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			return 0;
-
-		case WM_SIZE:
-		{
-			RECT wndSize;
-			GetClientRect(hwnd, &wndSize);
-			if (wndSize.right - wndSize.left > 0 && wndSize.bottom - wndSize.top > 0 && m_Painter != NULL)
-			{
-				m_Painter->MoveWindow(wndSize);
-				m_mapService->LookupTiles(m_Projection, m_Tiles);
-				m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-				m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
-			}
-		}
-		break;
-
-		case WM_MOUSEWHEEL:
-			if (m_Painter != NULL)
-			{
-				int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-				m_fZoom = m_Projection.GetMagnification().GetMagnification() + 100.0 * zDelta;
-				m_Projection.Set(m_Projection.GetCenter(), osmscout::Magnification(m_fZoom), m_Projection.GetDPI(), m_Projection.GetWidth(), m_Projection.GetHeight());
-				m_mapService->LookupTiles(m_Projection, m_Tiles);
-				m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-				m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
-				m_Painter->UpdateWindow();
-			}
-			break;
-
-		}
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
-	bool initialize(int nShowCmd)
+	bool DrawMapGDI::initialize(HINSTANCE hInstance, int nShowCmd)
 	{
 		// Init osmscout
 		m_database = std::make_shared<osmscout::Database>(m_databaseParameter);
@@ -162,34 +103,13 @@ public:
 		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
 		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 
-		const wchar_t CLASS_NAME[] = L"DemoDrawMapGDI";
-		WNDCLASS wc = { };
-		memset(&wc, 0, sizeof(WNDCLASS));
-		wc.lpfnWndProc = DrawMapGDI::_WinMsgHandler;
-		wc.hInstance = m_hInstance;
-		wc.lpszClassName = CLASS_NAME;
-
-		RegisterClass(&wc);
-
-		m_hWnd = CreateWindowEx(0,
-			CLASS_NAME,
-			L"DrawMapGDI",
-			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			NULL,
-			NULL,
-			m_hInstance,
-			(void*)this
-		);
-		if (m_hWnd == NULL) return false;
-		ShowWindow(m_hWnd, nShowCmd);
+		RECT size = { 0, 0, 800, 600 };
+		if (!CreateCanvas(m_StyleConfig, size, NULL, hInstance)) return false;
+		Set(&m_Projection, &m_DrawParameter, &m_Data);
 		return true;
 	}
 
-	int run()
+	int DrawMapGDI::run()
 	{
 		MSG msg = { };
 		while (GetMessage(&msg, NULL, 0, 0))
@@ -198,6 +118,33 @@ public:
 			DispatchMessage(&msg);
 		}
 		return EXIT_SUCCESS;
+	}
+
+	virtual LRESULT OnWinMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (uMsg)
+		{
+		default:
+			break;
+
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+
+		case WM_MOUSEWHEEL:
+			m_Projection.Set(m_Projection.GetCenter(), osmscout::Magnification(m_Projection.GetMagnification().GetMagnification() + 100.0 * GET_WHEEL_DELTA_WPARAM(wParam)), m_Projection.GetDPI(), m_Projection.GetWidth(), m_Projection.GetHeight());
+			OnTileUpdate();
+			InvalidateWindow();
+			break;
+		}
+		return MapPainterGDIWindow::OnWinMsg(hwnd, uMsg, wParam, lParam);
+	}
+
+	virtual void OnTileUpdate()
+	{
+		m_mapService->LookupTiles(m_Projection, m_Tiles);
+		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
+		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 	}
 };
 
@@ -245,8 +192,8 @@ int app_main(HINSTANCE hinstance, int nShowCmd)
 		return EXIT_FAILURE;
 	}
 
-	DrawMapGDI app(hinstance, map, style, lon, lat, zoom);
-	if (!app.initialize(nShowCmd)) return EXIT_FAILURE;
+	DrawMapGDI app(map, style, lon, lat, zoom);
+	if (!app.initialize(hinstance, nShowCmd)) return EXIT_FAILURE;
 	return app.run();
 }
 

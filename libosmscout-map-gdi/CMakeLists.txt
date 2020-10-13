@@ -1,10 +1,12 @@
 set(HEADER_FILES
     include/osmscout/MapGDIImportExport.h
     include/osmscout/MapPainterGDI.h
+    include/osmscout/MapPainterGDIWindow.h
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterGDI.cpp
+    src/osmscout/MapPainterGDIWindow.cpp
 )
 
 osmscout_library_project(

@@ -1,6 +1,6 @@
 /*
   This source is part of the libosmscout-map-gdi library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2020 Transporter
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -127,12 +127,31 @@ namespace osmscout {
 
 		~GdiRender()
 		{
-			delete m_pGraphics;
+			Release();
 		}
 
-		void Clear() {  }
+		void Release()
+		{
+			for (std::map<Gdiplus::ARGB, Gdiplus::SolidBrush*>::iterator iter = m_SolidBrushes.begin(); iter != m_SolidBrushes.end(); iter++) delete iter->second;
+			for (std::map<PENDEF, Gdiplus::Pen*>::iterator iter = m_Pens.begin(); iter != m_Pens.end(); iter++) delete iter->second;
+			for (std::map<FONTDEF, Gdiplus::Font*>::iterator iter = m_Fonts.begin(); iter != m_Fonts.end(); iter++) delete iter->second;
+			for (std::map<size_t, Gdiplus::Image*>::iterator iter = m_Images.begin(); iter != m_Images.end(); iter++) delete iter->second;
+			delete m_pGraphics;
+			m_pGraphics = NULL;
+			delete m_pMemBitmap;
+			m_pMemBitmap = NULL;
+		}
 
-		inline void Paint(Gdiplus::Graphics* pGraphics) { pGraphics->DrawImage(m_pMemBitmap, 0, 0); }
+		void Resize(INT width, INT height)
+		{
+			if (width == m_width && height == m_height) return;
+			if (width == 0 || height == 0) return;
+			Release();
+			m_pMemBitmap = new Gdiplus::Bitmap(width, height);
+			m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
+		}
+
+		inline void Paint(Gdiplus::Graphics* pGraphics, INT x = 0, INT y = 0) { pGraphics->DrawImage(m_pMemBitmap, x, y); }
 
 		Gdiplus::SolidBrush* GetSolidBrush(osmscout::Color color)
 		{
@@ -226,6 +245,10 @@ namespace osmscout {
 			else
 				return m_Images[iconID];
 		}
+	
+		inline INT GetWidth() { return m_width; }
+
+		inline INT GetHeight() { return m_height; }
 	};
 
 #define RENDEROBJECT(r) if (m_pBuffer == NULL) return; \
@@ -280,52 +303,34 @@ namespace osmscout {
 		inline void Close() { if (m_Size > 0) AddPoint(m_Data[0]); }
 	};
 
-	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig, HINSTANCE hInstance, RECT position, HWND hWndParent, osmscout::MapData* pData, osmscout::MapParameter* pParameter, osmscout::MercatorProjection* pProjection)
+	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig)
 		: MapPainter(styleConfig, new CoordBuffer())
 		, m_labelLayouter(this)
-		, m_hInstance(hInstance)
-		, m_hWnd(NULL)
 		, m_pBuffer(NULL)
-		, m_pProjection(pProjection)
-		, m_pParameter(pParameter)
-		, m_pData(pData)
 	{
-		if (m_hInstance == NULL) m_hInstance = GetModuleHandle(NULL);
-		memset(&m_Size, 0, sizeof(RECT));
-		const wchar_t CLASS_NAME[] = L"MapPainterGDI";
-		WNDCLASSEX wcx;
-		memset(&wcx, 0, sizeof(WNDCLASSEX));
-		wcx.cbSize = sizeof(WNDCLASSEX);
-		wcx.style = CS_HREDRAW | CS_VREDRAW;
-		wcx.lpfnWndProc = MapPainterGDI::_WinMsgHandler;
-		wcx.hInstance = hInstance;
-		wcx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-		wcx.lpszClassName = CLASS_NAME;
-		RegisterClassEx(&wcx);
-		m_hWnd = CreateWindowEx(0,
-			CLASS_NAME,
-			CLASS_NAME,
-			WS_CHILD | WS_VISIBLE,
-			position.left,
-			position.top,
-			position.right - position.left,
-			position.bottom - position.top,
-			hWndParent,
-			NULL,
-			m_hInstance,
-			(void*)this
-		);
-		if (m_hWnd == NULL) return;
 		if (m_gdiplusInstCount == 0)
 		{
 			Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 			Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 		}
 		m_gdiplusInstCount++;
+		m_pBuffer = new GdiRender(100, 100);
 	}
 
 	MapPainterGDI::~MapPainterGDI()
 	{
+		if (m_pBuffer != NULL)
+		{
+			((GdiRender*)m_pBuffer)->Release();
+			delete m_pBuffer;
+			m_pBuffer = NULL;
+		}
+		m_gdiplusInstCount--;
+		if (m_gdiplusToken > 0 && m_gdiplusInstCount == 0)
+		{
+			Gdiplus::GdiplusShutdown(m_gdiplusToken);
+			m_gdiplusToken = 0;
+		}
 	}
 
 	template<>
@@ -442,6 +447,7 @@ namespace osmscout {
 		const MapParameter& /*parameter*/,
 		const MapData& /*data*/)
 	{
+		// Not implemented
 	}
 
 	void MapPainterGDI::BeforeDrawing(const StyleConfig& /*styleConfig*/,
@@ -459,6 +465,7 @@ namespace osmscout {
 		const MapParameter& /*parameter*/,
 		const MapData& /*data*/)
 	{
+		// Not implemented
 	}
 
 	bool MapPainterGDI::HasIcon(const StyleConfig& /*styleConfig*/,
@@ -509,13 +516,13 @@ namespace osmscout {
 		return projection.ConvertWidthToPixel(fontSize * parameter.GetFontSize());
 	}
 
-	void MapPainterGDI::DrawContourSymbol(const Projection& /*projection*/,
+	void MapPainterGDI::DrawGround(const Projection& projection,
 		const MapParameter& /*parameter*/,
-		const Symbol& /*symbol*/,
-		double /*space*/,
-		size_t /*transStart*/, size_t /*transEnd*/)
+		const FillStyle& style)
 	{
-		// Not implemented
+		RENDEROBJECT(pRender);
+		Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(style.GetFillColor());
+		pRender->m_pGraphics->FillRectangle(pBrush, 0, 0, (INT)projection.GetWidth(), (INT)projection.GetHeight());
 	}
 
 	void MapPainterGDI::RegisterRegularLabel(const Projection &projection,
@@ -527,9 +534,6 @@ namespace osmscout {
 		m_labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
 	}
 
-	/**
-	 * Register contour label
-	 */
 	void MapPainterGDI::RegisterContourLabel(const Projection &projection,
 		const MapParameter &parameter,
 		const PathLabelData &label,
@@ -645,6 +649,14 @@ namespace osmscout {
 		pRender->m_pGraphics->DrawLines(pPen, points.m_Data, (INT)points.m_Size);
 	}
 
+	void MapPainterGDI::DrawWayOutline(const StyleConfig& /*styleConfig*/,
+		const Projection& /*projection*/,
+		const MapParameter& /*parameter*/,
+		const WayData& /*data*/)
+	{
+		// Not implemented
+	}
+
 	void MapPainterGDI::DrawWay(const StyleConfig& /*styleConfig*/,
 		const Projection& projection,
 		const MapParameter& parameter,
@@ -668,6 +680,15 @@ namespace osmscout {
 			data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
 			data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
 			data.transStart, data.transEnd);
+	}
+
+	void MapPainterGDI::DrawContourSymbol(const Projection& /*projection*/,
+		const MapParameter& /*parameter*/,
+		const Symbol& /*symbol*/,
+		double /*space*/,
+		size_t /*transStart*/, size_t /*transEnd*/)
+	{
+		// Not implemented
 	}
 
 	void MapPainterGDI::DrawArea(const Projection& /*projection*/,
@@ -727,104 +748,17 @@ namespace osmscout {
 		clippingInfo.clear();
 	}
 
-	void MapPainterGDI::DrawGround(const Projection& projection,
-		const MapParameter& /*parameter*/,
-		const FillStyle& style)
+	bool MapPainterGDI::DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, HDC hdc, RECT paintRect)
 	{
-		RENDEROBJECT(pRender);
-		Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(style.GetFillColor());
-		pRender->m_pGraphics->FillRectangle(pBrush, 0, 0, (INT)projection.GetWidth(), (INT)projection.GetHeight());
-	}
-
-	LRESULT CALLBACK MapPainterGDI::_WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		if (uMsg == WM_NCCREATE)
+		INT w = paintRect.right - paintRect.left;
+		INT h = paintRect.bottom - paintRect.top;
+		((GdiRender*)m_pBuffer)->Resize(w, h);
+		if (Draw(projection, parameter, data))
 		{
-			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)((LPCREATESTRUCT(lParam))->lpCreateParams));
+			Gdiplus::Graphics g(hdc);
+			((GdiRender*)m_pBuffer)->Paint(&g, paintRect.left, paintRect.top);
+			return true;
 		}
-		MapPainterGDI* pWnd = (MapPainterGDI*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		if (pWnd)
-			return pWnd->WinMsgHandler(hwnd, uMsg, wParam, lParam);
-		else
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
-	LRESULT CALLBACK MapPainterGDI::WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (uMsg)
-		{
-		case WM_CREATE:
-			Resize();
-			break;
-
-		case WM_DESTROY:
-			if (m_pBuffer != NULL)
-			{
-				delete m_pBuffer;
-				m_pBuffer = NULL;
-			}
-			m_gdiplusInstCount--;
-			if (m_gdiplusToken > 0 && m_gdiplusInstCount == 0)
-			{
-				Gdiplus::GdiplusShutdown(m_gdiplusToken);
-				m_gdiplusToken = 0;
-			}
-			break;
-
-		case WM_SIZE:
-			Resize();
-			break;
-
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hwnd, &ps);
-			if (m_pBuffer != NULL)
-			{
-				std::lock_guard<std::mutex> guard(m_mutex);
-				bool result = Draw(*m_pProjection, *m_pParameter, *m_pData);
-				Gdiplus::Graphics graphics(hdc);
-				((GdiRender*)m_pBuffer)->Paint(&graphics);
-			}
-			EndPaint(hwnd, &ps);
-		}
-		return 0;
-
-		}
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
-	void MapPainterGDI::MoveWindow(RECT position, bool bRepaint)
-	{
-		::MoveWindow(m_hWnd, position.left, position.top, position.right - position.left, position.bottom - position.top, bRepaint ? TRUE : FALSE);
-		Resize();
-	}
-
-	void MapPainterGDI::UpdateWindow()
-	{
-		RECT wndSize;
-		GetClientRect(m_hWnd, &wndSize);
-		InvalidateRect(m_hWnd, &wndSize, TRUE);
-	}
-
-	void MapPainterGDI::Resize()
-	{
-		RECT tmp;
-		GetClientRect(m_hWnd, &tmp);
-		if (tmp.left == m_Size.left && tmp.top == m_Size.top && tmp.right == m_Size.right && tmp.bottom == m_Size.bottom)
-			return;
-		memcpy(&m_Size, &tmp, sizeof(RECT));
-		if (m_pBuffer != NULL)
-		{
-			delete m_pBuffer;
-			m_pBuffer = NULL;
-		}
-		INT w = tmp.right - tmp.left;
-		INT h = tmp.bottom - tmp.top;
-		if (w > 0 && h > 0)
-		{
-			m_pBuffer = new GdiRender(w, h);
-			m_pProjection->Set(osmscout::GeoCoord(m_pProjection->GetLat(), m_pProjection->GetLon()), m_pProjection->GetMagnification(), m_pProjection->GetDPI(), w, h);
-		}
+		return false;
 	}
 }

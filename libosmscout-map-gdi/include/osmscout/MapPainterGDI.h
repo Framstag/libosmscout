@@ -3,7 +3,7 @@
 
 /*
   This source is part of the libosmscout-map-gdi library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2020 Transporter
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -28,8 +28,6 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
-
-#include <mutex>
 
 #include <osmscout/MapGDIImportExport.h>
 #include <osmscout/MapPainter.h>
@@ -58,16 +56,9 @@ namespace osmscout {
 		friend GdiLabelLayouter;
 
 		GdiLabelLayouter                   m_labelLayouter;
-		std::mutex                         m_mutex;
-		HWND                               m_hWnd;
-		HINSTANCE                          m_hInstance;
-		RECT                               m_Size;
 		void*                              m_pBuffer;
 		static ULONG_PTR                   m_gdiplusToken;
 		static DWORD                       m_gdiplusInstCount;
-		osmscout::MapData*                 m_pData;
-		osmscout::MapParameter*            m_pParameter;
-		osmscout::MercatorProjection*      m_pProjection;
 
 	private:
 		osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
@@ -181,50 +172,15 @@ namespace osmscout {
 			const AreaData& area) override;
 
 	public:
+		bool DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, HDC hdc, RECT paintRect);
+
 		/**
 		@brief Default constructor
 		@details Standard constructor with parameters for map display.
 		@param[in] styleConfig Configuration of the drawing styles
-		@param[in] hInstance HINSTANCE of the program or NULL if it should be determined by GetModuleHandle
-		@param[in] position Position and size of the drawing area on the parent window
-		@param[in] hWndParent Handle of the parent window
-		@param[in] data Map data
-		@param[in] parameter Parameter for map drawing
-		@param[in] projection Map projection
 		*/
-		explicit MapPainterGDI(const StyleConfigRef& styleConfig, HINSTANCE hInstance, RECT position, HWND hWndParent, osmscout::MapData* pData, osmscout::MapParameter* pParameter, osmscout::MercatorProjection* pProjection);
+		explicit MapPainterGDI(const StyleConfigRef& styleConfig);
 		~MapPainterGDI() override;
-
-		/**
-		@brief Windows message handler function
-		@details Static callback function to receive Windows messages of the used window. The data is passed to the non-static function of the class.
-		@warning This function is for internal use only! Do not use it in your application!
-		*/
-		static LRESULT CALLBACK _WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-		/**
-		@brief Windows message handler function
-		@details Non-static callback function to receive Windows messages of the used window in current class instance.
-		@warning This function is for internal use only! Do not use it in your application!
-		*/
-		LRESULT CALLBACK WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-		/**
-		@brief Move and/or resize the drawing Window
-		@details Moves and/or changes the size of the drawing window on the parent window. The function can be used to update the size of the parent window's WM_SIZE message, for example.
-		@param[in] position Rectangle on the parent window in which to draw.
-		@param[in] bRepaint True, if the drawing window should be redrawn immediately after changing size/position.
-		*/
-		void MoveWindow(RECT position, bool bRepaint = true);
-
-		/**
-		@brief Repaint window
-		@details Declares the drawing area invalid and triggers a new drawing.
-		*/
-		void UpdateWindow();
-
-	private:
-		void Resize();
 	};
 }
 
