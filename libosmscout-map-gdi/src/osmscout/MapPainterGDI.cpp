@@ -280,16 +280,16 @@ namespace osmscout {
 		inline void Close() { if (m_Size > 0) AddPoint(m_Data[0]); }
 	};
 
-	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig, HINSTANCE hInstance, RECT position, HWND hWndParent, osmscout::MapData& data, osmscout::MapParameter& parameter, osmscout::MercatorProjection& projection)
+	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig, HINSTANCE hInstance, RECT position, HWND hWndParent, osmscout::MapData* pData, osmscout::MapParameter* pParameter, osmscout::MercatorProjection* pProjection)
 		: MapPainter(styleConfig, new CoordBuffer())
 		, m_labelLayouter(this)
 		, m_hInstance(hInstance)
 		, m_hWnd(NULL)
 		, m_pBuffer(NULL)
+		, m_pProjection(pProjection)
+		, m_pParameter(pParameter)
+		, m_pData(pData)
 	{
-		m_Projection = projection;
-		m_Parameter = parameter;
-		m_Data = data;
 		memset(&m_Size, 0, sizeof(RECT));
 		const wchar_t CLASS_NAME[] = L"MapPainterGDI";
 		WNDCLASSEX wcx;
@@ -776,7 +776,7 @@ namespace osmscout {
 			if (m_pBuffer != NULL)
 			{
 				std::lock_guard<std::mutex> guard(m_mutex);
-				bool result = Draw(m_Projection, m_Parameter, m_Data);
+				bool result = Draw(*m_pProjection, *m_pParameter, *m_pData);
 				Gdiplus::Graphics graphics(hdc);
 				((GdiRender*)m_pBuffer)->Paint(&graphics);
 			}
@@ -792,6 +792,13 @@ namespace osmscout {
 	{
 		::MoveWindow(m_hWnd, position.left, position.top, position.right - position.left, position.bottom - position.top, bRepaint ? TRUE : FALSE);
 		Resize();
+	}
+
+	void MapPainterGDI::UpdateWindow()
+	{
+		RECT wndSize;
+		GetClientRect(m_hWnd, &wndSize);
+		InvalidateRect(m_hWnd, &wndSize, TRUE);
 	}
 
 	void MapPainterGDI::Resize()
@@ -811,7 +818,7 @@ namespace osmscout {
 		if (w > 0 && h > 0)
 		{
 			m_pBuffer = new GdiRender(w, h);
-			m_Projection.Set(osmscout::GeoCoord(m_Projection.GetLat(), m_Projection.GetLon()), m_Projection.GetMagnification(), m_Projection.GetDPI(), w, h);
+			m_pProjection->Set(osmscout::GeoCoord(m_pProjection->GetLat(), m_pProjection->GetLon()), m_pProjection->GetMagnification(), m_pProjection->GetDPI(), w, h);
 		}
 	}
 }

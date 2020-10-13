@@ -30,6 +30,7 @@ src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 7.465
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterGDI.h>
 
+#include <Windowsx.h>
 #include <tchar.h>
 
 #ifndef DPI
@@ -69,7 +70,6 @@ public:
 		, m_fLatitude(lat)
 		, m_fZoom(zoom)
 	{
-
 	}
 
 	static LRESULT CALLBACK _WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -93,7 +93,7 @@ public:
 		{
 			RECT wndSize;
 			GetClientRect(hwnd, &wndSize);
-			m_Painter = new osmscout::MapPainterGDI(m_StyleConfig, m_hInstance, wndSize, hwnd, m_Data, m_DrawParameter, m_Projection);
+			m_Painter = new osmscout::MapPainterGDI(m_StyleConfig, m_hInstance, wndSize, hwnd, &m_Data, &m_DrawParameter, &m_Projection);
 		}
 		break;
 
@@ -108,10 +108,25 @@ public:
 			if (wndSize.right - wndSize.left > 0 && wndSize.bottom - wndSize.top > 0 && m_Painter != NULL)
 			{
 				m_Painter->MoveWindow(wndSize);
+				m_mapService->LookupTiles(m_Projection, m_Tiles);
+				m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
+				m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 			}
 		}
 		break;
 
+		case WM_MOUSEWHEEL:
+			if (m_Painter != NULL)
+			{
+				int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+				m_fZoom = m_Projection.GetMagnification().GetMagnification() + 100.0 * zDelta;
+				m_Projection.Set(m_Projection.GetCenter(), osmscout::Magnification(m_fZoom), m_Projection.GetDPI(), m_Projection.GetWidth(), m_Projection.GetHeight());
+				m_mapService->LookupTiles(m_Projection, m_Tiles);
+				m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
+				m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
+				m_Painter->UpdateWindow();
+			}
+			break;
 
 		}
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
