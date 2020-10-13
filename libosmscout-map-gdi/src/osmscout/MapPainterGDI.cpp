@@ -282,7 +282,7 @@ namespace osmscout {
 
 	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig, HINSTANCE hInstance, RECT position, HWND hWndParent, osmscout::MapData& data, osmscout::MapParameter& parameter, osmscout::MercatorProjection& projection)
 		: MapPainter(styleConfig, new CoordBuffer())
-		, labelLayouter(this)
+		, m_labelLayouter(this)
 		, m_hInstance(hInstance)
 		, m_hWnd(NULL)
 		, m_pBuffer(NULL)
@@ -424,9 +424,9 @@ namespace osmscout {
 			Gdiplus::RectF bb;
 			pRender->m_pGraphics->MeasureString(text.c_str(), -1, pFont, ptf, &bb);
 			Gdiplus::Matrix m;
-			m.RotateAt(RadToDeg(glyph.angle), ptf);
+			m.RotateAt((Gdiplus::REAL)RadToDeg(glyph.angle), ptf);
 			pRender->m_pGraphics->SetTransform(&m);
-			pRender->m_pGraphics->DrawString(text.c_str(), -1, pFont, ptf - Gdiplus::PointF(0.5 * bb.Width, 0.5 * bb.Height), pBrush);
+			pRender->m_pGraphics->DrawString(text.c_str(), -1, pFont, ptf - Gdiplus::PointF(0.5f * bb.Width, 0.5f * bb.Height), pBrush);
 			pRender->m_pGraphics->ResetTransform();
 		}
 	}
@@ -444,8 +444,8 @@ namespace osmscout {
 		const MapData& /*data*/)
 	{
 		DoubleRectangle viewport(0.0, 0.0, (double)projection.GetWidth(), (double)projection.GetHeight());
-		labelLayouter.SetViewport(viewport);
-		labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+		m_labelLayouter.SetViewport(viewport);
+		m_labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
 	}
 
 	void MapPainterGDI::AfterDrawing(const StyleConfig& /*styleConfig*/,
@@ -480,8 +480,8 @@ namespace osmscout {
 			dimension = std::round(parameter.GetIconPixelSize());
 		}
 
-		style.SetWidth(dimension);
-		style.SetHeight(dimension);
+		style.SetWidth((unsigned int)dimension);
+		style.SetHeight((unsigned int)dimension);
 
 		Gdiplus::Image* pImage = pRender->GetIcon(idx);
 		if (pImage != NULL) return true;
@@ -518,7 +518,7 @@ namespace osmscout {
 		const Vertex2D &position,
 		double objectWidth)
 	{
-		labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+		m_labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
 	}
 
 	/**
@@ -529,18 +529,18 @@ namespace osmscout {
 		const PathLabelData &label,
 		const LabelPath &labelPath)
 	{
-		labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+		m_labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
 	}
 
 	void MapPainterGDI::DrawLabels(const Projection& projection,
 		const MapParameter& parameter,
 		const MapData& /*data*/)
 	{
-		labelLayouter.Layout(projection, parameter);
-		labelLayouter.DrawLabels(projection,
+		m_labelLayouter.Layout(projection, parameter);
+		m_labelLayouter.DrawLabels(projection,
 			parameter,
 			this);
-		labelLayouter.Reset();
+		m_labelLayouter.Reset();
 	}
 
 	void MapPainterGDI::DrawSymbol(const Projection& projection,
@@ -654,7 +654,6 @@ namespace osmscout {
 				data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
 				data.transStart, data.transEnd);
 		}
-		
 		DrawPath(projection,
 			parameter,
 			data.lineStyle->GetLineColor(),
@@ -776,7 +775,7 @@ namespace osmscout {
 			HDC hdc = BeginPaint(hwnd, &ps);
 			if (m_pBuffer != NULL)
 			{
-				std::lock_guard<std::mutex> guard(mutex);
+				std::lock_guard<std::mutex> guard(m_mutex);
 				bool result = Draw(m_Projection, m_Parameter, m_Data);
 				Gdiplus::Graphics graphics(hdc);
 				((GdiRender*)m_pBuffer)->Paint(&graphics);

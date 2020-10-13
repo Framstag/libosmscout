@@ -24,17 +24,14 @@
 #define UNICODE
 #endif
 #define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <Windows.h>
 
-#include <ostream>
-#include <map>
 #include <mutex>
-#include <unordered_map>
-#include <set>
 
 #include <osmscout/MapGDIImportExport.h>
-
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
@@ -58,8 +55,8 @@ namespace osmscout {
 		using GdiLabelLayouter = LabelLayouter<NativeGlyph, NativeLabel, MapPainterGDI>;
 		friend GdiLabelLayouter;
 
-		GdiLabelLayouter                   labelLayouter;
-		std::mutex                         mutex;
+		GdiLabelLayouter                   m_labelLayouter;
+		std::mutex                         m_mutex;
 		HWND                               m_hWnd;
 		HINSTANCE                          m_hInstance;
 		RECT                               m_Size;
