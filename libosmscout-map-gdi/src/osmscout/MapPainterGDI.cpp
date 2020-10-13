@@ -290,6 +290,7 @@ namespace osmscout {
 		, m_pParameter(pParameter)
 		, m_pData(pData)
 	{
+		if (m_hInstance == NULL) m_hInstance = GetModuleHandle(NULL);
 		memset(&m_Size, 0, sizeof(RECT));
 		const wchar_t CLASS_NAME[] = L"MapPainterGDI";
 		WNDCLASSEX wcx;
@@ -332,15 +333,14 @@ namespace osmscout {
 	{
 		std::vector<Glyph<MapPainterGDI::NativeGlyph>> result;
 		double horizontalOffset = 0;
-		for (size_t ch = 0; ch < label.length(); ch++) {
+		for (size_t ch = 0; ch < label.wstr.length(); ch++) {
 			result.emplace_back();
-
-			result.back().glyph.character = WStringToUTF8String(label.substr(ch, 1));
-
+			result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch, 1));
 			result.back().position.SetX(horizontalOffset);
 			result.back().position.SetY(0);
-
-			horizontalOffset += (double)(height * MapPainterGDI::AverageCharacterWidth);
+			Gdiplus::RectF bb;
+			((GdiRender*)label.render)->m_pGraphics->MeasureString(label.wstr.substr(ch, 1).c_str(), -1, (const Gdiplus::Font*)label.font, Gdiplus::PointF(0, fontSize * 2), &bb);
+			horizontalOffset += bb.Width;
 		}
 		return result;
 	}
@@ -361,12 +361,18 @@ namespace osmscout {
 		bool /*enableWrapping*/,
 		bool /*contourLabel*/)
 	{
-		auto label = std::make_shared<MapPainterGDI::GdiLabel>(UTF8StringToWString(text));
-
+		auto label = std::make_shared<MapPainterGDI::GdiLabel>();
+		label->label.wstr = UTF8StringToWString(text);
 		label->text = text;
 		label->fontSize = fontSize;
-		label->height = projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
-		label->width = label->label.length() * label->height * AverageCharacterWidth;
+		label->height = projection.ConvertWidthToPixel(fontSize * parameter.GetFontSize());
+		Gdiplus::Font* pFont = ((GdiRender*)m_pBuffer)->GetFont(parameter.GetFontName(), projection.ConvertWidthToPixel(fontSize * parameter.GetFontSize()));
+		Gdiplus::RectF bb;
+		std::wstring wtext = UTF8StringToWString(text);
+		((GdiRender*)m_pBuffer)->m_pGraphics->MeasureString(wtext.c_str(), -1, pFont, Gdiplus::PointF(0, label->height), &bb);
+		label->width = bb.Width;
+		label->label.font = pFont;
+		label->label.render = m_pBuffer;
 
 		return label;
 	}
@@ -500,7 +506,7 @@ namespace osmscout {
 		const MapParameter& parameter,
 		double fontSize)
 	{
-		return projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());;
+		return projection.ConvertWidthToPixel(fontSize * parameter.GetFontSize());
 	}
 
 	void MapPainterGDI::DrawContourSymbol(const Projection& /*projection*/,

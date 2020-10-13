@@ -39,14 +39,16 @@ namespace osmscout {
 	class OSMSCOUT_MAP_GDI_API MapPainterGDI : public MapPainter
 	{
 	public:
-		using NativeLabel = std::wstring;
+		struct NativeLabel {
+			std::wstring wstr;
+			void* font;
+			void* render;
+		};
 		struct NativeGlyph {
 			std::string character;
 			double width;
 			double height;
 		};
-		static constexpr double AverageCharacterWidth = 0.75;
-
 		using GdiLabel = Label<NativeGlyph, NativeLabel>;
 
 	private:
