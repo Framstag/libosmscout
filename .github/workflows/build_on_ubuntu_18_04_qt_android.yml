@@ -49,8 +49,7 @@ jobs:
       - name: List Qt installation
         run:  ls -l ../Qt/5.12.9/android_arm64_v8a/
       - name: Configure build project
-        run: "mkdir -p $(dirname ${ANDROID_HOME}/ndk/21.3.6528147/sysroot/${Qt5_DIR})
-              ln -s ${Qt5_DIR} ${ANDROID_HOME}/ndk/21.3.6528147/sysroot/${Qt5_DIR}
+        run: "ln -s ${Qt5_DIR} ${ANDROID_HOME}/ndk/21.3.6528147/sysroot/Qt ;
               cmake -B build
                     -DCMAKE_TOOLCHAIN_FILE=${ANDROID_HOME}/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
                     -DANDROID_NDK=${ANDROID_HOME}/ndk/21.3.6528147/
@@ -65,7 +64,7 @@ jobs:
                     -DOSMSCOUT_BUILD_DOC_API=OFF
                     -DOSMSCOUT_BUILD_WEBPAGE=OFF
                     -DOSMSCOUT_BUILD_TESTS=OFF
-                    -DQt5_DIR=${Qt5_DIR}/lib/cmake/Qt5
+                    -DQt5_DIR=/Qt/lib/cmake/Qt5
                     -Wno-dev"
       - name: Build project
         run:  cmake --build build
