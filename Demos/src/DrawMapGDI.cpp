@@ -186,7 +186,7 @@ public:
 	}
 };
 
-int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+int app_main(HINSTANCE hinstance, int nShowCmd)
 {
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -234,3 +234,15 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (!app.initialize(nShowCmd)) return EXIT_FAILURE;
 	return app.run();
 }
+
+#ifdef _MSC_VER
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nShowCmd)
+{
+	return app_main(hinstance, nShowCmd);
+}
+#else
+int main(int argc, char *argv[])
+{
+	return app_main(GetModuleHandle(NULL), SW_SHOW);
+}
+#endif
