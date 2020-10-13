@@ -487,12 +487,7 @@ private:
 	}
 };
 
-int WINAPI WinMain(
-	HINSTANCE /* hInstance */,
-	HINSTANCE /* hPrevInstance */,
-	LPSTR /* lpCmdLine */,
-	int /* nCmdShow */
-)
+int app_main()
 {
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -558,3 +553,15 @@ int WINAPI WinMain(
 
 	return EXIT_SUCCESS;
 }
+
+#ifdef _MSC_VER
+int WINAPI WinMain(HINSTANCE /*hinstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nShowCmd*/)
+{
+	return app_main();
+}
+#else
+int main(int argc, char *argv[])
+{
+	return app_main();
+}
+#endif
