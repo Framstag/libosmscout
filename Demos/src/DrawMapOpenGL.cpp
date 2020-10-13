@@ -33,7 +33,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  DrawMapOpenGL ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 7.46525 51.51241 70000 test.ppm
+  DrawMapOpenGL ../maps/nordrhein-westfalen ../stylesheets/standard.oss 1024 800 51.51241 7.46525 70000 test.ppm
  */
 
 int main(int argc, char* argv[]) {

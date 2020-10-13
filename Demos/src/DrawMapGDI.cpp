@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 Example for the nordrhein-westfalen.osm (to be executed in the Demos top
 level directory):
 
-src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 7.46525 51.51241 70000
+src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 7.46525 70000
 */
 
 #include <iostream>
