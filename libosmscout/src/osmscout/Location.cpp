@@ -35,10 +35,6 @@ namespace osmscout {
       return true;
     }
 
-    if (aliasObject==object) {
-      return true;
-    }
-
     if (object.GetType()==refNode) {
       for (const auto& aliase : aliases) {
         if (aliase.objectOffset==object.GetFileOffset()) {
@@ -144,12 +140,7 @@ namespace osmscout {
         stream << UTF8StringToLocaleString(postalArea->name) << " ";
       }
 
-      if (!adminRegion->aliasName.empty()) {
-        stream << UTF8StringToLocaleString(adminRegion->aliasName);
-      }
-      else {
-        stream << UTF8StringToLocaleString(adminRegion->name);
-      }
+      stream << UTF8StringToLocaleString(adminRegion->name);
     }
 
     return stream.str();

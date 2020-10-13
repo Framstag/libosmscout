@@ -72,6 +72,7 @@ namespace osmscout {
     {
       FileOffset  reference; //!< Reference to the node that is the alias
       std::string name;      //!< The alias itself
+      std::string altName;
     };
 
     /**
@@ -168,6 +169,7 @@ namespace osmscout {
 
       ObjectFileRef                      reference;          //!< Reference to the object this area is based on
       std::string                        name;               //!< The name of this area
+      std::string                        altName;
       std::string                        isIn;               //!< Name of the parent region as stated in OSM (is_in tag)
       std::list<RegionAlias>             aliases;            //!< Location that are represented by this region
       int8_t                             level{-1};          //!< Admin level or -1 if not set

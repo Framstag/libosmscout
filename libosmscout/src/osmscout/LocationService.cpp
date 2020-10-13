@@ -467,10 +467,6 @@ namespace osmscout {
     }
 
     if (adminRegion && other.adminRegion) {
-      if (adminRegion->aliasObject!=other.adminRegion->aliasObject) {
-        return false;
-      }
-
       if (adminRegion->object!=other.adminRegion->object) {
         return false;
       }
@@ -733,38 +729,45 @@ namespace osmscout {
     Action Visit(const AdminRegion& region) override
     {
       for (const auto& pattern : patterns) {
-        StringMatcher::Result matchResult=pattern.matcher->Match(region.name);
 
-        if (matchResult==StringMatcher::match) {
-          osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'";
-          matches.emplace_back(pattern.tokenString,
-                               std::make_shared<AdminRegion>(region),
-                               region.name);
+        auto TryMatch=[this, &pattern, &region](const std::string &name, const std::string_view &type){
+          StringMatcher::Result matchResult=pattern.matcher->Match(name);
 
-        }
-        else if (matchResult==StringMatcher::partialMatch) {
-          osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region name '" << region.name << "'";
-          partialMatches.emplace_back(pattern.tokenString,
-                                      std::make_shared<AdminRegion>(region),
-                                      region.name);
+          if (matchResult==StringMatcher::match) {
+            osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region " << type << " '" << name << "'";
+            matches.emplace_back(pattern.tokenString,
+                                 std::make_shared<AdminRegion>(region),
+                                 name);
+
+          }
+          else if (matchResult==StringMatcher::partialMatch) {
+            osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region " << type << " '" << name << "'";
+            partialMatches.emplace_back(pattern.tokenString,
+                                        std::make_shared<AdminRegion>(region),
+                                        name);
+          }
+          return matchResult;
+        };
+
+        using namespace std::string_view_literals;
+        StringMatcher::Result matchResult=TryMatch(region.name, "name"sv);
+
+        if (matchResult!=StringMatcher::match && !region.altName.empty()){
+          matchResult=TryMatch(region.altName, "alternative name"sv);
         }
 
         if (matchResult!=StringMatcher::match) {
           for (const auto& alias : region.aliases) {
-            matchResult=pattern.matcher->Match(alias.name);
-
-            if (matchResult==StringMatcher::match) {
-              osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'";
-              matches.emplace_back(pattern.tokenString,
-                                          std::make_shared<AdminRegion>(region),
-                                          alias.name);
+            matchResult=TryMatch(alias.name, "alias"sv);
+            if (matchResult==StringMatcher::match){
               break;
             }
-            else if (matchResult==StringMatcher::partialMatch) {
-              osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region alias '" << region.name << "' '" << alias.name << "'";
-              partialMatches.emplace_back(pattern.tokenString,
-                                          std::make_shared<AdminRegion>(region),
-                                          alias.name);
+
+            if (!alias.altName.empty()) {
+              matchResult = TryMatch(alias.altName, "alias alternative name"sv);
+              if (matchResult==StringMatcher::match){
+                break;
+              }
             }
           }
         }
