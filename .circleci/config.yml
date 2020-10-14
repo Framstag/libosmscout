@@ -13,16 +13,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Create build directory
-          command: mkdir build
-      - run:
           name: Configure project
-          command: cmake .. -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+          command: cmake -B build -DCMAKE_UNITY_BUILD -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
           working_directory: build
       - run:
           name: Build project
-          command: make -j 2
-          working_directory: build
+          command: cmake --build build
       - run:
           name: Test project
           command: ctest -j 2 --output-on-failure
