@@ -30,9 +30,9 @@ if [ "$TARGET" = "build" ]; then
     meson test -C debug --print-errorlogs
   elif [ "$BUILDTOOL" = "cmake" ]; then
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
-      cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev
+      cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev
     else
-      cmake -B build -DCMAKE_UNITY_BUILD -G Ninja  -Wno-dev
+      cmake -B build -DCMAKE_UNITY_BUILD=ON -G Ninja  -Wno-dev
     fi
 
     cmake --build build
