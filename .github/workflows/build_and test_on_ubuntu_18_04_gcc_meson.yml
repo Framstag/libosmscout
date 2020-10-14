@@ -41,6 +41,6 @@ jobs:
           CXX: ccache g++-10
           CC: ccache gcc-10
       - name: Build project
-        run:  meson compile -C debug
+        run:  ninja -C debug
       - name: Run tests
         run:  meson test -C debug --print-errorlogs
