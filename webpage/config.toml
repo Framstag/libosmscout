@@ -33,3 +33,7 @@ pygmentsuseclasses = true
 [blackfriday]
 angledQuotes = true
 smartypantsQuotesNBSP = true
+
+[markup.goldmark.renderer]
+# allow raw html (tables, extended formating...) in source markdown
+unsafe= true
