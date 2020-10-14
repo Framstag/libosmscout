@@ -52,10 +52,20 @@ namespace olt {
 char* coco_string_create(const char* value) {
   char* data;
   size_t len = 0;
-  if (value) { len = strlen(value); }
+
+  if (value) {
+    len = strlen(value);
+  }
+
   data = new char[len + 1];
-  strncpy(data, value, len);
-  data[len] = 0;
+
+  if (value) {
+    strncpy(data, value, len+1);
+  }
+  else {
+    data[len] = '\0';
+  }
+
   return data;
 }
 
@@ -63,10 +73,17 @@ char* coco_string_create(const char *value , int startIndex, size_t length) {
   size_t len = 0;
   char* data;
 
-  if (value) { len = length; }
+  if (value) {
+    len = length;
+  }
+
   data = new char[len + 1];
-  strncpy(data, &(value[startIndex]), len);
-  data[len] = 0;
+
+  if (value) {
+    strncpy(data, &(value[startIndex]), len);
+  }
+
+  data[len] = '\0';
 
   return data;
 }

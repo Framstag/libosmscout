@@ -132,55 +132,55 @@ void Parser::OLT() {
 		while (!(la->kind == _EOF || la->kind == 4 /* "OLT" */)) {SynErr(22); Get();}
 		Expect(4 /* "OLT" */);
 		while (StartOf(1)) {
-			osmscout::test::RegionRef region=std::make_shared<osmscout::test::Region>();
+			osmscout::test::RegionRef region=std::make_shared<osmscout::test::Region>(); 
 			REGION(*region);
-			regionList.AddRegion(region);
+			regionList.AddRegion(region); 
 		}
 		Expect(5 /* "END" */);
 }
 
 void Parser::REGION(osmscout::test::Region& region) {
 		std::string name;
-
+		
 		while (!(StartOf(2))) {SynErr(23); Get();}
 		if (la->kind == 6 /* "REGION" */) {
 			Get();
-			region.SetPlaceType(osmscout::test::PlaceType::region);
+			region.SetPlaceType(osmscout::test::PlaceType::region); 
 		} else if (la->kind == 7 /* "COUNTY" */) {
 			Get();
-			region.SetPlaceType(osmscout::test::PlaceType::county);
+			region.SetPlaceType(osmscout::test::PlaceType::county); 
 		} else if (la->kind == 8 /* "CITY" */) {
 			Get();
-			region.SetPlaceType(osmscout::test::PlaceType::city);
+			region.SetPlaceType(osmscout::test::PlaceType::city); 
 		} else if (la->kind == 9 /* "SUBURB" */) {
 			Get();
-			region.SetPlaceType(osmscout::test::PlaceType::suburb);
+			region.SetPlaceType(osmscout::test::PlaceType::suburb); 
 		} else if (la->kind == 10 /* "OBJECT" */) {
 			Get();
 		} else SynErr(24);
 		if (la->kind == 11 /* "BOUNDARY" */) {
-			size_t adminLevel;
+			size_t adminLevel; 
 			Get();
 			UINT(adminLevel);
-			region.SetAdminLevel(adminLevel);
+			region.SetAdminLevel(adminLevel); 
 		}
 		if (la->kind == 12 /* "NODE" */) {
 			Get();
-			region.SetIsNode();
+			region.SetIsNode(); 
 		}
 		STRING(name);
-		region.SetName(name);
+		region.SetName(name); 
 		if (la->kind == 13 /* "{" */) {
 			Get();
 			while (la->kind == 15 /* "POSTAL_AREA" */) {
-				osmscout::test::PostalAreaRef postalArea=std::make_shared<osmscout::test::PostalArea>();
+				osmscout::test::PostalAreaRef postalArea=std::make_shared<osmscout::test::PostalArea>(); 
 				POSTAL_AREA(*postalArea);
-				region.AddPostalArea(postalArea);
+				region.AddPostalArea(postalArea); 
 			}
 			while (StartOf(1)) {
-				osmscout::test::RegionRef childRegion=std::make_shared<osmscout::test::Region>();
+				osmscout::test::RegionRef childRegion=std::make_shared<osmscout::test::Region>(); 
 				REGION(*childRegion);
-				region.AddRegion(childRegion);
+				region.AddRegion(childRegion); 
 			}
 			Expect(14 /* "}" */);
 		}
@@ -190,63 +190,63 @@ void Parser::UINT(size_t& value) {
 		Expect(_number);
 		if (!StringToNumber(t->val,value)) {
 		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
-
+		
 		 SemErr(e.c_str());
 		}
-
+		
 }
 
 void Parser::STRING(std::string& value) {
 		Expect(_string);
 		value=Destring(t->val);
-
+		
 }
 
 void Parser::POSTAL_AREA(osmscout::test::PostalArea& postalArea) {
 		std::string name;
-
+		
 		while (!(la->kind == _EOF || la->kind == 15 /* "POSTAL_AREA" */)) {SynErr(25); Get();}
 		Expect(15 /* "POSTAL_AREA" */);
 		if (la->kind == _string) {
 			STRING(name);
-			postalArea.SetName(name);
+			postalArea.SetName(name); 
 		}
 		while (la->kind == 16 /* "LOCATION" */) {
-			osmscout::test::LocationRef location=std::make_shared<osmscout::test::Location>();
+			osmscout::test::LocationRef location=std::make_shared<osmscout::test::Location>(); 
 			LOCATION(*location);
-			postalArea.AddLocation(location);
+			postalArea.AddLocation(location); 
 		}
 }
 
 void Parser::LOCATION(osmscout::test::Location& location) {
 		std::string name;
-
+		
 		while (!(la->kind == _EOF || la->kind == 16 /* "LOCATION" */)) {SynErr(26); Get();}
 		Expect(16 /* "LOCATION" */);
 		STRING(name);
-		location.SetName(name);
+		location.SetName(name); 
 		while (la->kind == 17 /* "ADDRESS" */) {
-			osmscout::test::AddressRef address=std::make_shared<osmscout::test::Address>();
+			osmscout::test::AddressRef address=std::make_shared<osmscout::test::Address>(); 
 			ADDRESS(*address);
-			location.AddAddress(address);
+			location.AddAddress(address); 
 		}
 }
 
 void Parser::ADDRESS(osmscout::test::Address& address) {
 		std::string name;
-
+		
 		while (!(la->kind == _EOF || la->kind == 17 /* "ADDRESS" */)) {SynErr(27); Get();}
 		Expect(17 /* "ADDRESS" */);
 		STRING(name);
-		address.SetName(name);
+		address.SetName(name); 
 		if (la->kind == 18 /* "[" */) {
 			Get();
 			while (la->kind == _string) {
-				std::string tagKey,tagValue;
+				std::string tagKey,tagValue; 
 				STRING(tagKey);
 				Expect(19 /* "=" */);
 				STRING(tagValue);
-				address.AddTag(tagKey,tagValue);
+				address.AddTag(tagKey,tagValue); 
 			}
 			Expect(20 /* "]" */);
 		}
