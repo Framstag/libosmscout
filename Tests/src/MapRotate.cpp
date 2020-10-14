@@ -831,7 +831,7 @@ TEST_CASE()
     if (lat == 0.0)
       break;
     double lon = ringCoords[i+1];
-    ring.push_back(osmscout::Point(0, osmscout::GeoCoord(lat, lon)));
+    ring.emplace_back(0, osmscout::GeoCoord(lat, lon));
   }
 
   osmscout::Magnification mag(osmscout::MagnificationLevel(15));
@@ -842,14 +842,12 @@ TEST_CASE()
 
   osmscout::GeoCoord center(50.107252570499767, 14.459053009732296);
 
-  int problems = 0;
   osmscout::MercatorProjection  projection;
 
   for (double angle=0; angle<2*M_PI; angle+= 2*M_PI/32.0){
     projection.Set(center, angle, mag,
                    dpi, width, height
                    );
-    double angleDeg = (360*(angle/(2*M_PI)));
     REQUIRE(painter.IsVisibleAreaPublic(projection, ring, 0.0));
   }
 }
