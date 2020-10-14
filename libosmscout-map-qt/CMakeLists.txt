@@ -16,7 +16,7 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_qt"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	INCLUDES ${OPENGL_INCLUDE_DIR}
+	INCLUDES ${QT5_INCLUDE_DIR}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map Qt5::Gui Qt5::Svg
 )
