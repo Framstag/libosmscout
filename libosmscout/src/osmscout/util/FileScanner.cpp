@@ -190,17 +190,17 @@ namespace osmscout {
 
 #if defined(HAVE_POSIX_FADVISE)
     if (mode==FastRandom) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_WILLNEED)<0) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_WILLNEED)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
     else if (mode==Sequential) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_SEQUENTIAL)<0) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_SEQUENTIAL)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
     else if (mode==LowMemRandom) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_RANDOM)<0) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_RANDOM)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
@@ -215,17 +215,17 @@ namespace osmscout {
         offset=0;
 #if defined(HAVE_POSIX_MADVISE)
         if (mode==FastRandom) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_WILLNEED)<0) {
+          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_WILLNEED)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
         else if (mode==Sequential) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_SEQUENTIAL)<0) {
+          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_SEQUENTIAL)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
         else if (mode==LowMemRandom) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_RANDOM)<0) {
+          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_RANDOM)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
