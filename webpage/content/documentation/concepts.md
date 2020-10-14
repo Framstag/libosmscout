@@ -82,10 +82,9 @@ The following backends currently exist:
 * Qt backend
 * iOS and Mac OS backend
 * DirectX backend (proof of concept)
-* SVG backend (this backend is in a proof of concept state and is not activly
-  maintained)
-* OpenGL backend (current in proof of concept but will be rewritten as part of
-  the GSoC 2017).
+* SVG backend
+* OpenGL backend (current in proof of concept, 
+  basic functionality was written as part of the GSoC 2017).
 * GDI+ backend (proof of concept)
   
 You can find more information regarding requirements for a backend 
