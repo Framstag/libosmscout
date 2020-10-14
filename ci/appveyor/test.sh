@@ -13,5 +13,5 @@ if [ "${BUILDTOOL}" = "cmake" ] ; then
     ctest
 fi
 if [ "${BUILDTOOL}" = "meson" ] ; then
-  meson -C debug --print-errorlogs
+  meson test -C debug --print-errorlogs
 fi
