@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: Ubuntu+gcc+meson - Build and test
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout

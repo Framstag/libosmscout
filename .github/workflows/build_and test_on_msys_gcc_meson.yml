@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: MSYS+gcc+meson - Build and test
     runs-on: windows-2019
     defaults:
       run:
