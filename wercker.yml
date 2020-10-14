@@ -8,7 +8,7 @@ build:
         code: meson setup --buildtype debugoptimized --unity on debug -DenableClientQt=false
     - script:
         name: Build project
-        code: mesn compile -C debug
+        code: meson compile -C debug
     - script:
         name: Test project
         code: meson test -C debug
