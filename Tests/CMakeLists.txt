@@ -23,8 +23,10 @@ osmscout_test_project(NAME ColorParse SOURCES src/ColorParse.cpp)
 osmscout_test_project(NAME CoordinateEncoding SOURCES src/CoordinateEncoding.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- LocationLookup
-osmscout_test_project(NAME LocationLookupTest SOURCES src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp TARGET OSMScout::Test OSMScout::Import)
+osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp TARGET OSMScout::Test OSMScout::Import)
+set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR})
+set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 
 #---- NumberSetPerformance
 osmscout_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
