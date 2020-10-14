@@ -39,6 +39,6 @@ jobs:
           CXX: ccache clang++-9
           CC: ccache clang-9
       - name: Build project
-        run: ninja -C debug
+        run: meson compile -C debug
       - name: Run tests
-        run: meson test -C debug
+        run: meson test -C debug --print-errorlogs
