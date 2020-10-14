@@ -42,6 +42,7 @@ jobs:
           host: 'linux'
           target: 'android'
           arch: 'android_arm64_v8a'
+          modules: android
           install-deps: 'true'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
       - name: Dump Qt installation data
@@ -56,14 +57,15 @@ jobs:
                     -DANDROID_PLATFORM=android-29
                     -DANDROID_STL=c++_shared
                     -DANDROID_LD=lld
-                    -DOSMSCOUT_BUILD_IMPORT=ON
-                    -DOSMSCOUT_BUILD_GPX=OFF
+                    -DOSMSCOUT_BUILD_IMPORT=OFF
+                    -DOSMSCOUT_BUILD_GPX=ON
                     -DOSMSCOUT_BUILD_DEMOS=OFF
                     -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
                     -DOSMSCOUT_BUILD_DOC_API=OFF
                     -DOSMSCOUT_BUILD_WEBPAGE=OFF
                     -DOSMSCOUT_BUILD_TESTS=OFF
                     -DQt5_DIR=${Qt5_DIR}/lib/cmake/Qt5
+                    -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ON
                     -Wno-dev"
       - name: Build project
         run:  cmake --build build
