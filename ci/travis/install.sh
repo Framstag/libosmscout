@@ -28,7 +28,7 @@ if [ "$TARGET" = "build" ]; then
       echo "Installing meson..."
       pip3 install --user meson
     elif [ "$BUILDTOOL" = "cmake" ]; then
-      sudo apt-get install -y cmake
+      sudo apt-get install -y cmake ninja-build
     fi
 
     sudo apt-get install -y \
