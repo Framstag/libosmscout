@@ -8,7 +8,7 @@
 #define -->prefixPARSER_H
 
 -->headerdef
-#include <osmscout/olt/Scanner.h>
+#include <osmscout-test/olt/Scanner.h>
 
 -->namespace_open
 
