@@ -88,90 +88,7 @@ namespace osmscout {
     return true;
   }
 
-  bool WayAreaDataGenerator::GetAreas(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& typeConfig,
-                                      TypeInfoSet& types,
-                                      const BlacklistSet& blacklist,
-                                      FileScanner& scanner,
-                                      std::vector<std::list<RawWayRef> >& areas)
-  {
-    uint32_t    wayCount=0;
-    size_t      collectedWaysCount=0;
-    size_t      typesWithWays=0;
-    TypeInfoSet currentTypes(types);
-
-    scanner.GotoBegin();
-
-    scanner.Read(wayCount);
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      RawWayRef way=std::make_shared<RawWay>();
-
-      progress.SetProgress(w,wayCount);
-
-      way->Read(typeConfig,
-                scanner);
-
-      if (!way->IsArea()) {
-        continue;
-      }
-
-      if (!currentTypes.IsSet(way->GetType())) {
-        continue;
-      }
-
-      if (way->GetNodeCount()<3) {
-        continue;
-      }
-
-      if (blacklist.find(way->GetId())!=blacklist.end()) {
-        continue;
-      }
-
-      if (areas[way->GetType()->GetIndex()].empty()) {
-        typesWithWays++;
-      }
-
-      areas[way->GetType()->GetIndex()].push_back(way);
-
-      collectedWaysCount++;
-
-      while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
-          typesWithWays>1) {
-        TypeInfoRef victimType;
-
-        // Find the type with the smallest amount of ways loaded
-        for (const auto &type : currentTypes) {
-          if (!areas[type->GetIndex()].empty() &&
-              (!victimType ||
-               (areas[type->GetIndex()].size()<areas[victimType->GetIndex()].size()))) {
-            victimType=type;
-          }
-        }
-
-        if (victimType) {
-          collectedWaysCount-=areas[victimType->GetIndex()].size();
-          areas[victimType->GetIndex()].clear();
-
-          typesWithWays--;
-          currentTypes.Remove(victimType);
-        }
-      }
-
-      if (typesWithWays==0) {
-        break;
-      }
-    }
-
-    types.Remove(currentTypes);
-
-    progress.SetAction("Collected "+std::to_string(collectedWaysCount)+" ways for "+std::to_string(currentTypes.Size())+" types");
-
-    return true;
-  }
-
-  bool WayAreaDataGenerator::WriteArea(const ImportParameter& parameter,
+  void WayAreaDataGenerator::WriteArea(const ImportParameter& parameter,
                                        Progress& progress,
                                        const TypeConfig& typeConfig,
                                        FileWriter& writer,
@@ -188,37 +105,33 @@ namespace osmscout {
     ring.MarkAsOuterRing();
     ring.nodes.resize(rawWay.GetNodeCount());
 
-    bool success=true;
-    for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-      auto coord=coordsMap.find(rawWay.GetNodeId(n));
+    size_t index=0;
+    for (const auto& nodeId  : rawWay.GetNodes()) {
+      auto coord=coordsMap.find(nodeId);
 
       if (coord==coordsMap.end()) {
         progress.Error("Cannot resolve node with id "+
-                       std::to_string(rawWay.GetNodeId(n))+
+                       std::to_string(nodeId)+
                        " for area "+
                        std::to_string(wayId));
-        success=false;
-        break;
+        return;
       }
 
-      ring.nodes[n].Set(coord->second.GetSerial(),
-                        coord->second.GetCoord());
-    }
-
-    if (!success) {
-      return true;
+      ring.nodes[index].Set(coord->second.GetSerial(),
+                            coord->second.GetCoord());
+      index++;
     }
 
     if (!IsValidToWrite(ring.nodes)) {
       progress.Error("Area coordinates are not dense enough to be written for area "+
                      std::to_string(wayId));
-      return false;
+      return;
     }
 
     if (parameter.GetStrictAreas() &&
         !AreaIsSimple(ring.nodes)) {
       progress.Error("Area "+std::to_string(wayId)+" of type '"+ring.GetType()->GetName()+"' is not simple");
-      return true;
+      return;
     }
 
     area.rings.push_back(ring);
@@ -229,8 +142,6 @@ namespace osmscout {
                      writer);
 
     writtenWayCount++;
-
-    return true;
   }
 
   bool WayAreaDataGenerator::Import(const TypeConfigRef& typeConfig,
