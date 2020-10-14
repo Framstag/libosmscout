@@ -36,7 +36,7 @@
 /*
   Example for the nordrhein-westfalen.osm.pbf:
 
-  Demos/DrawMapQt ../maps/Dortmund ../stylesheets/standard.oss 1000 800 7.465 51.514 40000 test.png
+  Demos/DrawMapQt ../maps/Dortmund ../stylesheets/standard.oss 1000 800 51.514 7.465 40000 test.png
 */
 
 static const double MIN_YEAR=1800;

@@ -1,0 +1,1 @@
+mapgdiFeaturesCfg = configuration_data()

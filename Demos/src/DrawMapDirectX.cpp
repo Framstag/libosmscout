@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 Example for the nordrhein-westfalen.osm (to be executed in the Demos top
 level directory):
 
-src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 7.46525 51.51241 70000
+src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 7.46525 70000
 */
 
 // Application based on https://msdn.microsoft.com/en-us/library/windows/desktop/dd370994
@@ -487,12 +487,7 @@ private:
 	}
 };
 
-int WINAPI WinMain(
-	HINSTANCE /* hInstance */,
-	HINSTANCE /* hPrevInstance */,
-	LPSTR /* lpCmdLine */,
-	int /* nCmdShow */
-)
+int app_main()
 {
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -521,13 +516,13 @@ int WINAPI WinMain(
 	std::string map = argv[1];
 	std::string style = argv[2];
 	double lon, lat, zoom;
-	if (sscanf(argv[3].c_str(), "%lf", &lon) != 1) {
-		MessageBox(NULL, _T("lon is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+	if (sscanf(argv[3].c_str(), "%lf", &lat) != 1) {
+		MessageBox(NULL, _T("lat is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
 
-	if (sscanf(argv[4].c_str(), "%lf", &lat) != 1) {
-		MessageBox(NULL, _T("lat is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+	if (sscanf(argv[4].c_str(), "%lf", &lon) != 1) {
+		MessageBox(NULL, _T("lon is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
 		return EXIT_FAILURE;
 	}
 
@@ -558,3 +553,15 @@ int WINAPI WinMain(
 
 	return EXIT_SUCCESS;
 }
+
+#ifdef _MSC_VER
+int WINAPI WinMain(HINSTANCE /*hinstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nShowCmd*/)
+{
+	return app_main();
+}
+#else
+int main(int argc, char *argv[])
+{
+	return app_main();
+}
+#endif
