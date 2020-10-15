@@ -19,9 +19,10 @@ if [ "${BUILDTOOL}" = "cmake" ] ; then
     CMAKE_ARGS=${CMAKE_ARGS:-"-DCMAKE_BUILD_TYPE=Debug"}
     echo "CMAKE_ARGS: ${CMAKE_ARGS}"
 
-    cmake -B build -DCMAKE_UNITY_BUILD=ON -G Ninja "${CMAKE_ARGS}"
-    cmake --build build
-    cd build && ctest -j 2 --output-on-failure
+    mkdir build
+    (cd build && cmake -DCMAKE_UNITY_BUILD=ON -G Ninja "${CMAKE_ARGS}" ..)
+    (cd build && ninja)
+    (cd build && ctest -j 2 --output-on-failure)
 fi
 if [ "${BUILDTOOL}" = "meson" ] ; then
     meson setup --buildtype debugoptimized --unity on debug
