@@ -36,7 +36,7 @@ if [ "$TARGET" = "build" ]; then
       cmake --build build
     elif  [ "$TRAVIS_OS_NAME" = "osx" ] ; then
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
-      cmake -B build -Wno-dev .
+      cmake -B build -Wno-dev -G Ninja .
       cmake --build build
     else
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
