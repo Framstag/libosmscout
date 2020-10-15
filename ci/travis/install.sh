@@ -47,6 +47,7 @@ if [ "$TARGET" = "build" ]; then
       libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    echo "brew update..."
     brew update
 
       # Current images have preinstalled
@@ -54,10 +55,12 @@ if [ "$TARGET" = "build" ]; then
       # - libxml2
 
     if [ "$BUILDTOOL" = "meson" ]; then
+      echo "brew install meson..."
       brew install meson || true
-    fi
-    if [ "$BUILDTOOL" = "cmake" ]; then
+    elif [ "$BUILDTOOL" = "cmake" ]; then
+      echo "brew upgrade cmake..."
       brew upgrade cmake
+      echo "brew install meson..."
       brew install ninja
     fi
 
