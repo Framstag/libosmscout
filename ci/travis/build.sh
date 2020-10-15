@@ -40,15 +40,15 @@ if [ "$TARGET" = "build" ]; then
       cmake --build build
     else
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
-      cd build && cmake -Wno-dev -G Ninja ..
+      (cd build && cmake -Wno-dev -G Ninja ..)
       #cmake --build build
-      cd build && ninja
+      (cd build && ninja)
     fi
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
         echo "Skip test execution for iOS platform"
     else
-        cd build && ctest -j 2 --output-on-failure
+        (cd build && ctest -j 2 --output-on-failure)
     fi
   fi
 elif [ "$TARGET" = "importer" ]; then
