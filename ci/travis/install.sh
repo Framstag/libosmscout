@@ -55,6 +55,11 @@ if [ "$TARGET" = "build" ]; then
 
     if [ "$BUILDTOOL" = "meson" ]; then
       brew install meson || true
+      brew install ninja
+    fi
+    if [ "$BUILDTOOL" = "cmake" ]; then
+      brew install cmake
+      brew install ninja
     fi
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
