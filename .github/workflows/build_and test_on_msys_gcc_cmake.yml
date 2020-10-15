@@ -33,5 +33,5 @@ jobs:
         run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -G 'MSYS Makefiles'
       - name: Build project
         run: /mingw64/bin/cmake --build build
-      - name: Run tests
-        run: cd build && /mingw64/bin/ctest
+#      - name: Run tests
+#        run: cd build && /mingw64/bin/ctest

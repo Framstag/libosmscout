@@ -34,10 +34,12 @@ if [ "$TARGET" = "build" ]; then
       cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
       cmake --build build
     elif  [ "$TRAVIS_OS_NAME" = "osx" ] ; then
-      cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
+      cmake -B build -Wno-dev .
       cmake --build build
     else
-      cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
+      cmake -B build -Wno-dev -G Ninja .
       #cmake --build build
       cd build && ninja
     fi
