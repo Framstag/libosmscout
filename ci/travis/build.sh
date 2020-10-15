@@ -31,7 +31,8 @@ if [ "$TARGET" = "build" ]; then
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
-      cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
+      cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
       cmake --build build
     elif  [ "$TRAVIS_OS_NAME" = "osx" ] ; then
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
@@ -39,7 +40,8 @@ if [ "$TARGET" = "build" ]; then
       cmake --build build
     else
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
-      cmake -B build -Wno-dev -G Ninja .
+      mkdir build
+      cd build && cmake -Wno-dev -G Ninja ..
       #cmake --build build
       cd build && ninja
     fi
@@ -47,8 +49,7 @@ if [ "$TARGET" = "build" ]; then
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
         echo "Skip test execution for iOS platform"
     else
-        cd build
-        ctest -j 2 --output-on-failure
+        cd build && ctest -j 2 --output-on-failure
     fi
   fi
 elif [ "$TARGET" = "importer" ]; then
