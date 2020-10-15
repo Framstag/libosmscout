@@ -40,7 +40,6 @@ if [ "$TARGET" = "build" ]; then
       cmake --build build
     else
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
-      mkdir build
       cd build && cmake -Wno-dev -G Ninja ..
       #cmake --build build
       cd build && ninja
