@@ -21,7 +21,6 @@ apt-get install -y \
           qtlocation5-dev qtpositioning5-dev qttools5-dev-tools qttools5-dev \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
-          doxygen \
           swig openjdk-8-jdk \
           locales
 
