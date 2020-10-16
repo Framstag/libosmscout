@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Ubuntu+android - Build
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout

@@ -1,5 +1,4 @@
-#define CATCH_CONFIG_RUNNER
-#include "catch.hpp"
+#include <iostream>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/ImportProgress.h>
@@ -7,6 +6,9 @@
 #include <osmscout-test/PreprocessOLT.h>
 
 #include <osmscout/LocationService.h>
+
+#define CATCH_CONFIG_RUNNER
+#include <catch.hpp>
 
 osmscout::DatabaseRef        database;
 osmscout::LocationServiceRef locationService;
@@ -40,7 +42,7 @@ void DumpSeachResult(const osmscout::LocationSearchResult& result)
   std::cout << result.results.size() << " " << (result.results.size() >1 ? "results" : "result") << ":" << std::endl;
 
   size_t currentResult=1;
-  for (const auto entry : result.results) {
+  for (const auto& entry : result.results) {
     std::cout << "#" << currentResult << std::endl;
 
     if (entry.adminRegionMatchQuality!=osmscout::LocationSearchResult::none) {

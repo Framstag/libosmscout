@@ -26,24 +26,29 @@ if [ "$TARGET" = "build" ]; then
       meson setup --buildtype debugoptimized --unity on debug
     fi
 
-    ninja -C debug
+    meson compile -C debug
     meson test -C debug --print-errorlogs
   elif [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
-    cd build
-
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config ..
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
+      cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
+      cmake --build build
+    elif  [ "$TRAVIS_OS_NAME" = "osx" ] ; then
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
+      cmake -B build -Wno-dev .
+      cmake --build build
     else
-      cmake ..
+      # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
+      (cd build && cmake -Wno-dev -G Ninja ..)
+      #cmake --build build
+      (cd build && ninja)
     fi
-
-    make
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ] ; then
         echo "Skip test execution for iOS platform"
     else
-        make test
+        (cd build && ctest -j 2 --output-on-failure)
     fi
   fi
 elif [ "$TARGET" = "importer" ]; then

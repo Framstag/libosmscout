@@ -5,14 +5,12 @@ build:
   steps:
     - script:
         name: Configure project
-        code: meson -DenableClientQt=false debug
+        code: meson setup --buildtype debugoptimized --unity on debug -DenableClientQt=false
     - script:
         name: Build project
-        code: ninja
-        cwd: debug
+        code: meson compile -C debug
     - script:
         name: Test project
-        code: meson test
-        cwd: debug
-          
+        code: meson test -C debug
+
 

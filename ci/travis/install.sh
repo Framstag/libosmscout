@@ -28,7 +28,7 @@ if [ "$TARGET" = "build" ]; then
       echo "Installing meson..."
       pip3 install --user meson
     elif [ "$BUILDTOOL" = "cmake" ]; then
-      sudo apt-get install -y cmake
+      sudo apt-get install -y cmake ninja-build
     fi
 
     sudo apt-get install -y \
@@ -47,6 +47,7 @@ if [ "$TARGET" = "build" ]; then
       libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    echo "brew update..."
     brew update
 
       # Current images have preinstalled
@@ -54,7 +55,13 @@ if [ "$TARGET" = "build" ]; then
       # - libxml2
 
     if [ "$BUILDTOOL" = "meson" ]; then
+      echo "brew install meson..."
       brew install meson || true
+    elif [ "$BUILDTOOL" = "cmake" ]; then
+      echo "brew upgrade cmake..."
+      brew upgrade cmake
+      echo "brew install meson..."
+      brew install ninja
     fi
 
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: Ubuntu+clang+meson - Build and test
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -41,4 +41,4 @@ jobs:
       - name: Build project
         run: ninja -C debug
       - name: Run tests
-        run: meson test -C debug
+        run: meson test -C debug --print-errorlogs

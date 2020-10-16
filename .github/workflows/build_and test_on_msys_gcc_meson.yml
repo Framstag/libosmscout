@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: MSYS+gcc+meson - Build and test
     runs-on: windows-2019
     defaults:
       run:
@@ -35,7 +35,7 @@ jobs:
           CXX: ccache g++
           CC: ccache gcc
       - name: Build project
-        run: ninja -C debug
+        run: meson compile -C debug
       - name: Run tests
         run: meson test -C debug --print-errorlogs
         env:

@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: MSYS+gcc+cmake - Build and test
     runs-on: windows-2019
     defaults:
       run:
@@ -30,10 +30,8 @@ jobs:
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: /mingw64/bin/cmake -B build -S . -G 'MSYS Makefiles'
+        run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -G 'MSYS Makefiles'
       - name: Build project
         run: /mingw64/bin/cmake --build build
 #      - name: Run tests
-#        run: meson test -C debug
-#        env:
-#          LANG: en_US.utf8
+#        run: cd build && /mingw64/bin/ctest
