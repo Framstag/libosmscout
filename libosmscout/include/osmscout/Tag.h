@@ -32,7 +32,7 @@
 #include <osmscout/util/Parsing.h>
 
 #include <osmscout/system/Compiler.h>
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
 
@@ -252,7 +252,7 @@ namespace osmscout {
                           uint32_t priority);
     TagId RegisterNameAltTag(const std::string& tagName,
                              uint32_t priority);
-      
+
     TagId GetTagId(const char* name) const;
     TagId GetTagId(const std::string& name) const;
 

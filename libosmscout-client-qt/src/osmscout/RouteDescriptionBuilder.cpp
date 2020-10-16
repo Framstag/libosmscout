@@ -19,7 +19,7 @@
  */
 
 #include <osmscout/RouteDescriptionBuilder.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/util/Logger.h>
 
 #include <set>

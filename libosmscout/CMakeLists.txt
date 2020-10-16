@@ -8,7 +8,7 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-    include/osmscout/system/OSMScoutTypes.h)
+	include/osmscout/system/SystemTypes.h)
 
 set(HEADER_FILES_UTIL
     include/osmscout/util/Base64.h
@@ -46,8 +46,8 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/WorkQueue.h)
 
 set(HEADER_FILES_ROUTING
-    include/osmscout/routing/Route.h
     include/osmscout/routing/RouteData.h
+	include/osmscout/routing/RouteDescription.h
     include/osmscout/routing/RouteNode.h
     include/osmscout/routing/RouteNodeDataFile.h
     include/osmscout/routing/RoutePostprocessor.h
@@ -167,9 +167,9 @@ set(SOURCE_FILES
     src/osmscout/util/Transformation.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/TagErrorReporter.cpp
-    src/osmscout/routing/Route.cpp
     src/osmscout/routing/RouteData.cpp
-    src/osmscout/routing/RouteNode.cpp
+	src/osmscout/routing/RouteDescription.cpp
+	src/osmscout/routing/RouteNode.cpp
     src/osmscout/routing/RouteNodeDataFile.cpp
     src/osmscout/routing/RoutePostprocessor.cpp
     src/osmscout/routing/RoutingDB.cpp
@@ -235,7 +235,7 @@ set(SOURCE_FILES
     src/osmscout/TypeFeatures.cpp
     src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
-    src/osmscout/OSMScoutTypes.cpp
+	src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp

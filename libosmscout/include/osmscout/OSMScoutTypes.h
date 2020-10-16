@@ -24,7 +24,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
   /**

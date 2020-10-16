@@ -43,7 +43,7 @@
 
 // Routing
 #include <osmscout/Intersection.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteData.h>
 #include <osmscout/routing/RouteNodeDataFile.h>
 #include <osmscout/routing/RoutingProfile.h>
