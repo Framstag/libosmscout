@@ -47,12 +47,20 @@ if [ "$TARGET" = "build" ]; then
       libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    echo "brew update..."
-    brew update
-
       # Current images have preinstalled
       # - cmake
       # - libxml2
+
+    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
+      brew unlink python
+      brew upgrade protobuf qt5 cairo
+      brew install gettext
+      brew install pango
+      brew install  glfw3 glew glm
+      brew link --force gettext
+      brew link --force qt5
+      brew link --force --overwrite python
+    fi
 
     if [ "$BUILDTOOL" = "meson" ]; then
       echo "brew install meson..."
@@ -62,19 +70,6 @@ if [ "$TARGET" = "build" ]; then
       brew upgrade cmake
       echo "brew install meson..."
       brew install ninja
-    fi
-
-    if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
-      brew unlink python
-      # skip cairo, already installed
-      brew install gettext
-      brew upgrade protobuf
-      brew install pango
-      brew upgrade qt5
-      brew install  glfw3 glew glm
-      brew link --force gettext
-      brew link --force qt5
-      brew link --force --overwrite python
     fi
   fi
 elif [ "$TARGET" = "importer" ]; then
