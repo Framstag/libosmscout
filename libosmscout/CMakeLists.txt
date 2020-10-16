@@ -235,7 +235,7 @@ set(SOURCE_FILES
     src/osmscout/TypeFeatures.cpp
     src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
-		src/osmscout/SystemTypes.cpp
+	src/osmscout/OSMScoutTypes.cpp
     src/osmscout/WaterIndex.cpp
     src/osmscout/Way.cpp
     src/osmscout/WayDataFile.cpp
