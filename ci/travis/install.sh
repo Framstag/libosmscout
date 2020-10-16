@@ -47,16 +47,11 @@ if [ "$TARGET" = "build" ]; then
       libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
-      # Current images have preinstalled
-      # - cmake
-      # - libxml2
-
+    brew pin postgis postgresql mercurial ansible
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
       brew unlink python
-      brew upgrade protobuf qt5 cairo
-      brew install gettext
-      brew install pango
-      brew install  glfw3 glew glm
+      brew upgrade openjdk protobuf qt5 cairo
+      brew install libxml2 gettext pango glfw3 glew glm pkgconfig
       brew link --force gettext
       brew link --force qt5
       brew link --force --overwrite python
