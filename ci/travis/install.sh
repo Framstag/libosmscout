@@ -47,10 +47,10 @@ if [ "$TARGET" = "build" ]; then
       libglfw3 libglfw3-dev
 
   elif  [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew pin postgis postgresql mercurial ansible
+    brew pin postgis postgresql libpq poppler numpy mercurial ansible gnupg krb5 gdal geos libdap git gnutls
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
       brew unlink python
-      brew upgrade openjdk protobuf qt5 cairo
+      brew upgrade openjdk protobuf protobuf-c qt5 cairo
       brew install libxml2 gettext pango glfw3 glew glm pkgconfig
       brew link --force gettext
       brew link --force qt5
