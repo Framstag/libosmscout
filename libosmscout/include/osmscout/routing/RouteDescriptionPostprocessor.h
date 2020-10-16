@@ -31,7 +31,7 @@
 #include <osmscout/Path.h>
 #include <osmscout/GeoCoord.h>
 #include <osmscout/routing/DBFileOffset.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/util/Distance.h>
 #include <osmscout/util/Time.h>
 

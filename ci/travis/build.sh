@@ -12,10 +12,11 @@ echo "Build start time: $(date)"
 
 if [ "$TARGET" = "build" ]; then
   if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ] ; then
-    export PATH="/usr/local/opt/qt/bin:$PATH"
     export PATH="/usr/local/opt/gettext/bin:$PATH"
     export PATH="/usr/local/opt/libxml2/bin:$PATH"
     export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export PKG_CONFIG_PATH="$PKG_CONFIG_FILE:/usr/local/opt/qt/lib/pkgconfig"
+    export PATH="/usr/local/opt/qt/bin:$PATH"
   fi
 
   if [ "$BUILDTOOL" = "meson" ]; then
@@ -34,10 +35,11 @@ if [ "$TARGET" = "build" ]; then
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
       cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=/usr/local/include/ -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -Wno-dev .
       cmake --build build
-    elif  [ "$TRAVIS_OS_NAME" = "osx" ] ; then
+    elif  [ "$TRAVIS_OS_NAME" = "osx" ]  && [ "$PLATFORM" = "osx" ] ; then
+
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev .
-      cmake -B build -Wno-dev .
-      cmake --build build
+      cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Unix Makefiles"
+      cmake --build build -j 2
     else
       # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
       (cd build && cmake -Wno-dev -G Ninja ..)

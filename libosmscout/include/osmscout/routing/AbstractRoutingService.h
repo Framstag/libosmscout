@@ -33,7 +33,7 @@
 #include <osmscout/Point.h>
 #include <osmscout/Pixel.h>
 
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteData.h>
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/RoutingService.h>

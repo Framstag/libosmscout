@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_ROUTE_H
-#define OSMSCOUT_ROUTE_H
+#ifndef OSMSCOUT_ROUTE_DESCRIPTION_H
+#define OSMSCOUT_ROUTE_DESCRIPTION_H
 
 /*
   This source is part of the libosmscout library

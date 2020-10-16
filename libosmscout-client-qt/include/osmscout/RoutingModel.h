@@ -22,7 +22,7 @@
 
 #include <osmscout/Location.h>
 #include <osmscout/util/Breaker.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 
 #include <osmscout/ClientQtImportExport.h>
 

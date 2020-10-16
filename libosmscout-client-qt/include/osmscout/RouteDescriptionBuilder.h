@@ -22,7 +22,7 @@
  */
 
 #include <osmscout/routing/RouteData.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 #include <osmscout/Way.h>
 
