@@ -50,11 +50,13 @@ if [ "$TARGET" = "build" ]; then
     brew pin postgis postgresql libpq poppler numpy mercurial ansible gnupg krb5 gdal geos libdap git gnutls
     if  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "osx" ]; then
       brew unlink python
-      brew upgrade openjdk protobuf protobuf-c qt5 cairo
+      brew upgrade openjdk protobuf protobuf-c qt5 cairo cmake
       brew install libxml2 gettext pango glfw3 glew glm pkgconfig
       brew link --force gettext
       brew link --force qt5
       brew link --force --overwrite python
+    elif  [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$PLATFORM" = "ios" ]; then
+      brew pin cairo
     fi
 
     if [ "$BUILDTOOL" = "meson" ]; then
@@ -63,7 +65,7 @@ if [ "$TARGET" = "build" ]; then
     elif [ "$BUILDTOOL" = "cmake" ]; then
       echo "brew upgrade cmake..."
       brew upgrade cmake
-      echo "brew install meson..."
+      echo "brew install ninja..."
       brew install ninja
     fi
   fi
