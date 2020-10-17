@@ -275,7 +275,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
     if (database->Open(basemapLookupDirectory.toLocal8Bit().data())) {
       basemapDatabase=database;
-      qDebug() << "Basemap found and loaded!";
+      qDebug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
     }
     else {
       qWarning() << "Cannot open basemap database '" << basemapLookupDirectory << "'!";
