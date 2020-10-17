@@ -66,7 +66,7 @@ void InstalledVoicesModel::update()
   endResetModel();
 }
 
-void InstalledVoicesModel::onVoiceChanged(const QString dir)
+void InstalledVoicesModel::onVoiceChanged(const QString& dir)
 {
   voiceDir = dir;
   if (!QDir(voiceDir).exists()){
@@ -142,7 +142,7 @@ void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringLis
 
   currentPlaylist->clear();
 
-  for (auto file : sample){
+  for (const auto& file : sample){
     auto sampleUrl = QUrl::fromLocalFile(voice.getDir().path() + QDir::separator() + file);
     qDebug() << "Adding to playlist:" << sampleUrl;
     currentPlaylist->addMedia(sampleUrl);

@@ -220,7 +220,7 @@ namespace osmscout {
     writer.Write(maxCell.x);
     writer.Write(maxCell.y);
 
-    for (auto b : bitmap) {
+    for (const auto& b : bitmap) {
       writer.Write(b);
     }
 

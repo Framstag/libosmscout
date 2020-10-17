@@ -47,7 +47,7 @@ signals:
 
 public slots:
   void update();
-  void onVoiceChanged(const QString);
+  void onVoiceChanged(const QString&);
 
 public:
   InstalledVoicesModel();

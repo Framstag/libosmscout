@@ -101,7 +101,7 @@ void MapRenderer::onRenderSeaChanged(bool b)
   emit Redraw();
 }
 
-void MapRenderer::onFontNameChanged(const QString fontName)
+void MapRenderer::onFontNameChanged(const QString& fontName)
 {
   {
     QMutexLocker locker(&lock);
@@ -131,7 +131,7 @@ void MapRenderer::onShowAltLanguageChanged(bool showAltLanguage)
   emit Redraw();
 }
 
-void MapRenderer::onUnitsChanged(const QString units)
+void MapRenderer::onUnitsChanged(const QString& units)
 {
   {
     QMutexLocker locker(&lock);
@@ -141,7 +141,7 @@ void MapRenderer::onUnitsChanged(const QString units)
   emit Redraw();
 }
 
-void MapRenderer::addOverlayObject(int id, OverlayObjectRef obj)
+void MapRenderer::addOverlayObject(int id, const OverlayObjectRef& obj)
 {
   {
     QMutexLocker locker(&overlayLock);
@@ -188,7 +188,7 @@ osmscout::GeoBox MapRenderer::overlayObjectsBox() const
   {
     QMutexLocker locker(&overlayLock);
     osmscout::GeoBox box;
-    for (auto &p:overlayObjectMap){
+    for (const auto &p:overlayObjectMap){
       osmscout::GeoBox wayBox=p.second->boundingBox();
       if (wayBox.IsValid()){
         if (box.IsValid()){
@@ -208,7 +208,7 @@ void MapRenderer::getOverlayObjects(std::vector<OverlayObjectRef> &objs,
   QMutexLocker locker(&overlayLock);
   objs.clear();
   objs.reserve(overlayObjectMap.size());
-  for (auto &p:overlayObjectMap){
+  for (const auto &p:overlayObjectMap){
     if (requestBox.Intersects(p.second->boundingBox())){
       objs.push_back(p.second);
     }
@@ -248,7 +248,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
   // draw background
   if (drawCanvasBackground){
-    for (auto &db:databases){
+    for (const auto &db:databases){
       // fill background with "unknown" color
       if (!backgroundRendered && db->GetStyleConfig()){
           osmscout::FillStyleRef unknownFillStyle=db->GetStyleConfig()->GetUnknownFillStyle(renderProjection);
@@ -280,7 +280,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   // prepare data for batch
   osmscout::MapPainterBatchQt batch(databases.size());
   size_t i=0;
-  for (auto &db:databases){
+  for (const auto &db:databases){
     bool first=(i==0);
     bool last=(i==databases.size()-1);
     bool skip=true;
@@ -355,8 +355,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                        data->groundTiles);
     }
 
-    auto painter=db->GetPainter();
-    if (painter) {
+    auto *painter=db->GetPainter();
+    if (painter != nullptr) {
       batch.addData(data, painter);
     }else{
       osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();

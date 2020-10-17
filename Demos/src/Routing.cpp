@@ -23,7 +23,6 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
-#include <sstream>
 
 #include <osmscout/Database.h>
 #include <osmscout/routing/SimpleRoutingService.h>
@@ -165,7 +164,6 @@ static std::string MoveToTurnCommand(osmscout::RouteDescription::DirectionDescri
   }
 
   assert(false);
-
   return "???";
 }
 
@@ -213,9 +211,8 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 
     return stream.str();
   }
-  else {
-    return "";
-  }
+
+  return "";
 }
 
 struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
@@ -550,11 +547,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
       std::cout << std::endl;
 
-      for (std::list<osmscout::RouteDescription::DescriptionRef>::const_iterator d = node.GetDescriptions().begin();
-           d != node.GetDescriptions().end();
-           ++d) {
-        osmscout::RouteDescription::DescriptionRef desc = *d;
-
+      for (const auto& desc : node.GetDescriptions()) {
         NextLine(lineCount);
         std::cout << "// " << desc->GetDebugString() << std::endl;
       }

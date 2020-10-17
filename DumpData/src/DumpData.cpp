@@ -1092,7 +1092,7 @@ int main(int argc, char* argv[])
           case osmscout::refNone:
             break;
           case osmscout::refNode:
-            for (auto &node : nodes) {
+            for (const auto &node : nodes) {
               if (reference->second.GetFileOffset() == node->GetFileOffset()) {
                 DumpNode(node, reference->first.GetId());
                 break;
@@ -1100,7 +1100,7 @@ int main(int argc, char* argv[])
             }
             break;
           case osmscout::refArea:
-            for (auto &area : areas) {
+            for (const auto &area : areas) {
               if (reference->second.GetFileOffset() == area->GetFileOffset()) {
                 DumpArea(area, reference->first.GetId());
                 break;
@@ -1108,7 +1108,7 @@ int main(int argc, char* argv[])
             }
             break;
           case osmscout::refWay:
-            for (auto &way : ways) {
+            for (const auto &way : ways) {
               if (reference->second.GetFileOffset() == way->GetFileOffset()) {
                 DumpWay(way, reference->first.GetId());
                 break;
