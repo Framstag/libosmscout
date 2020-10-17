@@ -502,7 +502,8 @@ namespace osmscout {
                            double& r,
                            GeoCoord& intersection)
   {
-    double qx,qy;
+    // Initialisation to make compiler happy
+    double qx=0.0,qy=0.0;
 
     double distance=DistanceToSegment(point.GetLon(),point.GetLat(),
                                       segmentStart.GetLon(),segmentStart.GetLat(),

@@ -1783,7 +1783,7 @@ namespace osmscout {
     std::string strValue;
 
     std::vector<TagId> websiteTags{tagWebsite, tagContactWebsite};
-    for (auto tagId:websiteTags) {
+    for (auto tagId : websiteTags) {
       auto website = tags.find(tagId);
       if (website != tags.end()) {
         strValue = website->second;

@@ -116,7 +116,7 @@ QObject* MapObjectInfoModel::createOverlayObject(int row) const
       o=new OverlayArea();
     }
     if (o!=nullptr) {
-      for (auto const p:obj.points) {
+      for (const auto& p:obj.points) {
         o->addPoint(p.GetLat(), p.GetLon());
       }
     }

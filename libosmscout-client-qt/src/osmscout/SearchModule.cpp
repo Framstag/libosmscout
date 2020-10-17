@@ -177,7 +177,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
 
       //std::cout << "Sorted databases:" << std::endl;
 
-      for (auto db:sortedDbs){
+      for (auto& db:sortedDbs){
         //std::cout << "  " << db->path.toStdString() << std::endl;
         std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
 
@@ -296,10 +296,8 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
       LocationEntry location(LocationEntry::typeObject, loc, objectType, adminRegionList,
                              db->path, coordinates, bbox);
 
-      for (std::vector<osmscout::ObjectFileRef>::const_iterator object=entry.location->objects.begin();
-          object!=entry.location->objects.end();
-          ++object) {
-          location.addReference(*object);
+      for (auto object : entry.location->objects) {
+          location.addReference(object);
       }
       locations.append(location);
     }

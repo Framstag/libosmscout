@@ -50,7 +50,7 @@ AvailableVoicesModel::AvailableVoicesModel()
 
 AvailableVoicesModel::~AvailableVoicesModel()
 {
-  for (auto item:items){
+  for (auto& item:items){
     delete item;
   }
   items.clear();
@@ -61,7 +61,7 @@ void AvailableVoicesModel::reload()
   fetchError=""; // reset errors
 
   beginResetModel();
-  for (auto item:items){
+  for (auto& item:items){
     delete item;
   }
   items.clear();

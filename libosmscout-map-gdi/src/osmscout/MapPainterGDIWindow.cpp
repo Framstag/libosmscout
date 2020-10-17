@@ -165,7 +165,7 @@ namespace osmscout {
 			HDC hdc = BeginPaint(hwnd, &ps);
 			if (m_pPainter != NULL && m_pProjection != NULL && m_pParameter != NULL && m_pData != NULL)
 			{
-				bool result = m_pPainter->DrawMap(*m_pProjection, *m_pParameter, *m_pData, hdc, ps.rcPaint);
+				/*bool result = */m_pPainter->DrawMap(*m_pProjection, *m_pParameter, *m_pData, hdc, ps.rcPaint);
 			}
 			EndPaint(hwnd, &ps);
 		}

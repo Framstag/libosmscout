@@ -100,7 +100,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   osmscout::GeoBox lookupBox;
   lookupProjection.GetDimensions(lookupBox);
   std::list<DBInstanceRef> relevantDatabases;
-  for (auto &db:databases){
+  for (const auto &db:databases){
     if (!db->IsOpen() || (!db->GetStyleConfig())) {
       qDebug() << "Database is not ready" << db->path;
       continue;
@@ -129,7 +129,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     callbacks[db->path]=callbackId;
     loadedTiles[db->path]=QMap<osmscout::TileKey,osmscout::TileRef>();
     QMap<osmscout::TileKey,osmscout::TileRef> tileMap;
-    for (auto &tile:tiles){
+    for (const auto &tile:tiles){
       tileMap[tile->GetKey()]=tile;
     }
     allTiles[db->path]=tileMap;
@@ -228,7 +228,7 @@ bool DBLoadJob::AddTileDataToMapData(QString dbPath,
   for (auto &db:databases){
     if (db->path==dbPath){
       std::list<osmscout::TileRef> tileList;
-      for (auto &tile:tiles){
+      for (const auto &tile:tiles){
         tileList.push_back(tile);
       }
       db->GetMapService()->AddTileDataToMapData(tileList,data);

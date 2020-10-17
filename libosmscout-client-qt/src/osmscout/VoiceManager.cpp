@@ -133,7 +133,7 @@ void VoiceManager::reload()
 
 VoiceManager::~VoiceManager()
 {
-  for (auto job:downloadJobs) {
+  for (auto* job:downloadJobs) {
     delete job;
   }
   downloadJobs.clear();
@@ -162,7 +162,7 @@ bool VoiceManager::isDownloading(const AvailableVoice &voice) const
 
 void VoiceManager::download(const AvailableVoice &voice)
 {
-  auto job=new VoiceDownloadJob(&webCtrl,
+  auto* job=new VoiceDownloadJob(&webCtrl,
       voice,
       lookupDir + QDir::separator() + voice.getDirectory(),
       /*replaceExisting*/ true);
@@ -177,12 +177,12 @@ void VoiceManager::download(const AvailableVoice &voice)
 
 void VoiceManager::downloadNext()
 {
-  for (auto job:downloadJobs){
+  for (const auto* job:downloadJobs){
     if (job->isDownloading()){
       return;
     }
   }
-  for (auto job:downloadJobs){
+  for (auto* job:downloadJobs){
     job->start();
     break;
   }
@@ -197,7 +197,7 @@ void VoiceManager::onJobFailed(QString errorMessage)
 void VoiceManager::onJobFinished()
 {
   QList<VoiceDownloadJob*> finished;
-  for (auto job:downloadJobs){
+  for (auto *job:downloadJobs){
     if (job->isDone()){
       finished << job;
     }
@@ -205,7 +205,7 @@ void VoiceManager::onJobFinished()
   if (!finished.isEmpty()){
     reload();
   }
-  for (auto job:finished){
+  for (auto *job:finished){
     downloadJobs.removeOne(job);
     emit downloaded(job->getVoice());
     job->deleteLater();
