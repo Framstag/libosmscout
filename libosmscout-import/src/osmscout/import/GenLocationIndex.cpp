@@ -168,11 +168,13 @@ namespace osmscout {
   void LocationIndexGenerator::Region::CalculateProbePoints()
   {
     probePoints.clear();
-    if ( boundingBoxes.size() != areas.size() )
+    if ( boundingBoxes.size() != areas.size() ) {
       CalculateMinMax();
+    }
 
-    for (size_t i=0; i < areas.size(); ++i)
+    for (size_t i=0; i < areas.size(); ++i) {
       CalculateProbePointsForArea(i, 0);
+    }
   }
 
   void LocationIndexGenerator::Region::CalculateProbePointsForArea(size_t areaIndex, size_t refinement)
@@ -211,8 +213,9 @@ namespace osmscout {
     const double min_delta_lon = 0.1 / distance_lon;
 
     if ( refinement > 0 ) {
-      if (delta_lat < min_delta_lat && delta_lon < min_delta_lon )
+      if (delta_lat < min_delta_lat && delta_lon < min_delta_lon ) {
         return; // the refinement is considered to be too fine
+      }
 
       delta_lat = std::max(min_delta_lat, delta_lat);
       delta_lon = std::max(min_delta_lon, delta_lon);
@@ -235,18 +238,22 @@ namespace osmscout {
       for (double lon = box.GetMinCoord().GetLon() + delta_lon*0.5;
            lon < box.GetMaxCoord().GetLon(); lon += delta_lon ) {
         GeoCoord p(lat, lon);
-        if (osmscout::GetRelationOfPointToArea(p,area) > 0)
+        if (osmscout::GetRelationOfPointToArea(p,area) > 0) {
           probePoints.push_back(p);
+        }
       }
     }
 
-    if ( refinement == 2 ) return; // last level
+    if ( refinement == 2 ) { return; // last level
+    }
 
-    if ( probePoints.size() < targetprobes )
+    if ( probePoints.size() < targetprobes ) {
       CalculateProbePointsForArea( areaIndex, refinement+1 );
+    }
 
-    if ( refinement == 0 && probePoints.size() < minprobes )
+    if ( refinement == 0 && probePoints.size() < minprobes ) {
       probePoints.insert(std::end(probePoints), std::begin(area), std::end(area));
+    }
   }
 
   bool LocationIndexGenerator::Region::Contains(Region& child) const
@@ -987,7 +994,7 @@ namespace osmscout {
 
         region->reference=area.GetObjectFileRef();
         region->name=nameValue->GetName();
-        if (nameAltValue){
+        if (nameAltValue!=nullptr){
           region->altName=nameAltValue->GetNameAlt();
         }
         region->level=(int8_t)level;
@@ -1304,7 +1311,7 @@ namespace osmscout {
 
           alias.reference=node.GetFileOffset();
           alias.name=nameValue->GetName();
-          if (nameAltValue){
+          if (nameAltValue!=nullptr){
             alias.altName=nameAltValue->GetNameAlt();
           }
 
@@ -1799,13 +1806,13 @@ namespace osmscout {
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
 
-        scanner.ReadFileOffset(fileOffset);
-        scanner.ReadNumber(tmpType);
+        fileOffset=scanner.ReadFileOffset();
+        tmpType=scanner.ReadUInt32Number();
 
-        scanner.Read(name);
-        scanner.Read(postalCode);
-        scanner.Read(location);
-        scanner.Read(address);
+        name=scanner.ReadString();
+        postalCode=scanner.ReadString();
+        location=scanner.ReadString();
+        address=scanner.ReadString();
 
         GeoBox boundingBox;
         std::vector<SegmentGeoBox> segments;
@@ -2011,11 +2018,11 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        scanner.ReadFileOffset(fileOffset);
-        scanner.ReadNumber(tmpType);
+        fileOffset=scanner.ReadFileOffset();
+        tmpType=scanner.ReadUInt32Number();
 
-        scanner.Read(name);
-        scanner.Read(postalCode);
+        name=scanner.ReadString();
+        postalCode=scanner.ReadString();
 
         GeoBox boundingBox;
         std::vector<SegmentGeoBox> segments;
@@ -2189,15 +2196,15 @@ namespace osmscout {
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);
 
-        scanner.ReadFileOffset(fileOffset);
-        scanner.ReadNumber(tmpType);
+        fileOffset=scanner.ReadFileOffset();
+        tmpType=scanner.ReadUInt32Number();
 
-        scanner.Read(name);
-        scanner.Read(postalCode);
-        scanner.Read(location);
-        scanner.Read(address);
+        name=scanner.ReadString();
+        postalCode=scanner.ReadString();
+        location=scanner.ReadString();
+        address=scanner.ReadString();
 
-        scanner.ReadCoord(coord);
+        coord=scanner.ReadCoord();
 
         typeId=(TypeId)tmpType;
         type=typeConfig.GetNodeTypeInfo(typeId);
@@ -2207,8 +2214,9 @@ namespace osmscout {
         bool isPOI=!name.empty() &&
                    type->GetIndexAsPOI();
 
-        if (postalCode.empty())
+        if (postalCode.empty()) {
           postalCodeFound++;
+        }
 
         if (!isAddress && !isPOI) {
           continue;
@@ -2633,7 +2641,6 @@ namespace osmscout {
     std::vector<std::list<RegionRef>>  regionTree;
     RegionIndex                        regionIndex;
     TypeInfoRef                        boundaryType;
-    TypeInfoSet                        boundaryTypes(*typeConfig);
     std::vector<std::list<RegionRef>>  boundaryAreas;
     std::list<RegionRef>               regionAreas;
     std::list<std::string>             regionIgnoreTokens;
@@ -2646,6 +2653,8 @@ namespace osmscout {
     boundaryAreas.resize(13);
 
     try {
+      TypeInfoSet boundaryTypes(*typeConfig);
+
       bytesForNodeFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
                                                         "nodes.dat"));
       bytesForAreaFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),

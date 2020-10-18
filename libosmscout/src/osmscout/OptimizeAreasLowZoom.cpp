@@ -30,7 +30,6 @@
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/Transformation.h>
 
 namespace osmscout
 {
@@ -57,7 +56,7 @@ namespace osmscout
     scanner.Read(data.cellYStart);
     scanner.Read(data.cellYEnd);
 
-    scanner.ReadFileOffset(data.bitmapOffset);
+    data.bitmapOffset=scanner.ReadFileOffset();
     scanner.Read(data.dataOffsetBytes);
 
     data.cellXCount=data.cellXEnd-data.cellXStart+1;
@@ -84,7 +83,7 @@ namespace osmscout
 
       FileOffset indexOffset;
 
-      scanner.ReadFileOffset(indexOffset);
+      indexOffset=scanner.ReadFileOffset();
 
       scanner.SetPos(indexOffset);
 
@@ -193,10 +192,7 @@ namespace osmscout
 
       // For each column in row
       for (size_t x=minxc; x<=maxxc; x++) {
-        FileOffset cellDataOffset;
-
-        scanner.ReadFileOffset(cellDataOffset,
-                               typeData.dataOffsetBytes);
+        FileOffset cellDataOffset=scanner.ReadFileOffset(typeData.dataOffsetBytes);
 
         if (cellDataOffset==0) {
           continue;
@@ -219,16 +215,11 @@ namespace osmscout
 
       // For each data cell in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
-        uint32_t   dataCount;
+        uint32_t   dataCount=scanner.ReadUInt32Number();
         FileOffset lastOffset=0;
 
-
-        scanner.ReadNumber(dataCount);
-
         for (size_t d=0; d<dataCount; d++) {
-          FileOffset objectOffset;
-
-          scanner.ReadNumber(objectOffset);
+          FileOffset objectOffset=scanner.ReadUInt64Number();
 
           objectOffset+=lastOffset;
 

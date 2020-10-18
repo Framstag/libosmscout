@@ -74,10 +74,7 @@ namespace osmscout {
   {
     scanner.ReadNumber(id);
 
-    TypeId typeId;
-
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetNodeTypeIdBytes());
+    TypeId typeId=scanner.ReadTypeId(typeConfig.GetNodeTypeIdBytes());
 
     TypeInfoRef type=typeConfig.GetNodeTypeInfo(typeId);
 
@@ -87,7 +84,7 @@ namespace osmscout {
       featureValueBuffer.Read(scanner);
     }
 
-    scanner.ReadCoord(coord);
+    coord=scanner.ReadCoord();
   }
 
   /**

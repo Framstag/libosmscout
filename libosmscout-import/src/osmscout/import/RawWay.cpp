@@ -111,9 +111,7 @@ namespace osmscout {
       featureValueBuffer.Read(scanner);
     }
 
-    uint32_t nodeCount;
-
-    scanner.ReadNumber(nodeCount);
+    uint32_t nodeCount=scanner.ReadUInt32Number();
 
     nodes.resize(nodeCount);
 

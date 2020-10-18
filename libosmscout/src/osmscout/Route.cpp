@@ -36,34 +36,33 @@ namespace osmscout {
   void Route::Read(const TypeConfig& typeConfig,
                    FileScanner& scanner)
   {
-    TypeId typeId;
-
     fileOffset=scanner.GetPos();
 
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetRouteTypeIdBytes());
+    TypeId typeId=scanner.ReadTypeId(typeConfig.GetRouteTypeIdBytes());
 
     featureValueBuffer.SetType(typeConfig.GetRouteTypeInfo(typeId));
 
     featureValueBuffer.Read(scanner);
 
-    scanner.ReadBox(bbox);
+    bbox=scanner.ReadBox();
 
     // read segments
-    uint32_t segmentCnt;
-    scanner.ReadNumber(segmentCnt);
+    uint32_t segmentCnt=scanner.ReadUInt32Number();
+    uint64_t allMemberCnt=0;
+
     segments.clear();
     segments.reserve(segmentCnt);
-    uint64_t allMemberCnt=0;
+
     for (uint32_t i=0; i<segmentCnt; i++) {
       auto &segment=segments.emplace_back();
-      uint32_t memberCnt;
-      scanner.ReadNumber(memberCnt);
+      uint32_t memberCnt=scanner.ReadUInt32Number();
+
       segment.members.reserve(memberCnt);
       allMemberCnt+=memberCnt;
+
       for (uint32_t j=0; j<memberCnt; j++) {
         auto &member=segment.members.emplace_back();
-        scanner.ReadNumber(member.way);
+        member.way=scanner.ReadUInt64Number();
       }
     }
 

@@ -46,9 +46,7 @@ namespace osmscout {
   void ObjectVariantData::Read(const TypeConfig& typeConfig,
                                FileScanner& scanner)
   {
-    uint32_t typeIndex;
-
-    scanner.ReadNumber(typeIndex);
+    uint32_t typeIndex=scanner.ReadUInt32Number();
 
     type=typeConfig.GetTypeInfo(typeIndex);
 
@@ -111,7 +109,7 @@ namespace osmscout {
     fileOffset=scanner.GetPos();
 
     scanner.Read(serial);
-    scanner.ReadCoord(coord);
+    coord=scanner.ReadCoord();
 
     point.Set(serial,coord);
 
@@ -125,9 +123,7 @@ namespace osmscout {
 
     for (auto& object : objects) {
       RefType    type;
-      FileOffset fileOffset;
-
-      scanner.ReadNumber(fileOffset);
+      FileOffset fileOffset=scanner.ReadUInt64Number();
 
       if (fileOffset % 2==0) {
         type=refWay;
@@ -156,14 +152,14 @@ namespace osmscout {
       scanner.Read(path.objectIndex);
       //scanner.Read(paths[i].bearing);
       scanner.Read(path.flags);
-      scanner.ReadNumber(distanceValue);
+      distanceValue=scanner.ReadUInt32Number();
 
       path.distance=Distance::Of<Kilometer>(distanceValue/(1000.0*100.0));
     }
 
     excludes.resize(excludesCount);
     for (auto& exclude: excludes) {
-      scanner.Read(exclude.source);
+      exclude.source=scanner.ReadObjectFileRef();
       scanner.Read(exclude.targetIndex);
     }
   }

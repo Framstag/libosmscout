@@ -354,7 +354,7 @@ namespace osmscout {
         scanner.Read(wayId);
         scanner.Read(typeByte);
 
-        scanner.ReadFileOffset(wayOffset);
+        wayOffset=scanner.ReadFileOffset();
 
         type=(OSMRefType)typeByte;
 

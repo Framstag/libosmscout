@@ -28,9 +28,8 @@ namespace osmscout {
    */
   void TurnRestriction::Read(FileScanner& scanner)
   {
-    uint32_t typeValue;
+    uint32_t typeValue=scanner.ReadUInt32Number();
 
-    scanner.ReadNumber(typeValue);
     this->type=(Type)typeValue;
 
     scanner.ReadNumber(from);

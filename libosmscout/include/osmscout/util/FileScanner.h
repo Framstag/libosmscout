@@ -115,11 +115,10 @@ namespace osmscout {
      *
      * @param latDat raw latitude data
      * @param lonDat raw longitude data
-     * @param coord output
+     * @return coord output
      */
-    inline void SetCoord(const uint32_t &latDat,
-                         const uint32_t &lonDat,
-                         GeoCoord &coord)
+    inline GeoCoord CreateCoord(const uint32_t &latDat,
+                                const uint32_t &lonDat)
     {
 #ifndef NDEBUG
       if (latDat > maxRawCoordValue ||
@@ -129,8 +128,8 @@ namespace osmscout {
       }
 #endif
 
-      coord.Set(latDat/latConversionFactor-90.0,
-                lonDat/lonConversionFactor-180.0);
+      return {latDat/latConversionFactor-90.0,
+              lonDat/lonConversionFactor-180.0};
     }
 
     /**
@@ -211,9 +210,9 @@ namespace osmscout {
 
     void Read(char* buffer, size_t bytes);
 
-    void Read(std::string& value);
+    std::string ReadString();
 
-    void Read(bool& boolean);
+    bool ReadBool();
 
     void Read(int8_t& number);
     void Read(int16_t& number);
@@ -229,22 +228,22 @@ namespace osmscout {
     void Read(uint32_t& number, size_t bytes);
     void Read(uint64_t& number, size_t bytes);
 
-    void Read(ObjectFileRef& ref);
-    void Read(Color& color);
+    ObjectFileRef ReadObjectFileRef();
 
-    void ReadFileOffset(FileOffset& offset);
-    void ReadFileOffset(FileOffset& offset,
-                        size_t bytes);
+    Color ReadColor();
+
+    FileOffset ReadFileOffset();
+    FileOffset ReadFileOffset(size_t bytes);
 
     void ReadNumber(int16_t& number);
     void ReadNumber(int32_t& number);
     void ReadNumber(int64_t& number);
 
     void ReadNumber(uint16_t& number);
-    void ReadNumber(uint32_t& number);
-    void ReadNumber(uint64_t& number);
+    uint32_t ReadUInt32Number();
+    uint64_t ReadUInt64Number();
 
-    void ReadCoord(GeoCoord& coord);
+    GeoCoord ReadCoord();
     void ReadConditionalCoord(GeoCoord& coord,
                               bool& isSet);
 
@@ -261,10 +260,9 @@ namespace osmscout {
               GeoBox &bbox,
               bool readIds);
 
-    void ReadBox(GeoBox& box);
+    GeoBox ReadBox();
 
-    void ReadTypeId(TypeId& id,
-                    uint8_t maxBytes);
+    TypeId ReadTypeId(uint8_t maxBytes);
 
     std::vector<ObjectFileRef> ReadObjectFileRefs(size_t count);
   };

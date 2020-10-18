@@ -90,24 +90,18 @@ namespace osmscout {
         TypeData data;
         ReadTypeData(typeConfig, data);
 
-        scanner.ReadFileOffset(data.bitmapOffset);
+        data.bitmapOffset=scanner.ReadFileOffset();
 
         if (data.bitmapOffset>0) {
           scanner.Read(data.dataOffsetBytes);
 
-          uint32_t indexLevel;
-          scanner.ReadNumber(indexLevel);
+          uint32_t indexLevel=scanner.ReadUInt32Number();
           data.indexLevel=MagnificationLevel(indexLevel);
 
-          uint32_t minX;
-          uint32_t maxX;
-          uint32_t minY;
-          uint32_t maxY;
-
-          scanner.ReadNumber(minX);
-          scanner.ReadNumber(maxX);
-          scanner.ReadNumber(minY);
-          scanner.ReadNumber(maxY);
+          uint32_t minX=scanner.ReadUInt32Number();
+          uint32_t maxX=scanner.ReadUInt32Number();
+          uint32_t minY=scanner.ReadUInt32Number();
+          uint32_t maxY=scanner.ReadUInt32Number();
 
           data.tileBox=TileIdBox(TileId(minX,minY),
                                  TileId(maxX,maxY));
@@ -166,10 +160,7 @@ namespace osmscout {
 
       // For each column in row
       for (size_t x=boundingTileBox.GetMinX(); x<=boundingTileBox.GetMaxX(); x++) {
-        FileOffset cellDataOffset;
-
-        scanner.ReadFileOffset(cellDataOffset,
-                               typeData.dataOffsetBytes);
+        FileOffset cellDataOffset=scanner.ReadFileOffset(typeData.dataOffsetBytes);
 
         if (cellDataOffset==0) {
           continue;
@@ -198,15 +189,11 @@ namespace osmscout {
 
       // For each data cell (in range) in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
-        uint32_t   dataCount;
+        uint32_t   dataCount=scanner.ReadUInt32Number();
         FileOffset lastOffset=0;
 
-        scanner.ReadNumber(dataCount);
-
         for (size_t d=0; d<dataCount; d++) {
-          FileOffset objectOffset;
-
-          scanner.ReadNumber(objectOffset);
+          FileOffset objectOffset=scanner.ReadUInt64Number();
 
           objectOffset+=lastOffset;
 

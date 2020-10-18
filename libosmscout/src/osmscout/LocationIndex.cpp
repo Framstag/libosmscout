@@ -19,12 +19,10 @@
 
 #include <osmscout/LocationIndex.h>
 
-#include <osmscout/system/Assert.h>
-
 #include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
-#include <iostream>
+
 namespace osmscout {
 
   const char* const LocationIndex::FILENAME_LOCATION_IDX = "location.idx";
@@ -45,54 +43,46 @@ namespace osmscout {
       scanner.Read(bytesForAreaFileOffset);
       scanner.Read(bytesForWayFileOffset);
 
-      uint32_t ignoreTokenCount;
-
-      scanner.ReadNumber(ignoreTokenCount);
+      uint32_t ignoreTokenCount=scanner.ReadUInt32Number();
       regionIgnoreTokens.reserve(ignoreTokenCount);
 
-      for (size_t i=0; i<ignoreTokenCount; i++) {
-        std::string token;
-
-        scanner.Read(token);
+      for (uint32_t i=0; i<ignoreTokenCount; i++) {
+        std::string token=scanner.ReadString();
 
         regionIgnoreTokens.push_back(token);
         regionIgnoreTokenSet.insert(token);
       }
 
-      scanner.ReadNumber(ignoreTokenCount);
+      ignoreTokenCount=scanner.ReadUInt32Number();
       poiIgnoreTokens.reserve(ignoreTokenCount);
 
-      for (size_t i=0; i<ignoreTokenCount; i++) {
-        std::string token;
-
-        scanner.Read(token);
+      for (uint32_t i=0; i<ignoreTokenCount; i++) {
+        std::string token=scanner.ReadString();
 
         poiIgnoreTokens.push_back(token);
         poiIgnoreTokenSet.insert(token);
       }
 
-      scanner.ReadNumber(ignoreTokenCount);
+      ignoreTokenCount=scanner.ReadUInt32Number();
       locationIgnoreTokens.reserve(ignoreTokenCount);
 
       for (size_t i=0; i<ignoreTokenCount; i++) {
-        std::string token;
-
-        scanner.Read(token);
+        std::string token=scanner.ReadString();
 
         locationIgnoreTokens.push_back(token);
         locationIgnoreTokenSet.insert(token);
       }
 
-      scanner.ReadNumber(minRegionChars);
-      scanner.ReadNumber(maxRegionChars);
-      scanner.ReadNumber(minRegionWords);
-      scanner.ReadNumber(maxRegionWords);
-      scanner.ReadNumber(maxPOIWords);
-      scanner.ReadNumber(minLocationChars);
-      scanner.ReadNumber(maxLocationChars);
-      scanner.ReadNumber(minLocationWords);
-      scanner.ReadNumber(maxLocationWords);
-      scanner.ReadNumber(maxAddressWords);
+      minRegionChars=scanner.ReadUInt32Number();
+      maxRegionChars=scanner.ReadUInt32Number();
+      minRegionWords=scanner.ReadUInt32Number();
+      maxRegionWords=scanner.ReadUInt32Number();
+      maxPOIWords=scanner.ReadUInt32Number();
+      minLocationChars=scanner.ReadUInt32Number();
+      maxLocationChars=scanner.ReadUInt32Number();
+      minLocationWords=scanner.ReadUInt32Number();
+      maxLocationWords=scanner.ReadUInt32Number();
+      maxAddressWords=scanner.ReadUInt32Number();
 
       indexOffset=scanner.GetPos();
 
@@ -129,20 +119,17 @@ namespace osmscout {
     case refNone:
       break;
     case refNode:
-      scanner.ReadFileOffset(fileOffset,
-                             bytesForNodeFileOffset);
+      fileOffset=scanner.ReadFileOffset(bytesForNodeFileOffset);
       object.Set(fileOffset,
                  refNode);
       break;
     case refArea:
-      scanner.ReadFileOffset(fileOffset,
-                             bytesForAreaFileOffset);
+      fileOffset=scanner.ReadFileOffset(bytesForAreaFileOffset);
       object.Set(fileOffset,
                  refArea);
       break;
     case refWay:
-      scanner.ReadFileOffset(fileOffset,
-                             bytesForWayFileOffset);
+      fileOffset=scanner.ReadFileOffset(bytesForWayFileOffset);
       object.Set(fileOffset,
                  refWay);
       break;
@@ -163,51 +150,50 @@ namespace osmscout {
 
     region.regionOffset=scanner.GetPos();
 
-    scanner.ReadFileOffset(region.dataOffset);
-    scanner.ReadFileOffset(region.parentRegionOffset);
-    scanner.Read(region.name);
-    scanner.Read(region.altName);
+    region.dataOffset=scanner.ReadFileOffset();
+    region.parentRegionOffset=scanner.ReadFileOffset();
+    region.name=scanner.ReadString();
+    region.altName=scanner.ReadString();
 
     Read(scanner,
          region.object);
 
-    scanner.ReadNumber(aliasCount);
+    aliasCount=scanner.ReadUInt32Number();
 
     region.aliases.clear();
 
     if (aliasCount>0) {
       region.aliases.resize(aliasCount);
 
-      for (size_t i=0; i<aliasCount; i++) {
-        scanner.Read(region.aliases[i].name);
-        scanner.Read(region.aliases[i].altName);
-        scanner.ReadFileOffset(region.aliases[i].objectOffset,
-                               bytesForNodeFileOffset);
+      for (uint32_t i=0; i<aliasCount; i++) {
+        region.aliases[i].name=scanner.ReadString();
+        region.aliases[i].altName=scanner.ReadString();
+        region.aliases[i].objectOffset=scanner.ReadFileOffset(bytesForNodeFileOffset);
       }
     }
 
-    scanner.ReadNumber(postalAreasCount);
+    postalAreasCount=scanner.ReadUInt32Number();
 
     region.postalAreas.clear();
 
     if (postalAreasCount>0) {
       region.postalAreas.resize(postalAreasCount);
 
-      for (size_t i=0; i<postalAreasCount; i++) {
-        scanner.Read(region.postalAreas[i].name);
-        scanner.ReadFileOffset(region.postalAreas[i].objectOffset);
+      for (uint32_t i=0; i<postalAreasCount; i++) {
+        region.postalAreas[i].name=scanner.ReadString();
+        region.postalAreas[i].objectOffset=scanner.ReadFileOffset();
       }
     }
 
-    scanner.ReadNumber(childrenOffsetsCount);
+    childrenOffsetsCount=scanner.ReadUInt32Number();
 
     region.childrenOffsets.clear();
 
     if (childrenOffsetsCount>0) {
       region.childrenOffsets.resize(childrenOffsetsCount);
 
-      for (size_t i=0; i<childrenOffsetsCount; i++) {
-        scanner.ReadFileOffset(region.childrenOffsets[i]);
+      for (uint32_t i=0; i<childrenOffsetsCount; i++) {
+        region.childrenOffsets[i]=scanner.ReadFileOffset();
       }
     }
 
@@ -251,7 +237,8 @@ namespace osmscout {
             action==AdminRegionVisitor::error) {
           return action;
         }
-        else if (action==AdminRegionVisitor::skipChildren) {
+
+        if (action==AdminRegionVisitor::skipChildren) {
           return AdminRegionVisitor::visitChildren;
         }
       }
@@ -264,9 +251,8 @@ namespace osmscout {
     if (scanner.HasError()) {
       return AdminRegionVisitor::error;
     }
-    else {
-      return AdminRegionVisitor::visitChildren;
-    }
+
+    return AdminRegionVisitor::visitChildren;
   }
 
   bool LocationIndex::VisitLocations(const AdminRegion& adminRegion,
@@ -276,30 +262,24 @@ namespace osmscout {
                                      bool& stopped) const
   {
     //std::cout << "Visiting locations for " << adminRegion.name << std::endl;
-    uint32_t locationCount;
 
     for (const auto& postalArea : adminRegion.postalAreas) {
       scanner.SetPos(postalArea.objectOffset);
-      scanner.ReadNumber(locationCount);
 
-      for (size_t i=0; i<locationCount; i++) {
+      uint32_t locationCount=scanner.ReadUInt32Number();
+
+      for (uint32_t i=0; i<locationCount; i++) {
         Location location;
-        uint32_t objectCount;
 
         location.locationOffset=scanner.GetPos();
-
-        scanner.Read(location.name);
-
+        location.name=scanner.ReadString();
         location.regionOffset=adminRegion.regionOffset;
 
-        scanner.ReadNumber(objectCount);
-
-        bool hasAddresses;
-
-        scanner.Read(hasAddresses);
+        uint32_t objectCount=scanner.ReadUInt32Number();
+        bool     hasAddresses=scanner.ReadBool();
 
         if (hasAddresses) {
-          scanner.ReadFileOffset(location.addressesOffset);
+          location.addressesOffset=scanner.ReadFileOffset();
         }
         else {
           location.addressesOffset=0;
@@ -358,29 +338,23 @@ namespace osmscout {
                                                bool& stopped) const
   {
     //std::cout << "Visiting locations for " << postalArea.name << " " << adminRegion.name << std::endl;
-    uint32_t locationCount;
 
     scanner.SetPos(postalArea.objectOffset);
-    scanner.ReadNumber(locationCount);
 
-    for (size_t i=0; i<locationCount; i++) {
+    uint32_t locationCount=scanner.ReadUInt32Number();
+
+    for (uint32_t i=0; i<locationCount; i++) {
       Location location;
-      uint32_t objectCount;
 
       location.locationOffset=scanner.GetPos();
-
-      scanner.Read(location.name);
-
+      location.name=scanner.ReadString();
       location.regionOffset=adminRegion.regionOffset;
 
-      scanner.ReadNumber(objectCount);
-
-      bool hasAddresses;
-
-      scanner.Read(hasAddresses);
+      uint32_t objectCount=scanner.ReadUInt32Number();
+      bool     hasAddresses=scanner.ReadBool();
 
       if (hasAddresses) {
-        scanner.ReadFileOffset(location.addressesOffset);
+        location.addressesOffset=scanner.ReadFileOffset();
       }
       else {
         location.addressesOffset=0;
@@ -410,17 +384,16 @@ namespace osmscout {
   {
     scanner.SetPos(region.dataOffset);
 
-    uint32_t                  poiCount;
     ObjectFileRefStreamReader objectFileRefReader(scanner);
 
-    scanner.ReadNumber(poiCount);
+    uint32_t poiCount=scanner.ReadUInt32Number();
 
-    for (size_t i=0; i<poiCount; i++) {
+    for (uint32_t i=0; i<poiCount; i++) {
       POI poi;
 
       poi.regionOffset=region.regionOffset;
 
-      scanner.Read(poi.name);
+      poi.name=scanner.ReadString();
       objectFileRefReader.Read(poi.object);
 
       if (!visitor.Visit(region,
@@ -530,11 +503,10 @@ namespace osmscout {
       return true;
     }
 
-    uint32_t addressCount;
 
     scanner.SetPos(location.addressesOffset);
 
-    scanner.ReadNumber(addressCount);
+    uint32_t addressCount=scanner.ReadUInt32Number();
 
     ObjectFileRefStreamReader objectFileRefReader(scanner);
 
@@ -545,7 +517,7 @@ namespace osmscout {
       address.locationOffset=location.locationOffset;
       address.regionOffset=location.regionOffset;
 
-      scanner.Read(address.name);
+      address.name=scanner.ReadString();
 
       objectFileRefReader.Read(address.object);
 
@@ -574,17 +546,17 @@ namespace osmscout {
 
       scanner.SetPos(indexOffset);
 
-      uint32_t                regionCount;
       std::vector<FileOffset> rootRegionOffsets;
 
-      scanner.ReadNumber(regionCount);
+      uint32_t regionCount=scanner.ReadUInt32Number();
+
       rootRegionOffsets.resize(regionCount);
 
-      for (size_t i=0; i<regionCount; i++) {
-        scanner.ReadFileOffset(rootRegionOffsets[i]);
+      for (uint32_t i=0; i<regionCount; i++) {
+        rootRegionOffsets[i]=scanner.ReadFileOffset();
       }
 
-      for (size_t i=0; i<regionCount; i++) {
+      for (uint32_t i=0; i<regionCount; i++) {
         AdminRegion region;
 
         scanner.SetPos(rootRegionOffsets[i]);
@@ -607,7 +579,8 @@ namespace osmscout {
           scanner.Close();
           return false;
         }
-        else if (action==AdminRegionVisitor::stop) {
+
+        if (action==AdminRegionVisitor::stop) {
           scanner.Close();
           return true;
         }

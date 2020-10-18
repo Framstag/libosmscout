@@ -93,7 +93,7 @@ namespace osmscout {
 
         scanner.Read(cell.x);
         scanner.Read(cell.y);
-        scanner.ReadFileOffset(entry.fileOffset);
+        entry.fileOffset=scanner.ReadFileOffset();
         scanner.Read(entry.count);
 
         index[cell]=entry;

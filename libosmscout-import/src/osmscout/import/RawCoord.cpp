@@ -46,7 +46,7 @@ namespace osmscout {
                      FileScanner& scanner)
   {
     scanner.ReadNumber(id);
-    scanner.ReadCoord(coord);
+    coord=scanner.ReadCoord();
   }
 
   /**

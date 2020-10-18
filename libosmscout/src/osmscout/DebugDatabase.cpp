@@ -120,7 +120,7 @@ namespace osmscout {
 
         scanner.Read(id);
         scanner.Read(typeByte);
-        scanner.ReadFileOffset(fileOffset);
+        fileOffset=scanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,fileType);

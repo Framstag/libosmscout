@@ -201,7 +201,7 @@ namespace osmscout {
 
         nodeIdScanner.Read(id);
         nodeIdScanner.Read(typeByte);
-        nodeIdScanner.ReadFileOffset(fileOffset);
+        fileOffset=nodeIdScanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,refNode);
@@ -233,7 +233,7 @@ namespace osmscout {
 
         wayIdScanner.Read(id);
         wayIdScanner.Read(typeByte);
-        wayIdScanner.ReadFileOffset(fileOffset);
+        fileOffset=wayIdScanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,refWay);

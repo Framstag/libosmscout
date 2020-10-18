@@ -29,7 +29,6 @@
 
 #include <osmscout/system/Math.h>
 
-#include <iostream>
 namespace osmscout {
 
   const char* const AreaNodeIndex::AREA_NODE_IDX="areanode.idx";
@@ -76,19 +75,17 @@ namespace osmscout {
           nodeTypeData.resize(typeId+1);
         }
 
-        scanner.Read(nodeTypeData[typeId].isComplex);
+        nodeTypeData[typeId].isComplex=scanner.ReadBool();
 
-        GeoCoord minCoord,maxCoord;
-
-        scanner.ReadCoord(minCoord);
-        scanner.ReadCoord(maxCoord);
+        GeoCoord minCoord=scanner.ReadCoord();
+        GeoCoord maxCoord=scanner.ReadCoord();
 
         TypeData& entry=nodeTypeData[typeId];
 
         entry.boundingBox.Set(minCoord,maxCoord);
 
         if (!entry.isComplex) {
-          scanner.ReadFileOffset(entry.indexOffset);
+          entry.indexOffset=scanner.ReadFileOffset();
           scanner.Read(entry.entryCount);
         }
       }
@@ -113,9 +110,9 @@ namespace osmscout {
 
         ListTile& entry=nodeTypeData[typeId].listTiles[TileId(x,y)];
 
-        scanner.ReadFileOffset(entry.fileOffset);
+        entry.fileOffset=scanner.ReadFileOffset();
         scanner.Read(entry.entryCount);
-        scanner.Read(entry.storeGeoCoord);
+        entry.storeGeoCoord=scanner.ReadBool();
       }
 
       uint32_t bitmapEntryCount;
@@ -139,7 +136,7 @@ namespace osmscout {
 
         BitmapTile& entry=nodeTypeData[typeId].bitmapTiles[TileId(x,y)];
 
-        scanner.ReadFileOffset(entry.fileOffset);
+        entry.fileOffset=scanner.ReadFileOffset();
         scanner.Read(entry.dataOffsetBytes);
 
         scanner.Read(magnification);
@@ -170,8 +167,8 @@ namespace osmscout {
       GeoCoord   coord;
       FileOffset fileOffset;
 
-      scanner.ReadCoord(coord);
-      scanner.ReadNumber(fileOffset);
+      coord=scanner.ReadCoord();
+      fileOffset=scanner.ReadUInt64Number();
 
       fileOffset+=previousOffset;
 
@@ -207,8 +204,8 @@ namespace osmscout {
             GeoCoord   coord;
             FileOffset fileOffset;
 
-            scanner.ReadCoord(coord);
-            scanner.ReadNumber(fileOffset);
+            coord=scanner.ReadCoord();
+            fileOffset=scanner.ReadUInt64Number();
 
             fileOffset+=previousOffset;
 
@@ -223,7 +220,7 @@ namespace osmscout {
           for (auto i=1; i<=tile->second.entryCount; i++) {
             FileOffset fileOffset;
 
-            scanner.ReadNumber(fileOffset);
+            fileOffset=scanner.ReadUInt64Number();
 
             fileOffset+=previousOffset;
 
@@ -284,10 +281,7 @@ namespace osmscout {
 
           // For each column in row
           for (size_t x=minxc; x<=maxxc; x++) {
-            FileOffset cellDataOffset;
-
-            scanner.ReadFileOffset(cellDataOffset,
-                                   tileBitmap->second.dataOffsetBytes);
+            FileOffset cellDataOffset=scanner.ReadFileOffset(tileBitmap->second.dataOffsetBytes);
 
             if (cellDataOffset==0) {
               continue;
@@ -313,15 +307,11 @@ namespace osmscout {
 
           // For each data cell in row found
           for (size_t i=0; i<cellDataOffsetCount; i++) {
-            uint32_t   dataCount;
             FileOffset previousOffset=0;
+            uint32_t   dataCount=scanner.ReadUInt32Number();
 
-            scanner.ReadNumber(dataCount);
-
-            for (size_t d=0; d<dataCount; d++) {
-              FileOffset fileOffset;
-
-              scanner.ReadNumber(fileOffset);
+            for (uint32_t d=0; d<dataCount; d++) {
+              FileOffset fileOffset=scanner.ReadUInt64Number();
 
               fileOffset+=previousOffset;
 

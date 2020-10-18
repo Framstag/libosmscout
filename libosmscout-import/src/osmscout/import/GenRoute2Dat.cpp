@@ -76,7 +76,7 @@ namespace osmscout {
         wayIdScanner.Read(id);
         wayIdScanner.Read(typeByte);
         assert((OSMRefType)typeByte==osmRefWay);
-        wayIdScanner.ReadFileOffset(fileOffset);
+        fileOffset=wayIdScanner.ReadFileOffset();
 
         wayIdMap.insert(std::make_pair(id, fileOffset));
       }
