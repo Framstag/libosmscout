@@ -850,8 +850,8 @@ namespace osmscout {
 
       FileOffset offset=scanner.GetPos();
 
-      uint8_t objectType=scanner.ReadUInt8();
-      Id      id=scanner.ReadUInt64();
+      /*uint8_t objectType=*/scanner.ReadUInt8();
+      /*Id      id=*/scanner.ReadUInt64();
 
       area.Read(*typeConfig,scanner);
 
