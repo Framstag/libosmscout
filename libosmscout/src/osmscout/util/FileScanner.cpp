@@ -101,9 +101,9 @@ namespace osmscout {
       mmap=nullptr;
     }
 #elif  defined(_WIN32)
-      if (buffer!=nullptr) {
-        UnmapViewOfFile(buffer);
-        buffer=nullptr;
+      if (mmap!=nullptr) {
+        UnmapViewOfFile(mmap);
+        mmap=nullptr;
       }
       if (mmfHandle!=nullptr) {
         CloseHandle(mmfHandle);
