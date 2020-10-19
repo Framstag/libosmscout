@@ -107,7 +107,7 @@ namespace osmscout {
 
     uint32_t areaCount=scanner.ReadUInt32();
 
-    Area data;
+    Area area;
 
     std::unordered_set<Id> usedOnceSet;
 
