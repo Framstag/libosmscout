@@ -74,7 +74,7 @@ namespace osmscout {
                    memoryMappedData);
 
       FileOffset indexFileOffset=scanner.ReadFileOffset();
-      uint32_t dataCount=scanner.ReadUInt32();
+      /*uint32_t dataCount=*/scanner.ReadUInt32();
       uint32_t tileMag=scanner.ReadUInt32();
 
       magnification.SetLevel(MagnificationLevel(tileMag));
