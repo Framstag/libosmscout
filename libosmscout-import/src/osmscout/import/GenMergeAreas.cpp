@@ -92,7 +92,7 @@ namespace osmscout {
   }
 
   /**
-   * Scans all areas. If an areas is of one of the given merge types, index all node ids
+   * Scans all areas. If an area is of one of the given merge types, index all node ids
    * into the given NodeUseMap for all outer rings of the given area.
    */
   bool MergeAreasGenerator::ScanAreaNodeIds(Progress& progress,
@@ -117,10 +117,10 @@ namespace osmscout {
       uint8_t type=scanner.ReadUInt8();
       Id      id=scanner.ReadUInt64();
 
-      data.ReadImport(typeConfig,
+      area.ReadImport(typeConfig,
                       scanner);
 
-      if (!mergeTypes.IsSet(data.GetType())) {
+      if (!mergeTypes.IsSet(area.GetType())) {
         continue;
       }
 
@@ -129,7 +129,7 @@ namespace osmscout {
 
       std::unordered_set<Id> nodeIds;
 
-      for (const auto& ring: data.rings) {
+      for (const auto& ring: area.rings) {
         if (!ring.IsTopOuter()) {
           continue;
         }
@@ -138,9 +138,7 @@ namespace osmscout {
           Id id=node.GetId();
 
           if (nodeIds.find(id)==nodeIds.end()) {
-            auto entry=usedOnceSet.find(id);
-
-            if (entry!=usedOnceSet.end()) {
+            if (usedOnceSet.find(id)!=usedOnceSet.end()) {
               nodeUseMap.insert(id);
             }
             else {
@@ -161,7 +159,7 @@ namespace osmscout {
    * index it into the areas map.
    *
    * If the number of indexed areas is bigger than parameter.GetRawWayBlockSize() types are
-   * dropped form areas until the number is again below the lmit.
+   * dropped form areas until the number is again below the limit.
    */
   bool MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
                                      Progress& progress,
@@ -566,7 +564,6 @@ namespace osmscout {
     std::unordered_set<Id> nodeUseMap;
 
     try {
-
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    MergeAreaDataGenerator::AREAS_TMP),
                    FileScanner::Sequential,

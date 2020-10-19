@@ -78,7 +78,7 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
 
 FileDownloader::~FileDownloader()
 {
-  if (reply) {
+  if (reply != nullptr) {
     reply->deleteLater();
   }
   if (file.exists() && !finishedSuccessfully) {
@@ -139,7 +139,7 @@ void FileDownloader::onFinished()
   qDebug() << "Downloaded" << downloaded << "bytes";
   finishedSuccessfully = file.rename(path);
 
-  if (reply) {
+  if (reply != nullptr) {
     reply->deleteLater();
     reply = nullptr;
   }
@@ -152,7 +152,7 @@ void FileDownloader::onError(const QString &err)
   file.close();
   file.remove();
 
-  if (reply){
+  if (reply != nullptr){
     reply->deleteLater();
     reply = nullptr;
   }
@@ -194,7 +194,7 @@ uint64_t FileDownloader::getBytesDownloaded() const
 
 void FileDownloader::onDownloaded()
 {
-  if (!reply) {
+  if (reply == nullptr) {
     return; // happens on error, after error cleanup and initiating retry
   }
 
@@ -204,7 +204,7 @@ void FileDownloader::onDownloaded()
 
   onNetworkReadyRead(); // update all data if needed
 
-  if (reply) {
+  if (reply != nullptr) {
     reply->deleteLater();
   }
   reply = nullptr;
@@ -242,7 +242,7 @@ bool FileDownloader::restartDownload()
   qDebug() << QTime::currentTime() << "Restart called:"
            << url << "retries:" <<  backOff.downloadRetries;
 
-  if (reply){
+  if (reply != nullptr){
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
     reply->deleteLater();
@@ -257,10 +257,10 @@ bool FileDownloader::restartDownload()
 
 void FileDownloader::onNetworkError(QNetworkReply::NetworkError code)
 {
-  QString errorStr = reply ? reply->errorString(): "";
+  QString errorStr = reply != nullptr ? reply->errorString(): "";
   qDebug() << "Error " << code << "/" << errorStr;
 
-  QVariant statusCode = reply ? reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) : QVariant();
+  QVariant statusCode = reply != nullptr ? reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) : QVariant();
   if (statusCode.isValid()) {
     QString reason = reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
     qWarning() << "Server status code" << statusCode.toInt() << ":" << reason;
@@ -292,7 +292,7 @@ DownloadJob::DownloadJob(QNetworkAccessManager *webCtrl, QDir target, bool repla
 
 DownloadJob::~DownloadJob()
 {
-  for (auto job:jobs){
+  for (auto* job:jobs){
     delete job;
   }
   jobs.clear();
@@ -300,8 +300,8 @@ DownloadJob::~DownloadJob()
 
 void DownloadJob::start(const QString &serverBasePath, const QStringList &fileNames)
 {
-  for (auto fileName:fileNames){
-    auto job=new FileDownloader(webCtrl, serverBasePath+"/"+fileName, target.filePath(fileName));
+  for (const auto& fileName:fileNames){
+    auto *job=new FileDownloader(webCtrl, serverBasePath+"/"+fileName, target.filePath(fileName));
     connect(job, &FileDownloader::finished, this, &MapDownloadJob::onJobFinished);
     connect(job, &FileDownloader::error, this, &MapDownloadJob::onJobFailed);
     connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::downloadProgress);
@@ -374,7 +374,7 @@ double DownloadJob::getProgress()
 {
   double expected=expectedSize();
   uint64_t downloaded=downloadedBytes;
-  for (auto job:jobs){
+  for (auto *job:jobs){
     downloaded+=job->getBytesDownloaded();
   }
   if (expected==0.0)

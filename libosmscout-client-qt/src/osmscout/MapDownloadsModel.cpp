@@ -48,15 +48,15 @@ QString MapDownloadsModel::suggestedDirectory(QObject *obj, QString rootDirector
   const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(obj);
   if (map!=nullptr){
     path+=QDir::separator();
-    for (auto part:map->getPath()){
+    for (const auto& part:map->getPath()){
       path+=part+"-";
     }
     path+=map->getCreation().toString("yyyyMMdd-HHmmss");
     return path;
-  }else{
-    qWarning() << obj << "can't be converted to AvailableMapsModelMap";
-    return path;
   }
+
+  qWarning() << obj << "can't be converted to AvailableMapsModelMap";
+  return path;
 }
 
 void MapDownloadsModel::downloadMap(QObject *obj, QString dir)
@@ -84,7 +84,7 @@ double MapDownloadsModel::getFreeSpace(QString dir)
 void MapDownloadsModel::onDownloadJobsChanged()
 {
   beginResetModel();
-  for (auto job:mapManager->getDownloadJobs()){
+  for (auto *job:mapManager->getDownloadJobs()){
     connect(job, &MapDownloadJob::downloadProgress, this, &MapDownloadsModel::onDownloadProgress);
   }
   endResetModel();
@@ -114,7 +114,7 @@ QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  auto job=jobs.at(index.row());
+  auto *job=jobs.at(index.row());
   switch (role) {
     case Qt::DisplayRole:
     case MapNameRole:
@@ -140,7 +140,7 @@ void MapDownloadsModel::cancel(int row)
     return;
   }
 
-  auto job = jobs.at(row);
+  auto *job = jobs.at(row);
   qDebug() << "Cancel downloading:" << job->getMapName();
   job->cancel();
 }

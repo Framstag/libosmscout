@@ -57,11 +57,11 @@ public:
               bool renderBasemap=true);
   virtual ~DBRenderJob();
 
-  virtual void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
-                   const std::list<DBInstanceRef> &databases,
-                   QReadLocker *locker);
+  void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+           const std::list<DBInstanceRef> &databases,
+           QReadLocker *locker) override;
 
-  inline bool IsSuccess(){
+  inline bool IsSuccess() const{
     return success;
   };
 };
@@ -102,10 +102,10 @@ public slots:
 
   virtual void onMapDPIChange(double dpi);
   virtual void onRenderSeaChanged(bool);
-  virtual void onFontNameChanged(const QString);
+  virtual void onFontNameChanged(const QString&);
   virtual void onFontSizeChanged(double);
   virtual void onShowAltLanguageChanged(bool);
-  virtual void onUnitsChanged(const QString);
+  virtual void onUnitsChanged(const QString&);
 
 protected:
   MapRenderer(QThread *thread,
@@ -130,7 +130,7 @@ public:
   virtual bool RenderMap(QPainter& painter,
                          const MapViewStruct& request) = 0;
 
-  void addOverlayObject(int id, OverlayObjectRef obj);
+  void addOverlayObject(int id, const OverlayObjectRef& obj);
 
   void removeOverlayObject(int id);
   void removeAllOverlayObjects();
@@ -138,7 +138,7 @@ public:
   std::map<int,OverlayObjectRef> getOverlayObjects() const;
 };
 
-typedef std::shared_ptr<MapRenderer> MapRendererRef;
+using MapRendererRef = std::shared_ptr<MapRenderer>;
 
 }
 

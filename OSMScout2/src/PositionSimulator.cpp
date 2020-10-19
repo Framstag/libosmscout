@@ -54,8 +54,8 @@ void PositionSimulator::setTrack(const QString &t)
 
   segments.clear();
 
-  for (auto const &trk:gpxFile.tracks){
-    for (auto const &seg:trk.segments){
+  for (const auto& trk:gpxFile.tracks){
+    for (const auto& seg:trk.segments){
       if (seg.points.empty()){
         continue;
       }

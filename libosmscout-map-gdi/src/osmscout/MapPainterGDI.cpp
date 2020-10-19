@@ -245,7 +245,7 @@ namespace osmscout {
 			else
 				return m_Images[iconID];
 		}
-	
+
 		inline INT GetWidth() { return m_width; }
 
 		inline INT GetHeight() { return m_height; }
@@ -443,7 +443,7 @@ namespace osmscout {
 	}
 
 	void MapPainterGDI::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
-		const Projection& projection,
+		const Projection& /*projection*/,
 		const MapParameter& /*parameter*/,
 		const MapData& /*data*/)
 	{

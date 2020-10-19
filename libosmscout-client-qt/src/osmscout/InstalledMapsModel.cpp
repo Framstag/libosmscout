@@ -49,7 +49,7 @@ void InstalledMapsModel::onDatabaseListChanged()
 
   // process removals
   QMap<QString, MapDirectory> currentDirMap;
-  for (auto dir: currentDirs){
+  for (const auto& dir: currentDirs){
     currentDirMap[dir.getDir().absolutePath()] = dir;
   }
 
@@ -69,12 +69,12 @@ void InstalledMapsModel::onDatabaseListChanged()
 
   // process adds
   QMap<QString, MapDirectory> oldDirMap;
-  for (auto dir: dirs){
+  for (const auto& dir: dirs){
     oldDirMap[dir.getDir().absolutePath()] = dir;
   }
 
   for (int row = 0; row < currentDirs.size(); row++) {
-    auto dir = currentDirs.at(row);
+    const auto& dir = currentDirs.at(row);
     if (!oldDirMap.contains(dir.getDir().absolutePath())){
       beginInsertRows(QModelIndex(), row, row);
       dirs.insert(row, dir);
@@ -155,7 +155,7 @@ bool InstalledMapsModel::deleteMap(int row)
   return removeRows(row, 1);
 }
 
-QVariant InstalledMapsModel::timeOfMap(QStringList path)
+QVariant InstalledMapsModel::timeOfMap(const QStringList& path)
 {
   if (path.empty()){
     return QVariant();

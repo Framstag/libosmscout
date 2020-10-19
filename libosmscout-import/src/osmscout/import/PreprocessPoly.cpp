@@ -53,7 +53,7 @@ namespace osmscout {
     std::vector<Node> nodes(polygonNodes.size());
     int               i=0;
 
-    for (auto n : polygonNodes) {
+    for (const auto& n : polygonNodes) {
       nodes[i].x=n.GetLon();
       nodes[i].y=n.GetLat();
       i++;
@@ -72,7 +72,7 @@ namespace osmscout {
     way.tags[polygonTagId]=context==IncludedPolygon ? "include" : "exclude";
     way.id=availableId++;
 
-    for (auto p : polygonNodes) {
+    for (const auto& p : polygonNodes) {
       PreprocessorCallback::RawNodeData node;
       OSMId                             id=availableId++;
 

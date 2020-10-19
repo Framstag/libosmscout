@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
   routerParameter.SetDebugPerformance(true);
 
-  for (auto const &databaseDirectory:args.databaseDirectories) {
+  for (const auto& databaseDirectory:args.databaseDirectories) {
     std::cout << "Opening database " << databaseDirectory << std::endl;
     osmscout::DatabaseRef database=std::make_shared<osmscout::Database>(dbParameter);;
     if (!database->Open(databaseDirectory)) {
