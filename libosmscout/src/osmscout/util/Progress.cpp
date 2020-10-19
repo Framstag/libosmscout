@@ -51,25 +51,29 @@ namespace osmscout {
   }
 
   void Progress::SetProgress(double /*current*/,
-                             double /*total*/)
+                             double /*total*/,
+                             const std::string& /*label*/)
   {
     // no code
   }
 
   void Progress::SetProgress(unsigned int /*current*/,
-                             unsigned int /*total*/)
+                             unsigned int /*total*/,
+                             const std::string& /*label*/)
   {
     // no code
   }
 
   void Progress::SetProgress(unsigned long /*current*/,
-                             unsigned long /*total*/)
+                             unsigned long /*total*/,
+                             const std::string& /*label*/)
   {
     // no code
   }
 
   void Progress::SetProgress(unsigned long long /*current*/,
-                             unsigned long long /*total*/)
+                             unsigned long long /*total*/,
+                             const std::string& /*label*/)
   {
     // no code
   }
@@ -113,7 +117,7 @@ namespace osmscout {
     lastProgressDump=0;
   }
 
-  void ConsoleProgress::SetProgress(double current, double total)
+  void ConsoleProgress::SetProgress(double current, double total, const std::string& label="")
   {
     if (lastProgressDump==0) {
       lastProgressDump=time(nullptr);
@@ -124,24 +128,38 @@ namespace osmscout {
 
     if (now-lastProgressDump>=5) {
       lastProgressDump=now;
-      std::cout << "   % " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100 << " (" << std::setprecision(0) << current << "/" << std::setprecision(0) << total << ")" << std::endl;
+      std::cout << "   %";
+
+
+      std::cout << " " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100;
+
+      if (!label.empty()) {
+        std::cout << " " << label;
+      }
+
+      std::cout << " (" << std::setprecision(0) << current << "/" << std::setprecision(0) << total << ")" << std::endl;
     }
   }
 
-  void ConsoleProgress::SetProgress(unsigned int current, unsigned int total)
+  void ConsoleProgress::SetProgress(unsigned int current,
+                                    unsigned int total,
+                                    const std::string& label)
   {
-    SetProgress((double)current, (double)total);
+    SetProgress((double)current, (double)total,label);
   }
 
-  void ConsoleProgress::SetProgress(unsigned long current, unsigned long total)
+  void ConsoleProgress::SetProgress(unsigned long current,
+                                    unsigned long total,
+                                    const std::string& label)
   {
-    SetProgress((double)current,(double)total);
+    SetProgress((double)current,(double)total,label);
   }
 
   void ConsoleProgress::SetProgress(unsigned long long current,
-                                    unsigned long long total)
+                                    unsigned long long total,
+                                    const std::string& label)
   {
-    SetProgress((double)current,(double)total);
+    SetProgress((double)current,(double)total,label);
   }
 
   void ConsoleProgress::Debug(const std::string& text)
