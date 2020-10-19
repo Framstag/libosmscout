@@ -232,9 +232,7 @@ namespace osmscout
                    FileScanner::Sequential,
                    false);
 
-      uint32_t nodeCount=0;
-
-      scanner.Read(nodeCount);
+      uint32_t nodeCount=scanner.ReadUInt32();
 
       // Iterate through each node and add text
       // data to the corresponding keyset
@@ -327,9 +325,7 @@ namespace osmscout
                    FileScanner::Sequential,
                    false);
 
-      uint32_t wayCount=0;
-
-      scanner.Read(wayCount);
+      uint32_t wayCount=scanner.ReadUInt32();
 
       // Iterate through each way and add text
       // data to the corresponding keyset
@@ -439,9 +435,7 @@ namespace osmscout
                    FileScanner::Sequential,
                    false);
 
-      uint32_t areaCount=0;
-
-      scanner.Read(areaCount);
+      uint32_t areaCount=scanner.ReadUInt32();
 
       // Iterate through each area and add text
       // data to the corresponding keyset

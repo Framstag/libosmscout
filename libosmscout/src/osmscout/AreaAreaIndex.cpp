@@ -87,7 +87,7 @@ namespace osmscout {
         for (FileOffset& c : cacheRef->value.children) {
           FileOffset childOffset;
 
-          scanner.ReadNumber(childOffset);
+          childOffset=scanner.ReadUInt64Number();
 
           if (childOffset==0) {
             c=0;
@@ -127,20 +127,13 @@ namespace osmscout {
 
     scanner.SetPos(dataOffset);
 
-    uint32_t typeCount;
-
-    scanner.ReadNumber(typeCount);
-
+    uint32_t   typeCount=scanner.ReadUInt32Number();
     FileOffset prevDataFileOffset=0;
 
-    for (size_t t=0; t<typeCount; t++) {
-      TypeId     typeId;
-      uint32_t   dataCount;
-      FileOffset dataFileOffset;
-
-      scanner.ReadTypeId(typeId,typeConfig.GetAreaTypeIdBytes());
-      scanner.ReadNumber(dataCount);
-      scanner.ReadNumber(dataFileOffset);
+    for (uint32_t t=0; t<typeCount; t++) {
+      TypeId     typeId=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
+      uint32_t   dataCount=scanner.ReadUInt32Number();
+      FileOffset dataFileOffset=scanner.ReadUInt64Number();
 
       dataFileOffset+=prevDataFileOffset;
       prevDataFileOffset=dataFileOffset;
@@ -234,8 +227,8 @@ namespace osmscout {
     try {
       scanner.Open(datafilename,FileScanner::FastRandom,memoryMappedData);
 
-      scanner.ReadNumber(maxLevel);
-      scanner.ReadFileOffset(topLevelOffset);
+      maxLevel=scanner.ReadUInt32Number();
+      topLevelOffset=scanner.ReadFileOffset();
 
       return !scanner.HasError();
     }

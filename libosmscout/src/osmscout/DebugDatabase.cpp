@@ -39,11 +39,6 @@ namespace osmscout {
     // no code
   }
 
-  DebugDatabase::~DebugDatabase()
-  {
-    // no code
-  }
-
   bool DebugDatabase::Open(const std::string& path)
   {
     assert(!path.empty());
@@ -107,20 +102,15 @@ namespace osmscout {
     std::string filename=AppendFileToDir(path,mapName);
 
     try {
-      uint32_t    entryCount;
 
       scanner.Open(filename,FileScanner::LowMemRandom,false);
 
-      scanner.Read(entryCount);
+      uint32_t    entryCount=scanner.ReadUInt32();
 
-      for (size_t i=1; i<=entryCount; i++) {
-        Id         id;
-        uint8_t    typeByte;
-        FileOffset fileOffset;
-
-        scanner.Read(id);
-        scanner.Read(typeByte);
-        scanner.ReadFileOffset(fileOffset);
+      for (uint32_t i=1; i<=entryCount; i++) {
+        Id         id=scanner.ReadUInt64();
+        uint8_t    typeByte=scanner.ReadUInt8();
+        FileOffset fileOffset=scanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,fileType);

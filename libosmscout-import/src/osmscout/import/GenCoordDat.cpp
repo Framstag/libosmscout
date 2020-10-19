@@ -65,9 +65,7 @@ namespace osmscout {
 
       scanner.GotoBegin();
 
-      uint32_t coordCount;
-
-      scanner.Read(coordCount);
+      uint32_t coordCount=scanner.ReadUInt32();
 
       while (loadedCoordCount<coordCount) {
         std::map<Id,std::vector<Id>> coordPages;
@@ -77,7 +75,7 @@ namespace osmscout {
 
         scanner.GotoBegin();
 
-        scanner.Read(coordCount);
+        coordCount=scanner.ReadUInt32();
 
         RawCoord coord;
 
@@ -244,9 +242,7 @@ namespace osmscout {
 
       scanner.GotoBegin();
 
-      uint32_t coordCount;
-
-      scanner.Read(coordCount);
+      uint32_t coordCount=scanner.ReadUInt32();
 
       while (loadedCoordCount<coordCount) {
         std::map<Id,std::vector<RawCoord>> coordPages;
@@ -256,7 +252,7 @@ namespace osmscout {
 
         scanner.GotoBegin();
 
-        scanner.Read(coordCount);
+        coordCount=scanner.ReadUInt32();
 
         RawCoord coord;
 

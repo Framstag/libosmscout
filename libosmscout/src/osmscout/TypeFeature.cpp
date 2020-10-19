@@ -111,9 +111,8 @@ namespace osmscout {
     if (entry!=descriptions.end()) {
       return entry->second;
     }
-    else {
-      return "";
-    }
+
+    return "";
   }
 
   /**

@@ -88,16 +88,15 @@ namespace osmscout {
     coastlines.clear();
 
     try {
-      uint32_t coastlineCount=0;
-      size_t   wayCoastCount=0;
-      size_t   areaCoastCount=0;
+      uint32_t wayCoastCount=0;
+      uint32_t areaCoastCount=0;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    rawFile),
                    FileScanner::Sequential,
                    true);
 
-      scanner.Read(coastlineCount);
+      uint32_t coastlineCount=scanner.ReadUInt32();
 
       progress.Info(std::to_string(coastlineCount)+" coastlines");
 
@@ -228,14 +227,13 @@ namespace osmscout {
     // We do not yet know if we handle borders as ways or areas
 
     try {
-      uint32_t wayCount=0;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayDataFile::WAYS_DAT),
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(wayCount);
+      uint32_t wayCount=scanner.ReadUInt32();
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);

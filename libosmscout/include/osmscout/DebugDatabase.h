@@ -71,7 +71,7 @@ namespace osmscout {
 
   public:
     explicit DebugDatabase(const DebugDatabaseParameter& parameter);
-    virtual ~DebugDatabase();
+    virtual ~DebugDatabase() = default;
 
     bool Open(const std::string& path);
     bool IsOpen() const;

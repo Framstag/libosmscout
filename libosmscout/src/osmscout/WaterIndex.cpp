@@ -19,8 +19,6 @@
 
 #include <osmscout/WaterIndex.h>
 
-#include <algorithm>
-
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
@@ -43,8 +41,8 @@ namespace osmscout {
     try {
       scanner.Open(datafilename,FileScanner::FastRandom,memoryMappedData);
 
-      scanner.ReadNumber(waterIndexMinMag);
-      scanner.ReadNumber(waterIndexMaxMag);
+      waterIndexMinMag=scanner.ReadUInt32Number();
+      waterIndexMaxMag=scanner.ReadUInt32Number();
 
       levels.resize(waterIndexMaxMag-waterIndexMinMag+1);
 
@@ -65,20 +63,20 @@ namespace osmscout {
 
       for (size_t level=waterIndexMinMag; level<=waterIndexMaxMag; level++){
         size_t  idx=level-waterIndexMinMag;
-        uint8_t state;
 
-        scanner.Read(levels[idx].hasCellData);
-        scanner.Read(levels[idx].dataOffsetBytes);
-        scanner.Read(state);
+        levels[idx].hasCellData=scanner.ReadBool();
+        levels[idx].dataOffsetBytes=scanner.ReadUInt8();
+
+        uint8_t state=scanner.ReadUInt8();
 
         levels[idx].defaultCellData=(GroundTile::Type)state;
 
-        scanner.ReadFileOffset(levels[idx].indexDataOffset);
+        levels[idx].indexDataOffset=scanner.ReadFileOffset();
 
-        scanner.ReadNumber(levels[idx].cellXStart);
-        scanner.ReadNumber(levels[idx].cellXEnd);
-        scanner.ReadNumber(levels[idx].cellYStart);
-        scanner.ReadNumber(levels[idx].cellYEnd);
+        levels[idx].cellXStart=scanner.ReadUInt32Number();
+        levels[idx].cellXEnd=scanner.ReadUInt32Number();
+        levels[idx].cellYStart=scanner.ReadUInt32Number();
+        levels[idx].cellYEnd=scanner.ReadUInt32Number();
 
         levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
         levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
@@ -200,7 +198,7 @@ namespace osmscout {
 
           scanner.SetPos(level.indexDataOffset+index);
 
-          scanner.ReadFileOffset(cell,level.dataOffsetBytes);
+          cell=scanner.ReadFileOffset(level.dataOffsetBytes);
 
           if (cell==(FileOffset)GroundTile::land ||
               cell==(FileOffset)GroundTile::water ||
@@ -212,34 +210,26 @@ namespace osmscout {
             tiles.push_back(tile);
           }
           else {
-            uint32_t tileCount;
-
             tile.type=GroundTile::coast;
             tile.coords.clear();
 
             tiles.push_back(tile);
 
             scanner.SetPos(level.dataOffset+cell);
-            scanner.ReadNumber(tileCount);
+            uint32_t tileCount=scanner.ReadUInt32Number();
 
             for (size_t t=0; t<tileCount; t++) {
-              uint8_t  tileType;
-              uint32_t coordCount;
-
-              scanner.Read(tileType);
+              uint8_t  tileType=scanner.ReadUInt8();
 
               tile.type=(GroundTile::Type)tileType;
 
-              scanner.ReadNumber(coordCount);
+              uint32_t coordCount=scanner.ReadUInt32Number();
 
               tile.coords.resize(coordCount);
 
               for (size_t n=0; n<coordCount; n++) {
-                uint16_t x;
-                uint16_t y;
-
-                scanner.Read(x);
-                scanner.Read(y);
+                uint16_t x=scanner.ReadUInt16();
+                uint16_t y=scanner.ReadUInt16();
 
                 tile.coords[n].Set(x & ~(1 << 15),
                                    y,

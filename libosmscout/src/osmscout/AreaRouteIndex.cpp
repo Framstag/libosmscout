@@ -34,8 +34,7 @@ namespace osmscout {
   {
     TypeId typeId;
 
-    scanner.ReadTypeId(typeId,
-                       typeConfig->GetRouteTypeIdBytes());
+    typeId=scanner.ReadTypeId(typeConfig->GetRouteTypeIdBytes());
 
     data.type=typeConfig->GetRouteTypeInfo(typeId);
   }

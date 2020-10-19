@@ -50,9 +50,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     std::cout << "Start reading files using FileScanner..." << std::endl;
 
-    uint32_t wayCount;
-
-    scanner.Read(wayCount);
+    uint32_t wayCount=scanner.ReadUInt32();
 
     for (size_t w=1; w<=wayCount; w++) {
       osmscout::Way way;

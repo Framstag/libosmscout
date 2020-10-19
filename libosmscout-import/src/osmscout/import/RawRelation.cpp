@@ -71,13 +71,10 @@ namespace osmscout {
   void RawRelation::Read(const TypeConfig& typeConfig,
                          FileScanner& scanner)
   {
-    uint32_t memberCount;
 
-    scanner.ReadNumber(id);
+    id=scanner.ReadInt64Number();
 
-    uint32_t tmpType;
-
-    scanner.ReadNumber(tmpType);
+    uint32_t tmpType=scanner.ReadUInt32Number();
 
     TypeInfoRef type=typeConfig.GetTypeInfo(tmpType);
 
@@ -87,27 +84,22 @@ namespace osmscout {
       featureValueBuffer.Read(scanner);
     }
 
-    scanner.ReadNumber(memberCount);
-
+    uint32_t memberCount=scanner.ReadUInt32Number();
 
     if (memberCount>0) {
-      OSMId minId;
-
-      scanner.ReadNumber(minId);
+      OSMId minId=scanner.ReadInt64Number();
 
       members.resize(memberCount);
 
       for (auto& member : members) {
-        uint32_t memberType;
-        OSMId    id;
+        uint32_t memberType=scanner.ReadUInt32Number();
 
-        scanner.ReadNumber(memberType);
         member.type=(MemberType)memberType;
 
-        scanner.ReadNumber(id);
+        OSMId    id=scanner.ReadInt64Number();
         member.id=minId+id;
 
-        scanner.Read(member.role);
+        member.role=scanner.ReadString();
       }
     }
   }

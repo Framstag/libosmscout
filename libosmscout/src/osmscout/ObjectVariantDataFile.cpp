@@ -55,13 +55,11 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      uint32_t dataCount;
-
-      scanner.Read(dataCount);
+      uint32_t dataCount=scanner.ReadUInt32();
 
       data.resize(dataCount);
 
-      for (size_t i=0; i<dataCount; i++) {
+      for (uint32_t i=0; i<dataCount; i++) {
         data[i].Read(typeConfig,
                      scanner);
       }

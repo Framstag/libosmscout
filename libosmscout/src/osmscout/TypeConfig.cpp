@@ -31,7 +31,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -97,19 +96,19 @@ namespace osmscout {
   {
     TypeCondition typeCondition;
 
-    if (types & typeNode) {
+    if ((types & typeNode)!=0) {
       canBeNode=true;
     }
 
-    if (types & typeWay) {
+    if ((types & typeWay)!=0) {
       canBeWay=true;
     }
 
-    if (types & typeArea) {
+    if ((types & typeArea)!=0) {
       canBeArea=true;
     }
 
-    if (types & typeRelation) {
+    if ((types & typeRelation)!=0) {
       canBeRelation=true;
     }
 
@@ -204,9 +203,8 @@ namespace osmscout {
 
       return true;
     }
-    else {
-      return false;
-    }
+
+    return false;
   }
 
   uint8_t TypeInfo::GetDefaultAccess() const
@@ -244,16 +242,13 @@ namespace osmscout {
     if (entry!=descriptions.end()) {
       return entry->second;
     }
-    else {
-      return "";
-    }
+
+    return "";
   }
 
   TypeInfoRef TypeInfo::Read(FileScanner& scanner)
   {
-    std::string name;
-
-    scanner.Read(name);
+    std::string name=scanner.ReadString();
 
     TypeInfoRef typeInfo=std::make_shared<TypeInfo>(name);
 
@@ -278,26 +273,26 @@ namespace osmscout {
     uint8_t     lanes;
     uint8_t     onewayLanes;
 
-    scanner.Read(canBeNode);
-    scanner.Read(canBeWay);
-    scanner.Read(canBeArea);
-    scanner.Read(canBeRelation);
-    scanner.Read(isPath);
-    scanner.Read(canRouteFoot);
-    scanner.Read(canRouteBicycle);
-    scanner.Read(canRouteCar);
-    scanner.Read(indexAsAddress);
-    scanner.Read(indexAsLocation);
-    scanner.Read(indexAsRegion);
-    scanner.Read(indexAsPOI);
-    scanner.Read(optimizeLowZoom);
-    scanner.Read(specialType);
-    scanner.Read(pinWay);
-    scanner.Read(mergeAreas);
-    scanner.Read(ignoreSeaLand);
-    scanner.Read(ignore);
-    scanner.Read(lanes);
-    scanner.Read(onewayLanes);
+    canBeNode=scanner.ReadBool();
+    canBeWay=scanner.ReadBool();
+    canBeArea=scanner.ReadBool();
+    canBeRelation=scanner.ReadBool();
+    isPath=scanner.ReadBool();
+    canRouteFoot=scanner.ReadBool();
+    canRouteBicycle=scanner.ReadBool();
+    canRouteCar=scanner.ReadBool();
+    indexAsAddress=scanner.ReadBool();
+    indexAsLocation=scanner.ReadBool();
+    indexAsRegion=scanner.ReadBool();
+    indexAsPOI=scanner.ReadBool();
+    optimizeLowZoom=scanner.ReadBool();
+    specialType=scanner.ReadUInt8();
+    pinWay=scanner.ReadBool();
+    mergeAreas=scanner.ReadBool();
+    ignoreSeaLand=scanner.ReadBool();
+    ignore=scanner.ReadBool();
+    lanes=scanner.ReadUInt8();
+    onewayLanes=scanner.ReadUInt8();
 
     typeInfo->CanBeNode(canBeNode);
     typeInfo->CanBeWay(canBeWay);
@@ -436,9 +431,8 @@ namespace osmscout {
 
       return type->GetFeature(idx).GetFeature()->AllocateValue(value);
     }
-    else {
-      return nullptr;
-    }
+
+    return nullptr;
   }
 
   void FeatureValueBuffer::FreeValue(size_t idx)
@@ -479,7 +473,7 @@ namespace osmscout {
   void FeatureValueBuffer::Read(FileScanner& scanner)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
@@ -503,16 +497,14 @@ namespace osmscout {
                                 bool& specialFlag)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
 
     if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
       specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
     }
     else {
-      uint8_t addByte;
-
-      scanner.Read(addByte);
+      uint8_t addByte=scanner.ReadUInt8();
 
       specialFlag=(addByte & 0x80)!=0;
     }
@@ -540,7 +532,7 @@ namespace osmscout {
                                 bool& specialFlag2)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
 
     if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
@@ -548,9 +540,7 @@ namespace osmscout {
       specialFlag2=(featureBits[type->GetFeatureMaskBytes()-1] & 0x40)!=0;
     }
     else {
-      uint8_t addByte;
-
-      scanner.Read(addByte);
+      uint8_t addByte=scanner.ReadUInt8();
 
       specialFlag1=(addByte & 0x80)!=0;
       specialFlag2=(addByte & 0x40)!=0;
@@ -952,9 +942,8 @@ namespace osmscout {
     if (feature!=nameToFeatureMap.end()) {
       return feature->second;
     }
-    else {
-      return nullptr;
-    }
+
+    return nullptr;
   }
 
   TypeInfoRef TypeConfig::RegisterType(const TypeInfoRef& typeInfo)
@@ -1111,9 +1100,8 @@ namespace osmscout {
     if (types.empty()) {
       return 0;
     }
-    else {
-      return (TypeId)types.size();
-    }
+
+    return (TypeId)types.size();
   }
 
   const TypeInfoRef TypeConfig::GetTypeInfo(const std::string& name) const
@@ -1140,7 +1128,7 @@ namespace osmscout {
       }
 
       for (const auto &cond : type->GetConditions()) {
-        if (!(cond.types & TypeInfo::typeNode)) {
+        if ((cond.types & TypeInfo::typeNode)==0) {
           continue;
         }
 
@@ -1172,19 +1160,19 @@ namespace osmscout {
       }
 
       for (const auto& cond : type->GetConditions()) {
-        if (!((cond.types & TypeInfo::typeWay) ||
-              (cond.types & TypeInfo::typeArea))) {
+        if (!((cond.types & TypeInfo::typeWay)!=0 ||
+              (cond.types & TypeInfo::typeArea)!=0)) {
           continue;
         }
 
         if (cond.condition->Evaluate(tagMap)) {
           if (wayType==typeInfoIgnore &&
-              (cond.types & TypeInfo::typeWay)) {
+              (cond.types & TypeInfo::typeWay)!=0) {
             wayType=type;
           }
 
           if (areaType==typeInfoIgnore &&
-              (cond.types & TypeInfo::typeArea)) {
+              (cond.types & TypeInfo::typeArea)!=0) {
             areaType=type;
           }
 
@@ -1216,7 +1204,7 @@ namespace osmscout {
         }
 
         for (const auto &cond : type->GetConditions()) {
-          if (!(cond.types & TypeInfo::typeArea)) {
+          if ((cond.types & TypeInfo::typeArea)==0) {
             continue;
           }
 
@@ -1234,7 +1222,7 @@ namespace osmscout {
         }
 
         for (const auto &cond : type->GetConditions()) {
-          if (!(cond.types & TypeInfo::typeRelation)) {
+          if ((cond.types & TypeInfo::typeRelation)==0) {
             continue;
           }
 
@@ -1329,9 +1317,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      uint32_t fileFormatVersion;
-
-      scanner.Read(fileFormatVersion);
+      uint32_t fileFormatVersion=scanner.ReadUInt32();
 
       if (fileFormatVersion!=FILE_FORMAT_VERSION) {
         log.Error() << "File '" << scanner.GetFilename() << "' does not have the expected format version! Actual " << fileFormatVersion << ", expected: " << FILE_FORMAT_VERSION;
@@ -1339,26 +1325,16 @@ namespace osmscout {
       }
 
       // Features
-      uint32_t featureCount;
-
-      scanner.ReadNumber(featureCount);
+      uint32_t featureCount=scanner.ReadUInt32Number();
 
       for (uint32_t f=1; f<=featureCount; f++) {
-        std::string featureName;
-        uint32_t    descriptionCount;
-        FeatureRef  feature;
-
-        scanner.Read(featureName);
-        scanner.ReadNumber(descriptionCount);
-
-        feature=GetFeature(featureName);
+        std::string featureName=scanner.ReadString();
+        uint32_t    descriptionCount=scanner.ReadUInt32Number();
+        FeatureRef  feature=GetFeature(featureName);
 
         for (uint32_t d=1; d<=descriptionCount; d++) {
-          std::string languageCode;
-          std::string description;
-
-          scanner.Read(languageCode);
-          scanner.Read(description);
+          std::string languageCode=scanner.ReadString();
+          std::string description=scanner.ReadString();
 
           if (feature) {
             feature->AddDescription(languageCode,
@@ -1369,23 +1345,17 @@ namespace osmscout {
 
       // Types
 
-      uint32_t typeCount;
-
-      scanner.ReadNumber(typeCount);
+      uint32_t typeCount=scanner.ReadUInt32Number();
 
       for (uint32_t i=1; i<=typeCount; i++) {
         TypeInfoRef typeInfo=TypeInfo::Read(scanner);
 
         // Type Features
 
-        uint32_t featureCount;
+        uint32_t typeFeatureCount=scanner.ReadUInt32Number();
 
-        scanner.ReadNumber(featureCount);
-
-        for (uint32_t f=0; f<featureCount; f++) {
-          std::string featureName;
-
-          scanner.Read(featureName);
+        for (uint32_t f=0; f<typeFeatureCount; f++) {
+          std::string featureName=scanner.ReadString();
 
           FeatureRef feature=GetFeature(featureName);
 
@@ -1399,30 +1369,21 @@ namespace osmscout {
 
         // Groups
 
-        uint32_t groupCount;
-
-        scanner.ReadNumber(groupCount);
+        uint32_t groupCount=scanner.ReadUInt32Number();
 
         for (uint32_t g=0; g<groupCount; g++) {
-          std::string groupName;
-
-          scanner.Read(groupName);
+          std::string groupName=scanner.ReadString();
 
           typeInfo->AddGroup(groupName);
         }
 
         // Descriptions
 
-        uint32_t descriptionCount;
-
-        scanner.ReadNumber(descriptionCount);
+        uint32_t descriptionCount=scanner.ReadUInt32Number();
 
         for (uint32_t d=1; d<=descriptionCount; d++) {
-          std::string languageCode;
-          std::string description;
-
-          scanner.Read(languageCode);
-          scanner.Read(description);
+          std::string languageCode=scanner.ReadString();
+          std::string description=scanner.ReadString();
 
           typeInfo->AddDescription(languageCode,
                                    description);

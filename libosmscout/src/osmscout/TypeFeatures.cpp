@@ -24,15 +24,15 @@
 #include <osmscout/util/String.h>
 
 #include <iostream>
-#include <sstream>
 #include <iomanip>
 #include <set>
+#include <sstream>
 
 namespace osmscout {
 
   void NameFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(name);
+    name=scanner.ReadString();
   }
 
   void NameFeatureValue::Write(FileWriter& writer)
@@ -125,7 +125,7 @@ namespace osmscout {
 
   void NameAltFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(nameAlt);
+    nameAlt=scanner.ReadString();
   }
 
   void NameAltFeatureValue::Write(FileWriter& writer)
@@ -216,7 +216,7 @@ namespace osmscout {
 
   void NameShortFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(nameShort);
+    nameShort=scanner.ReadString();
   }
 
   void NameShortFeatureValue::Write(FileWriter& writer)
@@ -297,7 +297,7 @@ namespace osmscout {
 
   void RefFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(ref);
+    ref=scanner.ReadString();
   }
 
   void RefFeatureValue::Write(FileWriter& writer)
@@ -378,7 +378,7 @@ namespace osmscout {
 
   void LocationFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(location);
+    location=scanner.ReadString();
   }
 
   void LocationFeatureValue::Write(FileWriter& writer)
@@ -467,7 +467,7 @@ namespace osmscout {
 
   void AddressFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(address);
+    address=scanner.ReadString();
   }
 
   void AddressFeatureValue::Write(FileWriter& writer)
@@ -568,7 +568,7 @@ namespace osmscout {
 
   void AccessFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(access);
+    access=scanner.ReadUInt8();
   }
 
   void AccessFeatureValue::Write(FileWriter& writer)
@@ -736,10 +736,10 @@ namespace osmscout {
       access&=~(AccessFeatureValue::bicycleForward|AccessFeatureValue::bicycleBackward);
 
       if (!(accessBicycleValue->second=="no")) {
-        if (!(access & AccessFeatureValue::onewayBackward)) {
+        if ((access & AccessFeatureValue::onewayBackward)==0) {
           access|=(AccessFeatureValue::bicycleForward);
         }
-        if (!(access & AccessFeatureValue::onewayForward)) {
+        if ((access & AccessFeatureValue::onewayForward)==0) {
           access|=(AccessFeatureValue::bicycleBackward);
         }
       }
@@ -751,10 +751,10 @@ namespace osmscout {
       access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
 
       if (!(accessMotorVehicleValue->second=="no")) {
-        if (!(access & AccessFeatureValue::onewayBackward)) {
+        if ((access & AccessFeatureValue::onewayBackward)==0) {
           access|=(AccessFeatureValue::carForward);
         }
-        if (!(access & AccessFeatureValue::onewayForward)) {
+        if ((access & AccessFeatureValue::onewayForward)==0) {
           access|=(AccessFeatureValue::carBackward);
         }
       }
@@ -766,10 +766,10 @@ namespace osmscout {
       access&=~(AccessFeatureValue::carForward|AccessFeatureValue::carBackward);
 
       if (!(accessMotorcarValue->second=="no")) {
-        if (!(access & AccessFeatureValue::onewayBackward)) {
+        if ((access & AccessFeatureValue::onewayBackward)==0) {
           access|=(AccessFeatureValue::carForward);
         }
-        if (!(access & AccessFeatureValue::onewayForward)) {
+        if ((access & AccessFeatureValue::onewayForward)==0) {
           access|=(AccessFeatureValue::carBackward);
         }
       }
@@ -853,7 +853,7 @@ namespace osmscout {
 
   void AccessRestrictedFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(access);
+    access=scanner.ReadUInt8();
   }
 
   void AccessRestrictedFeatureValue::Write(FileWriter& writer)
@@ -978,7 +978,7 @@ namespace osmscout {
 
   void LayerFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(layer);
+    layer=scanner.ReadInt8();
   }
 
   void LayerFeatureValue::Write(FileWriter& writer)
@@ -1058,7 +1058,7 @@ namespace osmscout {
 
   void WidthFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(width);
+    width=scanner.ReadUInt8();
   }
 
   void WidthFeatureValue::Write(FileWriter& writer)
@@ -1173,7 +1173,7 @@ namespace osmscout {
 
   void MaxSpeedFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(maxSpeed);
+    maxSpeed=scanner.ReadUInt8();
   }
 
   void MaxSpeedFeatureValue::Write(FileWriter& writer)
@@ -1399,7 +1399,7 @@ namespace osmscout {
 
   void GradeFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(grade);
+    grade=scanner.ReadUInt8();
   }
 
   void GradeFeatureValue::Write(FileWriter& writer)
@@ -1470,37 +1470,40 @@ namespace osmscout {
 
         return;
       }
-      else if (tracktype->second=="grade2") {
+
+      if (tracktype->second=="grade2") {
         auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(2);
 
         return;
       }
-      else if (tracktype->second=="grade3") {
+
+      if (tracktype->second=="grade3") {
         auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(3);
 
         return;
       }
-      else if (tracktype->second=="grade4") {
+
+      if (tracktype->second=="grade4") {
         auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(4);
 
         return;
       }
-      else if (tracktype->second=="grade5") {
+
+      if (tracktype->second=="grade5") {
         auto* value=static_cast<GradeFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
         value->SetGrade(5);
 
         return;
       }
-      else {
-        errorReporter.ReportTag(object,tags,std::string("Unsupported tracktype value '")+tracktype->second+"'");
-      }
+
+      errorReporter.ReportTag(object,tags,std::string("Unsupported tracktype value '")+tracktype->second+"'");
     }
 
     auto surface=tags.find(tagSurface);
@@ -1522,8 +1525,8 @@ namespace osmscout {
 
   void AdminLevelFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(adminLevel);
-    scanner.Read(isIn);
+    adminLevel=scanner.ReadUInt8();
+    isIn=scanner.ReadString();
   }
 
   void AdminLevelFeatureValue::Write(FileWriter& writer)
@@ -1611,7 +1614,7 @@ namespace osmscout {
 
   void PostalCodeFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(postalCode);
+    postalCode=scanner.ReadString();
   }
 
   void PostalCodeFeatureValue::Write(FileWriter& writer)
@@ -1708,7 +1711,7 @@ namespace osmscout {
 
   void WebsiteFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(website);
+    website=scanner.ReadString();
   }
 
   void WebsiteFeatureValue::Write(FileWriter& writer)
@@ -1777,8 +1780,9 @@ namespace osmscout {
                              FeatureValueBuffer& buffer) const
   {
     // ignore ways for now
-    if (object.GetType() == OSMRefType::osmRefWay)
+    if (object.GetType() == OSMRefType::osmRefWay) {
       return;
+    }
 
     std::string strValue;
 
@@ -1807,7 +1811,7 @@ namespace osmscout {
 
   void PhoneFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(phone);
+    phone=scanner.ReadString();
   }
 
   void PhoneFeatureValue::Write(FileWriter& writer)
@@ -1877,8 +1881,9 @@ namespace osmscout {
                            FeatureValueBuffer& buffer) const
   {
     // ignore ways for now
-    if (object.GetType() == OSMRefType::osmRefWay)
+    if (object.GetType() == OSMRefType::osmRefWay) {
       return;
+    }
 
     std::string strValue;
 
@@ -2040,7 +2045,7 @@ namespace osmscout {
 
   void EleFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.ReadNumber(ele);
+    ele=scanner.ReadUInt32Number();
   }
 
   void EleFeatureValue::Write(FileWriter& writer)
@@ -2200,7 +2205,7 @@ namespace osmscout {
     if (!StringToNumber(eleString,e)) {
       errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' is no double!");
     }
-    else if (e<0 && e>std::numeric_limits<uint32_t>::max()) {
+    else if (e<0 || e>std::numeric_limits<uint32_t>::max()) {
       errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' value is too small or too big!");
     }
     else {
@@ -2212,7 +2217,7 @@ namespace osmscout {
 
   void DestinationFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(destination);
+    destination=scanner.ReadString();
   }
 
   void DestinationFeatureValue::Write(FileWriter& writer)
@@ -2337,7 +2342,7 @@ namespace osmscout {
 
   void IsInFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(isIn);
+    isIn=scanner.ReadString();
   }
 
   void IsInFeatureValue::Write(FileWriter& writer)
@@ -2407,8 +2412,8 @@ namespace osmscout {
 
   void ConstructionYearFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(startYear);
-    scanner.Read(endYear);
+    startYear=scanner.ReadInt32();
+    endYear=scanner.ReadInt32();
   }
 
   void ConstructionYearFeatureValue::Write(FileWriter& writer)
@@ -2513,87 +2518,85 @@ namespace osmscout {
 
       return;
     }
-    else {
-      auto pos=strValue.find('-');
+    auto pos=strValue.find('-');
 
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+1);
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+1);
 
-        if (!startValue.empty() &&
+      if (!startValue.empty() &&
+        !endValue.empty() &&
+        osmscout::StringToNumber(startValue,startYear) &&
+        osmscout::StringToNumber(endValue,endYear)) {
+
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
+      }
+
+      return;
+    }
+
+    pos=strValue.find('/');
+
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+1);
+
+      if (!startValue.empty() &&
           !endValue.empty() &&
           osmscout::StringToNumber(startValue,startYear) &&
           osmscout::StringToNumber(endValue,endYear)) {
 
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
       }
 
-      pos=strValue.find('/');
-
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+1);
-
-        if (!startValue.empty() &&
-            !endValue.empty() &&
-            osmscout::StringToNumber(startValue,startYear) &&
-            osmscout::StringToNumber(endValue,endYear)) {
-
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
-      }
-
-      pos=strValue.find("..");
-
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+2);
-
-        if (!startValue.empty() &&
-            !endValue.empty() &&
-            osmscout::StringToNumber(startValue,startYear) &&
-            osmscout::StringToNumber(endValue,endYear)) {
-
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
-      }
-
-      if (strValue[0]=='C') {
-        std::string startValue=strValue.substr(1);
-
-        if (osmscout::StringToNumber(startValue,startYear)) {
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear*100);
-          value->SetEndYear((startYear+1)*100-1);
-
-          return;
-        }
-      }
-
-      errorReporter.ReportTag(object,tags,std::string("Construction startYear tag value '")+strValue+"' cannot be parsed to a startYear!");
+      return;
     }
+
+    pos=strValue.find("..");
+
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+2);
+
+      if (!startValue.empty() &&
+          !endValue.empty() &&
+          osmscout::StringToNumber(startValue,startYear) &&
+          osmscout::StringToNumber(endValue,endYear)) {
+
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
+      }
+
+      return;
+    }
+
+    if (strValue[0]=='C') {
+      std::string startValue=strValue.substr(1);
+
+      if (osmscout::StringToNumber(startValue,startYear)) {
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear*100);
+        value->SetEndYear((startYear+1)*100-1);
+
+        return;
+      }
+    }
+
+    errorReporter.ReportTag(object,tags,std::string("Construction startYear tag value '")+strValue+"' cannot be parsed to a startYear!");
   }
 
   void SidewayFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(featureSet);
+    featureSet=scanner.ReadUInt8();
   }
 
   void SidewayFeatureValue::Write(FileWriter& writer)
@@ -2738,13 +2741,13 @@ namespace osmscout {
 
   void LanesFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(lanes);
+    lanes=scanner.ReadUInt8();
 
-    if (lanes & 0x01) {
-      scanner.Read(turnForward);
-      scanner.Read(turnBackward);
-      scanner.Read(destinationForward);
-      scanner.Read(destinationBackward);
+    if ((lanes & 0x01)!=0) {
+      turnForward=scanner.ReadString();
+      turnBackward=scanner.ReadString();
+      destinationForward=scanner.ReadString();
+      destinationBackward=scanner.ReadString();
     }
   }
 
@@ -2762,7 +2765,7 @@ namespace osmscout {
 
     writer.Write(lanes);
 
-    if (lanes & 0x01) {
+    if ((lanes & 0x01)!=0) {
       writer.Write(turnForward);
       writer.Write(turnBackward);
       writer.Write(destinationForward);
@@ -3006,7 +3009,7 @@ namespace osmscout {
 
   void OperatorFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(op);
+    op=scanner.ReadString();
   }
 
   void OperatorFeatureValue::Write(FileWriter& writer)
@@ -3084,7 +3087,7 @@ namespace osmscout {
 
   void NetworkFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(network);
+    network=scanner.ReadString();
   }
 
   void NetworkFeatureValue::Write(FileWriter& writer)
@@ -3162,8 +3165,8 @@ namespace osmscout {
 
   void FromToFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(from);
-    scanner.Read(to);
+    from=scanner.ReadString();
+    to=scanner.ReadString();
   }
 
   void FromToFeatureValue::Write(FileWriter& writer)
@@ -3253,7 +3256,7 @@ namespace osmscout {
 
   void ColorFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(color);
+    color=scanner.ReadColor();
   }
 
   void ColorFeatureValue::Write(FileWriter& writer)

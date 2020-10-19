@@ -67,13 +67,7 @@ namespace osmscout {
                    true);
 
       while (!scanner.IsEOF()) {
-        OSMId id;
-
-        scanner.ReadNumber(id);
-
-        if (scanner.HasError()) {
-          return false;
-        }
+        OSMId id=scanner.ReadInt64Number();
 
         wayBlacklist.insert(id);
       }
@@ -155,12 +149,10 @@ namespace osmscout {
     CoordDataFile             coordDataFile;
 
     FileScanner               scanner;
-    uint32_t                  rawWayCount=0;
     std::vector<RawWayRef>    rawWays;
     std::set<OSMId>           nodeIds;
 
     FileWriter                areaWriter;
-    uint32_t                  writtenWayCount=0;
 
     rawWays.reserve(parameter.GetRawWayBlockSize());
 
@@ -185,12 +177,14 @@ namespace osmscout {
     progress.SetAction("Processing raw ways as areas");
 
     try {
+      uint32_t writtenWayCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWWAYS_DAT),
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      scanner.Read(rawWayCount);
+      uint32_t rawWayCount=scanner.ReadUInt32();
 
       areaWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       WAYAREA_TMP));
@@ -284,6 +278,9 @@ namespace osmscout {
       areaWriter.SetPos(0);
       areaWriter.Write(writtenWayCount);
       areaWriter.Close();
+
+      progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
+                    std::to_string(writtenWayCount) + " areas(s) written");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
@@ -298,14 +295,7 @@ namespace osmscout {
 
     wayBlacklist.clear();
 
-    if (!coordDataFile.Close()) {
-      return false;
-    }
-
-    progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
-                  std::to_string(writtenWayCount) + " areas(s) written");
-
-    return true;
+    return coordDataFile.Close();
   }
 }
 

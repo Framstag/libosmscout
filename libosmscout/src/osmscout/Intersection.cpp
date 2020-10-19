@@ -32,11 +32,9 @@ namespace osmscout {
   bool Intersection::Read(FileScanner& scanner)
   {
     try {
-      scanner.ReadNumber(nodeId);
+      nodeId=scanner.ReadUInt64Number();
 
-      uint32_t objectCount;
-
-      scanner.ReadNumber(objectCount);
+      uint32_t objectCount=scanner.ReadUInt32Number();
 
       objects.resize(objectCount);
 

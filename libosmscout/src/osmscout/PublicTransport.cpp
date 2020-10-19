@@ -112,58 +112,47 @@ namespace osmscout {
   {
     fileOffset=scanner.GetPos();
 
-    uint16_t typeIndex;
-
-    scanner.Read(typeIndex);
+    uint16_t typeIndex=scanner.ReadUInt16();
 
     type=typeConfig.GetTypeInfo(typeIndex);
 
-    scanner.Read(name);
-    scanner.Read(ref);
-    scanner.Read(operatorName);
-    scanner.Read(network);
-    scanner.Read(color);
+    name=scanner.ReadString();
+    ref=scanner.ReadString();
+    operatorName=scanner.ReadString();
+    network=scanner.ReadString();
+    color=scanner.ReadColor();
 
-    uint32_t variantCount;
-
-    scanner.ReadNumber(variantCount);
+    uint32_t variantCount=scanner.ReadUInt32Number();
 
     variants.resize(variantCount);
 
     for (auto& variant : variants) {
-      scanner.Read(variant.name);
-      scanner.Read(variant.ref);
-      scanner.Read(variant.operatorName);
-      scanner.Read(variant.network);
-      scanner.Read(variant.from);
-      scanner.Read(variant.to);
-      scanner.Read(variant.color);
+      variant.name=scanner.ReadString();
+      variant.ref=scanner.ReadString();
+      variant.operatorName=scanner.ReadString();
+      variant.network=scanner.ReadString();
+      variant.from=scanner.ReadString();
+      variant.to=scanner.ReadString();
+      variant.color=scanner.ReadColor();
 
-      uint32_t stopCount;
-      uint32_t platformCount;
-
-      scanner.ReadNumber(stopCount);
-      scanner.ReadNumber(platformCount);
+      uint32_t stopCount=scanner.ReadUInt32Number();
+      uint32_t platformCount=scanner.ReadUInt32Number();
 
       variant.stops.resize(stopCount);
       variant.platforms.resize(platformCount);
 
       for (auto& stop : variant.stops) {
-        uint8_t type;
-
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
 
         stop.type=(StopType)type;
-        scanner.Read(stop.stop);
+        stop.stop=scanner.ReadObjectFileRef();
       }
 
       for (auto& platform : variant.platforms) {
-        uint8_t type;
-
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
 
         platform.type=(PlatformType)type;
-        scanner.Read(platform.platform);
+        platform.platform=scanner.ReadObjectFileRef();
       }
     }
 
