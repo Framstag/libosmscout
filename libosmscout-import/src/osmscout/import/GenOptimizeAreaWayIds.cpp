@@ -432,10 +432,10 @@ namespace osmscout {
                      return (*processor)();
                    });
 #endif
-    return std::reduce(successes.begin(),
-                       successes.end(),
-                       true,
-                       std::logical_and());
+    return std::accumulate(successes.begin(),
+                           successes.end(),
+                           true,
+                           std::logical_and());
   }
 }
 
