@@ -112,7 +112,7 @@ namespace osmscout {
         PageId relatedId=id+std::numeric_limits<OSMId>::min();
         PageId pageId=relatedId/pageSize;
 
-        auto   pageOffset=pageFileOffsetMap.find(pageId);
+        auto pageOffset=pageFileOffsetMap.find(pageId);
 
         if (pageOffset==pageFileOffsetMap.end()) {
           continue;
@@ -122,12 +122,8 @@ namespace osmscout {
 
         scanner.SetPos(offset);
 
-        bool     isSet;
-        GeoCoord coord;
-
-        uint8_t  serial=scanner.ReadUInt8();
-        scanner.ReadConditionalCoord(coord,
-                                     isSet);
+        uint8_t serial=scanner.ReadUInt8();
+        auto    [coord, isSet]=scanner.ReadConditionalCoord();
 
         if (!isSet) {
           continue;
@@ -135,7 +131,7 @@ namespace osmscout {
 
         resultMap.insert(std::make_pair(id,
                                         Point(serial,
-                                              coord)));
+                                                 coord)));
       }
     }
     catch (IOException& e) {

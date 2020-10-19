@@ -67,13 +67,12 @@ namespace osmscout {
       uint32_t dataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=dataCount; current++) {
-        OSMId   osmId;
         Area    data;
 
         progress.SetProgress(current,dataCount);
 
         uint8_t type=scanner.ReadUInt8();
-        scanner.Read(osmId);
+        OSMId   osmId=scanner.ReadInt64();
 
         data.ReadImport(typeConfig,
                         scanner);
@@ -136,13 +135,12 @@ namespace osmscout {
       uint32_t dataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=dataCount; current++) {
-        OSMId   osmId;
         Way     data;
 
         progress.SetProgress(current,dataCount);
 
         uint8_t type=scanner.ReadUInt8();
-        scanner.Read(osmId);
+        OSMId   osmId=scanner.ReadInt64();
 
         data.Read(typeConfig,
                   scanner);
@@ -217,13 +215,12 @@ namespace osmscout {
       uint32_t areaCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=areaCount; current++) {
-        OSMId   osmId;
         Area    data;
 
         progress.SetProgress(current,areaCount);
 
         uint8_t type=scanner.ReadUInt8();
-        scanner.Read(osmId);
+        OSMId   osmId=scanner.ReadInt64();
 
         data.ReadImport(typeConfig,
                         scanner);
@@ -291,13 +288,12 @@ namespace osmscout {
       writer.Write(dataCount);
 
       for (uint32_t current=1; current<=dataCount; current++) {
-        OSMId   osmId;
         Way     data;
 
         progress.SetProgress(current,dataCount);
 
         uint8_t type=scanner.ReadUInt8();
-        scanner.Read(osmId);
+        OSMId   osmId=scanner.ReadInt64();
 
         data.Read(typeConfig,
                   scanner);

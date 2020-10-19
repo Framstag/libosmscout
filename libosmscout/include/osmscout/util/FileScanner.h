@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <osmscout/CoreImportExport.h>
@@ -214,10 +215,10 @@ namespace osmscout {
 
     bool ReadBool();
 
-    void Read(int8_t& number);
-    void Read(int16_t& number);
-    void Read(int32_t& number);
-    void Read(int64_t& number);
+    int8_t ReadInt8();
+    int16_t ReadInt16();
+    int32_t ReadInt32();
+    int64_t ReadInt64();
 
     uint8_t ReadUInt8();
     uint16_t ReadUInt16();
@@ -225,8 +226,8 @@ namespace osmscout {
     uint64_t ReadUInt64();
 
     void Read(uint16_t& number, size_t bytes);
-    void Read(uint32_t& number, size_t bytes);
-    void Read(uint64_t& number, size_t bytes);
+    uint32_t ReadUInt32(size_t bytes);
+    uint64_t ReadUInt64(size_t bytes);
 
     ObjectFileRef ReadObjectFileRef();
 
@@ -244,8 +245,7 @@ namespace osmscout {
     uint64_t ReadUInt64Number();
 
     GeoCoord ReadCoord();
-    void ReadConditionalCoord(GeoCoord& coord,
-                              bool& isSet);
+    std::tuple<GeoCoord,bool> ReadConditionalCoord();
 
     /**
      * Reads vector of Point and pre-compute segments and bounding box for it

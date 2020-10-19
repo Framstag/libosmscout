@@ -273,10 +273,6 @@ namespace osmscout {
   bool NumericIndex<N>::Open(const std::string& path,
                              bool memoryMapped)
   {
-    uint32_t    entries;
-    FileOffset  lastLevelPageStart;
-    FileOffset  indexPageCountsOffset;
-
     filename=AppendFileToDir(path,filepart);
 
     try {
@@ -285,18 +281,13 @@ namespace osmscout {
                    memoryMapped);
 
       pageSize=scanner.ReadUInt32Number();                  // Size of one index page
-      entries=scanner.ReadUInt32Number();                   // Number of entries in data file
+      uint32_t entries=scanner.ReadUInt32Number();                   // Number of entries in data file
 
       levels=scanner.ReadUInt32();                    // Number of levels
-      lastLevelPageStart=scanner.ReadFileOffset();    // Start of top level index page
-      indexPageCountsOffset=scanner.ReadFileOffset(); // Start of list of sizes of index levels
-
-      if (scanner.HasError()) {
-        log.Error() << "Error while loading header data of index file '" << filename << "'";
-        return false;
-      }
-
       pageCounts.resize(levels);
+
+      FileOffset lastLevelPageStart=scanner.ReadFileOffset();    // Start of top level index page
+      FileOffset indexPageCountsOffset=scanner.ReadFileOffset(); // Start of list of sizes of index levels
 
       scanner.SetPos(indexPageCountsOffset);
       for (size_t level=0; level<levels; level++) {

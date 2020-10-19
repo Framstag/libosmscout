@@ -87,10 +87,6 @@ namespace osmscout
       uint32_t optimizationMaxMag=scanner.ReadUInt32();
       uint32_t areaTypeCount=scanner.ReadUInt32();
 
-      if (scanner.HasError()) {
-        return false;
-      }
-
       magnification=pow(2.0,(int)optimizationMaxMag);
 
       for (size_t i=1; i<=areaTypeCount; i++) {

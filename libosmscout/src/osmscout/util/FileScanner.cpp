@@ -577,13 +577,13 @@ namespace osmscout {
     return ConvertBool(value);
   }
 
-  void FileScanner::Read(int8_t& number)
+  int8_t FileScanner::ReadInt8()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int8_t","File already in error state");
     }
 
-    number=0;
+    int8_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -596,7 +596,7 @@ namespace osmscout {
 
       offset++;
 
-      return;
+      return number;
     }
 #endif
 
@@ -605,15 +605,17 @@ namespace osmscout {
     if (hasError) {
       throw IOException(filename,"Cannot read int8_t");
     }
+
+    return number;
   }
 
-  void FileScanner::Read(int16_t& number)
+  int16_t FileScanner::ReadInt16()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int16_t","File already in error state");
     }
 
-    number=0;
+    int16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -636,19 +638,19 @@ namespace osmscout {
 
       offset+=2;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[2];
+    std::array<unsigned char,2> buffer;
 
-    hasError=fread(&buffer,1,2,file)!=2;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int16_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int16_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -659,15 +661,17 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(int32_t& number)
+  int32_t FileScanner::ReadInt32()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int32_t","File already in error state");
     }
 
-    number=0;
+    int32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -700,19 +704,19 @@ namespace osmscout {
 
       offset+=4;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,4,file)!=4;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int32_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -733,15 +737,17 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(int64_t& number)
+  int64_t FileScanner::ReadInt64()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int64_t","File already in error state");
     }
 
-    number=0;
+    int64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -794,19 +800,19 @@ namespace osmscout {
 
       offset+=8;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int64_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -847,6 +853,8 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
+
+    return number;
   }
 
   uint8_t FileScanner::ReadUInt8()
@@ -1188,14 +1196,13 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::Read(uint32_t& number,
-                         size_t bytes)
+  uint32_t FileScanner::ReadUInt32(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read size limited uint32_t","File already in error state");
     }
 
-    number=0;
+    uint32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1234,19 +1241,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read size limited uint32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint32_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1273,16 +1280,17 @@ namespace osmscout {
         }
       }
     }
+
+    return number;
   }
 
-  void FileScanner::Read(uint64_t& number,
-                         size_t bytes)
+  uint64_t FileScanner::ReadUInt64(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read size limited uint64_t","File already in error state");
     }
 
-    number=0;
+    uint64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1349,19 +1357,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read size limited uint64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint64_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1416,6 +1424,8 @@ namespace osmscout {
         }
       }
     }
+
+    return number;
   }
 
   ObjectFileRef FileScanner::ReadObjectFileRef()
@@ -2190,8 +2200,7 @@ namespace osmscout {
     return CreateCoord(latDat, lonDat);
   }
 
-  void FileScanner::ReadConditionalCoord(GeoCoord& coord,
-                                         bool& isSet)
+  std::tuple<GeoCoord,bool> FileScanner::ReadConditionalCoord()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read coordinate","File already in error state");
@@ -2199,6 +2208,8 @@ namespace osmscout {
 
     uint32_t latDat;
     uint32_t lonDat;
+    GeoCoord coord;
+    bool     isSet;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -2231,7 +2242,7 @@ namespace osmscout {
         isSet=true;
       }
 
-      return;
+      return std::make_tuple(coord,isSet);
     }
 #endif
 
@@ -2261,6 +2272,8 @@ namespace osmscout {
       coord=CreateCoord(latDat, lonDat);
       isSet=true;
     }
+
+    return std::make_tuple(coord,isSet);
   }
 
   void FileScanner::Read(std::vector<Point>& nodes,

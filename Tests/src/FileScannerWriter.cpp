@@ -158,6 +158,18 @@ TEST_CASE("FileScannerWriter")
   writer.Write(out64u2);
   writer.Write(out64u3);
 
+  writer.Write(out16s1);
+  writer.Write(out16s2);
+  writer.Write(out16s3);
+
+  writer.Write(out32s1);
+  writer.Write(out32s2);
+  writer.Write(out32s3);
+
+  writer.Write(out64s1);
+  writer.Write(out64s2);
+  writer.Write(out64s3);
+
   writer.WriteNumber(out16u1);
   writer.WriteNumber(out16u2);
   writer.WriteNumber(out16u3);
@@ -238,6 +250,33 @@ TEST_CASE("FileScannerWriter")
 
     in64u=scanner.ReadUInt64();
     REQUIRE(in64u == out64u3);
+
+    in16s=scanner.ReadInt16();
+    REQUIRE(in16s == out16s1);
+
+    in16s=scanner.ReadInt16();
+    REQUIRE(in16s == out16s2);
+
+    in16s=scanner.ReadInt16();
+    REQUIRE(in16s == out16s3);
+
+    in32s=scanner.ReadInt32();
+    REQUIRE(in32s == out32s1);
+
+    in32s=scanner.ReadInt32();
+    REQUIRE(in32s == out32s2);
+
+    in32s=scanner.ReadInt32();
+    REQUIRE(in32s == out32s3);
+
+    in64s=scanner.ReadInt64();
+    REQUIRE(in64s == out64s1);
+
+    in64s=scanner.ReadInt64();
+    REQUIRE(in64s == out64s2);
+
+    in64s=scanner.ReadInt64();
+    REQUIRE(in64s == out64s3);
 
     // Read/WriteNumber
 

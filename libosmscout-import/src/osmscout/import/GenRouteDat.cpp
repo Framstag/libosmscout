@@ -343,9 +343,7 @@ namespace osmscout {
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
 
-        OSMId      wayId;
-
-        scanner.Read(wayId);
+        OSMId      wayId=scanner.ReadInt64();
         uint8_t   typeByte=scanner.ReadUInt8();
         FileOffset wayOffset=scanner.ReadFileOffset();
         OSMRefType type=(OSMRefType)typeByte;

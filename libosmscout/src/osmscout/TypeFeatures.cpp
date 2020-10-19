@@ -977,7 +977,7 @@ namespace osmscout {
 
   void LayerFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(layer);
+    layer=scanner.ReadInt8();
   }
 
   void LayerFeatureValue::Write(FileWriter& writer)
@@ -2411,8 +2411,8 @@ namespace osmscout {
 
   void ConstructionYearFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(startYear);
-    scanner.Read(endYear);
+    startYear=scanner.ReadInt32();
+    endYear=scanner.ReadInt32();
   }
 
   void ConstructionYearFeatureValue::Write(FileWriter& writer)
@@ -2517,82 +2517,80 @@ namespace osmscout {
 
       return;
     }
-    else {
-      auto pos=strValue.find('-');
+    auto pos=strValue.find('-');
 
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+1);
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+1);
 
-        if (!startValue.empty() &&
+      if (!startValue.empty() &&
+        !endValue.empty() &&
+        osmscout::StringToNumber(startValue,startYear) &&
+        osmscout::StringToNumber(endValue,endYear)) {
+
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
+      }
+
+      return;
+    }
+
+    pos=strValue.find('/');
+
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+1);
+
+      if (!startValue.empty() &&
           !endValue.empty() &&
           osmscout::StringToNumber(startValue,startYear) &&
           osmscout::StringToNumber(endValue,endYear)) {
 
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
       }
 
-      pos=strValue.find('/');
-
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+1);
-
-        if (!startValue.empty() &&
-            !endValue.empty() &&
-            osmscout::StringToNumber(startValue,startYear) &&
-            osmscout::StringToNumber(endValue,endYear)) {
-
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
-      }
-
-      pos=strValue.find("..");
-
-      if (pos!=std::string::npos) {
-        std::string startValue=strValue.substr(0,pos);
-        std::string endValue=strValue.substr(pos+2);
-
-        if (!startValue.empty() &&
-            !endValue.empty() &&
-            osmscout::StringToNumber(startValue,startYear) &&
-            osmscout::StringToNumber(endValue,endYear)) {
-
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear);
-          value->SetEndYear(endYear);
-        }
-
-        return;
-      }
-
-      if (strValue[0]=='C') {
-        std::string startValue=strValue.substr(1);
-
-        if (osmscout::StringToNumber(startValue,startYear)) {
-          auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
-
-          value->SetStartYear(startYear*100);
-          value->SetEndYear((startYear+1)*100-1);
-
-          return;
-        }
-      }
-
-      errorReporter.ReportTag(object,tags,std::string("Construction startYear tag value '")+strValue+"' cannot be parsed to a startYear!");
+      return;
     }
+
+    pos=strValue.find("..");
+
+    if (pos!=std::string::npos) {
+      std::string startValue=strValue.substr(0,pos);
+      std::string endValue=strValue.substr(pos+2);
+
+      if (!startValue.empty() &&
+          !endValue.empty() &&
+          osmscout::StringToNumber(startValue,startYear) &&
+          osmscout::StringToNumber(endValue,endYear)) {
+
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear);
+        value->SetEndYear(endYear);
+      }
+
+      return;
+    }
+
+    if (strValue[0]=='C') {
+      std::string startValue=strValue.substr(1);
+
+      if (osmscout::StringToNumber(startValue,startYear)) {
+        auto* value=static_cast<ConstructionYearFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+
+        value->SetStartYear(startYear*100);
+        value->SetEndYear((startYear+1)*100-1);
+
+        return;
+      }
+    }
+
+    errorReporter.ReportTag(object,tags,std::string("Construction startYear tag value '")+strValue+"' cannot be parsed to a startYear!");
   }
 
   void SidewayFeatureValue::Read(FileScanner& scanner)
