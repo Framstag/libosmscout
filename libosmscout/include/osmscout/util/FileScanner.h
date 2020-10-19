@@ -71,18 +71,18 @@ namespace osmscout {
     };
 
   private:
-    std::string          filename;       //!< Filename
-    std::FILE            *file;          //!< Internal low level file handle
-    mutable bool         hasError;       //!< Flag to signal errors in the stream
+    std::string  filename;       //!< Filename
+    std::FILE    *file;          //!< Internal low level file handle
+    mutable bool hasError;       //!< Flag to signal errors in the stream
 
     // For mmap usage
-    char                 *buffer;        //!< Pointer to the file memory
-    FileOffset           size;           //!< Size of the memory/file
-    FileOffset           offset;         //!< Current offset into the file memory
+    char         *mmap;          //!< Pointer to the file memory
+    FileOffset   size;           //!< Size of the memory/file
+    FileOffset   offset;         //!< Current offset into the file memory
 
     // For std::vector<GeoCoord> loading
-    uint8_t              *byteBuffer;    //!< Temporary buffer for loading of std::vector<GeoCoord>
-    size_t               byteBufferSize; //!< Size of the temporary byte buffer
+    uint8_t      *byteBuffer;    //!< Temporary buffer for loading of std::vector<GeoCoord>
+    size_t       byteBufferSize; //!< Size of the temporary byte buffer
 
     // For Windows mmap usage
 #if defined(__WIN32__) || defined(WIN32)
@@ -225,7 +225,7 @@ namespace osmscout {
     uint32_t ReadUInt32();
     uint64_t ReadUInt64();
 
-    void Read(uint16_t& number, size_t bytes);
+    uint16_t Read(size_t bytes);
     uint32_t ReadUInt32(size_t bytes);
     uint64_t ReadUInt64(size_t bytes);
 
