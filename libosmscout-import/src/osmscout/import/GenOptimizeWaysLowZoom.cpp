@@ -125,7 +125,6 @@ namespace osmscout
                                              std::set<TypeInfoRef>& types,
                                              std::vector<std::list<WayRef> >& ways)
   {
-    uint32_t              wayCount=0;
     size_t                collectedWaysCount=0;
     std::set<TypeInfoRef> currentTypes(types);
     FeatureRef            featureRef(typeConfig.GetFeature(RefFeature::NAME));
@@ -134,7 +133,7 @@ namespace osmscout
 
     scanner.GotoBegin();
 
-    scanner.Read(wayCount);
+    uint32_t wayCount=scanner.ReadUInt32();
 
     for (uint32_t w=1; w<=wayCount; w++) {
       WayRef way=std::make_shared<Way>();

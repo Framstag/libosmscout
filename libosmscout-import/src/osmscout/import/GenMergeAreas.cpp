@@ -101,16 +101,13 @@ namespace osmscout {
                                             const TypeInfoSet& mergeTypes,
                                             std::unordered_set<Id>& nodeUseMap)
   {
-    uint32_t areaCount=0;
-
     progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     uint8_t type;
-    Id      id;
     Area    data;
 
     std::unordered_set<Id> usedOnceSet;
@@ -119,7 +116,7 @@ namespace osmscout {
       progress.SetProgress(current,areaCount);
 
       scanner.Read(type);
-      scanner.Read(id);
+      Id id=scanner.ReadUInt64();
 
       data.ReadImport(typeConfig,
                       scanner);
@@ -179,7 +176,6 @@ namespace osmscout {
                                      uint32_t& areasWritten)
   {
     bool        firstCall=areasWritten==0; // We are called for the first time
-    uint32_t    areaCount=0;
     size_t      collectedAreasCount=0;
     size_t      typesWithAreas=0;
 
@@ -191,17 +187,16 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t type;
-      Id      id;
       AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
       scanner.Read(type);
-      scanner.Read(id);
+      Id id=scanner.ReadUInt64();
 
       area->ReadImport(typeConfig,
                        scanner);
@@ -504,7 +499,6 @@ namespace osmscout {
                                              std::vector<AreaMergeData>& mergeJob,
                                              uint32_t& areasWritten)
   {
-    uint32_t                               areaCount=0;
     std::unordered_map<FileOffset,AreaRef> merges;
     std::unordered_set<FileOffset>         ignores;
 
@@ -519,17 +513,16 @@ namespace osmscout {
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t type;
-      Id      id;
       AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
       scanner.Read(type);
-      scanner.Read(id);
+      Id id=scanner.ReadUInt64();
 
       area->ReadImport(typeConfig,
                        scanner);

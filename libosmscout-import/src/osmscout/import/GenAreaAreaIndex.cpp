@@ -578,7 +578,6 @@ namespace osmscout {
 
     for (FileOffset srcOffset : srcOffsets) {
       uint8_t    objectType;
-      Id         id;
       Area       area;
       FileOffset dstOffset;
       bool       save=true;
@@ -586,7 +585,7 @@ namespace osmscout {
       scanner.SetPos(srcOffset);
 
       scanner.Read(objectType);
-      scanner.Read(id);
+      Id id=scanner.ReadUInt64();
 
       area.Read(typeConfig,
                 scanner);
@@ -841,15 +840,13 @@ namespace osmscout {
                                                   FileScanner& scanner,
                                                   std::vector<Level>& levels)
   {
-    uint32_t areaCount=0;
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
       uint8_t    objectType;
-      Id         id;
       FileOffset offset;
       Area       area;
 
@@ -857,8 +854,8 @@ namespace osmscout {
 
       offset=scanner.GetPos();
 
-      scanner.Read(objectType),
-      scanner.Read(id);
+      scanner.Read(objectType);
+      Id id=scanner.ReadUInt64();
 
       area.Read(*typeConfig,scanner);
 

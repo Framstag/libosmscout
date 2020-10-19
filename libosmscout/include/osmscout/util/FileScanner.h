@@ -221,8 +221,8 @@ namespace osmscout {
 
     void Read(uint8_t& number);
     void Read(uint16_t& number);
-    void Read(uint32_t& number);
-    void Read(uint64_t& number);
+    uint32_t ReadUInt32();
+    uint64_t ReadUInt64();
 
     void Read(uint16_t& number, size_t bytes);
     void Read(uint32_t& number, size_t bytes);
@@ -235,11 +235,11 @@ namespace osmscout {
     FileOffset ReadFileOffset();
     FileOffset ReadFileOffset(size_t bytes);
 
-    void ReadNumber(int16_t& number);
-    void ReadNumber(int32_t& number);
-    void ReadNumber(int64_t& number);
+    int16_t ReadInt16Number();
+    int32_t ReadInt32Number();
+    int64_t ReadInt64Number();
 
-    void ReadNumber(uint16_t& number);
+    uint16_t ReadUInt16Number();
     uint32_t ReadUInt32Number();
     uint64_t ReadUInt64Number();
 

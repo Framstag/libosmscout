@@ -123,24 +123,24 @@ namespace osmscout {
 
     for (auto& object : objects) {
       RefType    type;
-      FileOffset fileOffset=scanner.ReadUInt64Number();
+      FileOffset objectFileOffset=scanner.ReadUInt64Number();
 
-      if (fileOffset % 2==0) {
+      if (objectFileOffset%2==0) {
         type=refWay;
       }
       else {
         type=refArea;
       }
 
-      fileOffset=fileOffset/2;
+      objectFileOffset=objectFileOffset/2;
 
-      fileOffset+=previousFileOffset;
+      objectFileOffset+=previousFileOffset;
 
-      object.object.Set(fileOffset,type);
+      object.object.Set(objectFileOffset,type);
 
       scanner.Read(object.objectVariantIndex);
 
-      previousFileOffset=fileOffset;
+      previousFileOffset=objectFileOffset;
     }
 
     paths.resize(pathCount);
@@ -148,7 +148,7 @@ namespace osmscout {
     for (auto& path : paths) {
       uint32_t distanceValue;
 
-      scanner.Read(path.id);
+      path.id=scanner.ReadUInt64();
       scanner.Read(path.objectIndex);
       //scanner.Read(paths[i].bearing);
       scanner.Read(path.flags);

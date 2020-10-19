@@ -72,7 +72,7 @@ namespace osmscout {
   void RawNode::Read(const TypeConfig& typeConfig,
                      FileScanner& scanner)
   {
-    scanner.ReadNumber(id);
+    id=scanner.ReadInt64Number();
 
     TypeId typeId=scanner.ReadTypeId(typeConfig.GetNodeTypeIdBytes());
 

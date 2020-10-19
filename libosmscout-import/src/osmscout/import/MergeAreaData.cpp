@@ -49,8 +49,6 @@ namespace osmscout {
     FileWriter  writer;
 
     try {
-      uint32_t wayDataCount=0;
-      uint32_t relDataCount=0;
       uint32_t dataWritten=0;
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -65,7 +63,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      scanner.Read(wayDataCount);
+      uint32_t wayDataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=wayDataCount; current++) {
         uint8_t type;
@@ -96,7 +94,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetAreaDataMemoryMaped());
 
-      scanner.Read(relDataCount);
+      uint32_t relDataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=relDataCount; current++) {
         uint8_t type;

@@ -32,9 +32,9 @@ namespace osmscout {
 
     this->type=(Type)typeValue;
 
-    scanner.ReadNumber(from);
-    scanner.ReadNumber(via);
-    scanner.ReadNumber(to);
+    from=scanner.ReadInt64Number();
+    via=scanner.ReadInt64Number();
+    to=scanner.ReadInt64Number();
   }
 
   /**

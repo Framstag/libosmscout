@@ -80,9 +80,7 @@ namespace osmscout {
     try {
       scanner.Open(fullIndexFileName,FileScanner::FastRandom,memoryMappedData);
 
-      uint32_t indexEntries;
-
-      scanner.Read(indexEntries);
+      uint32_t indexEntries=scanner.ReadUInt32();
 
       typeData.reserve(indexEntries);
 

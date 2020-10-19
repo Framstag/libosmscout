@@ -192,14 +192,12 @@ namespace osmscout {
       size_t   minIndex=0;
 
       for (auto& source : sources) {
-        uint32_t dataCount=0;
-
         source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                             source.filename),
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
-        source.scanner.Read(dataCount);
+        uint32_t dataCount=source.scanner.ReadUInt32();
 
         progress.Info(std::to_string(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
@@ -226,24 +224,21 @@ namespace osmscout {
         for (typename std::list<Source>::iterator source=sources.begin();
              source!=sources.end();
              ++source) {
-          uint32_t dataCount;
           progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
 
           source->scanner.GotoBegin();
 
-          source->scanner.Read(dataCount);
-
+          uint32_t dataCount=source->scanner.ReadUInt32();
           uint32_t current=1;
 
           while (current<=dataCount) {
             uint8_t type;
-            Id      id;
             N       data;
 
             progress.SetProgress(current,dataCount);
 
             source->scanner.Read(type);
-            source->scanner.Read(id);
+            Id id=source->scanner.ReadUInt64();
 
             data.Read(typeConfig,
                       source->scanner);
@@ -430,8 +425,6 @@ namespace osmscout {
       mapWriter.Write(overallDataCount);
 
       for (auto& source : sources) {
-        uint32_t dataCount=0;
-
         progress.Info("Copying from file '"+source.scanner.GetFilename()+"'");
 
         source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -439,7 +432,7 @@ namespace osmscout {
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
-        source.scanner.Read(dataCount);
+        uint32_t dataCount=source.scanner.ReadUInt32();
 
         progress.Info(std::to_string(dataCount)+" entries in file '"+source.scanner.GetFilename()+"'");
 
@@ -447,13 +440,12 @@ namespace osmscout {
 
         for (uint32_t current=1; current<=dataCount; current++) {
           uint8_t type=0;
-          Id      id=0;
           N       data;
 
           progress.SetProgress(current,dataCount);
 
           source.scanner.Read(type);
-          source.scanner.Read(id);
+          Id id=source.scanner.ReadUInt64();
 
           data.Read(typeConfig,
                     source.scanner);

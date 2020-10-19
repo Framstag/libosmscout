@@ -221,33 +221,33 @@ TEST_CASE("FileScannerWriter")
     scanner.Read(in16u);
     REQUIRE(in16u == out16u3);
 
-    scanner.Read(in32u);
+    in32u=scanner.ReadUInt32();
     REQUIRE(in32u == out32u1);
 
-    scanner.Read(in32u);
+    in32u=scanner.ReadUInt32();
     REQUIRE(in32u == out32u2);
 
-    scanner.Read(in32u);
+    in32u=scanner.ReadUInt32();
     REQUIRE(in32u == out32u3);
 
-    scanner.Read(in64u);
+    in64u=scanner.ReadUInt64();
     REQUIRE(in64u == out64u1);
 
-    scanner.Read(in64u);
+    in64u=scanner.ReadUInt64();
     REQUIRE(in64u == out64u2);
 
-    scanner.Read(in64u);
+    in64u=scanner.ReadUInt64();
     REQUIRE(in64u == out64u3);
 
     // Read/WriteNumber
 
-    scanner.ReadNumber(in16u);
+    in16u=scanner.ReadUInt16Number();
     REQUIRE(in16u == out16u1);
 
-    scanner.ReadNumber(in16u);
+    in16u=scanner.ReadUInt16Number();
     REQUIRE(in16u == out16u2);
 
-    scanner.ReadNumber(in16u);
+    in16u=scanner.ReadUInt16Number();
     REQUIRE(in16u == out16u3);
 
     in32u=scanner.ReadUInt32Number();
@@ -268,31 +268,31 @@ TEST_CASE("FileScannerWriter")
     in64u=scanner.ReadUInt64Number();
     REQUIRE(in64u == out64u3);
 
-    scanner.ReadNumber(in16s);
+    in16s=scanner.ReadInt16Number();
     REQUIRE(in16s == out16s1);
 
-    scanner.ReadNumber(in16s);
+    in16s=scanner.ReadInt16Number();
     REQUIRE(in16s == out16s2);
 
-    scanner.ReadNumber(in16s);
+    in16s=scanner.ReadInt16Number();
     REQUIRE(in16s == out16s3);
 
-    scanner.ReadNumber(in32s);
+    in32s=scanner.ReadInt32Number();
     REQUIRE(in32s == out32s1);
 
-    scanner.ReadNumber(in32s);
+    in32s=scanner.ReadInt32Number();
     REQUIRE(in32s == out32s2);
 
-    scanner.ReadNumber(in32s);
+    in32s=scanner.ReadInt32Number();
     REQUIRE(in32s == out32s3);
 
-    scanner.ReadNumber(in64s);
+    in64s=scanner.ReadInt64Number();
     REQUIRE(in64s == out64s1);
 
-    scanner.ReadNumber(in64s);
+    in64s=scanner.ReadInt64Number();
     REQUIRE(in64s == out64s2);
 
-    scanner.ReadNumber(in64s);
+    in64s=scanner.ReadInt64Number();
     REQUIRE(in64s == out64s3);
 
     // Read/WriteFileOffset

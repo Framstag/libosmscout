@@ -947,14 +947,12 @@ namespace osmscout {
     AdminLevelFeatureValueReader adminLevelReader(*typeConfig);
 
     try {
-      uint32_t areaCount;
-
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
                    true);
 
-      scanner.Read(areaCount);
+      uint32_t areaCount=scanner.ReadUInt32();
 
       for (uint32_t r=1; r<=areaCount; r++) {
         progress.SetProgress(r,areaCount);
@@ -1072,7 +1070,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t               areaCount;
       size_t                 areasFound=0;
       NameFeatureValueReader nameReader(typeConfig);
       IsInFeatureValueReader isInReader(typeConfig);
@@ -1082,7 +1079,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(areaCount);
+      uint32_t areaCount=scanner.ReadUInt32();
 
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
@@ -1277,7 +1274,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t                  nodeCount;
       size_t                    citiesFound=0;
       NameFeatureValueReader    nameReader(*typeConfig);
       NameAltFeatureValueReader nameAltReader(*typeConfig);
@@ -1287,7 +1283,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      scanner.Read(nodeCount);
+      uint32_t nodeCount=scanner.ReadUInt32();
 
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);
@@ -1442,7 +1438,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t                     areaCount;
       size_t                       areasFound=0;
       NameFeatureValueReader       nameReader(typeConfig);
       PostalCodeFeatureValueReader postalCodeReader(typeConfig);
@@ -1452,7 +1447,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(areaCount);
+      uint32_t areaCount=scanner.ReadUInt32();
 
       for (uint32_t w=1; w<=areaCount; w++) {
         progress.SetProgress(w,areaCount);
@@ -1556,7 +1551,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t                     wayCount;
       size_t                       waysFound=0;
       NameFeatureLabelReader       nameReader(typeConfig);
       RefFeatureLabelReader        refReader(typeConfig);
@@ -1567,7 +1561,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(wayCount);
+      uint32_t wayCount=scanner.ReadUInt32();
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -1782,7 +1776,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t           areaCount;
       size_t             addressFound=0;
       size_t             poiFound=0;
       size_t             postalCodeFound=0;
@@ -1801,7 +1794,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(areaCount);
+      uint32_t areaCount=scanner.ReadUInt32();
 
       for (uint32_t a=1; a<=areaCount; a++) {
         progress.SetProgress(a,areaCount);
@@ -1997,7 +1990,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t           wayCount=0;
       size_t             poiFound=0;
       size_t             postalCodeFound=0;
       FileOffset         fileOffset;
@@ -2013,7 +2005,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetWayDataMemoryMaped());
 
-      scanner.Read(wayCount);
+      uint32_t wayCount=scanner.ReadUInt32();
 
       for (uint32_t w=1; w<=wayCount; w++) {
         progress.SetProgress(w,wayCount);
@@ -2172,7 +2164,6 @@ namespace osmscout {
     FileScanner scanner;
 
     try {
-      uint32_t    nodeCount;
       size_t      addressFound=0;
       size_t      poiFound=0;
       size_t      postalCodeFound=0;
@@ -2191,7 +2182,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      scanner.Read(nodeCount);
+      uint32_t nodeCount=scanner.ReadUInt32();
 
       for (uint32_t n=1; n<=nodeCount; n++) {
         progress.SetProgress(n,nodeCount);

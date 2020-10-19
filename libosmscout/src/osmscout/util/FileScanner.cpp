@@ -933,13 +933,13 @@ namespace osmscout {
     number|=add;
   }
 
-  void FileScanner::Read(uint32_t& number)
+  uint32_t FileScanner::ReadUInt32()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint32_t","File already in error state");
     }
 
-    number=0;
+    uint32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -972,19 +972,19 @@ namespace osmscout {
 
       offset+=4;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,4,file)!=4;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint32_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1005,15 +1005,17 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(uint64_t& number)
+  uint64_t FileScanner::ReadUInt64()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint64_t","File already in error state");
     }
 
-    number=0;
+    uint64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1066,19 +1068,19 @@ namespace osmscout {
 
       offset+=8;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint64_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1119,6 +1121,8 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
+
+    return number;
   }
 
   void FileScanner::Read(uint16_t& number,
@@ -1725,13 +1729,13 @@ namespace osmscout {
     return fileOffset;
   }
 
-  void FileScanner::ReadNumber(int16_t& number)
+  int16_t FileScanner::ReadInt16Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int16_t number","File already in error state");
     }
 
-    number=0;
+    int16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1744,7 +1748,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1803,15 +1807,17 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(int32_t& number)
+  int32_t FileScanner::ReadInt32Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int32_t number","File already in error state");
     }
 
-    number=0;
+    int32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1824,7 +1830,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1884,15 +1890,17 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(int64_t& number)
+  int64_t FileScanner::ReadInt64Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int64_t number","File already in error state");
     }
 
-    number=0;
+    int64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1905,7 +1913,7 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1929,7 +1937,6 @@ namespace osmscout {
       nextShift=6;
 
       while ((buffer & 0x80)!=0) {
-
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
@@ -1950,7 +1957,6 @@ namespace osmscout {
       nextShift=6;
 
       while ((buffer & 0x80)!=0) {
-
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
@@ -1964,15 +1970,17 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(uint16_t& number)
+  uint16_t FileScanner::ReadUInt16Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint16_t number","File already in error state");
     }
 
-    number=0;
+    uint16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -1983,7 +1991,7 @@ namespace osmscout {
 
         if ((buffer[offset] & 0x80)==0) {
           offset++;
-          return;
+          return number;
         }
 
         shift+=7;
@@ -2007,7 +2015,7 @@ namespace osmscout {
       number|=static_cast<uint16_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
-        return;
+        return number;
       }
 
       if (fread(&buffer,1,1,file)!=1) {

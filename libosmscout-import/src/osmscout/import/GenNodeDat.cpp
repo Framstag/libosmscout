@@ -63,14 +63,13 @@ namespace osmscout {
     FileWriter  writer;
 
     try {
-      uint32_t rawNodeCount=0;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWNODES_DAT),
                    FileScanner::Sequential,
                    parameter.GetRawNodeDataMemoryMaped());
 
-      scanner.Read(rawNodeCount);
+      uint32_t rawNodeCount=scanner.ReadUInt32();
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   NODES_TMP));

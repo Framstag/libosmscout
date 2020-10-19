@@ -287,7 +287,7 @@ namespace osmscout {
       pageSize=scanner.ReadUInt32Number();                  // Size of one index page
       entries=scanner.ReadUInt32Number();                   // Number of entries in data file
 
-      scanner.Read(levels);                          // Number of levels
+      levels=scanner.ReadUInt32();                    // Number of levels
       lastLevelPageStart=scanner.ReadFileOffset();    // Start of top level index page
       indexPageCountsOffset=scanner.ReadFileOffset(); // Start of list of sizes of index levels
 

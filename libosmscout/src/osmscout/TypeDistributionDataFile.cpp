@@ -70,9 +70,9 @@ namespace osmscout {
                    true);
 
       for (const auto &type : typeConfig.GetTypes()) {
-        scanner.Read(distribution[type->GetIndex()].nodeCount);
-        scanner.Read(distribution[type->GetIndex()].wayCount);
-        scanner.Read(distribution[type->GetIndex()].areaCount);
+        distribution[type->GetIndex()].nodeCount=scanner.ReadUInt32();
+        distribution[type->GetIndex()].wayCount=scanner.ReadUInt32();
+        distribution[type->GetIndex()].areaCount=scanner.ReadUInt32();
       }
 
       scanner.Close();

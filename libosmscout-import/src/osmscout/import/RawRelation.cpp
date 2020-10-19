@@ -72,7 +72,7 @@ namespace osmscout {
                          FileScanner& scanner)
   {
 
-    scanner.ReadNumber(id);
+    id=scanner.ReadInt64Number();
 
     uint32_t tmpType=scanner.ReadUInt32Number();
 
@@ -87,19 +87,16 @@ namespace osmscout {
     uint32_t memberCount=scanner.ReadUInt32Number();
 
     if (memberCount>0) {
-      OSMId minId;
-
-      scanner.ReadNumber(minId);
+      OSMId minId=scanner.ReadInt64Number();
 
       members.resize(memberCount);
 
       for (auto& member : members) {
-        OSMId    id;
         uint32_t memberType=scanner.ReadUInt32Number();
 
         member.type=(MemberType)memberType;
 
-        scanner.ReadNumber(id);
+        OSMId    id=scanner.ReadInt64Number();
         member.id=minId+id;
 
         member.role=scanner.ReadString();

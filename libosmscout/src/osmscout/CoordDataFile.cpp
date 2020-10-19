@@ -55,23 +55,16 @@ namespace osmscout {
                    FileScanner::FastRandom,
                    memoryMapedData);
 
-      FileOffset mapOffset;
-
-      scanner.Read(mapOffset);
-      scanner.Read(pageSize);
+      FileOffset mapOffset=scanner.ReadFileOffset();
+      pageSize=scanner.ReadUInt32();
 
       scanner.SetPos(mapOffset);
 
-      uint32_t mapSize;
+      uint32_t mapSize=scanner.ReadUInt32();
 
-      scanner.Read(mapSize);
-
-      for (size_t i=1; i<=mapSize; i++) {
-        PageId     pageId;
-        FileOffset offset;
-
-        scanner.Read(pageId);
-        scanner.Read(offset);
+      for (uint32_t i=1; i<=mapSize; i++) {
+        PageId pageId=scanner.ReadUInt64();
+        FileOffset offset=scanner.ReadFileOffset();
 
         pageFileOffsetMap[pageId]=offset;
       }

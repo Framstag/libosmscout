@@ -56,9 +56,7 @@ namespace osmscout {
                    FileScanner::FastRandom,
                    memoryMappedData);
 
-      uint32_t gridMag;
-
-      scanner.Read(gridMag);
+      uint32_t gridMag=scanner.ReadUInt32();
 
       this->gridMag=MagnificationLevel(gridMag);
 
@@ -67,9 +65,7 @@ namespace osmscout {
       scanner.Read(indexEntryCount);
 
       for (uint16_t i=1; i<=indexEntryCount; i++) {
-        TypeId typeId;
-
-        scanner.ReadNumber(typeId);
+        TypeId typeId=scanner.ReadUInt16Number();
 
         if (typeId>=nodeTypeData.size()) {
           nodeTypeData.resize(typeId+1);
@@ -90,23 +86,17 @@ namespace osmscout {
         }
       }
 
-      uint32_t tileEntryCount;
-
-      scanner.Read(tileEntryCount);
+      uint32_t tileEntryCount=scanner.ReadUInt32();
 
       for (uint32_t i=1; i<=tileEntryCount; i++) {
-        TypeId typeId;
-
-        scanner.ReadNumber(typeId);
+        TypeId typeId=scanner.ReadUInt16Number();
 
         if (typeId>=nodeTypeData.size()) {
           nodeTypeData.resize(typeId+1);
         }
 
-        uint32_t x,y;
-
-        scanner.Read(x);
-        scanner.Read(y);
+        uint32_t x=scanner.ReadUInt32();
+        uint32_t y=scanner.ReadUInt32();
 
         ListTile& entry=nodeTypeData[typeId].listTiles[TileId(x,y)];
 
@@ -115,24 +105,19 @@ namespace osmscout {
         entry.storeGeoCoord=scanner.ReadBool();
       }
 
-      uint32_t bitmapEntryCount;
-
-      scanner.Read(bitmapEntryCount);
+      uint32_t bitmapEntryCount=scanner.ReadUInt32();
 
       for (uint32_t i=1; i<=bitmapEntryCount; i++) {
-        TypeId typeId;
-
-        scanner.ReadNumber(typeId);
+        TypeId typeId=scanner.ReadUInt16Number();
 
         if (typeId>=nodeTypeData.size()) {
           nodeTypeData.resize(typeId+1);
         }
 
-        uint32_t x,y;
         uint8_t  magnification;
 
-        scanner.Read(x);
-        scanner.Read(y);
+        uint32_t x=scanner.ReadUInt32();
+        uint32_t y=scanner.ReadUInt32();
 
         BitmapTile& entry=nodeTypeData[typeId].bitmapTiles[TileId(x,y)];
 

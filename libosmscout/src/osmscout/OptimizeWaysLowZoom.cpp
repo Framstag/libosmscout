@@ -49,12 +49,12 @@ namespace osmscout
   void OptimizeWaysLowZoom::ReadTypeData(FileScanner& scanner,
                                          OptimizeWaysLowZoom::TypeData& data)
   {
-    scanner.Read(data.optLevel);
-    scanner.Read(data.indexLevel);
-    scanner.Read(data.cellXStart);
-    scanner.Read(data.cellXEnd);
-    scanner.Read(data.cellYStart);
-    scanner.Read(data.cellYEnd);
+    data.optLevel=scanner.ReadUInt32();
+    data.indexLevel=scanner.ReadUInt32();
+    data.cellXStart=scanner.ReadUInt32();
+    data.cellXEnd=scanner.ReadUInt32();
+    data.cellYStart=scanner.ReadUInt32();
+    data.cellYEnd=scanner.ReadUInt32();
 
     data.bitmapOffset=scanner.ReadFileOffset();
     scanner.Read(data.dataOffsetBytes);
@@ -81,17 +81,12 @@ namespace osmscout
     try {
       scanner.Open(datafilename,FileScanner::LowMemRandom,memoryMappedData);
 
-      FileOffset indexOffset;
-
-      indexOffset=scanner.ReadFileOffset();
+      FileOffset indexOffset=scanner.ReadFileOffset();
 
       scanner.SetPos(indexOffset);
 
-      uint32_t optimizationMaxMag;
-      uint32_t wayTypeCount;
-
-      scanner.Read(optimizationMaxMag);
-      scanner.Read(wayTypeCount);
+      uint32_t optimizationMaxMag=scanner.ReadUInt32();
+      uint32_t wayTypeCount=scanner.ReadUInt32();
 
       if (scanner.HasError()) {
         return false;

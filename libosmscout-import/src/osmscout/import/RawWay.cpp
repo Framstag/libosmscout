@@ -82,11 +82,9 @@ namespace osmscout {
   void RawWay::Read(const TypeConfig& typeConfig,
                     FileScanner& scanner)
   {
-    scanner.ReadNumber(id);
+    id=scanner.ReadInt64Number();
 
-    TypeId tmpType;
-
-    scanner.ReadNumber(tmpType);
+    TypeId tmpType=scanner.ReadUInt16Number();
 
     if (tmpType>typeConfig.GetMaxTypeId()) {
       isArea=true;
@@ -116,14 +114,10 @@ namespace osmscout {
     nodes.resize(nodeCount);
 
     if (nodeCount>0) {
-      OSMId minId;
-
-      scanner.ReadNumber(minId);
+      OSMId minId=scanner.ReadInt64Number();
 
       for (size_t i=0; i<nodeCount; i++) {
-        OSMId id;
-
-        scanner.ReadNumber(id);
+        OSMId id=scanner.ReadInt64Number();
 
         nodes[i]=minId+id;
       }

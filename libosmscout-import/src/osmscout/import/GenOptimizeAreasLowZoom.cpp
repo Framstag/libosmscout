@@ -124,8 +124,7 @@ namespace osmscout
                                                std::vector<std::list<AreaRef> >& areas,
                                                TypeInfoSet& loadedTypes)
   {
-    uint32_t    areaCount=0;
-    size_t      collectedAreasCount=0;
+    uint32_t collectedAreasCount=0;
 
     loadedTypes=types;
 
@@ -133,7 +132,7 @@ namespace osmscout
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
       AreaRef area=std::make_shared<Area>();
