@@ -112,9 +112,7 @@ namespace osmscout {
   {
     fileOffset=scanner.GetPos();
 
-    uint16_t typeIndex;
-
-    scanner.Read(typeIndex);
+    uint16_t typeIndex=scanner.ReadUInt16();
 
     type=typeConfig.GetTypeInfo(typeIndex);
 
@@ -144,18 +142,14 @@ namespace osmscout {
       variant.platforms.resize(platformCount);
 
       for (auto& stop : variant.stops) {
-        uint8_t type;
-
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
 
         stop.type=(StopType)type;
         stop.stop=scanner.ReadObjectFileRef();
       }
 
       for (auto& platform : variant.platforms) {
-        uint8_t type;
-
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
 
         platform.type=(PlatformType)type;
         platform.platform=scanner.ReadObjectFileRef();

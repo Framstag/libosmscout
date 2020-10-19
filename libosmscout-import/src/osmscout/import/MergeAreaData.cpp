@@ -66,13 +66,12 @@ namespace osmscout {
       uint32_t wayDataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=wayDataCount; current++) {
-        uint8_t type;
         OSMId   id;
         Area    data;
 
         progress.SetProgress(current,wayDataCount);
 
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
         scanner.Read(id);
         data.ReadImport(typeConfig,
                         scanner);
@@ -97,13 +96,12 @@ namespace osmscout {
       uint32_t relDataCount=scanner.ReadUInt32();
 
       for (uint32_t current=1; current<=relDataCount; current++) {
-        uint8_t type;
         OSMId   id;
         Area    data;
 
         progress.SetProgress(current,relDataCount);
 
-        scanner.Read(type);
+        uint8_t type=scanner.ReadUInt8();
         scanner.Read(id);
         data.ReadImport(typeConfig,
                         scanner);

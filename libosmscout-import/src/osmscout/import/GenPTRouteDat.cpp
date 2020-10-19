@@ -192,12 +192,9 @@ namespace osmscout {
       for (uint32_t n=1; n<nodeIdCount; n++) {
         progress.SetProgress(n,nodeIdCount);
 
-        uint8_t    typeByte;
-        FileOffset fileOffset;
-
-        Id id=nodeIdScanner.ReadUInt64();
-        nodeIdScanner.Read(typeByte);
-        fileOffset=nodeIdScanner.ReadFileOffset();
+        Id         id=nodeIdScanner.ReadUInt64();
+        uint8_t    typeByte=nodeIdScanner.ReadUInt8();
+        FileOffset fileOffset=nodeIdScanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,refNode);
@@ -222,12 +219,9 @@ namespace osmscout {
       for (uint32_t w=1; w<wayIdCount; w++) {
         progress.SetProgress(w,wayIdCount);
 
-        uint8_t    typeByte;
-        FileOffset fileOffset;
-
-        Id id=wayIdScanner.ReadUInt64();
-        wayIdScanner.Read(typeByte);
-        fileOffset=wayIdScanner.ReadFileOffset();
+        Id         id=wayIdScanner.ReadUInt64();
+        uint8_t    typeByte=wayIdScanner.ReadUInt8();
+        FileOffset fileOffset=wayIdScanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,refWay);

@@ -60,9 +60,7 @@ namespace osmscout {
 
       this->gridMag=MagnificationLevel(gridMag);
 
-      uint16_t indexEntryCount;
-
-      scanner.Read(indexEntryCount);
+      uint16_t indexEntryCount=scanner.ReadUInt16();
 
       for (uint16_t i=1; i<=indexEntryCount; i++) {
         TypeId typeId=scanner.ReadUInt16Number();
@@ -82,7 +80,7 @@ namespace osmscout {
 
         if (!entry.isComplex) {
           entry.indexOffset=scanner.ReadFileOffset();
-          scanner.Read(entry.entryCount);
+          entry.entryCount=scanner.ReadUInt16();
         }
       }
 
@@ -101,7 +99,7 @@ namespace osmscout {
         ListTile& entry=nodeTypeData[typeId].listTiles[TileId(x,y)];
 
         entry.fileOffset=scanner.ReadFileOffset();
-        scanner.Read(entry.entryCount);
+        entry.entryCount=scanner.ReadUInt16();
         entry.storeGeoCoord=scanner.ReadBool();
       }
 
@@ -122,9 +120,9 @@ namespace osmscout {
         BitmapTile& entry=nodeTypeData[typeId].bitmapTiles[TileId(x,y)];
 
         entry.fileOffset=scanner.ReadFileOffset();
-        scanner.Read(entry.dataOffsetBytes);
+        entry.dataOffsetBytes=scanner.ReadUInt8();
 
-        scanner.Read(magnification);
+        magnification=scanner.ReadUInt8();
 
         entry.magnification=MagnificationLevel(magnification);
       }

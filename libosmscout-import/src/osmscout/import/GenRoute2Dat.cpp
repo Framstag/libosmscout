@@ -69,13 +69,14 @@ namespace osmscout {
         progress.SetProgress(w,wayIdCount);
 
         OSMId      id;
-        uint8_t    typeByte;
-        FileOffset fileOffset;
 
         wayIdScanner.Read(id);
-        wayIdScanner.Read(typeByte);
+
+        uint8_t    typeByte=wayIdScanner.ReadUInt8();
+
         assert((OSMRefType)typeByte==osmRefWay);
-        fileOffset=wayIdScanner.ReadFileOffset();
+
+        FileOffset fileOffset=wayIdScanner.ReadFileOffset();
 
         wayIdMap.insert(std::make_pair(id, fileOffset));
       }

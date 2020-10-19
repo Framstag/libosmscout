@@ -212,13 +212,13 @@ TEST_CASE("FileScannerWriter")
     inBool=scanner.ReadBool();
     REQUIRE(inBool == outBool2);
 
-    scanner.Read(in16u);
+    in16u=scanner.ReadUInt16();
     REQUIRE(in16u == out16u1);
 
-    scanner.Read(in16u);
+    in16u=scanner.ReadUInt16();
     REQUIRE(in16u == out16u2);
 
-    scanner.Read(in16u);
+    in16u=scanner.ReadUInt16();
     REQUIRE(in16u == out16u3);
 
     in32u=scanner.ReadUInt32();

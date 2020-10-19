@@ -219,8 +219,8 @@ namespace osmscout {
     void Read(int32_t& number);
     void Read(int64_t& number);
 
-    void Read(uint8_t& number);
-    void Read(uint16_t& number);
+    uint8_t ReadUInt8();
+    uint16_t ReadUInt16();
     uint32_t ReadUInt32();
     uint64_t ReadUInt64();
 

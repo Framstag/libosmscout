@@ -122,11 +122,10 @@ namespace osmscout {
 
         scanner.SetPos(offset);
 
-        uint8_t  serial;
         bool     isSet;
         GeoCoord coord;
 
-        scanner.Read(serial);
+        uint8_t  serial=scanner.ReadUInt8();
         scanner.ReadConditionalCoord(coord,
                                      isSet);
 

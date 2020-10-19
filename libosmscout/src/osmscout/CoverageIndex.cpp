@@ -66,7 +66,7 @@ namespace osmscout {
       bitmap.resize((width*height)/8,0);
 
       for (auto& b : bitmap) {
-        scanner.Read(b);
+        b=scanner.ReadUInt8();
       }
 
       return !scanner.HasError();

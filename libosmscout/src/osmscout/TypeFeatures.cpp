@@ -567,7 +567,7 @@ namespace osmscout {
 
   void AccessFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(access);
+    access=scanner.ReadUInt8();
   }
 
   void AccessFeatureValue::Write(FileWriter& writer)
@@ -852,7 +852,7 @@ namespace osmscout {
 
   void AccessRestrictedFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(access);
+    access=scanner.ReadUInt8();
   }
 
   void AccessRestrictedFeatureValue::Write(FileWriter& writer)
@@ -1057,7 +1057,7 @@ namespace osmscout {
 
   void WidthFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(width);
+    width=scanner.ReadUInt8();
   }
 
   void WidthFeatureValue::Write(FileWriter& writer)
@@ -1172,7 +1172,7 @@ namespace osmscout {
 
   void MaxSpeedFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(maxSpeed);
+    maxSpeed=scanner.ReadUInt8();
   }
 
   void MaxSpeedFeatureValue::Write(FileWriter& writer)
@@ -1398,7 +1398,7 @@ namespace osmscout {
 
   void GradeFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(grade);
+    grade=scanner.ReadUInt8();
   }
 
   void GradeFeatureValue::Write(FileWriter& writer)
@@ -1524,7 +1524,7 @@ namespace osmscout {
 
   void AdminLevelFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(adminLevel);
+    adminLevel=scanner.ReadUInt8();
     isIn=scanner.ReadString();
   }
 
@@ -2597,7 +2597,7 @@ namespace osmscout {
 
   void SidewayFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(featureSet);
+    featureSet=scanner.ReadUInt8();
   }
 
   void SidewayFeatureValue::Write(FileWriter& writer)
@@ -2742,7 +2742,7 @@ namespace osmscout {
 
   void LanesFeatureValue::Read(FileScanner& scanner)
   {
-    scanner.Read(lanes);
+    lanes=scanner.ReadUInt8();
 
     if ((lanes & 0x01)!=0) {
       turnForward=scanner.ReadString();

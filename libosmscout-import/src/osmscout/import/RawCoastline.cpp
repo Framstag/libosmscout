@@ -50,7 +50,7 @@ namespace osmscout {
   {
     id=scanner.ReadInt64Number();
 
-    scanner.Read(flags);
+    flags=scanner.ReadUInt8();
 
     uint32_t nodeCount=scanner.ReadUInt32Number();
 
@@ -60,9 +60,9 @@ namespace osmscout {
       OSMId minId=scanner.ReadInt64Number();
 
       for (size_t i=0; i<nodeCount; i++) {
-        OSMId id=scanner.ReadInt64Number();
+        OSMId relNodeId=scanner.ReadInt64Number();
 
-        nodes[i]=minId+id;
+        nodes[i]=minId+relNodeId;
       }
     }
   }

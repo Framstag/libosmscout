@@ -56,8 +56,7 @@ namespace osmscout
     data.cellYStart=scanner.ReadUInt32();
     data.cellYEnd=scanner.ReadUInt32();
     data.bitmapOffset=scanner.ReadFileOffset();
-
-    scanner.Read(data.dataOffsetBytes);
+    data.dataOffsetBytes=scanner.ReadUInt8();
 
     data.cellXCount=data.cellXEnd-data.cellXStart+1;
     data.cellYCount=data.cellYEnd-data.cellYStart+1;
@@ -95,12 +94,8 @@ namespace osmscout
       magnification=pow(2.0,(int)optimizationMaxMag);
 
       for (size_t i=1; i<=areaTypeCount; i++) {
-        TypeId      typeId;
-        TypeInfoRef type;
-
-        scanner.Read(typeId);
-
-        type=typeConfig->GetAreaTypeInfo(typeId);
+        TypeId      typeId=scanner.ReadUInt16();
+        TypeInfoRef type=typeConfig->GetAreaTypeInfo(typeId);
 
         TypeData typeData;
 

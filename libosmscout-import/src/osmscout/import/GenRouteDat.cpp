@@ -344,16 +344,11 @@ namespace osmscout {
         progress.SetProgress(w,wayCount);
 
         OSMId      wayId;
-        uint8_t    typeByte;
-        OSMRefType type;
-        FileOffset wayOffset;
 
         scanner.Read(wayId);
-        scanner.Read(typeByte);
-
-        wayOffset=scanner.ReadFileOffset();
-
-        type=(OSMRefType)typeByte;
+        uint8_t   typeByte=scanner.ReadUInt8();
+        FileOffset wayOffset=scanner.ReadFileOffset();
+        OSMRefType type=(OSMRefType)typeByte;
 
         if (type!=osmRefWay) {
           continue;

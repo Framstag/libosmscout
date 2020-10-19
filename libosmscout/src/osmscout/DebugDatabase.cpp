@@ -108,12 +108,9 @@ namespace osmscout {
       uint32_t    entryCount=scanner.ReadUInt32();
 
       for (uint32_t i=1; i<=entryCount; i++) {
-        uint8_t    typeByte;
-        FileOffset fileOffset;
-
-        Id id=scanner.ReadUInt64();
-        scanner.Read(typeByte);
-        fileOffset=scanner.ReadFileOffset();
+        Id         id=scanner.ReadUInt64();
+        uint8_t    typeByte=scanner.ReadUInt8();
+        FileOffset fileOffset=scanner.ReadFileOffset();
 
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,fileType);

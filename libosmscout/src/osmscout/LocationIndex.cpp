@@ -39,13 +39,13 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    memoryMappedData);
 
-      scanner.Read(bytesForNodeFileOffset);
-      scanner.Read(bytesForAreaFileOffset);
-      scanner.Read(bytesForWayFileOffset);
+      bytesForNodeFileOffset=scanner.ReadUInt8();
+      bytesForAreaFileOffset=scanner.ReadUInt8();
+      bytesForWayFileOffset=scanner.ReadUInt8();
 
       uint32_t ignoreTokenCount=scanner.ReadUInt32Number();
-      regionIgnoreTokens.reserve(ignoreTokenCount);
 
+      regionIgnoreTokens.reserve(ignoreTokenCount);
       for (uint32_t i=0; i<ignoreTokenCount; i++) {
         std::string token=scanner.ReadString();
 
@@ -54,8 +54,8 @@ namespace osmscout {
       }
 
       ignoreTokenCount=scanner.ReadUInt32Number();
-      poiIgnoreTokens.reserve(ignoreTokenCount);
 
+      poiIgnoreTokens.reserve(ignoreTokenCount);
       for (uint32_t i=0; i<ignoreTokenCount; i++) {
         std::string token=scanner.ReadString();
 
@@ -64,8 +64,8 @@ namespace osmscout {
       }
 
       ignoreTokenCount=scanner.ReadUInt32Number();
-      locationIgnoreTokens.reserve(ignoreTokenCount);
 
+      locationIgnoreTokens.reserve(ignoreTokenCount);
       for (size_t i=0; i<ignoreTokenCount; i++) {
         std::string token=scanner.ReadString();
 
@@ -110,10 +110,9 @@ namespace osmscout {
   void LocationIndex::Read(FileScanner& scanner,
                            ObjectFileRef& object) const
   {
-    uint8_t    type;
     FileOffset fileOffset;
 
-    scanner.Read(type);
+    uint8_t    type=scanner.ReadUInt8();
 
     switch (type) {
     case refNone:

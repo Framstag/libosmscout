@@ -107,16 +107,15 @@ namespace osmscout {
 
     uint32_t areaCount=scanner.ReadUInt32();
 
-    uint8_t type;
-    Area    data;
+    Area data;
 
     std::unordered_set<Id> usedOnceSet;
 
     for (uint32_t current=1; current<=areaCount; current++) {
       progress.SetProgress(current,areaCount);
 
-      scanner.Read(type);
-      Id id=scanner.ReadUInt64();
+      uint8_t type=scanner.ReadUInt8();
+      Id      id=scanner.ReadUInt64();
 
       data.ReadImport(typeConfig,
                       scanner);
@@ -190,13 +189,12 @@ namespace osmscout {
     uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
-      uint8_t type;
       AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
-      scanner.Read(type);
-      Id id=scanner.ReadUInt64();
+      uint8_t type=scanner.ReadUInt8();
+      Id      id=scanner.ReadUInt64();
 
       area->ReadImport(typeConfig,
                        scanner);
@@ -516,13 +514,12 @@ namespace osmscout {
     uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
-      uint8_t type;
       AreaRef area=std::make_shared<Area>();
 
       progress.SetProgress(a,areaCount);
 
-      scanner.Read(type);
-      Id id=scanner.ReadUInt64();
+      uint8_t type=scanner.ReadUInt8();
+      Id      id=scanner.ReadUInt64();
 
       area->ReadImport(typeConfig,
                        scanner);

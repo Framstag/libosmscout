@@ -232,13 +232,12 @@ namespace osmscout {
           uint32_t current=1;
 
           while (current<=dataCount) {
-            uint8_t type;
-            N       data;
+            N  data;
 
             progress.SetProgress(current,dataCount);
 
-            source->scanner.Read(type);
-            Id id=source->scanner.ReadUInt64();
+            uint8_t type=source->scanner.ReadUInt8();
+            Id      id=source->scanner.ReadUInt64();
 
             data.Read(typeConfig,
                       source->scanner);
@@ -439,13 +438,12 @@ namespace osmscout {
         overallDataCount+=dataCount;
 
         for (uint32_t current=1; current<=dataCount; current++) {
-          uint8_t type=0;
-          N       data;
+          N data;
 
           progress.SetProgress(current,dataCount);
 
-          source.scanner.Read(type);
-          Id id=source.scanner.ReadUInt64();
+          uint8_t type=source.scanner.ReadUInt8();
+          Id      id=source.scanner.ReadUInt64();
 
           data.Read(typeConfig,
                     source.scanner);

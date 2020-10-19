@@ -91,7 +91,7 @@ namespace osmscout {
         data.bitmapOffset=scanner.ReadFileOffset();
 
         if (data.bitmapOffset>0) {
-          scanner.Read(data.dataOffsetBytes);
+          data.dataOffsetBytes=scanner.ReadUInt8();
 
           uint32_t indexLevel=scanner.ReadUInt32Number();
           data.indexLevel=MagnificationLevel(indexLevel);

@@ -286,13 +286,13 @@ namespace osmscout {
     indexAsRegion=scanner.ReadBool();
     indexAsPOI=scanner.ReadBool();
     optimizeLowZoom=scanner.ReadBool();
-    scanner.Read(specialType);
+    specialType=scanner.ReadUInt8();
     pinWay=scanner.ReadBool();
     mergeAreas=scanner.ReadBool();
     ignoreSeaLand=scanner.ReadBool();
     ignore=scanner.ReadBool();
-    scanner.Read(lanes);
-    scanner.Read(onewayLanes);
+    lanes=scanner.ReadUInt8();
+    onewayLanes=scanner.ReadUInt8();
 
     typeInfo->CanBeNode(canBeNode);
     typeInfo->CanBeWay(canBeWay);
@@ -473,7 +473,7 @@ namespace osmscout {
   void FeatureValueBuffer::Read(FileScanner& scanner)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
     for (const auto &feature : type->GetFeatures()) {
       size_t idx=feature.GetIndex();
@@ -497,16 +497,14 @@ namespace osmscout {
                                 bool& specialFlag)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
 
     if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
       specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
     }
     else {
-      uint8_t addByte;
-
-      scanner.Read(addByte);
+      uint8_t addByte=scanner.ReadUInt8();
 
       specialFlag=(addByte & 0x80)!=0;
     }
@@ -534,7 +532,7 @@ namespace osmscout {
                                 bool& specialFlag2)
   {
     for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      scanner.Read(featureBits[i]);
+      featureBits[i]=scanner.ReadUInt8();
     }
 
     if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
@@ -542,9 +540,7 @@ namespace osmscout {
       specialFlag2=(featureBits[type->GetFeatureMaskBytes()-1] & 0x40)!=0;
     }
     else {
-      uint8_t addByte;
-
-      scanner.Read(addByte);
+      uint8_t addByte=scanner.ReadUInt8();
 
       specialFlag1=(addByte & 0x80)!=0;
       specialFlag2=(addByte & 0x40)!=0;

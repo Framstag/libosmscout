@@ -50,8 +50,8 @@ namespace osmscout {
 
     type=typeConfig.GetTypeInfo(typeIndex);
 
-    scanner.Read(maxSpeed);
-    scanner.Read(grade);
+    maxSpeed=scanner.ReadUInt8();
+    grade=scanner.ReadUInt8();
   }
 
   /**
@@ -100,22 +100,16 @@ namespace osmscout {
    */
   void RouteNode::Read(FileScanner& scanner)
   {
-    uint8_t  serial;
-    GeoCoord coord;
-    uint8_t  objectCount;
-    uint8_t  pathCount;
-    uint8_t  excludesCount;
-
     fileOffset=scanner.GetPos();
 
-    scanner.Read(serial);
-    coord=scanner.ReadCoord();
+    uint8_t  serial=scanner.ReadUInt8();
+    GeoCoord coord=scanner.ReadCoord();
 
     point.Set(serial,coord);
 
-    scanner.Read(objectCount);
-    scanner.Read(pathCount);
-    scanner.Read(excludesCount);
+    uint8_t objectCount=scanner.ReadUInt8();
+    uint8_t pathCount=scanner.ReadUInt8();
+    uint8_t excludesCount=scanner.ReadUInt8();
 
     objects.resize(objectCount);
 
@@ -138,7 +132,7 @@ namespace osmscout {
 
       object.object.Set(objectFileOffset,type);
 
-      scanner.Read(object.objectVariantIndex);
+      object.objectVariantIndex=scanner.ReadUInt16();
 
       previousFileOffset=objectFileOffset;
     }
@@ -146,13 +140,12 @@ namespace osmscout {
     paths.resize(pathCount);
 
     for (auto& path : paths) {
-      uint32_t distanceValue;
-
       path.id=scanner.ReadUInt64();
-      scanner.Read(path.objectIndex);
+      path.objectIndex=scanner.ReadUInt8();
       //scanner.Read(paths[i].bearing);
-      scanner.Read(path.flags);
-      distanceValue=scanner.ReadUInt32Number();
+      path.flags=scanner.ReadUInt8();
+
+      uint32_t distanceValue=scanner.ReadUInt32Number();
 
       path.distance=Distance::Of<Kilometer>(distanceValue/(1000.0*100.0));
     }
@@ -160,7 +153,7 @@ namespace osmscout {
     excludes.resize(excludesCount);
     for (auto& exclude: excludes) {
       exclude.source=scanner.ReadObjectFileRef();
-      scanner.Read(exclude.targetIndex);
+      exclude.targetIndex=scanner.ReadUInt8();
     }
   }
 

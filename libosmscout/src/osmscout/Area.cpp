@@ -271,7 +271,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,
@@ -341,7 +341,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,
@@ -411,7 +411,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,

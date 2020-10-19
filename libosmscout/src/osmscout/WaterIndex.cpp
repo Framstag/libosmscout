@@ -63,11 +63,11 @@ namespace osmscout {
 
       for (size_t level=waterIndexMinMag; level<=waterIndexMaxMag; level++){
         size_t  idx=level-waterIndexMinMag;
-        uint8_t state;
 
         levels[idx].hasCellData=scanner.ReadBool();
-        scanner.Read(levels[idx].dataOffsetBytes);
-        scanner.Read(state);
+        levels[idx].dataOffsetBytes=scanner.ReadUInt8();
+
+        uint8_t state=scanner.ReadUInt8();
 
         levels[idx].defaultCellData=(GroundTile::Type)state;
 
@@ -219,9 +219,7 @@ namespace osmscout {
             uint32_t tileCount=scanner.ReadUInt32Number();
 
             for (size_t t=0; t<tileCount; t++) {
-              uint8_t  tileType;
-
-              scanner.Read(tileType);
+              uint8_t  tileType=scanner.ReadUInt8();
 
               tile.type=(GroundTile::Type)tileType;
 
@@ -230,11 +228,8 @@ namespace osmscout {
               tile.coords.resize(coordCount);
 
               for (size_t n=0; n<coordCount; n++) {
-                uint16_t x;
-                uint16_t y;
-
-                scanner.Read(x);
-                scanner.Read(y);
+                uint16_t x=scanner.ReadUInt16();
+                uint16_t y=scanner.ReadUInt16();
 
                 tile.coords[n].Set(x & ~(1 << 15),
                                    y,

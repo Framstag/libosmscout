@@ -849,13 +849,13 @@ namespace osmscout {
     number|=add;
   }
 
-  void FileScanner::Read(uint8_t& number)
+  uint8_t FileScanner::ReadUInt8()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint8_t","File already in error state");
     }
 
-    number=0;
+    uint8_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -868,7 +868,7 @@ namespace osmscout {
 
       offset++;
 
-      return;
+      return number;
     }
 #endif
 
@@ -877,15 +877,17 @@ namespace osmscout {
     if (hasError) {
       throw IOException(filename,"Cannot read uint8_t");
     }
+
+    return number;
   }
 
-  void FileScanner::Read(uint16_t& number)
+  uint16_t FileScanner::ReadUInt16()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint16_t","File already in error state");
     }
 
-    number=0;
+    uint16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (buffer!=nullptr) {
@@ -908,19 +910,19 @@ namespace osmscout {
 
       offset+=2;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[2];
+    std::array<unsigned char,2> buffer;
 
-    hasError=fread(&buffer,1,2,file)!=2;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint16_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint16_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -931,6 +933,8 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
+
+    return number;
   }
 
   uint32_t FileScanner::ReadUInt32()
@@ -1416,11 +1420,8 @@ namespace osmscout {
 
   ObjectFileRef FileScanner::ReadObjectFileRef()
   {
-    uint8_t    typeByte;
-    FileOffset fileOffset;
-
-    Read(typeByte);
-    fileOffset=ReadFileOffset();
+    uint8_t    typeByte=ReadUInt8();
+    FileOffset fileOffset=ReadFileOffset();
 
     return {fileOffset,(RefType)typeByte};
   }
@@ -2270,7 +2271,7 @@ namespace osmscout {
     size_t  coordBitSize;
     uint8_t sizeByte;
 
-    Read(sizeByte);
+    sizeByte=ReadUInt8();
 
     // Fast exit for empty arrays
     if (sizeByte==0) {
@@ -2296,17 +2297,17 @@ namespace osmscout {
       nodeCount=(sizeByte & 0x78) >> 3;
 
       if ((sizeByte & 0x80) != 0) {
-        Read(sizeByte);
+        sizeByte=ReadUInt8();
 
         nodeCount|=(sizeByte & 0x7f) << 4;
 
         if ((sizeByte & 0x80) != 0) {
-          Read(sizeByte);
+          sizeByte=ReadUInt8();
 
           nodeCount|=(sizeByte & 0x7f) << 11;
 
           if ((sizeByte & 0x80) != 0) {
-             Read(sizeByte);
+            sizeByte=ReadUInt8();
 
              nodeCount|=sizeByte << 18;
           }
@@ -2329,17 +2330,17 @@ namespace osmscout {
       nodeCount=(sizeByte & 0x7c) >> 2;
 
       if ((sizeByte & 0x80) != 0) {
-        Read(sizeByte);
+        sizeByte=ReadUInt8();
 
         nodeCount|=(sizeByte & 0x7f) << 5;
 
         if ((sizeByte & 0x80) != 0) {
-          Read(sizeByte);
+          sizeByte=ReadUInt8();
 
           nodeCount|=(sizeByte & 0x7f) << 12;
 
           if ((sizeByte & 0x80) != 0) {
-            Read(sizeByte);
+            sizeByte=ReadUInt8();
 
             nodeCount|=sizeByte << 19;
           }
@@ -2464,13 +2465,11 @@ namespace osmscout {
         uint8_t bitset;
         size_t bitmask=1;
 
-        Read(bitset);
+        bitset=ReadUInt8();
 
         for (size_t i=0; i<8 && idCurrent<nodeCount; i++) {
           if (bitset & bitmask) {
-            uint8_t serial;
-
-            Read(serial);
+            uint8_t serial=ReadUInt8();
 
             nodes[idCurrent].SetSerial(serial);
           }
@@ -2498,9 +2497,7 @@ namespace osmscout {
   TypeId FileScanner::ReadTypeId(uint8_t maxBytes)
   {
     if (maxBytes==1) {
-      uint8_t byteValue;
-
-      Read(byteValue);
+      uint8_t byteValue=ReadUInt8();
 
       return byteValue;
     }
@@ -2508,11 +2505,11 @@ namespace osmscout {
     if (maxBytes==2) {
       uint8_t byteValue;
 
-      Read(byteValue);
+      byteValue=ReadUInt8();
 
       TypeId id=byteValue *256;
 
-      Read(byteValue);
+      byteValue=ReadUInt8();
 
       id+=byteValue;
 
