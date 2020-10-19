@@ -54,10 +54,11 @@ namespace osmscout {
     description.AddProvidedTemporaryFile(WAYAREA_TMP);
   }
 
-  bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
-                                              Progress& progress,
-                                              BlacklistSet& wayBlacklist) const
+  std::tuple<WayAreaDataGenerator::BlacklistSet,bool>
+  WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
+                                         Progress& progress) const
   {
+    BlacklistSet wayBlacklist;
     FileScanner scanner;
 
     try {
@@ -76,10 +77,10 @@ namespace osmscout {
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
-      return false;
+      return {{},false};
     }
 
-    return true;
+    return {wayBlacklist,true};
   }
 
   void WayAreaDataGenerator::WriteArea(const ImportParameter& parameter,
@@ -144,8 +145,6 @@ namespace osmscout {
   {
     progress.SetAction("Generate wayarea.tmp");
 
-    BlacklistSet              wayBlacklist; //! Set of ways that should not be handled
-
     CoordDataFile             coordDataFile;
 
     FileScanner               scanner;
@@ -162,9 +161,9 @@ namespace osmscout {
 
     progress.SetAction("Reading way area blacklist");
 
-    if (!ReadWayBlacklist(parameter,
-                          progress,
-                          wayBlacklist)) {
+    auto [wayBlacklist, success]=ReadWayBlacklist(parameter,
+                                                  progress);
+    if (!success) {
       return false;
     }
 
@@ -195,7 +194,8 @@ namespace osmscout {
         RawWayRef way=std::make_shared<RawWay>();
 
         progress.SetProgress(w,
-                             rawWayCount);
+                             rawWayCount,
+                             Preprocess::RAWWAYS_DAT);
 
         way->Read(*typeConfig,
                   scanner);
@@ -216,9 +216,7 @@ namespace osmscout {
           continue;
         }
 
-        for (size_t n=0; n<way->GetNodeCount(); n++) {
-          nodeIds.insert(way->GetNodeId(n));
-        }
+        nodeIds.insert(way->GetNodes().begin(),way->GetNodes().end());
 
         rawWays.push_back(way);
 
@@ -267,9 +265,6 @@ namespace osmscout {
                     *rawWay);
         }
       }
-
-      progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
-                    std::to_string(writtenWayCount) + " areas(s) written");
 
       /* -------*/
 
