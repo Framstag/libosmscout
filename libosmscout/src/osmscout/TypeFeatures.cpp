@@ -26,6 +26,7 @@
 #include <iostream>
 #include <iomanip>
 #include <set>
+#include <sstream>
 
 namespace osmscout {
 
