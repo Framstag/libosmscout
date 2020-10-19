@@ -34,8 +34,6 @@ namespace osmscout
   class TextIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
-    TextIndexGenerator();
-
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 
@@ -44,22 +42,26 @@ namespace osmscout
                 Progress &progress) override;
 
   private:
-    bool SetFileOffsetSize(const ImportParameter &parameter,
-                           Progress &progress);
+    uint8_t GetFileOffsetSizeBytes(const ImportParameter &parameter,
+                                   Progress &progress);
 
     bool AddNodeTextToKeysets(const ImportParameter &parameter,
                               Progress &progress,
-                              const TypeConfig &typeConfig);
+                              const TypeConfig &typeConfig,
+                              uint8_t offsetSizeBytes);
 
     bool AddWayTextToKeysets(const ImportParameter &parameter,
                              Progress &progress,
-                             const TypeConfig &typeConfig);
+                             const TypeConfig &typeConfig,
+                             uint8_t offsetSizeBytes);
 
     bool AddAreaTextToKeysets(const ImportParameter &parameter,
                               Progress &progress,
-                              const TypeConfig &typeConfig);
+                              const TypeConfig &typeConfig,
+                              uint8_t offsetSizeBytes);
 
     bool BuildKeyStr(const std::string& text,
+                     uint8_t offsetSizeBytes,
                      FileOffset offset,
                      const RefType& reftype,
                      std::string& keyString) const;
@@ -69,8 +71,6 @@ namespace osmscout
     marisa::Keyset  keysetLocation;
     marisa::Keyset  keysetRegion;
     marisa::Keyset  keysetOther;
-
-    uint8_t         offsetSizeBytes;  //! size in bytes of FileOffsets stored in the tries
   };
 }
 

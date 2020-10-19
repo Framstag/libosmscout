@@ -43,12 +43,6 @@
 
 namespace osmscout
 {
-  TextIndexGenerator::TextIndexGenerator() :
-    offsetSizeBytes(4)
-  {
-    // no code
-  }
-
   void TextIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                           ImportModuleDescription& description) const
   {
@@ -69,26 +63,30 @@ namespace osmscout
                                   const ImportParameter &parameter,
                                   Progress &progress)
   {
-    if (!SetFileOffsetSize(parameter,
-                           progress)) {
-      return false;
-    }
+    progress.SetAction("Calculating required FileOffset size...");
+
+    uint8_t offsetSizeBytes=GetFileOffsetSizeBytes(parameter,
+                                                   progress);
+
     progress.Info("Using "+std::to_string(offsetSizeBytes)+"-byte offsets");
 
     // add node text data
     if(!this->AddNodeTextToKeysets(parameter,
                                    progress,
-                                   *typeConfig)) {
+                                   *typeConfig,
+                                   offsetSizeBytes)) {
       return false;
     }
     if(!this->AddWayTextToKeysets(parameter,
                                   progress,
-                                  *typeConfig)) {
+                                  *typeConfig,
+                                  offsetSizeBytes)) {
       return false;
     }
     if(!this->AddAreaTextToKeysets(parameter,
                                    progress,
-                                   *typeConfig)) {
+                                   *typeConfig,
+                                   offsetSizeBytes)) {
       return false;
     }
 
@@ -156,79 +154,66 @@ namespace osmscout
     return true;
   }
 
-  bool TextIndexGenerator::SetFileOffsetSize(const ImportParameter &parameter,
-                                             Progress &progress)
+  uint8_t TextIndexGenerator::GetFileOffsetSizeBytes(const ImportParameter &parameter,
+                                                     Progress &progress)
   {
-    progress.SetAction("Calculating required FileOffset size...");
+    // node count
+    std::string nodesDataFile=
+    AppendFileToDir(parameter.GetDestinationDirectory(),
+                    "nodes.dat");
 
-    FileScanner scanner;
+    const FileOffset nodesFileSize=GetFileSize(nodesDataFile);
 
-    try {
-      // node count
-      std::string nodesDataFile=
-      AppendFileToDir(parameter.GetDestinationDirectory(),
-                      "nodes.dat");
+    // way count
+    std::string waysDataFile=
+    AppendFileToDir(parameter.GetDestinationDirectory(),
+                    "ways.dat");
 
-      const FileOffset nodesFileSize=GetFileSize(nodesDataFile);
+    const FileOffset waysFileSize=GetFileSize(waysDataFile);
 
-      // way count
-      std::string waysDataFile=
-      AppendFileToDir(parameter.GetDestinationDirectory(),
-                      "ways.dat");
+    // area count
+    std::string areasDataFile=
+    AppendFileToDir(parameter.GetDestinationDirectory(),
+                    "areas.dat");
 
-      const FileOffset waysFileSize=GetFileSize(waysDataFile);
+    const FileOffset areasFileSize=GetFileSize(areasDataFile);
 
-      // area count
-      std::string areasDataFile=
-      AppendFileToDir(parameter.GetDestinationDirectory(),
-                      "areas.dat");
+    // Determine the number of bytes needed to store offsets
+    uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);
+    uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
+    uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
 
-      const FileOffset areasFileSize=GetFileSize(areasDataFile);
+    progress.Info("Node filesize is " + std::to_string(nodesFileSize) + " bytes, "+
+                  "req. " + std::to_string(minNodeOffsetSizeBytes) +" bytes");
 
-      // Determine the number of bytes needed to store offsets
-      uint8_t minNodeOffsetSizeBytes = BytesNeededToEncodeNumber(nodesFileSize);
-      uint8_t minWayOffsetSizeBytes  = BytesNeededToEncodeNumber(waysFileSize);
-      uint8_t minAreaOffsetSizeBytes = BytesNeededToEncodeNumber(areasFileSize);
+    progress.Info("Way filesize is " + std::to_string(waysFileSize) + " bytes, "+
+                  "req. " + std::to_string(minWayOffsetSizeBytes) +" bytes");
 
-      progress.Info("Node filesize is " + std::to_string(nodesFileSize) + " bytes, "+
-                    "req. " + std::to_string(minNodeOffsetSizeBytes) +" bytes");
+    progress.Info("Area filesize is " + std::to_string(areasFileSize) + " bytes, "+
+                  "req. " + std::to_string(minAreaOffsetSizeBytes) +" bytes");
 
-      progress.Info("Way filesize is " + std::to_string(waysFileSize) + " bytes, "+
-                    "req. " + std::to_string(minWayOffsetSizeBytes) +" bytes");
+    uint8_t offsetSizeBytes=std::max(minNodeOffsetSizeBytes,minWayOffsetSizeBytes);
 
-      progress.Info("Area filesize is " + std::to_string(areasFileSize) + " bytes, "+
-                    "req. " + std::to_string(minAreaOffsetSizeBytes) +" bytes");
+    offsetSizeBytes = std::max(offsetSizeBytes,minAreaOffsetSizeBytes);
 
-      offsetSizeBytes = 0;
-      offsetSizeBytes = std::max(minNodeOffsetSizeBytes,minWayOffsetSizeBytes);
-      offsetSizeBytes = std::max(offsetSizeBytes,minAreaOffsetSizeBytes);
-    }
-    catch (IOException& e) {
-      progress.Error(e.GetDescription());
-      return false;
-    }
-
-    return true;
+    return offsetSizeBytes;
   }
 
   bool TextIndexGenerator::AddNodeTextToKeysets(const ImportParameter &parameter,
                                                 Progress &progress,
-                                                const TypeConfig &typeConfig)
+                                                const TypeConfig &typeConfig,
+                                                uint8_t offsetSizeBytes)
   {
     progress.SetAction("Getting node text data");
 
     NameFeatureValueReader    nameReader(typeConfig);
     NameAltFeatureValueReader nameAltReader(typeConfig);
 
-    // Open nodes.dat
-    std::string nodesDataFile=
-        AppendFileToDir(parameter.GetDestinationDirectory(),
-                        NodeDataFile::NODES_DAT);
-
     FileScanner scanner;
 
     try {
-      scanner.Open(nodesDataFile,
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   NodeDataFile::NODES_DAT),
                    FileScanner::Sequential,
                    false);
 
@@ -253,8 +238,9 @@ namespace osmscout
 
           // Save name attributes of this node
           // in the right keyset
-          TypeInfoRef typeInfo=node.GetType();
-          marisa::Keyset * keyset;
+          TypeInfoRef    typeInfo=node.GetType();
+          marisa::Keyset *keyset;
+
           if(typeInfo->GetIndexAsPOI()) {
             keyset = &keysetPoi;
           }
@@ -270,22 +256,24 @@ namespace osmscout
 
           if(nameValue!=nullptr) {
             std::string keyString;
+
             if(BuildKeyStr(nameValue->GetName(),
+                           offsetSizeBytes,
                            node.GetFileOffset(),
                            refNode,
-                           keyString))
-            {
+                           keyString)) {
               keyset->push_back(keyString.c_str(),
                                 keyString.length());
             }
           }
           if(nameAltValue!=nullptr) {
             std::string keyString;
+
             if(BuildKeyStr(nameAltValue->GetNameAlt(),
+                           offsetSizeBytes,
                            node.GetFileOffset(),
                            refNode,
-                           keyString))
-            {
+                           keyString)) {
               keyset->push_back(keyString.c_str(),
                                 keyString.length());
             }
@@ -305,7 +293,8 @@ namespace osmscout
 
   bool TextIndexGenerator::AddWayTextToKeysets(const ImportParameter &parameter,
                                                Progress &progress,
-                                               const TypeConfig &typeConfig)
+                                               const TypeConfig &typeConfig,
+                                               uint8_t offsetSizeBytes)
   {
     progress.SetAction("Getting way text data");
 
@@ -351,8 +340,8 @@ namespace osmscout
 
         // Save name attributes of this node
         // in the right keyset
-        TypeInfoRef typeInfo=way.GetType();
-        marisa::Keyset * keyset;
+        TypeInfoRef    typeInfo=way.GetType();
+        marisa::Keyset *keyset;
 
         if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
@@ -369,11 +358,12 @@ namespace osmscout
 
         if(nameValue!=nullptr) {
           std::string keyString;
+
           if(BuildKeyStr(nameValue->GetName(),
+                         offsetSizeBytes,
                          way.GetFileOffset(),
                          refWay,
-                         keyString))
-          {
+                         keyString)) {
             keyset->push_back(keyString.c_str(),
                               keyString.length());
           }
@@ -381,11 +371,12 @@ namespace osmscout
 
         if(nameAltValue!=nullptr) {
           std::string keyString;
+
           if(BuildKeyStr(nameAltValue->GetNameAlt(),
+                         offsetSizeBytes,
                          way.GetFileOffset(),
                          refWay,
-                         keyString))
-          {
+                         keyString)) {
             keyset->push_back(keyString.c_str(),
                               keyString.length());
           }
@@ -393,11 +384,12 @@ namespace osmscout
 
         if(refValue!=nullptr) {
           std::string keyString;
+
           if(BuildKeyStr(refValue->GetRef(),
+                         offsetSizeBytes,
                          way.GetFileOffset(),
                          refWay,
-                         keyString))
-          {
+                         keyString)) {
             keyset->push_back(keyString.c_str(),
                               keyString.length());
           }
@@ -416,22 +408,19 @@ namespace osmscout
 
   bool TextIndexGenerator::AddAreaTextToKeysets(const ImportParameter &parameter,
                                                 Progress &progress,
-                                                const TypeConfig &typeConfig)
+                                                const TypeConfig &typeConfig,
+                                                uint8_t offsetSizeBytes)
   {
     NameFeatureValueReader    nameReader(typeConfig);
     NameAltFeatureValueReader nameAltReader(typeConfig);
 
     progress.SetAction("Getting area text data");
 
-    // Open areas.dat
-    std::string areasDataFile=
-        AppendFileToDir(parameter.GetDestinationDirectory(),
-                        AreaDataFile::AREAS_DAT);
-
     FileScanner scanner;
 
     try {
-      scanner.Open(areasDataFile,
+      scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   AreaDataFile::AREAS_DAT),
                    FileScanner::Sequential,
                    false);
 
@@ -478,22 +467,24 @@ namespace osmscout
 
           if (nameValue!=nullptr) {
             std::string keyString;
+
             if(BuildKeyStr(nameValue->GetName(),
+                           offsetSizeBytes,
                            area.GetFileOffset(),
                            refArea,
-                           keyString))
-            {
+                           keyString)) {
               keyset->push_back(keyString.c_str(),
                                 keyString.length());
             }
           }
           if (nameAltValue!=nullptr) {
             std::string keyString;
+
             if(BuildKeyStr(nameAltValue->GetNameAlt(),
+                           offsetSizeBytes,
                            area.GetFileOffset(),
                            refArea,
-                           keyString))
-            {
+                           keyString)) {
               keyset->push_back(keyString.c_str(),
                                 keyString.length());
             }
@@ -512,6 +503,7 @@ namespace osmscout
   }
 
   bool TextIndexGenerator::BuildKeyStr(const std::string& text,
+                                       uint8_t offsetSizeBytes,
                                        FileOffset offset,
                                        const RefType& reftype,
                                        std::string& keyString) const
@@ -557,8 +549,7 @@ namespace osmscout
     // LSB was written first, it would have four
     // branches immediately from its root.
 
-    if (offsetSizeBytes > 0)
-    {
+    if (offsetSizeBytes > 0) {
       char* buffer = new char[offsetSizeBytes];
       for (uint8_t i = 0; i < offsetSizeBytes; i++) {
         uint8_t r = offsetSizeBytes - 1 - i;
