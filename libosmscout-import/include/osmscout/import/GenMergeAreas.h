@@ -88,10 +88,8 @@ namespace osmscout {
      *   Set of types for which we do area merging
      * @param nodeUseMap
      *   special structure to track multiple use of the same node id. We have one map for each type.
-     * @return
-     *   if everything is fine, else false
      */
-    bool ScanAreaNodeIds(Progress& progress,
+    void ScanAreaNodeIds(Progress& progress,
                          const TypeConfig& typeConfig,
                          FileScanner& scanner,
                          const TypeInfoSet& mergeTypes,
@@ -126,10 +124,8 @@ namespace osmscout {
      * @param areasWritten
      *   Number of areas directly written, because they
      *   are of a type that is not marked as mergable
-     * @return
-     *   true, if everything is fine, else false
      */
-    bool GetAreas(const ImportParameter& parameter,
+    void GetAreas(const ImportParameter& parameter,
                   Progress& progress,
                   const TypeConfig& typeConfig,
                   const TypeInfoSet& candidateTypes,
@@ -173,7 +169,7 @@ namespace osmscout {
                     const std::unordered_set<Id>& nodeUseMap,
                     AreaMergeData& job);
 
-    bool WriteMergeResult(Progress& progress,
+    void WriteMergeResult(Progress& progress,
                           const TypeConfig& typeConfig,
                           FileScanner& scanner,
                           FileWriter& writer,
