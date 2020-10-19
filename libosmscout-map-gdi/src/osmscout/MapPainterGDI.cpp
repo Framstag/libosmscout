@@ -132,10 +132,10 @@ namespace osmscout {
 
 		void Release()
 		{
-			for (std::map<Gdiplus::ARGB, Gdiplus::SolidBrush*>::iterator iter = m_SolidBrushes.begin(); iter != m_SolidBrushes.end(); iter++) delete iter->second;
-			for (std::map<PENDEF, Gdiplus::Pen*>::iterator iter = m_Pens.begin(); iter != m_Pens.end(); iter++) delete iter->second;
-			for (std::map<FONTDEF, Gdiplus::Font*>::iterator iter = m_Fonts.begin(); iter != m_Fonts.end(); iter++) delete iter->second;
-			for (std::map<size_t, Gdiplus::Image*>::iterator iter = m_Images.begin(); iter != m_Images.end(); iter++) delete iter->second;
+			for (auto brush : m_SolidBrushes) delete brush.second;
+			for (auto pen : m_Pens) delete pen.second;
+			for (auto font : m_Fonts) delete font.second;
+			for (auto img : m_Images) delete img.second;
 			delete m_pGraphics;
 			m_pGraphics = NULL;
 			delete m_pMemBitmap;
