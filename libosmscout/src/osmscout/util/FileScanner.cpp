@@ -247,13 +247,13 @@ namespace osmscout {
                                   (LPCTSTR)nullptr);
 
       if (mmfHandle!=nullptr) {
-        buffer=(char*)MapViewOfFile(mmfHandle,
-                                    FILE_MAP_READ,
-                                    0,
-                                    0,
-                                    0);
+        mmap=(char*)MapViewOfFile(mmfHandle,
+                                  FILE_MAP_READ,
+                                  0,
+                                  0,
+                                  0);
 
-        if (buffer!=nullptr) {
+        if (mmap!=nullptr) {
           offset=0;
         }
         else {
