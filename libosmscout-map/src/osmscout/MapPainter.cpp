@@ -2817,7 +2817,7 @@ namespace osmscout {
              it!=labelEntry.second.end();
              ++it){
           if (it!=labelEntry.second.begin()){
-            labels << ", "; // TODO: make separator configurable, possibly by MapParameter
+            labels << parameter.GetRouteLabelSeparator();
           }
           labels << *it;
         }
