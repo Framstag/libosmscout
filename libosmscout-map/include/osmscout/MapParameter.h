@@ -114,7 +114,7 @@ namespace osmscout {
 
     bool                                showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
-    Locale                              locale;                     //!< Locale used by the renderer, for example peak elevation
+    Locale                              locale;                    //!< Locale used by the renderer, for example peak elevation
 
     std::vector<FillStyleProcessorRef > fillProcessors;            //!< List of processors for FillStyles for types
 
