@@ -435,7 +435,7 @@ namespace osmscout {
     return std::accumulate(successes.begin(),
                            successes.end(),
                            true,
-                           std::logical_and());
+                           std::logical_and<bool>());
   }
 }
 
