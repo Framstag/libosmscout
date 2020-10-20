@@ -282,6 +282,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void WAYPATHSYMBOLSTYLE(StyleFilter filter, bool state);
 	void WAYSHIELDSTYLE(StyleFilter filter, bool state);
 	void LINESTYLEATTR(LinePartialStyle& style);
+	void ROUTEPATHTEXTSTYLE(StyleFilter filter, bool state);
 	void PATHTEXTSTYLEATTR(PathTextPartialStyle& style);
 	void PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style);
 	void PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style);

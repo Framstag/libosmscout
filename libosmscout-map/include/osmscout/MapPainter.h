@@ -70,9 +70,10 @@ namespace osmscout {
     DrawAreaBorderLabels  = 13,
     DrawAreaBorderSymbols = 14,
     PrepareNodeLabels     = 15,
-    DrawLabels            = 16,
-    Postrender            = 17, //!< Implementation specific final step
-    LastStep              = 17
+    PrepareRouteLabels    = 16,
+    DrawLabels            = 17,
+    Postrender            = 18, //!< Implementation specific final step
+    LastStep              = 18
   };
 
   /**
@@ -207,6 +208,17 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
+    using WayPathDataIt=std::list<WayPathData>::iterator;
+
+    /**
+     * Data structure for holding temporary data route labels
+     */
+    struct OSMSCOUT_MAP_API RouteLabelData
+    {
+      WayPathDataIt wayData;
+      std::map<PathTextStyleRef,std::set<std::string>> labels;
+    };
+
   protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
     TextStyleRef                 debugLabel;
@@ -228,6 +240,7 @@ namespace osmscout {
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
     std::list<RouteData>         routeData;
+    std::list<RouteLabelData>    routeLabelData;
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
@@ -366,6 +379,12 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const WayPathData& data);
 
+    bool DrawWayContourLabel(const Projection& projection,
+                             const MapParameter& parameter,
+                             const WayPathData& data,
+                             const PathTextStyleRef &pathTextStyle,
+                             const std::string &textLabel);
+
     bool DrawAreaBorderLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
@@ -454,6 +473,10 @@ namespace osmscout {
     void PrepareNodeLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const MapData& data);
+
+    void PrepareRouteLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
 
     void Postrender(const Projection& projection,
                     const MapParameter& parameter,

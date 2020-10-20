@@ -200,6 +200,7 @@ namespace osmscout {
     stepMethods[RenderSteps::DrawAreaBorderLabels]=&MapPainter::DrawAreaBorderLabels;
     stepMethods[RenderSteps::DrawAreaBorderSymbols]=&MapPainter::DrawAreaBorderSymbols;
     stepMethods[RenderSteps::PrepareNodeLabels]=&MapPainter::PrepareNodeLabels;
+    stepMethods[RenderSteps::PrepareRouteLabels]=&MapPainter::PrepareRouteLabels;
     stepMethods[RenderSteps::DrawLabels]=&MapPainter::DrawLabels;
     stepMethods[RenderSteps::Postrender]=&MapPainter::Postrender;
   }
@@ -1191,22 +1192,38 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const WayPathData& data)
   {
-    PathTextStyleRef pathTextStyle=styleConfig.GetWayPathTextStyle(*data.buffer,
-                                                                   projection);
+    PathTextStyleRef pathTextStyle = styleConfig.GetWayPathTextStyle(*data.buffer,
+                                                                     projection);
 
     if (!pathTextStyle) {
       return false;
     }
 
-    double      lineOffset=0.0;
-    size_t      transStart=data.transStart;
-    size_t      transEnd=data.transEnd;
-    std::string textLabel=pathTextStyle->GetLabel()->GetLabel(parameter,
-                                                              *data.buffer);
+    std::string textLabel = pathTextStyle->GetLabel()->GetLabel(parameter,
+                                                                *data.buffer);
 
     if (textLabel.empty()) {
       return false;
     }
+
+    return DrawWayContourLabel(projection,
+                               parameter,
+                               data,
+                               pathTextStyle,
+                               textLabel);
+  }
+
+  bool MapPainter::DrawWayContourLabel(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const WayPathData& data,
+                                       const PathTextStyleRef &pathTextStyle,
+                                       const std::string &textLabel)
+  {
+    assert(pathTextStyle);
+
+    double      lineOffset=0.0;
+    size_t      transStart=data.transStart;
+    size_t      transEnd=data.transEnd;
 
     if (pathTextStyle->GetOffset()!=0.0) {
       lineOffset+=GetProjectedWidth(projection,
@@ -1874,13 +1891,12 @@ namespace osmscout {
       return;
     }
 
-    using WayPathDataIt=std::list<WayPathData>::iterator;
-
     struct WayRoutes {
       WayPathDataIt wayData;
       std::set<Color> colors; // collapse "sidecar" routes with same color
       double rightSideCarPos=0;
       double leftSideCarPos=0;
+      std::map<PathTextStyleRef,std::set<std::string>> labels;
     };
 
     double sidecarOffset=std::min(projection.ConvertWidthToPixel(parameter.GetSidecarMaxDistanceMM()),
@@ -1898,7 +1914,7 @@ namespace osmscout {
 
     for (const auto &route:data.routes){
       if (!projection.GetDimensions().Intersects(route->bbox)) {
-        // outside projection, end segment and continue
+        // outside projection, continue
         continue;
       }
 
@@ -1911,6 +1927,9 @@ namespace osmscout {
       }
       LineStyleRef lineStyle=lineStyles.front(); // slots for routes are not supported yet
       assert(lineStyle);
+
+      PathTextStyleRef routeTextStyle=styleConfig.GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
+                                                                        projection);
 
       Color color=lineStyle->GetLineColor();
       if (lineStyle->GetPreferColorFeature()){
@@ -1984,6 +2003,14 @@ namespace osmscout {
           
           assert(memberWay!=wayDataMap.end());
 
+          if (routeTextStyle){
+            assert(routeTextStyle->GetLabel());
+            std::string label = routeTextStyle->GetLabel()->GetLabel(parameter, route->GetFeatureValueBuffer());
+            if (!label.empty()) {
+              memberWay->second.labels[routeTextStyle].insert(label);
+            }
+          }
+
           // collapse colors
           auto &pathData=memberWay->second.wayData;
           if (memberWay->second.colors.find(color)!=memberWay->second.colors.end()){
@@ -2056,6 +2083,16 @@ namespace osmscout {
           }
         }
         FlushRouteData();
+      }
+    }
+
+    // collect data about route labels
+    for (const auto& it : wayDataMap){
+      if (!it.second.labels.empty()){
+        RouteLabelData data;
+        data.wayData = it.second.wayData;
+        data.labels = it.second.labels;
+        routeLabelData.push_back(data);
       }
     }
   }
@@ -2161,6 +2198,7 @@ namespace osmscout {
 
     StopClock prepareRoutesTimer;
     routeData.clear();
+    routeLabelData.clear();
 
     PrepareRoutes(*styleConfig,
                   projection,
@@ -2761,6 +2799,44 @@ namespace osmscout {
     if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
       log.Info()
         << "Prepare node labels: " << timer.ResultString() << "(s)";
+    }
+  }
+
+  void MapPainter::PrepareRouteLabels(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& /*data*/)
+  {
+    StopClock timer;
+    size_t    drawnCount=0;
+
+    for (const auto& routeLabel : routeLabelData) {
+      for (const auto& labelEntry : routeLabel.labels) {
+        // concatenate all labels for given style
+        std::stringstream labels;
+        for (auto it=labelEntry.second.begin();
+             it!=labelEntry.second.end();
+             ++it){
+          if (it!=labelEntry.second.begin()){
+            labels << ", "; // TODO: make separator configurable, possibly by MapParameter
+          }
+          labels << *it;
+        }
+
+        if (DrawWayContourLabel(projection,
+                                parameter,
+                                *(routeLabel.wayData),
+                                labelEntry.first,
+                                labels.str())) {
+          drawnCount++;
+        }
+      }
+    }
+
+    timer.Stop();
+
+    if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
+      log.Info()
+          << "Draw route contour labels: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
     }
   }
 
