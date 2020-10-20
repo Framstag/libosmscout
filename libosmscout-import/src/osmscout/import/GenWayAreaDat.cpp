@@ -77,7 +77,9 @@ namespace osmscout {
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
-      return {{},false};
+
+      wayBlacklist.clear();
+      return {wayBlacklist,false};
     }
 
     return {wayBlacklist,true};
