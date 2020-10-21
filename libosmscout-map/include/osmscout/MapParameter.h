@@ -100,6 +100,8 @@ namespace osmscout {
     double                              contourLabelSpace;         //!< Space in mm between repetitive labels on the same contour
     double                              contourLabelPadding;       //!< Space around contour labels in mm (default 1).
 
+    std::string                         routeLabelSeparator;       //!< Separator of contour labels
+
     bool                                renderBackground;          //!< Render any background features, else render like the background should be transparent
     bool                                renderSeaLand;             //!< Rendering of sea/land tiles
     bool                                renderUnknowns;            //!< Unknown areas are not rendered (transparent)
@@ -112,7 +114,7 @@ namespace osmscout {
 
     bool                                showAltLanguage;           //!< if true, display alternative language (needs support by style sheet and import)
 
-    Locale                              locale;                     //!< Locale used by the renderer, for example peak elevation
+    Locale                              locale;                    //!< Locale used by the renderer, for example peak elevation
 
     std::vector<FillStyleProcessorRef > fillProcessors;            //!< List of processors for FillStyles for types
 
@@ -159,6 +161,8 @@ namespace osmscout {
     void SetPatternSize(double size);
 
     void SetContourLabelPadding(double padding);
+
+    void SetRouteLabelSeparator(const std::string &separator);
 
     void SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels);
 
@@ -325,6 +329,11 @@ namespace osmscout {
     inline double GetContourLabelPadding() const
     {
       return contourLabelPadding;
+    }
+
+    inline std::string GetRouteLabelSeparator() const
+    {
+      return routeLabelSeparator;
     }
 
     inline bool GetDropNotVisiblePointLabels() const

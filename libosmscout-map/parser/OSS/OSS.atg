@@ -1050,6 +1050,23 @@ PRODUCTIONS
                 .)
                 .
 
+  ROUTEPATHTEXTSTYLE<StyleFilter filter, bool state>
+              = SYNC "TEXT"
+                (.
+                  PathTextPartialStyle style;
+                .)
+                SYNC "{"
+                {
+                  PATHTEXTSTYLEATTR<style> WEAK ";"
+                }
+                SYNC "}"
+                (.
+                  if (state) {
+                    config.AddRoutePathTextStyle(filter,style);
+                  }
+                .)
+                .
+
   WAYPATHTEXTSTYLE<StyleFilter filter, bool state>
               = SYNC "TEXT"
                 (.
@@ -1237,10 +1254,10 @@ PRODUCTIONS
                 = SYNC "ROUTE"
                 (
                   ROUTESTYLE<filter,state>
-                  /*| "."
+                | "."
                   (
                     ROUTEPATHTEXTSTYLE<filter,state>
-                  )*/
+                  )
                 )
                 .
 

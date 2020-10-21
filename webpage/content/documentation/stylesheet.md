@@ -263,8 +263,14 @@ with values ("`<attributeName> : <value> ;`") and a closing
   * `leftOutline` - offset in relation to the left outline 
   * `rightOutline` - offset in relation to the right outline
   * `laneDivider` - offset on each lane divider - if lane information is
-  available for the given way and the numbe rof lanes is greater than 1.
-
+    available for the given way and the numbe rof lanes is greater than 1
+  * `laneForwardLeft`, `laneForwardThroughLeft`, `laneForwardThrough`, 
+    `laneForwardThroughRight`, `laneForwardRight`, `laneBackwardLeft`, 
+    `laneBackwardThroughLeft`, `laneBackwardThrough`, `laneBackwardThroughRight`, 
+    `laneBackwardRight` - when way has explicit turns, these offsets may be used 
+    to decorate them specially 
+  * `sidecar` - special offset available for routes, line are stacked next to way,
+    same colors are "collapsed"
   
 ## Slots
 
@@ -278,28 +284,28 @@ In this case the style name is postpended by an `#` and a slot name.
 Currently allowed instances:
 
 * `WAY#<slot>`
+* `ROUTE`
 
 The line style has the following attributes:
 
-Name         |Type         |Default |Description
--------------|-------------|--------|-----------
-color        |Color        |red     |Color of the line. if not set, color is transparent (a lines is not drawn)
-dash         |Dash         |        |Size of the dashes. If not set lines is solid
-gapColor     |Color        |red     |Color drawn in the "gap", if not set gapColor is transparent
-displayWidth |ScreenSize   |0       |width of the line in millimeter ("size on map")
-width        |GroundSize   |0       |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
-displayOffset|ScreenSize   |0       |Offset of drawn line in relation to the actual path.
-offset       |GroundSize   |0       |Offset of the drawn line in relation to the actual path.
-joinCap      |Cap          |round   |Cap in case where lines join.
-endCap       |Cap          |round   |Cap in the case where the lines ends without joining another line.
-priority     |Int          |0       |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
-offsetRel    |OffsetRel    |0       |Position the way offset is relative to
+Name               |Type         |Default |Description
+-------------------|-------------|--------|-----------
+color              |Color        |red     |Color of the line. if not set, color is transparent (a lines is not drawn)
+preferColorFeature |Bool         |false   |When way has Color feature and this property is set to true, feature color will be used
+dash               |Dash         |        |Size of the dashes. If not set lines is solid
+gapColor           |Color        |red     |Color drawn in the "gap", if not set gapColor is transparent
+displayWidth       |ScreenSize   |0       |width of the line in millimeter ("size on map")
+width              |GroundSize   |0       |width of the line in meters ("real word dimension"). Note that if the object itself has a "width" feature, this value will be replaced with the actual value!
+displayOffset      |ScreenSize   |0       |Offset of drawn line in relation to the actual path.
+offset             |GroundSize   |0       |Offset of the drawn line in relation to the actual path.
+joinCap            |Cap          |round   |Cap in case where lines join.
+endCap             |Cap          |round   |Cap in the case where the lines ends without joining another line.
+priority           |Int          |0       |Drawing priority in relation to other slots/pathes of the same object. Smaller values are drawn first.
+offsetRel          |OffsetRel    |0       |Position the way offset is relative to
 
 If `displayWidth` and `width` are both set, the resulting pixel values will be added.
 
 ### BorderStyle - Border of areas
-
-### LineStyle - Drawing lines
 
 Currently allowed instances:
 
@@ -354,12 +360,13 @@ scaleMag     |Magnification                |1000000 |Starting with the given mag
 priority     |Int                          |max(Int)|numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
 autoSize     |Bool                         |false   |The size of the label is automatically scaled to fit the height of the area itself. Thus bigger areas will get bigger labels, label with not be higher than the actual area.
 
-### PathTextStyle - Draw labels onto ways and area borders
+### PathTextStyle - Draw labels onto ways, routes and area borders
 
 Currently allowed instances:
 
 * `WAY.TEXT`
 * `AREA.BORDERTEXT`
+* `ROUTE.TEXT`
 
 The text style for contour labels has the following attributes:
 

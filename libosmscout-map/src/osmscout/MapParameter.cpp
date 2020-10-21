@@ -51,6 +51,7 @@ namespace osmscout {
     contourLabelOffset(50.0),
     contourLabelSpace(100.0),
     contourLabelPadding(1.0),
+    routeLabelSeparator(", "),
     renderBackground(true),
     renderSeaLand(false),
     renderUnknowns(false),
@@ -186,6 +187,11 @@ namespace osmscout {
   void MapParameter::SetContourLabelPadding(double padding)
   {
     this->contourLabelPadding=padding;
+  }
+
+  void MapParameter::SetRouteLabelSeparator(const std::string &separator)
+  {
+    this->routeLabelSeparator=separator;
   }
 
   void MapParameter::SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels)

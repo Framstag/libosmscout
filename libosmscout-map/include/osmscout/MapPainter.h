@@ -63,13 +63,13 @@ namespace osmscout {
     DrawOSMTileGrids      =  6, //!< If special style exists, renders grid corresponding to OSM tiles
     DrawAreas             =  7,
     DrawWays              =  8,
-    DrawRoutes            =  9,
-    DrawWayDecorations    = 10,
-    DrawWayContourLabels  = 11,
-    PrepareAreaLabels     = 12,
-    DrawAreaBorderLabels  = 13,
-    DrawAreaBorderSymbols = 14,
-    PrepareNodeLabels     = 15,
+    DrawWayDecorations    =  9,
+    DrawWayContourLabels  = 10,
+    PrepareAreaLabels     = 11,
+    DrawAreaBorderLabels  = 12,
+    DrawAreaBorderSymbols = 13,
+    PrepareNodeLabels     = 14,
+    PrepareRouteLabels    = 15,
     DrawLabels            = 16,
     Postrender            = 17, //!< Implementation specific final step
     LastStep              = 17
@@ -114,6 +114,7 @@ namespace osmscout {
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       int8_t                   layer;           //!< Layer this way is in
       LineStyleRef             lineStyle;       //!< Line style
+      Color                    color;           //!< Line color
       size_t                   wayPriority;     //!< Priority of way (from style sheet)
       size_t                   transStart;      //!< Start of coordinates in transformation buffer
       size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
@@ -153,24 +154,6 @@ namespace osmscout {
       }
     };
 
-    struct OSMSCOUT_MAP_API RouteSegmentData
-    {
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
-      Route::MemberDirection   direction;
-    };
-
-    /**
-     * Data structure for holding temporary data about route
-     */
-    struct OSMSCOUT_MAP_API RouteData
-    {
-      LineStyleRef                lineStyle;       //!< Line style
-      Color                       color;           //!< Color of route
-      double                      lineWidth;
-      std::list<RouteSegmentData> transSegments;   //!< Transformation buffer segments
-    };
-
     /**
      * Data structure for holding temporary data about way paths (a way may consist of
      * multiple paths/lines rendered)
@@ -207,6 +190,17 @@ namespace osmscout {
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
+    using WayPathDataIt=std::list<WayPathData>::iterator;
+
+    /**
+     * Data structure for holding temporary data route labels
+     */
+    struct OSMSCOUT_MAP_API RouteLabelData
+    {
+      WayPathDataIt wayData;
+      std::map<PathTextStyleRef,std::set<std::string>> labels;
+    };
+
   protected:
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
     TextStyleRef                 debugLabel;
@@ -227,7 +221,8 @@ namespace osmscout {
     std::list<AreaData>          areaData;
     std::list<WayData>           wayData;
     std::list<WayPathData>       wayPathData;
-    std::list<RouteData>         routeData;
+    // std::list<RouteData>         routeData;
+    std::list<RouteLabelData>    routeLabelData;
 
     std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
@@ -366,6 +361,12 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const WayPathData& data);
 
+    bool DrawWayContourLabel(const Projection& projection,
+                             const MapParameter& parameter,
+                             const WayPathData& data,
+                             const PathTextStyleRef &pathTextStyle,
+                             const std::string &textLabel);
+
     bool DrawAreaBorderLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
@@ -423,10 +424,6 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const MapData& data);
 
-    void DrawRoutes(const Projection& projection,
-                    const MapParameter& parameter,
-                    const MapData& data);
-
     void DrawWays(const Projection& projection,
                   const MapParameter& parameter,
                   const MapData& data);
@@ -454,6 +451,10 @@ namespace osmscout {
     void PrepareNodeLabels(const Projection& projection,
                            const MapParameter& parameter,
                            const MapData& data);
+
+    void PrepareRouteLabels(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
 
     void Postrender(const Projection& projection,
                     const MapParameter& parameter,
@@ -629,11 +630,6 @@ namespace osmscout {
                                          double averageCharWidth,
                                          double objectWidth,
                                          size_t stringLength);
-
-    virtual void DrawRoute(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter,
-                           const RouteData& data);
 
     virtual void DrawWay(const StyleConfig& styleConfig,
                          const Projection& projection,

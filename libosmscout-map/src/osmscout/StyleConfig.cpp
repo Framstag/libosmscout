@@ -387,6 +387,7 @@ namespace osmscout {
 
     routeTypeSets.clear();
     routeLineStyleSelectors.clear();
+    routePathTextStyleConditionals.clear();
 
     constants.clear();
   }
@@ -814,6 +815,13 @@ namespace osmscout {
     size_t maxLevel=0;
     GetMaxLevelInConditionals(routeLineStyleConditionals,
                               maxLevel);
+    GetMaxLevelInConditionals(routePathTextStyleConditionals,
+                              maxLevel);
+
+    SortInConditionals(*typeConfig,
+                       routePathTextStyleConditionals,
+                       maxLevel,
+                       routePathTextStyleSelectors);
 
     routeTypeSets.reserve(maxLevel);
 
@@ -826,12 +834,18 @@ namespace osmscout {
                        maxLevel,
                        routeTypeSets);
 
+    CalculateUsedTypes(*typeConfig,
+                       routePathTextStyleConditionals,
+                       maxLevel,
+                       routeTypeSets);
+
     SortInConditionalsBySlot(*typeConfig,
                              routeLineStyleConditionals,
                              maxLevel,
                              routeLineStyleSelectors);
 
     routeLineStyleConditionals.clear();
+    routePathTextStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessIconId()
@@ -1046,6 +1060,14 @@ namespace osmscout {
     LineConditionalStyle conditional(filter,style);
 
     routeLineStyleConditionals.push_back(conditional);
+  }
+
+  void StyleConfig::AddRoutePathTextStyle(const StyleFilter& filter,
+                                          PathTextPartialStyle& style)
+  {
+    PathTextConditionalStyle conditional(filter,style);
+
+    routePathTextStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(const Magnification& maxMag,
@@ -1272,6 +1294,15 @@ namespace osmscout {
   {
     return GetFeatureStyle(styleResolveContext,
                            wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
+                           buffer,
+                           projection);
+  }
+
+  PathTextStyleRef StyleConfig::GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
+                                                      const Projection& projection) const
+  {
+    return GetFeatureStyle(styleResolveContext,
+                           routePathTextStyleSelectors[buffer.GetType()->GetIndex()],
                            buffer,
                            projection);
   }

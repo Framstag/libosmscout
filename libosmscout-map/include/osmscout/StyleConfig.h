@@ -617,6 +617,8 @@ namespace osmscout {
     // Route
     std::vector<LineStyleLookupTable>          routeLineStyleSelectors;
     std::list<LineConditionalStyle>            routeLineStyleConditionals;
+    std::list<PathTextConditionalStyle>        routePathTextStyleConditionals;
+    PathTextStyleLookupTable                   routePathTextStyleSelectors;
 
     FillStyleLookupTable                       areaFillStyleSelectors;
     std::vector<BorderStyleLookupTable>        areaBorderStyleSelectors;
@@ -714,6 +716,8 @@ namespace osmscout {
 
     void AddRouteLineStyle(const StyleFilter& filter,
                            LinePartialStyle& style);
+    void AddRoutePathTextStyle(const StyleFilter& filter,
+                               PathTextPartialStyle& style);
 
     void GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                 TypeInfoSet& types) const;
@@ -758,6 +762,9 @@ namespace osmscout {
                                          const Projection& projection) const;
     PathShieldStyleRef GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const;
+
+    PathTextStyleRef GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
+                                           const Projection& projection) const;
 
     void GetRouteLineStyles(const FeatureValueBuffer& buffer,
                             const Projection& projection,
