@@ -281,7 +281,7 @@ namespace osmscout {
                    memoryMapped);
 
       pageSize=scanner.ReadUInt32Number();                  // Size of one index page
-      uint32_t entries=scanner.ReadUInt32Number();                   // Number of entries in data file
+      /*uint32_t entries=*/scanner.ReadUInt32Number();                   // Number of entries in data file
 
       levels=scanner.ReadUInt32();                    // Number of levels
       pageCounts.resize(levels);

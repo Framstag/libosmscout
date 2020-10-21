@@ -95,7 +95,7 @@ namespace osmscout {
    * Scans all areas. If an area is of one of the given merge types, index all node ids
    * into the given NodeUseMap for all outer rings of the given area.
    */
-  bool MergeAreasGenerator::ScanAreaNodeIds(Progress& progress,
+  void MergeAreasGenerator::ScanAreaNodeIds(Progress& progress,
                                             const TypeConfig& typeConfig,
                                             FileScanner& scanner,
                                             const TypeInfoSet& mergeTypes,
@@ -114,8 +114,8 @@ namespace osmscout {
     for (uint32_t current=1; current<=areaCount; current++) {
       progress.SetProgress(current,areaCount);
 
-      uint8_t type=scanner.ReadUInt8();
-      Id      id=scanner.ReadUInt64();
+      /*uint8_t type=*/scanner.ReadUInt8();
+      /*Id      id=*/scanner.ReadUInt64();
 
       area.ReadImport(typeConfig,
                       scanner);
@@ -135,33 +135,31 @@ namespace osmscout {
         }
 
         for (const auto node : ring.nodes) {
-          Id id=node.GetId();
+          nodeIds.insert(node.GetId());
+        }
+      }
 
-          if (nodeIds.find(id)==nodeIds.end()) {
-            if (usedOnceSet.find(id)!=usedOnceSet.end()) {
-              nodeUseMap.insert(id);
-            }
-            else {
-              usedOnceSet.insert(id);
-            }
-            nodeIds.insert(id);
-          }
+      for (auto id : nodeIds) {
+        if (usedOnceSet.find(id)!=usedOnceSet.end()) {
+          nodeUseMap.insert(id);
+        }
+        else {
+          usedOnceSet.insert(id);
         }
       }
     }
-
-    return true;
   }
 
   /**
-   * Load areas which has a one for the types given by types. If at leats one node
+   * Load areas which have one for the types given by types. If at least one node
    * in one of the outer rings of the areas is marked in nodeUseMap as "used at least twice",
    * index it into the areas map.
    *
    * If the number of indexed areas is bigger than parameter.GetRawWayBlockSize() types are
    * dropped form areas until the number is again below the limit.
    */
-  bool MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
+
+  void MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
                                      const TypeInfoSet& candidateTypes,
@@ -273,8 +271,6 @@ namespace osmscout {
     }
 
     progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types");
-
-    return true;
   }
 
   void MergeAreasGenerator::IndexAreasByNodeIds(const std::unordered_set<Id>& nodeUseMap,
@@ -415,13 +411,9 @@ namespace osmscout {
 
               return true;
             }
-            else {
-              //std::cout << "COULD merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
-            }
+            //std::cout << "COULD merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << std::endl;
           }
-          else {
-            //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " at " << index << " " << node.GetCoord().GetDisplayText() << std::endl;
-          }
+          //std::cout << "CANNOT merge areas " << area.GetFileOffset() << " and " << candidateArea->GetFileOffset() << " at " << index << " " << node.GetCoord().GetDisplayText() << std::endl;
 
           ++candidate;
         }
@@ -487,7 +479,7 @@ namespace osmscout {
     }
   }
 
-  bool MergeAreasGenerator::WriteMergeResult(Progress& progress,
+  void MergeAreasGenerator::WriteMergeResult(Progress& progress,
                                              const TypeConfig& typeConfig,
                                              FileScanner& scanner,
                                              FileWriter& writer,
@@ -542,8 +534,6 @@ namespace osmscout {
         areasWritten++;
       }
     }
-
-    return true;
   }
 
   bool MergeAreasGenerator::Import(const TypeConfigRef& typeConfig,
@@ -569,13 +559,11 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      if (!ScanAreaNodeIds(progress,
-                           *typeConfig,
-                           scanner,
-                           mergeTypes,
-                           nodeUseMap)) {
-        return false;
-      }
+      ScanAreaNodeIds(progress,
+                      *typeConfig,
+                      scanner,
+                      mergeTypes,
+                      nodeUseMap);
 
       size_t   nodeCount=nodeUseMap.size();
       uint32_t areasWritten=0;
@@ -599,18 +587,16 @@ namespace osmscout {
 
         progress.SetAction("Collecting area data by type");
 
-        if (!GetAreas(parameter,
-                      progress,
-                      *typeConfig,
-                      mergeTypes,
-                      loadedTypes,
-                      nodeUseMap,
-                      scanner,
-                      writer,
-                      mergeJob,
-                      areasWritten)) {
-          return false;
-        }
+        GetAreas(parameter,
+                 progress,
+                 *typeConfig,
+                 mergeTypes,
+                 loadedTypes,
+                 nodeUseMap,
+                 scanner,
+                 writer,
+                 mergeJob,
+                 areasWritten);
 
         // Merge
 
@@ -631,15 +617,13 @@ namespace osmscout {
         // Store back merge result
 
         if (!loadedTypes.Empty()) {
-          if (!WriteMergeResult(progress,
-                                *typeConfig,
-                                scanner,
-                                writer,
-                                loadedTypes,
-                                mergeJob,
-                                areasWritten)) {
-            return false;
-          }
+          WriteMergeResult(progress,
+                           *typeConfig,
+                           scanner,
+                           writer,
+                           loadedTypes,
+                           mergeJob,
+                           areasWritten);
 
           mergeTypes.Remove(loadedTypes);
         }

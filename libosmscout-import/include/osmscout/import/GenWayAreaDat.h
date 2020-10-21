@@ -22,6 +22,7 @@
 
 #include <osmscout/import/ImportFeatures.h>
 
+#include <tuple>
 #include <unordered_set>
 
 #include <osmscout/Area.h>
@@ -58,9 +59,8 @@ namespace osmscout {
     using BlacklistSet = std::unordered_set<OSMId>;
     using WayList      = std::list<RawWayRef>;
 
-    bool ReadWayBlacklist(const ImportParameter& parameter,
-                          Progress& progress,
-                          BlacklistSet& wayBlacklist) const;
+    std::tuple<BlacklistSet,bool> ReadWayBlacklist(const ImportParameter& parameter,
+                                                   Progress& progress) const;
 
     void WriteArea(const ImportParameter& parameter,
                    Progress& progress,

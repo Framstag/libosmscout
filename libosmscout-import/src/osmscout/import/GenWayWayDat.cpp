@@ -758,11 +758,7 @@ namespace osmscout {
     FileScanner                             scanner;
     FileWriter                              wayWriter;
 
-    uint32_t                                writtenWayCount=0;
-    size_t                                  mergeCount=0;
-
     progress.SetAction("Reading type distribution");
-
 
     if (!typeDistributionDataFile.Load(*typeConfig,
                                        parameter.GetDestinationDirectory())) {
@@ -809,6 +805,9 @@ namespace osmscout {
     }
 
     try {
+      uint32_t writtenWayCount=0;
+      size_t   mergeCount=0;
+
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    Preprocess::RAWWAYS_DAT),
                    FileScanner::Sequential,
@@ -819,7 +818,7 @@ namespace osmscout {
       wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      WAYWAY_TMP));
 
-      wayWriter.Write(writtenWayCount);
+      wayWriter.Write(uint32_t(0));
 
       /* ------ */
 
