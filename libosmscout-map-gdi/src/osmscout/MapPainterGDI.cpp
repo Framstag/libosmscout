@@ -158,6 +158,9 @@ namespace osmscout {
 			m_height = height;
 			m_pMemBitmap = new Gdiplus::Bitmap(width, height);
 			m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
+			m_pGraphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+			m_pGraphics->SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+			m_pGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
 		}
 
 		inline void Paint(Gdiplus::Graphics* pGraphics, INT x = 0, INT y = 0) { pGraphics->DrawImage(m_pMemBitmap, x, y); }
