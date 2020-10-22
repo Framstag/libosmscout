@@ -43,6 +43,8 @@ src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51
 #include <osmscout/MapService.h>
 #include <osmscout/MapPainterDirectX.h>
 
+#include <DrawMap.h>
+
 #define WINDOW_CLASS_NAME _T("DemoDrawMapDirectX")
 #ifndef WS_OPERLAPPEDWINDOW
 #define WS_OPERLAPPEDWINDOW WS_TILEDWINDOW
@@ -80,25 +82,12 @@ private:
 	ID2D1SolidColorBrush*			m_pLightSlateGrayBrush;
 	ID2D1SolidColorBrush*			m_pCornflowerBlueBrush;
 
-	osmscout::DatabaseParameter		m_databaseParameter;
-	osmscout::DatabaseRef			m_database;
-	osmscout::MapServiceRef			m_mapService;
-	osmscout::MercatorProjection	m_Projection;
-	osmscout::MapParameter			m_DrawParameter;
-	osmscout::MapData				m_Data;
 	osmscout::MapPainterDirectX*	m_Painter;
-	osmscout::AreaSearchParameter	m_SearchParameter;
-	osmscout::StyleConfigRef		m_StyleConfig;
 	std::list<osmscout::TileRef>	m_Tiles;
-
-	std::string						m_szMap;
-	std::string						m_szStyle;
-	double							m_fLongitude;
-	double							m_fLatitude;
-	double							m_fZoom;
+	DrawMapDemo*                    m_pBaseData;
 
 public:
-	DrawMapDirectX(std::string map = "", std::string style = "", double lon = 0.0, double lat = 0.0, double zoom = 0.0) :
+	DrawMapDirectX(DrawMapDemo* pDemoData) :
 		m_hwnd(NULL),
 		m_pDirect2dFactory(NULL),
 		m_pWriteFactory(NULL),
@@ -106,11 +95,7 @@ public:
 		m_pLightSlateGrayBrush(NULL),
 		m_pCornflowerBlueBrush(NULL),
 		m_Painter(NULL),
-		m_szMap(map),
-		m_szStyle(style),
-		m_fLongitude(lon),
-		m_fLatitude(lat),
-		m_fZoom(zoom)
+		m_pBaseData(pDemoData)
 	{
 	}
 
@@ -168,30 +153,17 @@ public:
 		// to create its own windows.
 		m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
 
-		// Init osmscout
-		m_database = std::make_shared<osmscout::Database>(m_databaseParameter);
-		if (!m_database->Open(m_szMap.c_str()))
-		{
-			MessageBox(m_hwnd, _T("Cannot open database"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-			return E_FAIL;
-		}
-		m_mapService = std::make_shared<osmscout::MapService>(m_database);
-		m_StyleConfig = std::make_shared<osmscout::StyleConfig>(m_database->GetTypeConfig());
-		if (!m_StyleConfig->Load(m_szStyle))
-		{
-			MessageBox(m_hwnd, _T("Cannot open style"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-			return E_FAIL;
-		}
+		Arguments args = m_pBaseData->GetArguments();
 
 		// Create the window.
 		m_hwnd = CreateWindow(
 			_T("DemoDrawMapDirectX"),
 			_T("DrawMapDirectX"),
 			WS_OPERLAPPEDWINDOW ^ WS_THICKFRAME,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			static_cast<UINT>(std::ceil(800.f * dpiX / DPI)),
-			static_cast<UINT>(std::ceil(600.f * dpiY / DPI)),
+			(GetSystemMetrics(SM_CXSCREEN) - args.width) / 2,
+			(GetSystemMetrics(SM_CYSCREEN) - args.height) / 2,
+			args.width,
+			args.height,
 			NULL,
 			NULL,
 			HINST_THISCOMPONENT,
@@ -207,15 +179,6 @@ public:
 		}
 
 		std::cout << "Window created." << std::endl;
-
-		m_DrawParameter.SetFontName("sans-serif");
-		m_DrawParameter.SetFontSize(3.0);
-		m_DrawParameter.SetDebugPerformance(true);
-
-		m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
-		m_mapService->LookupTiles(m_Projection, m_Tiles);
-		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
 
 		ShowWindow(m_hwnd, SW_SHOWNORMAL);
 		UpdateWindow(m_hwnd);
@@ -367,7 +330,7 @@ private:
 
 			if (m_Painter != NULL)
 			{
-				m_Painter->DrawMap(m_Projection, m_DrawParameter, m_Data, m_pRenderTarget);
+				m_Painter->DrawMap(m_pBaseData->projection, m_pBaseData->drawParameter, m_pBaseData->data, m_pRenderTarget);
 			}
 			hr = m_pRenderTarget->EndDraw();
 		}
@@ -393,10 +356,10 @@ private:
 		}
 		if (width > 0 && height > 0)
 		{
-			m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, width, height);
-			m_mapService->LookupTiles(m_Projection, m_Tiles);
-			m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-			m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
+			m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(), m_pBaseData->projection.GetMagnification(), m_pBaseData->projection.GetDPI(), width, height);
+			m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
+			m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
+			m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
 		}
 	}
 
@@ -423,7 +386,7 @@ private:
 
 			result = 1;
 
-			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_StyleConfig, pDemoApp->m_pDirect2dFactory, pDemoApp->m_pWriteFactory);
+			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_pBaseData->styleConfig, pDemoApp->m_pDirect2dFactory, pDemoApp->m_pWriteFactory);
 		}
 		else
 		{
@@ -487,49 +450,27 @@ private:
 	}
 };
 
-int app_main()
+int app_main(int argc, char* argv[])
 {
-	int argc = 0;
-	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	DrawMapDemo drawDemo("DrawMapDirectX", argc, argv, DPI, ARG_WS_WINDOW);
 
-	if (argc != 6)
-	{
-		if (w_argv) LocalFree(w_argv);
-		MessageBox(NULL, _T("Arguments requied!\n\nDrawMapDirectX <map directory> <style-file> <lon> <lat> <zoom>"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+	std::streambuf* oldCerrStreamBuf = std::cerr.rdbuf();
+	std::streambuf* oldCoutStreamBuf = std::cout.rdbuf();
+	std::ostringstream strCerr, strCout;
+	std::cerr.rdbuf(strCerr.rdbuf());
+	std::cout.rdbuf(strCout.rdbuf());
+
+	if (!drawDemo.OpenDatabase()) {
+		bool bHelp = drawDemo.GetArguments().help;
+		MessageBoxA(NULL, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapDirectX", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
+		std::cerr.rdbuf(oldCerrStreamBuf);
+		std::cout.rdbuf(oldCoutStreamBuf);
 		return EXIT_FAILURE;
 	}
+	std::cerr.rdbuf(oldCerrStreamBuf);
+	std::cout.rdbuf(oldCoutStreamBuf);
 
-	std::vector<std::string> argv;
-	if (w_argv)
-	{
-		for (int i = 0; i < argc; ++i)
-		{
-			int w_len = lstrlenW(w_argv[i]);
-			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
-			std::string s(len, 0);
-			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, &s[0], len, NULL, NULL);
-			argv.push_back(s);
-		}
-		LocalFree(w_argv);
-	}
-
-	std::string map = argv[1];
-	std::string style = argv[2];
-	double lon, lat, zoom;
-	if (sscanf(argv[3].c_str(), "%lf", &lat) != 1) {
-		MessageBox(NULL, _T("lat is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	if (sscanf(argv[4].c_str(), "%lf", &lon) != 1) {
-		MessageBox(NULL, _T("lon is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	if (sscanf(argv[5].c_str(), "%lf", &zoom) != 1) {
-		MessageBox(NULL, _T("zoom is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
+	drawDemo.LoadData();
 
 	// Use HeapSetInformation to specify that the process should
 	// terminate if the heap manager detects an error in any heap used
@@ -541,7 +482,7 @@ int app_main()
 	if (SUCCEEDED(CoInitialize(NULL)))
 	{
 		{
-			DrawMapDirectX app(map, style, lon, lat, zoom);
+			DrawMapDirectX app(&drawDemo);
 
 			if (SUCCEEDED(app.Initialize())) {
 				app.RunMessageLoop();
@@ -557,11 +498,36 @@ int app_main()
 #ifdef _MSC_VER
 int WINAPI WinMain(HINSTANCE /*hinstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nShowCmd*/)
 {
-	return app_main();
+	int argc = 0;
+	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	char** argv = NULL;
+	if (w_argv)
+	{
+		argv = new char*[argc];
+		for (int i = 0; i < argc; ++i)
+		{
+			int w_len = lstrlenW(w_argv[i]);
+			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
+			argv[i] = new char[len + 1];
+			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, NULL, NULL);
+			argv[i][len] = 0;
+		}
+		LocalFree(w_argv);
+	}
+
+	int result = app_main(argc, argv);
+
+	if (argv != NULL)
+	{
+		for (int i = 0; i < argc; i++) delete argv[i];
+		delete argv;
+	}
+
+	return result;
 }
 #else
 int main(int argc, char *argv[])
 {
-	return app_main();
+	return app_main(argc, argv);
 }
 #endif
