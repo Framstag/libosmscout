@@ -24,7 +24,7 @@ menu:
 <th style="text-align: left; width: 5%" class="vertical bottom">POI symbols</th>
 <th style="text-align: left; width: 5%" class="vertical bottom">POI icons</th>
 <th style="text-align: left; width: 5%" class="vertical bottom">Labels</th>
-<th style="text-align: left; width: 5%" class="vertical bottom">Rith-to-left labels</th>
+<th style="text-align: left; width: 5%" class="vertical bottom">Rigth-to-left labels</th>
 <th style="text-align: left; width: 5%" class="vertical bottom">Contour labels</th>
 </tr>
 </thead>
@@ -120,6 +120,20 @@ menu:
 <td style="text-align: center" class="ok">✓<sup>1</sup></td>
 <td style="text-align: center" class="ok">✓</td>
 </tr>
+
+<tr>
+<td style="text-align: left">GDI+</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="missing">✗</td> 
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center" class="ok">✓</td>
+<td style="text-align: center">?</td>
+<td style="text-align: center" class="ok">✓</td>
+</tr>
+
 </tbody>
 </table>
 

@@ -31,6 +31,8 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 #include <osmscout/MapPainterGDI.h>
 #include <osmscout/MapPainterGDIWindow.h>
 
+#include <DrawMap.h>
+
 #include <Windowsx.h>
 #include <tchar.h>
 
@@ -41,30 +43,14 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 class DrawMapGDI : public osmscout::MapPainterGDIWindow
 {
 private:
-	osmscout::DatabaseParameter		m_databaseParameter;
-	osmscout::DatabaseRef			m_database;
-	osmscout::MapServiceRef			m_mapService;
-	osmscout::MercatorProjection	m_Projection;
-	osmscout::MapParameter			m_DrawParameter;
-	osmscout::MapData				m_Data;
 	osmscout::MapPainterGDI*	    m_Painter;
-	osmscout::AreaSearchParameter	m_SearchParameter;
-	osmscout::StyleConfigRef		m_StyleConfig;
 	std::list<osmscout::TileRef>	m_Tiles;
-
-	std::string						m_szMap;
-	std::string						m_szStyle;
-	double							m_fLongitude;
-	double							m_fLatitude;
-	double							m_fZoom;
+	DrawMapDemo*                    m_pBaseData;
 
 public:
-	DrawMapGDI(std::string map, std::string style, double lon, double lat, double zoom)
-		: m_szMap(map)
-		, m_szStyle(style)
-		, m_fLongitude(lon)
-		, m_fLatitude(lat)
-		, m_fZoom(zoom)
+	DrawMapGDI(DrawMapDemo* pBaseData)
+		: m_Painter(NULL)
+		, m_pBaseData(pBaseData)
 		, osmscout::MapPainterGDIWindow()
 	{
 	}
@@ -75,37 +61,15 @@ public:
 
 	bool DrawMapGDI::initialize(HINSTANCE hInstance, int nShowCmd)
 	{
-		// Init osmscout
-		m_database = std::make_shared<osmscout::Database>(m_databaseParameter);
-		if (!m_database->Open(m_szMap.c_str()))
-		{
-			MessageBox(NULL, _T("Cannot open database"), _T("DrawMapGDI"), MB_OK | MB_ICONERROR);
-			return false;
-		}
-		m_mapService = std::make_shared<osmscout::MapService>(m_database);
-		m_StyleConfig = std::make_shared<osmscout::StyleConfig>(m_database->GetTypeConfig());
-		if (!m_StyleConfig->Load(m_szStyle))
-		{
-			MessageBox(NULL, _T("Cannot open style"), _T("DrawMapGDI"), MB_OK | MB_ICONERROR);
-			return false;
-		}
-
-		m_DrawParameter.SetFontName("sans-serif");
-		m_DrawParameter.SetFontSize(3.0);
-#ifdef NDEBUG
-		m_DrawParameter.SetDebugPerformance(false);
-#else
-		m_DrawParameter.SetDebugPerformance(true);
-#endif
-
-		m_Projection.Set(osmscout::GeoCoord(m_fLatitude, m_fLongitude), osmscout::Magnification(m_fZoom), DPI, 800, 600);
-		m_mapService->LookupTiles(m_Projection, m_Tiles);
-		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
-
-		RECT size = { 0, 0, 800, 600 };
-		if (!CreateCanvas(m_StyleConfig, size, NULL, hInstance)) return false;
-		Set(&m_Projection, &m_DrawParameter, &m_Data);
+		Arguments args = m_pBaseData->GetArguments();
+		RECT size = {
+			(GetSystemMetrics(SM_CXSCREEN) - args.width) / 2,
+			(GetSystemMetrics(SM_CYSCREEN) - args.height) / 2,
+			(GetSystemMetrics(SM_CXSCREEN) + args.width) / 2,
+			(GetSystemMetrics(SM_CYSCREEN) + args.height) / 2
+		};
+		if (!CreateCanvas(m_pBaseData->styleConfig, size, NULL, hInstance)) return false;
+		Set(&m_pBaseData->projection, &m_pBaseData->drawParameter, &m_pBaseData->data);
 		return true;
 	}
 
@@ -132,7 +96,7 @@ public:
 			return 0;
 
 		case WM_MOUSEWHEEL:
-			m_Projection.Set(m_Projection.GetCenter(), osmscout::Magnification(m_Projection.GetMagnification().GetMagnification() + 100.0 * GET_WHEEL_DELTA_WPARAM(wParam)), m_Projection.GetDPI(), m_Projection.GetWidth(), m_Projection.GetHeight());
+			m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(), osmscout::Magnification(m_pBaseData->projection.GetMagnification().GetMagnification() + 100.0 * GET_WHEEL_DELTA_WPARAM(wParam)), m_pBaseData->projection.GetDPI(), m_pBaseData->projection.GetWidth(), m_pBaseData->projection.GetHeight());
 			OnTileUpdate();
 			InvalidateWindow();
 			break;
@@ -142,57 +106,35 @@ public:
 
 	virtual void OnTileUpdate()
 	{
-		m_mapService->LookupTiles(m_Projection, m_Tiles);
-		m_mapService->LoadMissingTileData(m_SearchParameter, *m_StyleConfig, m_Tiles);
-		m_mapService->AddTileDataToMapData(m_Tiles, m_Data);
+		m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
+		m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
+		m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
 	}
 };
 
-int app_main(HINSTANCE hinstance, int nShowCmd)
+int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 {
-	int argc = 0;
-	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	DrawMapDemo drawDemo("DrawMapGDI", argc, argv, DPI, ARG_WS_WINDOW);
 
-	if (argc != 6)
-	{
-		if (w_argv) LocalFree(w_argv);
-		MessageBox(NULL, _T("Arguments requied!\n\nDrawMapGDI <map directory> <style-file> <lat> <lon> <zoom>"), _T("DrawMapGDI"), MB_OK | MB_ICONERROR);
+	std::streambuf* oldCerrStreamBuf = std::cerr.rdbuf();
+	std::streambuf* oldCoutStreamBuf = std::cout.rdbuf();
+	std::ostringstream strCerr, strCout;
+	std::cerr.rdbuf(strCerr.rdbuf());
+	std::cout.rdbuf(strCout.rdbuf());
+
+	if (!drawDemo.OpenDatabase()) {
+		bool bHelp = drawDemo.GetArguments().help;
+		MessageBoxA(NULL, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapGDI", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
+		std::cerr.rdbuf(oldCerrStreamBuf);
+		std::cout.rdbuf(oldCoutStreamBuf);
 		return EXIT_FAILURE;
 	}
+	std::cerr.rdbuf(oldCerrStreamBuf);
+	std::cout.rdbuf(oldCoutStreamBuf);
 
-	std::vector<std::string> argv;
-	if (w_argv)
-	{
-		for (int i = 0; i < argc; ++i)
-		{
-			int w_len = lstrlenW(w_argv[i]);
-			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
-			std::string s(len, 0);
-			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, &s[0], len, NULL, NULL);
-			argv.push_back(s);
-		}
-		LocalFree(w_argv);
-	}
+	drawDemo.LoadData();
 
-	std::string map = argv[1];
-	std::string style = argv[2];
-	double lat, lon, zoom;
-	if (sscanf(argv[3].c_str(), "%lf", &lat) != 1) {
-		MessageBox(NULL, _T("lat is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	if (sscanf(argv[4].c_str(), "%lf", &lon) != 1) {
-		MessageBox(NULL, _T("lon is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	if (sscanf(argv[5].c_str(), "%lf", &zoom) != 1) {
-		MessageBox(NULL, _T("zoom is not numeric!"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
-		return EXIT_FAILURE;
-	}
-
-	DrawMapGDI app(map, style, lon, lat, zoom);
+	DrawMapGDI app(&drawDemo);
 	if (!app.initialize(hinstance, nShowCmd)) return EXIT_FAILURE;
 	return app.run();
 }
@@ -200,11 +142,36 @@ int app_main(HINSTANCE hinstance, int nShowCmd)
 #ifdef _MSC_VER
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nShowCmd)
 {
-	return app_main(hinstance, nShowCmd);
+	int argc = 0;
+	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	char** argv = NULL;
+	if (w_argv)
+	{
+		argv = new char*[argc];
+		for (int i = 0; i < argc; ++i)
+		{
+			int w_len = lstrlenW(w_argv[i]);
+			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
+			argv[i] = new char[len + 1];
+			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, NULL, NULL);
+			argv[i][len] = 0;
+		}
+		LocalFree(w_argv);
+}
+
+	int result = app_main(argc, argv, hinstance, nShowCmd);
+
+	if (argv != NULL)
+	{
+		for (int i = 0; i < argc; i++) delete argv[i];
+		delete argv;
+	}
+
+	return result;
 }
 #else
 int main(int argc, char *argv[])
 {
-	return app_main(GetModuleHandle(NULL), SW_SHOW);
+	return app_main(argc, argv, GetModuleHandle(NULL), SW_SHOW);
 }
 #endif
