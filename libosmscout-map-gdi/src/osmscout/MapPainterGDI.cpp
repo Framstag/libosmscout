@@ -414,7 +414,9 @@ namespace osmscout {
 		{
 			std::wstring text = osmscout::UTF8StringToWString(label.text);
 			Gdiplus::Font* pFont = pRender->GetFont(parameter.GetFontName(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()));
-			Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(style->GetTextColor());
+			osmscout::Color fill = style->GetTextColor();
+			if (label.alpha != 1.0) fill = osmscout::Color(fill.GetR(), fill.GetG(), fill.GetB(), label.alpha);
+			Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(fill);
 			if (style->GetStyle() == TextStyle::normal)
 			{
 				pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, rectF, &stringFormat, pBrush);
@@ -441,7 +443,9 @@ namespace osmscout {
 			pRender->m_pGraphics->DrawRectangle(pPen, (INT)labelRectangle.x, (INT)labelRectangle.y, (INT)labelRectangle.width, (INT)labelRectangle.height + 2);
 
 			Gdiplus::Font* pFont = pRender->GetFont(parameter.GetFontName(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()));
-			pBrush = pRender->GetSolidBrush(style->GetTextColor());
+			osmscout::Color fill = style->GetTextColor();
+			if (label.alpha != 1.0) fill.Alpha(label.alpha);
+			pBrush = pRender->GetSolidBrush(fill);
 			std::wstring text = osmscout::UTF8StringToWString(label.text);
 			pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, rectF, &stringFormat, pBrush);
 		}
