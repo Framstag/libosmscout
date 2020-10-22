@@ -125,6 +125,7 @@ namespace osmscout {
 			m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
 			m_pGraphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 			m_pGraphics->SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+			m_pGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
 		}
 
 		~GdiRender()
