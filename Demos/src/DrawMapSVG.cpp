@@ -43,6 +43,48 @@ int main(int argc, char* argv[])
 
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
+#ifdef WIN32
+  // Windows font file fix for SVG
+  char drive1[_MAX_DRIVE], dir1[_MAX_DIR], fname1[_MAX_FNAME], ext1[_MAX_EXT];
+  _splitpath(args.fontName.c_str(), drive1, dir1, fname1, ext1);
+  if (stricmp(ext1, ".ttf") == 0 || stricmp(ext1, ".otf") == 0)
+  {
+    char drive2[_MAX_DRIVE], dir2[_MAX_DIR], fname2[_MAX_FNAME], ext2[_MAX_EXT];
+    HKEY hKey = NULL;
+    if (RegOpenKey(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", &hKey) == ERROR_SUCCESS)
+    {
+      DWORD cValues = 0, cchMaxValue, cbMaxValueData, cbSecurityDescriptor, cchName = 16383, cchValue = 16383, cType = 0;
+      FILETIME ftLastWriteTime;
+      char achName[16383], achValue[16383];
+      DWORD retCode = RegQueryInfoKey(hKey, NULL, NULL, NULL, NULL, NULL, NULL, &cValues, &cchMaxValue, &cbMaxValueData, &cbSecurityDescriptor, &ftLastWriteTime);
+      if (cValues)
+      {
+        for (DWORD i = 0, retCode = ERROR_SUCCESS; i < cValues; i++)
+        {
+          cchName = 16383;
+          achName[0] = '\0';
+          cchValue = 16383;
+          achValue[0] = '\0';
+          if (RegEnumValueA(hKey, i, achName, &cchName, NULL, &cType, (LPBYTE)achValue, &cchValue) == ERROR_SUCCESS)
+          {
+            _splitpath(achValue, drive2, dir2, fname2, ext2);
+            if (stricmp(fname1, fname2) == 0 && stricmp(ext1, ext2) == 0)
+            {
+              retCode = strlen(achName);
+              if (retCode > 11)
+              {
+                if (strcmp(achName + retCode - 11, " (TrueType)") == 0) achName[retCode - 11] = 0;
+              }
+              drawDemo.drawParameter.SetFontName(std::string(achName));
+              break;
+            }
+          }
+        }
+      }
+      RegCloseKey(hKey);
+    }
+  }
+#endif
 
   std::ofstream stream(args.output.c_str(), std::ios_base::binary|std::ios_base::trunc|std::ios_base::out);
 
