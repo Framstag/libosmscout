@@ -135,9 +135,13 @@ namespace osmscout {
 		void Release()
 		{
 			for (auto brush : m_SolidBrushes) delete brush.second;
+			m_SolidBrushes.clear();
 			for (auto pen : m_Pens) delete pen.second;
+			m_Pens.clear();
 			for (auto font : m_Fonts) delete font.second;
+			m_Fonts.clear();
 			for (auto img : m_Images) delete img.second;
+			m_Images.clear();
 			delete m_pGraphics;
 			m_pGraphics = NULL;
 			delete m_pMemBitmap;
@@ -149,6 +153,8 @@ namespace osmscout {
 			if (width == m_width && height == m_height) return;
 			if (width == 0 || height == 0) return;
 			Release();
+			m_width = width;
+			m_height = height;
 			m_pMemBitmap = new Gdiplus::Bitmap(width, height);
 			m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
 		}
@@ -398,6 +404,8 @@ namespace osmscout {
 		const NativeLabel &/*layout*/)
 	{
 		RENDEROBJECT(pRender);
+		Gdiplus::RectF rectF(labelRectangle.x, labelRectangle.y, labelRectangle.width, labelRectangle.height);
+		Gdiplus::StringFormat stringFormat;
 		if (const TextStyle* style = dynamic_cast<const TextStyle*>(label.style.get()); style != nullptr)
 		{
 			std::wstring text = osmscout::UTF8StringToWString(label.text);
@@ -405,15 +413,14 @@ namespace osmscout {
 			Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(style->GetTextColor());
 			if (style->GetStyle() == TextStyle::normal)
 			{
-				pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, Gdiplus::PointF((Gdiplus::REAL)labelRectangle.x, (Gdiplus::REAL)labelRectangle.y), pBrush);
+				pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, rectF, &stringFormat, pBrush);
 			}
 			else if (style->GetStyle() == TextStyle::emphasize)
 			{
-				Gdiplus::StringFormat strformat;
 				Gdiplus::FontFamily fontFamily;
 				pFont->GetFamily(&fontFamily);
 				Gdiplus::GraphicsPath path;
-				path.AddString(text.c_str(), (INT)text.length(), &fontFamily, pFont->GetStyle(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()), Gdiplus::PointF((Gdiplus::REAL)labelRectangle.x, (Gdiplus::REAL)labelRectangle.y), &strformat);
+				path.AddString(text.c_str(), (INT)text.length(), &fontFamily, pFont->GetStyle(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()), rectF, &stringFormat);
 				Gdiplus::Pen* pPen = pRender->GetPen(osmscout::Color::WHITE);
 				pRender->m_pGraphics->DrawPath(pPen, &path);
 				pRender->m_pGraphics->FillPath(pBrush, &path);
@@ -423,16 +430,16 @@ namespace osmscout {
 		{
 			// Shield background
 			Gdiplus::SolidBrush* pBrush = pRender->GetSolidBrush(style->GetBgColor());
-			pRender->m_pGraphics->FillRectangle(pBrush, (INT)labelRectangle.x - 2, (INT)labelRectangle.y - 2, (INT)labelRectangle.width + 5, (INT)labelRectangle.height + 6);
+			pRender->m_pGraphics->FillRectangle(pBrush, (INT)labelRectangle.x - 2, (INT)labelRectangle.y - 2, (INT)labelRectangle.width + 5, (INT)labelRectangle.height + 7);
 
 			// Shield inner border
 			Gdiplus::Pen* pPen = pRender->GetPen(style->GetBorderColor());
-			pRender->m_pGraphics->DrawRectangle(pPen, (INT)labelRectangle.x, (INT)labelRectangle.y, (INT)labelRectangle.width, (INT)labelRectangle.height + 1);
+			pRender->m_pGraphics->DrawRectangle(pPen, (INT)labelRectangle.x, (INT)labelRectangle.y, (INT)labelRectangle.width, (INT)labelRectangle.height + 2);
 
 			Gdiplus::Font* pFont = pRender->GetFont(parameter.GetFontName(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()));
 			pBrush = pRender->GetSolidBrush(style->GetTextColor());
 			std::wstring text = osmscout::UTF8StringToWString(label.text);
-			pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, Gdiplus::PointF((Gdiplus::REAL)labelRectangle.x, (Gdiplus::REAL)labelRectangle.y), pBrush);
+			pRender->m_pGraphics->DrawString(text.c_str(), (INT)text.length(), pFont, rectF, &stringFormat, pBrush);
 		}
 	}
 
