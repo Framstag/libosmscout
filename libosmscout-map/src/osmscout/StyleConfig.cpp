@@ -1102,6 +1102,23 @@ namespace osmscout {
     }
   }
 
+  template <class S, class A>
+  bool HasStyle(const std::vector<std::vector<std::list<StyleSelector<S,A>>>>& styleSelectors,
+                const Projection& projection)
+  {
+    for (const auto &selectorsForType: styleSelectors){
+      assert(!selectorsForType.empty());
+      size_t level=projection.GetMagnification().GetLevel();
+      if (level >= selectorsForType.size()) {
+        level = selectorsForType.size() - 1;
+      }
+      if (!selectorsForType[level].empty()){
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Get the style data based on the given features of an object,
    * a given style (S) and its style attributes (A).
@@ -1112,6 +1129,8 @@ namespace osmscout {
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection)
   {
+    assert(!styleSelectors.empty());
+
     bool               fastpath=false;
     bool               composed=false;
     size_t             level=projection.GetMagnification().GetLevel();
@@ -1298,6 +1317,11 @@ namespace osmscout {
                            projection);
   }
 
+  bool StyleConfig::HasWayPathTextStyle(const Projection& projection) const
+  {
+    return HasStyle(wayPathTextStyleSelectors, projection);
+  }
+
   PathTextStyleRef StyleConfig::GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
                                                       const Projection& projection) const
   {
@@ -1314,6 +1338,11 @@ namespace osmscout {
                            wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
                            buffer,
                            projection);
+  }
+
+  bool StyleConfig::HasWayPathShieldStyle(const Projection& projection) const
+  {
+    return HasStyle(wayPathShieldStyleSelectors, projection);
   }
 
   FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
