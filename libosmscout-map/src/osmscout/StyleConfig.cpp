@@ -428,9 +428,9 @@ namespace osmscout {
   }
 
   /**
-   * Returns thevalue of the given flag identified by the name of the flag.
+   * Returns the value of the given flag identified by the name of the flag.
    *
-   * Asserts, if the flag name is unnown.
+   * Asserts, if the flag name is unknown.
    */
   bool StyleConfig::GetFlagByName(const std::string& name) const
   {
@@ -446,7 +446,7 @@ namespace osmscout {
    * gets overwritten.
    */
   void StyleConfig::AddFlag(const std::string& name,
-                           bool value)
+                            bool value)
   {
     flags[name]=value;
   }
