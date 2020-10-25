@@ -20,10 +20,9 @@
 #include <osmscout/StyleConfig.h>
 
 #include <cstring>
-
 #include <set>
-
 #include <sstream>
+#include <algorithm>
 
 #include <osmscout/system/Assert.h>
 
@@ -369,6 +368,8 @@ namespace osmscout {
     wayPathSymbolStyleSelectors.clear();
     wayPathShieldStyleSelectors.clear();
     wayTypeSets.clear();
+    wayTextFlags.clear();
+    wayShieldFlags.clear();
 
     areaFillStyleConditionals.clear();
     areaBorderStyleConditionals.clear();
@@ -428,9 +429,9 @@ namespace osmscout {
   }
 
   /**
-   * Returns thevalue of the given flag identified by the name of the flag.
+   * Returns the value of the given flag identified by the name of the flag.
    *
-   * Asserts, if the flag name is unnown.
+   * Asserts, if the flag name is unknown.
    */
   bool StyleConfig::GetFlagByName(const std::string& name) const
   {
@@ -446,7 +447,7 @@ namespace osmscout {
    * gets overwritten.
    */
   void StyleConfig::AddFlag(const std::string& name,
-                           bool value)
+                            bool value)
   {
     flags[name]=value;
   }
@@ -659,6 +660,19 @@ namespace osmscout {
     nodeIconStyleConditionals.clear();
   }
 
+  template <class S, class A>
+  bool HasStyle(const std::vector<std::vector<std::list<StyleSelector<S,A>>>>& styleSelectors,
+                const size_t level)
+  {
+    for (const auto &selectorsForType: styleSelectors){
+      assert(!selectorsForType.empty());
+      if (!selectorsForType[std::min(level, selectorsForType.size() - 1)].empty()){
+        return true;
+      }
+    }
+    return false;
+  }
+
   void StyleConfig::PostprocessWays()
   {
     size_t maxLevel=0;
@@ -693,9 +707,13 @@ namespace osmscout {
                        wayPathShieldStyleSelectors);
 
     wayTypeSets.reserve(maxLevel);
+    wayTextFlags.reserve(maxLevel);
+    wayShieldFlags.reserve(maxLevel);
 
-    for (size_t type=0; type<maxLevel; type++) {
+    for (size_t level=0; level < maxLevel; level++) {
       wayTypeSets.emplace_back(*typeConfig);
+      wayTextFlags.emplace_back(HasStyle(wayPathTextStyleSelectors, level));
+      wayShieldFlags.emplace_back(HasStyle(wayPathShieldStyleSelectors, level));
     }
 
     CalculateUsedTypes(*typeConfig,
@@ -1112,6 +1130,8 @@ namespace osmscout {
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection)
   {
+    assert(!styleSelectors.empty());
+
     bool               fastpath=false;
     bool               composed=false;
     size_t             level=projection.GetMagnification().GetLevel();
@@ -1298,6 +1318,15 @@ namespace osmscout {
                            projection);
   }
 
+  bool StyleConfig::HasWayPathTextStyle(const Projection& projection) const
+  {
+    if (wayTextFlags.empty()){
+      return false;
+    }
+    size_t level = projection.GetMagnification().GetLevel();
+    return wayTextFlags[std::min(level, wayTextFlags.size()-1)];
+  }
+
   PathTextStyleRef StyleConfig::GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
                                                       const Projection& projection) const
   {
@@ -1314,6 +1343,15 @@ namespace osmscout {
                            wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
                            buffer,
                            projection);
+  }
+
+  bool StyleConfig::HasWayPathShieldStyle(const Projection& projection) const
+  {
+    if (wayShieldFlags.empty()){
+      return false;
+    }
+    size_t level = projection.GetMagnification().GetLevel();
+    return wayShieldFlags[std::min(level, wayTextFlags.size()-1)];
   }
 
   FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,

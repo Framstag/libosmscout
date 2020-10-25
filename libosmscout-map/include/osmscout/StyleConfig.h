@@ -603,7 +603,9 @@ namespace osmscout {
     std::vector<PathSymbolStyleLookupTable>    wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
-    std::vector<TypeInfoSet>                   wayTypeSets;
+    std::vector<TypeInfoSet>                   wayTypeSets;     //!< way types with defined style by magnification level
+    std::vector<bool>                          wayTextFlags;    //!< flags by magnification level if there is style with way label
+    std::vector<bool>                          wayShieldFlags;  //!< flags by magnification level if there is style with way shield
 
     // Area
 
@@ -760,8 +762,21 @@ namespace osmscout {
                                std::vector<PathSymbolStyleRef> &symbolStyles) const;
     PathTextStyleRef GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                                          const Projection& projection) const;
+
+    /**
+     * @param projection
+     * @return true when some way text style is defined on provided projection
+     */
+    bool HasWayPathTextStyle(const Projection& projection) const;
+
     PathShieldStyleRef GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const;
+
+    /**
+     * @param projection
+     * @return true when some way shield style is defined on provided projection
+     */
+    bool HasWayPathShieldStyle(const Projection& projection) const;
 
     PathTextStyleRef GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
                                            const Projection& projection) const;

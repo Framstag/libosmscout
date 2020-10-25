@@ -1827,16 +1827,20 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapData& data)
   {
+    bool hasShieldLabels = styleConfig.HasWayPathShieldStyle(projection);
+
     for (const auto& way : data.ways) {
       CalculatePaths(styleConfig,
                      projection,
                      parameter,
                      *way);
 
-      CalculateWayShieldLabels(styleConfig,
-                               projection,
-                               parameter,
-                               *way);
+      if (hasShieldLabels) {
+        CalculateWayShieldLabels(styleConfig,
+                                 projection,
+                                 parameter,
+                                 *way);
+      }
     }
 
     for (const auto& way : data.poiWays) {
@@ -1845,10 +1849,12 @@ namespace osmscout {
                      parameter,
                      *way);
 
-      CalculateWayShieldLabels(styleConfig,
-                               projection,
-                               parameter,
-                               *way);
+      if (hasShieldLabels) {
+        CalculateWayShieldLabels(styleConfig,
+                                 projection,
+                                 parameter,
+                                 *way);
+      }
     }
   }
 
@@ -2660,8 +2666,11 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const MapData& /*data*/)
   {
-    // TODO: Draw labels only if there is a style for the current zoom level
+    // Draw labels only if there is a style for the current zoom level
     // that requires labels
+    if (!styleConfig->HasWayPathTextStyle(projection)){
+      return;
+    }
 
     StopClock timer;
     size_t    drawnCount=0;
