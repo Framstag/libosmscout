@@ -212,7 +212,7 @@ namespace osmscout {
       ways[way->GetType()->GetIndex()].push_back(way);
 
       collectedWaysCount++;
-      collectedWayNodesCount+=way->GetNodes().size();
+      collectedWayNodesCount+=static_cast<uint32_t>(way->GetNodes().size());
 
       while ((collectedWaysCount>parameter.GetRawWayBlockSize() ||
               collectedWayNodesCount>parameter.GetRawCoordBlockSize()) &&
@@ -231,9 +231,9 @@ namespace osmscout {
         // If there is more then one type of way, we always must find a "victim" type.
         assert(victimType);
 
-        collectedWaysCount-=ways[victimType->GetIndex()].size();
+        collectedWaysCount-=static_cast<uint32_t>(ways[victimType->GetIndex()].size());
         for (auto const &way:ways[victimType->GetIndex()]){
-          collectedWayNodesCount-=way->GetNodes().size();
+          collectedWayNodesCount-=static_cast<uint32_t>(way->GetNodes().size());
         }
         ways[victimType->GetIndex()].clear();
 
