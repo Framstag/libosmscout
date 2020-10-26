@@ -405,21 +405,21 @@ namespace osmscout {
       return false;
     }
 
-    char chars[1024];
+    std::array<char,1024> chars;
 
-    int res=fread(chars,1,4,file);
+    int res=fread(chars.data(),1u,4u,file);
     if (res!=4) {
       fclose(file);
       return false;
     }
 
-    ctxt=xmlCreatePushParserCtxt(&saxParser,&parser,chars,res,nullptr);
+    ctxt=xmlCreatePushParserCtxt(&saxParser,&parser,chars.data(),res,nullptr);
 
     // Resolve entities, do not do any network communication
     xmlCtxtUseOptions(ctxt,XML_PARSE_NOENT|XML_PARSE_NONET);
 
-    while ((res=fread(chars,1,sizeof(chars),file))>0) {
-      if (xmlParseChunk(ctxt,chars,res,0)!=0) {
+    while ((res=fread(chars.data(),1u,chars.size(),file))>0) {
+      if (xmlParseChunk(ctxt,chars.data(),res,0)!=0) {
         xmlParserError(ctxt,"xmlParseChunk");
         xmlFreeParserCtxt(ctxt);
         fclose(file);
@@ -428,7 +428,7 @@ namespace osmscout {
       }
     }
 
-    if (xmlParseChunk(ctxt,chars,0,1)!=0) {
+    if (xmlParseChunk(ctxt,chars.data(),0u,1)!=0) {
       xmlParserError(ctxt,"xmlParseChunk");
       xmlFreeParserCtxt(ctxt);
       fclose(file);

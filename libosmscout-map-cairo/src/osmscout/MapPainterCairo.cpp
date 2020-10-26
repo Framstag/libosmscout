@@ -377,12 +377,12 @@ namespace osmscout {
       cairo_set_dash(draw, nullptr, 0, 0);
     }
     else {
-      double dashArray[10];
+      std::array<double,10> dashArray;
 
       for (size_t i = 0; i < dash.size(); i++) {
         dashArray[i] = dash[i] * width;
       }
-      cairo_set_dash(draw, dashArray, dash.size(), 0);
+      cairo_set_dash(draw, dashArray.data(), static_cast<int>(dash.size()), 0.0);
     }
   }
 

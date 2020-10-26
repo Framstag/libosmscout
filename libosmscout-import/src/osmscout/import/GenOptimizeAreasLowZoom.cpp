@@ -161,7 +161,7 @@ namespace osmscout
 
           assert(victimType);
 
-          collectedAreasCount-=areas[victimType->GetIndex()].size();
+          collectedAreasCount-=static_cast<uint32_t>(areas[victimType->GetIndex()].size());
           areas[victimType->GetIndex()].clear();
           loadedTypes.Remove(victimType);
         }

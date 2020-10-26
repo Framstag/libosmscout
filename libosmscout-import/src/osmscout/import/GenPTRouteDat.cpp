@@ -42,7 +42,7 @@ namespace osmscout {
                                          const std::list<PTRouteRef>& routes)
   {
     FileWriter writer;
-    uint32_t   routesWrittenCount=routes.size();
+    uint32_t   routesWrittenCount=static_cast<uint32_t>(routes.size());
 
     progress.SetAction("Writing "+std::string(PTRouteDataFile::PTROUTES_DAT));
 

@@ -94,7 +94,7 @@ namespace osmscout {
                            (uint32_t) 0u,
                            [](uint32_t value,
                               const AreaNodeIndexGenerator::DistributionData& entry) {
-                             return value+entry.bitmapTiles.size();
+                             return value+static_cast<uint32_t>(entry.bitmapTiles.size());
                            });
   }
 
