@@ -108,6 +108,11 @@ exchange the constants with the matching values during import.
 
 OSM has two tags for defning the quality of a way: `grade` and `surface`.
 
+## Section `FEATURES`
+
+This section allows you to give individual feature localized names. See the default
+type definition for concrete examples.
+
 ## Section `TYPES`
 
 The type section consists of a number of type definitions that match 
@@ -127,6 +132,8 @@ surrounded by`{` and `}`.
 * Followed by a optional list of type options
 * Followed again by an optional list of group names introduced by the keyword
 `GROUP`.
+* Follows again by an optional list of localized type names introduced with `DESC`. Syntax is similar
+format of the `FEATURES` section.
 
 Some examples:
 
@@ -241,4 +248,17 @@ MERGE_AREAS
 IGNORESEALAND
 : Ignore this type for calculation of land masses (because objects of this type
   can occur on sea, too, and thus have no distinguishing character).
-
+  
+LANES[bidirectional oneway]
+: Default value for the number of lanes, if the way is either bidirectional or
+  oneway. Default value will be overwritten during parsing of concrete ways by the
+  actual values.
+  
+GROUP
+: Allows to tag a type with one or multiple group names. Later on in the stylesheet
+  you can the group name as a filter criteria to e.g. assign similar style to all types
+  in the same group.
+  
+DESC
+: Allows to give types localized names for e.g. listing them in a localized UI.   
+   
