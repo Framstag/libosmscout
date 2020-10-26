@@ -88,8 +88,8 @@ elif [ "$TARGET" = "importer" ]; then
 elif [ "$TARGET" = "website" ]; then
   echo "Installing dependencies for website..."
 
-  wget https://github.com/gohugoio/hugo/releases/download/v0.74.3/hugo_0.74.3_Linux-64bit.deb
-  sudo dpkg -i hugo_0.74.3_Linux-64bit.deb
+  wget https://github.com/gohugoio/hugo/releases/download/v0.76.5/hugo_0.76.5_Linux-64bit.deb
+  sudo dpkg -i hugo_0.76.5_Linux-64bit.deb
 
   sudo apt-get -qq update
   sudo apt-get install -y python3-pygments python-pygments doxygen lftp
