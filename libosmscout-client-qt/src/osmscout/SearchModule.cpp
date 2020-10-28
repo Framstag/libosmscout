@@ -26,6 +26,67 @@
 
 namespace osmscout {
 
+SearchRunnable::SearchRunnable(SearchModule *searchModule,
+                               DBInstanceRef &db,
+                               const QString &searchPattern,
+                               int limit,
+                               osmscout::BreakerRef &breaker):
+    searchModule(searchModule),
+    db(db),
+    searchPattern(searchPattern),
+    limit(limit),
+    breaker(breaker)
+{
+}
+
+std::future<bool> SearchRunnable::getFuture()
+{
+  return promise.get_future();
+}
+
+SearchLocationsRunnable::SearchLocationsRunnable(SearchModule *searchModule,
+                                                 DBInstanceRef &db,
+                                                 const QString &searchPattern,
+                                                 int limit,
+                                                 osmscout::BreakerRef &breaker,
+                                                 AdminRegionInfoRef &defaultRegionInfo):
+    SearchRunnable(searchModule, db, searchPattern, limit, breaker),
+    defaultRegionInfo(defaultRegionInfo)
+{}
+
+void SearchLocationsRunnable::run()
+{
+  if (breaker && breaker->IsAborted()){
+    promise.set_value(true);
+    return;
+  }
+
+  osmscout::AdminRegionRef defaultRegion;
+  if (defaultRegionInfo && defaultRegionInfo->database==db->path){
+    defaultRegion=defaultRegionInfo->adminRegion;
+  }
+
+  promise.set_value( SearchLocations(db,searchPattern,defaultRegion,limit,breaker,adminRegionMap));
+}
+
+FreeTextSearchRunnable::FreeTextSearchRunnable(SearchModule *searchModule,
+                                               DBInstanceRef &db,
+                                               const QString &searchPattern,
+                                               int limit,
+                                               osmscout::BreakerRef &breaker):
+    SearchRunnable(searchModule, db, searchPattern, limit, breaker)
+{}
+
+void FreeTextSearchRunnable::run()
+{
+  if (breaker && breaker->IsAborted()){
+    promise.set_value(true);
+    return;
+  }
+
+  promise.set_value(FreeTextSearch(db,searchPattern, limit,adminRegionMap));
+}
+
 SearchModule::SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule):
   thread(thread),dbThread(dbThread),lookupModule(lookupModule)
 {
@@ -44,12 +105,12 @@ SearchModule::~SearchModule()
   }
 }
 
-void SearchModule::SearchLocations(DBInstanceRef &db,
-                                   const QString searchPattern,
-                                   const osmscout::AdminRegionRef defaultRegion,
-                                   int limit,
-                                   osmscout::BreakerRef &breaker,
-                                   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
+bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
+                                              const QString &searchPattern,
+                                              const osmscout::AdminRegionRef &defaultRegion,
+                                              int limit,
+                                              osmscout::BreakerRef &breaker,
+                                              std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
 {
   QList<LocationEntry> locations;
   std::string stdSearchPattern=searchPattern.toUtf8().constData();
@@ -57,8 +118,9 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
   osmscout::LocationStringSearchParameter searchParameter(stdSearchPattern);
 
   searchParameter.SetStringMatcherFactory(std::make_shared<osmscout::StringMatcherTransliterateFactory>());
-  if (defaultRegion)
+  if (defaultRegion) {
     searchParameter.SetDefaultAdminRegion(defaultRegion);
+  }
 
   searchParameter.SetLimit(limit);
   searchParameter.SetBreaker(breaker);
@@ -66,75 +128,83 @@ void SearchModule::SearchLocations(DBInstanceRef &db,
   osmscout::LocationSearchResult result;
 
   if (!db->GetLocationService()->SearchForLocationByString(searchParameter, result)){
-    emit searchFinished(searchPattern, /*error*/ true);
-    return;
+    if (breaker){
+      breaker->Break();
+    }
+    return false;
   }
 
   for (auto &entry: result.results){
     if (!BuildLocationEntry(entry, db, adminRegionMap, locations)){
-      emit searchFinished(searchPattern, /*error*/ true);
-      return;
+      if (breaker) {
+        breaker->Break();
+      }
+      return false;
     }
   }
 
-  emit searchResult(searchPattern, locations);
+  searchModule->searchResult(searchPattern, locations);
+  return true;
 }
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-  void SearchModule::FreeTextSearch(DBInstanceRef &db,
-                                    const QString searchPattern,
-                                    int limit,
-                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
+  bool FreeTextSearchRunnable::FreeTextSearch(DBInstanceRef &db,
+                                              const QString &searchPattern,
+                                              int limit,
+                                              std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap)
   {
-  // Search by free text
-  QList<LocationEntry> locations;
-  QList<osmscout::ObjectFileRef> objectSet;
-  osmscout::TextSearchIndex textSearch;
-  if(!textSearch.Load(db->path.toStdString())){
-    osmscout::log.Warn() << "Failed to load text index files, search only for locations with database " << db->path.toStdString();
-    return; // silently continue, text indexes are optional in database
-  }
-  osmscout::TextSearchIndex::ResultsMap resultsTxt;
-  textSearch.Search(searchPattern.toStdString(),
-                    /*searchPOIs*/ true, /*searchLocations*/ true,
-                    /*searchRegions*/ true, /*searchOther*/ true,
-                    resultsTxt);
-  osmscout::TextSearchIndex::ResultsMap::iterator it;
-  int count = 0;
-  for(it=resultsTxt.begin();
-    it != resultsTxt.end() && count < limit;
-    ++it, ++count)
-  {
-    std::vector<osmscout::ObjectFileRef> &refs=it->second;
-
-    std::size_t maxPrintedOffsets=5;
-    std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
-
-    for(size_t r=0; r < minRefCount; r++){
-      if (locations.size()>=limit)
-          break;
-
-      osmscout::ObjectFileRef fref = refs[r];
-
-      if (objectSet.contains(fref))
-          continue;
-
-      objectSet << fref;
-      BuildLocationEntry(fref, QString::fromStdString(it->first),
-                         db, adminRegionMap, locations);
+    // Search by free text
+    QList<LocationEntry> locations;
+    QList<osmscout::ObjectFileRef> objectSet;
+    osmscout::TextSearchIndex textSearch;
+    if(!textSearch.Load(db->path.toStdString())){
+      osmscout::log.Warn() << "Failed to load text index files, search only for locations with database " << db->path.toStdString();
+      return true; // silently continue, text indexes are optional in database
     }
-  }
-  // TODO: merge locations with same label database type
-  // bus stations can have more points for example...
-  emit searchResult(searchPattern, locations);
+    osmscout::TextSearchIndex::ResultsMap resultsTxt;
+    textSearch.Search(searchPattern.toStdString(),
+                      /*searchPOIs*/ true, /*searchLocations*/ true,
+                      /*searchRegions*/ true, /*searchOther*/ true,
+                      resultsTxt);
+    osmscout::TextSearchIndex::ResultsMap::iterator it;
+    int count = 0;
+    for(it=resultsTxt.begin();
+      it != resultsTxt.end() && count < limit;
+      ++it, ++count)
+    {
+      std::vector<osmscout::ObjectFileRef> &refs=it->second;
+
+      std::size_t maxPrintedOffsets=5;
+      std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
+
+      for(size_t r=0; r < minRefCount; r++){
+        if (locations.size()>=limit) {
+          break;
+        }
+
+        osmscout::ObjectFileRef fref = refs[r];
+
+        if (objectSet.contains(fref)) {
+          continue;
+        }
+
+        objectSet << fref;
+        BuildLocationEntry(fref, QString::fromStdString(it->first),
+                           db, adminRegionMap, locations);
+      }
+    }
+
+    searchModule->searchResult(searchPattern, locations);
+    return true;
   }
 #else
-  void SearchModule::FreeTextSearch(DBInstanceRef &/*db*/,
-                                    const QString /*1:1searchPattern*/,
-                                    int /*limit*/,
-                                    std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/)
+  bool FreeTextSearchRunnable::FreeTextSearch(DBInstanceRef &/*db*/,
+                                              const QString& /*1:1searchPattern*/,
+                                              int /*limit*/,
+                                              std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/)
   {
     // no code
+    return true;
   }
 #endif
 
@@ -144,7 +214,9 @@ void SearchModule::SearchForLocations(const QString searchPattern,
                                       AdminRegionInfoRef defaultRegionInfo,
                                       osmscout::BreakerRef breaker)
 {
-  QMutexLocker locker(&mutex);
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
 
   osmscout::log.Debug() << "Searching for " << searchPattern.toStdString();
   QElapsedTimer timer;
@@ -177,26 +249,28 @@ void SearchModule::SearchForLocations(const QString searchPattern,
 
       //std::cout << "Sorted databases:" << std::endl;
 
+      std::vector<std::future<bool>> results;
+      results.reserve(2*sortedDbs.size());
+
+      auto StartRunnable = [&results](SearchRunnable *runnable){
+        // thread pool takes ownership
+        assert(QThreadPool::globalInstance());
+        results.push_back(runnable->getFuture());
+        QThreadPool::globalInstance()->start(runnable);
+      };
+
       for (auto& db:sortedDbs){
         //std::cout << "  " << db->path.toStdString() << std::endl;
-        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
-
-        if (breaker && breaker->IsAborted()){
-          emit searchFinished(searchPattern, /*error*/ false);
-          break;
-        }
-        osmscout::AdminRegionRef defaultRegion;
-        if (defaultRegionInfo && defaultRegionInfo->database==db->path){
-          defaultRegion=defaultRegionInfo->adminRegion;
-        }
-        SearchLocations(db,searchPattern,defaultRegion,limit,breaker,adminRegionMap);
-
-        if (breaker && breaker->IsAborted()){
-          emit searchFinished(searchPattern, /*error*/ false);
-          break;
-        }
-        FreeTextSearch(db,searchPattern,limit,adminRegionMap);
+        StartRunnable(new SearchLocationsRunnable(this, db, searchPattern, limit, breaker, defaultRegionInfo));
+        StartRunnable(new FreeTextSearchRunnable(this, db, searchPattern, limit, breaker));
       }
+
+      // wait for all runnables
+      bool success=true;
+      for (auto &resultFuture : results){
+        success = success && resultFuture.get();
+      }
+      emit searchFinished(searchPattern, /*error*/ !success);
     }
   );
 
@@ -204,12 +278,12 @@ void SearchModule::SearchForLocations(const QString searchPattern,
   emit searchFinished(searchPattern, /*error*/ false);
 }
 
-bool SearchModule::BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                                      const QString title,
-                                      DBInstanceRef db,
-                                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/,
-                                      QList<LocationEntry> &locations
-                                      )
+bool SearchRunnable::BuildLocationEntry(const osmscout::ObjectFileRef& object,
+                                        const QString &title,
+                                        DBInstanceRef &db,
+                                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/,
+                                        QList<LocationEntry> &locations
+                                        )
 {
     QStringList adminRegionList;
     QString objectType;
@@ -245,11 +319,11 @@ bool SearchModule::BuildLocationEntry(const osmscout::ObjectFileRef& object,
     return true;
 }
 
-bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
-                                      DBInstanceRef db,
-                                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                                      QList<LocationEntry> &locations
-                                      )
+bool SearchRunnable::BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
+                                        DBInstanceRef &db,
+                                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                                        QList<LocationEntry> &locations
+                                        )
 {
     if (entry.adminRegion){
       db->GetLocationService()->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
@@ -334,22 +408,22 @@ bool SearchModule::BuildLocationEntry(const osmscout::LocationSearchResult::Entr
     return true;
 }
 
-bool SearchModule::GetObjectDetails(DBInstanceRef db,
-                                    const osmscout::ObjectFileRef& object,
-                                    QString &typeName,
-                                    osmscout::GeoCoord& coordinates,
-                                    osmscout::GeoBox& bbox) {
+bool SearchRunnable::GetObjectDetails(DBInstanceRef &db,
+                                      const osmscout::ObjectFileRef& object,
+                                      QString &typeName,
+                                      osmscout::GeoCoord& coordinates,
+                                      osmscout::GeoBox& bbox) {
 
   std::vector<osmscout::ObjectFileRef> objects;
   objects.push_back(object);
   return GetObjectDetails(db,objects,typeName,coordinates,bbox);
 }
 
-bool SearchModule::GetObjectDetails(DBInstanceRef db,
-                                    const std::vector<osmscout::ObjectFileRef>& objects,
-                                    QString &typeName,
-                                    osmscout::GeoCoord& coordinates,
-                                    osmscout::GeoBox& bbox)
+bool SearchRunnable::GetObjectDetails(DBInstanceRef &db,
+                                      const std::vector<osmscout::ObjectFileRef>& objects,
+                                      QString &typeName,
+                                      osmscout::GeoCoord& coordinates,
+                                      osmscout::GeoBox& bbox)
 {
   auto database=db->GetDatabase();
   for (const osmscout::ObjectFileRef& object:objects) {

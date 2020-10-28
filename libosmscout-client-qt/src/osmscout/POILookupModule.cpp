@@ -19,7 +19,6 @@
 
 #include <osmscout/POILookupModule.h>
 #include <osmscout/POIService.h>
-#include <osmscout/SearchModule.h>
 
 namespace osmscout {
 
