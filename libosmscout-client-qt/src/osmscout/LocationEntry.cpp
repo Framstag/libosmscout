@@ -109,6 +109,9 @@ void LocationEntry::mergeWith(const LocationEntry &location)
   for (auto &ref:location.getReferences()) {
     addReference(ref);
   }
+  if (adminRegionList.empty() && !location.adminRegionList.empty()){
+    adminRegionList=location.adminRegionList;
+  }
   coord=bbox.GetCenter();
 }
 
