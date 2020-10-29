@@ -87,7 +87,7 @@ LocationListModel::~LocationListModel()
 }
 
 void LocationListModel::onSearchResult(const QString searchPattern, 
-                                       const QList<LocationEntry> foundLocations)
+                                       const QList<LocationEntry> foundLocationsConst)
 {
   if (this->pattern.isEmpty()) {
     return; //No search requested
@@ -99,78 +99,127 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   QElapsedTimer timer;
   timer.start();
 
+  int equalityCall=0;
+  int comparisonsCall=0;
+
+  QList<LocationEntry> foundLocations = foundLocationsConst;
   QQmlEngine *engine = qmlEngine(this);
-  for (auto &location : foundLocations) {
+  if (equalsFn.isCallable()){
+    // try to merge locations that are equals
+    auto Equal = [&](LocationEntry &a, const LocationEntry &b) -> bool {
+      if (a.getLabel()==b.getLabel() &&
+          a.getDatabase()==b.getDatabase() &&
+          a.getType()==LocationEntry::typeObject &&
+          b.getType()==LocationEntry::typeObject){
 
-    if (equalsFn.isCallable()){
-      // try to merge locations that are equals
-      bool merge=false;
-      for (LocationEntry* secondLocation:locations) {
-        if (secondLocation->getLabel()==location.getLabel() &&
-            secondLocation->getDatabase()==location.getDatabase() &&
-            secondLocation->getType()==LocationEntry::typeObject &&
-            location.getType()==LocationEntry::typeObject){
-
-          QJSValueList args;
-          args << engine->newQObject(new LocationEntry(location));
-          args << engine->newQObject(new LocationEntry(*secondLocation));
-          QJSValue result = equalsFn.call(args);
-          if (result.isError()){
-            qWarning() << "Equals failed: " << result.toString();
-            break;
-          }
-          if (result.isBool() && result.toBool()){
-
-            // qDebug() << "Merge " << location.getLabel() << " to location " << secondLocation->getLabel();
-            secondLocation->mergeWith(location);
-
-            // emit data change
-            int index=locations.indexOf(secondLocation);
-            if (index>=0) {
-              QVector<int> roles;
-              roles << LatRole << LonRole << DistanceRole << BearingRole;
-              emit dataChanged(createIndex(index, 0), createIndex(index, 0), roles);
-            }
-
-            merge=true;
-            break;
-          }
-        }
-      }
-      if (merge){
-        continue;
-      }
-    }
-
-    // evaluate final position of location
-    int position=locations.size();
-    if (compareFn.isCallable()) {
-      position=0;
-      for (LocationEntry* secondLocation:locations){
         QJSValueList args;
-        args << engine->newQObject(new LocationEntry(location));
-        args << engine->newQObject(new LocationEntry(*secondLocation));
-        QJSValue result = compareFn.call(args);
+        args << engine->newQObject(new LocationEntry(a));
+        args << engine->newQObject(new LocationEntry(b));
+        QJSValue result = equalsFn.call(args);
+        equalityCall++;
         if (result.isError()){
-          qWarning() << "Compare failed: " << result.toString();
+          qWarning() << "Equals failed: " << result.toString();
+          return false;
+        }
+        if (result.isBool()){
+          return result.toBool();
+        }
+      }
+      return false;
+    };
+
+    // merge equal locations in new entries
+    for (auto locA = foundLocations.begin(); locA != foundLocations.end();) {
+      bool merged=false;
+      for (auto locB = locA+1; locB != foundLocations.end(); ++locB) {
+        if (Equal(*locA, *locB)){
+          locB->mergeWith(*locA);
+          merged=true;
           break;
         }
-        if (result.isNumber() && result.toNumber() <= 0){
-          break;
-        }
-        position++;
+      }
+      if (merged) {
+        locA = foundLocations.erase(locA);
+      } else {
+        ++locA;
       }
     }
+    // merge new locations to existing one in model
+    for (auto newLocation = foundLocations.begin(); newLocation != foundLocations.end(); ) {
+      int index=0;
+      bool merged=false;
+      for (LocationEntry *modelLocation:locations) {
+        if (Equal(*modelLocation, *newLocation)){
+          // qDebug() << "Merge " << b.getLabel() << " to location " << a.getLabel();
+          modelLocation->mergeWith(*newLocation);
+          merged=true;
 
-    emit beginInsertRows(QModelIndex(), position, position);
-    locations.insert(position, new LocationEntry(location));
+          // emit data change
+          QVector<int> roles;
+          roles << LatRole << LonRole << DistanceRole << BearingRole;
+          emit dataChanged(createIndex(index, 0), createIndex(index, 0), roles);
+          break;
+        }
+        index++;
+      }
+      if (merged) {
+        newLocation = foundLocations.erase(newLocation);
+      } else {
+        ++newLocation;
+      }
+    }
+  }
 
-    // qDebug() << "Put " << location.getLabel() << " to position: " << position;
+  if (compareFn.isCallable()){
+    auto Compare = [&](LocationEntry &a, const LocationEntry &b) -> bool {
+      QJSValueList args;
+      args << engine->newQObject(new LocationEntry(a));
+      args << engine->newQObject(new LocationEntry(b));
+      QJSValue result = compareFn.call(args);
+      comparisonsCall++;
+      if (result.isError()){
+        qWarning() << "Compare failed: " << result.toString();
+        return false;
+      }
+      if (result.isNumber()){
+        return result.toNumber() <= 0;
+      }
+      return false;
+    };
 
-    emit endInsertRows();
-  }  
+    // sort new location entries
+    std::sort(foundLocations.begin(), foundLocations.end(), Compare);
+
+    // use merge sort with existing location entries, they are sorted already
+    auto position = 0;
+    auto positionIt = locations.begin();
+    for (auto &location : foundLocations) {
+      if (positionIt == locations.end() || Compare(location, *positionIt)){
+        emit beginInsertRows(QModelIndex(), position, position);
+        positionIt = locations.insert(positionIt, new LocationEntry(location));
+        // qDebug() << "Put " << location.getLabel() << " to position: " << position;
+        emit endInsertRows();
+      }
+      ++positionIt;
+      ++position;
+    }
+  } else {
+    // no sorting, just append new entries to the end
+    if (!foundLocations.empty()) {
+      emit beginInsertRows(QModelIndex(), locations.size(), locations.size() + foundLocations.size() - 1);
+      for (auto &location : foundLocations) {
+        locations.push_back(new LocationEntry(location));
+      }
+      emit endInsertRows();
+    }
+  }
+
   emit countChanged(locations.size());
-  qDebug() << "added " << foundLocations.size() << " (in " << timer.elapsed() << " ms), model size" << locations.size();
+  qDebug() << "new" << foundLocationsConst.size()
+           << "added" << foundLocations.size()
+           << "(in" << timer.elapsed() << "ms,"
+           << "equal" << equalityCall << "x, compare" << comparisonsCall << "x),"
+           << "model size" << locations.size();
 }
 
 void LocationListModel::onLocationAdminRegions(const osmscout::GeoCoord location,
