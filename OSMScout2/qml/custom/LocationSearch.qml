@@ -340,6 +340,10 @@ LineEdit {
 
                 model: suggestionModel
 
+                onContentHeightChanged: {
+                    updatePopup();
+                }
+
                 delegate: Item{
                     width: suggestionView.width
                     height: labelLabel.height + entryRegion.height
