@@ -32,6 +32,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/NodeUseMap.h
     include/osmscout/util/Number.h
     include/osmscout/util/NumberSet.h
+    include/osmscout/util/ObjectPool.h
     include/osmscout/util/Parsing.h
     include/osmscout/util/Progress.h
     include/osmscout/util/Projection.h

@@ -619,6 +619,7 @@ namespace osmscout {
       result.push_back(regionResult);
     }
 
+    FlushLocationIndexCache();
     return true;
   }
 
@@ -923,10 +924,12 @@ namespace osmscout {
                                                                                         candidate.GetBearing()));
         }
 
+        FlushLocationIndexCache();
         return true;
       }
     }
 
+    FlushLocationIndexCache();
     return true;
   }
 
@@ -1013,11 +1016,21 @@ namespace osmscout {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,
                             candidate.GetDistance(), candidate.GetBearing()));
         }
+        FlushLocationIndexCache();
         return true;
       }
     }
 
+    FlushLocationIndexCache();
     return true;
+  }
+
+  void LocationDescriptionService::FlushLocationIndexCache() const
+  {
+    if (LocationIndexRef locationIndex=database->GetLocationIndex();
+        locationIndex) {
+      locationIndex->FlushCache();
+    }
   }
 
   bool LocationDescriptionService::DescribeLocationByPOI(const GeoCoord& location,
@@ -1099,10 +1112,12 @@ namespace osmscout {
                                                                                        candidate.GetDistance(),
                                                                                        candidate.GetBearing()));
         }
+        FlushLocationIndexCache();
         return true;
       }
     }
 
+    FlushLocationIndexCache();
     return true;
   }
 
@@ -1239,6 +1254,7 @@ namespace osmscout {
 
     description.SetCrossingDescription(crossingDescription);
 
+    FlushLocationIndexCache();
     return true;
   }
 
@@ -1323,7 +1339,8 @@ namespace osmscout {
     }
 
     if(result.empty()) {
-      return false;
+      FlushLocationIndexCache();
+      return true;
     }
 
     Place place = GetPlace(result);
@@ -1331,6 +1348,7 @@ namespace osmscout {
 
     description.SetWayDescription(wayDescription);
 
+    FlushLocationIndexCache();
     return true;
   }
 
