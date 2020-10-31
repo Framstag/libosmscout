@@ -320,6 +320,59 @@ namespace osmscout {
     }
   }
 
+  class POIReverseLookupVisitor : public POIVisitor
+  {
+  private:
+    std::set<ObjectFileRef>                   objects;
+    std::list<LocationDescriptionService::ReverseLookupResult>& results;
+
+  public:
+    explicit POIReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results);
+
+    void AddObject(const ObjectFileRef& object);
+
+    bool Visit(const AdminRegion& adminRegion,
+               const POI &poi) override;
+  };
+
+  class AddressReverseLookupVisitor : public AddressVisitor
+  {
+  private:
+    std::list<LocationDescriptionService::ReverseLookupResult>& results;
+
+    std::set<ObjectFileRef>                          objects;
+
+  public:
+    explicit AddressReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results);
+    void AddObject(const ObjectFileRef& object);
+
+    bool Visit(const AdminRegion& adminRegion,
+               const PostalArea& postalArea,
+               const Location &location,
+               const Address& address) override;
+  };
+
+  class LocationReverseLookupVisitor : public LocationVisitor
+  {
+  private:
+    const LocationIndex&                      locationIndex;
+    std::set<ObjectFileRef>                   objects;
+    std::list<LocationDescriptionService::ReverseLookupResult>& results;
+    bool                                      lookupAddress;
+    AddressReverseLookupVisitor               addressVisitor;
+
+  public:
+    LocationReverseLookupVisitor(const LocationIndex& locationIndex,
+                                 std::list<LocationDescriptionService::ReverseLookupResult>& results,
+                                 bool lookupAddress);
+
+    void AddObject(const ObjectFileRef& object);
+
+    bool Visit(const AdminRegion& adminRegion,
+               const PostalArea& postalArea,
+               const Location &location) override;
+  };
+
   class AdminRegionReverseLookupVisitor : public AdminRegionVisitor
   {
   public:
@@ -332,16 +385,26 @@ namespace osmscout {
 
   private:
     const Database&                                  database;
+    const LocationIndex&                             locationIndex;
     std::list<LocationDescriptionService::ReverseLookupResult>& results;
 
     std::list<SearchEntry>                           searchEntries;
+
+    bool                                             lookupPoi;
+    POIReverseLookupVisitor                          poiVisitor;
+    bool                                             lookupLocation;
+    LocationReverseLookupVisitor                     locationVisitor;
 
   public:
     std::map<FileOffset,AdminRegionRef>              adminRegions;
 
   public:
     AdminRegionReverseLookupVisitor(const Database& database,
-                                    std::list<LocationDescriptionService::ReverseLookupResult>& results);
+                                    const LocationIndex& locationIndex,
+                                    std::list<LocationDescriptionService::ReverseLookupResult>& results,
+                                    bool lookupPoi,
+                                    bool lookupLocation,
+                                    bool lookupAddress);
 
     void AddSearchEntry(const SearchEntry& searchEntry);
 
@@ -349,16 +412,30 @@ namespace osmscout {
   };
 
   AdminRegionReverseLookupVisitor::AdminRegionReverseLookupVisitor(const Database& database,
-                                                                   std::list<LocationDescriptionService::ReverseLookupResult>& results)
+                                                                   const LocationIndex& locationIndex,
+                                                                   std::list<LocationDescriptionService::ReverseLookupResult>& results,
+                                                                   bool lookupPoi,
+                                                                   bool lookupLocations,
+                                                                   bool lookupAddress)
   : database(database),
-    results(results)
+    locationIndex(locationIndex),
+    results(results),
+    lookupPoi(lookupPoi),
+    poiVisitor(results),
+    lookupLocation(lookupLocations),
+    locationVisitor(locationIndex, results, lookupAddress)
   {
-    // no code
   }
 
   void AdminRegionReverseLookupVisitor::AddSearchEntry(const SearchEntry& searchEntry)
   {
     searchEntries.push_back(searchEntry);
+    if (lookupPoi){
+      poiVisitor.AddObject(searchEntry.object);
+    }
+    if (lookupLocation){
+      locationVisitor.AddObject(searchEntry.object);
+    }
   }
 
   AdminRegionVisitor::Action AdminRegionReverseLookupVisitor::Visit(const AdminRegion& region)
@@ -422,6 +499,23 @@ namespace osmscout {
       atLeastOneCandidate=true;
       adminRegions.insert(std::make_pair(region.regionOffset,
                                          std::make_shared<AdminRegion>(region)));
+      if (lookupPoi){
+        if (!locationIndex.VisitPOIs(region,
+                                     poiVisitor,
+                                     false)) {
+          return error;
+        }
+      }
+      if (lookupLocation){
+        for (const auto& postalArea : region.postalAreas) {
+          if (!locationIndex.VisitLocations(region,
+                                            postalArea,
+                                            locationVisitor,
+                                            false)) {
+            return error;
+          }
+        }
+      }
     }
 
     if (atLeastOneCandidate) {
@@ -431,31 +525,6 @@ namespace osmscout {
 
     return skipChildren;
   }
-
-  class POIReverseLookupVisitor : public POIVisitor
-  {
-  public:
-    struct Result
-    {
-      AdminRegionRef adminRegion;
-      LocationRef    location;
-    };
-
-  private:
-    std::set<ObjectFileRef>                   objects;
-    std::list<LocationDescriptionService::ReverseLookupResult>& results;
-
-  public:
-    std::list<Result>                         result;
-
-  public:
-    explicit POIReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results);
-
-    void AddObject(const ObjectFileRef& object);
-
-    bool Visit(const AdminRegion& adminRegion,
-               const POI &poi) override;
-  };
 
   POIReverseLookupVisitor::POIReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results)
     : results(results)
@@ -484,35 +553,13 @@ namespace osmscout {
     return true;
   }
 
-  class LocationReverseLookupVisitor : public LocationVisitor
-  {
-  public:
-    struct Result
-    {
-      AdminRegionRef adminRegion;
-      PostalAreaRef  postalArea;
-      LocationRef    location;
-    };
-
-  private:
-    std::set<ObjectFileRef>                   objects;
-    std::list<LocationDescriptionService::ReverseLookupResult>& results;
-
-  public:
-    std::list<Result>                          result;
-
-  public:
-    explicit LocationReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results);
-
-    void AddObject(const ObjectFileRef& object);
-
-    bool Visit(const AdminRegion& adminRegion,
-               const PostalArea& postalArea,
-               const Location &location) override;
-  };
-
-  LocationReverseLookupVisitor::LocationReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results)
-  : results(results)
+  LocationReverseLookupVisitor::LocationReverseLookupVisitor(const LocationIndex& locationIndex,
+                                                             std::list<LocationDescriptionService::ReverseLookupResult>& results,
+                                                             bool lookupAddress)
+  : locationIndex(locationIndex),
+    results(results),
+    lookupAddress(lookupAddress),
+    addressVisitor(results)
   {
     // no code
   }
@@ -520,28 +567,46 @@ namespace osmscout {
   void LocationReverseLookupVisitor::AddObject(const ObjectFileRef& object)
   {
     objects.insert(object);
+    if (lookupAddress){
+      addressVisitor.AddObject(object);
+    }
   }
 
   bool LocationReverseLookupVisitor::Visit(const AdminRegion& adminRegion,
                                            const PostalArea& postalArea,
                                            const Location &location)
   {
-    Result l;
+    if (lookupAddress){
+      if (!locationIndex.VisitAddresses(adminRegion,
+                                        postalArea,
+                                        location,
+                                        addressVisitor)) {
+        return false;
+      }
+    }
 
-    l.adminRegion=std::make_shared<AdminRegion>(adminRegion);
-    l.postalArea=std::make_shared<PostalArea>(postalArea);
-    l.location=std::make_shared<Location>(location);
-
-    result.push_back(l);
+    AdminRegionRef adminRegionRef;
+    PostalAreaRef postalAreaRef;
+    LocationRef locationRef;
 
     for (const auto& object : location.objects) {
       if (objects.find(object)!=objects.end()) {
         LocationDescriptionService::ReverseLookupResult result;
 
+        if (!adminRegionRef) {
+          adminRegionRef=std::make_shared<AdminRegion>(adminRegion);
+        }
+        if (!postalAreaRef) {
+          postalAreaRef=std::make_shared<PostalArea>(postalArea);
+        }
+        if (!locationRef){
+          locationRef=std::make_shared<Location>(location);
+        }
+
         result.object=object;
-        result.adminRegion=l.adminRegion;
-        result.postalArea=l.postalArea;
-        result.location=l.location;
+        result.adminRegion=adminRegionRef;
+        result.postalArea=postalAreaRef;
+        result.location=locationRef;
 
         results.push_back(result);
       }
@@ -549,23 +614,6 @@ namespace osmscout {
 
     return true;
   }
-
-  class AddressReverseLookupVisitor : public AddressVisitor
-  {
-  private:
-    std::list<LocationDescriptionService::ReverseLookupResult>& results;
-
-    std::set<ObjectFileRef>                          objects;
-
-  public:
-    explicit AddressReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results);
-    void AddObject(const ObjectFileRef& object);
-
-    bool Visit(const AdminRegion& adminRegion,
-               const PostalArea& postalArea,
-               const Location &location,
-               const Address& address) override;
-  };
 
   AddressReverseLookupVisitor::AddressReverseLookupVisitor(std::list<LocationDescriptionService::ReverseLookupResult>& results)
   : results(results)
@@ -602,8 +650,19 @@ namespace osmscout {
                                                        std::list<ReverseLookupResult>& result) const
   {
     result.clear();
+
+    LocationIndexRef locationIndex=database->GetLocationIndex();
+
+    if (!locationIndex) {
+      return false;
+    }
+
     AdminRegionReverseLookupVisitor adminRegionVisitor(*database,
-                                                       result);
+                                                       *locationIndex,
+                                                       result,
+                                                       false,
+                                                       false,
+                                                       false);
     AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
     searchEntry.coords.push_back(coord);
@@ -644,7 +703,11 @@ namespace osmscout {
     }
 
     AdminRegionReverseLookupVisitor adminRegionVisitor(*database,
-                                                       result);
+                                                       *locationIndex,
+                                                       result,
+                                                       true,
+                                                       true,
+                                                       true);
 
     for (const auto& object : objects) {
       if (object.GetType()==refNode) {
@@ -715,56 +778,6 @@ namespace osmscout {
 
     if (!VisitAdminRegions(adminRegionVisitor)) {
       return false;
-    }
-
-    if (adminRegionVisitor.adminRegions.empty()) {
-      return true;
-    }
-
-    POIReverseLookupVisitor poiVisitor(result);
-
-    for (const auto& object : objects) {
-      poiVisitor.AddObject(object);
-    }
-
-    for (const auto& regionEntry : adminRegionVisitor.adminRegions) {
-      if (!locationIndex->VisitPOIs(*regionEntry.second,
-                                    poiVisitor,
-                                    false)) {
-        return false;
-      }
-    }
-
-    LocationReverseLookupVisitor locationVisitor(result);
-
-    for (const auto& object : objects) {
-      locationVisitor.AddObject(object);
-    }
-
-    for (const auto& regionEntry : adminRegionVisitor.adminRegions) {
-      for (const auto& postalArea : regionEntry.second->postalAreas) {
-        if (!locationIndex->VisitLocations(*regionEntry.second,
-                                           postalArea,
-                                           locationVisitor,
-                                           false)) {
-          return false;
-        }
-      }
-    }
-
-    AddressReverseLookupVisitor addressVisitor(result);
-
-    for (const auto& object : objects) {
-      addressVisitor.AddObject(object);
-    }
-
-    for (const auto& location : locationVisitor.result) {
-      if (!locationIndex->VisitAddresses(*location.adminRegion,
-                                         *location.postalArea,
-                                         *location.location,
-                                         addressVisitor)) {
-        return false;
-      }
     }
 
     return true;
