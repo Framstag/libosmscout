@@ -31,7 +31,7 @@ namespace osmscout {
   template<typename T>
   class ObjectPool {
   private:
-    std::list<T*> pool;
+    std::vector<T*> pool;
     size_t maxSize;
     std::mutex mutex;
 
@@ -52,7 +52,9 @@ namespace osmscout {
   public:
     explicit ObjectPool(size_t maxSize):
         maxSize(maxSize)
-    {}
+    {
+      pool.reserve(std::min((size_t)100, maxSize));
+    }
 
     virtual ~ObjectPool(){
       Clear();
