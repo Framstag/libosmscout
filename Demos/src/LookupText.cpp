@@ -118,12 +118,15 @@ int main (int argc, char *argv[])
                "* Input at least 3 characters or 'q' to quit\n" << std::endl;
 
 
-  while(true) {
+  while(!std::cin.eof()) {
     std::string searchInput;
 
     std::cout << std::endl;
     std::cout << "Enter a search term:"<< std::endl;
     std::getline(std::cin,searchInput);
+    if (searchInput.empty() && std::cin.eof()){
+      break;
+    }
 
     if(searchInput.size() < 3) {
       if(searchInput.size()==1) {

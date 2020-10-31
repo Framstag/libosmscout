@@ -33,6 +33,104 @@
 
 namespace osmscout {
 
+class SearchModule;
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API SearchRunnable : public QRunnable {
+
+protected:
+  SearchModule *searchModule;
+  DBInstanceRef db;
+  QString searchPattern;
+  int limit;
+  osmscout::BreakerRef breaker;
+  std::map<osmscout::FileOffset,osmscout::AdminRegionRef> adminRegionMap;
+  std::promise<bool> promise;
+
+public:
+  SearchRunnable(SearchModule *searchModule,
+                 DBInstanceRef &db,
+                 const QString &searchPattern,
+                 int limit,
+                 osmscout::BreakerRef &breaker);
+
+  std::future<bool> getFuture();
+
+protected:
+  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
+                          const QString &title,
+                          DBInstanceRef &db,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations);
+
+  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
+                          DBInstanceRef &db,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations);
+
+  bool GetObjectDetails(DBInstanceRef &db,
+                        const osmscout::ObjectFileRef& object,
+                        QString &typeName,
+                        osmscout::GeoCoord& coordinates,
+                        osmscout::GeoBox& bbox);
+
+  bool GetObjectDetails(DBInstanceRef &db,
+                        const std::vector<osmscout::ObjectFileRef>& objects,
+                        QString &typeName,
+                        osmscout::GeoCoord& coordinates,
+                        osmscout::GeoBox& bbox);
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API SearchLocationsRunnable : public SearchRunnable {
+
+private:
+  AdminRegionInfoRef defaultRegionInfo;
+
+public:
+  SearchLocationsRunnable(SearchModule *searchModule,
+                          DBInstanceRef &db,
+                          const QString &searchPattern,
+                          int limit,
+                          osmscout::BreakerRef &breaker,
+                          AdminRegionInfoRef &defaultRegion);
+
+  void run() override;
+
+private:
+  bool SearchLocations(DBInstanceRef &db,
+                       const QString &searchPattern,
+                       const osmscout::AdminRegionRef &defaultRegion,
+                       int limit,
+                       osmscout::BreakerRef &breaker,
+                       std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
+};
+
+/**
+ * \ingroup QtAPI
+ */
+class OSMSCOUT_CLIENT_QT_API FreeTextSearchRunnable : public SearchRunnable {
+
+public:
+  FreeTextSearchRunnable(SearchModule *searchModule,
+                         DBInstanceRef &db,
+                         const QString &searchPattern,
+                         int limit,
+                         osmscout::BreakerRef &breaker);
+
+  void run() override;
+
+private:
+  bool FreeTextSearch(DBInstanceRef &db,
+                      const QString &searchPattern,
+                      int limit,
+                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
+};
+
 /**
  * \ingroup QtAPI
  */
@@ -40,7 +138,6 @@ class OSMSCOUT_CLIENT_QT_API SearchModule:public QObject{
   Q_OBJECT
 
 private:
-  QMutex           mutex;
   QThread          *thread;
   DBThreadRef      dbThread;
   LookupModule     *lookupModule;
@@ -76,40 +173,6 @@ public:
   SearchModule(QThread *thread,DBThreadRef dbThread,LookupModule *lookupModule);
   virtual ~SearchModule();
 
-private:
-  void FreeTextSearch(DBInstanceRef &db,
-                      const QString searchPattern,
-                      int limit,
-                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
-
-  void SearchLocations(DBInstanceRef &db,
-                       const QString searchPattern,
-                       const osmscout::AdminRegionRef defaultRegion,
-                       int limit,
-                       osmscout::BreakerRef &breaker,
-                       std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
-
-  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                          const QString title,
-                          DBInstanceRef db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations);
-
-  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
-                          DBInstanceRef db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations);
-
-  bool GetObjectDetails(DBInstanceRef db, const osmscout::ObjectFileRef& object,
-                        QString &typeName,
-                        osmscout::GeoCoord& coordinates,
-                        osmscout::GeoBox& bbox);
-
-  bool GetObjectDetails(DBInstanceRef db,
-                        const std::vector<osmscout::ObjectFileRef>& objects,
-                        QString &typeName,
-                        osmscout::GeoCoord& coordinates,
-                        osmscout::GeoBox& bbox);
 };
 
 }

@@ -2154,7 +2154,7 @@ namespace osmscout {
       if (offset+coordByteSize-1>=size) {
         hasError=true;
 
-        throw IOException(filename,"Cannot read coordinate","Cannot read beyonf end of file");
+        throw IOException(filename,"Cannot read coordinate","Cannot read beyond end of file");
       }
 
       char *dataPtr=&mmap[offset];
