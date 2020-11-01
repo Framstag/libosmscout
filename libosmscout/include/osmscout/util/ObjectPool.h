@@ -62,10 +62,7 @@ namespace osmscout {
     /**
      * Make a new object. It may return nullptr in case of failure.
      */
-    virtual T* MakeNew() noexcept
-    {
-      return new T();
-    }
+    virtual T* MakeNew() noexcept = 0;
 
     virtual void Destroy(T* o) noexcept
     {
@@ -104,7 +101,6 @@ namespace osmscout {
       std::lock_guard<std::mutex> guard(mutex);
       for (T* o:pool){
         Destroy(o);
-        Delete(o);
       }
       pool.clear();
     }
