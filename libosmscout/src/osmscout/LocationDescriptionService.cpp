@@ -264,11 +264,19 @@ namespace osmscout {
 
   void LocationDescriptionService::AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
                                                    const GeoCoord& location,
-                                                   const NodeRegionSearchResult& results)
+                                                   const NodeRegionSearchResult& results,
+                                                   bool requireAddress,
+                                                   bool requireName)
   {
     NameFeatureLabelReader nameFeatureLabelReader(*database->GetTypeConfig());
+    NameFeatureValueReader nameFeatureReader(*database->GetTypeConfig());
+    AddressFeatureValueReader addressFeatureReader(*database->GetTypeConfig());
 
     for (const auto& entry : results.GetNodeResults()) {
+      if ((requireAddress && addressFeatureReader.GetValue(entry.GetNode()->GetFeatureValueBuffer()) == nullptr) ||
+          (requireName && nameFeatureReader.GetValue(entry.GetNode()->GetFeatureValueBuffer()) == nullptr)) {
+        continue;
+      }
       GeoBox boundingBox;
       auto bearing=GetSphericalBearingInitial(entry.GetNode()->GetCoords(),location);
 
@@ -303,11 +311,20 @@ namespace osmscout {
 
   void LocationDescriptionService::AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
                                                    const GeoCoord& location,
-                                                   const AreaRegionSearchResult& results)
+                                                   const AreaRegionSearchResult& results,
+                                                   bool requireAddress,
+                                                   bool requireName)
   {
     NameFeatureLabelReader nameFeatureLabelReader(*database->GetTypeConfig());
+    NameFeatureValueReader nameFeatureReader(*database->GetTypeConfig());
+    AddressFeatureValueReader addressFeatureReader(*database->GetTypeConfig());
 
     for (const auto& entry : results.GetAreaResults()) {
+      if ((requireAddress && addressFeatureReader.GetValue(entry.GetArea()->GetFeatureValueBuffer()) == nullptr) ||
+          (requireName && nameFeatureReader.GetValue(entry.GetArea()->GetFeatureValueBuffer()) == nullptr)) {
+        continue;
+      }
+
       GeoBox boundingBox=entry.GetArea()->GetBoundingBox();
       auto bearing=GetSphericalBearingInitial(entry.GetClosestPoint(),location);
 
@@ -827,7 +844,6 @@ namespace osmscout {
       return false;
     }
 
-    NameFeatureLabelReader                    nameFeatureLabelLeader(*typeConfig);
     std::vector<LocationDescriptionCandicate> candidates;
 
     TypeInfoSet nameTypes;
@@ -849,7 +865,9 @@ namespace osmscout {
 
       AddToCandidates(candidates,
                       location,
-                      areaSearchResult);
+                      areaSearchResult,
+                      false,
+                      true);
     }
 
     // near nameable nodes, but no regions
@@ -869,7 +887,9 @@ namespace osmscout {
                                                                           lookupDistance);
       AddToCandidates(candidates,
                       location,
-                      nodeSearchResult);
+                      nodeSearchResult,
+                      false,
+                      true);
     }
 
     if (candidates.empty()) {
@@ -881,10 +901,6 @@ namespace osmscout {
 
     for (const auto &candidate : candidates) {
       std::list<ReverseLookupResult> result;
-
-      if (candidate.GetName().empty()) {
-        continue;
-      }
 
       if (candidate.GetSize() > sizeFilter) {
         continue;
@@ -977,7 +993,9 @@ namespace osmscout {
 
       AddToCandidates(candidates,
                       location,
-                      areaSearchResult);
+                      areaSearchResult,
+                      true, // objects without address feature are not in address index
+                      false);
     }
 
     // near addressable nodes
@@ -995,7 +1013,9 @@ namespace osmscout {
                                                                           lookupDistance);
       AddToCandidates(candidates,
                       location,
-                      nodeSearchResult);
+                      nodeSearchResult,
+                      true, // objects without address feature are not in address index
+                      false);
     }
 
     if (candidates.empty()) {
@@ -1077,7 +1097,9 @@ namespace osmscout {
 
       AddToCandidates(candidates,
                       location,
-                      areaSearchResult);
+                      areaSearchResult,
+                      false,
+                      true); // POI have to have name feature to be in location index
     }
 
     // near addressable nodes
@@ -1094,7 +1116,9 @@ namespace osmscout {
                                                                           lookupDistance);
       AddToCandidates(candidates,
                       location,
-                      nodeSearchResult);
+                      nodeSearchResult,
+                      false,
+                      true); // POI have to have name feature to be in location index
     }
 
     if (candidates.empty()) {
