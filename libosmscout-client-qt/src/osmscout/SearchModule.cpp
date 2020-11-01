@@ -126,6 +126,7 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
   searchParameter.SetBreaker(breaker);
 
   osmscout::LocationSearchResult result;
+  LocationIndex::ScopeCacheCleaner cacheCleaner(db->GetDatabase()->GetLocationIndex());
 
   if (!db->GetLocationService()->SearchForLocationByString(searchParameter, result)){
     if (breaker){
