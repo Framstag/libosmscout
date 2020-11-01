@@ -383,13 +383,17 @@ namespace osmscout {
 
     void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
                          const GeoCoord& location,
-                         const NodeRegionSearchResult& results);
+                         const NodeRegionSearchResult& results,
+                         bool requireAddress,
+                         bool requireName);
     void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
                          const GeoCoord& location,
                          const WayRegionSearchResult& results);
     void AddToCandidates(std::vector<LocationDescriptionCandicate>& candidates,
                          const GeoCoord& location,
-                         const AreaRegionSearchResult& results);
+                         const AreaRegionSearchResult& results,
+                         bool requireAddress,
+                         bool requireName);
 
   public:
     explicit LocationDescriptionService(const DatabaseRef& database);
