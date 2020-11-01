@@ -29,6 +29,7 @@
 #include <osmscout/Location.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/ObjectPool.h>
 #include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
@@ -49,7 +50,46 @@ namespace osmscout {
     static const char* const FILENAME_LOCATION_IDX;
 
   private:
-    std::string                     path;
+
+    /**
+     * FileScanner opening may be expensive operation,
+     * but LocationIndex may be recursive, because some Visit* method
+     * may be called even from visitor. So it is not possible
+     * use "global" scanner, because its position would be different
+     * when returning from visitor. So, scanners are managed in
+     * the ObjectPool that allows reusing the objects, and guarantee
+     * exclusive access.
+     *
+     * To keep small LocationIndex memory footprint, user may call
+     * FlushCache method when index is not needed anymore.
+     */
+    class FileScannerPool: public ObjectPool<FileScanner>
+    {
+    public:
+      std::string path;
+      bool memoryMappedData=false;
+    public:
+      FileScannerPool():
+          ObjectPool<FileScanner>(4) // 4 should be enough for recursive visitors
+      {}
+
+      ~FileScannerPool() override {
+        Clear(); // we have Close method override...
+      }
+
+      Ptr Borrow() override;
+
+      FileScanner* MakeNew() noexcept override;
+
+      void Close(FileScanner*) noexcept override;
+
+      bool IsValid(FileScanner* o) noexcept override;
+    };
+
+    using FileScannerPtr = FileScannerPool::Ptr;
+
+  private:
+    mutable FileScannerPool         fileScannerPool;
     uint8_t                         bytesForNodeFileOffset;
     uint8_t                         bytesForAreaFileOffset;
     uint8_t                         bytesForWayFileOffset;
@@ -202,7 +242,9 @@ namespace osmscout {
     bool ResolveAdminRegionHierachie(const AdminRegionRef& region,
                                      std::map<FileOffset,AdminRegionRef>& refs) const;
 
-    void DumpStatistics();
+    void DumpStatistics() const;
+
+    void FlushCache() const;
   };
 
   using LocationIndexRef = std::shared_ptr<LocationIndex>;

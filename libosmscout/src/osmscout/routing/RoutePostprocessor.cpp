@@ -1193,14 +1193,16 @@ namespace osmscout {
                                                     ways,
                                                     areas);
 
-    database.GetLocationIndex()->VisitAdminRegions(regionCollector);
+    LocationIndexRef locationIndex=database.GetLocationIndex();
+    assert(locationIndex);
+    locationIndex->VisitAdminRegions(regionCollector);
 
     for (const auto& adminRegion : regionCollector.regions) {
       LocationNameByPathCollectorVisitor locationCollector(paths);
 
-      database.GetLocationIndex()->VisitLocations(*adminRegion,
-                                                  locationCollector,
-                                                  false);
+      locationIndex->VisitLocations(*adminRegion,
+                                    locationCollector,
+                                    false);
 
       if (locationCollector.namePathsMap.empty()) {
         continue;
@@ -1208,9 +1210,9 @@ namespace osmscout {
 
       LocationByNameCollectorVisitor location2Collector(locationCollector.namePathsMap);
 
-      database.GetLocationIndex()->VisitLocations(*adminRegion,
-                                                   location2Collector,
-                                                   false);
+      locationIndex->VisitLocations(*adminRegion,
+                                   location2Collector,
+                                   false);
 
       AddressCollectorVisitor addressCollector(location2Collector.locationPathsMap,
                                                poiCandidates);
@@ -1219,10 +1221,10 @@ namespace osmscout {
         AdminRegion fakeRegion;
         PostalArea  fakePostalArea;
 
-        database.GetLocationIndex()->VisitAddresses(*adminRegion,
-                                                    fakePostalArea,
-                                                    *location,
-                                                    addressCollector);
+        locationIndex->VisitAddresses(*adminRegion,
+                                      fakePostalArea,
+                                      *location,
+                                      addressCollector);
       }
     }
 
@@ -1230,6 +1232,7 @@ namespace osmscout {
 
     std::cout << "Scanning locations: " << scanLocationTime.ResultString() << std::endl;
 
+    locationIndex->FlushCache();
     return poiCandidates;
   }
 

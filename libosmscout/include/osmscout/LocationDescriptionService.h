@@ -391,6 +391,8 @@ namespace osmscout {
                          const GeoCoord& location,
                          const AreaRegionSearchResult& results);
 
+    void FlushLocationIndexCache() const;
+
   public:
     explicit LocationDescriptionService(const DatabaseRef& database);
 

@@ -31,6 +31,7 @@ osmscoutHeader = [
             'osmscout/util/NodeUseMap.h',
             'osmscout/util/Number.h',
             'osmscout/util/NumberSet.h',
+            'osmscout/util/ObjectPool.h',
             'osmscout/util/Parsing.h',
             'osmscout/util/Progress.h',
             'osmscout/util/Projection.h',
