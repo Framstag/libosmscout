@@ -39,8 +39,7 @@ namespace osmscout {
     void Return(T* o){
       std::lock_guard<std::mutex> guard(mutex);
       if (!IsValid(o) || pool.size()==maxSize){
-        Close(o);
-        delete o;
+        Destroy(o);
       } else {
         pool.push_back(o);
       }
@@ -68,9 +67,9 @@ namespace osmscout {
       return new T();
     }
 
-    virtual void Close(T*) noexcept
+    virtual void Destroy(T* o) noexcept
     {
-      // no-op
+      delete o;
     }
 
     virtual bool IsValid(T*) noexcept
@@ -104,8 +103,8 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
       for (T* o:pool){
-        Close(o);
-        delete o;
+        Destroy(o);
+        Delete(o);
       }
       pool.clear();
     }

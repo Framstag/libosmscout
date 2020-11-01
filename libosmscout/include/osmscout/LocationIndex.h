@@ -81,7 +81,7 @@ namespace osmscout {
 
       FileScanner* MakeNew() noexcept override;
 
-      void Close(FileScanner*) noexcept override;
+      void Destroy(FileScanner*) noexcept override;
 
       bool IsValid(FileScanner* o) noexcept override;
     };
