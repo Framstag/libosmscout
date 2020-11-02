@@ -1844,11 +1844,11 @@ namespace osmscout {
   bool LocationService::SearchForLocationByString(const LocationStringSearchParameter& searchParameter,
                                                   LocationSearchResult& result) const
   {
-    LocationIndexRef                locationIndex=database->GetLocationIndex();
-    std::unordered_set<std::string> regionIgnoreTokenSet;
-    AdminRegionRef                  defaultAdminRegion=searchParameter.GetDefaultAdminRegion();
-    std::string                     searchPattern=searchParameter.GetSearchString();
-    SearchParameter                 parameter;
+    LocationIndexRef                 locationIndex=database->GetLocationIndex();
+    std::unordered_set<std::string>  regionIgnoreTokenSet;
+    AdminRegionRef                   defaultAdminRegion=searchParameter.GetDefaultAdminRegion();
+    std::string                      searchPattern=searchParameter.GetSearchString();
+    SearchParameter                  parameter;
 
     BreakerRef breaker=searchParameter.GetBreaker();
 
@@ -2072,9 +2072,9 @@ namespace osmscout {
   bool LocationService::SearchForLocationByForm(const LocationFormSearchParameter& searchParameter,
                                                 LocationSearchResult& result) const
   {
-    LocationIndexRef                locationIndex=database->GetLocationIndex();
-    std::unordered_set<std::string> regionIgnoreTokenSet;
-    SearchParameter                 parameter;
+    LocationIndexRef                 locationIndex=database->GetLocationIndex();
+    std::unordered_set<std::string>  regionIgnoreTokenSet;
+    SearchParameter                  parameter;
 
     BreakerRef breaker=searchParameter.GetBreaker();
 
@@ -2202,9 +2202,9 @@ namespace osmscout {
   bool LocationService::SearchForPOIByForm(const POIFormSearchParameter& searchParameter,
                                            LocationSearchResult& result) const
   {
-    LocationIndexRef                locationIndex=database->GetLocationIndex();
-    std::unordered_set<std::string> regionIgnoreTokenSet;
-    SearchParameter                 parameter;
+    LocationIndexRef                 locationIndex=database->GetLocationIndex();
+    std::unordered_set<std::string>  regionIgnoreTokenSet;
+    SearchParameter                  parameter;
 
     BreakerRef breaker=searchParameter.GetBreaker();
 

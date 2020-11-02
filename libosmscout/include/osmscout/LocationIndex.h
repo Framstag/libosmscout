@@ -49,6 +49,28 @@ namespace osmscout {
   public:
     static const char* const FILENAME_LOCATION_IDX;
 
+    /**
+     * Util class that cleanup location index cache when instance is destructed.
+     */
+    class OSMSCOUT_API ScopeCacheCleaner CLASS_FINAL {
+      std::shared_ptr<LocationIndex> index;
+    public:
+      explicit ScopeCacheCleaner(std::shared_ptr<LocationIndex> index):
+        index(index)
+      {}
+
+      ScopeCacheCleaner(const ScopeCacheCleaner&) = delete;
+      ScopeCacheCleaner(ScopeCacheCleaner&&) = delete;
+      ScopeCacheCleaner& operator=(const ScopeCacheCleaner &) = delete;
+      ScopeCacheCleaner& operator=(ScopeCacheCleaner &&) = delete;
+
+      ~ScopeCacheCleaner() {
+        if (index) {
+          index->FlushCache();
+        }
+      }
+    };
+
   private:
 
     /**

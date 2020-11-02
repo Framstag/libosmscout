@@ -669,6 +669,7 @@ namespace osmscout {
     result.clear();
 
     LocationIndexRef locationIndex=database->GetLocationIndex();
+    LocationIndex::ScopeCacheCleaner cacheCleaner(database->GetLocationIndex());
 
     if (!locationIndex) {
       return false;
@@ -695,7 +696,6 @@ namespace osmscout {
       result.push_back(regionResult);
     }
 
-    FlushLocationIndexCache();
     return true;
   }
 
@@ -844,6 +844,7 @@ namespace osmscout {
       return false;
     }
 
+    LocationIndex::ScopeCacheCleaner          cacheCleaner(database->GetLocationIndex());
     std::vector<LocationDescriptionCandicate> candidates;
 
     TypeInfoSet nameTypes;
@@ -953,12 +954,10 @@ namespace osmscout {
                                                                                         candidate.GetBearing()));
         }
 
-        FlushLocationIndexCache();
         return true;
       }
     }
 
-    FlushLocationIndexCache();
     return true;
   }
 
@@ -973,6 +972,8 @@ namespace osmscout {
     if (!typeConfig) {
       return false;
     }
+
+    LocationIndex::ScopeCacheCleaner cacheCleaner(database->GetLocationIndex());
 
     std::vector<LocationDescriptionCandicate> candidates;
 
@@ -1049,21 +1050,11 @@ namespace osmscout {
           description.SetAtAddressDescription(std::make_shared<LocationAtPlaceDescription>(place,
                             candidate.GetDistance(), candidate.GetBearing()));
         }
-        FlushLocationIndexCache();
         return true;
       }
     }
 
-    FlushLocationIndexCache();
     return true;
-  }
-
-  void LocationDescriptionService::FlushLocationIndexCache() const
-  {
-    if (LocationIndexRef locationIndex=database->GetLocationIndex();
-        locationIndex) {
-      locationIndex->FlushCache();
-    }
   }
 
   bool LocationDescriptionService::DescribeLocationByPOI(const GeoCoord& location,
@@ -1078,6 +1069,7 @@ namespace osmscout {
       return false;
     }
 
+    LocationIndex::ScopeCacheCleaner          cacheCleaner(database->GetLocationIndex());
     std::vector<LocationDescriptionCandicate> candidates;
 
     TypeInfoSet poiTypes;
@@ -1149,12 +1141,10 @@ namespace osmscout {
                                                                                        candidate.GetDistance(),
                                                                                        candidate.GetBearing()));
         }
-        FlushLocationIndexCache();
         return true;
       }
     }
 
-    FlushLocationIndexCache();
     return true;
   }
 
@@ -1175,12 +1165,12 @@ namespace osmscout {
   {
     TypeConfigRef          typeConfig=database->GetTypeConfig();
     NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
-
     if (!typeConfig) {
       return false;
     }
 
-    std::vector<WayRef> candidates;
+    LocationIndex::ScopeCacheCleaner cacheCleaner(database->GetLocationIndex());
+    std::vector<WayRef>              candidates;
 
     TypeInfoSet wayTypes;
 
@@ -1291,7 +1281,6 @@ namespace osmscout {
 
     description.SetCrossingDescription(crossingDescription);
 
-    FlushLocationIndexCache();
     return true;
   }
 
@@ -1318,7 +1307,8 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<WayRef> candidates;
+    std::vector<WayRef>              candidates;
+    LocationIndex::ScopeCacheCleaner cacheCleaner(database->GetLocationIndex());
 
     TypeInfoSet wayTypes;
 
@@ -1376,7 +1366,6 @@ namespace osmscout {
     }
 
     if(result.empty()) {
-      FlushLocationIndexCache();
       return true;
     }
 
@@ -1385,7 +1374,6 @@ namespace osmscout {
 
     description.SetWayDescription(wayDescription);
 
-    FlushLocationIndexCache();
     return true;
   }
 

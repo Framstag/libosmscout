@@ -395,8 +395,6 @@ namespace osmscout {
                          bool requireAddress,
                          bool requireName);
 
-    void FlushLocationIndexCache() const;
-
   public:
     explicit LocationDescriptionService(const DatabaseRef& database);
 
