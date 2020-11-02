@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <list>
+#include <vector>
 #include <memory>
 #include <mutex>
 
