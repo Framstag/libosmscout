@@ -22,9 +22,10 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <list>
+#include <vector>
 #include <memory>
 #include <mutex>
+#include <functional>
 
 namespace osmscout {
 
@@ -39,8 +40,7 @@ namespace osmscout {
     void Return(T* o){
       std::lock_guard<std::mutex> guard(mutex);
       if (!IsValid(o) || pool.size()==maxSize){
-        Close(o);
-        delete o;
+        Destroy(o);
       } else {
         pool.push_back(o);
       }
@@ -63,14 +63,11 @@ namespace osmscout {
     /**
      * Make a new object. It may return nullptr in case of failure.
      */
-    virtual T* MakeNew() noexcept
-    {
-      return new T();
-    }
+    virtual T* MakeNew() noexcept = 0;
 
-    virtual void Close(T*) noexcept
+    virtual void Destroy(T* o) noexcept
     {
-      // no-op
+      delete o;
     }
 
     virtual bool IsValid(T*) noexcept
@@ -104,8 +101,7 @@ namespace osmscout {
     {
       std::lock_guard<std::mutex> guard(mutex);
       for (T* o:pool){
-        Close(o);
-        delete o;
+        Destroy(o);
       }
       pool.clear();
     }

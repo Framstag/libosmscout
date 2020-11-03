@@ -28,10 +28,12 @@
 #include <sstream>
 #include <array>
 #include <ctime>
+#include <thread>
 
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/ObjectPool.h>
 
 #include <osmscout/private/Config.h>
 
@@ -44,6 +46,125 @@
 #endif
 
 namespace osmscout {
+
+#if defined(HAVE_ICONV)
+
+  class IConvWrapper
+  {
+  private:
+    iconv_t handle;
+  public:
+    IConvWrapper(const std::string &fromCode,
+                 const std::string &toCode):
+        handle(iconv_open(toCode.c_str(), fromCode.c_str()))
+    {
+      int errnoSnapshot=errno;
+      if (!IsValid()) {
+        log.Error() << "Error iconv_open(\"" << toCode << "\", \"" << fromCode << "\"): " << strerror(errnoSnapshot);
+      }
+    }
+
+    ~IConvWrapper()
+    {
+      Close();
+    }
+
+    bool IsValid() const
+    {
+      return handle!=(iconv_t)-1;
+    }
+
+    void Close()
+    {
+      if (IsValid()) {
+        iconv_close(handle);
+        handle=(iconv_t)-1; // invalidate handler
+      }
+    }
+
+    template <typename InChar, typename InString, typename OutChar, typename OutString>
+    OutString Convert(const InString &text)
+    {
+      // length+1 to get the result '\0'-terminated
+      size_t inCountBytes=(text.length() + 1) * sizeof(InChar);
+      size_t outCount=text.length()*4+4; // will be resized when necessary
+
+      char *in=const_cast<char*>(reinterpret_cast<const char*>(text.data())); // TODO: it is safe cast?
+
+      std::vector<OutChar> outBuff(outCount);
+      char *tmpOut=reinterpret_cast<char*>(outBuff.data()); // TODO: it is safe cast?
+      size_t tmpOutCountBytes=outBuff.size() * sizeof(OutChar);
+      while (inCountBytes > 0) {
+        if (iconv(handle, (ICONV_CONST char **) &in, &inCountBytes, &tmpOut, &tmpOutCountBytes) == (size_t) -1) {
+          if (errno==EILSEQ || errno==EINVAL) {
+            // An invalid multibyte sequence is encountered in the input
+            log.Error() << "Error iconv: " << strerror(errno);
+            break;
+          } else if (errno==E2BIG) {
+            // The output buffer has no more room for the next converted character
+            size_t convertedBytes = outBuff.size() * sizeof(OutChar) - tmpOutCountBytes;
+            outBuff.resize(outBuff.size() * 2);
+
+            tmpOut = reinterpret_cast<char*>(outBuff.data()) + convertedBytes;
+            tmpOutCountBytes = outBuff.size() * sizeof(OutChar) - convertedBytes;
+          } else {
+            // unrecoverable error
+            Close();
+            return OutString();
+          }
+        }
+      }
+
+      if (tmpOutCountBytes < (4 * sizeof(OutChar))) { // ensure enough space for remaining data
+        size_t convertedBytes = outBuff.size() * sizeof(OutChar) - tmpOutCountBytes;
+        outBuff.resize(outBuff.size() + 4);
+        tmpOut= reinterpret_cast<char*>(outBuff.data()) + convertedBytes;
+        tmpOutCountBytes = outBuff.size() * sizeof(OutChar) - convertedBytes;
+      }
+
+      // flush the iconv buffer,
+      iconv(handle, NULL, NULL, &tmpOut, &tmpOutCountBytes);
+
+      OutString res=outBuff.data();
+      return res;
+    }
+
+    std::string Convert(const std::string &text)
+    {
+      return Convert<char, std::string, char, std::string>(text);
+    }
+  };
+
+  class IConvHandlerPool: public ObjectPool<IConvWrapper>
+  {
+  private:
+    std::string fromCode;
+    std::string toCode;
+  public:
+    IConvHandlerPool(const std::string &fromCode,
+                     const std::string &toCode):
+        ObjectPool<IConvWrapper>(std::thread::hardware_concurrency()),
+        fromCode(fromCode),
+        toCode(toCode)
+    {}
+
+    IConvWrapper* MakeNew() noexcept override
+    {
+      IConvWrapper* wrapper=new IConvWrapper(fromCode, toCode);
+      if (!wrapper->IsValid()) {
+        delete wrapper;
+        return nullptr;
+      }
+      return wrapper;
+    }
+
+    bool IsValid(IConvWrapper* wrapper) noexcept override
+    {
+      return wrapper->IsValid();
+    }
+  };
+
+#endif
 
   bool StringToBool(const char* string, bool& value)
   {
@@ -500,57 +621,29 @@ namespace osmscout {
 #if defined(HAVE_ICONV)
   std::wstring UTF8StringToWString(const std::string& text)
   {
-    std::wstring res;
-    iconv_t      handle;
-
-    handle=iconv_open("WCHAR_T","UTF-8");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error in UTF8StringToWString()" << strerror(errno);
+    static IConvHandlerPool iconvPool("UTF-8", "WCHAR_T");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return L"";
     }
-
-    // length+1+1 to handle a potential BOM if ICONV_WCHAR_T is UTF-16 and to convert of \0
-    size_t inCount=text.length()+1;
-    size_t outCount=(text.length()+2)*sizeof(wchar_t);
-
-    char    *in=const_cast<char*>(text.data());
-    wchar_t *out=new wchar_t[text.length()+2];
-
-    char *tmpOut=(char*)out;
-    size_t tmpOutCount=outCount;
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error in UTF8StringToWString()" << strerror(errno);
-      return L"";
+    std::wstring res=iconvWrapperPtr->Convert<char,std::string,wchar_t,std::wstring>(text);
+    if (res.empty()) {
+      return res;
     }
-
-    iconv_close(handle);
 
     // remove potential byte order marks
     if (sizeof(wchar_t)==4) {
       // strip off potential BOM if ICONV_WCHAR_T is UTF-32
-      if (out[0]==0xfeff) {
-        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
-      }
-      else {
-        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      if (res[0] == 0xfeff) {
+        return std::wstring(res.data() + 1, res.length() - 2);
       }
     }
     else if (sizeof(wchar_t)==2) {
       // strip off potential BOM if ICONV_WCHAR_T is UTF-16
-      if (out[0]==0xfeff || out[0]==0xfffe) {
-        res=std::wstring(out+1,(outCount-tmpOutCount)/sizeof(wchar_t)-2);
-      }
-      else {
-        res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
+      if (res[0] == 0xfeff || res[0] == 0xfffe) {
+        return std::wstring(res.data() + 1, res.length() - 2);
       }
     }
-    else {
-      res=std::wstring(out,(outCount-tmpOutCount)/sizeof(wchar_t)-1);
-    }
-
-    delete [] out;
 
     return res;
   }
@@ -568,42 +661,20 @@ namespace osmscout {
 #if defined(HAVE_ICONV)
   std::u32string UTF8StringToU32String(const std::string& text)
   {
-    std::u32string res;
-    iconv_t        handle;
-
-    handle=iconv_open("UTF-32","UTF-8");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error returned by iconv_open() in UTF8StringToU32String(): " << strerror(errno);
+    static IConvHandlerPool iconvPool("UTF-8", "UTF-32");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return std::u32string();
     }
-
-    // length+1+1 to handle a potential BOM and to convert of \0
-    size_t inCount=text.length()+1;
-    size_t outCount=(text.length()+2)*sizeof(char32_t);
-
-    char     *in=const_cast<char*>(text.data());
-    char32_t *out=new char32_t[text.length()+2];
-
-    char *tmpOut=(char*)out;
-    size_t tmpOutCount=outCount;
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error returned by iconv() in UTF8StringToU32String():" << strerror(errno);
-      return std::u32string();
+    std::u32string res=iconvWrapperPtr->Convert<char,std::string,char32_t,std::u32string>(text);
+    if (res.empty()) {
+      return res;
     }
-
-    iconv_close(handle);
 
     // remove potential byte order marks
-    if (out[0]==0xfeff) {
-      res=std::u32string(out+1,(outCount-tmpOutCount)/sizeof(char32_t)-2);
+    if (res[0]==0xfeff) {
+      return std::u32string(res.data()+1,res.length()-2);
     }
-    else {
-      res=std::u32string(out,(outCount-tmpOutCount)/sizeof(char32_t)-1);
-    }
-
-    delete [] out;
 
     return res;
   }
@@ -627,38 +698,12 @@ namespace osmscout {
 #if defined(HAVE_ICONV)
   std::string WStringToUTF8String(const std::wstring& text)
   {
-    iconv_t handle;
-
-    handle=iconv_open("UTF-8","WCHAR_T");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error iconv_open in WStringToUTF8String(): " << strerror(errno);
+    static IConvHandlerPool iconvPool("WCHAR_T", "UTF-8");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return "";
     }
-
-    // length+1 to get the result '\0'-terminated
-    size_t inCount=(text.length()+1)*sizeof(wchar_t);
-    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
-
-    char *in=const_cast<char*>((const char*)text.c_str());
-    char *out=new char[outCount];
-
-    char   *tmpOut=out;
-    size_t tmpOutCount=outCount;
-
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error iconv in WStringToUTF8String() " << strerror(errno);
-      return "";
-    }
-
-    std::string res=out;
-
-    delete [] out;
-
-    iconv_close(handle);
-
-    return res;
+    return iconvWrapperPtr->Convert<wchar_t,std::wstring,char,std::string>(text);
   }
 #elif defined(HAVE_CODECVT)
   std::string WStringToUTF8String(const std::wstring& text)
@@ -674,38 +719,12 @@ namespace osmscout {
 #if defined(HAVE_ICONV)
   std::string LocaleStringToUTF8String(const std::string& text)
   {
-    iconv_t handle;
-
-    handle=iconv_open("UTF-8","");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error iconv_open in LocaleStringToUTF8String() " << strerror(errno);
+    static IConvHandlerPool iconvPool("", "UTF-8");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return "";
     }
-
-    // length+1 to get the result '\0'-terminated
-    size_t inCount=text.length()+1;
-    size_t outCount=text.length()*4+1; // Up to 4 bytes for one UTF-8 character
-
-    char *in=const_cast<char*>(text.data());
-    char *out=new char[outCount];
-
-    char   *tmpOut=out;
-    size_t tmpOutCount=outCount;
-
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error iconv in LocaleStringToUTF8String() " << strerror(errno);
-      return "";
-    }
-
-    std::string res=out;
-
-    delete [] out;
-
-    iconv_close(handle);
-
-    return res;
+    return iconvWrapperPtr->Convert(text);
   }
 #else
   std::string LocaleStringToUTF8String(const std::string& text)
@@ -717,38 +736,12 @@ namespace osmscout {
 #if defined(HAVE_ICONV)
   std::string UTF8StringToLocaleString(const std::string& text)
   {
-    iconv_t handle;
-
-    handle=iconv_open("","UTF-8");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error iconv_open in UTF8StringToLocaleString() " << strerror(errno);
+    static IConvHandlerPool iconvPool("UTF-8", "");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return "";
     }
-
-    // length+1 to get the result '\0'-terminated
-    size_t inCount=text.length()+1;
-    size_t outCount=text.length()*4+2; // Up to 4 bytes for one UTF-8 character and space for a byte order mark
-
-    char *in=const_cast<char*>(text.data());
-    char *out=new char[outCount];
-
-    char   *tmpOut=out;
-    size_t tmpOutCount=outCount;
-
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error iconv in UTF8StringToLocaleString() " << strerror(errno);
-      return "";
-    }
-
-    std::string res=out;
-
-    delete [] out;
-
-    iconv_close(handle);
-
-    return res;
+    return iconvWrapperPtr->Convert(text);
   }
 #else
   std::string UTF8StringToLocaleString(const std::string& text)
@@ -814,44 +807,19 @@ namespace osmscout {
     return WStringToUTF8String(wstr);
   }
 
-// MacOS iconv implementation transiterate diacritics nasty way:
+// MacOS iconv implementation transliterate diacritics nasty way:
 // á => 'a , ü => "u ...
 // Lets use our transliterate implementation instead
 #if defined(HAVE_ICONV) && !defined(__APPLE__)
+
   std::string UTF8Transliterate(const std::string& text)
   {
-    iconv_t handle;
-
-    handle=iconv_open("ASCII//TRANSLIT","UTF-8");
-    if (handle==(iconv_t)-1) {
-      log.Error() << "Error iconv_open in UTF8StringToLocaleString() " << strerror(errno);
+    static IConvHandlerPool iconvPool("UTF-8", "ASCII//TRANSLIT");
+    auto iconvWrapperPtr=iconvPool.Borrow();
+    if (!iconvWrapperPtr) {
       return "";
     }
-
-    // length+1 to get the result '\0'-terminated
-    size_t inCount=text.length()+1;
-    size_t outCount=text.length()*4+2; // TODO; How many bytes we really needs to tranliterated output?
-
-    char *in=const_cast<char*>(text.data());
-    char *out=new char[outCount];
-
-    char   *tmpOut=out;
-    size_t tmpOutCount=outCount;
-
-    if (iconv(handle,(ICONV_CONST char**)&in,&inCount,&tmpOut,&tmpOutCount)==(size_t)-1) {
-      iconv_close(handle);
-      delete [] out;
-      log.Error() << "Error iconv in UTF8Transliterate() " << strerror(errno);
-      return "";
-    }
-
-    std::string res=out;
-
-    delete [] out;
-
-    iconv_close(handle);
-
-    return res;
+    return iconvWrapperPtr->Convert(text);
   }
 
 #else
