@@ -67,7 +67,7 @@ public:
     return map.getPath();
   }
 
-  inline size_t expectedSize() const override
+  inline uint64_t expectedSize() const override
   {
     return map.getSize();
   }
