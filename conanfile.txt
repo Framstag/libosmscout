@@ -2,28 +2,29 @@
 
 # You need the following remotes:
 # conan-center: https://conan.bintray.com [Verify SSL: True]
-# bincrafters: https://api.bintray.com/conan/bincrafters/public-conan [Verify SSL: True]
+# conan remote add bincrafters "https://api.bintray.com/conan/bincrafters/public-conan"
 #
 # Not yet needed:
 # conan-community: https://api.bintray.com/conan/conan-community/conan [Verify SSL: True]
 
 # Core and Import
-libiconv/1.15@bincrafters/stable
-zlib/1.2.11@conan/stable
-libxml2/2.9.8@bincrafters/stable
-protobuf/3.5.2@bincrafters/stable
+libiconv/1.16
+zlib/1.2.11
+#libxml2/2.9.10
+protobuf/3.9.1
 
 # Cairo
-freetype/2.9.0@bincrafters/stable
-libpng/1.6.34@bincrafters/stable
+#freetype/2.10.4
+libpng/1.6.37
+#cairo/1.17.2@bincrafters/stable
 
 # OpenGL
-glfw/3.2.1.20180327@bincrafters/stable
-glm/0.9.8.5@bincrafters/stable
-glew/2.1.0@bincrafters/stable
+#glfw/3.3.2
+glm/0.9.9.5
+glew/2.1.0
 
 # Qt5
-Qt/5.11.1@bincrafters/stable
+#qt/5.15.1@bincrafters/stable 
 
 [generators]
 cmake
