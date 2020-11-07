@@ -103,9 +103,10 @@ endif
 marisaDep = dependency('marisa', required : false)
 
 # Import
-protobufDep = dependency('protobuf', required : false)
-xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false)
-zlibDep = dependency('zlib', required : false)
+zlibDep = dependency('zlib', required : false, fallback: ['zlib','zlib_dep'])
+lzmaDep = dependency('lzma', required : false, fallback: ['liblzma','lzma_dep'])
+xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','xml2lib_dep'])
+protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','protoc_dep'])
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
 protocCmd = find_program('protoc', required: false)
@@ -184,11 +185,11 @@ endif
 
 # OpenGL
 openGLDep = dependency('gl', required: false)
-glmDep = dependency('glm', required: false)
-glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
+glmDep = dependency('glm', required: false, fallback: ['glm', 'glm_dep'])
+#glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
 
 
-glewDep = dependency('glew', required: false)
+glewDep = dependency('glew', required: false, fallback: ['glew', 'glew_dep'])
 
 # Workaround for dependency, else error under Ubuntu 14.04
 
