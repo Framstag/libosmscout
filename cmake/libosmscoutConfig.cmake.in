@@ -1,0 +1,119 @@
+#-------------------------------------------------------------------
+# This file is part of the CMake build system for libosmscout
+# For the latest info, see https://github.com/Framstag/libosmscout/
+#-------------------------------------------------------------------
+
+# Find libosmscout includes and library
+#
+# This module defines
+#  LIBOSMSCOUT_INCLUDE_DIRS - the libosmscout include directories 
+#  LIBOSMSCOUT_LIBRARIES - link these to use the libosmscout
+#  LIBOSMSCOUT_LIBRARY_DIRS, the location of the libraries
+#  LIBOSMSCOUT_SHARED - whther libosmscout was build as shared lib
+#  LIBOSMSCOUT_${COMPONENT}_FOUND - ${COMPONENT} is available
+#  LIBOSMSCOUT_${COMPONENT}_LIBRARIES - link these to only use ${COMPONENT} 
+#  LIBOSMSCOUT_STYLES_DIR - The directory where the libosmscout styles are located
+#  LIBOSMSCOUT_CONFIG_DIR - The directory where the libosmscout config files are located
+#  LIBOSMSCOUT_COMPONENTS - libosmscout components
+#
+# An imported interface is also available:
+#  OSMScout::OSMScout - Main libosmscout library
+#  OSMScout::${COMPONENT} - Interface for component library
+#  OSMScout::ImportTool - Executable tool to import an osm map
+#
+# Example:
+#  find_package(libosmscout REQUIRED)
+#  add_executable(Example app.cpp)
+#  target_link_libraries(Example PRIVATE OSMScout::OSMScout OSMScout::MapGDI)
+
+if (CMAKE_VERSION VERSION_LESS 3.10)
+    message(FATAL_ERROR "libosmscout requires at least CMake version 3.10")
+endif()
+
+get_filename_component(LIBOSMSCOUT_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+get_filename_component(_libosmscout_install_prefix "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
+set(LIBOSMSCOUT_SHARED @BUILD_SHARED_LIBS@)
+set(LIBOSMSCOUT_STYLES_DIR "${_libosmscout_install_prefix}/share/stylesheets")
+get_filename_component(LIBOSMSCOUT_LIBRARY_DIRS "${_libosmscout_install_prefix}/lib" ABSOLUTE)
+get_filename_component(LIBOSMSCOUT_INCLUDE_DIRS "${_libosmscout_install_prefix}/include" ABSOLUTE)
+set(LIBOSMSCOUT_VERSION @PROJECT_VERSION@)
+set(LIBOSMSCOUT_DEBUG_POSTFIX @CMAKE_DEBUG_POSTFIX@)
+set(LIBOSMSCOUT_RELEASE_POSTFIX @CMAKE_RELEASE_POSTFIX@)
+
+macro(libosmscout_declare_component COMPONENT OUTPUT DEPS)
+	add_library(OSMScout::${COMPONENT} SHARED IMPORTED)
+	foreach(CFG DEBUG RELEASE)
+		set_property(TARGET OSMScout::${COMPONENT} APPEND PROPERTY IMPORTED_CONFIGURATIONS ${CFG})
+		find_library(LIBOSMSCOUT_OSMScout${COMPONENT}_LIB_${CFG} NAME ${OUTPUT}${LIBOSMSCOUT_${CFG}_POSTFIX} HINTS ${LIBOSMSCOUT_LIBRARY_DIRS})
+		set_target_properties(OSMScout::${COMPONENT} PROPERTIES
+			INTERFACE_INCLUDE_DIRECTORIES ${LIBOSMSCOUT_INCLUDE_DIRS}
+			IMPORTED_IMPLIB_${CFG} ${LIBOSMSCOUT_OSMScout${COMPONENT}_LIB_${CFG}}
+		)
+	endforeach()
+    set(LIBOSMSCOUT_${COMPONENT}_FOUND TRUE)
+    set(LIBOSMSCOUT_${COMPONENT}_LIBRARIES debug;${LIBOSMSCOUT_OSMScout${COMPONENT}_LIB_DEBUG};optimized;${LIBOSMSCOUT_OSMScout${COMPONENT}_LIB_RELEASE})
+    list(APPEND LIBOSMSCOUT_COMPONENTS ${COMPONENT})
+    list(APPEND LIBOSMSCOUT_LIBRARIES OSMScout::${COMPONENT})
+endmacro()
+
+set(LIBOSMSCOUT_FOUND TRUE)
+add_library(OSMScout::OSMScout SHARED IMPORTED)
+set_property(TARGET OSMScout::OSMScout APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+find_library(LIBOSMSCOUT_OSMScout_LIB_DEBUG NAME osmscout${LIBOSMSCOUT_DEBUG_POSTFIX} HINTS ${LIBOSMSCOUT_LIBRARY_DIRS})
+set_target_properties(OSMScout::OSMScout PROPERTIES
+	INTERFACE_INCLUDE_DIRECTORIES ${LIBOSMSCOUT_INCLUDE_DIRS}
+	IMPORTED_IMPLIB_DEBUG ${LIBOSMSCOUT_OSMScout_LIB_DEBUG}
+)
+set_property(TARGET OSMScout::OSMScout APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+find_library(LIBOSMSCOUT_OSMScout_LIB_RELEASE NAME osmscout${LIBOSMSCOUT_RELEASE_POSTFIX} HINTS ${LIBOSMSCOUT_LIBRARY_DIRS})
+set_target_properties(OSMScout::OSMScout PROPERTIES
+	INTERFACE_INCLUDE_DIRECTORIES ${LIBOSMSCOUT_INCLUDE_DIRS}
+	IMPORTED_IMPLIB_RELEASE ${LIBOSMSCOUT_OSMScout_LIB_RELEASE}
+)
+set(LIBOSMSCOUT_COMPONENTS OSMScout)
+set(LIBOSMSCOUT_LIBRARIES OSMScout::OSMScout)
+
+if(@OSMSCOUT_BUILD_CLIENT_QT@)
+	libosmscout_declare_component(ClientQt "osmscout_client_qt" OSMScout::OSMScout)
+endif()
+if(@OSMSCOUT_BUILD_MAP@)
+	libosmscout_declare_component(Map "osmscout_map" OSMScout::OSMScout)
+endif()
+if(@OSMSCOUT_BUILD_MAP_AGG@)
+	libosmscout_declare_component(MapAGG "osmscout_map_agg" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_CAIRO@)
+	libosmscout_declare_component(MapCairo "osmscout_map_cairo" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_OPENGL@)
+	libosmscout_declare_component(MapOpenGL "osmscout_map_opengl" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_DIRECTX@)
+	libosmscout_declare_component(MapDirectX "osmscout_map_directx" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_QT@)
+	libosmscout_declare_component(MapQt "osmscout_map_qt" OSMScout::Map;OSMScout::ClientQt)
+endif()
+if(@OSMSCOUT_BUILD_MAP_SVG@)
+	libosmscout_declare_component(MapSVG "osmscout_map_svg" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_IOSX@)
+	libosmscout_declare_component(MapIOSX "OSMScoutMapIOSX" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_MAP_GDI@)
+	libosmscout_declare_component(MapGDI "osmscout_map_gdi" OSMScout::Map)
+endif()
+if(@OSMSCOUT_BUILD_GPX@)
+	libosmscout_declare_component(GPX "osmscout_gpx" OSMScout::OSMScout)
+endif()
+if(@OSMSCOUT_BUILD_IMPORT@)
+	libosmscout_declare_component(Import "osmscout_import" OSMScout::OSMScout)
+endif()
+if(@OSMSCOUT_BUILD_TESTS@)
+	libosmscout_declare_component(Test "osmscout_test" OSMScout::OSMScout)
+endif()
+if(@OSMSCOUT_BUILD_TOOL_IMPORT@)
+	add_executable(OSMScout::ImportTool IMPORTED)
+	find_program(LIBOSMSCOUT_Import_TOOL NAME Import HINTS "${_libosmscout_install_prefix}/bin" "${_libosmscout_install_prefix}/lib")
+	set_target_properties(OSMScout::ImportTool PROPERTIES IMPORTED_LOCATION ${LIBOSMSCOUT_Import_TOOL})
+endif()
