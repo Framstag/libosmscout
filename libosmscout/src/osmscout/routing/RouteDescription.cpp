@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -65,11 +65,6 @@ namespace osmscout {
   const char* const RouteDescription::LANES_DESC             = "Lanes";
   /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
   const char* const RouteDescription::SUGGESTED_LANES_DESC   = "SuggestedLanes";
-
-  RouteDescription::Description::~Description()
-  {
-    // no code
-  }
 
   RouteDescription::StartDescription::StartDescription(const std::string& description)
   : description(description)
@@ -236,10 +231,8 @@ namespace osmscout {
 
       result+="with";
 
-      for (std::list<NameDescriptionRef>::const_iterator desc=descriptions.begin();
-          desc!=descriptions.end();
-          ++desc) {
-        result+=" '"+(*desc)->GetDescription()+"'";
+      for (const auto& description : descriptions) {
+        result+=" '"+description->GetDescription()+"'";
       }
     }
 
@@ -258,15 +251,16 @@ namespace osmscout {
     if (fabs(angle)<=10.0) {
       return straightOn;
     }
-    else if (fabs(angle)<=45.0) {
+
+    if (fabs(angle)<=45.0) {
       return angle<0 ? slightlyLeft : slightlyRight;
     }
-    else if (fabs(angle)<=120.0) {
+
+    if (fabs(angle)<=120.0) {
       return angle<0 ? left : right;
     }
-    else {
-      return angle<0 ? sharpLeft : sharpRight;
-    }
+
+    return angle<0 ? sharpLeft : sharpRight;
   }
 
   std::string RouteDescription::DirectionDescription::ConvertMoveToString(Move move) const
@@ -311,11 +305,6 @@ namespace osmscout {
     stream << "Curve: " << ConvertMoveToString(curve) << ", " << curveAngle << " degrees";
 
     return stream.str();
-  }
-
-  RouteDescription::TurnDescription::TurnDescription()
-  {
-    // no code
   }
 
   std::string RouteDescription::TurnDescription::GetDebugString() const
@@ -558,9 +547,8 @@ namespace osmscout {
     if (entry!=descriptionMap.end()) {
       return entry->second;
     }
-    else {
-      return nullptr;
-    }
+
+    return nullptr;
   }
 
   void RouteDescription::Node::SetDistance(Distance distance)
@@ -584,16 +572,6 @@ namespace osmscout {
   {
     descriptions.push_back(description);
     descriptionMap[name]=description;
-  }
-
-  RouteDescription::RouteDescription()
-  {
-    // no code
-  }
-
-  RouteDescription::~RouteDescription()
-  {
-    // no code
   }
 
   void RouteDescription::SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping)

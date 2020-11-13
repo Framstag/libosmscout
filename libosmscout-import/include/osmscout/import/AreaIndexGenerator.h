@@ -43,20 +43,18 @@ namespace osmscout {
   class AreaIndexGenerator : public ImportModule
   {
   protected:
-    typedef std::map<TileId,size_t>                 CoordCountMap;
-    typedef std::map<TileId,std::list<FileOffset> > CoordOffsetsMap;
+    using CoordCountMap = std::map<TileId, size_t>;
+    using CoordOffsetsMap = std::map<TileId, std::list<FileOffset>>;
 
     struct TypeData
     {
-      MagnificationLevel indexLevel;   //! magnification level of index
-      size_t             indexCells;   //! Number of filled cells in index
-      size_t             indexEntries; //! Number of entries over all cells
+      MagnificationLevel indexLevel{0};  //! magnification level of index
+      size_t             indexCells=0;   //! Number of filled cells in index
+      size_t             indexEntries=0; //! Number of entries over all cells
 
-      TileIdBox          tileBox;
+      TileIdBox          tileBox{TileId(0,0),TileId(0,0)};
 
-      FileOffset         indexOffset; //! Position in file where the offset of the bitmap is written to
-
-      TypeData();
+      FileOffset         indexOffset=0; //! Position in file where the offset of the bitmap is written to
 
       inline bool HasEntries()
       {
@@ -137,18 +135,6 @@ namespace osmscout {
                        const MagnificationLevel &areaIndexMaxLevel,
                        bool useMmap);
   };
-
-  template <typename Object>
-  AreaIndexGenerator<Object>::TypeData::TypeData()
-    : indexLevel(0),
-      indexCells(0),
-      indexEntries(0),
-      tileBox(TileId(0,0),
-              TileId(0,0)),
-      indexOffset(0)
-  {
-    // no code
-  }
 
   template <typename Object>
   bool AreaIndexGenerator<Object>::WriteBitmap(Progress& progress,
@@ -407,7 +393,6 @@ namespace osmscout {
       for (MagnificationLevel l=areaIndexMinMag; l<=maxLevel; l++) {
         Magnification magnification(l);
         TypeInfoSet   indexTypes(*typeConfig);
-        uint32_t      objectCount;
 
         scanner.GotoBegin();
 
@@ -426,7 +411,7 @@ namespace osmscout {
 
         std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig->GetTypeCount());
 
-        scanner.Read(objectCount);
+        uint32_t objectCount=scanner.ReadUInt32();
 
         Object obj;
 
@@ -532,7 +517,6 @@ namespace osmscout {
       while (!remainingObjectTypes.Empty() &&
              level <= maxLevelParam) {
         Magnification              magnification(level);
-        uint32_t                   objectCount=0;
         TypeInfoSet                currentObjectTypes(remainingObjectTypes);
         std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypeCount());
 
@@ -540,7 +524,7 @@ namespace osmscout {
 
         scanner.GotoBegin();
 
-        scanner.Read(objectCount);
+        uint32_t objectCount=scanner.ReadUInt32();
 
         Object obj;
 

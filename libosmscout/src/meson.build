@@ -34,7 +34,7 @@ osmscoutSrc = [
             'src/osmscout/util/Transformation.cpp',
             'src/osmscout/util/WorkQueue.cpp',
             'src/osmscout/util/TagErrorReporter.cpp',
-            'src/osmscout/routing/Route.cpp',
+            'src/osmscout/routing/RouteDescription.cpp',
             'src/osmscout/routing/RouteDescriptionPostprocessor.cpp',
             'src/osmscout/routing/RouteData.cpp',
             'src/osmscout/routing/RouteNode.cpp',

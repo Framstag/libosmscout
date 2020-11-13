@@ -55,7 +55,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    true);
 
-      scanner.ReadBox(boundingBox);
+      boundingBox=scanner.ReadBox();
 
       log.Debug() << "BoundingBox: " << boundingBox.GetDisplayText();
 

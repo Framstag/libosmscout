@@ -32,7 +32,7 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>

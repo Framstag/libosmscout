@@ -30,7 +30,6 @@
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/Transformation.h>
 
 namespace osmscout
 {
@@ -50,15 +49,14 @@ namespace osmscout
   void OptimizeAreasLowZoom::ReadTypeData(FileScanner& scanner,
                                           OptimizeAreasLowZoom::TypeData& data)
   {
-    scanner.Read(data.optLevel);
-    scanner.Read(data.indexLevel);
-    scanner.Read(data.cellXStart);
-    scanner.Read(data.cellXEnd);
-    scanner.Read(data.cellYStart);
-    scanner.Read(data.cellYEnd);
-
-    scanner.ReadFileOffset(data.bitmapOffset);
-    scanner.Read(data.dataOffsetBytes);
+    data.optLevel=scanner.ReadUInt32();
+    data.indexLevel=scanner.ReadUInt32();
+    data.cellXStart=scanner.ReadUInt32();
+    data.cellXEnd=scanner.ReadUInt32();
+    data.cellYStart=scanner.ReadUInt32();
+    data.cellYEnd=scanner.ReadUInt32();
+    data.bitmapOffset=scanner.ReadFileOffset();
+    data.dataOffsetBytes=scanner.ReadUInt8();
 
     data.cellXCount=data.cellXEnd-data.cellXStart+1;
     data.cellYCount=data.cellYEnd-data.cellYStart+1;
@@ -82,31 +80,18 @@ namespace osmscout
     try {
       scanner.Open(datafilename,FileScanner::LowMemRandom,memoryMappedData);
 
-      FileOffset indexOffset;
-
-      scanner.ReadFileOffset(indexOffset);
+      FileOffset indexOffset=scanner.ReadFileOffset();
 
       scanner.SetPos(indexOffset);
 
-      uint32_t optimizationMaxMag;
-      uint32_t areaTypeCount;
-
-      scanner.Read(optimizationMaxMag);
-      scanner.Read(areaTypeCount);
-
-      if (scanner.HasError()) {
-        return false;
-      }
+      uint32_t optimizationMaxMag=scanner.ReadUInt32();
+      uint32_t areaTypeCount=scanner.ReadUInt32();
 
       magnification=pow(2.0,(int)optimizationMaxMag);
 
       for (size_t i=1; i<=areaTypeCount; i++) {
-        TypeId      typeId;
-        TypeInfoRef type;
-
-        scanner.Read(typeId);
-
-        type=typeConfig->GetAreaTypeInfo(typeId);
+        TypeId      typeId=scanner.ReadUInt16();
+        TypeInfoRef type=typeConfig->GetAreaTypeInfo(typeId);
 
         TypeData typeData;
 
@@ -193,10 +178,7 @@ namespace osmscout
 
       // For each column in row
       for (size_t x=minxc; x<=maxxc; x++) {
-        FileOffset cellDataOffset;
-
-        scanner.ReadFileOffset(cellDataOffset,
-                               typeData.dataOffsetBytes);
+        FileOffset cellDataOffset=scanner.ReadFileOffset(typeData.dataOffsetBytes);
 
         if (cellDataOffset==0) {
           continue;
@@ -219,16 +201,11 @@ namespace osmscout
 
       // For each data cell in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
-        uint32_t   dataCount;
+        uint32_t   dataCount=scanner.ReadUInt32Number();
         FileOffset lastOffset=0;
 
-
-        scanner.ReadNumber(dataCount);
-
         for (size_t d=0; d<dataCount; d++) {
-          FileOffset objectOffset;
-
-          scanner.ReadNumber(objectOffset);
+          FileOffset objectOffset=scanner.ReadUInt64Number();
 
           objectOffset+=lastOffset;
 

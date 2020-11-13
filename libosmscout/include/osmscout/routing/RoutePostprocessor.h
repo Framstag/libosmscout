@@ -442,8 +442,6 @@ namespace osmscout {
      */
     friend Postprocessor;
 
-    RoutePostprocessor();
-
     bool PostprocessRouteDescription(RouteDescription& description,
                                      const std::vector<RoutingProfileRef>& profiles,
                                      const std::vector<DatabaseRef>& databases,

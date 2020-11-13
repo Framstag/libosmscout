@@ -25,7 +25,7 @@
 #include <limits>
 #include <cstddef>
 
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
 

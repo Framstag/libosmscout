@@ -21,9 +21,9 @@
 
 #include <osmscout/util/FileScanner.h>
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 #include <limits>
 
@@ -56,7 +56,7 @@ namespace osmscout {
   FileScanner::FileScanner()
    : file(nullptr),
      hasError(true),
-     buffer(nullptr),
+     mmap(nullptr),
      size(0),
      offset(0),
      byteBuffer(nullptr),
@@ -93,17 +93,17 @@ namespace osmscout {
   void FileScanner::FreeBuffer()
   {
 #if defined(HAVE_MMAP)
-    if (buffer!=nullptr) {
-      if (munmap(buffer,size)!=0) {
+    if (mmap!=nullptr) {
+      if (munmap(mmap,size)!=0) {
         log.Error() << "Error while calling munmap: "<< strerror(errno) << " for file '" << filename << "'";
       }
 
-      buffer=nullptr;
+      mmap=nullptr;
     }
 #elif  defined(_WIN32)
-      if (buffer!=nullptr) {
-        UnmapViewOfFile(buffer);
-        buffer=nullptr;
+      if (mmap!=nullptr) {
+        UnmapViewOfFile(mmap);
+        mmap=nullptr;
       }
       if (mmfHandle!=nullptr) {
         CloseHandle(mmfHandle);
@@ -130,19 +130,19 @@ namespace osmscout {
     }
 
 #if defined(HAVE_FSEEKO)
-    off_t size;
+    off_t fileSize;
 
     if (fseeko(file,0L,SEEK_END)!=0) {
       throw IOException(filename,"Cannot seek to end of file");
     }
 
-    size=ftello(file);
+    fileSize=ftello(file);
 
-    if (size==-1) {
+    if (fileSize==-1) {
       throw IOException(filename,"Cannot get size of file");
     }
 
-    this->size=(FileOffset)size;
+    this->size=(FileOffset)fileSize;
 
     if (fseeko(file,0L,SEEK_SET)!=0) {
       throw IOException(filename,"Cannot seek to start of file");
@@ -190,17 +190,17 @@ namespace osmscout {
 
 #if defined(HAVE_POSIX_FADVISE)
     if (mode==FastRandom) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_WILLNEED)<0) {
+      if (posix_fadvise(fileno(file),0,fileSize,POSIX_FADV_WILLNEED)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
     else if (mode==Sequential) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_SEQUENTIAL)<0) {
+      if (posix_fadvise(fileno(file),0,fileSize,POSIX_FADV_SEQUENTIAL)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
     else if (mode==LowMemRandom) {
-      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_RANDOM)<0) {
+      if (posix_fadvise(fileno(file),0,fileSize,POSIX_FADV_RANDOM)!=0) {
         log.Error() << "Cannot set file access advice for file '" << filename << "' (" << strerror(errno) << ")";
       }
     }
@@ -210,30 +210,30 @@ namespace osmscout {
     if (useMmap && this->size>0) {
       FreeBuffer();
 
-      buffer=(char*)mmap(nullptr,(size_t)size,PROT_READ,MAP_PRIVATE,fileno(file),0);
-      if (buffer!=MAP_FAILED) {
+      mmap=(char*)::mmap(nullptr,(size_t)fileSize,PROT_READ,MAP_PRIVATE,fileno(file),0);
+      if (mmap!=MAP_FAILED) {
         offset=0;
 #if defined(HAVE_POSIX_MADVISE)
         if (mode==FastRandom) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_WILLNEED)<0) {
+          if (posix_madvise(mmap,(size_t)fileSize,POSIX_MADV_WILLNEED)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
         else if (mode==Sequential) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_SEQUENTIAL)<0) {
+          if (posix_madvise(mmap,(size_t)fileSize,POSIX_MADV_SEQUENTIAL)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
         else if (mode==LowMemRandom) {
-          if (posix_madvise(buffer,(size_t)size,POSIX_MADV_RANDOM)<0) {
+          if (posix_madvise(mmap,(size_t)fileSize,POSIX_MADV_RANDOM)!=0) {
             log.Error() << "Cannot set mmaped file access advice for file '" << filename << "' (" << strerror(errno) << ")";
           }
         }
 #endif
       }
       else {
-        log.Error() << "Cannot mmap file '" << filename << "' of size " << size << " (" << strerror(errno) << ")";
-        buffer=nullptr;
+        log.Error() << "Cannot mmap file '" << filename << "' of size " << fileSize << " (" << strerror(errno) << ")";
+        mmap=nullptr;
       }
     }
 #elif  defined(_WIN32)
@@ -247,13 +247,13 @@ namespace osmscout {
                                   (LPCTSTR)nullptr);
 
       if (mmfHandle!=nullptr) {
-        buffer=(char*)MapViewOfFile(mmfHandle,
-                                    FILE_MAP_READ,
-                                    0,
-                                    0,
-                                    0);
+        mmap=(char*)MapViewOfFile(mmfHandle,
+                                  FILE_MAP_READ,
+                                  0,
+                                  0,
+                                  0);
 
-        if (buffer!=nullptr) {
+        if (mmap!=nullptr) {
           offset=0;
         }
         else {
@@ -323,7 +323,7 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       return offset>=size;
     }
 #endif
@@ -358,7 +358,7 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (pos>=size) {
         hasError=true;
         throw IOException(filename,"Cannot set position in file to "+std::to_string(pos),"Position beyond file end");
@@ -374,9 +374,10 @@ namespace osmscout {
 
 #if defined(HAVE_FSEEKO)
     hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
-#elif defined(HAVE__FSEEKi64)
+#elif defined(HAVE__FSEEKI64)
     hasError=_fseeki64(file,(__int64)pos,SEEK_SET)!=0;
 #else
+    assert(pos <= (FileOffset)std::numeric_limits<long>::max());
     hasError=fseek(file,(long)pos,SEEK_SET)!=0;
 #endif
 
@@ -397,7 +398,7 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       return offset;
     }
 #endif
@@ -439,13 +440,13 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (this->buffer!=nullptr) {
+    if (this->mmap!=nullptr) {
       if (offset+(FileOffset)bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
       }
 
-      char *res = &this->buffer[offset];
+      char *res = &this->mmap[offset];
 
       offset+=bytes;
 
@@ -469,13 +470,13 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (this->buffer!=nullptr) {
+    if (this->mmap!=nullptr) {
       if (offset+(FileOffset)bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
       }
 
-      memcpy(buffer,&this->buffer[offset],bytes);
+      memcpy(buffer,&this->mmap[offset],bytes);
 
       offset+=bytes;
 
@@ -490,16 +491,14 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::Read(std::string& value)
+  std::string FileScanner::ReadString()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read string","File already in error state");
     }
 
-    value.clear();
-
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read string","Cannot read beyond end of file");
@@ -508,24 +507,26 @@ namespace osmscout {
       FileOffset start=offset;
 
       while (offset<size &&
-             buffer[offset]!='\0') {
+             mmap[offset]!='\0') {
         offset++;
       }
 
-      value.assign(&buffer[start],offset-start);
 
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read string","String has no terminating '\\0' before end of file");
       }
 
+      std::string value(&mmap[start],offset-start);
+
       offset++;
 
-      return;
+      return value;
     }
 #endif
 
-    char character;
+    std::string value;
+    char        character;
 
     hasError=fread(&character,1,1,file)!=1;
 
@@ -542,9 +543,11 @@ namespace osmscout {
         throw IOException(filename,"Cannot read string");
       }
     }
+
+    return value;
   }
 
-  void FileScanner::Read(bool& boolean)
+  bool FileScanner::ReadBool()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read bool","File already in error state");
@@ -553,18 +556,16 @@ namespace osmscout {
     char value;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read bool","Cannot read beyond end of file");
       }
 
-      value=buffer[offset];
-      boolean=ConvertBool(value);
-
+      value=mmap[offset];
       offset++;
 
-      return;
+      return ConvertBool(value);
     }
 #endif
 
@@ -574,29 +575,29 @@ namespace osmscout {
       throw IOException(filename,"Cannot read bool");
     }
 
-    boolean=ConvertBool(value);
+    return ConvertBool(value);
   }
 
-  void FileScanner::Read(int8_t& number)
+  int8_t FileScanner::ReadInt8()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int8_t","File already in error state");
     }
 
-    number=0;
+    int8_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int8_t","Cannot read beyond end of file");
       }
 
-      number=(int8_t)buffer[offset];
+      number=(int8_t)mmap[offset];
 
       offset++;
 
-      return;
+      return number;
     }
 #endif
 
@@ -605,24 +606,26 @@ namespace osmscout {
     if (hasError) {
       throw IOException(filename,"Cannot read int8_t");
     }
+
+    return number;
   }
 
-  void FileScanner::Read(int16_t& number)
+  int16_t FileScanner::ReadInt16()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int16_t","File already in error state");
     }
 
-    number=0;
+    int16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+2-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int16_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&buffer[offset];
+      char    *dataPtr=&mmap[offset];
       int16_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -636,19 +639,19 @@ namespace osmscout {
 
       offset+=2;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[2];
+    std::array<unsigned char,2> buffer;
 
-    hasError=fread(&buffer,1,2,file)!=2;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int16_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int16_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -659,24 +662,26 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(int32_t& number)
+  int32_t FileScanner::ReadInt32()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int32_t","File already in error state");
     }
 
-    number=0;
+    int32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+4-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int32_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&buffer[offset];
+      char    *dataPtr=&mmap[offset];
       int32_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -700,19 +705,19 @@ namespace osmscout {
 
       offset+=4;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,4,file)!=4;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int32_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -733,24 +738,26 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(int64_t& number)
+  int64_t FileScanner::ReadInt64()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int64_t","File already in error state");
     }
 
-    number=0;
+    int64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+8-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int64_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&buffer[offset];
+      char    *dataPtr=&mmap[offset];
       int64_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -794,19 +801,19 @@ namespace osmscout {
 
       offset+=8;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read int64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     int64_t       add;
 
     add=(unsigned char)(*dataPtr);
@@ -847,28 +854,30 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(uint8_t& number)
+  uint8_t FileScanner::ReadUInt8()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint8_t","File already in error state");
     }
 
-    number=0;
+    uint8_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read uint8_t","Cannot read beyond end of file");
       }
 
-      number=(uint8_t)buffer[offset];
+      number=(uint8_t)mmap[offset];
 
       offset++;
 
-      return;
+      return number;
     }
 #endif
 
@@ -877,24 +886,26 @@ namespace osmscout {
     if (hasError) {
       throw IOException(filename,"Cannot read uint8_t");
     }
+
+    return number;
   }
 
-  void FileScanner::Read(uint16_t& number)
+  uint16_t FileScanner::ReadUInt16()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint16_t","File already in error state");
     }
 
-    number=0;
+    uint16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+2-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read uint16_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint16_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -908,19 +919,19 @@ namespace osmscout {
 
       offset+=2;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[2];
+    std::array<unsigned char,2> buffer;
 
-    hasError=fread(&buffer,1,2,file)!=2;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint16_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint16_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -931,24 +942,26 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 8;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(uint32_t& number)
+  uint32_t FileScanner::ReadUInt32()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint32_t","File already in error state");
     }
 
-    number=0;
+    uint32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+4-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read uint32_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint32_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -972,19 +985,19 @@ namespace osmscout {
 
       offset+=4;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,4,file)!=4;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint32_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1005,24 +1018,26 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 24;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(uint64_t& number)
+  uint64_t FileScanner::ReadUInt64()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint64_t","File already in error state");
     }
 
-    number=0;
+    uint64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+8-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read uint64_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint64_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -1066,19 +1081,19 @@ namespace osmscout {
 
       offset+=8;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read uint64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint64_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1119,25 +1134,26 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     number|=add;
+
+    return number;
   }
 
-  void FileScanner::Read(uint16_t& number,
-                         size_t bytes)
+  uint16_t FileScanner::Read(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read size limited uint16_t","File already in error state");
     }
 
-    number=0;
+    uint16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read size limited uint16_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint16_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -1153,19 +1169,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[2];
+    std::array<unsigned char,2> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read size limited uint16_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint16_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1178,25 +1194,26 @@ namespace osmscout {
       add=add << 8;
       number|=add;
     }
+
+    return number;
   }
 
-  void FileScanner::Read(uint32_t& number,
-                         size_t bytes)
+  uint32_t FileScanner::ReadUInt32(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read size limited uint32_t","File already in error state");
     }
 
-    number=0;
+    uint32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read size limited uint32_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint32_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -1226,19 +1243,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read size limited uint32_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint32_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1265,25 +1282,26 @@ namespace osmscout {
         }
       }
     }
+
+    return number;
   }
 
-  void FileScanner::Read(uint64_t& number,
-                         size_t bytes)
+  uint64_t FileScanner::ReadUInt64(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read size limited uint64_t","File already in error state");
     }
 
-    number=0;
+    uint64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read size limited uint64_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&buffer[offset];
+      char     *dataPtr=&mmap[offset];
       uint64_t add;
 
       add=(unsigned char)(*dataPtr);
@@ -1341,19 +1359,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read size limited uint64_t");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     uint64_t      add;
 
     add=(unsigned char)(*dataPtr);
@@ -1408,27 +1426,26 @@ namespace osmscout {
         }
       }
     }
+
+    return number;
   }
 
-  void FileScanner::Read(ObjectFileRef& ref)
+  ObjectFileRef FileScanner::ReadObjectFileRef()
   {
-    uint8_t    typeByte;
-    FileOffset fileOffset;
+    uint8_t    typeByte=ReadUInt8();
+    FileOffset fileOffset=ReadFileOffset();
 
-    Read(typeByte);
-    ReadFileOffset(fileOffset);
-
-    ref.Set(fileOffset,(RefType)typeByte);
+    return {fileOffset,(RefType)typeByte};
   }
 
-  void FileScanner::Read(Color& color)
+  Color FileScanner::ReadColor()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read file offset","File already in error state");
     }
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+4-1>=size) {
         hasError=true;
         throw IOException(filename,
@@ -1436,22 +1453,20 @@ namespace osmscout {
                           "Cannot read beyond end of file");
       }
 
-      double r=((unsigned char)buffer[offset+0])/255.0;
-      double g=((unsigned char)buffer[offset+1])/255.0;
-      double b=((unsigned char)buffer[offset+2])/255.0;
-      double a=((unsigned char)buffer[offset+3])/255.0;
-
-      color=Color(r,g,b,a);
+      double r=((unsigned char)mmap[offset+0])/255.0;
+      double g=((unsigned char)mmap[offset+1])/255.0;
+      double b=((unsigned char)mmap[offset+2])/255.0;
+      double a=((unsigned char)mmap[offset+3])/255.0;
 
       offset+=4;
 
-      return;
+      return {r,g,b,a};
     }
 #endif
 
-    unsigned char buffer[4];
+    std::array<unsigned char,4> buffer;
 
-    hasError=fread(&buffer,1,4,file)!=4;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read color");
@@ -1462,25 +1477,25 @@ namespace osmscout {
     double b=buffer[2]/255.0;
     double a=buffer[3]/255.0;
 
-    color=Color(r,g,b,a);
+    return {r,g,b,a};
   }
 
-  void FileScanner::ReadFileOffset(FileOffset& fileOffset)
+  FileOffset FileScanner::ReadFileOffset()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read file offset","File already in error state");
     }
 
-    fileOffset=0;
+    FileOffset fileOffset=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+8-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
-      char       *dataPtr=&buffer[offset];
+      char       *dataPtr=&mmap[offset];
       FileOffset add;
 
       add=(unsigned char)(*dataPtr);
@@ -1524,19 +1539,19 @@ namespace osmscout {
 
       offset+=8;
 
-      return;
+      return fileOffset;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,8,file)!=8;
+    hasError=fread(buffer.data(),1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read file offset");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     FileOffset    add;
 
     add=(unsigned char)(*dataPtr);
@@ -1577,10 +1592,11 @@ namespace osmscout {
     add=(unsigned char)(*dataPtr);
     add=add << 56;
     fileOffset|=add;
+
+    return fileOffset;
   }
 
-  void FileScanner::ReadFileOffset(FileOffset& fileOffset,
-                                   size_t bytes)
+  FileOffset FileScanner::ReadFileOffset(size_t bytes)
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read file offset","File already in error state");
@@ -1588,16 +1604,16 @@ namespace osmscout {
 
     assert(bytes>0 && bytes<=8);
 
-    fileOffset=0;
+    FileOffset fileOffset=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+bytes-1>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
-      char       *dataPtr=&buffer[offset];
+      char       *dataPtr=&mmap[offset];
       FileOffset add;
 
       add=(unsigned char)(*dataPtr);
@@ -1655,19 +1671,19 @@ namespace osmscout {
 
       offset+=bytes;
 
-      return;
+      return fileOffset;
     }
 #endif
 
-    unsigned char buffer[8];
+    std::array<unsigned char,8> buffer;
 
-    hasError=fread(&buffer,1,bytes,file)!=bytes;
+    hasError=fread(buffer.data(),1,bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot read file offset");
     }
 
-    unsigned char *dataPtr=buffer;
+    unsigned char *dataPtr=buffer.data();
     FileOffset    add;
 
     add=(unsigned char)(*dataPtr);
@@ -1722,28 +1738,30 @@ namespace osmscout {
         }
       }
     }
+
+    return fileOffset;
   }
 
-  void FileScanner::ReadNumber(int16_t& number)
+  int16_t FileScanner::ReadInt16Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int16_t number","File already in error state");
     }
 
-    number=0;
+    int16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int16_t number","Cannot read beyond end of file");
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int bytes=DecodeNumber(&mmap[offset],number);
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1754,17 +1772,15 @@ namespace osmscout {
       throw IOException(filename,"Cannot read int16_t number");
     }
 
-    typedef int16_t num_t;
-
+    using        num_t = int16_t;
     unsigned int shift=0;
-    unsigned int nextShift=0;
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      int16_t val=(buffer & 0x7e) >> 1;
+      int16_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=-1;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
 
@@ -1782,10 +1798,10 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int16_t val=(buffer & 0x7e) >> 1;
+      int16_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=0;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
 
@@ -1802,28 +1818,30 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(int32_t& number)
+  int32_t FileScanner::ReadInt32Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int32_t number","File already in error state");
     }
 
-    number=0;
+    int32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int32_t number","Cannot read beyond end of file");
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int bytes=DecodeNumber(&mmap[offset],number);
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1835,17 +1853,15 @@ namespace osmscout {
     }
 
 
-    typedef int32_t num_t;
-
+    using        num_t = int32_t;
     unsigned int shift=0;
-    unsigned int nextShift=0;
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      int32_t val=(buffer & 0x7e) >> 1;
+      int32_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=-1;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
 
@@ -1863,10 +1879,10 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int32_t val=(buffer & 0x7e) >> 1;
+      int32_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=0;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
 
@@ -1883,28 +1899,30 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(int64_t& number)
+  int64_t FileScanner::ReadInt64Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read int64_t number","File already in error state");
     }
 
-    number=0;
+    int64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read int64_t number","Cannot read beyond end of file");
       }
 
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+      unsigned int bytes=DecodeNumber(&mmap[offset],number);
 
       offset+=bytes;
 
-      return;
+      return number;
     }
 #endif
 
@@ -1915,20 +1933,18 @@ namespace osmscout {
       throw IOException(filename,"Cannot read int64_t number");
     }
 
-    typedef int64_t num_t;
+    using num_t = int64_t;
 
     unsigned int shift=0;
-    unsigned int nextShift=0;
 
     // negative form
     if ((buffer & 0x01)!=0) {
-      int64_t val=(buffer & 0x7e) >> 1;
+      int64_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=-1;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
-
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
@@ -1943,13 +1959,12 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int64_t val=(buffer & 0x7e) >> 1;
+      int64_t      val=(buffer & 0x7e) >> 1;
+      unsigned int nextShift=6;
 
       number=0;
-      nextShift=6;
 
       while ((buffer & 0x80)!=0) {
-
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
@@ -1963,26 +1978,28 @@ namespace osmscout {
 
       number|=static_cast<num_t>(val) << shift;
     }
+
+    return number;
   }
 
-  void FileScanner::ReadNumber(uint16_t& number)
+  uint16_t FileScanner::ReadUInt16Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint16_t number","File already in error state");
     }
 
-    number=0;
+    uint16_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint16_t>(buffer[offset] & 0x7f) << shift;
+        number|=static_cast<uint16_t>(mmap[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80)==0) {
           offset++;
-          return;
+          return number;
         }
 
         shift+=7;
@@ -2006,7 +2023,7 @@ namespace osmscout {
       number|=static_cast<uint16_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
-        return;
+        return number;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
@@ -2018,24 +2035,24 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::ReadNumber(uint32_t& number)
+  uint32_t FileScanner::ReadUInt32Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint32_t number","File already in error state");
     }
 
-    number=0;
+    uint32_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint32_t>(buffer[offset] & 0x7f) << shift;
+        number|=static_cast<uint32_t>(mmap[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80)==0) {
           offset++;
-          return;
+          return number;
         }
 
         shift+=7;
@@ -2059,7 +2076,7 @@ namespace osmscout {
       number|=static_cast<uint32_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
-        return;
+        return number;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
@@ -2071,24 +2088,24 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::ReadNumber(uint64_t& number)
+  uint64_t FileScanner::ReadUInt64Number()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read uint64_t number","File already in error state");
     }
 
-    number=0;
+    uint64_t number=0;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint64_t>(buffer[offset] & 0x7f) << shift;
+        number|=static_cast<uint64_t>(mmap[offset] & 0x7f) << shift;
 
-        if ((buffer[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80)==0) {
           offset++;
-          return;
+          return number;
         }
 
         shift+=7;
@@ -2112,7 +2129,7 @@ namespace osmscout {
       number|=static_cast<uint64_t>(buffer & 0x7f) << shift;
 
       if ((buffer & 0x80)==0) {
-        return;
+        return number;
       }
 
       if (fread(&buffer,1,1,file)!=1) {
@@ -2124,7 +2141,7 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::ReadCoord(GeoCoord& coord)
+  GeoCoord FileScanner::ReadCoord()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read coordinate","File already in error state");
@@ -2134,14 +2151,14 @@ namespace osmscout {
     uint32_t lonDat;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+coordByteSize-1>=size) {
         hasError=true;
 
-        throw IOException(filename,"Cannot read coordinate","Cannot read beyonf end of file");
+        throw IOException(filename,"Cannot read coordinate","Cannot read beyond end of file");
       }
 
-      char *dataPtr=&buffer[offset];
+      char *dataPtr=&mmap[offset];
 
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
@@ -2155,12 +2172,11 @@ namespace osmscout {
 
       offset+=coordByteSize;
 
-      SetCoord(latDat, lonDat, coord);
-      return;
+      return CreateCoord(latDat, lonDat);
     }
 #endif
 
-    unsigned char buffer[coordByteSize];
+    std::array<unsigned char,coordByteSize> buffer;
 
     hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
 
@@ -2178,11 +2194,10 @@ namespace osmscout {
            | (buffer[5] << 16)
            | ((buffer[6] & 0xf0) << 20);
 
-    SetCoord(latDat, lonDat, coord);
+    return CreateCoord(latDat, lonDat);
   }
 
-  void FileScanner::ReadConditionalCoord(GeoCoord& coord,
-                                         bool& isSet)
+  std::tuple<GeoCoord,bool> FileScanner::ReadConditionalCoord()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read coordinate","File already in error state");
@@ -2190,16 +2205,18 @@ namespace osmscout {
 
     uint32_t latDat;
     uint32_t lonDat;
+    GeoCoord coord;
+    bool     isSet;
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
-    if (buffer!=nullptr) {
+    if (mmap!=nullptr) {
       if (offset+coordByteSize-1>=size) {
         hasError=true;
 
         throw IOException(filename,"Cannot read coordinate","Cannot read beyond end of file");
       }
 
-      char *dataPtr=&buffer[offset];
+      char *dataPtr=&mmap[offset];
 
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
@@ -2218,17 +2235,17 @@ namespace osmscout {
         isSet=false;
       }
       else  {
-        SetCoord(latDat, lonDat, coord);
+        coord=CreateCoord(latDat, lonDat);
         isSet=true;
       }
 
-      return;
+      return std::make_tuple(coord,isSet);
     }
 #endif
 
-    unsigned char buffer[coordByteSize];
+    std::array<unsigned char,coordByteSize> buffer;
 
-    hasError=fread(&buffer,1,coordByteSize,file)!=coordByteSize;
+    hasError=fread(&buffer,1,buffer.size(),file)!=buffer.size();
 
     if (hasError) {
       throw IOException(filename,"Cannot read coordinate");
@@ -2249,9 +2266,11 @@ namespace osmscout {
       isSet=false;
     }
     else  {
-      SetCoord(latDat, lonDat, coord);
+      coord=CreateCoord(latDat, lonDat);
       isSet=true;
     }
+
+    return std::make_tuple(coord,isSet);
   }
 
   void FileScanner::Read(std::vector<Point>& nodes,
@@ -2262,7 +2281,7 @@ namespace osmscout {
     size_t  coordBitSize;
     uint8_t sizeByte;
 
-    Read(sizeByte);
+    sizeByte=ReadUInt8();
 
     // Fast exit for empty arrays
     if (sizeByte==0) {
@@ -2288,17 +2307,17 @@ namespace osmscout {
       nodeCount=(sizeByte & 0x78) >> 3;
 
       if ((sizeByte & 0x80) != 0) {
-        Read(sizeByte);
+        sizeByte=ReadUInt8();
 
         nodeCount|=(sizeByte & 0x7f) << 4;
 
         if ((sizeByte & 0x80) != 0) {
-          Read(sizeByte);
+          sizeByte=ReadUInt8();
 
           nodeCount|=(sizeByte & 0x7f) << 11;
 
           if ((sizeByte & 0x80) != 0) {
-             Read(sizeByte);
+            sizeByte=ReadUInt8();
 
              nodeCount|=sizeByte << 18;
           }
@@ -2321,17 +2340,17 @@ namespace osmscout {
       nodeCount=(sizeByte & 0x7c) >> 2;
 
       if ((sizeByte & 0x80) != 0) {
-        Read(sizeByte);
+        sizeByte=ReadUInt8();
 
         nodeCount|=(sizeByte & 0x7f) << 5;
 
         if ((sizeByte & 0x80) != 0) {
-          Read(sizeByte);
+          sizeByte=ReadUInt8();
 
           nodeCount|=(sizeByte & 0x7f) << 12;
 
           if ((sizeByte & 0x80) != 0) {
-            Read(sizeByte);
+            sizeByte=ReadUInt8();
 
             nodeCount|=sizeByte << 19;
           }
@@ -2343,9 +2362,7 @@ namespace osmscout {
 
     size_t byteBufferSize=(nodeCount-1)*coordBitSize/8;
 
-    GeoCoord firstCoord;
-
-    ReadCoord(firstCoord);
+    GeoCoord firstCoord=ReadCoord();
 
     uint32_t latValue=(uint32_t)round((firstCoord.GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((firstCoord.GetLon()+180.0)*lonConversionFactor);
@@ -2458,13 +2475,11 @@ namespace osmscout {
         uint8_t bitset;
         size_t bitmask=1;
 
-        Read(bitset);
+        bitset=ReadUInt8();
 
         for (size_t i=0; i<8 && idCurrent<nodeCount; i++) {
-          if (bitset & bitmask) {
-            uint8_t serial;
-
-            Read(serial);
+          if ((bitset & bitmask)!=0) {
+            uint8_t serial=ReadUInt8();
 
             nodes[idCurrent].SetSerial(serial);
           }
@@ -2476,46 +2491,43 @@ namespace osmscout {
     }
   }
 
-  void FileScanner::ReadBox(GeoBox& box)
+  GeoBox FileScanner::ReadBox()
   {
     if (HasError()) {
       throw IOException(filename,"Cannot read geo box","File already in error state");
     }
 
-    GeoCoord minCoord;
-    GeoCoord maxCoord;
+    GeoCoord minCoord=ReadCoord();
+    GeoCoord maxCoord=ReadCoord();
 
-    ReadCoord(minCoord);
-    ReadCoord(maxCoord);
-
-    box.Set(minCoord,
-            maxCoord);
+    return {minCoord,
+            maxCoord};
   }
 
-  void FileScanner::ReadTypeId(TypeId& id,
-                               uint8_t maxBytes)
+  TypeId FileScanner::ReadTypeId(uint8_t maxBytes)
   {
     if (maxBytes==1) {
-      uint8_t byteValue;
+      uint8_t byteValue=ReadUInt8();
 
-      Read(byteValue);
-
-      id=byteValue;
+      return byteValue;
     }
-    else if (maxBytes==2) {
+
+    if (maxBytes==2) {
       uint8_t byteValue;
 
-      Read(byteValue);
+      byteValue=ReadUInt8();
 
-      id=byteValue *256;
+      TypeId id=byteValue *256;
 
-      Read(byteValue);
+      byteValue=ReadUInt8();
 
       id+=byteValue;
+
+      return id;
     }
-    else {
-      assert(false);
-    }
+
+    assert(false);
+    return 0;
   }
 
   std::vector<ObjectFileRef> FileScanner::ReadObjectFileRefs(size_t count)
@@ -2524,12 +2536,8 @@ namespace osmscout {
     FileOffset                 lastFileOffset=0;
 
     for (size_t i=0; i<count; i++) {
-      RefType    type;
-      FileOffset offset;
-
-      ReadNumber(offset);
-
-      type=(RefType)(offset%4);
+      FileOffset offset=ReadUInt64Number();
+      RefType    type=(RefType)(offset%4);
 
       offset=offset >> 2;
       offset=offset+lastFileOffset;
@@ -2556,12 +2564,8 @@ namespace osmscout {
 
   void ObjectFileRefStreamReader::Read(ObjectFileRef& ref)
   {
-    RefType    type;
-    FileOffset offset;
-
-    reader.ReadNumber(offset);
-
-    type=(RefType)(offset%4);
+    FileOffset offset=reader.ReadUInt64Number();
+    RefType    type=(RefType)(offset%4);
 
     offset=offset >> 2;
     offset=offset+lastFileOffset;

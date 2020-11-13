@@ -48,7 +48,7 @@ typedef std::shared_ptr<AdminRegionInfo> AdminRegionInfoRef;
 class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
   Q_OBJECT
 
-  friend class SearchModule;
+  friend class SearchRunnable;
 
 public:
 

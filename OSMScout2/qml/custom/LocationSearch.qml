@@ -229,6 +229,7 @@ LineEdit {
 
     LocationListModel {
         id: suggestionModel
+        resultLimit: 150 // default is 50, higher numbers for test UI performance
 
         // compute rank for location, it should be in range 0~1
         function locationRank(loc){
@@ -338,6 +339,10 @@ LineEdit {
                 clip: true
 
                 model: suggestionModel
+
+                onContentHeightChanged: {
+                    updatePopup();
+                }
 
                 delegate: Item{
                     width: suggestionView.width

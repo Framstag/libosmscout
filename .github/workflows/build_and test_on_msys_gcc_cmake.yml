@@ -30,7 +30,7 @@ jobs:
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -G 'MSYS Makefiles'
+        run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G 'MSYS Makefiles'
       - name: Build project
         run: /mingw64/bin/cmake --build build
 #      - name: Run tests

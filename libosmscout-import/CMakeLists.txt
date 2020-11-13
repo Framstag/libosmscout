@@ -116,12 +116,9 @@ else()
 endif()
 
 if (PROTOBUF_FOUND)
-    set(PROTOBUF_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/pbf)
-    file(MAKE_DIRECTORY "${PROTOBUF_OUT_DIR}")
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
-            "${PROTOBUF_OUT_DIR}"
-            src/protobuf/fileformat.proto src/protobuf/osmformat.proto)
-
+		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/fileformat.proto
+		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/osmformat.proto)
     list(APPEND HEADER_FILES include/osmscout/import/PreprocessPBF.h)
     list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
     list(APPEND HEADER_FILES ${PROTO_HDRS})
@@ -148,11 +145,12 @@ if(LIBXML2_FOUND)
 endif()
 
 if (PROTOBUF_FOUND)
-	target_include_directories(OSMScoutImport PRIVATE ${PROTOBUF_INCLUDE_DIRS})
-	target_link_libraries(OSMScoutImport ${PROTOBUF_LIBRARIES})
+	target_include_directories(OSMScoutImport PRIVATE ${Protobuf_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+	target_link_libraries(OSMScoutImport ${Protobuf_LIBRARIES})
 	if(WIN32)
 		target_compile_definitions(OSMScoutImport PRIVATE -DPROTOBUF_USE_DLLS)
 	endif()
+	target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_CMAKE_BUILD)
 endif()
 
 if (ICONV_FOUND)

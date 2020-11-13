@@ -69,32 +69,27 @@ namespace osmscout {
     datafilename=AppendFileToDir(path,datafile);
 
     try {
-      FileOffset indexFileOffset;
-      uint32_t   dataCount;
-      uint32_t   indexEntryCount;
-      uint32_t   tileMag;
-
       scanner.Open(datafilename,
                    FileScanner::LowMemRandom,
                    memoryMappedData);
 
-      scanner.Read(indexFileOffset);
-      scanner.Read(dataCount);
-      scanner.Read(tileMag);
+      FileOffset indexFileOffset=scanner.ReadFileOffset();
+      /*uint32_t dataCount=*/scanner.ReadUInt32();
+      uint32_t tileMag=scanner.ReadUInt32();
 
       magnification.SetLevel(MagnificationLevel(tileMag));
 
       scanner.SetPos(indexFileOffset);
-      scanner.Read(indexEntryCount);
+      uint32_t indexEntryCount=scanner.ReadUInt32();
 
-      for (size_t i=1; i<=indexEntryCount; i++) {
+      for (uint32_t i=1; i<=indexEntryCount; i++) {
         Pixel      cell;
         IndexEntry entry;
 
-        scanner.Read(cell.x);
-        scanner.Read(cell.y);
-        scanner.ReadFileOffset(entry.fileOffset);
-        scanner.Read(entry.count);
+        cell.x=scanner.ReadUInt32();
+        cell.y=scanner.ReadUInt32();
+        entry.fileOffset=scanner.ReadFileOffset();
+        entry.count=scanner.ReadUInt32();
 
         index[cell]=entry;
       }

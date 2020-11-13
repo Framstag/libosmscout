@@ -1,6 +1,10 @@
 OST
 
 /*
+  Please see http://libosmscout.sourceforge.net/documentation/typedef/ for a detailed
+  description of the format of this file. The documentation below contains only the
+  most important information and is not a complete description.
+
   Types:
     A type can be support for any of the following types:
     * NODE
@@ -60,6 +64,10 @@ OST
     IGNORESEALAND:
       Ignore this type for calculation of land masses (because objects of this type can
       occur on sea, too, and thus have no distinguishing character).
+    LANES[bidirectional oneway]:
+      Default value for the number of lanes, if the way is either bidirectional or
+      oneway. Default value will be overwritten during parsing of concrete ways by the
+      actual values.
     IGNORE:
       Ignore objects of this type
 */
@@ -162,6 +170,10 @@ GRADES
     "rocks"
   }
 
+/*
+  Allows to give features a localized name. This can be helpful for
+  UI visualisation.
+*/
 FEATURES
   FEATURE Address
   DESC

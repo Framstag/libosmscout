@@ -5,6 +5,8 @@
 /build/
 # cmake build directory for android builds
 /android/
+# cmake build directory for unity builds
+/unity/
 
 # IDEs
 **/.cproject

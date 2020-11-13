@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <osmscout/CoreImportExport.h>
@@ -70,18 +71,18 @@ namespace osmscout {
     };
 
   private:
-    std::string          filename;       //!< Filename
-    std::FILE            *file;          //!< Internal low level file handle
-    mutable bool         hasError;       //!< Flag to signal errors in the stream
+    std::string  filename;       //!< Filename
+    std::FILE    *file;          //!< Internal low level file handle
+    mutable bool hasError;       //!< Flag to signal errors in the stream
 
     // For mmap usage
-    char                 *buffer;        //!< Pointer to the file memory
-    FileOffset           size;           //!< Size of the memory/file
-    FileOffset           offset;         //!< Current offset into the file memory
+    char         *mmap;          //!< Pointer to the file memory
+    FileOffset   size;           //!< Size of the memory/file
+    FileOffset   offset;         //!< Current offset into the file memory
 
     // For std::vector<GeoCoord> loading
-    uint8_t              *byteBuffer;    //!< Temporary buffer for loading of std::vector<GeoCoord>
-    size_t               byteBufferSize; //!< Size of the temporary byte buffer
+    uint8_t      *byteBuffer;    //!< Temporary buffer for loading of std::vector<GeoCoord>
+    size_t       byteBufferSize; //!< Size of the temporary byte buffer
 
     // For Windows mmap usage
 #if defined(__WIN32__) || defined(WIN32)
@@ -115,11 +116,10 @@ namespace osmscout {
      *
      * @param latDat raw latitude data
      * @param lonDat raw longitude data
-     * @param coord output
+     * @return coord output
      */
-    inline void SetCoord(const uint32_t &latDat,
-                         const uint32_t &lonDat,
-                         GeoCoord &coord)
+    inline GeoCoord CreateCoord(const uint32_t &latDat,
+                                const uint32_t &lonDat)
     {
 #ifndef NDEBUG
       if (latDat > maxRawCoordValue ||
@@ -129,8 +129,8 @@ namespace osmscout {
       }
 #endif
 
-      coord.Set(latDat/latConversionFactor-90.0,
-                lonDat/lonConversionFactor-180.0);
+      return {latDat/latConversionFactor-90.0,
+              lonDat/lonConversionFactor-180.0};
     }
 
     /**
@@ -211,42 +211,41 @@ namespace osmscout {
 
     void Read(char* buffer, size_t bytes);
 
-    void Read(std::string& value);
+    std::string ReadString();
 
-    void Read(bool& boolean);
+    bool ReadBool();
 
-    void Read(int8_t& number);
-    void Read(int16_t& number);
-    void Read(int32_t& number);
-    void Read(int64_t& number);
+    int8_t ReadInt8();
+    int16_t ReadInt16();
+    int32_t ReadInt32();
+    int64_t ReadInt64();
 
-    void Read(uint8_t& number);
-    void Read(uint16_t& number);
-    void Read(uint32_t& number);
-    void Read(uint64_t& number);
+    uint8_t ReadUInt8();
+    uint16_t ReadUInt16();
+    uint32_t ReadUInt32();
+    uint64_t ReadUInt64();
 
-    void Read(uint16_t& number, size_t bytes);
-    void Read(uint32_t& number, size_t bytes);
-    void Read(uint64_t& number, size_t bytes);
+    uint16_t Read(size_t bytes);
+    uint32_t ReadUInt32(size_t bytes);
+    uint64_t ReadUInt64(size_t bytes);
 
-    void Read(ObjectFileRef& ref);
-    void Read(Color& color);
+    ObjectFileRef ReadObjectFileRef();
 
-    void ReadFileOffset(FileOffset& offset);
-    void ReadFileOffset(FileOffset& offset,
-                        size_t bytes);
+    Color ReadColor();
 
-    void ReadNumber(int16_t& number);
-    void ReadNumber(int32_t& number);
-    void ReadNumber(int64_t& number);
+    FileOffset ReadFileOffset();
+    FileOffset ReadFileOffset(size_t bytes);
 
-    void ReadNumber(uint16_t& number);
-    void ReadNumber(uint32_t& number);
-    void ReadNumber(uint64_t& number);
+    int16_t ReadInt16Number();
+    int32_t ReadInt32Number();
+    int64_t ReadInt64Number();
 
-    void ReadCoord(GeoCoord& coord);
-    void ReadConditionalCoord(GeoCoord& coord,
-                              bool& isSet);
+    uint16_t ReadUInt16Number();
+    uint32_t ReadUInt32Number();
+    uint64_t ReadUInt64Number();
+
+    GeoCoord ReadCoord();
+    std::tuple<GeoCoord,bool> ReadConditionalCoord();
 
     /**
      * Reads vector of Point and pre-compute segments and bounding box for it
@@ -261,10 +260,9 @@ namespace osmscout {
               GeoBox &bbox,
               bool readIds);
 
-    void ReadBox(GeoBox& box);
+    GeoBox ReadBox();
 
-    void ReadTypeId(TypeId& id,
-                    uint8_t maxBytes);
+    TypeId ReadTypeId(uint8_t maxBytes);
 
     std::vector<ObjectFileRef> ReadObjectFileRefs(size_t count);
   };

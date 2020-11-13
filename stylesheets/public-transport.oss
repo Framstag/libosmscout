@@ -99,7 +99,7 @@ STYLE
     [MAG cityOver-] WAY {color: #8090c0; dash: 1.5,1.0; displayWidth: 0.6mm; joinCap: butt; endCap: butt; }    
   }
   [TYPE route_subway]  {
-    [MAG suburb-] ROUTE {color: #8090c0; preferColorFeature: true; offsetRel: sidecar; displayWidth: 0.8mm; priority: -10; }
+    [MAG suburb-] ROUTE {color: #8090c0; preferColorFeature: true; offsetRel: sidecar; displayWidth: 0.8mm; priority: 60; }
   }
 
   // -------------------------------------------------------
@@ -210,6 +210,19 @@ STYLE
 
   // -------------------------------------------------------
   //
+  // Bus & Tram routes
+  //
+  [TYPE route_bus]  {
+    [MAG detail-] ROUTE {color: #5e6cecd0; offsetRel: sidecar; displayWidth: 0.2mm; priority: 50; }
+    [MAG close-] ROUTE.TEXT {label: Ref.name; color: #5e6cec; size: 1.0; displayOffset: 3.0mm; priority: 19;}
+  }
+  [TYPE route_tram]  {
+    [MAG detail-] ROUTE {color: #b05bec; offsetRel: sidecar; displayWidth: 0.2mm; priority: 50; }
+    [MAG close-] ROUTE.TEXT {label: Ref.name; color: #b05bec; size: 1.0; displayOffset: 3.0mm; priority: 19;}
+  }
+
+  // -------------------------------------------------------
+  //
   // Places
   //
 
@@ -267,7 +280,7 @@ STYLE
     [MAG cityOver-] WAY { color: #ffffff; displayWidth: 0.5mm; width: 18m;}
     [MAG detail-] {
       WAY#outline { color: #808080; width: 18m; displayWidth: 0.55mm; priority: -1; joinCap: butt; }
-      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; }
+      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; priority: 20; }
     }
   }
   [TYPE highway_trunk, highway_trunk_link] {
@@ -275,7 +288,7 @@ STYLE
     [MAG detail-] WAY { color: #f8f8f8; }
     [MAG close-] {
       WAY#outline { color: #808080; width: 18m; displayWidth: 0.55mm; priority: -1; joinCap: butt; }
-      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; }
+      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; priority: 20; }
     }
   }
   [TYPE highway_primary, highway_motorway_primary] {
@@ -284,7 +297,7 @@ STYLE
     [MAG detail-] WAY { color: #f8f8f8; }
     [MAG close-] {
       WAY#outline { color: #808080; width: 14m; displayWidth: 0.45mm; priority: -1; joinCap: butt; }
-      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; }
+      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; priority: 20; }
     }
   }
   [TYPE highway_secondary, highway_secondary_link] {
@@ -292,7 +305,7 @@ STYLE
     [MAG detail-] WAY { color: #f8f8f8; }
     [MAG closer-] {
       WAY#outline { color: #808080; width: 10m; displayWidth: 0.45mm; priority: -1; joinCap: butt; }
-      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; }
+      WAY.TEXT{label: Name.name; color: #000000; size: 1.0; priority: 20; }
     }
   }
   [TYPE highway_tertiary,
@@ -306,7 +319,7 @@ STYLE
     [MAG veryClose-] WAY { color: #f8f8f8; }
     [MAG veryClose-] {
       WAY#outline { color: #808080; width: 8m; displayWidth: 0.35mm; priority: -1; joinCap: butt; }
-      WAY.TEXT{label: Name.name; color: #404040; size: 1.0; }
+      WAY.TEXT{label: Name.name; color: #404040; size: 1.0; priority: 20; }
     }
   }
 

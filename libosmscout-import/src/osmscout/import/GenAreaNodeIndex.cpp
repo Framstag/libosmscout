@@ -94,7 +94,7 @@ namespace osmscout {
                            (uint32_t) 0u,
                            [](uint32_t value,
                               const AreaNodeIndexGenerator::DistributionData& entry) {
-                             return value+entry.bitmapTiles.size();
+                             return value+static_cast<uint32_t>(entry.bitmapTiles.size());
                            });
   }
 
@@ -162,9 +162,7 @@ namespace osmscout {
 
       progress.SetAction("Scanning distribution of node types");
 
-      uint32_t dataCount=0;
-
-      nodeScanner.Read(dataCount);
+      uint32_t dataCount=nodeScanner.ReadUInt32();
 
       for (uint32_t n=1; n<=dataCount; n++) {
         progress.SetProgress(n,dataCount);
@@ -559,7 +557,6 @@ namespace osmscout {
 
       std::vector<std::map<TileId,FileOffset>> bitmapIndexOffsets=WriteBitmapIndex(progress,data,writer);
 
-      uint32_t nodeCount;
 
       //
       // Read list index data
@@ -568,7 +565,7 @@ namespace osmscout {
       std::vector<std::list<std::pair<GeoCoord,FileOffset>>> listData(data.size());
 
       nodeScanner.GotoBegin();
-      nodeScanner.Read(nodeCount);
+      uint32_t nodeCount=nodeScanner.ReadUInt32();
 
       //
       // Collect all node offsets for each bitmap cell for all current types
@@ -610,7 +607,8 @@ namespace osmscout {
       std::vector<std::map<TileId,std::list<std::pair<GeoCoord,FileOffset>>>> tileData(data.size());
 
       nodeScanner.GotoBegin();
-      nodeScanner.Read(nodeCount);
+
+      nodeCount=nodeScanner.ReadUInt32();
 
       //
       // Collect all node offsets for each tile for all current types

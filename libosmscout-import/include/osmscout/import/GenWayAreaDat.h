@@ -22,6 +22,7 @@
 
 #include <osmscout/import/ImportFeatures.h>
 
+#include <tuple>
 #include <unordered_set>
 
 #include <osmscout/Area.h>
@@ -55,29 +56,19 @@ namespace osmscout {
       Distribution();
     };
 
-    typedef std::unordered_set<OSMId> BlacklistSet;
+    using BlacklistSet = std::unordered_set<OSMId>;
+    using WayList      = std::list<RawWayRef>;
 
-    typedef std::list<RawWayRef>      WayList;
+    std::tuple<BlacklistSet,bool> ReadWayBlacklist(const ImportParameter& parameter,
+                                                   Progress& progress) const;
 
-    bool ReadWayBlacklist(const ImportParameter& parameter,
-                          Progress& progress,
-                          BlacklistSet& wayBlacklist) const;
-
-    bool GetAreas(const ImportParameter& parameter,
-                 Progress& progress,
-                 const TypeConfig& typeConfig,
-                 TypeInfoSet& types,
-                 const BlacklistSet& blacklist,
-                 FileScanner& scanner,
-                 std::vector<std::list<RawWayRef> >& areas);
-
-    bool WriteArea(const ImportParameter& parameter,
-                  Progress& progress,
-                  const TypeConfig& typeConfig,
-                  FileWriter& writer,
-                  uint32_t& writtenWayCount,
-                  const CoordDataFile::ResultMap& coordsMap,
-                  const RawWay& rawWay);
+    void WriteArea(const ImportParameter& parameter,
+                   Progress& progress,
+                   const TypeConfig& typeConfig,
+                   FileWriter& writer,
+                   uint32_t& writtenWayCount,
+                   const CoordDataFile::ResultMap& coordsMap,
+                   const RawWay& rawWay);
 
   public:
     void GetDescription(const ImportParameter& parameter,

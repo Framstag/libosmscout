@@ -327,7 +327,7 @@ void NavigationModule::playerStateChanged(QMediaPlayer::State state)
 
     currentPlaylist->clear();
 
-    for (auto sample : nextMessage){
+    for (const auto& sample : nextMessage){
       auto sampleUrl = QUrl::fromLocalFile(voiceDir + QDir::separator() + sampleFile(sample));
       qDebug() << "Adding to playlist:" << sampleUrl;
       currentPlaylist->addMedia(sampleUrl);

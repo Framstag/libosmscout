@@ -134,9 +134,7 @@ bool LoadPTRoutes(const Arguments& arguments,
 
     scanner.Open(filename,osmscout::FileScanner::Sequential,true);
 
-    uint32_t routesCount;
-
-    scanner.Read(routesCount);
+    uint32_t routesCount=scanner.ReadUInt32();
 
     for (uint32_t r=1; r<=routesCount; r++) {
       osmscout::PTRouteRef route=std::make_shared<osmscout::PTRoute>();

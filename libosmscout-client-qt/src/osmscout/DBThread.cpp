@@ -79,7 +79,7 @@ DBThread::~DBThread()
     basemapDatabase=nullptr;
   }
 
-  for (auto db:databases){
+  for (auto& db:databases){
     db->close();
   }
   databases.clear();
@@ -93,7 +93,7 @@ DBThread::~DBThread()
  */
 bool DBThread::isInitializedInternal()
 {
-  for (auto db:databases){
+  for (const auto& db:databases){
     if (!db->IsOpen()){
       return false;
     }
@@ -119,7 +119,7 @@ double DBThread::GetPhysicalDpi() const
 const DatabaseLoadedResponse DBThread::loadedResponse() const {
   QReadLocker locker(&lock);
   DatabaseLoadedResponse response;
-  for (auto db:databases){
+  for (const auto& db:databases){
     response.boundingBox.Include(db->GetDBGeoBox());
   }
   return response;
@@ -190,7 +190,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
     basemapDatabase=nullptr;
   }
 
-  for (auto db:databases){
+  for (const auto& db:databases){
     db->close();
   }
   databases.clear();
@@ -275,7 +275,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
     if (database->Open(basemapLookupDirectory.toLocal8Bit().data())) {
       basemapDatabase=database;
-      qDebug() << "Basemap found and loaded!";
+      qDebug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
     }
     else {
       qWarning() << "Cannot open basemap database '" << basemapLookupDirectory << "'!";
@@ -401,7 +401,7 @@ void DBThread::LoadStyle(QString stylesheetFilename,
 
   bool prevErrs = !styleErrors.isEmpty();
   styleErrors.clear();
-  for (auto db: databases){
+  for (const auto& db: databases){
     db->LoadStyle(stylesheetFilename+suffix, stylesheetFlags, styleErrors);
   }
   if (prevErrs || (!styleErrors.isEmpty())){
@@ -421,7 +421,7 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   }
 
   // add flags defined by stylesheet
-  for (auto &db:databases){
+  for (const auto &db:databases){
     if (!db->GetStyleConfig()) {
       continue;
     }

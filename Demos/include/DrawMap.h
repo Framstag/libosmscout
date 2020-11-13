@@ -31,7 +31,11 @@
 
 struct Arguments {
   bool help{false};
+#ifdef NDEBUG
   bool debug{false};
+#else
+  bool debug{true};
+#endif
   double dpi{96.0};
 
   std::string map;
@@ -56,6 +60,12 @@ struct Arguments {
 #endif
 };
 
+enum DrawMapArgParserWindowStyle
+{
+  ARG_WS_CONSOLE,
+  ARG_WS_WINDOW
+};
+
 class DrawMapArgParser: public osmscout::CmdLineParser
 {
 private:
@@ -64,7 +74,8 @@ private:
 public:
   DrawMapArgParser(const std::string& appName,
                    int argc, char* argv[],
-                   double dpi)
+                   double dpi,
+                   DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE)
                    : osmscout::CmdLineParser(appName, argc, argv)
   {
     args.dpi = dpi;
@@ -128,7 +139,18 @@ public:
               "baseMap",
               "Directory with world base map",
               false);
-
+    if (windowStyle == ARG_WS_WINDOW) {
+        AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                    args.width = value;
+                  }),
+                  "width",
+                  "Image width");
+        AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                    args.height = value;
+                  }),
+                  "height",
+                  "Image height");
+    }
     AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
                     args.map=value;
                   }),
@@ -139,16 +161,18 @@ public:
                   }),
                   "stylesheet",
                   "Map stylesheet");
-    AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                    args.width=value;
-                  }),
-                  "width",
-                  "Image width");
-    AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                    args.height=value;
-                  }),
-                  "height",
-                  "Image height");
+    if (windowStyle == ARG_WS_CONSOLE) {
+        AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                        args.width=value;
+                      }),
+                      "width",
+                      "Image width");
+        AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                        args.height=value;
+                      }),
+                      "height",
+                      "Image height");
+    }
     AddPositional(osmscout::CmdLineGeoCoordOption([this](const osmscout::GeoCoord& coord) {
                     args.center = coord;
                   }),
@@ -159,12 +183,13 @@ public:
                   }),
                   "zoom",
                   "Rendering zoom");
-    AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
-                    args.output=value;
-                  }),
-                  "output",
-                  "Image output");
-
+    if (windowStyle == ARG_WS_CONSOLE) {
+        AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
+                        args.output=value;
+                      }),
+                      "output",
+                      "Image output");
+    }
   }
 
   Arguments GetArguments() const
@@ -193,8 +218,9 @@ public:
 public:
   DrawMapDemo(const std::string& appName,
               int argc, char* argv[],
-              double dpi=96.0):
-      argParser(appName, argc, argv, dpi)
+              double dpi=96.0,
+              DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE):
+      argParser(appName, argc, argv, dpi, windowStyle)
   {
 
   }
@@ -227,6 +253,7 @@ public:
       return false;
     }
 
+    if (!args.fontName.empty()) drawParameter.SetFontName(args.fontName);
     drawParameter.SetFontSize(args.fontSize);
     drawParameter.SetRenderSeaLand(true);
     drawParameter.SetRenderUnknowns(false);

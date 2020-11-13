@@ -31,7 +31,7 @@
 
 #include <osmscout/import/Preprocessor.h>
 
-#if defined(OSMSCOUT_IMPORT_MESON_BUILD)
+#if defined(OSMSCOUT_IMPORT_MESON_BUILD) || defined(OSMSCOUT_IMPORT_CMAKE_BUILD)
   #include <fileformat.pb.h>
   #include <osmformat.pb.h>
 #else

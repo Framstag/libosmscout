@@ -48,27 +48,21 @@ namespace osmscout {
 
   void RawCoastline::Read(FileScanner& scanner)
   {
-    scanner.ReadNumber(id);
+    id=scanner.ReadInt64Number();
 
-    scanner.Read(flags);
+    flags=scanner.ReadUInt8();
 
-    uint32_t nodeCount;
-
-    scanner.ReadNumber(nodeCount);
+    uint32_t nodeCount=scanner.ReadUInt32Number();
 
     nodes.resize(nodeCount);
 
     if (nodeCount>0) {
-      OSMId minId;
-
-      scanner.ReadNumber(minId);
+      OSMId minId=scanner.ReadInt64Number();
 
       for (size_t i=0; i<nodeCount; i++) {
-        OSMId id;
+        OSMId relNodeId=scanner.ReadInt64Number();
 
-        scanner.ReadNumber(id);
-
-        nodes[i]=minId+id;
+        nodes[i]=minId+relNodeId;
       }
     }
   }

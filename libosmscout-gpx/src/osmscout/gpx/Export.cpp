@@ -348,7 +348,7 @@ bool GpxWritter::WriteTrackPoint(const char *elemName, const TrackPoint &point)
 
 bool GpxWritter::WriteTrackPoints(const char *elemName, const std::vector<TrackPoint> &points)
 {
-  for (auto const &point: points){
+  for (const auto& point: points){
     if (breaker && breaker->IsAborted()){
       if (callback) {
         callback->Error("aborted");
@@ -372,7 +372,7 @@ bool GpxWritter::WriteTrackSegment(const TrackSegment &segment)
 
 bool GpxWritter::WriteTrackSegments(const std::vector<TrackSegment> &segments)
 {
-  for (auto const &segment: segments){
+  for (const auto& segment: segments){
     if (!WriteTrackSegment(segment)){
       return false;
     }
@@ -402,7 +402,7 @@ bool GpxWritter::WriteTrack(const Track &track)
 
 bool GpxWritter::WriteTracks(const std::vector<Track> &tracks)
 {
-  for (auto const &track: tracks){
+  for (const auto& track: tracks){
     if (!WriteTrack(track)){
       return false;
     }
@@ -426,7 +426,7 @@ bool GpxWritter::WriteRoute(const Route &route){
 
 bool GpxWritter::WriteRoutes(const std::vector<Route> &routes)
 {
-  for (auto const &route: routes){
+  for (const auto& route: routes){
     if (!WriteRoute(route)){
       return false;
     }
@@ -465,7 +465,7 @@ bool GpxWritter::WriteMetadata(const GpxFile file)
 
 bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)
 {
-  for (auto const &waypoint: waypoints){
+  for (const auto& waypoint: waypoints){
     if (breaker && breaker->IsAborted()){
       if (callback) {
         callback->Error("aborted");

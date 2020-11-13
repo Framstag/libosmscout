@@ -75,7 +75,7 @@ public:
    * @param path
    * @return
    */
-  Q_INVOKABLE QVariant timeOfMap(QStringList path);
+  Q_INVOKABLE QVariant timeOfMap(const QStringList& path);
 
 private:
   QList<MapDirectory> dirs;

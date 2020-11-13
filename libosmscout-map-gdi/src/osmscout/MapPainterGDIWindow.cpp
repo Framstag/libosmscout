@@ -69,6 +69,7 @@ namespace osmscout {
 	bool MapPainterGDIWindow::CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance)
 	{
 		if (m_hWnd != NULL) return true;
+		m_hInstance = hInstance;
 		if (m_hInstance == NULL) m_hInstance = GetModuleHandle(NULL);
 		if (m_pPainter == NULL) m_pPainter = new MapPainterGDI(styleConfig);
 		const wchar_t CLASS_NAME[] = L"MapPainterGDIWindow";
@@ -165,7 +166,7 @@ namespace osmscout {
 			HDC hdc = BeginPaint(hwnd, &ps);
 			if (m_pPainter != NULL && m_pProjection != NULL && m_pParameter != NULL && m_pData != NULL)
 			{
-				bool result = m_pPainter->DrawMap(*m_pProjection, *m_pParameter, *m_pData, hdc, ps.rcPaint);
+				/*bool result = */m_pPainter->DrawMap(*m_pProjection, *m_pParameter, *m_pData, hdc, ps.rcPaint);
 			}
 			EndPaint(hwnd, &ps);
 		}

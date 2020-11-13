@@ -19,9 +19,6 @@
 
 #include <osmscout/Area.h>
 
-#include <algorithm>
-#include <limits>
-
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Math.h>
@@ -230,8 +227,7 @@ namespace osmscout {
 
     fileOffset=scanner.GetPos();
 
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
+    ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
     TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -242,7 +238,7 @@ namespace osmscout {
                             hasMaster);
 
     if (multipleRings) {
-      scanner.ReadNumber(ringCount);
+      ringCount=scanner.ReadUInt32Number();
 
       ringCount++;
     }
@@ -265,8 +261,7 @@ namespace osmscout {
 
     for (size_t i=1; i<ringCount; i++) {
       auto &ring = rings[i];
-      scanner.ReadTypeId(ringType,
-                         typeConfig.GetAreaTypeIdBytes());
+      ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -276,7 +271,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,
@@ -302,8 +297,7 @@ namespace osmscout {
 
     fileOffset=scanner.GetPos();
 
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
+    ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
     TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -314,7 +308,7 @@ namespace osmscout {
                             hasMaster);
 
     if (multipleRings) {
-      scanner.ReadNumber(ringCount);
+      ringCount=scanner.ReadUInt32Number();
 
       ringCount++;
     }
@@ -337,8 +331,7 @@ namespace osmscout {
 
     for (size_t i=1; i<ringCount; i++) {
       auto &ring = rings[i];
-      scanner.ReadTypeId(ringType,
-                         typeConfig.GetAreaTypeIdBytes());
+      ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -348,7 +341,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,
@@ -374,8 +367,7 @@ namespace osmscout {
 
     fileOffset=scanner.GetPos();
 
-    scanner.ReadTypeId(ringType,
-                       typeConfig.GetAreaTypeIdBytes());
+    ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
     TypeInfoRef type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -386,7 +378,7 @@ namespace osmscout {
                             hasMaster);
 
     if (multipleRings) {
-      scanner.ReadNumber(ringCount);
+      ringCount=scanner.ReadUInt32Number();
 
       ringCount++;
     }
@@ -409,8 +401,7 @@ namespace osmscout {
 
     for (size_t i=1; i<ringCount; i++) {
       auto &ring = rings[i];
-      scanner.ReadTypeId(ringType,
-                         typeConfig.GetAreaTypeIdBytes());
+      ringType=scanner.ReadTypeId(typeConfig.GetAreaTypeIdBytes());
 
       type=typeConfig.GetAreaTypeInfo(ringType);
 
@@ -420,7 +411,7 @@ namespace osmscout {
         ring.featureValueBuffer.Read(scanner);
       }
 
-      scanner.Read(ring.ring);
+      ring.ring=scanner.ReadUInt8();
       scanner.Read(ring.nodes,
                    ring.segments,
                    ring.bbox,

@@ -22,7 +22,7 @@
 
 #include <osmscout/CoreImportExport.h>
 
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Number.h>

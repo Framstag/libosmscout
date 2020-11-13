@@ -16,6 +16,7 @@ osmscout_library_project(
 )
 
 set_target_properties(OSMScoutMapIOSX PROPERTIES
+  UNITY_BUILD OFF
   FRAMEWORK TRUE
   FRAMEWORK_VERSION A
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework

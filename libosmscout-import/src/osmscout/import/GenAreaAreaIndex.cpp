@@ -577,23 +577,20 @@ namespace osmscout {
     dataStartOffset=0;
 
     for (FileOffset srcOffset : srcOffsets) {
-      uint8_t    objectType;
-      Id         id;
-      Area       area;
-      FileOffset dstOffset;
-      bool       save=true;
+      Area area;
+      bool save=true;
 
       scanner.SetPos(srcOffset);
 
-      scanner.Read(objectType);
-      scanner.Read(id);
+      uint8_t objectType=scanner.ReadUInt8();
+      Id      id=scanner.ReadUInt64();
 
       area.Read(typeConfig,
                 scanner);
 
       //  std::cout << (size_t)objectType << " " << id << " " << area.GetType()->GetName() << " " << area.GetType()->GetIndex() << std::endl;
 
-      dstOffset=dataWriter.GetPos();
+      FileOffset dstOffset=dataWriter.GetPos();
 
       for (const auto& filter : filters) {
         if (!filter->Process(progress,
@@ -841,24 +838,20 @@ namespace osmscout {
                                                   FileScanner& scanner,
                                                   std::vector<Level>& levels)
   {
-    uint32_t areaCount=0;
 
     scanner.GotoBegin();
 
-    scanner.Read(areaCount);
+    uint32_t areaCount=scanner.ReadUInt32();
 
     for (uint32_t a=1; a<=areaCount; a++) {
-      uint8_t    objectType;
-      Id         id;
-      FileOffset offset;
-      Area       area;
+      Area area;
 
       progress.SetProgress(a,areaCount);
 
-      offset=scanner.GetPos();
+      FileOffset offset=scanner.GetPos();
 
-      scanner.Read(objectType),
-      scanner.Read(id);
+      /*uint8_t objectType=*/scanner.ReadUInt8();
+      /*Id      id=*/scanner.ReadUInt64();
 
       area.Read(*typeConfig,scanner);
 

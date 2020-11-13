@@ -531,7 +531,7 @@ void PlaneMapRenderer::onStylesheetFilenameChanged()
 
     dbThread->RunSynchronousJob(
       [this](const std::list<DBInstanceRef>& databases) {
-        for (auto &db:databases){
+        for (const auto &db:databases){
           auto styleConfig=db->GetStyleConfig();
           if (styleConfig){
             finishedUnknownFillStyle=styleConfig->GetUnknownFillStyle(projection);

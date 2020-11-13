@@ -49,7 +49,7 @@ public:
 
   void start();
 
-  inline size_t expectedSize() const override
+  inline uint64_t expectedSize() const override
   {
     return 0;
   }

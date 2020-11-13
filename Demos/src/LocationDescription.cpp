@@ -30,15 +30,10 @@
 
 struct Arguments
 {
-  bool               help;
+  bool               help=false;
+  bool               debug=false;
   std::string        databaseDirectory;
   osmscout::GeoCoord location;
-
-  Arguments()
-  : help(false)
-  {
-    // no code
-  }
 };
 
 /**
@@ -212,6 +207,13 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -243,7 +245,10 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot set locale: \"" << e.what() << "\"" << std::endl;
   }
 
-  osmscout::log.Debug(false);
+  osmscout::log.Debug(args.debug);
+  osmscout::log.Info(true);
+  osmscout::log.Warn(true);
+  osmscout::log.Error(true);
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));

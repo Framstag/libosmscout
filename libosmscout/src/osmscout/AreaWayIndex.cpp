@@ -32,10 +32,7 @@ namespace osmscout {
   void AreaWayIndex::ReadTypeData(const TypeConfigRef& typeConfig,
                                   TypeData &data)
   {
-    TypeId typeId;
-
-    scanner.ReadTypeId(typeId,
-                       typeConfig->GetWayTypeIdBytes());
+    TypeId typeId=scanner.ReadTypeId(typeConfig->GetWayTypeIdBytes());
 
     data.type=typeConfig->GetWayTypeInfo(typeId);
   }

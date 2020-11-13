@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_ROUTE_H
-#define OSMSCOUT_ROUTE_H
+#ifndef OSMSCOUT_ROUTE_DESCRIPTION_H
+#define OSMSCOUT_ROUTE_DESCRIPTION_H
 
 /*
   This source is part of the libosmscout library
@@ -100,7 +100,7 @@ namespace osmscout {
     class OSMSCOUT_API Description
     {
     public:
-      virtual ~Description();
+      virtual ~Description() = default;
 
       virtual std::string GetDebugString() const = 0;
     };
@@ -322,8 +322,6 @@ namespace osmscout {
     class OSMSCOUT_API TurnDescription : public Description
     {
     public:
-      TurnDescription();
-
       std::string GetDebugString() const override;
     };
 
@@ -642,8 +640,8 @@ namespace osmscout {
     class OSMSCOUT_API SuggestedLaneDescription : public RouteDescription::Description
     {
     private:
-      uint8_t from = -1; //!< left-most suggested lane, inclusive
-      uint8_t to = -1; //!< right-most suggested lane, inclusive
+      uint8_t from = uint8_t(-1); //!< left-most suggested lane, inclusive
+      uint8_t to = uint8_t(-1); //!< right-most suggested lane, inclusive
 
     public:
       SuggestedLaneDescription(uint8_t from, uint8_t to);
@@ -785,8 +783,8 @@ namespace osmscout {
     std::map<DatabaseId, std::string> databaseMapping;
 
   public:
-    RouteDescription();
-    virtual ~RouteDescription();
+    RouteDescription() = default;
+    virtual ~RouteDescription() = default;
 
     void SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping);
 

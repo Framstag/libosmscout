@@ -46,16 +46,13 @@ namespace osmscout {
   {
     fileOffset=scanner.GetPos();
 
-    TypeId typeId;
-
-    scanner.ReadTypeId(typeId,
-                       typeConfig.GetNodeTypeIdBytes());
+    TypeId typeId=scanner.ReadTypeId(typeConfig.GetNodeTypeIdBytes());
 
     featureValueBuffer.SetType(typeConfig.GetNodeTypeInfo(typeId));
 
     featureValueBuffer.Read(scanner);
 
-    scanner.ReadCoord(coords);
+    coords=scanner.ReadCoord();
     nextFileOffset=scanner.GetPos();
   }
 

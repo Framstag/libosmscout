@@ -19,7 +19,7 @@
 
 #include <osmscout/navigation/VoiceInstructionAgent.h>
 #include <osmscout/navigation/PositionAgent.h>
-#include <osmscout/routing/Route.h>
+#include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/system/Compiler.h>

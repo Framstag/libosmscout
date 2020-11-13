@@ -45,8 +45,8 @@ namespace osmscout {
   void RawCoord:: Read(const TypeConfig& /*typeConfig*/,
                      FileScanner& scanner)
   {
-    scanner.ReadNumber(id);
-    scanner.ReadCoord(coord);
+    id=scanner.ReadInt64Number();
+    coord=scanner.ReadCoord();
   }
 
   /**

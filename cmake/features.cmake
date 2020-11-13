@@ -146,7 +146,7 @@ if (LIBXML2_FOUND AND NOT BUILD_SHARED_LIBS)
     list(APPEND LIBXML2_LIBRARIES "dl")
   endif()
 endif()
-find_package(MyProtobuf) # Modified FindProtobuf
+find_package(Protobuf)
 if (${PROTOBUF_FOUND} AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")
   set(PROTOBUF_FOUND FALSE)

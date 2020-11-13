@@ -28,7 +28,7 @@
 #include <unordered_map>
 
 #include <osmscout/system/Compiler.h>
-#include <osmscout/system/OSMScoutTypes.h>
+#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
 
