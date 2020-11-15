@@ -187,9 +187,6 @@ endif
 # OpenGL
 openGLDep = dependency('gl', required: false)
 glmDep = dependency('glm', required: false, fallback: ['glm', 'glm_dep'])
-#glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
-
-
 glewDep = dependency('glew', required: false, fallback: ['glew', 'glew_dep'])
 
 # Workaround for dependency, else error under Ubuntu 14.04
@@ -200,7 +197,7 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
+if openGLDep.found() and glmDep.found() and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
