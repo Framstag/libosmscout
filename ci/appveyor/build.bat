@@ -55,7 +55,7 @@ IF %COMPILER%==msvc2019 (
   IF %BUILDTOOL%==meson (
     echo Using build tool 'meson'...
     mkdir debug
-    meson debug --backend vs2019
+    meson debug --wrap-mode nofallback --backend vs2019
     cd debug
     msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
     echo Finished meson build

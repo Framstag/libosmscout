@@ -2,7 +2,8 @@ project('libosmscout',
         'cpp',
         meson_version: '>=0.46.0',
         default_options: ['cpp_std=c++17', 'buildtype=debugoptimized', 'warning_level=3'],
-        license: ['LGPL'])
+        license: ['LGPL'],
+        version: '1.1.1')
 
 if build_machine.system()=='darwin'
   add_languages(['objcpp'])
@@ -103,9 +104,10 @@ endif
 marisaDep = dependency('marisa', required : false)
 
 # Import
-protobufDep = dependency('protobuf', required : false)
-xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false)
-zlibDep = dependency('zlib', required : false)
+zlibDep = dependency('zlib', required : false, fallback: ['zlib','zlib_dep'])
+lzmaDep = dependency('liblzma', required : false, fallback: ['liblzma','lzma_dep'])
+xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','xml2lib_dep'])
+protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','protoc_dep'])
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
 protocCmd = find_program('protoc', required: false)
@@ -184,21 +186,18 @@ endif
 
 # OpenGL
 openGLDep = dependency('gl', required: false)
-glmDep = dependency('glm', required: false)
-glmAvailable = compiler.has_header('glm/glm.hpp', dependencies: glmDep)
-
-
-glewDep = dependency('glew', required: false)
+glmDep = dependency('glm', required: false, fallback: ['glm', 'glm_dep'])
+glewDep = dependency('glew', required: false, fallback: ['glew', 'glew_dep'])
 
 # Workaround for dependency, else error under Ubuntu 14.04
 
-if build_machine.system()=='darwin'
+if build_machine.system()=='darwin' or build_machine.system()=='linux'
   glfwDep=dependency('glfw3', required: false)
 else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
-if openGLDep.found() and (glmDep.found() or glmAvailable) and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
+if openGLDep.found() and glmDep.found() and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
   buildMapOpenGL=false
