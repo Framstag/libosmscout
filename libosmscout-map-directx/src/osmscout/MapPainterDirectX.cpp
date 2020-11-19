@@ -414,7 +414,7 @@ namespace osmscout
     viewport.height=projection.GetHeight();
 
     m_LabelLayouter.SetViewport(viewport);
-    m_LabelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    m_LabelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
   void MapPainterDirectX::AfterDrawing(const StyleConfig& /*styleConfig*/,

@@ -678,7 +678,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& /*projection*/,
+                                      const Projection& projection,
                                       const MapParameter& parameter,
                                       const MapData& /*data*/)
   {
@@ -689,7 +689,7 @@ namespace osmscout {
     viewport.height = y2 - viewport.y;
 
     labelLayouter.SetViewport(viewport);
-    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)

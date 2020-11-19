@@ -251,9 +251,6 @@ int main(int argc, char* argv[])
   drawParameter.SetFontSize(2.0);
   // Fadings make problems with tile approach, we disable it
   drawParameter.SetDrawFadings(false);
-  // To get accurate label drawing at tile borders, we take into account labels
-  // of other than the current tile, too.
-  drawParameter.SetDropNotVisiblePointLabels(false);
 
   searchParameter.SetUseLowZoomOptimization(true);
   searchParameter.SetMaximumAreaLevel(3);

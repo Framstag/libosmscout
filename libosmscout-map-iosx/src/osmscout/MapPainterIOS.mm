@@ -518,7 +518,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                        const MapData& data){
         labelLayouter.SetViewport(DoubleRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
-        labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+        labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
     
     void MapPainterIOS::RegisterRegularLabel(const Projection &projection,
