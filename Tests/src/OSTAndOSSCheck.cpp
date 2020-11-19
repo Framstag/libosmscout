@@ -26,12 +26,147 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/CmdLineParsing.h>
+#include <iomanip>
 
 using namespace std;
+
+class StyleConfigAnalyzer: public osmscout::StyleConfig
+{
+private:
+  template <typename Selector>
+  bool HasStyle(const std::vector<std::vector<std::list<Selector>>> &styleLookup, size_t typeIndex) const
+  {
+    assert(styleLookup.size() > typeIndex);
+    return !styleLookup[typeIndex].empty();
+  }
+
+  template <typename Selector>
+  bool HasStyle(const std::vector<std::vector<std::vector<std::list<Selector>>>> &selectors, size_t typeIndex) const
+  {
+    for (const auto &styleLookup: selectors){
+      if (HasStyle(styleLookup, typeIndex)){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool HasStyle(const std::vector<osmscout::TypeInfoSet> &typeSets,
+                const osmscout::TypeInfoRef &type) const
+  {
+    return std::any_of(typeSets.begin(), typeSets.end(),
+                       [&type](const auto &typeSet){
+
+      return typeSet.IsSet(type);
+    });
+  }
+
+public:
+  explicit StyleConfigAnalyzer(const osmscout::TypeConfigRef& typeConfig):
+    osmscout::StyleConfig(typeConfig)
+  {}
+
+  ~StyleConfigAnalyzer() override = default;
+
+  void Analyze() const
+  {
+    using namespace std::string_literals;
+
+    std::vector<osmscout::TypeInfoRef> areasWithoutStyle;
+    std::vector<osmscout::TypeInfoRef> waysWithoutStyle;
+    std::vector<osmscout::TypeInfoRef> nodesWithoutStyle;
+
+    size_t maxMagLevel = std::max(std::max(areaTypeSets.size(), wayTypeSets.size()),
+                                  nodeTypeSets.size()) -1;
+
+    std::cout << std::setw(35+5) << std::left << "type" << "visible on magnification" << std::endl;
+    for (size_t i=0; i<(35+5+10+maxMagLevel+2); i++){
+      std::cout << '-';
+    }
+    std::cout << std::endl;
+
+    auto PrintLevels = [&maxMagLevel](const std::string &objectType,
+                                      const std::vector<osmscout::TypeInfoSet> &typeSets,
+                                      const osmscout::TypeInfoRef &type){
+
+      std::cout << objectType << " " << std::setw(35) << std::left << type->GetName() << " ";
+      size_t minMag=maxMagLevel;
+      size_t maxMag=0;
+      for (size_t mag=0; mag<=maxMagLevel; mag++){
+        osmscout::TypeInfoSet types=typeSets[std::min(mag,typeSets.size()-1)];
+        if (types.IsSet(type)) {
+          minMag=std::min(mag,minMag);
+          maxMag=std::max(mag,maxMag);
+        }
+      }
+      std::cout << std::right
+                << std::setw(2) << std::setfill(' ') << minMag << " - "
+                << std::setw(2) << std::setfill(' ') << maxMag << " |";
+      for (size_t mag=0; mag<=maxMagLevel; mag++){
+        osmscout::TypeInfoSet types=typeSets[std::min(mag,typeSets.size()-1)];
+        std::cout << (types.IsSet(type) ? "x" : " ");
+      }
+      std::cout << "|" << std::endl;
+    };
+
+    for (const auto &type: typeConfig->GetTypes()) {
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeArea()) {
+        if (HasStyle(areaTypeSets, type)) {
+          PrintLevels("Area"s, areaTypeSets, type);
+        } else {
+          areasWithoutStyle.push_back(type);
+        }
+      }
+
+      if (type->CanBeWay()) {
+        if (HasStyle(wayTypeSets, type)) {
+          PrintLevels("Way "s, wayTypeSets, type);
+        } else {
+          waysWithoutStyle.push_back(type);
+        }
+      }
+
+      if (type->CanBeNode()){
+        if (HasStyle(nodeTypeSets, type)) {
+          PrintLevels("Node"s, nodeTypeSets, type);
+        } else {
+          nodesWithoutStyle.push_back(type);
+        }
+      }
+    }
+
+    auto PrintTypes = [](const std::vector<osmscout::TypeInfoRef> &types) {
+      for (const auto &type: types){
+        std::cout << type->GetName() << " ";
+      }
+    };
+
+    std::cout << "[I] Area types without style: ";
+    PrintTypes(areasWithoutStyle);
+    std::cout << std::endl;
+
+    std::cout << "[I] Way types without style: ";
+    PrintTypes(waysWithoutStyle);
+    std::cout << std::endl;
+
+    std::cout << "[I] Node types without style: ";
+    PrintTypes(nodesWithoutStyle);
+    std::cout << std::endl;
+
+  }
+
+};
+
+using StyleConfigAnalyzerRef = std::shared_ptr<StyleConfigAnalyzer>;
 
 struct Arguments {
   bool help = false;
   bool warningAsError = false;
+  bool analyze = false;
   std::string ostFile;
   std::string ossFile;
 };
@@ -55,6 +190,13 @@ int main(int argc, char** argv)
                       }),
                       "warning-as-error",
                       "Mark all warnings as error",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.analyze=value;
+                      }),
+                      "analyze",
+                      "Show detailed analysis of stylesheet",
                       false);
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
@@ -91,8 +233,8 @@ int main(int argc, char** argv)
     std::cout << "OST file '" << ostFilepath << "' => OK" << std::endl;
 
 
-    osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-    std::string             ossFilepath=args.ossFile;
+    StyleConfigAnalyzerRef styleConfig=std::make_shared<StyleConfigAnalyzer>(typeConfig);
+    std::string            ossFilepath=args.ossFile;
 
     if (styleConfig->Load(ossFilepath)) {
       if (styleConfig->GetWarnings().empty()) {
@@ -102,6 +244,11 @@ int main(int argc, char** argv)
         if (args.warningAsError){
           errorCount+=styleConfig->GetWarnings().size();
         }
+      }
+
+      if (args.analyze){
+        std::cout << std::endl;
+        styleConfig->Analyze();
       }
     }
     else {
