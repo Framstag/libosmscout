@@ -173,7 +173,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   QMutexLocker locker(&tileCacheMutex);
   int elapsed = start.elapsed();
   if (elapsed > 1){
-    osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
+    osmscout::log.Warn() << "Mutex acquire took " << elapsed << " ms";
   }
 
   QList<TileCache*> layerCaches;
