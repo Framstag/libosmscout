@@ -89,7 +89,7 @@ namespace osmscout {
     double                              iconPixelSize;             //!< Size of icons in px (default 14)
     double                              iconPadding;               //!< Space around icons and symbols in mm (default 1).
 
-    PatternMode                         patternMode;               //!< Mode of pattern, it controls what type of files would be loaded and how pattern geometry will be canculated
+    PatternMode                         patternMode;               //!< Mode of pattern, it controls what type of files would be loaded and how pattern geometry will be calculated
     double                              patternSize;               //!< Size of pattern image in mm (default 3.7)
 
     bool                                dropNotVisiblePointLabels; //!< Point labels that are not visible, are clipped during label positioning phase
