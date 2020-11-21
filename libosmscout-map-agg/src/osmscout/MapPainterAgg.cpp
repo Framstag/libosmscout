@@ -440,7 +440,7 @@ namespace osmscout {
                                       const MapData& /*data*/)
   {
     labelLayouter.SetViewport(DoubleRectangle(0, 0, projection.GetWidth(), projection.GetHeight()));
-    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
   void MapPainterAgg::DrawContourSymbol(const Projection& /*projection*/,

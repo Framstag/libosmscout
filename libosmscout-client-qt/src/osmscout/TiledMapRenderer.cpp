@@ -173,7 +173,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   QMutexLocker locker(&tileCacheMutex);
   int elapsed = start.elapsed();
   if (elapsed > 1){
-    osmscout::log.Warn() << "Mutex acquiere took " << elapsed << " ms";
+    osmscout::log.Warn() << "Mutex acquire took " << elapsed << " ms";
   }
 
   QList<TileCache*> layerCaches;
@@ -447,12 +447,6 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     drawParameter.SetLabelLineMaxCharCount(30);
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(screenWidth, screenHeight));
-
-    // see Tiler.cpp example...
-
-    // To get accurate label drawing at tile borders, we take into account labels
-    // of other than the current tile, too.
-    drawParameter.SetDropNotVisiblePointLabels(loadZ.Get() >= 14);
 
     drawParameter.GetLocaleRef().SetDistanceUnits(units == "imperial" ? osmscout::Units::Imperial : osmscout::Units::Metrics);
 

@@ -47,7 +47,7 @@ namespace osmscout {
     iconPadding(1.0),
     patternMode(PatternMode::OriginalPixmap),
     patternSize(3.7),
-    dropNotVisiblePointLabels(true),
+    labelLayouterOverlap(30),
     contourLabelOffset(50.0),
     contourLabelSpace(100.0),
     contourLabelPadding(1.0),
@@ -194,9 +194,9 @@ namespace osmscout {
     this->routeLabelSeparator=separator;
   }
 
-  void MapParameter::SetDropNotVisiblePointLabels(bool dropNotVisiblePointLabels)
+  void MapParameter::SetLabelLayouterOverlap(double labelLayouterOverlap)
   {
-    this->dropNotVisiblePointLabels=dropNotVisiblePointLabels;
+    this->labelLayouterOverlap=labelLayouterOverlap;
   }
 
   void MapParameter::SetContourLabelOffset(double contourLabelOffset)
