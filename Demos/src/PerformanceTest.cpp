@@ -84,6 +84,9 @@ struct Arguments {
   osmscout::MagnificationLevel endZoom{20};
   std::tuple<size_t, size_t> tileDimension{std::make_tuple(256, 256)};
   std::string driver{"none"};
+  // TODO: Use some way to find a valid font on the system (Agg display a ton of messages otherwise)
+  std::string font{"/usr/share/fonts/TTF/DejaVuSans.ttf"};
+  std::list<std::string> icons;
   double dpi{96};
   size_t drawRepeat{1};
   size_t loadRepeat{1};
@@ -539,6 +542,18 @@ int main(int argc, char* argv[])
                       "cache-areas",
                       "Cache size for areas, default: " + std::to_string(databaseParameter.GetAreaDataCacheSize()),
                       false);
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.icons.push_back(value);
+                      }),
+                      "icons",
+                      "Directory with (SVG) icons",
+                      false);
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.font=value;
+                      }),
+                      "font",
+                      "Used font, default: " + args.font,
+                      false);
 
 #if defined(HAVE_LIB_GPERFTOOLS)
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
@@ -616,8 +631,11 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   std::list<LevelStats>         statistics;
 
-  // TODO: Use some way to find a valid font on the system (Agg display a ton of messages otherwise)
-  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
+  drawParameter.SetFontName(args.font);
+  drawParameter.SetIconPaths(args.icons);
+  drawParameter.SetPatternPaths(args.icons); // for simplicity use same directories for lookup
+  drawParameter.SetIconMode(osmscout::MapParameter::IconMode::Scalable);
+  drawParameter.SetPatternMode(osmscout::MapParameter::PatternMode::Scalable);
   searchParameter.SetUseMultithreading(true);
 
   for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(args.startZoom,args.endZoom));
