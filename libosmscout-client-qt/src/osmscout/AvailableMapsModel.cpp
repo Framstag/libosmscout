@@ -84,7 +84,7 @@ void AvailableMapsModel::reload()
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
-    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
     //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 
     QNetworkReply *reply = webCtrl.get(request);
