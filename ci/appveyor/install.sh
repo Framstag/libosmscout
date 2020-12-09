@@ -24,6 +24,10 @@ apt-get install -y \
           swig openjdk-8-jdk \
           locales
 
+# workaround for custom doxygen dependecy
+# see https://help.appveyor.com/discussions/problems/28634-broken-linux-image
+sudo apt-get install -y libclang1-9
+
 locale-gen en_US.UTF-8
 
 if [ "${COMPILER}" = "gcc" ] ; then
