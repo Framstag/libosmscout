@@ -73,7 +73,12 @@ void AvailableVoicesModel::reload()
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 9, 0) /* For compatibility with QT 5.6 */
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+#else
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+#endif
     //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 
     QNetworkReply *reply = webCtrl.get(request);
