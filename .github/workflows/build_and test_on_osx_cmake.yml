@@ -1,4 +1,4 @@
-name: MSYS using gcc and cmake
+name: OS X and cmake
 
 on:
   pull_request:
@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Configure build project
-        run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
+      - name: Install build tool
+        run:  brew install ninja
       - name: Configure build project
         run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
       - name: Build project
