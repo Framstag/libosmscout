@@ -32,7 +32,7 @@ jobs:
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug
         env:
-          CXX: clang
+          CXX: clang++
           CC: clang
       - name: Build project
         run: ninja -C debug
