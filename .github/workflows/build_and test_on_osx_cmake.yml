@@ -23,3 +23,6 @@ jobs:
         run: cmake -B build -DCMAKE_PREFIX_PATH=/usr/local/opt/qt -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
       - name: Build project
         run: cmake --build build
+      - name: Run tests
+        run: ctest -j 2 --output-on-failure
+        working-directory: build
