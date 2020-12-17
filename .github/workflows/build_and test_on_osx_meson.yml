@@ -1,0 +1,25 @@
+name: OS X and cmake
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: OSX+cmake - Build and test
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install build tool
+        run:  brew install meson ninja
+      - name: Configure build project
+        run: meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
+      - name: Build project
+        run: meson compile -C debug
+      - name: Execute tests
+        run: meson test -C debug --print-errorlogs
