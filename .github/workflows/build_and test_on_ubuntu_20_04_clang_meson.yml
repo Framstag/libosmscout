@@ -18,7 +18,7 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install clang compiler, meson and ninja
-        run: sudo apt-get -y install clang ccache libtool pkg-config meson ninja-build
+        run: sudo apt-get -y install clang libc++-10-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get update && sudo apt-get install -y
               libxml2-dev
