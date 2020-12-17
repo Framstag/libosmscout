@@ -1,4 +1,4 @@
-name: OS X and cmake
+name: OS X and meson
 
 on:
   pull_request:
@@ -10,13 +10,15 @@ on:
 
 jobs:
   build:
-    name: OSX+cmake - Build and test
+    name: OSX+meson - Build and test
     runs-on: macos-10.15
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install build tool
         run:  brew install meson ninja
+      - name: Install dependencies
+        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
       - name: Build project

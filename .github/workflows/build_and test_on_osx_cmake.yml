@@ -17,6 +17,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Install build tool
         run:  brew install ninja
+      - name: Install dependencies
+        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
       - name: Configure build project
         run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
       - name: Build project
