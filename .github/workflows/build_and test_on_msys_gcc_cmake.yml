@@ -33,6 +33,12 @@ jobs:
         run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G 'MSYS Makefiles'
       - name: Build project
         run: /mingw64/bin/cmake --build build
+      - name: Print PATH
+        run: echo "PATH: ${{ env.PATH }}"
+      - name: Print workspace path
+        run: echo "PATH: ${{ github.workspace }}"
       - name: Run tests
         run: /mingw64/bin/ctest -j 2 --output-on-failure
         working-directory: build
+        env:
+          PATH: ${{ env.PATH }};${{ github.workspace }}/build/libosmscout
