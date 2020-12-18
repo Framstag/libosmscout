@@ -29,28 +29,10 @@ jobs:
                     mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
-      - name: Print PATH
-        run: echo PATH ${{ env.path }}
-      - name: Print workspace path
-        run: echo Workspace ${{ env.working-directory }}
-      - name: Print DLL path 1
-        run:  echo $PATH
-        env:
-          PATH: ${{ env.path }};${{ env.working-directory }}\\build\\libosmscout
-      - name: Print DLL path 2
-        run:  echo $PATH
-        env:
-          PATH: ${{ env.path }};${{ env.working-directory }}/build/libosmscout
-      - name: Print DLL path 3
-        run:  echo $PATH
-        env: 
-          PATH: ${{ env.path }};/d/a/libosmscout/libosmscout/build/libosmscout
       - name: Configure build project
         run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G 'MSYS Makefiles'
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure
+        run:  PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test ctest -j 4 --output-on-failure
         working-directory: build
-        env:
-          PATH: ${{ env.path }};${{ env.working-directory }}\\build\\libosmscout
