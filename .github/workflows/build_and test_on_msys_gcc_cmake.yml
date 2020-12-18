@@ -34,9 +34,9 @@ jobs:
       - name: Build project
         run: /mingw64/bin/cmake --build build
       - name: Print PATH
-        run: echo PATH: ${{ env.PATH }}
+        run: echo PATH ${{ env.PATH }}
       - name: Print workspace path
-        run: echo Workspace: ${{ github.workspace }}
+        run: echo Workspace ${{ github.workspace }}
       - name: Run tests
         run: /mingw64/bin/ctest -j 2 --output-on-failure
         working-directory: build
