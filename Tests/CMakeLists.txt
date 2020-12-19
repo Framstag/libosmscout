@@ -32,7 +32,7 @@ set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 osmscout_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
 
 #---- ReaderScannerPerformance
-osmscout_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp)
+osmscout_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- MultiDBRouting
 osmscout_test_project(NAME MultiDBRouting SOURCES src/MultiDBRouting.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")

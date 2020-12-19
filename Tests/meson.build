@@ -257,7 +257,7 @@ test('Check position accuracy with coordinate bits', CalculateResolution)
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
 test('Check number set performance', NumberSetPerformance, timeout: 180)
-test('Check reader scanner performance', ReaderScannerPerformance, workdir : meson.current_source_dir() + '/data/testregion')
+test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
 test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
 test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
 test('Check threaded database', ThreadedDatabase, args : [
