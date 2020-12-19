@@ -46,9 +46,9 @@ namespace osmscout {
     uint32_t                   maximumEntriesInMemory;
     uint32_t                   pageSize;
     uint32_t                   overallEntryCount;         // number of entries in file
-    std::function<void(const I&,const std::vector<E>&&)> processor;
-    uint32_t                   minPageId;
-    uint32_t                   maxPageId;
+    std::function<void(const I&,std::vector<E>&&)> processor;
+    I                          minPageId;
+    I                          maxPageId;
     uint32_t                   processedPagesCount;
     uint32_t                   processedPagesEntryCount;  // number of entries in completely processed pages
     uint32_t                   handledPagesEntryCount;    // number entries in current pages
@@ -57,13 +57,13 @@ namespace osmscout {
     PageManager(uint32_t maximumEntriesInMemory,
                 uint32_t pageSize,
                 uint32_t overallEntryCount,
-                std::function<void(const I&,const std::vector<E>&&)> processor)
+                std::function<void(const I&,std::vector<E>&&)> processor)
     : maximumEntriesInMemory(maximumEntriesInMemory),
       pageSize(pageSize),
       overallEntryCount(overallEntryCount),
       processor(processor),
-      minPageId(std::numeric_limits<I>::min()/pageSize),
-      maxPageId(std::numeric_limits<I>::max()/pageSize),
+      minPageId(std::numeric_limits<I>::min()/static_cast<I>(pageSize)),
+      maxPageId(std::numeric_limits<I>::max()/static_cast<I>(pageSize)),
       processedPagesCount(0u),
       processedPagesEntryCount(0u),
       handledPagesEntryCount(0u)
@@ -139,23 +139,85 @@ namespace osmscout {
     }
   };
 
-  class CoordDataGenerator CLASS_FINAL : public ImportModule
+  template<typename I, typename E>
+  class PageSplitter
   {
   private:
-    struct PageEntry
-    {
-      bool  isSet=false;
-      Point point;
-    };
+    size_t                                        pageSize;      //< Size of page
+    I                                             currentPageId; //< Id of current page
+    size_t                                        entryCount;    //< Number of entries in the current page
+    size_t                                        processedPagesCount;     //< Number of processed pages
+    std::vector<E>                                page;          //< Page data itself
+    std::function<void(const I&,std::vector<E>&)> processor; //< Callback for processing a complete page
 
+  private:
+    void FlushPage()
+    {
+      processor(currentPageId,page);
+      InitializePage();
+
+      processedPagesCount++;
+    }
+
+    void InitializePage()
+    {
+      std::for_each(page.begin(),page.end(),[](E& entry) {
+        entry.isSet=false;
+      });
+
+      entryCount=0;
+    }
+
+  public:
+    PageSplitter(size_t pageSize,
+                 std::function<void(const I&,std::vector<E>&)> processor)
+    : pageSize(pageSize),
+      currentPageId(std::numeric_limits<I>::min()),
+      entryCount(0),
+      processedPagesCount(0),
+      page(pageSize),
+      processor(processor)
+    {
+    }
+
+    void Set(const I& id, const E& value)
+    {
+      I relatedId=std::numeric_limits<I>::min()+id;
+      I pageId=relatedId/pageSize;
+      I index=relatedId%pageSize;
+
+      if (pageId!=currentPageId) {
+        if (entryCount>0) {
+          FlushPage();
+        }
+
+        currentPageId=pageId;
+      }
+
+      page[index]=value;
+      entryCount++;
+    }
+
+    void FileCompletelyScanned()
+    {
+      if (entryCount>0) {
+        FlushPage();
+      }
+    }
+
+    size_t GetProcessedPagesCount() const
+    {
+      return processedPagesCount;
+    }
+  };
+
+  class CoordDataGenerator CLASS_FINAL : public ImportModule
+  {
   private:
     bool FindDuplicateCoordinates(const TypeConfig& typeConfig,
                                   const ImportParameter& parameter,
                                   Progress& progress,
                                   SerialIdManager& serialIdManager) const;
-
-    bool DumpCurrentPage(FileWriter& writer,
-                         std::vector<PageEntry>& page) const;
 
     bool StoreCoordinates(const TypeConfig& typeConfig,
                           const ImportParameter& parameter,

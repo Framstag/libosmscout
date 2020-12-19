@@ -29,6 +29,8 @@
 
 #include <osmscout/CoordDataFile.h>
 
+#include <osmscout/util/ProcessingQueue.h>
+
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoord.h>
 
@@ -63,6 +65,19 @@ namespace osmscout {
     return idToSerialMap.size();
   }
 
+  static void SortCoordPage(std::vector<Id>& page)
+  {
+#if defined(HAVE_STD_EXECUTION)
+    std::sort(std::execution::par_unseq,
+                    page.begin(),
+                    page.end());
+
+#else
+    std::sort(page.begin(),
+              page.end());
+#endif
+  }
+
   /**
    We currently assume that coordinates are ordered by increasing id
    So if we have to nodes with the same coordinate we can expect them
@@ -90,40 +105,83 @@ namespace osmscout {
     }
   }
 
-  static void SortCoordPage(std::vector<Id>& coordPage)
+  using IdPage = std::vector<Id>;
+
+  class IdPageSortWorker
   {
-#if defined(HAVE_STD_EXECUTION)
-      std::sort(std::execution::par_unseq,
-                    coordPage.begin(),
-                    coordPage.end());
+  private:
+    osmscout::ProcessingQueue<IdPage>& inQueue;
+    std::thread                        thread;
+    osmscout::ProcessingQueue<IdPage>& outQueue;
 
-#else
-      std::sort(coordPage.begin(),
-                coordPage.end());
-#endif
-  }
+  private:
+    void ProcessorLoop()
+    {
+      while (true) {
+        std::optional<IdPage> value=inQueue.PopTask();
 
-  static inline bool SortCoordsByOSMId(const RawCoord& a, const RawCoord& b)
-  {
-    return a.GetOSMId()<b.GetOSMId();
-  }
+        if (!value) {
+          break;
+        }
 
-  static void SortCoordPages(std::map<Id,std::vector<RawCoord>>& coordPages)
-  {
-    for (auto& entry : coordPages) {
-#if defined(HAVE_STD_EXECUTION)
-      std::sort(std::execution::par_unseq,
-                    entry.second.begin(),
-                    entry.second.end(),
-                    SortCoordsByOSMId);
+        IdPage page=std::move(value.value());
 
-#else
-      std::sort(entry.second.begin(),
-                entry.second.end(),
-                SortCoordsByOSMId);
-#endif
+        SortCoordPage(page);
+
+        outQueue.PushTask(page);
+      }
     }
-  }
+
+  public:
+    explicit IdPageSortWorker(osmscout::ProcessingQueue<IdPage>& inQueue,
+                              osmscout::ProcessingQueue<IdPage>& outQueue)
+    : inQueue(inQueue),
+      thread(&IdPageSortWorker::ProcessorLoop,this),
+      outQueue(outQueue)
+    {
+    }
+
+    void Wait() {
+      thread.join();
+    }
+  };
+
+  class SerialIdWorker
+  {
+  private:
+    osmscout::ProcessingQueue<IdPage>& queue;
+    std::thread                        thread;
+    SerialIdManager&                   serialIdManager;
+
+  private:
+    void ProcessorLoop()
+    {
+      while (true) {
+        std::optional<IdPage> value=queue.PopTask();
+
+        if (!value) {
+          break;
+        }
+
+        IdPage page=std::move(value.value());
+
+        ProcessIds(page,serialIdManager);
+      }
+    }
+
+  public:
+    explicit SerialIdWorker(osmscout::ProcessingQueue<IdPage>& queue,
+                            SerialIdManager& serialIdManager)
+      : queue(queue),
+        thread(&SerialIdWorker::ProcessorLoop,this),
+        serialIdManager(serialIdManager)
+    {
+    }
+
+    void Wait() {
+      thread.join();
+    }
+  };
 
   bool CoordDataGenerator::FindDuplicateCoordinates(const TypeConfig& typeConfig,
                                                     const ImportParameter& parameter,
@@ -133,6 +191,12 @@ namespace osmscout {
     progress.SetAction("Searching for duplicate coordinates");
 
     FileScanner scanner;
+    ProcessingQueue<IdPage> idPageQueue1(1000);
+    ProcessingQueue<IdPage> idPageQueue2(1000);
+    IdPageSortWorker        idSortWorker(idPageQueue1,
+                                         idPageQueue2);
+    SerialIdWorker          serialIdWorker(idPageQueue2,
+                                           serialIdManager);
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -147,12 +211,10 @@ namespace osmscout {
       PageManager<Id,Id> pageManager(parameter.GetRawCoordBlockSize(),
                                      coordSortPageSize,
                                      coordCount,
-                                     [&serialIdManager](const Id& /*id*/, const std::vector<Id>&& page) {
-         std::vector<Id> ids(page);
-
-         SortCoordPage(ids);
-         ProcessIds(ids,serialIdManager);
-       });
+                                     [&idPageQueue1](const Id& /*id*/,
+                                                     IdPage&& page) {
+                                       idPageQueue1.PushTask(page);
+                                     });
 
       while (!pageManager.AreAllEntriesLoaded()) {
         std::map<Id,std::vector<Id>> coordPages;
@@ -202,14 +264,52 @@ namespace osmscout {
       progress.Error(e.GetDescription());
       scanner.CloseFailsafe();
 
+      idPageQueue1.Stop();
+      idPageQueue2.Stop();
+
+      idSortWorker.Wait();
+      serialIdWorker.Wait();
+
       return false;
     }
+
+    idPageQueue1.Stop();
+    idPageQueue2.Stop();
+
+    idSortWorker.Wait();
+    serialIdWorker.Wait();
 
     return true;
   }
 
-  bool CoordDataGenerator::DumpCurrentPage(FileWriter& writer,
-                                           std::vector<PageEntry>& page) const
+  struct PageEntry
+  {
+    bool  isSet=false;
+    Point point;
+  };
+
+  static inline bool SortCoordsByOSMId(const RawCoord& a, const RawCoord& b)
+  {
+    return a.GetOSMId()<b.GetOSMId();
+  }
+
+  static void SortCoordPage(std::vector<RawCoord>& page)
+  {
+#if defined(HAVE_STD_EXECUTION)
+      std::sort(std::execution::par_unseq,
+                    page.begin(),
+                    page.end(),
+                    SortCoordsByOSMId);
+
+#else
+      std::sort(page.begin(),
+                page.end(),
+                SortCoordsByOSMId);
+#endif
+  }
+
+  bool DumpCurrentPage(FileWriter& writer,
+                       std::vector<PageEntry>& page)
   {
     bool somethingToStore=std::any_of(page.begin(),
                                       page.end(),
@@ -235,6 +335,26 @@ namespace osmscout {
     return true;
   }
 
+  void ProcessPage(Progress& progress,
+                   const std::vector<RawCoord>& page,
+                   SerialIdManager& serialIdManager,
+                   PageSplitter<OSMId,PageEntry>& pageSplitter)
+  {
+    for (const auto& osmCoord : page) {
+      uint8_t serial=serialIdManager.GetNextSerialForId(osmCoord.GetCoord().GetId());
+
+      if (serial==255) {
+        progress.Error("Coordinate "+std::to_string(osmCoord.GetOSMId())+" "+osmCoord.GetCoord().GetDisplayText()+" has more than 256 nodes");
+        continue;
+      }
+
+      pageSplitter.Set(osmCoord.GetOSMId(),
+                       PageEntry{true,
+                                 Point(serial,
+                                       osmCoord.GetCoord())});
+    }
+  }
+
   bool CoordDataGenerator::StoreCoordinates(const TypeConfig& typeConfig,
                                             const ImportParameter& parameter,
                                             Progress& progress,
@@ -246,13 +366,6 @@ namespace osmscout {
     FileWriter               writer;
 
     try {
-      OSMId                  maxId=std::numeric_limits<OSMId>::max();
-      OSMId                  currentLowerLimit=std::numeric_limits<OSMId>::min()/coordSortPageSize;
-      OSMId                  currentUpperLimit=maxId/coordSortPageSize;
-      size_t                 pageDumps=0;
-      PageId                 currentPageId=0;
-      std::vector<PageEntry> page(coordDiskPageSize);
-
       std::unordered_map<OSMId,FileOffset> pageFileOffsetIndex;
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -270,12 +383,28 @@ namespace osmscout {
 
       uint32_t coordCount=scanner.ReadUInt32();
 
-      uint32_t loadedCoordCount=0;
-      while (loadedCoordCount<coordCount) {
-        std::map<Id,std::vector<RawCoord>> coordPages;
-        uint32_t                           currentCoordCount=0;
+      PageSplitter<OSMId,PageEntry> pageSplitter(coordDiskPageSize,
+                                                 [&writer,&pageFileOffsetIndex](const OSMId& pageId,
+                                                    std::vector<PageEntry>& page) {
+                                                   FileOffset pageOffset=writer.GetPos();
 
-        progress.Info("Search for coordinates with page id >= "+std::to_string(currentLowerLimit));
+                                                   if (DumpCurrentPage(writer,
+                                                                       page)) {
+                                                     pageFileOffsetIndex[pageId]=pageOffset;
+                                                   }
+                                                 });
+
+      PageManager<OSMId,RawCoord> pageManager(parameter.GetRawCoordBlockSize(),
+                                              coordSortPageSize,
+                                              coordCount,
+                                              [&progress,&serialIdManager,&pageSplitter](const OSMId& /*pageId*/,
+                                                                                         std::vector<RawCoord>&& page) {
+                                                SortCoordPage(page);
+                                                ProcessPage(progress,page,serialIdManager,pageSplitter);
+                                              });
+
+      while (!pageManager.AreAllEntriesLoaded()) {
+        progress.Info("Search for coordinates with page id >= "+std::to_string(pageManager.GetMinPageId()));
 
         scanner.GotoBegin();
 
@@ -288,97 +417,31 @@ namespace osmscout {
 
           coord.Read(typeConfig,scanner);
 
-          OSMId pageId=coord.GetOSMId()/coordSortPageSize;
-
-          if (pageId<currentLowerLimit || pageId>currentUpperLimit) {
+          if (!pageManager.IsACurrentlyHandledPage(coord.GetOSMId())) {
             continue;
           }
 
-          coordPages[pageId].push_back(coord);
-          currentCoordCount++;
-          loadedCoordCount++;
+          pageManager.AddEntry(coord.GetOSMId(),coord);
 
-          if (loadedCoordCount==coordCount) {
+          // Shortcut loading of file in the last iteration
+          if (pageManager.AreAllEntriesLoaded()) {
             break;
           }
-
-          if (currentCoordCount>parameter.GetRawCoordBlockSize()
-              && coordPages.size()>1) {
-            [[maybe_unused]] OSMId oldUpperLimit=currentUpperLimit;
-
-            while (currentCoordCount>parameter.GetRawCoordBlockSize()
-                   && coordPages.size()>1) {
-              auto pageEntry=coordPages.rbegin();
-              OSMId highestPageId=pageEntry->first;
-
-              currentCoordCount-=(uint32_t)pageEntry->second.size();
-              loadedCoordCount-=(uint32_t)pageEntry->second.size();
-              coordPages.erase(highestPageId);
-              currentUpperLimit=highestPageId-1;
-            }
-
-            assert(currentUpperLimit<oldUpperLimit);
-          }
         }
 
-        progress.Info("Sorting coordinates");
+        pageManager.FileCompletelyScanned();
+        pageSplitter.FileCompletelyScanned();
 
-        SortCoordPages(coordPages);
+        progress.Info("Loaded "+std::to_string(pageManager.GetProcessedPagesEntryCount())+
+                      " of "+std::to_string(coordCount)+" coords"+
+                      "("+std::to_string(pageManager.GetProcessedPagesCount())+" pages)");
 
-        progress.Info("Write coordinates");
-
-        for (const auto& entry : coordPages) {
-          for (const auto& osmCoord : entry.second) {
-            uint8_t serial=serialIdManager.GetNextSerialForId(osmCoord.GetCoord().GetId());
-
-            if (serial==255) {
-              progress.Error("Coordinate "+std::to_string(osmCoord.GetOSMId())+" "+osmCoord.GetCoord().GetDisplayText()+" has more than 256 nodes");
-              continue;
-            }
-
-            PageId relatedId=osmCoord.GetOSMId()+std::numeric_limits<OSMId>::min();
-            PageId pageId=relatedId/coordDiskPageSize;
-
-            if (currentPageId!=pageId) {
-              FileOffset pageOffset=writer.GetPos();
-
-              if (DumpCurrentPage(writer,
-                                  page)) {
-                pageFileOffsetIndex[currentPageId]=pageOffset;
-                pageDumps++;
-              }
-
-              std::for_each(page.begin(),page.end(),[](PageEntry& entry) {
-                entry.isSet=false;
-              });
-              currentPageId=pageId;
-            }
-
-            size_t pageIndex=relatedId%coordDiskPageSize;
-
-            page[pageIndex]=PageEntry{true,
-                                      Point(serial,
-                                                  osmCoord.GetCoord())};
-          }
-        }
-
-        FileOffset pageOffset=writer.GetPos();
-
-        if (DumpCurrentPage(writer,
-                            page)) {
-          pageFileOffsetIndex[currentPageId]=pageOffset;
-          pageDumps++;
-        }
-
-        progress.Info("Loaded "+std::to_string(currentCoordCount)+" coords (" +std::to_string(loadedCoordCount)+"/"+std::to_string(coordCount)+")");
-
-        currentLowerLimit=currentUpperLimit+1;
-        currentUpperLimit=maxId/coordSortPageSize;
       }
 
       FileOffset indexStartOffset=writer.GetPos();
 
-      progress.SetAction("Writing "+std::to_string(pageFileOffsetIndex.size())+" pages to disk, using "+std::to_string(pageDumps)+" page dumps");
+      progress.SetAction("Written "+std::to_string(pageFileOffsetIndex.size())+" pages to disk, using "+std::to_string(pageSplitter.GetProcessedPagesCount())+" page dumps");
+      progress.SetAction("Writing "+std::to_string(pageFileOffsetIndex.size())+" pages index to disk");
 
       writer.Write((uint32_t)pageFileOffsetIndex.size());
 
