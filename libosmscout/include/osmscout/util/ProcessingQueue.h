@@ -22,84 +22,88 @@
 
 #include <condition_variable>
 #include <deque>
-#include <memory>
 #include <limits>
+#include <memory>
+#include <mutex>
 #include <optional>
-#include <thread>
 
 #include <osmscout/CoreImportExport.h>
 
 namespace osmscout {
 
-  template<typename R>
+  template<typename T>
   class ProcessingQueue
   {
   private:
     std::mutex              mutex;
     std::condition_variable pushCondition;
     std::condition_variable popCondition;
-    std::deque<R>           tasks;
+    std::deque<T>           tasks;
     size_t                  queueLimit;
     bool                    running=true;
 
   public:
     ProcessingQueue();
-
     explicit ProcessingQueue(size_t queueLimit);
-    ~ProcessingQueue();
 
-    void PushTask(const R& task);
-    void PushTask(R&& task);
-    std::optional<R> PopTask();
+    ProcessingQueue(const ProcessingQueue&) = delete;
+    ProcessingQueue &operator=(const ProcessingQueue&) = delete;
+
+    ~ProcessingQueue() = default;
+
+    void PushTask(const T& task);
+    void PushTask(T&& task);
+    std::optional<T> PopTask();
 
     void Stop();
   };
 
-  template<class R>
-  ProcessingQueue<R>::ProcessingQueue()
+  template<class T>
+  ProcessingQueue<T>::ProcessingQueue()
     : queueLimit(std::numeric_limits<size_t>::max())
   {
     // no code
   }
 
-  template<class R>
-  ProcessingQueue<R>::ProcessingQueue(size_t queueLimit)
+  template<class T>
+  ProcessingQueue<T>::ProcessingQueue(size_t queueLimit)
     : queueLimit(queueLimit)
   {
     // no code
   }
 
-  template<class R>
-  ProcessingQueue<R>::~ProcessingQueue() = default;
-
-  template<class R>
-  void ProcessingQueue<R>::PushTask(const R& task)
+  template<class T>
+  void ProcessingQueue<T>::PushTask(const T& task)
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
 
     tasks.push_back(task);
 
+    lock.unlock();
+
     popCondition.notify_one();
   }
 
-  template<class R>
-  void ProcessingQueue<R>::PushTask(R&& task)
+  template<class T>
+  void ProcessingQueue<T>::PushTask(T&& task)
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
 
-    tasks.push_back(std::move(task));
+    tasks.push_back(std::forward<T>(task));
+
+    lock.unlock();
 
     popCondition.notify_one();
   }
 
-  template<class R>
-  std::optional<R> ProcessingQueue<R>::PopTask()
+  template<class T>
+  std::optional<T> ProcessingQueue<T>::PopTask()
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
@@ -108,7 +112,7 @@ namespace osmscout {
       return {};
     }
 
-    R task=std::move(tasks.front());
+    T task=std::move(tasks.front());
     tasks.pop_front();
 
     pushCondition.notify_one();
@@ -119,7 +123,7 @@ namespace osmscout {
   template<class R>
   void ProcessingQueue<R>::Stop()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     running=false;
 
