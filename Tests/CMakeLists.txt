@@ -1,6 +1,9 @@
 #---- AccessParse
 osmscout_test_project(NAME AccessParse SOURCES src/AccessParse.cpp)
 
+#---- AsyncProcessing
+osmscout_test_project(NAME AsyncProcessing SOURCES src/AsyncProcessing.cpp)
+
 #---- Bearing
 osmscout_test_project(NAME Bearing SOURCES src/Bearing.cpp)
 

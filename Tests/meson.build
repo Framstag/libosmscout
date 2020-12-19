@@ -7,6 +7,13 @@ AccessParse =  executable('AccessParse',
              link_with: [osmscout],
              install: false)
 
+AsyncProcessing =  executable('AsyncProcessing',
+             'src/AsyncProcessing.cpp',
+             include_directories: [osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -297,7 +304,7 @@ if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
   warning('Test "Check WString<=>String conversion code" does not run under MSYS because of missing locale support')
 else
   test('Check WString<=>String conversion code', WStringStringConversion)
-endif  
+endif
 test('Check LabelPath code', LabelPathTest)
 test('Check Base64 code', Base64Test)
 
