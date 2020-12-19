@@ -34,6 +34,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/NumberSet.h
     include/osmscout/util/ObjectPool.h
     include/osmscout/util/Parsing.h
+	include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
     include/osmscout/util/Projection.h
     include/osmscout/util/StopClock.h
