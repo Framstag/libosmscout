@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <thread>
@@ -25,11 +26,19 @@
 #include <osmscout/util/ProcessingQueue.h>
 #include <osmscout/util/StopClock.h>
 
+using namespace std::chrono_literals;
+
+static size_t iterationCount=10000;
+static auto   taskDuration=1ms;
+
 class IntWorker
 {
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
+
+public:
+  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -50,6 +59,10 @@ private:
         std::cout << "Stop signal fetched!" << std::endl;
         break;
       }
+
+      std::this_thread::sleep_for(taskDuration);
+
+      processedCount++;
     }
 
     std::cout << "Processing...done" << std::endl;
@@ -58,11 +71,12 @@ private:
 public:
   explicit IntWorker(osmscout::ProcessingQueue<int>& queue)
   : queue(queue),
-    thread(&IntWorker::ProcessorLoop,this)
+    thread(&IntWorker::ProcessorLoop,this),
+    processedCount(0)
   {
   }
 
-  ~IntWorker() {
+  void Wait() {
     thread.join();
   }
 };
@@ -79,13 +93,7 @@ struct VectorData
   }
 
   VectorData(const VectorData& other) = delete;
-
-  VectorData(VectorData&& other) noexcept
-   : id(other.id),
-     data(std::move(other.data))
-  {
-    //std::cout << "Move constructed vector " << id << std::endl;
-  }
+  VectorData(VectorData&& other) = default;
 
 };
 
@@ -94,6 +102,9 @@ class VectorWorker
 private:
   osmscout::ProcessingQueue<VectorData>& queue;
   std::thread                            thread;
+
+public:
+  size_t                                 processedCount;
 
 private:
   void ProcessorLoop()
@@ -114,6 +125,10 @@ private:
         std::cout << "Stop signal fetched!" << std::endl;
         break;
       }
+
+      std::this_thread::sleep_for(taskDuration);
+
+      processedCount++;
     }
 
     std::cout << "Processing...done" << std::endl;
@@ -122,26 +137,32 @@ private:
 public:
   explicit VectorWorker(osmscout::ProcessingQueue<VectorData>& queue)
     : queue(queue),
-      thread(&VectorWorker::ProcessorLoop,this)
+      thread(&VectorWorker::ProcessorLoop,this),
+      processedCount(0)
   {
   }
 
-  ~VectorWorker() {
+  void Wait() {
     thread.join();
   }
 };
 
 int main(int /*argc*/, char* /*argv*/[])
 {
-  //std::cout << "#" << std::this_thread::get_id() << " IntWorker..." << std::endl;
-  osmscout::StopClock            stopClockInt;
+  std::cout << "Main thread id: #" << std::this_thread::get_id() << std::endl;
+  std::cout << iterationCount << " iterations, every task takes " << taskDuration.count() << "ms" << std::endl;
+  std::cout << std::endl;
+
   {
+    std::cout << ">>> IntWorker..." << std::endl;
+
+    osmscout::StopClock            stopClock;
     osmscout::ProcessingQueue<int> queue(1000);
-    IntWorker                      intWorker(queue);
+    IntWorker                      worker(queue);
 
     std::cout << "Pushing int tasks..." << std::endl;
 
-    for (int i=1; i<=1000000; i++) {
+    for (size_t i=1; i<=iterationCount; i++) {
       queue.PushTask(i);
     }
 
@@ -149,20 +170,25 @@ int main(int /*argc*/, char* /*argv*/[])
 
     queue.Stop();
 
-    std::cout << "Pushing tasks...done" << std::endl;
-  }
-  stopClockInt.Stop();
-  std::cout << "IntWorker...done: " << stopClockInt.ResultString() << std::endl;
+    std::cout << "Pushing tasks...done, waiting..." << std::endl;
 
-  //std::cout << "#" << std::this_thread::get_id() << " VectorWorker..." << std::endl;
-  osmscout::StopClock                   stopClockVector;
+    worker.Wait();
+
+    stopClock.Stop();
+    std::cout << "#processed: " << worker.processedCount << std::endl;
+    std::cout << "<<< IntWorker...done: " << stopClock.ResultString() << std::endl;
+    std::cout << std::endl;
+  }
+
   {
+    std::cout << ">>> VectorWorker..." << std::endl;
+    osmscout::StopClock                   stopClock;
     osmscout::ProcessingQueue<VectorData> queue(1000);
-    VectorWorker                          vectorWorker(queue);
+    VectorWorker                          worker(queue);
 
     std::cout << "Pushing vector tasks..." << std::endl;
 
-    for (int i=1; i<=100000; i++) {
+    for (size_t i=1; i<=iterationCount; i++) {
       VectorData data(i);
 
       data.data.assign(i,i);
@@ -174,10 +200,54 @@ int main(int /*argc*/, char* /*argv*/[])
 
     queue.Stop();
 
-    std::cout << "Pushing tasks...done" << std::endl;
+    std::cout << "Pushing tasks...done, waiting..." << std::endl;
+
+    worker.Wait();
+
+    stopClock.Stop();
+    std::cout << "#processed: " << worker.processedCount << std::endl;
+    std::cout << "<<< VectorWorker...done: " << stopClock.ResultString() << std::endl;
+    std::cout << std::endl;
   }
-  stopClockVector.Stop();
-  std::cout << "VectorWorker...done: " << stopClockVector.ResultString() << std::endl;
+
+  {
+    std::cout << ">>> MultiVectorWorker..." << std::endl;
+    osmscout::StopClock                   stopClock;
+    osmscout::ProcessingQueue<VectorData> queue(1000);
+    VectorWorker                          worker1(queue);
+    VectorWorker                          worker2(queue);
+    VectorWorker                          worker3(queue);
+    VectorWorker                          worker4(queue);
+
+    std::cout << "Pushing vector tasks..." << std::endl;
+
+    for (size_t i=1; i<=iterationCount; i++) {
+      VectorData data(i);
+
+      data.data.assign(i,i);
+
+      queue.PushTask(std::move(data));
+    }
+
+    queue.PushTask(VectorData(-1));
+
+    queue.Stop();
+
+    std::cout << "Pushing tasks...done, waiting..." << std::endl;
+
+    worker1.Wait();
+    worker2.Wait();
+    worker3.Wait();
+    worker4.Wait();
+
+    stopClock.Stop();
+
+    std::cout << "#processed: "
+              << worker1.processedCount+worker2.processedCount+worker3.processedCount+
+                 worker4.processedCount << std::endl;
+    std::cout << "<<< MultiVectorWorker...done: " << stopClock.ResultString() << std::endl;
+    std::cout << std::endl;
+  }
 
   return 0;
 }
