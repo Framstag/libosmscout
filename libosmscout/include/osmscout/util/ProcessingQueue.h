@@ -24,6 +24,7 @@
 #include <deque>
 #include <memory>
 #include <limits>
+#include <optional>
 #include <thread>
 
 #include <osmscout/CoreImportExport.h>
