@@ -10,7 +10,7 @@ AccessParse =  executable('AccessParse',
 AsyncProcessing =  executable('AsyncProcessing',
              'src/AsyncProcessing.cpp',
              include_directories: [osmscoutIncDir],
-             dependencies: [mathDep, openmpDep],
+             dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
              install: false)
 
