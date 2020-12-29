@@ -163,7 +163,7 @@ namespace osmscout {
 
     if (!running &&
         tasks.empty()) {
-      return {};
+      return std::nullopt;
     }
 
     T task=std::move(tasks.front());
