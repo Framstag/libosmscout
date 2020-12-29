@@ -31,6 +31,26 @@
 
 namespace osmscout {
 
+  /**
+   * A ProcessingQueue is a special multi-threaded safe implementation
+   * of a queue.
+   *
+   * The goal is to use this queues as a asynchronous pipeline between
+   * individual agents or worker threads.
+   *
+   * The queue has FIFO semantics.
+   *
+   * A queue can have multiple producers and consumers. There is currently no Peek() method
+   * data that has been taken has either to be consumed, pushed back or dropped.
+   *
+   * The queue data should be movable but can be copyable also. If the content is not movable
+   * additional CPU overhead for copying data is to be expected.
+   *
+   * Note that even is the content is moveable is should be assumed that
+   * moving data through the queue has it own cost.
+   *
+   * @tparam T Type of the queue content
+   */
   template<typename T>
   class ProcessingQueue
   {
@@ -58,6 +78,11 @@ namespace osmscout {
     void Stop();
   };
 
+  /**
+   * Initialize a unbounded queue.
+   *
+   * @tparam T
+   */
   template<class T>
   ProcessingQueue<T>::ProcessingQueue()
     : queueLimit(std::numeric_limits<size_t>::max())
@@ -65,6 +90,14 @@ namespace osmscout {
     // no code
   }
 
+  /**
+   * Initialize a bounded queue. The queue is guaranteed to hold no more than the given
+   * amount of data entries. Producer will be blocked until the queue shrinks below
+   * its limit before data can be pushed.
+   *
+   * @tparam T
+   * @param queueLimit Queue size limit
+   */
   template<class T>
   ProcessingQueue<T>::ProcessingQueue(size_t queueLimit)
     : queueLimit(queueLimit)
@@ -72,6 +105,13 @@ namespace osmscout {
     // no code
   }
 
+  /**
+   * Push a copy of the given data into the queue. Pushing data will be blocked
+   * until queue size is below limit.
+   *
+   * @tparam T
+   * @param task
+   */
   template<class T>
   void ProcessingQueue<T>::PushTask(const T& task)
   {
@@ -86,6 +126,13 @@ namespace osmscout {
     popCondition.notify_one();
   }
 
+  /**
+   * Push a copy or move the given data into the queue. Pushing data will be blocked
+   * until queue size is below limit.
+   *
+   * @tparam T
+   * @param task
+   */
   template<class T>
   void ProcessingQueue<T>::PushTask(T&& task)
   {
@@ -100,6 +147,13 @@ namespace osmscout {
     popCondition.notify_one();
   }
 
+  /**
+   * Move one data entry out of the queue (FIFO semantics). No data will be returned
+   * if the queue is stopped and empty.
+   *
+   * @tparam T
+   * @return
+   */
   template<class T>
   std::optional<T> ProcessingQueue<T>::PopTask()
   {
@@ -121,6 +175,12 @@ namespace osmscout {
 
     return task;
   }
+
+  /**
+   * Signal that all data has been pushed into the queue.
+   *
+   * @tparam R
+   */
 
   template<class R>
   void ProcessingQueue<R>::Stop()

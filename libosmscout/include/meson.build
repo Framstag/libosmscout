@@ -43,6 +43,7 @@ osmscoutHeader = [
             'osmscout/util/Time.h',
             'osmscout/util/TileId.h',
             'osmscout/util/Transformation.h',
+            'osmscout/util/Worker.h',
             'osmscout/util/WorkQueue.h',
             'osmscout/util/TagErrorReporter.h',
             'osmscout/routing/RouteDescription.h',

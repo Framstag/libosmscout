@@ -30,6 +30,7 @@
 #include <osmscout/CoordDataFile.h>
 
 #include <osmscout/util/ProcessingQueue.h>
+#include <osmscout/util/Worker.h>
 
 #include <osmscout/import/Preprocess.h>
 #include <osmscout/import/RawCoord.h>
@@ -67,19 +68,15 @@ namespace osmscout {
 
   using IdPage = std::vector<Id>;
 
-  class RawCoordIdReaderWorker
+  class RawCoordIdReaderWorker : public Producer<IdPage>
   {
   private:
     const TypeConfig                  &typeConfig;
     const ImportParameter             &parameter;
     Progress                          &progress;
 
-    std::thread                       thread;
-
-    osmscout::ProcessingQueue<IdPage> &outQueue;
-
   private:
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       FileScanner scanner;
 
@@ -156,27 +153,16 @@ namespace osmscout {
                            const ImportParameter& parameter,
                            Progress& progress,
                            osmscout::ProcessingQueue<IdPage>& outQueue)
-      : typeConfig(typeConfig),
+      : Producer(outQueue),
+        typeConfig(typeConfig),
         parameter(parameter),
-        progress(progress),
-        thread(&RawCoordIdReaderWorker::ProcessorLoop,
-               this),
-        outQueue(outQueue)
+        progress(progress)
     {
-    }
-
-    void Wait() {
-      thread.join();
     }
   };
 
-  class IdPageSortWorker
+  class IdPageSortWorker : public Pipe<IdPage,IdPage>
   {
-  private:
-    osmscout::ProcessingQueue<IdPage> &inQueue;
-    std::thread                       thread;
-    osmscout::ProcessingQueue<IdPage> &outQueue;
-
   private:
     void SortCoordPage(std::vector<Id>& page)
     {
@@ -191,7 +177,7 @@ namespace osmscout {
 #endif
     }
 
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       while (true) {
         std::optional<IdPage> value=inQueue.PopTask();
@@ -213,23 +199,15 @@ namespace osmscout {
   public:
     IdPageSortWorker(osmscout::ProcessingQueue<IdPage>& inQueue,
                      osmscout::ProcessingQueue<IdPage>& outQueue)
-    : inQueue(inQueue),
-      thread(&IdPageSortWorker::ProcessorLoop,this),
-      outQueue(outQueue)
+    : Pipe(inQueue,outQueue)
     {
-    }
-
-    void Wait() {
-      thread.join();
     }
   };
 
-  class SerialIdWorker
+  class SerialIdWorker : public Consumer<IdPage>
   {
   private:
     Progress                          &progress;
-    osmscout::ProcessingQueue<IdPage> &queue;
-    std::thread                       thread;
     SerialIdManager                   &serialIdManager;
 
   private:
@@ -259,12 +237,12 @@ namespace osmscout {
       }
     }
 
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       progress.Info("Detecting duplicate coordinates");
 
       while (true) {
-        std::optional<IdPage> value=queue.PopTask();
+        std::optional<IdPage> value=inQueue.PopTask();
 
         if (!value) {
           break;
@@ -282,16 +260,10 @@ namespace osmscout {
     SerialIdWorker(Progress& progress,
                    osmscout::ProcessingQueue<IdPage>& queue,
                    SerialIdManager& serialIdManager)
-      : progress(progress),
-        queue(queue),
-        thread(&SerialIdWorker::ProcessorLoop,
-               this),
+      : Consumer(queue),
+        progress(progress),
         serialIdManager(serialIdManager)
     {
-    }
-
-    void Wait() {
-      thread.join();
     }
   };
 
@@ -337,19 +309,15 @@ namespace osmscout {
 
   using RawCoordPage = std::vector<RawCoord>;
 
-  class RawCoordReaderWorker
+  class RawCoordReaderWorker : public Producer<RawCoordPage>
   {
   private:
     const TypeConfig                        &typeConfig;
     const ImportParameter                   &parameter;
     Progress                                &progress;
 
-    std::thread                             thread;
-
-    osmscout::ProcessingQueue<RawCoordPage> &outQueue;
-
   private:
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       FileScanner scanner;
 
@@ -420,18 +388,11 @@ namespace osmscout {
                          const ImportParameter& parameter,
                          Progress& progress,
                          osmscout::ProcessingQueue<RawCoordPage>& outQueue)
-      : typeConfig(typeConfig),
+      : Producer(outQueue),
+        typeConfig(typeConfig),
         parameter(parameter),
-        progress(progress),
-        thread(&RawCoordReaderWorker::ProcessorLoop,
-               this),
-        outQueue(outQueue)
+        progress(progress)
     {
-    }
-
-    void Wait()
-    {
-      thread.join();
     }
   };
 
@@ -440,13 +401,8 @@ namespace osmscout {
     return a.GetOSMId()<b.GetOSMId();
   }
 
-  class RawCoordPageSortWorker
+  class RawCoordPageSortWorker : public Pipe<RawCoordPage,RawCoordPage>
   {
-  private:
-    osmscout::ProcessingQueue<RawCoordPage> &inQueue;
-    std::thread                             thread;
-    osmscout::ProcessingQueue<RawCoordPage> &outQueue;
-
   private:
     static void SortCoordPage(std::vector<RawCoord>& page)
     {
@@ -463,7 +419,7 @@ namespace osmscout {
 #endif
     }
 
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       while (true) {
         std::optional<RawCoordPage> value=inQueue.PopTask();
@@ -485,15 +441,8 @@ namespace osmscout {
   public:
     RawCoordPageSortWorker(osmscout::ProcessingQueue<RawCoordPage>& inQueue,
                            osmscout::ProcessingQueue<RawCoordPage>& outQueue)
-      : inQueue(inQueue),
-        thread(&RawCoordPageSortWorker::ProcessorLoop,
-               this),
-        outQueue(outQueue)
+      : Pipe(inQueue,outQueue)
     {
-    }
-
-    void Wait() {
-      thread.join();
     }
   };
 
@@ -503,15 +452,12 @@ namespace osmscout {
     Point point;
   };
 
-  class CoordDatFileWorker
+  class CoordDatFileWorker : public Consumer<RawCoordPage>
   {
   private:
     const ImportParameter                   &parameter;
     Progress                                &progress;
 
-    osmscout::ProcessingQueue<RawCoordPage> &inQueue;
-
-    std::thread                             thread;
     SerialIdManager                         &serialIdManager;
 
   private:
@@ -560,7 +506,7 @@ namespace osmscout {
       }
     }
 
-    void ProcessorLoop()
+    void ProcessingLoop() override
     {
       FileWriter writer;
 
@@ -641,16 +587,11 @@ namespace osmscout {
                                 Progress& progress,
                                 osmscout::ProcessingQueue<RawCoordPage>& inQueue,
                                 SerialIdManager& serialIdManager)
-      : parameter(parameter),
+      : Consumer(inQueue),
+        parameter(parameter),
         progress(progress),
-        inQueue(inQueue),
-        thread(&CoordDatFileWorker::ProcessorLoop,this),
         serialIdManager(serialIdManager)
     {
-    }
-
-    void Wait() {
-      thread.join();
     }
   };
 
