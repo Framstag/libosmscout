@@ -20,6 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
+#include <vector>
+
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawNode.h>
 
@@ -30,7 +33,8 @@ namespace osmscout {
   class SerialIdManager CLASS_FINAL
   {
   private:
-    std::unordered_map<Id,uint8_t> idToSerialMap;
+    // It seems, like a map is faster in this case then a default-initialized unordered_map
+    std::map<Id,uint8_t> idToSerialMap;
 
   public:
     void MarkIdAsDuplicate(Id id);
