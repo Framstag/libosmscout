@@ -40,7 +40,7 @@ namespace osmscout {
     std::condition_variable popCondition;
     std::deque<T>           tasks;
     size_t                  queueLimit;
-    bool                    running=true;
+    bool                    running{true};
 
   public:
     ProcessingQueue();
@@ -77,7 +77,7 @@ namespace osmscout {
   {
     std::unique_lock lock(mutex);
 
-    pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
+    pushCondition.wait(lock,[this]{return tasks.size()<queueLimit;});
 
     tasks.push_back(task);
 
@@ -91,7 +91,7 @@ namespace osmscout {
   {
     std::unique_lock lock(mutex);
 
-    pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
+    pushCondition.wait(lock,[this]{return tasks.size()<queueLimit;});
 
     tasks.push_back(std::forward<T>(task));
 
@@ -107,13 +107,15 @@ namespace osmscout {
 
     popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
-    if (tasks.empty() &&
-        !running) {
+    if (!running &&
+        tasks.empty()) {
       return {};
     }
 
     T task=std::move(tasks.front());
     tasks.pop_front();
+
+    lock.unlock();
 
     pushCondition.notify_one();
 
@@ -126,6 +128,8 @@ namespace osmscout {
     std::unique_lock lock(mutex);
 
     running=false;
+
+    lock.unlock();
 
     popCondition.notify_all();
   }
