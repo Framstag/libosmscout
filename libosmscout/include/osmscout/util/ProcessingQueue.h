@@ -173,7 +173,7 @@ namespace osmscout {
 
     pushCondition.notify_one();
 
-    return std::make_optional(task);
+    return task;
   }
 
   /**
