@@ -28,6 +28,11 @@
 
 namespace osmscout {
 
+  /**
+   * A single threaded agent.
+   *
+   * This is a simple wrapper around the std::thread primitive.
+   */
   class OSMSCOUT_API ThreadedWorker
   {
   private:
@@ -52,8 +57,17 @@ namespace osmscout {
     virtual void ProcessingLoop() = 0;
   };
 
+  /**
+   * A specialisation of Worker. A Producer generates events of type E and
+   * places them into an out queue.
+   *
+   *  If the producer is finished it can be joined. The outQueue is
+   *  stopped.
+   *
+   * @tparam E The event type of the outgoing queue
+   */
   template <typename E>
-  class OSMSCOUT_API Producer : public ThreadedWorker
+  class Producer : public ThreadedWorker
   {
   protected:
     ProcessingQueue<E>& outQueue;
@@ -65,8 +79,17 @@ namespace osmscout {
     }
   };
 
+  /**
+   * A specialisation of worker. A pipe consumes events from a incoming queue and
+   * produces new events for a outgoing queue.
+   *
+   * The incoming queue is processes until it is stopped and empty.
+   *
+   * @tparam E1 The event type of the incoming queue
+   * @tparam E2 The event type of the outgoing queue
+   */
   template <typename E1, typename E2>
-  class OSMSCOUT_API Pipe : public ThreadedWorker
+  class Pipe : public ThreadedWorker
   {
   protected:
     ProcessingQueue<E1>& inQueue;
@@ -81,8 +104,16 @@ namespace osmscout {
     }
   };
 
+  /**
+   * A specialisation of worker that consumes events from a queue.
+   *
+   * The consumer polls the queue and processes the events until the queue
+   * is stopped and the remaining events completely consumed.
+   *
+   * @tparam E the event type of the incoming queue
+   */
   template <typename E>
-  class OSMSCOUT_API Consumer : public ThreadedWorker
+  class Consumer : public ThreadedWorker
   {
   protected:
     ProcessingQueue<E>& inQueue;
