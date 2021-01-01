@@ -186,31 +186,34 @@ int main(int argc, char* argv[])
 
   DataLoader dataLoader(database);
   osmscout::ElevationService<DataLoader> eleService(dataLoader, osmscout::Magnification::magSuburb);
-  auto profile=eleService.ElevationProfile(way);
+
+  osmscout::gpx::GpxFile output;
+
+  std::cout << "Distance \tElevation \tCoord (type)" << std::endl;
+  size_t pointCnt=eleService.ElevationProfile(way, [&](const osmscout::Distance&, const std::vector<osmscout::ElevationPoint> &points){
+    for (const auto &point: points) {
+      std::cout << point.distance << " \t" << point.elevation.AsMeter() << " m \t" << point.coord.GetDisplayText() << " (" << point.contour->GetType()->GetName() << " " << point.contour->GetFileOffset() << ")" << std::endl;
+
+      if (!args.gpxOutput.empty()) {
+        osmscout::gpx::Waypoint w(point.coord);
+        w.name = std::make_optional<std::string>(point.distance.AsString() + " " + std::to_string(point.elevation.AsMeter()) + " m");
+        output.waypoints.push_back(w);
+      }
+    }
+  });
 
   stopClock.Stop();
   osmscout::log.Debug() << "Evaluating elevation profile: " << stopClock.ResultString() << " (" << dataLoader.GetCount() << "x loading: " << dataLoader.GetMillis()/1000 << " s)";
 
-  if (profile.empty()){
+  if (pointCnt==0){
     std::cout << "No intersection with contours found." << std::endl;
     return 0;
   }
-  std::cout << "Found " << profile.size() << " intersections" << std::endl;
-
-  std::cout << "Distance \tElevation \tCoord (type)" << std::endl;
-  for (const auto &point: profile) {
-    std::cout << point.distance << " \t" << point.elevation.AsMeter() << " m \t" << point.coord.GetDisplayText() << " (" << point.contour->GetType()->GetName() << " " << point.contour->GetFileOffset() << ")" << std::endl;
-  }
+  std::cout << "Found " << pointCnt << " intersections" << std::endl;
 
   // export debug gpx output
   if (!args.gpxOutput.empty()) {
-    osmscout::gpx::GpxFile output;
     output.tracks.push_back(gpxFile.tracks[0]);
-    for (const auto &point: profile) {
-      osmscout::gpx::Waypoint w(point.coord);
-      w.name = std::make_optional<std::string>(point.distance.AsString() + " " + std::to_string(point.elevation.AsMeter()) + " m");
-      output.waypoints.push_back(w);
-    }
     osmscout::gpx::ExportGpx(output, args.gpxOutput);
   }
 
