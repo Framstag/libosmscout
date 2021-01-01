@@ -143,6 +143,8 @@ namespace osmscout {
       catch (IOException& e) {
         progress.Error(e.GetDescription());
         scanner.CloseFailsafe();
+
+        MarkWorkerAsFailed();
       }
 
       outQueue.Stop();
@@ -304,7 +306,7 @@ namespace osmscout {
     idSortWorker.Wait();
     serialIdWorker.Wait();
 
-    return true;
+    return rawCoordIdReaderWorker.WasSuccessful() && idSortWorker.WasSuccessful() && serialIdWorker.WasSuccessful();
   }
 
   using RawCoordPage = std::vector<RawCoord>;
@@ -378,6 +380,8 @@ namespace osmscout {
       catch (IOException& e) {
         progress.Error(e.GetDescription());
         scanner.CloseFailsafe();
+
+        MarkWorkerAsFailed();
       }
 
       outQueue.Stop();
@@ -579,6 +583,8 @@ namespace osmscout {
       catch (IOException& e) {
         progress.Error(e.GetDescription());
         writer.CloseFailsafe();
+
+        MarkWorkerAsFailed();
       }
     }
 
@@ -633,7 +639,9 @@ namespace osmscout {
     rawCoordPageSortWorker.Wait();
     coordDatFileWorker.Wait();
 
-    return true;
+    return rawCoordPageSortWorker.WasSuccessful() &&
+           rawCoordPageSortWorker.WasSuccessful() &&
+           coordDatFileWorker.WasSuccessful();
   }
 
   void CoordDataGenerator::GetDescription(const ImportParameter& /*parameter*/,

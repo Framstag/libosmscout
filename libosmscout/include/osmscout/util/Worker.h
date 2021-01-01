@@ -37,6 +37,24 @@ namespace osmscout {
   {
   private:
     std::thread thread;
+    bool        success=true;
+
+  protected:
+    /**
+     * Worker can set itself to the failure status. This can later on queried
+     * by the parent process after Wait() to stop further processing.
+     *
+     * The status is not protected by a mutex, please only call from inside the worker.
+     *
+     * We currently do not support propagation of an detailed error object.
+     * We assume that the worker itself logs its error and that the parent worker
+     * is only interested in a boolean status.
+     *
+     * This might change in future.
+     */
+    void MarkWorkerAsFailed() {
+      success=false;
+    }
 
   public:
     ThreadedWorker()
@@ -49,9 +67,25 @@ namespace osmscout {
 
     virtual ~ThreadedWorker() = default;
 
+    /**
+     * Returns true if the worker processed successfully, else false.
+     *
+     * Please do not call before #Wait() return.
+     * If called before #Wait() the status may not be final. Also the value is not protected
+     * by a mutex.
+     *
+     * @return true or false
+     */
+    bool WasSuccessful() const
+    {
+      return success;
+    }
+
     void Wait() {
       thread.join();
     }
+
+
 
   protected:
     virtual void ProcessingLoop() = 0;
@@ -73,7 +107,7 @@ namespace osmscout {
     ProcessingQueue<E>& outQueue;
 
   public:
-    Producer(ProcessingQueue<E>& outQueue)
+    explicit Producer(ProcessingQueue<E>& outQueue)
       : outQueue(outQueue)
     {
     }
@@ -119,7 +153,7 @@ namespace osmscout {
     ProcessingQueue<E>& inQueue;
 
   public:
-    Consumer(ProcessingQueue<E>& inQueue)
+    explicit Consumer(ProcessingQueue<E>& inQueue)
       : inQueue(inQueue)
     {
     }
