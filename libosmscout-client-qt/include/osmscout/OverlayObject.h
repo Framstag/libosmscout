@@ -64,12 +64,11 @@ public slots:
 public:
   OverlayObject(QObject *parent=Q_NULLPTR);
 
-  OverlayObject(const std::vector<osmscout::Point> &nodes,
-                QString typeName="_route",
-                QObject *parent=Q_NULLPTR);
+  explicit OverlayObject(const std::vector<osmscout::Point> &nodes,
+                         QString typeName="_route",
+                         QObject *parent=Q_NULLPTR);
 
   OverlayObject(const OverlayObject &o);
-
 
   ~OverlayObject() override;
 
@@ -151,9 +150,9 @@ Q_OBJECT
 public:
   OverlayArea(QObject *parent=Q_NULLPTR);
 
-  OverlayArea(const std::vector<osmscout::Point> &nodes,
-              QString typeName="_route",
-              QObject *parent=Q_NULLPTR);
+  explicit OverlayArea(const std::vector<osmscout::Point> &nodes,
+                       QString typeName="_route",
+                       QObject *parent=Q_NULLPTR);
 
   ~OverlayArea() override;
 
@@ -172,9 +171,9 @@ Q_OBJECT
 public:
   OverlayWay(QObject *parent=Q_NULLPTR);
 
-  OverlayWay(const std::vector<osmscout::Point> &nodes,
-             QString typeName="_route",
-             QObject *parent=Q_NULLPTR);
+  explicit OverlayWay(const std::vector<osmscout::Point> &nodes,
+                      QString typeName="_route",
+                      QObject *parent=Q_NULLPTR);
 
   ~OverlayWay() override;
 
@@ -193,9 +192,9 @@ Q_OBJECT
 public:
   OverlayNode(QObject *parent=Q_NULLPTR);
 
-  OverlayNode(const std::vector<osmscout::Point> &nodes,
-              QString typeName="_route",
-              QObject *parent=Q_NULLPTR);
+  explicit OverlayNode(const std::vector<osmscout::Point> &nodes,
+                       QString typeName="_route",
+                       QObject *parent=Q_NULLPTR);
 
   ~OverlayNode() override;
 
