@@ -63,6 +63,18 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   }
   cancel(); // cancel current computation
   clear(); // clear model
+
+  if (start==nullptr || target==nullptr) {
+    if (start == nullptr) {
+      qWarning() << "Start is null";
+    } else {
+      qWarning() << "Target is null";
+    }
+    computing=false;
+    emit computingChanged();
+    return;
+  }
+
   computing=true;
   breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit computingChanged();
