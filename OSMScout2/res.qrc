@@ -66,5 +66,6 @@
 
         <file>resources/online-tile-providers.json</file>
         <file>resources/map-providers.json</file>
+        <file>resources/voice-providers.json</file>
     </qresource>
 </RCC>
