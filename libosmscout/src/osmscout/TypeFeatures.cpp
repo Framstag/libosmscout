@@ -2087,15 +2087,7 @@ namespace osmscout {
     }
 
     std::stringstream ss;
-    if (value < 1000 || locale.GetThousandsSeparator().empty()){
-      ss << value;
-    }else{
-      // not expecting that value will be bigger than million
-      ss << (value/1000);
-      ss << locale.GetThousandsSeparator();
-      ss << std::setw(3) << std::setfill('0') << (value%1000);
-    }
-
+    ss << NumberToString(value, locale);
     ss << locale.GetUnitsSeparator();
     ss << unitsStr;
     return ss.str();

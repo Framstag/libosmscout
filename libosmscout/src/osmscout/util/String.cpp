@@ -33,6 +33,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/Locale.h>
 #include <osmscout/util/ObjectPool.h>
 
 #include <osmscout/private/Config.h>
@@ -189,6 +190,27 @@ namespace osmscout {
     }
 
     return "false";
+  }
+
+  std::string NumberToString(long value, const Locale &locale)
+  {
+    std::stringstream ss;
+    if (std::abs(value) < 1000 || locale.GetThousandsSeparator().empty()){
+      ss << value;
+    }else{
+      long mag=1000;
+      while (mag*1000 < std::abs(value)) {
+        mag*=1000;
+      }
+      ss << (value/mag);
+      while (mag>1) {
+        ss << locale.GetThousandsSeparator();
+        value = std::abs(value % mag);
+        mag/=1000;
+        ss << std::setw(3) << std::setfill('0') << (value/mag);
+      }
+    }
+    return ss.str();
   }
 
   bool GetDigitValue(char digit, size_t& result)

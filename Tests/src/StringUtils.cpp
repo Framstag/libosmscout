@@ -55,3 +55,11 @@ TEST_CASE("Transliterate diacritics")
 
   REQUIRE(transformed == "aeiyouudtnescrzuoAEIYOUUDTNESCRZUOss");
 }
+
+TEST_CASE("Local aware number to string")
+{
+  osmscout::Locale locale;
+  locale.SetThousandsSeparator(" ");
+  REQUIRE(osmscout::NumberToString(1002030, locale) == "1 002 030");
+  REQUIRE(osmscout::NumberToString(-1002030, locale) == "-1 002 030");
+}
