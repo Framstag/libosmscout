@@ -68,7 +68,8 @@ public:
   }
 
   size_t ElevationProfile(const std::vector<GeoCoord> &way,
-                          std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)> callback)
+                          std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)> callback,
+                          BreakerRef breaker=nullptr)
   {
     Distance distance;
     size_t pointCnt = 0;
@@ -82,6 +83,10 @@ public:
       GeoCoord a1=way[i];
       GeoCoord a2=way[i+1];
       GeoBox lineBox(a1,a2);
+
+      if (i%100==0 && breaker && breaker->IsAborted()){
+        break;
+      }
 
       if (!loadBox.Includes(a1) || !loadBox.Includes(a2)) {
         TileId tile1=TileId::GetTile(loadTileMag, lineBox.GetMinCoord());
