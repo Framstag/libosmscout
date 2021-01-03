@@ -61,11 +61,14 @@ void ElevationChartWidget::paint(QPainter *painter)
   assert(lowest.has_value());
   assert(highest.has_value());
 
+  painter->setRenderHint(QPainter::Antialiasing, true);
+  painter->setRenderHint(QPainter::TextAntialiasing, true);
+
   QRectF painterViewport=painter->viewport();
   QRectF chartRect(painterViewport.width() * 0.1,
-                  painterViewport.height()*0.05,
-                  painterViewport.width()*0.9,
-                  painterViewport.height()*0.9);
+                  painterViewport.height() * 0.05,
+                  painterViewport.width() * 0.85,
+                  painterViewport.height() * 0.9);
 
   Distance wayLength=points.back().distance;
   qreal distancePixelM = wayLength==Distance::Zero() ? 0 : chartRect.width() / wayLength.AsMeter();
@@ -80,6 +83,15 @@ void ElevationChartWidget::paint(QPainter *painter)
     path.lineTo(chartRect.left() + point.distance.AsMeter() * distancePixelM,
                 chartRect.bottom() - (point.elevation - lowest->elevation).AsMeter() * elePixelM);
   }
+
+  QPainterPath gradientArea=path;
+  gradientArea.lineTo(chartRect.bottomRight());
+  gradientArea.lineTo(chartRect.bottomLeft());
+
+  QLinearGradient gradient(0,0,0, chartRect.height());
+  gradient.setColorAt(0.0, gradientTopColor);
+  gradient.setColorAt(1.0, gradientBottomColor);
+  painter->fillPath(gradientArea, gradient);
 
   QPen pen;
   pen.setColor(lineColor);
@@ -178,6 +190,26 @@ void ElevationChartWidget::setLineColor(const QColor &color)
   }
   lineColor=color;
   emit lineColorChanged();
+  update();
+}
+
+void ElevationChartWidget::setGradientTopColor(const QColor &color)
+{
+  if (gradientTopColor==color){
+    return;
+  }
+  gradientTopColor=color;
+  emit gradientTopColorChanged();
+  update();
+}
+
+void ElevationChartWidget::setGradientBottomColor(const QColor &color)
+{
+  if (gradientBottomColor==color){
+    return;
+  }
+  gradientBottomColor=color;
+  emit gradientBottomColorChanged();
   update();
 }
 

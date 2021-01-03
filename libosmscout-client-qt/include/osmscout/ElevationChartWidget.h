@@ -35,7 +35,8 @@ class OSMSCOUT_CLIENT_QT_API ElevationChartWidget : public QQuickPaintedItem {
   Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
   Q_PROPERTY(QColor lineColor READ getLineColor WRITE setLineColor NOTIFY lineColorChanged)
   Q_PROPERTY(qreal lineWidth READ getLineWidth WRITE setLineWidth NOTIFY lineWidthChanged)
-
+  Q_PROPERTY(QColor gradientTopColor READ getGradientTopColor WRITE setGradientTopColor NOTIFY gradientTopColorChanged)
+  Q_PROPERTY(QColor gradientBottomColor READ getGradientBottomColor WRITE setGradientBottomColor NOTIFY gradientBottomColorChanged)
 signals:
   void wayChanged();
   void loadingChanged();
@@ -44,6 +45,8 @@ signals:
                                osmscout::BreakerRef breaker);
   void lineColorChanged();
   void lineWidthChanged();
+  void gradientTopColorChanged();
+  void gradientBottomColorChanged();
 
 public slots:
   void onError(int requestId);
@@ -78,6 +81,20 @@ public:
 
   void setLineWidth(qreal w);
 
+  QColor getGradientTopColor() const
+  {
+    return gradientTopColor;
+  }
+
+  void setGradientTopColor(const QColor &c);
+
+  QColor getGradientBottomColor() const
+  {
+    return gradientBottomColor;
+  }
+
+  void setGradientBottomColor(const QColor &c);
+
 private:
   void reset();
 
@@ -93,6 +110,8 @@ private:
   std::optional<ElevationPoint> highest;
 
   QColor lineColor=QColorConstants::DarkBlue;
+  QColor gradientTopColor=QColor(QColorConstants::DarkBlue.red(), QColorConstants::DarkBlue.green(), QColorConstants::DarkBlue.blue(), 0xA0);
+  QColor gradientBottomColor=QColorConstants::Transparent;
   qreal lineWidth=5;
 };
 
