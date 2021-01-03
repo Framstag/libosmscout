@@ -19,6 +19,7 @@
 
 #include <osmscout/ElevationChartWidget.h>
 #include <osmscout/OSMScoutQt.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -50,6 +51,98 @@ ElevationChartWidget::~ElevationChartWidget()
     elevationModule->deleteLater();
     elevationModule=nullptr;
   }
+}
+
+namespace {
+class DistanceUnit {
+public:
+  virtual ~DistanceUnit() = default;
+  virtual double ToMeter(double d) = 0;
+  virtual double FromMeter(double m) = 0;
+  virtual std::string UnitStr() = 0;
+};
+
+using DistanceUnitPtr = std::shared_ptr<DistanceUnit>;
+
+class MeterUnit: public DistanceUnit {
+public:
+  ~MeterUnit() override = default;
+
+  double ToMeter(double d) override
+  {
+    return Meter::ToMeter(d);
+  };
+
+  double FromMeter(double m) override
+  {
+    return Meter::FromMeter(m);
+  };
+
+  std::string UnitStr() override
+  {
+    return "m";
+  };
+};
+
+class KilometerUnit: public DistanceUnit {
+public:
+  ~KilometerUnit() override = default;
+
+  double ToMeter(double d) override
+  {
+    return Kilometer::ToMeter(d);
+  };
+
+  double FromMeter(double m) override
+  {
+    return Kilometer::FromMeter(m);
+  };
+
+  std::string UnitStr() override
+  {
+    return "km";
+  };
+};
+
+class MileUnit: public DistanceUnit {
+public:
+  ~MileUnit() override = default;
+
+  double ToMeter(double d) override
+  {
+    return Mile::ToMeter(d);
+  };
+
+  double FromMeter(double m) override
+  {
+    return Mile::FromMeter(m);
+  };
+
+  std::string UnitStr() override
+  {
+    return "mi";
+  };
+};
+
+class FeetUnit: public DistanceUnit {
+public:
+  ~FeetUnit() override = default;
+
+  double ToMeter(double d) override
+  {
+    return Feet::ToMeter(d);
+  };
+
+  double FromMeter(double m) override
+  {
+    return Feet::FromMeter(m);
+  };
+
+  std::string UnitStr() override
+  {
+    return "ft";
+  };
+};
 }
 
 void ElevationChartWidget::paint(QPainter *painter)
@@ -101,6 +194,48 @@ void ElevationChartWidget::paint(QPainter *painter)
 
   painter->setPen(pen);
   painter->drawPath(path);
+
+  // X axis
+  auto distanceIntervals = std::array{500, 250, 200, 100,
+                                      50, 25, 20, 10,
+                                      5,1};
+
+  std::vector<DistanceUnitPtr> distanceUnits;
+  if (locale.GetDistanceUnits()==Units::Imperial) {
+    distanceUnits.push_back(std::make_shared<MileUnit>());
+    distanceUnits.push_back(std::make_shared<FeetUnit>());
+  } else {
+    distanceUnits.push_back(std::make_shared<KilometerUnit>());
+    distanceUnits.push_back(std::make_shared<MeterUnit>());
+  }
+
+  double distanceLabelInterval=-1;
+  DistanceUnitPtr distanceLabelUnit=distanceUnits[0];
+  for (size_t ui=0; ui<distanceUnits.size() && distanceLabelInterval < 0; ui++) {
+    distanceLabelUnit=distanceUnits[ui];
+    for (size_t i = 0; i < distanceIntervals.size() && distanceLabelInterval < 0; i++) {
+      if (wayLength.AsMeter() / distanceLabelUnit->ToMeter(distanceIntervals[i]) > 2) {
+        distanceLabelInterval = distanceIntervals[i];
+      }
+    }
+  }
+
+  painter->setPen(textColor);
+  QFont font = painter->font();
+  font.setPointSize(textSize);
+  painter->setFont(font);
+
+  for (int i=1; true; i++){
+    double position = distanceLabelUnit->ToMeter(distanceLabelInterval*i) * distancePixelM;
+    if (position > chartRect.width()){
+      break;
+    }
+    std::stringstream ss;
+    ss << NumberToString(distanceLabelInterval*i, locale);
+    ss << locale.GetUnitsSeparator();
+    ss << distanceLabelUnit->UnitStr();
+    painter->drawText(chartRect.left()+position, chartRect.bottom(), QString::fromStdString(ss.str()));
+  }
 }
 
 void ElevationChartWidget::onError(int requestId)

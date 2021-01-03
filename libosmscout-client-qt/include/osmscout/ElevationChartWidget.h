@@ -23,6 +23,7 @@
 #include <osmscout/ClientQtImportExport.h>
 #include <osmscout/OverlayObject.h>
 #include <osmscout/ElevationModule.h>
+#include <osmscout/util/Locale.h>
 
 #include <QQuickPaintedItem>
 #include <QColor>
@@ -110,9 +111,13 @@ private:
   std::optional<ElevationPoint> highest;
 
   QColor lineColor=QColorConstants::DarkBlue;
+  QColor textColor=QColorConstants::DarkBlue;
   QColor gradientTopColor=QColor(QColorConstants::DarkBlue.red(), QColorConstants::DarkBlue.green(), QColorConstants::DarkBlue.blue(), 0xA0);
   QColor gradientBottomColor=QColorConstants::Transparent;
   qreal lineWidth=5;
+  int textSize=14;
+
+  Locale locale=Locale::ByEnvironment();
 };
 
 }
