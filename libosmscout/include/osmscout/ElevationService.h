@@ -71,6 +71,10 @@ public:
                           std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)> callback,
                           BreakerRef breaker=nullptr)
   {
+    if (way.empty()){
+      return 0;
+    }
+
     Distance distance;
     size_t pointCnt = 0;
     GeoCoord intersection;
