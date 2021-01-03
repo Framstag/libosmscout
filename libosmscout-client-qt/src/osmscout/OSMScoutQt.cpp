@@ -27,6 +27,7 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/DataTileCache.h>
 #include <osmscout/MapWidget.h>
+#include <osmscout/ElevationChartWidget.h>
 #include <osmscout/PlaneMapRenderer.h>
 #include <osmscout/TiledMapRenderer.h>
 #include <osmscout/OverlayObject.h>
@@ -159,9 +160,11 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<RouteStep>("RouteStep");
   qRegisterMetaType<std::list<RouteStep>>("std::list<RouteStep>");
   qRegisterMetaType<OverlayWay*>("OverlayWay*");
+  qRegisterMetaType<std::shared_ptr<OverlayWay>>("std::shared_ptr<OverlayWay>");
   qRegisterMetaType<OverlayArea*>("OverlayArea*");
   qRegisterMetaType<OverlayNode*>("OverlayNode*");
   qRegisterMetaType<QList<LookupModule::ObjectInfo>>("QList<LookupModule::ObjectInfo>");
+  qRegisterMetaType<ElevationModule::ElevationPoints>("ElevationModule::ElevationPoints");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -172,6 +175,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<MapObjectInfoModel>(uri, versionMajor, versionMinor, "MapObjectInfoModel");
   qmlRegisterType<MapStyleModel>(uri, versionMajor, versionMinor, "MapStyleModel");
   qmlRegisterType<MapWidget>(uri, versionMajor, versionMinor, "Map");
+  qmlRegisterType<ElevationChartWidget>(uri, versionMajor, versionMinor, "ElevationChart");
   qmlRegisterType<NavigationModel>(uri, versionMajor, versionMinor, "NavigationModel");
   qmlRegisterType<OnlineTileProviderModel>(uri, versionMajor, versionMinor, "OnlineTileProviderModel");
   qmlRegisterType<OverlayWay>(uri, versionMajor, versionMinor, "OverlayWay");
@@ -343,6 +347,15 @@ POILookupModule *OSMScoutQt::MakePOILookupModule()
 {
   QThread *thread=makeThread("POILookupModule");
   POILookupModule *module=new POILookupModule(thread,dbThread);
+  module->moveToThread(thread);
+  thread->start();
+  return module;
+}
+
+ElevationModule *OSMScoutQt::MakeElevationModule()
+{
+  QThread *thread=makeThread("ElevationModule");
+  ElevationModule *module=new ElevationModule(thread,dbThread);
   module->moveToThread(thread);
   thread->start();
   return module;

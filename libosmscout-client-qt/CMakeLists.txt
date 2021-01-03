@@ -5,6 +5,8 @@ set(HEADER_FILES
     include/osmscout/ClientQtImportExport.h
     include/osmscout/DBThread.h
     include/osmscout/DBInstance.h
+    include/osmscout/ElevationChartWidget.h
+    include/osmscout/ElevationModule.h
     include/osmscout/FileDownloader.h
     include/osmscout/InputHandler.h
     include/osmscout/LocationEntry.h
@@ -58,6 +60,8 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/osmscout/DBThread.cpp
     src/osmscout/DBInstance.cpp
+    src/osmscout/ElevationChartWidget.cpp
+    src/osmscout/ElevationModule.cpp
     src/osmscout/FileDownloader.cpp
     src/osmscout/InputHandler.cpp
     src/osmscout/LocationEntry.cpp
