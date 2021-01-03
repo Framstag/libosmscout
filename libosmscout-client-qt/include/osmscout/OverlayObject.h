@@ -130,6 +130,8 @@ public:
   }
 
   osmscout::GeoBox boundingBox() const;
+  std::vector<osmscout::GeoCoord> getCoords() const;
+  std::vector<osmscout::Point> getPoints() const;
 
 protected:
   void setupFeatures(const osmscout::TypeInfoRef &type,
