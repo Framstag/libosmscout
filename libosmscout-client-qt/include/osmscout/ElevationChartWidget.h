@@ -38,6 +38,10 @@ class OSMSCOUT_CLIENT_QT_API ElevationChartWidget : public QQuickPaintedItem {
   Q_PROPERTY(qreal lineWidth READ getLineWidth WRITE setLineWidth NOTIFY lineWidthChanged)
   Q_PROPERTY(QColor gradientTopColor READ getGradientTopColor WRITE setGradientTopColor NOTIFY gradientTopColorChanged)
   Q_PROPERTY(QColor gradientBottomColor READ getGradientBottomColor WRITE setGradientBottomColor NOTIFY gradientBottomColorChanged)
+  Q_PROPERTY(QColor textColor READ getTextColor WRITE setTextColor NOTIFY textColorChanged)
+  Q_PROPERTY(int textPixelSize READ getTextPixelSize WRITE setTextPixelSize NOTIFY textPixelSizeChanged)
+  Q_PROPERTY(int textPadding READ getTextPadding WRITE setTextPadding NOTIFY textPaddingChanged)
+
 signals:
   void wayChanged();
   void loadingChanged();
@@ -48,6 +52,9 @@ signals:
   void lineWidthChanged();
   void gradientTopColorChanged();
   void gradientBottomColorChanged();
+  void textColorChanged();
+  void textPixelSizeChanged();
+  void textPaddingChanged();
 
 public slots:
   void onError(int requestId);
@@ -96,6 +103,27 @@ public:
 
   void setGradientBottomColor(const QColor &c);
 
+  QColor getTextColor() const
+  {
+    return textColor;
+  }
+
+  void setTextColor(const QColor &c);
+
+  int getTextPixelSize() const
+  {
+    return textPixelSize;
+  }
+
+  void setTextPixelSize(int size);
+
+  int getTextPadding() const
+  {
+    return textPadding;
+  }
+
+  void setTextPadding(int size);
+
 private:
   void reset();
 
@@ -115,7 +143,8 @@ private:
   QColor gradientTopColor=QColor(QColorConstants::DarkBlue.red(), QColorConstants::DarkBlue.green(), QColorConstants::DarkBlue.blue(), 0xA0);
   QColor gradientBottomColor=QColorConstants::Transparent;
   qreal lineWidth=5;
-  int textSize=14;
+  int textPixelSize=14;
+  int textPadding=4;
 
   Locale locale=Locale::ByEnvironment();
 };

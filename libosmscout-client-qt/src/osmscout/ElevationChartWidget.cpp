@@ -209,7 +209,7 @@ void ElevationChartWidget::paint(QPainter *painter)
     distanceUnits.push_back(std::make_shared<MeterUnit>());
   }
 
-  double distanceLabelInterval=-1;
+  int distanceLabelInterval=-1;
   DistanceUnitPtr distanceLabelUnit=distanceUnits[0];
   for (size_t ui=0; ui<distanceUnits.size() && distanceLabelInterval < 0; ui++) {
     distanceLabelUnit=distanceUnits[ui];
@@ -219,22 +219,86 @@ void ElevationChartWidget::paint(QPainter *painter)
       }
     }
   }
+  if (distanceLabelInterval<0){
+    distanceLabelInterval=1;
+  }
 
   painter->setPen(textColor);
   QFont font = painter->font();
-  font.setPointSize(textSize);
+  font.setPixelSize(textPixelSize);
   painter->setFont(font);
 
-  for (int i=1; true; i++){
-    double position = distanceLabelUnit->ToMeter(distanceLabelInterval*i) * distancePixelM;
-    if (position > chartRect.width()){
+  for (int i = 1; true; i++) {
+    double position = distanceLabelUnit->ToMeter(distanceLabelInterval * i) * distancePixelM;
+    if (position > chartRect.width()) {
       break;
     }
     std::stringstream ss;
-    ss << NumberToString(distanceLabelInterval*i, locale);
+    ss << NumberToString(distanceLabelInterval * i, locale);
     ss << locale.GetUnitsSeparator();
     ss << distanceLabelUnit->UnitStr();
-    painter->drawText(chartRect.left()+position, chartRect.bottom(), QString::fromStdString(ss.str()));
+    painter->drawText(chartRect.left() + position, chartRect.bottom() + textPixelSize + textPadding, QString::fromStdString(ss.str()));
+    if (distancePixelM<=0) {
+      break;
+    }
+  }
+
+  // Y axis
+  int eleLabelInterval=-1;
+  DistanceUnitPtr eleLabelUnit;
+  if (locale.GetDistanceUnits()==Units::Imperial){
+    eleLabelUnit=std::make_shared<FeetUnit>();
+  } else {
+    eleLabelUnit=std::make_shared<MeterUnit>();
+  }
+  for (size_t i = 0; i < distanceIntervals.size() && eleLabelInterval < 0; i++) {
+    if (eleDiff.AsMeter() / eleLabelUnit->ToMeter(distanceIntervals[i]) > 2) {
+      eleLabelInterval = distanceIntervals[i];
+    }
+  }
+  if (eleLabelInterval<0){
+    eleLabelInterval=1;
+  }
+
+  double lowestEleVal = eleLabelUnit->FromMeter(lowest->elevation.AsMeter());
+  int firstAxisLabelVal = std::ceil((double)lowestEleVal / (double)eleLabelInterval) * eleLabelInterval;
+  double firstPosition = (eleLabelUnit->ToMeter(firstAxisLabelVal) - lowest->elevation.AsMeter())  * elePixelM;
+  // lowest elevation, conditionally
+  if (firstPosition > 3*textPixelSize){
+    std::stringstream ss;
+    ss << NumberToString(lowestEleVal, locale);
+    ss << locale.GetUnitsSeparator();
+    ss << eleLabelUnit->UnitStr();
+    painter->drawText(0, chartRect.bottom() - textPixelSize, chartRect.left()-textPadding, 2*textPixelSize,
+                      Qt::AlignVCenter | Qt::AlignRight, QString::fromStdString(ss.str()));
+  }
+
+  double lastPosition = firstPosition;
+  for (int i=0; true; i++) {
+    double position = firstPosition + eleLabelUnit->ToMeter(eleLabelInterval * i) * elePixelM;
+    if (position > chartRect.height()) {
+      break;
+    }
+    lastPosition = position;
+    std::stringstream ss;
+    ss << NumberToString(firstAxisLabelVal + eleLabelInterval * i, locale);
+    ss << locale.GetUnitsSeparator();
+    ss << eleLabelUnit->UnitStr();
+    painter->drawText(0, chartRect.bottom() - position - textPixelSize, chartRect.left()-textPadding, 2*textPixelSize,
+                      Qt::AlignVCenter | Qt::AlignRight, QString::fromStdString(ss.str()));
+    if (elePixelM<=0){
+      break;
+    }
+  }
+
+  // highest elevation, conditionally
+  if (lastPosition < chartRect.height() - 3*textPixelSize){
+    std::stringstream ss;
+    ss << NumberToString(eleLabelUnit->FromMeter(highest->elevation.AsMeter()), locale);
+    ss << locale.GetUnitsSeparator();
+    ss << eleLabelUnit->UnitStr();
+    painter->drawText(0, chartRect.top() - textPixelSize, chartRect.left()-textPadding, 2*textPixelSize,
+                      Qt::AlignVCenter | Qt::AlignRight, QString::fromStdString(ss.str()));
   }
 }
 
@@ -357,4 +421,35 @@ void ElevationChartWidget::setLineWidth(qreal w)
   emit lineWidthChanged();
   update();
 }
+
+void ElevationChartWidget::setTextColor(const QColor &c)
+{
+  if (textColor==c){
+    return;
+  }
+  textColor=c;
+  emit textColorChanged();
+  update();
+}
+
+void ElevationChartWidget::setTextPixelSize(int size)
+{
+  if (textPixelSize==size){
+    return;
+  }
+  textPixelSize=size;
+  emit textPixelSizeChanged();
+  update();
+}
+
+void ElevationChartWidget::setTextPadding(int size)
+{
+  if (textPadding==size){
+    return;
+  }
+  textPadding=size;
+  emit textPaddingChanged();
+  update();
+}
+
 }
