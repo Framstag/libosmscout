@@ -47,6 +47,10 @@ ElevationChartWidget::ElevationChartWidget(QQuickItem* parent):
 
 ElevationChartWidget::~ElevationChartWidget()
 {
+  if (breaker){
+    breaker->Break();
+  }
+
   if (elevationModule!=nullptr){
     elevationModule->deleteLater();
     elevationModule=nullptr;
