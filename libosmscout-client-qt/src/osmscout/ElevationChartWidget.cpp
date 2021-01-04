@@ -167,10 +167,14 @@ void ElevationChartWidget::paint(QPainter *painter)
   painter->setRenderHint(QPainter::TextAntialiasing, true);
 
   QRectF painterViewport=painter->viewport();
-  QRectF chartRect(painterViewport.width() * 0.1,
-                  painterViewport.height() * 0.05,
-                  painterViewport.width() * 0.85,
-                  painterViewport.height() * 0.9);
+  double topMargin = 0;
+  double rightMargin = 0;
+  double bottomMargin = textPixelSize * 1.5;
+  double leftMargin = textPixelSize * 4;
+  QRectF chartRect(leftMargin,
+                   topMargin,
+                  painterViewport.width() - (leftMargin+rightMargin),
+                  painterViewport.height() - (topMargin+bottomMargin));
 
   Distance wayLength=points.back().distance;
   qreal distancePixelM = wayLength==Distance::Zero() ? 0 : chartRect.width() / wayLength.AsMeter();
@@ -239,7 +243,7 @@ void ElevationChartWidget::paint(QPainter *painter)
 
   for (int i = 1; true; i++) {
     double position = distanceLabelUnit->ToMeter(distanceLabelInterval * i) * distancePixelM;
-    if (position > chartRect.width()) {
+    if (position > chartRect.width() - 2*textPixelSize) {
       break;
     }
     std::stringstream ss;
@@ -285,7 +289,7 @@ void ElevationChartWidget::paint(QPainter *painter)
   double lastPosition = firstPosition;
   for (int i=0; true; i++) {
     double position = firstPosition + eleLabelUnit->ToMeter(eleLabelInterval * i) * elePixelM;
-    if (position > chartRect.height()) {
+    if (position > chartRect.height() - 1.5*textPixelSize) {
       break;
     }
     lastPosition = position;
@@ -306,7 +310,7 @@ void ElevationChartWidget::paint(QPainter *painter)
     ss << NumberToString(eleLabelUnit->FromMeter(highest->elevation.AsMeter()), locale);
     ss << locale.GetUnitsSeparator();
     ss << eleLabelUnit->UnitStr();
-    painter->drawText(0, chartRect.top() - textPixelSize, chartRect.left()-textPadding, 2*textPixelSize,
+    painter->drawText(0, chartRect.top() - textPixelSize*0.5, chartRect.left()-textPadding, 2*textPixelSize,
                       Qt::AlignVCenter | Qt::AlignRight, QString::fromStdString(ss.str()));
   }
 }
