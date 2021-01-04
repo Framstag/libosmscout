@@ -138,10 +138,10 @@ private:
   std::optional<ElevationPoint> lowest;
   std::optional<ElevationPoint> highest;
 
-  QColor lineColor=QColorConstants::DarkBlue;
-  QColor textColor=QColorConstants::DarkBlue;
-  QColor gradientTopColor=QColor(QColorConstants::DarkBlue.red(), QColorConstants::DarkBlue.green(), QColorConstants::DarkBlue.blue(), 0xA0);
-  QColor gradientBottomColor=QColorConstants::Transparent;
+  QColor lineColor=Qt::darkBlue;
+  QColor textColor=Qt::darkBlue;
+  QColor gradientTopColor=QColor(lineColor.red(), lineColor.green(), lineColor.blue(), 0xA0);
+  QColor gradientBottomColor=Qt::transparent;
   qreal lineWidth=5;
   int textPixelSize=14;
   int textPadding=4;
