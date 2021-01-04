@@ -26,7 +26,12 @@ namespace osmscout {
 ElevationChartWidget::ElevationChartWidget(QQuickItem* parent):
   QQuickPaintedItem(parent)
 {
-  elevationModule=OSMScoutQt::GetInstance().MakeElevationModule();
+  OSMScoutQt& osmScoutInst = OSMScoutQt::GetInstance();
+  elevationModule=osmScoutInst.MakeElevationModule();
+
+  locale.SetDistanceUnits(osmScoutInst.GetSettings()->GetUnits() == "imperial" ?
+                          osmscout::Units::Imperial :
+                          osmscout::Units::Metrics);
 
   connect(this, &ElevationChartWidget::elevationProfileRequest,
           elevationModule, &ElevationModule::onElevationProfileRequest,
