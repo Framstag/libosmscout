@@ -175,6 +175,8 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 
 			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)
 	target_compile_definitions(ElevationProfileChart PRIVATE ${Qt5Widgets_DEFINITIONS})
+	set_target_properties(ElevationProfileChart PROPERTIES
+		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
 	if(MSVC)
 		visual_studio_qt_helper("ElevationProfileChart")
 	endif()

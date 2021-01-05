@@ -161,6 +161,7 @@ if buildClientQt
                                 include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir],
                                 dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
                                 link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
+                                override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
                                 install: true)
 endif
 
