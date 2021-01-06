@@ -64,6 +64,11 @@ NavigationModel::NavigationModel():
   connect(navigationModule, &NavigationModule::laneUpdate,
           this, &NavigationModel::onLaneUpdate,
           Qt::QueuedConnection);
+
+  connect(this, &NavigationModel::routeChanged,
+          this, &NavigationModel::routeAheadChanged);
+  connect(this, &NavigationModel::arrivalUpdate,
+          this, &NavigationModel::routeAheadChanged);
 }
 
 NavigationModel::~NavigationModel(){
@@ -72,6 +77,56 @@ NavigationModel::~NavigationModel(){
     navigationModule=nullptr;
   }
 }
+
+OverlayWay* NavigationModel::getRouteWayAhead() const
+{
+  if (!route){
+    return nullptr;
+  }
+
+  const auto &nodes=route.routeDescription().Nodes();
+  if (nodes.empty()){
+    return nullptr;
+  }
+  if (!remainingDistance.has_value()){
+    return new OverlayWay(route.routeWay().nodes);
+  }
+  std::vector<osmscout::Point> pointsAhead;
+  pointsAhead.reserve(nodes.size());
+  Distance traveled = nodes.back().GetDistance() - remainingDistance.value();
+  for (auto const &node : nodes){
+    if (node.GetDistance() > traveled) {
+      pointsAhead.emplace_back(0, node.GetLocation());
+    }
+  }
+  return new OverlayWay(pointsAhead);
+}
+
+OverlayWay* NavigationModel::getRouteWayPassed() const
+{
+  if (!route){
+    return nullptr;
+  }
+
+  const auto &nodes=route.routeDescription().Nodes();
+  if (nodes.empty()){
+    return nullptr;
+  }
+  if (!remainingDistance.has_value()){
+    return nullptr;
+  }
+  std::vector<osmscout::Point> pointsPassed;
+  pointsPassed.reserve(nodes.size());
+  Distance traveled = nodes.back().GetDistance() - remainingDistance.value();
+  for (auto const &node : nodes){
+    if (node.GetDistance() > traveled) {
+      break;
+    }
+    pointsPassed.emplace_back(0, node.GetLocation());
+  }
+  return new OverlayWay(pointsPassed);
+}
+
 
 void NavigationModel::locationChanged(bool /*locationValid*/,
                                       double lat, double lon,
@@ -186,7 +241,7 @@ void NavigationModel::setRoute(QObject *o)
     routeSteps.insert(routeSteps.begin(), steps.begin(), steps.end());
   }
   arrivalEstimate=QDateTime();
-  remainingDistance=Distance::Zero();
+  remainingDistance=std::nullopt;
   endResetModel();
 
   emit arrivalUpdate();

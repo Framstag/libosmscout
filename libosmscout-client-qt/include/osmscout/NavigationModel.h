@@ -40,9 +40,11 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
 {
   Q_OBJECT
-  Q_PROPERTY(QObject *route         READ getRoute          WRITE setRoute NOTIFY routeChanged)
-  Q_PROPERTY(QObject *routeWay      READ getRouteWay       NOTIFY routeChanged)
-  Q_PROPERTY(QObject *nextRouteStep READ getNextRoutStep   NOTIFY update)
+  Q_PROPERTY(QObject *route          READ getRoute          WRITE setRoute NOTIFY routeChanged)
+  Q_PROPERTY(QObject *routeWay       READ getRouteWay       NOTIFY routeChanged)
+  Q_PROPERTY(QObject *routeWayAhead  READ getRouteWayAhead  NOTIFY routeAheadChanged)
+  Q_PROPERTY(QObject *routeWayPassed READ getRouteWayPassed NOTIFY routeAheadChanged)
+  Q_PROPERTY(QObject *nextRouteStep  READ getNextRoutStep   NOTIFY update)
 
   Q_PROPERTY(QObject *vehiclePosition  READ getVehiclePosition    NOTIFY vehiclePositionChanged)
 
@@ -64,6 +66,7 @@ signals:
   void update();
 
   void arrivalUpdate();
+  void routeAheadChanged();
 
   void vehiclePositionChanged();
 
@@ -137,13 +140,16 @@ public:
 
   QHash<int, QByteArray> roleNames() const;
 
-  inline OverlayWay* getRouteWay()
+  inline OverlayWay* getRouteWay() const
   {
     if (!route){
       return nullptr;
     }
     return new OverlayWay(route.routeWay().nodes);
   }
+
+  OverlayWay* getRouteWayAhead() const;
+  OverlayWay* getRouteWayPassed() const;
 
   inline VehiclePosition* getVehiclePosition() const
   {
@@ -161,7 +167,10 @@ public:
 
   inline double getRemainingDinstance() const
   {
-    return remainingDistance.AsMeter();
+    if (!remainingDistance.has_value()){
+      return 0;
+    }
+    return remainingDistance->AsMeter();
   }
 
   inline double getCurrentSpeed() const
@@ -216,7 +225,7 @@ private:
   RouteStep nextRouteStep;
 
   QDateTime arrivalEstimate;
-  osmscout::Distance remainingDistance;
+  std::optional<osmscout::Distance> remainingDistance;
 
   double currentSpeed{-1};
   double maxAllowedSpeed{-1};
