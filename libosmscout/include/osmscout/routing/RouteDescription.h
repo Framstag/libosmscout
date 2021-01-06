@@ -742,7 +742,7 @@ namespace osmscout {
       }
 
       /**
-       * Distance from the start of the route in km.
+       * Distance from the start of the route.
        */
       inline Distance GetDistance() const
       {
