@@ -116,7 +116,7 @@ private:
 private:
   QThread     *thread;
   SettingsRef settings;
-  Units       units{Locale::ByEnvironment().GetDistanceUnits()}; // TODO: make possible to override
+  DistanceUnitSystem       units{Locale::ByEnvironment().GetDistanceUnits()}; // TODO: make possible to override
   DBThreadRef dbThread;
   QTimer      timer;
   std::optional<Bearing> lastBearing;

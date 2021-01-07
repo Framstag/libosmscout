@@ -32,7 +32,7 @@
 
 namespace osmscout {
 
-  enum class Units
+  enum class DistanceUnitSystem
   {
     Metrics,
     Imperial
