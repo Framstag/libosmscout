@@ -30,8 +30,8 @@ ElevationChartWidget::ElevationChartWidget(QQuickItem* parent):
   elevationModule=osmScoutInst.MakeElevationModule();
 
   locale.SetDistanceUnits(osmScoutInst.GetSettings()->GetUnits() == "imperial" ?
-                          osmscout::Units::Imperial :
-                          osmscout::Units::Metrics);
+                          osmscout::DistanceUnitSystem::Imperial :
+                          osmscout::DistanceUnitSystem::Metrics);
 
   connect(this, &ElevationChartWidget::elevationProfileRequest,
           elevationModule, &ElevationModule::onElevationProfileRequest,
@@ -60,98 +60,6 @@ ElevationChartWidget::~ElevationChartWidget()
     elevationModule->deleteLater();
     elevationModule=nullptr;
   }
-}
-
-namespace {
-class DistanceUnit {
-public:
-  virtual ~DistanceUnit() = default;
-  virtual double ToMeter(double d) = 0;
-  virtual double FromMeter(double m) = 0;
-  virtual std::string UnitStr() = 0;
-};
-
-using DistanceUnitPtr = std::shared_ptr<DistanceUnit>;
-
-class MeterUnit: public DistanceUnit {
-public:
-  ~MeterUnit() override = default;
-
-  double ToMeter(double d) override
-  {
-    return Meter::ToMeter(d);
-  };
-
-  double FromMeter(double m) override
-  {
-    return Meter::FromMeter(m);
-  };
-
-  std::string UnitStr() override
-  {
-    return "m";
-  };
-};
-
-class KilometerUnit: public DistanceUnit {
-public:
-  ~KilometerUnit() override = default;
-
-  double ToMeter(double d) override
-  {
-    return Kilometer::ToMeter(d);
-  };
-
-  double FromMeter(double m) override
-  {
-    return Kilometer::FromMeter(m);
-  };
-
-  std::string UnitStr() override
-  {
-    return "km";
-  };
-};
-
-class MileUnit: public DistanceUnit {
-public:
-  ~MileUnit() override = default;
-
-  double ToMeter(double d) override
-  {
-    return Mile::ToMeter(d);
-  };
-
-  double FromMeter(double m) override
-  {
-    return Mile::FromMeter(m);
-  };
-
-  std::string UnitStr() override
-  {
-    return "mi";
-  };
-};
-
-class FeetUnit: public DistanceUnit {
-public:
-  ~FeetUnit() override = default;
-
-  double ToMeter(double d) override
-  {
-    return Feet::ToMeter(d);
-  };
-
-  double FromMeter(double m) override
-  {
-    return Feet::FromMeter(m);
-  };
-
-  std::string UnitStr() override
-  {
-    return "ft";
-  };
-};
 }
 
 void ElevationChartWidget::paint(QPainter *painter)
@@ -214,12 +122,12 @@ void ElevationChartWidget::paint(QPainter *painter)
                                       5,1};
 
   std::vector<DistanceUnitPtr> distanceUnits;
-  if (locale.GetDistanceUnits()==Units::Imperial) {
-    distanceUnits.push_back(std::make_shared<MileUnit>());
-    distanceUnits.push_back(std::make_shared<FeetUnit>());
+  if (locale.GetDistanceUnits() == DistanceUnitSystem::Imperial) {
+    distanceUnits.push_back(std::make_shared<Mile>());
+    distanceUnits.push_back(std::make_shared<Feet>());
   } else {
-    distanceUnits.push_back(std::make_shared<KilometerUnit>());
-    distanceUnits.push_back(std::make_shared<MeterUnit>());
+    distanceUnits.push_back(std::make_shared<Kilometer>());
+    distanceUnits.push_back(std::make_shared<Meter>());
   }
 
   int distanceLabelInterval=-1;
@@ -227,7 +135,7 @@ void ElevationChartWidget::paint(QPainter *painter)
   for (size_t ui=0; ui<distanceUnits.size() && distanceLabelInterval < 0; ui++) {
     distanceLabelUnit=distanceUnits[ui];
     for (size_t i = 0; i < distanceIntervals.size() && distanceLabelInterval < 0; i++) {
-      if (wayLength.AsMeter() / distanceLabelUnit->ToMeter(distanceIntervals[i]) > 2) {
+      if (wayLength.AsMeter() / distanceLabelUnit->Distance(distanceIntervals[i]).AsMeter() > 2) {
         distanceLabelInterval = distanceIntervals[i];
       }
     }
@@ -242,7 +150,7 @@ void ElevationChartWidget::paint(QPainter *painter)
   painter->setFont(font);
 
   for (int i = 1; true; i++) {
-    double position = distanceLabelUnit->ToMeter(distanceLabelInterval * i) * distancePixelM;
+    double position = distanceLabelUnit->Distance(distanceLabelInterval * i).AsMeter() * distancePixelM;
     if (position > chartRect.width() - 2*textPixelSize) {
       break;
     }
@@ -259,13 +167,13 @@ void ElevationChartWidget::paint(QPainter *painter)
   // Y axis
   int eleLabelInterval=-1;
   DistanceUnitPtr eleLabelUnit;
-  if (locale.GetDistanceUnits()==Units::Imperial){
-    eleLabelUnit=std::make_shared<FeetUnit>();
+  if (locale.GetDistanceUnits() == DistanceUnitSystem::Imperial){
+    eleLabelUnit=std::make_shared<Feet>();
   } else {
-    eleLabelUnit=std::make_shared<MeterUnit>();
+    eleLabelUnit=std::make_shared<Meter>();
   }
   for (size_t i = 0; i < distanceIntervals.size() && eleLabelInterval < 0; i++) {
-    if (eleDiff.AsMeter() / eleLabelUnit->ToMeter(distanceIntervals[i]) > 2) {
+    if (eleDiff.AsMeter() / eleLabelUnit->Distance(distanceIntervals[i]).AsMeter() > 2) {
       eleLabelInterval = distanceIntervals[i];
     }
   }
@@ -273,9 +181,9 @@ void ElevationChartWidget::paint(QPainter *painter)
     eleLabelInterval=1;
   }
 
-  double lowestEleVal = eleLabelUnit->FromMeter(lowest->elevation.AsMeter());
+  double lowestEleVal = eleLabelUnit->Value(lowest->elevation);
   int firstAxisLabelVal = std::ceil((double)lowestEleVal / (double)eleLabelInterval) * eleLabelInterval;
-  double firstPosition = (eleLabelUnit->ToMeter(firstAxisLabelVal) - lowest->elevation.AsMeter())  * elePixelM;
+  double firstPosition = (eleLabelUnit->Distance(firstAxisLabelVal).AsMeter() - lowest->elevation.AsMeter())  * elePixelM;
   // lowest elevation, conditionally
   if (firstPosition > 3*textPixelSize){
     std::stringstream ss;
@@ -288,7 +196,7 @@ void ElevationChartWidget::paint(QPainter *painter)
 
   double lastPosition = firstPosition;
   for (int i=0; true; i++) {
-    double position = firstPosition + eleLabelUnit->ToMeter(eleLabelInterval * i) * elePixelM;
+    double position = firstPosition + eleLabelUnit->Distance(eleLabelInterval * i).AsMeter() * elePixelM;
     if (position > chartRect.height() - 1.5*textPixelSize) {
       break;
     }
@@ -307,7 +215,7 @@ void ElevationChartWidget::paint(QPainter *painter)
   // highest elevation, conditionally
   if (lastPosition < chartRect.height() - 3*textPixelSize){
     std::stringstream ss;
-    ss << NumberToString(eleLabelUnit->FromMeter(highest->elevation.AsMeter()), locale);
+    ss << NumberToString(eleLabelUnit->Value(highest->elevation), locale);
     ss << locale.GetUnitsSeparator();
     ss << eleLabelUnit->UnitStr();
     painter->drawText(0, chartRect.top() - textPixelSize*0.5, chartRect.left()-textPadding, 2*textPixelSize,
