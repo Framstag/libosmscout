@@ -171,7 +171,7 @@ public:
   };
 
 private:
-  Units units{Units::Metrics};
+  DistanceUnitSystem units{DistanceUnitSystem::Metrics};
 
   // state used for triggering GpsFound / GpsLost messages
   bool prevGpsSignal{true};
@@ -181,7 +181,7 @@ private:
   Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.disntace usually)
 
 public:
-  inline VoiceInstructionAgent(Units units):
+  inline VoiceInstructionAgent(DistanceUnitSystem units):
     units{units}
   {};
 

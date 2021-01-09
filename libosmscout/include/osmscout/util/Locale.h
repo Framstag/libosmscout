@@ -32,7 +32,7 @@ namespace osmscout {
   class OSMSCOUT_API Locale CLASS_FINAL
   {
   private:
-    Units distanceUnits{Units::Metrics};
+    DistanceUnitSystem distanceUnits{DistanceUnitSystem::Metrics};
     std::string decimalSeparator{"."}; //!<  UTF-8 encoded string with decimal separator
     std::string thousandsSeparator; //!< UTF-8 encoded string with thousands separator
 
@@ -51,7 +51,7 @@ namespace osmscout {
      */
     Locale() = default;
 
-    Locale(const Units &distanceUnits,
+    Locale(const DistanceUnitSystem &distanceUnits,
            const std::string &decimalSeparator,
            const std::string &thousandsSeparator);
 
@@ -61,12 +61,12 @@ namespace osmscout {
     Locale &operator=(const Locale &) = default;
     Locale &operator=(Locale &&) = default;
 
-    Units GetDistanceUnits() const
+    DistanceUnitSystem GetDistanceUnits() const
     {
       return distanceUnits;
     }
 
-    void SetDistanceUnits(const Units &units)
+    void SetDistanceUnits(const DistanceUnitSystem &units)
     {
       this->distanceUnits = units;
     }

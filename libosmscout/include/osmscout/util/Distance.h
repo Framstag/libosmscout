@@ -28,78 +28,14 @@
 #include <algorithm>
 #include <string>
 #include <ostream>
+#include <memory>
 
 namespace osmscout {
 
-  enum class Units
+  enum class DistanceUnitSystem
   {
     Metrics,
     Imperial
-  };
-
-  struct OSMSCOUT_API Meter
-  {
-    static inline double ToMeter(double m)
-    {
-      return m;
-    }
-
-    static inline double FromMeter(double m)
-    {
-      return m;
-    }
-  };
-
-  struct OSMSCOUT_API Kilometer
-  {
-    static inline double ToMeter(double km)
-    {
-      return km*1000.0;
-    }
-
-    static inline double FromMeter(double m)
-    {
-      return m/1000.0;
-    }
-  };
-
-  struct OSMSCOUT_API Feet
-  {
-    static inline double ToMeter(double feet)
-    {
-      return feet * 0.3048;
-    }
-
-    static inline double FromMeter(double m)
-    {
-      return m/0.3048;
-    }
-  };
-
-  struct OSMSCOUT_API Yard
-  {
-    static inline double ToMeter(double yard)
-    {
-      return yard / 0.9144;
-    }
-
-    static inline double FromMeter(double m)
-    {
-      return m * 0.9144;
-    }
-  };
-
-  struct OSMSCOUT_API Mile
-  {
-    static inline double ToMeter(double mile)
-    {
-      return mile * 1609.344;
-    }
-
-    static inline double FromMeter(double m)
-    {
-      return m / 1609.344;
-    }
   };
 
   class OSMSCOUT_API Distance CLASS_FINAL
@@ -251,6 +187,172 @@ namespace osmscout {
 
     return os;
   }
+
+  struct OSMSCOUT_API DistanceUnit
+  {
+  public:
+    virtual ~DistanceUnit() = default;
+    virtual class Distance Distance(double d) const = 0;
+    virtual double Value(const class Distance &d) const = 0;
+    virtual std::string UnitStr() const = 0;
+  };
+
+  using DistanceUnitPtr = std::shared_ptr<DistanceUnit>;
+
+  class OSMSCOUT_API Meter: public DistanceUnit
+  {
+  public:
+    ~Meter() override = default;
+
+    class Distance Distance(double d) const override
+    {
+      return Distance::Of<Meter>(d);
+    }
+
+    double Value(const class Distance &d) const override
+    {
+      return d.As<Meter>();
+    }
+
+    std::string UnitStr() const override
+    {
+      return "m";
+    };
+
+    static inline double ToMeter(double m)
+    {
+      return m;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m;
+    }
+  };
+
+  struct OSMSCOUT_API Kilometer: public DistanceUnit
+  {
+  public:
+    ~Kilometer() override = default;
+
+    class Distance Distance(double d) const override
+    {
+      return Distance::Of<Kilometer>(d);
+    }
+
+    double Value(const class Distance &d) const override
+    {
+      return d.As<Kilometer>();
+    }
+
+    std::string UnitStr() const override
+    {
+      return "km";
+    };
+
+    static inline double ToMeter(double km)
+    {
+      return km*1000.0;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m/1000.0;
+    }
+  };
+
+  struct OSMSCOUT_API Feet: public DistanceUnit
+  {
+  public:
+    ~Feet() override = default;
+
+    class Distance Distance(double d) const override
+    {
+      return Distance::Of<Feet>(d);
+    }
+
+    double Value(const class Distance &d) const override
+    {
+      return d.As<Feet>();
+    }
+
+    std::string UnitStr() const override
+    {
+      return "ft";
+    };
+
+    static inline double ToMeter(double feet)
+    {
+      return feet * 0.3048;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m/0.3048;
+    }
+  };
+
+  struct OSMSCOUT_API Yard: public DistanceUnit
+  {
+  public:
+    ~Yard() override = default;
+
+    class Distance Distance(double d) const override
+    {
+      return Distance::Of<Yard>(d);
+    }
+
+    double Value(const class Distance &d) const override
+    {
+      return d.As<Yard>();
+    }
+
+    std::string UnitStr() const override
+    {
+      return "yard";
+    };
+
+    static inline double ToMeter(double yard)
+    {
+      return yard / 0.9144;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m * 0.9144;
+    }
+  };
+
+  struct OSMSCOUT_API Mile: public DistanceUnit
+  {
+  public:
+    ~Mile() override = default;
+
+    class Distance Distance(double d) const override
+    {
+      return Distance::Of<Mile>(d);
+    }
+
+    double Value(const class Distance &d) const override
+    {
+      return d.As<Mile>();
+    }
+
+    std::string UnitStr() const override
+    {
+      return "mi";
+    };
+
+    static inline double ToMeter(double mile)
+    {
+      return mile * 1609.344;
+    }
+
+    static inline double FromMeter(double m)
+    {
+      return m / 1609.344;
+    }
+  };
 
   inline Distance Meters(double m){
     return Distance::Of<Meter>(m);

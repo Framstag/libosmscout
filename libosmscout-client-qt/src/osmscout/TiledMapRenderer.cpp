@@ -448,7 +448,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     drawParameter.SetLabelLineFitToArea(true);
     drawParameter.SetLabelLineFitToWidth(std::min(screenWidth, screenHeight));
 
-    drawParameter.GetLocaleRef().SetDistanceUnits(units == "imperial" ? osmscout::Units::Imperial : osmscout::Units::Metrics);
+    drawParameter.GetLocaleRef().SetDistanceUnits(units == "imperial" ? osmscout::DistanceUnitSystem::Imperial : osmscout::DistanceUnitSystem::Metrics);
 
     // setup projection for these tiles
     osmscout::MercatorProjection projection;
