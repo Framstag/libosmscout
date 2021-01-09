@@ -32,6 +32,7 @@ osmscoutSrc = [
             'src/osmscout/util/Tiling.cpp',
             'src/osmscout/util/TileId.cpp',
             'src/osmscout/util/Transformation.cpp',
+            'src/osmscout/util/Worker.cpp',
             'src/osmscout/util/WorkQueue.cpp',
             'src/osmscout/util/TagErrorReporter.cpp',
             'src/osmscout/routing/RouteDescription.cpp',

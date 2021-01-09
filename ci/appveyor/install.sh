@@ -21,7 +21,7 @@ apt-get install -y \
           qtlocation5-dev qtpositioning5-dev qttools5-dev-tools qttools5-dev \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
-          swig openjdk-8-jdk \
+          swig openjdk-8-jdk\
           locales
 
 # workaround for custom doxygen dependecy
@@ -32,7 +32,7 @@ locale-gen en_US.UTF-8
 
 if [ "${COMPILER}" = "gcc" ] ; then
     apt-get install -y \
-          g++
+          g++-10
 fi
 if [ "${COMPILER}" = "clang" ] ; then
     apt-get install -y \
