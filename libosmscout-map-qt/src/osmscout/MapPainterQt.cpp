@@ -229,7 +229,7 @@ namespace osmscout {
 
         patterns[idx].setTextureImage(image);
 
-        //std::cout << "Loaded image '" << filename << "'" << std::endl;
+        log.Info() << "Loaded pattern '" << style.GetPatternName() << "' from \"" << filename << "\"";
 
         return true;
       }
