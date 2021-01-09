@@ -30,6 +30,7 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/util/Time.h>
+#include <osmscout/util/Locale.h>
 
 #include <osmscout/CoreImportExport.h>
 #include <osmscout/OSMScoutTypes.h>
@@ -56,7 +57,7 @@ namespace osmscout {
   extern OSMSCOUT_API bool StringToBool(const char* string, bool& value);
 
   /**
-   * Rteurns a string representation of the given boolean value (either 'true' or 'false')
+   * Returns a string representation of the given boolean value (either 'true' or 'false')
    *
    * @param value
    *    value to return
@@ -64,6 +65,15 @@ namespace osmscout {
    *    result of the conversion
    */
   extern OSMSCOUT_API const char* BoolToString(bool value);
+
+  /**
+   * Returns locale-aware string representation of number
+   *
+   * @param value
+   * @param locale
+   * @return
+   */
+  extern OSMSCOUT_API std::string NumberToString(long value, const Locale &locale);
 
   /**
    * \ingroup Util

@@ -146,6 +146,25 @@ if buildMapQt
                                 install: true)
 endif
 
+if buildClientQt
+
+  eleDemoMocs = qt5.preprocess(moc_headers : [
+                                'include/QtDemoApp.h'
+                               ],
+                               qresources: ['demo.qrc', '../OSMScout2/res.qrc'])
+
+  ElevationProfileChart = executable('ElevationProfileChart',
+                                ['src/ElevationProfileChart.cpp',
+                                 'src/QtDemoApp.cpp'],
+                                eleDemoMocs,
+                                cpp_args: ['-fPIC'],
+                                include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir],
+                                dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
+                                link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
+                                override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
+                                install: true)
+endif
+
 Routing = executable('Routing',
                      'src/Routing.cpp',
                      include_directories: [osmscoutIncDir],

@@ -61,16 +61,36 @@ public:
   std::vector<ElevationPoint> ElevationProfile(const std::vector<GeoCoord> &way)
   {
     std::vector<ElevationPoint> result;
+    ElevationProfile(way, [&result](const Distance &, const std::vector<ElevationPoint> &points){
+      result.insert(result.end(), points.begin(), points.end());
+    });
+    return result;
+  }
+
+  size_t ElevationProfile(const std::vector<GeoCoord> &way,
+                          std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)> callback,
+                          BreakerRef breaker=nullptr)
+  {
+    if (way.empty()){
+      return 0;
+    }
+
     Distance distance;
+    size_t pointCnt = 0;
     GeoCoord intersection;
 
     std::vector<ContoursData> contours;
     GeoBox loadBox;
 
     for (size_t i=0; i < way.size()-1; i+=1){
+      std::vector<ElevationPoint> result;
       GeoCoord a1=way[i];
       GeoCoord a2=way[i+1];
       GeoBox lineBox(a1,a2);
+
+      if (i%100==0 && breaker && breaker->IsAborted()){
+        break;
+      }
 
       if (!loadBox.Includes(a1) || !loadBox.Includes(a2)) {
         TileId tile1=TileId::GetTile(loadTileMag, lineBox.GetMinCoord());
@@ -119,19 +139,24 @@ public:
 
         }
       }
+
       //log.Debug() << "At distance " << distance << " adding " << GetEllipsoidalDistance(a1,a2) << " (" << a1.GetDisplayText() << " -> " << a2.GetDisplayText() << ")";
       distance+=GetEllipsoidalDistance(a1,a2);
+      if (!result.empty()) {
+        std::sort(result.begin(), result.end(), [](const ElevationPoint &a, const ElevationPoint &b) {
+          if (a.distance != b.distance) {
+            return a.distance < b.distance;
+          }
+          if (a.elevation != b.elevation) {
+            return a.elevation < b.elevation;
+          }
+          return a.coord < b.coord;
+        });
+        pointCnt += result.size();
+        callback(distance, result);
+      }
     }
-    std::sort(result.begin(), result.end(), [](const ElevationPoint &a, const ElevationPoint &b) {
-      if (a.distance != b.distance) {
-        return a.distance < b.distance;
-      }
-      if (a.elevation != b.elevation) {
-        return a.elevation < b.elevation;
-      }
-      return a.coord < b.coord;
-    });
-    return result;
+    return pointCnt;
   }
 };
 

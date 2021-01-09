@@ -32,6 +32,7 @@
 #include <osmscout/NavigationModule.h>
 #include <osmscout/POILookupModule.h>
 #include <osmscout/VoiceManager.h>
+#include <osmscout/ElevationModule.h>
 
 #include <osmscout/ClientQtImportExport.h>
 
@@ -304,6 +305,7 @@ public:
   SearchModule *MakeSearchModule();
   StyleModule *MakeStyleModule();
   POILookupModule *MakePOILookupModule();
+  ElevationModule *MakeElevationModule();
 
   QString GetUserAgent() const;
   QString GetCacheLocation() const;
