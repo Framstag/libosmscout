@@ -48,7 +48,7 @@ public:
 #endif
 
     QStringList mapLookupDirectories;
-    QString style="stylesheets/standard.oss";
+    QString stylesheet="stylesheets/standard.oss";
     QString iconDirectory="icons";
     QString translationDir;
     QString basemapDir;

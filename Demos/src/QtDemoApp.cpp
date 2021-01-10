@@ -53,6 +53,13 @@ void QtDemoApp::Arguments::AddOptions(osmscout::CmdLineParser &argParser)
                       false);
 
   argParser.AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                        stylesheet=QString::fromStdString(value);
+                      }),
+                      "stylesheet",
+                      "Map style. Default: " + stylesheet.toStdString(),
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
                         mapLookupDirectories.append(QString::fromStdString(value));
                       }),
                       "database",
@@ -150,7 +157,7 @@ int QtDemoApp::Run(const Arguments &args, const QUrl &qmlFileUrl)
                "(" << translationDir << ")";
   }
 
-  QFileInfo stylesheetFile(args.style);
+  QFileInfo stylesheetFile(args.stylesheet);
 
   osmscout::OSMScoutQtBuilder builder=osmscout::OSMScoutQt::NewInstance();
 
