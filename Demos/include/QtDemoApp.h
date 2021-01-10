@@ -55,6 +55,16 @@ public:
   };
 
 public:
+  /**
+   * @param appName
+   *
+   * @param argc - be aware that this argument is reference!
+   *    QGuiApplication may "consume" some arguments,
+   *    like "--style", "--plugin" (see QGuiApplicationPrivate::init() source).
+   *    So, these arguments cannot be used by demo application itself.
+   *
+   * @param argv
+   */
   QtDemoApp(QString appName, int &argc, char* argv[]);
 
   QtDemoApp(const QtDemoApp &) = delete;
