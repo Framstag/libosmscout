@@ -9,21 +9,18 @@ set(OSMSCOUT_USER_AGENT "OSMScout demo app %1")
 set(HEADER_FILES
     src/Theme.h
     src/AppSettings.h
-	src/PositionSimulator.h
 	)
 
 set(SOURCE_FILES
     src/Theme.cpp
     src/AppSettings.cpp
     src/OSMScout.cpp
-	src/PositionSimulator.cpp
 
     # qml files in CMake sources make it visible in QtCreator
     qml/AboutDialog.qml
     qml/main.qml
     qml/SearchDialog.qml
     qml/MapDownloadDialog.qml
-	qml/NavigationSimulation.qml
     qml/custom/MapDialog.qml
     qml/custom/ScrollIndicator.qml
     qml/custom/LineEdit.qml
@@ -76,7 +73,6 @@ target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES}
 target_link_libraries(OSMScout2
 	OSMScout::OSMScout
 	OSMScout::Map
-	OSMScout::GPX
 	OSMScout::MapQt
 	OSMScout::ClientQt
 	Qt5::Core

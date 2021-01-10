@@ -2,20 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en">
 <context>
-    <name>NavigationSimulation</name>
-    <message>
-        <location filename="../qml/NavigationSimulation.qml" line="281"/>
-        <location filename="../qml/NavigationSimulation.qml" line="284"/>
-        <source>meters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../qml/NavigationSimulation.qml" line="286"/>
-        <source>km</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>osmscout::RouteDescriptionBuilder</name>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="74"/>

@@ -17,11 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "PositionSimulator.h"
+#include <PositionSimulator.h>
 
 #include <osmscout/util/Logger.h>
 
-#include <osmscout/gpx/GPXFeatures.h>
 #include <osmscout/gpx/Import.h>
 
 static const std::chrono::milliseconds TickDuration(100);
@@ -41,16 +40,11 @@ void PositionSimulator::setTrack(const QString &t)
 
   osmscout::gpx::GpxFile gpxFile;
 
-#ifndef OSMSCOUT_GPX_HAVE_LIB_XML
-  osmscout::log.Error() << "GPX import is not supported!";
-  return;
-#else
   osmscout::log.Info() << "Loading " << trackFile.toStdString();
   if (!osmscout::gpx::ImportGpx(trackFile.toStdString(), gpxFile)){
     osmscout::log.Error() << "Failed to load gpx file " << trackFile.toStdString();
     return;
   }
-#endif
 
   segments.clear();
 
