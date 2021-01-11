@@ -69,7 +69,7 @@ private slots:
 
 public:
   PositionSimulator();
-  virtual ~PositionSimulator(){}
+  virtual ~PositionSimulator() = default;
 
   QString getTrack() const {
     return trackFile;
