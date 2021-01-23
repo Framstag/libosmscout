@@ -45,7 +45,7 @@ namespace osmscout {
         country=="LR" || // Liberia
         country=="MM"  // Myanmar
     ){
-      locale.SetDistanceUnits(Units::Imperial);
+      locale.SetDistanceUnits(DistanceUnitSystem::Imperial);
     }
 
     using Facet = std::numpunct<wchar_t>;

@@ -1,4 +1,4 @@
-name: Ubuntu 18.04 using clang and meson
+name: Ubuntu 20.04 using clang and meson
 
 on:
   pull_request:
@@ -11,12 +11,14 @@ on:
 jobs:
   build:
     name: Ubuntu+clang+meson - Build and test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
+      - name: Install clang compiler, meson and ninja
+        run: sudo apt-get -y install clang libc++-10-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get update && sudo apt-get install -y
               libxml2-dev
@@ -25,19 +27,13 @@ jobs:
               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
               qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
               qttools5-dev qtmultimedia5-dev
-              freeglut3 freeglut3-dev
+              libglm-dev libglew-dev freeglut3 freeglut3-dev
               libmarisa-dev"
-      - name: Install clang compiler and ninja
-        run: sudo apt-get -y install clang-9 libc++abi-9-dev ccache libtool pkg-config ninja-build
-      - name: Add eoan repository to apt for current meson
-        run: sudo add-apt-repository -y -u "deb http://de.archive.ubuntu.com/ubuntu eoan main universe"
-      - name: Install meson von eoan repository
-        run: sudo apt-get -y install meson
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug
         env:
-          CXX: ccache clang++-9
-          CC: ccache clang-9
+          CXX: clang++
+          CC: clang
       - name: Build project
         run: ninja -C debug
       - name: Run tests

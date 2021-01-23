@@ -22,7 +22,6 @@
 // Qt includes
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQuickView>
 #include <QApplication>
 #include <QFileInfo>
 #include <QQmlContext>
@@ -30,26 +29,13 @@
 // OSM Scout library singleton
 #include <osmscout/OSMScoutQt.h>
 
-// Custom QML objects
-#include <osmscout/MapWidget.h>
-#include <osmscout/SearchLocationModel.h>
-#include <osmscout/RoutingModel.h>
-#include <osmscout/AvailableMapsModel.h>
-#include <osmscout/MapDownloadsModel.h>
-
-// Application settings
-#include <osmscout/Settings.h>
-
 // Application theming
 #include "Theme.h"
 
 #include "AppSettings.h"
-#include "PositionSimulator.h"
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/CmdLineParsing.h>
-
-#include <osmscout/gpx/GPXFeatures.h>
 
 using namespace osmscout;
 
@@ -93,15 +79,11 @@ struct Arguments {
   QString iconDirectory;
   QString translationDir;
 
-  QString track;
-  bool simulateNavigation;
-
   Arguments() :
       help(false),
       databaseDirectory("."),
       style("stylesheets/standard.oss"),
-      iconDirectory("icons"),
-      simulateNavigation(false)
+      iconDirectory("icons")
   {}
 };
 
@@ -167,16 +149,6 @@ int main(int argc, char* argv[])
                       "Directory with translation files (*.qm)",
                       false);
 
-#ifdef OSMSCOUT_GPX_HAVE_LIB_XML
-  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                        args.track=QString::fromStdString(value);
-                        args.simulateNavigation=true;
-                      }),
-                      "simulate-track",
-                      "GPX file for navigation simulation",
-                      false);
-#endif
-
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=QString::fromStdString(value);
                           }),
@@ -238,14 +210,6 @@ int main(int argc, char* argv[])
       builder.WithBasemapLookupDirectory(dir.absolutePath());
     }
   }
-  if (args.simulateNavigation){
-    QFileInfo gpxFile(args.track);
-    if (!gpxFile.exists()){
-      std::cerr << args.track.toStdString() << " dont exists" << std::endl;
-      return 1;
-    }
-    qmlRegisterType<PositionSimulator>("net.sf.libosmscout.map", 1, 0, "PositionSimulator");
-  }
 
   QFileInfo stylesheetFile(args.style);
 
@@ -265,15 +229,8 @@ int main(int argc, char* argv[])
   }
 
   {
-    if (args.simulateNavigation){
-      QQmlApplicationEngine window;
-      window.rootContext()->setContextProperty("PositionSimulationTrack", args.track);
-      window.load(QUrl("qrc:/qml/NavigationSimulation.qml"));
-      result = app.exec();
-    }else{
-      QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
-      result = app.exec();
-    }
+    QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
+    result = app.exec();
   }
 
   OSMScoutQt::FreeInstance();

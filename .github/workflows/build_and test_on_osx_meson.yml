@@ -1,0 +1,29 @@
+name: OS X and meson
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: OSX+meson - Build and test
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install build tool
+        run:  brew install meson ninja
+      - name: Install dependencies
+        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
+      - name: Configure build project
+        run: meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
+        env:
+          PKG_CONFIG_PATH: "/usr/local/opt/qt/lib/pkgconfig:/usr/local/opt/libxml2/lib/pkgconfig"
+      - name: Build project
+        run: meson compile -C debug
+      - name: Execute tests
+        run: meson test -C debug --print-errorlogs

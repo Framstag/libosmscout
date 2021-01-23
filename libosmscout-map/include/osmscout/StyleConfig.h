@@ -561,7 +561,7 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API StyleConfig
   {
-  private:
+  protected:
     TypeConfigRef                              typeConfig;             //!< Reference to the type configuration
     mutable StyleResolveContext                styleResolveContext;    //!< Instance of helper class that can get passed around to templated helper methods
 

@@ -21,6 +21,7 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/StopClock.h>
 
@@ -31,22 +32,28 @@
   Call this program repeately to avoid different timing because of OS file caching.
 */
 
-int main(int /*argc*/, char* /*argv*/[])
+int main(int argc, char* argv[])
 {
-  std::string           wayFilename="ways.dat";
-
   osmscout::StopClock   scannerTimer;
 
   osmscout::TypeConfig  typeConfig;
   osmscout::FileScanner scanner;
 
-  if (!typeConfig.LoadFromDataFile(".")) {
+  if (argc!=2) {
+    std::cerr << "ReadScannerPerformance <map directory>" << std::endl;
+    return 1;
+  }
+
+  std::string mapDirectory=argv[1];
+  std::string wayDatFilename=osmscout::AppendFileToDir(mapDirectory,"ways.dat");
+
+  if (!typeConfig.LoadFromDataFile(mapDirectory)) {
     std::cerr << "Cannot open type configuration!" << std::endl;
     return 1;
   }
 
   try {
-    scanner.Open(wayFilename,osmscout::FileScanner::Sequential,true);
+    scanner.Open(wayDatFilename,osmscout::FileScanner::Sequential,true);
 
     std::cout << "Start reading files using FileScanner..." << std::endl;
 

@@ -443,7 +443,7 @@ namespace osmscout {
 
   CmdLineParseResult CmdLineParser::Parse()
   {
-    // Skip the initial parameter naming the programm
+    // Skip the initial parameter naming the program
     if (scanner.HasNextArg()) {
       scanner.Advance();
     }

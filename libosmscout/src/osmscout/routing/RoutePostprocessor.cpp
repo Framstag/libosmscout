@@ -1524,10 +1524,10 @@ namespace osmscout {
               if (possibilities.find(turn) != possibilities.end()){
                 // it is possible to use this turn
                 if (allowedLaneFrom < 0) {
-                  allowedLaneFrom=i;
-                  allowedLaneTo=i;
+                  allowedLaneFrom=static_cast<int>(i);
+                  allowedLaneTo=static_cast<int>(i);
                 } else {
-                  allowedLaneTo=i;
+                  allowedLaneTo=static_cast<int>(i);
                 }
               } else {
                 if (allowedLaneFrom>0){

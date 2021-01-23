@@ -34,6 +34,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/NumberSet.h
     include/osmscout/util/ObjectPool.h
     include/osmscout/util/Parsing.h
+	include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
     include/osmscout/util/Projection.h
     include/osmscout/util/StopClock.h
@@ -44,7 +45,8 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Time.h
     include/osmscout/util/TileId.h
     include/osmscout/util/Transformation.h
-    include/osmscout/util/WorkQueue.h)
+	include/osmscout/util/Worker.h
+	include/osmscout/util/WorkQueue.h)
 
 set(HEADER_FILES_ROUTING
     include/osmscout/routing/RouteData.h
@@ -166,6 +168,7 @@ set(SOURCE_FILES
     src/osmscout/util/Tiling.cpp
     src/osmscout/util/TileId.cpp
     src/osmscout/util/Transformation.cpp
+	src/osmscout/util/Worker.cpp
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/TagErrorReporter.cpp
     src/osmscout/routing/RouteData.cpp

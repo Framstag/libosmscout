@@ -2066,19 +2066,19 @@ namespace osmscout {
 
   std::string EleFeatureValue::GetLabel(const Locale &locale, size_t labelIndex) const
   {
-    Units units;
+    DistanceUnitSystem units;
     if (labelIndex==EleFeature::IN_LOCALE_UNIT_LABEL_INDEX){
       units=locale.GetDistanceUnits();
     } else if (labelIndex==EleFeature::IN_METER_LABEL_INDEX){
-      units=Units::Metrics;
+      units=DistanceUnitSystem::Metrics;
     } else {
       assert(labelIndex==EleFeature::IN_FEET_LABEL_INDEX);
-      units=Units::Imperial;
+      units=DistanceUnitSystem::Imperial;
     }
 
     int value;
     std::string unitsStr;
-    if (units==Units::Imperial){
+    if (units == DistanceUnitSystem::Imperial){
       value=std::round(Meters(ele).As<Feet>());
       unitsStr="ft";
     }else{
@@ -2087,15 +2087,7 @@ namespace osmscout {
     }
 
     std::stringstream ss;
-    if (value < 1000 || locale.GetThousandsSeparator().empty()){
-      ss << value;
-    }else{
-      // not expecting that value will be bigger than million
-      ss << (value/1000);
-      ss << locale.GetThousandsSeparator();
-      ss << std::setw(3) << std::setfill('0') << (value%1000);
-    }
-
+    ss << NumberToString(value, locale);
     ss << locale.GetUnitsSeparator();
     ss << unitsStr;
     return ss.str();

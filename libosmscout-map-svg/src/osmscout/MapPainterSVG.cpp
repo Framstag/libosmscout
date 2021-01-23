@@ -609,7 +609,7 @@ namespace osmscout {
                              (double)projection.GetWidth(), (double)projection.GetHeight());
 
     labelLayouter.SetViewport(viewport);
-    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
   void MapPainterSVG::AfterDrawing(const StyleConfig& /*styleConfig*/,

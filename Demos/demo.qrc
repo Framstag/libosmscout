@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/ElevationProfileChart.qml</file>
+        <file>qml/NavigationSimulation.qml</file>
+    </qresource>
+</RCC>

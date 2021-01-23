@@ -1,6 +1,8 @@
 osmscoutclientqtSrc = [
             'src/osmscout/DBThread.cpp',
             'src/osmscout/DBInstance.cpp',
+            'src/osmscout/ElevationChartWidget.cpp',
+            'src/osmscout/ElevationModule.cpp',
             'src/osmscout/RoutingModel.cpp',
             'src/osmscout/Router.cpp',
             'src/osmscout/RouteDescriptionBuilder.cpp',

@@ -30,8 +30,9 @@ jobs:
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: /mingw64/bin/cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G 'MSYS Makefiles'
+        run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G 'MSYS Makefiles'
       - name: Build project
-        run: /mingw64/bin/cmake --build build
-#      - name: Run tests
-#        run: cd build && /mingw64/bin/ctest
+        run: cmake --build build
+      - name: Run tests
+        run:  PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test ctest -j 4 --output-on-failure
+        working-directory: build

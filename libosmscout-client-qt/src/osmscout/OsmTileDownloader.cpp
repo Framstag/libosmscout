@@ -40,15 +40,15 @@ OsmTileDownloader::OsmTileDownloader(QString diskCacheDir,
   tileProvider(provider)
 {
   /** http://wiki.openstreetmap.org/wiki/Tile_usage_policy
-   * 
+   *
    * - Valid User-Agent identifying application. Faking another app's User-Agent WILL get you blocked.
    * - If known, a valid HTTP Referer.
    * - DO NOT send no-cache headers. ("Cache-Control: no-cache", "Pragma: no-cache" etc.)
    * - Cache Tile downloads locally according to HTTP Expiry Header, alternatively a minimum of 7 days.
    * - Maximum of 2 download threads. (Unmodified web browsers' download thread limits are acceptable.)
    */
- 
-  
+
+
   diskCache.setCacheDirectory(diskCacheDir);
   webCtrl.setCache(&diskCache);
 }
@@ -65,38 +65,43 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
 {
   if (!tileProvider.isValid()){
     emit failed(zoomLevel, x, y, false);
-    return;      
+    return;
   }
   if ((int)zoomLevel > tileProvider.getMaximumZoomLevel()){
     emit failed(zoomLevel, x, y, true);
     return;
-  }  
-  
+  }
+
   QStringList servers = tileProvider.getServers();
   if (servers.empty()){
     emit failed(zoomLevel, x, y, false);
-    return;      
+    return;
   }
   QString server = servers.at(serverNumber % servers.size());
 
   QUrl tileUrl(server.arg(zoomLevel).arg(x).arg(y));
   qDebug() << "Download tile" << tileUrl << "(current thread:" << QThread::currentThread() << ")";
-  
+
   TileCacheKey key = {zoomLevel, x, y};
-  
+
   QNetworkRequest request(tileUrl);
   request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 9, 0) /* For compatibility with QT 5.6 */
   request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+#else
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+#endif
   //request.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 
   QNetworkReply *reply = webCtrl.get(request);
   connect(reply, &QNetworkReply::finished, [key, this, reply](){ this->fileDownloaded(key, reply); });
 }
-  
+
 void OsmTileDownloader::fileDownloaded(const TileCacheKey &key, QNetworkReply *reply)
-{ 
+{
   QUrl url = reply->url();
-    
+
   if (reply->error() != QNetworkReply::NoError){
     qWarning() << "Downloading" << url << "failed with" << reply->errorString();
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */

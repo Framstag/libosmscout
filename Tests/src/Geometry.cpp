@@ -252,3 +252,23 @@ TEST_CASE("Angle diff")
     }
   }
 }
+
+TEST_CASE("Distance conversions")
+{
+  using namespace osmscout;
+
+  // FROM DistanceUnit instance
+  REQUIRE(Kilometer().Distance(1).AsMeter() == 1000);
+
+  // FROM helper method
+  REQUIRE(Kilometers(1).AsMeter() == 1000);
+
+  // FROM Distance static template method
+  REQUIRE(Distance::Of<Kilometer>(1).AsMeter() == 1000);
+
+  // TO DistanceUnit instance
+  REQUIRE(Kilometer().Value(Meters(1000)) == 1);
+
+  // TO Distance static template method
+  REQUIRE(Meters(1000).As<Kilometer>() == 1);
+}

@@ -25,6 +25,6 @@ TEST_CASE("Elevation label formatting")
   locale.SetUnitsSeparator("");
   REQUIRE(ele.GetLabel(locale, EleFeature::IN_FEET_LABEL_INDEX) == "3,281ft");
 
-  locale.SetDistanceUnits(Units::Imperial);
+  locale.SetDistanceUnits(DistanceUnitSystem::Imperial);
   REQUIRE(ele.GetLabel(locale, EleFeature::IN_LOCALE_UNIT_LABEL_INDEX) == "3,281ft");
 }

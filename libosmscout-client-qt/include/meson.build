@@ -4,6 +4,8 @@ osmscoutclientqtHeader = [
             'osmscout/ClientQtImportExport.h',
             'osmscout/DBThread.h',
             'osmscout/DBInstance.h',
+            'osmscout/ElevationChartWidget.h',
+            'osmscout/ElevationModule.h',
             'osmscout/RoutingModel.h',
             'osmscout/Router.h',
             'osmscout/RouteDescriptionBuilder.h',

@@ -216,7 +216,7 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
   assert(message);
   // distance from our position to next message
   Distance nextMessageDistance = (message.distance - distanceFromStart);
-  double distanceInUnits = (units == Units::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
+  double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
   if (distanceInUnits > 900){
     return samples;
@@ -245,7 +245,7 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
     } else {
       samples.push_back(VoiceSample::Distance50);
     }
-    samples.push_back(units == Units::Metrics ? VoiceSample::Meters : VoiceSample::Yards);
+    samples.push_back(units == DistanceUnitSystem::Metrics ? VoiceSample::Meters : VoiceSample::Yards);
   }
 
   toSamples(samples, message.type);
@@ -328,7 +328,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
 
   // distance from our position to next message
   Distance nextMessageDistance = (callback.nextMessage.distance - distanceFromStart);
-  double distanceInUnits = (units == Units::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
+  double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
   if (callback.nextMessage && distanceInUnits < 900){
 

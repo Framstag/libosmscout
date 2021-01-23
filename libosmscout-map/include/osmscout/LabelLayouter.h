@@ -295,16 +295,13 @@ namespace osmscout {
       SetLayoutOverlap(layoutOverlap);
     }
 
-    void SetLayoutOverlap(double overlap)
+    void SetLayoutOverlap(uint32_t overlap)
     {
-      if (overlap < 0){
-        overlap = 0;
-      }
       layoutOverlap = overlap;
-      layoutViewport.width = visibleViewport.width * (overlap + 1);
-      layoutViewport.height = visibleViewport.height * (overlap + 1);
-      layoutViewport.x = visibleViewport.x - (visibleViewport.width * overlap) / 2;
-      layoutViewport.y = visibleViewport.y - (visibleViewport.height * overlap) / 2;
+      layoutViewport.width = visibleViewport.width + (overlap * 2);
+      layoutViewport.height = visibleViewport.height + (overlap * 2);
+      layoutViewport.x = visibleViewport.x - overlap;
+      layoutViewport.y = visibleViewport.y - overlap;
     }
 
     void Reset()
@@ -801,7 +798,7 @@ namespace osmscout {
     std::vector<LabelInstanceType> labelInstances;
     DoubleRectangle visibleViewport;
     DoubleRectangle layoutViewport;
-    double layoutOverlap; // overlap ratio used for label layouting
+    uint32_t layoutOverlap; // overlap [pixels] used for label layouting
   };
 
 }

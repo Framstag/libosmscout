@@ -4,7 +4,6 @@
         <file>qml/AboutDialog.qml</file>
         <file>qml/SearchDialog.qml</file>
         <file>qml/MapDownloadDialog.qml</file>
-        <file>qml/NavigationSimulation.qml</file>
 
         <file>qml/custom/DialogActionButton.qml</file>
         <file>qml/custom/LineEdit.qml</file>
@@ -66,5 +65,6 @@
 
         <file>resources/online-tile-providers.json</file>
         <file>resources/map-providers.json</file>
+        <file>resources/voice-providers.json</file>
     </qresource>
 </RCC>

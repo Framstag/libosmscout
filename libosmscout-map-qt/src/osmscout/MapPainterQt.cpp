@@ -229,7 +229,7 @@ namespace osmscout {
 
         patterns[idx].setTextureImage(image);
 
-        //std::cout << "Loaded image '" << filename << "'" << std::endl;
+        log.Info() << "Loaded pattern '" << style.GetPatternName() << "' from \"" << filename << "\"";
 
         return true;
       }
@@ -967,12 +967,12 @@ namespace osmscout {
   }
 
   void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                   const Projection& /*projection*/,
+                                   const Projection& projection,
                                    const MapParameter& parameter,
                                    const MapData& /*data*/)
   {
     labelLayouter.SetViewport(DoubleRectangle(0, 0, painter->window().width(), painter->window().height()));
-    labelLayouter.SetLayoutOverlap(parameter.GetDropNotVisiblePointLabels() ? 0 : 1);
+    labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
   MapPainterQt::QtLabelLayouter& MapPainterQt::GetLayouter()

@@ -155,6 +155,77 @@ else()
 	message("Skip ResourceConsumptionQt and DrawMapQt demos, libosmscout-map-qt is missing.")
 endif()
 
+#---- ElevationProfileChart
+if(${OSMSCOUT_BUILD_CLIENT_QT})
+	set(CMAKE_AUTOMOC ON)
+	set(CMAKE_AUTORCC ON)
+
+	qt5_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
+
+	set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
+	set_property(SOURCE qrc_demo.cpp PROPERTY SKIP_AUTOMOC ON)
+
+	#---- ElevationProfileChart
+	osmscout_demo_project(NAME ElevationProfileChart
+			SOURCES
+				src/ElevationProfileChart.cpp
+				src/QtDemoApp.cpp
+				${RESOURCE_FILES}
+
+				# qml files in CMake sources make it visible in QtCreator
+				qml/ElevationProfileChart.qml
+
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)
+	target_compile_definitions(ElevationProfileChart PRIVATE ${Qt5Widgets_DEFINITIONS})
+	set_target_properties(ElevationProfileChart PROPERTIES
+		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
+	if(MSVC)
+		visual_studio_qt_helper("ElevationProfileChart")
+	endif()
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		add_custom_command(TARGET ElevationProfileChart
+				POST_BUILD
+				COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+				COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ElevationProfileChart>/$<TARGET_FILE_NAME:ElevationProfileChart>"
+				)
+	endif()
+
+	if (${OSMSCOUT_BUILD_GPX})
+
+		#---- NavigationSimulation
+		osmscout_demo_project(NAME NavigationSimulation
+			SOURCES
+			src/NavigationSimulation.cpp
+			include/PositionSimulator.h src/PositionSimulator.cpp
+			../OSMScout2/src/Theme.h ../OSMScout2/src/Theme.cpp
+			src/QtDemoApp.cpp
+			${RESOURCE_FILES}
+
+			# qml files in CMake sources make it visible in QtCreator
+			qml/NavigationSimulation.qml
+
+			INCLUDES ../OSMScout2/src/
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt OSMScout::GPX Qt5::Widgets)
+		target_compile_definitions(NavigationSimulation PRIVATE ${Qt5Widgets_DEFINITIONS})
+		set_target_properties(NavigationSimulation PROPERTIES
+			UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
+		if(MSVC)
+			visual_studio_qt_helper("NavigationSimulation")
+		endif()
+		if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+			add_custom_command(TARGET NavigationSimulation
+				POST_BUILD
+				COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+				COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:NavigationSimulation>/$<TARGET_FILE_NAME:NavigationSimulation>"
+				)
+		endif()
+	else()
+		message("Skip NavigationSimulation demo, libosmscout-gpx is missing.")
+	endif()
+else()
+	message("Skip ElevationProfileChart and NavigationSimulation demo, libosmscout-client-qt is missing.")
+endif()
+
 #---- DrawMapSVG
 if(${OSMSCOUT_BUILD_MAP_SVG})
     osmscout_demo_project(NAME DrawMapSVG SOURCES src/DrawMapSVG.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSVG)

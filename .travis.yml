@@ -27,27 +27,6 @@ matrix:
       env:
         - BUILDTOOL=meson
         - TARGET=build
-    - os: osx
-      osx_image: xcode11.3
-      compiler: clang
-      env:
-        - BUILDTOOL=meson
-        - TARGET=build
-        - PLATFORM=osx
-    - os: osx
-      osx_image: xcode11.3
-      compiler: clang
-      env:
-        - BUILDTOOL=cmake
-        - TARGET=build
-        - PLATFORM=osx
-    - os: osx
-      osx_image: xcode11.3
-      compiler: clang
-      env:
-        - BUILDTOOL=cmake
-        - TARGET=build
-        - PLATFORM=ios
     - os: linux
       dist: bionic
       sudo: required

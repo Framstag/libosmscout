@@ -79,6 +79,24 @@ osmscout::GeoBox OverlayObject::boundingBox() const
   return boundingBoxInternal();
 }
 
+std::vector<osmscout::GeoCoord> OverlayObject::getCoords() const
+{
+  QMutexLocker locker(&lock);
+  std::vector<osmscout::GeoCoord> coords;
+  coords.reserve(nodes.size());
+  for (const auto &point: nodes){
+    coords.push_back(point.GetCoord());
+  }
+  return coords;
+}
+
+std::vector<osmscout::Point> OverlayObject::getPoints() const
+{
+  QMutexLocker locker(&lock);
+  return nodes;
+}
+
+
 osmscout::GeoBox OverlayObject::boundingBoxInternal() const
 {
   if (!box.IsValid() && !nodes.empty()){
