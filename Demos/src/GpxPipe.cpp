@@ -28,15 +28,9 @@
 
 struct Arguments
 {
-  bool               help;
+  bool               help=false;
   std::string        gpxInput;
   std::string        gpxOutput;
-
-  Arguments()
-      : help(false)
-  {
-    // no code
-  }
 };
 
 int main(int argc, char* argv[])

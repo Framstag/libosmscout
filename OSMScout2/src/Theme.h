@@ -53,7 +53,7 @@ private:
 
 public:
     Theme();
-    ~Theme() override;
+    ~Theme() override = default;
 
     qreal GetDPI() const;
 

@@ -274,7 +274,7 @@ namespace osmscout {
                          const std::string& variantFilename);
 
   public:
-    RouteDataGenerator();
+    RouteDataGenerator() = default;
 
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;

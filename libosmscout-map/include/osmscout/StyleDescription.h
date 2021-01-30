@@ -51,7 +51,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API Style
   {
   public:
-    virtual ~Style();
+    virtual ~Style() = default;
 
     virtual void SetBoolValue(int attribute, bool value);
     virtual void SetStringValue(int attribute, const std::string& value);
@@ -112,7 +112,7 @@ namespace osmscout {
                              int attribute);
 
   public:
-    virtual ~StyleAttributeDescriptor();
+    virtual ~StyleAttributeDescriptor() = default;
 
     inline std::string GetName() const
     {

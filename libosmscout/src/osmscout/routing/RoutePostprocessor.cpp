@@ -31,11 +31,6 @@
 
 namespace osmscout {
 
-  RoutePostprocessor::Postprocessor::~Postprocessor()
-  {
-    // no code
-  }
-
   RoutePostprocessor::StartPostprocessor::StartPostprocessor(const std::string& startDescription)
   : startDescription(startDescription)
   {

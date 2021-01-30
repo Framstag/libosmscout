@@ -31,8 +31,4 @@ namespace osmscout {
     // no code
   }
 
-  MapTile::~MapTile()
-  {
-    // no code
-  }
 }

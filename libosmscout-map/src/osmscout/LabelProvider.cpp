@@ -23,16 +23,6 @@
 
 namespace osmscout {
 
-  LabelProvider::~LabelProvider()
-  {
-    // No code
-  }
-
-  LabelProviderFactory::~LabelProviderFactory()
-  {
-    // no code
-  }
-
   INameLabelProviderFactory::INameLabelProvider::INameLabelProvider(const TypeConfig& typeConfig)
   {
     nameLookupTable.resize(typeConfig.GetTypeCount(),

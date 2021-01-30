@@ -52,7 +52,7 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Callback
     {
-      virtual ~Callback();
+      virtual ~Callback() = default;
 
       /**
        * Call once before evaluation the the RouteDescription starts

@@ -286,7 +286,7 @@ namespace osmscout {
   public:
     friend class DataTileCache;
 
-    ~Tile();
+    ~Tile() = default;
 
     /**
      * Return the id of the tile

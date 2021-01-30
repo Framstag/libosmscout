@@ -31,17 +31,11 @@
 
 struct Arguments
 {
-  bool                   help;
+  bool                   help=false;
   std::string            databaseDirectory;
   osmscout::GeoCoord     topLeft;
   osmscout::GeoCoord     bottomRight;
   std::list<std::string> typeNames;
-
-  Arguments()
-    : help(false)
-  {
-    // no code
-  }
 };
 
 
