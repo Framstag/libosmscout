@@ -156,7 +156,7 @@ namespace osmscout {
       indexEntries+=cell.second.size();
 
       dataSize+=EncodeNumber(cell.second.size(),
-                             buffer.data());
+                             buffer);
 
       FileOffset previousOffset=0;
 
@@ -164,7 +164,7 @@ namespace osmscout {
         FileOffset data=offset-previousOffset;
 
         dataSize+=EncodeNumber(data,
-                               buffer.data());
+                               buffer);
 
         previousOffset=offset;
       }

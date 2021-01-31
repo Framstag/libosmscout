@@ -413,14 +413,14 @@ namespace osmscout
       indexEntries+=cell.second.size();
 
       dataSize+=EncodeNumber(cell.second.size(),
-                             buffer.data());
+                             buffer);
 
       FileOffset previousOffset=0;
       for (const auto& offset : cell.second) {
         FileOffset dataOffset=offset-previousOffset;
 
         dataSize+=EncodeNumber(dataOffset,
-                               buffer.data());
+                               buffer);
 
         previousOffset=offset;
       }

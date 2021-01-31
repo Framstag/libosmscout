@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <array>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -59,8 +60,8 @@ namespace osmscout {
       */
     struct IndexCell
     {
-      FileOffset children[4]; //!< File index of each of the four children, or 0 if there is no child
-      FileOffset data;        //!< The file index at which the data payload starts
+      std::array<FileOffset, 4> children; //!< File index of each of the four children, or 0 if there is no child
+      FileOffset data;                    //!< The file index at which the data payload starts
     };
 
     using IndexCache = Cache<FileOffset, IndexCell>;

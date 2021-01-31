@@ -8,9 +8,8 @@
 bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)
 {
-  const size_t bufferLength=10;
-  char         buffer[bufferLength];
-  size_t       bytes;
+  std::array<char,10> buffer;
+  size_t              bytes;
 
   bytes=osmscout::EncodeNumber(value,buffer);
 

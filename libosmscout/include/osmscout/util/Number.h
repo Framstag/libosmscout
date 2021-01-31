@@ -22,8 +22,10 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <array>
 #include <limits>
 #include <cstddef>
+#include <cassert>
 
 #include <osmscout/system/SystemTypes.h>
 
@@ -135,7 +137,7 @@ namespace osmscout {
    * for sizeof(N)*8/7 bytes for an unsigned number
    * and sizeof(N)*8/7 + 1/8 bytes for a signed number
    *
-   * This are 5 bytes for a 32bit value and 10 bytes for a64bit value.
+   * This are 5 bytes for a 32bit value and 10 bytes for a 64bit value.
    *
    * The methods returns the number of bytes written.
    */
@@ -145,6 +147,33 @@ namespace osmscout {
   {
     return EncodeNumberTemplated<std::numeric_limits<N>::is_signed, N>
       ::f(number,buffer);
+  }
+
+  /**
+   * \ingroup Util
+   * Encode a number into the given buffer using some variable length encoding.
+   *
+   * The current implementation requires the buffer to have at least space
+   * for sizeof(N)*8/7 bytes for an unsigned number
+   * and sizeof(N)*8/7 + 1/8 bytes for a signed number
+   *
+   * This are 5 bytes for a 32bit value and 10 bytes for a 64bit value.
+   *
+   * The methods returns the number of bytes written.
+   */
+  template<typename N, size_t S>
+  inline unsigned int EncodeNumber(N number,
+                                   std::array<char, S> &buffer)
+  {
+    if constexpr (std::numeric_limits<N>::is_signed) {
+      static_assert(sizeof(N) * 64 + 7 <= S * 56, "Not enough big buffer for encoding signed number");
+    } else {
+      static_assert(sizeof(N) * 64 <= S * 56, "Not enough big buffer for encoding unsigned number");
+    }
+    auto dataWritten = EncodeNumberTemplated<std::numeric_limits<N>::is_signed, N>
+      ::f(number,buffer.data());
+    assert(dataWritten<=S);
+    return dataWritten;
   }
 
   /**

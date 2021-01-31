@@ -2547,8 +2547,8 @@ namespace osmscout {
       // Calculate size of data
       //
 
-      size_t dataSize=4;
-      char   buffer[10];
+      size_t              dataSize=4;
+      std::array<char,10> buffer;
 
       for (const auto& coord : cellGroundTileMap) {
         // Number of ground tiles
