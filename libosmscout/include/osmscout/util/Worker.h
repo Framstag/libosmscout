@@ -21,6 +21,7 @@
 */
 
 #include <thread>
+#include <optional>
 
 #include <osmscout/util/ProcessingQueue.h>
 
@@ -32,6 +33,12 @@ namespace osmscout {
    * A single threaded agent.
    *
    * This is a simple wrapper around the std::thread primitive.
+   *
+   * Note: ProcessingLoop method is pure virtual in ThreadedWorker.
+   * It may be called only after Vtable of child object is constructed.
+   * For that reason it is responsibility for child class to call
+   * Start method from its constructor. It is also beneficial
+   * to mark child classes as final.
    */
   class OSMSCOUT_API ThreadedWorker
   {
@@ -57,10 +64,7 @@ namespace osmscout {
     }
 
   public:
-    ThreadedWorker()
-    : thread(&ThreadedWorker::ProcessingLoop,this)
-    {
-    }
+    ThreadedWorker() = default;
 
     ThreadedWorker(const ThreadedWorker& other) = delete;
     ThreadedWorker(ThreadedWorker&& other) = delete;
@@ -82,12 +86,17 @@ namespace osmscout {
     }
 
     void Wait() {
-      thread.join();
+      if (thread.joinable()) {
+        thread.join();
+      }
     }
 
-
-
   protected:
+    void Start()
+    {
+      thread = std::thread(&ThreadedWorker::ProcessingLoop,this);
+    }
+
     virtual void ProcessingLoop() = 0;
   };
 
