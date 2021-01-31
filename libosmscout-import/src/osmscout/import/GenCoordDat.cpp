@@ -68,7 +68,7 @@ namespace osmscout {
 
   using IdPage = std::vector<Id>;
 
-  class RawCoordIdReaderWorker : public Producer<IdPage>
+  class RawCoordIdReaderWorker CLASS_FINAL : public Producer<IdPage>
   {
   private:
     const TypeConfig                  &typeConfig;
@@ -160,10 +160,11 @@ namespace osmscout {
         parameter(parameter),
         progress(progress)
     {
+      Start();
     }
   };
 
-  class IdPageSortWorker : public Pipe<IdPage,IdPage>
+  class IdPageSortWorker CLASS_FINAL : public Pipe<IdPage,IdPage>
   {
   private:
     void SortCoordPage(std::vector<Id>& page)
@@ -203,10 +204,11 @@ namespace osmscout {
                      osmscout::ProcessingQueue<IdPage>& outQueue)
     : Pipe(inQueue,outQueue)
     {
+      Start();
     }
   };
 
-  class SerialIdWorker : public Consumer<IdPage>
+  class SerialIdWorker CLASS_FINAL : public Consumer<IdPage>
   {
   private:
     Progress                          &progress;
@@ -266,6 +268,7 @@ namespace osmscout {
         progress(progress),
         serialIdManager(serialIdManager)
     {
+      Start();
     }
   };
 
@@ -311,7 +314,7 @@ namespace osmscout {
 
   using RawCoordPage = std::vector<RawCoord>;
 
-  class RawCoordReaderWorker : public Producer<RawCoordPage>
+  class RawCoordReaderWorker CLASS_FINAL : public Producer<RawCoordPage>
   {
   private:
     const TypeConfig                        &typeConfig;
@@ -397,6 +400,7 @@ namespace osmscout {
         parameter(parameter),
         progress(progress)
     {
+      Start();
     }
   };
 
@@ -405,7 +409,7 @@ namespace osmscout {
     return a.GetOSMId()<b.GetOSMId();
   }
 
-  class RawCoordPageSortWorker : public Pipe<RawCoordPage,RawCoordPage>
+  class RawCoordPageSortWorker CLASS_FINAL : public Pipe<RawCoordPage,RawCoordPage>
   {
   private:
     static void SortCoordPage(std::vector<RawCoord>& page)
@@ -447,6 +451,7 @@ namespace osmscout {
                            osmscout::ProcessingQueue<RawCoordPage>& outQueue)
       : Pipe(inQueue,outQueue)
     {
+      Start();
     }
   };
 
@@ -456,7 +461,7 @@ namespace osmscout {
     Point point;
   };
 
-  class CoordDatFileWorker : public Consumer<RawCoordPage>
+  class CoordDatFileWorker CLASS_FINAL : public Consumer<RawCoordPage>
   {
   private:
     const ImportParameter                   &parameter;
@@ -598,6 +603,7 @@ namespace osmscout {
         progress(progress),
         serialIdManager(serialIdManager)
     {
+      Start();
     }
   };
 
