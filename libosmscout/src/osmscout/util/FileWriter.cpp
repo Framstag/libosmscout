@@ -598,12 +598,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write int16_t number","File already in error state");
     }
 
-    char         buffer[3];
+    std::array<char,3> buffer;
     unsigned int bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write int16_t number");
@@ -623,12 +623,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write int32_t number","File already in error state");
     }
 
-    char         buffer[5];
-    unsigned int bytes;
+    std::array<char,5> buffer;
+    unsigned int       bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write int32_t number");
@@ -648,12 +648,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write int64_t number","File already in error state");
     }
 
-    char         buffer[10];
-    unsigned int bytes;
+    std::array<char,10> buffer;
+    unsigned int        bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write int64_t number");
@@ -673,12 +673,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write uint16_t number","File already in error state");
     }
 
-    char         buffer[10];
-    unsigned int bytes;
+    std::array<char,10> buffer;
+    unsigned int        bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write uint16_t number");
@@ -698,12 +698,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write uint32_t number","File already in error state");
     }
 
-    char         buffer[10];
-    unsigned int bytes;
+    std::array<char,10> buffer;
+    unsigned int        bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write uint32_t number");
@@ -723,12 +723,12 @@ namespace osmscout {
       throw IOException(filename,"Cannot write uint64_t number","File already in error state");
     }
 
-    char         buffer[10];
-    unsigned int bytes;
+    std::array<char,10> buffer;
+    unsigned int        bytes;
 
     bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+    hasError=fwrite(buffer.data(),sizeof(unsigned char),bytes,file)!=bytes;
 
     if (hasError) {
       throw IOException(filename,"Cannot write uint64_t number");
