@@ -95,7 +95,7 @@ public:
     return typeName;
   }
 
-  inline void setTypeName(QString name){
+  inline void setTypeName(const QString &name){
     QMutexLocker locker(&lock);
     typeName=name;
   }

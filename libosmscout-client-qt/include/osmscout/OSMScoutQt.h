@@ -83,73 +83,73 @@ public:
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithOnlineTileProviders(QString onlineTileProviders)
+  inline OSMScoutQtBuilder& WithOnlineTileProviders(const QString &onlineTileProviders)
   {
     this->onlineTileProviders=onlineTileProviders;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithMapProviders(QString mapProviders)
+  inline OSMScoutQtBuilder& WithMapProviders(const QString &mapProviders)
   {
     this->mapProviders=mapProviders;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithVoiceProviders(QString voiceProviders)
+  inline OSMScoutQtBuilder& WithVoiceProviders(const QString &voiceProviders)
   {
     this->voiceProviders=voiceProviders;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithMapLookupDirectories(QStringList mapLookupDirectories)
+  inline OSMScoutQtBuilder& WithMapLookupDirectories(const QStringList &mapLookupDirectories)
   {
     this->mapLookupDirectories=mapLookupDirectories;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithBasemapLookupDirectory(QString basemapLookupDirectory)
+  inline OSMScoutQtBuilder& WithBasemapLookupDirectory(const QString &basemapLookupDirectory)
   {
     this->basemapLookupDirectory=basemapLookupDirectory;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithVoiceLookupDirectory(QString voiceLookupDirectory)
+  inline OSMScoutQtBuilder& WithVoiceLookupDirectory(const QString &voiceLookupDirectory)
   {
     this->voiceLookupDirectory=voiceLookupDirectory;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& AddMapLookupDirectories(QString mapLookupDirectory)
+  inline OSMScoutQtBuilder& AddMapLookupDirectories(const QString &mapLookupDirectory)
   {
     this->mapLookupDirectories << mapLookupDirectory;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithCustomPoiTypes(QStringList customPoiTypes)
+  inline OSMScoutQtBuilder& WithCustomPoiTypes(const QStringList &customPoiTypes)
   {
     this->customPoiTypes=customPoiTypes;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& AddCustomPoiType(QString typeName)
+  inline OSMScoutQtBuilder& AddCustomPoiType(const QString &typeName)
   {
     this->customPoiTypes << typeName;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithCacheLocation(QString cacheLocation)
+  inline OSMScoutQtBuilder& WithCacheLocation(const QString &cacheLocation)
   {
     this->cacheLocation=cacheLocation;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithIconDirectory(QString iconDirectory)
+  inline OSMScoutQtBuilder& WithIconDirectory(const QString &iconDirectory)
   {
     this->iconDirectory=iconDirectory;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithStyleSheetDirectory(QString styleSheetDirectory)
+  inline OSMScoutQtBuilder& WithStyleSheetDirectory(const QString &styleSheetDirectory)
   {
     this->styleSheetDirectory=styleSheetDirectory;
     this->styleSheetDirectoryConfigured=true;
@@ -170,8 +170,8 @@ public:
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithUserAgent(QString appName,
-                                          QString appVersion){
+  inline OSMScoutQtBuilder& WithUserAgent(const QString &appName,
+                                          const QString &appVersion){
     this->appName=appName;
     this->appVersion=appVersion;
     return *this;

@@ -57,10 +57,10 @@ private:
     ProgressReporter                      reporter;
 
   public:
-    QtRoutingProgress(ProgressReporter reporter)
+    explicit QtRoutingProgress(ProgressReporter reporter)
     : lastDump(std::chrono::system_clock::now()),
       maxPercent(0.0),
-      reporter(reporter)
+      reporter(std::move(reporter))
     {
       // no code
     }
