@@ -44,10 +44,7 @@ struct Job
   osmscout::ObjectOSMRef  osmRef;
   osmscout::ObjectFileRef fileRef;
 
-  Job()
-  {
-    // no code
-  }
+  Job() = default;
 
   Job(osmscout::OSMRefType type, osmscout::Id id)
   : osmRef(id,type)

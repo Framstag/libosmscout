@@ -67,7 +67,7 @@ namespace osmscout {
                         ImportProgress& progress);
   public:
     explicit Importer(const ImportParameter& parameter);
-    virtual ~Importer();
+    virtual ~Importer() = default;
 
     bool Import(ImportProgress& progress);
 

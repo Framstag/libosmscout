@@ -23,11 +23,6 @@
 
 namespace osmscout {
 
-  Style::~Style()
-  {
-    // no code
-  }
-
   void Style::SetBoolValue(int /*attribute*/,
                            bool /*value*/)
   {
@@ -94,11 +89,6 @@ namespace osmscout {
   : type(type),
     name(name),
     attribute(attribute)
-  {
-    // no code
-  }
-
-  StyleAttributeDescriptor::~StyleAttributeDescriptor()
   {
     // no code
   }

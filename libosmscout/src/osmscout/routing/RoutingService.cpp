@@ -66,11 +66,6 @@ namespace osmscout {
     return debugPerformance;
   }
 
-  RoutingProgress::~RoutingProgress()
-  {
-    // no code
-  }
-
   void RoutingParameter::SetBreaker(const BreakerRef& breaker)
   {
     this->breaker=breaker;

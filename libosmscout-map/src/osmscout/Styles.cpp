@@ -830,11 +830,6 @@ namespace osmscout {
     this->size=style.size;
   }
 
-  LabelStyle::~LabelStyle()
-  {
-    // no code
-  }
-
   LabelStyle& LabelStyle::SetPriority(size_t priority)
   {
     this->priority=priority;
@@ -1554,11 +1549,6 @@ namespace osmscout {
         break;
       }
     }
-  }
-
-  DrawPrimitive::~DrawPrimitive()
-  {
-    // no code
   }
 
   DrawPrimitive::DrawPrimitive(ProjectionMode projectionMode,

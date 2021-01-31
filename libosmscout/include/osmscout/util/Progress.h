@@ -61,7 +61,7 @@ namespace osmscout {
   {
     public:
     SilentProgress() = default;
-    ~SilentProgress() override;
+    ~SilentProgress() override = default;
   };
 
   class OSMSCOUT_API ConsoleProgress : public Progress

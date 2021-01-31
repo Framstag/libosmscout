@@ -35,11 +35,6 @@ namespace osmscout {
     // no code
   }
 
-  Tile::~Tile()
-  {
-    // no code
-  }
-
   /**
    * Create a new tile cache with the given cache size
    */

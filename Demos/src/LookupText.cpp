@@ -27,14 +27,8 @@
 
 struct Arguments
 {
-  bool        help;
+  bool        help=false;
   std::string databaseDirectory;
-
-  Arguments()
-    : help(false)
-  {
-    // no code
-  }
 };
 
 void printDetails(const osmscout::FeatureValueBuffer& features)

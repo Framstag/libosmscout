@@ -33,11 +33,6 @@ Theme::Theme()
   // no code
 }
 
-Theme::~Theme()
-{
-  // no code
-}
-
 qreal Theme::mmToPixel(qreal mm) const
 {
     return mm*GetDPI()/25.4;

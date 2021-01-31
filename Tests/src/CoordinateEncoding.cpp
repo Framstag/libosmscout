@@ -184,10 +184,7 @@ public:
     // no code
   }
 
-  virtual ~Encoder()
-  {
-    // no code
-  }
+  virtual ~Encoder() = default;
 
   virtual void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords) = 0;
 };

@@ -30,7 +30,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API FillStyleProcessor
   {
   public:
-    virtual ~FillStyleProcessor();
+    virtual ~FillStyleProcessor() = default;
 
     virtual FillStyleRef Process(const FeatureValueBuffer& features,
                                  const FillStyleRef& fillStyle) const = 0;

@@ -27,15 +27,9 @@
 
 struct Arguments
 {
-  bool        help;
+  bool        help=false;
   std::string ostFile;
   std::string ossFile;
-
-  Arguments()
-    : help(false)
-  {
-    // no code
-  }
 };
 
 void DumpFillStyleAttributes(const std::set<osmscout::FillStyle::Attribute>& attributes,
