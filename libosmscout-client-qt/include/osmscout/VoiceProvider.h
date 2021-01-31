@@ -52,7 +52,7 @@ public:
     QObject(o.parent()),
     valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
 
-  inline VoiceProvider(QString name, QString uri, QString listUri):
+  inline VoiceProvider(const QString &name, const QString &uri, const QString &listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
 
   ~VoiceProvider() override = default;

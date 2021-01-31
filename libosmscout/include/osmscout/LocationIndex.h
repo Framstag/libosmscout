@@ -56,7 +56,7 @@ namespace osmscout {
       std::shared_ptr<LocationIndex> index;
     public:
       explicit ScopeCacheCleaner(std::shared_ptr<LocationIndex> index):
-        index(index)
+        index(std::move(index))
       {}
 
       ScopeCacheCleaner(const ScopeCacheCleaner&) = delete;
