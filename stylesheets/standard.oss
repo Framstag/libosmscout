@@ -2092,6 +2092,10 @@ STYLE
        AREA.TEXT { label: Name.name; style: emphasize; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
      }
 
+     [TYPE amenity_charging_station] {
+       NODE.TEXT {label: Operator.name; style: emphasize;color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
+     }
+
      [TYPE amenity_pharmacy] NODE.TEXT {label: Name.name; style: emphasize; color: #da0092; size: 0.9; priority: @labelPrioMajorBuilding;}
 
      [TYPE amenity_post_office,
