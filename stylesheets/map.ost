@@ -1133,6 +1133,7 @@ TYPES
 
   TYPE amenity_charging_station
     = NODE ("amenity"=="charging_station")
+      {Operator}
       GROUP amenity
 
   TYPE amenity_clock
