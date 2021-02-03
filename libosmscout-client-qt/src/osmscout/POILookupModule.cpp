@@ -49,10 +49,17 @@ LocationEntry buildLocationEntry(T obj,
   QString title;
   QString objectType = QString::fromUtf8(obj->GetType()->GetName().c_str());
   const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
-  const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-  if (name!=nullptr){
+
+  if (const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
+      name!=nullptr){
     title=QString::fromStdString(name->GetLabel(osmscout::Locale(), 0));
     //std::cout << " \"" << name->GetLabel() << "\"";
+  } else if (const osmscout::OperatorFeatureValue *operatorVal=features.findValue<osmscout::OperatorFeatureValue>();
+             operatorVal!=nullptr) {
+    title=QString::fromStdString(operatorVal->GetLabel(osmscout::Locale(), 0));
+  } else if (const osmscout::RefFeatureValue *ref=features.findValue<osmscout::RefFeatureValue>();
+             ref!=nullptr) {
+    title=QString::fromStdString(ref->GetLabel(osmscout::Locale(), 0));
   }
 
   LocationEntry location(LocationEntry::typeObject, title, objectType, adminRegionList,
