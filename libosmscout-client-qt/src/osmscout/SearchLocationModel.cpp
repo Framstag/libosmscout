@@ -362,7 +362,7 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
       return "";
     }
   case LocationObjectRole:
-    // QML will take ownerhip
+    // QML will take ownership
     return QVariant::fromValue(new LocationEntry(*location));
   default:
     break;
@@ -403,7 +403,7 @@ QObject* LocationListModel::get(int row) const
     }
 
     LocationEntry* location=locations.at(row);
-    // QML will take ownerhip
+    // QML will take ownership
     return new LocationEntry(*location);
 }
 
