@@ -1,0 +1,1728 @@
+[
+  {
+    "lat": 49.993356,
+    "lon": 14.157516,
+    "name": "",
+    "ref": "",
+    "type": "highway_motorway_link"
+  },
+  {
+    "lat": 49.993448,
+    "lon": 14.157626,
+    "name": "",
+    "ref": "",
+    "type": "highway_motorway_link"
+  },
+  {
+    "lat": 49.993951,
+    "lon": 14.15861,
+    "name": "",
+    "ref": "",
+    "type": "highway_motorway_link"
+  },
+  {
+    "lat": 49.99397,
+    "lon": 14.158736,
+    "name": "",
+    "ref": "",
+    "type": "highway_motorway_link"
+  },
+  {
+    "lat": 49.993994,
+    "lon": 14.158849,
+    "name": "",
+    "ref": "",
+    "type": "highway_motorway_link"
+  },
+  {
+    "lat": 49.994014,
+    "lon": 14.158956,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.993723,
+    "lon": 14.159332,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.993352,
+    "lon": 14.159836,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.993026,
+    "lon": 14.160268,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.992778,
+    "lon": 14.160563,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.992621,
+    "lon": 14.160702,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.992414,
+    "lon": 14.16085,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.992331,
+    "lon": 14.160839,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.992173,
+    "lon": 14.160823,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991611,
+    "lon": 14.16034,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991415,
+    "lon": 14.16023,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991347,
+    "lon": 14.16019,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991288,
+    "lon": 14.16019,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991207,
+    "lon": 14.16019,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.991156,
+    "lon": 14.160185,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.990958,
+    "lon": 14.160163,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.990833,
+    "lon": 14.160161,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.990689,
+    "lon": 14.160067,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.990413,
+    "lon": 14.159732,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.990208,
+    "lon": 14.159533,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.989279,
+    "lon": 14.158895,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.98911,
+    "lon": 14.158803,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.988436,
+    "lon": 14.158621,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987999,
+    "lon": 14.158546,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987841,
+    "lon": 14.158573,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987716,
+    "lon": 14.158661,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987621,
+    "lon": 14.158862,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987587,
+    "lon": 14.159206,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987641,
+    "lon": 14.160386,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987624,
+    "lon": 14.160523,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987589,
+    "lon": 14.160627,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987488,
+    "lon": 14.16088,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987412,
+    "lon": 14.161223,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987419,
+    "lon": 14.161598,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987555,
+    "lon": 14.162583,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987633,
+    "lon": 14.163167,
+    "name": "Karlštejnská",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987718,
+    "lon": 14.163613,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987821,
+    "lon": 14.164047,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987858,
+    "lon": 14.164283,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987879,
+    "lon": 14.164624,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987844,
+    "lon": 14.165214,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987802,
+    "lon": 14.165697,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987754,
+    "lon": 14.166131,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987373,
+    "lon": 14.167354,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987322,
+    "lon": 14.167502,
+    "name": "",
+    "ref": "11612",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987292,
+    "lon": 14.167596,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987138,
+    "lon": 14.167526,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.987048,
+    "lon": 14.167435,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.98695,
+    "lon": 14.167258,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.986111,
+    "lon": 14.165657,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.986089,
+    "lon": 14.165616,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.985981,
+    "lon": 14.165391,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.985837,
+    "lon": 14.165091,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.985757,
+    "lon": 14.164924,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.985623,
+    "lon": 14.164578,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.985353,
+    "lon": 14.163602,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.984502,
+    "lon": 14.160161,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.984358,
+    "lon": 14.159681,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.984266,
+    "lon": 14.159426,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.984131,
+    "lon": 14.159128,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.98396,
+    "lon": 14.158806,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.983819,
+    "lon": 14.158592,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.983505,
+    "lon": 14.158221,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.983378,
+    "lon": 14.158098,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981974,
+    "lon": 14.156738,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981886,
+    "lon": 14.156663,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981768,
+    "lon": 14.156601,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981662,
+    "lon": 14.156585,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.98159,
+    "lon": 14.156601,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981507,
+    "lon": 14.156647,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981439,
+    "lon": 14.156733,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981361,
+    "lon": 14.156902,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981207,
+    "lon": 14.157328,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981147,
+    "lon": 14.15743,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980894,
+    "lon": 14.157717,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980836,
+    "lon": 14.157803,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980768,
+    "lon": 14.157964,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980738,
+    "lon": 14.158109,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980732,
+    "lon": 14.158385,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980761,
+    "lon": 14.158605,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981005,
+    "lon": 14.159699,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981091,
+    "lon": 14.160209,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981164,
+    "lon": 14.160783,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981211,
+    "lon": 14.161507,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981215,
+    "lon": 14.162006,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981209,
+    "lon": 14.162202,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981156,
+    "lon": 14.162626,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981113,
+    "lon": 14.162717,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.981072,
+    "lon": 14.162808,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980981,
+    "lon": 14.162961,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980842,
+    "lon": 14.163114,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980615,
+    "lon": 14.16324,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980481,
+    "lon": 14.163256,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980303,
+    "lon": 14.163218,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.980194,
+    "lon": 14.163154,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.979641,
+    "lon": 14.16269,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.97935,
+    "lon": 14.162553,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.97911,
+    "lon": 14.162497,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.978815,
+    "lon": 14.162483,
+    "name": "11611",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.978481,
+    "lon": 14.162553,
+    "name": "",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.978213,
+    "lon": 14.162642,
+    "name": "",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.977402,
+    "lon": 14.162864,
+    "name": "",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.975593,
+    "lon": 14.163031,
+    "name": "",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.975251,
+    "lon": 14.163079,
+    "name": "",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.974585,
+    "lon": 14.163229,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.974403,
+    "lon": 14.163269,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.973564,
+    "lon": 14.163479,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.973413,
+    "lon": 14.163546,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.973114,
+    "lon": 14.163752,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.972098,
+    "lon": 14.164554,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.970737,
+    "lon": 14.165257,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.970653,
+    "lon": 14.1653,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.97033,
+    "lon": 14.165509,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.970079,
+    "lon": 14.16571,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.970031,
+    "lon": 14.165756,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969988,
+    "lon": 14.165809,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969953,
+    "lon": 14.165866,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969925,
+    "lon": 14.165927,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969904,
+    "lon": 14.165994,
+    "name": "Bubovická",
+    "ref": "11611",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.96989,
+    "lon": 14.166048,
+    "name": "",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 49.969865,
+    "lon": 14.166072,
+    "name": "",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 49.969838,
+    "lon": 14.166115,
+    "name": "",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 49.969733,
+    "lon": 14.166335,
+    "name": "",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 49.969681,
+    "lon": 14.166461,
+    "name": "",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 49.96965,
+    "lon": 14.166526,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969393,
+    "lon": 14.166284,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.969095,
+    "lon": 14.165984,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968833,
+    "lon": 14.165718,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968675,
+    "lon": 14.165549,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968611,
+    "lon": 14.165466,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968553,
+    "lon": 14.165386,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968481,
+    "lon": 14.165265,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968416,
+    "lon": 14.165147,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968347,
+    "lon": 14.165007,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.9683,
+    "lon": 14.164879,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968261,
+    "lon": 14.164742,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968234,
+    "lon": 14.164602,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968199,
+    "lon": 14.164391,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968175,
+    "lon": 14.164286,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.968033,
+    "lon": 14.163833,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.96725,
+    "lon": 14.161588,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966672,
+    "lon": 14.159927,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966622,
+    "lon": 14.159723,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966492,
+    "lon": 14.159211,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.96643,
+    "lon": 14.159056,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966414,
+    "lon": 14.159013,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966315,
+    "lon": 14.158828,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.966171,
+    "lon": 14.158624,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.965804,
+    "lon": 14.158176,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.965234,
+    "lon": 14.157511,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.965056,
+    "lon": 14.157277,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964905,
+    "lon": 14.156993,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964793,
+    "lon": 14.156717,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964711,
+    "lon": 14.156448,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964624,
+    "lon": 14.156124,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964571,
+    "lon": 14.155805,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964433,
+    "lon": 14.155,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964243,
+    "lon": 14.15382,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964176,
+    "lon": 14.153031,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.964073,
+    "lon": 14.152208,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963989,
+    "lon": 14.151902,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963721,
+    "lon": 14.151063,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963592,
+    "lon": 14.150743,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963433,
+    "lon": 14.150389,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963189,
+    "lon": 14.149907,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.963002,
+    "lon": 14.149585,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.96254,
+    "lon": 14.148885,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.962321,
+    "lon": 14.148619,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961942,
+    "lon": 14.148276,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961797,
+    "lon": 14.148115,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961685,
+    "lon": 14.147882,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961667,
+    "lon": 14.147777,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961649,
+    "lon": 14.147179,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961593,
+    "lon": 14.146929,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.961208,
+    "lon": 14.145749,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.960194,
+    "lon": 14.143204,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.960063,
+    "lon": 14.142761,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959723,
+    "lon": 14.140905,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959544,
+    "lon": 14.13925,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959489,
+    "lon": 14.138971,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959431,
+    "lon": 14.138832,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959384,
+    "lon": 14.138773,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959301,
+    "lon": 14.138738,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.959231,
+    "lon": 14.138757,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958907,
+    "lon": 14.138955,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.95879,
+    "lon": 14.138966,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.95872,
+    "lon": 14.138947,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.95865,
+    "lon": 14.138893,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958616,
+    "lon": 14.138834,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958567,
+    "lon": 14.138684,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958487,
+    "lon": 14.138258,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958392,
+    "lon": 14.137882,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958135,
+    "lon": 14.137217,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.958026,
+    "lon": 14.137,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957861,
+    "lon": 14.136807,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957524,
+    "lon": 14.136622,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957429,
+    "lon": 14.13652,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957379,
+    "lon": 14.136423,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957321,
+    "lon": 14.136235,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.95725,
+    "lon": 14.135905,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.957142,
+    "lon": 14.135554,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.956941,
+    "lon": 14.135098,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.956738,
+    "lon": 14.134843,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.956679,
+    "lon": 14.134725,
+    "name": "",
+    "ref": "11610",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 49.956612,
+    "lon": 14.134465,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.956408,
+    "lon": 14.134438,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.956206,
+    "lon": 14.134457,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.956106,
+    "lon": 14.134425,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.955421,
+    "lon": 14.134012,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.954757,
+    "lon": 14.133108,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.954515,
+    "lon": 14.132665,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.954411,
+    "lon": 14.132483,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.95423,
+    "lon": 14.132335,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.95359,
+    "lon": 14.131995,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.953113,
+    "lon": 14.131925,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.952838,
+    "lon": 14.131984,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.952709,
+    "lon": 14.131928,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.952298,
+    "lon": 14.131415,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.952193,
+    "lon": 14.131311,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951898,
+    "lon": 14.131292,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951658,
+    "lon": 14.131236,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951568,
+    "lon": 14.131241,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951496,
+    "lon": 14.13126,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951406,
+    "lon": 14.131324,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951347,
+    "lon": 14.131407,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951272,
+    "lon": 14.131584,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951203,
+    "lon": 14.131855,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951049,
+    "lon": 14.132212,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.951014,
+    "lon": 14.132357,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.950999,
+    "lon": 14.132534,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.950999,
+    "lon": 14.132719,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.950957,
+    "lon": 14.132891,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.95084,
+    "lon": 14.133213,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.950753,
+    "lon": 14.133293,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.950232,
+    "lon": 14.133803,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.949701,
+    "lon": 14.134741,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.949391,
+    "lon": 14.135353,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.948953,
+    "lon": 14.136136,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.948623,
+    "lon": 14.136809,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.948298,
+    "lon": 14.137327,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.947495,
+    "lon": 14.138572,
+    "name": "",
+    "ref": "116",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 49.947495,
+    "lon": 14.138572
+  }
+]
