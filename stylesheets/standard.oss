@@ -1625,7 +1625,8 @@ STYLE
 
  IF leisure {
    [MAG county-] {
-     [TYPE leisure_pitch] {
+     [TYPE leisure_pitch,
+           leisure_fitness_station] {
        AREA { color: @pitchColor;}
        AREA.BORDER { color: @pitchBorderColor; width: 0.1mm; }
      }
@@ -2036,7 +2037,8 @@ STYLE
      [TYPE leisure_building,
            sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; }
 
-     [TYPE leisure_pitch] AREA.TEXT { label: Name.name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
+     [TYPE leisure_pitch,
+           leisure_fitness_station] AREA.TEXT { label: Name.name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
 
      [TYPE amenity_school_building,
            amenity_school] AREA.TEXT { label: Name.name; style: emphasize; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
