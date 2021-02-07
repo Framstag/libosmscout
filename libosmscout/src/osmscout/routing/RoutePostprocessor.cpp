@@ -1727,6 +1727,11 @@ namespace osmscout {
       delete p.second;
     }
     lanesReaders.clear();
+
+    for (const auto p:accessReaders){
+      delete p.second;
+    }
+    accessReaders.clear();
   }
 
   AreaRef RoutePostprocessor::GetArea(const DBFileOffset &offset) const

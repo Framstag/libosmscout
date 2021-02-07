@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
+#include <fstream>
 
 #include <osmscout/Database.h>
 #include <osmscout/routing/SimpleRoutingService.h>
@@ -61,13 +62,18 @@ struct Arguments
   bool                   help=false;
   std::string            router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
   osmscout::Vehicle      vehicle=osmscout::Vehicle::vehicleCar;
-  bool                   gpx=false;
+  std::string            gpx;
   std::string            databaseDirectory;
   osmscout::GeoCoord     start;
   osmscout::GeoCoord     target;
   bool                   debug=false;
   bool                   dataDebug=false;
   bool                   routeDebug=false;
+  std::string            routeJson;
+
+  osmscout::Distance     penaltySameType=osmscout::Meters(160);
+  osmscout::Distance     penaltyDifferentType=osmscout::Meters(250);
+  osmscout::HourDuration maxPenalty=std::chrono::seconds(10);
 };
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -210,6 +216,77 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
   return "";
 }
 
+struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostprocessor::Callback
+{
+  std::ofstream jsonOut;
+  bool firstNode=true;
+
+  explicit RouteDescriptionJsonCallback(const std::string &routeJson):
+    jsonOut(routeJson, std::ios::binary)
+  {
+  }
+
+  void BeforeRoute() override
+  {
+    jsonOut.precision(6);
+    jsonOut.imbue(std::locale("C"));
+    jsonOut << "[" << std::endl;
+  }
+
+  void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef&) override
+  {
+    jsonOut << std::endl;
+    jsonOut << "]" << std::endl;
+  }
+
+  // naive string escaping for json
+  std::string JsonStrEscape(const std::string &str) const
+  {
+    std::string buffer;
+    buffer.reserve(str.size());
+    for(size_t pos = 0; pos != str.size(); ++pos) {
+      switch(str[pos]) {
+        case '"':  buffer.append("\\\"");       break;
+        case '\\': buffer.append("\\\\");       break;
+        default:   buffer.append(&str[pos], 1); break;
+      }
+    }
+    return buffer;
+  }
+
+  void BeforeNode(const osmscout::RouteDescription::Node& node) override
+  {
+    if (firstNode){
+      firstNode=false;
+    } else {
+      jsonOut << "," << std::endl;
+    }
+    jsonOut << "  {" << std::endl;
+    jsonOut << "    \"lat\": " << node.GetLocation().GetLat() << "," << std::endl;
+    jsonOut << "    \"lon\": " << node.GetLocation().GetLon();
+
+    for (const auto& desc : node.GetDescriptions()) {
+      if (auto nameDesc=dynamic_cast<osmscout::RouteDescription::NameDescription*>(desc.get());
+          nameDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"name\": \"" << JsonStrEscape(nameDesc->GetName()) << "\"," << std::endl;
+        jsonOut << "    \"ref\": \"" << JsonStrEscape(nameDesc->GetRef()) << "\"";
+      } else if (auto typeNameDesc=dynamic_cast<osmscout::RouteDescription::TypeNameDescription*>(desc.get());
+          typeNameDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"type\": \"" << JsonStrEscape(typeNameDesc->GetName()) << "\"";
+      } else if (auto directionDesc=dynamic_cast<osmscout::RouteDescription::DirectionDescription*>(desc.get());
+                 directionDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"turn\": \"" << JsonStrEscape(MoveToTurnCommand(directionDesc->GetTurn())) << "\"";
+      }
+    }
+    jsonOut << std::endl;
+    jsonOut << "  }";
+  }
+};
+
+
 struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
 {
   size_t lineCount;
@@ -220,7 +297,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
   bool  lineDrawn;
   bool routeDebug;
 
-  RouteDescriptionGeneratorCallback(bool routeDebug)
+  explicit RouteDescriptionGeneratorCallback(bool routeDebug)
   : lineCount(0),
     prevDistance(0.0),
     prevTime(osmscout::Duration::zero()),
@@ -562,6 +639,9 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
 int main(int argc, char* argv[])
 {
+  using namespace std::string_literals;
+  using namespace std::chrono;
+
   osmscout::CmdLineParser   argParser("Routing",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
@@ -574,11 +654,18 @@ int main(int argc, char* argv[])
                       "Return argument help",
                       true);
 
-  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.gpx=value;
                       }),
                       "gpx",
-                      "Dump resulting route as GPX to std::cout",
+                      "Dump resulting route as GPX to file",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.routeJson=value;
+                      }),
+                      "routeJson",
+                      "Dump resulting route as JSON to file",
                       false);
 
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
@@ -621,6 +708,24 @@ int main(int argc, char* argv[])
                       }),
                       "router",
                       "Router filename base");
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.penaltySameType=osmscout::Meters(value);
+                      }),
+                      "penalty-same",
+                      "Junction penalty for same types, distance [m]. Default "s + std::to_string((int)args.penaltySameType.AsMeter()));
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.penaltyDifferentType=osmscout::Meters(value);
+                      }),
+                      "penalty-diff",
+                      "Junction penalty for different types, distance [m]. Default "s + std::to_string((int)args.penaltyDifferentType.AsMeter()));
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.maxPenalty=seconds(value);
+                      }),
+                      "penalty-max",
+                      "Maximum junction penalty, time [s]. Default "s + std::to_string(duration_cast<seconds>(args.maxPenalty).count()));
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
@@ -670,9 +775,11 @@ int main(int argc, char* argv[])
   osmscout::FastestPathRoutingProfileRef routingProfile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
   osmscout::RouterParameter              routerParameter;
 
-  if (!args.gpx) {
-    routerParameter.SetDebugPerformance(true);
-  }
+  routingProfile->SetPenaltySameType(args.penaltySameType);
+  routingProfile->SetPenaltyDifferentType(args.penaltyDifferentType);
+  routingProfile->SetMaxPenalty(args.maxPenalty);
+
+  routerParameter.SetDebugPerformance(true);
 
   osmscout::SimpleRoutingServiceRef router=std::make_shared<osmscout::SimpleRoutingService>(database,
                                                                                             routerParameter,
@@ -780,37 +887,49 @@ int main(int argc, char* argv[])
 
   osmscout::RoutePostprocessor postprocessor;
 
-  if(args.gpx) {
+  if(!args.gpx.empty()) {
     osmscout::RoutePointsResult routePointsResult=router->TransformRouteDataToPoints(result.GetRoute());
 
     if (routePointsResult.Success()) {
-      std::cout.precision(8);
-      std::cout << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
-      std::cout
+      std::ofstream gpxOut(args.gpx, std::ios::binary);
+      if (gpxOut.bad()){
+        std::cerr << "Cannot open " << args.gpx << " for write!" << std::endl;
+        return 1;
+      }
+
+      gpxOut.precision(8);
+      gpxOut << R"(<?xml version="1.0" encoding="UTF-8" standalone="no" ?>)" << std::endl;
+      gpxOut
         << R"(<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="bin2gpx" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">)"
         << std::endl;
 
-      std::cout << "\t<wpt lat=\"" << args.start.GetLat() << "\" lon=\"" << args.start.GetLon() << "\">" << std::endl;
-      std::cout << "\t\t<name>Start</name>" << std::endl;
-      std::cout << "\t\t<fix>2d</fix>" << std::endl;
-      std::cout << "\t</wpt>" << std::endl;
+      gpxOut << "\t<wpt lat=\"" << args.start.GetLat() << "\" lon=\"" << args.start.GetLon() << "\">" << std::endl;
+      gpxOut << "\t\t<name>Start</name>" << std::endl;
+      gpxOut << "\t\t<fix>2d</fix>" << std::endl;
+      gpxOut << "\t</wpt>" << std::endl;
 
-      std::cout << "\t<wpt lat=\"" << args.target.GetLat() << "\" lon=\"" << args.target.GetLon() << "\">" << std::endl;
-      std::cout << "\t\t<name>Target</name>" << std::endl;
-      std::cout << "\t\t<fix>2d</fix>" << std::endl;
-      std::cout << "\t</wpt>" << std::endl;
+      gpxOut << "\t<wpt lat=\"" << args.target.GetLat() << "\" lon=\"" << args.target.GetLon() << "\">" << std::endl;
+      gpxOut << "\t\t<name>Target</name>" << std::endl;
+      gpxOut << "\t\t<fix>2d</fix>" << std::endl;
+      gpxOut << "\t</wpt>" << std::endl;
 
-      std::cout << "\t<trk>" << std::endl;
-      std::cout << "\t\t<name>Route</name>" << std::endl;
-      std::cout << "\t\t<trkseg>" << std::endl;
+      gpxOut << "\t<trk>" << std::endl;
+      gpxOut << "\t\t<name>Route</name>" << std::endl;
+      gpxOut << "\t\t<trkseg>" << std::endl;
       for (const auto& point : routePointsResult.GetPoints()->points) {
-        std::cout << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
-        std::cout << "\t\t\t\t<fix>2d</fix>" << std::endl;
-        std::cout << "\t\t\t</trkpt>" << std::endl;
+        gpxOut << "\t\t\t<trkpt lat=\"" << point.GetLat() << "\" lon=\"" << point.GetLon() << "\">" << std::endl;
+        gpxOut << "\t\t\t\t<fix>2d</fix>" << std::endl;
+        gpxOut << "\t\t\t</trkpt>" << std::endl;
       }
-      std::cout << "\t\t</trkseg>" << std::endl;
-      std::cout << "\t</trk>" << std::endl;
-      std::cout << "</gpx>" << std::endl;
+      gpxOut << "\t\t</trkseg>" << std::endl;
+      gpxOut << "\t</trk>" << std::endl;
+      gpxOut << "</gpx>" << std::endl;
+
+      gpxOut.close();
+      if (gpxOut.fail()){
+        std::cerr << "Error while writing " << args.gpx << "!" << std::endl;
+        return 1;
+      }
     }
     else {
       std::cerr << "Error during route conversion" << std::endl;
@@ -850,6 +969,23 @@ int main(int argc, char* argv[])
 
   generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
                                 generatorCallback);
+
+  if (!args.routeJson.empty()){
+    RouteDescriptionJsonCallback jsonCallback(args.routeJson);
+    if (jsonCallback.jsonOut.bad()){
+      std::cerr << "Cannot open " << args.routeJson << " for write!" << std::endl;
+      return 1;
+    }
+
+    generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
+                                  jsonCallback);
+
+    jsonCallback.jsonOut.close();
+    if (jsonCallback.jsonOut.fail()){
+      std::cerr << "Error while writing " << args.routeJson << "!" << std::endl;
+      return 1;
+    }
+  }
 
   generateTimer.Stop();
 
