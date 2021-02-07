@@ -236,13 +236,14 @@ struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostproce
   }
 
   // naive string escaping for json
-  std::string StrEscape(const std::string &str) const
+  std::string JsonStrEscape(const std::string &str) const
   {
     std::string buffer;
     buffer.reserve(str.size());
     for(size_t pos = 0; pos != str.size(); ++pos) {
       switch(str[pos]) {
-        case '"':  buffer.append("\\\"");      break;
+        case '"':  buffer.append("\\\"");       break;
+        case '\\': buffer.append("\\\\");       break;
         default:   buffer.append(&str[pos], 1); break;
       }
     }
@@ -264,16 +265,16 @@ struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostproce
       if (auto nameDesc=dynamic_cast<osmscout::RouteDescription::NameDescription*>(desc.get());
           nameDesc != nullptr){
         jsonOut << "," << std::endl;
-        jsonOut << "    \"name\": \"" << StrEscape(nameDesc->GetName()) << "\"," << std::endl;
-        jsonOut << "    \"ref\": \"" << StrEscape(nameDesc->GetRef()) << "\"";
+        jsonOut << "    \"name\": \"" << JsonStrEscape(nameDesc->GetName()) << "\"," << std::endl;
+        jsonOut << "    \"ref\": \"" << JsonStrEscape(nameDesc->GetRef()) << "\"";
       } else if (auto typeNameDesc=dynamic_cast<osmscout::RouteDescription::TypeNameDescription*>(desc.get());
           typeNameDesc != nullptr){
         jsonOut << "," << std::endl;
-        jsonOut << "    \"type\": \"" << StrEscape(typeNameDesc->GetName()) << "\"";
+        jsonOut << "    \"type\": \"" << JsonStrEscape(typeNameDesc->GetName()) << "\"";
       } else if (auto directionDesc=dynamic_cast<osmscout::RouteDescription::DirectionDescription*>(desc.get());
                  directionDesc != nullptr){
         jsonOut << "," << std::endl;
-        jsonOut << "    \"turn\": \"" << StrEscape(MoveToTurnCommand(directionDesc->GetTurn())) << "\"";
+        jsonOut << "    \"turn\": \"" << JsonStrEscape(MoveToTurnCommand(directionDesc->GetTurn())) << "\"";
       }
     }
     jsonOut << std::endl;
