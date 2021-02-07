@@ -859,7 +859,7 @@ int main(int argc, char* argv[])
     if (routePointsResult.Success()) {
       std::ofstream gpxOut(args.gpx, std::ios::binary);
       if (gpxOut.bad()){
-        std::cerr << "Cannot open " << args.gpx << " for write!";
+        std::cerr << "Cannot open " << args.gpx << " for write!" << std::endl;
         return 1;
       }
 
@@ -893,7 +893,7 @@ int main(int argc, char* argv[])
 
       gpxOut.close();
       if (gpxOut.fail()){
-        std::cerr << "Error while writing " << args.gpx << "!";
+        std::cerr << "Error while writing " << args.gpx << "!" << std::endl;
         return 1;
       }
     }
@@ -939,7 +939,7 @@ int main(int argc, char* argv[])
   if (!args.routeJson.empty()){
     RouteDescriptionJsonCallback jsonCallback(args.routeJson);
     if (jsonCallback.jsonOut.bad()){
-      std::cerr << "Cannot open " << args.routeJson << " for write!";
+      std::cerr << "Cannot open " << args.routeJson << " for write!" << std::endl;
       return 1;
     }
 
@@ -948,7 +948,7 @@ int main(int argc, char* argv[])
 
     jsonCallback.jsonOut.close();
     if (jsonCallback.jsonOut.fail()){
-      std::cerr << "Error while writing " << args.routeJson << "!";
+      std::cerr << "Error while writing " << args.routeJson << "!" << std::endl;
       return 1;
     }
   }
