@@ -70,6 +70,10 @@ struct Arguments
   bool                   dataDebug=false;
   bool                   routeDebug=false;
   std::string            routeJson;
+
+  osmscout::Distance     penaltySameType=osmscout::Meters(160);
+  osmscout::Distance     penaltyDifferentType=osmscout::Meters(250);
+  osmscout::HourDuration maxPenalty=std::chrono::seconds(10);
 };
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -635,6 +639,9 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
 int main(int argc, char* argv[])
 {
+  using namespace std::string_literals;
+  using namespace std::chrono;
+
   osmscout::CmdLineParser   argParser("Routing",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
@@ -702,6 +709,24 @@ int main(int argc, char* argv[])
                       "router",
                       "Router filename base");
 
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.penaltySameType=osmscout::Meters(value);
+                      }),
+                      "penalty-same",
+                      "Junction penalty for same types, distance [m]. Default "s + std::to_string((int)args.penaltySameType.AsMeter()));
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.penaltyDifferentType=osmscout::Meters(value);
+                      }),
+                      "penalty-diff",
+                      "Junction penalty for different types, distance [m]. Default "s + std::to_string((int)args.penaltyDifferentType.AsMeter()));
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.maxPenalty=seconds(value);
+                      }),
+                      "penalty-max",
+                      "Maximum junction penalty, time [s]. Default "s + std::to_string(duration_cast<seconds>(args.maxPenalty).count()));
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -749,6 +774,10 @@ int main(int argc, char* argv[])
 
   osmscout::FastestPathRoutingProfileRef routingProfile=std::make_shared<osmscout::FastestPathRoutingProfile>(database->GetTypeConfig());
   osmscout::RouterParameter              routerParameter;
+
+  routingProfile->SetPenaltySameType(args.penaltySameType);
+  routingProfile->SetPenaltyDifferentType(args.penaltyDifferentType);
+  routingProfile->SetMaxPenalty(args.maxPenalty);
 
   routerParameter.SetDebugPerformance(true);
 

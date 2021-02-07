@@ -297,6 +297,46 @@ namespace osmscout {
       return AbstractRoutingProfile::ParametrizeForCar(typeConfig, speedMap, maxSpeed);
     }
 
+    bool HasJunctionPenalty() const
+    {
+      return applyJunctionPenalty;
+    }
+
+    void SetJunctionPenalty(bool b)
+    {
+      applyJunctionPenalty=b;
+    }
+
+    Distance GetPenaltySameType() const
+    {
+      return penaltySameType;
+    }
+
+    void SetPenaltySameType(const Distance &d)
+    {
+      penaltySameType=d;
+    }
+
+    Distance GetPenaltyDifferentType() const
+    {
+      return penaltyDifferentType;
+    }
+
+    void SetPenaltyDifferentType(const Distance &d)
+    {
+      penaltyDifferentType=d;
+    }
+
+    HourDuration GetMaxPenalty() const
+    {
+      return maxPenalty;
+    }
+
+    void SetMaxPenalty(const HourDuration &d)
+    {
+      maxPenalty=d;
+    }
+
     inline double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& objectVariantData,
                            size_t inPathIndex,
