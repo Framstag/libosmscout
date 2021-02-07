@@ -224,7 +224,7 @@ struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostproce
 
   void BeforeRoute() override
   {
-    jsonOut.precision(8);
+    jsonOut.precision(6);
     jsonOut.imbue(std::locale("C"));
     jsonOut << "[" << std::endl;
   }
