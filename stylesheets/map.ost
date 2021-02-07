@@ -1003,7 +1003,7 @@ TYPES
       PATH[FOOT] PIN_WAY OPTIMIZE_LOW_ZOOM
 
   TYPE leisure_pitch
-    = NODE AREA ("leisure"=="pitch")
+    = NODE AREA ("leisure"=="pitch" OR "leisure"=="fitness_station")
       {Name, NameAlt}
       ADDRESS OPTIMIZE_LOW_ZOOM
 
