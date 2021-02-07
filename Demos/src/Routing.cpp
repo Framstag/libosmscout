@@ -267,9 +267,13 @@ struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostproce
         jsonOut << "    \"name\": \"" << StrEscape(nameDesc->GetName()) << "\"," << std::endl;
         jsonOut << "    \"ref\": \"" << StrEscape(nameDesc->GetRef()) << "\"";
       } else if (auto typeNameDesc=dynamic_cast<osmscout::RouteDescription::TypeNameDescription*>(desc.get());
-                 typeNameDesc != nullptr){
+          typeNameDesc != nullptr){
         jsonOut << "," << std::endl;
         jsonOut << "    \"type\": \"" << StrEscape(typeNameDesc->GetName()) << "\"";
+      } else if (auto directionDesc=dynamic_cast<osmscout::RouteDescription::DirectionDescription*>(desc.get());
+                 directionDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"turn\": \"" << StrEscape(MoveToTurnCommand(directionDesc->GetTurn())) << "\"";
       }
     }
     jsonOut << std::endl;
