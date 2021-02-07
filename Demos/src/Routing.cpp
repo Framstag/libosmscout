@@ -69,6 +69,7 @@ struct Arguments
   bool                   debug=false;
   bool                   dataDebug=false;
   bool                   routeDebug=false;
+  std::string            routeJson;
 };
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -210,6 +211,72 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 
   return "";
 }
+
+struct RouteDescriptionJsonCallback : public osmscout::RouteDescriptionPostprocessor::Callback
+{
+  std::ofstream jsonOut;
+  bool firstNode=true;
+
+  explicit RouteDescriptionJsonCallback(const std::string &routeJson):
+    jsonOut(routeJson, std::ios::binary)
+  {
+  }
+
+  void BeforeRoute() override
+  {
+    jsonOut.precision(8);
+    jsonOut.imbue(std::locale("C"));
+    jsonOut << "[" << std::endl;
+  }
+
+  void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef&) override
+  {
+    jsonOut << std::endl;
+    jsonOut << "]" << std::endl;
+  }
+
+  // naive string escaping for json
+  std::string StrEscape(const std::string &str) const
+  {
+    std::string buffer;
+    buffer.reserve(str.size());
+    for(size_t pos = 0; pos != str.size(); ++pos) {
+      switch(str[pos]) {
+        case '"':  buffer.append("\\\"");      break;
+        default:   buffer.append(&str[pos], 1); break;
+      }
+    }
+    return buffer;
+  }
+
+  void BeforeNode(const osmscout::RouteDescription::Node& node) override
+  {
+    if (firstNode){
+      firstNode=false;
+    } else {
+      jsonOut << "," << std::endl;
+    }
+    jsonOut << "  {" << std::endl;
+    jsonOut << "    \"lat\": " << node.GetLocation().GetLat() << "," << std::endl;
+    jsonOut << "    \"lon\": " << node.GetLocation().GetLon();
+
+    for (const auto& desc : node.GetDescriptions()) {
+      if (auto nameDesc=dynamic_cast<osmscout::RouteDescription::NameDescription*>(desc.get());
+          nameDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"name\": \"" << StrEscape(nameDesc->GetName()) << "\"," << std::endl;
+        jsonOut << "    \"ref\": \"" << StrEscape(nameDesc->GetRef()) << "\"";
+      } else if (auto typeNameDesc=dynamic_cast<osmscout::RouteDescription::TypeNameDescription*>(desc.get());
+                 typeNameDesc != nullptr){
+        jsonOut << "," << std::endl;
+        jsonOut << "    \"type\": \"" << StrEscape(typeNameDesc->GetName()) << "\"";
+      }
+    }
+    jsonOut << std::endl;
+    jsonOut << "  }";
+  }
+};
+
 
 struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPostprocessor::Callback
 {
@@ -582,6 +649,13 @@ int main(int argc, char* argv[])
                       "Dump resulting route as GPX to file",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.routeJson=value;
+                      }),
+                      "routeJson",
+                      "Dump resulting route as JSON to file",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
                       args.debug=value;
                       }),
@@ -861,6 +935,23 @@ int main(int argc, char* argv[])
 
   generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
                                 generatorCallback);
+
+  if (!args.routeJson.empty()){
+    RouteDescriptionJsonCallback jsonCallback(args.routeJson);
+    if (jsonCallback.jsonOut.bad()){
+      std::cerr << "Cannot open " << args.routeJson << " for write!";
+      return 1;
+    }
+
+    generator.GenerateDescription(*routeDescriptionResult.GetDescription(),
+                                  jsonCallback);
+
+    jsonCallback.jsonOut.close();
+    if (jsonCallback.jsonOut.fail()){
+      std::cerr << "Error while writing " << args.routeJson << "!";
+      return 1;
+    }
+  }
 
   generateTimer.Stop();
 
