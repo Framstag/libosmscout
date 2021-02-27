@@ -166,7 +166,7 @@ namespace osmscout {
       return std::nullopt;
     }
 
-    T task=std::move(tasks.front());
+    std::optional<T> task=std::move(tasks.front());
     tasks.pop_front();
 
     lock.unlock();
