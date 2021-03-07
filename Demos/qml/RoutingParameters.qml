@@ -20,67 +20,240 @@ Window {
     width: 1024
     height: 768
 
-    function reroute(){
-        var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
-        var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
-        console.log("We leave route, reroute from " + Utils.locationStr(startLoc) + " -> " + Utils.locationStr(destinationLoc));
-        routingModel.setStartAndTarget(startLoc, destinationLoc);
+    function locationStr(location){
+        if (location==null){
+            return "null";
+        }
+        return (location.label=="" ) ?
+                    location.lat.toFixed(5) + " " + location.lon.toFixed(5) :
+                    "\"" + location.label + "\"";
     }
 
     RoutingListModel {
         id: routingModel
+
+        onRoutingProgress: {
+            routingState.text = "Searching route: " + Math.round(percent) + "%"
+        }
+
         onReadyChanged: {
+            if (!ready) {
+                routingState.text = "Preparing...";
+            }
+
             var routeWay = routingModel.routeWay;
             if (routeWay==null){
                 return;
             }
 
+            routingState.text = "Done";
             map.addOverlayObject(0,routeWay);
         }
     }
 
-    Map {
-        id: map
+    SplitView {
+        id: mainRow
         anchors.fill: parent
-        showCurrentPosition: true
-        focus: true
-    }
+        orientation: Qt.Horizontal
 
-    Rectangle {
-        id: rightContainer
-        anchors.right: parent.right
-        anchors.top: parent.top
-        width: 220
-        height: parent.height
-        color: "transparent"
+        Map {
+            id: map
+            Layout.fillWidth: true
+            width: parent.width*0.6
+            Layout.minimumWidth: 200
 
-        Rectangle {
-            id: routingStepsBox
+            showCurrentPosition: true
+            focus: true
 
-            x: 0
-            y: Theme.vertSpace
-            height: parent.height - (2*Theme.vertSpace)
-            width: parent.width - Theme.horizSpace
-
-            border.color: "lightgrey"
-            border.width: 1
-
-            ListView {
-                id: routingView
-
-                model: routingModel
-
-                anchors.fill: parent
-                anchors.margins: 1
-                clip: true
-
-                delegate: RoutingStep{}
+            onTap: {
+                if (startInput.focus) {
+                    startInput.text = Utils.formatCoord(lat, lon);
+                }
+                if (targetInput.focus) {
+                    targetInput.text = Utils.formatCoord(lat, lon);
+                }
             }
 
-            ScrollIndicator {
-                flickableArea: routingView
+            function setupInitialPosition(){
+                if (map.databaseLoaded){
+                    map.recenter();
+                }
+            }
+
+            Component.onCompleted: {
+                setupInitialPosition();
+            }
+            onDatabaseLoaded: {
+                setupInitialPosition();
+            }
+        }
+
+        Rectangle {
+            id: rightPanel
+            width: parent.width*0.4
+            Layout.minimumWidth: 300
+
+            GridLayout {
+                id: routingControl
+                columns: 3
+                columnSpacing: 6
+                rowSpacing: 6
+
+                anchors{
+                    top: parent.top
+                    right: parent.right
+                    left: parent.left
+                    margins: 6
+                }
+
+                property LocationEntry routeFromLocation
+                property LocationEntry routeToLocation
+
+                function reroute(){
+                    if (routeFromLocation!=null){
+                        map.addPositionMark(0, routeFromLocation.lat, routeFromLocation.lon);
+                    } else {
+                        map.removePositionMark(0);
+                    }
+
+                    if (routeToLocation!=null){
+                        map.addPositionMark(1, routeToLocation.lat, routeToLocation.lon);
+                    } else {
+                        map.removePositionMark(1);
+                    }
+
+                    if (routeFromLocation==null || routeToLocation==null){
+                        return;
+                    }
+
+                    console.log("Route from " + locationStr(routeFromLocation) + " -> " + locationStr(routeToLocation));
+                    routingModel.setStartAndTarget(routeFromLocation, routeToLocation);
+                }
+
+                Text {
+                    text: qsTr("Start:")
+                }
+
+                TextField {
+                    id: startInput
+                    textColor: "black"
+                    Layout.fillWidth: true
+
+                    LocationListModel {
+                        id: startLocationSearchModel
+                        pattern: startInput.text
+
+                        onCountChanged:{
+                            if (count==0){
+                                if (pattern!="" && !searching){
+                                    statusText.text = "No location found for " + pattern;
+                                    startState.text = "error";
+                                } else {
+                                    if (pattern!=""){
+                                        startState.text = "searching";
+                                    } else {
+                                        startState.text = "empty";
+                                    }
+                                }
+
+                                console.log("empty!");
+                                routeFromLocation = null;
+                                return;
+                            }
+                            console.log("NOT empty!");
+
+                            console.log("Start location: " + locationStr(startLocationSearchModel.get(0)));
+                            startState.text = "ok";
+                            routingControl.routeFromLocation = startLocationSearchModel.get(0);
+                            routingControl.reroute();
+                        }
+                    }
+                }
+                Text {
+                    id: startState
+                    text: qsTr("empty")
+                }
+
+                Text {
+                    text: qsTr("Target:")
+                }
+
+                TextField {
+                    id: targetInput
+                    textColor: "black"
+                    Layout.fillWidth: true
+
+                    LocationListModel {
+                        id: targetLocationSearchModel
+                        pattern: targetInput.text
+
+                        onCountChanged:{
+                            if (count==0){
+                                if (pattern!="" && !searching){
+                                    statusText.text = "No location found for " + pattern;
+                                    targetState.text = "error";
+                                } else {
+                                    if (pattern!=""){
+                                        targetState.text = "searching";
+                                    } else {
+                                        targetState.text = "empty";
+                                    }
+                                }
+
+                                console.log("empty!");
+                                routeFromLocation = null;
+                                return;
+                            }
+                            console.log("NOT empty!");
+
+                            console.log("Start location: " + locationStr(targetLocationSearchModel.get(0)));
+                            targetState.text = "ok";
+                            routingControl.routeToLocation = targetLocationSearchModel.get(0);
+                            routingControl.reroute();
+                        }
+                    }
+                }
+                Text {
+                    id: targetState
+                    text: qsTr("empty")
+                }
+                Text {}
+                Text {
+                    id: routingState
+                    text: qsTr("No start or target set")
+                }
+                Text {}
+            }
+
+            Rectangle {
+                id: routingStepsBox
+
+                anchors{
+                    top: routingControl.bottom
+                    right: parent.right
+                    bottom: parent.bottom
+                    left: parent.left
+                }
+
+                border.color: "lightgrey"
+                border.width: 1
+
+                ListView {
+                    id: routingView
+
+                    model: routingModel
+
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    clip: true
+
+                    delegate: RoutingStep{}
+                }
+
+                ScrollIndicator {
+                    flickableArea: routingView
+                }
             }
         }
     }
-
 }
