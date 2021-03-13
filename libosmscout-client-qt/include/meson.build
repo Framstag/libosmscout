@@ -10,6 +10,7 @@ osmscoutclientqtHeader = [
             'osmscout/Router.h',
             'osmscout/RouteDescriptionBuilder.h',
             'osmscout/RouteStep.h',
+            'osmscout/QmlRoutingProfile.h',
             'osmscout/QtRouteData.h',
             'osmscout/NavigationModule.h',
             'osmscout/NavigationModel.h',

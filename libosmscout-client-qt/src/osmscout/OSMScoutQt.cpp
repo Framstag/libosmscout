@@ -49,6 +49,7 @@
 #include <osmscout/InstalledMapsModel.h>
 #include <osmscout/AvailableVoicesModel.h>
 #include <osmscout/InstalledVoicesModel.h>
+#include <osmscout/QmlRoutingProfile.h>
 
 #include <optional>
 
@@ -182,6 +183,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<OverlayArea>(uri, versionMajor, versionMinor, "OverlayArea");
   qmlRegisterType<OverlayNode>(uri, versionMajor, versionMinor, "OverlayNode");
   qmlRegisterType<QmlSettings>(uri, versionMajor, versionMinor, "Settings");
+  qmlRegisterType<QmlRoutingProfile>(uri, versionMajor, versionMinor, "RoutingProfile");
   qmlRegisterType<RouteStep>(uri, versionMajor, versionMinor, "RouteStep");
   qmlRegisterType<RoutingListModel>(uri, versionMajor, versionMinor, "RoutingListModel");
   qmlRegisterType<StyleFlagsModel>(uri, versionMajor, versionMinor, "StyleFlagsModel");
