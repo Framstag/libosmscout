@@ -154,10 +154,26 @@ Window {
                     }
                 }
 
+                Text{}
+
                 Text {
                     id: routingState
                     text: qsTr("No start or target set")
                 }
+
+                Text {
+                    text: qsTr("Distance")
+                }
+                Text {
+                    text: routingModel.ready ? Utils.humanDistance(routingModel.length) : "?"
+                }
+                Text {
+                    text: qsTr("Duration")
+                }
+                Text {
+                    text: routingModel.ready ? Utils.humanDuration(routingModel.duration) : "?"
+                }
+
             }
 
             Rectangle {
