@@ -233,6 +233,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 
 			# qml files in CMake sources make it visible in QtCreator
 			qml/RoutingParameters.qml
+			qml/PlaceInput.qml
 
 		INCLUDES ../OSMScout2/src/
 		TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)

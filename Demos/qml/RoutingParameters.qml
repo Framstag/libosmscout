@@ -66,10 +66,10 @@ Window {
             focus: true
 
             onTap: {
-                if (startInput.focus) {
+                if (startInput.inputFocus) {
                     startInput.text = Utils.formatCoord(lat, lon);
                 }
-                if (targetInput.focus) {
+                if (targetInput.inputFocus) {
                     targetInput.text = Utils.formatCoord(lat, lon);
                 }
             }
@@ -95,7 +95,7 @@ Window {
 
             GridLayout {
                 id: routingControl
-                columns: 3
+                columns: 2
                 columnSpacing: 6
                 rowSpacing: 6
 
@@ -134,95 +134,30 @@ Window {
                     text: qsTr("Start:")
                 }
 
-                TextField {
+                PlaceInput {
                     id: startInput
-                    textColor: "black"
-                    Layout.fillWidth: true
-
-                    LocationListModel {
-                        id: startLocationSearchModel
-                        pattern: startInput.text
-
-                        onCountChanged:{
-                            if (count==0){
-                                if (pattern!="" && !searching){
-                                    statusText.text = "No location found for " + pattern;
-                                    startState.text = "error";
-                                } else {
-                                    if (pattern!=""){
-                                        startState.text = "searching";
-                                    } else {
-                                        startState.text = "empty";
-                                    }
-                                }
-
-                                console.log("empty!");
-                                routeFromLocation = null;
-                                return;
-                            }
-                            console.log("NOT empty!");
-
-                            console.log("Start location: " + locationStr(startLocationSearchModel.get(0)));
-                            startState.text = "ok";
-                            routingControl.routeFromLocation = startLocationSearchModel.get(0);
-                            routingControl.reroute();
-                        }
+                    onLocationChanged: {
+                        routingControl.routeFromLocation = startInput.location;
+                        routingControl.reroute();
                     }
-                }
-                Text {
-                    id: startState
-                    text: qsTr("empty")
                 }
 
                 Text {
                     text: qsTr("Target:")
                 }
 
-                TextField {
+                PlaceInput {
                     id: targetInput
-                    textColor: "black"
-                    Layout.fillWidth: true
-
-                    LocationListModel {
-                        id: targetLocationSearchModel
-                        pattern: targetInput.text
-
-                        onCountChanged:{
-                            if (count==0){
-                                if (pattern!="" && !searching){
-                                    statusText.text = "No location found for " + pattern;
-                                    targetState.text = "error";
-                                } else {
-                                    if (pattern!=""){
-                                        targetState.text = "searching";
-                                    } else {
-                                        targetState.text = "empty";
-                                    }
-                                }
-
-                                console.log("empty!");
-                                routeFromLocation = null;
-                                return;
-                            }
-                            console.log("NOT empty!");
-
-                            console.log("Start location: " + locationStr(targetLocationSearchModel.get(0)));
-                            targetState.text = "ok";
-                            routingControl.routeToLocation = targetLocationSearchModel.get(0);
-                            routingControl.reroute();
-                        }
+                    onLocationChanged: {
+                        routingControl.routeToLocation = targetInput.location;
+                        routingControl.reroute();
                     }
                 }
-                Text {
-                    id: targetState
-                    text: qsTr("empty")
-                }
-                Text {}
+
                 Text {
                     id: routingState
                     text: qsTr("No start or target set")
                 }
-                Text {}
             }
 
             Rectangle {
