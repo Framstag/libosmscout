@@ -97,7 +97,7 @@ namespace osmscout {
    * The actual maximum cost limit is calculated based on a constant limit distance (default 10.0 Km)
    * and a cost factor applied to the minimum costs default 5.0).
    *
-   * So the resulting maxium cost are profile.GetCosts(profile.GetCostLimitDistance())+
+   * So the resulting maximum cost are profile.GetCosts(profile.GetCostLimitDistance())+
    * profile.GetCosts(distance)*profile.GetCostLimitFactor().
    *
    * @param costLimitFactor
