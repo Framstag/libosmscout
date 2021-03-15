@@ -131,14 +131,15 @@ namespace osmscout
     std::vector<Glyph<MapPainterDirectX::DirectXNativeGlyph>> result;
 
     double horizontalOffset = 0;
-    for (size_t ch = 0; ch < text.length(); ch++){
-      result.emplace_back();
-
 #ifdef MBUC
-      std::wstring sample = s2w(text.substr(ch,1));
+    std::wstring wText = UTF8StringToWString(text);
+    for (size_t ch = 0; ch < wText.length(); ch++) {
+      std::wstring sample = wText.substr(ch,1);
 #else
+    for (size_t ch = 0; ch < text.length(); ch++) {
       std::string sample = text.substr(ch,1);
 #endif
+      result.emplace_back();
 
       result.back().glyph.character = sample;
 
