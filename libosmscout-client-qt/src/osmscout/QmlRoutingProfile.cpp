@@ -24,18 +24,234 @@ namespace osmscout {
 QmlRoutingProfile::QmlRoutingProfile(QObject *parent):
   QObject(parent)
 {
-   // no code
+  setDefaults();
+}
+
+QmlRoutingProfile::QmlRoutingProfile(Vehicle vehicle):
+  vehicle(vehicle)
+{
+  setDefaults();
 }
 
 QmlRoutingProfile::QmlRoutingProfile(const QmlRoutingProfile& other):
   QObject(other.parent())
 {
-   // no code
+   operator=(other);
 }
 
-void QmlRoutingProfile::operator=(const QmlRoutingProfile&)
+QmlRoutingProfile& QmlRoutingProfile::operator=(const QmlRoutingProfile& other)
 {
-   // no code
+  vehicle=other.vehicle;
+  speedTable=other.speedTable;
+  applyJunctionPenalty=other.applyJunctionPenalty;
+  penaltySameType=other.penaltySameType;
+  penaltyDifferentType=other.penaltyDifferentType;
+  maxPenalty=other.maxPenalty;
+
+  emit update();
+  return *this;
+}
+
+osmscout::Vehicle QmlRoutingProfile::getVehicle() const
+{
+  return vehicle;
+}
+
+void QmlRoutingProfile::setVehicle(osmscout::Vehicle vehicle)
+{
+  if (this->vehicle==vehicle){
+    return;
+  }
+  this->vehicle = vehicle;
+  setDefaults();
+}
+
+double QmlRoutingProfile::getMaxSpeed() const
+{
+  return maxSpeed;
+}
+
+void QmlRoutingProfile::setMaxSpeed(double d)
+{
+  if (maxSpeed==d){
+    return;
+  }
+  maxSpeed=d;
+  emit update();
+}
+
+QVariantMap QmlRoutingProfile::getSpeedTable() const
+{
+  return QVariantMap(); // TODO
+}
+
+void QmlRoutingProfile::setSpeedTable(const QVariantMap &)
+{
+  // TODO
+}
+
+bool QmlRoutingProfile::getJunctionPenalty() const
+{
+  return applyJunctionPenalty;
+}
+
+void QmlRoutingProfile::setJunctionPenalty(bool b)
+{
+  if (applyJunctionPenalty==b){
+    return;
+  }
+  applyJunctionPenalty=b;
+  emit update();
+}
+
+double QmlRoutingProfile::getPenaltySameType() const
+{
+  return penaltySameType.AsMeter();
+}
+
+void QmlRoutingProfile::setPenaltySameType(double d)
+{
+  if (penaltySameType==Meters(d)){
+    return;
+  }
+  penaltySameType=Meters(d);
+  emit update();
+}
+
+double QmlRoutingProfile::getPenaltyDifferentType() const
+{
+  return penaltyDifferentType.AsMeter();
+}
+
+void QmlRoutingProfile::setPenaltyDifferentType(double d)
+{
+  if (penaltyDifferentType==Meters(d)){
+    return;
+  }
+  penaltyDifferentType=Meters(d);
+  emit update();
+}
+
+double QmlRoutingProfile::getMaxPenalty() const
+{
+  return maxPenalty.count();
+}
+
+void QmlRoutingProfile::setMaxPenalty(double d)
+{
+  if (maxPenalty.count()==d){
+    return;
+  }
+  maxPenalty=std::chrono::seconds((int64_t)d);
+  emit update();
+}
+
+void QmlRoutingProfile::setDefaults()
+{
+  speedTable.clear();
+
+  if (vehicle==vehicleFoot) {
+    maxSpeed=5;
+    applyJunctionPenalty=false;
+    maxPenalty=std::chrono::seconds::zero();
+    penaltySameType=Meters(0);
+    penaltyDifferentType=Meters(0);
+    costLimitDistance=Kilometers(10);
+    costLimitFactor=5.0;
+
+    speedTable["highway_track"][SolidGrade]=maxSpeed*0.9;
+    speedTable["highway_track"][MostlySoftGrade]=maxSpeed*0.75;
+    speedTable["highway_path"][SolidGrade]=maxSpeed*0.9;
+    speedTable["highway_path"][MostlySoftGrade]=maxSpeed*0.75;
+    speedTable["highway_steps"][SolidGrade]=1;
+
+  } else if (vehicle==vehicleBicycle) {
+    maxSpeed=30;
+    applyJunctionPenalty=true;
+    maxPenalty=std::chrono::seconds(10);
+    penaltySameType=Meters(160);
+    penaltyDifferentType=Meters(250);
+    costLimitDistance=Kilometers(20);
+    costLimitFactor=7.5;
+
+    speedTable["highway_trunk"][SolidGrade]=maxSpeed;
+    speedTable["highway_trunk_link"][SolidGrade]=maxSpeed;
+    speedTable["highway_primary"][SolidGrade]=maxSpeed;
+    speedTable["highway_primary_link"][SolidGrade]=maxSpeed;
+    speedTable["highway_secondary"][SolidGrade]=maxSpeed;
+    speedTable["highway_secondary_link"][SolidGrade]=maxSpeed;
+    speedTable["highway_tertiary"][SolidGrade]=maxSpeed;
+    speedTable["highway_tertiary_link"][SolidGrade]=maxSpeed;
+    speedTable["highway_unclassified"][SolidGrade]=maxSpeed;
+    speedTable["highway_road"][SolidGrade]=maxSpeed;
+    speedTable["highway_residential"][SolidGrade]=maxSpeed;
+    speedTable["highway_living_street"][SolidGrade]=maxSpeed;
+    speedTable["highway_service"][SolidGrade]=maxSpeed;
+
+    speedTable["highway_track"][SolidGrade]=maxSpeed;
+    speedTable["highway_track"][GravelGrade]=20;
+    speedTable["highway_track"][UnpavedGrade]=15;
+    speedTable["highway_track"][MostlySoftGrade]=12;
+    speedTable["highway_track"][SoftGrade]=10;
+
+    speedTable["highway_path"][SolidGrade]=20;
+    speedTable["highway_path"][GravelGrade]=15;
+    speedTable["highway_path"][UnpavedGrade]=12;
+    speedTable["highway_path"][MostlySoftGrade]=10;
+    speedTable["highway_path"][SoftGrade]=8;
+
+    speedTable["highway_cycleway"][SolidGrade]=maxSpeed;
+    speedTable["highway_roundabout"][SolidGrade]=maxSpeed;
+
+  } else { // vehicle==vehicleCar
+    maxSpeed=160;
+    applyJunctionPenalty=true;
+    maxPenalty=std::chrono::seconds(10);
+    penaltySameType=Meters(160);
+    penaltyDifferentType=Meters(250);
+    costLimitDistance=Kilometers(20);
+    costLimitFactor=7.5;
+
+    speedTable["highway_motorway"][SolidGrade]=110.0;
+    speedTable["highway_motorway_trunk"][SolidGrade]=100.0;
+    speedTable["highway_motorway_primary"][SolidGrade]=70.0;
+    speedTable["highway_motorway_link"][SolidGrade]=60.0;
+    speedTable["highway_motorway_junction"][SolidGrade]=60.0;
+    speedTable["highway_trunk"][SolidGrade]=100.0;
+    speedTable["highway_trunk_link"][SolidGrade]=60.0;
+    speedTable["highway_primary"][SolidGrade]=70.0;
+    speedTable["highway_primary_link"][SolidGrade]=60.0;
+    speedTable["highway_secondary"][SolidGrade]=60.0;
+    speedTable["highway_secondary_link"][SolidGrade]=50.0;
+    speedTable["highway_tertiary"][SolidGrade]=55.0;
+    speedTable["highway_tertiary_link"][SolidGrade]=55.0;
+    speedTable["highway_unclassified"][SolidGrade]=50.0;
+    speedTable["highway_road"][SolidGrade]=50.0;
+    speedTable["highway_residential"][SolidGrade]=40.0;
+    speedTable["highway_roundabout"][SolidGrade]=40.0;
+    speedTable["highway_living_street"][SolidGrade]=10.0;
+    speedTable["highway_service"][SolidGrade]=30.0;
+  }
+}
+
+RoutingProfileRef QmlRoutingProfile::MakeInstance(TypeConfigRef typeConfig) const
+{
+  osmscout::FastestPathRoutingProfileRef routingProfile =
+      std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
+  // TODO
+
+  routingProfile->SetVehicle(vehicle);
+  routingProfile->SetVehicleMaxSpeed(maxSpeed);
+
+  for (const auto &type : typeConfig->GetTypes()) {
+    if (!type->GetIgnore() &&
+        type->CanRoute(vehicle)) {
+      // todo: use speed table
+      routingProfile->AddType(type,maxSpeed);
+    }
+  }
+
+  return routingProfile;
 }
 
 }

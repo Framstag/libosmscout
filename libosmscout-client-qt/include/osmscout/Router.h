@@ -21,8 +21,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/RouteDescriptionBuilder.h>
+#include <osmscout/ClientQtImportExport.h>
 
+#include <osmscout/RouteDescriptionBuilder.h>
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/Settings.h>
@@ -30,8 +31,7 @@
 #include <osmscout/routing/MultiDBRoutingService.h>
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
-
-#include <osmscout/ClientQtImportExport.h>
+#include <osmscout/QmlRoutingProfile.h>
 
 #include <memory>
 
@@ -115,7 +115,7 @@ public slots:
    */
   void onRouteRequest(LocationEntryRef start,
                       LocationEntryRef target,
-                      osmscout::Vehicle vehicle,
+                      QmlRoutingProfileRef profile,
                       int requestId,
                       osmscout::BreakerRef breaker);
 signals:
@@ -131,7 +131,6 @@ signals:
                        int requestId);
 
 private:
-  void GetCarSpeedTable(std::map<std::string,double>& map);
 
   void ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
                            const LocationEntryRef &start,
@@ -153,7 +152,7 @@ private:
                                                               const std::string& target);
 
   osmscout::MultiDBRoutingServiceRef MakeRoutingService(const std::list<DBInstanceRef>& databases,
-                                                        const osmscout::Vehicle vehicle);
+                                                        const QmlRoutingProfileRef &profile);
 
 public:
   Router(QThread *thread,

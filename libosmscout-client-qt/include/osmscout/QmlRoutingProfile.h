@@ -22,7 +22,15 @@
 
 #include <osmscout/ClientQtImportExport.h>
 
+#include <osmscout/OSMScoutTypes.h>
+#include <osmscout/util/Distance.h>
+#include <osmscout/routing/RoutingProfile.h>
+#include <osmscout/TypeConfig.h>
+
 #include <QObject>
+#include <QVariant>
+
+#include <cmath>
 
 namespace osmscout {
 
@@ -33,12 +41,75 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API QmlRoutingProfile: public QObject {
   Q_OBJECT
+  Q_PROPERTY(Vehicle           vehicle    READ getVehicle     WRITE setVehicle    NOTIFY update)
+  Q_PROPERTY(double            maxSpeed   READ getMaxSpeed    WRITE setMaxSpeed   NOTIFY update)
+  Q_PROPERTY(QVariantMap       speedTable READ getSpeedTable  WRITE setSpeedTable NOTIFY update)
+
+  Q_PROPERTY(bool applyJunctionPenalty READ getJunctionPenalty WRITE setJunctionPenalty NOTIFY update)
+  // meters
+  Q_PROPERTY(double penaltySameType READ getPenaltySameType WRITE setPenaltySameType NOTIFY update)
+  // meters
+  Q_PROPERTY(double penaltyDifferentType READ getPenaltyDifferentType WRITE setPenaltyDifferentType NOTIFY update)
+  // seconds
+  Q_PROPERTY(double maxPenalty READ getMaxPenalty WRITE setMaxPenalty NOTIFY update)
+
+public:
+  Q_ENUM(Vehicle);
+  Q_ENUM(Grade);
+
+signals:
+  void update();
+
 public:
   Q_INVOKABLE explicit QmlRoutingProfile(QObject *parent = nullptr);
+  explicit QmlRoutingProfile(Vehicle vehicle);
   ~QmlRoutingProfile() override = default;
 
   QmlRoutingProfile(const QmlRoutingProfile& other);
-  void operator=(const QmlRoutingProfile& other);
+  QmlRoutingProfile& operator=(const QmlRoutingProfile& other);
+
+  osmscout::Vehicle getVehicle() const;
+  void setVehicle(osmscout::Vehicle vehicle);
+
+  double getMaxSpeed() const;
+  void setMaxSpeed(double);
+
+  QVariantMap getSpeedTable() const;
+  void setSpeedTable(const QVariantMap &);
+
+  bool getJunctionPenalty() const;
+  void setJunctionPenalty(bool);
+
+  double getPenaltySameType() const;
+  void setPenaltySameType(double);
+
+  double getPenaltyDifferentType() const;
+  void setPenaltyDifferentType(double);
+
+  double getMaxPenalty() const;
+  void setMaxPenalty(double);
+
+  RoutingProfileRef MakeInstance(TypeConfigRef typeConfig) const;
+
+private:
+  void setDefaults(); //!< setup defaults for current vehicle
+
+private:
+  osmscout::Vehicle vehicle=osmscout::Vehicle::vehicleCar;
+  double maxSpeed=130;
+  std::map<std::string,SpeedVariant> speedTable;
+  bool applyJunctionPenalty=true;
+  Distance costLimitDistance=Kilometers(20);
+  double costLimitFactor=7.5;
+  osmscout::Distance penaltySameType=Meters(160);
+  osmscout::Distance penaltyDifferentType=Meters(250);
+  std::chrono::seconds maxPenalty=std::chrono::seconds(10);
 };
+
+using QmlRoutingProfileRef = std::shared_ptr<QmlRoutingProfile>;
+
 }
+
+Q_DECLARE_METATYPE(osmscout::QmlRoutingProfileRef)
+
 #endif //OSMSCOUT_CLIENT_QT_QMLROUTINGPROFILE_H

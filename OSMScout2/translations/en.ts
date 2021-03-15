@@ -2,6 +2,20 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en">
 <context>
+    <name>Utils</name>
+    <message>
+        <location filename="../qml/custom/Utils.js" line="45"/>
+        <source>meters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/custom/Utils.js" line="48"/>
+        <location filename="../qml/custom/Utils.js" line="50"/>
+        <source>km</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>osmscout::RouteDescriptionBuilder</name>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp" line="74"/>
