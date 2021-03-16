@@ -238,16 +238,26 @@ RoutingProfileRef QmlRoutingProfile::MakeInstance(TypeConfigRef typeConfig) cons
 {
   osmscout::FastestPathRoutingProfileRef routingProfile =
       std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
-  // TODO
 
   routingProfile->SetVehicle(vehicle);
   routingProfile->SetVehicleMaxSpeed(maxSpeed);
+  routingProfile->SetJunctionPenalty(applyJunctionPenalty);
+  routingProfile->SetCostLimitDistance(costLimitDistance);
+  routingProfile->SetCostLimitFactor(costLimitFactor);
+  routingProfile->SetPenaltySameType(penaltySameType);
+  routingProfile->SetPenaltyDifferentType(penaltyDifferentType);
+  routingProfile->SetMaxPenalty(maxPenalty);
 
   for (const auto &type : typeConfig->GetTypes()) {
     if (!type->GetIgnore() &&
         type->CanRoute(vehicle)) {
-      // todo: use speed table
-      routingProfile->AddType(type,maxSpeed);
+
+      if (auto typeSpeed=speedTable.find(type->GetName());
+          typeSpeed==speedTable.end()){
+        routingProfile->AddType(type,maxSpeed);
+      } else {
+        routingProfile->AddType(type,typeSpeed->second);
+      }
     }
   }
 
