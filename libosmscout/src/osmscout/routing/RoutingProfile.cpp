@@ -175,7 +175,6 @@ namespace osmscout {
   void AbstractRoutingProfile::AddType(const TypeInfoRef& type,
                                        SpeedVariant speed)
   {
-    assert(!std::isnan(speed[SolidGrade]));
     speed.SetupValues();
     if (speeds.empty()) {
       minSpeed=speed.Min();

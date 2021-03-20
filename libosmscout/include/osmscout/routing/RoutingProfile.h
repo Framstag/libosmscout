@@ -273,7 +273,7 @@ namespace osmscout {
      * Setup zero speed to forbid some grade for routing.
      * @param type
      * @param speed table of speeds for various grades. (copy in intentional)
-     * At least first grade (solid) have to be setup (not NAN), SetupValues() is called to fill all values.
+     * SetupValues() is called to fill all values.
      */
     void AddType(const TypeInfoRef& type, SpeedVariant speed);
 
