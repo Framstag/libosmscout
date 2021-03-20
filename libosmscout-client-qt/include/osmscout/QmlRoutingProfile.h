@@ -41,7 +41,7 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API QmlRoutingProfile: public QObject {
   Q_OBJECT
-  Q_PROPERTY(Vehicle           vehicle    READ getVehicle     WRITE setVehicle    NOTIFY update)
+  Q_PROPERTY(QmlVehicle        vehicle    READ getQmlVehicle  WRITE setVehicle    NOTIFY update)
   Q_PROPERTY(double            maxSpeed   READ getMaxSpeed    WRITE setMaxSpeed   NOTIFY update)
   Q_PROPERTY(QVariantMap       speedTable READ getSpeedTable  WRITE setSpeedTable NOTIFY update)
 
@@ -54,8 +54,15 @@ class OSMSCOUT_CLIENT_QT_API QmlRoutingProfile: public QObject {
   Q_PROPERTY(double maxPenalty READ getMaxPenalty WRITE setMaxPenalty NOTIFY update)
 
 public:
-  Q_ENUM(Vehicle);
-  Q_ENUM(Grade);
+  // enums fields exported to qml have to start with uppercase...
+  enum QmlVehicle: uint8_t
+  {
+    FootVehicle     = Vehicle::vehicleFoot,
+    BicycleVehicle  = Vehicle::vehicleBicycle,
+    CarVehicle      = Vehicle::vehicleCar
+  };
+
+  Q_ENUM(QmlVehicle);
 
 signals:
   void update();
@@ -68,8 +75,9 @@ public:
   QmlRoutingProfile(const QmlRoutingProfile& other);
   QmlRoutingProfile& operator=(const QmlRoutingProfile& other);
 
-  osmscout::Vehicle getVehicle() const;
-  void setVehicle(osmscout::Vehicle vehicle);
+  Vehicle getVehicle() const;
+  QmlVehicle getQmlVehicle() const;
+  void setVehicle(QmlVehicle vehicle);
 
   double getMaxSpeed() const;
   void setMaxSpeed(double);
@@ -95,8 +103,8 @@ private:
   void setDefaults(); //!< setup defaults for current vehicle
 
 private:
-  osmscout::Vehicle vehicle=osmscout::Vehicle::vehicleCar;
-  double maxSpeed=130;
+  QmlVehicle vehicle=QmlVehicle::CarVehicle;
+  double maxSpeed=160;
   std::map<std::string,SpeedVariant> speedTable;
   bool applyJunctionPenalty=true;
   Distance costLimitDistance=Kilometers(20);

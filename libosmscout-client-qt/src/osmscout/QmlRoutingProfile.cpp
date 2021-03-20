@@ -19,6 +19,8 @@
 
 #include <osmscout/QmlRoutingProfile.h>
 
+#include <QDebug>
+
 namespace osmscout {
 
 QmlRoutingProfile::QmlRoutingProfile(QObject *parent):
@@ -28,7 +30,7 @@ QmlRoutingProfile::QmlRoutingProfile(QObject *parent):
 }
 
 QmlRoutingProfile::QmlRoutingProfile(Vehicle vehicle):
-  vehicle(vehicle)
+  vehicle(static_cast<QmlVehicle>(vehicle))
 {
   setDefaults();
 }
@@ -42,7 +44,10 @@ QmlRoutingProfile::QmlRoutingProfile(const QmlRoutingProfile& other):
 QmlRoutingProfile& QmlRoutingProfile::operator=(const QmlRoutingProfile& other)
 {
   vehicle=other.vehicle;
+  maxSpeed=other.maxSpeed;
   speedTable=other.speedTable;
+  costLimitDistance=other.costLimitDistance;
+  costLimitFactor=other.costLimitFactor;
   applyJunctionPenalty=other.applyJunctionPenalty;
   penaltySameType=other.penaltySameType;
   penaltyDifferentType=other.penaltyDifferentType;
@@ -52,12 +57,17 @@ QmlRoutingProfile& QmlRoutingProfile::operator=(const QmlRoutingProfile& other)
   return *this;
 }
 
-osmscout::Vehicle QmlRoutingProfile::getVehicle() const
+Vehicle QmlRoutingProfile::getVehicle() const
+{
+  return static_cast<Vehicle>(vehicle);
+}
+
+QmlRoutingProfile::QmlVehicle QmlRoutingProfile::getQmlVehicle() const
 {
   return vehicle;
 }
 
-void QmlRoutingProfile::setVehicle(osmscout::Vehicle vehicle)
+void QmlRoutingProfile::setVehicle(QmlVehicle vehicle)
 {
   if (this->vehicle==vehicle){
     return;
@@ -82,12 +92,55 @@ void QmlRoutingProfile::setMaxSpeed(double d)
 
 QVariantMap QmlRoutingProfile::getSpeedTable() const
 {
-  return QVariantMap(); // TODO
+  QVariantMap table;
+  for (auto const &entry: speedTable) {
+    const auto &speedArr=entry.second.speed;
+    QString type=QString::fromStdString(entry.first);
+    if (!std::isnan(speedArr[0]) &&
+        std::all_of(speedArr.begin() + 1, speedArr.end(), [](double d){ return std::isnan(d); })) {
+      table[type]=speedArr[0];
+    } else {
+      int grade=1;
+      for (double speed: speedArr){
+        if (!std::isnan(speed)){
+          table[type + QString(":%1").arg(grade)]=speed;
+        }
+        grade++;
+      }
+    }
+  }
+  return table;
 }
 
-void QmlRoutingProfile::setSpeedTable(const QVariantMap &)
+void QmlRoutingProfile::setSpeedTable(const QVariantMap &table)
 {
-  // TODO
+  speedTable.clear();
+  for (auto entry = table.begin(); entry != table.end(); entry++){
+    Grade grade=SolidGrade;
+    QString type=entry.key();
+    bool ok=true;
+    if (type.contains(':')){
+      QStringList arr=type.split(':');
+      if (arr.size()!=2){
+        qWarning() << "Cannot parse type:" << type;
+        continue;
+      }
+
+      int i=arr[1].toInt(&ok);
+      if (!ok || i<1 || i>5){
+        qWarning() << "Cannot parse grade:" << arr[1];
+        continue;
+      }
+      grade=static_cast<Grade>(i);
+      type=arr[0];
+    }
+    double speed=entry.value().toDouble(&ok);
+    if (!ok || std::isnan(speed) || speed<0) {
+      qWarning() << "Cannot parse speed:" << entry.value();
+      continue;
+    }
+    speedTable[type.toStdString()][grade]=speed;
+  }
 }
 
 bool QmlRoutingProfile::getJunctionPenalty() const
@@ -150,7 +203,7 @@ void QmlRoutingProfile::setDefaults()
 {
   speedTable.clear();
 
-  if (vehicle==vehicleFoot) {
+  if (vehicle==FootVehicle) {
     maxSpeed=5;
     applyJunctionPenalty=false;
     maxPenalty=std::chrono::seconds::zero();
@@ -165,8 +218,8 @@ void QmlRoutingProfile::setDefaults()
     speedTable["highway_path"][MostlySoftGrade]=maxSpeed*0.75;
     speedTable["highway_steps"][SolidGrade]=1;
 
-  } else if (vehicle==vehicleBicycle) {
-    maxSpeed=30;
+  } else if (vehicle==BicycleVehicle) {
+    maxSpeed=20;
     applyJunctionPenalty=true;
     maxPenalty=std::chrono::seconds(10);
     penaltySameType=Meters(160);
@@ -189,21 +242,21 @@ void QmlRoutingProfile::setDefaults()
     speedTable["highway_service"][SolidGrade]=maxSpeed;
 
     speedTable["highway_track"][SolidGrade]=maxSpeed;
-    speedTable["highway_track"][GravelGrade]=20;
-    speedTable["highway_track"][UnpavedGrade]=15;
-    speedTable["highway_track"][MostlySoftGrade]=12;
-    speedTable["highway_track"][SoftGrade]=10;
+    speedTable["highway_track"][GravelGrade]=15;
+    speedTable["highway_track"][UnpavedGrade]=12;
+    speedTable["highway_track"][MostlySoftGrade]=10;
+    speedTable["highway_track"][SoftGrade]=8;
 
-    speedTable["highway_path"][SolidGrade]=20;
-    speedTable["highway_path"][GravelGrade]=15;
-    speedTable["highway_path"][UnpavedGrade]=12;
-    speedTable["highway_path"][MostlySoftGrade]=10;
-    speedTable["highway_path"][SoftGrade]=8;
+    speedTable["highway_path"][SolidGrade]=12;
+    speedTable["highway_path"][GravelGrade]=10;
+    speedTable["highway_path"][UnpavedGrade]=9;
+    speedTable["highway_path"][MostlySoftGrade]=8;
+    speedTable["highway_path"][SoftGrade]=7;
 
     speedTable["highway_cycleway"][SolidGrade]=maxSpeed;
-    speedTable["highway_roundabout"][SolidGrade]=maxSpeed;
+    speedTable["highway_roundabout"][SolidGrade]=10;
 
-  } else { // vehicle==vehicleCar
+  } else { // vehicle==CarVehicle
     maxSpeed=160;
     applyJunctionPenalty=true;
     maxPenalty=std::chrono::seconds(10);
@@ -232,6 +285,7 @@ void QmlRoutingProfile::setDefaults()
     speedTable["highway_living_street"][SolidGrade]=10.0;
     speedTable["highway_service"][SolidGrade]=30.0;
   }
+  emit update();
 }
 
 RoutingProfileRef QmlRoutingProfile::MakeInstance(TypeConfigRef typeConfig) const
@@ -239,7 +293,7 @@ RoutingProfileRef QmlRoutingProfile::MakeInstance(TypeConfigRef typeConfig) cons
   osmscout::FastestPathRoutingProfileRef routingProfile =
       std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
 
-  routingProfile->SetVehicle(vehicle);
+  routingProfile->SetVehicle(static_cast<Vehicle>(vehicle));
   routingProfile->SetVehicleMaxSpeed(maxSpeed);
   routingProfile->SetJunctionPenalty(applyJunctionPenalty);
   routingProfile->SetCostLimitDistance(costLimitDistance);
@@ -250,7 +304,7 @@ RoutingProfileRef QmlRoutingProfile::MakeInstance(TypeConfigRef typeConfig) cons
 
   for (const auto &type : typeConfig->GetTypes()) {
     if (!type->GetIgnore() &&
-        type->CanRoute(vehicle)) {
+        type->CanRoute(static_cast<Vehicle>(vehicle))) {
 
       if (auto typeSpeed=speedTable.find(type->GetName());
           typeSpeed==speedTable.end()){
