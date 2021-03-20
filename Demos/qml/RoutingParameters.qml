@@ -1,9 +1,9 @@
-import QtQuick 2.2
+import QtQuick 2.12
 
-import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1
-import QtQuick.Controls.Styles 1.1
-import QtQuick.Window 2.0
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Window 2.12
 
 import QtPositioning 5.2
 
@@ -91,14 +91,10 @@ Window {
         Rectangle {
             id: rightPanel
             width: parent.width*0.4
-            Layout.minimumWidth: 300
+            Layout.minimumWidth: 350
 
-            GridLayout {
-                id: routingControl
-                columns: 2
-                columnSpacing: 6
-                rowSpacing: 6
-
+            Column {
+                id: routingControlColumn
                 anchors{
                     top: parent.top
                     right: parent.right
@@ -106,81 +102,270 @@ Window {
                     margins: 6
                 }
 
-                property LocationEntry routeFromLocation
-                property LocationEntry routeToLocation
+                GridLayout {
+                    id: routingControl
+                    columns: 2
+                    columnSpacing: 6
+                    rowSpacing: 6
+                    width: parent.width
 
-                function reroute(){
-                    if (routeFromLocation!=null){
-                        map.addPositionMark(0, routeFromLocation.lat, routeFromLocation.lon);
-                    } else {
-                        map.removePositionMark(0);
+                    property LocationEntry routeFromLocation
+                    property LocationEntry routeToLocation
+                    property RoutingProfile routingProfile: RoutingProfile{}
+
+                    Timer {
+                        id: rerouteTimer
+                        interval: 500
+                        running: false
+                        repeat: false
+                        onTriggered: {
+                            routingControl.reroute();
+                        }
                     }
 
-                    if (routeToLocation!=null){
-                        map.addPositionMark(1, routeToLocation.lat, routeToLocation.lon);
-                    } else {
-                        map.removePositionMark(1);
+                    function reroute(){
+                        if (routeFromLocation!=null){
+                            map.addPositionMark(0, routeFromLocation.lat, routeFromLocation.lon);
+                        } else {
+                            map.removePositionMark(0);
+                        }
+
+                        if (routeToLocation!=null){
+                            map.addPositionMark(1, routeToLocation.lat, routeToLocation.lon);
+                        } else {
+                            map.removePositionMark(1);
+                        }
+
+                        if (routeFromLocation==null || routeToLocation==null){
+                            return;
+                        }
+
+
+                        var speedTable = {};
+                        var speedTableLines=speedTableTextArea.text.split(/[\r\n]+/);
+                        for (var i in speedTableLines){
+                            var line=speedTableLines[i];
+                            if (line!=""){
+                                var arr=line.split(/\s*=\s*/);
+                                if (arr.length==2){
+                                    speedTable[arr[0]] = arr[1];
+                                    console.log(arr[0] + ": " + arr[1]);
+                                } else {
+                                    console.log("Invalid line: " + line);
+                                }
+                            }
+                        }
+                        console.log("speedTable type " + (typeof speedTable));
+                        routingProfile.speedTable = speedTable;
+
+                        routingProfile.maxSpeed = maxVehicleSpeedField.text;
+                        routingProfile.penaltySameType = penaltySameTypeField.text;
+                        routingProfile.penaltyDifferentType = penaltyDifferentTypesField.text;
+                        routingProfile.maxPenalty = maximumPenaltyField.text;
+
+                        console.log("Route from " + locationStr(routeFromLocation) + " -> " + locationStr(routeToLocation) + " with " + routingProfile);
+                        routingModel.setStartAndTarget(routeFromLocation, routeToLocation, routingProfile);
                     }
 
-                    if (routeFromLocation==null || routeToLocation==null){
-                        return;
+                    Text {
+                        text: qsTr("Start:")
                     }
 
-                    console.log("Route from " + locationStr(routeFromLocation) + " -> " + locationStr(routeToLocation));
-                    routingModel.setStartAndTarget(routeFromLocation, routeToLocation);
+                    PlaceInput {
+                        id: startInput
+                        onLocationChanged: {
+                            routingControl.routeFromLocation = startInput.location;
+                            routingControl.reroute();
+                        }
+                    }
+
+                    Text {
+                        text: qsTr("Target:")
+                    }
+
+                    PlaceInput {
+                        id: targetInput
+                        onLocationChanged: {
+                            routingControl.routeToLocation = targetInput.location;
+                            routingControl.reroute();
+                        }
+                    }
+
+                    Text{}
+
+                    Text {
+                        id: routingState
+                        text: qsTr("No start or target set")
+                    }
+
+                    Text {
+                        text: qsTr("Vehicle:")
+                    }
+                    ComboBox {
+                        id: vehicleComboBox
+                        width: 200
+                        style: ComboBoxStyle {
+                            textColor: "black"
+                        }
+
+                        model: [ "Car", "Bicycle", "Foot" ]
+                        onCurrentIndexChanged: {
+                            if (currentIndex==0){
+                                routingControl.routingProfile.vehicle=RoutingProfile.CarVehicle;
+                            } else if (currentIndex==1) {
+                                routingControl.routingProfile.vehicle=RoutingProfile.BicycleVehicle;
+                            } else if (currentIndex==2) {
+                                routingControl.routingProfile.vehicle=RoutingProfile.FootVehicle;
+                            }
+
+                            //routingControl.reroute();
+                            rerouteTimer.restart(); // need to update route table before reroute
+                        }
+                    }
+
+                    Text{
+                        text: qsTr("Max speed [km/h]:")
+                    }
+                    TextField {
+                        id: maxVehicleSpeedField
+                        Layout.fillWidth: true
+                        text: routingControl.routingProfile.maxSpeed
+                        textColor: "black"
+                        onTextChanged: {
+                            rerouteTimer.restart();
+                        }
+                    }
+
+                    Text{}
+                    CheckBox {
+                       checked: routingControl.routingProfile.applyJunctionPenalty
+                       text: qsTr("Junction penalty")
+                       onCheckedChanged: {
+                           routingControl.routingProfile.applyJunctionPenalty = checked
+                           routingControl.reroute();
+                       }
+                    }
+
+                    Text{
+                        text: qsTr("Penalty, same type [m]:")
+                    }
+                    TextField {
+                        id: penaltySameTypeField
+                        Layout.fillWidth: true
+                        text: routingControl.routingProfile.penaltySameType
+                        textColor: enabled ? "black" : "grey"
+                        enabled: routingControl.routingProfile.applyJunctionPenalty
+                        onTextChanged: {
+                            rerouteTimer.restart();
+                        }
+                    }
+
+                    Text{
+                        text: qsTr("Penalty, different types [m]:")
+                    }
+                    TextField {
+                        id: penaltyDifferentTypesField
+                        Layout.fillWidth: true
+                        text: routingControl.routingProfile.penaltyDifferentType
+                        textColor: enabled ? "black" : "grey"
+                        enabled: routingControl.routingProfile.applyJunctionPenalty
+                        onTextChanged: {
+                            rerouteTimer.restart();
+                        }
+                    }
+
+                    Text{
+                        text: qsTr("Maximum penalty [s]:")
+                    }
+                    TextField {
+                        id: maximumPenaltyField
+                        Layout.fillWidth: true
+                        text: routingControl.routingProfile.maxPenalty
+                        textColor: enabled ? "black" : "grey"
+                        enabled: routingControl.routingProfile.applyJunctionPenalty
+                        onTextChanged: {
+                            rerouteTimer.restart();
+                        }
+                    }
+
+                    Text{
+                        text: qsTr("Route type speed table:")
+                    }
+                    Text{}
                 }
 
-                Text {
-                    text: qsTr("Start:")
-                }
 
-                PlaceInput {
-                    id: startInput
-                    onLocationChanged: {
-                        routingControl.routeFromLocation = startInput.location;
-                        routingControl.reroute();
+                TextArea {
+                    id: speedTableTextArea
+                    height: 160
+                    width: parent.width
+
+                    backgroundVisible: false
+                    textColor: "black"
+
+                    function updateTable(){
+                        speedTableTextArea.text="";
+                        var table=routingControl.routingProfile.speedTable;
+                        for (var type in table){
+                            speedTableTextArea.text += type + "=" + table[type] + "\n";
+                        }
+                    }
+
+                    onTextChanged: {
+                        rerouteTimer.restart();
+                    }
+
+                    Component.onCompleted: updateTable()
+
+                    Connections {
+                        target: routingControl.routingProfile
+                        onSpeedTableChanged: {
+                            speedTableTextArea.updateTable();
+                        }
                     }
                 }
 
-                Text {
-                    text: qsTr("Target:")
-                }
 
-                PlaceInput {
-                    id: targetInput
-                    onLocationChanged: {
-                        routingControl.routeToLocation = targetInput.location;
-                        routingControl.reroute();
+                Button {
+                    id: rerouteButton
+                    text: qsTr("Reroute")
+                    onClicked: routingControl.reroute()
+                    style: ButtonStyle {
+                        label: Text{
+                            color: "black"
+                            text: rerouteButton.text
+                        }
                     }
                 }
 
-                Text{}
+                GridLayout {
+                    id: routingInfo
+                    columns: 2
+                    columnSpacing: 6
+                    rowSpacing: 6
 
-                Text {
-                    id: routingState
-                    text: qsTr("No start or target set")
+                    Text {
+                        text: qsTr("Distance")
+                    }
+                    Text {
+                        text: routingModel.ready ? Utils.humanDistance(routingModel.length) : "?"
+                    }
+                    Text {
+                        text: qsTr("Duration")
+                    }
+                    Text {
+                        text: routingModel.ready ? Utils.humanDuration(routingModel.duration) : "?"
+                    }
                 }
-
-                Text {
-                    text: qsTr("Distance")
-                }
-                Text {
-                    text: routingModel.ready ? Utils.humanDistance(routingModel.length) : "?"
-                }
-                Text {
-                    text: qsTr("Duration")
-                }
-                Text {
-                    text: routingModel.ready ? Utils.humanDuration(routingModel.duration) : "?"
-                }
-
             }
+
 
             Rectangle {
                 id: routingStepsBox
+                color: "transparent"
 
                 anchors{
-                    top: routingControl.bottom
+                    top: routingControlColumn.bottom
                     right: parent.right
                     bottom: parent.bottom
                     left: parent.left

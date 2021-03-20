@@ -1,9 +1,9 @@
-import QtQuick 2.2
+import QtQuick 2.12
 
-import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1
-import QtQuick.Controls.Styles 1.1
-import QtQuick.Window 2.0
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Window 2.12
 
 import QtPositioning 5.2
 
@@ -23,8 +23,8 @@ GridLayout {
 
     TextField {
         id: inputField
-        textColor: "black"
         Layout.fillWidth: true
+        textColor: "black"
 
         LocationListModel {
             id: startLocationSearchModel
