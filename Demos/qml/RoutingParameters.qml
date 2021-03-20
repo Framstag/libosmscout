@@ -238,12 +238,19 @@ Window {
 
                     Text{}
                     CheckBox {
-                       checked: routingControl.routingProfile.applyJunctionPenalty
-                       text: qsTr("Junction penalty")
-                       onCheckedChanged: {
-                           routingControl.routingProfile.applyJunctionPenalty = checked
-                           routingControl.reroute();
-                       }
+                        id: junctionPenaltyCheckBox
+                        checked: routingControl.routingProfile.applyJunctionPenalty
+                        text: qsTr("Junction penalty")
+                        style: CheckBoxStyle {
+                            label: Text{
+                                color: "black"
+                                text: junctionPenaltyCheckBox.text
+                            }
+                        }
+                        onCheckedChanged: {
+                            routingControl.routingProfile.applyJunctionPenalty = checked
+                            routingControl.reroute();
+                        }
                     }
 
                     Text{
