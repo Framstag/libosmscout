@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>qml/ElevationProfileChart.qml</file>
         <file>qml/NavigationSimulation.qml</file>
+        <file>qml/RoutingParameters.qml</file>
+        <file>qml/PlaceInput.qml</file>
     </qresource>
 </RCC>

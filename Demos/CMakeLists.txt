@@ -222,8 +222,36 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 	else()
 		message("Skip NavigationSimulation demo, libosmscout-gpx is missing.")
 	endif()
+
+	#---- RoutingParameters
+	osmscout_demo_project(NAME RoutingParameters
+		SOURCES
+			../OSMScout2/src/Theme.h ../OSMScout2/src/Theme.cpp
+			src/RoutingParameters.cpp
+			src/QtDemoApp.cpp
+			${RESOURCE_FILES}
+
+			# qml files in CMake sources make it visible in QtCreator
+			qml/RoutingParameters.qml
+			qml/PlaceInput.qml
+
+		INCLUDES ../OSMScout2/src/
+		TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)
+	target_compile_definitions(RoutingParameters PRIVATE ${Qt5Widgets_DEFINITIONS})
+	set_target_properties(RoutingParameters PROPERTIES
+		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
+	if(MSVC)
+		visual_studio_qt_helper("RoutingParameters")
+	endif()
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		add_custom_command(TARGET RoutingParameters
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
+			)
+	endif()
 else()
-	message("Skip ElevationProfileChart and NavigationSimulation demo, libosmscout-client-qt is missing.")
+	message("Skip ElevationProfileChart, NavigationSimulation and RoutingParameters demo, libosmscout-client-qt is missing.")
 endif()
 
 #---- DrawMapSVG

@@ -106,7 +106,7 @@ namespace osmscout {
     bool                                renderSeaLand;             //!< Rendering of sea/land tiles
     bool                                renderUnknowns;            //!< Unknown areas are not rendered (transparent)
 
-    bool                                debugData;                 //!< Print out some performance relvant information about the data
+    bool                                debugData;                 //!< Print out some performance relevant information about the data
     bool                                debugPerformance;          //!< Print out some performance information
 
     size_t                              warnObjectCountLimit;      //!< Limit for objects/type. If limit is reached a warning is created

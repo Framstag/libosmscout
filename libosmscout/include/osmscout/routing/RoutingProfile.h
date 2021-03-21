@@ -43,6 +43,73 @@ namespace osmscout {
 
   /**
    * \ingroup Routing
+   * Enum representation of route grade
+   */
+  enum Grade: uint8_t
+  {
+    SolidGrade = 1,
+    GravelGrade = 2,
+    UnpavedGrade = 3,
+    MostlySoftGrade = 4,
+    SoftGrade = 5
+  };
+
+  /**
+   * \ingroup Routing
+   * Possible route speed variants by its grade.
+   */
+  struct SpeedVariant
+  {
+    //! speed for each grade, indexed by grade-1.
+    std::array<double,5> speed{NAN, NAN, NAN, NAN, NAN};
+
+    const double& operator[](Grade grade) const
+    {
+      uint8_t i=static_cast<uint8_t>(grade);
+      assert(i>=1 && i<=5);
+      return speed[i-1];
+    }
+
+    double& operator[](Grade grade)
+    {
+      uint8_t i=static_cast<uint8_t>(grade);
+      assert(i>=1 && i<=5);
+      return speed[i-1];
+    }
+
+    /**
+     * Evaluate speed for all grades.
+     * When speed for grade is not defined, it copy speed from nearest "better".
+     */
+    void SetupValues()
+    {
+      double speedVal=0;
+      for (size_t i=0; i<5; i++){
+        if (std::isnan(speed[i])){
+          speed[i]=speedVal;
+        } else {
+          speedVal=speed[i];
+        }
+      }
+    }
+
+    double Min() const
+    {
+      return *std::min_element(speed.begin(), speed.end());
+    }
+
+    double Max() const
+    {
+      return *std::max_element(speed.begin(), speed.end());
+    }
+
+    static SpeedVariant Fill(double speed)
+    {
+      return SpeedVariant({speed, speed, speed, speed, speed});
+    }
+  };
+  /**
+   * \ingroup Routing
    * Abstract interface for a routing profile. A routing profile decides about the costs
    * of taking a certain way. It thus may hold information about how fast ways can be used,
    * maximum speed of the traveling device etc...
@@ -114,14 +181,41 @@ namespace osmscout {
     TypeConfigRef              typeConfig;
     AccessFeatureValueReader   accessReader;
     MaxSpeedFeatureValueReader maxSpeedReader;
+    GradeFeatureValueReader    gradeReader;
     Vehicle                    vehicle;
     uint8_t                    vehicleRouteNodeBit;
     Distance                   costLimitDistance;
     double                     costLimitFactor;
-    std::vector<double>        speeds;
+    std::vector<SpeedVariant>  speeds; //!< maximum vehicle speed on route type and its grade
     double                     minSpeed;
     double                     maxSpeed;
     double                     vehicleMaxSpeed;
+
+  protected:
+    template <typename Obj>
+    Duration GetTime2(const Obj& obj,
+                      const Distance &distance) const
+    {
+      double speed=vehicleMaxSpeed;
+
+      MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(obj.GetFeatureValueBuffer());
+
+      if (maxSpeedValue!=nullptr &&
+          maxSpeedValue->GetMaxSpeed()>0 &&
+          speed > maxSpeedValue->GetMaxSpeed()) {
+        speed=maxSpeedValue->GetMaxSpeed();
+      }
+
+      Grade grade=SolidGrade;
+      GradeFeatureValue *gradeValue=gradeReader.GetValue(obj.GetFeatureValueBuffer());
+      if (gradeValue!=nullptr){
+        grade=static_cast<Grade>(gradeValue->GetGrade());
+      }
+
+      speed=std::min(speed,speeds[obj.GetType()->GetIndex()][grade]);
+
+      return DurationOfHours(distance.As<Kilometer>()/speed);
+    }
 
   public:
     explicit AbstractRoutingProfile(const TypeConfigRef& typeConfig);
@@ -166,7 +260,22 @@ namespace osmscout {
       return std::to_string(cost);
     }
 
+    /**
+     * Setup same speed for all grades of route type.
+     * Type may be forbidden for routing by setting speed to zero.
+     * @param type
+     * @param speed
+     */
     void AddType(const TypeInfoRef& type, double speed);
+
+    /**
+     * Setup speed for various grades of route type.
+     * Setup zero speed to forbid some grade for routing.
+     * @param type
+     * @param speed table of speeds for various grades. (copy in intentional)
+     * SetupValues() is called to fill all values.
+     */
+    void AddType(const TypeInfoRef& type, SpeedVariant speed);
 
     bool CanUse(const RouteNode& currentNode,
                 const std::vector<ObjectVariantData>& objectVariantData,
@@ -179,31 +288,13 @@ namespace osmscout {
     inline Duration GetTime(const Area& area,
                             const Distance &distance) const override
     {
-      double speed=speeds[area.GetType()->GetIndex()];
-
-      speed=std::min(vehicleMaxSpeed,speed);
-
-      return DurationOfHours(distance.As<Kilometer>()/speed);
+      return GetTime2(area,distance);
     }
 
     inline Duration GetTime(const Way& way,
                             const Distance &distance) const override
     {
-      double speed;
-
-      MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(way.GetFeatureValueBuffer());
-
-      if (maxSpeedValue!=nullptr &&
-          maxSpeedValue->GetMaxSpeed()>0) {
-        speed=maxSpeedValue->GetMaxSpeed();
-      }
-      else {
-        speed=speeds[way.GetType()->GetIndex()];
-      }
-
-      speed=std::min(vehicleMaxSpeed,speed);
-
-      return DurationOfHours(distance.As<Kilometer>()/speed);
+      return GetTime2(way,distance);
     }
   };
 
@@ -354,13 +445,14 @@ namespace osmscout {
       const ObjectVariantData &outPathVariant=objectVariantData[outVariantIndex];
 
       auto GetMaxSpeed = [&](const ObjectVariantData &variant) -> double {
-        if (variant.maxSpeed > 0) {
-          return variant.maxSpeed;
-        }
         TypeInfoRef type=variant.type;
-        double speed=speeds[type->GetIndex()];
+        Grade grade=static_cast<Grade>(variant.grade);
+        double speed=speeds[type->GetIndex()][grade];
         if (speed<=0){
           log.Warn() << "Infinite cost for type " << type->GetName();
+        }
+        if (variant.maxSpeed > 0 && speed>variant.maxSpeed) {
+          speed=variant.maxSpeed;
         }
         return speed;
       };
@@ -396,31 +488,15 @@ namespace osmscout {
     inline double GetCosts(const Area& area,
                            const Distance &distance) const override
     {
-      double speed=speeds[area.GetType()->GetIndex()];
-
-      speed=std::min(vehicleMaxSpeed,speed);
-
-      return distance.As<Kilometer>()/speed;
+      auto time=GetTime2(area,distance);
+      return std::chrono::duration_cast<HourDuration>(time).count();
     }
 
     inline double GetCosts(const Way& way,
                            const Distance &distance) const override
     {
-      double speed;
-
-      MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(way.GetFeatureValueBuffer());
-
-      if (maxSpeedValue!=nullptr &&
-          maxSpeedValue->GetMaxSpeed()>0) {
-        speed=maxSpeedValue->GetMaxSpeed();
-      }
-      else {
-        speed=speeds[way.GetType()->GetIndex()];
-      }
-
-      speed=std::min(vehicleMaxSpeed,speed);
-
-      return distance.As<Kilometer>()/speed;
+      auto time=GetTime2(way,distance);
+      return std::chrono::duration_cast<HourDuration>(time).count();
     }
 
     inline double GetCosts(const Distance &distance) const override
