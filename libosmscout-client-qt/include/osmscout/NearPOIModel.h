@@ -67,7 +67,7 @@ Q_OBJECT
   Q_PROPERTY(double   maxDistance READ GetMaxDistance WRITE SetMaxDistance)
 
   /**
-   * Limit of results for each database.
+   * Limit of lookup results.
    */
   Q_PROPERTY(int      resultLimit READ GetResultLimit WRITE SetResultLimit)
 
