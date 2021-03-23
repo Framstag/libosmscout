@@ -117,7 +117,7 @@ void ElevationChartWidget::paint(QPainter *painter)
   painter->drawPath(path);
 
   // X axis
-  auto distanceIntervals = std::array{500, 250, 200, 100,
+  auto distanceIntervals = std::array<int, 10>{500, 250, 200, 100,
                                       50, 25, 20, 10,
                                       5,1};
 
