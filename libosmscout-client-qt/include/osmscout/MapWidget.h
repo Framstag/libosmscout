@@ -140,6 +140,8 @@ private:
   };
   Vehicle vehicle;
 
+  float vehicleScaleFactor{1.0};
+
 signals:
   void viewChanged();
   void lockToPossitionChanged();
@@ -230,6 +232,14 @@ public slots:
 
   bool toggleDebug();
   bool toggleInfo();
+
+  /**
+   * Method for configuring the aspect ratio of painted items. Default value is 1.0.
+   * Using HiDPI it is required to set the value according with the scale factor.
+   *
+   * @param ratio
+   */
+  void setVehicleScaleFactor(float factor);
 
 private slots:
 

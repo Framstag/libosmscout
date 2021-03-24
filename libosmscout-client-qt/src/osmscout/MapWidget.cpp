@@ -277,9 +277,8 @@ void MapWidget::paint(QPainter *painter)
       }
 
       painter->save();
-      QTransform t=QTransform::fromTranslate(x, y); // move to rotation center
-      t.rotateRadians(iconAngle.AsRadians());
-      painter->setTransform(t);
+      painter->translate(x,y);
+      painter->rotate(iconAngle.AsDegrees());
       // draw vehicleIcon center on coordinate 0x0
       painter->drawImage(QPointF(vehicleIcon.width()/-2, vehicleIcon.height()/-2), vehicleIcon);
       painter->restore();
@@ -782,7 +781,7 @@ QImage MapWidget::loadSVGIcon(const QString &directory, const QString fileName, 
 
 void MapWidget::loadVehicleIcons()
 {
-  double iconPixelSize=getProjection().ConvertWidthToPixel(vehicle.iconSize);
+  double iconPixelSize=getProjection().ConvertWidthToPixel(vehicle.iconSize * vehicleScaleFactor);
   QString iconDirectory=OSMScoutQt::GetInstance().GetIconDirectory();
 
   vehicle.standardIcon=loadSVGIcon(iconDirectory, vehicle.standardIconFile, iconPixelSize);
@@ -850,6 +849,13 @@ bool MapWidget::toggleInfo()
     osmscout::log.Info(!osmscout::log.IsInfo());
 
     return osmscout::log.IsInfo();
+}
+
+void MapWidget::setVehicleScaleFactor(float factor)
+{
+  vehicleScaleFactor = factor;
+  loadVehicleIcons();
+  redraw();
 }
 
 QString MapWidget::GetRenderingType() const
