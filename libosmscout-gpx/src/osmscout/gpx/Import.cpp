@@ -58,9 +58,9 @@ public:
 
   virtual GpxParserContext* StartElement(NameSpace ns,
                                          const std::string &name,
-                                         const std::map<AttrKey, std::string> &/*atts*/);
+                                         const std::map<AttrKey, std::string> &atts);
 
-  virtual void Characters(const std::string &/*str*/){}
+  virtual void Characters(const std::string &){}
 };
 
 
@@ -80,7 +80,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override;
+                                 const std::map<AttrKey, std::string> &atts) override;
 
 };
 
@@ -236,7 +236,7 @@ public:
     contextStack.pop_back();
   }
 
-  void EndElement(const std::string &/*name*/) {
+  void EndElement([[maybe_unused]] const std::string &name) {
     PopContext();
   }
 
@@ -288,12 +288,12 @@ public:
 
   static void StartElement(void* data,
                            const xmlChar *localname,
-                           const xmlChar */*prefix*/,
+                           [[maybe_unused]] const xmlChar *prefix,
                            const xmlChar *eleUri,
-                           int /*nb_namespaces*/,
-                           const xmlChar **/*namespaces*/,
+                           [[maybe_unused]] int nb_namespaces,
+                           [[maybe_unused]] const xmlChar **namespaces,
                            int nb_attributes,
-                           int /*nb_defaulted*/,
+                           [[maybe_unused]] int nb_defaulted,
                            const xmlChar **atts)
   {
     auto* parser=static_cast<GpxParser*>(data);
@@ -323,14 +323,14 @@ public:
 
   static void EndElement(void* data,
                          const xmlChar *localname,
-                         const xmlChar */*prefix*/,
-                         const xmlChar */*URI*/)
+                         [[maybe_unused]] const xmlChar *prefix,
+                         [[maybe_unused]] const xmlChar *URI)
   {
     auto* parser=static_cast<GpxParser*>(data);
     parser->EndElement(std::string((const char *)localname));
   }
 
-  static xmlEntityPtr GetEntity(void* /*data*/, const xmlChar *name)
+  static xmlEntityPtr GetEntity([[maybe_unused]] void* data, const xmlChar *name)
   {
     return xmlGetPredefinedEntity(name);
   }
@@ -368,7 +368,7 @@ public:
 
 GpxParserContext* GpxParserContext::StartElement(NameSpace,
                                                  const std::string &name,
-                                                 const std::map<AttrKey, std::string> &/*atts*/)
+                                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts)
 {
   xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
   parser.Warning("Unexpected element");
@@ -418,7 +418,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
     if (ns == NameSpace::Gpx && name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
@@ -552,7 +552,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
     if (ns == NameSpace::Gpx && name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
@@ -654,7 +654,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
     if (ns == NameSpace::Gpx && name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
@@ -788,7 +788,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
     if (ns == NameSpace::GarminExtensions && name=="TrackExtension"){
       return new TrkExtensionContext(ctxt, track, parser);
@@ -829,7 +829,7 @@ public:
 
   GpxParserContext* StartElement(NameSpace ns,
                                  const std::string &name,
-                                 const std::map<AttrKey, std::string> &/*atts*/) override
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
     if (ns == NameSpace::Gpx && name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
