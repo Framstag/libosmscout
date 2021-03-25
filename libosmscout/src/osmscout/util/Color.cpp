@@ -31,26 +31,26 @@ namespace osmscout {
   const Color Color::GREEN(0.0,1.0,0.0);
   const Color Color::BLUE(0.0,0.0,1.0);
 
-  const Color Color::SILVER(192/255,192/255,192/255);
-  const Color Color::GRAY(128/255,128/255,128/255);
-  const Color Color::MAROON(128/255,0/255,0/255);
-  const Color Color::PURPLE(128/255,0/255,128/255);
-  const Color Color::FUCHSIA(255/255,0/255,255/255);
-  const Color Color::LIME(0/255,255/255,0/255);
-  const Color Color::OLIVE(128/255,128/255,0/255);
-  const Color Color::YELLOW(255/255,255/255,0/255);
-  const Color Color::NAVY(0/255,0/255,128/255);
-  const Color Color::TEAL(0/255,128/255,128/255);
-  const Color Color::AQUA(0/255,255/255,255/255);
+  const Color Color::SILVER(192.0/255,192.0/255,192.0/255);
+  const Color Color::GRAY(128.0/255,128.0/255,128.0/255);
+  const Color Color::MAROON(128.0/255,0.0/255,0.0/255);
+  const Color Color::PURPLE(128.0/255,0/255,128.0/255);
+  const Color Color::FUCHSIA(255.0/255,0.0/255,255.0/255);
+  const Color Color::LIME(0.0/255,255.0/255,0.0/255);
+  const Color Color::OLIVE(128.0/255,128.0/255,0.0/255);
+  const Color Color::YELLOW(255.0/255,255.0/255,0.0/255);
+  const Color Color::NAVY(0.0/255,0.0/255,128.0/255);
+  const Color Color::TEAL(0.0/255,128.0/255,128.0/255);
+  const Color Color::AQUA(0.0/255,255.0/255,255.0/255);
 
-  const Color Color::LIGHT_GRAY(211/255,211/255,211/255);
-  const Color Color::DARK_GRAY(169/255,169/255,169/255);
-  const Color Color::DARK_RED(139/255,0/255,0/255);
-  const Color Color::DARK_GREEN(0/255,100/255,0/255);
-  const Color Color::DARK_YELLOW(255/255,215/255,0/255);
-  const Color Color::DARK_BLUE(0/255,0/255,139/255);
-  const Color Color::DARK_FUCHSIA(139/255,0/255,139/255);
-  const Color Color::DARK_AQUA(0/255,139/255,139/255);
+  const Color Color::LIGHT_GRAY(211.0/255,211.0/255,211.0/255);
+  const Color Color::DARK_GRAY(169.0/255,169.0/255,169.0/255);
+  const Color Color::DARK_RED(139.0/255,0.0/255,0.0/255);
+  const Color Color::DARK_GREEN(0.0/255,100.0/255,0.0/255);
+  const Color Color::DARK_YELLOW(255.0/255,215.0/255,0.0/255);
+  const Color Color::DARK_BLUE(0.0/255,0.0/255,139.0/255);
+  const Color Color::DARK_FUCHSIA(139.0/255,0.0/255,139.0/255);
+  const Color Color::DARK_AQUA(0.0/255,139.0/255,139.0/255);
 
   const Color Color::LUCENT_WHITE(1.0,1.0,1.0,1.0);
 
