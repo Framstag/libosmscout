@@ -171,8 +171,10 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   }
 
   if (compareFn.isCallable()){
-    auto Compare = [&](LocationEntry &a, const LocationEntry &b) -> bool {
+    auto Compare = [&](const LocationEntry &a, const LocationEntry &b) -> bool {
       QJSValueList args;
+      // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
+      assert(a.parent() == nullptr && b.parent() == nullptr);
       args << engine->newQObject(new LocationEntry(a));
       args << engine->newQObject(new LocationEntry(b));
       QJSValue result = compareFn.call(args);
@@ -194,7 +196,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     auto position = 0;
     auto positionIt = locations.begin();
     for (auto &location : foundLocations) {
-      if (positionIt == locations.end() || Compare(location, *positionIt)){
+      if (positionIt == locations.end() || Compare(location, **positionIt)){
         emit beginInsertRows(QModelIndex(), position, position);
         positionIt = locations.insert(positionIt, new LocationEntry(location));
         // qDebug() << "Put " << location.getLabel() << " to position: " << position;
