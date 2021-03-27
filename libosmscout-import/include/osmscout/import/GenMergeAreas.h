@@ -93,7 +93,7 @@ namespace osmscout {
                          const TypeConfig& typeConfig,
                          FileScanner& scanner,
                          const TypeInfoSet& mergeTypes,
-                         std::unordered_set<Id>& nodeUseMap);
+                         std::vector<std::unordered_set<Id>>& nodeUseMap);
 
     /**
      * Load all areas which have at least one of the "used at least twice"
@@ -130,7 +130,7 @@ namespace osmscout {
                   const TypeConfig& typeConfig,
                   const TypeInfoSet& candidateTypes,
                   TypeInfoSet& loadedTypes,
-                  const std::unordered_set<Id>& nodeUseMap,
+                  const std::vector<std::unordered_set<Id>>& nodeUseMap,
                   FileScanner& scanner,
                   FileWriter& writer,
                   std::vector<AreaMergeData>& mergeJob,
