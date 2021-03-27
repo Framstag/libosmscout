@@ -124,7 +124,7 @@ osmscout_library_project(
 )
 
 if(MARISA_FOUND)
-    target_include_directories(OSMScoutClientQt PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_include_directories(OSMScoutClientQt PUBLIC ${MARISA_INCLUDE_DIRS})
     target_link_libraries(OSMScoutClientQt ${MARISA_LIBRARIES})
 endif()
 
