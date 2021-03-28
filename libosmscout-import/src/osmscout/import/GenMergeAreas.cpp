@@ -82,7 +82,7 @@ namespace osmscout {
   {
     for (const auto& ring: area->rings) {
       if (ring.IsTopOuter()) {
-        for (const auto node : ring.nodes) {
+        for (const auto& node : ring.nodes) {
           Id id=node.GetId();
 
           if (nodeUseMap.find(id)!=nodeUseMap.end()) {
@@ -138,7 +138,7 @@ namespace osmscout {
           continue;
         }
 
-        for (const auto node : ring.nodes) {
+        for (const auto& node : ring.nodes) {
           nodeIds.insert(node.GetId());
         }
       }
@@ -160,12 +160,15 @@ namespace osmscout {
   }
 
   /**
-   * Load areas which have one for the types given by types. If at least one node
+   * Load areas which have one of the types given by candidateTypes. If at least one node
    * in one of the outer rings of the areas is marked in nodeUseMap as "used at least twice",
-   * index it into the areas map.
+   * add it to the mergeJob type array.
    *
-   * If the number of indexed areas is bigger than parameter.GetRawWayBlockSize() types are
-   * dropped form areas until the number is again below the limit.
+   * If the number of indexed areas is bigger than parameter.GetRawWayBlockSize() mergeJobs for types are
+   * dropped until the number is again below the limit.
+   *
+   * At he same type write read areas that are not of a mergable type to the destination file -
+   * if we are called for the first time.
    */
 
   void MergeAreasGenerator::GetAreas(const ImportParameter& parameter,
@@ -233,7 +236,7 @@ namespace osmscout {
           continue;
         }
 
-        for (const auto node : ring.nodes) {
+        for (const auto& node : ring.nodes) {
           if (nodeUseMap[area->GetType()->GetIndex()].find(node.GetId())!=nodeUseMap[area->GetType()->GetIndex()].end()) {
             isMergeCandidate=true;
             break;
@@ -262,7 +265,7 @@ namespace osmscout {
         TypeInfoRef victimType;
 
         // Find the type with the smallest amount of ways loaded
-        for (const auto &loadedType : loadedTypes) {
+        for (const auto& loadedType : loadedTypes) {
           if (!mergeJob[loadedType->GetIndex()].areas.empty() &&
               (!victimType ||
                mergeJob[loadedType->GetIndex()].areas.size()<mergeJob[victimType->GetIndex()].areas.size())) {
@@ -298,7 +301,7 @@ namespace osmscout {
 
       for (const auto& ring: area->rings) {
         if (ring.IsTopOuter()) {
-          for (const auto node : ring.nodes) {
+          for (const auto& node : ring.nodes) {
             Id id=node.GetId();
 
             if (nodeIds.find(id)==nodeIds.end() &&
@@ -334,7 +337,7 @@ namespace osmscout {
       std::unordered_set<Id> nodeIds;
       std::set<AreaRef>      visitedAreas; // It is possible that two areas intersect in multiple nodes, to avoid multiple merge tests, we monitor the visited areas
 
-      for (const auto node : ring.nodes) {
+      for (const auto& node : ring.nodes) {
         Id id=node.GetId();
 
         if(finishedIds.find(id)!=finishedIds.end()) {
