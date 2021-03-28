@@ -148,7 +148,7 @@ void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkRep
   }else{
     QByteArray downloadedData = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
-    for (const QJsonValueRef &ref: doc.array()){
+    for (const QJsonValueRef ref: doc.array()){
       if (!ref.isObject())
         continue;
       QJsonObject obj=ref.toObject();
