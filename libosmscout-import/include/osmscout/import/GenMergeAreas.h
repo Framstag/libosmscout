@@ -40,6 +40,27 @@
 namespace osmscout {
 
   /**
+   * Input for a merge job for one area type
+   */
+  struct AreaMergeJob
+  {
+    TypeInfoRef            type;
+    std::unordered_set<Id> nodeUseSet;
+    size_t                 areaCount;  //!< Number of areas of this type
+    std::list<AreaRef>     areas;      //!< List of areas that are candidates for merging
+  };
+
+  /**
+   * Result of the merge job for one area type
+   */
+  struct AreaMergeResult
+  {
+    TypeInfoRef                    type;
+    std::list<AreaRef>             merges;     //!< List of areas that got merged
+    std::unordered_set<FileOffset> mergedAway; //!< List of file offsets of areas, that were merged into another area
+  };
+
+  /**
    * Merges areas of the same type (and where the type is flag as mergable), which
    * "touch" each other and share the same nodes (same node id).
    */
@@ -49,36 +70,6 @@ namespace osmscout {
     static const char* const AREAS2_TMP;
 
   private:
-    /**
-     * Input for a merge job for one area type
-     */
-    struct AreaMergeJob
-    {
-      std::unordered_set<Id>         nodeUseSet;
-      size_t                         areaCount;  //!< Number of areas of this type
-      std::list<AreaRef>             areas;      //!< List of areas that are candidates for merging
-    };
-
-    /**
-     * Result of the merge job for one area type
-     */
-    struct AreaMergeResult
-    {
-      std::list<AreaRef>             merges;     //!< List of areas that got merged
-      std::unordered_set<FileOffset> mergedAway; //!< List of file offsets of areas, that were merged into another area
-    };
-
-  private:
-    /**
-     * Return the index of the first outer ring that contains the given node id.
-     */
-    size_t GetFirstOuterRingWithId(const Area& area,
-                                   Id id) const;
-
-    void EraseAreaInCache(const std::unordered_set<Id>& nodeUseMap,
-                          const AreaRef& area,
-                          std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
-
     /**
      * Scan all areas for node ids that occur in more than one area. Only areas with
      * nodes that are used in other areas, too, are candidates for merging.
@@ -139,37 +130,6 @@ namespace osmscout {
                   FileWriter& writer,
                   std::vector<AreaMergeJob>& mergeJobs,
                   uint32_t& areasWritten);
-
-    /**
-     * Index areas by their "at least used twice" nodes
-     * @param nodeUseMap
-     *    Node use map
-     * @param areas
-     *    List of areas
-     * @param idAreaMap
-     *    Resulting index structure, mammping a node id to the
-     *    list of areas that hold this node in on of their outer
-     *    rings.
-     */
-    void IndexAreasByNodeIds(const std::unordered_set<Id>& nodeUseMap,
-                             const std::list<AreaRef>& areas,
-                             std::unordered_map<Id,std::set<AreaRef> >& idAreaMap);
-
-    bool TryMerge(const std::unordered_set<Id>& nodeUseMap,
-                  Area& area,
-                  std::unordered_map<Id,std::set<AreaRef> >& idAreaMap,
-                  std::set<Id>& finishedIds,
-                  std::unordered_set<FileOffset>& mergedAway);
-
-    /**
-     * Merge area data of one type
-     *
-     * @param progress
-     * @param nodeUseMap
-     * @param job
-     */
-    AreaMergeResult MergeAreas(Progress& progress,
-                               AreaMergeJob& job);
 
     void WriteMergeResult(Progress& progress,
                           const TypeConfig& typeConfig,
