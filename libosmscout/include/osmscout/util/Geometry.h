@@ -1427,7 +1427,6 @@ namespace osmscout {
     std::unordered_map<Id,size_t>                               nodeIdIndexMap;
     std::vector<Point>                                          nodes;
     std::list<Edge>                                             edges;
-    std::unordered_map<Id,std::list<std::list<Edge>::iterator>> idEdgeMap;
 
   private:
     void RemoveEliminatingEdges();
