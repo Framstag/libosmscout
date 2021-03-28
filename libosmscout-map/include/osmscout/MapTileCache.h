@@ -215,7 +215,7 @@ namespace osmscout {
   public:
     explicit MapTile(const TileKey& key);
 
-    ~MapTile();
+    ~MapTile() = default;
 
     /**
      * Return the id of the tile

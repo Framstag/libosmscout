@@ -39,7 +39,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelProvider
   {
   public:
-    virtual ~LabelProvider();
+    virtual ~LabelProvider() = default;
 
     /**
      * Returns the label based on the given feature value buffer
@@ -67,7 +67,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelProviderFactory
   {
   public:
-    virtual ~LabelProviderFactory();
+    virtual ~LabelProviderFactory() = default;
 
     virtual LabelProviderRef Create(const TypeConfig& typeConfig) const = 0;
   };

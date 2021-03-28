@@ -27,10 +27,6 @@
 
 
 namespace osmscout {
-  RouteDescriptionPostprocessor::Callback::~Callback()
-  {
-    // no code
-  }
 
   void RouteDescriptionPostprocessor::Callback::BeforeRoute()
   {

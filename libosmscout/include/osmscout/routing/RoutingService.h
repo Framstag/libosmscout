@@ -153,7 +153,7 @@ namespace osmscout {
   class OSMSCOUT_API RoutingProgress
   {
   public:
-    virtual ~RoutingProgress();
+    virtual ~RoutingProgress() = default;
 
     /**
      * Call, if you want to reset the progress

@@ -322,8 +322,13 @@ namespace osmscout {
   void TagRegistry::RegisterSurfaceToGradeMapping(const std::string& surface,
                                                   size_t grade)
   {
+    // normalize grade to interval <1,5>
+    size_t normGrade=std::max(std::min(grade, size_t(5)), size_t(1));
+    if (grade!=normGrade) {
+      log.Warn() << "Grade " << grade << " out of range <1,5>";
+    }
     surfaceToGradeMap.insert(std::make_pair(surface,
-                                            grade));
+                                            normGrade));
   }
 
   bool TagRegistry::GetGradeForSurface(const std::string& surfaceStr,

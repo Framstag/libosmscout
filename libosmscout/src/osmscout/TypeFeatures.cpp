@@ -3028,12 +3028,12 @@ namespace osmscout {
   }
 
   const char* const OperatorFeature::NAME = "Operator";
-  const char* const OperatorFeature::NUMBER_LABEL = "number";
-  const size_t      OperatorFeature::NUMBER_LABEL_INDEX = 0;
+  const char* const OperatorFeature::NAME_LABEL = "name";
+  const size_t      OperatorFeature::NAME_LABEL_INDEX = 0;
 
   OperatorFeature::OperatorFeature()
   {
-    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
+    RegisterLabel(NAME_LABEL_INDEX,NAME_LABEL);
   }
 
   void OperatorFeature::Initialize(TagRegistry& tagRegistry)
@@ -3106,12 +3106,12 @@ namespace osmscout {
   }
 
   const char* const NetworkFeature::NAME = "Network";
-  const char* const NetworkFeature::NUMBER_LABEL = "number";
-  const size_t      NetworkFeature::NUMBER_LABEL_INDEX = 0;
+  const char* const NetworkFeature::NAME_LABEL = "name";
+  const size_t      NetworkFeature::NAME_LABEL_INDEX = 0;
 
   NetworkFeature::NetworkFeature()
   {
-    RegisterLabel(NUMBER_LABEL_INDEX,NUMBER_LABEL);
+    RegisterLabel(NAME_LABEL_INDEX,NAME_LABEL);
   }
 
   void NetworkFeature::Initialize(TagRegistry& tagRegistry)

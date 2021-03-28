@@ -184,10 +184,7 @@ public:
     // no code
   }
 
-  virtual ~Encoder()
-  {
-    // no code
-  }
+  virtual ~Encoder() = default;
 
   virtual void Encode(osmscout::FileOffset offset, const std::vector<osmscout::Point>& coords) = 0;
 };
@@ -198,7 +195,7 @@ public:
 class TrivialEncoder : public Encoder
 {
 private:
-  char buffer[10]; // Enough for 64bit values
+  std::array<char,10> buffer; // Enough for 64bit values
 public:
   TrivialEncoder()
   : Encoder("TrivialEncoder")
@@ -228,7 +225,7 @@ public:
 class MinimumVLQDeltaEncoder : public Encoder
 {
 private:
-  char buffer[10]; // Enough for 64bit values
+  std::array<char,10> buffer; // Enough for 64bit values
 
 public:
   MinimumVLQDeltaEncoder()
@@ -268,7 +265,7 @@ public:
 class VLQDeltaEncoder : public Encoder
 {
 private:
-  char buffer[10]; // Enough for 64bit values
+  std::array<char,10> buffer; // Enough for 64bit values
 
 public:
   VLQDeltaEncoder()

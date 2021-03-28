@@ -56,57 +56,12 @@ void Router::Initialize()
 
 }
 
-void Router::GetCarSpeedTable(std::map<std::string,double>& map)
-{
-  map["highway_motorway"]=110.0;
-  map["highway_motorway_trunk"]=100.0;
-  map["highway_motorway_primary"]=70.0;
-  map["highway_motorway_link"]=60.0;
-  map["highway_motorway_junction"]=60.0;
-  map["highway_trunk"]=100.0;
-  map["highway_trunk_link"]=60.0;
-  map["highway_primary"]=70.0;
-  map["highway_primary_link"]=60.0;
-  map["highway_secondary"]=60.0;
-  map["highway_secondary_link"]=50.0;
-  map["highway_tertiary"]=55.0;
-  map["highway_tertiary_link"]=55.0;
-  map["highway_unclassified"]=50.0;
-  map["highway_road"]=50.0;
-  map["highway_residential"]=40.0;
-  map["highway_roundabout"]=40.0;
-  map["highway_living_street"]=10.0;
-  map["highway_service"]=30.0;
-}
-
 osmscout::MultiDBRoutingServiceRef Router::MakeRoutingService(const std::list<DBInstanceRef>& databases,
-                                                              const osmscout::Vehicle vehicle)
+                                                              const QmlRoutingProfileRef &profile)
 {
   osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder=
-      [this,vehicle](const osmscout::DatabaseRef &database){
-        osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
-        osmscout::FastestPathRoutingProfileRef routingProfile=
-          std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
-
-        if (vehicle==osmscout::vehicleFoot) {
-          routingProfile->ParametrizeForFoot(*typeConfig,
-                                             5.0);
-        }
-        else if (vehicle==osmscout::vehicleBicycle) {
-          routingProfile->ParametrizeForBicycle(*typeConfig,
-                                                20.0);
-        }
-        else /* car */ {
-          std::map<std::string,double> speedMap;
-
-          GetCarSpeedTable(speedMap);
-
-          routingProfile->ParametrizeForCar(*typeConfig,
-                                            speedMap,
-                                            160.0);
-        }
-
-        return routingProfile;
+      [profile](const osmscout::DatabaseRef &database){
+        return profile->MakeInstance(database->GetTypeConfig());
       };
 
   std::vector<osmscout::DatabaseRef> dbs;
@@ -275,23 +230,23 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
 
 void Router::onRouteRequest(LocationEntryRef start,
                             LocationEntryRef target,
-                            osmscout::Vehicle vehicle,
+                            QmlRoutingProfileRef profile,
                             int requestId,
                             osmscout::BreakerRef breaker)
 {
   osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() <<
     "' to '" << target->getLabel().toLocal8Bit().data() << "'" <<
-    " by '" << vehicleStr(vehicle) << "'";
+    " by '" << vehicleStr(profile->getVehicle()) << "'";
 
   dbThread->RunSynchronousJob(
-    [this,vehicle,requestId,start,target,breaker](const std::list<DBInstanceRef>& databases) {
-      osmscout::MultiDBRoutingServiceRef routingService=MakeRoutingService(databases,vehicle);
+    [this,profile,requestId,start,target,breaker](const std::list<DBInstanceRef>& databases) {
+      osmscout::MultiDBRoutingServiceRef routingService=MakeRoutingService(databases,profile);
       if (!routingService){
         osmscout::log.Warn() << "Can't open routing service";
         emit routeFailed("Can't open routing service",requestId);
         return;
       }
-      ProcessRouteRequest(routingService,start,target,vehicle,requestId,breaker);
+      ProcessRouteRequest(routingService,start,target,profile->getVehicle(),requestId,breaker);
       routingService->Close();
     }
   );

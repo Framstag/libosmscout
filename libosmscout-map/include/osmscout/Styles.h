@@ -473,7 +473,7 @@ namespace osmscout {
     LabelStyle();
     LabelStyle(const LabelStyle& style);
 
-    ~LabelStyle() override;
+    ~LabelStyle() override = default;
 
     virtual bool IsVisible() const = 0;
     virtual double GetAlpha() const = 0;
@@ -995,7 +995,7 @@ namespace osmscout {
     DrawPrimitive(ProjectionMode projectionMode,
                   const FillStyleRef& fillStyle,
                   const BorderStyleRef& borderStyle);
-    virtual ~DrawPrimitive();
+    virtual ~DrawPrimitive() = default;
 
     inline ProjectionMode GetProjectionMode() const
     {

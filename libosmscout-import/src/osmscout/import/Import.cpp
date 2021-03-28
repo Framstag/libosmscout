@@ -94,11 +94,6 @@ namespace osmscout {
     }
   }
 
-  Importer::~Importer()
-  {
-    // no code
-  }
-
   bool Importer::ValidateDescription(Progress& progress)
   {
     std::unordered_set<std::string> temporaryFiles;

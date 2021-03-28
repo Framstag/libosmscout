@@ -63,7 +63,7 @@ namespace osmscout {
     class OSMSCOUT_API Postprocessor
     {
     public:
-      virtual ~Postprocessor();
+      virtual ~Postprocessor() = default;
 
       virtual bool Process(const RoutePostprocessor& postprocessor,
                            RouteDescription& description) = 0;

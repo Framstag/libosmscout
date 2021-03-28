@@ -196,6 +196,7 @@ class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
   Q_PROPERTY(bool     onlineTiles READ GetOnlineTilesEnabled WRITE SetOnlineTilesEnabled NOTIFY OnlineTilesEnabledChanged)
   Q_PROPERTY(QString  onlineTileProviderId READ GetOnlineTileProviderId WRITE SetOnlineTileProviderId NOTIFY OnlineTileProviderIdChanged)
   Q_PROPERTY(bool     offlineMap READ GetOfflineMap WRITE SetOfflineMap NOTIFY OfflineMapChanged)
+  Q_PROPERTY(QString  styleSheetFile READ GetStyleSheetFile WRITE SetStyleSheetFile NOTIFY StyleSheetFileChanged)
   Q_PROPERTY(bool     renderSea  READ GetRenderSea  WRITE SetRenderSea  NOTIFY RenderSeaChanged)
   Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
   Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
@@ -211,6 +212,7 @@ signals:
   void OnlineTilesEnabledChanged(bool enabled);
   void OnlineTileProviderIdChanged(const QString id);
   void OfflineMapChanged(bool);
+  void StyleSheetFileChanged(const QString file);
   void RenderSeaChanged(bool);
   void FontNameChanged(const QString fontName);
   void FontSizeChanged(double fontSize);
@@ -237,6 +239,9 @@ public:
 
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);
+
+  QString GetStyleSheetFile() const;
+  void SetStyleSheetFile(const QString file);
 
   bool GetRenderSea() const;
   void SetRenderSea(bool);

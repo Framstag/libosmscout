@@ -77,11 +77,6 @@ LocationEntry::LocationEntry(const LocationEntry& other)
     // no code
 }
 
-LocationEntry::~LocationEntry()
-{
-    // no code
-}
-
 void LocationEntry::operator=(const LocationEntry& other)
 {
     type=other.type;

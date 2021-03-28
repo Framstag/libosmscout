@@ -157,7 +157,7 @@ public:
       return nullptr;
     }
     return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
-        nextRouteStep.getType().isEmpty() ? std::nullopt : std::optional(nextRouteStep.GetCoord()));
+        nextRouteStep.getType().isEmpty() ? std::nullopt : std::optional<GeoCoord>(nextRouteStep.GetCoord()));
   }
 
   inline QDateTime getArrivalEstimate() const

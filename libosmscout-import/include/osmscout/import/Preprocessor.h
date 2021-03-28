@@ -77,7 +77,7 @@ namespace osmscout {
     using RawBlockDataRef = std::shared_ptr<RawBlockData>;
 
   public:
-    virtual ~PreprocessorCallback();
+    virtual ~PreprocessorCallback() = default;
 
     virtual void ProcessBlock(RawBlockDataRef data) = 0;
   };
@@ -85,7 +85,7 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API Preprocessor
   {
   public:
-    virtual ~Preprocessor();
+    virtual ~Preprocessor() = default;
 
     virtual bool Import(const TypeConfigRef& typeConfig,
                         const ImportParameter& parameter,

@@ -437,7 +437,6 @@ namespace osmscout {
     std::map<TileId,std::list<FileOffset>> bitmapData;
     size_t                                 dataSize=0;
     std::array<char,10>                    buffer;
-    //char                                   buffer[10];
     MagnificationLevel                     magnification=GetBitmapZoomLevel(parameter,data);
 
     for (const auto& entry : data) {
@@ -452,7 +451,7 @@ namespace osmscout {
 
     // Calculate the size of the bitmap for each current node type
     for (const auto& cell : bitmapData) {
-      dataSize+=EncodeNumber(cell.second.size(),buffer.data());
+      dataSize+=EncodeNumber(cell.second.size(),buffer);
 
       FileOffset previousOffset=0;
       for (auto offset : cell.second) {

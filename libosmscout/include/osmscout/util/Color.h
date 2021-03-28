@@ -50,6 +50,15 @@ namespace osmscout {
     static const Color TEAL;
     static const Color AQUA;
 
+    static const Color LIGHT_GRAY;
+    static const Color DARK_GRAY;
+    static const Color DARK_RED;
+    static const Color DARK_GREEN;
+    static const Color DARK_YELLOW;
+    static const Color DARK_BLUE;
+    static const Color DARK_FUCHSIA;
+    static const Color DARK_AQUA;
+
     static const Color LUCENT_WHITE;
 
   private:

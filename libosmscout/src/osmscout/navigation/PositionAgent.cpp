@@ -118,6 +118,7 @@ namespace osmscout {
       double nearest=std::numeric_limits<double>::max();
 
       PositionAgent::Position position;
+      position.coord=coord;
 
       for (auto &e:routableObjects->dbMap){
         DatabaseId dbId=e.first;

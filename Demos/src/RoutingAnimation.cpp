@@ -76,16 +76,11 @@
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
 {
 private:
-  std::chrono::system_clock::time_point lastDump;
-  double                                maxPercent;
+  std::chrono::system_clock::time_point lastDump=std::chrono::system_clock::now();
+  double                                maxPercent=0.0;
 
 public:
-  ConsoleRoutingProgress()
-  : lastDump(std::chrono::system_clock::now()),
-    maxPercent(0.0)
-  {
-    // no code
-  }
+  ConsoleRoutingProgress() = default;
 
   void Reset()
   {

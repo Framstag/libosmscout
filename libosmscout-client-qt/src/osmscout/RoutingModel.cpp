@@ -61,11 +61,21 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   } else if (vehicleStr=="foot"){
     vehicle=osmscout::Vehicle::vehicleFoot;
   }
+  QmlRoutingProfile profile(vehicle);
+  setStartAndTarget(start, target, &profile);
+}
+
+void RoutingListModel::setStartAndTarget(LocationEntry* start,
+                                         LocationEntry* target,
+                                         QmlRoutingProfile *routingProfile)
+{
   cancel(); // cancel current computation
   clear(); // clear model
 
-  if (start==nullptr || target==nullptr) {
-    if (start == nullptr) {
+  if (start==nullptr || target==nullptr || routingProfile==nullptr) {
+    if (routingProfile == nullptr) {
+      qWarning() << "Routing profile is null";
+    } else if (start == nullptr) {
       qWarning() << "Start is null";
     } else {
       qWarning() << "Target is null";
@@ -84,8 +94,10 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   startRef->setParent(Q_NULLPTR);
   LocationEntryRef targetRef=std::make_shared<LocationEntry>(*target);
   targetRef->setParent(Q_NULLPTR);
+  QmlRoutingProfileRef profileRef=std::make_shared<QmlRoutingProfile>(*routingProfile);
+  profileRef->setParent(Q_NULLPTR);
 
-  emit routeRequest(startRef,targetRef,vehicle,++requestId,breaker);
+  emit routeRequest(startRef,targetRef,profileRef,++requestId,breaker);
 }
 
 void RoutingListModel::onRouteComputed(QtRouteData route,

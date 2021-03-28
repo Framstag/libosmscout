@@ -36,6 +36,7 @@ namespace osmscout {
    : typeConfig(typeConfig),
      accessReader(*typeConfig),
      maxSpeedReader(*typeConfig),
+     gradeReader(*typeConfig),
      vehicle(vehicleCar),
      vehicleRouteNodeBit(RouteNode::usableByCar),
      costLimitDistance(Distance::Of<Kilometer>(10.0)),
@@ -97,7 +98,7 @@ namespace osmscout {
    * The actual maximum cost limit is calculated based on a constant limit distance (default 10.0 Km)
    * and a cost factor applied to the minimum costs default 5.0).
    *
-   * So the resulting maxium cost are profile.GetCosts(profile.GetCostLimitDistance())+
+   * So the resulting maximum cost are profile.GetCosts(profile.GetCostLimitDistance())+
    * profile.GetCosts(distance)*profile.GetCostLimitFactor().
    *
    * @param costLimitFactor
@@ -172,22 +173,28 @@ namespace osmscout {
   }
 
   void AbstractRoutingProfile::AddType(const TypeInfoRef& type,
-                                       double speed)
+                                       SpeedVariant speed)
   {
+    speed.SetupValues();
     if (speeds.empty()) {
-      minSpeed=speed;
-      maxSpeed=speed;
-    }
-    else {
-      minSpeed=std::min(minSpeed,speed);
-      maxSpeed=std::max(maxSpeed,speed);
+      minSpeed=speed.Min();
+      maxSpeed=speed.Max();
+    } else {
+      minSpeed=std::min(minSpeed, speed.Min());
+      maxSpeed=std::max(maxSpeed, speed.Max());
     }
 
     if (type->GetIndex()>=speeds.size()) {
-      speeds.resize(type->GetIndex()+1,0.0);
+      speeds.resize(type->GetIndex()+1, SpeedVariant::Fill(0.0));
     }
 
     speeds[type->GetIndex()]=speed;
+  }
+
+  void AbstractRoutingProfile::AddType(const TypeInfoRef &type,
+                                       double speed)
+  {
+    AddType(type, SpeedVariant::Fill(speed));
   }
 
   bool AbstractRoutingProfile::CanUse(const RouteNode& currentNode,
@@ -198,13 +205,14 @@ namespace osmscout {
       return false;
     }
 
-
-    size_t      index=currentNode.paths[pathIndex].objectIndex;
-    TypeInfoRef type=objectVariantData[currentNode.objects[index].objectVariantIndex].type;
+    size_t index=currentNode.paths[pathIndex].objectIndex;
+    auto objectVariant=objectVariantData[currentNode.objects[index].objectVariantIndex];
+    TypeInfoRef type=objectVariant.type;
 
     size_t typeIndex=type->GetIndex();
+    Grade grade=static_cast<Grade>(objectVariant.grade);
 
-    return typeIndex<speeds.size() && speeds[typeIndex]>0.0;
+    return typeIndex<speeds.size() && speeds[typeIndex][grade]>0.0;
   }
 
   bool AbstractRoutingProfile::CanUse(const Area& area) const
@@ -215,14 +223,26 @@ namespace osmscout {
 
     size_t index=area.rings[0].GetType()->GetIndex();
 
-    return index<speeds.size() && speeds[index]>0.0;
+    Grade grade=SolidGrade;
+    GradeFeatureValue *gradeValue = gradeReader.GetValue(area.GetFeatureValueBuffer());
+    if (gradeValue!=nullptr){
+      grade=static_cast<Grade>(gradeValue->GetGrade());
+    }
+
+    return index<speeds.size() && speeds[index][grade]>0.0;
   }
 
   bool AbstractRoutingProfile::CanUse(const Way& way) const
   {
     size_t index=way.GetType()->GetIndex();
 
-    if (index>=speeds.size() || speeds[index]<=0.0) {
+    Grade grade=SolidGrade;
+    GradeFeatureValue *gradeValue = gradeReader.GetValue(way.GetFeatureValueBuffer());
+    if (gradeValue!=nullptr){
+      grade=static_cast<Grade>(gradeValue->GetGrade());
+    }
+
+    if (index>=speeds.size() || speeds[index][grade]<=0.0) {
       return false;
     }
 
@@ -262,7 +282,13 @@ namespace osmscout {
   {
     size_t index=way.GetType()->GetIndex();
 
-    if (index>=speeds.size() || speeds[index]<=0.0) {
+    Grade grade=SolidGrade;
+    GradeFeatureValue *gradeValue = gradeReader.GetValue(way.GetFeatureValueBuffer());
+    if (gradeValue!=nullptr){
+      grade=static_cast<Grade>(gradeValue->GetGrade());
+    }
+
+    if (index>=speeds.size() || speeds[index][grade]<=0.0) {
       return false;
     }
 
@@ -302,7 +328,13 @@ namespace osmscout {
   {
     size_t index=way.GetType()->GetIndex();
 
-    if (index>=speeds.size() || speeds[index]<=0.0) {
+    Grade grade=SolidGrade;
+    GradeFeatureValue *gradeValue = gradeReader.GetValue(way.GetFeatureValueBuffer());
+    if (gradeValue!=nullptr){
+      grade=static_cast<Grade>(gradeValue->GetGrade());
+    }
+
+    if (index>=speeds.size() || speeds[index][grade]<=0.0) {
       return false;
     }
 
@@ -312,26 +344,20 @@ namespace osmscout {
       switch (vehicle) {
       case vehicleFoot:
         return accessValue->CanRouteFootBackward();
-        break;
       case vehicleBicycle:
         return accessValue->CanRouteBicycleBackward();
-        break;
       case vehicleCar:
         return accessValue->CanRouteCarBackward();
-        break;
       }
     }
     else {
       switch (vehicle) {
       case vehicleFoot:
         return way.GetType()->CanRouteFoot();
-        break;
       case vehicleBicycle:
         return way.GetType()->CanRouteBicycle();
-        break;
       case vehicleCar:
         return way.GetType()->CanRouteCar();
-        break;
       }
     }
 

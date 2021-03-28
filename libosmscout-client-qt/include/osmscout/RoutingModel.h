@@ -30,6 +30,7 @@
 #include <osmscout/DBThread.h>
 #include <osmscout/Router.h>
 #include <osmscout/OverlayObject.h>
+#include <osmscout/QmlRoutingProfile.h>
 
 #include <QObject>
 #include <QAbstractListModel>
@@ -54,7 +55,7 @@ class OSMSCOUT_CLIENT_QT_API RoutingListModel : public QAbstractListModel
 signals:
   void routeRequest(LocationEntryRef start,
                     LocationEntryRef target,
-                    osmscout::Vehicle vehicle,
+                    QmlRoutingProfileRef profile,
                     int requestId,
                     osmscout::BreakerRef breaker);
 
@@ -68,6 +69,10 @@ public slots:
   void setStartAndTarget(LocationEntry* start,
                          LocationEntry* target,
                          QString vehicleStr="car");
+
+  void setStartAndTarget(LocationEntry* start,
+                         LocationEntry* target,
+                         QmlRoutingProfile *routingProfile);
 
   void clear();
 

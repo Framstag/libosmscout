@@ -81,7 +81,7 @@ public:
 
   LocationEntry(QObject* parent = nullptr);
   LocationEntry(const LocationEntry& other);
-  virtual ~LocationEntry();
+  ~LocationEntry() override = default;
 
   void operator=(const LocationEntry&);
 

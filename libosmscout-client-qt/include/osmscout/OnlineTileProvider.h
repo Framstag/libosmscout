@@ -48,7 +48,7 @@ public:
     valid(o.valid), id(o.id), name(o.name), servers(o.servers),
           maximumZoomLevel(o.maximumZoomLevel), copyright(o.copyright){};
 
-  inline OnlineTileProvider(QString id, QString name, QStringList servers, int maximumZoomLevel,
+  inline OnlineTileProvider(const QString &id, const QString &name, const QStringList &servers, int maximumZoomLevel,
           QString copyright):
     valid(true), id(id), name(name), servers(servers), maximumZoomLevel(maximumZoomLevel),
     copyright(copyright){};

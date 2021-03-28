@@ -51,7 +51,7 @@ private:
 public:
   AvailableMapsModelItem() = default;
 
-  inline AvailableMapsModelItem(QString name, QStringList path, QString description):
+  inline AvailableMapsModelItem(const QString &name, const QStringList &path, const QString &description):
     valid(true), name(name), path(path), description(description){};
 
   inline AvailableMapsModelItem(const AvailableMapsModelItem &o):
@@ -100,7 +100,7 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelDir : public AvailableMapsModelIt
   Q_OBJECT
 
 public:
-  inline AvailableMapsModelDir(QString name, QList<QString> path, QString description):
+  inline AvailableMapsModelDir(const QString &name, const QList<QString> &path, const QString &description):
     AvailableMapsModelItem(name, path, description){};
 
   inline AvailableMapsModelDir(const AvailableMapsModelDir &o):
@@ -137,8 +137,8 @@ private:
 public:
   AvailableMapsModelMap() = default;
 
-  inline AvailableMapsModelMap(QString name, QList<QString> path, QString description, MapProvider provider,
-                               uint64_t size, QString serverDirectory, QDateTime creation, int version):
+  inline AvailableMapsModelMap(const QString &name, const QList<QString> &path, const QString &description, const MapProvider &provider,
+                               uint64_t size, const QString &serverDirectory, const QDateTime &creation, int version):
     AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory),
     creation(creation), version(version) {};
 

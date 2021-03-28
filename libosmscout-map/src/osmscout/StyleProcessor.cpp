@@ -21,8 +21,4 @@
 
 namespace osmscout {
 
-  FillStyleProcessor::~FillStyleProcessor()
-  {
-    // no code
-  }
 }

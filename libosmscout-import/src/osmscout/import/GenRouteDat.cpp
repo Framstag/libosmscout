@@ -46,11 +46,6 @@
 
 namespace osmscout {
 
-  RouteDataGenerator::RouteDataGenerator()
-  {
-    // no code
-  }
-
   void RouteDataGenerator::GetDescription(const ImportParameter& parameter,
                                           ImportModuleDescription& description) const
   {

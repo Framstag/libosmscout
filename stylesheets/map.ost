@@ -1007,6 +1007,11 @@ TYPES
       {Name, NameAlt}
       ADDRESS OPTIMIZE_LOW_ZOOM
 
+  TYPE leisure_fitness_station
+    = NODE AREA ("leisure"=="fitness_station")
+      {Name, NameAlt}
+      ADDRESS OPTIMIZE_LOW_ZOOM
+
   TYPE leisure_golf_course
     = NODE AREA ("leisure"=="golf_course")
       {Name, NameAlt}
@@ -1133,6 +1138,7 @@ TYPES
 
   TYPE amenity_charging_station
     = NODE ("amenity"=="charging_station")
+      {Operator}
       GROUP amenity
 
   TYPE amenity_clock

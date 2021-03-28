@@ -118,7 +118,7 @@ public slots:
   void onThreadFinished();
 
 public:
-  inline DBInstance(QString path,
+  inline DBInstance(const QString &path,
                     osmscout::DatabaseRef database,
                     osmscout::LocationServiceRef locationService,
                     osmscout::LocationDescriptionServiceRef locationDescriptionService,

@@ -19,8 +19,9 @@
 
 #include <cstring>
 #include <functional>
-#include <iomanip>
 #include <iostream>
+#include <map>
+#include <utility>
 
 #include <libxml/parser.h>
 
@@ -35,6 +36,14 @@ using namespace osmscout::gpx;
 
 class GpxParser;
 
+enum class NameSpace {
+  Unknown,
+  Gpx,
+  GarminExtensions
+};
+
+using AttrKey = std::pair<NameSpace, std::string>;
+
 class GpxParserContext {
 protected:
   xmlParserCtxtPtr  ctxt;
@@ -47,10 +56,11 @@ public:
 
   virtual const char *ContextName() const = 0;
 
-  virtual GpxParserContext* StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &/*atts*/);
+  virtual GpxParserContext* StartElement(NameSpace ns,
+                                         const std::string &name,
+                                         const std::map<AttrKey, std::string> &atts);
 
-  virtual void Characters(const std::string &/*str*/){};
+  virtual void Characters(const std::string &){}
 };
 
 
@@ -68,8 +78,9 @@ public:
     return "Document";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &/*atts*/) override;
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 const std::map<AttrKey, std::string> &atts) override;
 
 };
 
@@ -108,13 +119,13 @@ public:
     saxParser.startDocument=StartDocumentHandler;
     saxParser.endDocument=EndDocumentHandler;
     saxParser.getEntity=GetEntity;
-    saxParser.startElement=StartElement;
     saxParser.characters=Characters;
-    saxParser.endElement=EndElement;
     saxParser.warning=WarningHandler;
     saxParser.error=ErrorHandler;
     saxParser.fatalError=ErrorHandler;
     saxParser.serror=StructuredErrorHandler;
+    saxParser.startElementNs=StartElement;
+    saxParser.endElementNs=EndElement;
 
     try{
       fileSize=GetFileSize(filePath);
@@ -198,12 +209,13 @@ public:
     contextStack.push_back(new DocumentContext(ctxt, output, *this));
   }
 
-  void StartElement(const std::string &name,
-                    const std::unordered_map<std::string, std::string> &atts)
+  void StartElement(NameSpace ns,
+                    const std::string &name,
+                    const std::map<AttrKey, std::string> &atts)
   {
     assert(!contextStack.empty());
     GpxParserContext *top=contextStack.back();
-    contextStack.push_back(top==nullptr ? nullptr : top->StartElement(name, atts));
+    contextStack.push_back(top==nullptr ? nullptr : top->StartElement(ns, name, atts));
   }
 
   void Characters(const std::string &str)
@@ -224,7 +236,7 @@ public:
     contextStack.pop_back();
   }
 
-  void EndElement(const std::string &/*name*/) {
+  void EndElement([[maybe_unused]] const std::string &name) {
     PopContext();
   }
 
@@ -246,11 +258,11 @@ public:
     osmscout::log.Warn() << msg;
   }
 
-  static bool ParseDoubleAttr(const std::unordered_map<std::string,std::string>& atts,
-                              const std::string& attName,
+  static bool ParseDoubleAttr(const std::map<AttrKey, std::string>& atts,
+                              const AttrKey& attKey,
                               double& target)
   {
-    auto it=atts.find(attName);
+    auto it=atts.find(attKey);
     if (it==atts.end()){
       return false;
     }
@@ -258,16 +270,48 @@ public:
     return StringToNumber(value,target);
   }
 
-  static void StartElement(void *data, const xmlChar *name, const xmlChar **atts)
+  static NameSpace NameSpaceByUri(const char *uri)
+  {
+    if (uri == nullptr) {
+      return NameSpace::Unknown;
+    }
+    static std::unordered_map<std::string,NameSpace> nameSpaceMap{
+      {"http://www.topografix.com/GPX/1/1", NameSpace::Gpx},
+      {"http://www.garmin.com/xmlschemas/GpxExtensions/v3", NameSpace::GarminExtensions},
+    };
+    if (auto it=nameSpaceMap.find(std::string(uri));
+        it!=nameSpaceMap.end()){
+      return it->second;
+    }
+    return NameSpace::Unknown;
+  }
+
+  static void StartElement(void* data,
+                           const xmlChar *localname,
+                           [[maybe_unused]] const xmlChar *prefix,
+                           const xmlChar *eleUri,
+                           [[maybe_unused]] int nb_namespaces,
+                           [[maybe_unused]] const xmlChar **namespaces,
+                           int nb_attributes,
+                           [[maybe_unused]] int nb_defaulted,
+                           const xmlChar **atts)
   {
     auto* parser=static_cast<GpxParser*>(data);
-    std::unordered_map<std::string,std::string> attsMap;
+    std::map<AttrKey,std::string> attsMap;
     if (atts!=nullptr) {
-      for (size_t i = 0; atts[i] !=nullptr && atts[i + 1] !=nullptr; i += 2) {
-        attsMap[std::string((const char *) atts[i])] = std::string((const char *) atts[i + 1]);
+
+      for (int i = 0; i<nb_attributes; ++i) {
+        const char *name = (const char *)atts[i*5+0];
+        const char *attrUri = (const char *)atts[i * 5 + 2];
+        const char *value = (const char *)atts[i*5+3];
+        const char *end = (const char *)atts[i*5+4];
+        AttrKey key{NameSpaceByUri(attrUri != nullptr ? attrUri : (const char *)eleUri), name};
+        attsMap[key] = std::string(value, end);
       }
     }
-    parser->StartElement(std::string((const char *)name),attsMap);
+    parser->StartElement(NameSpaceByUri((const char *)eleUri),
+                         std::string((const char *)localname),
+                         attsMap);
   }
 
   static void Characters(void *data, const xmlChar *ch, int len)
@@ -277,13 +321,16 @@ public:
                                    static_cast<unsigned long>(len)));
   }
 
-  static void EndElement(void *data, const xmlChar *name)
+  static void EndElement(void* data,
+                         const xmlChar *localname,
+                         [[maybe_unused]] const xmlChar *prefix,
+                         [[maybe_unused]] const xmlChar *URI)
   {
     auto* parser=static_cast<GpxParser*>(data);
-    parser->EndElement(std::string((const char *)name));
+    parser->EndElement(std::string((const char *)localname));
   }
 
-  static xmlEntityPtr GetEntity(void* /*data*/, const xmlChar *name)
+  static xmlEntityPtr GetEntity([[maybe_unused]] void* data, const xmlChar *name)
   {
     return xmlGetPredefinedEntity(name);
   }
@@ -312,7 +359,6 @@ public:
     parser->StartDocument();
   }
 
-
   static void EndDocumentHandler(void* data)
   {
     auto* parser=static_cast<GpxParser*>(data);
@@ -320,8 +366,9 @@ public:
   }
 };
 
-GpxParserContext* GpxParserContext::StartElement(const std::string &name,
-                                                 const std::unordered_map<std::string, std::string> &/*atts*/)
+GpxParserContext* GpxParserContext::StartElement(NameSpace,
+                                                 const std::string &name,
+                                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts)
 {
   xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
   parser.Warning("Unexpected element");
@@ -351,12 +398,12 @@ public:
   const char *ContextName() const override
   {
     return name.c_str();
-  };
+  }
 
   void Characters(const std::string &str) override
   {
     buffer+=str;
-  };
+  }
 
 };
 
@@ -369,10 +416,11 @@ public:
 
   ~PointLikeContext() override = default;
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
-    if (name == "ele") {
+    if (ns == NameSpace::Gpx && name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
         if (StringToNumber(value, ele)){
@@ -384,7 +432,7 @@ public:
       });
     }
 
-    if (name == "magvar") {
+    if (ns == NameSpace::Gpx && name == "magvar") {
       return new SimpleValueContext("MagvarContext", ctxt, parser, [&](const std::string &value){
         double course;
         if (StringToNumber(value, course)){
@@ -396,7 +444,7 @@ public:
       });
     }
 
-    if (name == "hdop") {
+    if (ns == NameSpace::Gpx && name == "hdop") {
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
@@ -408,19 +456,19 @@ public:
       });
     }
 
-    if (name == "vdop") {
+    if (ns == NameSpace::Gpx && name == "vdop") {
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
           point.vdop=std::make_optional<double>(vdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Ele value\n");
-          parser.Warning("Can't parse Ele value");
+          xmlParserWarning(ctxt,"Can't parse VDop value\n");
+          parser.Warning("Can't parse VDop value");
         }
       });
     }
 
-    if (name == "pdop") {
+    if (ns == NameSpace::Gpx && name == "pdop") {
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
@@ -432,14 +480,14 @@ public:
       });
     }
 
-    if (name == "time") {
+    if (ns == NameSpace::Gpx && name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
           point.time=std::make_optional<Timestamp>(time);
         }else{
-          xmlParserWarning(ctxt,"Can't parse PDop value\n");
-          parser.Warning("Can't parse PDop value");
+          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          parser.Warning("Can't parse Time value");
         }
       });
     }
@@ -502,28 +550,29 @@ public:
     return "Waypoint";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="name") {
+    if (ns == NameSpace::Gpx && name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         waypoint.name = std::make_optional<std::string>(name);
       });
     }
 
-    if (name == "desc") {
+    if (ns == NameSpace::Gpx && name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
         waypoint.description = std::make_optional<std::string>(description);
       });
     }
 
-    if (name == "sym") {
+    if (ns == NameSpace::Gpx && name == "sym") {
       return new SimpleValueContext("SymContext", ctxt, parser, [&](const std::string &symbol) {
         waypoint.symbol = std::make_optional<std::string>(symbol);
       });
     }
 
-    if (name == "ele") {
+    if (ns == NameSpace::Gpx && name == "ele") {
       return new SimpleValueContext("EleContext", ctxt, parser, [&](const std::string &value){
         double ele;
         if (StringToNumber(value, ele)){
@@ -535,7 +584,7 @@ public:
       });
     }
 
-    if (name == "hdop") {
+    if (ns == NameSpace::Gpx && name == "hdop") {
       return new SimpleValueContext("HDopContext", ctxt, parser, [&](const std::string &value){
         double hdop;
         if (StringToNumber(value, hdop)){
@@ -547,7 +596,7 @@ public:
       });
     }
 
-    if (name == "vdop") {
+    if (ns == NameSpace::Gpx && name == "vdop") {
       return new SimpleValueContext("VDopContext", ctxt, parser, [&](const std::string &value){
         double vdop;
         if (StringToNumber(value, vdop)){
@@ -559,7 +608,7 @@ public:
       });
     }
 
-    if (name == "pdop") {
+    if (ns == NameSpace::Gpx && name == "pdop") {
       return new SimpleValueContext("PDopContext", ctxt, parser, [&](const std::string &value){
         double pdop;
         if (StringToNumber(value, pdop)){
@@ -571,7 +620,7 @@ public:
       });
     }
 
-    if (name == "time") {
+    if (ns == NameSpace::Gpx && name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
@@ -603,22 +652,23 @@ public:
     return "Metadata";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="name") {
+    if (ns == NameSpace::Gpx && name=="name") {
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name) {
         output.name = std::make_optional<std::string>(name);
       });
     }
 
-    if (name == "desc") {
+    if (ns == NameSpace::Gpx && name == "desc") {
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &description) {
         output.desc = std::make_optional<std::string>(description);
       });
     }
 
-    if (name == "time") {
+    if (ns == NameSpace::Gpx && name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
@@ -652,14 +702,15 @@ public:
     return "TrkSeg";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &atts) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="trkpt"){
+    if (ns == NameSpace::Gpx && name=="trkpt"){
       double lat;
       double lon;
-      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
-          GpxParser::ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lat"}, lat) &&
+          GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lon"}, lon)
           ) {
         return new TrkptContext(ctxt, segment, parser, lat, lon);
       }
@@ -669,7 +720,7 @@ public:
       return nullptr;
     }
 
-    return GpxParserContext::StartElement(name, atts);
+    return GpxParserContext::StartElement(ns, name, atts);
   }
 };
 
@@ -691,14 +742,15 @@ public:
     return "Route";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &atts) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="rtept") {
+    if (ns == NameSpace::Gpx && name=="rtept") {
       double lat;
       double lon;
-      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
-          GpxParser::ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lat"}, lat) &&
+          GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lon"}, lon)
           ) {
         return new RteptContext(ctxt, route, parser, lat, lon);
       }
@@ -708,9 +760,48 @@ public:
       return nullptr;
     }
 
-    if (name=="name"){
+    if (ns == NameSpace::Gpx && name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
         route.name=std::make_optional<std::string>(name);
+      });
+    }
+
+    return nullptr; // silently ignore unknown elements
+  }
+};
+
+class TrkExtensionContext : public GpxParserContext {
+private:
+  Track &track;
+public:
+  TrkExtensionContext(xmlParserCtxtPtr ctxt, Track &track, GpxParser &parser) :
+      GpxParserContext(ctxt, parser), track(track) {}
+
+  ~TrkExtensionContext() override
+  {
+  }
+
+  const char *ContextName() const override
+  {
+    return "TrkExtensions";
+  }
+
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
+  {
+    if (ns == NameSpace::GarminExtensions && name=="TrackExtension"){
+      return new TrkExtensionContext(ctxt, track, parser);
+    } else if (ns == NameSpace::GarminExtensions && name=="DisplayColor"){
+      return new SimpleValueContext("DisplayColorContext", ctxt, parser, [&](const std::string &value){
+        std::string colorString=UTF8StringToLower(value);
+        Color color;
+        if (!Color::FromHexString(colorString, color) &&
+            !Color::FromW3CKeywordString(colorString, color)) {
+          osmscout::log.Warn() << "Not a valid color value: " << colorString;
+          return;
+        }
+        track.displayColor=std::make_optional<osmscout::Color>(color);
       });
     }
 
@@ -734,25 +825,28 @@ public:
   const char *ContextName() const override
   {
     return "Trk";
-  };
+  }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &/*atts*/) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 [[maybe_unused]] const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="name"){
+    if (ns == NameSpace::Gpx && name=="name"){
       return new SimpleValueContext("NameContext", ctxt, parser, [&](const std::string &name){
         track.name=std::make_optional<std::string>(name);
       });
     }
 
-    if (name=="desc"){
+    if (ns == NameSpace::Gpx && name=="desc"){
       return new SimpleValueContext("DescContext", ctxt, parser, [&](const std::string &desc){
         track.desc=std::make_optional<std::string>(desc);
       });
     }
 
-    if (name=="trkseg"){
+    if (ns == NameSpace::Gpx && name=="trkseg"){
       return new TrkSegContext(ctxt, track, parser);
+    } else if (ns == NameSpace::Gpx && name=="extensions"){
+      return new TrkExtensionContext(ctxt, track, parser);
     }
 
     return nullptr; // silently ignore unknown elements
@@ -772,18 +866,19 @@ public:
     return "Gpx";
   }
 
-  GpxParserContext* StartElement(const std::string &name,
-                                 const std::unordered_map<std::string, std::string> &atts) override
+  GpxParserContext* StartElement(NameSpace ns,
+                                 const std::string &name,
+                                 const std::map<AttrKey, std::string> &atts) override
   {
-    if (name=="trk"){
+    if (ns == NameSpace::Gpx && name=="trk"){
       return new TrkContext(ctxt,output,parser);
     }
 
-    if (name=="wpt"){
+    if (ns == NameSpace::Gpx && name=="wpt"){
       double lat;
       double lon;
-      if (GpxParser::ParseDoubleAttr(atts, "lat", lat) &&
-          GpxParser::ParseDoubleAttr(atts, "lon", lon)
+      if (GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lat"}, lat) &&
+          GpxParser::ParseDoubleAttr(atts, {NameSpace::Gpx, "lon"}, lon)
           ) {
         return new WaypointContext(ctxt, output, parser, lat, lon);
       }
@@ -793,24 +888,25 @@ public:
       return nullptr;
     }
 
-    if (name=="rte"){
+    if (ns == NameSpace::Gpx && name=="rte"){
       return new RouteContext(ctxt,output,parser);
     }
 
-    if (name=="metadata"){
+    if (ns == NameSpace::Gpx && name=="metadata"){
       return new MetadataContext(ctxt,output,parser);
     }
     return nullptr; // silently ignore unknown elements
   }
 };
 
-GpxParserContext* DocumentContext::StartElement(const std::string &name,
-                                         const std::unordered_map<std::string, std::string> &atts)
+GpxParserContext* DocumentContext::StartElement(NameSpace ns,
+                                                const std::string &name,
+                                                const std::map<AttrKey, std::string> &atts)
 {
-  if (name=="gpx"){
+  if (ns == NameSpace::Gpx && name=="gpx"){
     return new GpxDocumentContext(ctxt,output,parser);
   }
-  return GpxParserContext::StartElement(name, atts);
+  return GpxParserContext::StartElement(ns, name, atts);
 }
 
 bool gpx::ImportGpx(const std::string &filePath,

@@ -45,6 +45,7 @@ set(HEADER_FILES
     include/osmscout/RouteDescriptionBuilder.h
     include/osmscout/NavigationModel.h
     include/osmscout/VehiclePosition.h
+    include/osmscout/QmlRoutingProfile.h
     include/osmscout/QtRouteData.h
     include/osmscout/RouteStep.h
     include/osmscout/NearPOIModel.h
@@ -100,6 +101,7 @@ set(SOURCE_FILES
     src/osmscout/NavigationModel.cpp
     src/osmscout/VehiclePosition.cpp
     src/osmscout/RouteStep.cpp
+    src/osmscout/QmlRoutingProfile.cpp
     src/osmscout/QtRouteData.cpp
     src/osmscout/NearPOIModel.cpp
     src/osmscout/POILookupModule.cpp
@@ -122,7 +124,7 @@ osmscout_library_project(
 )
 
 if(MARISA_FOUND)
-    target_include_directories(OSMScoutClientQt PRIVATE ${MARISA_INCLUDE_DIRS})
+    target_include_directories(OSMScoutClientQt PUBLIC ${MARISA_INCLUDE_DIRS})
     target_link_libraries(OSMScoutClientQt ${MARISA_LIBRARIES})
 endif()
 

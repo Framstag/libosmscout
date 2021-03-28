@@ -107,10 +107,7 @@ namespace osmscout {
     }
     else {
       indexCell.data=offset;
-
-      for (FileOffset& c : indexCell.children) {
-        c=0;
-      }
+      indexCell.children.fill(0);
     }
 
     dataOffset=indexCell.data;

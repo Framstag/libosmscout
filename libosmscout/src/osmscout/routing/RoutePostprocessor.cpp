@@ -31,11 +31,6 @@
 
 namespace osmscout {
 
-  RoutePostprocessor::Postprocessor::~Postprocessor()
-  {
-    // no code
-  }
-
   RoutePostprocessor::StartPostprocessor::StartPostprocessor(const std::string& startDescription)
   : startDescription(startDescription)
   {
@@ -1732,6 +1727,11 @@ namespace osmscout {
       delete p.second;
     }
     lanesReaders.clear();
+
+    for (const auto p:accessReaders){
+      delete p.second;
+    }
+    accessReaders.clear();
   }
 
   AreaRef RoutePostprocessor::GetArea(const DBFileOffset &offset) const

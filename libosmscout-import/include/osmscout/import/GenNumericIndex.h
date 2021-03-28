@@ -163,12 +163,12 @@ namespace osmscout {
         }
 
         if (currentPageSize>0) {
-          char         b1[10];
-          char         b2[10];
-          N            b1val=data.GetId()-lastId;
-          FileOffset   b2val=readPos-lastPos;
-          unsigned int b1size;
-          unsigned int b2size;
+          std::array<char,10> b1;
+          std::array<char,10> b2;
+          N                   b1val=data.GetId()-lastId;
+          FileOffset          b2val=readPos-lastPos;
+          unsigned int        b1size;
+          unsigned int        b2size;
 
 
           b1size=EncodeNumber(b1val,b1);
@@ -184,8 +184,8 @@ namespace osmscout {
             currentPageSize=0;
           }
           else {
-            writer.Write(b1,b1size);
-            writer.Write(b2,b2size);
+            writer.Write(b1.data(),b1size);
+            writer.Write(b2.data(),b2size);
 
             currentPageSize+=b1size+b2size;
           }
@@ -224,12 +224,12 @@ namespace osmscout {
 
         for (size_t i=0; i<si.size(); i++) {
           if (currentPageSize>0) {
-            char         b1[10];
-            char         b2[10];
-            N            b1val=si[i]-si[i-1];
-            FileOffset   b2val=po[i]-po[i-1];
-            unsigned int b1size;
-            unsigned int b2size;
+            std::array<char,10> b1;
+            std::array<char,10> b2;
+            N                   b1val=si[i]-si[i-1];
+            FileOffset          b2val=po[i]-po[i-1];
+            unsigned int        b1size;
+            unsigned int        b2size;
 
             b1size=EncodeNumber(b1val,b1);
             b2size=EncodeNumber(b2val,b2);
@@ -244,8 +244,8 @@ namespace osmscout {
               currentPageSize=0;
             }
             else {
-              writer.Write(b1,b1size);
-              writer.Write(b2,b2size);
+              writer.Write(b1.data(),b1size);
+              writer.Write(b2.data(),b2size);
 
               currentPageSize+=b1size+b2size;
             }
