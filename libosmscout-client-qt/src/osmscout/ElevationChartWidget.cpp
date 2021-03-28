@@ -238,7 +238,7 @@ void ElevationChartWidget::onElevationProfileAppend(ElevationModule::ElevationPo
     return;
   }
   points.insert(points.end(), batch.begin(), batch.end());
-  for (const auto point:batch){
+  for (const auto& point:batch){
     std::cout << point.distance << " \t" << point.elevation.AsMeter() << " m \t" << point.coord.GetDisplayText() << " (" << point.contour->GetType()->GetName() << " " << point.contour->GetFileOffset() << ")" << std::endl;
     if (!lowest.has_value() || lowest->elevation > point.elevation){
       lowest=point;

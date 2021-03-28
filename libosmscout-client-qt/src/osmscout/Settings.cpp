@@ -46,7 +46,7 @@ Settings::Settings(QSettings *providedStorage):
      *   242.236 - Jolla phone native
      *   130 - PC (24" FullHD)
      *   100 - Qt default (reported by SailfishOS < 2.0.1)
-     */    
+     */
     QScreen *srn=QGuiApplication::screens().at(0);
     physicalDpi = (double)srn->physicalDotsPerInch();
 }
@@ -144,7 +144,7 @@ bool Settings::loadOnlineTileProviders(QString path)
         return false;
     }
     qDebug() << "Loading online tile providers from " << loadFile.fileName();
-    
+
     QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
     for (auto obj: doc.array()){
         OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
@@ -157,15 +157,15 @@ bool Settings::loadOnlineTileProviders(QString path)
             }
         }
     }
-    
+
     // check if current provider is valid...
     if (!onlineProviderMap.contains(GetOnlineTileProviderId())){
         // ...if not, setup first
         if (!onlineProviders.isEmpty()){
             SetOnlineTileProviderId(onlineProviders.begin()->getId());
         }
-    }    
-    
+    }
+
     emit OnlineTileProviderIdChanged(GetOnlineTileProviderId());
     return true;
 }
@@ -226,7 +226,7 @@ void Settings::SetRenderSea(bool b)
   if (GetRenderSea() != b){
     storage->setValue("OSMScoutLib/Rendering/RenderSea", b);
     emit RenderSeaChanged(b);
-  }    
+  }
 }
 
 const QString Settings::GetStyleSheetDirectory() const
@@ -285,7 +285,7 @@ const std::unordered_map<std::string,bool> Settings::GetStyleSheetFlags(const QS
 {
   std::unordered_map<std::string,bool> stylesheetFlags; // TODO: read from config
   storage->beginGroup("OSMScoutLib/Rendering/StylesheetFlags/"+styleSheetFile);
-  for (const QString key:storage->allKeys()){
+  for (const QString& key:storage->allKeys()){
     stylesheetFlags[key.toStdString()]=storage->value(key, false).toBool();
   }
   storage->endGroup();
@@ -346,7 +346,7 @@ void Settings::SetShowAltLanguage(bool showAltLanguage)
 
 const QString Settings::GetHttpCacheDir() const
 {
-  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);  
+  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
   return cacheLocation + QDir::separator() + "OSMScoutHttpCache";
 }
 

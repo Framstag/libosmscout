@@ -1073,7 +1073,7 @@ namespace osmscout {
         }
       }
 
-      for (const auto textStyle : textStyles) {
+      for (const auto& textStyle : textStyles) {
         std::string label = textStyle->GetLabel()->GetLabel(parameter,
                                                             buffer);
 
