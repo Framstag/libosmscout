@@ -131,24 +131,27 @@ namespace osmscout {
       // We insert every node id only once per area, because we want to
       // find nodes that are shared by *different* areas.
 
-      std::unordered_set<Id> nodeIds;
+      // We currently only merge simple areas with one (outer) ring
+      if (area.rings.size()==1) {
+        std::unordered_set<Id> nodeIds;
 
-      for (const auto& ring: area.rings) {
-        if (!ring.IsTopOuter()) {
-          continue;
+        for (const auto& ring: area.rings) {
+          if (!ring.IsTopOuter()) {
+            continue;
+          }
+
+          for (const auto& node : ring.nodes) {
+            nodeIds.insert(node.GetId());
+          }
         }
 
-        for (const auto& node : ring.nodes) {
-          nodeIds.insert(node.GetId());
-        }
-      }
-
-      for (auto id : nodeIds) {
-        if (usedOnceSet.find(id)!=usedOnceSet.end()) {
-          nodeUseMap[area.GetType()->GetIndex()].insert(id);
-        }
-        else {
-          usedOnceSet.insert(id);
+        for (auto id : nodeIds) {
+          if (usedOnceSet.find(id)!=usedOnceSet.end()) {
+            nodeUseMap[area.GetType()->GetIndex()].insert(id);
+          }
+          else {
+            usedOnceSet.insert(id);
+          }
         }
       }
     }
@@ -231,20 +234,27 @@ namespace osmscout {
 
       bool isMergeCandidate=false;
 
-      for (const auto& ring: area->rings) {
-        if (!ring.IsTopOuter()) {
-          continue;
-        }
+      // We currently only merge simple areas with one (outer) ring
+      if (area->rings.size()==1) {
+        for (const auto& ring: area->rings) {
+          if (!ring.IsTopOuter()) {
+            continue;
+          }
 
-        for (const auto& node : ring.nodes) {
-          if (nodeUseMap[area->GetType()->GetIndex()].find(node.GetId())!=nodeUseMap[area->GetType()->GetIndex()].end()) {
-            isMergeCandidate=true;
+          for (const auto& node : ring.nodes) {
+            const auto& nodeUseSet=nodeUseMap[area->GetType()->GetIndex()];
+
+            if (nodeUseSet.find(node.GetId())!=
+                nodeUseSet.end()) {
+              // contains at least one joinable node
+              isMergeCandidate=true;
+              break;
+            }
+          }
+
+          if (isMergeCandidate) {
             break;
           }
-        }
-
-        if (isMergeCandidate) {
-          break;
         }
       }
 
@@ -287,7 +297,6 @@ namespace osmscout {
     }
 
     stopClock.Stop();
-
 
     progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types in "+stopClock.ResultString());
   }
@@ -655,6 +664,8 @@ namespace osmscout {
 
         progress.SetAction("Merging areas");
 
+        StopClock stopClock;
+
         for (const auto& type : loadedTypes) {
           if (!mergeJob[type->GetIndex()].areas.empty()) {
             progress.Info("Merging areas of type "+type->GetName());
@@ -690,6 +701,9 @@ namespace osmscout {
           mergeTypes.Remove(loadedTypes);
         }
 
+        stopClock.Stop();
+
+        progress.SetAction("Merged "+std::to_string(loadedTypes.Size())+" types in "+stopClock.ResultString());
 
         if (mergeTypes.Empty()) {
           break;
