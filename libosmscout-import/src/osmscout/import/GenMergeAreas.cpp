@@ -101,7 +101,7 @@ namespace osmscout {
                                             const TypeConfig& typeConfig,
                                             FileScanner& scanner,
                                             const TypeInfoSet& mergeTypes,
-                                            std::vector<std::unordered_set<Id>>& nodeUseMap)
+                                            std::vector<AreaMergeJob>& mergeJobs)
   {
     progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
 
@@ -147,7 +147,7 @@ namespace osmscout {
 
         for (auto id : nodeIds) {
           if (usedOnceSet.find(id)!=usedOnceSet.end()) {
-            nodeUseMap[area.GetType()->GetIndex()].insert(id);
+            mergeJobs[area.GetType()->GetIndex()].nodeUseSet.insert(id);
           }
           else {
             usedOnceSet.insert(id);
@@ -179,10 +179,9 @@ namespace osmscout {
                                      const TypeConfig& typeConfig,
                                      const TypeInfoSet& candidateTypes,
                                      TypeInfoSet& loadedTypes,
-                                     const std::vector<std::unordered_set<Id>>& nodeUseMap,
                                      FileScanner& scanner,
                                      FileWriter& writer,
-                                     std::vector<AreaMergeData>& mergeJob,
+                                     std::vector<AreaMergeJob>& mergeJobs,
                                      uint32_t& areasWritten)
   {
     bool        firstCall=areasWritten==0; // We are called for the first time
@@ -193,8 +192,8 @@ namespace osmscout {
 
     StopClock stopClock;
 
-    for (auto& data : mergeJob) {
-      data.areaCount=0;
+    for (auto& job : mergeJobs) {
+      job.areaCount=0;
     }
 
     loadedTypes=candidateTypes;
@@ -214,7 +213,7 @@ namespace osmscout {
       area->ReadImport(typeConfig,
                        scanner);
 
-      mergeJob[area->GetType()->GetIndex()].areaCount++;
+      mergeJobs[area->GetType()->GetIndex()].areaCount++;
 
       // This is an area of a type that does not get merged,
       // we directly store it in the target file.
@@ -242,7 +241,7 @@ namespace osmscout {
           }
 
           for (const auto& node : ring.nodes) {
-            const auto& nodeUseSet=nodeUseMap[area->GetType()->GetIndex()];
+            const auto& nodeUseSet=mergeJobs[area->GetType()->GetIndex()].nodeUseSet;
 
             if (nodeUseSet.find(node.GetId())!=
                 nodeUseSet.end()) {
@@ -262,11 +261,11 @@ namespace osmscout {
         continue;
       }
 
-      if (mergeJob[area->GetType()->GetIndex()].areas.empty()) {
+      if (mergeJobs[area->GetType()->GetIndex()].areas.empty()) {
         typesWithAreas++;
       }
 
-      mergeJob[area->GetType()->GetIndex()].areas.push_back(area);
+      mergeJobs[area->GetType()->GetIndex()].areas.push_back(area);
 
       collectedAreasCount++;
 
@@ -276,9 +275,9 @@ namespace osmscout {
 
         // Find the type with the smallest amount of ways loaded
         for (const auto& loadedType : loadedTypes) {
-          if (!mergeJob[loadedType->GetIndex()].areas.empty() &&
+          if (!mergeJobs[loadedType->GetIndex()].areas.empty() &&
               (!victimType ||
-               mergeJob[loadedType->GetIndex()].areas.size()<mergeJob[victimType->GetIndex()].areas.size())) {
+               mergeJobs[loadedType->GetIndex()].areas.size()<mergeJobs[victimType->GetIndex()].areas.size())) {
             victimType=loadedType;
           }
         }
@@ -287,9 +286,9 @@ namespace osmscout {
         assert(victimType);
 
         // Correct the statistics
-        collectedAreasCount-=mergeJob[victimType->GetIndex()].areas.size();
+        collectedAreasCount-=mergeJobs[victimType->GetIndex()].areas.size();
         // Clear already loaded data of th victim type
-        mergeJob[victimType->GetIndex()].areas.clear();
+        mergeJobs[victimType->GetIndex()].areas.clear();
 
         typesWithAreas--;
         loadedTypes.Remove(victimType);
@@ -298,7 +297,7 @@ namespace osmscout {
 
     stopClock.Stop();
 
-    progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types in "+stopClock.ResultString());
+    progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(loadedTypes.Size())+" types in "+stopClock.ResultString()+" second(s)");
   }
 
   void MergeAreasGenerator::IndexAreasByNodeIds(const std::unordered_set<Id>& nodeUseMap,
@@ -461,14 +460,14 @@ namespace osmscout {
     return false;
   }
 
-  void MergeAreasGenerator::MergeAreas(Progress& progress,
-                                       const std::unordered_set<Id>& nodeUseMap,
-                                       AreaMergeData& job)
+  MergeAreasGenerator::AreaMergeResult MergeAreasGenerator::MergeAreas(Progress& progress,
+                                                                          AreaMergeJob& job)
   {
     std::unordered_map<Id,std::set<AreaRef> > idAreaMap;
     size_t                                    overallCount=job.areas.size();
+    AreaMergeResult                           mergeResult;
 
-    IndexAreasByNodeIds(nodeUseMap,
+    IndexAreasByNodeIds(job.nodeUseSet,
                         job.areas,
                         idAreaMap);
 
@@ -484,35 +483,36 @@ namespace osmscout {
       job.areas.pop_front();
 
       // This areas has already be "handled", ignore it
-      if (job.mergedAway.find(area->GetFileOffset())!=job.mergedAway.end()) {
+      if (mergeResult.mergedAway.find(area->GetFileOffset())!=mergeResult.mergedAway.end()) {
         continue;
       }
 
       // Delete all mentioning of this area in the idAreaMap cache
-      EraseAreaInCache(nodeUseMap,
+      EraseAreaInCache(job.nodeUseSet,
                        area,
                        idAreaMap);
 
       std::set<Id> finishedIds;
 
       // Now try to merge it against candidates that share the same ids.
-      if (TryMerge(nodeUseMap,
+      if (TryMerge(job.nodeUseSet,
                    *area,
                    idAreaMap,
                    finishedIds,
-                   job.mergedAway)) {
-        job.merges.push_back(area);
+                   mergeResult.mergedAway)) {
+        mergeResult.merges.push_back(area);
 
-        while (TryMerge(nodeUseMap,
+        while (TryMerge(job.nodeUseSet,
                         *area,
                         idAreaMap,
                         finishedIds,
-                        job.mergedAway)) {
+                        mergeResult.mergedAway)) {
           // no code
         }
       }
-
     }
+
+    return mergeResult;
   }
 
   void MergeAreasGenerator::WriteMergeResult(Progress& progress,
@@ -520,7 +520,7 @@ namespace osmscout {
                                              FileScanner& scanner,
                                              FileWriter& writer,
                                              const TypeInfoSet& loadedTypes,
-                                             std::vector<AreaMergeData>& mergeJob,
+                                             std::vector<AreaMergeResult>& mergeJob,
                                              uint32_t& areasWritten)
   {
     std::unordered_map<FileOffset,AreaRef> merges;
@@ -607,8 +607,7 @@ namespace osmscout {
       }
     }
 
-    std::vector<std::unordered_set<Id>> nodeUseMap(typeConfig->GetTypeCount());
-
+    std::vector<AreaMergeJob>  mergeJobs(typeConfig->GetTypeCount());
 
     try {
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -620,16 +619,16 @@ namespace osmscout {
                       *typeConfig,
                       scanner,
                       mergeTypes,
-                      nodeUseMap);
+                      mergeJobs);
 
       uint32_t areasWritten=0;
 
-      size_t nodeCount=std::accumulate(nodeUseMap.begin(),
-                                       nodeUseMap.end(),
+      size_t nodeCount=std::accumulate(mergeJobs.begin(),
+                                       mergeJobs.end(),
                                        0,
                                        [](size_t sum,
-                                          const std::unordered_set<Id>& value) {
-                                         return sum+value.size();
+                                          const AreaMergeJob& job) {
+                                         return sum+job.nodeUseSet.size();
                                        });
 
       progress.Info("Found "+std::to_string(nodeCount)+" nodes as possible connection points for areas");
@@ -642,8 +641,8 @@ namespace osmscout {
       writer.Write(areasWritten);
 
       while (true) {
-        TypeInfoSet                loadedTypes;
-        std::vector<AreaMergeData> mergeJob(typeConfig->GetTypeCount());
+        TypeInfoSet                  loadedTypes;
+        std::vector<AreaMergeResult> mergeResult(typeConfig->GetTypeCount());
 
         //
         // Load type data
@@ -654,10 +653,9 @@ namespace osmscout {
                  *typeConfig,
                  mergeTypes,
                  loadedTypes,
-                 nodeUseMap,
                  scanner,
                  writer,
-                 mergeJob,
+                 mergeJobs,
                  areasWritten);
 
         // Merge
@@ -667,22 +665,21 @@ namespace osmscout {
         StopClock stopClock;
 
         for (const auto& type : loadedTypes) {
-          if (!mergeJob[type->GetIndex()].areas.empty()) {
+          if (!mergeJobs[type->GetIndex()].areas.empty()) {
             progress.Info("Merging areas of type "+type->GetName());
 
-            StopClock stopClock;
+            StopClock mergeStopClock;
 
-            MergeAreas(progress,
-                       nodeUseMap[type->GetIndex()],
-                       mergeJob[type->GetIndex()]);
+            mergeResult[type->GetIndex()]=MergeAreas(progress,
+                                                     mergeJobs[type->GetIndex()]);
 
-            mergeJob[type->GetIndex()].areas.clear();
+            mergeJobs[type->GetIndex()].areas.clear();
 
-            stopClock.Stop();
+            mergeStopClock.Stop();
             progress.Info(
-              "Reduced areas of '"+type->GetName()+"' from "+std::to_string(mergeJob[type->GetIndex()].areaCount)+
-              " to "+std::to_string(mergeJob[type->GetIndex()].areaCount-mergeJob[type->GetIndex()].mergedAway.size())+
-              " in "+stopClock.ResultString());
+              "Reduced areas of '"+type->GetName()+"' from "+std::to_string(mergeJobs[type->GetIndex()].areaCount)+
+              " to "+std::to_string(mergeJobs[type->GetIndex()].areaCount-mergeResult[type->GetIndex()].mergedAway.size())+
+              " in "+mergeStopClock.ResultString()+" second(s)");
 
           }
         }
@@ -695,7 +692,7 @@ namespace osmscout {
                            scanner,
                            writer,
                            loadedTypes,
-                           mergeJob,
+                           mergeResult,
                            areasWritten);
 
           mergeTypes.Remove(loadedTypes);

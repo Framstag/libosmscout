@@ -50,13 +50,20 @@ namespace osmscout {
 
   private:
     /**
-     * Data structure holding all information for merging
-     * areas of one type
+     * Input for a merge job for one area type
      */
-    struct AreaMergeData
+    struct AreaMergeJob
     {
+      std::unordered_set<Id>         nodeUseSet;
       size_t                         areaCount;  //!< Number of areas of this type
       std::list<AreaRef>             areas;      //!< List of areas that are candidates for merging
+    };
+
+    /**
+     * Result of the merge job for one area type
+     */
+    struct AreaMergeResult
+    {
       std::list<AreaRef>             merges;     //!< List of areas that got merged
       std::unordered_set<FileOffset> mergedAway; //!< List of file offsets of areas, that were merged into another area
     };
@@ -86,14 +93,14 @@ namespace osmscout {
      *   TypeConfiguration
      * @param mergeTypes
      *   Set of types for which we do area merging
-     * @param nodeUseMap
-     *   special structure to track multiple use of the same node id. We have one map for each type.
+     * @param mergeJobs
+     *   track data for the area merge job
      */
     void ScanAreaNodeIds(Progress& progress,
                          const TypeConfig& typeConfig,
                          FileScanner& scanner,
                          const TypeInfoSet& mergeTypes,
-                         std::vector<std::unordered_set<Id>>& nodeUseMap);
+                         std::vector<AreaMergeJob>& mergeJobs);
 
     /**
      * Load all areas which have at least one of the "used at least twice"
@@ -111,14 +118,12 @@ namespace osmscout {
      *   Set of types which should be loaded
      * @param loadedTypes
      *   Set of types which have been loaded
-     * @param nodeUseMap
-     *   Array of NodeUseMaps
      * @param scanner
      *   File Scanner for reading the area data
      * @param writer
      *   File writer for the writing area data which
      *   are of a type that is not marked as mergable
-     * @param mergeJob
+     * @param mergeJobs
      * data structure for merging areas of one type, here passed to return
      * all merge candidates in 'areas'
      * @param areasWritten
@@ -130,10 +135,9 @@ namespace osmscout {
                   const TypeConfig& typeConfig,
                   const TypeInfoSet& candidateTypes,
                   TypeInfoSet& loadedTypes,
-                  const std::vector<std::unordered_set<Id>>& nodeUseMap,
                   FileScanner& scanner,
                   FileWriter& writer,
-                  std::vector<AreaMergeData>& mergeJob,
+                  std::vector<AreaMergeJob>& mergeJobs,
                   uint32_t& areasWritten);
 
     /**
@@ -160,21 +164,19 @@ namespace osmscout {
     /**
      * Merge area data of one type
      *
+     * @param progress
      * @param nodeUseMap
-     * @param areas
-     * @param merges
-     * @param blacklist
+     * @param job
      */
-    void MergeAreas(Progress& progress,
-                    const std::unordered_set<Id>& nodeUseMap,
-                    AreaMergeData& job);
+    AreaMergeResult MergeAreas(Progress& progress,
+                               AreaMergeJob& job);
 
     void WriteMergeResult(Progress& progress,
                           const TypeConfig& typeConfig,
                           FileScanner& scanner,
                           FileWriter& writer,
                           const TypeInfoSet& loadedTypes,
-                          std::vector<AreaMergeData>& mergeJob,
+                          std::vector<AreaMergeResult>& mergeJob,
                           uint32_t& areasWritten);
 
   public:
