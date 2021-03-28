@@ -106,13 +106,15 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   QQmlEngine *engine = qmlEngine(this);
   if (equalsFn.isCallable()){
     // try to merge locations that are equals
-    auto Equal = [&](LocationEntry &a, const LocationEntry &b) -> bool {
+    auto Equal = [&](const LocationEntry &a, const LocationEntry &b) -> bool {
       if (a.getLabel()==b.getLabel() &&
           a.getDatabase()==b.getDatabase() &&
           a.getType()==LocationEntry::typeObject &&
           b.getType()==LocationEntry::typeObject){
 
         QJSValueList args;
+        // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
+        assert(a.parent() == nullptr && b.parent() == nullptr);
         args << engine->newQObject(new LocationEntry(a));
         args << engine->newQObject(new LocationEntry(b));
         QJSValue result = equalsFn.call(args);
