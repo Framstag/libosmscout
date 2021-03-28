@@ -26,6 +26,7 @@
 
 #include <osmscout/LocationDescriptionService.h>
 
+#include <cassert>
 #include <iostream>
 #include <string_view>
 
@@ -1693,42 +1694,42 @@ namespace osmscout {
     motorwayTypes.clear();
     motorwayLinkTypes.clear();
 
-    for (const auto p:nameReaders){
+    for (const auto& p:nameReaders){
       delete p.second;
     }
     nameReaders.clear();
 
-    for (const auto p:refReaders){
+    for (const auto& p:refReaders){
       delete p.second;
     }
     refReaders.clear();
 
-    for (const auto p:bridgeReaders){
+    for (const auto& p:bridgeReaders){
       delete p.second;
     }
     bridgeReaders.clear();
 
-    for (const auto p:roundaboutReaders){
+    for (const auto& p:roundaboutReaders){
       delete p.second;
     }
     roundaboutReaders.clear();
 
-    for (const auto p:destinationReaders){
+    for (const auto& p:destinationReaders){
       delete p.second;
     }
     destinationReaders.clear();
 
-    for (const auto p:maxSpeedReaders){
+    for (const auto& p:maxSpeedReaders){
       delete p.second;
     }
     maxSpeedReaders.clear();
 
-    for (const auto p:lanesReaders){
+    for (const auto& p:lanesReaders){
       delete p.second;
     }
     lanesReaders.clear();
 
-    for (const auto p:accessReaders){
+    for (const auto& p:accessReaders){
       delete p.second;
     }
     accessReaders.clear();

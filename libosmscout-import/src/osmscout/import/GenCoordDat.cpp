@@ -483,7 +483,7 @@ namespace osmscout {
         return false;
       }
 
-      for (const PageEntry entry : page) {
+      for (const PageEntry& entry : page) {
         if (entry.isSet) {
           writer.Write(entry.point.GetSerial());
           writer.WriteCoord(entry.point.GetCoord());
@@ -569,7 +569,7 @@ namespace osmscout {
         // Write Index
 
         writer.Write((uint32_t)pageFileOffsetIndex.size());
-        for (const auto entry : pageFileOffsetIndex) {
+        for (const auto& entry : pageFileOffsetIndex) {
           writer.Write(entry.first);
           writer.Write(entry.second);
         }
