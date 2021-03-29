@@ -43,12 +43,6 @@ NearPOIModel::NearPOIModel()
 
 NearPOIModel::~NearPOIModel()
 {
-  for (QList<LocationEntry*>::iterator location=locations.begin();
-       location!=locations.end();
-       ++location) {
-      delete *location;
-  }
-
   locations.clear();
 
   if (breaker){
@@ -68,7 +62,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  LocationEntry* location=locations.at(index.row());
+  LocationEntryRef location=locations.at(index.row());
 
   switch (role) {
     case Qt::DisplayRole:
@@ -139,7 +133,7 @@ QObject* NearPOIModel::get(int row) const
     return nullptr;
   }
 
-  LocationEntry* location=locations.at(row);
+  LocationEntryRef location=locations.at(row);
   // QML will take ownership
   return new LocationEntry(*location);
 }
@@ -169,7 +163,7 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
     if (distance > maxDistance){
       continue;
     }
-    for (LocationEntry* secondLocation:locations) {
+    for (const LocationEntryRef& secondLocation:qAsConst(locations)) {
       if (distance < osmscout::GetSphericalDistance(secondLocation->getCoord(), searchCenter)){
         break;
       }
@@ -182,7 +176,7 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
     }
 
     emit beginInsertRows(QModelIndex(), position, position);
-    locations.insert(position, new LocationEntry(location));
+    locations.insert(position, std::make_shared<LocationEntry>(location));
     qDebug() << "Put " << location.getObjectType() << location.getLabel() << " to position: " << position << "(distance" << distance.AsMeter() << " m)";
     emit endInsertRows();
   }
@@ -196,12 +190,6 @@ void NearPOIModel::lookupPOI()
 
   if (!locations.isEmpty()){
     beginResetModel();
-    for (QList<LocationEntry*>::iterator location=locations.begin();
-         location!=locations.end();
-         ++location) {
-      delete *location;
-    }
-
     locations.clear();
     endResetModel();
     emit countChanged(locations.size());
