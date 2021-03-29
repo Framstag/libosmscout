@@ -71,29 +71,6 @@ namespace osmscout {
 
   private:
     /**
-     * Scan all areas for node ids that occur in more than one area. Only areas with
-     * nodes that are used in other areas, too, are candidates for merging.
-     *
-     * We only take nodes in the outer rings into account.
-     *
-     * @param parameter
-     *   ImportParameter
-     * @param progress
-     *   Progress
-     * @param typeConfig
-     *   TypeConfiguration
-     * @param mergeTypes
-     *   Set of types for which we do area merging
-     * @param mergeJobs
-     *   track data for the area merge job
-     */
-    void ScanAreaNodeIds(Progress& progress,
-                         const TypeConfig& typeConfig,
-                         FileScanner& scanner,
-                         const TypeInfoSet& mergeTypes,
-                         std::vector<AreaMergeJob>& mergeJobs);
-
-    /**
      * Load all areas which have at least one of the "used at least twice"
      * nodes in its nodeUseMap for all given types. If the number of areas
      * increases over a certain limit, data of some types is dropped

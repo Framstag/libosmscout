@@ -385,16 +385,32 @@ namespace osmscout {
   }
 
   /**
-   * Scans all areas. If an area is of one of the given merge types, index all node ids
-   * into the given NodeUseMap for all outer rings of the given area.
+   * Scan all areas for node ids that occur in more than one area. Only areas with
+   * nodes that are used in other areas, too, are candidates for merging.
+   *
+   * We only take nodes in the outer rings into account.
+   *
+   * @param progress
+   *   Progress
+   * @param typeConfig
+   *   TypeConfiguration
+   * @param scanner
+   *    FileScanner for area data
+   * @param mergeTypes
+   *   Set of types for which we do area merging
    */
-  void MergeAreasGenerator::ScanAreaNodeIds(Progress& progress,
-                                            const TypeConfig& typeConfig,
-                                            FileScanner& scanner,
-                                            const TypeInfoSet& mergeTypes,
-                                            std::vector<AreaMergeJob>& mergeJobs)
+  static std::vector<AreaMergeJob> ScanAreaNodeIds(Progress& progress,
+                                                   const TypeConfig& typeConfig,
+                                                   FileScanner& scanner,
+                                                   const TypeInfoSet& mergeTypes)
   {
     progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
+
+    std::vector<AreaMergeJob> mergeJobs(typeConfig.GetTypeCount());
+
+    for (const auto& type : typeConfig.GetTypes()) {
+      mergeJobs[type->GetIndex()].type=type;
+    }
 
     StopClock stopClock;
 
@@ -451,6 +467,7 @@ namespace osmscout {
 
     progress.Info("Scanning took "+stopClock.ResultString()+ " second(s)");
 
+    return mergeJobs;
   }
 
   /**
@@ -676,14 +693,10 @@ namespace osmscout {
     FileScanner scanner;
     FileWriter  writer;
 
-    std::vector<AreaMergeJob>  mergeJobs(typeConfig->GetTypeCount());
-
     for (const auto& type : typeConfig->GetTypes()) {
       if (type->CanBeArea() &&
           type->GetMergeAreas()) {
         mergeTypes.Set(type);
-
-        mergeJobs[type->GetIndex()].type=type;
       }
     }
 
@@ -694,11 +707,10 @@ namespace osmscout {
                    FileScanner::Sequential,
                    parameter.GetRawWayDataMemoryMaped());
 
-      ScanAreaNodeIds(progress,
-                      *typeConfig,
-                      scanner,
-                      mergeTypes,
-                      mergeJobs);
+      std::vector<AreaMergeJob> mergeJobs=ScanAreaNodeIds(progress,
+                                                          *typeConfig,
+                                                          scanner,
+                                                          mergeTypes);
 
       uint32_t areasWritten=0;
 
@@ -753,11 +765,24 @@ namespace osmscout {
                                                                     queue2));
           }
 
-          // Push all jobs
+          std::vector<AreaMergeJob> mergeJobList;
+
           for (const auto& type : loadedTypes) {
             if (!mergeJobs[type->GetIndex()].areas.empty()) {
-              queue1.PushTask(mergeJobs[type->GetIndex()]);
+              mergeJobList.push_back(std::move(mergeJobs[type->GetIndex()]));
             }
+          }
+
+          std::sort(mergeJobList.begin(),
+                    mergeJobList.end(),
+                    [](const AreaMergeJob& a,
+                       const AreaMergeJob& b) {
+                      return a.areas.size()>b.areas.size();
+                    });
+
+          // Push all jobs
+          for (auto& job : mergeJobList) {
+            queue1.PushTask(std::move(job));
           }
 
           // All jobs pushed
