@@ -43,4 +43,10 @@ to common online providers. Can be used on desktop or mobile.
     <td>Low activity (3 commits in last year)</td>
     <td>offline map, map downloads, search, routing</td>
   </tr>
+  <tr>
+    <td><strong>OSMin for Android</strong></td>
+    <td><a href="https://github.com/janbar/osmin">Github: janbar/osmin</a></td>
+    <td>Active</td>
+    <td>offline map, place address, routing, tracking</td>
+  </tr>
 </table>
