@@ -107,7 +107,7 @@ public slots:
 private:
   bool searching{false};
   int currentRequest{0};
-  QList<LocationEntry*> locations;
+  QList<LocationEntryRef> locations;
   osmscout::GeoCoord searchCenter{INVALID_COORD,INVALID_COORD};
   int resultLimit{100};
   osmscout::BreakerRef breaker;

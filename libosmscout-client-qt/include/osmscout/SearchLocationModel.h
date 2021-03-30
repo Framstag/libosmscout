@@ -144,7 +144,7 @@ public slots:
 private:
   QString pattern;
   QString lastRequestPattern;
-  QList<LocationEntry*> locations;
+  QList<LocationEntryRef> locations;
   bool searching;
   SearchModule* searchModule;
   LookupModule* lookupModule;
