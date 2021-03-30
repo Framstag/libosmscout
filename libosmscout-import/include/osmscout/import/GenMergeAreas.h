@@ -88,15 +88,9 @@ namespace osmscout {
      *   Set of types which have been loaded
      * @param scanner
      *   File Scanner for reading the area data
-     * @param writer
-     *   File writer for the writing area data which
-     *   are of a type that is not marked as mergable
      * @param mergeJobs
      * data structure for merging areas of one type, here passed to return
      * all merge candidates in 'areas'
-     * @param areasWritten
-     *   Number of areas directly written, because they
-     *   are of a type that is not marked as mergable
      */
     void GetAreas(const ImportParameter& parameter,
                   Progress& progress,
@@ -104,16 +98,14 @@ namespace osmscout {
                   const TypeInfoSet& candidateTypes,
                   TypeInfoSet& loadedTypes,
                   FileScanner& scanner,
-                  FileWriter& writer,
-                  std::vector<AreaMergeJob>& mergeJobs,
-                  uint32_t& areasWritten);
+                  std::vector<AreaMergeJob>& mergeJobs);
 
     void WriteMergeResult(Progress& progress,
                           const TypeConfig& typeConfig,
                           FileScanner& scanner,
                           FileWriter& writer,
                           const TypeInfoSet& loadedTypes,
-                          std::vector<AreaMergeResult>& mergeJob,
+                          const std::vector<AreaMergeResult>& mergeJob,
                           uint32_t& areasWritten);
 
   public:
