@@ -98,7 +98,7 @@ public:
   using Roles = RouteStep::Roles;
 
 public:
-  RoutingListModel(QObject* parent = 0);
+  explicit RoutingListModel(QObject* parent = 0);
   virtual ~RoutingListModel();
 
   QVariant data(const QModelIndex &index, int role) const;

@@ -79,7 +79,12 @@ public:
                 const osmscout::GeoCoord& coord,
                 QObject* parent = nullptr);
 
-  LocationEntry(QObject* parent = nullptr);
+  explicit LocationEntry(QObject* parent = nullptr);
+
+  /**
+   * copy constructor, note that it copy Qt ownership
+   * @param other
+   */
   LocationEntry(const LocationEntry& other);
   ~LocationEntry() override = default;
 

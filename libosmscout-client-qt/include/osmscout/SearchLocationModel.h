@@ -169,7 +169,7 @@ public:
   };
 
 public:
-  LocationListModel(QObject* parent = nullptr);
+  explicit LocationListModel(QObject* parent = nullptr);
   ~LocationListModel() override;
 
   QJSValue getCompare() const {
