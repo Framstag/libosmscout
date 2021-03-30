@@ -111,6 +111,8 @@ void LocationListModel::onSearchResult(const QString searchPattern,
           b->getType()==LocationEntry::typeObject){
 
         QJSValueList args;
+        // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
+        assert(a->parent() == nullptr && b->parent() == nullptr);
         args << engine->newQObject(new LocationEntry(*a));
         args << engine->newQObject(new LocationEntry(*b));
         QJSValue result = equalsFn.call(args);
@@ -172,6 +174,8 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     auto Compare = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
       assert(a != nullptr && a->parent() == nullptr && b != nullptr && b->parent() == nullptr);
       QJSValueList args;
+      // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
+      assert(a->parent() == nullptr && b->parent() == nullptr);
       args << engine->newQObject(new LocationEntry(*a));
       args << engine->newQObject(new LocationEntry(*b));
       QJSValue result = compareFn.call(args);
