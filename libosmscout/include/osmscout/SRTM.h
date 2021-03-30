@@ -29,43 +29,47 @@
  */
 
 #include <string>
-#include <fstream>
+
+#include <osmscout/GeoCoord.h>
 
 #include <osmscout/OSMScoutTypes.h>
 
-#define SRTM1_GRID 3601
-#define SRTM3_GRID 1201
-#define SRTM1_FILESIZE (SRTM1_GRID*SRTM1_GRID*2)
-#define SRTM3_FILESIZE (SRTM3_GRID*SRTM3_GRID*2)
+#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
 
-    /**
-     * Read elevation data in hgt format
-     */
-    class OSMSCOUT_API SRTM
-    {
-    public:
-        static size_t rows;
-        static size_t columns;
-        static size_t patchSize;
+  /**
+   * Read elevation data in hgt format
+   */
+  class OSMSCOUT_API SRTM
+  {
+  public:
+    static const int32_t nodata=-32768;
 
-        static const int nodata = -32768;
+  private:
+    std::string srtmPath;
+    std::string currentFilename;
+    size_t      rows;
+    size_t      columns;
+    size_t      patchSize;
+    uint8_t     *heights;
 
-    private:
-        std::string     srtmPath;
-        std::string     currentFilename;
-        std::ifstream   currentFile;
-        int             currentPatchLat;
-        int             currentPatchLon;
-        unsigned char   *heights;
+  private:
+    bool AssureCorrectFileLoaded(double latitude,
+                                 double longitude);
 
-    public:
-        explicit SRTM(const std::string &path);
-        virtual ~SRTM();
-        const std::string& srtmFilename(int patchLat, int patchLon);
-        int heightAtLocation(double latitude, double longitude);
-    };
+    std::string CalculateHGTFilename(int patchLat,
+                                     int patchLon) const;
+  public:
+    explicit SRTM(const std::string& path);
+
+    virtual ~SRTM();
+
+    int32_t GetHeightAtLocation(double latitude,
+                                double longitude);
+
+    int32_t GetHeightAtLocation(const GeoCoord& coord);
+  };
 }
 
 #endif

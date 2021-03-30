@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   double longitude = atof(argv[3]);
 
   osmscout::SRTM srtm(srtmDir);
-  int h = srtm.heightAtLocation(latitude, longitude);
+  int h = srtm.GetHeightAtLocation(latitude, longitude);
   if(h!=osmscout::SRTM::nodata){
     std::cout<<"Height at ("<<latitude<<","<<longitude<<") = "<<h<<" m"<<std::endl;
   } else {
