@@ -95,16 +95,16 @@ void LocationListModel::onSearchResult(const QString searchPattern,
 
   int equalityCall=0;
   int comparisonsCall=0;
+  int filtered=0;
 
-  QList<LocationEntryRef> foundLocations;
+  QList<LocationEntry*> foundLocations;
   for (const LocationEntry& e : foundLocationsConst)
-    foundLocations.push_back(std::make_shared<LocationEntry>(e));
+    foundLocations.push_back(new LocationEntry(e));
 
   QQmlEngine *engine = qmlEngine(this);
   if (equalsFn.isCallable()){
     // try to merge locations that are equals
-    auto Equal = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
-      assert(a != nullptr && a->parent() == nullptr && b != nullptr && b->parent() == nullptr);
+    auto Equal = [&](const LocationEntry* a, const LocationEntry* b) -> bool {
       if (a->getLabel()==b->getLabel() &&
           a->getDatabase()==b->getDatabase() &&
           a->getType()==LocationEntry::typeObject &&
@@ -139,6 +139,8 @@ void LocationListModel::onSearchResult(const QString searchPattern,
         }
       }
       if (merged) {
+        // free the found location that was merged
+        delete *locA;
         locA = foundLocations.erase(locA);
       } else {
         ++locA;
@@ -149,7 +151,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
       int index=0;
       bool merged=false;
       for (LocationEntryRef& modelLocation:locations) {
-        if (Equal(modelLocation, *newLocation)){
+        if (Equal(modelLocation.get(), *newLocation)){
           // qDebug() << "Merge " << b.getLabel() << " to location " << a.getLabel();
           modelLocation->mergeWith(**newLocation);
           merged=true;
@@ -163,6 +165,8 @@ void LocationListModel::onSearchResult(const QString searchPattern,
         index++;
       }
       if (merged) {
+        // free the found location that was merged
+        delete *newLocation;
         newLocation = foundLocations.erase(newLocation);
       } else {
         ++newLocation;
@@ -171,8 +175,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   }
 
   if (compareFn.isCallable()){
-    auto Compare = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
-      assert(a != nullptr && a->parent() == nullptr && b != nullptr && b->parent() == nullptr);
+    auto Compare = [&](const LocationEntry* a, const LocationEntry* b) -> bool {
       QJSValueList args;
       // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
       assert(a->parent() == nullptr && b->parent() == nullptr);
@@ -197,11 +200,16 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     auto position = 0;
     auto positionIt = locations.begin();
     for (auto &location : foundLocations) {
-      if (positionIt == locations.end() || Compare(location, *positionIt)){
+      if (positionIt == locations.end() || Compare(location, positionIt->get())){
         emit beginInsertRows(QModelIndex(), position, position);
-        positionIt = locations.insert(positionIt, location);
+        // no need to reallocate, only transfer the ownership of the found location
+        positionIt = locations.insert(positionIt, LocationEntryRef(location));
         // qDebug() << "Put " << location.getLabel() << " to position: " << position;
         emit endInsertRows();
+      } else {
+        // free the location found that does not match the filter
+        delete location;
+        ++filtered;
       }
       ++positionIt;
       ++position;
@@ -211,7 +219,8 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     if (!foundLocations.empty()) {
       emit beginInsertRows(QModelIndex(), locations.size(), locations.size() + foundLocations.size() - 1);
       for (auto &location : foundLocations) {
-        locations.push_back(location);
+        // no need to reallocate, only transfer the ownership of the found location
+        locations.push_back(LocationEntryRef(location));
       }
       emit endInsertRows();
     }
@@ -219,7 +228,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
 
   emit countChanged(locations.size());
   qDebug() << "new" << foundLocationsConst.size()
-           << "added" << foundLocations.size()
+           << "added" << (foundLocations.size() - filtered)
            << "(in" << timer.elapsed() << "ms,"
            << "equal" << equalityCall << "x, compare" << comparisonsCall << "x),"
            << "model size" << locations.size();
