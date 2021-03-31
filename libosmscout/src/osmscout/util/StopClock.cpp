@@ -24,8 +24,8 @@
 
 namespace osmscout {
 
-  typedef std::chrono::duration<double,std::milli> MilliDouble;
-  typedef std::chrono::duration<double,std::nano>  NanoDouble;
+  using MilliDouble = std::chrono::duration<double, std::milli>;
+  using NanoDouble = std::chrono::duration<double, std::nano>;
 
   StopClock::StopClock()
    : start(std::chrono::steady_clock::now()),
