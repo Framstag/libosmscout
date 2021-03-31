@@ -24,26 +24,31 @@ IF %COMPILER%==msys2 (
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
   echo Updating pacman...
-  bash -lc "pacman -S --needed --noconfirm pacman-mirrors"
-  bash -lc "pacman -Syyu --noconfirm"
+  bash -lc "pacman --noconfirm -Syuu --overwrite *"
+
+  echo Killing pacman...
+  taskkill.exe /F /FI "MODULES eq msys-2.0.dll
+
+  echo Updating system...
+  bash -lc "pacman --noconfirm -Syuu --overwrite *"
 
   echo Installing git...
-  bash -lc "pacman -S --needed --noconfirm git"
+  bash -lc "pacman --noconfirm -S --needed git"
 
   IF %BUILDTOOL%==meson (
     echo Installing ninja and meson build tool...
-    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-meson"
+    bash -lc "pacman --noconfirm -S --needed mingw-w64-%MSYS2_ARCH%-meson mingw-w64-x86_64-ninja"
   )
 
   IF %BUILDTOOL%==cmake (
     echo Installing cmake build tool...
-    bash -lc "pacman -S --needed --noconfirm make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
+    bash -lc "pacman --noconfirm -S --needed make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"
   )
 
   echo Installing build and compile time dependencies...
 
   IF %TARGET%==importer (
-    bash -lc "pacman -S --needed --noconfirm mingw-w64-%MSYS2_ARCH%-toolchain mingw-w64-%MSYS2_ARCH%-libtool mingw-w64-%MSYS2_ARCH%-libiconv mingw-w64-%MSYS2_ARCH%-libxml2 zip"
+    bash -lc "pacman --noconfirm -S --needed mingw-w64-%MSYS2_ARCH%-toolchain mingw-w64-%MSYS2_ARCH%-libtool mingw-w64-%MSYS2_ARCH%-libiconv mingw-w64-%MSYS2_ARCH%-libxml2 zip"
 
     cinst wget -x86
 
