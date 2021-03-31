@@ -26,6 +26,7 @@
  */
 
 #include <cstdlib>
+#include <fstream>
 #include <ostream>
 #include <sstream>
 
@@ -34,115 +35,162 @@
 #include <osmscout/util/Logger.h>
 
 #include <osmscout/system/Math.h>
-#include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
 
-  size_t SRTM::rows = SRTM3_GRID;
-  size_t SRTM::columns = SRTM3_GRID;
-  size_t SRTM::patchSize = 2*rows*columns;
+#define SRTM1_GRID 3601
+#define SRTM3_GRID 1201
+#define SRTM1_FILESIZE (SRTM1_GRID*SRTM1_GRID*2)
+#define SRTM3_FILESIZE (SRTM3_GRID*SRTM3_GRID*2)
 
-  SRTM::SRTM(const std::string &path){
-    srtmPath = path;
-    currentFilename = "";
-    heights =nullptr;
+  SRTM::SRTM(const std::string& path)
+  : srtmPath(path),
+    heights(nullptr)
+  {
   }
 
-  SRTM::~SRTM(){
+  SRTM::~SRTM()
+  {
     delete heights;
   }
 
   /**
    * generate SRTM3 filename like N43E006.hgt from integer part of latitude and longitude
    */
-  const std::string& SRTM::srtmFilename(int patchLat, int patchLon){
+  std::string SRTM::CalculateHGTFilename(int patchLat,
+                                         int patchLon) const
+  {
     std::ostringstream fileName;
-    if(patchLat>=0){
-      fileName << "N";
-    } else {
-      fileName << "S";
-      patchLat = std::abs(patchLat);
-    }
-    if(patchLat<10){
-      fileName<<"0";
-    }
-    fileName << patchLat;
-    if(patchLon>=0){
-      fileName << "E";
-    } else {
-      fileName << "W";
-      patchLon = std::abs(patchLon);
-    }
-    if(patchLon<10){
-      fileName<<"0";
-    }
-    if(patchLon<100){
-      fileName<<"0";
-    }
-    fileName << patchLon << ".hgt";
 
-    return *(new std::string(fileName.str()));
+    if (patchLat>=0) {
+      fileName << "N";
+    }
+    else {
+      fileName << "S";
+      patchLat=std::abs(patchLat);
+    }
+
+    if (patchLat<10) {
+      fileName << "0";
+    }
+
+    fileName << patchLat;
+
+    if (patchLon>=0) {
+      fileName << "E";
+    }
+    else {
+      fileName << "W";
+      patchLon=std::abs(patchLon);
+    }
+
+    if (patchLon<10) {
+      fileName << "0";
+    }
+
+    if (patchLon<100) {
+      fileName << "0";
+    }
+
+    fileName << patchLon;
+
+    fileName << ".hgt";
+
+    return fileName.str();
+  }
+
+  bool SRTM::AssureCorrectFileLoaded(double latitude,
+                                     double longitude)
+  {
+    int         patchLat     =int(floor(latitude));
+    int         patchLon     =int(floor(longitude));
+    std::string patchFilename=CalculateHGTFilename(patchLat,
+                                                   patchLon);
+
+    if (currentFilename==patchFilename) {
+      return heights!=nullptr;
+    }
+
+    std::istream::pos_type length;
+
+    currentFilename=patchFilename;
+
+    if (heights!=nullptr) {
+      delete heights;
+      heights=nullptr;
+    }
+
+    std::ifstream currentFile;
+
+    currentFile.open(srtmPath+"/"+currentFilename,
+                     std::ios::in | std::ios::binary | std::ios::ate);
+
+    if (!currentFile.std::ios::good()) {
+      currentFile.close();
+      return false;
+    }
+
+    length=currentFile.tellg();
+    currentFile.seekg(0,
+                      std::ios::beg);
+
+    if (length==(std::istream::pos_type) SRTM1_FILESIZE) {
+      rows   =SRTM1_GRID;
+      columns=SRTM1_GRID;
+      patchSize=SRTM1_FILESIZE;
+      log.Debug() << "Open SRTM1 hgt file: " << (srtmPath+"/"+currentFilename).c_str();
+    }
+    else if (length==(std::istream::pos_type) SRTM3_FILESIZE) {
+      rows   =SRTM3_GRID;
+      columns=SRTM3_GRID;
+      patchSize=SRTM3_FILESIZE;
+      log.Debug() << "Open SRTM3 hgt file: " << (srtmPath+"/"+currentFilename).c_str();
+    }
+    else {
+      return false;
+    }
+
+    heights=new uint8_t[SRTM::patchSize];
+
+    currentFile.read((char*) heights,
+                     SRTM::patchSize);
+
+    if (!currentFile.std::ios::good()) {
+      delete[] heights;
+      heights=nullptr;
+      currentFile.close();
+
+      return false;
+    }
+
+    currentFile.close();
+
+    return true;
   }
 
   /**
    * return the height at (latitude,longitude) or SRTM::nodata if no data at the location
    */
-  int SRTM::heightAtLocation(double latitude, double longitude){
-    int patchLat = int(floor(latitude));
-    int patchLon = int(floor(longitude));
-    std::string patchFilename = srtmFilename(patchLat, patchLon);
-    if(currentFilename.empty() || currentFilename != patchFilename){
-      std::istream::pos_type length;
-
-      currentFilename = patchFilename;
-      currentPatchLat = patchLat;
-      currentPatchLon = patchLon;
-
-      if(heights){
-        delete heights;
-        heights =nullptr;
-      }
-
-      if(currentFile.is_open()){
-        currentFile.close();
-      }
-      currentFile.open((srtmPath+"/"+currentFilename).c_str(), std::ios::in|std::ios::binary|std::ios::ate);
-      if(currentFile.std::ios::good()){
-        length = currentFile.tellg();
-        currentFile.seekg (0, std::ios::beg);
-      } else {
-        return SRTM::nodata;
-      }
-      if(length == (std::istream::pos_type)SRTM1_FILESIZE){
-        rows = SRTM1_GRID;
-        columns = SRTM1_GRID;
-        patchSize = SRTM1_FILESIZE;
-        log.Info() << "Open SRTM1 hgt file : "<<(srtmPath+"/"+currentFilename).c_str();
-      } else if (length == (std::istream::pos_type)SRTM3_FILESIZE){
-        rows = SRTM3_GRID;
-        columns = SRTM3_GRID;
-        patchSize = SRTM3_FILESIZE;
-        log.Info() << "Open SRTM3 hgt file : "<<(srtmPath+"/"+currentFilename).c_str();
-      } else {
-        return SRTM::nodata;
-      }
-      if(!heights){
-        heights = new unsigned char[SRTM::patchSize];
-      }
-      currentFile.read((char *)heights,SRTM::patchSize);
+  int32_t SRTM::GetHeightAtLocation(double latitude,
+                                    double longitude)
+  {
+    if (!AssureCorrectFileLoaded(latitude,
+                                 longitude)) {
+      return nodata;
     }
-    if(currentFile.std::ios::good()){
-      [[maybe_unused]] double pixelSize = 1.0/(SRTM::rows-1);
-      double fracLat = latitude>=0.0 ? 1 - latitude + floor(latitude) : ceil(latitude) - latitude;
-      double fracLon = longitude>=0.0 ?  longitude - floor(longitude) : 1 - ceil(longitude) + longitude;
-      int col = int(floor(fracLon*SRTM::columns));
-      int col2 = col << 1;
-      int row = int(floor(fracLat*SRTM::rows));
 
-      int h1 = (heights[2*row*SRTM::columns+col2]<<8)+(heights[2*row*SRTM::columns+col2+1]);
+    if (heights!=nullptr) {
+      [[maybe_unused]] double pixelSize=1.0/double(SRTM::rows-1);
+      double                  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
+      double                  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
+      int                     col      =int(floor(fracLon*SRTM::columns));
+      int                     row      =int(floor(fracLat*SRTM::rows));
+
+      int32_t h1=(heights[2*row*SRTM::columns+2*col] << 8)+
+                 (heights[2*row*SRTM::columns+2*col+1]);
 
 #ifndef SRTM_BILINEAR_INTERPOLATION
-      return (int)floor(h1);
+      return (int32_t) floor(h1);
 #else
       int h2 = (heights[2*row*SRTM::columns+col2+2]<<8)+(heights[2*row*SRTM::columns+col2+3]);
       int h3 = (heights[2*(row+1)*SRTM::columns+col2]<<8)+(heights[2*(row+1)*SRTM::columns+col2+1]);
@@ -153,11 +201,16 @@ namespace osmscout {
       log.Info() << "fLat=" << fLat << " fLon=" << fLon;
 
       double h = h1*(1-fLat)*(1-fLon) + h2*fLat*(1-fLon) + h3*(1-fLat)*fLon + h4*fLat*fLon;
-      return (int)floor(h+0.5);
+      return (int32_t)floor(h+0.5);
 #endif
-    } else {
-      return SRTM::nodata;
     }
+
+    return nodata;
+  }
+
+  int32_t SRTM::GetHeightAtLocation(const GeoCoord& coord)
+  {
+    return GetHeightAtLocation(coord.GetLat(),coord.GetLon());
   }
 
 }
