@@ -68,10 +68,10 @@ namespace osmscout {
       for (uint32_t w=1; w<wayIdCount; w++) {
         progress.SetProgress(w,wayIdCount);
 
-        OSMId   id=wayIdScanner.ReadInt64();
-        uint8_t typeByte=wayIdScanner.ReadUInt8();
+        OSMId id=wayIdScanner.ReadInt64();
+        [[maybe_unused]] uint8_t typeByte=wayIdScanner.ReadUInt8();
 
-        assert((OSMRefType)typeByte==osmRefWay);
+        assert(static_cast<OSMRefType>(typeByte)==osmRefWay);
 
         FileOffset fileOffset=wayIdScanner.ReadFileOffset();
 
