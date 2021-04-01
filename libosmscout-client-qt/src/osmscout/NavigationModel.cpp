@@ -137,6 +137,7 @@ void NavigationModel::locationChanged(bool /*locationValid*/,
 
 QObject *NavigationModel::getRoute() const
 {
+  assert(route.parent()==nullptr); // Ownership is copied. To transfer ownership to QML, parent have to be null.
   return new QtRouteData(route);
 }
 

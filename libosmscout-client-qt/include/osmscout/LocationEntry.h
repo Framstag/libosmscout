@@ -81,12 +81,14 @@ public:
 
   explicit LocationEntry(QObject* parent = nullptr);
 
-  /**
-   * copy constructor, note that it copy Qt ownership
-   * @param other
-   */
+  //! copy constructor, Qt ownership is copied
   LocationEntry(const LocationEntry& other);
+  LocationEntry(LocationEntry&& other) = delete;
   ~LocationEntry() override = default;
+
+  //! copy assignment, Qt ownership is not changed
+  LocationEntry &operator=(LocationEntry& other);
+  LocationEntry &operator=(LocationEntry&& other) = delete;
 
   void operator=(const LocationEntry&);
 

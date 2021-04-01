@@ -98,8 +98,13 @@ public:
   using Roles = RouteStep::Roles;
 
 public:
-  explicit RoutingListModel(QObject* parent = 0);
+  explicit RoutingListModel(QObject* parent = nullptr);
+  RoutingListModel(const RoutingListModel&) = delete;
+  RoutingListModel(RoutingListModel&&) = delete;
   virtual ~RoutingListModel();
+
+  RoutingListModel& operator=(const RoutingListModel&) = delete;
+  RoutingListModel& operator=(RoutingListModel&&) = delete;
 
   QVariant data(const QModelIndex &index, int role) const;
 
@@ -148,6 +153,7 @@ public:
 
   inline QObject *getRoute() const
   {
+    assert(route.parent()==nullptr); // Ownership is copied. To transfer ownership to QML, parent have to be null.
     return new QtRouteData(route);
   }
 

@@ -52,18 +52,20 @@ private:
   PrivateDataRef data;
 
 public:
-  QtRouteData(QObject* parent=nullptr): QObject(parent) {};
-
-  QtRouteData(const QtRouteData &other, QObject* parent=nullptr);
+  explicit QtRouteData(QObject* parent=nullptr): QObject(parent) {};
+  //! copy constructor, Qt ownership is copied
+  QtRouteData(const QtRouteData &other);
 
   QtRouteData(osmscout::RouteDescription &&routeDescription,
               QList<RouteStep> &&routeSteps,
               osmscout::Way &&routeWay,
               QObject* parent=nullptr);
 
+  QtRouteData(QtRouteData &&) = delete;
   ~QtRouteData() override = default;
 
   QtRouteData& operator=(const QtRouteData&);
+  QtRouteData& operator=(const QtRouteData&&) = delete;
 
   inline operator bool() const {
     return (bool)data;
