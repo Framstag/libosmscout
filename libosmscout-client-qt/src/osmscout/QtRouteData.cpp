@@ -22,9 +22,8 @@
 
 namespace osmscout {
 
-QtRouteData::QtRouteData(const QtRouteData &other,
-                         QObject* parent):
-  QObject(parent)
+QtRouteData::QtRouteData(const QtRouteData &other):
+  QObject(other.parent())
 {
   data=other.data;
 }

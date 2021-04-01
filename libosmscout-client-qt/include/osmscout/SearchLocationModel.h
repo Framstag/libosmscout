@@ -170,7 +170,12 @@ public:
 
 public:
   explicit LocationListModel(QObject* parent = nullptr);
+  LocationListModel(const LocationListModel&) = delete;
+  LocationListModel(LocationListModel&&) = delete;
   ~LocationListModel() override;
+
+  LocationListModel& operator=(const LocationListModel&) = delete;
+  LocationListModel& operator=(LocationListModel&&) = delete;
 
   QJSValue getCompare() const {
     return compareFn;

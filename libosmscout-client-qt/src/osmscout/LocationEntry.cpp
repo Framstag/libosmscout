@@ -77,6 +77,19 @@ LocationEntry::LocationEntry(const LocationEntry& other)
     // no code
 }
 
+LocationEntry &LocationEntry::operator=(LocationEntry& other)
+{
+    type=other.type;
+    label=other.label;
+    objectType=other.objectType;
+    adminRegionList=other.adminRegionList;
+    database=other.database;
+    references=other.references;
+    coord=other.coord;
+    bbox=other.bbox;
+    return *this;
+}
+
 void LocationEntry::operator=(const LocationEntry& other)
 {
     type=other.type;
