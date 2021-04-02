@@ -39,6 +39,15 @@
 namespace osmscout {
 
   /**
+   * Class to allows transformation of geometric primitives form geo coordinate to display
+   * coordinates using the passed Projection instance.
+   *
+   * A number of optimizations on the resulting display coordinates objects can be triggered to
+   * reduce the number of to-be-rendered pixels.
+   *
+   * In one pass only one geometric primitive can be transformed, however to reduce memory allocation
+   * and reallocation TransPolygon can be reused.
+   *
    * \ingroup Geometry
    */
   class OSMSCOUT_API TransPolygon CLASS_FINAL
@@ -95,10 +104,32 @@ namespace osmscout {
     TransPoint* points;
 
   private:
-    void TransformGeoToPixel(const Projection& projection,
-                             const std::vector<GeoCoord>& nodes);
-    void TransformGeoToPixel(const Projection& projection,
-                             const std::vector<Point>& nodes);
+    template <typename C>
+    void  TransformGeoToPixel(const Projection& projection,
+                              const C& nodes)
+    {
+      Projection::BatchTransformer batchTransformer(projection);
+
+      if (!nodes.empty()) {
+        start=0;
+        length=nodes.size();
+        end=length-1;
+
+        for (size_t i=start; i<=end; i++) {
+          batchTransformer.GeoToPixel(nodes[i].GetLon(),
+                                      nodes[i].GetLat(),
+                                      points[i].x,
+                                      points[i].y);
+          points[i].draw=true;
+        }
+      }
+      else {
+        start=0;
+        end=0;
+        length=0;
+      }
+    }
+
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
@@ -129,27 +160,121 @@ namespace osmscout {
       return end;
     }
 
+    template<typename C>
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
-                       const std::vector<GeoCoord>& nodes,
+                       const C& nodes,
                        double optimizeErrorTolerance,
-                       OutputConstraint constraint=noConstraint);
-    void TransformArea(const Projection& projection,
-                       OptimizeMethod optimize,
-                       const std::vector<Point>& nodes,
-                       double optimizeErrorTolerance,
-                       OutputConstraint constraint=noConstraint);
+                       OutputConstraint constraint=noConstraint)
+    {
+      if (nodes.size()<2) {
+        length=0;
 
+        return;
+      }
+
+      if (pointsSize<nodes.size()) {
+        delete[] points;
+
+        points=new TransPoint[nodes.size()];
+        pointsSize=nodes.size();
+      }
+
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      if (optimize!=none) {
+        if (optimize==fast) {
+          DropSimilarPoints(optimizeErrorTolerance);
+          DropRedundantPointsFast(optimizeErrorTolerance);
+        }
+        else {
+          DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,
+                                            true);
+        }
+
+        DropEqualPoints();
+
+        if (constraint==simple) {
+          EnsureSimple(true);
+        }
+
+        length=0;
+        start=nodes.size();
+        end=0;
+
+        // Calculate start, end and length
+        for (size_t i=0; i<nodes.size(); i++) {
+          if (points[i].draw) {
+            length++;
+
+            if (i<start) {
+              start=i;
+            }
+
+            end=i;
+          }
+        }
+      }
+    }
+
+    template<typename C>
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
-                      const std::vector<GeoCoord>& nodes,
+                      const C& nodes,
                       double optimizeErrorTolerance,
-                      OutputConstraint constraint=noConstraint);
-    void TransformWay(const Projection& projection,
-                      OptimizeMethod optimize,
-                      const std::vector<Point>& nodes,
-                      double optimizeErrorTolerance,
-                      OutputConstraint constraint=noConstraint);
+                      OutputConstraint constraint=noConstraint)
+    {
+      if (nodes.empty()) {
+        length=0;
+
+        return;
+      }
+
+      if (pointsSize<nodes.size()) {
+        delete [] points;
+
+        points=new TransPoint[nodes.size()];
+        pointsSize=nodes.size();
+      }
+
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      if (optimize!=none) {
+
+        DropSimilarPoints(optimizeErrorTolerance);
+
+        if (optimize==fast) {
+          DropRedundantPointsFast(optimizeErrorTolerance);
+        }
+        else {
+          DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
+        }
+
+        DropEqualPoints();
+
+        if (constraint==simple) {
+          EnsureSimple(false);
+        }
+
+        length=0;
+        start=nodes.size();
+        end=0;
+
+        // Calculate start & end
+        for (size_t i=0; i<nodes.size(); i++) {
+          if (points[i].draw) {
+            length++;
+
+            if (i<start) {
+              start=i;
+            }
+            end=i;
+          }
+        }
+      }
+    }
 
     void TransformBoundingBox(const Projection& projection,
                               OptimizeMethod optimize,
@@ -162,6 +287,19 @@ namespace osmscout {
   };
 
   /**
+   * Buffer structure for Vertex2D data. You can add coordinates to the buffer and get the position
+   * of the coordinate in the buffer in return.
+   *
+   * The CoordBuffer automatically resizes by a factor of 2 if its is too small to hold the additional data.
+   * The initial size of the buffer should be able to hold "enough" data. If you thus get reallocation
+   * log warnings this is not an error, but if it happens too often you are either not reusing
+   * CoordBuffer instances as much as possible or are pushing more geometric data than we expect to
+   * be sensible for mobile or desktop rendering. Check your allocation strategy for MapPainte rinstances
+   * or style sheet in this case,
+   *
+   * CoordBuffer also allows also higher level operations on the buffer to generate copies
+   * of stored objects.
+   *
    * \ingroup Geometry
    */
   class OSMSCOUT_API CoordBuffer CLASS_FINAL
@@ -178,6 +316,7 @@ namespace osmscout {
     ~CoordBuffer();
 
     void Reset();
+
     size_t PushCoord(double x, double y);
 
     /**
@@ -190,9 +329,8 @@ namespace osmscout {
      * @param offset offset of parallel way - positive offset is left, negative right
      * @param start start of result
      * @param end end of result (inclusive)
-     * @return true on success, false othervise
      */
-    bool GenerateParallelWay(size_t orgStart,
+    void GenerateParallelWay(size_t orgStart,
                              size_t orgEnd,
                              double offset,
                              size_t& start,
@@ -201,6 +339,9 @@ namespace osmscout {
 
 
   /**
+   * Allows to transform areas and ways using a embedded TransPolygon (for caching od data structures
+   * to avoid allocations) and copies the result to the passed CoordBuffer.
+   *
    * \ingroup Geometry
    */
   class OSMSCOUT_API TransBuffer CLASS_FINAL

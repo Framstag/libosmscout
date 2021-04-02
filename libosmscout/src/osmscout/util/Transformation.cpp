@@ -43,12 +43,12 @@ namespace osmscout {
       inverseLength=1/(xdelta*xdelta+ydelta*ydelta);
     }
 
-    bool IsValid()
+    bool IsValid() const
     {
       return !(xdelta==0 && ydelta==0);
     }
 
-    double CalculateDistanceSquared(const TransPolygon::TransPoint& p)
+    double CalculateDistanceSquared(const TransPolygon::TransPoint& p) const
     {
       double cx=p.x-ref.x;
       double cy=p.y-ref.y;
@@ -202,16 +202,14 @@ namespace osmscout {
     return usedPoints++;
   }
 
-  bool CoordBuffer::GenerateParallelWay(size_t orgStart,
+  void CoordBuffer::GenerateParallelWay(size_t orgStart,
                                         size_t orgEnd,
                                         double offset,
                                         size_t& start,
                                         size_t& end)
   {
-    if (orgStart+1>orgEnd || orgEnd >= usedPoints) {
-      // To avoid "not initialized" warnings
-      return false;
-    }
+    assert(orgStart<=orgEnd);
+    assert(orgEnd<usedPoints);
 
     double oax,oay;
     double obx,oby;
@@ -281,8 +279,6 @@ namespace osmscout {
 
     end=PushCoord(buffer[orgEnd].GetX()+oax,
                   buffer[orgEnd].GetY()+oay);
-
-    return true;
   }
 
   TransPolygon::TransPolygon()
@@ -298,56 +294,6 @@ namespace osmscout {
   TransPolygon::~TransPolygon()
   {
     delete [] points;
-  }
-
-  void TransPolygon::TransformGeoToPixel(const Projection& projection,
-                                         const std::vector<GeoCoord>& nodes)
-  {
-    Projection::BatchTransformer batchTransformer(projection);
-
-    if (!nodes.empty()) {
-      start=0;
-      length=nodes.size();
-      end=length-1;
-
-      for (size_t i=start; i<=end; i++) {
-        batchTransformer.GeoToPixel(nodes[i].GetLon(),
-                                    nodes[i].GetLat(),
-                                    points[i].x,
-                                    points[i].y);
-        points[i].draw=true;
-      }
-    }
-    else {
-      start=0;
-      end=0;
-      length=0;
-    }
-  }
-
-  void TransPolygon::TransformGeoToPixel(const Projection& projection,
-                                         const std::vector<Point>& nodes)
-  {
-    Projection::BatchTransformer batchTransformer(projection);
-
-    if (!nodes.empty()) {
-      start=0;
-      length=nodes.size();
-      end=length-1;
-
-      for (size_t i=start; i<=end; i++) {
-         batchTransformer.GeoToPixel(nodes[i].GetLon(),
-                                     nodes[i].GetLat(),
-                                     points[i].x,
-                                     points[i].y);
-        points[i].draw=true;
-      }
-    }
-    else {
-      start=0;
-      end=0;
-      length=0;
-    }
   }
 
   void TransPolygon::DropSimilarPoints(double optimizeErrorTolerance)
@@ -523,9 +469,11 @@ namespace osmscout {
   {
     // copy points to vector of TransPointRef for easy manipulation
     std::vector<TransPointRef> optimised;
+
     for (size_t i=0;i<length;i++) {
       if (points[i].draw) {
         TransPointRef ref{points+i};
+
         optimised.push_back(ref);
       }
     }
@@ -578,229 +526,6 @@ namespace osmscout {
     }
   }
 
-  void TransPolygon::TransformArea(const Projection& projection,
-                                   OptimizeMethod optimize,
-                                   const std::vector<GeoCoord>& nodes,
-                                   double optimizeErrorTolerance,
-                                   OutputConstraint constraint)
-  {
-    if (nodes.size()<2) {
-      length=0;
-
-      return;
-    }
-
-    if (pointsSize<nodes.size()) {
-      delete [] points;
-
-      points=new TransPoint[nodes.size()];
-      pointsSize=nodes.size();
-    }
-
-    TransformGeoToPixel(projection,
-                        nodes);
-    if (optimize!=none) {
-      if (optimize==fast) {
-        DropSimilarPoints(optimizeErrorTolerance);
-        DropRedundantPointsFast(optimizeErrorTolerance);
-      }
-      else {
-        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
-      }
-
-      DropEqualPoints();
-
-      if (constraint==simple){
-        EnsureSimple(true);
-      }
-
-      length=0;
-      start=nodes.size();
-      end=0;
-
-      // Calculate start, end and length
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          length++;
-
-          if (i<start) {
-            start=i;
-          }
-
-          end=i;
-        }
-      }
-    }
-  }
-
-  void TransPolygon::TransformArea(const Projection& projection,
-                                   OptimizeMethod optimize,
-                                   const std::vector<Point>& nodes,
-                                   double optimizeErrorTolerance,
-                                   OutputConstraint constraint)
-  {
-    if (nodes.size()<2) {
-      length=0;
-
-      return;
-    }
-
-    if (pointsSize<nodes.size()) {
-      delete [] points;
-
-      points=new TransPoint[nodes.size()];
-      pointsSize=nodes.size();
-    }
-
-    TransformGeoToPixel(projection,
-                        nodes);
-
-    if (optimize!=none) {
-      if (optimize==fast) {
-        DropSimilarPoints(optimizeErrorTolerance);
-        DropRedundantPointsFast(optimizeErrorTolerance);
-      }
-      else {
-        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
-      }
-
-      DropEqualPoints();
-
-      if (constraint==simple) {
-        EnsureSimple(true);
-      }
-
-      length=0;
-      start=nodes.size();
-      end=0;
-
-      // Calculate start, end and length
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          length++;
-
-          if (i<start) {
-            start=i;
-          }
-
-          end=i;
-        }
-      }
-    }
-  }
-
-  void TransPolygon::TransformWay(const Projection& projection,
-                                  OptimizeMethod optimize,
-                                  const std::vector<GeoCoord>& nodes,
-                                  double optimizeErrorTolerance,
-                                  OutputConstraint constraint)
-  {
-    if (nodes.empty()) {
-      length=0;
-
-      return;
-    }
-
-    if (pointsSize<nodes.size()) {
-      delete [] points;
-
-      points=new TransPoint[nodes.size()];
-      pointsSize=nodes.size();
-    }
-
-    TransformGeoToPixel(projection,
-                        nodes);
-    if (optimize!=none) {
-
-      DropSimilarPoints(optimizeErrorTolerance);
-
-      if (optimize==fast) {
-        DropRedundantPointsFast(optimizeErrorTolerance);
-      }
-      else {
-        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
-      }
-
-      DropEqualPoints();
-
-      if (constraint==simple){
-        EnsureSimple(false);
-      }
-
-      length=0;
-      start=nodes.size();
-      end=0;
-
-      // Calculate start & end
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          length++;
-
-          if (i<start) {
-            start=i;
-          }
-          end=i;
-        }
-      }
-    }
-  }
-
-  void TransPolygon::TransformWay(const Projection& projection,
-                                  OptimizeMethod optimize,
-                                  const std::vector<Point>& nodes,
-                                  double optimizeErrorTolerance,
-                                  OutputConstraint constraint)
-  {
-    if (nodes.empty()) {
-      length=0;
-
-      return;
-    }
-
-    if (pointsSize<nodes.size()) {
-      delete [] points;
-
-      points=new TransPoint[nodes.size()];
-      pointsSize=nodes.size();
-    }
-
-    TransformGeoToPixel(projection,
-                        nodes);
-    if (optimize!=none) {
-
-      DropSimilarPoints(optimizeErrorTolerance);
-
-      if (optimize==fast) {
-        DropRedundantPointsFast(optimizeErrorTolerance);
-      }
-      else {
-        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
-      }
-
-      DropEqualPoints();
-
-      if (constraint==simple){
-        EnsureSimple(false);
-      }
-
-      length=0;
-      start=nodes.size();
-      end=0;
-
-      // Calculate start & end
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          length++;
-
-          if (i<start) {
-            start=i;
-          }
-          end=i;
-        }
-      }
-    }
-  }
-
   bool TransPolygon::GetBoundingBox(double& xmin, double& ymin,
                                     double& xmax, double& ymax) const
   {
@@ -839,20 +564,20 @@ namespace osmscout {
                                           double optimizeErrorTolerance,
                                           TransPolygon::OutputConstraint constraint)
   {
-    std::vector<GeoCoord> coords(4);
+    std::array<GeoCoord,4> coords;
 
     // left bottom
-    coords.emplace_back(boundingBox.GetMinLat(),
-                        boundingBox.GetMinLon());
+    coords[0]=GeoCoord(boundingBox.GetMinLat(),
+                       boundingBox.GetMinLon());
     // left top
-    coords.emplace_back(boundingBox.GetMaxLat(),
-                        boundingBox.GetMinLon());
+    coords[1]=GeoCoord(boundingBox.GetMaxLat(),
+                       boundingBox.GetMinLon());
     // right top
-    coords.emplace_back(boundingBox.GetMaxLat(),
-                        boundingBox.GetMaxLon());
+    coords[2]=GeoCoord(boundingBox.GetMaxLat(),
+                       boundingBox.GetMaxLon());
     // right bottom
-    coords.emplace_back(boundingBox.GetMinLat(),
-                        boundingBox.GetMaxLon());
+    coords[3]=GeoCoord(boundingBox.GetMinLat(),
+                       boundingBox.GetMaxLon());
 
     TransformArea(projection,
                   optimize,
