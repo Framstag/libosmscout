@@ -172,7 +172,10 @@ void LocationListModel::onSearchResult(const QString searchPattern,
 
   if (compareFn.isCallable()){
     auto Compare = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
-      assert(a != nullptr && a->parent() == nullptr && b != nullptr && b->parent() == nullptr);
+      assert(a != nullptr && b != nullptr);
+      if (a.get() == b.get()) {
+        return false; // comp(a,a)==false
+      }
       QJSValueList args;
       // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
       assert(a->parent() == nullptr && b->parent() == nullptr);
@@ -185,7 +188,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
         return false;
       }
       if (result.isNumber()){
-        return result.toNumber() <= 0;
+        return result.toNumber() < 0; // true if the first argument is less than (i.e. is ordered before) the second
       }
       return false;
     };
