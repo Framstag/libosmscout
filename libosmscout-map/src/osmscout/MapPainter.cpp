@@ -35,12 +35,13 @@
 
 namespace osmscout {
 
-  static void GetGridPoints(const std::vector<Point>& nodes,
+  static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
                             double gridSizeHoriz,
-                            double gridSizeVert,
-                            std::set<GeoCoord>& intersections)
+                            double gridSizeVert)
   {
     assert(nodes.size()>=2);
+
+    std::set<GeoCoord> intersections;
 
     for (size_t i=0; i<nodes.size()-1; i++) {
       size_t cellXStart=(size_t)((nodes[i].GetLon()+180.0)/gridSizeHoriz);
@@ -87,6 +88,8 @@ namespace osmscout {
         }
       }
     }
+
+    return intersections;
   }
 
   /**
@@ -98,7 +101,8 @@ namespace osmscout {
       if (a.fillStyle->GetFillColor().IsSolid() && !b.fillStyle->GetFillColor().IsSolid()) {
         return true;
       }
-      else if (!a.fillStyle->GetFillColor().IsSolid() && b.fillStyle->GetFillColor().IsSolid()) {
+
+      if (!a.fillStyle->GetFillColor().IsSolid() && b.fillStyle->GetFillColor().IsSolid()) {
         return false;
       }
     }
@@ -119,21 +123,18 @@ namespace osmscout {
              * In such case, we want to draw area with outer type after that one of inner type
              */
             return !a.isOuter && b.isOuter;
-          } else {
-            return a.boundingBox.GetMaxCoord().GetLat() > b.boundingBox.GetMaxCoord().GetLat();
           }
+
+          return a.boundingBox.GetMaxCoord().GetLat() > b.boundingBox.GetMaxCoord().GetLat();
         }
-        else {
-          return a.boundingBox.GetMinCoord().GetLat()<b.boundingBox.GetMinCoord().GetLat();
-        }
+
+        return a.boundingBox.GetMinCoord().GetLat()<b.boundingBox.GetMinCoord().GetLat();
       }
-      else {
-        return a.boundingBox.GetMaxCoord().GetLon()>b.boundingBox.GetMaxCoord().GetLon();
-      }
+
+      return a.boundingBox.GetMaxCoord().GetLon()>b.boundingBox.GetMaxCoord().GetLon();
     }
-    else {
-      return a.boundingBox.GetMinCoord().GetLon()<b.boundingBox.GetMinCoord().GetLon();
-    }
+
+    return a.boundingBox.GetMinCoord().GetLon()<b.boundingBox.GetMinCoord().GetLon();
   }
 
   /**
@@ -549,9 +550,8 @@ namespace osmscout {
     if (width<minPixel) {
       return minPixel;
     }
-    else {
-      return width;
-    }
+
+    return width;
   }
 
   void MapPainter::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
@@ -585,12 +585,9 @@ namespace osmscout {
                                          const std::vector<Point>& nodes)
   {
     const LabelStyleRef& style=shieldStyle->GetShieldStyle();
-    std::set<GeoCoord>   gridPoints;
-
-    GetGridPoints(nodes,
-                  shieldGridSizeHoriz,
-                  shieldGridSizeVert,
-                  gridPoints);
+    std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
+                                                shieldGridSizeHoriz,
+                                                shieldGridSizeVert);
 
     for (const auto& gridPoint : gridPoints) {
       double x,y;
@@ -2012,7 +2009,7 @@ namespace osmscout {
               continue;
             }
           }
-          
+
           assert(memberWay!=wayDataMap.end());
 
           if (routeTextStyle){
@@ -2101,10 +2098,12 @@ namespace osmscout {
     // collect data about route labels
     for (const auto& it : wayDataMap){
       if (!it.second.labels.empty()){
-        RouteLabelData data;
-        data.wayData = it.second.wayData;
-        data.labels = it.second.labels;
-        routeLabelData.push_back(data);
+        RouteLabelData labelData;
+
+        labelData.wayData= it.second.wayData;
+        labelData.labels = it.second.labels;
+
+        routeLabelData.push_back(labelData);
       }
     }
   }
@@ -2294,23 +2293,39 @@ namespace osmscout {
     DrawGroundTiles(projection, parameter, data.groundTiles);
   }
 
+#if defined(DEBUG_GROUNDTILES)
+static void DumpGroundTile(const GroundTile& tile)
+  {
+    switch (tile.type) {
+    case GroundTile::land:
+      std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+      break;
+    case GroundTile::water:
+      std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+      break;
+    case GroundTile::coast:
+      std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+      break;
+    case GroundTile::unknown:
+      std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+      break;
+    }
+  }
+#endif
+
   void MapPainter::DrawGroundTiles(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const std::list<GroundTile> &groundTiles)
+                                   const std::list<GroundTile>& groundTiles)
   {
-#if defined(DEBUG_GROUNDTILES)
-    std::set<GeoCoord> drawnLabels;
-#endif
-    FillStyleRef      landFill=styleConfig->GetLandFillStyle(projection);
-
-    if (!landFill) {
-      landFill=this->landFill;
-    }
-
     if (!parameter.GetRenderSeaLand()) {
       return;
     }
 
+#if defined(DEBUG_GROUNDTILES)
+    std::set<GeoCoord> drawnLabels;
+#endif
+
+    FillStyleRef       landFill=styleConfig->GetLandFillStyle(projection);
     FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
     FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
     FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
@@ -2319,12 +2334,20 @@ namespace osmscout {
     size_t             start=0; // Make the compiler happy
     size_t             end=0;   // Make the compiler happy
 
+    if (!landFill) {
+      landFill=this->landFill;
+    }
+
     if (!seaFill) {
       seaFill=this->seaFill;
     }
 
     for (const auto& tile : groundTiles) {
-      AreaData areaData;
+      AreaData groundTileData;
+
+#if defined(DEBUG_GROUNDTILES)
+      DumpGroundTile(tile);
+#endif
 
       if (tile.type==GroundTile::unknown &&
           !parameter.GetRenderUnknowns()) {
@@ -2333,31 +2356,20 @@ namespace osmscout {
 
       switch (tile.type) {
       case GroundTile::land:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=landFill;
+        groundTileData.fillStyle=landFill;
         break;
       case GroundTile::water:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=seaFill;
+        groundTileData.fillStyle=seaFill;
         break;
       case GroundTile::coast:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=coastFill;
+        groundTileData.fillStyle=coastFill;
         break;
       case GroundTile::unknown:
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
-#endif
-        areaData.fillStyle=unknownFill;
+        groundTileData.fillStyle=unknownFill;
         break;
       }
-      if (!areaData.fillStyle){
+
+      if (!groundTileData.fillStyle) {
         continue;
       }
 
@@ -2366,10 +2378,10 @@ namespace osmscout {
       GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
                         minCoord.GetLon()+tile.cellWidth);
 
-      areaData.boundingBox.Set(minCoord,maxCoord);
+      groundTileData.boundingBox.Set(minCoord,maxCoord);
 
       // skip tiles that are completely outside projection
-      if (!projection.GetDimensions().Intersects(areaData.boundingBox)){
+      if (!projection.GetDimensions().Intersects(groundTileData.boundingBox)){
 #if defined(DEBUG_GROUNDTILES)
         std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
                   << " " << areaData.boundingBox.GetDisplayText() << std::endl;
@@ -2381,21 +2393,10 @@ namespace osmscout {
 #if defined(DEBUG_GROUNDTILES)
         std::cout << " >= fill" << std::endl;
 #endif
-        // Fill the cell completely with the fill for the given cell type
-        points.resize(5);
-
-        points[0].SetCoord(areaData.boundingBox.GetMinCoord());
-        points[1].SetCoord(GeoCoord(areaData.boundingBox.GetMinCoord().GetLat(),
-                                    areaData.boundingBox.GetMaxCoord().GetLon()));
-        points[2].SetCoord(areaData.boundingBox.GetMaxCoord());
-        points[3].SetCoord(GeoCoord(areaData.boundingBox.GetMaxCoord().GetLat(),
-                                    areaData.boundingBox.GetMinCoord().GetLon()));
-        points[4]=points[0];
-
-        transBuffer.transPolygon.TransformArea(projection,
-                                               TransPolygon::none,
-                                               points,
-                                               errorTolerancePixel);
+        transBuffer.transPolygon.TransformBoundingBox(projection,
+                                                      TransPolygon::none,
+                                                      groundTileData.boundingBox,
+                                                      errorTolerancePixel);
 
         size_t s=transBuffer.transPolygon.GetStart();
 
@@ -2409,11 +2410,8 @@ namespace osmscout {
         transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
                                       floor(transBuffer.transPolygon.points[s+2].y));
 
-        transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
-                                      floor(transBuffer.transPolygon.points[s+3].y));
-
-        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
-                                          ceil(transBuffer.transPolygon.points[s+4].y));
+        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
+                                          floor(transBuffer.transPolygon.points[s+3].y));
       }
       else {
 #if defined(DEBUG_GROUNDTILES)
@@ -2425,8 +2423,8 @@ namespace osmscout {
           double lat;
           double lon;
 
-          lat=areaData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=areaData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
+          lat=groundTileData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=groundTileData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
 
           points[i].SetCoord(GeoCoord(lat,lon));
         }
@@ -2514,11 +2512,11 @@ namespace osmscout {
         }
       }
 
-      areaData.ref=ObjectFileRef();
-      areaData.transStart=start;
-      areaData.transEnd=end;
+      groundTileData.ref=ObjectFileRef();
+      groundTileData.transStart=start;
+      groundTileData.transEnd  =end;
 
-      DrawArea(projection,parameter,areaData);
+      DrawArea(projection,parameter,groundTileData);
 
 #if defined(DEBUG_GROUNDTILES)
       GeoCoord cc=areaData.boundingBox.GetCenter();
