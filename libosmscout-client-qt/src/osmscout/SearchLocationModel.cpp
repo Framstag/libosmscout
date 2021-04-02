@@ -104,7 +104,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   if (equalsFn.isCallable()){
     // try to merge locations that are equals
     auto Equal = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
-      assert(a != nullptr && a->parent() == nullptr && b != nullptr && b->parent() == nullptr);
+      assert(a != nullptr && b != nullptr);
       if (a->getLabel()==b->getLabel() &&
           a->getDatabase()==b->getDatabase() &&
           a->getType()==LocationEntry::typeObject &&
