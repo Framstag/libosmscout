@@ -2237,7 +2237,10 @@ STYLE
  //
 
  [MAG continent-] {
-   [TYPE hillshading_tile] AREA { color: #00000033; }
+   [TYPE srtm_tile] {
+     AREA { color: #00000033; }
+     AREA.BORDER { width: 0.1mm; color:  #555555; }
+   }
  }
 
 END

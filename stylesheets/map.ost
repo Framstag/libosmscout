@@ -2456,6 +2456,6 @@ TYPES
 
 
   // Debugging
-  TYPE hillshading_tile IGNORE
-    = AREA ("type"=="hillshading_tile")
+  TYPE srtm_tile IGNORE
+    = AREA ("type"=="srtm_tile")
 END
