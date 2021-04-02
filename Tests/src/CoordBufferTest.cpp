@@ -6,24 +6,6 @@
 
 using namespace osmscout;
 
-TEST_CASE("Check rejection of invalid offsets")
-{
-  CoordBuffer buffer;
-  size_t trFrom, trTo;
-  // should fail - buffer is empty
-  REQUIRE_FALSE(buffer.GenerateParallelWay(/*from*/0, /*to*/1, /*offset*/-1, trFrom, trTo));
-
-  buffer.PushCoord(0,0);
-  buffer.PushCoord(10,0);
-  buffer.PushCoord(5,1);
-  buffer.PushCoord(0,0);
-
-  // should fail - end after last valid point
-  REQUIRE_FALSE(buffer.GenerateParallelWay(/*from*/0, /*to*/4, /*offset*/-1, trFrom, trTo));
-  // should fail - just one point
-  REQUIRE_FALSE(buffer.GenerateParallelWay(/*from*/3, /*to*/3, /*offset*/-1, trFrom, trTo));
-}
-
 TEST_CASE("Check bounding box of generated parallel way")
 {
   CoordBuffer buffer;
@@ -34,7 +16,7 @@ TEST_CASE("Check bounding box of generated parallel way")
   buffer.PushCoord(5,1);
   buffer.PushCoord(0,0);
 
-  REQUIRE(buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/-1, trFrom, trTo));
+  buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/-1, trFrom, trTo);
   REQUIRE(trTo - trFrom >= 3);
   REQUIRE(trFrom > 3);
 
@@ -55,6 +37,6 @@ TEST_CASE("Check bounding box of generated parallel way")
   REQUIRE(minY >= -1);
   REQUIRE(maxY < 3);
 
-  REQUIRE(buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/1, trFrom, trTo));
+  buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/1, trFrom, trTo);
   REQUIRE(trFrom > 7);
 }
