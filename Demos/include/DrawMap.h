@@ -38,6 +38,7 @@ struct Arguments {
 #endif
   double     dpi=96.0;
 
+  bool renderContourLines=false;
   bool renderHillShading=false;
 
   std::string map;
@@ -146,6 +147,12 @@ public:
               }),
               "hillshading",
               "Enable hillshading",
+              false);
+    AddOption(osmscout::CmdLineBoolOption([this](const bool& value) {
+                args.renderContourLines=value;
+              }),
+              "contourlines",
+              "Enable contour lines",
               false);
     if (windowStyle == ARG_WS_WINDOW) {
         AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
@@ -269,6 +276,7 @@ public:
     drawParameter.SetRenderSeaLand(true);
     drawParameter.SetRenderUnknowns(false);
     drawParameter.SetRenderBackground(false);
+    drawParameter.SetRenderContourLines(args.renderContourLines);
     drawParameter.SetRenderHillShading(args.renderHillShading);
 
     drawParameter.SetIconMode(args.iconMode);
