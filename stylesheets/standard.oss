@@ -2231,4 +2231,13 @@ STYLE
     }
   }
 
+ // -------------------------------------------------------
+ //
+ // Debugging
+ //
+
+ [MAG continent-] {
+   [TYPE hillshading_tile] AREA { color: #00000033; }
+ }
+
 END
