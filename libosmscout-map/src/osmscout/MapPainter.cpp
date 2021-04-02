@@ -202,6 +202,7 @@ namespace osmscout {
     stepMethods[RenderSteps::PrepareNodeLabels]=&MapPainter::PrepareNodeLabels;
     stepMethods[RenderSteps::PrepareRouteLabels]=&MapPainter::PrepareRouteLabels;
     stepMethods[RenderSteps::DrawLabels]=&MapPainter::DrawLabels;
+    stepMethods[RenderSteps::DrawHillShading]=&MapPainter::DrawHillShading;
     stepMethods[RenderSteps::Postrender]=&MapPainter::Postrender;
   }
 
@@ -2393,25 +2394,12 @@ static void DumpGroundTile(const GroundTile& tile)
 #if defined(DEBUG_GROUNDTILES)
         std::cout << " >= fill" << std::endl;
 #endif
-        transBuffer.transPolygon.TransformBoundingBox(projection,
-                                                      TransPolygon::none,
-                                                      groundTileData.boundingBox,
-                                                      errorTolerancePixel);
-
-        size_t s=transBuffer.transPolygon.GetStart();
-
-        start=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+0].x),
-                                            ceil(transBuffer.transPolygon.points[s+0].y));
-
-
-        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+1].x),
-                                      ceil(transBuffer.transPolygon.points[s+1].y));
-
-        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
-                                      floor(transBuffer.transPolygon.points[s+2].y));
-
-        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
-                                          floor(transBuffer.transPolygon.points[s+3].y));
+        transBuffer.TransformBoundingBox(projection,
+                                         TransPolygon::none,
+                                         groundTileData.boundingBox,
+                                         start,
+                                         end,
+                                         errorTolerancePixel);
       }
       else {
 #if defined(DEBUG_GROUNDTILES)
@@ -2829,6 +2817,107 @@ static void DumpGroundTile(const GroundTile& tile)
     if (parameter.IsDebugPerformance() && timer.IsSignificant()) {
       log.Info()
           << "Draw route contour labels: " << drawnCount << " (pcs) " << timer.ResultString() << "(s)";
+    }
+  }
+
+  double RoundDown(double value) {
+    if (value>=0.0) {
+      return floor(value);
+    }
+
+    return ceil(value);
+  }
+
+  double RoundUp(double value) {
+    if (value>=0.0) {
+      return ceil(value);
+    }
+
+    return floor(value);
+  }
+
+  void MapPainter::DrawHillShading(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const MapData& /*data*/)
+  {
+    if (!parameter.GetRenderHillShading()) {
+      return;
+    }
+
+    log.Info() << "Draw hillshading";
+
+    TypeInfoRef hillShadingType=styleConfig->GetTypeConfig()->GetTypeInfo("hillshading_tile");
+
+    if (!hillShadingType) {
+      log.Warn() << "HillShading activated but no type 'hillshading_tile' found";
+      return;
+    }
+
+    FeatureValueBuffer hillShadingBuffer;
+
+    hillShadingBuffer.SetType(hillShadingType);
+
+    FillStyleRef hillShadingFill=styleConfig->GetAreaFillStyle(hillShadingType,
+                                                               hillShadingBuffer,
+                                                               projection);
+
+    if (!hillShadingFill) {
+      log.Warn() << "HillShading activated but no fill style for type 'hillshading_tile' found";
+    }
+
+    GeoBox boundingBox=projection.GetDimensions();
+
+    log.Info() << "Initial bounding box: "  << boundingBox.GetDisplayText();
+
+    double minLat=RoundDown(boundingBox.GetMinLat());
+    double maxLat=RoundUp(boundingBox.GetMaxLat());
+
+    double minLon=RoundDown(boundingBox.GetMinLon());
+    double maxLon=RoundUp(boundingBox.GetMaxLon());
+
+    log.Info() << "Even bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
+
+    int minX=int(minLon);
+    int minY=int(minLat);
+
+    double factor=1.0/1201;
+
+    bool even=true;
+    for (int x=minX; x<int(maxLon); x++) {
+      for (int y=minY; y<int(maxLat); y++) {
+        for (int subX=0; subX<1201; subX++) {
+          for (int subY=0; subY<1201; subY++) {
+            even=!even;
+
+            if (!even) {
+              continue;
+            }
+
+            size_t   start,end;
+            AreaData tileData;
+            GeoBox   tileBoundingBox;
+            double   xDelta=subX*factor;
+            double   yDelta=subY*factor;
+
+            tileData.fillStyle  =hillShadingFill;
+            tileData.boundingBox=GeoBox(GeoCoord(y+yDelta,x+xDelta),
+                                        GeoCoord(y+yDelta+factor,x+xDelta+factor));
+
+            transBuffer.TransformBoundingBox(projection,
+                                             TransPolygon::none,
+                                             tileData.boundingBox,
+                                             start,
+                                             end,
+                                             errorTolerancePixel);
+
+            tileData.ref=ObjectFileRef();
+            tileData.transStart=start;
+            tileData.transEnd=end;
+
+            DrawArea(projection,parameter,tileData);
+          }
+        }
+      }
     }
   }
 
