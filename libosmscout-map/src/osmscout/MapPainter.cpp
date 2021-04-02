@@ -202,6 +202,7 @@ namespace osmscout {
     stepMethods[RenderSteps::PrepareNodeLabels]=&MapPainter::PrepareNodeLabels;
     stepMethods[RenderSteps::PrepareRouteLabels]=&MapPainter::PrepareRouteLabels;
     stepMethods[RenderSteps::DrawLabels]=&MapPainter::DrawLabels;
+    stepMethods[RenderSteps::DrawContourLines]=&MapPainter::DrawContourLines;
     stepMethods[RenderSteps::DrawHillShading]=&MapPainter::DrawHillShading;
     stepMethods[RenderSteps::Postrender]=&MapPainter::Postrender;
   }
@@ -2836,6 +2837,96 @@ static void DumpGroundTile(const GroundTile& tile)
     return floor(value);
   }
 
+  void MapPainter::DrawContourLines(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& /*data*/)
+  {
+    if (!parameter.GetRenderContourLines()) {
+      return;
+    }
+
+    log.Info() << "Draw contour lines";
+
+    TypeInfoRef srtmType=styleConfig->GetTypeConfig()->GetTypeInfo("srtm_tile");
+
+    if (!srtmType) {
+      log.Warn() << "Contour lines activated but no type 'srtm_tile' found";
+      return;
+    }
+
+    FeatureValueBuffer contourLinesBuffer;
+
+    contourLinesBuffer.SetType(srtmType);
+
+    std::vector<BorderStyleRef> areaBorderStyles;
+
+    styleConfig->GetAreaBorderStyles(srtmType,
+                                     contourLinesBuffer,
+                                     projection,
+                                     areaBorderStyles);
+
+    if (areaBorderStyles.empty()) {
+      log.Warn() << "Contour lines activated but no border style for type 'srtm_tile' found";
+    }
+
+    GeoBox mapBoundingBox=projection.GetDimensions();
+
+    log.Info() << "Initial bounding box: "  << mapBoundingBox.GetDisplayText();
+
+    double minLat=RoundDown(mapBoundingBox.GetMinLat());
+    double maxLat=RoundUp(mapBoundingBox.GetMaxLat());
+
+    double minLon=RoundDown(mapBoundingBox.GetMinLon());
+    double maxLon=RoundUp(mapBoundingBox.GetMaxLon());
+
+    log.Info() << "Even bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
+
+    int minX=int(minLon);
+    int minY=int(minLat);
+
+    double factor=1.0/1201;
+
+    bool even=true;
+    for (int x=minX; x<int(maxLon); x++) {
+      for (int y=minY; y<int(maxLat); y++) {
+        for (int subX=0; subX<1201; subX++) {
+          for (int subY=0; subY<1201; subY++) {
+            even=!even;
+
+            if (!even) {
+              continue;
+            }
+
+            size_t   start,end;
+            double   xDelta=subX*factor;
+            double   yDelta=subY*factor;
+            GeoBox   tileBoundingBox=GeoBox(GeoCoord(y+yDelta,x+xDelta),
+                                            GeoCoord(y+yDelta+factor,x+xDelta+factor));
+
+            transBuffer.TransformBoundingBox(projection,
+                                             TransPolygon::none,
+                                             tileBoundingBox,
+                                             start,
+                                             end,
+                                             errorTolerancePixel);
+
+            for (const auto& borderStyle : areaBorderStyles) {
+              AreaData tileData;
+
+              tileData.borderStyle=borderStyle;
+              tileData.boundingBox=tileBoundingBox;
+              tileData.ref=ObjectFileRef();
+              tileData.transStart=start;
+              tileData.transEnd=end;
+
+              DrawArea(projection,parameter,tileData);
+            }
+          }
+        }
+      }
+    }
+  }
+
   void MapPainter::DrawHillShading(const Projection& projection,
                                    const MapParameter& parameter,
                                    const MapData& /*data*/)
@@ -2846,34 +2937,34 @@ static void DumpGroundTile(const GroundTile& tile)
 
     log.Info() << "Draw hillshading";
 
-    TypeInfoRef hillShadingType=styleConfig->GetTypeConfig()->GetTypeInfo("hillshading_tile");
+    TypeInfoRef srtmType=styleConfig->GetTypeConfig()->GetTypeInfo("srtm_tile");
 
-    if (!hillShadingType) {
-      log.Warn() << "HillShading activated but no type 'hillshading_tile' found";
+    if (!srtmType) {
+      log.Warn() << "HillShading activated but no type 'srtm_tile' found";
       return;
     }
 
     FeatureValueBuffer hillShadingBuffer;
 
-    hillShadingBuffer.SetType(hillShadingType);
+    hillShadingBuffer.SetType(srtmType);
 
-    FillStyleRef hillShadingFill=styleConfig->GetAreaFillStyle(hillShadingType,
+    FillStyleRef hillShadingFill=styleConfig->GetAreaFillStyle(srtmType,
                                                                hillShadingBuffer,
                                                                projection);
 
     if (!hillShadingFill) {
-      log.Warn() << "HillShading activated but no fill style for type 'hillshading_tile' found";
+      log.Warn() << "HillShading activated but no fill style for type 'srtm_tile' found";
     }
 
-    GeoBox boundingBox=projection.GetDimensions();
+    GeoBox mapBoundingBox=projection.GetDimensions();
 
-    log.Info() << "Initial bounding box: "  << boundingBox.GetDisplayText();
+    log.Info() << "Initial bounding box: "  << mapBoundingBox.GetDisplayText();
 
-    double minLat=RoundDown(boundingBox.GetMinLat());
-    double maxLat=RoundUp(boundingBox.GetMaxLat());
+    double minLat=RoundDown(mapBoundingBox.GetMinLat());
+    double maxLat=RoundUp(mapBoundingBox.GetMaxLat());
 
-    double minLon=RoundDown(boundingBox.GetMinLon());
-    double maxLon=RoundUp(boundingBox.GetMaxLon());
+    double minLon=RoundDown(mapBoundingBox.GetMinLon());
+    double maxLon=RoundUp(mapBoundingBox.GetMaxLon());
 
     log.Info() << "Even bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
 

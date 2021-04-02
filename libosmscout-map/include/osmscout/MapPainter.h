@@ -71,9 +71,10 @@ namespace osmscout {
     PrepareNodeLabels     = 14,
     PrepareRouteLabels    = 15,
     DrawLabels            = 16,
-    DrawHillShading       = 17,
-    Postrender            = 18, //!< Implementation specific final step
-    LastStep              = 18
+    DrawContourLines      = 17,
+    DrawHillShading       = 18,
+    Postrender            = 19, //!< Implementation specific final step
+    LastStep              = 19
   };
 
   /**
@@ -575,6 +576,10 @@ namespace osmscout {
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
                             const MapData& data) = 0;
+
+    virtual void DrawContourLines(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data);
 
     virtual void DrawHillShading(const Projection& projection,
                                  const MapParameter& parameter,
