@@ -366,6 +366,11 @@ namespace osmscout {
                       const std::vector<Point>& nodes,
                       size_t& start, size_t &end,
                       double optimizeErrorTolerance);
+    bool TransformBoundingBox(const Projection& projection,
+                              TransPolygon::OptimizeMethod optimize,
+                              const GeoBox& boundingBox,
+                              size_t& start, size_t &end,
+                              double optimizeErrorTolerance);
   };
 }
 

@@ -2231,4 +2231,16 @@ STYLE
     }
   }
 
+ // -------------------------------------------------------
+ //
+ // Debugging
+ //
+
+ [MAG continent-] {
+   [TYPE srtm_tile] {
+     AREA { color: #00000033; }
+     AREA.BORDER { width: 0.1mm; color:  #555555; }
+   }
+ }
+
 END

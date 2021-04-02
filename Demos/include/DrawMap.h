@@ -30,13 +30,16 @@
 #include <iostream>
 
 struct Arguments {
-  bool help{false};
+  bool       help=false;
 #ifdef NDEBUG
-  bool debug{false};
+  bool       debug=false;
 #else
-  bool debug{true};
+  bool       debug=true;
 #endif
-  double dpi{96.0};
+  double     dpi=96.0;
+
+  bool renderContourLines=false;
+  bool renderHillShading=false;
 
   std::string map;
   std::string style;
@@ -138,6 +141,18 @@ public:
               }),
               "baseMap",
               "Directory with world base map",
+              false);
+    AddOption(osmscout::CmdLineBoolOption([this](const bool& value) {
+                args.renderHillShading=value;
+              }),
+              "hillshading",
+              "Enable hillshading",
+              false);
+    AddOption(osmscout::CmdLineBoolOption([this](const bool& value) {
+                args.renderContourLines=value;
+              }),
+              "contourlines",
+              "Enable contour lines",
               false);
     if (windowStyle == ARG_WS_WINDOW) {
         AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
@@ -253,11 +268,16 @@ public:
       return false;
     }
 
-    if (!args.fontName.empty()) drawParameter.SetFontName(args.fontName);
+    if (!args.fontName.empty()) {
+      drawParameter.SetFontName(args.fontName);
+    }
+
     drawParameter.SetFontSize(args.fontSize);
     drawParameter.SetRenderSeaLand(true);
     drawParameter.SetRenderUnknowns(false);
     drawParameter.SetRenderBackground(false);
+    drawParameter.SetRenderContourLines(args.renderContourLines);
+    drawParameter.SetRenderHillShading(args.renderHillShading);
 
     drawParameter.SetIconMode(args.iconMode);
     drawParameter.SetIconPaths(args.iconPaths);

@@ -59,13 +59,16 @@ static int LogEnv(const QString& env)
   if (env.toUpper()=="DEBUG") {
     return DEBUG;
   }
-  else if (env.toUpper()=="INFO") {
+
+  if (env.toUpper()=="INFO") {
     return INFO;
   }
-  else if (env.toUpper()=="WARNING") {
+
+  if (env.toUpper()=="WARNING") {
     return INFO;
   }
-  else if (env.toUpper()=="ERROR") {
+
+  if (env.toUpper()=="ERROR") {
     return ERROR;
   }
 
@@ -73,18 +76,11 @@ static int LogEnv(const QString& env)
 }
 
 struct Arguments {
-  bool help;
-  QString databaseDirectory;
-  QString style;
-  QString iconDirectory;
+  bool    help=false;
+  QString databaseDirectory=".";
+  QString style="stylesheets/standard.oss";
+  QString iconDirectory="icons";
   QString translationDir;
-
-  Arguments() :
-      help(false),
-      databaseDirectory("."),
-      style("stylesheets/standard.oss"),
-      iconDirectory("icons")
-  {}
 };
 
 int main(int argc, char* argv[])
@@ -96,9 +92,9 @@ int main(int argc, char* argv[])
   QGuiApplication app(argc,argv);
   int             result;
 
-  app.setOrganizationName("libosmscout");
-  app.setOrganizationDomain("libosmscout.sf.net");
-  app.setApplicationName("OSMScout2");
+  QGuiApplication::setOrganizationName("libosmscout");
+  QGuiApplication::setOrganizationDomain("libosmscout.sf.net");
+  QGuiApplication::setApplicationName("OSMScout2");
 
   // register OSMScout library QML types
   OSMScoutQt::RegisterQmlTypes();
@@ -128,6 +124,7 @@ int main(int argc, char* argv[])
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
   Arguments                 args;
+
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
                         args.help=value;
                       }),
@@ -166,7 +163,8 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-  else if (args.help) {
+
+  if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
@@ -193,7 +191,7 @@ int main(int argc, char* argv[])
   }
   if (translator.load(locale.name(), translationDir)) {
     qDebug() << "Install translator for locale " << locale << "/" << locale.name();
-    app.installTranslator(&translator);
+    QGuiApplication::installTranslator(&translator);
   }else{
     qWarning() << "Can't load translator for locale" << locale << "/" << locale.name() <<
                "(" << translationDir << ")";
@@ -230,7 +228,7 @@ int main(int argc, char* argv[])
 
   {
     QQmlApplicationEngine window(QUrl("qrc:/qml/main.qml"));
-    result = app.exec();
+    result = QGuiApplication::exec();
   }
 
   OSMScoutQt::FreeInstance();

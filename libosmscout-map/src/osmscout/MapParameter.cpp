@@ -55,6 +55,8 @@ namespace osmscout {
     renderBackground(true),
     renderSeaLand(false),
     renderUnknowns(false),
+    renderContourLines(false),
+    renderHillShading(false),
     debugData(false),
     debugPerformance(false),
     warnObjectCountLimit(0),
@@ -223,6 +225,16 @@ namespace osmscout {
   void MapParameter::SetRenderUnknowns(bool render)
   {
     this->renderUnknowns=render;
+  }
+
+  void MapParameter::SetRenderContourLines(bool render)
+  {
+    this->renderContourLines=render;
+  }
+
+  void MapParameter::SetRenderHillShading(bool render)
+  {
+    this->renderHillShading=render;
   }
 
   void MapParameter::SetDebugData(bool debug)

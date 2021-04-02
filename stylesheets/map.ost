@@ -2453,4 +2453,9 @@ TYPES
 
   TYPE compound_any IGNORE
     = RELATION ("type"=="compound")
+
+
+  // Debugging
+  TYPE srtm_tile IGNORE
+    = AREA ("type"=="srtm_tile")
 END

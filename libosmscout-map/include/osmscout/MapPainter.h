@@ -71,8 +71,10 @@ namespace osmscout {
     PrepareNodeLabels     = 14,
     PrepareRouteLabels    = 15,
     DrawLabels            = 16,
-    Postrender            = 17, //!< Implementation specific final step
-    LastStep              = 17
+    DrawContourLines      = 17,
+    DrawHillShading       = 18,
+    Postrender            = 19, //!< Implementation specific final step
+    LastStep              = 19
   };
 
   /**
@@ -574,6 +576,14 @@ namespace osmscout {
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
                             const MapData& data) = 0;
+
+    virtual void DrawContourLines(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data);
+
+    virtual void DrawHillShading(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const MapData& data);
 
     /**
       Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
