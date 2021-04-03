@@ -586,6 +586,29 @@ namespace osmscout {
                   constraint);
   }
 
+  CoordBufferRange CopyPolygonToCoordBuffer(const TransPolygon& polygon, CoordBuffer& buffer)
+  {
+    assert(!polygon.IsEmpty());
+
+    size_t start=0;
+    size_t end=0;
+    bool   isStart=true;
+
+    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
+      if (polygon.points[i].draw) {
+        end=buffer.PushCoord(polygon.points[i].x,
+                             polygon.points[i].y);
+
+        if (isStart) {
+          start=end;
+          isStart=false;
+        }
+      }
+    }
+
+    return CoordBufferRange(start,end);
+  }
+
   TransBuffer::TransBuffer(CoordBuffer* buffer)
   : buffer(buffer)
   {
@@ -613,17 +636,9 @@ namespace osmscout {
 
     assert(!transPolygon.IsEmpty());
 
-    bool isStart=true;
-    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
-      if (transPolygon.points[i].draw) {
-        end=buffer->PushCoord(transPolygon.points[i].x,
-                              transPolygon.points[i].y);
+    CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
 
-        if (isStart) {
-          start=end;
-          isStart=false;
-        }
-      }
-    }
+    start=range.GetStart();
+    end=range.GetEnd();
   }
 }

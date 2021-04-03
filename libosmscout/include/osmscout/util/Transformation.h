@@ -53,10 +53,10 @@ namespace osmscout {
   class OSMSCOUT_API TransPolygon CLASS_FINAL
   {
   private:
-    size_t  pointsSize;
-    size_t  length;
-    size_t  start;
-    size_t  end;
+    size_t pointsSize;
+    size_t length;
+    size_t start;
+    size_t end;
 
   public:
     enum OptimizeMethod
@@ -287,6 +287,35 @@ namespace osmscout {
   };
 
   /**
+   * Hold a reference to a range of data within a CoordBuffer.
+   *
+   * \ingroup Geometry
+   */
+  class OSMSCOUT_API CoordBufferRange CLASS_FINAL
+  {
+  private:
+    size_t start;
+    size_t end;
+
+  public:
+    CoordBufferRange(size_t start, size_t end)
+      : start(start),
+        end(end)
+    {
+    }
+
+    inline size_t GetStart() const
+    {
+      return start;
+    }
+
+    inline size_t GetEnd() const
+    {
+      return end;
+    }
+  };
+
+  /**
    * Buffer structure for Vertex2D data. You can add coordinates to the buffer and get the position
    * of the coordinate in the buffer in return.
    *
@@ -313,6 +342,7 @@ namespace osmscout {
 
   public:
     CoordBuffer();
+    CoordBuffer(const CoordBuffer& other)   = delete;
     ~CoordBuffer();
 
     void Reset();
@@ -339,6 +369,7 @@ namespace osmscout {
                              size_t& end);
   };
 
+  extern OSMSCOUT_API CoordBufferRange CopyPolygonToCoordBuffer(const TransPolygon& polygon, CoordBuffer& buffer);
 
   /**
    * Allows to transform areas and ways using a embedded TransPolygon (for caching od data structures
@@ -372,18 +403,10 @@ namespace osmscout {
 
       assert(!transPolygon.IsEmpty());
 
-      bool isStart=true;
-      for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
-        if (transPolygon.points[i].draw) {
-          end=buffer->PushCoord(transPolygon.points[i].x,
-                                transPolygon.points[i].y);
+      CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
 
-          if (isStart) {
-            start=end;
-            isStart=false;
-          }
-        }
-      }
+      start=range.GetStart();
+      end=range.GetEnd();
     }
 
     template<typename C>
@@ -397,18 +420,10 @@ namespace osmscout {
 
       assert(!transPolygon.IsEmpty());
 
-      bool isStart=true;
-      for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
-        if (transPolygon.points[i].draw) {
-          end=buffer->PushCoord(transPolygon.points[i].x,
-                                transPolygon.points[i].y);
+      CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
 
-          if (isStart) {
-            start=end;
-            isStart=false;
-          }
-        }
-      }
+      start=range.GetStart();
+      end=range.GetEnd();
     }
 
     void TransformBoundingBox(const Projection& projection,
