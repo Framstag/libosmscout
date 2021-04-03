@@ -602,16 +602,14 @@ namespace osmscout {
     buffer->Reset();
   }
 
-  void TransBuffer::TransformArea(const Projection& projection,
-                                  TransPolygon::OptimizeMethod optimize,
-                                  const std::vector<Point>& nodes,
-                                  size_t& start, size_t &end,
-                                  double optimizeErrorTolerance)
+  void TransBuffer::TransformBoundingBox(const Projection& projection,
+                                         TransPolygon::OptimizeMethod optimize,
+                                         const GeoBox& boundingBox,
+                                         size_t& start,
+                                         size_t& end,
+                                         double optimizeErrorTolerance)
   {
-    transPolygon.TransformArea(projection,
-                               optimize,
-                               nodes,
-                               optimizeErrorTolerance);
+    transPolygon.TransformBoundingBox(projection, optimize, boundingBox, optimizeErrorTolerance);
 
     assert(!transPolygon.IsEmpty());
 
@@ -627,62 +625,5 @@ namespace osmscout {
         }
       }
     }
-  }
-
-  bool TransBuffer::TransformWay(const Projection& projection,
-                                 TransPolygon::OptimizeMethod optimize,
-                                 const std::vector<Point>& nodes,
-                                 size_t& start, size_t &end,
-                                 double optimizeErrorTolerance)
-  {
-    transPolygon.TransformWay(projection, optimize, nodes, optimizeErrorTolerance);
-
-    if (transPolygon.IsEmpty()) {
-      return false;
-    }
-
-    bool isStart=true;
-    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
-      if (transPolygon.points[i].draw) {
-        end=buffer->PushCoord(transPolygon.points[i].x,
-                              transPolygon.points[i].y);
-
-        if (isStart) {
-          start=end;
-          isStart=false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  bool TransBuffer::TransformBoundingBox(const Projection& projection,
-                                         TransPolygon::OptimizeMethod optimize,
-                                         const GeoBox& boundingBox,
-                                         size_t& start,
-                                         size_t& end,
-                                         double optimizeErrorTolerance)
-  {
-    transPolygon.TransformBoundingBox(projection, optimize, boundingBox, optimizeErrorTolerance);
-
-    if (transPolygon.IsEmpty()) {
-      return false;
-    }
-
-    bool isStart=true;
-    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
-      if (transPolygon.points[i].draw) {
-        end=buffer->PushCoord(transPolygon.points[i].x,
-                              transPolygon.points[i].y);
-
-        if (isStart) {
-          start=end;
-          isStart=false;
-        }
-      }
-    }
-
-    return true;
   }
 }

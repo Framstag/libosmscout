@@ -785,9 +785,9 @@ namespace osmscout {
                                               tile));
 
     std::future<bool> future=task.get_future();
-    
+
     routeWorkerQueue.PushTask(task);
-    
+
     return future;
   }
 
@@ -1416,6 +1416,35 @@ namespace osmscout {
     //std::cout << "Loading ground tiles took: " << timer.ResultString() << std::endl;
 
     return true;
+  }
+
+  SRTMDataRef MapService::GetSRTMData(const Projection& projection) const
+  {
+    return GetSRTMData(projection.GetDimensions());
+  }
+
+  SRTMDataRef MapService::GetSRTMData(const GeoBox& boundingBox) const
+  {
+    SRTMRef srtmIndex=database->GetSRTMIndex();
+
+    if (!srtmIndex) {
+      return nullptr;
+    }
+
+    StopClock timer;
+
+    SRTMDataRef tile=srtmIndex->GetHeightInBoundingBox(boundingBox);
+
+    if (!tile) {
+      log.Error() << "Error reading SRTM data!";
+      return nullptr;
+    }
+
+    timer.Stop();
+
+    //std::cout << "Loading ground tiles took: " << timer.ResultString() << std::endl;
+
+    return tile;
   }
 
   MapService::CallbackId MapService::RegisterTileStateCallback(TileStateCallback callback)

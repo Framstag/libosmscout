@@ -19,6 +19,10 @@
 
 #include <osmscout/MapPainter.h>
 
+#include <cstdint>
+
+#include <algorithm>
+#include <iostream>
 #include <limits>
 
 #include <osmscout/system/Math.h>
@@ -27,8 +31,6 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>
-#include <iostream>
-#include <cstdint>
 
 //#define DEBUG_GROUNDTILES
 //#define DEBUG_NODE_DRAW
@@ -2848,11 +2850,21 @@ static void DumpGroundTile(const GroundTile& tile)
     return floor(value);
   }
 
+  bool CrossesElevationLine(int32_t ele, int32_t height1, int32_t height2)
+  {
+    return (height1>=ele && height2 <ele) || (height1<ele && height2>=ele);
+  }
+
   void MapPainter::DrawContourLines(const Projection& projection,
                                     const MapParameter& parameter,
-                                    const MapData& /*data*/)
+                                    const MapData& data)
   {
     if (!parameter.GetRenderContourLines()) {
+      return;
+    }
+
+    if (!data.srtmTile) {
+      log.Warn() << "Contour lines activated but data available";
       return;
     }
 
@@ -2865,72 +2877,290 @@ static void DumpGroundTile(const GroundTile& tile)
       return;
     }
 
-    FeatureValueBuffer contourLinesBuffer;
+    if (true) {
+      FeatureValueBuffer contourLinesBuffer;
 
-    contourLinesBuffer.SetType(srtmType);
+      contourLinesBuffer.SetType(srtmType);
 
-    std::vector<BorderStyleRef> areaBorderStyles;
+      std::vector<LineStyleRef> contourLineStyles;
 
-    styleConfig->GetAreaBorderStyles(srtmType,
-                                     contourLinesBuffer,
-                                     projection,
-                                     areaBorderStyles);
+      styleConfig->GetWayLineStyles(contourLinesBuffer,projection,contourLineStyles);
 
-    if (areaBorderStyles.empty()) {
-      log.Warn() << "Contour lines activated but no border style for type 'srtm_tile' found";
-    }
+      if (contourLineStyles.empty()) {
+        log.Warn() << "Contour lines activated but no line style for type 'srtm_tile' found";
+      }
 
-    GeoBox mapBoundingBox=projection.GetDimensions();
+      log.Info() << "Processing height map " << data.srtmTile->boundingBox.GetDisplayText() << " " << data.srtmTile->columns << "x" << data.srtmTile->rows;
 
-    log.Info() << "Initial bounding box: "  << mapBoundingBox.GetDisplayText();
+      int32_t minHeight=std::numeric_limits<int32_t>::max();
+      int32_t maxHeight=std::numeric_limits<int32_t>::min();
+      for (auto height : data.srtmTile->heights) {
+        if (height!=SRTM::nodata) {
+          minHeight=std::min(minHeight,height);
+          maxHeight=std::max(maxHeight,height);
+        }
+      }
 
-    double minLat=RoundDown(mapBoundingBox.GetMinLat());
-    double maxLat=RoundUp(mapBoundingBox.GetMaxLat());
+      if (minHeight>maxHeight) {
+        log.Warn() << "No valid height data available";
+        return;
+      }
 
-    double minLon=RoundDown(mapBoundingBox.GetMinLon());
-    double maxLon=RoundUp(mapBoundingBox.GetMaxLon());
+      int32_t elevationSteps=25;
+      int32_t minElevation=(minHeight/elevationSteps)*elevationSteps;
+      int32_t maxElevation=((maxHeight+elevationSteps)/elevationSteps)*elevationSteps;
+      GeoBox  boundingBox=projection.GetDimensions();
 
-    log.Info() << "Even bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
+      log.Info() << "Elevation range: " << minHeight << " => " << maxHeight << " | " << minElevation << " => " << maxElevation;
 
-    int minX=int(minLon);
-    int minY=int(minLat);
+      for (int32_t ele=minElevation; ele<=maxElevation; ele+=elevationSteps) {
+        log.Info() << "### Ele " << ele;
+        for (size_t y=0; y<data.srtmTile->rows; y++) {
+          for (size_t x=0; x<data.srtmTile->columns; x++) {
+            int32_t height=data.srtmTile->GetHeight(x,y);
+            GeoBox box=GeoBox(GeoCoord(data.srtmTile->boundingBox.GetMinLat()+(1-double(y)/data.srtmTile->rows),
+                                          data.srtmTile->boundingBox.GetMinLon()+double(x)/data.srtmTile->columns),
+                              GeoCoord(data.srtmTile->boundingBox.GetMinLat()+(1-double(y+1)/data.srtmTile->rows),
+                                              data.srtmTile->boundingBox.GetMinLon()+double(x+1)/data.srtmTile->columns));
 
-    double factor=1.0/1201;
-
-    bool even=true;
-    for (int x=minX; x<int(maxLon); x++) {
-      for (int y=minY; y<int(maxLat); y++) {
-        for (int subX=0; subX<1201; subX++) {
-          for (int subY=0; subY<1201; subY++) {
-            even=!even;
-
-            if (!even) {
+            if (!boundingBox.Intersects(box)) {
               continue;
             }
 
-            size_t   start,end;
-            double   xDelta=subX*factor;
-            double   yDelta=subY*factor;
-            GeoBox   tileBoundingBox=GeoBox(GeoCoord(y+yDelta,x+xDelta),
-                                            GeoCoord(y+yDelta+factor,x+xDelta+factor));
+            if (x>0) {
+              // left
+              int32_t otherHeight=data.srtmTile->GetHeight(x-1,y);
+              if (CrossesElevationLine(ele,height,otherHeight)) {
+                log.Info() << "Left " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
 
-            transBuffer.TransformBoundingBox(projection,
-                                             TransPolygon::none,
-                                             tileBoundingBox,
-                                             start,
-                                             end,
-                                             errorTolerancePixel);
+                FeatureValueBuffer     buffer;
+                WayData                wd;
+                std::array<GeoCoord,2> path;
+                size_t                 start,end;
 
-            for (const auto& borderStyle : areaBorderStyles) {
-              AreaData tileData;
+                path[0]=box.GetBottomLeft();
+                path[1]=box.GetTopLeft();
 
-              tileData.borderStyle=borderStyle;
-              tileData.boundingBox=tileBoundingBox;
-              tileData.ref=ObjectFileRef();
-              tileData.transStart=start;
-              tileData.transEnd=end;
+                transBuffer.TransformWay(projection,
+                                         TransPolygon::none,
+                                         path,
+                                         start,
+                                         end,
+                                         errorTolerancePixel);
 
-              DrawArea(projection,parameter,tileData);
+                wd.buffer=&buffer;
+                wd.layer=0;
+                wd.lineStyle=contourLineStyles[0];
+                wd.color=contourLineStyles[0]->GetLineColor();
+                wd.wayPriority=std::numeric_limits<size_t>::max();
+                wd.transStart=start;
+                wd.transEnd=end;
+                wd.lineWidth=GetProjectedWidth(projection,
+                                               projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
+                                               contourLineStyles[0]->GetWidth());
+                wd.startIsClosed=false;
+                wd.endIsClosed=false;
+
+                DrawWay(*styleConfig,projection,parameter,wd);
+              }
+            }
+
+            if (x<data.srtmTile->columns-1) {
+              // right
+              int32_t otherHeight=data.srtmTile->GetHeight(x+1,y);
+              if (CrossesElevationLine(ele,height,otherHeight)) {
+                log.Info() << "Right " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+
+                FeatureValueBuffer     buffer;
+                WayData                wd;
+                std::array<GeoCoord,2> path;
+                size_t                 start,end;
+
+                path[0]=box.GetBottomRight();
+                path[1]=box.GetTopRight();
+
+                transBuffer.TransformWay(projection,
+                                         TransPolygon::none,
+                                         path,
+                                         start,
+                                         end,
+                                         errorTolerancePixel);
+
+                wd.buffer=&buffer;
+                wd.layer=0;
+                wd.lineStyle=contourLineStyles[0];
+                wd.color=contourLineStyles[0]->GetLineColor();
+                wd.wayPriority=std::numeric_limits<size_t>::max();
+                wd.transStart=start;
+                wd.transEnd=end;
+                wd.lineWidth=GetProjectedWidth(projection,
+                                               projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
+                                               contourLineStyles[0]->GetWidth());
+                wd.startIsClosed=false;
+                wd.endIsClosed=false;
+
+                DrawWay(*styleConfig,projection,parameter,wd);
+              }
+            }
+
+            if (y>0) {
+              // top
+              int32_t otherHeight=data.srtmTile->GetHeight(x,y-1);
+              if (CrossesElevationLine(ele,height,otherHeight)) {
+                log.Info() << "Top " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+
+                FeatureValueBuffer     buffer;
+                WayData                wd;
+                std::array<GeoCoord,2> path;
+                size_t                 start,end;
+
+                path[0]=box.GetTopLeft();
+                path[1]=box.GetTopRight();
+
+                transBuffer.TransformWay(projection,
+                                         TransPolygon::none,
+                                         path,
+                                         start,
+                                         end,
+                                         errorTolerancePixel);
+
+                wd.buffer=&buffer;
+                wd.layer=0;
+                wd.lineStyle=contourLineStyles[0];
+                wd.color=contourLineStyles[0]->GetLineColor();
+                wd.wayPriority=std::numeric_limits<size_t>::max();
+                wd.transStart=start;
+                wd.transEnd=end;
+                wd.lineWidth=GetProjectedWidth(projection,
+                                               projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
+                                               contourLineStyles[0]->GetWidth());
+                wd.startIsClosed=false;
+                wd.endIsClosed=false;
+
+                DrawWay(*styleConfig,projection,parameter,wd);
+
+              }
+            }
+
+            if (y<data.srtmTile->rows-1) {
+              // bottom
+              int32_t otherHeight=data.srtmTile->GetHeight(x,y+1);
+              if (CrossesElevationLine(ele,height,otherHeight)) {
+                log.Info() << "Bottom " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+
+                FeatureValueBuffer     buffer;
+                WayData                wd;
+                std::array<GeoCoord,2> path;
+                size_t                 start,end;
+
+                path[0]=box.GetBottomLeft();
+                path[1]=box.GetBottomRight();
+
+                transBuffer.TransformWay(projection,
+                                         TransPolygon::none,
+                                         path,
+                                         start,
+                                         end,
+                                         errorTolerancePixel);
+
+                wd.buffer=&buffer;
+                wd.layer=0;
+                wd.lineStyle=contourLineStyles[0];
+                wd.color=contourLineStyles[0]->GetLineColor();
+                wd.wayPriority=std::numeric_limits<size_t>::max();
+                wd.transStart=start;
+                wd.transEnd=end;
+                wd.lineWidth=GetProjectedWidth(projection,
+                                               projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
+                                               contourLineStyles[0]->GetWidth());
+                wd.startIsClosed=false;
+                wd.endIsClosed=false;
+
+                DrawWay(*styleConfig,projection,parameter,wd);
+
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (false) {
+      FeatureValueBuffer contourLinesBuffer;
+
+      contourLinesBuffer.SetType(srtmType);
+
+      std::vector<BorderStyleRef> areaBorderStyles;
+
+      styleConfig->GetAreaBorderStyles(srtmType,
+                                       contourLinesBuffer,
+                                       projection,
+                                       areaBorderStyles);
+
+      if (areaBorderStyles.empty()) {
+        log.Warn() << "Contour lines activated but no border style for type 'srtm_tile' found";
+      }
+
+      GeoBox mapBoundingBox=projection.GetDimensions();
+
+      log.Info() << "Initial bounding box: " << mapBoundingBox.GetDisplayText();
+
+      double minLat=RoundDown(mapBoundingBox.GetMinLat());
+      double maxLat=RoundUp(mapBoundingBox.GetMaxLat());
+
+      double minLon=RoundDown(mapBoundingBox.GetMinLon());
+      double maxLon=RoundUp(mapBoundingBox.GetMaxLon());
+
+      log.Info() << "SRTM bounding box: " << GeoBox(GeoCoord(minLat,
+                                                             minLon),
+                                                    GeoCoord(maxLat,
+                                                             maxLon)).GetDisplayText();
+
+      int minX=int(minLon);
+      int minY=int(minLat);
+
+      double factor=1.0/1201;
+
+      bool even=true;
+
+      for (int x=minX; x<int(maxLon); x++) {
+        for (int y=minY; y<int(maxLat); y++) {
+          for (int subX=0; subX<1201; subX++) {
+            for (int subY=0; subY<1201; subY++) {
+              even =!even;
+
+              if (!even) {
+                continue;
+              }
+
+              size_t start,end;
+              double xDelta         =subX*factor;
+              double yDelta         =subY*factor;
+              GeoBox tileBoundingBox=GeoBox(GeoCoord(y+yDelta,
+                                                     x+xDelta),
+                                            GeoCoord(y+yDelta+factor,
+                                                     x+xDelta+factor));
+
+              transBuffer.TransformBoundingBox(projection,
+                                               TransPolygon::none,
+                                               tileBoundingBox,
+                                               start,
+                                               end,
+                                               errorTolerancePixel);
+
+              for (const auto& borderStyle : areaBorderStyles) {
+                AreaData tileData;
+
+                tileData.borderStyle=borderStyle;
+                tileData.boundingBox=tileBoundingBox;
+                tileData.ref=ObjectFileRef();
+                tileData.transStart=start;
+                tileData.transEnd  =end;
+
+                DrawArea(projection,
+                         parameter,
+                         tileData);
+              }
             }
           }
         }
@@ -2940,7 +3170,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
   void MapPainter::DrawHillShading(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const MapData& /*data*/)
+                                   const MapData& data)
   {
     if (!parameter.GetRenderHillShading()) {
       return;
@@ -2963,8 +3193,19 @@ static void DumpGroundTile(const GroundTile& tile)
                                                                hillShadingBuffer,
                                                                projection);
 
+    std::vector<TextStyleRef> textStyles;
+
+    styleConfig->GetAreaTextStyles(srtmType,
+                                   hillShadingBuffer,
+                                   projection,
+                                   textStyles);
+
     if (!hillShadingFill) {
       log.Warn() << "HillShading activated but no fill style for type 'srtm_tile' found";
+    }
+
+    if (textStyles.empty()) {
+      log.Warn() << "HillShading activated but no text style for type 'srtm_tile' found";
     }
 
     GeoBox mapBoundingBox=projection.GetDimensions();
@@ -2977,7 +3218,7 @@ static void DumpGroundTile(const GroundTile& tile)
     double minLon=RoundDown(mapBoundingBox.GetMinLon());
     double maxLon=RoundUp(mapBoundingBox.GetMaxLon());
 
-    log.Info() << "Even bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
+    log.Info() << "SRTM bounding box: "  << GeoBox(GeoCoord(minLat,minLon),GeoCoord(maxLat,maxLon)).GetDisplayText();
 
     int minX=int(minLon);
     int minY=int(minLat);
@@ -2991,13 +3232,8 @@ static void DumpGroundTile(const GroundTile& tile)
           for (int subY=0; subY<1201; subY++) {
             even=!even;
 
-            if (!even) {
-              continue;
-            }
-
             size_t   start,end;
             AreaData tileData;
-            GeoBox   tileBoundingBox;
             double   xDelta=subX*factor;
             double   yDelta=subY*factor;
 
@@ -3005,18 +3241,58 @@ static void DumpGroundTile(const GroundTile& tile)
             tileData.boundingBox=GeoBox(GeoCoord(y+yDelta,x+xDelta),
                                         GeoCoord(y+yDelta+factor,x+xDelta+factor));
 
-            transBuffer.TransformBoundingBox(projection,
-                                             TransPolygon::none,
-                                             tileData.boundingBox,
-                                             start,
-                                             end,
-                                             errorTolerancePixel);
+            if (!mapBoundingBox.Intersects(tileData.boundingBox)) {
+              continue;
+            }
 
-            tileData.ref=ObjectFileRef();
-            tileData.transStart=start;
-            tileData.transEnd=end;
 
-            DrawArea(projection,parameter,tileData);
+            if (!textStyles.empty() && data.srtmTile) {
+              GeoCoord center=tileData.boundingBox.GetCenter();
+              double xPos,yPos;
+
+              projection.GeoToPixel(center,xPos,yPos);
+
+              double                  latitude=center.GetLat();
+              double                  longitude=center.GetLon();
+              double                  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
+              double                  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
+              int                     col      =int(floor(fracLon*data.srtmTile->columns));
+              int                     row      =int(floor(fracLat*data.srtmTile->rows));
+
+              int32_t height=data.srtmTile->GetHeight(col,row);
+
+              LabelData labelBox;
+
+              labelBox.priority=0;
+              labelBox.alpha=1.0;
+              labelBox.fontSize=textStyles[0]->GetSize();
+              labelBox.style=textStyles[0];
+              labelBox.text=std::to_string(height);
+
+              std::vector<LabelData> vect;
+              vect.push_back(labelBox);
+              RegisterRegularLabel(projection, parameter, vect, Vertex2D(xPos,yPos), /*proposedWidth*/ -1);
+            }
+
+            // chess pattern
+            if (!even) {
+              continue;
+            }
+
+            if (hillShadingFill) {
+              transBuffer.TransformBoundingBox(projection,
+                                               TransPolygon::none,
+                                               tileData.boundingBox,
+                                               start,
+                                               end,
+                                               errorTolerancePixel);
+
+              tileData.ref=ObjectFileRef();
+              tileData.transStart=start;
+              tileData.transEnd=end;
+
+              DrawArea(projection,parameter,tileData);
+            }
           }
         }
       }

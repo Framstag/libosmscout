@@ -358,17 +358,60 @@ namespace osmscout {
 
     void Reset();
 
+    template<typename C>
     void TransformArea(const Projection& projection,
                        TransPolygon::OptimizeMethod optimize,
-                       const std::vector<Point>& nodes,
+                       const C& nodes,
                        size_t& start, size_t &end,
-                       double optimizeErrorTolerance);
-    bool TransformWay(const Projection& projection,
+                       double optimizeErrorTolerance)
+    {
+      transPolygon.TransformArea(projection,
+                                 optimize,
+                                 nodes,
+                                 optimizeErrorTolerance);
+
+      assert(!transPolygon.IsEmpty());
+
+      bool isStart=true;
+      for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
+        if (transPolygon.points[i].draw) {
+          end=buffer->PushCoord(transPolygon.points[i].x,
+                                transPolygon.points[i].y);
+
+          if (isStart) {
+            start=end;
+            isStart=false;
+          }
+        }
+      }
+    }
+
+    template<typename C>
+    void TransformWay(const Projection& projection,
                       TransPolygon::OptimizeMethod optimize,
-                      const std::vector<Point>& nodes,
+                      const C& nodes,
                       size_t& start, size_t &end,
-                      double optimizeErrorTolerance);
-    bool TransformBoundingBox(const Projection& projection,
+                      double optimizeErrorTolerance)
+    {
+      transPolygon.TransformWay(projection, optimize, nodes, optimizeErrorTolerance);
+
+      assert(!transPolygon.IsEmpty());
+
+      bool isStart=true;
+      for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
+        if (transPolygon.points[i].draw) {
+          end=buffer->PushCoord(transPolygon.points[i].x,
+                                transPolygon.points[i].y);
+
+          if (isStart) {
+            start=end;
+            isStart=false;
+          }
+        }
+      }
+    }
+
+    void TransformBoundingBox(const Projection& projection,
                               TransPolygon::OptimizeMethod optimize,
                               const GeoBox& boundingBox,
                               size_t& start, size_t &end,

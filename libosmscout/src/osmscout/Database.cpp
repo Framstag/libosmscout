@@ -609,6 +609,27 @@ namespace osmscout {
     return waterIndex;
   }
 
+  SRTMRef Database::GetSRTMIndex() const
+  {
+    std::lock_guard<std::mutex> guard(srtmIndexMutex);
+
+    if (!IsOpen()) {
+      return nullptr;
+    }
+
+    if (!srtmIndex) {
+      srtmIndex=std::make_shared<SRTM>(parameter.GetSRTMDirectory());
+
+      StopClock timer;
+
+      timer.Stop();
+
+      log.Debug() << "Opening SRTMIndex: " << timer.ResultString();
+    }
+
+    return srtmIndex;
+  }
+
   OptimizeAreasLowZoomRef Database::GetOptimizeAreasLowZoom() const
   {
     std::lock_guard<std::mutex> guard(optimizeAreasMutex);

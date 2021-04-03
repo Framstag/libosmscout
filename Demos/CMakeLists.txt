@@ -317,3 +317,6 @@ if(${OSMSCOUT_BUILD_MAP_GDI})
 else()
 	message("Skip DrawMapGDI demo, libosmscout-map-gdi is missing.")
 endif()
+
+#---- Srtm
+osmscout_demo_project(NAME Srtm SOURCES src/Srtm.cpp TARGET OSMScout::OSMScout)

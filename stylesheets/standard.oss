@@ -2238,8 +2238,11 @@ STYLE
 
  [MAG continent-] {
    [TYPE srtm_tile] {
-     AREA { color: #00000033; }
+     //WAY {color: @majorContourColor; displayWidth: 0.150mm; }
+     WAY {color: #ff0000; displayWidth: 0.5mm; }
+     AREA { color: #00000008; }
      AREA.BORDER { width: 0.1mm; color:  #555555; }
+     AREA.TEXT { label: Name.name ; priority: 0; size: 0.8; }
    }
  }
 

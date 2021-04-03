@@ -39,6 +39,7 @@ namespace osmscout {
   {
   private:
     bool dataMMap{true};
+
   public:
     BasemapDatabaseParameter() = default;
 

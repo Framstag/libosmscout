@@ -33,29 +33,33 @@
 
  */
 
-#include <cstring>
 #include <iostream>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/SRTM.h>
 
-int main(int argc, char* argv[])
+int main(int argc,
+         char* argv[])
 {
 
-  if (argc!=4) {
+  if (argc<4 || argc%2!=0) {
     std::cout << "Srtm <SRTM directory> <latitude> <longitude>" << std::endl;
     return 1;
   }
 
-  char *srtmDir = strdup(argv[1]);
-  double latitude = atof(argv[2]);
-  double longitude = atof(argv[3]);
+  osmscout::SRTMRef  srtm=std::make_shared<osmscout::SRTM>(argv[1]);
 
-  osmscout::SRTM srtm(srtmDir);
-  int h = srtm.GetHeightAtLocation(latitude, longitude);
-  if(h!=osmscout::SRTM::nodata){
-    std::cout<<"Height at ("<<latitude<<","<<longitude<<") = "<<h<<" m"<<std::endl;
-  } else {
-    std::cout<<"No data for ("<<latitude<<","<<longitude<<")"<<std::endl;
+  for (int a=2; a<argc; a+=2) {
+    osmscout::GeoCoord coord(atof(argv[a]),
+                             atof(argv[a+1]));
+    int                h=srtm->GetHeightAtLocation(coord);
+
+    if (h!=osmscout::SRTM::nodata) {
+      std::cout << "Height at " << coord.GetDisplayText() << " = " << h << " m" << std::endl;
+    }
+    else {
+      std::cout << "No data for " << coord.GetDisplayText() << std::endl;
+    }
   }
 
   return 0;

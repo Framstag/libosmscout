@@ -165,36 +165,48 @@ namespace osmscout {
 
     currentFile.close();
 
+    fileBoundingBox=GeoBox(GeoCoord(patchLat,patchLon),GeoCoord(patchLat+1,patchLon+1));
+
     return true;
+  }
+
+  int32_t SRTM::GetHeight(size_t column, size_t row) const
+  {
+    return (heights[2*row*SRTM::columns+2*column] << 8)+
+           (heights[2*row*SRTM::columns+2*column+1]);
   }
 
   /**
    * return the height at (latitude,longitude) or SRTM::nodata if no data at the location
    */
-  int32_t SRTM::GetHeightAtLocation(double latitude,
-                                    double longitude)
+  int32_t SRTM::GetHeightAtLocation(const GeoCoord& coord)
   {
-    if (!AssureCorrectFileLoaded(latitude,
-                                 longitude)) {
+    if (!AssureCorrectFileLoaded(coord.GetLat(),
+                                 coord.GetLon())) {
       return nodata;
     }
 
     if (heights!=nullptr) {
       [[maybe_unused]] double pixelSize=1.0/double(SRTM::rows-1);
+      double                  latitude=coord.GetLat();
+      double                  longitude=coord.GetLon();
       double                  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
       double                  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
       int                     col      =int(floor(fracLon*SRTM::columns));
       int                     row      =int(floor(fracLat*SRTM::rows));
 
-      int32_t h1=(heights[2*row*SRTM::columns+2*col] << 8)+
-                 (heights[2*row*SRTM::columns+2*col+1]);
+      int32_t h1=GetHeight(col,row);
+
+      log.Info() << "Height at " << coord.GetDisplayText() << " " << fracLat << "x" << fracLon << " with tile coords " << col << "," << row << " = " << h1;
 
 #ifndef SRTM_BILINEAR_INTERPOLATION
       return (int32_t) floor(h1);
 #else
-      int h2 = (heights[2*row*SRTM::columns+col2+2]<<8)+(heights[2*row*SRTM::columns+col2+3]);
-      int h3 = (heights[2*(row+1)*SRTM::columns+col2]<<8)+(heights[2*(row+1)*SRTM::columns+col2+1]);
-      int h4 = (heights[2*(row+1)*SRTM::columns+col2+2]<<8)+(heights[2*(row+1)*SRTM::columns+col2+3]);
+      // TODO: Hmmm, is the right interpolation box? Have to look again at the original sources!
+      int h2 = GetHeight(col+1,row);
+      int h3 = GetHeight(col,row+1);
+      int h4 = GetHeight(col+1,row+1);
+
       // bilinear interpolation
       double fLat = fracLat - fracLat*row/SRTM::rows;
       double fLon = fracLon - fracLon*pixelSize/SRTM::columns;
@@ -208,9 +220,43 @@ namespace osmscout {
     return nodata;
   }
 
-  int32_t SRTM::GetHeightAtLocation(const GeoCoord& coord)
+  SRTMDataRef SRTM::GetHeightInBoundingBox(const GeoBox& boundingBox)
   {
-    return GetHeightAtLocation(coord.GetLat(),coord.GetLon());
-  }
+    if (!AssureCorrectFileLoaded(boundingBox.GetMinCoord().GetLat(),
+                                 boundingBox.GetMinCoord().GetLon())) {
+      return nullptr;
+    }
 
+    SRTMDataRef tile=std::make_shared<SRTMData>();
+
+    tile->boundingBox=boundingBox.Intersection(fileBoundingBox);
+
+    log.Info() << "SRTM boundingBox: " << fileBoundingBox.GetDisplayText();
+    log.Info() << "Requested boundingBox: " << boundingBox.GetDisplayText();
+    log.Info() << "Clipped boundingBox: " << tile->boundingBox.GetDisplayText();
+
+    // TODO: We simply copy the complete height map for now
+
+    tile->boundingBox=fileBoundingBox;
+    tile->columns=columns;
+    tile->rows=rows;
+
+    tile->heights.resize(columns*rows);
+
+    for (size_t y=0; y<rows; y++) {
+      for (size_t x=0; x<columns; x++) {
+        int32_t height=GetHeight(x,y);
+
+        if (height>10000) {
+          log.Error() << "Unexpected height: " << x << "," << y << " = " << height;
+
+          height=nodata;
+        }
+
+        tile->heights[y*columns+x]=height;
+      }
+    }
+
+    return tile;
+  }
 }

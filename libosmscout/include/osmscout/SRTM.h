@@ -28,15 +28,34 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/util/GeoBox.h>
 
 #include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/system/SystemTypes.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_API SRTMData
+  {
+  public:
+    GeoBox               boundingBox;
+    size_t               rows;
+    size_t               columns;
+    std::vector<int32_t> heights;
+
+    inline int32_t GetHeight(size_t x, size_t y) const
+    {
+      return heights[y*columns+x];
+    }
+  };
+
+  using SRTMDataRef = std::shared_ptr<SRTMData>;
 
   /**
    * Read elevation data in hgt format
@@ -47,12 +66,13 @@ namespace osmscout {
     static const int32_t nodata=-32768;
 
   private:
-    std::string srtmPath;
-    std::string currentFilename;
-    size_t      rows;
-    size_t      columns;
-    size_t      patchSize;
-    uint8_t     *heights;
+    std::string      srtmPath;
+    std::string      currentFilename;
+    osmscout::GeoBox fileBoundingBox;
+    size_t           rows;
+    size_t           columns;
+    size_t           patchSize;
+    uint8_t          *heights;
 
   private:
     bool AssureCorrectFileLoaded(double latitude,
@@ -60,16 +80,19 @@ namespace osmscout {
 
     std::string CalculateHGTFilename(int patchLat,
                                      int patchLon) const;
+
+    int32_t GetHeight(size_t column, size_t row) const;
+
   public:
     explicit SRTM(const std::string& path);
 
     virtual ~SRTM();
 
-    int32_t GetHeightAtLocation(double latitude,
-                                double longitude);
-
     int32_t GetHeightAtLocation(const GeoCoord& coord);
+    SRTMDataRef GetHeightInBoundingBox(const GeoBox& boundingBox);
   };
+
+  using SRTMRef = std::shared_ptr<SRTM>;
 }
 
 #endif
