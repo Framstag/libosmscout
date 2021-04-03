@@ -69,7 +69,7 @@ public slots:
   void onLoadingFinished(int requestId);
 
 public:
-  ElevationChartWidget(QQuickItem* parent = nullptr);
+  explicit ElevationChartWidget(QQuickItem* parent = nullptr);
   ~ElevationChartWidget() override;
 
   void paint(QPainter *painter) override;
