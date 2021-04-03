@@ -206,7 +206,7 @@ namespace osmscout
 
           polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
-          if (polygon.IsEmpty() ||
+          if (polygon.GetLength() < 3 || // drop rings reduced to single line or just point
               (xmax-xmin<=pixel &&
                ymax-ymin<=pixel)) {
             // We drop all sub roles of the current role, too
