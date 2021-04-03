@@ -54,6 +54,9 @@
 // Water index
 #include <osmscout/WaterIndex.h>
 
+// SRTM index
+#include <osmscout/SRTM.h>
+
 #include <osmscout/routing/RouteDescription.h>
 
 #include <osmscout/util/GeoBox.h>
@@ -93,6 +96,10 @@ namespace osmscout {
     bool routesDataMMap=true;
     bool optimizeLowZoomMMap=true;
     bool indexMMap=true;
+
+    // temporary, until we have our own database file
+    std::string srtmDirectory;
+
   public:
     DatabaseParameter() = default;
 
@@ -110,6 +117,12 @@ namespace osmscout {
     void SetOptimizeLowZoomMMap(bool mmap);
     void SetIndexMMap(bool mmap);
 
+    // Temporary
+    void SetSRTMDirectory(const std::string& directory)
+    {
+      this->srtmDirectory=directory;
+    }
+
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetNodeDataCacheSize() const;
     unsigned long GetWayDataCacheSize() const;
@@ -123,6 +136,12 @@ namespace osmscout {
     bool GetRoutesDataMMap() const;
     bool GetOptimizeLowZoomMMap() const;
     bool GetIndexMMap() const;
+
+    // Temporary
+    std::string GetSRTMDirectory() const
+    {
+      return srtmDirectory;
+    }
   };
 
   class Database;
@@ -323,6 +342,9 @@ namespace osmscout {
     mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;      //!< Optimized data for low zoom situations
     mutable std::mutex              optimizeWaysMutex;        //!< Mutex to make lazy initialisation of optimized ways index thread-safe
 
+    mutable SRTMRef                 srtmIndex;
+    mutable std::mutex              srtmIndexMutex;           //!< Mutex to make lazy initialisation of optimized ways index thread-safe
+
   private:
     template<typename DataFile, typename OffsetsCol, typename DataCol>
     bool GetObjectsByOffset(DataFile dataFile,
@@ -379,6 +401,8 @@ namespace osmscout {
 
     OptimizeAreasLowZoomRef GetOptimizeAreasLowZoom() const;
     OptimizeWaysLowZoomRef GetOptimizeWaysLowZoom() const;
+
+    SRTMRef GetSRTMIndex() const;
 
     bool GetBoundingBox(GeoBox& boundingBox) const;
 
