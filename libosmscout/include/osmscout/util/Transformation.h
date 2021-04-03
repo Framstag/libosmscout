@@ -377,15 +377,15 @@ namespace osmscout {
    *
    * \ingroup Geometry
    */
-  class OSMSCOUT_API TransBuffer CLASS_FINAL
+  class OSMSCOUT_API PolyToCoordTransformer CLASS_FINAL
   {
   public:
     TransPolygon transPolygon;
     CoordBuffer  *buffer;
 
   public:
-    explicit TransBuffer(CoordBuffer* buffer);
-    ~TransBuffer();
+    explicit PolyToCoordTransformer(CoordBuffer* buffer);
+    ~PolyToCoordTransformer();
 
     void Reset();
 

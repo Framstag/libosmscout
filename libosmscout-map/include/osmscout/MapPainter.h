@@ -217,17 +217,17 @@ namespace osmscout {
     //@}
 
   private:
-    std::vector<StepMethod>      stepMethods;
+    std::vector<StepMethod>      stepMethods;        //!< Jump table render step methods
     double                       errorTolerancePixel;
 
-    std::list<AreaData>          areaData;
-    std::list<WayData>           wayData;
+    std::list<AreaData>          areaData;           //!< Internal processing list for area rendering
+    std::list<WayData>           wayData;            //!< Internal processing list for way rendering
     std::list<WayPathData>       wayPathData;
     // std::list<RouteData>         routeData;
     std::list<RouteLabelData>    routeLabelData;
 
-    std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
-    std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
+    std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
+    std::vector<LineStyleRef>    lineStyles;         //!< Temporary storage for StyleConfig return value
 
     /**                           L
      Precalculations
@@ -238,12 +238,12 @@ namespace osmscout {
     //@}
 
   protected:
-    StyleConfigRef               styleConfig;       //!< Reference to the style configuration to be used
+    StyleConfigRef               styleConfig;        //!< Reference to the style configuration to be used
     /**
        Scratch variables for path optimization algorithm
      */
     //@{
-    TransBuffer                  transBuffer;       //!< Static (avoid reallocation) buffer of transformed coordinates
+    PolyToCoordTransformer       transformer;        //!< Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
     /**

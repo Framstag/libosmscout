@@ -609,28 +609,28 @@ namespace osmscout {
     return CoordBufferRange(start,end);
   }
 
-  TransBuffer::TransBuffer(CoordBuffer* buffer)
+  PolyToCoordTransformer::PolyToCoordTransformer(CoordBuffer* buffer)
   : buffer(buffer)
   {
     // no code
   }
 
-  TransBuffer::~TransBuffer()
+  PolyToCoordTransformer::~PolyToCoordTransformer()
   {
     delete buffer;
   }
 
-  void TransBuffer::Reset()
+  void PolyToCoordTransformer::Reset()
   {
     buffer->Reset();
   }
 
-  void TransBuffer::TransformBoundingBox(const Projection& projection,
-                                         TransPolygon::OptimizeMethod optimize,
-                                         const GeoBox& boundingBox,
-                                         size_t& start,
-                                         size_t& end,
-                                         double optimizeErrorTolerance)
+  void PolyToCoordTransformer::TransformBoundingBox(const Projection& projection,
+                                                    TransPolygon::OptimizeMethod optimize,
+                                                    const GeoBox& boundingBox,
+                                                    size_t& start,
+                                                    size_t& end,
+                                                    double optimizeErrorTolerance)
   {
     transPolygon.TransformBoundingBox(projection, optimize, boundingBox, optimizeErrorTolerance);
 
