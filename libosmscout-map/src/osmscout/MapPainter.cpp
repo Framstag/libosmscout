@@ -1333,6 +1333,8 @@ namespace osmscout {
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
       if (ring.IsMaster() || ring.nodes.size() < 3) {
+        td[i].transStart=0;
+        td[i].transEnd=0;
         continue;
       }
 
@@ -1367,6 +1369,9 @@ namespace osmscout {
         // clipping inner ring, we will not render it, but still go deeper,
         // there may be nested outer rings
         return true;
+      }
+      if (td[i].transStart==td[i].transEnd) {
+        return false; // ring was skipped or reduced to single point
       }
 
       FillStyleRef                fillStyle;
@@ -1419,7 +1424,7 @@ namespace osmscout {
       // we currently assume that it does not have alpha and paints over its region and clipping is
       // not required.
       area->VisitClippingRings(i, [&a, &td](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
-        if (type->GetIgnore()) {
+        if (type->GetIgnore() && td[j].transStart < td[j].transEnd) {
           a.clippings.push_back(td[j]);
         }
         return true;
@@ -1829,6 +1834,9 @@ namespace osmscout {
     bool hasShieldLabels = styleConfig.HasWayPathShieldStyle(projection);
 
     for (const auto& way : data.ways) {
+      if (way->nodes.size() < 2) {
+        continue; // algorithms require at least two points
+      }
       CalculatePaths(styleConfig,
                      projection,
                      parameter,
@@ -1843,6 +1851,9 @@ namespace osmscout {
     }
 
     for (const auto& way : data.poiWays) {
+      if (way->nodes.size() < 2) {
+        continue; // algorithms require at least two points
+      }
       CalculatePaths(styleConfig,
                      projection,
                      parameter,
