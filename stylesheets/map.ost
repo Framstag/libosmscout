@@ -2457,5 +2457,5 @@ TYPES
 
   // Debugging
   TYPE srtm_tile IGNORE
-    = AREA ("type"=="srtm_tile")
+    = WAY AREA ("type"=="srtm_tile")
 END
