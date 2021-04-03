@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
