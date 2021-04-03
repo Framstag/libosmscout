@@ -1834,6 +1834,9 @@ namespace osmscout {
     bool hasShieldLabels = styleConfig.HasWayPathShieldStyle(projection);
 
     for (const auto& way : data.ways) {
+      if (way->nodes.size() < 2) {
+        continue; // algorithms require at least two points
+      }
       CalculatePaths(styleConfig,
                      projection,
                      parameter,
@@ -1848,6 +1851,9 @@ namespace osmscout {
     }
 
     for (const auto& way : data.poiWays) {
+      if (way->nodes.size() < 2) {
+        continue; // algorithms require at least two points
+      }
       CalculatePaths(styleConfig,
                      projection,
                      parameter,
