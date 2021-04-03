@@ -44,10 +44,11 @@ struct Arguments {
   std::string map;
   std::string style;
   std::string output;
-  size_t      width{1920};
-  size_t      height{1080};
+  size_t      width=1920;
+  size_t      height=1080;
 
   std::string basemap;
+  std::string srtmDirectory;
 
   osmscout::GeoCoord       center;
   osmscout::Magnification  zoom{osmscout::Magnification::magClose};
@@ -166,6 +167,13 @@ public:
                   "height",
                   "Image height");
     }
+    AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                args.srtmDirectory=value;
+              }),
+              "srtmDirectory",
+              "SRTM data lookup directory",
+              false);
+
     AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
                     args.map=value;
                   }),
@@ -219,8 +227,8 @@ public:
   DrawMapArgParser argParser;
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database{new osmscout::Database(databaseParameter)};
-  osmscout::MapServiceRef     mapService{new osmscout::MapService(database)};
+  osmscout::DatabaseRef       database;
+  osmscout::MapServiceRef     mapService;
   osmscout::StyleConfigRef    styleConfig;
 
   osmscout::BasemapDatabaseRef basemapDatabase;
@@ -257,10 +265,18 @@ public:
 
     osmscout::log.Debug(args.debug);
 
+    if (!args.srtmDirectory.empty()) {
+      databaseParameter.SetSRTMDirectory(args.srtmDirectory);
+    }
+
+    database=std::make_shared<osmscout::Database>(databaseParameter);
+
     if (!database->Open(args.map)) {
       std::cerr << "Cannot open database" << std::endl;
       return false;
     }
+
+    mapService=std::make_shared<osmscout::MapService>(database);
 
     styleConfig = std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
     if (!styleConfig->Load(args.style)) {
@@ -320,6 +336,10 @@ public:
     mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
     mapService->AddTileDataToMapData(tiles,data);
     mapService->GetGroundTiles(projection,data.groundTiles);
+
+    if (GetArguments().renderHillShading) {
+      data.srtmTile=mapService->GetSRTMData(projection);
+    }
 
     LoadBaseMapTiles(data.baseMapTiles);
   }
