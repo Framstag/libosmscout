@@ -42,6 +42,12 @@ class OSMSCOUT_CLIENT_QT_API ElevationChartWidget : public QQuickPaintedItem {
   Q_PROPERTY(int textPixelSize READ getTextPixelSize WRITE setTextPixelSize NOTIFY textPixelSizeChanged)
   Q_PROPERTY(int textPadding READ getTextPadding WRITE setTextPadding NOTIFY textPaddingChanged)
 
+  Q_PROPERTY(qint64 pointCount READ getPointCount NOTIFY pointsUpdated)
+  Q_PROPERTY(double lowestElevation READ getLowestElevation NOTIFY pointsUpdated)
+  Q_PROPERTY(double highestElevation READ getHighestElevation NOTIFY pointsUpdated)
+  Q_PROPERTY(double ascent READ getAscent NOTIFY pointsUpdated)
+  Q_PROPERTY(double descent READ getDescent NOTIFY pointsUpdated)
+
 signals:
   void wayChanged();
   void loadingChanged();
@@ -55,6 +61,7 @@ signals:
   void textColorChanged();
   void textPixelSizeChanged();
   void textPaddingChanged();
+  void pointsUpdated();
 
 public slots:
   void onError(int requestId);
@@ -62,7 +69,7 @@ public slots:
   void onLoadingFinished(int requestId);
 
 public:
-  ElevationChartWidget(QQuickItem* parent = nullptr);
+  explicit ElevationChartWidget(QQuickItem* parent = nullptr);
   ~ElevationChartWidget() override;
 
   void paint(QPainter *painter) override;
@@ -124,7 +131,38 @@ public:
 
   void setTextPadding(int size);
 
-private:
+  qint64 getPointCount() const
+  {
+    return points.size();
+  }
+
+  double getLowestElevation() const
+  {
+    if (lowest.has_value()) {
+      return lowest->elevation.AsMeter();
+    }
+    return 0;
+  }
+
+  double getHighestElevation() const
+  {
+    if (highest.has_value()) {
+      return highest->elevation.AsMeter();
+    }
+    return 0;
+  }
+
+  double getAscent() const
+  {
+    return ascent.AsMeter();
+  }
+
+  double getDescent() const
+  {
+    return descent.AsMeter();
+  }
+
+protected:
   void reset();
 
 private:
@@ -137,6 +175,8 @@ private:
   ElevationModule::ElevationPoints points;
   std::optional<ElevationPoint> lowest;
   std::optional<ElevationPoint> highest;
+  osmscout::Distance ascent;
+  osmscout::Distance descent;
 
   QColor lineColor=Qt::darkBlue;
   QColor textColor=Qt::darkBlue;

@@ -237,6 +237,10 @@ void ElevationChartWidget::onElevationProfileAppend(ElevationModule::ElevationPo
   if (this->requestId!=requestId){
     return;
   }
+  std::optional<ElevationPoint> last=std::nullopt;
+  if (!points.empty()){
+    last=points[points.size()-1];
+  }
   points.insert(points.end(), batch.begin(), batch.end());
   for (const auto& point:batch){
     std::cout << point.distance << " \t" << point.elevation.AsMeter() << " m \t" << point.coord.GetDisplayText() << " (" << point.contour->GetType()->GetName() << " " << point.contour->GetFileOffset() << ")" << std::endl;
@@ -246,7 +250,16 @@ void ElevationChartWidget::onElevationProfileAppend(ElevationModule::ElevationPo
     if (!highest.has_value() || highest->elevation < point.elevation){
       highest=point;
     }
+    if (last.has_value()) {
+      if (point.elevation > last->elevation) {
+        ascent += point.elevation - last->elevation;
+      } else {
+        descent += last->elevation - point.elevation;
+      }
+    }
+    last=point;
   }
+  emit pointsUpdated();
   update();
 }
 
@@ -274,6 +287,9 @@ void ElevationChartWidget::reset()
   points.clear();
   lowest=std::nullopt;
   highest=std::nullopt;
+  ascent=Meters(0);
+  descent=Meters(0);
+  emit pointsUpdated();
 }
 
 void ElevationChartWidget::setWay(QObject* o)
