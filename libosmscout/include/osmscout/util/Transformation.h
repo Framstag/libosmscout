@@ -324,6 +324,8 @@ namespace osmscout {
      * Result is stored after the last valid point. Generated way offsets are returned
      * in start and end.
      *
+     * Way have to have at least two nodes (orgEnd > orgStart)
+     *
      * @param orgStart original way start
      * @param orgEnd original way end (inclusive)
      * @param offset offset of parallel way - positive offset is left, negative right

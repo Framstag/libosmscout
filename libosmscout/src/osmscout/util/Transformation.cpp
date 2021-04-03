@@ -208,7 +208,7 @@ namespace osmscout {
                                         size_t& start,
                                         size_t& end)
   {
-    assert(orgStart<=orgEnd);
+    assert(orgStart<orgEnd);
     assert(orgEnd<usedPoints);
 
     double oax,oay;

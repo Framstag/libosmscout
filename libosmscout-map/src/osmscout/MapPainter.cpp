@@ -1333,6 +1333,8 @@ namespace osmscout {
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
       if (ring.IsMaster() || ring.nodes.size() < 3) {
+        td[i].transStart=0;
+        td[i].transEnd=0;
         continue;
       }
 
@@ -1367,6 +1369,9 @@ namespace osmscout {
         // clipping inner ring, we will not render it, but still go deeper,
         // there may be nested outer rings
         return true;
+      }
+      if (td[i].transStart==td[i].transEnd) {
+        return false; // ring was skipped or reduced to single point
       }
 
       FillStyleRef                fillStyle;
