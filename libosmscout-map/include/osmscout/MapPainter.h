@@ -118,8 +118,7 @@ namespace osmscout {
       LineStyleRef             lineStyle;       //!< Line style
       Color                    color;           //!< Line color
       size_t                   wayPriority;     //!< Priority of way (from style sheet)
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       double                   lineWidth;       //!< Line width
       bool                     startIsClosed;   //!< The end of the way is closed, it does not lead to another way or area
       bool                     endIsClosed;     //!< The end of the way is closed, it does not lead to another way or area
@@ -164,8 +163,7 @@ namespace osmscout {
     {
       FileOffset               ref;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment. Not owned pointer.
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       double                   mainSlotWidth;   //!< Width of main slot, used for relative positioning
     };
 
@@ -187,8 +185,7 @@ namespace osmscout {
       BorderStyleRef           borderStyle;     //!< Border style
       GeoBox                   boundingBox;     //!< Bounding box of the area
       bool                     isOuter;         //!< flag if this area is outer ring of some relation
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 

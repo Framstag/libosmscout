@@ -951,7 +951,7 @@ namespace osmscout {
                emptyDash,
                data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-               data.transStart,data.transEnd);
+               data.coordRange.GetStart(),data.coordRange.GetEnd());
     }
 
     DrawPath(projection,
@@ -960,7 +960,7 @@ namespace osmscout {
              data.lineWidth,
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-             data.transStart,data.transEnd);
+             data.coordRange.GetStart(),data.coordRange.GetEnd());
   }
 
   void MapPainterSVG::DrawArea(const Projection& /*projection*/,
@@ -996,8 +996,8 @@ namespace osmscout {
 
     stream << "          d=\"";
 
-    stream << "M " << coordBuffer->buffer[area.transStart].GetX() << " " << coordBuffer->buffer[area.transStart].GetY();
-    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+    stream << "M " << coordBuffer->buffer[area.coordRange.GetStart()].GetX() << " " << coordBuffer->buffer[area.coordRange.GetStart()].GetY();
+    for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
       stream << " L " << coordBuffer->buffer[i].GetX() << " " << coordBuffer->buffer[i].GetY();
     }
     stream << " Z";

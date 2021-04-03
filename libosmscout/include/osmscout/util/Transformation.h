@@ -299,6 +299,7 @@ namespace osmscout {
 
   public:
     CoordBufferRange() = default;
+    CoordBufferRange(const CoordBufferRange& other) = default;
 
     CoordBufferRange(size_t start, size_t end)
       : start(start),
@@ -358,17 +359,12 @@ namespace osmscout {
      *
      * Way have to have at least two nodes (orgEnd > orgStart)
      *
-     * @param orgStart original way start
-     * @param orgEnd original way end (inclusive)
+     * @param org original range of data in the CoordBuffer
      * @param offset offset of parallel way - positive offset is left, negative right
-     * @param start start of result
-     * @param end end of result (inclusive)
+     * @return range of data in the CoordBuffer
      */
-    void GenerateParallelWay(size_t orgStart,
-                             size_t orgEnd,
-                             double offset,
-                             size_t& start,
-                             size_t& end);
+    CoordBufferRange GenerateParallelWay(const CoordBufferRange& org,
+                                         double offset);
   };
 
   extern OSMSCOUT_API CoordBufferRange CopyPolygonToCoordBuffer(const TransPolygon& polygon, CoordBuffer& buffer);

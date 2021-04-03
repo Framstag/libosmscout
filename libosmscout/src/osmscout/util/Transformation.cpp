@@ -202,30 +202,28 @@ namespace osmscout {
     return usedPoints++;
   }
 
-  void CoordBuffer::GenerateParallelWay(size_t orgStart,
-                                        size_t orgEnd,
-                                        double offset,
-                                        size_t& start,
-                                        size_t& end)
+  CoordBufferRange CoordBuffer::GenerateParallelWay(const CoordBufferRange& org,
+                                                    double offset)
   {
-    assert(orgStart<orgEnd);
-    assert(orgEnd<usedPoints);
+    assert(org.GetStart()<org.GetEnd());
+    assert(org.GetEnd()<usedPoints);
 
+    size_t start,end;
     double oax,oay;
     double obx,oby;
 
 
-    Normalize(buffer[orgStart].GetY()-buffer[orgStart+1].GetY(),
-              buffer[orgStart+1].GetX()-buffer[orgStart].GetX(),
+    Normalize(buffer[org.GetStart()].GetY()-buffer[org.GetStart()+1].GetY(),
+              buffer[org.GetStart()+1].GetX()-buffer[org.GetStart()].GetX(),
               oax, oay);
 
     oax=offset*oax;
     oay=offset*oay;
 
-    start=PushCoord(buffer[orgStart].GetX()+oax,
-                    buffer[orgStart].GetY()+oay);
+    start=PushCoord(buffer[org.GetStart()].GetX()+oax,
+                    buffer[org.GetStart()].GetY()+oay);
 
-    for (size_t i=orgStart+1; i<orgEnd; i++) {
+    for (size_t i=org.GetStart()+1; i<org.GetEnd(); i++) {
       Normalize(buffer[i-1].GetY()-buffer[i].GetY(),
                 buffer[i].GetX()-buffer[i-1].GetX(),
                 oax, oay);
@@ -270,15 +268,17 @@ namespace osmscout {
       }
     }
 
-    Normalize(buffer[orgEnd-1].GetY()-buffer[orgEnd].GetY(),
-              buffer[orgEnd].GetX()-buffer[orgEnd-1].GetX(),
+    Normalize(buffer[org.GetEnd()-1].GetY()-buffer[org.GetEnd()].GetY(),
+              buffer[org.GetEnd()].GetX()-buffer[org.GetEnd()-1].GetX(),
               oax, oay);
 
     oax=offset*oax;
     oay=offset*oay;
 
-    end=PushCoord(buffer[orgEnd].GetX()+oax,
-                  buffer[orgEnd].GetY()+oay);
+    end=PushCoord(buffer[org.GetEnd()].GetX()+oax,
+                  buffer[org.GetEnd()].GetY()+oay);
+
+    return CoordBufferRange(start,end);
   }
 
   TransPolygon::TransPolygon()

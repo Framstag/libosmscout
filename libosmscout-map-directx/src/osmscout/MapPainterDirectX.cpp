@@ -960,8 +960,8 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        pSink->BeginFigure(POINTF(coordBuffer->buffer[area.transStart].GetX(), coordBuffer->buffer[area.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
-        for (size_t i = area.transStart + 1; i <= area.transEnd; i++) {
+        pSink->BeginFigure(POINTF(coordBuffer->buffer[area.coordRange.GetStart()].GetX(), coordBuffer->buffer[area.coordRange.GetStart()].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+        for (size_t i = area.coordRange.GetStart() + 1; i <= area.coordRange.GetEnd(); i++) {
           pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
         }
         pSink->EndFigure(D2D1_FIGURE_END_CLOSED);

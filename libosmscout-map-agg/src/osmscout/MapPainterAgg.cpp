@@ -652,9 +652,9 @@ namespace osmscout {
       rasterizer->filling_rule(agg::fill_non_zero);
     }
 
-    path.move_to(coordBuffer->buffer[area.transStart].GetX(),
-                 coordBuffer->buffer[area.transStart].GetY());
-    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+    path.move_to(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                 coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+    for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
       path.line_to(coordBuffer->buffer[i].GetX(),
                    coordBuffer->buffer[i].GetY());
     }
