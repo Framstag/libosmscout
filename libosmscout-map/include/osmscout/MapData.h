@@ -31,6 +31,8 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/GroundTile.h>
+#include <osmscout/SRTM.h>
+
 #include <osmscout/system/Compiler.h>
 
 namespace osmscout {
@@ -52,6 +54,7 @@ namespace osmscout {
     std::list<WayRef>     poiWays;      //!< List of manually added ways (not managed or changed by the database)
     std::list<GroundTile> groundTiles;  //!< List of ground tiles (optional)
     std::list<GroundTile> baseMapTiles; //!< List of ground tiles of base map (optional)
+    SRTMDataRef           srtmTile;     //!< Optional data with height information
 
   public:
     void ClearDBData();
