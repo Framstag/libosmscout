@@ -20,14 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-// For memcpy
-#include <cstring>
 #include <vector>
 
 #include <osmscout/CoreImportExport.h>
-
-#include <osmscout/GeoCoord.h>
-#include <osmscout/Pixel.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>

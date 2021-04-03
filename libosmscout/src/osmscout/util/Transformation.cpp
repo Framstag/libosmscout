@@ -19,8 +19,9 @@
 
 #include <osmscout/util/Transformation.h>
 
-#include <limits>
 #include <cstring>
+
+#include <limits>
 
 namespace osmscout {
 

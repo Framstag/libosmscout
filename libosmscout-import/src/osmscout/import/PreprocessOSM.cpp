@@ -19,6 +19,7 @@
 
 #include <osmscout/import/PreprocessOSM.h>
 
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <string>
