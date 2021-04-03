@@ -20,10 +20,6 @@
 #include <DrawMap.h>
 
 #include <iostream>
-#include <iomanip>
-
-#include <osmscout/Database.h>
-#include <osmscout/MapService.h>
 
 #include <osmscout/MapPainterCairo.h>
 
@@ -42,6 +38,7 @@ int main(int argc, char* argv[])
   }
 
   drawDemo.LoadData();
+
   Arguments args = drawDemo.GetArguments();
 
   cairo_surface_t *surface;
