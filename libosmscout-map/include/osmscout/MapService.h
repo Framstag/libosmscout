@@ -386,6 +386,10 @@ namespace osmscout {
                         const Magnification& magnification,
                         std::list<GroundTile>& tiles) const;
 
+    SRTMDataRef GetSRTMData(const Projection& projection) const;
+
+    SRTMDataRef GetSRTMData(const GeoBox& boundingBox) const;
+
     CallbackId RegisterTileStateCallback(TileStateCallback callback);
     void DeregisterTileStateCallback(CallbackId callbackId);
   };
