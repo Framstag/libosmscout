@@ -294,10 +294,12 @@ namespace osmscout {
   class OSMSCOUT_API CoordBufferRange CLASS_FINAL
   {
   private:
-    size_t start;
-    size_t end;
+    size_t start=std::numeric_limits<size_t>::max();
+    size_t end=std::numeric_limits<size_t>::max();
 
   public:
+    CoordBufferRange() = default;
+
     CoordBufferRange(size_t start, size_t end)
       : start(start),
         end(end)
@@ -390,11 +392,10 @@ namespace osmscout {
     void Reset();
 
     template<typename C>
-    void TransformArea(const Projection& projection,
-                       TransPolygon::OptimizeMethod optimize,
-                       const C& nodes,
-                       size_t& start, size_t &end,
-                       double optimizeErrorTolerance)
+    CoordBufferRange TransformArea(const Projection& projection,
+                                   TransPolygon::OptimizeMethod optimize,
+                                   const C& nodes,
+                                   double optimizeErrorTolerance)
     {
       transPolygon.TransformArea(projection,
                                  optimize,
@@ -403,34 +404,31 @@ namespace osmscout {
 
       assert(!transPolygon.IsEmpty());
 
-      CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
-
-      start=range.GetStart();
-      end=range.GetEnd();
+      return CopyPolygonToCoordBuffer(transPolygon,
+                                      *buffer);
     }
 
     template<typename C>
-    void TransformWay(const Projection& projection,
-                      TransPolygon::OptimizeMethod optimize,
-                      const C& nodes,
-                      size_t& start, size_t &end,
-                      double optimizeErrorTolerance)
+    CoordBufferRange TransformWay(const Projection& projection,
+                                  TransPolygon::OptimizeMethod optimize,
+                                  const C& nodes,
+                                  double optimizeErrorTolerance)
     {
-      transPolygon.TransformWay(projection, optimize, nodes, optimizeErrorTolerance);
+      transPolygon.TransformWay(projection,
+                                optimize,
+                                nodes,
+                                optimizeErrorTolerance);
 
       assert(!transPolygon.IsEmpty());
 
-      CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
-
-      start=range.GetStart();
-      end=range.GetEnd();
+      return CopyPolygonToCoordBuffer(transPolygon,
+                                      *buffer);
     }
 
-    void TransformBoundingBox(const Projection& projection,
-                              TransPolygon::OptimizeMethod optimize,
-                              const GeoBox& boundingBox,
-                              size_t& start, size_t &end,
-                              double optimizeErrorTolerance);
+    CoordBufferRange TransformBoundingBox(const Projection& projection,
+                                          TransPolygon::OptimizeMethod optimize,
+                                          const GeoBox& boundingBox,
+                                          double optimizeErrorTolerance);
   };
 }
 

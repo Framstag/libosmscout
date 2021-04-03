@@ -1268,15 +1268,12 @@ namespace osmscout {
         points[x-startTileX].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
-      size_t transStart;
-      size_t transEnd;
+      CoordBufferRange transRange;
 
-      transformer.TransformWay(projection,
-                               parameter.GetOptimizeWayNodes(),
-                               points,
-                               transStart,
-                               transEnd,
-                               errorTolerancePixel);
+      transRange=transformer.TransformWay(projection,
+                                          parameter.GetOptimizeWayNodes(),
+                                          points,
+                                          errorTolerancePixel);
 
       WayData data;
 
@@ -1285,8 +1282,8 @@ namespace osmscout {
       data.lineStyle=osmTileLine;
       data.color=osmTileLine->GetLineColor();
       data.wayPriority=std::numeric_limits<size_t>::max();
-      data.transStart=transStart;
-      data.transEnd=transEnd;
+      data.transStart=transRange.GetStart();
+      data.transEnd=transRange.GetStart();
       data.lineWidth=GetProjectedWidth(projection,
                                        projection.ConvertWidthToPixel(osmTileLine->GetDisplayWidth()),
                                        osmTileLine->GetWidth());
@@ -1304,15 +1301,12 @@ namespace osmscout {
         points[y-startTileY].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
       }
 
-      size_t transStart;
-      size_t transEnd;
+      CoordBufferRange transRange;
 
-      transformer.TransformWay(projection,
-                               parameter.GetOptimizeWayNodes(),
-                               points,
-                               transStart,
-                               transEnd,
-                               errorTolerancePixel);
+      transRange=transformer.TransformWay(projection,
+                                          parameter.GetOptimizeWayNodes(),
+                                          points,
+                                          errorTolerancePixel);
 
       WayData data;
 
@@ -1321,8 +1315,8 @@ namespace osmscout {
       data.lineStyle=osmTileLine;
       data.color=osmTileLine->GetLineColor();
       data.wayPriority=std::numeric_limits<size_t>::max();
-      data.transStart=transStart;
-      data.transEnd=transEnd;
+      data.transStart=transRange.GetStart();
+      data.transEnd=transRange.GetEnd();
       data.lineWidth=GetProjectedWidth(projection,
                                        projection.ConvertWidthToPixel(osmTileLine->GetDisplayWidth()),
                                        osmTileLine->GetWidth());
@@ -1350,13 +1344,17 @@ namespace osmscout {
       }
 
       if (ring.segments.size() <= 1){
-        transformer.TransformArea(projection,
-                                  parameter.GetOptimizeAreaNodes(),
-                                  ring.nodes,
-                                  td[i].transStart,td[i].transEnd,
-                                  errorTolerancePixel);
-      }else{
+        CoordBufferRange range=transformer.TransformArea(projection,
+                                                         parameter.GetOptimizeAreaNodes(),
+                                                         ring.nodes,
+                                                         errorTolerancePixel);
+
+        td[i].transStart=range.GetStart();
+        td[i].transEnd=range.GetEnd();
+      }
+      else {
         std::vector<Point> nodes;
+
         for (const auto &segment:ring.segments){
           if (projection.GetDimensions().Intersects(segment.bbox, false)){
             // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
@@ -1366,11 +1364,14 @@ namespace osmscout {
             nodes.push_back(ring.nodes[segment.to-1]);
           }
         }
-        transformer.TransformArea(projection,
-                                  parameter.GetOptimizeAreaNodes(),
-                                  nodes,
-                                  td[i].transStart,td[i].transEnd,
-                                  errorTolerancePixel);
+
+        CoordBufferRange range=transformer.TransformArea(projection,
+                                                         parameter.GetOptimizeAreaNodes(),
+                                                         nodes,
+                                                         errorTolerancePixel);
+
+        td[i].transStart=range.GetStart();
+        td[i].transEnd=range.GetEnd();
       }
     }
 
@@ -1586,12 +1587,13 @@ namespace osmscout {
                                      WayPathData &pathData)
   {
     if (way.segments.size() <= 1) {
-      transformer.TransformWay(projection,
-                               parameter.GetOptimizeWayNodes(),
-                               way.nodes,
-                               pathData.transStart,
-                               pathData.transEnd,
-                               errorTolerancePixel);
+      CoordBufferRange transRange=transformer.TransformWay(projection,
+                                                           parameter.GetOptimizeWayNodes(),
+                                                           way.nodes,
+                                                           errorTolerancePixel);
+
+      pathData.transStart=transRange.GetStart();
+      pathData.transEnd=transRange.GetEnd();
     }
     else {
       std::vector<Point> nodes;
@@ -1604,12 +1606,14 @@ namespace osmscout {
           nodes.push_back(way.nodes[segment.to-1]);
         }
       }
-      transformer.TransformWay(projection,
-                               parameter.GetOptimizeWayNodes(),
-                               nodes,
-                               pathData.transStart,
-                               pathData.transEnd,
-                               errorTolerancePixel);
+
+      CoordBufferRange transRange=transformer.TransformWay(projection,
+                                                           parameter.GetOptimizeWayNodes(),
+                                                           nodes,
+                                                           errorTolerancePixel);
+
+      pathData.transStart=transRange.GetStart();
+      pathData.transEnd=transRange.GetEnd();
     }
   }
 
@@ -2417,12 +2421,13 @@ static void DumpGroundTile(const GroundTile& tile)
 #if defined(DEBUG_GROUNDTILES)
         std::cout << " >= fill" << std::endl;
 #endif
-        transformer.TransformBoundingBox(projection,
-                                         TransPolygon::none,
-                                         groundTileData.boundingBox,
-                                         start,
-                                         end,
-                                         errorTolerancePixel);
+        CoordBufferRange range=transformer.TransformBoundingBox(projection,
+                                                                TransPolygon::none,
+                                                                groundTileData.boundingBox,
+                                                                errorTolerancePixel);
+
+        start=range.GetStart();
+        end=range.GetEnd();
       }
       else {
 #if defined(DEBUG_GROUNDTILES)
@@ -2945,25 +2950,22 @@ static void DumpGroundTile(const GroundTile& tile)
                 FeatureValueBuffer     buffer;
                 WayData                wd;
                 std::array<GeoCoord,2> path;
-                size_t                 start,end;
 
                 path[0]=box.GetBottomLeft();
                 path[1]=box.GetTopLeft();
 
-                transformer.TransformWay(projection,
-                                         TransPolygon::none,
-                                         path,
-                                         start,
-                                         end,
-                                         errorTolerancePixel);
+                CoordBufferRange range=transformer.TransformWay(projection,
+                                                                TransPolygon::none,
+                                                                path,
+                                                                errorTolerancePixel);
 
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
                 wd.color=contourLineStyles[0]->GetLineColor();
                 wd.wayPriority=std::numeric_limits<size_t>::max();
-                wd.transStart=start;
-                wd.transEnd=end;
+                wd.transStart=range.GetStart();
+                wd.transEnd=range.GetEnd();
                 wd.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
                                                contourLineStyles[0]->GetWidth());
@@ -2983,25 +2985,22 @@ static void DumpGroundTile(const GroundTile& tile)
                 FeatureValueBuffer     buffer;
                 WayData                wd;
                 std::array<GeoCoord,2> path;
-                size_t                 start,end;
 
                 path[0]=box.GetBottomRight();
                 path[1]=box.GetTopRight();
 
-                transformer.TransformWay(projection,
-                                         TransPolygon::none,
-                                         path,
-                                         start,
-                                         end,
-                                         errorTolerancePixel);
+                CoordBufferRange range=transformer.TransformWay(projection,
+                                                                TransPolygon::none,
+                                                                path,
+                                                                errorTolerancePixel);
 
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
                 wd.color=contourLineStyles[0]->GetLineColor();
                 wd.wayPriority=std::numeric_limits<size_t>::max();
-                wd.transStart=start;
-                wd.transEnd=end;
+                wd.transStart=range.GetStart();
+                wd.transEnd=range.GetEnd();
                 wd.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
                                                contourLineStyles[0]->GetWidth());
@@ -3021,25 +3020,22 @@ static void DumpGroundTile(const GroundTile& tile)
                 FeatureValueBuffer     buffer;
                 WayData                wd;
                 std::array<GeoCoord,2> path;
-                size_t                 start,end;
 
                 path[0]=box.GetTopLeft();
                 path[1]=box.GetTopRight();
 
-                transformer.TransformWay(projection,
-                                         TransPolygon::none,
-                                         path,
-                                         start,
-                                         end,
-                                         errorTolerancePixel);
+                CoordBufferRange range=transformer.TransformWay(projection,
+                                                                TransPolygon::none,
+                                                                path,
+                                                                errorTolerancePixel);
 
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
                 wd.color=contourLineStyles[0]->GetLineColor();
                 wd.wayPriority=std::numeric_limits<size_t>::max();
-                wd.transStart=start;
-                wd.transEnd=end;
+                wd.transStart=range.GetStart();
+                wd.transEnd=range.GetEnd();
                 wd.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
                                                contourLineStyles[0]->GetWidth());
@@ -3060,25 +3056,22 @@ static void DumpGroundTile(const GroundTile& tile)
                 FeatureValueBuffer     buffer;
                 WayData                wd;
                 std::array<GeoCoord,2> path;
-                size_t                 start,end;
 
                 path[0]=box.GetBottomLeft();
                 path[1]=box.GetBottomRight();
 
-                transformer.TransformWay(projection,
-                                         TransPolygon::none,
-                                         path,
-                                         start,
-                                         end,
-                                         errorTolerancePixel);
+                CoordBufferRange range=transformer.TransformWay(projection,
+                                                                TransPolygon::none,
+                                                                path,
+                                                                errorTolerancePixel);
 
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
                 wd.color=contourLineStyles[0]->GetLineColor();
                 wd.wayPriority=std::numeric_limits<size_t>::max();
-                wd.transStart=start;
-                wd.transEnd=end;
+                wd.transStart=range.GetStart();
+                wd.transEnd=range.GetEnd();
                 wd.lineWidth=GetProjectedWidth(projection,
                                                projection.ConvertWidthToPixel(contourLineStyles[0]->GetDisplayWidth()),
                                                contourLineStyles[0]->GetWidth());
@@ -3142,20 +3135,18 @@ static void DumpGroundTile(const GroundTile& tile)
                 continue;
               }
 
-              size_t start,end;
-              double xDelta         =subX*factor;
-              double yDelta         =subY*factor;
-              GeoBox tileBoundingBox=GeoBox(GeoCoord(y+yDelta,
-                                                     x+xDelta),
+              CoordBufferRange range;
+              double           xDelta=subX*factor;
+              double           yDelta=subY*factor;
+              GeoBox           tileBoundingBox=GeoBox(GeoCoord(y+yDelta,
+                                                                  x+xDelta),
                                             GeoCoord(y+yDelta+factor,
-                                                     x+xDelta+factor));
+                                                        x+xDelta+factor));
 
-              transformer.TransformBoundingBox(projection,
-                                               TransPolygon::none,
-                                               tileBoundingBox,
-                                               start,
-                                               end,
-                                               errorTolerancePixel);
+              range=transformer.TransformBoundingBox(projection,
+                                                     TransPolygon::none,
+                                                     tileBoundingBox,
+                                                     errorTolerancePixel);
 
               for (const auto& borderStyle : areaBorderStyles) {
                 AreaData tileData;
@@ -3163,8 +3154,8 @@ static void DumpGroundTile(const GroundTile& tile)
                 tileData.borderStyle=borderStyle;
                 tileData.boundingBox=tileBoundingBox;
                 tileData.ref=ObjectFileRef();
-                tileData.transStart=start;
-                tileData.transEnd  =end;
+                tileData.transStart=range.GetStart();
+                tileData.transEnd  =range.GetEnd();
 
                 DrawArea(projection,
                          parameter,
@@ -3241,7 +3232,6 @@ static void DumpGroundTile(const GroundTile& tile)
           for (int subY=0; subY<1201; subY++) {
             even=!even;
 
-            size_t   start,end;
             AreaData tileData;
             double   xDelta=subX*factor;
             double   yDelta=subY*factor;
@@ -3257,18 +3247,18 @@ static void DumpGroundTile(const GroundTile& tile)
 
             if (!textStyles.empty() && data.srtmTile) {
               GeoCoord center=tileData.boundingBox.GetCenter();
-              double xPos,yPos;
+              double   xPos,yPos;
 
               projection.GeoToPixel(center,xPos,yPos);
 
-              double                  latitude=center.GetLat();
-              double                  longitude=center.GetLon();
-              double                  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
-              double                  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
-              int                     col      =int(floor(fracLon*data.srtmTile->columns));
-              int                     row      =int(floor(fracLat*data.srtmTile->rows));
-
-              int32_t height=data.srtmTile->GetHeight(col,row);
+              double  latitude =center.GetLat();
+              double  longitude=center.GetLon();
+              double  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
+              double  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
+              int     col      =int(floor(fracLon*data.srtmTile->columns));
+              int     row      =int(floor(fracLat*data.srtmTile->rows));
+              int32_t height   =data.srtmTile->GetHeight(col,
+                                                         row);
 
               LabelData labelBox;
 
@@ -3289,16 +3279,14 @@ static void DumpGroundTile(const GroundTile& tile)
             }
 
             if (hillShadingFill) {
-              transformer.TransformBoundingBox(projection,
-                                               TransPolygon::none,
-                                               tileData.boundingBox,
-                                               start,
-                                               end,
-                                               errorTolerancePixel);
+              CoordBufferRange range=transformer.TransformBoundingBox(projection,
+                                                                      TransPolygon::none,
+                                                                      tileData.boundingBox,
+                                                                      errorTolerancePixel);
 
               tileData.ref=ObjectFileRef();
-              tileData.transStart=start;
-              tileData.transEnd=end;
+              tileData.transStart=range.GetStart();
+              tileData.transEnd=range.GetEnd();
 
               DrawArea(projection,parameter,tileData);
             }

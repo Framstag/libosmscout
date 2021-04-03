@@ -625,20 +625,19 @@ namespace osmscout {
     buffer->Reset();
   }
 
-  void PolyToCoordTransformer::TransformBoundingBox(const Projection& projection,
-                                                    TransPolygon::OptimizeMethod optimize,
-                                                    const GeoBox& boundingBox,
-                                                    size_t& start,
-                                                    size_t& end,
-                                                    double optimizeErrorTolerance)
+  CoordBufferRange PolyToCoordTransformer::TransformBoundingBox(const Projection& projection,
+                                                                TransPolygon::OptimizeMethod optimize,
+                                                                const GeoBox& boundingBox,
+                                                                double optimizeErrorTolerance)
   {
-    transPolygon.TransformBoundingBox(projection, optimize, boundingBox, optimizeErrorTolerance);
+    transPolygon.TransformBoundingBox(projection,
+                                      optimize,
+                                      boundingBox,
+                                      optimizeErrorTolerance);
 
     assert(!transPolygon.IsEmpty());
 
-    CoordBufferRange range=CopyPolygonToCoordBuffer(transPolygon,*buffer);
-
-    start=range.GetStart();
-    end=range.GetEnd();
+    return CopyPolygonToCoordBuffer(transPolygon,
+                                    *buffer);
   }
 }
