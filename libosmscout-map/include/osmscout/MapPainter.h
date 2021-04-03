@@ -70,9 +70,9 @@ namespace osmscout {
     DrawAreaBorderSymbols = 13,
     PrepareNodeLabels     = 14,
     PrepareRouteLabels    = 15,
-    DrawLabels            = 16,
-    DrawContourLines      = 17,
-    DrawHillShading       = 18,
+    DrawContourLines      = 16,
+    DrawHillShading       = 17,
+    DrawLabels            = 18,
     Postrender            = 19, //!< Implementation specific final step
     LastStep              = 19
   };
