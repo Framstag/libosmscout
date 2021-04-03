@@ -1424,7 +1424,7 @@ namespace osmscout {
       // we currently assume that it does not have alpha and paints over its region and clipping is
       // not required.
       area->VisitClippingRings(i, [&a, &td](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
-        if (type->GetIgnore()) {
+        if (type->GetIgnore() && td[j].transStart < td[j].transEnd) {
           a.clippings.push_back(td[j]);
         }
         return true;
