@@ -2620,7 +2620,7 @@ static void DumpGroundTile(const GroundTile& tile)
     StopClock timer;
     size_t    drawnCount=0;
 
-    for (const auto way&: wayPathData) {
+    for (const auto& way: wayPathData) {
       if (DrawWayDecoration(*styleConfig,
                             projection,
                             parameter,
