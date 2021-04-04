@@ -296,7 +296,7 @@ static void GetCarSpeedTable(std::map<std::string,double>& map)
   map["highway_tertiary"]=55.0;
   map["highway_unclassified"]=50.0;
   map["highway_road"]=50.0;
-  map["highway_residential"]=40.0;
+  map["highway_residential"]=20.0;
   map["highway_roundabout"]=40.0;
   map["highway_living_street"]=10.0;
   map["highway_service"]=30.0;

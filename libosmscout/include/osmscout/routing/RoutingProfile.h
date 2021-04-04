@@ -349,7 +349,7 @@ namespace osmscout {
   {
   protected:
     bool applyJunctionPenalty=true;
-    Distance penaltySameType=Meters(160);
+    Distance penaltySameType=Meters(40);
     Distance penaltyDifferentType=Meters(250);
     HourDuration maxPenalty=std::chrono::seconds(10);
 
