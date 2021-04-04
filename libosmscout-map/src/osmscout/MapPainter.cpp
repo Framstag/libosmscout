@@ -31,6 +31,7 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>
+#include <osmscout/util/Geometry.h>
 
 //#define DEBUG_GROUNDTILES
 //#define DEBUG_NODE_DRAW
@@ -2357,6 +2358,11 @@ static void DumpGroundTile(const GroundTile& tile)
       seaFill=this->seaFill;
     }
 
+    // Due to rounding errors during coordinate transformations there may be small
+    // space between tiles. For that reason we increase tile size approximately by 1 pixel
+    // to avoid visible grid.
+    double pixelAsDegree = GetDistanceInLonDegrees(Meters(projection.GetPixelSize()));
+
     for (const auto& tile : groundTiles) {
       AreaData groundTileData;
 
@@ -2388,10 +2394,10 @@ static void DumpGroundTile(const GroundTile& tile)
         continue;
       }
 
-      GeoCoord minCoord(tile.yAbs*tile.cellHeight-90.0,
-                        tile.xAbs*tile.cellWidth-180.0);
-      GeoCoord maxCoord(minCoord.GetLat()+tile.cellHeight,
-                        minCoord.GetLon()+tile.cellWidth);
+      GeoCoord minCoord(tile.yAbs*tile.cellHeight - 90.0 - pixelAsDegree/2,
+                        tile.xAbs*tile.cellWidth - 180.0 - pixelAsDegree/2);
+      GeoCoord maxCoord(minCoord.GetLat() + tile.cellHeight + pixelAsDegree,
+                        minCoord.GetLon() + tile.cellWidth + pixelAsDegree);
 
       groundTileData.boundingBox.Set(minCoord,maxCoord);
 
@@ -2425,8 +2431,8 @@ static void DumpGroundTile(const GroundTile& tile)
           double lat;
           double lon;
 
-          lat=groundTileData.boundingBox.GetMinCoord().GetLat()+tile.coords[i].y*tile.cellHeight/GroundTile::Coord::CELL_MAX;
-          lon=groundTileData.boundingBox.GetMinCoord().GetLon()+tile.coords[i].x*tile.cellWidth/GroundTile::Coord::CELL_MAX;
+          lat=groundTileData.boundingBox.GetMinCoord().GetLat() + double(tile.coords[i].y) / double(GroundTile::Coord::CELL_MAX) * (tile.cellHeight+pixelAsDegree);
+          lon=groundTileData.boundingBox.GetMinCoord().GetLon() + double(tile.coords[i].x) / double(GroundTile::Coord::CELL_MAX) * (tile.cellWidth+pixelAsDegree);
 
           points[i].SetCoord(GeoCoord(lat,lon));
         }
