@@ -374,9 +374,9 @@ TYPES
   TYPE highway_footway
     = WAY AREA ("highway"=="footway") OR AREA ("area:highway"=="footway")
       {Name, NameAlt}
-      PATH[FOOT] LOCATION PIN_WAY
+      PATH[FOOT BICYCLE] LOCATION PIN_WAY
       DESC
-        en: "cycleway"
+        en: "footway"
         de: "Fußweg"
 
   TYPE highway_via_ferrata_easy
