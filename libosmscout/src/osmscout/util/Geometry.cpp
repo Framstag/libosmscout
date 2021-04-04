@@ -371,6 +371,14 @@ namespace osmscout {
     return Bearing::Radians(bearing);
   }
 
+  double GetDistanceInLonDegrees(const Distance &d,
+                                 double latitude)
+  {
+    static double oneDegreeAtEquator=111320.0;
+    return d.AsMeter()/(oneDegreeAtEquator * cos(M_PI * latitude / 180));
+  }
+
+
   double NormalizeRelativeAngle(double angle)
   {
     if (angle>180.0) {

@@ -161,13 +161,6 @@ namespace osmscout {
       return position;
     }
 
-    static double one_degree_at_equator=111320.0;
-
-    double distanceInDegrees(const Distance &d, double latitude)
-    {
-      return d.AsMeter()/(one_degree_at_equator*cos(M_PI*latitude/180));
-    }
-
     double GetVehicleSpeed(osmscout::Vehicle vehicle,
                            const TypeConfig &/*typeConfig*/,
                            const TypeInfo &/*typeInfo*/)
@@ -390,8 +383,8 @@ namespace osmscout {
     double abscissa=0.0;
     bool   found=false;
     double qLon,qLat;
-    double snapDistanceInDegrees = distanceInDegrees(snapDistanceInMeters,
-                                                     location.GetLat());
+    double snapDistanceInDegrees = GetDistanceInLonDegrees(snapDistanceInMeters,
+                                                           location.GetLat());
 
     minDistance=std::numeric_limits<double>::max();
     for (auto node=nextNode++; node!=route->Nodes().end(); node++) {
