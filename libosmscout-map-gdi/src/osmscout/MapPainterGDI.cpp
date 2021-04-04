@@ -708,7 +708,7 @@ namespace osmscout {
 				emptyDash,
 				data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
 				data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-				data.transStart, data.transEnd);
+				data.coordRange.GetStart(), data.coordRange.GetEnd());
 		}
 		DrawPath(projection,
 			parameter,
@@ -717,7 +717,7 @@ namespace osmscout {
 			data.lineStyle->GetDash(),
 			data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
 			data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-			data.transStart, data.transEnd);
+			data.coordRange.GetStart(), data.coordRange.GetEnd());
 	}
 
 	void MapPainterGDI::DrawContourSymbol(const Projection& /*projection*/,
@@ -735,7 +735,7 @@ namespace osmscout {
 	{
 		RENDEROBJECT(pRender);
 		PointFBuffer areaPoints;
-		for (size_t i = area.transStart; i <= area.transEnd; i++)
+		for (size_t i = area.coordRange.GetStart(); i <= area.coordRange.GetEnd(); i++)
 		{
 			areaPoints.AddPoint(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY());
 		}

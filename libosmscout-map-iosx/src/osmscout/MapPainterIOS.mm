@@ -910,8 +910,8 @@ namespace osmscout {
             CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
                         coordBuffer->buffer[i].GetY());
         }
-        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
-                                coordBuffer->buffer[area.transStart].GetY());
+        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                                coordBuffer->buffer[area.coordRange.GetEnd()].GetY());
 
         if (!area.clippings.empty()) {
             for (std::list<PolyData>::const_iterator c=area.clippings.begin();
