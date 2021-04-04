@@ -1,0 +1,460 @@
+[
+  {
+    "lat": 50.0848,
+    "lon": 14.5062,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary"
+  },
+  {
+    "lat": 50.0848,
+    "lon": 14.5064,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0848,
+    "lon": 14.5066,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0847,
+    "lon": 14.5077,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0847,
+    "lon": 14.5079,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5098,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5101,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5102,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5107,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5108,
+    "name": "Malešická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0846,
+    "lon": 14.5109,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn sharp right"
+  },
+  {
+    "lat": 50.0845,
+    "lon": 14.5109,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.084,
+    "lon": 14.5106,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0839,
+    "lon": 14.5105,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0839,
+    "lon": 14.5105,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0838,
+    "lon": 14.5105,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0838,
+    "lon": 14.5105,
+    "name": "U Tvrze",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0834,
+    "lon": 14.5106,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn right"
+  },
+  {
+    "lat": 50.0833,
+    "lon": 14.5097,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0833,
+    "lon": 14.5095,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0832,
+    "lon": 14.5092,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0832,
+    "lon": 14.5091,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0831,
+    "lon": 14.508,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0831,
+    "lon": 14.5079,
+    "name": "Počernická",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.083,
+    "lon": 14.5077,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn left"
+  },
+  {
+    "lat": 50.0829,
+    "lon": 14.5078,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0828,
+    "lon": 14.5078,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0826,
+    "lon": 14.5078,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0819,
+    "lon": 14.5081,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0815,
+    "lon": 14.5082,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0814,
+    "lon": 14.5082,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0813,
+    "lon": 14.5083,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0806,
+    "lon": 14.5085,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0806,
+    "lon": 14.5086,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0805,
+    "lon": 14.5086,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0804,
+    "lon": 14.5086,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0801,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.08,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0799,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0798,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0796,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0795,
+    "lon": 14.5088,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0793,
+    "lon": 14.5087,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.079,
+    "lon": 14.5086,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.079,
+    "lon": 14.5085,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0788,
+    "lon": 14.5084,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0786,
+    "lon": 14.5082,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0786,
+    "lon": 14.5081,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0779,
+    "lon": 14.5075,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0778,
+    "lon": 14.5075,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_tertiary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0778,
+    "lon": 14.5074,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0777,
+    "lon": 14.5073,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0777,
+    "lon": 14.5073,
+    "name": "Limuzská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0777,
+    "lon": 14.5073,
+    "name": "Úvalská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0776,
+    "lon": 14.5073,
+    "name": "Úvalská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0764,
+    "lon": 14.5074,
+    "name": "Úvalská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0763,
+    "lon": 14.5074,
+    "name": "Úvalská",
+    "ref": "",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 50.0763,
+    "lon": 14.5074
+  }
+]

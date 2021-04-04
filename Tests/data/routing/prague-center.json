@@ -1,0 +1,2276 @@
+[
+  {
+    "lat": 50.0912,
+    "lon": 14.4976,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential"
+  },
+  {
+    "lat": 50.091,
+    "lon": 14.4972,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0909,
+    "lon": 14.4969,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0908,
+    "lon": 14.4967,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0908,
+    "lon": 14.4965,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0908,
+    "lon": 14.4965,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4945,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4941,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4939,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0902,
+    "lon": 14.4938,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4931,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.493,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0904,
+    "lon": 14.4925,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0907,
+    "lon": 14.4914,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.091,
+    "lon": 14.4904,
+    "name": "Pod Lipami",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.091,
+    "lon": 14.4902,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Turn right"
+  },
+  {
+    "lat": 50.0911,
+    "lon": 14.4903,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0914,
+    "lon": 14.4904,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0916,
+    "lon": 14.4907,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0921,
+    "lon": 14.4912,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0922,
+    "lon": 14.4912,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0922,
+    "lon": 14.4913,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0923,
+    "lon": 14.4913,
+    "name": "V Jezerách",
+    "ref": "",
+    "type": "highway_residential",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0923,
+    "lon": 14.4914,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn left"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4901,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.49,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4898,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4897,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4895,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4893,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4885,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4884,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.488,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4872,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4869,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4867,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4864,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.486,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0926,
+    "lon": 14.4859,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4846,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4837,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0925,
+    "lon": 14.4828,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0924,
+    "lon": 14.4825,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0923,
+    "lon": 14.4815,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0923,
+    "lon": 14.4813,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0923,
+    "lon": 14.4811,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0921,
+    "lon": 14.4797,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.092,
+    "lon": 14.4783,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.092,
+    "lon": 14.4781,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0918,
+    "lon": 14.4766,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0918,
+    "lon": 14.4764,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0918,
+    "lon": 14.476,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0917,
+    "lon": 14.4754,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0917,
+    "lon": 14.4753,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0917,
+    "lon": 14.4751,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0916,
+    "lon": 14.4746,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0914,
+    "lon": 14.4735,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0913,
+    "lon": 14.473,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0912,
+    "lon": 14.4725,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0912,
+    "lon": 14.4724,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0912,
+    "lon": 14.4722,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0912,
+    "lon": 14.4721,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0911,
+    "lon": 14.472,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.091,
+    "lon": 14.4714,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.091,
+    "lon": 14.4712,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0909,
+    "lon": 14.4709,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0909,
+    "lon": 14.4707,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0909,
+    "lon": 14.4706,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0909,
+    "lon": 14.4704,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0908,
+    "lon": 14.4702,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0908,
+    "lon": 14.4699,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0907,
+    "lon": 14.4695,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0906,
+    "lon": 14.4692,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0906,
+    "lon": 14.4688,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0905,
+    "lon": 14.4684,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0904,
+    "lon": 14.4683,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0904,
+    "lon": 14.468,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4678,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0903,
+    "lon": 14.4676,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0902,
+    "lon": 14.4675,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0902,
+    "lon": 14.4672,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.09,
+    "lon": 14.4664,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0899,
+    "lon": 14.4659,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0897,
+    "lon": 14.4649,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0893,
+    "lon": 14.4634,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0893,
+    "lon": 14.4633,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0891,
+    "lon": 14.4623,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.089,
+    "lon": 14.4617,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0889,
+    "lon": 14.4615,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0888,
+    "lon": 14.4609,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0886,
+    "lon": 14.4598,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0885,
+    "lon": 14.4593,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0884,
+    "lon": 14.4588,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0884,
+    "lon": 14.4587,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0882,
+    "lon": 14.4578,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0881,
+    "lon": 14.4577,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0878,
+    "lon": 14.4566,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0877,
+    "lon": 14.4564,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4555,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4553,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4553,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4552,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.455,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4533,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4531,
+    "name": "Koněvova",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4529,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4526,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4524,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4515,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4515,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0871,
+    "lon": 14.4512,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0871,
+    "lon": 14.4511,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0871,
+    "lon": 14.451,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0869,
+    "lon": 14.4498,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4497,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4495,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.449,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.4483,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.4482,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4472,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4468,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4464,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.4461,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.446,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0867,
+    "lon": 14.4459,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4456,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4455,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.087,
+    "lon": 14.4447,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4436,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4435,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4435,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0872,
+    "lon": 14.4434,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4433,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4431,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.443,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4427,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4421,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4419,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0874,
+    "lon": 14.4415,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4413,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0873,
+    "lon": 14.4406,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0871,
+    "lon": 14.4397,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.087,
+    "lon": 14.4393,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.087,
+    "lon": 14.4392,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0869,
+    "lon": 14.4391,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0869,
+    "lon": 14.4389,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0868,
+    "lon": 14.4387,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4383,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4383,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4382,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4381,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.438,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.438,
+    "name": "Husitská",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4379,
+    "name": "Seifertova",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4378,
+    "name": "Seifertova",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4376,
+    "name": "Seifertova",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4375,
+    "name": "Seifertova",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4374,
+    "name": "Hybernská",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4374,
+    "name": "Hybernská",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4373,
+    "name": "Hybernská",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4373,
+    "name": "Hybernská",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4372,
+    "name": "Hybernská",
+    "ref": "",
+    "type": "highway_secondary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4372,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0866,
+    "lon": 14.4372,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4371,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0865,
+    "lon": 14.4371,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0864,
+    "lon": 14.4371,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0863,
+    "lon": 14.437,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0862,
+    "lon": 14.4369,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.086,
+    "lon": 14.4368,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0858,
+    "lon": 14.4366,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0857,
+    "lon": 14.4365,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0848,
+    "lon": 14.4357,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0842,
+    "lon": 14.4353,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0841,
+    "lon": 14.4352,
+    "name": "",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0838,
+    "lon": 14.4351,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0833,
+    "lon": 14.4347,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.083,
+    "lon": 14.4346,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0823,
+    "lon": 14.434,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0818,
+    "lon": 14.4336,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0815,
+    "lon": 14.4334,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0814,
+    "lon": 14.4333,
+    "name": "Wilsonova",
+    "ref": "8",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0813,
+    "lon": 14.4332,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0812,
+    "lon": 14.4331,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0811,
+    "lon": 14.4329,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.081,
+    "lon": 14.4327,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0807,
+    "lon": 14.4322,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0803,
+    "lon": 14.4316,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.08,
+    "lon": 14.431,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0797,
+    "lon": 14.4305,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0797,
+    "lon": 14.4305,
+    "name": "Wilsonova",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0795,
+    "lon": 14.4302,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0793,
+    "lon": 14.4301,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0792,
+    "lon": 14.43,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0792,
+    "lon": 14.43,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0788,
+    "lon": 14.4298,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0787,
+    "lon": 14.4297,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.078,
+    "lon": 14.4294,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0777,
+    "lon": 14.4293,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0773,
+    "lon": 14.4292,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0772,
+    "lon": 14.4292,
+    "name": "Mezibranská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0772,
+    "lon": 14.4292,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0771,
+    "lon": 14.4292,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0766,
+    "lon": 14.4292,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0763,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0757,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0757,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0756,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0755,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0755,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0754,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0753,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0753,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0749,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0747,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0745,
+    "lon": 14.4291,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0741,
+    "lon": 14.4292,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0736,
+    "lon": 14.4292,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0728,
+    "lon": 14.4293,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.072,
+    "lon": 14.4294,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0716,
+    "lon": 14.4294,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0712,
+    "lon": 14.4294,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0708,
+    "lon": 14.4295,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0707,
+    "lon": 14.4295,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0707,
+    "lon": 14.4295,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0697,
+    "lon": 14.4295,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0696,
+    "lon": 14.4295,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0694,
+    "lon": 14.4296,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0692,
+    "lon": 14.4297,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.069,
+    "lon": 14.4298,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0688,
+    "lon": 14.4299,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0686,
+    "lon": 14.4301,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0683,
+    "lon": 14.4302,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0682,
+    "lon": 14.4302,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0679,
+    "lon": 14.4303,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0632,
+    "lon": 14.4304,
+    "name": "Sokolská",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.063,
+    "lon": 14.4305,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0628,
+    "lon": 14.4304,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0623,
+    "lon": 14.4305,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0621,
+    "lon": 14.4306,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0619,
+    "lon": 14.4306,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0616,
+    "lon": 14.4308,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0613,
+    "lon": 14.431,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.061,
+    "lon": 14.4313,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0578,
+    "lon": 14.4355,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0573,
+    "lon": 14.4359,
+    "name": "5. května",
+    "ref": "",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0571,
+    "lon": 14.4361,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.057,
+    "lon": 14.4361,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.0568,
+    "lon": 14.4362,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0567,
+    "lon": 14.4363,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0566,
+    "lon": 14.4363,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0566,
+    "lon": 14.4362,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0565,
+    "lon": 14.4362,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.0564,
+    "lon": 14.4361,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0561,
+    "lon": 14.4354,
+    "name": "náměstí Hrdinů",
+    "ref": "",
+    "type": "highway_primary_link",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.056,
+    "lon": 14.4352,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.056,
+    "lon": 14.435,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.056,
+    "lon": 14.4349,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn sharp left"
+  },
+  {
+    "lat": 50.0558,
+    "lon": 14.4352,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0557,
+    "lon": 14.4353,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0553,
+    "lon": 14.4356,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0547,
+    "lon": 14.4363,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0545,
+    "lon": 14.4365,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0541,
+    "lon": 14.437,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.054,
+    "lon": 14.437,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0538,
+    "lon": 14.4372,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0535,
+    "lon": 14.4375,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0531,
+    "lon": 14.438,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0524,
+    "lon": 14.4388,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0521,
+    "lon": 14.439,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.052,
+    "lon": 14.4392,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.052,
+    "lon": 14.4392,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0518,
+    "lon": 14.4394,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0509,
+    "lon": 14.4402,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0507,
+    "lon": 14.4404,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0505,
+    "lon": 14.4405,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0502,
+    "lon": 14.4409,
+    "name": "Na Pankráci",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.05,
+    "lon": 14.441,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0499,
+    "lon": 14.4411,
+    "name": "Na Strži",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn left"
+  },
+  {
+    "lat": 50.05,
+    "lon": 14.4413,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Turn left"
+  },
+  {
+    "lat": 50.0501,
+    "lon": 14.4411,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0506,
+    "lon": 14.4407,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0509,
+    "lon": 14.4404,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.0511,
+    "lon": 14.4403,
+    "name": "",
+    "ref": "",
+    "type": "highway_secondary"
+  },
+  {
+    "lat": 50.0511,
+    "lon": 14.4403
+  }
+]
