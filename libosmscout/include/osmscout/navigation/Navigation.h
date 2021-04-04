@@ -29,7 +29,6 @@
 #include <osmscout/util/Time.h>
 
 namespace osmscout {
-  static double one_degree_at_equator=111320.0;
 
   template<class NodeDescriptionTmpl>
   class OutputDescription
@@ -71,6 +70,9 @@ namespace osmscout {
       bool   found=false;
       double qx,qy;
       minDistance=std::numeric_limits<double>::max();
+      double snapDistanceInDegrees = GetDistanceInLonDegrees(snapDistanceInMeters,
+                                                             location.GetLat());
+
       for (auto node=nextNode++; node!=route->Nodes().end(); node++) {
         if (nextNode==route->Nodes().end()) {
           break;
@@ -86,8 +88,7 @@ namespace osmscout {
                                    qy);
         if (minDistance>=d) {
           minDistance=d;
-          if (d<=distanceInDegrees(snapDistanceInMeters,
-                                   location.GetLat())) {
+          if (d<=snapDistanceInDegrees) {
             foundNode    =node;
             foundAbscissa=abscissa;
             found        =true;
@@ -112,12 +113,6 @@ namespace osmscout {
         outputDescription(outputDescr),
         snapDistanceInMeters(Distance::Of<Meter>(25.0))
     {
-    }
-
-    static inline double distanceInDegrees(const Distance &d,
-                                           double latitude)
-    {
-      return d.AsMeter()/(one_degree_at_equator*cos(M_PI*latitude/180));
     }
 
     void SetRoute(RouteDescription* newRoute)

@@ -1109,6 +1109,16 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
+   * @param d distance
+   * @param latitude where degrees are computed.
+   *    Function is not defined on poles (+90, -90), it may leads to division by zero error.
+   * @return longitude degrees corresponding to distance
+   */
+  extern OSMSCOUT_API double GetDistanceInLonDegrees(const Distance &d,
+                                                     double latitude=0);
+
+  /**
+   * \ingroup Geometry
    * Normalizes the given angle (in degrees) to be in the interval [-180.0 - 180.0]
    */
   extern OSMSCOUT_API double NormalizeRelativeAngle(double angle);
