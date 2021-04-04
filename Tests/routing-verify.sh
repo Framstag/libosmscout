@@ -46,7 +46,6 @@ function verifyRouting() {
 }
 
 verifyRouting "${TOP_DIR}/Tests/data/routing/srbsko.json"          "${CZECH_DATABASE}" 49.9934 14.1575 49.9469 14.1402
-verifyRouting "${TOP_DIR}/Tests/data/routing/harrachov-praha.json" "${CZECH_DATABASE}" 50.7728 15.4261 50.1004 14.4453
 verifyRouting "${TOP_DIR}/Tests/data/routing/sumburk.json"         "${CZECH_DATABASE}" 50.7509 15.3151 50.7335 15.3000
 
 echo "$FAILURES issues"
