@@ -257,369 +257,409 @@
   {
     "lat": 50.7459,
     "lon": 15.3121,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
   },
   {
-    "lat": 50.7459,
-    "lon": 15.312,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
+    "lat": 50.7458,
+    "lon": 15.3119,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7459,
+    "lat": 50.7456,
     "lon": 15.3117,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Turn slightly left"
   },
   {
-    "lat": 50.7458,
+    "lat": 50.7455,
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7453,
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7444,
     "lon": 15.3115,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7458,
-    "lon": 15.3114,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
+    "lat": 50.7442,
+    "lon": 15.3115,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
-  },
-  {
-    "lat": 50.7457,
-    "lon": 15.3113,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7457,
-    "lon": 15.3113,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
-  },
-  {
-    "lat": 50.7452,
-    "lon": 15.3107,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
-  },
-  {
-    "lat": 50.7451,
-    "lon": 15.3106,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.745,
-    "lon": 15.3105,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7448,
-    "lon": 15.3105,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7445,
-    "lon": 15.3104,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7443,
-    "lon": 15.3104,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
   },
   {
     "lat": 50.744,
-    "lon": 15.3105,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
   },
   {
     "lat": 50.7439,
-    "lon": 15.3105,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
-  },
-  {
-    "lat": 50.7438,
-    "lon": 15.3104,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
-  },
-  {
-    "lat": 50.7437,
-    "lon": 15.3102,
-    "name": "Česká",
-    "ref": "29048",
-    "type": "highway_tertiary",
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7437,
-    "lon": 15.3101,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn left"
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7435,
+    "lon": 15.3117,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
   },
   {
     "lat": 50.7434,
-    "lon": 15.3101,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3117,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7433,
+    "lon": 15.3117,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7432,
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.743,
-    "lon": 15.31,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
-  },
-  {
-    "lat": 50.7429,
-    "lon": 15.31,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
-  },
-  {
-    "lat": 50.7427,
-    "lon": 15.3099,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7425,
-    "lon": 15.3096,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lat": 50.7429,
+    "lon": 15.3116,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7428,
+    "lon": 15.3115,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7426,
+    "lon": 15.3114,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7424,
+    "lon": 15.3112,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7423,
-    "lon": 15.3094,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly right"
+    "lon": 15.3111,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
   },
   {
     "lat": 50.7422,
-    "lon": 15.3091,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3109,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly right"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3108,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3107,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn right"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3107,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3106,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3105,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3105,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7421,
+    "lon": 15.3104,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.742,
+    "lon": 15.3104,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.742,
+    "lon": 15.3104,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
   },
   {
     "lat": 50.7419,
-    "lon": 15.308,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
+    "lon": 15.3104,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly left"
+  },
+  {
+    "lat": 50.7419,
+    "lon": 15.3105,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn right"
   },
   {
     "lat": 50.7418,
-    "lon": 15.3078,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
+    "lon": 15.3104,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Turn slightly right"
   },
   {
     "lat": 50.7417,
-    "lon": 15.3076,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
-  },
-  {
-    "lat": 50.7417,
-    "lon": 15.3075,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3103,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7416,
-    "lon": 15.3074,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
-  },
-  {
-    "lat": 50.7416,
-    "lon": 15.3074,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3101,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7415,
-    "lon": 15.3073,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
+    "lon": 15.31,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
   },
   {
     "lat": 50.7414,
-    "lon": 15.3073,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3099,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7409,
-    "lon": 15.3072,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lat": 50.7413,
+    "lon": 15.3098,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7406,
-    "lon": 15.3071,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7405,
-    "lon": 15.3071,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lat": 50.7411,
+    "lon": 15.3096,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7403,
-    "lon": 15.3072,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3093,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7403,
+    "lon": 15.3092,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7399,
+    "lon": 15.3091,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7398,
+    "lon": 15.309,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7398,
+    "lon": 15.309,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
     "lat": 50.7397,
-    "lon": 15.3073,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.3089,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7396,
-    "lon": 15.3074,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Turn slightly left"
+    "lat": 50.7397,
+    "lon": 15.3089,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
   },
   {
-    "lat": 50.7396,
-    "lon": 15.3074,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lat": 50.7395,
+    "lon": 15.3086,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
+    "turn": "Straight on"
+  },
+  {
+    "lat": 50.7394,
+    "lon": 15.3084,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Turn slightly right"
   },
   {
-    "lat": 50.7396,
-    "lon": 15.3074,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7394,
-    "lon": 15.3075,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
-    "lat": 50.7394,
-    "lon": 15.3075,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
-    "turn": "Straight on"
-  },
-  {
     "lat": 50.7393,
-    "lon": 15.3075,
-    "name": "Česká",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "lon": 15.308,
+    "name": "Krkonošská",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
-    "lat": 50.7393,
-    "lon": 15.3075,
+    "lat": 50.7392,
+    "lon": 15.308,
     "name": "",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Turn slightly left"
   },
   {
     "lat": 50.7392,
-    "lon": 15.3077,
+    "lon": 15.308,
     "name": "",
-    "ref": "29022",
-    "type": "highway_tertiary",
+    "ref": "10",
+    "type": "highway_primary",
     "turn": "Straight on"
   },
   {
@@ -628,7 +668,7 @@
     "name": "Krkonošská",
     "ref": "10",
     "type": "highway_primary",
-    "turn": "Turn right"
+    "turn": "Turn slightly left"
   },
   {
     "lat": 50.7391,
@@ -807,18 +847,10 @@
     "turn": "Turn slightly left"
   },
   {
-    "lat": 50.7354,
+    "lat": 50.7355,
     "lon": 15.3079,
-    "name": "Krkonošská",
-    "ref": "10",
-    "type": "highway_primary",
-    "turn": "Turn sharp left"
-  },
-  {
-    "lat": 50.7354,
-    "lon": 15.3079,
-    "name": "Krkonošská",
-    "ref": "14",
+    "name": "",
+    "ref": "",
     "type": "highway_primary",
     "turn": "Turn right"
   },
@@ -828,11 +860,11 @@
     "name": "Krkonošská",
     "ref": "14",
     "type": "highway_primary",
-    "turn": "Straight on"
+    "turn": "Turn slightly right"
   },
   {
     "lat": 50.7354,
-    "lon": 15.3075,
+    "lon": 15.3073,
     "name": "Krkonošská",
     "ref": "14",
     "type": "highway_primary",
