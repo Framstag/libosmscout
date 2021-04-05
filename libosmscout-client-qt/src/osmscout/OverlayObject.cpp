@@ -63,6 +63,7 @@ void OverlayObject::clear()
   QMutexLocker locker(&lock);
   nodes.clear();
   box.Invalidate();
+  emit bboxChanged();
 }
 
 void OverlayObject::addPoint(double lat, double lon)
@@ -71,6 +72,21 @@ void OverlayObject::addPoint(double lat, double lon)
   nodes.push_back(osmscout::Point(0,osmscout::GeoCoord(lat,lon)));
   box.Invalidate();
   segmentsBoxes.clear();
+  emit bboxChanged();
+}
+
+LocationEntry* OverlayObject::getBBoxAsLocation() const
+{
+  GeoBox bbox = boundingBox();
+
+  // QML will take ownership
+  return new LocationEntry(LocationEntry::Type::typeNone,
+                           "bbox",
+                           "bbox",
+                           QStringList(),
+                           "",
+                           bbox.GetCenter(),
+                           bbox);
 }
 
 osmscout::GeoBox OverlayObject::boundingBox() const
