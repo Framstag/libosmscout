@@ -30,6 +30,7 @@
 #include <osmscout/Node.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/ClientQtImportExport.h>
+#include <osmscout/LocationEntry.h>
 
 namespace osmscout {
 
@@ -47,6 +48,7 @@ class OSMSCOUT_CLIENT_QT_API OverlayObject : public QObject
   Q_PROPERTY(QString objectType READ getObjectTypeStr)
   Q_PROPERTY(qint8 layer READ getLayer WRITE setLayer)
   Q_PROPERTY(QString name READ getName WRITE setName)
+  Q_PROPERTY(LocationEntry *boundingBox READ getBBoxAsLocation NOTIFY bboxChanged)
 
 protected:
   QString                             typeName;
@@ -60,6 +62,9 @@ protected:
 public slots:
   void clear();
   void addPoint(double lat, double lon);
+
+signals:
+  void bboxChanged();
 
 public:
   OverlayObject(QObject *parent=Q_NULLPTR);
@@ -129,6 +134,7 @@ public:
     name = n;
   }
 
+  LocationEntry* getBBoxAsLocation() const;
   osmscout::GeoBox boundingBox() const;
   std::vector<osmscout::GeoCoord> getCoords() const;
   std::vector<osmscout::Point> getPoints() const;
