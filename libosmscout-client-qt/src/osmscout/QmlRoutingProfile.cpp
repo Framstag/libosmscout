@@ -256,6 +256,8 @@ void QmlRoutingProfile::setDefaults()
     speedTable["highway_cycleway"][SolidGrade]=maxSpeed;
     speedTable["highway_roundabout"][SolidGrade]=10;
 
+    speedTable["highway_footway"][SolidGrade]=5;
+
   } else { // vehicle==CarVehicle
     maxSpeed=160;
     applyJunctionPenalty=true;
