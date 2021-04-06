@@ -167,7 +167,7 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
   Q_PROPERTY(double   mapDpi    READ GetMapDpi    CONSTANT)
 
 public:
-  inline MapView(QObject *parent=nullptr): QObject(parent) {}
+  explicit inline MapView(QObject *parent=nullptr): QObject(parent) {}
 
   inline MapView(QObject *parent,
                  const osmscout::GeoCoord &center,
@@ -246,8 +246,8 @@ inline bool operator!=(const MapView& a, const MapView& b)
 class OSMSCOUT_CLIENT_QT_API InputHandler : public QObject{
     Q_OBJECT
 public:
-    InputHandler(const MapView &view);
-    ~InputHandler() override;
+    explicit InputHandler(const MapView &view);
+    ~InputHandler() override = default;
 
     virtual void painted();
     virtual bool animationInProgress();
@@ -299,8 +299,8 @@ private slots:
     void onTimeout();
 
 public:
-    MoveHandler(const MapView &view);
-    ~MoveHandler() override;
+    explicit MoveHandler(const MapView &view);
+    ~MoveHandler() override = default;
 
     bool animationInProgress() override;
 
@@ -344,11 +344,11 @@ private slots:
     void onTimeout();
 
 public:
-    JumpHandler(const MapView &view,
-                double moveAnimationDuration = (double)ANIMATION_DURATION,
-                double zoomAnimationDuration = (double)ANIMATION_DURATION);
+    explicit JumpHandler(const MapView &view,
+                         double moveAnimationDuration = (double)ANIMATION_DURATION,
+                         double zoomAnimationDuration = (double)ANIMATION_DURATION);
 
-    ~JumpHandler() override;
+    ~JumpHandler() override = default;
 
     bool animationInProgress() override;
     bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
@@ -362,8 +362,8 @@ public:
 class OSMSCOUT_CLIENT_QT_API DragHandler : public MoveHandler {
     Q_OBJECT
 public:
-    DragHandler(const MapView &view);
-    ~DragHandler() override;
+    explicit DragHandler(const MapView &view);
+    ~DragHandler() override = default;
 
     bool animationInProgress() override;
 
@@ -392,8 +392,8 @@ private:
 class OSMSCOUT_CLIENT_QT_API MultitouchHandler : public MoveHandler {
     Q_OBJECT
 public:
-    MultitouchHandler(const MapView &view);
-    ~MultitouchHandler() override;
+    explicit MultitouchHandler(const MapView &view);
+    ~MultitouchHandler() override = default;
 
     bool animationInProgress() override;
 
@@ -427,6 +427,8 @@ public:
       JumpHandler(view), window(widgetSize)
     {};
 
+    ~LockHandler() override = default;
+
     bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition) override;
     bool showCoordinates(const osmscout::GeoCoord &coord, const osmscout::Magnification &magnification, const osmscout::Bearing &bearing) override;
     bool isLockedToPosition() override;
@@ -445,6 +447,7 @@ class OSMSCOUT_CLIENT_QT_API VehicleFollowHandler : public JumpHandler {
 Q_OBJECT
 public:
   VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize);
+  ~VehicleFollowHandler() override = default;
 
   bool vehiclePosition(const VehiclePosition &vehiclePosition) override;
   bool isLockedToPosition() override;

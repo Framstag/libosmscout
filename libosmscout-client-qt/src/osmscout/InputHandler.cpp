@@ -177,10 +177,7 @@ QVector2D MoveAccumulator::collect()
 InputHandler::InputHandler(const MapView &view): view(view)
 {
 }
-InputHandler::~InputHandler()
-{
-    // noop
-}
+
 void InputHandler::painted()
 {
     // noop
@@ -245,10 +242,6 @@ MoveHandler::MoveHandler(const MapView &view): InputHandler(view)
     timer.setSingleShot(false);
 }
 
-MoveHandler::~MoveHandler()
-{
-    // noop
-}
 bool MoveHandler::touch(const QTouchEvent &event)
 {
     // move handler consumes finger release
@@ -466,10 +459,6 @@ JumpHandler::JumpHandler(const MapView &view,
     timer.setSingleShot(false);
 }
 
-JumpHandler::~JumpHandler()
-{
-    // noop
-}
 void JumpHandler::onTimeout()
 {
     double progress = (double)(animationStart.elapsed() + ANIMATION_TICK) / moveAnimationDuration;
@@ -533,9 +522,7 @@ DragHandler::DragHandler(const MapView &view):
         startX(-1), startY(-1), ended(false)
 {
 }
-DragHandler::~DragHandler()
-{
-}
+
 bool DragHandler::touch(const QTouchEvent &event)
 {
     if (ended)
@@ -599,10 +586,6 @@ MultitouchHandler::MultitouchHandler(const MapView &view):
 {
 }
 
-MultitouchHandler::~MultitouchHandler()
-{
-
-}
 bool MultitouchHandler::animationInProgress()
 {
     return moving || MoveHandler::animationInProgress();
