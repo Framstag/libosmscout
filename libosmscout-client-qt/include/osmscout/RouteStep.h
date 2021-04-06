@@ -65,7 +65,14 @@ public:
     DescriptionRole = Qt::UserRole + 2,
     TypeRole = Qt::UserRole + 3,
     RoundaboutExitRole = Qt::UserRole + 4,
-    RoundaboutClockwiseRole = Qt::UserRole + 5
+    RoundaboutClockwiseRole = Qt::UserRole + 5,
+    latRole = Qt::UserRole + 6,
+    lonRole = Qt::UserRole + 7,
+    distanceRole = Qt::UserRole + 8,
+    distanceDeltaRole = Qt::UserRole + 9,
+    distanceToRole = Qt::UserRole + 10,
+    timeRole = Qt::UserRole + 11,
+    timeDeltaRole = Qt::UserRole + 12
   };
   Q_ENUM(Roles)
 
