@@ -182,17 +182,17 @@ void MapWidget::touchEvent(QTouchEvent *event)
 {
     assert(event);
     vehicle.lastGesture.restart();
+
+    tapRecognizer.touch(*event);
+
     if (!inputHandler->touch(*event)){
         if (event->touchPoints().size() == 1){
-            QTouchEvent::TouchPoint tp = event->touchPoints()[0];
             setupInputHandler(new DragHandler(*view));
         }else{
             setupInputHandler(new MultitouchHandler(*view));
         }
         inputHandler->touch(*event);
     }
-
-    tapRecognizer.touch(*event);
 
     event->accept();
  }
