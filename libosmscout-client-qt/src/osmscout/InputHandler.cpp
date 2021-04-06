@@ -72,12 +72,24 @@ void TapRecognizer::touch(const QTouchEvent &event)
     int x = finger.pos().x();
     int y = finger.pos().y();
 
-    // discard when PRESSED and registered another finger or some bigger movement
-    if ((state == PRESSED || state == PRESSED2) &&
-            (fingerId != startFingerId || std::max(std::abs(x - startX), std::abs(y - startY)) > moveTolerance)){
-
+    // discard when PRESSED and registered another finger
+    if ((state == PRESSED || state == PRESSED2) && (fingerId != startFingerId)){
         state = INACTIVE;
         return;
+    }
+    // where there is significant movement...
+    if (std::max(std::abs(x - startX), std::abs(y - startY)) > moveTolerance) {
+        // discard during first press
+        if (state == PRESSED) {
+            state = INACTIVE;
+            return;
+        }
+        // emit tap and drag immediately
+        if (state == PRESSED2) {
+            state = INACTIVE;
+            emit tapAndDrag(QPoint(startX, startY));
+            return;
+        }
     }
     // second touch with too big distance
     if (state == RELEASED && std::max(std::abs(x - startX), std::abs(y - startY)) > moveTolerance){
@@ -447,6 +459,47 @@ bool MoveHandler::rotateBy(double angleChange)
     return true;
 }
 
+ZoomGestureHandler::ZoomGestureHandler(const MapView &view, const QPoint &p, double zoomDistance):
+    InputHandler(view),
+  startMag(view.magnification),
+  gestureStart(p),
+  zoomDistance(zoomDistance)
+{
+  // qDebug() << "zoom gesture init:" << startMag.GetMagnification();
+}
+
+bool ZoomGestureHandler::touch(const QTouchEvent &event)
+{
+  if (event.touchPoints().size() != 1) {
+    return false;
+  }
+
+  QTouchEvent::TouchPoint finger = event.touchPoints()[0];
+  Qt::TouchPointStates state(finger.state());
+  if (state.testFlag(Qt::TouchPointReleased)){
+    return false;
+  }
+
+  double zoom = (finger.pos().y() - double(gestureStart.y())) / zoomDistance;
+  if (zoom < 0){
+    zoom = 1.0/(1.0+abs(zoom));
+  } else {
+    zoom = 1.0+zoom;
+  }
+
+  Magnification maxMag(osmscout::MagnificationLevel(20));
+  if (startMag.GetMagnification() * zoom > maxMag.GetMagnification()) {
+    view.magnification = maxMag;
+  } else if (startMag.GetMagnification() * zoom < 1) {
+    view.magnification.SetMagnification(1);
+  } else {
+    view.magnification.SetMagnification(startMag.GetMagnification() * zoom);
+  }
+  // qDebug() << "zoom gesture:" << zoom << "(" << double(gestureStart.y()) << finger.pos().y() << ")"
+  //          << startMag.GetMagnification() << "->" << view.magnification.GetMagnification();
+  emit viewChanged(view);
+  return true;
+}
 
 JumpHandler::JumpHandler(const MapView &view,
     double moveAnimationDuration,

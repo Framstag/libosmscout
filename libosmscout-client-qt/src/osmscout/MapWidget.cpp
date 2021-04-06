@@ -64,6 +64,7 @@ MapWidget::MapWidget(QQuickItem* parent)
     connect(&tapRecognizer, &TapRecognizer::doubleTap,  this, &MapWidget::onDoubleTap);
     connect(&tapRecognizer, &TapRecognizer::longTap,    this, &MapWidget::onLongTap);
     connect(&tapRecognizer, &TapRecognizer::tapLongTap, this, &MapWidget::onTapLongTap);
+    connect(&tapRecognizer, &TapRecognizer::tapAndDrag, this, &MapWidget::onTapAndDrag);
 
     connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
     connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
@@ -701,9 +702,19 @@ void MapWidget::onLongTap(const QPoint p)
     emit longTap(p.x(), p.y(), lat, lon);
 }
 
+void MapWidget::onTapAndDrag(const QPoint p)
+{
+    // discard current input handler
+    DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
+    setupInputHandler(new ZoomGestureHandler(*view, p, dbThread->GetPhysicalDpi()));
+}
+
 void MapWidget::onTapLongTap(const QPoint p)
 {
-    zoomOut(2.0, p);
+    // discard current input handler
+    DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
+    setupInputHandler(new ZoomGestureHandler(*view, p, dbThread->GetPhysicalDpi()));
+
     double lat;
     double lon;
     getProjection().PixelToGeo(p.x(), p.y(), lon, lat);

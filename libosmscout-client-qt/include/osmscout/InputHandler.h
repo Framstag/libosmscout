@@ -47,12 +47,13 @@ namespace osmscout {
  *  - **Tap**: touch shorter than holdInterval (1000 ms) followed with pause longer than tapInterval (200 ms)
  *  - **Long tap**: touch longer than holdInterval (1000 ms)
  *  - **Double tap**: tap followed by second one within tapInterval (200 ms)
+ *  - **Tap, drag**: tap followed by drag
  *  - **Tap, long tap**: tap followed by long tap within tapInterval (200 ms)
  *
  * Physical DPI of display should be setup before first use. TapRecognizer use some small move
- * tolerance (~ 2.5 mm), it means that events are emited even that touch point is moving within
+ * tolerance (~ 2.5 mm), it means that events are emitted even that touch point is moving within
  * this tolerance. For double tap, when second tap is farther than this tolerance,
- * double-tap event is not emited.
+ * double-tap event is not emitted.
  */
 class OSMSCOUT_CLIENT_QT_API TapRecognizer : public QObject{
   Q_OBJECT
@@ -60,8 +61,8 @@ class OSMSCOUT_CLIENT_QT_API TapRecognizer : public QObject{
 private:
   enum TapRecState{
     INACTIVE = 0,
-    PRESSED = 1, // timer started with hold interval, if expired - long-tap is emited
-    RELEASED = 2, // timer started with tap interval, if expired - tap is emited
+    PRESSED = 1, // timer started with hold interval, if expired - long-tap is emitted
+    RELEASED = 2, // timer started with tap interval, if expired - tap is emitted
     PRESSED2 = 3, // timer started with hold interval, if expired - tap-long-tap
   };
 
@@ -105,6 +106,7 @@ signals:
   void doubleTap(const QPoint p);
   void longTap(const QPoint p);
   void tapLongTap(const QPoint p);
+  void tapAndDrag(const QPoint p);
 };
 
 /**
@@ -317,6 +319,31 @@ public:
     bool rotateTo(double angle) override;
     bool rotateBy(double angleChange) override;
     bool touch(const QTouchEvent &event) override;
+};
+
+/**
+ * \ingroup QtAPI
+ *
+ * Handler for zoom gesture with one finger, activated by tap and press usually.
+ */
+class OSMSCOUT_CLIENT_QT_API ZoomGestureHandler : public InputHandler
+{
+  Q_OBJECT
+private:
+  Magnification startMag;
+  QPoint gestureStart;
+  double zoomDistance;
+
+public:
+  /**
+   * @param view
+   * @param p - where the gesture start
+   * @param zoomDistance - distance [in pixels] where zoom is doubled/halved
+   */
+  ZoomGestureHandler(const MapView &view, const QPoint &p, double zoomDistance);
+  ~ZoomGestureHandler() override = default;
+
+  bool touch(const QTouchEvent &event) override;
 };
 
 /**
