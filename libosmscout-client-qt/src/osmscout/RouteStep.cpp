@@ -77,6 +77,20 @@ QVariant RouteStep::data(int role) const
       return getRoundaboutExit();
     case RoundaboutClockwiseRole:
       return getRoundaboutClockwise();
+    case latRole:
+      return getLat();
+    case lonRole:
+      return getLon();
+    case distanceRole:
+      return getDistance();
+    case distanceDeltaRole:
+      return getDistanceDelta();
+    case distanceToRole:
+      return getDistanceTo();
+    case timeRole:
+      return getTime();
+    case timeDeltaRole:
+      return getTimeDelta();
     default:
       break;
   }
@@ -91,6 +105,13 @@ QHash<int, QByteArray> RouteStep::roleNames(QHash<int, QByteArray> roles)
   roles[TypeRole] = "type";
   roles[RoundaboutExitRole] = "roundaboutExit";
   roles[RoundaboutClockwiseRole] = "roundaboutClockwise";
+  roles[latRole] = "lat";
+  roles[lonRole] = "lon";
+  roles[distanceRole] = "distance";
+  roles[distanceDeltaRole] = "distanceDelta";
+  roles[distanceToRole] = "distanceTo";
+  roles[timeRole] = "time";
+  roles[timeDeltaRole] = "timeDelta";
 
   return roles;
 }
