@@ -247,6 +247,7 @@ private slots:
   virtual void onDoubleTap(const QPoint p);
   virtual void onLongTap(const QPoint p);
   virtual void onTapLongTap(const QPoint p);
+  virtual void onTapAndDrag(const QPoint p);
 
   void onMapDPIChange(double dpi);
 
