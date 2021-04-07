@@ -26,7 +26,8 @@
 #include <memory>
 #include <vector>
 
-namespace osmscout::gpx {
+namespace osmscout {
+namespace gpx {
 
 class OSMSCOUT_GPX_API ProcessCallback {
 public:
@@ -67,6 +68,7 @@ extern OSMSCOUT_GPX_API void FilterNearPoints(std::vector<TrackPoint> &points,
 extern OSMSCOUT_GPX_API void FilterInaccuratePoints(std::vector<TrackPoint> &points,
                                                     double maxDilution=30);
 
+}
 }
 
 #endif //LIBOSMSCOUT_GPX_UTILS_H
