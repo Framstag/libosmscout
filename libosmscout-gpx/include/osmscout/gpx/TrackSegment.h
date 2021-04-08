@@ -27,7 +27,8 @@
 
 #include <vector>
 
-namespace osmscout::gpx {
+namespace osmscout {
+namespace gpx {
 
 class OSMSCOUT_GPX_API TrackSegment {
 public:
@@ -39,6 +40,7 @@ public:
    */
   Distance GetLength() const;
 };
+}
 }
 
 #endif //OSMSCOUT_GPX_TRACKSEGMENT_H
