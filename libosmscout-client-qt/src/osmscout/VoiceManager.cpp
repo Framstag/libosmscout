@@ -43,7 +43,7 @@ VoiceDownloadJob::~VoiceDownloadJob()
 
 void VoiceDownloadJob::start()
 {
-  if (target.exists()){
+  if (target.exists() && !isReplaceExisting()) {
     qWarning() << "Directory already exists"<<target.canonicalPath()<<"!";
     onJobFailed("Directory already exists", false);
     return;
