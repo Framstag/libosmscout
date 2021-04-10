@@ -1,0 +1,32 @@
+name: Windows using Visual Studio 2019 and meson
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Windows+Visual_Studio+meson - Build and test
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python 3.x for meson
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Install meson and ninja
+      - run: pip install meson ninja
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+      - name: Create build directory
+        run:  mkdir debug
+      - name: Configure build project
+        run:  meson debug --wrap-mode nofallback --backend vs2019
+      - name: Build project
+        run: msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
+        working-directory: debug
