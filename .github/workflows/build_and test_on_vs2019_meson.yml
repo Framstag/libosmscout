@@ -8,7 +8,6 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
     name: Windows+Visual_Studio+meson - Build and test
@@ -40,5 +39,3 @@ jobs:
         run:  meson compile -C build
       - name: Test project
         run:  meson test -C build --print-errorlogs
-
-
