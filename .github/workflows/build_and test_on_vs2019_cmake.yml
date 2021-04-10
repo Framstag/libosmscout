@@ -24,6 +24,3 @@ jobs:
         working-directory: build
       - name: Build project
         run: cmake --build build
-      - name: Run tests
-        run:  PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test ctest -j 4 --output-on-failure
-        working-directory: build
