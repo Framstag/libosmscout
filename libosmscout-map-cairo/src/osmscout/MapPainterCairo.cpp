@@ -1333,9 +1333,9 @@ namespace osmscout {
 
     cairo_new_path(draw);
     cairo_move_to(draw,
-                  coordBuffer->buffer[area.transStart].GetX(),
-                  coordBuffer->buffer[area.transStart].GetY());
-    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+                  coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                  coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+    for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
       cairo_line_to(draw,
                     coordBuffer->buffer[i].GetX(),
                     coordBuffer->buffer[i].GetY());

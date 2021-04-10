@@ -8,23 +8,23 @@ using namespace osmscout;
 
 TEST_CASE("Check bounding box of generated parallel way")
 {
-  CoordBuffer buffer;
-  size_t trFrom, trTo;
+  CoordBuffer      buffer;
+  CoordBufferRange range;
 
   buffer.PushCoord(0,0);
   buffer.PushCoord(10,0);
   buffer.PushCoord(5,1);
   buffer.PushCoord(0,0);
 
-  buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/-1, trFrom, trTo);
-  REQUIRE(trTo - trFrom >= 3);
-  REQUIRE(trFrom > 3);
+  range=buffer.GenerateParallelWay(CoordBufferRange(0,3), /*offset*/-1);
+  REQUIRE(range.GetEnd() - range.GetStart() >= 3);
+  REQUIRE(range.GetStart() > 3);
 
   // get bounding box of parallel way
   double minX, maxX, minY, maxY;
-  minX = maxX = buffer.buffer[trFrom].GetX();
-  minY = maxY = buffer.buffer[trFrom].GetY();
-  for (size_t i=trFrom; i<=trTo; i++){
+  minX = maxX = buffer.buffer[range.GetStart()].GetX();
+  minY = maxY = buffer.buffer[range.GetStart()].GetY();
+  for (size_t i=range.GetStart(); i<=range.GetEnd(); i++){
     //std::cout << buffer.buffer[i].GetX() << " , " << buffer.buffer[i].GetY() << std::endl;
     minX = std::min(minX, buffer.buffer[i].GetX());
     maxX = std::max(maxX, buffer.buffer[i].GetX());
@@ -37,6 +37,6 @@ TEST_CASE("Check bounding box of generated parallel way")
   REQUIRE(minY >= -1);
   REQUIRE(maxY < 3);
 
-  buffer.GenerateParallelWay(/*from*/0, /*to*/3, /*offset*/1, trFrom, trTo);
-  REQUIRE(trFrom > 7);
+  range=buffer.GenerateParallelWay(CoordBufferRange(0,3), /*offset*/1);
+  REQUIRE(range.GetStart() > 7);
 }

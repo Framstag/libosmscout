@@ -140,7 +140,7 @@ namespace osmscout {
             } else {
                 filename = *path+"/"+style.GetIconName()+"@"+std::to_string((int)contentScale)+"x.png";
             }
-            
+
             Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
@@ -257,13 +257,13 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 double fontSize){
         Font *font = GetFont(projection,parameter,fontSize);
-        
+
         double convFontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
         std::map<size_t,double>::const_iterator it = averageCharWidth.find(convFontSize);
         if (it != averageCharWidth.end()) {
             return it->second;
         }
-        
+
         CGSize size = CGSizeZero;
         NSString *allChars = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         if(font){
@@ -284,7 +284,7 @@ namespace osmscout {
         CGRect glyphRect = CTRunGetImageBounds(glyph.run, cg, range);
         return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
     }
-    
+
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
         std::vector<IOSGlyph> result;
         int i = 0;
@@ -318,12 +318,12 @@ namespace osmscout {
         const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
         CGGlyph glyphToDraw[1];
         CGPoint glyphPositions[1];
-        
+
         double r = style->GetTextColor().GetR();
         double g = style->GetTextColor().GetG();
         double b = style->GetTextColor().GetB();
         double a = style->GetTextColor().GetA();
-        
+
         CGContextSaveGState(cg);
         CGContextSetRGBFillColor(cg, r, g, b, a);
         CGContextSetRGBStrokeColor(cg, r, g, b, a);
@@ -340,9 +340,9 @@ namespace osmscout {
             index++;
         }
         CGContextRestoreGState(cg);
-        
+
     }
-    
+
     std::shared_ptr<IOSLabel> MapPainterIOS::Layout(const Projection& projection,
                                                     const MapParameter& parameter,
                                                     const std::string& text,
@@ -352,17 +352,17 @@ namespace osmscout {
                                                     bool contourLabel) {
         std::shared_ptr<IOSLabel> result = std::make_shared<IOSLabel>();
         CGRect rect = CGRectZero;
-        
+
         double proposedWidth = -1;
         if (enableWrapping && objectWidth > 50.0) {
             proposedWidth = GetProposedLabelWidth(parameter,
                                                   GetAverageCharWidth(projection, parameter, fontSize),
                                                   objectWidth,
                                                   text.length());
-            
+
             log.Debug() << "proposedWidth=" << proposedWidth;
         }
-        
+
         Font *font = GetFont(projection, parameter, fontSize);
         NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
         str = [str stringByReplacingOccurrencesOfString:@"-" withString:@"\u2011"];
@@ -371,7 +371,7 @@ namespace osmscout {
             attr[NSFontAttributeName] = font;
         }
         NSAttributedString *attrStr = [[NSAttributedString alloc] initWithString:str attributes:attr];
-        
+
         CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
 
         CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(cfString);
@@ -403,10 +403,10 @@ namespace osmscout {
         result->fontSize = fontSize;
         result->width = rect.size.width;
         result->height = rect.size.height;
-        
+
         return result;
     }
-    
+
     void MapPainterIOS::LayoutDrawLabel(const IOSLabel& layout,
                                         const CGPoint& coords,
                                         const Color &color,
@@ -444,7 +444,7 @@ namespace osmscout {
                 }
             }
             lineNumber++;
-            
+
             CGContextSaveGState(cg);
             CGContextSetRGBFillColor(cg, r, g, b, a);
             CGContextSetRGBStrokeColor(cg, r, g, b, a);
@@ -462,26 +462,26 @@ namespace osmscout {
             CGContextRestoreGState(cg);
         }
     }
-    
+
     void MapPainterIOS::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const DoubleRectangle& labelRect,
                                   const LabelData& label,
                                   const IOSLabel& layout) {
-        
+
         if (const auto *style = dynamic_cast<const TextStyle*>(label.style.get());
             style != nullptr) {
-            
+
             if (style->GetStyle()==TextStyle::normal) {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
-                
+
             } else if (style->GetStyle()==TextStyle::emphasize) {
                 LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), true);
             }
-            
+
         } else if (const ShieldStyle* style = dynamic_cast<const ShieldStyle*>(label.style.get());
                    style != nullptr) {
-            
+
             CGContextSaveGState(cg);
             CGContextSetRGBFillColor(cg,
                                      style->GetBgColor().GetR(),
@@ -497,22 +497,22 @@ namespace osmscout {
                                             labelRect.width + 10,
                                             labelRect.height + 10));
             CGContextDrawPath(cg, kCGPathFillStroke);
-            
+
             CGContextAddRect(cg, CGRectMake(labelRect.x - 5 + 2,
                                             labelRect.y - 5 + 2,
                                             labelRect.width + 10 - 4,
                                             labelRect.height + 10 - 4));
             CGContextDrawPath(cg, kCGPathStroke);
-            
+
             LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y - layout.label.lineHeight/3), style->GetTextColor(), false);
-            
+
             CGContextRestoreGState(cg);
-            
+
         } else {
             log.Warn() << "Label style not recognised: " << label.style.get();
         }
     }
-    
+
     void MapPainterIOS::BeforeDrawing(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
@@ -520,7 +520,7 @@ namespace osmscout {
         labelLayouter.SetViewport(DoubleRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
         labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
-    
+
     void MapPainterIOS::RegisterRegularLabel(const Projection &projection,
                                              const MapParameter &parameter,
                                              const std::vector<LabelData> &labels,
@@ -528,14 +528,14 @@ namespace osmscout {
                                              double objectWidth){
         labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
     }
-    
+
     void MapPainterIOS::RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath){
         labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
     }
-    
+
     void MapPainterIOS::DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
                             const MapData& data) {
@@ -646,7 +646,7 @@ namespace osmscout {
             }
         }
     }
-    
+
     /*
      *
      * DrawIcon(const IconStyle* style,
@@ -685,14 +685,14 @@ namespace osmscout {
         double maxX;
         double maxY;
         symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-        
+
         double centerX=(maxX+minX)/2;
         double centerY=(maxY+minY)/2;
 
         CGContextSaveGState(cg);
         for (const auto& primitive : symbol.GetPrimitives()) {
             const DrawPrimitive *primitivePtr=primitive.get();
-            
+
             if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
                 polygon != nullptr) {
 
@@ -904,14 +904,14 @@ namespace osmscout {
                                 const MapPainter::AreaData& area) {
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
-                    coordBuffer->buffer[area.transStart].GetY());
-        for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+        CGContextMoveToPoint(cg,coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                    coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+        for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
             CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
                         coordBuffer->buffer[i].GetY());
         }
-        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.transStart].GetX(),
-                                coordBuffer->buffer[area.transStart].GetY());
+        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                                coordBuffer->buffer[area.coordRange.GetEnd()].GetY());
 
         if (!area.clippings.empty()) {
             for (std::list<PolyData>::const_iterator c=area.clippings.begin();

@@ -118,8 +118,7 @@ namespace osmscout {
       LineStyleRef             lineStyle;       //!< Line style
       Color                    color;           //!< Line color
       size_t                   wayPriority;     //!< Priority of way (from style sheet)
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       double                   lineWidth;       //!< Line width
       bool                     startIsClosed;   //!< The end of the way is closed, it does not lead to another way or area
       bool                     endIsClosed;     //!< The end of the way is closed, it does not lead to another way or area
@@ -164,8 +163,7 @@ namespace osmscout {
     {
       FileOffset               ref;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment. Not owned pointer.
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       double                   mainSlotWidth;   //!< Width of main slot, used for relative positioning
     };
 
@@ -187,8 +185,7 @@ namespace osmscout {
       BorderStyleRef           borderStyle;     //!< Border style
       GeoBox                   boundingBox;     //!< Bounding box of the area
       bool                     isOuter;         //!< flag if this area is outer ring of some relation
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
+      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
@@ -204,7 +201,14 @@ namespace osmscout {
     };
 
   protected:
+    /**
+     Internal coordinate transformation data structures
+   */
+    //@{
+    TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo coordinates to display coordinates
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
+    //@}
+
     TextStyleRef                 debugLabel;
 
     /**
@@ -217,17 +221,17 @@ namespace osmscout {
     //@}
 
   private:
-    std::vector<StepMethod>      stepMethods;
+    std::vector<StepMethod>      stepMethods;        //!< Jump table render step methods
     double                       errorTolerancePixel;
 
-    std::list<AreaData>          areaData;
-    std::list<WayData>           wayData;
+    std::list<AreaData>          areaData;           //!< Internal processing list for area rendering
+    std::list<WayData>           wayData;            //!< Internal processing list for way rendering
     std::list<WayPathData>       wayPathData;
     // std::list<RouteData>         routeData;
     std::list<RouteLabelData>    routeLabelData;
 
-    std::vector<TextStyleRef>    textStyles;     //!< Temporary storage for StyleConfig return value
-    std::vector<LineStyleRef>    lineStyles;     //!< Temporary storage for StyleConfig return value
+    std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
+    std::vector<LineStyleRef>    lineStyles;         //!< Temporary storage for StyleConfig return value
 
     /**                           L
      Precalculations
@@ -238,13 +242,7 @@ namespace osmscout {
     //@}
 
   protected:
-    StyleConfigRef               styleConfig;       //!< Reference to the style configuration to be used
-    /**
-       Scratch variables for path optimization algorithm
-     */
-    //@{
-    TransBuffer                  transBuffer;       //!< Static (avoid reallocation) buffer of transformed coordinates
-    //@}
+    StyleConfigRef               styleConfig;        //!< Reference to the style configuration to be used
 
     /**
      * Attribute readers

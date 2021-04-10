@@ -36,10 +36,9 @@ bool WayIsSimple(const std::vector<osmscout::Point> &points)
     return true;
   }
 
-  size_t edgesIntersect=0;
 
   for (size_t i=0; i<points.size()-1; i++) {
-    edgesIntersect=0;
+    size_t edgesIntersect=0;
 
     for (size_t j=i+1; j<points.size()-1; j++) {
       if (LinesIntersect(points[i],
@@ -65,11 +64,55 @@ bool WayIsSimple(const std::vector<osmscout::Point> &points)
   return true;
 }
 
-TEST_CASE()
+TEST_CASE("Testway is simple")
 {
   std::vector<osmscout::Point> testWay=GetTestWay();
 
   REQUIRE(WayIsSimple(testWay));
+}
+
+TEST_CASE("Optimized way is still simple")
+{
+  std::vector<osmscout::Point> testWay=GetTestWay();
+
+  osmscout::MercatorProjection projection;
+  osmscout::Magnification      mag;
+  mag.SetLevel(osmscout::Magnification::magSuburb);
+  projection.Set(osmscout::GeoCoord(43.914554,
+                                    8.0902544),
+    /*angle*/
+                 0,
+                 mag,
+    /*dpi*/
+                 72,
+    /*width*/
+                 1000,
+    /*height*/
+                 1000);
+
+  osmscout::TransBuffer transBuffer;
+  osmscout::TransformWay(testWay,
+                         transBuffer,
+                         projection,
+                         osmscout::TransPolygon::OptimizeMethod::quality,
+                         1.0,
+                         osmscout::TransPolygon::simple);
+
+  std::vector<osmscout::Point> optimised;
+  for (size_t                  p      =transBuffer.GetStart(); p<=transBuffer.GetEnd(); p++) {
+    if (transBuffer.points[p].draw) {
+      optimised.emplace_back(0,
+                             osmscout::GeoCoord(transBuffer.points[p].x,
+                                                transBuffer.points[p].y));
+    }
+  }
+
+  REQUIRE(WayIsSimple(optimised));
+}
+
+TEST_CASE("Optimized area is still simple")
+{
+  std::vector<osmscout::Point> testWay=GetTestWay();
 
   osmscout::MercatorProjection projection;
   osmscout::Magnification mag;
@@ -81,33 +124,20 @@ TEST_CASE()
                  /*width*/ 1000,
                  /*height*/ 1000);
 
-  osmscout::TransPolygon polygon;
-  polygon.TransformWay(projection,
-                       osmscout::TransPolygon::OptimizeMethod::quality,
-                       testWay,
-                       /*optimizeErrorTolerance*/1.0,
-                       osmscout::TransPolygon::simple);
-
-  std::vector<osmscout::Point> optimised;
-  for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
-    if (polygon.points[p].draw) {
-      optimised.emplace_back(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y));
-    }
-  }
-
-  REQUIRE(WayIsSimple(optimised));
+  osmscout::TransBuffer transBuffer;
 
   // try again as area
-  polygon.TransformArea(projection,
-                        osmscout::TransPolygon::OptimizeMethod::quality,
-                        testWay,
-                        /*optimizeErrorTolerance*/1.0,
-                        osmscout::TransPolygon::simple);
+  osmscout::TransformArea(testWay,
+                          transBuffer,
+                          projection,
+                          osmscout::TransPolygon::OptimizeMethod::quality,
+                          1.0,
+                          osmscout::TransPolygon::simple);
 
-  optimised.clear();
-  for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
-    if (polygon.points[p].draw) {
-      optimised.emplace_back(0, osmscout::GeoCoord(polygon.points[p].x, polygon.points[p].y));
+  std::vector<osmscout::Point> optimised;
+  for (size_t p=transBuffer.GetStart(); p<=transBuffer.GetEnd(); p++) {
+    if (transBuffer.points[p].draw) {
+      optimised.emplace_back(0, osmscout::GeoCoord(transBuffer.points[p].x, transBuffer.points[p].y));
     }
   }
 

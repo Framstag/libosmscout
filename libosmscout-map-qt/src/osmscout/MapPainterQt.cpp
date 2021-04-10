@@ -892,9 +892,9 @@ namespace osmscout {
   {
     QPainterPath path;
 
-    path.moveTo(coordBuffer->buffer[area.transStart].GetX(),
-                coordBuffer->buffer[area.transStart].GetY());
-    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+    path.moveTo(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
+                coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+    for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
       path.lineTo(coordBuffer->buffer[i].GetX(),
                   coordBuffer->buffer[i].GetY());
     }
@@ -941,8 +941,8 @@ namespace osmscout {
 
       if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
         patterns[idx].setTransform(QTransform::fromTranslate(
-                                          remainder(coordBuffer->buffer[area.transStart].GetX(),patterns[idx].textureImage().width()),
-                                          remainder(coordBuffer->buffer[area.transStart].GetY(),patterns[idx].textureImage().height())));
+                                          remainder(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),patterns[idx].textureImage().width()),
+                                          remainder(coordBuffer->buffer[area.coordRange.GetStart()].GetY(),patterns[idx].textureImage().height())));
         painter->setBrush(patterns[idx]);
         restoreTransform = true;
       }
