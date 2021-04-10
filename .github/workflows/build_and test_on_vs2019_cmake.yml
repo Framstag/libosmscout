@@ -20,7 +20,7 @@ jobs:
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
-        run:  cmake -G "Visual Studio 16 2019" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=%VCPKG_INSTALLATION_ROOT%\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
+        run:  cmake -G "Visual Studio 16 2019" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
         working-directory: build
       - name: Build project
         run: cmake --build build
