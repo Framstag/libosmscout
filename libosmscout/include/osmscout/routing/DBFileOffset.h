@@ -22,6 +22,7 @@
 
 #include <string>
 #include <ostream>
+#include <tuple>
 #include <osmscout/OSMScoutTypes.h>
 
 namespace osmscout{
@@ -72,11 +73,7 @@ namespace osmscout{
 
     inline bool operator<(const DBId& other) const
     {
-      if (database!=other.database) {
-        return database<other.database;
-      }
-
-      return id<other.id;
+      return std::tie(database, id) < std::tie(other.database, other.id);
     }
   };
 
@@ -124,11 +121,7 @@ namespace osmscout{
 
     inline bool operator<(const DBFileOffset& other) const
     {
-      if (database!=other.database) {
-        return database<other.database;
-      }
-
-      return offset<other.offset;
+      return std::tie(database, offset) < std::tie(other.database, other.offset);
     }
 
     DBFileOffset& operator=(const DBFileOffset& other) = default;

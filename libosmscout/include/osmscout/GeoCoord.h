@@ -23,6 +23,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <string>
+#include <tuple>
 
 #include <osmscout/OSMScoutTypes.h>
 
@@ -278,8 +279,7 @@ namespace osmscout {
 
     inline bool operator<(const GeoCoord& other) const
     {
-      return lat<other.lat ||
-             (lat==other.lat && lon<other.lon);
+      return std::tie(lat, lon) < std::tie(other.lat, other.lon);
     }
 
     /**

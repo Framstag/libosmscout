@@ -21,6 +21,7 @@
 
 #include <osmscout/system/Math.h>
 #include <map>
+#include <tuple>
 
 namespace osmscout {
 
@@ -109,19 +110,7 @@ namespace osmscout {
 
   bool Color::operator<(const Color& other) const
   {
-    if (r!=other.r) {
-      return r<other.r;
-    }
-
-    if (g!=other.g) {
-      return g<other.g;
-    }
-
-    if (b!=other.b) {
-      return b<other.b;
-    }
-
-    return a<other.a;
+    return std::tie(r, g, b, a) < std::tie(other.r, other.g, other.b, other.a);
   }
 
   Color Color::FromHexString(const std::string& hexString)

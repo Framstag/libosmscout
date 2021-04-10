@@ -20,6 +20,7 @@
 #include <osmscout/routing/RouteNode.h>
 
 #include <limits>
+#include <tuple>
 
 #include <osmscout/system/Math.h>
 
@@ -36,11 +37,7 @@ namespace osmscout {
       return type->GetIndex()<other.type->GetIndex();
     }
 
-    if (maxSpeed!=other.maxSpeed) {
-      return maxSpeed<other.maxSpeed;
-    }
-
-    return grade<other.grade;
+    return std::tie(maxSpeed, grade) < std::tie(other.maxSpeed, other.grade);
   }
 
   void ObjectVariantData::Read(const TypeConfig& typeConfig,
