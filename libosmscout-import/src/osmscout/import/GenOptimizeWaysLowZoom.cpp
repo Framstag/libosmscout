@@ -440,31 +440,32 @@ namespace osmscout
     projection.Set(GeoCoord(0.0,0.0),magnification,dpi,width,height);
 
     for (const auto &way :ways) {
-      TransPolygon       polygon;
+      TransBuffer        transBuffer;
       std::vector<Point> newNodes;
       double             xmin;
       double             xmax;
       double             ymin;
       double             ymax;
 
-      polygon.TransformWay(projection,
-                           optimizeWayMethod,
-                           way->nodes,
-                           pixel/8);
+      TransformWay(way->nodes,
+                   transBuffer,
+                   projection,
+                   optimizeWayMethod,
+                   pixel/8);
 
-      polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
+      transBuffer.GetBoundingBox(xmin,ymin,xmax,ymax);
 
       if (xmax-xmin<=pixel &&
           ymax-ymin<=pixel) {
         continue;
       }
 
-      newNodes.reserve(polygon.GetLength());
+      newNodes.reserve(transBuffer.GetLength());
 
-      for (size_t i=polygon.GetStart();
-           i<=polygon.GetEnd();
+      for (size_t i=transBuffer.GetStart();
+           i<=transBuffer.GetEnd();
            i++) {
-        if (polygon.points[i].draw) {
+        if (transBuffer.points[i].draw) {
           newNodes.push_back(way->nodes[i]);
         }
       }

@@ -188,7 +188,7 @@ namespace osmscout
     projection.Set(GeoCoord(0.0,0.0),magnification,dpi,width,height);
 
     for (const auto &area :areas) {
-      TransPolygon            polygon;
+      TransBuffer             transBuffer;
       std::vector<Area::Ring> newRings;
       double                  xmin;
       double                  xmax;
@@ -199,14 +199,15 @@ namespace osmscout
       while (r<area->rings.size()) {
         if (!(area->rings[r].IsMaster() &&
               area->rings[r].nodes.empty())) {
-          polygon.TransformArea(projection,
-                                optimizeAreaMethod,
-                                area->rings[r].nodes,
-                                pixel/8.0);
+          TransformArea(area->rings[r].nodes,
+                        transBuffer,
+                        projection,
+                        optimizeAreaMethod,
+                        pixel/8.0);
 
-          polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
+          transBuffer.GetBoundingBox(xmin,ymin,xmax,ymax);
 
-          if (polygon.GetLength() < 3 || // drop rings reduced to single line or just point
+          if (transBuffer.GetLength() < 3 || // drop rings reduced to single line or just point
               (xmax-xmin<=pixel &&
                ymax-ymin<=pixel)) {
             // We drop all sub roles of the current role, too
@@ -228,10 +229,10 @@ namespace osmscout
               area->rings[r].nodes.empty())) {
           newRings.back().nodes.clear();
 
-          for (size_t i=polygon.GetStart();
-               i<=polygon.GetEnd();
+          for (size_t i=transBuffer.GetStart();
+               i<=transBuffer.GetEnd();
                i++) {
-            if (polygon.points[i].draw) {
+            if (transBuffer.points[i].draw) {
               newRings.back().nodes.push_back(area->rings[r].nodes[i]);
             }
           }

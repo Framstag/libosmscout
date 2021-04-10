@@ -201,7 +201,14 @@ namespace osmscout {
     };
 
   protected:
+    /**
+     Internal coordinate transformation data structures
+   */
+    //@{
+    TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo coordinates to display coordinates
     CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
+    //@}
+
     TextStyleRef                 debugLabel;
 
     /**
@@ -236,12 +243,6 @@ namespace osmscout {
 
   protected:
     StyleConfigRef               styleConfig;        //!< Reference to the style configuration to be used
-    /**
-       Scratch variables for path optimization algorithm
-     */
-    //@{
-    PolyToCoordTransformer       transformer;        //!< Static (avoid reallocation) buffer of transformed coordinates
-    //@}
 
     /**
      * Attribute readers

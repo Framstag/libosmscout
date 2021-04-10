@@ -1132,7 +1132,7 @@ namespace osmscout {
       index++;
       progress.SetProgress(index,coastlines.size());
 
-      TransPolygon polygon;
+      TransBuffer transBuffer;
 
       // For areas we first transform the bounding box to make sure, that
       // the area coastline will be big enough to be actually visible
@@ -1140,23 +1140,24 @@ namespace osmscout {
 
         GeoBox boundingBox;
         GetBoundingBox(coast->coast, boundingBox);
-        polygon.TransformBoundingBox(projection,
-                                     optimizationMethod,
-                                     boundingBox,
-                                     1.0,
-                                     TransPolygon::simple);
+        TransformBoundingBox(boundingBox,
+                             transBuffer,
+                             projection,
+                             optimizationMethod,
+                             1.0,
+                             TransPolygon::simple);
 
-        double minX=polygon.points[polygon.GetStart()].x;
-        double minY=polygon.points[polygon.GetStart()].y;
+        double minX=transBuffer.points[transBuffer.GetStart()].x;
+        double minY=transBuffer.points[transBuffer.GetStart()].y;
         double maxX=minX;
         double maxY=minY;
 
-        for (size_t p=polygon.GetStart()+1; p<=polygon.GetEnd(); p++) {
-          if (polygon.points[p].draw) {
-            minX=std::min(minX,polygon.points[p].x);
-            maxX=std::max(maxX,polygon.points[p].x);
-            minY=std::min(minY,polygon.points[p].y);
-            maxY=std::max(maxY,polygon.points[p].y);
+        for (size_t p=transBuffer.GetStart()+1; p<=transBuffer.GetEnd(); p++) {
+          if (transBuffer.points[p].draw) {
+            minX=std::min(minX,transBuffer.points[p].x);
+            maxX=std::max(maxX,transBuffer.points[p].x);
+            minY=std::min(minY,transBuffer.points[p].y);
+            maxY=std::max(maxY,transBuffer.points[p].y);
           }
         }
 
@@ -1171,18 +1172,20 @@ namespace osmscout {
       }
 
       if (coast->isArea) {
-        polygon.TransformArea(projection,
-                              optimizationMethod,
-                              coast->coast,
-                              tolerance,
-                              TransPolygon::simple);
+        TransformArea(coast->coast,
+                      transBuffer,
+                      projection,
+                      optimizationMethod,
+                      tolerance,
+                      TransPolygon::simple);
       }
       else {
-        polygon.TransformWay(projection,
-                             optimizationMethod,
-                             coast->coast,
-                             tolerance,
-                             TransPolygon::simple);
+        TransformWay(coast->coast,
+                     transBuffer,
+                     projection,
+                     optimizationMethod,
+                     tolerance,
+                     TransPolygon::simple);
       }
 
       CoastlineDataRef coastline=std::make_shared<CoastlineData>();
@@ -1191,10 +1194,10 @@ namespace osmscout {
       coastline->isArea=coast->isArea;
       coastline->right=coast->right;
       coastline->left=coast->left;
-      coastline->points.reserve(polygon.GetLength());
+      coastline->points.reserve(transBuffer.GetLength());
 
-      for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
-        if (polygon.points[p].draw) {
+      for (size_t p=transBuffer.GetStart(); p<=transBuffer.GetEnd(); p++) {
+        if (transBuffer.points[p].draw) {
           coastline->points.push_back(coast->coast[p].GetCoord());
         }
       }
