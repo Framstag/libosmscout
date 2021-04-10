@@ -23,6 +23,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <string>
+#include <tuple>
 
 #include <osmscout/OSMScoutTypes.h>
 
@@ -111,7 +112,7 @@ namespace osmscout {
     }
     inline bool operator<(const ObjectOSMRef& reference) const
     {
-      return type<reference.type || (type==reference.type &&  id<reference.id);
+      return std::tie(type, id) < std::tie(reference.type, reference.id);
     }
 
     inline bool operator==(const ObjectOSMRef& reference) const
@@ -209,7 +210,7 @@ namespace osmscout {
 
     inline bool operator<(const ObjectFileRef& reference) const
     {
-      return type<reference.type || (type==reference.type &&  offset<reference.offset);
+      return std::tie(type, offset) < std::tie(reference.type, reference.offset);
     }
 
     inline bool operator==(const ObjectFileRef& reference) const

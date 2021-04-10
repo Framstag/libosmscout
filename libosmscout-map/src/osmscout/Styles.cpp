@@ -20,6 +20,7 @@
 #include <osmscout/Styles.h>
 
 #include <algorithm>
+#include <tuple>
 
 namespace osmscout {
 
@@ -374,55 +375,12 @@ namespace osmscout {
 
   bool LineStyle::operator<(const LineStyle& other) const
   {
-    if (slot!=other.slot) {
-      return slot<other.slot;
-    }
-
-    if (lineColor!=other.lineColor) {
-      return lineColor<other.lineColor;
-    }
-
-    if (gapColor!=other.gapColor) {
-      return gapColor<other.gapColor;
-    }
-
-    if (displayWidth!=other.displayWidth) {
-      return displayWidth<other.displayWidth;
-    }
-
-    if (width!=other.width) {
-      return width<other.width;
-    }
-
-    if (displayOffset!=other.displayOffset) {
-      return displayOffset<other.displayOffset;
-    }
-
-    if (offset!=other.offset) {
-      return offset<other.offset;
-    }
-
-    if (joinCap!=other.joinCap) {
-      return joinCap<other.joinCap;
-    }
-
-    if (endCap!=other.endCap) {
-      return endCap<other.endCap;
-    }
-
-    if (dash!=other.dash) {
-      return dash<other.dash;
-    }
-
-    if (priority!=other.priority) {
-      return priority<other.priority;
-    }
-
-    if (zIndex!=other.zIndex) {
-      return zIndex<other.zIndex;
-    }
-
-    return offsetRel<other.offsetRel;
+    return std::tie(slot, lineColor, gapColor, displayWidth, width,
+                    displayOffset, offset, joinCap, endCap, dash,
+                    priority, zIndex, offsetRel)
+           < std::tie(other.slot, other.lineColor, other.gapColor, other.displayWidth, other.width,
+                      other.displayOffset, other.offset, other.joinCap, other.endCap, other.dash,
+                      other.priority, other.zIndex, other.offsetRel);
   }
 
   class FillStyleDescriptor CLASS_FINAL : public StyleDescriptor
@@ -506,15 +464,7 @@ namespace osmscout {
 
   bool FillStyle::operator==(const FillStyle& other) const
   {
-    if (fillColor!=other.fillColor) {
-      return false;
-    }
-
-    if (pattern!=other.pattern) {
-      return false;
-    }
-
-    return patternMinMag!=other.patternMinMag;
+    return std::tie(fillColor, pattern, patternMinMag) == std::tie(other.fillColor, other.pattern, other.patternMinMag);;
   }
 
   bool FillStyle::operator!=(const FillStyle& other) const
@@ -524,15 +474,7 @@ namespace osmscout {
 
   bool FillStyle::operator<(const FillStyle& other) const
   {
-    if (fillColor!=other.fillColor) {
-      return fillColor<other.fillColor;
-    }
-
-    if (pattern!=other.pattern) {
-      return pattern<other.pattern;
-    }
-
-    return patternMinMag<other.patternMinMag;
+    return std::tie(fillColor, pattern, patternMinMag) < std::tie(other.fillColor, other.pattern, other.patternMinMag);
   }
 
   void FillStyle::SetStringValue(int attribute,
@@ -790,31 +732,8 @@ namespace osmscout {
 
   bool BorderStyle::operator<(const BorderStyle& other) const
   {
-    if (color!=other.color) {
-      return color<other.color;
-    }
-
-    if (gapColor!=other.gapColor) {
-      return gapColor<other.gapColor;
-    }
-
-    if (width!=other.width) {
-      return width<other.width;
-    }
-
-    if (displayOffset!=other.displayOffset) {
-      return displayOffset<other.displayOffset;
-    }
-
-    if (offset!=other.offset) {
-      return offset<other.offset;
-    }
-
-    if (dash!=other.dash) {
-      return dash<other.dash;
-    }
-
-    return priority<other.priority;
+    return std::tie(color, gapColor, width, displayOffset, offset, dash, priority)
+           < std::tie(other.color, other.gapColor, other.width, other.displayOffset, other.offset, other.dash, other.priority);
   }
 
   LabelStyle::LabelStyle()
@@ -1070,35 +989,10 @@ namespace osmscout {
       return false;
     }
 
-    if (slot!=other.slot) {
-      return false;
-    }
-
-    if (label!=other.label) {
-      return false;
-    }
-
-    if (position!=other.position) {
-      return false;
-    }
-
-    if (textColor!=other.textColor) {
-      return false;
-    }
-
-    if (style!=other.style) {
-      return false;
-    }
-
-    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
-      return false;
-    }
-
-    if (autoSize!=other.autoSize) {
-      return false;
-    }
-
-    return true;
+    return std::tie(slot, label, position, textColor, style,
+                    scaleAndFadeMag, autoSize)
+           == std::tie(other.slot, other.label, other.position, other.textColor, other.style,
+                       other.scaleAndFadeMag, other.autoSize);
   }
 
   bool TextStyle::operator!=(const TextStyle& other) const
@@ -1116,31 +1010,10 @@ namespace osmscout {
       return GetSize()<other.GetSize();
     }
 
-    if (slot!=other.slot) {
-      return slot<other.slot;
-    }
-
-    if (label!=other.label) {
-      return label<other.label;
-    }
-
-    if (position!=other.position) {
-      return position<other.position;
-    }
-
-    if (textColor!=other.textColor) {
-      return textColor<other.textColor;
-    }
-
-    if (style!=other.style) {
-      return style<other.style;
-    }
-
-    if (scaleAndFadeMag!=other.scaleAndFadeMag) {
-      return scaleAndFadeMag<other.scaleAndFadeMag;
-    }
-
-    return autoSize<other.autoSize;
+    return std::tie(slot, label, position, textColor, style,
+                    scaleAndFadeMag, autoSize)
+           < std::tie(other.slot, other.label, other.position, other.textColor, other.style,
+                      other.scaleAndFadeMag, other.autoSize);
   }
 
   ShieldStyle::ShieldStyle()

@@ -18,8 +18,9 @@
 */
 
 #include <osmscout/util/TileId.h>
-
 #include <osmscout/util/Geometry.h>
+
+#include <tuple>
 
 namespace osmscout {
 
@@ -202,11 +203,7 @@ namespace osmscout {
    */
   bool TileKey::operator<(const TileKey& other) const
   {
-    if (level!=other.level) {
-      return level<other.level;
-    }
-
-    return id<other.id;
+    return std::tie(level, id) < std::tie(other.level, other.id);
   }
 
   TileIdBox::TileIdBox(const TileId& a,

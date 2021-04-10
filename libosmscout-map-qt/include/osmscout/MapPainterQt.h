@@ -21,6 +21,7 @@
 */
 
 #include <mutex>
+#include <tuple>
 
 #include <QPainter>
 #include <QMap>
@@ -68,19 +69,7 @@ namespace osmscout {
 
       bool operator<(const FontDescriptor& other) const
       {
-        if (fontName!=other.fontName) {
-          return fontName<other.fontName;
-        }
-
-        if (fontSize!=other.fontSize) {
-          return fontSize<other.fontSize;
-        }
-
-        if (weight!=other.weight) {
-          return weight<other.weight;
-        }
-
-        return italic<other.italic;
+        return std::tie(fontName, fontSize, weight, italic) < std::tie(other.fontName, other.fontSize, other.weight, other.italic);
       }
     };
 

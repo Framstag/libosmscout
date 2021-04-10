@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <tuple>
 
 #include <osmscout/TileCache.h>
 #include <osmscout/OSMTile.h>
@@ -42,11 +43,7 @@ bool operator==(const TileCacheKey &a, const TileCacheKey &b)
 
 bool operator<(const TileCacheKey &a, const TileCacheKey &b)
 {
-  if (a.zoomLevel != b.zoomLevel)
-    return a.zoomLevel < b.zoomLevel;
-  if (a.xtile != b.xtile)
-    return a.xtile < b.xtile;
-  return a.ytile < b.ytile;
+  return std::tie(a.zoomLevel, a.xtile, a.ytile) < std::tie(b.zoomLevel, b.xtile, b.ytile);
 }
 
 QDebug& operator<<(QDebug &out, const TileCacheKey &key)

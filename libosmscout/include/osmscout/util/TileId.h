@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <tuple>
 
 #include <osmscout/CoreImportExport.h>
 
@@ -98,11 +99,7 @@ namespace osmscout {
      */
     inline bool operator<(const TileId& other) const
     {
-      if (y!=other.y) {
-        return y<other.y;
-      }
-
-      return x<other.x;
+      return std::tie(y, x) < std::tie(other.y, other.x);
     }
 
     GeoCoord GetTopLeftCoord(const Magnification& magnification) const;

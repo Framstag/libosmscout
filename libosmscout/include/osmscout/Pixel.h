@@ -32,6 +32,7 @@
 #include <string>
 #include <array>
 #include <type_traits>
+#include <tuple>
 
 namespace osmscout {
 
@@ -69,8 +70,7 @@ namespace osmscout {
 
     inline bool operator<(const Pixel& other) const
     {
-      return y<other.y ||
-      (y==other.y && x<other.x);
+      return std::tie(y, x) < std::tie(other.y, other.x);
     }
 
     /**
@@ -156,8 +156,7 @@ namespace osmscout {
 
     inline bool operator<(const Vertex2D& other) const
     {
-      return coords[1]<other.coords[1] ||
-             (coords[1]==other.coords[1] && coords[0]<other.coords[0]);
+      return std::tie(coords[1], coords[0]) < std::tie(other.coords[1], other.coords[0]);
     }
 
     inline double DistanceTo(const Vertex2D &other) const {
@@ -257,15 +256,7 @@ namespace osmscout {
 
     inline bool operator<(const Vertex3D& other) const
     {
-      if (x!=other.x) {
-        return x<other.x;
-      }
-
-      if (y!=other.y) {
-        return y<other.y;
-      }
-
-      return z<other.z;
+      return std::tie(x, y, z) < std::tie(other.x, other.y, other.z);
     }
   };
 }

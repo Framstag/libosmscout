@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <tuple>
 
 #include <osmscout/CoreImportExport.h>
 
@@ -1143,15 +1144,7 @@ namespace osmscout {
 
     inline bool operator<(const ScanCell& other) const
     {
-      if (y<other.y) {
-        return true;
-      }
-
-      if (y==other.y) {
-        return x<other.x;
-      }
-
-      return false;
+      return std::tie(y, x) < std::tie(other.y, other.x);
     }
 
     inline bool IsEqual(const ScanCell& other) const
