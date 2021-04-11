@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Install meson and ninja
-      - run: pip install meson ninja
+        run: pip install meson ninja
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Create build directory
