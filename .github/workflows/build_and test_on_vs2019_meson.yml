@@ -25,6 +25,8 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Dump environment
         run: "dir env:"
+      - name: Dump path variable
+        run: $env:path -split ";"
       - name: Create build directory
         run:  mkdir debug
       - name: Configure build project
