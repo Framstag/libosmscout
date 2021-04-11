@@ -23,10 +23,14 @@ jobs:
         run: pip install meson ninja
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
+      - name: Dump environment
+        run: set
+      - name: Set CXX
+        env:
+          CXX: cl.exe
       - name: Create build directory
         run:  mkdir debug
       - name: Configure build project
-        run:  meson debug --wrap-mode nofallback --backend vs2019
+        run:  CXX=cl.exe meson debug --wrap-mode nofallback
       - name: Build project
-        run: msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
-        working-directory: debug
+        run: meson compile -C debug
