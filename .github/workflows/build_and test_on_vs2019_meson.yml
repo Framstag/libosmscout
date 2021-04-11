@@ -20,21 +20,21 @@ jobs:
         with:
           python-version: '3.x'
       - name: Install meson and ninja
-        run: pip install meson ninja
+        run:  pip install meson ninja
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Run vcvars64.bat
         shell: cmd
-        run: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        run:  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
       - name: Dump environment
         run: "dir env:"
       - name: Dump path variable
-        run: $env:path -split ";"
-      - name: Create build directory
-        run:  mkdir debug
+        run:  $env:path -split ";"
       - name: Configure build project
-        run:  meson debug --wrap-mode nofallback
-        env:
-          CXX: cl.exe
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on debug
       - name: Build project
-        run: meson compile -C debug
+        run:  meson compile -C debug
+      - name: Test project
+        run:  meson test -C debug
+
+
