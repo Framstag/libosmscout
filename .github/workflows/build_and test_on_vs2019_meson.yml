@@ -24,7 +24,7 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Dump environment
-        run: set
+        run: "dir env:"
       - name: Create build directory
         run:  mkdir debug
       - name: Configure build project
