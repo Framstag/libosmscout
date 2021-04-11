@@ -25,12 +25,11 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Dump environment
         run: set
-      - name: Set CXX
-        env:
-          CXX: cl.exe
       - name: Create build directory
         run:  mkdir debug
       - name: Configure build project
         run:  CXX=cl.exe meson debug --wrap-mode nofallback
+        env:
+          CXX: cl.exe
       - name: Build project
         run: meson compile -C debug
