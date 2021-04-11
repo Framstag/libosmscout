@@ -23,8 +23,9 @@ jobs:
         run: pip install meson ninja
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Run vcvarsall.bat
-        run: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+      - name: Run vcvars64.bat
+        shell: cmd
+        run: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
       - name: Dump environment
         run: "dir env:"
       - name: Dump path variable
