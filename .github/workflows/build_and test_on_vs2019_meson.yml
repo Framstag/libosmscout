@@ -33,7 +33,7 @@ jobs:
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on --backend vs debug
         env:
-          VSINSTALLDIR: "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\"
+          VSINSTALLDIR: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\
       - name: Build project
         run:  meson compile -C debug
       - name: Test project
