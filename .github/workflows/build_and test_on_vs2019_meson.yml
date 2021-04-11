@@ -28,7 +28,7 @@ jobs:
       - name: Create build directory
         run:  mkdir debug
       - name: Configure build project
-        run:  CXX=cl.exe meson debug --wrap-mode nofallback
+        run:  meson debug --wrap-mode nofallback
         env:
           CXX: cl.exe
       - name: Build project
