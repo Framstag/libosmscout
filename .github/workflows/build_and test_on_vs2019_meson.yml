@@ -31,7 +31,7 @@ jobs:
       - name: Dump path variable
         run:  $env:path -split ";"
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on --backend vs on debug
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on --backend vs debug
       - name: Build project
         run:  meson compile -C debug
       - name: Test project
