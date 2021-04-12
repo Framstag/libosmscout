@@ -8,10 +8,14 @@ on:
     branches:
       - master
 
+
 jobs:
   build:
     name: Windows+Visual_Studio+meson - Build and test
     runs-on: windows-2019
+    defaults:
+      run:
+        shell: cmd
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,12 +28,9 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Run vcvars64.bat
-        shell: cmd
         run:  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
       - name: Dump environment
-        run: "dir env:"
-      - name: Dump path variable
-        run:  $env:path -split ";"
+        run:  set
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on debug
         env:
