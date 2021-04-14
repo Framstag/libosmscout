@@ -52,10 +52,31 @@ OverlayObject::OverlayObject(const OverlayObject &other):
   nodes = other.nodes;
   layer = other.layer;
   name = other.name;
+  color = other.color;
+  colorValue = other.colorValue;
 }
 
 OverlayObject::~OverlayObject()
 {
+}
+
+void OverlayObject::setColor(const QString &c)
+{
+  QMutexLocker locker(&lock);
+  color = c;
+  if (c.isEmpty()) {
+    colorValue.reset();
+  } else {
+    Color cv;
+    std::string str(c.toLower().toStdString());
+    if (Color::FromHexString(str, cv) ||
+        Color::FromW3CKeywordString(str, cv)) {
+      colorValue = std::optional<Color>(cv);
+    } else {
+      colorValue.reset();
+      osmscout::log.Warn() << "Not a valid color value: " << c.toStdString();
+    }
+  }
 }
 
 void OverlayObject::clear()
@@ -149,6 +170,14 @@ void OverlayObject::setupFeatures(const osmscout::TypeInfoRef &type,
     auto*value=dynamic_cast<osmscout::NameFeatureValue*>(features.AllocateValue(featureIndex));
     assert(value);
     value->SetName(name.toStdString());
+  }
+
+  if (colorValue.has_value() &&
+      type->GetFeature(osmscout::ColorFeature::NAME,
+                       featureIndex)) {
+    auto*value=dynamic_cast<osmscout::ColorFeatureValue*>(features.AllocateValue(featureIndex));
+    assert(value);
+    value->SetColor(colorValue.value());
   }
 }
 

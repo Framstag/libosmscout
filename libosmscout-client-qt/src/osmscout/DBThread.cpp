@@ -301,6 +301,10 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
           if (nameFeature)
             typeInfo->AddFeature(nameFeature);
 
+          osmscout::FeatureRef colorFeature = typeConfig->GetFeature(ColorFeature::NAME);
+          if (colorFeature)
+            typeInfo->AddFeature(colorFeature);
+
           typeConfig->RegisterType(typeInfo);
         }
 
