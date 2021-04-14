@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GPX_GPXFILE_H
-#define OSMSCOUT_GPX_GPXFILE_H
+#ifndef OSMSCOUT_GPX_EXTENSIONS_H
+#define OSMSCOUT_GPX_EXTENSIONS_H
 
 /*
   This source is part of the libosmscout-gpx library
@@ -20,29 +20,45 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Track.h>
-#include <osmscout/gpx/Route.h>
-#include <osmscout/gpx/Waypoint.h>
-#include <osmscout/gpx/Extensions.h>
-
 #include <osmscout/gpx/GPXImportExport.h>
 
+#include <string>
 #include <vector>
-#include <optional>
+
+#define EXTENTIONS_GPX_V3 "gpxx" /* http://www.garmin.com/xmlschemas/GpxExtensions/v3 */
 
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API GpxFile {
+class OSMSCOUT_GPX_API Extension {
 public:
-  std::optional<std::string> name;
-  std::optional<std::string> desc;
-  std::optional<Timestamp> time;
+  Extension() : xmlns(EXTENTIONS_GPX_V3) {}
+  Extension(const char* ns, const std::string& name, const std::string& value)
+    : xmlns(ns), name(name), value(value) {}
 
-  std::vector<Track>    tracks;
-  std::vector<Route>    routes;
-  std::vector<Waypoint> waypoints;
+  const char* xmlns;
+  std::string name;
+  std::string value;
+
+};
+
+class OSMSCOUT_GPX_API Extensions {
+public:
+  Extensions() = default;
+
+  std::vector<Extension> elements;
+
+};
+
+class OSMSCOUT_GPX_API TrackExtensions : public Extensions {
+public:
+  TrackExtensions() : Extensions(), xmlns(EXTENTIONS_GPX_V3) {}
+  TrackExtensions(const char* ns) : Extensions(), xmlns(ns) {}
+
+  const char* xmlns;
+
 };
 }
 }
-#endif //OSMSCOUT_GPX_GPXFILE_H
+
+#endif //OSMSCOUT_GPX_EXTENSIONS_H

@@ -77,6 +77,10 @@ private:
 
   bool WriteRoute(const Route &route);
   bool WriteRoutes(const std::vector<Route> &routes);
+
+  bool WriteExtensions(const Extensions &ext);
+  bool WriteTrackExtensions(const Extensions &ext, const TrackExtensions &trkExt);
+
 public:
   GpxWritter(const GpxFile &gpxFile,
              const std::string &filePath,
@@ -240,6 +244,7 @@ bool GpxWritter::WriteGpxHeader()
       WriteAttribute("version", "1.1") &&
       WriteAttribute("creator", "libosmscout") &&
       WriteAttribute("xmlns", "http://www.topografix.com/GPX/1/1") &&
+      WriteAttribute("xmlns:" EXTENTIONS_GPX_V3, "http://www.garmin.com/xmlschemas/GpxExtensions/v3") &&
       WriteAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") &&
       WriteAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
 }
@@ -395,6 +400,13 @@ bool GpxWritter::WriteTrack(const Track &track)
       return false;
     }
   }
+  if (track.displayColor.has_value()){
+    TrackExtensions trkExt(EXTENTIONS_GPX_V3);
+    trkExt.elements.push_back(Extension(EXTENTIONS_GPX_V3, "DisplayColor", track.displayColor.value().ToHexString()));
+   if (!WriteTrackExtensions(Extensions(), trkExt)){
+      return false;
+    }
+  }
 
   return WriteTrackSegments(track.segments) &&
       EndElement();
@@ -477,6 +489,70 @@ bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)
     }
   }
   return true;
+}
+
+bool GpxWritter::WriteExtensions(const Extensions &ext)
+{
+  if (!StartElement("extensions")){
+    return false;
+  }
+
+  for (const auto& elem: ext.elements){
+    if (breaker && breaker->IsAborted()){
+      if (callback) {
+        callback->Error("aborted");
+      }
+      return false;
+    }
+    if (!elem.name.empty()){
+      if (!WriteTextElement(std::string(elem.xmlns).append(":").append(elem.name).c_str(), elem.value)){
+        return false;
+      }
+    }
+  }
+
+  return EndElement();
+}
+
+bool GpxWritter::WriteTrackExtensions(const Extensions &ext, const TrackExtensions &trkExt)
+{
+  if (!StartElement("extensions")){
+    return false;
+  }
+
+  for (const auto& elem: ext.elements){
+    if (breaker && breaker->IsAborted()){
+      if (callback) {
+        callback->Error("aborted");
+      }
+      return false;
+    }
+    if (!elem.name.empty()){
+      if (!WriteTextElement(std::string(elem.xmlns).append(":").append(elem.name).c_str(), elem.value)){
+        return false;
+      }
+    }
+  }
+
+  if (!StartElement(std::string(trkExt.xmlns).append(":").append("TrackExtension").c_str())){
+    return false;
+  }
+
+  for (const auto& elem: trkExt.elements){
+    if (breaker && breaker->IsAborted()){
+      if (callback) {
+        callback->Error("aborted");
+      }
+      return false;
+    }
+    if (!elem.name.empty()){
+      if (!WriteTextElement(std::string(elem.xmlns).append(":").append(elem.name).c_str(), elem.value)){
+        return false;
+      }
+    }
+  }
+
+  return EndElement() && EndElement();
 }
 
 bool gpx::ExportGpx(const GpxFile &gpxFile,
