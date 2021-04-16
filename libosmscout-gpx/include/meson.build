@@ -9,6 +9,7 @@ osmscoutgpxHeader = [
             'osmscout/gpx/Waypoint.h',
             'osmscout/gpx/TrackPoint.h',
             'osmscout/gpx/TrackSegment.h',
+            'osmscout/gpx/Extensions.h',
           ]
 
 if xml2Dep.found()

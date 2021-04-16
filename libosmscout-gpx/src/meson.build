@@ -3,6 +3,7 @@ osmscoutgpxSrc = [
             'src/osmscout/gpx/GpxFile.cpp',
             'src/osmscout/gpx/Utils.cpp',
             'src/osmscout/gpx/Track.cpp',
+            'src/osmscout/gpx/Extensions.cpp',
           ]
 
 if xml2Dep.found()

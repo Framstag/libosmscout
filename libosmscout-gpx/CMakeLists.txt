@@ -1,19 +1,21 @@
 set(HEADER_FILES
-	include/osmscout/gpx/GpxFile.h
-	include/osmscout/gpx/GPXImportExport.h
-	include/osmscout/gpx/Route.h
-	include/osmscout/gpx/Track.h
-	include/osmscout/gpx/Waypoint.h
-	include/osmscout/gpx/TrackPoint.h
-	include/osmscout/gpx/TrackSegment.h
-	include/osmscout/gpx/Utils.h
+    include/osmscout/gpx/GpxFile.h
+    include/osmscout/gpx/GPXImportExport.h
+    include/osmscout/gpx/Route.h
+    include/osmscout/gpx/Track.h
+    include/osmscout/gpx/Waypoint.h
+    include/osmscout/gpx/TrackPoint.h
+    include/osmscout/gpx/TrackSegment.h
+    include/osmscout/gpx/Utils.h
+    include/osmscout/gpx/Extensions.h
 )
 
 set(SOURCE_FILES
     src/osmscout/gpx/GpxFile.cpp
     src/osmscout/gpx/Track.cpp
-	src/osmscout/gpx/TrackSegment.cpp
-	src/osmscout/gpx/Utils.cpp
+    src/osmscout/gpx/TrackSegment.cpp
+    src/osmscout/gpx/Utils.cpp
+    src/osmscout/gpx/Extensions.cpp
 )
 
 if(LIBXML2_FOUND)

@@ -37,6 +37,9 @@ class GpxWritter {
 private:
   static constexpr char const *Encoding = "utf-8";
 
+  struct XmlNs { const char* prefix; const char* attr; const char* name; };
+  static constexpr XmlNs XmlNs_gpxx = {"gpxx", "xmlns:gpxx", "http://www.garmin.com/xmlschemas/GpxExtensions/v3"};
+
   xmlTextWriterPtr    writer;
   ProcessCallbackRef  callback;
   const GpxFile       &gpxFile;
@@ -77,6 +80,9 @@ private:
 
   bool WriteRoute(const Route &route);
   bool WriteRoutes(const std::vector<Route> &routes);
+
+  bool WriteExtensions(const Extensions &ext);
+
 public:
   GpxWritter(const GpxFile &gpxFile,
              const std::string &filePath,
@@ -240,6 +246,7 @@ bool GpxWritter::WriteGpxHeader()
       WriteAttribute("version", "1.1") &&
       WriteAttribute("creator", "libosmscout") &&
       WriteAttribute("xmlns", "http://www.topografix.com/GPX/1/1") &&
+      WriteAttribute(XmlNs_gpxx.attr, XmlNs_gpxx.name) &&
       WriteAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") &&
       WriteAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
 }
@@ -396,6 +403,31 @@ bool GpxWritter::WriteTrack(const Track &track)
     }
   }
 
+  // see https://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd
+  Extensions trkext; // store node $/extensions/TrackExtension
+
+  if (track.displayColor.has_value()){
+    trkext.elements.push_back(Extensions::Element(XmlNs_gpxx.prefix, "DisplayColor", track.displayColor.value().ToHexString()));
+  }
+
+  if (!trkext.elements.empty()){
+    if (!StartElement("extensions")){
+      return false;
+    }
+    if (!StartElement(std::string(XmlNs_gpxx.prefix).append(":TrackExtension").c_str())){
+      return false;
+    }
+    if (!WriteExtensions(trkext)){
+      return false;
+    }
+    if (!EndElement()){
+      return false;
+    }
+    if (!EndElement()){
+      return false;
+    }
+  }
+
   return WriteTrackSegments(track.segments) &&
       EndElement();
 }
@@ -473,6 +505,22 @@ bool GpxWritter::WriteWaypoints(const std::vector<Waypoint> &waypoints)
       return false;
     }
     if (!WriteWaypoint(waypoint)){
+      return false;
+    }
+  }
+  return true;
+}
+
+bool GpxWritter::WriteExtensions(const Extensions &ext)
+{
+  for (const auto& elem: ext.elements){
+    if (breaker && breaker->IsAborted()){
+      if (callback) {
+        callback->Error("aborted");
+      }
+      return false;
+    }
+    if (!WriteTextElement(elem.GetName().c_str(), elem.GetValue().c_str())){
       return false;
     }
   }
