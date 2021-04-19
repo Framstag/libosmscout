@@ -90,7 +90,7 @@ namespace osmscout {
       bufferSize=length;
     }
     else if (bufferSize<length) {
-      delete buffer;
+      delete[] buffer;
       buffer=new char[length];
       bufferSize=length;
     }
@@ -463,7 +463,7 @@ namespace osmscout {
 
   PreprocessPBF::~PreprocessPBF()
   {
-    delete buffer;
+    delete[] buffer;
   }
 
   void PreprocessPBF::ProcessBlock(const TypeConfigRef& typeConfig,
