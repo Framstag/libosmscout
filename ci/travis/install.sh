@@ -45,7 +45,7 @@ if [ "$TARGET" = "build" ]; then
       libglew-dev \
       libglm-dev \
       libglfw3 libglfw3-dev
-
+  fi
 elif [ "$TARGET" = "importer" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
