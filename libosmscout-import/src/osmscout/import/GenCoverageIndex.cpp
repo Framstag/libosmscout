@@ -183,12 +183,12 @@ namespace osmscout {
                   std::to_string(width)+"x"+std::to_string(height));
 
 
-    if (width/8!=0) {
+    if (width % 8!=0) {
       width=(width/8+1)*8;
       maxCell.x=minCell.x+width-1;
     }
 
-    if (height/8!=0) {
+    if (height % 8!=0) {
       height=(height/8+1)*8;
       maxCell.y=minCell.y+height-1;
     }
