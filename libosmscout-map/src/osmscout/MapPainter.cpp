@@ -2394,7 +2394,7 @@ static void DumpGroundTile(const GroundTile& tile)
       if (!projection.GetDimensions().Intersects(groundTileData.boundingBox)){
 #if defined(DEBUG_GROUNDTILES)
         std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
-                  << " " << areaData.boundingBox.GetDisplayText() << std::endl;
+                  << " " << groundTileData.boundingBox.GetDisplayText() << std::endl;
 #endif
         continue;
       }
@@ -2518,7 +2518,7 @@ static void DumpGroundTile(const GroundTile& tile)
       DrawArea(projection,parameter,groundTileData);
 
 #if defined(DEBUG_GROUNDTILES)
-      GeoCoord cc=areaData.boundingBox.GetCenter();
+      GeoCoord cc=groundTileData.boundingBox.GetCenter();
 
       std::string label;
 
