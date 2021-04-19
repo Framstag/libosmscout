@@ -32,6 +32,8 @@
 #include <osmscout/ClientQtImportExport.h>
 #include <osmscout/LocationEntry.h>
 
+#include <optional>
+
 namespace osmscout {
 
 /**
@@ -60,7 +62,7 @@ protected:
   QString                             name;
   QString                             color;
   mutable QMutex                      lock;
-  std::optional<Color>                colorValue;
+  std::optional<osmscout::Color>      colorValue;
 
 public slots:
   void clear();
