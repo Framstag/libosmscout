@@ -35,6 +35,8 @@ osmscoutSrc = [
             'src/osmscout/util/Worker.cpp',
             'src/osmscout/util/WorkQueue.cpp',
             'src/osmscout/util/TagErrorReporter.cpp',
+            'src/osmscout/util/utf8helper.cpp',
+            'src/osmscout/util/utf8helper_charmap.cpp',
             'src/osmscout/routing/RouteDescription.cpp',
             'src/osmscout/routing/RouteDescriptionPostprocessor.cpp',
             'src/osmscout/routing/RouteData.cpp',
