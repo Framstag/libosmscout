@@ -119,6 +119,13 @@ TEST_CASE("Lowercase 3")
           "لم تفهم شيئًا من بساطتي ، لا شيء ، يا ولدي المسكين! ومع جبين لا معنى له ، منزعج أن تهرب من قبل.");
 }
 
+TEST_CASE("Parse illegal UTF8 sequence")
+{
+  auto transformed=osmscout::UTF8Transliterate(u8"\xef\xbb\xbf\x2f\xc0\xae\x2e\x2f");
+
+  REQUIRE(transformed == u8"\xef\xbb\xbf\x2f\x2e\x2f");
+}
+
 TEST_CASE("Local aware number to string")
 {
   osmscout::Locale locale;
