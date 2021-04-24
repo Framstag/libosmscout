@@ -289,13 +289,7 @@ endif
 
 test('Check correctness of NumberSet class', NumberSet)
 test('Check scan conversion code', ScanConversion)
-
-if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
-  warning('Test "Check string utils" does not run under MSYS because of missing locale support')
-else
-  test('Check string utils', StringUtils)
-endif
-
+test('Check string utils', StringUtils)
 test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
 test('Check implementation of work queue', WorkQueue)
