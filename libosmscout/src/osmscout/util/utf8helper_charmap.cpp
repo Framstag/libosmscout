@@ -276,7 +276,7 @@ const character charmap_c3[64] = {
   { 0xc3ac , 0xc38c , 0xc3ac , None , "i" }, /* ì : up=Ì : lo=ì */
   { 0xc3ad , 0xc38d , 0xc3ad , None , "i" }, /* í : up=Í : lo=í */
   { 0xc3ae , 0xc38e , 0xc3ae , None , "i" }, /* î : up=Î : lo=î */
-  { 0xc3af , 0xc38f , 0xc3af , None , "I" }, /* ï : up=Ï : lo=ï */
+  { 0xc3af , 0xc38f , 0xc3af , None , "i" }, /* ï : up=Ï : lo=ï */
   { 0xc3b0 , 0xc390 , 0xc3b0 , None , "d" }, /* ð : up=Ð : lo=ð */
   { 0xc3b1 , 0xc391 , 0xc3b1 , None , "n" }, /* ñ : up=Ñ : lo=ñ */
   { 0xc3b2 , 0xc392 , 0xc3b2 , None , "o" }, /* ò : up=Ò : lo=ò */
