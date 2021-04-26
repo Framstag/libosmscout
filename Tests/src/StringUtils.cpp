@@ -126,6 +126,26 @@ TEST_CASE("Parse illegal UTF8 sequence")
   REQUIRE(transformed == u8"\xef\xbb\xbf\x2f\x2e\x2f");
 }
 
+TEST_CASE("Parse one UCS1 sequence without BOM")
+{
+  REQUIRE(osmscout::UTF8StringToUpper("z") == "Z");
+}
+
+TEST_CASE("Parse one UCS2 sequence without BOM")
+{
+  REQUIRE(osmscout::UTF8StringToUpper(u8"\xc3\xae") == u8"\xc3\x8e");
+}
+
+TEST_CASE("Parse one UCS3 sequence without BOM")
+{
+  REQUIRE(osmscout::UTF8StringToUpper(u8"\xe2\xb4\x80") == u8"\xe1\x82\xa0");
+}
+
+TEST_CASE("Parse one UCS4 sequence without BOM")
+{
+  REQUIRE(osmscout::UTF8StringToUpper(u8"\xf0\x9e\xa4\xa2") == u8"\xf0\x9e\xa4\x80");
+}
+
 TEST_CASE("Local aware number to string")
 {
   osmscout::Locale locale;
