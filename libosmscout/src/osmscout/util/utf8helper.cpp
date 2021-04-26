@@ -285,20 +285,6 @@ static codepoint transliterate(const character* ch, int context) {
   return c;
 }
 
-static codepoint transliterate_us7ascii(const character* ch, int context) {
-  codepoint c = NullCodepoint;
-  if ((IsSpace & context & ch->category))
-    return c;
-  const char* b = ch->translate;
-  for (; *b; ++b) {
-    if (*b < 0)
-      return '?';
-    c <<= 8;
-    c |= static_cast<byte>(*b);
-  }
-  return c;
-}
-
 std::string UTF8ToUpper(const std::string& text) {
   return parse(text, toUpper);
 }
@@ -317,10 +303,6 @@ std::string UTF8Capitalize(const std::string& text) {
 
 std::string UTF8Transliterate(const std::string& text) {
   return parse(text, transliterate);
-}
-
-std::string UTF8TransliterateUS7ASCII(const std::string& text) {
-  return parse(text, transliterate_us7ascii);
 }
 
 }
