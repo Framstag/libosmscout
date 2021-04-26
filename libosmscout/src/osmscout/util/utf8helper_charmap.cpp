@@ -2258,7 +2258,7 @@ const character* pagemap_24_e2[64] = {
   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, charmap_e2_b4, nullptr, nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
@@ -2461,6 +2461,73 @@ const character charmap_e2_82[64] = {
   { 0xe282bd , 0xe282bd , 0xe282bd , None , "RUB" }, /* ₽ : up=₽ : lo=₽ */
   { 0xe282be , 0xe282be , 0xe282be , None , "GEL" },
   { 0xe282bf , 0xe282bf , 0xe282bf , None , u8"\xe2\x82\xbf" }, /* ₿ : up=₿ : lo=₿ */
+};
+
+const character charmap_e2_b4[64] = {
+  { 0xe2b480 , 0xe182a0 , 0xe2b480 , None , u8"\xe2\xb4\x80" }, /* ⴀ : up=Ⴀ : lo=ⴀ */
+  { 0xe2b481 , 0xe182a1 , 0xe2b481 , None , u8"\xe2\xb4\x81" }, /* ⴁ : up=Ⴁ : lo=ⴁ */
+  { 0xe2b482 , 0xe182a2 , 0xe2b482 , None , u8"\xe2\xb4\x82" }, /* ⴂ : up=Ⴂ : lo=ⴂ */
+  { 0xe2b483 , 0xe182a3 , 0xe2b483 , None , u8"\xe2\xb4\x83" }, /* ⴃ : up=Ⴃ : lo=ⴃ */
+  { 0xe2b484 , 0xe182a4 , 0xe2b484 , None , u8"\xe2\xb4\x84" }, /* ⴄ : up=Ⴄ : lo=ⴄ */
+  { 0xe2b485 , 0xe182a5 , 0xe2b485 , None , u8"\xe2\xb4\x85" }, /* ⴅ : up=Ⴅ : lo=ⴅ */
+  { 0xe2b486 , 0xe182a6 , 0xe2b486 , None , u8"\xe2\xb4\x86" }, /* ⴆ : up=Ⴆ : lo=ⴆ */
+  { 0xe2b487 , 0xe182a7 , 0xe2b487 , None , u8"\xe2\xb4\x87" }, /* ⴇ : up=Ⴇ : lo=ⴇ */
+  { 0xe2b488 , 0xe182a8 , 0xe2b488 , None , u8"\xe2\xb4\x88" }, /* ⴈ : up=Ⴈ : lo=ⴈ */
+  { 0xe2b489 , 0xe182a9 , 0xe2b489 , None , u8"\xe2\xb4\x89" }, /* ⴉ : up=Ⴉ : lo=ⴉ */
+  { 0xe2b48a , 0xe182aa , 0xe2b48a , None , u8"\xe2\xb4\x8a" }, /* ⴊ : up=Ⴊ : lo=ⴊ */
+  { 0xe2b48b , 0xe182ab , 0xe2b48b , None , u8"\xe2\xb4\x8b" }, /* ⴋ : up=Ⴋ : lo=ⴋ */
+  { 0xe2b48c , 0xe182ac , 0xe2b48c , None , u8"\xe2\xb4\x8c" }, /* ⴌ : up=Ⴌ : lo=ⴌ */
+  { 0xe2b48d , 0xe182ad , 0xe2b48d , None , u8"\xe2\xb4\x8d" }, /* ⴍ : up=Ⴍ : lo=ⴍ */
+  { 0xe2b48e , 0xe182ae , 0xe2b48e , None , u8"\xe2\xb4\x8e" }, /* ⴎ : up=Ⴎ : lo=ⴎ */
+  { 0xe2b48f , 0xe182af , 0xe2b48f , None , u8"\xe2\xb4\x8f" }, /* ⴏ : up=Ⴏ : lo=ⴏ */
+  { 0xe2b490 , 0xe182b0 , 0xe2b490 , None , u8"\xe2\xb4\x90" }, /* ⴐ : up=Ⴐ : lo=ⴐ */
+  { 0xe2b491 , 0xe182b1 , 0xe2b491 , None , u8"\xe2\xb4\x91" }, /* ⴑ : up=Ⴑ : lo=ⴑ */
+  { 0xe2b492 , 0xe182b2 , 0xe2b492 , None , u8"\xe2\xb4\x92" }, /* ⴒ : up=Ⴒ : lo=ⴒ */
+  { 0xe2b493 , 0xe182b3 , 0xe2b493 , None , u8"\xe2\xb4\x93" }, /* ⴓ : up=Ⴓ : lo=ⴓ */
+  { 0xe2b494 , 0xe182b4 , 0xe2b494 , None , u8"\xe2\xb4\x94" }, /* ⴔ : up=Ⴔ : lo=ⴔ */
+  { 0xe2b495 , 0xe182b5 , 0xe2b495 , None , u8"\xe2\xb4\x95" }, /* ⴕ : up=Ⴕ : lo=ⴕ */
+  { 0xe2b496 , 0xe182b6 , 0xe2b496 , None , u8"\xe2\xb4\x96" }, /* ⴖ : up=Ⴖ : lo=ⴖ */
+  { 0xe2b497 , 0xe182b7 , 0xe2b497 , None , u8"\xe2\xb4\x97" }, /* ⴗ : up=Ⴗ : lo=ⴗ */
+  { 0xe2b498 , 0xe182b8 , 0xe2b498 , None , u8"\xe2\xb4\x98" }, /* ⴘ : up=Ⴘ : lo=ⴘ */
+  { 0xe2b499 , 0xe182b9 , 0xe2b499 , None , u8"\xe2\xb4\x99" }, /* ⴙ : up=Ⴙ : lo=ⴙ */
+  { 0xe2b49a , 0xe182ba , 0xe2b49a , None , u8"\xe2\xb4\x9a" }, /* ⴚ : up=Ⴚ : lo=ⴚ */
+  { 0xe2b49b , 0xe182bb , 0xe2b49b , None , u8"\xe2\xb4\x9b" }, /* ⴛ : up=Ⴛ : lo=ⴛ */
+  { 0xe2b49c , 0xe182bc , 0xe2b49c , None , u8"\xe2\xb4\x9c" }, /* ⴜ : up=Ⴜ : lo=ⴜ */
+  { 0xe2b49d , 0xe182bd , 0xe2b49d , None , u8"\xe2\xb4\x9d" }, /* ⴝ : up=Ⴝ : lo=ⴝ */
+  { 0xe2b49e , 0xe182be , 0xe2b49e , None , u8"\xe2\xb4\x9e" }, /* ⴞ : up=Ⴞ : lo=ⴞ */
+  { 0xe2b49f , 0xe182bf , 0xe2b49f , None , u8"\xe2\xb4\x9f" }, /* ⴟ : up=Ⴟ : lo=ⴟ */
+  { 0xe2b4a0 , 0xe18380 , 0xe2b4a0 , None , u8"\xe2\xb4\xa0" }, /* ⴠ : up=Ⴠ : lo=ⴠ */
+  { 0xe2b4a1 , 0xe18381 , 0xe2b4a1 , None , u8"\xe2\xb4\xa1" }, /* ⴡ : up=Ⴡ : lo=ⴡ */
+  { 0xe2b4a2 , 0xe18382 , 0xe2b4a2 , None , u8"\xe2\xb4\xa2" }, /* ⴢ : up=Ⴢ : lo=ⴢ */
+  { 0xe2b4a3 , 0xe18383 , 0xe2b4a3 , None , u8"\xe2\xb4\xa3" }, /* ⴣ : up=Ⴣ : lo=ⴣ */
+  { 0xe2b4a4 , 0xe18384 , 0xe2b4a4 , None , u8"\xe2\xb4\xa4" }, /* ⴤ : up=Ⴤ : lo=ⴤ */
+  { 0xe2b4a5 , 0xe18385 , 0xe2b4a5 , None , u8"\xe2\xb4\xa5" }, /* ⴥ : up=Ⴥ : lo=ⴥ */
+  { 0xe2b4a6 , 0xe2b4a6 , 0xe2b4a6 , None , u8"\xe2\xb4\xa6" }, /* ⴦ : up=⴦ : lo=⴦ */
+  { 0xe2b4a7 , 0xe18387 , 0xe2b4a7 , None , u8"\xe2\xb4\xa7" }, /* ⴧ : up=Ⴧ : lo=ⴧ */
+  { 0xe2b4a8 , 0xe2b4a8 , 0xe2b4a8 , None , u8"\xe2\xb4\xa8" }, /* ⴨ : up=⴨ : lo=⴨ */
+  { 0xe2b4a9 , 0xe2b4a9 , 0xe2b4a9 , None , u8"\xe2\xb4\xa9" }, /* ⴩ : up=⴩ : lo=⴩ */
+  { 0xe2b4aa , 0xe2b4aa , 0xe2b4aa , None , u8"\xe2\xb4\xaa" }, /* ⴪ : up=⴪ : lo=⴪ */
+  { 0xe2b4ab , 0xe2b4ab , 0xe2b4ab , None , u8"\xe2\xb4\xab" }, /* ⴫ : up=⴫ : lo=⴫ */
+  { 0xe2b4ac , 0xe2b4ac , 0xe2b4ac , None , u8"\xe2\xb4\xac" }, /* ⴬ : up=⴬ : lo=⴬ */
+  { 0xe2b4ad , 0xe1838d , 0xe2b4ad , None , u8"\xe2\xb4\xad" }, /* ⴭ : up=Ⴭ : lo=ⴭ */
+  { 0xe2b4ae , 0xe2b4ae , 0xe2b4ae , None , u8"\xe2\xb4\xae" }, /* ⴮ : up=⴮ : lo=⴮ */
+  { 0xe2b4af , 0xe2b4af , 0xe2b4af , None , u8"\xe2\xb4\xaf" }, /* ⴯ : up=⴯ : lo=⴯ */
+  { 0xe2b4b0 , 0xe2b4b0 , 0xe2b4b0 , None , u8"\xe2\xb4\xb0" }, /* ⴰ : up=ⴰ : lo=ⴰ */
+  { 0xe2b4b1 , 0xe2b4b1 , 0xe2b4b1 , None , u8"\xe2\xb4\xb1" }, /* ⴱ : up=ⴱ : lo=ⴱ */
+  { 0xe2b4b2 , 0xe2b4b2 , 0xe2b4b2 , None , u8"\xe2\xb4\xb2" }, /* ⴲ : up=ⴲ : lo=ⴲ */
+  { 0xe2b4b3 , 0xe2b4b3 , 0xe2b4b3 , None , u8"\xe2\xb4\xb3" }, /* ⴳ : up=ⴳ : lo=ⴳ */
+  { 0xe2b4b4 , 0xe2b4b4 , 0xe2b4b4 , None , u8"\xe2\xb4\xb4" }, /* ⴴ : up=ⴴ : lo=ⴴ */
+  { 0xe2b4b5 , 0xe2b4b5 , 0xe2b4b5 , None , u8"\xe2\xb4\xb5" }, /* ⴵ : up=ⴵ : lo=ⴵ */
+  { 0xe2b4b6 , 0xe2b4b6 , 0xe2b4b6 , None , u8"\xe2\xb4\xb6" }, /* ⴶ : up=ⴶ : lo=ⴶ */
+  { 0xe2b4b7 , 0xe2b4b7 , 0xe2b4b7 , None , u8"\xe2\xb4\xb7" }, /* ⴷ : up=ⴷ : lo=ⴷ */
+  { 0xe2b4b8 , 0xe2b4b8 , 0xe2b4b8 , None , u8"\xe2\xb4\xb8" }, /* ⴸ : up=ⴸ : lo=ⴸ */
+  { 0xe2b4b9 , 0xe2b4b9 , 0xe2b4b9 , None , u8"\xe2\xb4\xb9" }, /* ⴹ : up=ⴹ : lo=ⴹ */
+  { 0xe2b4ba , 0xe2b4ba , 0xe2b4ba , None , u8"\xe2\xb4\xba" }, /* ⴺ : up=ⴺ : lo=ⴺ */
+  { 0xe2b4bb , 0xe2b4bb , 0xe2b4bb , None , u8"\xe2\xb4\xbb" }, /* ⴻ : up=ⴻ : lo=ⴻ */
+  { 0xe2b4bc , 0xe2b4bc , 0xe2b4bc , None , u8"\xe2\xb4\xbc" }, /* ⴼ : up=ⴼ : lo=ⴼ */
+  { 0xe2b4bd , 0xe2b4bd , 0xe2b4bd , None , u8"\xe2\xb4\xbd" }, /* ⴽ : up=ⴽ : lo=ⴽ */
+  { 0xe2b4be , 0xe2b4be , 0xe2b4be , None , u8"\xe2\xb4\xbe" }, /* ⴾ : up=ⴾ : lo=ⴾ */
+  { 0xe2b4bf , 0xe2b4bf , 0xe2b4bf , None , u8"\xe2\xb4\xbf" }, /* ⴿ : up=ⴿ : lo=ⴿ */
 };
 
 const character* pagemap_32_f0_90[64] = {
