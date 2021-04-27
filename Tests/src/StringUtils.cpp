@@ -121,11 +121,6 @@ TEST_CASE("Lowercase 3")
 
 TEST_CASE("Normalize for lookup")
 {
-  // Normalized string should be converted to lowercase,
-  // all whitespaces* should be converted to standard space
-  // and multiple following spaces should be collapsed to one.
-  //
-  // *) tabular, no-break space (&nbsp;), figure space, narrow no-break space...
   auto transformed=osmscout::UTF8NormForLookup(
           "Baker \t \u00A0 \u2007 \u202F Street");
 
