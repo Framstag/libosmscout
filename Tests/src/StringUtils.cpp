@@ -119,6 +119,20 @@ TEST_CASE("Lowercase 3")
           "لم تفهم شيئًا من بساطتي ، لا شيء ، يا ولدي المسكين! ومع جبين لا معنى له ، منزعج أن تهرب من قبل.");
 }
 
+TEST_CASE("Normalize for lookup")
+{
+  // Normalized string should be converted to lowercase,
+  // all whitespaces* should be converted to standard space
+  // and multiple following spaces should be collapsed to one.
+  //
+  // *) tabular, no-break space (&nbsp;), figure space, narrow no-break space...
+  auto transformed=osmscout::UTF8NormForLookup(
+          "Baker \t \u00A0 \u2007 \u202F Street");
+
+  REQUIRE(transformed ==
+          "baker street");
+}
+
 TEST_CASE("Parse illegal UTF8 sequence")
 {
   auto transformed=osmscout::UTF8Transliterate(u8"\xef\xbb\xbf\x2f\xc0\xae\x2e\x2f");
