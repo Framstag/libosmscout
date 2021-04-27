@@ -149,10 +149,8 @@ namespace osmscout {
     return a.position<b.position;
   }
 
-  MapPainter::MapPainter(const StyleConfigRef& styleConfig,
-                         CoordBuffer *buffer)
-  : coordBuffer(buffer),
-    styleConfig(styleConfig),
+  MapPainter::MapPainter(const StyleConfigRef& styleConfig)
+  : styleConfig(styleConfig),
     nameReader(*styleConfig->GetTypeConfig()),
     nameAltReader(*styleConfig->GetTypeConfig()),
     refReader(*styleConfig->GetTypeConfig()),
@@ -899,7 +897,7 @@ namespace osmscout {
     }
 
     if (lineOffset!=0.0) {
-      range=coordBuffer->GenerateParallelWay(range,
+      range=coordBuffer.GenerateParallelWay(range,
                                              lineOffset);
     }
 
@@ -908,8 +906,8 @@ namespace osmscout {
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
       labelPath.AddPoint(
-          coordBuffer->buffer[j].GetX(),
-          coordBuffer->buffer[j].GetY());
+          coordBuffer.buffer[j].GetX(),
+          coordBuffer.buffer[j].GetY());
     }
 
     PathLabelData labelData;
@@ -951,7 +949,7 @@ namespace osmscout {
     }
 
     if (lineOffset!=0.0) {
-      range=coordBuffer->GenerateParallelWay(range,
+      range=coordBuffer.GenerateParallelWay(range,
                                              lineOffset);
     }
 
@@ -1073,7 +1071,7 @@ namespace osmscout {
 
         for (const OffsetRel &laneTurn: laneTurns) {
           if (pathSymbolStyle->GetOffsetRel() == laneTurn) {
-            range=coordBuffer->GenerateParallelWay(range,
+            range=coordBuffer.GenerateParallelWay(range,
                                                    laneOffset);
 
             DrawContourSymbol(projection,
@@ -1098,7 +1096,7 @@ namespace osmscout {
         }
 
         if (lineOffset != 0.0) {
-          range=coordBuffer->GenerateParallelWay(range,
+          range=coordBuffer.GenerateParallelWay(range,
                                                  lineOffset);
         }
 
@@ -1188,7 +1186,7 @@ namespace osmscout {
     }
 
     if (lineOffset!=0.0) {
-      range=coordBuffer->GenerateParallelWay(range,
+      range=coordBuffer.GenerateParallelWay(range,
                                              lineOffset);
     }
 
@@ -1206,8 +1204,8 @@ namespace osmscout {
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
       labelPath.AddPoint(
-          coordBuffer->buffer[j].GetX(),
-          coordBuffer->buffer[j].GetY());
+          coordBuffer.buffer[j].GetX(),
+          coordBuffer.buffer[j].GetY());
     }
     RegisterContourLabel(projection, parameter, labelData, labelPath);
 
@@ -1254,7 +1252,7 @@ namespace osmscout {
 
       transRange=TransformWay(points,
                               transBuffer,
-                              *coordBuffer,
+                              coordBuffer,
                               projection,
                               parameter.GetOptimizeWayNodes(),
                               errorTolerancePixel);
@@ -1288,7 +1286,7 @@ namespace osmscout {
 
       transRange=TransformWay(points,
                               transBuffer,
-                              *coordBuffer,
+                              coordBuffer,
                               projection,
                               parameter.GetOptimizeWayNodes(),
                               errorTolerancePixel);
@@ -1330,7 +1328,7 @@ namespace osmscout {
       if (ring.segments.size() <= 1){
         CoordBufferRange range=TransformArea(ring.nodes,
                                              transBuffer,
-                                             *coordBuffer,
+                                             coordBuffer,
                                              projection,
                                              parameter.GetOptimizeAreaNodes(),
                                              errorTolerancePixel);
@@ -1353,7 +1351,7 @@ namespace osmscout {
 
         CoordBufferRange range=TransformArea(nodes,
                                              transBuffer,
-                                             *coordBuffer,
+                                             coordBuffer,
                                              projection,
                                              parameter.GetOptimizeAreaNodes(),
                                              errorTolerancePixel);
@@ -1458,7 +1456,7 @@ namespace osmscout {
         }
 
         if (offset!=0.0) {
-          range=coordBuffer->GenerateParallelWay(range,
+          range=coordBuffer.GenerateParallelWay(range,
                                                  offset);
         }
 
@@ -1571,7 +1569,7 @@ namespace osmscout {
     if (way.segments.size() <= 1) {
       pathData.coordRange=TransformWay(way.nodes,
                                        transBuffer,
-                                       *coordBuffer,
+                                       coordBuffer,
                                        projection,
                                        parameter.GetOptimizeWayNodes(),
                                        errorTolerancePixel);
@@ -1590,7 +1588,7 @@ namespace osmscout {
 
       pathData.coordRange=TransformWay(nodes,
                                        transBuffer,
-                                       *coordBuffer,
+                                       coordBuffer,
                                        projection,
                                        parameter.GetOptimizeWayNodes(),
                                        errorTolerancePixel);
@@ -1740,7 +1738,7 @@ namespace osmscout {
       }
 
       if (lineOffset!=0.0) {
-        data.coordRange=coordBuffer->GenerateParallelWay(pathData.coordRange,
+        data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                          lineOffset);
       }
 
@@ -1765,7 +1763,7 @@ namespace osmscout {
         double  laneOffset=-pathData.mainSlotWidth/2.0+lanesSpace;
 
         for (size_t lane=1; lane<lanes; lane++) {
-          data.coordRange=coordBuffer->GenerateParallelWay(pathData.coordRange,
+          data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                            laneOffset);
           wayData.push_back(data);
           laneOffset+=lanesSpace;
@@ -1797,7 +1795,7 @@ namespace osmscout {
 
         for (const OffsetRel &laneTurn: laneTurns) {
           if (lineStyle->GetOffsetRel() == laneTurn) {
-            data.coordRange=coordBuffer->GenerateParallelWay(pathData.coordRange,
+            data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                              laneOffset);
             wayData.push_back(data);
           }
@@ -2052,7 +2050,7 @@ namespace osmscout {
             transEnd=pathData->coordRange.GetEnd();
           }
           else {
-            CoordBufferRange range=coordBuffer->GenerateParallelWay(pathData->coordRange,
+            CoordBufferRange range=coordBuffer.GenerateParallelWay(pathData->coordRange,
                                                                     lineOffset);
 
             transStart=range.GetStart();
@@ -2074,20 +2072,20 @@ namespace osmscout {
               // insert connecting segment between end of lastSegment and transStart
               Vertex2D lastEnd;
               if (lastSegment.direction==Route::MemberDirection::forward){
-                lastEnd=coordBuffer->buffer[lastSegment.transEnd];
+                lastEnd=coordBuffer.buffer[lastSegment.transEnd];
               }
               else{
-                lastEnd=coordBuffer->buffer[lastSegment.transStart];
+                lastEnd=coordBuffer.buffer[lastSegment.transStart];
               }
               Vertex2D currentStart;
               if (member.direction==Route::MemberDirection::forward){
-                currentStart=coordBuffer->buffer[transStart];
+                currentStart=coordBuffer.buffer[transStart];
               }
               else{
-                currentStart=coordBuffer->buffer[transEnd];
+                currentStart=coordBuffer.buffer[transEnd];
               }
-              RouteSegmentData segmentConnection{coordBuffer->PushCoord(lastEnd.GetX(),lastEnd.GetY()),
-                                                 coordBuffer->PushCoord(currentStart.GetX(),currentStart.GetY()),
+              RouteSegmentData segmentConnection{coordBuffer.PushCoord(lastEnd.GetX(),lastEnd.GetY()),
+                                                 coordBuffer.PushCoord(currentStart.GetX(),currentStart.GetY()),
                                                  Route::MemberDirection::forward};
               routeTmp.transSegments.push_back(segmentConnection);
 
@@ -2167,7 +2165,7 @@ namespace osmscout {
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
 
-    coordBuffer->Reset();
+    coordBuffer.Reset();
 
     standardFontSize=GetFontHeight(projection,
                                    parameter,
@@ -2405,7 +2403,7 @@ static void DumpGroundTile(const GroundTile& tile)
 #endif
         CoordBufferRange range=TransformBoundingBox(groundTileData.boundingBox,
                                                     transBuffer,
-                                                    *coordBuffer,
+                                                    coordBuffer,
                                                     projection,
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
@@ -2458,7 +2456,7 @@ static void DumpGroundTile(const GroundTile& tile)
             y=transBuffer.points[i].y;
           }
 
-          size_t idx=coordBuffer->PushCoord(x,y);
+          size_t idx=coordBuffer.PushCoord(x,y);
 
           if (i==transBuffer.GetStart()) {
             start=idx;
@@ -2939,7 +2937,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
                 CoordBufferRange range=TransformWay(path,
                                                     transBuffer,
-                                                    *coordBuffer,
+                                                    coordBuffer,
                                                     projection,
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
@@ -2975,7 +2973,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
                 CoordBufferRange range=TransformWay(path,
                                                     transBuffer,
-                                                    *coordBuffer,
+                                                    coordBuffer,
                                                     projection,
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
@@ -3011,7 +3009,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
                 CoordBufferRange range=TransformWay(path,
                                                     transBuffer,
-                                                    *coordBuffer,
+                                                    coordBuffer,
                                                     projection,
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
@@ -3048,7 +3046,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
                 CoordBufferRange range=TransformWay(path,
                                                     transBuffer,
-                                                    *coordBuffer,
+                                                    coordBuffer,
                                                     projection,
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
@@ -3131,7 +3129,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
               CoordBufferRange range=TransformBoundingBox(tileBoundingBox,
                                                           transBuffer,
-                                                          *coordBuffer,
+                                                          coordBuffer,
                                                           projection,
                                                           TransPolygon::none,
                                                           errorTolerancePixel);
@@ -3268,7 +3266,7 @@ static void DumpGroundTile(const GroundTile& tile)
             if (hillShadingFill) {
               CoordBufferRange range=TransformBoundingBox(tileData.boundingBox,
                                                           transBuffer,
-                                                          *coordBuffer,
+                                                          coordBuffer,
                                                           projection,
                                                           TransPolygon::none,
                                                           errorTolerancePixel);

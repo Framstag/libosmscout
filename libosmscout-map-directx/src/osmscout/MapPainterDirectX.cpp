@@ -809,12 +809,12 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        pSink->BeginFigure(POINTF(coordBuffer->buffer[transStart].GetX(),
-                                  coordBuffer->buffer[transStart].GetY()),
+        pSink->BeginFigure(POINTF(coordBuffer.buffer[transStart].GetX(),
+                                  coordBuffer.buffer[transStart].GetY()),
                                   D2D1_FIGURE_BEGIN_HOLLOW);
 
         for (size_t i = transStart + 1; i <= transEnd; i++) {
-          pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+          pSink->AddLine(POINTF(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY()));
         }
         pSink->EndFigure(D2D1_FIGURE_END_OPEN);
         hr = pSink->Close();
@@ -872,7 +872,7 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        Vertex2D* coords = coordBuffer->buffer;
+        Vertex2D* coords = coordBuffer.buffer;
         size_t start, end;
         int delta;
         if (coords[transStart].GetX() <= coords[transEnd].GetX()) {
@@ -960,9 +960,9 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        pSink->BeginFigure(POINTF(coordBuffer->buffer[area.coordRange.GetStart()].GetX(), coordBuffer->buffer[area.coordRange.GetStart()].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+        pSink->BeginFigure(POINTF(coordBuffer.buffer[area.coordRange.GetStart()].GetX(), coordBuffer.buffer[area.coordRange.GetStart()].GetY()), D2D1_FIGURE_BEGIN_FILLED);
         for (size_t i = area.coordRange.GetStart() + 1; i <= area.coordRange.GetEnd(); i++) {
-          pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+          pSink->AddLine(POINTF(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY()));
         }
         pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
         hr = pSink->Close();
@@ -988,10 +988,10 @@ namespace osmscout
         hr = pPathGeometry->Open(&pSink);
         if (SUCCEEDED(hr))
         {
-          pSink->BeginFigure(POINTF(coordBuffer->buffer[data.transStart].GetX(), coordBuffer->buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+          pSink->BeginFigure(POINTF(coordBuffer.buffer[data.transStart].GetX(), coordBuffer.buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
 
           for (size_t i = data.transStart + 1; i <= data.transEnd; i++) {
-            pSink->AddLine(POINTF(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY()));
+            pSink->AddLine(POINTF(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY()));
           }
           pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
           hr = pSink->Close();
@@ -1010,7 +1010,7 @@ namespace osmscout
   MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig,
                                        ID2D1Factory* pDirect2dFactory,
                                        IDWriteFactory* pWriteFactory)
-    : MapPainter(styleConfig, new CoordBuffer()),
+    : MapPainter(styleConfig),
     m_dashLessStrokeStyle(nullptr),
     m_pDirect2dFactory(pDirect2dFactory),
     m_pWriteFactory(pWriteFactory),

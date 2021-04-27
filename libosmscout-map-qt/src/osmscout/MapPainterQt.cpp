@@ -38,8 +38,7 @@
 namespace osmscout {
 
   MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig,
-               new CoordBuffer()),
+  : MapPainter(styleConfig),
     painter(nullptr),
     labelLayouter(this)
   {
@@ -498,7 +497,7 @@ namespace osmscout {
   {
     hnd.i=0;
     hnd.nVertex=transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
-    bool isReallyClosed=(coordBuffer->buffer[transStart]==coordBuffer->buffer[transEnd]);
+    bool isReallyClosed=(coordBuffer.buffer[transStart]==coordBuffer.buffer[transEnd]);
 
     if (isClosed && !isReallyClosed) {
       hnd.nVertex++;
@@ -509,7 +508,7 @@ namespace osmscout {
     }
 
     if (keepOrientation ||
-        coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
+        coordBuffer.buffer[transStart].GetX()<coordBuffer.buffer[transEnd].GetX()) {
       hnd.transStart=transStart;
       hnd.transEnd=transEnd;
     }
@@ -519,7 +518,7 @@ namespace osmscout {
     }
 
     hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
-    origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
+    origin.Set(coordBuffer.buffer[hnd.transStart].GetX(), coordBuffer.buffer[hnd.transStart].GetY());
   }
 
   bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
@@ -533,12 +532,12 @@ namespace osmscout {
 
     while (hnd.i<hnd.nVertex) {
       if (hnd.closeWay && hnd.nVertex-hnd.i==1) {
-        x2=coordBuffer->buffer[hnd.transStart].GetX();
-        y2=coordBuffer->buffer[hnd.transStart].GetY();
+        x2=coordBuffer.buffer[hnd.transStart].GetX();
+        y2=coordBuffer.buffer[hnd.transStart].GetY();
       }
       else {
-        x2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-        y2=coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+        x2=coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+        y2=coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
       }
       deltaX=(x2-x);
       deltaY=(y2-y);
@@ -848,11 +847,11 @@ namespace osmscout {
 
     QPainterPath p;
 
-    p.moveTo(coordBuffer->buffer[transStart].GetX(),
-             coordBuffer->buffer[transStart].GetY());
+    p.moveTo(coordBuffer.buffer[transStart].GetX(),
+             coordBuffer.buffer[transStart].GetY());
     for (size_t i=transStart+1; i<=transEnd; i++) {
-      p.lineTo(coordBuffer->buffer[i].GetX(),
-               coordBuffer->buffer[i].GetY());
+      p.lineTo(coordBuffer.buffer[i].GetX(),
+               coordBuffer.buffer[i].GetY());
     }
 
     painter->strokePath(p,pen);
@@ -866,8 +865,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer->buffer[transStart].GetX(),
-                                   coordBuffer->buffer[transStart].GetY()),
+      painter->drawEllipse(QPointF(coordBuffer.buffer[transStart].GetX(),
+                                   coordBuffer.buffer[transStart].GetY()),
                                    width/2,width/2);
     }
 
@@ -880,8 +879,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer->buffer[transEnd].GetX(),
-                                   coordBuffer->buffer[transEnd].GetY()),
+      painter->drawEllipse(QPointF(coordBuffer.buffer[transEnd].GetX(),
+                                   coordBuffer.buffer[transEnd].GetY()),
                                    width/2,width/2);
     }
   }
@@ -892,22 +891,22 @@ namespace osmscout {
   {
     QPainterPath path;
 
-    path.moveTo(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
-                coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+    path.moveTo(coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
+                coordBuffer.buffer[area.coordRange.GetStart()].GetY());
     for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
-      path.lineTo(coordBuffer->buffer[i].GetX(),
-                  coordBuffer->buffer[i].GetY());
+      path.lineTo(coordBuffer.buffer[i].GetX(),
+                  coordBuffer.buffer[i].GetY());
     }
     path.closeSubpath();
 
     if (!area.clippings.empty()) {
       for (const auto& data : area.clippings) {
-        path.moveTo(coordBuffer->buffer[data.transStart].GetX(),
-                    coordBuffer->buffer[data.transStart].GetY());
+        path.moveTo(coordBuffer.buffer[data.transStart].GetX(),
+                    coordBuffer.buffer[data.transStart].GetY());
 
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          path.lineTo(coordBuffer->buffer[i].GetX(),
-                      coordBuffer->buffer[i].GetY());
+          path.lineTo(coordBuffer.buffer[i].GetX(),
+                      coordBuffer.buffer[i].GetY());
         }
 
         path.closeSubpath();
@@ -941,8 +940,8 @@ namespace osmscout {
 
       if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
         patterns[idx].setTransform(QTransform::fromTranslate(
-                                          remainder(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),patterns[idx].textureImage().width()),
-                                          remainder(coordBuffer->buffer[area.coordRange.GetStart()].GetY(),patterns[idx].textureImage().height())));
+                                          remainder(coordBuffer.buffer[area.coordRange.GetStart()].GetX(),patterns[idx].textureImage().width()),
+                                          remainder(coordBuffer.buffer[area.coordRange.GetStart()].GetY(),patterns[idx].textureImage().height())));
         painter->setBrush(patterns[idx]);
         restoreTransform = true;
       }

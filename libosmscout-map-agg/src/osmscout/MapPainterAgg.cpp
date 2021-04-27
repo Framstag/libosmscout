@@ -39,8 +39,7 @@
 namespace osmscout {
 
   MapPainterAgg::MapPainterAgg(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig,
-               new CoordBuffer()),
+  : MapPainter(styleConfig),
     labelLayouter(this)
   {
     // no code
@@ -574,12 +573,12 @@ namespace osmscout {
 
     for (size_t i=transStart; i<=transEnd; i++) {
       if (i==transStart) {
-        p.move_to(coordBuffer->buffer[i].GetX(),
-                  coordBuffer->buffer[i].GetY());
+        p.move_to(coordBuffer.buffer[i].GetX(),
+                  coordBuffer.buffer[i].GetY());
       }
       else {
-        p.line_to(coordBuffer->buffer[i].GetX(),
-                  coordBuffer->buffer[i].GetY());
+        p.line_to(coordBuffer.buffer[i].GetX(),
+                  coordBuffer.buffer[i].GetY());
       }
     }
 
@@ -652,11 +651,11 @@ namespace osmscout {
       rasterizer->filling_rule(agg::fill_non_zero);
     }
 
-    path.move_to(coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
-                 coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+    path.move_to(coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
+                 coordBuffer.buffer[area.coordRange.GetStart()].GetY());
     for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
-      path.line_to(coordBuffer->buffer[i].GetX(),
-                   coordBuffer->buffer[i].GetY());
+      path.line_to(coordBuffer.buffer[i].GetX(),
+                   coordBuffer.buffer[i].GetY());
     }
     path.close_polygon();
 
@@ -666,11 +665,11 @@ namespace osmscout {
       for (const auto& data : area.clippings) {
         agg::path_storage clipPath;
 
-         clipPath.move_to(coordBuffer->buffer[data.transStart].GetX(),
-                          coordBuffer->buffer[data.transStart].GetY());
+         clipPath.move_to(coordBuffer.buffer[data.transStart].GetX(),
+                          coordBuffer.buffer[data.transStart].GetY());
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          clipPath.line_to(coordBuffer->buffer[i].GetX(),
-                           coordBuffer->buffer[i].GetY());
+          clipPath.line_to(coordBuffer.buffer[i].GetX(),
+                           coordBuffer.buffer[i].GetY());
         }
         clipPath.close_polygon();
 
