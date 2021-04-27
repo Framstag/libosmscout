@@ -35,8 +35,6 @@ extern std::string UTF8Capitalize(const std::string& text);
 
 extern std::string UTF8Transliterate(const std::string& text);
 
-extern std::string UTF8TransliterateUS7ASCII(const std::string& text);
-
 }
 
 #endif // UTF8HELPER_H

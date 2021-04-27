@@ -91,6 +91,7 @@ extern const character* pagemap_24_e2[];
 extern const character charmap_e2_80[];
 extern const character charmap_e2_81[];
 extern const character charmap_e2_82[];
+extern const character charmap_e2_b4[];
 
 /* character map 4 bytes F090 */
 extern const character* pagemap_32_f0_90[];

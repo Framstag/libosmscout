@@ -51,15 +51,16 @@ namespace utf8helper
  *    Processed text
  */
 static std::string parse(const std::string& text, codepoint (*func)(const character*, int context)){
+  size_t len = text.size();
   std::string result;
-  size_t rest = text.size();
-  result.reserve(rest);
+  result.reserve(len);
   const byte * b = reinterpret_cast<const byte*>(text.c_str());
-  const byte * e = b + (--rest);
+  const byte * e = b + len;
 
   int context = IsSpace | IsBreaker;
 
   for (; *b; ++b) {
+    size_t rb = e - b;
     // 1 byte
     // RFC 3629:#4: Valid UTF-8 matches the following syntax
     // 00-7F
@@ -84,7 +85,7 @@ static std::string parse(const std::string& text, codepoint (*func)(const charac
     // 2 bytes
     // RFC 3629:#4: Valid UTF-8 matches the following syntax
     // C2-DF 80-BF
-    else if (*b < 0xe0 && rest > 1) {
+    else if (*b < 0xe0 && rb > 1) {
       byte b0 = *b;
       if (*(++b) > 0x7f && *b < 0xc0) {
         const character* pg = pagemap_16[b0 - 0xc0];
@@ -119,7 +120,7 @@ static std::string parse(const std::string& text, codepoint (*func)(const charac
     // ED    80-9F 80-BF
     // EE-EF 80-BF 80-BF
     // RFC 3629:#6: [EF,BB,BF] is BOM on start, else ZERO WIDTH NO-BREAK SPACE
-    else if (*b < 0xf0 && rest > 2) {
+    else if (*b < 0xf0 && rb > 2) {
       byte b0 = *b;
       byte b1 = *(++b);
       if ( (b0 == 0xe0 && b1 > 0x9f && b1 < 0xc0) ||
@@ -174,7 +175,7 @@ static std::string parse(const std::string& text, codepoint (*func)(const charac
     // F0    90-BF 80-BF 80-BF
     // F1-F3 80-BF 80-BF 80-BF
     // F4    80-8F 80-BF 80-BF
-    else if (*b < 0xf5 && rest > 3) {
+    else if (*b < 0xf5 && rb > 3) {
       byte b0 = *b;
       byte b1 = *(++b);
       if ( (b0 == 0xf0 && b1 > 0x8f && b1 < 0xc0) ||
@@ -242,7 +243,6 @@ static std::string parse(const std::string& text, codepoint (*func)(const charac
       // invalid codepoint
       context = None;
     }
-    rest = e - b;
   }
   return result;
 }
@@ -285,20 +285,6 @@ static codepoint transliterate(const character* ch, int context) {
   return c;
 }
 
-static codepoint transliterate_us7ascii(const character* ch, int context) {
-  codepoint c = NullCodepoint;
-  if ((IsSpace & context & ch->category))
-    return c;
-  const char* b = ch->translate;
-  for (; *b; ++b) {
-    if (*b < 0)
-      return '?';
-    c <<= 8;
-    c |= static_cast<byte>(*b);
-  }
-  return c;
-}
-
 std::string UTF8ToUpper(const std::string& text) {
   return parse(text, toUpper);
 }
@@ -317,10 +303,6 @@ std::string UTF8Capitalize(const std::string& text) {
 
 std::string UTF8Transliterate(const std::string& text) {
   return parse(text, transliterate);
-}
-
-std::string UTF8TransliterateUS7ASCII(const std::string& text) {
-  return parse(text, transliterate_us7ascii);
 }
 
 }
