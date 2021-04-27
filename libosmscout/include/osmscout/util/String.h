@@ -495,11 +495,13 @@ namespace osmscout {
    * for example street name, where string are not binary equals,
    * but are "same" for human - for example "Baker Street" and "Baker  street"
    *
+   * Normalized string is converted to lowercase, all whitespaces are converted
+   * to standard space and multiple following spaces are collapsed to one.
+   *
    * @param text
    *    Text to get converted
    * @return
    *    Converted text
-   *
    */
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 
