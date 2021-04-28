@@ -206,7 +206,7 @@ namespace osmscout {
    */
     //@{
     TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo coordinates to display coordinates
-    CoordBuffer                  *coordBuffer;      //!< Reference to the coordinate buffer
+    CoordBuffer                  coordBuffer;       //!< Coordinate buffer
     //@}
 
     TextStyleRef                 debugLabel;
@@ -649,8 +649,7 @@ namespace osmscout {
     std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
 
   public:
-    MapPainter(const StyleConfigRef& styleConfig,
-               CoordBuffer *buffer);
+    MapPainter(const StyleConfigRef& styleConfig);
     virtual ~MapPainter();
 
     bool Draw(const Projection& projection,

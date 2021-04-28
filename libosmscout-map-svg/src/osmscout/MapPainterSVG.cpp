@@ -37,8 +37,7 @@ namespace osmscout {
   static const char* valueChar="0123456789abcdef";
 
   MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig,
-               new CoordBuffer()),
+  : MapPainter(styleConfig),
     labelLayouter(this),
     stream(nullptr),
     typeConfig(nullptr)
@@ -899,7 +898,7 @@ namespace osmscout {
         stream << " ";
       }
 
-      stream << coordBuffer->buffer[i].GetX() << "," << coordBuffer->buffer[i].GetY();
+      stream << coordBuffer.buffer[i].GetX() << "," << coordBuffer.buffer[i].GetY();
 
     }
 
@@ -926,7 +925,7 @@ namespace osmscout {
         stream << " ";
       }
 
-      stream << coordBuffer->buffer[i].GetX() << "," << coordBuffer->buffer[i].GetY();
+      stream << coordBuffer.buffer[i].GetX() << "," << coordBuffer.buffer[i].GetY();
 
     }
 
@@ -996,9 +995,9 @@ namespace osmscout {
 
     stream << "          d=\"";
 
-    stream << "M " << coordBuffer->buffer[area.coordRange.GetStart()].GetX() << " " << coordBuffer->buffer[area.coordRange.GetStart()].GetY();
+    stream << "M " << coordBuffer.buffer[area.coordRange.GetStart()].GetX() << " " << coordBuffer.buffer[area.coordRange.GetStart()].GetY();
     for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
-      stream << " L " << coordBuffer->buffer[i].GetX() << " " << coordBuffer->buffer[i].GetY();
+      stream << " L " << coordBuffer.buffer[i].GetX() << " " << coordBuffer.buffer[i].GetY();
     }
     stream << " Z";
 
@@ -1007,9 +1006,9 @@ namespace osmscout {
         ++c) {
       const PolyData    &data=*c;
 
-      stream << "M " << coordBuffer->buffer[data.transStart].GetX() << " " << coordBuffer->buffer[data.transStart].GetY();
+      stream << "M " << coordBuffer.buffer[data.transStart].GetX() << " " << coordBuffer.buffer[data.transStart].GetY();
       for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-        stream << " L " << coordBuffer->buffer[i].GetX() << " " << coordBuffer->buffer[i].GetY();
+        stream << " L " << coordBuffer.buffer[i].GetX() << " " << coordBuffer.buffer[i].GetY();
       }
       stream << " Z";
     }

@@ -25,8 +25,7 @@ namespace osmscout {
   //static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
 
   MapPainterNoOp::MapPainterNoOp(const StyleConfigRef& styleConfig)
-          : MapPainter(styleConfig,
-                       new CoordBuffer())
+          : MapPainter(styleConfig)
   {
     // no code
   }

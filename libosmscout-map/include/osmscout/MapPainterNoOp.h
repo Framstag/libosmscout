@@ -97,6 +97,8 @@ namespace osmscout {
   public:
     explicit MapPainterNoOp(const StyleConfigRef& styleConfig);
 
+    ~MapPainterNoOp() override = default;
+
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data);
