@@ -32,7 +32,7 @@ jobs:
       - name: Dump environment
         run:  set
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity --debug on build
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on --debug build
       - name: Build project
         run:  meson compile -C build
       - name: Test project
