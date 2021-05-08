@@ -106,7 +106,13 @@ marisaDep = dependency('marisa', required : false)
 # Import
 zlibDep = dependency('zlib', required : false, fallback: ['zlib','zlib_dep'])
 lzmaDep = dependency('liblzma', required : false, fallback: ['liblzma','lzma_dep'])
-xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','xml2lib_dep'])
+
+if get_option('enableXML')
+  xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','xml2lib_dep'])
+else
+  xml2Dep = dependency('', required: false)
+endif
+
 protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','protoc_dep'])
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
