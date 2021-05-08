@@ -297,6 +297,11 @@ DownloadJob::DownloadJob(QNetworkAccessManager *webCtrl, QDir target, bool repla
 
 DownloadJob::~DownloadJob()
 {
+  clearJobs();
+}
+
+void DownloadJob::clearJobs()
+{
   for (auto* job:jobs){
     delete job;
   }
@@ -342,6 +347,7 @@ void DownloadJob::onJobFailed(QString errorMessage, bool recoverable){
   }else{
     done = true;
     error = errorMessage;
+    clearJobs();
     if (canceledByUser) {
       emit canceled();
     }else{
