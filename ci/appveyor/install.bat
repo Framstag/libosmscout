@@ -166,7 +166,7 @@ IF %COMPILER%==msvc2019 (
     rem transitive
     rem echo Installing qt5-serialport...
     rem %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-serialport:x64-windows
-   
+
     rem echo Installing qt5-svg...
     rem %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg install qt5-svg:x64-windows
 
@@ -203,12 +203,5 @@ IF %COMPILER%==msvc2019 (
     %APPVEYOR_BUILD_FOLDER%\ci\timedexec.bat %timestart% 1800 .\vcpkg integrate install
 
     cd %APPVEYOR_BUILD_FOLDER%
-  )
-
-  IF %BUILDTOOL%==meson (
-    echo Installing meson build tool...
-    set "PATH=C:\Python36-x64;C:\Python36-x64\Scripts;%PATH%"
-    pip.exe install meson
-    echo ...done
   )
 )
