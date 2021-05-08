@@ -51,7 +51,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
   Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
 
-  // km/h, <0 when unkwnown
+  // km/h, <0 when unknown
   Q_PROPERTY(double currentSpeed    READ getCurrentSpeed    NOTIFY currentSpeedUpdate)
   // km/h <0 when unknown
   Q_PROPERTY(double maxAllowedSpeed READ getMaxAllowedSpeed NOTIFY maxAllowedSpeedUpdate)
