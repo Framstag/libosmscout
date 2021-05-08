@@ -32,7 +32,7 @@ jobs:
       - name: Dump environment
         run:  set
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on build
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false build
       - name: Dump found dependencies
         run:  meson introspect --dependencies
         working-directory: build

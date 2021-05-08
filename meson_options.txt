@@ -11,3 +11,5 @@ option('enableMapOpenGL',  type: 'boolean', value: 'true', description: 'Build O
 option('enableMapQt',      type: 'boolean', value: 'true', description: 'Build Qt backend')
 option('enableMapSvg',     type: 'boolean', value: 'true', description: 'Build SVG backend')
 option('enableClientQt',   type: 'boolean', value: 'true', description: 'Build Qt/QML library')
+option('enableXML',        type: 'boolean', value: 'true', description: 'Use libxml2')
+
