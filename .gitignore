@@ -25,3 +25,11 @@
 # meson
 /debug/
 /release/
+
+# Generation of db for tests
+Tests/*.dat
+Tests/*.idx
+Tests/*.tmp
+Tests/*.idmap
+Tests/*.txt
+Tests/*.html
