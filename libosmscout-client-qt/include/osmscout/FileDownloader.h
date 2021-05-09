@@ -173,6 +173,12 @@ public:
 
   void start(const QString &serverBasePath, const QStringList &files);
 
+  /**
+   * Cancel downloading,
+   * remove temporary files (of unfinished jobs),
+   * emit canceled signal.
+   * Already downloaded files are retained on disk (this behaviour may be modified by subclass).
+   */
   void cancel();
 
   virtual uint64_t expectedSize() const = 0;
@@ -209,6 +215,12 @@ public:
 
   double getProgress();
   QString getDownloadingFile();
+
+protected:
+  /**
+   * Clear all file download jobs, it removes temporary *.download files
+   */
+  void clearJobs();
 
 };
 

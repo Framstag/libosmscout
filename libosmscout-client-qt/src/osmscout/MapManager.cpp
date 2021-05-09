@@ -45,6 +45,7 @@ MapDownloadJob::~MapDownloadJob()
 {
   if (started && !successful){
     // delete partial database
+    clearJobs(); // need to remove temporary files before deleting database directory
     MapDirectory dir(target);
     dir.deleteDatabase();
   }

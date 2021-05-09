@@ -243,6 +243,7 @@ namespace osmscout {
       ringCount++;
     }
 
+    rings.clear();
     rings.resize(ringCount);
 
     rings[0].featureValueBuffer=std::move(featureValueBuffer);
@@ -313,6 +314,7 @@ namespace osmscout {
       ringCount++;
     }
 
+    rings.clear();
     rings.resize(ringCount);
 
     rings[0].featureValueBuffer=featureValueBuffer;
@@ -383,6 +385,7 @@ namespace osmscout {
       ringCount++;
     }
 
+    rings.clear();
     rings.resize(ringCount);
 
     rings[0].featureValueBuffer=featureValueBuffer;

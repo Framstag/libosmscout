@@ -56,12 +56,6 @@ namespace osmscout {
         : pattern(UTF8StringToUpper(patternArg)),
           transliteratedPattern(UTF8Transliterate(pattern))
   {
-    size_t unavailable=std::count(transliteratedPattern.begin(), transliteratedPattern.end(), '?');
-    if (unavailable > (transliteratedPattern.size()/2)) {
-      // if there is huge portion (more than 50%) of characters that cannot be transliterated
-      // we give up transliteration at all. It is usual for asian and arabic scripts.
-      transliteratedPattern.clear();
-    }
   }
 
   StringMatcher::Result StringMatcherTransliterate::Match(const std::string& text) const

@@ -467,27 +467,25 @@ namespace osmscout {
 
   /**
    * Convert the given std::string containing a UTF8 character sequence to upper case using
-   * the current global locale.
+   * translation table implementation.
    *
    * @param text
    *    Text to get converted
    * @return
    *    Converted text
    *
-   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8StringToUpper(const std::string& text);
 
   /**
    * Convert the given std::string containing a UTF8 character sequence to lower case using
-   * the current global locale.
+   * the translation table implementation.
    *
    * @param text
    *    Text to get converted
    * @return
    *    Converted text
    *
-   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8StringToLower(const std::string& text);
 
@@ -497,26 +495,26 @@ namespace osmscout {
    * for example street name, where string are not binary equals,
    * but are "same" for human - for example "Baker Street" and "Baker  street"
    *
+   * Normalized string is converted to lowercase, all whitespaces are converted
+   * to standard space and multiple following spaces are collapsed to one.
+   *
    * @param text
    *    Text to get converted
    * @return
    *    Converted text
-   *
-   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8NormForLookup(const std::string& text);
 
   /**
-   * Transliterate non-ascii characters to one or more characters that are similar to the original character.
-   * When there is no transformation available, question mark is used (iconv implementation)
-   * or original character is keep in place (translation table implementation).
+   * Transliterate non-ascii characters to one or more characters that are similar
+   * to the original character. When there is no transformation available, original
+   * character is keep in place (translation table implementation).
    *
    * @param text
    *    Text to get converted
    * @return
    *    Converted text
    *
-   * @note that a global C++ locale must be set for more than simple ASCII conversions to work.
    */
   extern OSMSCOUT_API std::string UTF8Transliterate(const std::string& text);
 

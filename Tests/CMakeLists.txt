@@ -90,9 +90,7 @@ osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
 #---- StringUtils
-if(NOT MINGW AND NOT MSYS)
-	osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
-endif()
+osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
@@ -101,9 +99,7 @@ osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 osmscout_test_project(NAME TimeParse SOURCES src/TimeParse.cpp)
 
 #---- WStringStringConversion
-if(NOT MINGW AND NOT MSYS)
-	osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
-endif()
+osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
 
 #---- TransPolygon
 osmscout_test_project(NAME TransPolygon SOURCES src/TransPolygon.cpp)

@@ -53,6 +53,12 @@ public:
   static const char* FILE_METADATA;
 
   MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target, bool replaceExisting);
+
+  /**
+   * Cancel downloading,
+   * when database is not downloaded successfully, remove it from disk
+   * (even already downloaded files).
+   */
   ~MapDownloadJob() override;
 
   void start();

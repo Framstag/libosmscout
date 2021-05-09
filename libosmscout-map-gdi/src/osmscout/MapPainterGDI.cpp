@@ -323,7 +323,7 @@ namespace osmscout {
 	};
 
 	MapPainterGDI::MapPainterGDI(const StyleConfigRef& styleConfig)
-		: MapPainter(styleConfig, new CoordBuffer())
+		: MapPainter(styleConfig)
 		, m_labelLayouter(this)
 		, m_pBuffer(NULL)
 	{
@@ -682,7 +682,7 @@ namespace osmscout {
 		PointFBuffer points;
 		for (size_t i = transStart; i <= transEnd; i++)
 		{
-			points.AddPoint(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY());
+			points.AddPoint(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY());
 		}
 		pRender->m_pGraphics->DrawLines(pPen, points.m_Data, (INT)points.m_Size);
 	}
@@ -737,7 +737,7 @@ namespace osmscout {
 		PointFBuffer areaPoints;
 		for (size_t i = area.coordRange.GetStart(); i <= area.coordRange.GetEnd(); i++)
 		{
-			areaPoints.AddPoint(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY());
+			areaPoints.AddPoint(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY());
 		}
 		areaPoints.Close();
 		struct clippingRegion
@@ -754,7 +754,7 @@ namespace osmscout {
 			clippingRegion cr;
 			cr.points = new PointFBuffer();
 			for (size_t i = data.transStart; i <= data.transEnd; i++) {
-				cr.points->AddPoint(coordBuffer->buffer[i].GetX(), coordBuffer->buffer[i].GetY());
+				cr.points->AddPoint(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY());
 			}
 			cr.points->Close();
 			cr.path = new Gdiplus::GraphicsPath();

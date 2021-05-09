@@ -74,6 +74,7 @@ namespace osmscout {
   void Way::Read(const TypeConfig& typeConfig,
                  FileScanner& scanner)
   {
+    nodes.clear();
     fileOffset=scanner.GetPos();
 
     TypeId typeId=scanner.ReadTypeId(typeConfig.GetWayTypeIdBytes());
@@ -100,6 +101,7 @@ namespace osmscout {
   void Way::ReadOptimized(const TypeConfig& typeConfig,
                           FileScanner& scanner)
   {
+    nodes.clear();
     fileOffset=scanner.GetPos();
 
     TypeId typeId=scanner.ReadTypeId(typeConfig.GetWayTypeIdBytes());

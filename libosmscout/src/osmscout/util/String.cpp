@@ -35,6 +35,7 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Locale.h>
 #include <osmscout/util/ObjectPool.h>
+#include <osmscout/util/utf8helper.h>
 
 #include <osmscout/private/Config.h>
 
@@ -774,178 +775,23 @@ namespace osmscout {
 
   std::string UTF8StringToUpper(const std::string& text)
   {
-    //std::cout << "* O \"" << text << std::endl;
-
-    std::wstring wstr=UTF8StringToWString(text);
-    //std::wcout << "* w \"" << wstr << std::endl;
-
-    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
-
-    f.toupper(&wstr[0],&wstr[0]+wstr.size());
-    //std::wcout << "* c \"" << wstr << std::endl;
-
-    return WStringToUTF8String(wstr);
+    return utf8helper::UTF8ToUpper(text);
   }
 
   std::string UTF8StringToLower(const std::string& text)
   {
-    //std::cout << "* O \"" << text << std::endl;
-
-    std::wstring wstr=UTF8StringToWString(text);
-    //std::wcout << "* w \"" << wstr << std::endl;
-
-    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
-
-    f.tolower(&wstr[0],&wstr[0]+wstr.size());
-    //std::wcout << "* c \"" << wstr << std::endl;
-
-    return WStringToUTF8String(wstr);
+    return utf8helper::UTF8ToLower(text);
   }
 
   std::string UTF8NormForLookup(const std::string& text)
   {
-    std::wstring wstr=UTF8StringToWString(text);
-
-    auto& f=std::use_facet<std::ctype<wchar_t>>(std::locale());
-
-    // convert to lower and replace all whitespaces with simple space
-    std::transform(wstr.begin(), wstr.end(), wstr.begin(),
-                   [&f](wchar_t c) -> wchar_t {
-                     // std::iswspace don't recognize no-break space and others
-                     // so-space characters as space -> we are using switch here...
-                     switch(c){
-                       case ' ':
-                       case L'\u0009': // tabular
-                       case L'\u00A0': // no-break space (&nbsp;)
-                       case L'\u2007': // figure space
-                       case L'\u202F': // narrow no-break space
-                         return ' ';
-                       default:
-                         return f.tolower(c); // to lower
-                     }});
-
-    // TODO: remove multiple following spaces by one
-
-    return WStringToUTF8String(wstr);
+    return utf8helper::UTF8Normalize(text);
   }
-
-// MacOS iconv implementation transliterate diacritics nasty way:
-// á => 'a , ü => "u ...
-// Lets use our transliterate implementation instead
-#if defined(HAVE_ICONV) && !defined(__APPLE__)
 
   std::string UTF8Transliterate(const std::string& text)
   {
-    static IConvHandlerPool iconvPool("UTF-8", "ASCII//TRANSLIT");
-    auto iconvWrapperPtr=iconvPool.Borrow();
-    if (!iconvWrapperPtr) {
-      return "";
-    }
-    return iconvWrapperPtr->Convert(text);
+    return utf8helper::UTF8Transliterate(text);
   }
-
-#else
-
-  std::string UTF8Transliterate(const std::string& text)
-  {
-    using namespace std::string_view_literals;
-
-    auto transChar = [](wchar_t c) -> std::string_view {
-      switch(c){
-        case L'\u00A0': // no-break space (&nbsp;)
-        case L'\u2007': // figure space
-        case L'\u202F': // narrow no-break space
-          return " "sv;
-
-        case L'\u00E1': // á
-          return "a"sv;
-        case L'\u00E9': // é
-        case L'\u011B': // ě
-          return "e"sv;
-        case L'\u00ED': // í
-          return "i"sv;
-        case L'\u00FD': // ý
-          return "y"sv;
-        case L'\u00F6': // ö
-        case L'\u00F3': // ó
-          return "o"sv;
-        case L'\u00FA': // ú
-        case L'\u016F': // ů
-        case L'\u00FC': // ü
-          return "u"sv;
-        case L'\u010F': // ď
-          return "d"sv;
-        case L'\u0165': // ť
-          return "t"sv;
-        case L'\u0148': // ň
-          return "n"sv;
-        case L'\u0161': // š
-          return "s"sv;
-        case L'\u010D': // č
-          return "c"sv;
-        case L'\u0159': // ř
-          return "r"sv;
-        case L'\u017E': // ž
-          return "z"sv;
-
-        case L'\u00C1': // Á
-          return "A"sv;
-        case L'\u00C9': // É
-        case L'\u011A': // Ě
-          return "E"sv;
-        case L'\u00CD': // Í
-          return "I"sv;
-        case L'\u00DD': // Ý
-          return "Y"sv;
-        case L'\u00D3': // Ó
-        case L'\u00D6': // Ö
-          return "O"sv;
-        case L'\u00DA': // Ú
-        case L'\u016E': // Ů
-        case L'\u00DC': // Ü
-          return "U"sv;
-        case L'\u010E': // Ď
-          return "D"sv;
-        case L'\u0164': // Ť
-          return "T"sv;
-        case L'\u0147': // Ň
-          return "N"sv;
-        case L'\u0160': // Š
-          return "S"sv;
-        case L'\u010C': // Č
-          return "C"sv;
-        case L'\u0158': // Ř
-          return "R"sv;
-        case L'\u017D': // Ž
-          return "Z"sv;
-
-        case L'\u00DF': // ß
-          return "ss"sv;
-
-        default:
-          // std::wstring s(1, c);
-          // printf("case L'\\u%04X': // %ls\n  return \"%ls\"sv;\n", (int)c, s.c_str(), s.c_str());
-          return ""sv; // no-opt
-      }
-    };
-
-    std::wstring wstr=UTF8StringToWString(text);
-
-    std::ostringstream buff;
-
-    // replace SOME common (in European languages) non-ascii characters by table
-    std::for_each(wstr.begin(), wstr.end(), [&](wchar_t c) {
-      auto tch = transChar(c);
-      if (tch.empty()) {
-        buff << WStringToUTF8String(std::wstring(1, c));
-      } else {
-        buff << tch;
-      }
-    });
-
-    return buff.str();
-  }
-#endif
 
   /**
    * returns the utc timezone offset

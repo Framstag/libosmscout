@@ -207,7 +207,6 @@ namespace osmscout {
     explicit MapPainterAgg(const StyleConfigRef& styleConfig);
     ~MapPainterAgg() override;
 
-
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,

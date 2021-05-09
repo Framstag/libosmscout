@@ -33,7 +33,7 @@
 namespace osmscout {
 
     MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
-    : MapPainter(styleConfig, new CoordBuffer()), labelLayouter(this){
+    : MapPainter(styleConfig), labelLayouter(this){
 #if TARGET_OS_IPHONE
         contentScale = [[UIScreen mainScreen] scale];
 #else
@@ -550,14 +550,14 @@ namespace osmscout {
                                        bool isClosed, bool keepOrientation) {
         hnd.i = 0;
         hnd.nVertex = transEnd - transStart;
-        bool isReallyClosed = (coordBuffer->buffer[transStart] == coordBuffer->buffer[transEnd]);
+        bool isReallyClosed = (coordBuffer.buffer[transStart] == coordBuffer.buffer[transEnd]);
         if(isClosed && !isReallyClosed){
             hnd.nVertex++;
             hnd.closeWay = true;
         } else {
             hnd.closeWay = false;
         }
-        if(keepOrientation || coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()){
+        if(keepOrientation || coordBuffer.buffer[transStart].GetX()<coordBuffer.buffer[transEnd].GetX()){
             hnd.transStart = transStart;
             hnd.transEnd = transEnd;
         } else {
@@ -565,7 +565,7 @@ namespace osmscout {
             hnd.transEnd = transStart;
         }
         hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-        origin.Set(coordBuffer->buffer[hnd.transStart].GetX(), coordBuffer->buffer[hnd.transStart].GetY());
+        origin.Set(coordBuffer.buffer[hnd.transStart].GetX(), coordBuffer.buffer[hnd.transStart].GetY());
     }
 
     bool MapPainterIOS::followPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
@@ -576,11 +576,11 @@ namespace osmscout {
         double deltaX, deltaY, len, fracToGo;
         while(hnd.i < hnd.nVertex) {
             if(hnd.closeWay && hnd.nVertex - hnd.i == 1){
-                x2 = coordBuffer->buffer[hnd.transStart].GetX();
-                y2 = coordBuffer->buffer[hnd.transStart].GetY();
+                x2 = coordBuffer.buffer[hnd.transStart].GetX();
+                y2 = coordBuffer.buffer[hnd.transStart].GetY();
             } else {
-                x2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-                y2 = coordBuffer->buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+                x2 = coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
+                y2 = coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
             }
             deltaX = (x2 - x);
             deltaY = (y2 - y);
@@ -813,21 +813,21 @@ namespace osmscout {
             CGContextSetLineCap(cg, kCGLineCapButt);
         }
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,coordBuffer->buffer[transStart].GetX(),coordBuffer->buffer[transStart].GetY());
+        CGContextMoveToPoint(cg,coordBuffer.buffer[transStart].GetX(),coordBuffer.buffer[transStart].GetY());
         for (size_t i=transStart+1; i<=transEnd; i++) {
-            CGContextAddLineToPoint (cg,coordBuffer->buffer[i].GetX(),coordBuffer->buffer[i].GetY());
+            CGContextAddLineToPoint (cg,coordBuffer.buffer[i].GetX(),coordBuffer.buffer[i].GetY());
         }
         CGContextStrokePath(cg);
         if (startCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer->buffer[transStart].GetX()-width/2,
-                                                     coordBuffer->buffer[transStart].GetY()-width/2,
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[transStart].GetX()-width/2,
+                                                     coordBuffer.buffer[transStart].GetY()-width/2,
                                                      width,width));
         }
         if (endCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer->buffer[transEnd].GetX()-width/2,
-                                                     coordBuffer->buffer[transEnd].GetY()-width/2,
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[transEnd].GetX()-width/2,
+                                                     coordBuffer.buffer[transEnd].GetY()-width/2,
                                                      width,width));
         }
         CGContextRestoreGState(cg);
@@ -904,14 +904,14 @@ namespace osmscout {
                                 const MapPainter::AreaData& area) {
         CGContextSaveGState(cg);
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
-                    coordBuffer->buffer[area.coordRange.GetStart()].GetY());
+        CGContextMoveToPoint(cg,coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
+                    coordBuffer.buffer[area.coordRange.GetStart()].GetY());
         for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
-            CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
-                        coordBuffer->buffer[i].GetY());
+            CGContextAddLineToPoint(cg,coordBuffer.buffer[i].GetX(),
+                        coordBuffer.buffer[i].GetY());
         }
-        CGContextAddLineToPoint(cg,coordBuffer->buffer[area.coordRange.GetStart()].GetX(),
-                                coordBuffer->buffer[area.coordRange.GetEnd()].GetY());
+        CGContextAddLineToPoint(cg,coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
+                                coordBuffer.buffer[area.coordRange.GetEnd()].GetY());
 
         if (!area.clippings.empty()) {
             for (std::list<PolyData>::const_iterator c=area.clippings.begin();
@@ -919,14 +919,14 @@ namespace osmscout {
                  c++) {
                 const PolyData& data=*c;
 
-                CGContextMoveToPoint(cg,coordBuffer->buffer[data.transStart].GetX(),
-                            coordBuffer->buffer[data.transStart].GetY());
+                CGContextMoveToPoint(cg,coordBuffer.buffer[data.transStart].GetX(),
+                            coordBuffer.buffer[data.transStart].GetY());
                 for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-                    CGContextAddLineToPoint(cg,coordBuffer->buffer[i].GetX(),
-                                coordBuffer->buffer[i].GetY());
+                    CGContextAddLineToPoint(cg,coordBuffer.buffer[i].GetX(),
+                                coordBuffer.buffer[i].GetY());
                 }
-                CGContextAddLineToPoint(cg,coordBuffer->buffer[data.transStart].GetX(),
-                                        coordBuffer->buffer[data.transStart].GetY());
+                CGContextAddLineToPoint(cg,coordBuffer.buffer[data.transStart].GetX(),
+                                        coordBuffer.buffer[data.transStart].GetY());
             }
         }
 
