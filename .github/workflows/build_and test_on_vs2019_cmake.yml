@@ -28,15 +28,15 @@ jobs:
         run:  set
         shell: cmd
       - name: Installing zlib, iconv, libxml2...
-        run: ${{ github.workspace }}/vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
+        run: ${{ github.workspace }}\vcpkg\vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
       - name: Installing protobuf...
-        run: ${{ github.workspace }}/vcpkg install protobuf:x64-windows
+        run: ${{ github.workspace }}\vcpkg\vcpkg install protobuf:x64-windows
       - name: Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
-        run: ${{ github.workspace }}/vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+        run: ${{ github.workspace }}\vcpkg\vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
-        run:  cmake -G "Visual Studio 16 2019" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
+        run:  cmake -G "Visual Studio 16 2019" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
         working-directory: build
       - name: Build project
         run: cmake --build build
