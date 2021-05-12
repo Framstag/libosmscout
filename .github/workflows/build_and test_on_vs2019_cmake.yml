@@ -23,6 +23,7 @@ jobs:
         uses: lukka/run-vcpkg@v6
         with:
           setupOnly: true
+          vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
       - name: Dump environment
         run:  set
       - name: Installing zlib, iconv, libxml2...
