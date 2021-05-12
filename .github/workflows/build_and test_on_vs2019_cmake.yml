@@ -26,11 +26,11 @@ jobs:
       - name: Dump environment
         run:  set
       - name: Installing zlib, iconv, libxml2...
-        run: %VCPKG_ROOT%/vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
+        run: ${{ github.workspace }}/vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
       - name: Installing protobuf...
-        run: %VCPKG_ROOT%/vcpkg install protobuf:x64-windows
+        run: ${{ github.workspace }}/vcpkg install protobuf:x64-windows
       - name: Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
-        run: %VCPKG_ROOT%/vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+        run: ${{ github.workspace }}/vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
