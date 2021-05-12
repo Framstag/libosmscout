@@ -26,6 +26,7 @@ jobs:
           vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
       - name: Dump environment
         run:  set
+        shell: cmd
       - name: Installing zlib, iconv, libxml2...
         run: ${{ github.workspace }}/vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
       - name: Installing protobuf...
