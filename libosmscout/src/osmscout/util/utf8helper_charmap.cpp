@@ -77,7 +77,7 @@ const character charmap_us7ascii[128] = {
   { 0x2b , 0x2b , 0x2b , None , "\x2b" }, /* + */
   { 0x2c , 0x2c , 0x2c , IsPunctuation , "\x2c" }, /* COMMA */
   { 0x2d , 0x2d , 0x2d , IsPunctuation , "\x2d" }, /* - */
-  { 0x2e , 0x2e , 0x2e , IsBreaker , "\x2e" }, /* . */
+  { 0x2e , 0x2e , 0x2e , IsPunctuation , "\x2e" }, /* . */
   { 0x2f , 0x2f , 0x2f , None , "\x2f" }, /* / */
   { 0x30 , 0x30 , 0x30 , None , "\x30" }, /* 0 */
   { 0x31 , 0x31 , 0x31 , None , "\x31" }, /* 1 */
@@ -217,7 +217,7 @@ const character charmap_c2[64] = {
   { 0xc2b4 , 0xc2b4 , 0xc2b4 , IsDiacritic , "\x27" }, /* ´ : up=´ : lo=´ */
   { 0xc2b5 , 0xce9c , 0xc2b5 , None , "u" }, /* µ : up=Μ : lo=µ */
   { 0xc2b6 , 0xc2b6 , 0xc2b6 , None , "" }, /* ¶ : up=¶ : lo=¶ */
-  { 0xc2b7 , 0xc2b7 , 0xc2b7 , IsBreaker , "." }, /* · : up=· : lo=· */
+  { 0xc2b7 , 0xc2b7 , 0xc2b7 , IsPunctuation , "." }, /* · : up=· : lo=· */
   { 0xc2b8 , 0xc2b8 , 0xc2b8 , IsPunctuation , "\x2c" }, /* ¸ : up=¸ : lo=¸ */
   { 0xc2b9 , 0xc2b9 , 0xc2b9 , None , "1" }, /* ¹ : up=¹ : lo=¹ */
   { 0xc2ba , 0xc2ba , 0xc2ba , None , "o" }, /* º : up=º : lo=º */
