@@ -28,8 +28,6 @@ jobs:
         uses: bus1/cabuild/action/msdevshell@v1
         with:
           architecture: x64
-      - name: Dump environment
-        run:  set
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false build
       - name: Dump found dependencies
