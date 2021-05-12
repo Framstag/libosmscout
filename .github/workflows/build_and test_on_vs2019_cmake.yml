@@ -17,6 +17,20 @@ jobs:
         uses: actions/checkout@v2
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
+        # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
+      - name: Restore from cache and install vcpkg
+        # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
+        uses: lukka/run-vcpkg@v6
+        with:
+          setupOnly: true
+      - name: Dump environment
+        run:  set
+      - name: Installing zlib, iconv, libxml2...
+        run: %VCPKG_ROOT%/vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
+      - name: Installing protobuf...
+        run: %VCPKG_ROOT%/vcpkg install protobuf:x64-windows
+      - name: Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
+        run: %VCPKG_ROOT%/vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
