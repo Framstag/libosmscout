@@ -51,13 +51,4 @@ IF %COMPILER%==msvc2019 (
     cmake --build .
     echo Finished cmake build
   )
-
-  IF %BUILDTOOL%==meson (
-    echo Using build tool 'meson'...
-    mkdir debug
-    meson debug --wrap-mode nofallback --backend vs2019
-    cd debug
-    msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
-    echo Finished meson build
-  )
 )
