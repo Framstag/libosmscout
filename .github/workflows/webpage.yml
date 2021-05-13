@@ -27,7 +27,7 @@ jobs:
       - name: Generate static webpages using Hugo
         run: hugo --verbose
         working-directory: webpage
-      -name: Copy webpage content to sourcforge page
+      - name: Copy webpage content to sourcforge page
         run: lftp -c "open --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror -R -n --verbose=3 public ."
         if: ${{ secrets.SOURCEFORGE_USER != '' && secrets.SOURCEFORGE_PASSWORD != '' }}
         env:
