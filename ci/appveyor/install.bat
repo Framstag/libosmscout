@@ -35,11 +35,6 @@ IF %COMPILER%==msys2 (
   echo Installing git...
   bash -lc "pacman --noconfirm -S --needed git"
 
-  IF %BUILDTOOL%==meson (
-    echo Installing ninja and meson build tool...
-    bash -lc "pacman --noconfirm -S --needed mingw-w64-%MSYS2_ARCH%-meson mingw-w64-x86_64-ninja"
-  )
-
   IF %BUILDTOOL%==cmake (
     echo Installing cmake build tool...
     bash -lc "pacman --noconfirm -S --needed make mingw-w64-%MSYS2_ARCH%-cmake mingw-w64-%MSYS2_ARCH%-extra-cmake-modules"

@@ -16,12 +16,6 @@ IF %COMPILER%==msys2 (
   echo Compiling libosmscout using msys2...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
-  IF %BUILDTOOL%==meson (
-    echo Using build tool 'meson'...
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.exe debug -DenableMapCairo=false && cd debug && ninja"
-    echo Finished mason build
-  )
-
   IF %BUILDTOOL%==cmake (
     echo Using build tool 'cmake'...
     IF %TARGET%==importer (
