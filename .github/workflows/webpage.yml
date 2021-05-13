@@ -28,7 +28,7 @@ jobs:
         run: hugo --verbose
         working-directory: webpage
       - name: Copy webpage content to sourcforge page
-        run: ([ -n $SOURCEFORGE_USER ] && [ -n $SOURCEFORGE_PASSWORD ] && echo "Calling lftp..." && lftp -c "open --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror --reverse --parallel=20 --overwrite --delete --verbose=3 public .")
+        run: ([ -n $SOURCEFORGE_USER ] && [ -n $SOURCEFORGE_PASSWORD ] && echo "Calling lftp..." && lftp -c "open -d --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror --reverse --parallel=20 --overwrite --delete --verbose=3 public .")
         env:
           SOURCEFORGE_USER: ${{ secrets.SOURCEFORGE_USER }}
           SOURCEFORGE_PASSWORD: ${{ secrets.SOURCEFORGE_PASSWORD }}
