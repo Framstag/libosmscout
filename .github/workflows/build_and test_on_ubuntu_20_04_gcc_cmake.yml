@@ -17,8 +17,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
-      - name: Install gcc compiler, meson and ninja
-        run:  sudo apt-get -y install gcc-10 g++-10 libtbb-dev ccache libtool pkg-config meson ninja-build
+      - name: Install gcc compiler, cmake and ninja
+        run:  sudo apt-get -y install gcc-10 g++-10 libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                libxml2-dev
@@ -30,11 +30,12 @@ jobs:
                libglm-dev libglew-dev freeglut3 freeglut3-dev
                libmarisa-dev"
       - name: Configure build project
-        run:  meson setup debug
+        run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
         env:
           CXX: g++-10
           CC: gcc-10
       - name: Build project
-        run:  ninja -C debug
+        run: cmake --build build
       - name: Run tests
-        run:  meson test -C debug --print-errorlogs
+        run: ctest -j 2 --output-on-failure
+        working-directory: build
