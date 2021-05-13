@@ -24,15 +24,14 @@ jobs:
         with:
           setupOnly: true
           vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
-      - name: Dump environment
-        run:  set
-        shell: cmd
       - name: Installing zlib, iconv, libxml2...
         run: ${{ github.workspace }}\vcpkg\vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
       - name: Installing protobuf...
         run: ${{ github.workspace }}\vcpkg\vcpkg install protobuf:x64-windows
       - name: Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
         run: ${{ github.workspace }}\vcpkg\vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+      - name: Installing opengl, freeglut, glm, glew...
+        run: ${{ github.workspace }}\vcpkg\vcpkg install opengl:x64-windows freeglut:x64-windows glm:x64-windows glew:x64-windows glfw3:x64-windows
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
