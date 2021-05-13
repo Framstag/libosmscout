@@ -51,7 +51,7 @@ jobs:
         working-directory: build
 
   sanitize_gcc:
-    name: gcc and cmake
+    name: gcc
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
