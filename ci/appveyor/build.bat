@@ -22,6 +22,7 @@ IF %COMPILER%==msys2 (
       echo Building importer...
       bash -lc "set -x && cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
       appveyor PushArtifact build\libosmscout-importer-Windows-x86_64.zip
+    )
     echo Finished cmake build
   )
 )
