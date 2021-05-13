@@ -31,6 +31,7 @@ jobs:
         run: mkdir -p ~/.ssh/ && echo "web.sourceforge.net ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2uifHZbNexw6cXbyg1JnzDitL5VhYs0E65Hk/tLAPmcmm5GuiGeUoI/B0eUSNFsbqzwgwrttjnzKMKiGLN5CWVmlN1IXGGAfLYsQwK6wAu7kYFzkqP4jcwc5Jr9UPRpJdYIK733tSEmzab4qc5Oq8izKQKIaxXNe7FgmL15HjSpatFt9w/ot/CHS78FUAr3j3RwekHCm/jhPeqhlMAgC+jUgNJbFt3DlhDaRMa0NYamVzmX8D47rtmBbEDU3ld6AezWBPUR5Lh7ODOwlfVI58NAf/aYNlmvl2TZiauBCTa7OPYSyXJnIPbQXg6YQlDknNCr0K769EjeIlAfY87Z4tw==" >> ~/.ssh/known_hosts
       - name: Copy webpage content to sourcforge page
         run: ([ -n $SOURCEFORGE_USER ] && [ -n $SOURCEFORGE_PASSWORD ] && echo "Calling lftp..." && lftp -c "open -d --user $SOURCEFORGE_USER --password $SOURCEFORGE_PASSWORD sftp://web.sourceforge.net; cd /home/project-web/libosmscout/htdocs/; mirror --reverse --parallel=20 --overwrite --delete --verbose=3 public .")
+        working-directory: webpage
         env:
           SOURCEFORGE_USER: ${{ secrets.SOURCEFORGE_USER }}
           SOURCEFORGE_PASSWORD: ${{ secrets.SOURCEFORGE_PASSWORD }}
