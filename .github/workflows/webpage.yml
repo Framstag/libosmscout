@@ -1,0 +1,28 @@
+name: Sanitize
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  webpage:
+    name: webpage
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install additional tools
+        run: sudo apt-get install python3-pygments python-pygments doxygen lftp
+      - name: Download Hugo static webpage builder
+        run: wget https://github.com/gohugoio/hugo/releases/download/v0.76.5/hugo_0.76.5_Linux-64bit.deb
+      - name: Install Hugo...
+        run: sudo dpkg -i hugo_0.76.5_Linux-64bit.deb
+      - name: Generate doxygen documentation
+        run: ( cat doxygen.cfg ; echo "OUTPUT_DIRECTORY=webpage/static/api-doc" ) | doxygen -
+      - name: Generate static webpages using Hugo
+        run: hugo --verbose
+        working-directory: webpage
