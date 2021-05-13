@@ -42,7 +42,3 @@ if [ "${BUILDTOOL}" = "cmake" ] ; then
     apt-get install -y \
           cmake
 fi
-if [ "${BUILDTOOL}" = "meson" ] ; then
-    apt-get install -y \
-          meson
-fi
