@@ -1,4 +1,4 @@
-name: Ubuntu 20.04 using gcc and meson
+name: Ubuntu 20.04 using gcc and cmake
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Ubuntu+gcc+meson - Build and test
+    name: Ubuntu+gcc+cmake - Build and test
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
