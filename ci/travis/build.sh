@@ -11,17 +11,7 @@ locale
 echo "Build start time: $(date)"
 
 if [ "$TARGET" = "build" ]; then
-  if [ "$BUILDTOOL" = "meson" ]; then
-    # Travis currently cannot build clang + OpenMP (https://github.com/travis-ci/travis-ci/issues/8613)
-    if [ "$CXX" = "clang++" ]; then
-      meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
-    else
-      meson setup --buildtype debugoptimized --unity on debug
-    fi
-
-    meson compile -C debug
-    meson test -C debug --print-errorlogs
-  elif [ "$BUILDTOOL" = "cmake" ]; then
+  if [ "$BUILDTOOL" = "cmake" ]; then
     mkdir build
     # cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G Ninja .
     (cd build && cmake -Wno-dev -G Ninja ..)

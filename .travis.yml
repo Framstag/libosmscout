@@ -11,21 +11,7 @@ matrix:
       sudo: required
       compiler: gcc
       env:
-        - BUILDTOOL=meson
-        - TARGET=build
-    - os: linux
-      dist: bionic
-      sudo: required
-      compiler: gcc
-      env:
         - BUILDTOOL=cmake
-        - TARGET=build
-    - os: linux
-      dist: bionic
-      sudo: required
-      compiler: clang
-      env:
-        - BUILDTOOL=meson
         - TARGET=build
     - os: linux
       dist: bionic

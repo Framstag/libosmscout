@@ -17,17 +17,7 @@ if [ "$TARGET" = "build" ]; then
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get -qq update
 
-    if [ "$BUILDTOOL" = "meson" ]; then
-      echo "Installing ninja, python and meson..."
-      sudo apt-get update
-      sudo apt-get install -y \
-        ninja-build \
-        build-essential python3-pip \
-        python3 python3-setuptools
-
-      echo "Installing meson..."
-      pip3 install --user meson
-    elif [ "$BUILDTOOL" = "cmake" ]; then
+    if [ "$BUILDTOOL" = "cmake" ]; then
       sudo apt-get install -y cmake ninja-build
     fi
 
