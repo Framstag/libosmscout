@@ -1,0 +1,70 @@
+name: Visual Studio 2019
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build_cmake:
+    name: cmake
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+        # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
+      - name: Restore from cache and install vcpkg
+        # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
+        uses: lukka/run-vcpkg@v6
+        with:
+          setupOnly: true
+          vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+      - name: Installing zlib, iconv, libxml2...
+        run: ${{ github.workspace }}\vcpkg\vcpkg install zlib:x64-windows libiconv:x64-windows libxml2:x64-windows
+      - name: Installing protobuf...
+        run: ${{ github.workspace }}\vcpkg\vcpkg install protobuf:x64-windows
+      - name: Installing pixman, expat, fontconfig, cairo, harfbuzz, pango...
+        run: ${{ github.workspace }}\vcpkg\vcpkg install pixman:x64-windows expat:x64-windows fontconfig:x64-windows cairo:x64-windows harfbuzz:x64-windows pango:x64-windows
+      - name: Installing opengl, freeglut, glm, glew...
+        run: ${{ github.workspace }}\vcpkg\vcpkg install opengl:x64-windows freeglut:x64-windows glm:x64-windows glew:x64-windows glfw3:x64-windows
+      - name: Create build directory
+        run:  mkdir build
+      - name: Configure build project
+        run:  cmake -G "Visual Studio 16 2019" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
+        working-directory: build
+      - name: Build project
+        run: cmake --build build
+
+  build_meson:
+    name: meson
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python 3.x for meson
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Install meson and ninja
+        run:  pip install meson ninja
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+      - name: Configure build project
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false build
+      - name: Dump found dependencies
+        run:  meson introspect --dependencies
+        working-directory: build
+      - name: Build project
+        run:  meson compile -C build
+      - name: Test project
+        run:  meson test -C build --print-errorlogs

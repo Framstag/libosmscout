@@ -9,27 +9,6 @@ matrix:
     - os: linux
       dist: bionic
       sudo: required
-      compiler: gcc
-      env:
-        - BUILDTOOL=meson
-        - TARGET=build
-    - os: linux
-      dist: bionic
-      sudo: required
-      compiler: gcc
-      env:
-        - BUILDTOOL=cmake
-        - TARGET=build
-    - os: linux
-      dist: bionic
-      sudo: required
-      compiler: clang
-      env:
-        - BUILDTOOL=meson
-        - TARGET=build
-    - os: linux
-      dist: bionic
-      sudo: required
       env:
         - TARGET=website
         - secure: "Oeondq8ZTLy7Msjr8ZaoWhwk0Ra1aQbz8H2NBgnhoovJk/128XS4cy4/8LAavQAEDE2Urblnq946qTrLGHcmKBhBU/727dcDCHd6OD44rY5gBrM/oRmZBePAp8tujj/47iBeGvRR/WWk6qkh3+v6efqK5sOW8Y9wkvEkKawz3iD34k2RqCeeQR0a4uC1PshOUokSd4AWf4ppMKjou4Xu+Dq0sgT4e2dxvcvfb9D43E2sULXBolF4G7jw7ud0DfyMSltYhATrUfI7pj80vYVs3s5uKkuaAq8g2toA30WrmmjrkKYB3QTsxrLNX4vRxggp1lsCheotcG0tLSY8f8R9bt7vuZC69CaAhAXcc4xVBY/RGgcoOn7oBsS04l2QD/TgStnvUmuwevdk1LtSZbu6g8jk+xihn7E/7FzWGkF9G+X6lRW6Bz0Dq4UWHoQiYr/2gx7xQv+PDfc5xf5I6vh2ORFRb/BRBwiDPE1tZY94TRcZRNqPxhsXvypMugRWXqlKqmdT786hQdwvkfndhI7wH5HQDVHMF6Vc4iy7GgnShlaarGWipR7x/fLOnJmj6vbMp/oSr7CTyzqm5Aaoqx2NasvBVMRem/gyYESt82oC2WKclw7f/Rk4e3h0g5mum82n9hleeMlyRdd4lsLSR+v3gb7fsXixYwJAnM69KOzppEQ="

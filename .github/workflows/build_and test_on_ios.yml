@@ -1,4 +1,4 @@
-name: OS X and cmake
+name: iOS
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  build:
-    name: OSX+cmake - Build and test
+  build_cmake:
+    name: cmake
     runs-on: macos-10.15
     steps:
       - name: Checkout
@@ -20,9 +20,6 @@ jobs:
       - name: Install dependencies
         run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
       - name: Configure build project
-        run: cmake -B build -DCMAKE_PREFIX_PATH=/usr/local/opt/qt -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
+        run: cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -DCMAKE_UNITY_BUILD=ON -Wno-dev
       - name: Build project
         run: cmake --build build
-      - name: Run tests
-        run: ctest -j 2 --output-on-failure
-        working-directory: build

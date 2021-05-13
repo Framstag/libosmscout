@@ -10,8 +10,8 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 endif()
 
 # global settings
-set(CMAKE_CXX_STANDARD 17) 
-set(CMAKE_CXX_STANDARD_REQUIRED ON) 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -640,6 +640,7 @@ message(STATUS " - Java binding:                 ${OSMSCOUT_BUILD_BINDING_JAVA}"
 message(STATUS " - C# binding:                   ${OSMSCOUT_BUILD_BINDING_CSHARP}")
 message(STATUS "external interfaces:")
 message(STATUS " - MATLAB mex function:          ${OSMSCOUT_BUILD_EXTERN_MATLAB}")
+message(STATUS "doxygen:                         ${DOXYGEN_FOUND}")
 message(STATUS "documentation:                   ${OSMSCOUT_BUILD_DOC_API}")
 message(STATUS "webpage:                         ${OSMSCOUT_BUILD_WEBPAGE}")
 if(CCACHE_PROGRAM)

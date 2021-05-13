@@ -16,39 +16,13 @@ IF %COMPILER%==msys2 (
   echo Compiling libosmscout using msys2...
   SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
-  IF %BUILDTOOL%==meson (
-    echo Using build tool 'meson'...
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && meson.exe debug -DenableMapCairo=false && cd debug && ninja"
-    echo Finished mason build
-  )
-
   IF %BUILDTOOL%==cmake (
     echo Using build tool 'cmake'...
     IF %TARGET%==importer (
       echo Building importer...
       bash -lc "set -x && cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && . packaging/import/windows/build_import.sh"
       appveyor PushArtifact build\libosmscout-importer-Windows-x86_64.zip
-    ) ELSE (
-      echo Standard cmake build...
-      bash -lc "set -x && cd ${APPVEYOR_BUILD_FOLDER} && . setupMSYS2.sh && exec 0</dev/null && mkdir build && cd build && CXX=g++ CC=gcc cmake -G 'MSYS Makefiles' .. && cmake -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -LAH -Wno-dev .. && make -j2"
     )
-    echo Finished cmake build
-  )
-)
-
-IF %COMPILER%==msvc2019 (
-  @echo on
-  echo Compiling libosmscout using Visual Studio 2019...
-
-  echo Initializing Visual Studio command line build environment
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-
-  IF %BUILDTOOL%==cmake (
-    echo Using build tool 'cmake'...
-    mkdir build
-    cd build
-    cmake -G "Visual Studio 16 2019" -A x64 .. -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0  -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev
-    cmake --build .
     echo Finished cmake build
   )
 )
