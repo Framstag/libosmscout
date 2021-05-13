@@ -1,4 +1,4 @@
-name: Windows using Visual Studio 2019 and cmake
+name: Visual Studio 2019
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  build:
-    name: Windows+Visual_Studio+cmake - Build and test
+  build_cmake:
+    name: cmake
     runs-on: windows-2019
     steps:
       - name: Checkout
@@ -39,3 +39,32 @@ jobs:
         working-directory: build
       - name: Build project
         run: cmake --build build
+
+  build_meson:
+    name: meson
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python 3.x for meson
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Install meson and ninja
+        run:  pip install meson ninja
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+      - name: Configure build project
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false build
+      - name: Dump found dependencies
+        run:  meson introspect --dependencies
+        working-directory: build
+      - name: Build project
+        run:  meson compile -C build
+      - name: Test project
+        run:  meson test -C build --print-errorlogs
