@@ -60,7 +60,7 @@ jobs:
                libglm-dev libglew-dev freeglut3 freeglut3-dev
                libmarisa-dev"
       - name: Configure build project
-        run:  meson setup debug
+        run:  meson setup --buildtype debugoptimized --unity on debug
         env:
           CXX: g++-10
           CC: gcc-10
