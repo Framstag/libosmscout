@@ -1,4 +1,4 @@
-name: Ubuntu 20.04
+name: Sonar
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   sonar_gcc_meson:
-    name: gcc and meson
+    name: sonar, gcc and meson
     runs-on: ubuntu-20.04
     environment: SONAR
     steps:
