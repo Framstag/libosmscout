@@ -77,11 +77,6 @@ namespace osmscout {
     return *this;
   }
 
-  Logger::Logger()
-  {
-    // no code
-  }
-
   Logger::Line Logger::Debug()
   {
     return Log(DEBUG);
@@ -100,10 +95,6 @@ namespace osmscout {
   Logger::Line Logger::Error()
   {
     return Log(ERROR);
-  }
-
-  Logger::Destination::Destination()
-  {
   }
 
   StreamLogger::StreamDestination::StreamDestination(std::ostream& stream)

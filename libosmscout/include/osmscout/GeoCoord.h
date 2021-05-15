@@ -259,7 +259,7 @@ namespace osmscout {
     * @note
     *    The difference in height between the two points is neglected.
     */
-    GeoCoord Add(const Bearing &bearing, const Distance &distance);
+    GeoCoord Add(const Bearing &bearing, const Distance &distance) const;
 
     /**
      * Return true if both coordinates are equals (using == operator)

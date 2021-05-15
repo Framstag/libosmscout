@@ -72,7 +72,7 @@ namespace osmscout {
    */
   GeoBox TileId::GetBoundingBox(const MagnificationLevel& level) const
   {
-    auto& ourCellDimension=cellDimension[level.Get()];
+    const auto& ourCellDimension=cellDimension[level.Get()];
 
     return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
                            x*ourCellDimension.width-180.0),
@@ -92,7 +92,7 @@ namespace osmscout {
    */
   GeoBox TileId::GetBoundingBox(const Magnification& magnification) const
   {
-    auto& ourCellDimension=cellDimension[magnification.GetLevel()];
+   const auto& ourCellDimension=cellDimension[magnification.GetLevel()];
 
     return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
                            x*ourCellDimension.width-180.0),

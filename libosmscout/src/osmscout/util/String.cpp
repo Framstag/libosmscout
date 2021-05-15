@@ -125,7 +125,7 @@ namespace osmscout {
       }
 
       // flush the iconv buffer,
-      iconv(handle, NULL, NULL, &tmpOut, &tmpOutCountBytes);
+      iconv(handle, nullptr, nullptr, &tmpOut, &tmpOutCountBytes);
 
       OutString res=outBuff.data();
       return res;

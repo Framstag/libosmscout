@@ -23,8 +23,8 @@ namespace osmscout {
 
     uint32_t val = 0;
     int32_t valb = -6;
-    for (size_t jj = 0; jj < in.size(); jj++) {
-      unsigned char c = (unsigned char)in[jj];
+    for (char jj : in) {
+      unsigned char c = (unsigned char)jj;
       val = (val << 8) + c;
       valb += 8;
       while (valb >= 0) {
@@ -32,8 +32,14 @@ namespace osmscout {
         valb -= 6;
       }
     }
-    if (valb > -6) out.push_back(Base64Chars[((val << 8) >> (valb + 8)) & 0x3F]);
-    while (out.size() % 4) out.push_back('=');
+    if (valb > -6) {
+      out.push_back(Base64Chars[((val << 8) >> (valb + 8)) & 0x3F]);
+    }
+
+    while ((out.size() % 4)!=0) {
+      out.push_back('=');
+    }
+
     return out;
   }
 
@@ -47,12 +53,14 @@ namespace osmscout {
 
     uint32_t val = 0;
     int32_t valb = -8;
-    for (size_t jj = 0; jj < in.size(); jj++) {
-      char c = in[jj];
-      if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+    for (char c : in) {
+      if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
         continue; // skip whitespaces
-      if (T[c] == -1)
+      }
+
+      if (T[c] == -1) {
         break; // terminate on invalid character
+      }
 
       val = (val << 6) + T[c];
       valb += 6;

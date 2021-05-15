@@ -44,7 +44,7 @@ namespace osmscout {
 
     Bearing(const Bearing &d) = default;
 
-    inline Bearing& operator=(const Bearing &d) = default;
+    Bearing& operator=(const Bearing &d) = default;
 
     inline Bearing(Bearing &&d) noexcept
     {
