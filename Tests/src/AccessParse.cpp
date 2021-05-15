@@ -150,7 +150,7 @@ void CheckParseSuccess(bool canFoot,
 
   osmscout::AccessFeatureValueReader accessValueReader(typeConfig);
 
-  osmscout::AccessFeatureValue *accessFeatureValue=accessValueReader.GetValue(buffer);
+  const osmscout::AccessFeatureValue *accessFeatureValue=accessValueReader.GetValue(buffer);
 
   if (accessFeatureValue!=nullptr) {
     actualAccessValue=accessFeatureValue->GetAccess();

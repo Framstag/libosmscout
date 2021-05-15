@@ -25,10 +25,11 @@
 #include <string>
 
 #include <osmscout/system/Assert.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API Color
+  class OSMSCOUT_API Color CLASS_FINAL
   {
   public:
     static const Color BLACK;
@@ -69,6 +70,7 @@ namespace osmscout {
 
   public:
     Color() = default;
+    ~Color() = default;
 
     inline Color(double r,
                  double g,
@@ -99,13 +101,7 @@ namespace osmscout {
       assert(a>=0.0 && a<=1.0);
     }
 
-    inline Color(const Color& other)
-    {
-      this->r=other.r;
-      this->g=other.g;
-      this->b=other.b;
-      this->a=other.a;
-    }
+    Color(const Color& other) = default;
 
     inline Color& operator=(const Color& other)
     {

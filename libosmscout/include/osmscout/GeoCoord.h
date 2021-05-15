@@ -76,9 +76,9 @@ namespace osmscout {
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */
-    inline GeoCoord() = default;
+    GeoCoord() = default;
 
-    inline GeoCoord(const GeoCoord& other) = default;
+    GeoCoord(const GeoCoord& other) = default;
 
     /**
      * Initialize the coordinate with the given latitude and longitude values.
@@ -285,7 +285,7 @@ namespace osmscout {
     /**
      * Assign the value of other
      */
-    inline GeoCoord& operator=(const GeoCoord& other) = default;
+    GeoCoord& operator=(const GeoCoord& other) = default;
 
     inline Distance operator-(const GeoCoord& other) const
     {

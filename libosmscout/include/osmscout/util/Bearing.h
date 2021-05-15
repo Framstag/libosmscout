@@ -41,6 +41,7 @@ namespace osmscout {
 
   public:
     Bearing() = default;
+    ~Bearing() = default;
 
     Bearing(const Bearing &d) = default;
 

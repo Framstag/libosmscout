@@ -71,7 +71,7 @@ namespace osmscout {
 
   public:
     ConsoleProgress() = default;
-    virtual ~ConsoleProgress() = default;
+    ~ConsoleProgress() override = default;
 
     void SetStep(const std::string& step) override;
     void SetAction(const std::string& action) override;

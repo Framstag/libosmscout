@@ -45,14 +45,14 @@ namespace osmscout {
     {
     }
 
-    inline MagnificationLevel(const MagnificationLevel& level) = default;
+    MagnificationLevel(const MagnificationLevel& level) = default;
 
     inline uint32_t Get() const
     {
       return level;
     }
 
-    inline MagnificationLevel& operator=(const MagnificationLevel& other) = default;
+    MagnificationLevel& operator=(const MagnificationLevel& other) = default;
 
     inline MagnificationLevel& operator++()
     {
@@ -166,6 +166,7 @@ namespace osmscout {
 
   public:
     Magnification() = default;
+    ~Magnification() = default;
 
     Magnification(const Magnification& other) = default;
 

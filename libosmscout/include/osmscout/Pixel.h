@@ -188,7 +188,7 @@ namespace osmscout {
      */
     Vertex3D() = default;
 
-    inline Vertex3D(const Vertex3D& other) = default;
+    Vertex3D(const Vertex3D& other) = default;
 
     inline Vertex3D(double x,
                     double y)

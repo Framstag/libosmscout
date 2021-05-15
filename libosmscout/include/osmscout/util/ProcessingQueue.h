@@ -59,7 +59,7 @@ namespace osmscout {
     std::condition_variable pushCondition;
     std::condition_variable popCondition;
     std::deque<T>           tasks;
-    size_t                  queueLimit;
+    size_t                  queueLimit=std::numeric_limits<size_t>::max();
     bool                    running{true};
 
   public:
@@ -84,11 +84,7 @@ namespace osmscout {
    * @tparam T
    */
   template<class T>
-  ProcessingQueue<T>::ProcessingQueue()
-    : queueLimit(std::numeric_limits<size_t>::max())
-  {
-    // no code
-  }
+  ProcessingQueue<T>::ProcessingQueue() = default;
 
   /**
    * Initialize a bounded queue. The queue is guaranteed to hold no more than the given

@@ -363,7 +363,7 @@ namespace osmscout {
                      const std::string& helpString)
       : helpString(helpString)
       {
-        argTemplates.push_back((argTemplate));
+        argTemplates.push_back(argTemplate);
       }
 
       CmdLineArgHelp(const std::vector<std::string>& argTemplates,
