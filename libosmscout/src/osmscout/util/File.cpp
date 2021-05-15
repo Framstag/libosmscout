@@ -216,7 +216,7 @@ namespace osmscout {
 
       fclose(file);
 
-    } catch (IOException& e) {
+    } catch (const IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }

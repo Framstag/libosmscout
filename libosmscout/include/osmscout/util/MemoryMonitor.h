@@ -42,10 +42,10 @@ namespace osmscout {
   class OSMSCOUT_API MemoryMonitor CLASS_FINAL
   {
   private:
-    std::atomic<bool> quit;
+    std::atomic<bool> quit=false;
     std::mutex        mutex;
-    double            maxVMUsage;
-    double            maxResidentSet;
+    double            maxVMUsage=0.0;
+    double            maxResidentSet=0.0;
     std::thread       thread;
 
   private:

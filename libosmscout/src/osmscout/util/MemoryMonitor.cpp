@@ -32,10 +32,7 @@
 namespace osmscout {
 
   MemoryMonitor::MemoryMonitor()
-  : quit(false),
-    maxVMUsage(0.0),
-    maxResidentSet(0.0),
-    thread(&MemoryMonitor::BackgroundJob,this)
+  : thread(&MemoryMonitor::BackgroundJob,this)
   {
     // no code
   }
@@ -83,8 +80,8 @@ namespace osmscout {
 
     long pageSizeInByte=sysconf(_SC_PAGE_SIZE);
 
-    currentVMUsage=vsize*pageSizeInByte;
-    currentResidentSet=rss*pageSizeInByte;
+    currentVMUsage=vsize*double(pageSizeInByte);
+    currentResidentSet=rss*double(pageSizeInByte);
 #endif
 
     maxVMUsage=std::max(maxVMUsage,currentVMUsage);

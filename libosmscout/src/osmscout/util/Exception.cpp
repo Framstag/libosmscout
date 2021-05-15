@@ -54,9 +54,9 @@ namespace osmscout {
                            const std::string& semanticError,
                            const std::system_error& error)
     : filename(filename),
-      semanticError(semanticError)
+      semanticError(semanticError),
+      errorMsg(error.code().message())
   {
-    errorMsg=error.code().message();
 
     if (!errorMsg.empty()) {
       description="File '" + filename +"' - " + semanticError+": " + errorMsg;
@@ -70,10 +70,9 @@ namespace osmscout {
                            const std::string& semanticError,
                            const std::exception& error)
     : filename(filename),
-      semanticError(semanticError)
+      semanticError(semanticError),
+      errorMsg(error.what())
   {
-    errorMsg=error.what();
-
     if (!errorMsg.empty()) {
       description="File '" + filename +"' - " + semanticError+": " + errorMsg;
     }
