@@ -27,17 +27,6 @@
 
 namespace osmscout {
 
-  /**
-   * The default constructor creates an invalid instance.
-   */
-  GeoBox::GeoBox()
-  : minCoord(0.0,0.0),
-    maxCoord(0.0,0.0),
-    valid(false)
-  {
-    // no code
-  }
-
   GeoBox::GeoBox(const GeoCoord& coordA,
                  const GeoCoord& coordB)
   : minCoord(std::min(coordA.GetLat(),coordB.GetLat()),

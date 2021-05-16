@@ -182,8 +182,7 @@ namespace osmscout {
   }
 
   Database::Database(const DatabaseParameter& parameter)
-   : parameter(parameter),
-     isOpen(false)
+   : parameter(parameter)
   {
     log.Debug() << "Database::Database()";
   }
@@ -291,7 +290,7 @@ namespace osmscout {
 
   BoundingBoxDataFileRef Database::GetBoundingBoxDataFile() const
   {
-    std::lock_guard<std::mutex> guard(boundingBoxDataFileMutex);
+    std::lock_guard guard(boundingBoxDataFileMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -319,7 +318,7 @@ namespace osmscout {
 
   NodeDataFileRef Database::GetNodeDataFile() const
   {
-    std::lock_guard<std::mutex> guard(nodeDataFileMutex);
+    std::scoped_lock<std::mutex> guard(nodeDataFileMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -349,7 +348,7 @@ namespace osmscout {
 
   AreaDataFileRef Database::GetAreaDataFile() const
   {
-    std::lock_guard<std::mutex> guard(areaDataFileMutex);
+    std::scoped_lock<std::mutex> guard(areaDataFileMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -379,7 +378,7 @@ namespace osmscout {
 
   WayDataFileRef Database::GetWayDataFile() const
   {
-    std::lock_guard<std::mutex> guard(wayDataFileMutex);
+    std::scoped_lock<std::mutex> guard(wayDataFileMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -409,7 +408,7 @@ namespace osmscout {
 
   RouteDataFileRef Database::GetRouteDataFile() const
   {
-    std::lock_guard<std::mutex> guard(routeDataFileMutex);
+    std::scoped_lock<std::mutex> guard(routeDataFileMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -439,7 +438,7 @@ namespace osmscout {
 
   AreaNodeIndexRef Database::GetAreaNodeIndex() const
   {
-    std::lock_guard<std::mutex> guard(areaNodeIndexMutex);
+    std::scoped_lock<std::mutex> guard(areaNodeIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -467,7 +466,7 @@ namespace osmscout {
 
   AreaAreaIndexRef Database::GetAreaAreaIndex() const
   {
-    std::lock_guard<std::mutex> guard(areaAreaIndexMutex);
+    std::scoped_lock<std::mutex> guard(areaAreaIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -495,7 +494,7 @@ namespace osmscout {
 
   AreaWayIndexRef Database::GetAreaWayIndex() const
   {
-    std::lock_guard<std::mutex> guard(areaWayIndexMutex);
+    std::scoped_lock<std::mutex> guard(areaWayIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -525,7 +524,7 @@ namespace osmscout {
 
   AreaRouteIndexRef Database::GetAreaRouteIndex() const
   {
-    std::lock_guard<std::mutex> guard(areaRouteIndexMutex);
+    std::scoped_lock<std::mutex> guard(areaRouteIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -555,7 +554,7 @@ namespace osmscout {
 
   LocationIndexRef Database::GetLocationIndex() const
   {
-    std::lock_guard<std::mutex> guard(locationIndexMutex);
+    std::scoped_lock<std::mutex> guard(locationIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -583,7 +582,7 @@ namespace osmscout {
 
   WaterIndexRef Database::GetWaterIndex() const
   {
-    std::lock_guard<std::mutex> guard(waterIndexMutex);
+    std::scoped_lock<std::mutex> guard(waterIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -611,7 +610,7 @@ namespace osmscout {
 
   SRTMRef Database::GetSRTMIndex() const
   {
-    std::lock_guard<std::mutex> guard(srtmIndexMutex);
+    std::scoped_lock<std::mutex> guard(srtmIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -632,7 +631,7 @@ namespace osmscout {
 
   OptimizeAreasLowZoomRef Database::GetOptimizeAreasLowZoom() const
   {
-    std::lock_guard<std::mutex> guard(optimizeAreasMutex);
+    std::scoped_lock<std::mutex> guard(optimizeAreasMutex);
 
     if (!IsOpen()) {
       return nullptr;
@@ -663,7 +662,7 @@ namespace osmscout {
 
   OptimizeWaysLowZoomRef Database::GetOptimizeWaysLowZoom() const
   {
-    std::lock_guard<std::mutex> guard(optimizeWaysMutex);
+    std::scoped_lock<std::mutex> guard(optimizeWaysMutex);
 
     if (!optimizeWaysLowZoom) {
       optimizeWaysLowZoom=std::make_shared<OptimizeWaysLowZoom>();
@@ -908,7 +907,7 @@ namespace osmscout {
     return result;
   }
 
-  void Database::DumpStatistics()
+  void Database::DumpStatistics() const
   {
     if (areaAreaIndex) {
       areaAreaIndex->DumpStatistics();
@@ -926,35 +925,35 @@ namespace osmscout {
   void Database::FlushCache()
   {
     {
-      std::lock_guard<std::mutex> guard(nodeDataFileMutex);
+      std::scoped_lock<std::mutex> guard(nodeDataFileMutex);
       if (nodeDataFile){
         nodeDataFile->FlushCache();
       }
     }
 
     {
-      std::lock_guard<std::mutex> guard(areaDataFileMutex);
+      std::scoped_lock<std::mutex> guard(areaDataFileMutex);
       if (areaDataFile){
         areaDataFile->FlushCache();
       }
     }
 
     {
-      std::lock_guard<std::mutex> guard(wayDataFileMutex);
+      std::scoped_lock<std::mutex> guard(wayDataFileMutex);
       if (wayDataFile){
         wayDataFile->FlushCache();
       }
     }
 
     {
-      std::lock_guard<std::mutex> guard(areaAreaIndexMutex);
+      std::scoped_lock<std::mutex> guard(areaAreaIndexMutex);
       if (areaAreaIndex){
         areaAreaIndex->FlushCache();
       }
     }
 
     {
-      std::lock_guard<std::mutex> guard(locationIndexMutex);
+      std::scoped_lock<std::mutex> guard(locationIndexMutex);
       if (locationIndex){
         locationIndex->FlushCache();
       }
@@ -964,7 +963,7 @@ namespace osmscout {
 
   NodeRegionSearchResult Database::LoadNodesInRadius(const GeoCoord& location,
                                                      const TypeInfoSet& types,
-                                                     Distance maxDistance)
+                                                     Distance maxDistance) const
   {
     AreaNodeIndexRef areaNodeIndex=GetAreaNodeIndex();
 
@@ -1016,7 +1015,7 @@ namespace osmscout {
 
   WayRegionSearchResult Database::LoadWaysInRadius(const GeoCoord& location,
                                                    const TypeInfoSet& types,
-                                                   Distance maxDistance)
+                                                   Distance maxDistance) const
   {
     AreaWayIndexRef areaWayIndex=GetAreaWayIndex();
 
@@ -1097,7 +1096,7 @@ namespace osmscout {
 
   AreaRegionSearchResult Database::LoadAreasInRadius(const GeoCoord& location,
                                                      const TypeInfoSet& types,
-                                                     Distance maxDistance)
+                                                     Distance maxDistance) const
   {
     AreaAreaIndexRef areaAreaIndex=GetAreaAreaIndex();
 
@@ -1204,7 +1203,7 @@ namespace osmscout {
   }
 
   NodeRegionSearchResult Database::LoadNodesInArea(const TypeInfoSet& types,
-                                                   const GeoBox& boundingBox)
+                                                   const GeoBox& boundingBox) const
   {
     AreaNodeIndexRef areaNodeIndex=GetAreaNodeIndex();
 
@@ -1253,7 +1252,7 @@ namespace osmscout {
   }
 
   WayRegionSearchResult Database::LoadWaysInArea(const TypeInfoSet& types,
-                                                 const GeoBox& boundingBox)
+                                                 const GeoBox& boundingBox) const
   {
     AreaWayIndexRef areaWayIndex=GetAreaWayIndex();
 
@@ -1330,7 +1329,7 @@ namespace osmscout {
   }
 
   AreaRegionSearchResult Database::LoadAreasInArea(const TypeInfoSet& types,
-                                                   const GeoBox& boundingBox)
+                                                   const GeoBox& boundingBox) const
   {
     AreaAreaIndexRef areaAreaIndex=GetAreaAreaIndex();
 

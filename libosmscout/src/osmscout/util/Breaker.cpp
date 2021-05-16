@@ -21,12 +21,6 @@
 
 namespace osmscout {
 
-  ThreadedBreaker::ThreadedBreaker()
-  : aborted(false)
-  {
-
-  }
-
   void ThreadedBreaker::Break()
   {
     aborted=true;

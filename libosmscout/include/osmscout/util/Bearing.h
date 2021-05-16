@@ -41,10 +41,11 @@ namespace osmscout {
 
   public:
     Bearing() = default;
+    ~Bearing() = default;
 
     Bearing(const Bearing &d) = default;
 
-    inline Bearing& operator=(const Bearing &d) = default;
+    Bearing& operator=(const Bearing &d) = default;
 
     inline Bearing(Bearing &&d) noexcept
     {

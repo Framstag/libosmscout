@@ -299,7 +299,7 @@ namespace osmscout {
     DatabaseParameter               parameter;                //!< Parameterization of this database object
 
     std::string                     path;                     //!< Path to the directory containing all files
-    bool                            isOpen;                   //!< true, if opened
+    bool                            isOpen=false;             //!< true, if opened
 
     TypeConfigRef                   typeConfig;               //!< Type config for the currently opened map
 
@@ -369,7 +369,7 @@ namespace osmscout {
 
   public:
     explicit Database(const DatabaseParameter& parameter);
-    virtual ~Database();
+    ~Database();
 
     bool Open(const std::string& path);
     bool IsOpen() const;
@@ -470,7 +470,7 @@ namespace osmscout {
      */
     NodeRegionSearchResult LoadNodesInRadius(const GeoCoord& location,
                                              const TypeInfoSet& types,
-                                             Distance maxDistance=Distance::Of<Meter>(100));
+                                             Distance maxDistance=Distance::Of<Meter>(100)) const;
 
     /**
      * Load ways of given types with maximum distance to the given coordinate.
@@ -486,7 +486,7 @@ namespace osmscout {
      */
     WayRegionSearchResult LoadWaysInRadius(const GeoCoord& location,
                                            const TypeInfoSet& types,
-                                           Distance maxDistance=Distance::Of<Meter>(100));
+                                           Distance maxDistance=Distance::Of<Meter>(100)) const;
 
     /**
      * Load areas of given types with maximum distance to the given coordinate.
@@ -502,7 +502,7 @@ namespace osmscout {
      */
     AreaRegionSearchResult LoadAreasInRadius(const GeoCoord& location,
                                              const TypeInfoSet& types,
-                                             Distance maxDistance=Distance::Of<Meter>(100));
+                                             Distance maxDistance=Distance::Of<Meter>(100)) const;
 
     /**
      * Load nodes of given types in the given geo box
@@ -516,7 +516,7 @@ namespace osmscout {
      * @throws OSMScoutException in case of errors
      */
     NodeRegionSearchResult LoadNodesInArea(const TypeInfoSet& types,
-                                           const GeoBox& boundingBox);
+                                           const GeoBox& boundingBox) const;
 
     /**
      * Load ways of given types in the given geo box.
@@ -530,7 +530,7 @@ namespace osmscout {
      * @throws OSMScoutException in case of errors
      */
     WayRegionSearchResult LoadWaysInArea(const TypeInfoSet& types,
-                                         const GeoBox& boundingBox);
+                                         const GeoBox& boundingBox) const;
 
     /**
      * Load areas of given types in the given geo box.
@@ -544,9 +544,9 @@ namespace osmscout {
      * @throws OSMScoutException in case of errors
      */
     AreaRegionSearchResult LoadAreasInArea(const TypeInfoSet& types,
-                                           const GeoBox& boundingBox);
+                                           const GeoBox& boundingBox) const;
 
-    void DumpStatistics();
+    void DumpStatistics() const;
 
     void FlushCache();
   };

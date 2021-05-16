@@ -54,7 +54,7 @@ namespace osmscout {
         scanner.Close();
       }
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
     }
@@ -66,7 +66,7 @@ namespace osmscout {
                                    FileOffset &dataOffset) const
   {
     if (level<maxLevel) {
-      std::lock_guard<std::mutex> guard(lookupMutex);
+      std::scoped_lock<std::mutex> guard(lookupMutex);
       IndexCache::CacheRef        cacheRef;
 
 #if defined(ANALYZE_CACHE)
@@ -120,7 +120,7 @@ namespace osmscout {
                                    FileOffset dataOffset,
                                    std::vector<DataBlockSpan>& spans) const
   {
-    std::lock_guard<std::mutex> guard(lookupMutex);
+    std::scoped_lock<std::mutex> guard(lookupMutex);
 
     scanner.SetPos(dataOffset);
 
@@ -229,7 +229,7 @@ namespace osmscout {
 
       return !scanner.HasError();
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
 
       return false;
@@ -341,7 +341,7 @@ namespace osmscout {
         std::swap(cellRefs,nextCellRefs);
       }
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
 
       return false;
@@ -361,13 +361,13 @@ namespace osmscout {
 
   void AreaAreaIndex::DumpStatistics()
   {
-    std::lock_guard<std::mutex> guard(lookupMutex);
+    std::scoped_lock<std::mutex> guard(lookupMutex);
     indexCache.DumpStatistics(AREA_AREA_IDX,IndexCacheValueSizer());
   }
 
   void AreaAreaIndex::FlushCache()
   {
-    std::lock_guard<std::mutex> guard(lookupMutex);
+    std::scoped_lock<std::mutex> guard(lookupMutex);
     indexCache.Flush();
   }
 }

@@ -73,7 +73,7 @@ namespace osmscout {
     return typeConfig;
   }
 
-  bool DebugDatabase::GetCoords(std::set<OSMId>& ids,
+  bool DebugDatabase::GetCoords(const std::set<OSMId>& ids,
                                 CoordDataFile::ResultMap& coordsMap) const
   {
     CoordDataFile dataFile;
@@ -126,7 +126,7 @@ namespace osmscout {
 
       return true;
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
 

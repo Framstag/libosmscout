@@ -625,8 +625,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read int16_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&mmap[offset];
-      int16_t add;
+      const char *dataPtr=&mmap[offset];
+      int16_t    add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -651,8 +651,8 @@ namespace osmscout {
       throw IOException(filename,"Cannot read int16_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    int16_t       add;
+    const unsigned char *dataPtr=buffer.data();
+    int16_t             add;
 
     add=(unsigned char)(*dataPtr);
     add=add << 0;
@@ -1495,7 +1495,7 @@ namespace osmscout {
         throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
-      char       *dataPtr=&mmap[offset];
+      const char *dataPtr=&mmap[offset];
       FileOffset add;
 
       add=(unsigned char)(*dataPtr);
@@ -1551,8 +1551,8 @@ namespace osmscout {
       throw IOException(filename,"Cannot read file offset");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    FileOffset    add;
+    const unsigned char *dataPtr=buffer.data();
+    FileOffset          add;
 
     add=(unsigned char)(*dataPtr);
     add=add << 0;
@@ -1613,7 +1613,7 @@ namespace osmscout {
         throw IOException(filename,"Cannot read file offset","Cannot read beyond end of file");
       }
 
-      char       *dataPtr=&mmap[offset];
+      const char *dataPtr=&mmap[offset];
       FileOffset add;
 
       add=(unsigned char)(*dataPtr);
@@ -1683,8 +1683,8 @@ namespace osmscout {
       throw IOException(filename,"Cannot read file offset");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    FileOffset    add;
+    const unsigned char *dataPtr=buffer.data();
+    FileOffset          add;
 
     add=(unsigned char)(*dataPtr);
     add=add << 0;
@@ -2158,7 +2158,7 @@ namespace osmscout {
         throw IOException(filename,"Cannot read coordinate","Cannot read beyond end of file");
       }
 
-      char *dataPtr=&mmap[offset];
+      const char *dataPtr=&mmap[offset];
 
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
@@ -2216,7 +2216,7 @@ namespace osmscout {
         throw IOException(filename,"Cannot read coordinate","Cannot read beyond end of file");
       }
 
-      char *dataPtr=&mmap[offset];
+      const char *dataPtr=&mmap[offset];
 
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
@@ -2369,7 +2369,7 @@ namespace osmscout {
 
     nodes[0].SetCoord(firstCoord);
 
-    uint8_t *tmpBuffer = (uint8_t*)ReadInternal(byteBufferSize);
+    const uint8_t *tmpBuffer = (uint8_t*)ReadInternal(byteBufferSize);
 
     if (coordBitSize==16) {
       size_t currentCoordPos=1;

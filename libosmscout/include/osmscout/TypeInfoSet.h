@@ -77,22 +77,22 @@ namespace osmscout {
       return tmp;
     }
 
-    bool operator==(const TypeInfoSetConstIterator& other)
+    bool operator==(const TypeInfoSetConstIterator& other) const
     {
       return iterCurrent==other.iterCurrent;
     }
 
-    bool operator!=(const TypeInfoSetConstIterator& other)
+    bool operator!=(const TypeInfoSetConstIterator& other) const
     {
       return iterCurrent!=other.iterCurrent;
     }
 
-    const TypeInfoRef& operator*()
+    const TypeInfoRef& operator*() const
     {
       return *iterCurrent;
     }
 
-    TypeInfoRef operator->()
+    TypeInfoRef operator->() const
     {
       return *iterCurrent;
     }
@@ -114,6 +114,7 @@ namespace osmscout {
 
   public:
     TypeInfoSet() = default;
+    ~TypeInfoSet() = default;
 
     explicit TypeInfoSet(const TypeConfig& typeConfig);
     explicit TypeInfoSet(const std::vector<TypeInfoRef>& types);

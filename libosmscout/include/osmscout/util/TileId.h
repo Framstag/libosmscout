@@ -210,22 +210,22 @@ namespace osmscout {
       return tmp;
     }
 
-    bool operator==(const TileIdBoxConstIterator& other)
+    bool operator==(const TileIdBoxConstIterator& other) const
     {
       return currentTile==other.currentTile;
     }
 
-    bool operator!=(const TileIdBoxConstIterator& other)
+    bool operator!=(const TileIdBoxConstIterator& other) const
     {
       return currentTile!=other.currentTile;
     }
 
-    const TileId& operator*()
+    const TileId& operator*() const
     {
       return currentTile;
     }
 
-    TileId operator->()
+    TileId operator->() const
     {
       return currentTile;
     }
