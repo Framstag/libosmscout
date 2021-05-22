@@ -73,7 +73,7 @@ private:
   double lastReportedMaxSpeed{-1};
 
 public:
-  explicit SpeedAgent();
+  explicit SpeedAgent() = default;
   std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 };
 }

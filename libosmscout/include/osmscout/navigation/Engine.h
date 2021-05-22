@@ -50,7 +50,7 @@ namespace osmscout {
     const Timestamp timestamp;
 
     explicit NavigationMessage(const Timestamp& timestamp);
-    virtual ~NavigationMessage();
+    virtual ~NavigationMessage() = default;
   };
 
   using NavigationMessageRef = std::shared_ptr<NavigationMessage>;
@@ -78,7 +78,7 @@ namespace osmscout {
   class OSMSCOUT_API NavigationAgent
   {
   public:
-    virtual ~NavigationAgent();
+    virtual ~NavigationAgent() = default;
 
     virtual std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) = 0;
   };
@@ -92,7 +92,7 @@ namespace osmscout {
 
   public:
     explicit NavigationEngine(std::initializer_list<NavigationAgentRef> agents);
-    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message);
+    std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) const;
   };
 }
 

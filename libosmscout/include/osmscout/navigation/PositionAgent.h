@@ -122,7 +122,7 @@ namespace osmscout {
                               GeoCoord &closestPosition,
                               std::list<RouteDescription::Node>::const_iterator& foundNode,
                               double& foundAbscissa,
-                              double& minDistance);
+                              double& minDistance) const;
   };
 
 }

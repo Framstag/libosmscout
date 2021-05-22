@@ -70,7 +70,7 @@ public:
   {
     QtDemoApp::SetupQmlContext(context, args);
     assert(context);
-    const EleChartArgs &eleArgs = static_cast<const EleChartArgs&>(args);
+    const auto&eleArgs= static_cast<const EleChartArgs&>(args);
     context->setContextProperty("routeFrom", eleArgs.routeFrom);
     context->setContextProperty("routeTo", eleArgs.routeTo);
     context->setContextProperty("routeVehicle", eleArgs.vehicle);

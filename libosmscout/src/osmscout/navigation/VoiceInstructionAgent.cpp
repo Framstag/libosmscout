@@ -44,15 +44,15 @@ public:
       distance{distanceFromStart}
   {}
 
-  virtual ~PostprocessorCallback() = default;
+   ~PostprocessorCallback() override = default;
 
-  void BeforeNode(const RouteDescription::Node& node)
+  void BeforeNode(const RouteDescription::Node& node) override
   {
     distance=node.GetDistance();
   }
 
-  virtual void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                 [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+   void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                                 [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(roundaboutLeaveDescription);
     assert(nameDescription);
@@ -89,7 +89,7 @@ public:
     }
   }
 
-  virtual void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& /*targetDescription*/)
+  void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& /*targetDescription*/) override
   {
     if (!nextMessage){
       using MessageType = VoiceInstructionAgent::MessageType;
@@ -99,11 +99,11 @@ public:
     }
   }
 
-  virtual void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
-                      const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/,
-                      const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                      const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
-                      const osmscout::RouteDescription::NameDescriptionRef& /*nameDescription*/)
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+              const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/,
+              const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+              const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
+              const osmscout::RouteDescription::NameDescriptionRef& /*nameDescription*/) override
   {
     assert(directionDescription);
 
@@ -144,7 +144,7 @@ public:
     }
   }
 
-  virtual bool Continue() const
+  bool Continue() const override
   {
     return (stopAfter < Distance::Zero() || distance <= stopAfter) && (!thenMessage);
   }

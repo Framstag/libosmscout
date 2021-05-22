@@ -38,10 +38,6 @@ MaxAllowedSpeedMessage::MaxAllowedSpeedMessage(const Timestamp& timestamp,
 {
 }
 
-SpeedAgent::SpeedAgent()
-{
-}
-
 std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &message)
 {
   using namespace std::chrono;
@@ -81,7 +77,7 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
   if (positionMsg) {
 
     // obtain max speed for current route object
-    MaxSpeedFeatureValue *maxSpeedValue = nullptr;
+    const MaxSpeedFeatureValue *maxSpeedValue = nullptr;
     if (positionMsg->position.typeConfig) {
       MaxSpeedFeatureValueReader reader(*(positionMsg->position.typeConfig));
       if (positionMsg->position.way) {

@@ -31,16 +31,11 @@ ArrivalEstimateMessage::ArrivalEstimateMessage(const Timestamp& timestamp,
 
 }
 
-ArrivalEstimateAgent::ArrivalEstimateAgent()
-{
-
-}
-
 std::list<NavigationMessageRef> ArrivalEstimateAgent::Process(const NavigationMessageRef &message)
 {
   std::list<NavigationMessageRef> result;
 
-  auto possitionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
+  const auto *possitionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
   if (possitionMsg==nullptr) {
     return result;
   }

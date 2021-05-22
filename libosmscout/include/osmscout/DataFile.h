@@ -175,7 +175,7 @@ namespace osmscout {
       data.Read(*typeConfig,
                 scanner);
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }
@@ -195,7 +195,7 @@ namespace osmscout {
       data.Read(*typeConfig,
                 scanner);
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }
@@ -222,7 +222,7 @@ namespace osmscout {
                    FileScanner::LowMemRandom,
                    memoryMappedData);
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
       return false;
@@ -258,7 +258,7 @@ namespace osmscout {
         scanner.Close();
       }
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       scanner.CloseFailsafe();
       return false;
@@ -270,7 +270,7 @@ namespace osmscout {
   template <class N>
   void DataFile<N>::FlushCache()
   {
-    std::lock_guard<std::mutex> lock(accessMutex);
+    std::scoped_lock<std::mutex> lock(accessMutex);
     cache.Flush();
   }
 
@@ -308,7 +308,7 @@ namespace osmscout {
     }
 
     data.reserve(data.size()+size);
-    std::lock_guard<std::mutex> lock(accessMutex);
+    std::scoped_lock<std::mutex> lock(accessMutex);
 
     if (cache.GetMaxSize()>0 &&
         size>cache.GetMaxSize()){
@@ -355,7 +355,7 @@ namespace osmscout {
     }
 
     data.reserve(data.size()+size);
-    std::lock_guard<std::mutex> lock(accessMutex);
+    std::scoped_lock<std::mutex> lock(accessMutex);
 
     if (cache.GetMaxSize()>0 &&
         size>cache.GetMaxSize()){
@@ -449,7 +449,7 @@ namespace osmscout {
   bool DataFile<N>::GetByOffset(FileOffset offset,
                                 ValueType& entry) const
   {
-    std::lock_guard<std::mutex> lock(accessMutex);
+    std::scoped_lock<std::mutex> lock(accessMutex);
 
     ValueCacheRef entryRef;
     if (cache.GetEntry(offset,entryRef)){
@@ -484,7 +484,7 @@ namespace osmscout {
       return true;
     }
 
-    std::lock_guard<std::mutex> lock(accessMutex);
+    std::scoped_lock<std::mutex> lock(accessMutex);
 
     try {
       bool offsetSetup=false;
@@ -519,7 +519,7 @@ namespace osmscout {
 
       return true;
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }
@@ -544,7 +544,7 @@ namespace osmscout {
     data.reserve(data.size()+overallCount);
 
     try {
-      std::lock_guard<std::mutex> lock(accessMutex);
+      std::scoped_lock<std::mutex> lock(accessMutex);
       for (IteratorIn spanIter=begin; spanIter!=end; ++spanIter) {
         if (spanIter->count==0) {
           continue;
@@ -580,7 +580,7 @@ namespace osmscout {
         }
       }
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
       return false;
     }

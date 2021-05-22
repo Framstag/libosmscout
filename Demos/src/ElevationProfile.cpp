@@ -46,7 +46,7 @@ private:
   double millis{0};
 
 public:
-  explicit DataLoader(osmscout::DatabaseRef &database):
+  explicit DataLoader(const osmscout::DatabaseRef &database):
     database(database),
     reader(*(database->GetTypeConfig()))
   {
@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
+  auto                        database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(args.database)) {
     std::cerr << "Cannot open database" << std::endl;
@@ -185,12 +185,12 @@ int main(int argc, char* argv[])
   osmscout::StopClock stopClock;
 
   DataLoader dataLoader(database);
-  osmscout::ElevationService<DataLoader> eleService(dataLoader, osmscout::Magnification::magSuburb);
+  osmscout::ElevationService eleService(dataLoader, osmscout::Magnification::magSuburb);
 
   osmscout::gpx::GpxFile output;
 
   std::cout << "Distance \tElevation \tCoord (type)" << std::endl;
-  size_t pointCnt=eleService.ElevationProfile(way, [&](const osmscout::Distance&, const std::vector<osmscout::ElevationPoint> &points){
+  size_t pointCnt=eleService.ElevationProfile(way, [&args,&output](const osmscout::Distance&, const std::vector<osmscout::ElevationPoint> &points){
     for (const auto &point: points) {
       std::cout << point.distance << " \t" << point.elevation.AsMeter() << " m \t" << point.coord.GetDisplayText() << " (" << point.contour->GetType()->GetName() << " " << point.contour->GetFileOffset() << ")" << std::endl;
 

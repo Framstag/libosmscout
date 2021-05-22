@@ -219,16 +219,16 @@ namespace osmscout {
      */
     struct RNode
     {
-      DBId          id;            //!< The file offset of the current route node
-      RouteNodeRef  node;          //!< The current route node
-      DBId          prev;          //!< The file offset of the previous route node
-      ObjectFileRef object;        //!< The object (way/area) visited from the current route node
+      DBId          id;              //!< The file offset of the current route node
+      RouteNodeRef  node;            //!< The current route node
+      DBId          prev;            //!< The file offset of the previous route node
+      ObjectFileRef object;          //!< The object (way/area) visited from the current route node
 
-      double        currentCost;   //!< The cost of the current up to the current node
-      double        estimateCost;  //!< The estimated cost from here to the target
-      double        overallCost;   //!< The overall costs (currentCost+estimateCost)
+      double        currentCost=0;   //!< The cost of the current up to the current node
+      double        estimateCost=0;  //!< The estimated cost from here to the target
+      double        overallCost=0;   //!< The overall costs (currentCost+estimateCost)
 
-      bool          access;        //!< Flags to signal, if we had access ("access restrictions") to this node
+      bool          access=true;     //!< Flags to signal, if we had access ("access restrictions") to this node
 
       RNode() = default;
 
@@ -237,11 +237,7 @@ namespace osmscout {
             const ObjectFileRef& object)
       : id(id),
         node(node),
-        object(object),
-        currentCost(0),
-        estimateCost(0),
-        overallCost(0),
-        access(true)
+        object(object)
       {
         // no code
       }

@@ -53,7 +53,7 @@ namespace osmscout {
     void Close();
 
     inline bool GetRouteNode(const Id& id,
-                             RouteNodeRef& node)
+                             RouteNodeRef& node) const
     {
       return routeNodeDataFile.Get(id,
                                    node);

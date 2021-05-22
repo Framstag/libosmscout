@@ -103,8 +103,7 @@ public:
   inline AvailableMapsModelDir(const QString &name, const QList<QString> &path, const QString &description):
     AvailableMapsModelItem(name, path, description){};
 
-  inline AvailableMapsModelDir(const AvailableMapsModelDir &o):
-    AvailableMapsModelItem(o){};
+  AvailableMapsModelDir(const AvailableMapsModelDir &o) = default;
 
   ~AvailableMapsModelDir() override = default;
 
@@ -142,9 +141,7 @@ public:
     AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory),
     creation(creation), version(version) {};
 
-  inline AvailableMapsModelMap(const AvailableMapsModelMap &o):
-    AvailableMapsModelItem(o), provider(o.provider), size(o.size), serverDirectory(o.serverDirectory),
-    creation(o.creation), version(o.version) {};
+  AvailableMapsModelMap(const AvailableMapsModelMap &o) = default;
 
   ~AvailableMapsModelMap() override = default;
 
@@ -153,16 +150,7 @@ public:
     return false;
   };
 
-  inline AvailableMapsModelMap& operator=(const AvailableMapsModelMap &o)
-  {
-    AvailableMapsModelItem::operator=(o);
-    provider=o.provider;
-    size=o.size;
-    serverDirectory=o.serverDirectory;
-    creation=o.creation;
-    version=o.version;
-    return *this;
-  }
+  AvailableMapsModelMap& operator=(const AvailableMapsModelMap &o) = default;
 
   MapProvider getProvider() const;
   uint64_t getSize() const;
@@ -253,7 +241,7 @@ public:
     return requests>0;
   }
 
-  inline QString getFetchError(){
+  inline QString getFetchError() const {
     return fetchError;
   }
 
