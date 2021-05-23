@@ -50,8 +50,9 @@ namespace osmscout {
 
   public:
     Distance() = default;
+    ~Distance() = default;
 
-     Distance(const Distance &d) = default;
+    Distance(const Distance &d) = default;
 
     Distance& operator=(const Distance &d) = default;
 

@@ -40,15 +40,15 @@ namespace osmscout {
   class OSMSCOUT_API GeoBox CLASS_FINAL
   {
   private:
-    GeoCoord minCoord;
-    GeoCoord maxCoord;
-    bool     valid;
+    GeoCoord minCoord=GeoCoord(0.0,0.0);
+    GeoCoord maxCoord=GeoCoord(0.0,0.0);
+    bool     valid=false;
 
   public:
     /**
      * The default constructor creates an invalid instance.
      */
-    GeoBox();
+    GeoBox() = default;
 
     /**
      * Copy-Constructor

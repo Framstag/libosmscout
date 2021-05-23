@@ -66,7 +66,7 @@ namespace osmscout {
     class OSMSCOUT_API Destination
     {
     public:
-      Destination();
+      Destination() = default;
       virtual ~Destination() = default;
 
       /**
@@ -230,7 +230,7 @@ namespace osmscout {
     virtual Line Log(Level level) = 0;
 
   public:
-    Logger();
+    Logger() = default;
     virtual ~Logger() = default;
 
     /**

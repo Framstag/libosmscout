@@ -247,7 +247,7 @@ namespace osmscout {
     double alpha1=bearing.AsRadians();
 
     double tanU1=(1-f)*tan(lat1);
-    double cosU1=1/sqrt((1+tanU1*tanU1));
+    double cosU1=1/sqrt(1+tanU1*tanU1);
     double sinU1=tanU1*cosU1;
 
     double cosAlpha1=cos(alpha1);

@@ -53,7 +53,7 @@ namespace osmscout {
       file.clear();
       file.open(filename);
     }
-    catch (std::ifstream::failure& f) {
+    catch (const std::ifstream::failure& f) {
       throw IOException(filename,"Error opening file for writing",f);
     }
   }
@@ -71,7 +71,7 @@ namespace osmscout {
     try {
       file.close();
     }
-    catch (std::ifstream::failure& f) {
+    catch (const std::ifstream::failure& f) {
       throw IOException(filename,"Cannot close file",f);
     }
   }
@@ -85,7 +85,7 @@ namespace osmscout {
     try {
       file.close();
     }
-    catch (std::ifstream::failure&) {
+    catch (const std::ifstream::failure&) {
       // suppress any error
     }
   }
@@ -125,10 +125,10 @@ namespace osmscout {
       file << "<!DOCTYPE html>" << std::endl;
       file << "<html>" << std::endl;
     }
-    catch (std::ios_base::failure& e) {
+    catch (const std::ios_base::failure& e) {
       throw IOException(filename,"Cannot write document start",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write document start",e);
     }
   }
@@ -146,10 +146,10 @@ namespace osmscout {
 
       WriteHeaderEnd();
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write header",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write header",e);
     }
   }
@@ -182,10 +182,10 @@ namespace osmscout {
 
       WriteMeta("generator","libosmscout import");
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write header start",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write header start",e);
     }
   }
@@ -196,10 +196,10 @@ namespace osmscout {
     try {
       file << "<meta name=\"" << Sanitize(name) << "\" content=\"" << Sanitize(content) << "\"/>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write meta",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write meta",e);
     }
   }
@@ -209,10 +209,10 @@ namespace osmscout {
     try {
       file << "</head>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write header end",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write header end",e);
     }
   }
@@ -222,10 +222,10 @@ namespace osmscout {
     try {
       file << "<body>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write body start",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write body start",e);
     }
   }
@@ -235,10 +235,10 @@ namespace osmscout {
     try {
       file << Sanitize(text) << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write text",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write text",e);
     }
   }
@@ -248,10 +248,10 @@ namespace osmscout {
     try {
       file << "<ul>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write text",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write text",e);
     }
   }
@@ -261,10 +261,10 @@ namespace osmscout {
     try {
       file << "<li>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write text",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write text",e);
     }
   }
@@ -274,10 +274,10 @@ namespace osmscout {
     try {
       file << "</li>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write text",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write text",e);
     }
   }
@@ -287,10 +287,10 @@ namespace osmscout {
     try {
       file << "</ul>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write text",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write text",e);
     }
   }
@@ -301,10 +301,10 @@ namespace osmscout {
     try {
       file << "<a href=\"" << url << "\">" << Sanitize(title) << "</a>";
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write link",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write link",e);
     }
   }
@@ -335,10 +335,10 @@ namespace osmscout {
       url << "/" << std::to_string(object.GetId());
       WriteLink(url.str(), name);
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write object link",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write object link",e);
     }
   }
@@ -348,10 +348,10 @@ namespace osmscout {
     try {
       file << "</body>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write body end",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write body end",e);
     }
   }
@@ -361,10 +361,10 @@ namespace osmscout {
     try {
       file << "</html>" << std::endl;
     }
-    catch (std::ifstream::failure& e) {
+    catch (const std::ifstream::failure& e) {
       throw IOException(filename,"Cannot write document end",e);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
       throw IOException(filename,"Cannot write document end",e);
     }
   }

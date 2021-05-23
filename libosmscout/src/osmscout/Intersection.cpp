@@ -44,7 +44,7 @@ namespace osmscout {
         objectFileRefReader.Read(objects[i]);
       }
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
 
       return false;

@@ -183,7 +183,7 @@ namespace osmscout {
 
   public:
     FileScanner();
-    virtual ~FileScanner();
+    ~FileScanner();
 
     void Open(const std::string& filename,
               Mode mode,

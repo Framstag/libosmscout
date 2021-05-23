@@ -67,10 +67,10 @@ namespace osmscout {
   class OSMSCOUT_API ThreadedBreaker : public Breaker
   {
   private:
-    std::atomic<bool> aborted;
+    std::atomic<bool> aborted{false};
 
   public:
-    ThreadedBreaker();
+    ThreadedBreaker() = default;
 
     void Break() override;
     bool IsAborted() const override;

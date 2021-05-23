@@ -32,10 +32,7 @@
 namespace osmscout {
 
   MemoryMonitor::MemoryMonitor()
-  : quit(false),
-    maxVMUsage(0.0),
-    maxResidentSet(0.0),
-    thread(&MemoryMonitor::BackgroundJob,this)
+  : thread(&MemoryMonitor::BackgroundJob,this)
   {
     // no code
   }
@@ -55,7 +52,7 @@ namespace osmscout {
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::scoped_lock<std::mutex> lock(mutex);
 
         Measure();
       }
@@ -83,8 +80,8 @@ namespace osmscout {
 
     long pageSizeInByte=sysconf(_SC_PAGE_SIZE);
 
-    currentVMUsage=vsize*pageSizeInByte;
-    currentResidentSet=rss*pageSizeInByte;
+    currentVMUsage=vsize*double(pageSizeInByte);
+    currentResidentSet=rss*double(pageSizeInByte);
 #endif
 
     maxVMUsage=std::max(maxVMUsage,currentVMUsage);
@@ -106,7 +103,7 @@ namespace osmscout {
   void MemoryMonitor::GetMaxValue(double& vmUsage,
                                   double& residentSet)
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock<std::mutex> lock(mutex);
 
     Measure();
 
@@ -119,7 +116,7 @@ namespace osmscout {
    */
   void MemoryMonitor::Reset()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock<std::mutex> lock(mutex);
 
     maxVMUsage=0.0;
     maxResidentSet=0.0;

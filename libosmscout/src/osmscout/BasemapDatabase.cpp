@@ -84,7 +84,7 @@ namespace osmscout {
 
   WaterIndexRef BasemapDatabase::GetWaterIndex() const
   {
-    std::lock_guard<std::mutex> guard(waterIndexMutex);
+    std::scoped_lock<std::mutex> guard(waterIndexMutex);
 
     if (!IsOpen()) {
       return nullptr;

@@ -60,7 +60,7 @@ namespace osmscout {
 
   public:
     FileWriter();
-    virtual ~FileWriter();
+    ~FileWriter();
 
     void Open(const std::string& filename);
     void Close();

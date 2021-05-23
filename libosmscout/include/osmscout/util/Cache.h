@@ -86,6 +86,8 @@ namespace osmscout {
       {
         // no code
       }
+
+      ~CacheEntry() = default;
     };
 
     /**
