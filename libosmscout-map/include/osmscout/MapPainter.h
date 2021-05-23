@@ -136,7 +136,7 @@ namespace osmscout {
        * @param other
        * @return
        */
-      inline bool operator<(const WayData& other) const
+      bool operator<(const WayData& other) const
       {
         if (layer!=other.layer)
         {
@@ -484,19 +484,19 @@ namespace osmscout {
                              double minPixel,
                              double width) const;
 
-    inline double GetProjectedWidth(const Projection& projection,
-                                    double width) const
+    double GetProjectedWidth(const Projection& projection,
+                             double width) const
     {
       return width/projection.GetPixelSize();
     }
     //@}
 
-    inline const std::list<WayData>& GetWayData() const
+    const std::list<WayData>& GetWayData() const
     {
       return wayData;
     }
 
-    inline const std::list<AreaData>& GetAreaData() const
+    const std::list<AreaData>& GetAreaData() const
     {
       return areaData;
     }
@@ -714,7 +714,7 @@ namespace osmscout {
 
     virtual ~MapPainterBatch() = default;
 
-    void addData(MapDataRef &d, PainterType &painter)
+    void addData(const MapDataRef &d, PainterType &painter)
     {
       data.push_back(d);
       painters.push_back(painter);

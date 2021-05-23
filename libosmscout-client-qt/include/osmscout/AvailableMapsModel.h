@@ -51,16 +51,16 @@ private:
 public:
   AvailableMapsModelItem() = default;
 
-  inline AvailableMapsModelItem(const QString &name, const QStringList &path, const QString &description):
+  AvailableMapsModelItem(const QString &name, const QStringList &path, const QString &description):
     valid(true), name(name), path(path), description(description){};
 
-  inline AvailableMapsModelItem(const AvailableMapsModelItem &o):
+  AvailableMapsModelItem(const AvailableMapsModelItem &o):
     QObject(o.parent()),
     valid(o.valid), name(o.name), path(o.path), description(o.description){};
 
   ~AvailableMapsModelItem() override = default;
 
-  inline AvailableMapsModelItem& operator=(const AvailableMapsModelItem &o)
+  AvailableMapsModelItem& operator=(const AvailableMapsModelItem &o)
   {
     valid=o.valid;
     name=o.name;
@@ -69,22 +69,22 @@ public:
     return *this;
   }
 
-  inline QString getName() const
+  QString getName() const
   {
     return name;
   }
 
-  inline QStringList getPath() const
+  QStringList getPath() const
   {
     return path;
   }
 
-  inline QString getDescription() const
+  QString getDescription() const
   {
     return description;
   }
 
-  inline bool isValid() const
+  bool isValid() const
   {
     return valid;
   }
@@ -100,14 +100,14 @@ class OSMSCOUT_CLIENT_QT_API AvailableMapsModelDir : public AvailableMapsModelIt
   Q_OBJECT
 
 public:
-  inline AvailableMapsModelDir(const QString &name, const QList<QString> &path, const QString &description):
+  AvailableMapsModelDir(const QString &name, const QList<QString> &path, const QString &description):
     AvailableMapsModelItem(name, path, description){};
 
   AvailableMapsModelDir(const AvailableMapsModelDir &o) = default;
 
   ~AvailableMapsModelDir() override = default;
 
-  inline bool isDirectory() const override
+  bool isDirectory() const override
   {
     return true;
   };
@@ -136,7 +136,7 @@ private:
 public:
   AvailableMapsModelMap() = default;
 
-  inline AvailableMapsModelMap(const QString &name, const QList<QString> &path, const QString &description, const MapProvider &provider,
+  AvailableMapsModelMap(const QString &name, const QList<QString> &path, const QString &description, const MapProvider &provider,
                                uint64_t size, const QString &serverDirectory, const QDateTime &creation, int version):
     AvailableMapsModelItem(name, path, description), provider(provider), size(size), serverDirectory(serverDirectory),
     creation(creation), version(version) {};
@@ -145,7 +145,7 @@ public:
 
   ~AvailableMapsModelMap() override = default;
 
-  inline bool isDirectory() const override
+  bool isDirectory() const override
   {
     return false;
   };
@@ -237,11 +237,11 @@ public:
    Q_INVOKABLE QVariant timeOfMap(QStringList path);
    Q_INVOKABLE QObject* mapByPath(QStringList path);
 
-  inline bool isLoading() const{
+  bool isLoading() const{
     return requests>0;
   }
 
-  inline QString getFetchError() const {
+  QString getFetchError() const {
     return fetchError;
   }
 

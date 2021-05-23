@@ -159,12 +159,12 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline NodeRef GetNode() const
+    NodeRef GetNode() const
     {
       return node;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
@@ -178,7 +178,7 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline std::list<NodeRegionSearchResultEntry> GetNodeResults() const
+    std::list<NodeRegionSearchResultEntry> GetNodeResults() const
     {
       return nodeResults;
     }
@@ -200,17 +200,17 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline WayRef GetWay() const
+    WayRef GetWay() const
     {
       return way;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
 
-    inline GeoCoord GetClosestPoint() const
+    GeoCoord GetClosestPoint() const
     {
       return closestPoint;
     }
@@ -224,7 +224,7 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline std::list<WayRegionSearchResultEntry> GetWayResults() const
+    std::list<WayRegionSearchResultEntry> GetWayResults() const
     {
       return wayResults;
     }
@@ -247,22 +247,22 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline AreaRef GetArea() const
+    AreaRef GetArea() const
     {
       return area;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
 
-    inline GeoCoord GetClosestPoint() const
+    GeoCoord GetClosestPoint() const
     {
       return closestPoint;
     }
 
-    inline bool IsInArea() const
+    bool IsInArea() const
     {
       return inArea;
     }
@@ -378,7 +378,7 @@ namespace osmscout {
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;
 
-    inline const DatabaseParameter& GetParameter() const
+    const DatabaseParameter& GetParameter() const
     {
       return parameter;
     }

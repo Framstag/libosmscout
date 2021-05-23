@@ -70,7 +70,7 @@ namespace osmscout {
      * @param other
      * @return true if intersects
      */
-    inline bool Intersects(const Rectangle<T> &other)
+    bool Intersects(const Rectangle<T> &other)
     {
       return !(
           (x + width) < other.x ||
@@ -155,7 +155,7 @@ namespace osmscout {
     Label() = default;
 
     template<typename... Args>
-    Label(Args&&... args):
+    explicit Label(Args&&... args):
       label(std::forward<Args>(args)...)
     {}
 
@@ -215,8 +215,10 @@ namespace osmscout {
 
     OSMSCOUT_MAP_API void prepare(const IntRectangle &rect);
 
-    inline int64_t size() const
-    { return d.size(); };
+    int64_t size() const
+    {
+      return d.size();
+    };
 
     std::vector<uint64_t> d;
 
@@ -282,14 +284,11 @@ namespace osmscout {
     using LabelInstanceType = LabelInstance<NativeGlyph, NativeLabel>;
 
   public:
-    LabelLayouter(TextLayouter *textLayouter):
-        textLayouter(textLayouter),
-        visibleViewport{0,0,0,0},
-        layoutViewport{0,0,0,0},
-        layoutOverlap{0}
+    explicit LabelLayouter(TextLayouter *textLayouter):
+        textLayouter(textLayouter)
     {};
 
-    void SetViewport(DoubleRectangle v)
+    void SetViewport(const DoubleRectangle& v)
     {
       visibleViewport = v;
       SetLayoutOverlap(layoutOverlap);
@@ -312,8 +311,7 @@ namespace osmscout {
 
     inline bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
                                     const Mask &mask,
-                                    int64_t viewportHeight
-    )
+                                    int64_t viewportHeight) const
     {
       bool collision=false;
       for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
@@ -326,8 +324,7 @@ namespace osmscout {
 
     inline void MarkLabelPlace(std::vector<uint64_t> &canvas,
                                const Mask &mask,
-                               int viewportHeight
-    )
+                               int viewportHeight) const
     {
       for (int r=std::max(0,mask.rowFrom); r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
         for (int c=std::max(0,mask.cellFrom); c<=std::min((int)mask.size()-1, mask.cellTo); c++){
@@ -337,7 +334,7 @@ namespace osmscout {
     }
 
     // Something is an overlay, if its alpha is <0.8
-    inline bool IsOverlay(const LabelData &labelData)
+    inline bool IsOverlay(const LabelData &labelData) const
     {
       return labelData.alpha < 0.8;
     }
@@ -796,9 +793,9 @@ namespace osmscout {
     TextLayouter *textLayouter;
     std::vector<ContourLabelType> contourLabelInstances;
     std::vector<LabelInstanceType> labelInstances;
-    DoubleRectangle visibleViewport;
-    DoubleRectangle layoutViewport;
-    uint32_t layoutOverlap; // overlap [pixels] used for label layouting
+    DoubleRectangle visibleViewport{0,0,0,0};
+    DoubleRectangle layoutViewport{0,0,0,0};
+    uint32_t layoutOverlap=0; // overlap [pixels] used for label layouting
   };
 
 }

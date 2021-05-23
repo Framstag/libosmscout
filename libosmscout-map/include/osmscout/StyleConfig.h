@@ -68,19 +68,19 @@ namespace osmscout {
 
     size_t GetFeatureReaderIndex(const Feature& feature);
 
-    inline bool HasFeature(size_t featureIndex,
-                           const FeatureValueBuffer& buffer) const
+    bool HasFeature(size_t featureIndex,
+                    const FeatureValueBuffer& buffer) const
     {
       return featureReaders[featureIndex].IsSet(buffer);
     }
 
-    inline std::string GetFeatureName(size_t featureIndex) const
+    std::string GetFeatureName(size_t featureIndex) const
     {
       return featureReaders[featureIndex].GetFeatureName();
     }
 
-    inline FeatureValue* GetFeatureValue(size_t featureIndex,
-                                         const FeatureValueBuffer& buffer) const
+    FeatureValue* GetFeatureValue(size_t featureIndex,
+                                  const FeatureValueBuffer& buffer) const
     {
       return featureReaders[featureIndex].GetValue(buffer);
     }
@@ -113,7 +113,7 @@ namespace osmscout {
   public:
     explicit StyleConstantColor(const Color& color);
 
-    inline Color GetColor() const
+    Color GetColor() const
     {
       return color;
     }
@@ -131,7 +131,7 @@ namespace osmscout {
   public:
     explicit StyleConstantMag(const Magnification& magnification);
 
-    inline Magnification GetMag() const
+    Magnification GetMag() const
     {
       return magnification;
     }
@@ -149,7 +149,7 @@ namespace osmscout {
   public:
     explicit StyleConstantUInt(size_t value);
 
-    inline size_t GetUInt() const
+    size_t GetUInt() const
     {
       return value;
     }
@@ -174,12 +174,12 @@ namespace osmscout {
   public:
     explicit StyleConstantWidth(double value, Unit unit);
 
-    inline double GetWidth() const
+    double GetWidth() const
     {
       return value;
     }
 
-    inline Unit GetUnit() const
+    Unit GetUnit() const
     {
       return unit;
     }
@@ -225,7 +225,7 @@ namespace osmscout {
     FeatureFilterData(size_t featureFilterIndex,
                       size_t flagIndex);
 
-    inline bool operator==(const FeatureFilterData& other) const
+    bool operator==(const FeatureFilterData& other) const
     {
       return featureFilterIndex==other.featureFilterIndex &&
              flagIndex==other.flagIndex;
@@ -240,8 +240,6 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API StyleFilter
   {
-  public:
-
   private:
     bool                         filtersByType;
     TypeInfoSet                  types;
@@ -266,47 +264,47 @@ namespace osmscout {
 
     StyleFilter& SetSizeCondition(const SizeConditionRef& condition);
 
-    inline bool FiltersByType() const
+    bool FiltersByType() const
     {
       return filtersByType;
     }
 
-    inline bool FiltersByFeature() const
+    bool FiltersByFeature() const
     {
       return !features.empty();
     }
 
-    inline bool HasType(const TypeInfoRef& type) const
+    bool HasType(const TypeInfoRef& type) const
     {
       return types.IsSet(type);
     }
 
-    inline size_t GetMinLevel() const
+    size_t GetMinLevel() const
     {
       return minLevel;
     }
 
-    inline size_t GetMaxLevel() const
+    size_t GetMaxLevel() const
     {
       return maxLevel;
     }
 
-    inline const std::list<FeatureFilterData>& GetFeatures() const
+    const std::list<FeatureFilterData>& GetFeatures() const
     {
       return features;
     }
 
-    inline bool GetOneway() const
+    bool GetOneway() const
     {
       return oneway;
     }
 
-    inline bool HasMaxLevel() const
+    bool HasMaxLevel() const
     {
       return maxLevel!=std::numeric_limits<size_t>::max();
     }
 
-    inline const SizeConditionRef& GetSizeCondition() const
+    const SizeConditionRef& GetSizeCondition() const
     {
       return sizeCondition;
     }
@@ -321,8 +319,6 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API StyleCriteria
   {
-  public:
-
   private:
     std::list<FeatureFilterData> features;
     bool                         oneway;
@@ -337,14 +333,14 @@ namespace osmscout {
     bool operator==(const StyleCriteria& other) const;
     bool operator!=(const StyleCriteria& other) const;
 
-    inline bool HasCriteria() const
+     bool HasCriteria() const
     {
       return !features.empty() ||
              oneway     ||
              sizeCondition;
     }
 
-    inline bool GetOneway() const
+     bool GetOneway() const
     {
       return oneway;
     }
@@ -383,66 +379,66 @@ namespace osmscout {
     std::shared_ptr<S> style;
 
     PartialStyle()
-    : style(new S())
+    : style(std::make_shared<S>())
     {
       // no code
     }
 
-    inline void SetBoolValue(int attribute, bool value) override
+     void SetBoolValue(int attribute, bool value) override
     {
       style->SetBoolValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetStringValue(int attribute, const std::string& value) override
+     void SetStringValue(int attribute, const std::string& value) override
     {
       style->SetStringValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetColorValue(int attribute, const Color& value) override
+     void SetColorValue(int attribute, const Color& value) override
     {
       style->SetColorValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetMagnificationValue(int attribute, const Magnification& value) override
+     void SetMagnificationValue(int attribute, const Magnification& value) override
     {
       style->SetMagnificationValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetDoubleValue(int attribute, double value) override
+     void SetDoubleValue(int attribute, double value) override
     {
       style->SetDoubleValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetDoubleArrayValue(int attribute, const std::vector<double>& value) override
+     void SetDoubleArrayValue(int attribute, const std::vector<double>& value) override
     {
       style->SetDoubleArrayValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetSymbolValue(int attribute, const SymbolRef& value) override
+     void SetSymbolValue(int attribute, const SymbolRef& value) override
     {
       style->SetSymbolValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetIntValue(int attribute, int value) override
+     void SetIntValue(int attribute, int value) override
     {
       style->SetIntValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetUIntValue(int attribute, size_t value) override
+     void SetUIntValue(int attribute, size_t value) override
     {
       style->SetUIntValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-    inline void SetLabelValue(int attribute, const LabelProviderRef& value) override
+     void SetLabelValue(int attribute, const LabelProviderRef& value) override
     {
       style->SetLabelValue(attribute,value);
       attributes.insert((A)attribute);
@@ -561,8 +557,10 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API StyleConfig
   {
-  protected:
+  public:
     TypeConfigRef                              typeConfig;             //!< Reference to the type configuration
+
+  private:
     mutable StyleResolveContext                styleResolveContext;    //!< Instance of helper class that can get passed around to templated helper methods
 
     FeatureValueBuffer                         tileLandBuffer;         //!< Fake FeatureValueBuffer for land tiles
@@ -580,17 +578,18 @@ namespace osmscout {
     SymbolRef                                  emptySymbol;            //!< A default empty symbol
 
     // Node
-
+  private:
     std::list<TextConditionalStyle>            nodeTextStyleConditionals;
     std::list<IconConditionalStyle>            nodeIconStyleConditionals;
 
     std::vector<TextStyleLookupTable>          nodeTextStyleSelectors;
     IconStyleLookupTable                       nodeIconStyleSelectors;
 
+  public:
     std::vector<TypeInfoSet>                   nodeTypeSets;
 
     // Way
-
+  private:
     std::vector<size_t>                        wayPrio;
 
     std::list<LineConditionalStyle>            wayLineStyleConditionals;
@@ -603,12 +602,15 @@ namespace osmscout {
     std::vector<PathSymbolStyleLookupTable>    wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
-    std::vector<TypeInfoSet>                   wayTypeSets;     //!< way types with defined style by magnification level
     std::vector<bool>                          wayTextFlags;    //!< flags by magnification level if there is style with way label
     std::vector<bool>                          wayShieldFlags;  //!< flags by magnification level if there is style with way shield
 
+  public:
+    std::vector<TypeInfoSet>                   wayTypeSets;     //!< way types with defined style by magnification level
+
     // Area
 
+  private:
     std::list<FillConditionalStyle>            areaFillStyleConditionals;
     std::list<BorderConditionalStyle>          areaBorderStyleConditionals;
     std::list<TextConditionalStyle>            areaTextStyleConditionals;
@@ -629,11 +631,15 @@ namespace osmscout {
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
     PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
 
+  public:
     std::vector<TypeInfoSet>                   areaTypeSets;
 
     // Route
+
+  public:
     std::vector<TypeInfoSet>                   routeTypeSets;
 
+  private:
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
     std::list<std::string>                     errors;
@@ -668,7 +674,7 @@ namespace osmscout {
     void AddFlag(const std::string& name,
                  bool value);
 
-    inline std::unordered_map<std::string,bool> GetFlags() const
+     std::unordered_map<std::string,bool> GetFlags() const
     {
       return flags;
     }
@@ -731,7 +737,7 @@ namespace osmscout {
                                  TypeInfoSet& types) const;
 
 
-    inline size_t GetWayPrio(const TypeInfoRef& type) const
+     size_t GetWayPrio(const TypeInfoRef& type) const
     {
       if (type->GetIndex()<wayPrio.size()) {
         return wayPrio[type->GetIndex()];

@@ -52,23 +52,23 @@ namespace osmscout {
      */
     inline Pixel() = default;
 
-    inline Pixel(uint32_t x, uint32_t y)
+    Pixel(uint32_t x, uint32_t y)
      :x(x),y(y)
     {
       // no code
     }
 
-    inline bool operator==(const Pixel& other) const
+    bool operator==(const Pixel& other) const
     {
       return x==other.x && y==other.y;
     }
 
-    inline bool operator!=(const Pixel& other) const
+    bool operator!=(const Pixel& other) const
     {
       return y!=other.y || x!=other.x;
     }
 
-    inline bool operator<(const Pixel& other) const
+    bool operator<(const Pixel& other) const
     {
       return std::tie(y, x) < std::tie(other.y, other.x);
     }
@@ -78,14 +78,14 @@ namespace osmscout {
      * are projected onto one number by interleaving the bits of the coordinates. Coordinates close
      * in 2D space are thus likely clos ein one dimensional space, too.
      */
-    inline uint64_t GetId() const
+    uint64_t GetId() const
     {
       return InterleaveNumbers(x,y);
     }
 
     std::string GetDisplayText() const;
 
-    inline std::ostream& operator<<(std::ostream& stream) const
+    std::ostream& operator<<(std::ostream& stream) const
     {
       stream << GetDisplayText();
       return stream;
@@ -108,8 +108,8 @@ namespace osmscout {
      */
     Vertex2D() = default;
 
-    inline Vertex2D(double x,
-                    double y)
+    Vertex2D(double x,
+             double y)
     {
       coords[0]=x;
       coords[1]=y;
@@ -121,45 +121,45 @@ namespace osmscout {
     Vertex2D& operator=(const Vertex2D& other) = default;
     Vertex2D& operator=(Vertex2D&& other) = default;
 
-    inline void SetX(double x)
+    void SetX(double x)
     {
       coords[0]=x;
     }
 
-    inline void SetY(double y)
+    void SetY(double y)
     {
       coords[1]=y;
     }
 
-    inline void Set(double x,
-                    double y)
+    void Set(double x,
+             double y)
     {
       coords[0]=x;
       coords[1]=y;
     }
 
-    inline double GetX() const
+    double GetX() const
     {
       return coords[0];
     }
 
-    inline double GetY() const
+    double GetY() const
     {
       return coords[1];
     }
 
-    inline bool operator==(const Vertex2D& other) const
+    bool operator==(const Vertex2D& other) const
     {
       return coords[0]==other.coords[0] &&
              coords[1]==other.coords[1];
     }
 
-    inline bool operator<(const Vertex2D& other) const
+    bool operator<(const Vertex2D& other) const
     {
       return std::tie(coords[1], coords[0]) < std::tie(other.coords[1], other.coords[0]);
     }
 
-    inline double DistanceTo(const Vertex2D &other) const {
+    double DistanceTo(const Vertex2D &other) const {
       double xDiff = coords[0] - other.coords[0];
       double yDiff = coords[1] - other.coords[1];
       return sqrt(xDiff*xDiff + yDiff*yDiff);
@@ -180,7 +180,7 @@ namespace osmscout {
   private:
     double x;
     double y;
-    double z;
+    double z=0.0;
 
   public:
     /**
@@ -188,73 +188,71 @@ namespace osmscout {
      */
     Vertex3D() = default;
 
-    inline Vertex3D(const Vertex3D& other) = default;
+    Vertex3D(const Vertex3D& other) = default;
 
-    inline Vertex3D(double x,
-                    double y)
+    Vertex3D(double x,
+             double y)
      :x(x),
-      y(y),
-      z(0.0)
-
+      y(y)
     {
       // no code
     }
 
-    inline double GetX() const
+    double GetX() const
     {
       return x;
     }
 
-    inline double GetY() const
+    double GetY() const
     {
       return y;
     }
 
-    inline double GetZ() const
+    double GetZ() const
     {
       return y;
     }
 
-    inline void SetX(double x)
+    void SetX(double x)
     {
       this->x=x;
     }
 
-    inline void SetY(double y)
+    void SetY(double y)
     {
       this->y=y;
     }
 
-    inline void SetZ(double z)
+    void SetZ(double z)
     {
       this->z=z;
     }
 
-    inline void Set(double x,
-                    double y)
+    void Set(double x,
+             double y)
     {
       this->x=x;
       this->y=y;
       this->z=0;
     }
 
-    inline void Set(double x,
-                    double y,
-                    double z)
+    void Set(double x,
+             double y,
+             double z)
     {
       this->x=x;
       this->y=y;
       this->z=z;
     }
 
-    inline bool operator==(const Vertex3D& other) const
+    bool operator==(const Vertex3D& other) const
     {
       return x==other.x &&
              y==other.y &&
              z==other.z;
     }
 
-    inline bool operator<(const Vertex3D& other) const
+    bool operator<(const Vertex3D& other) const
     {
       return std::tie(x, y, z) < std::tie(other.x, other.y, other.z);
     }

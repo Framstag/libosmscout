@@ -106,7 +106,7 @@ namespace osmscout {
     using Map       = std::unordered_map<K, typename OrderList::iterator>;
 
   private:
-    size_t    size;          //<! Current size fo the cache
+    size_t    size=0;        //<! Current size fo the cache
     size_t    maxSize;       //<! Maximum size of the cache
     OrderList order;         //<! Order list (by cache access) of cache entries for least recently used cache flush
     Map       map;           //<! Key=>Value map
@@ -145,8 +145,7 @@ namespace osmscout {
      Create a new cache object with the given max size.
       */
     explicit Cache(size_t maxSize)
-     : size(0),
-       maxSize(maxSize)
+     : maxSize(maxSize)
     {
       map.reserve(maxSize);
       previousEntry=order.end();
