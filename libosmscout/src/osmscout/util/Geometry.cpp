@@ -826,7 +826,7 @@ namespace osmscout {
     }
   }
 
-  std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension = {
+  const std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension = {
       CellDimension{360.0,                      180.0                       }, //  0
       CellDimension{ 180.0,                       90.0                      }, //  1
       CellDimension{  90.0,                       45.0                      }, //  2

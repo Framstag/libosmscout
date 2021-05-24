@@ -66,13 +66,6 @@ namespace osmscout {
       K key; // NOLINT
       V value; // NOLINT
 
-      CacheEntry(const CacheEntry& entry)
-      : key(entry.key),
-        value(entry.value)
-      {
-        // no code
-      }
-
       explicit CacheEntry(const K& key)
       : key(key)
       {
@@ -86,8 +79,6 @@ namespace osmscout {
       {
         // no code
       }
-
-      ~CacheEntry() = default;
     };
 
     /**
@@ -116,7 +107,7 @@ namespace osmscout {
 
   private:
 
-    inline IK KeyToInternalKey(K key)
+    IK KeyToInternalKey(K key)
     {
       return key - std::numeric_limits<K>::min();
     }

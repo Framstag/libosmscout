@@ -60,93 +60,93 @@ namespace osmscout {
   public:
     Way() = default;
 
-    inline FileOffset GetFileOffset() const
+    FileOffset GetFileOffset() const
     {
       return fileOffset;
     }
 
-    inline FileOffset GetNextFileOffset() const
+    FileOffset GetNextFileOffset() const
     {
       return nextFileOffset;
     }
 
-    inline ObjectFileRef GetObjectFileRef() const
+    ObjectFileRef GetObjectFileRef() const
     {
       return {fileOffset,refWay};
     }
 
-    inline TypeInfoRef GetType() const
+    TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
     }
 
-    inline size_t GetFeatureCount() const
+    size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
-    inline bool HasFeature(size_t idx) const
+    bool HasFeature(size_t idx) const
     {
       return featureValueBuffer.HasFeature(idx);
     }
 
-    inline const FeatureInstance& GetFeature(size_t idx) const
+    const FeatureInstance& GetFeature(size_t idx) const
     {
       return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline FeatureValue* GetFeatureValue(size_t idx) const
+    FeatureValue* GetFeatureValue(size_t idx) const
     {
       return featureValueBuffer.GetValue(idx);
     }
 
-    inline void UnsetFeature(size_t idx)
+    void UnsetFeature(size_t idx)
     {
       featureValueBuffer.FreeValue(idx);
     }
 
-    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return featureValueBuffer;
     }
 
-    inline bool IsCircular() const
+    bool IsCircular() const
     {
       return nodes[0].GetId()!=0 &&
              nodes[0].GetId()==nodes[nodes.size()-1].GetId();
     }
 
-    inline Id GetSerial(size_t index) const
+    Id GetSerial(size_t index) const
     {
       return nodes[index].GetSerial();
     }
 
-    inline Id GetId(size_t index) const
+    Id GetId(size_t index) const
     {
       return nodes[index].GetId();
     }
 
-    inline Id GetFrontId() const
+    Id GetFrontId() const
     {
       return nodes.front().GetId();
     }
 
-    inline Id GetBackId() const
+    Id GetBackId() const
     {
       return nodes.back().GetId();
     }
 
-    inline const Point& GetPoint(size_t index) const
+    const Point& GetPoint(size_t index) const
     {
       return nodes[index];
     }
 
-    inline const GeoCoord& GetCoord(size_t index) const
+    const GeoCoord& GetCoord(size_t index) const
     {
       return nodes[index].GetCoord();
     }
 
-    inline GeoBox GetBoundingBox() const
+    GeoBox GetBoundingBox() const
     {
       if (bbox.IsValid() || nodes.empty()) {
         return bbox;
@@ -168,7 +168,7 @@ namespace osmscout {
      * @return
      *    true on intersection, else false
      */
-    inline bool Intersects(const GeoBox& boundingBox) const
+    bool Intersects(const GeoBox& boundingBox) const
     {
       return GetBoundingBox().Intersects(boundingBox);
     }
@@ -178,12 +178,12 @@ namespace osmscout {
     bool GetNodeIndexByNodeId(Id id,
                               size_t& index) const;
 
-    inline void SetType(const TypeInfoRef& type)
+    void SetType(const TypeInfoRef& type)
     {
       featureValueBuffer.SetType(type);
     }
 
-    inline void SetFeatures(const FeatureValueBuffer& buffer)
+    void SetFeatures(const FeatureValueBuffer& buffer)
     {
       featureValueBuffer.Set(buffer);
     }

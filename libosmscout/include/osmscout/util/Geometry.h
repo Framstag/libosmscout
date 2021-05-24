@@ -476,7 +476,8 @@ namespace osmscout {
   inline bool IsCoordInArea(const N& point,
                             const std::vector<M>& nodes)
   {
-    size_t i,j;
+    size_t i;
+    size_t j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
@@ -507,7 +508,8 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const N& point,
                                       const std::vector<M>& nodes)
   {
-    size_t i,j;
+    size_t i;
+    size_t j;
     bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
@@ -638,12 +640,12 @@ namespace osmscout {
         ++contra;
       }
 
-      if (count>=100 && pro/20.0>contra) {
+      if (count>=100 && double(pro)/20.0>double(contra)) {
         return true;
       }
     }
 
-    return pro/20.0>contra;
+    return double(pro)/20.0>double(contra);
   }
 
   /**
@@ -1023,7 +1025,8 @@ namespace osmscout {
 
     double u=((p.GetLon()-a.GetLon())*xdelta+(p.GetLat()-a.GetLat())*ydelta)/(xdelta*xdelta+ydelta*ydelta);
 
-    double cx,cy;
+    double cx;
+    double cy;
 
     if (u<0) {
       cx=a.GetLon();
@@ -1131,33 +1134,33 @@ namespace osmscout {
 
     ScanCell(int x, int y);
 
-    inline void Set(int x, int y)
+    void Set(int x, int y)
     {
       this->x=x;
       this->y=y;
     }
 
-    inline bool operator==(const ScanCell& other) const
+    bool operator==(const ScanCell& other) const
     {
       return x==other.x && y==other.y;
     }
 
-    inline bool operator<(const ScanCell& other) const
+    bool operator<(const ScanCell& other) const
     {
       return std::tie(y, x) < std::tie(other.y, other.x);
     }
 
-    inline bool IsEqual(const ScanCell& other) const
+    bool IsEqual(const ScanCell& other) const
     {
       return x==other.x && y==other.y;
     }
 
-    inline int GetX() const
+    int GetX() const
     {
       return x;
     }
 
-    inline int GetY() const
+    int GetY() const
     {
       return y;
     }
@@ -1449,7 +1452,7 @@ namespace osmscout {
   const size_t CELL_DIMENSION_MAX   = 25;
   const size_t CELL_DIMENSION_COUNT = CELL_DIMENSION_MAX+1;
 
-  extern OSMSCOUT_API std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension;
+  extern OSMSCOUT_API const std::array<CellDimension,CELL_DIMENSION_COUNT> cellDimension;
 
   /**
    * Helper class to divide a given GeoBox in multiple equally sized parts. The partitioning
@@ -1473,7 +1476,7 @@ namespace osmscout {
     GeoBox    box;
     Direction direction;
     double    parts;
-    size_t    currentIndex;
+    size_t    currentIndex=0;
     GeoBox    currentBox;
 
   private:
@@ -1485,8 +1488,7 @@ namespace osmscout {
                      size_t parts)
      : box(box),
        direction(direction),
-       parts((double)parts),
-       currentIndex(0)
+       parts((double)parts)
     {
       assert(currentIndex<parts);
       CalculateBox();

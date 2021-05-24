@@ -65,12 +65,12 @@ namespace osmscout {
     void Open(const std::string& filename);
     void Close();
     void CloseFailsafe();
-    inline bool IsOpen() const
+    bool IsOpen() const
     {
       return file!=nullptr;
     }
 
-    inline bool HasError() const
+    bool HasError() const
     {
       return file==nullptr || hasError;
     }
@@ -103,7 +103,7 @@ namespace osmscout {
 
     void Write(const ObjectFileRef& ref);
 
-    inline void Write(const MagnificationLevel& level)
+    void Write(const MagnificationLevel& level)
     {
       Write(level.Get());
     }
@@ -122,7 +122,7 @@ namespace osmscout {
     void WriteNumber(uint32_t number);
     void WriteNumber(uint64_t number);
 
-    inline void WriteNumber(const MagnificationLevel& level)
+    void WriteNumber(const MagnificationLevel& level)
     {
       WriteNumber(level.Get());
     }

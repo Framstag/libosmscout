@@ -35,7 +35,7 @@ namespace osmscout {
     double radians=0.0; //!< bearing in radians, normalised to [0..2*M_PI)
 
   private:
-    explicit inline Bearing(double radians):
+    explicit Bearing(double radians):
         radians(Normalise(radians))
     { }
 
@@ -47,12 +47,12 @@ namespace osmscout {
 
     Bearing& operator=(const Bearing &d) = default;
 
-    inline Bearing(Bearing &&d) noexcept
+    Bearing(Bearing &&d) noexcept
     {
       std::swap(radians, d.radians);
     }
 
-    inline Bearing &operator=(Bearing &&d) noexcept
+    Bearing &operator=(Bearing &&d) noexcept
     {
       std::swap(radians, d.radians);
       return *this;
@@ -61,7 +61,7 @@ namespace osmscout {
     /**
      * Bearing in radians, normalised to [0..2*M_PI)
      */
-    inline double AsRadians() const
+    double AsRadians() const
     {
       return radians;
     }
@@ -69,27 +69,27 @@ namespace osmscout {
     /**
      * Bearing in degrees, normalised to [0..360)
      */
-    inline double AsDegrees() const
+    double AsDegrees() const
     {
       return radians*180.0/M_PI;
     }
 
-    inline Bearing operator-(const Bearing &d) const
+    Bearing operator-(const Bearing &d) const
     {
       return Bearing(radians-d.radians);
     }
 
-    inline Bearing operator+(const Bearing &d) const
+    Bearing operator+(const Bearing &d) const
     {
       return Bearing(radians+d.radians);
     }
 
-    inline Bearing operator*(const double &d) const
+    Bearing operator*(const double &d) const
     {
       return Bearing(radians * d);
     }
 
-    inline Bearing operator/(const double &d) const
+    Bearing operator/(const double &d) const
     {
       return Bearing(radians / d);
     }
@@ -106,22 +106,22 @@ namespace osmscout {
      */
     std::string LongDisplayString() const;
 
-    inline bool operator==(const Bearing& o) const
+    bool operator==(const Bearing& o) const
     {
       return radians == o.radians;
     }
 
-    inline bool operator!=(const Bearing& o) const
+    bool operator!=(const Bearing& o) const
     {
       return radians != o.radians;
     }
 
-    static inline Bearing Radians(double radians)
+    inline static Bearing Radians(double radians)
     {
       return Bearing(radians);
     }
 
-    static inline Bearing Degrees(double degrees)
+    inline static Bearing Degrees(double degrees)
     {
       return Bearing(degrees*M_PI/180.0);
     }

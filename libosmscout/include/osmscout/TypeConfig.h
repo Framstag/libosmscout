@@ -197,7 +197,7 @@ namespace osmscout {
     TypeInfo& AddDescription(const std::string& languageCode,
                              const std::string& description);
 
-    inline bool HasFeatures()
+    bool HasFeatures() const
     {
       return !features.empty();
     }
@@ -217,7 +217,7 @@ namespace osmscout {
     /**
      * Return the feature at the given index
      */
-    inline const FeatureInstance& GetFeature(size_t idx) const
+    const FeatureInstance& GetFeature(size_t idx) const
     {
       return features[idx];
     }
@@ -225,7 +225,7 @@ namespace osmscout {
     /**
      * Return the list of features assigned to this type
      */
-    inline const std::vector<FeatureInstance>& GetFeatures() const
+    const std::vector<FeatureInstance>& GetFeatures() const
     {
       return features;
     }
@@ -233,7 +233,7 @@ namespace osmscout {
     /**
      * Returns the number of features of the asisgned type
      */
-    inline size_t GetFeatureCount() const
+    size_t GetFeatureCount() const
     {
       return features.size();
     }
@@ -241,7 +241,7 @@ namespace osmscout {
     /**
      * Returns the (rounded) number of bytes required for storing the feature mask
      */
-    inline size_t GetFeatureMaskBytes() const
+    size_t GetFeatureMaskBytes() const
     {
       return featureMaskBytes;
     }
@@ -250,7 +250,7 @@ namespace osmscout {
      * Returns the (rounded) number of bytes required for storing the feature mask and one additional
      * general purpose signal byte.
      */
-    inline size_t GetSpecialFeatureMaskBytes() const
+    size_t GetSpecialFeatureMaskBytes() const
     {
       return specialFeatureMaskBytes;
     }
@@ -258,7 +258,7 @@ namespace osmscout {
     /**
      * Returns the size of the buffer required to store all FeatureValues of this type into
      */
-    inline size_t GetFeatureValueBufferSize() const
+    size_t GetFeatureValueBufferSize() const
     {
       return valueBufferSize;
     }
@@ -267,7 +267,7 @@ namespace osmscout {
      * Returns the unique id of this type. You should not use the type id as an index.
 
      */
-    inline TypeId GetNodeId() const
+    TypeId GetNodeId() const
     {
       return nodeId;
     }
@@ -276,7 +276,7 @@ namespace osmscout {
      * Returns the unique id of this type. You should not use the type id as an index.
 
      */
-    inline TypeId GetWayId() const
+    TypeId GetWayId() const
     {
       return wayId;
     }
@@ -284,7 +284,7 @@ namespace osmscout {
     /**
      * Returns the unique id of this type. You should not use the type id as an index.
      */
-    inline TypeId GetAreaId() const
+    TypeId GetAreaId() const
     {
       return areaId;
     }
@@ -292,7 +292,7 @@ namespace osmscout {
     /**
      * Returns the unique id of this type. You should not use the type id as an index.
      */
-    inline TypeId GetRouteId() const
+    TypeId GetRouteId() const
     {
       return routeId;
     }
@@ -300,7 +300,7 @@ namespace osmscout {
     /**
      * Returns the index of this type. The index is assured to in the interval [0..GetTypeCount()[
      */
-    inline size_t GetIndex() const
+    size_t GetIndex() const
     {
       return index;
     }
@@ -308,7 +308,7 @@ namespace osmscout {
     /**
      * Return true, if this is a internal type, else false
      */
-    inline bool IsInternal() const
+    bool IsInternal() const
     {
       return internal;
     }
@@ -316,7 +316,7 @@ namespace osmscout {
     /**
      * The name of the given type
      */
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
@@ -326,7 +326,7 @@ namespace osmscout {
      * are met for a given object, the object is in turn of the given type.
      * to
      */
-    inline bool HasConditions() const
+    bool HasConditions() const
     {
       return !conditions.empty();
     }
@@ -334,7 +334,7 @@ namespace osmscout {
     /**
      * Returns the list of conditions for the given type.
      */
-    inline const std::list<TypeCondition>& GetConditions() const
+    const std::list<TypeCondition>& GetConditions() const
     {
       return conditions;
     }
@@ -342,14 +342,14 @@ namespace osmscout {
     /**
      * If set to 'true', a node can be of this type.
      */
-    inline TypeInfo& CanBeNode(bool canBeNode)
+    TypeInfo& CanBeNode(bool canBeNode)
     {
       this->canBeNode=canBeNode;
 
       return *this;
     }
 
-    inline bool CanBeNode() const
+    bool CanBeNode() const
     {
       return canBeNode;
     }
@@ -357,14 +357,14 @@ namespace osmscout {
     /**
      * If set to 'true', a way can be of this type.
      */
-    inline TypeInfo& CanBeWay(bool canBeWay)
+    TypeInfo& CanBeWay(bool canBeWay)
     {
       this->canBeWay=canBeWay;
 
       return *this;
     }
 
-    inline bool CanBeWay() const
+    bool CanBeWay() const
     {
       return canBeWay;
     }
@@ -372,14 +372,14 @@ namespace osmscout {
     /**
      * If set to 'true', an area can be of this type.
      */
-    inline TypeInfo& CanBeArea(bool canBeArea)
+    TypeInfo& CanBeArea(bool canBeArea)
     {
       this->canBeArea=canBeArea;
 
       return *this;
     }
 
-    inline bool CanBeArea() const
+    bool CanBeArea() const
     {
       return canBeArea;
     }
@@ -387,14 +387,14 @@ namespace osmscout {
     /**
      * If set to 'true', a relation can be of this type.
      */
-    inline TypeInfo& CanBeRelation(bool canBeRelation)
+    TypeInfo& CanBeRelation(bool canBeRelation)
     {
       this->canBeRelation=canBeRelation;
 
       return *this;
     }
 
-    inline bool CanBeRelation() const
+    bool CanBeRelation() const
     {
       return canBeRelation;
     }
@@ -402,14 +402,14 @@ namespace osmscout {
     /**
      * If set to 'true', a node can be of this type.
      */
-    inline TypeInfo& SetIsPath(bool isPath)
+    TypeInfo& SetIsPath(bool isPath)
     {
       this->isPath=isPath;
 
       return *this;
     }
 
-    inline bool IsPath() const
+    bool IsPath() const
     {
       return isPath;
     }
@@ -417,14 +417,14 @@ namespace osmscout {
     /**
      * If set to 'true', an object of this type can be traveled by feet by default.
      */
-    inline TypeInfo& CanRouteFoot(bool canBeRoute)
+    TypeInfo& CanRouteFoot(bool canBeRoute)
     {
       this->canRouteFoot=canBeRoute;
 
       return *this;
     }
 
-    inline TypeInfo& CanRouteBicycle(bool canBeRoute)
+    TypeInfo& CanRouteBicycle(bool canBeRoute)
     {
       this->canRouteBicycle=canBeRoute;
 
@@ -434,14 +434,14 @@ namespace osmscout {
     /**
      * If set to 'true', an object of this type can be traveled by car by default.
      */
-    inline TypeInfo& CanRouteCar(bool canBeRoute)
+    TypeInfo& CanRouteCar(bool canBeRoute)
     {
       this->canRouteCar=canBeRoute;
 
       return *this;
     }
 
-    inline bool CanRoute() const
+    bool CanRoute() const
     {
       return canRouteFoot || canRouteBicycle || canRouteCar;
     }
@@ -449,7 +449,7 @@ namespace osmscout {
     /**
      * If set to 'true', an object of this type can be traveled by the given vehicle by default.
      */
-    inline bool CanRoute(Vehicle vehicle) const
+    bool CanRoute(Vehicle vehicle) const
     {
       switch (vehicle)
       {
@@ -464,17 +464,17 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanRouteFoot() const
+    bool CanRouteFoot() const
     {
       return canRouteFoot;
     }
 
-    inline bool CanRouteBicycle() const
+    bool CanRouteBicycle() const
     {
       return canRouteBicycle;
     }
 
-    inline bool CanRouteCar() const
+    bool CanRouteCar() const
     {
       return canRouteCar;
     }
@@ -484,14 +484,14 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be indexed as an address.
      */
-    inline TypeInfo& SetIndexAsAddress(bool indexAsAddress)
+    TypeInfo& SetIndexAsAddress(bool indexAsAddress)
     {
       this->indexAsAddress=indexAsAddress;
 
       return *this;
     }
 
-    inline bool GetIndexAsAddress() const
+    bool GetIndexAsAddress() const
     {
       return indexAsAddress;
     }
@@ -499,14 +499,14 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be indexed as a location.
      */
-    inline TypeInfo& SetIndexAsLocation(bool indexAsLocation)
+    TypeInfo& SetIndexAsLocation(bool indexAsLocation)
     {
       this->indexAsLocation=indexAsLocation;
 
       return *this;
     }
 
-    inline bool GetIndexAsLocation() const
+    bool GetIndexAsLocation() const
     {
       return indexAsLocation;
     }
@@ -514,14 +514,14 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be indexed as a region.
      */
-    inline TypeInfo& SetIndexAsRegion(bool indexAsRegion)
+    TypeInfo& SetIndexAsRegion(bool indexAsRegion)
     {
       this->indexAsRegion=indexAsRegion;
 
       return *this;
     }
 
-    inline bool GetIndexAsRegion() const
+    bool GetIndexAsRegion() const
     {
       return indexAsRegion;
     }
@@ -529,14 +529,14 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be indexed as a POI.
      */
-    inline TypeInfo& SetIndexAsPOI(bool indexAsPOI)
+    TypeInfo& SetIndexAsPOI(bool indexAsPOI)
     {
       this->indexAsPOI=indexAsPOI;
 
       return *this;
     }
 
-    inline bool GetIndexAsPOI() const
+    bool GetIndexAsPOI() const
     {
       return indexAsPOI;
     }
@@ -544,25 +544,25 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be optimized for low zoom.
      */
-    inline TypeInfo& SetOptimizeLowZoom(bool optimize)
+    TypeInfo& SetOptimizeLowZoom(bool optimize)
     {
       this->optimizeLowZoom=optimize;
 
       return *this;
     }
 
-    inline bool GetOptimizeLowZoom() const
+    bool GetOptimizeLowZoom() const
     {
       return optimizeLowZoom;
     }
 
-    inline TypeInfo& SetSpecialType(SpecialType specialType) {
+    TypeInfo& SetSpecialType(SpecialType specialType) {
       this->specialType=specialType;
 
       return *this;
     }
 
-    inline SpecialType GetSpecialType() const
+    SpecialType GetSpecialType() const
     {
       return specialType;
     }
@@ -570,7 +570,7 @@ namespace osmscout {
      * An object is handled as multipolygon even though it may not have
      * type=multipolygon set explicitly.
      */
-    inline TypeInfo& SetMultipolygon()
+    TypeInfo& SetMultipolygon()
     {
       this->specialType=SpecialType::multipolygon;
 
@@ -580,7 +580,7 @@ namespace osmscout {
     /**
      * An object is handled as route master.
      */
-    inline TypeInfo& SetRouteMaster()
+    TypeInfo& SetRouteMaster()
     {
       this->specialType=SpecialType::routeMaster;
 
@@ -590,36 +590,36 @@ namespace osmscout {
     /**
      * An object is handled as route.
      */
-    inline TypeInfo& SetRoute()
+    TypeInfo& SetRoute()
     {
       this->specialType=SpecialType::route;
 
       return *this;
     }
 
-    inline bool IsMultipolygon() const
+    bool IsMultipolygon() const
     {
       return specialType==SpecialType::multipolygon;
     }
 
-    inline bool IsRouteMaster() const
+    bool IsRouteMaster() const
     {
       return specialType==SpecialType::routeMaster;
     }
 
-    inline bool IsRoute() const
+    bool IsRoute() const
     {
       return specialType==SpecialType::route;
     }
 
-    inline TypeInfo& SetPinWay(bool pinWay)
+    TypeInfo& SetPinWay(bool pinWay)
     {
       this->pinWay=pinWay;
 
       return *this;
     }
 
-    inline bool GetPinWay() const
+    bool GetPinWay() const
     {
       return pinWay;
     }
@@ -627,14 +627,14 @@ namespace osmscout {
     /**
      * Set to true, if "touching" areas of this type should get merged.
      */
-    inline TypeInfo& SetMergeAreas(bool mergeAreas)
+    TypeInfo& SetMergeAreas(bool mergeAreas)
     {
       this->mergeAreas=mergeAreas;
 
       return *this;
     }
 
-    inline bool GetMergeAreas() const
+    bool GetMergeAreas() const
     {
       return mergeAreas;
     }
@@ -642,14 +642,14 @@ namespace osmscout {
     /**
      * Set, if an object of this type should be ignored for land/sea calculation.
      */
-    inline TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
+    TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
     {
       this->ignoreSeaLand=ignoreSeaLand;
 
       return *this;
     }
 
-    inline bool GetIgnoreSeaLand() const
+    bool GetIgnoreSeaLand() const
     {
       return ignoreSeaLand;
     }
@@ -658,38 +658,38 @@ namespace osmscout {
      * If set to true, an object of this typoe should be ignored (not exported for renderng, routing,
      * location indexing or other services).
      */
-    inline TypeInfo& SetIgnore(bool ignore)
+    TypeInfo& SetIgnore(bool ignore)
     {
       this->ignore=ignore;
 
       return *this;
     }
 
-    inline bool GetIgnore() const
+    bool GetIgnore() const
     {
       return ignore;
     }
 
-    inline TypeInfo& SetLanes(uint8_t lanes)
+    TypeInfo& SetLanes(uint8_t lanes)
     {
       this->lanes=lanes;
 
       return *this;
     }
 
-    inline uint8_t GetLanes() const
+    uint8_t GetLanes() const
     {
       return lanes;
     }
 
-    inline TypeInfo& SetOnewayLanes(uint8_t lanes)
+    TypeInfo& SetOnewayLanes(uint8_t lanes)
     {
       this->onewayLanes=lanes;
 
       return *this;
     }
 
-    inline uint8_t GetOnewayLanes() const
+    uint8_t GetOnewayLanes() const
     {
       return onewayLanes;
     }
@@ -697,17 +697,17 @@ namespace osmscout {
     /**
      * Return the set of groups the type is in.
      */
-    inline const std::unordered_set<std::string>& GetGroups() const
+    const std::unordered_set<std::string>& GetGroups() const
     {
       return groups;
     }
 
-    inline bool IsInGroup(const std::string& groupName) const
+    bool IsInGroup(const std::string& groupName) const
     {
       return groups.find(groupName)!=groups.end();
     }
 
-    inline const std::unordered_map<std::string,std::string>& GetDescriptions() const
+    const std::unordered_map<std::string,std::string>& GetDescriptions() const
     {
       return descriptions;
     };
@@ -737,7 +737,7 @@ namespace osmscout {
      * Return a raw pointer to the value (as reserved in the internal featureValueBuffer). If the
      * featureValueBuffer doe snot yet exist, it will be created lazy.
      */
-    inline FeatureValue* GetValueAndAllocateBuffer(size_t idx)
+    FeatureValue* GetValueAndAllocateBuffer(size_t idx)
     {
       AllocateValueBufferLazy();
       return static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
@@ -779,7 +779,7 @@ namespace osmscout {
 
     void SetType(const TypeInfoRef& type);
 
-    inline TypeInfoRef GetType() const
+    TypeInfoRef GetType() const
     {
       return type;
     }
@@ -787,7 +787,7 @@ namespace osmscout {
     /**
      * Return the numbe rof features defined for this type
      */
-    inline size_t GetFeatureCount() const
+    size_t GetFeatureCount() const
     {
       return type->GetFeatureCount();
     }
@@ -795,7 +795,7 @@ namespace osmscout {
     /**
      * Get a feature description for the feature with the given index ([0..featureCount[)
      */
-    inline FeatureInstance GetFeature(size_t idx) const
+    FeatureInstance GetFeature(size_t idx) const
     {
       return type->GetFeature(idx);
     }
@@ -803,7 +803,7 @@ namespace osmscout {
     /**
      * Return true, if the given feature is set (available), else false.
      */
-    inline bool HasFeature(size_t idx) const
+    bool HasFeature(size_t idx) const
     {
       size_t featureBit=type->GetFeature(idx).GetFeatureBit();
 
@@ -818,7 +818,7 @@ namespace osmscout {
      * HasFeature(idx) && GetFeature(idx).GetFeature()->HasValue()
      *  should be called before accessing the value.
      */
-    inline FeatureValue* GetValue(size_t idx) const
+    FeatureValue* GetValue(size_t idx) const
     {
       return featureValueBuffer==nullptr ? nullptr
                                          : static_cast<FeatureValue*>(static_cast<void*>(&featureValueBuffer[type->GetFeature(idx).GetOffset()]));
@@ -855,8 +855,8 @@ namespace osmscout {
         if (HasFeature(featureInstance.GetIndex())) {
           osmscout::FeatureRef feature=featureInstance.GetFeature();
           if (feature->HasValue()) {
-            osmscout::FeatureValue* value=GetValue(featureInstance.GetIndex());
-            const T *v=dynamic_cast<const T*>(value);
+            const osmscout::FeatureValue* value=GetValue(featureInstance.GetIndex());
+            const auto *v=dynamic_cast<const T*>(value);
             if (v!=nullptr) {
               return v;
             }
@@ -954,28 +954,28 @@ namespace osmscout {
 
   public:
     TypeConfig();
-    virtual ~TypeConfig();
+    ~TypeConfig();
 
     /**
      * Methods for dealing with tags
      */
     //@{
-    inline TagId GetTagId(const char* name) const
+    TagId GetTagId(const char* name) const
     {
       return tagRegistry.GetTagId(name);
     }
 
-    inline TagId GetTagId(const std::string& name) const
+    TagId GetTagId(const std::string& name) const
     {
       return tagRegistry.GetTagId(name);
     }
 
-    inline const TagRegistry& GetTagRegistry() const
+    const TagRegistry& GetTagRegistry() const
     {
       return tagRegistry;
     }
 
-    inline TagRegistry& GetTagRegistry()
+    TagRegistry& GetTagRegistry()
     {
       return tagRegistry;
     }
@@ -985,7 +985,7 @@ namespace osmscout {
      * Methods for dealing with mappings for surfaces and surface grades.
      */
     //@{
-    inline void RegisterSurfaceToGradeMapping(const std::string& surface,
+    void RegisterSurfaceToGradeMapping(const std::string& surface,
                                               size_t grade)
     {
       tagRegistry.RegisterSurfaceToGradeMapping(surface,
@@ -997,7 +997,7 @@ namespace osmscout {
      * Methods for dealing with mappings for surfaces and surface grades.
      */
     //@{
-    inline void RegisterMaxSpeedAlias(const std::string& alias,
+    void RegisterMaxSpeedAlias(const std::string& alias,
                                       uint8_t maxSpeed)
     {
       tagRegistry.RegisterMaxSpeedAlias(alias,
@@ -1014,7 +1014,7 @@ namespace osmscout {
     /**
      * Return an array of the types available
      */
-    inline const std::vector<TypeInfoRef>& GetTypes() const
+    const std::vector<TypeInfoRef>& GetTypes() const
     {
       return types;
     }
@@ -1022,12 +1022,12 @@ namespace osmscout {
     /**
      * Returns an array of the (ignore=false) node types available
      */
-    inline const std::vector<TypeInfoRef>& GetNodeTypes() const
+    const std::vector<TypeInfoRef>& GetNodeTypes() const
     {
       return nodeTypes;
     }
 
-    inline uint8_t GetNodeTypeIdBytes() const
+    uint8_t GetNodeTypeIdBytes() const
     {
       return nodeTypeIdBytes;
     }
@@ -1035,12 +1035,12 @@ namespace osmscout {
     /**
      * Returns an array of (ignore=false) the way types available
      */
-    inline const std::vector<TypeInfoRef>& GetWayTypes() const
+    const std::vector<TypeInfoRef>& GetWayTypes() const
     {
       return wayTypes;
     }
 
-    inline uint8_t GetWayTypeIdBytes() const
+    uint8_t GetWayTypeIdBytes() const
     {
       return wayTypeIdBytes;
     }
@@ -1048,17 +1048,17 @@ namespace osmscout {
     /**
      * Returns an array of the (ignore=false) area types available
      */
-    inline const std::vector<TypeInfoRef>& GetAreaTypes() const
+    const std::vector<TypeInfoRef>& GetAreaTypes() const
     {
       return areaTypes;
     }
 
-    inline uint8_t GetAreaTypeIdBits() const
+    uint8_t GetAreaTypeIdBits() const
     {
       return areaTypeIdBits;
     }
 
-    inline uint8_t GetAreaTypeIdBytes() const
+    uint8_t GetAreaTypeIdBytes() const
     {
       return areaTypeIdBytes;
     }
@@ -1066,12 +1066,12 @@ namespace osmscout {
     /**
      * Returns an array of the (ignore=false) route types available
      */
-    inline const std::vector<TypeInfoRef>& GetRouteTypes() const
+    const std::vector<TypeInfoRef>& GetRouteTypes() const
     {
       return routeTypes;
     }
 
-    inline uint8_t GetRouteTypeIdBytes() const
+    uint8_t GetRouteTypeIdBytes() const
     {
       return routeTypeIdBytes;
     }
@@ -1080,7 +1080,7 @@ namespace osmscout {
      * Returns the number of types available. The index of a type is guaranteed to be in the interval
      * [0..GetTypeCount()[
      */
-    inline size_t GetTypeCount() const
+    size_t GetTypeCount() const
     {
       return types.size();
     }
@@ -1093,7 +1093,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline TypeInfoRef GetTypeInfo(size_t index) const
+    TypeInfoRef GetTypeInfo(size_t index) const
     {
       assert(index<types.size());
 
@@ -1103,7 +1103,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline TypeInfoRef GetNodeTypeInfo(TypeId id) const
+    TypeInfoRef GetNodeTypeInfo(TypeId id) const
     {
       assert(id<=nodeTypes.size());
 
@@ -1117,7 +1117,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline TypeInfoRef GetWayTypeInfo(TypeId id) const
+    TypeInfoRef GetWayTypeInfo(TypeId id) const
     {
       assert(id<=wayTypes.size());
 
@@ -1131,7 +1131,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline TypeInfoRef GetAreaTypeInfo(TypeId id) const
+    TypeInfoRef GetAreaTypeInfo(TypeId id) const
     {
       assert(id<=areaTypes.size());
 
@@ -1145,7 +1145,7 @@ namespace osmscout {
     /**
      * Returns the type definition for the given type id
      */
-    inline TypeInfoRef GetRouteTypeInfo(TypeId id) const
+    TypeInfoRef GetRouteTypeInfo(TypeId id) const
     {
       assert(id<=routeTypes.size());
 
@@ -1205,7 +1205,7 @@ namespace osmscout {
     /**
      * Return all features registered
      */
-    inline const std::vector<FeatureRef>& GetFeatures() const
+    const std::vector<FeatureRef>& GetFeatures() const
     {
       return features;
     }

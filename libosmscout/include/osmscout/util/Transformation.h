@@ -76,7 +76,7 @@ namespace osmscout {
      * Return true, if the TransBuffer holds data (length==0)
      * @return
      */
-    inline bool IsEmpty() const
+    bool IsEmpty() const
     {
       return length==0;
     }
@@ -85,7 +85,7 @@ namespace osmscout {
      * Return the number of to be drawn points
      * @return
      */
-    inline size_t GetLength() const
+    size_t GetLength() const
     {
       return length;
     }
@@ -94,7 +94,7 @@ namespace osmscout {
      * Return the inex of the first to be drawn point
      * @return
      */
-    inline size_t GetStart() const
+    size_t GetStart() const
     {
       return start;
     }
@@ -103,7 +103,7 @@ namespace osmscout {
      * Return the last to be drawn point
      * @return
      */
-    inline size_t GetEnd() const
+    size_t GetEnd() const
     {
       return end;
     }
@@ -332,12 +332,12 @@ namespace osmscout {
     {
     }
 
-    inline size_t GetStart() const
+    size_t GetStart() const
     {
       return start;
     }
 
-    inline size_t GetEnd() const
+    size_t GetEnd() const
     {
       return end;
     }

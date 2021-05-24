@@ -42,7 +42,7 @@ namespace osmscout {
     std::condition_variable pushCondition;
     std::condition_variable popCondition;
     std::deque<Task>        tasks;
-    size_t                  queueLimit;
+    size_t                  queueLimit=std::numeric_limits<size_t>::max();
     bool                    running=true;
 
   public:
@@ -58,11 +58,7 @@ namespace osmscout {
   };
 
   template<class R>
-  WorkQueue<R>::WorkQueue()
-  : queueLimit(std::numeric_limits<size_t>::max())
-  {
-    // no code
-  }
+  WorkQueue<R>::WorkQueue() = default;
 
   template<class R>
   WorkQueue<R>::WorkQueue(size_t queueLimit)
@@ -77,7 +73,7 @@ namespace osmscout {
   template<class R>
   void WorkQueue<R>::PushTask(Task& task)
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
 
@@ -89,7 +85,7 @@ namespace osmscout {
   template<class R>
   bool WorkQueue<R>::PopTask(Task& task)
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock lock(mutex);
 
     popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
@@ -109,7 +105,7 @@ namespace osmscout {
   template<class R>
   void WorkQueue<R>::Stop()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock<std::mutex> lock(mutex);
 
     running=false;
 

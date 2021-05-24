@@ -38,7 +38,7 @@ namespace osmscout {
 
   private:
     void Return(T* o){
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
       if (!IsValid(o) || pool.size()==maxSize){
         Destroy(o);
       } else {
@@ -77,7 +77,7 @@ namespace osmscout {
 
     virtual Ptr Borrow()
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
       T* o;
       if (!pool.empty()){
         o=pool.back();
@@ -93,13 +93,13 @@ namespace osmscout {
 
     size_t Size()
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
       return pool.size();
     }
 
     void Clear()
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
       for (T* o:pool){
         Destroy(o);
       }

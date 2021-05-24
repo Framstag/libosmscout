@@ -190,12 +190,12 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline NameDescriptionRef GetOriginDescription() const
+      NameDescriptionRef GetOriginDescription() const
       {
         return originDescription;
       }
 
-      inline NameDescriptionRef GetTargetDescription() const
+      NameDescriptionRef GetTargetDescription() const
       {
         return targetDescription;
       }
@@ -224,27 +224,27 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline size_t GetExitCount() const
+      size_t GetExitCount() const
       {
         return exitCount;
       }
 
-      inline bool HasMultipleExits() const
+      bool HasMultipleExits() const
       {
         return exitCount>1;
       }
 
-      inline NameDescriptionRef GetOriginDesccription() const
+      NameDescriptionRef GetOriginDesccription() const
       {
         return originDescription;
       }
 
-      inline NameDescriptionRef GetTargetDesccription() const
+      NameDescriptionRef GetTargetDesccription() const
       {
         return targetDescription;
       }
 
-      inline const std::list<NameDescriptionRef>& GetDescriptions() const
+      const std::list<NameDescriptionRef>& GetDescriptions() const
       {
         return descriptions;
       }
@@ -292,22 +292,22 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline double GetTurnAngle() const
+      double GetTurnAngle() const
       {
         return turnAngle;
       }
 
-      inline double GetCurveAngle() const
+      double GetCurveAngle() const
       {
         return curveAngle;
       }
 
-      inline Move GetTurn() const
+      Move GetTurn() const
       {
         return turn;
       }
 
-      inline Move GetCurve() const
+      Move GetCurve() const
       {
         return curve;
       }
@@ -364,7 +364,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline size_t GetExitCount() const
+      size_t GetExitCount() const
       {
         return exitCount;
       }
@@ -391,7 +391,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline NameDescriptionRef GetToDescription() const
+      NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -415,12 +415,12 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline NameDescriptionRef GetFromDescription() const
+      NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
 
-      inline NameDescriptionRef GetToDescription() const
+      NameDescriptionRef GetToDescription() const
       {
         return toDescription;
       }
@@ -442,7 +442,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline NameDescriptionRef GetFromDescription() const
+      NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
       }
@@ -464,7 +464,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline NameDescriptionRef GetJunctionDescription() const
+      NameDescriptionRef GetJunctionDescription() const
       {
         return junctionDescription;
       }
@@ -505,7 +505,7 @@ namespace osmscout {
 
       std::string GetDebugString() const override;
 
-      inline uint8_t GetMaxSpeed() const
+      uint8_t GetMaxSpeed() const
       {
         return maxSpeed;
       }
@@ -561,17 +561,17 @@ namespace osmscout {
         return databaseId;
       }
 
-      inline ObjectFileRef GetObject() const
+      ObjectFileRef GetObject() const
       {
         return object;
       }
 
-      inline NameDescriptionRef GetName() const
+      NameDescriptionRef GetName() const
       {
         return name;
       }
 
-      inline Distance GetDistance() const
+      Distance GetDistance() const
       {
         return distance;
       }
@@ -685,7 +685,7 @@ namespace osmscout {
            const ObjectFileRef& pathObject,
            size_t targetNodeIndex);
 
-      inline size_t GetCurrentNodeIndex() const
+      size_t GetCurrentNodeIndex() const
       {
         return currentNodeIndex;
       }
@@ -693,7 +693,7 @@ namespace osmscout {
       /**
        * Return the objects that intersect at the current node index.
        */
-      inline const std::vector<ObjectFileRef>& GetObjects() const
+      const std::vector<ObjectFileRef>& GetObjects() const
       {
         return objects;
       }
@@ -701,7 +701,7 @@ namespace osmscout {
       /**
        * Return a list of descriptions attached to the current node
        */
-      inline const std::list<DescriptionRef>& GetDescriptions() const
+      const std::list<DescriptionRef>& GetDescriptions() const
       {
         return descriptions;
       }
@@ -710,17 +710,17 @@ namespace osmscout {
        * There exists a object/path from the current node to the next node
        * in the route.
        */
-      inline bool HasPathObject() const
+      bool HasPathObject() const
       {
         return pathObject.Valid();
       }
 
-      inline DatabaseId GetDatabaseId() const
+      DatabaseId GetDatabaseId() const
       {
         return database;
       }
 
-      inline DBFileOffset GetDBFileOffset() const
+      DBFileOffset GetDBFileOffset() const
       {
         return DBFileOffset(GetDatabaseId(),GetPathObject().GetFileOffset());
       }
@@ -728,7 +728,7 @@ namespace osmscout {
       /**
        * Return the path object that connects the current node to the next node.
        */
-      inline ObjectFileRef GetPathObject() const
+      ObjectFileRef GetPathObject() const
       {
         return pathObject;
       }
@@ -736,7 +736,7 @@ namespace osmscout {
       /**
        * The the index of the target node on the path that is the next node on the route.
        */
-      inline size_t GetTargetNodeIndex() const
+      size_t GetTargetNodeIndex() const
       {
         return targetNodeIndex;
       }
@@ -744,7 +744,7 @@ namespace osmscout {
       /**
        * Distance from the start of the route.
        */
-      inline Distance GetDistance() const
+      Distance GetDistance() const
       {
         return distance;
       }
@@ -752,7 +752,7 @@ namespace osmscout {
       /**
        * Time from the start of the route in h.
        */
-      inline Duration GetTime() const
+      Duration GetTime() const
       {
         return time;
       }
@@ -760,7 +760,7 @@ namespace osmscout {
       /**
        * Location (latitude,longitude) of the node
        */
-      inline GeoCoord GetLocation() const
+      GeoCoord GetLocation() const
       {
         return location;
       }
@@ -800,12 +800,12 @@ namespace osmscout {
                  const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
-    inline std::list<Node>& Nodes()
+    std::list<Node>& Nodes()
     {
       return nodes;
     }
 
-    inline const std::list<Node>& Nodes() const
+    const std::list<Node>& Nodes() const
     {
       return nodes;
     }

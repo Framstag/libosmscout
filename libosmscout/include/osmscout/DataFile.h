@@ -98,7 +98,8 @@ namespace osmscout {
                   N& data) const;
 
   public:
-    DataFile(const std::string& datafile, size_t cacheSize);
+    DataFile(const std::string& datafile,
+             size_t cacheSize);
 
     // disable copy and move
     DataFile(const DataFile&) = delete;
@@ -116,7 +117,7 @@ namespace osmscout {
 
     void FlushCache();
 
-    inline std::string GetFilename() const
+    std::string GetFilename() const
     {
       return datafilename;
     }

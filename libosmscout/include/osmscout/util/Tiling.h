@@ -73,12 +73,12 @@ namespace osmscout {
     OSMTileId(uint32_t x,
               uint32_t y);
 
-    inline uint32_t GetX() const
+    uint32_t GetX() const
     {
       return x;
     }
 
-    inline uint32_t GetY() const
+    uint32_t GetY() const
     {
       return y;
     }
@@ -86,17 +86,17 @@ namespace osmscout {
     GeoCoord GetTopLeftCoord(const Magnification& magnification) const;
     GeoBox GetBoundingBox(const Magnification& magnification) const;
 
-    inline bool operator==(const OSMTileId& other) const
+    bool operator==(const OSMTileId& other) const
     {
       return x==other.x && y==other.y;
     }
 
-    inline bool operator!=(const OSMTileId& other) const
+    bool operator!=(const OSMTileId& other) const
     {
       return x!=other.x || y!=other.y;
     }
 
-    inline std::string GetDisplayText() const
+    std::string GetDisplayText() const
     {
       return std::to_string(x)+","+std::to_string(y);
     }
@@ -191,59 +191,59 @@ namespace osmscout {
     OSMTileIdBox(const OSMTileId& a,
                  const OSMTileId& b);
 
-    inline OSMTileId GetMin() const
+    OSMTileId GetMin() const
     {
       return minTile;
     }
 
-    inline OSMTileId GetMax() const
+    OSMTileId GetMax() const
     {
       return maxTile;
     }
 
-    inline uint32_t GetMinX() const
+    uint32_t GetMinX() const
     {
       return minTile.GetX();
     }
 
-    inline uint32_t GetMaxX() const
+    uint32_t GetMaxX() const
     {
       return maxTile.GetX();
     }
 
-    inline uint32_t GetMinY() const
+    uint32_t GetMinY() const
     {
       return minTile.GetY();
     }
 
-    inline uint32_t GetMaxY() const
+    uint32_t GetMaxY() const
     {
       return maxTile.GetY();
     }
 
-    inline uint32_t GetWidth() const
+    uint32_t GetWidth() const
     {
       return maxTile.GetX()-minTile.GetX()+1;
     }
 
-    inline uint32_t GetHeight() const
+    uint32_t GetHeight() const
     {
       return maxTile.GetY()-minTile.GetY()+1;
     }
 
-    inline uint32_t GetCount() const
+    uint32_t GetCount() const
     {
       return GetWidth()*GetHeight();
     }
 
-    inline OSMTileIdBoxConstIterator begin() const
+    OSMTileIdBoxConstIterator begin() const
     {
       return OSMTileIdBoxConstIterator(minTile,
                                        minTile,
                                        maxTile);
     }
 
-    inline OSMTileIdBoxConstIterator end() const
+    OSMTileIdBoxConstIterator end() const
     {
       return OSMTileIdBoxConstIterator(OSMTileId(minTile.GetX(),
                                                  maxTile.GetY()+1),
@@ -253,7 +253,7 @@ namespace osmscout {
 
     GeoBox GetBoundingBox(const Magnification& magnification) const;
 
-    inline std::string GetDisplayText() const
+    std::string GetDisplayText() const
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
     }

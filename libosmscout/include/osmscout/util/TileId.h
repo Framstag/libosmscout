@@ -55,7 +55,7 @@ namespace osmscout {
     /**
      * Return the X coordinate fo the tile
      */
-    inline uint32_t GetX() const
+    uint32_t GetX() const
     {
       return x;
     }
@@ -63,12 +63,12 @@ namespace osmscout {
     /**
      * Return the y coordinate fo the tile
      */
-    inline uint32_t GetY() const
+    uint32_t GetY() const
     {
       return y;
     }
 
-    inline Pixel AsPixel() const
+    Pixel AsPixel() const
     {
       return {x,y};
     }
@@ -78,7 +78,7 @@ namespace osmscout {
     /**
      * Compare tile ids for equality
      */
-    inline bool operator==(const TileId& other) const
+    bool operator==(const TileId& other) const
     {
       return y==other.y &&
              x==other.x;
@@ -87,7 +87,7 @@ namespace osmscout {
     /**
      * Compare tile ids for inequality
      */
-    inline bool operator!=(const TileId& other) const
+    bool operator!=(const TileId& other) const
     {
       return y!=other.y ||
              x!=other.x;
@@ -97,7 +97,7 @@ namespace osmscout {
      * Compare tile ids by their order. Needed for sorting tile ids and placing them into (some)
      * containers.
      */
-    inline bool operator<(const TileId& other) const
+    bool operator<(const TileId& other) const
     {
       return std::tie(y, x) < std::tie(other.y, other.x);
     }
@@ -136,12 +136,12 @@ namespace osmscout {
     TileKey(const Magnification& magnification,
            const TileId& id);
 
-    inline uint32_t GetLevel() const
+    uint32_t GetLevel() const
     {
       return level;
     }
 
-    inline TileId GetId() const
+    TileId GetId() const
     {
       return id;
     }
@@ -256,59 +256,59 @@ namespace osmscout {
     {
     }
 
-    inline TileId GetMin() const
+    TileId GetMin() const
     {
       return minTile;
     }
 
-    inline TileId GetMax() const
+    TileId GetMax() const
     {
       return maxTile;
     }
 
-    inline uint32_t GetMinX() const
+    uint32_t GetMinX() const
     {
       return minTile.GetX();
     }
 
-    inline uint32_t GetMaxX() const
+    uint32_t GetMaxX() const
     {
       return maxTile.GetX();
     }
 
-    inline uint32_t GetMinY() const
+    uint32_t GetMinY() const
     {
       return minTile.GetY();
     }
 
-    inline uint32_t GetMaxY() const
+    uint32_t GetMaxY() const
     {
       return maxTile.GetY();
     }
 
-    inline uint32_t GetWidth() const
+    uint32_t GetWidth() const
     {
       return maxTile.GetX()-minTile.GetX()+1;
     }
 
-    inline uint32_t GetHeight() const
+    uint32_t GetHeight() const
     {
       return maxTile.GetY()-minTile.GetY()+1;
     }
 
-    inline uint32_t GetCount() const
+    uint32_t GetCount() const
     {
       return GetWidth()*GetHeight();
     }
 
-    inline TileIdBoxConstIterator begin() const
+    TileIdBoxConstIterator begin() const
     {
       return TileIdBoxConstIterator(minTile,
                                     minTile,
                                     maxTile);
     }
 
-    inline TileIdBoxConstIterator end() const
+    TileIdBoxConstIterator end() const
     {
       return TileIdBoxConstIterator(TileId(minTile.GetX(),
                                            maxTile.GetY()+1),
@@ -316,7 +316,7 @@ namespace osmscout {
                                        maxTile);
     }
 
-    inline bool operator==(const TileIdBox& other) const
+    bool operator==(const TileIdBox& other) const
     {
       return minTile==other.minTile &&
              maxTile==other.maxTile;
@@ -330,7 +330,7 @@ namespace osmscout {
 
     bool Intersects(const TileIdBox& other) const;
 
-    inline std::string GetDisplayText() const
+    std::string GetDisplayText() const
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
     }

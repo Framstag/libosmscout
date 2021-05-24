@@ -108,78 +108,78 @@ namespace osmscout {
       GeoBox                      bbox;         //!< Precomputed (cache) bounding box
 
     public:
-      inline Ring() = default;
+      Ring() = default;
 
-      inline TypeInfoRef GetType() const
+      TypeInfoRef GetType() const
       {
         return featureValueBuffer.GetType();
       }
 
-      inline size_t GetFeatureCount() const
+      size_t GetFeatureCount() const
       {
         return featureValueBuffer.GetType()->GetFeatureCount();
       }
 
-      inline bool HasFeature(size_t idx) const
+      bool HasFeature(size_t idx) const
       {
         return featureValueBuffer.HasFeature(idx);
       }
 
       bool HasAnyFeaturesSet() const;
 
-      inline const FeatureInstance& GetFeature(size_t idx) const
+      const FeatureInstance& GetFeature(size_t idx) const
       {
         return featureValueBuffer.GetType()->GetFeature(idx);
       }
 
-      inline void UnsetFeature(size_t idx)
+      void UnsetFeature(size_t idx)
       {
         featureValueBuffer.FreeValue(idx);
       }
 
-      inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+      const FeatureValueBuffer& GetFeatureValueBuffer() const
       {
         return featureValueBuffer;
       }
 
-      inline bool IsMaster() const
+      bool IsMaster() const
       {
         return ring==masterRingId;
       }
 
       // top level outer ring
-      inline bool IsTopOuter() const
+      bool IsTopOuter() const
       {
         return ring==outerRingId;
       }
 
       // ring level is odd, it is some outer ring
-      inline bool IsOuter() const
+      bool IsOuter() const
       {
         return (ring & outerRingId) == outerRingId;
       }
 
-      inline uint8_t GetRing() const
+      uint8_t GetRing() const
       {
         return ring;
       }
 
-      inline Id GetSerial(size_t index) const
+      Id GetSerial(size_t index) const
       {
         return nodes[index].GetSerial();
       }
 
-      inline Id GetId(size_t index) const
+      Id GetId(size_t index) const
       {
         return nodes[index].GetId();
       }
 
-      inline Id GetFrontId() const
+      Id GetFrontId() const
       {
         return nodes.front().GetId();
       }
 
-      inline Id GetBackId() const
+      Id GetBackId() const
       {
         return nodes.back().GetId();
       }
@@ -187,7 +187,7 @@ namespace osmscout {
       bool GetNodeIndexByNodeId(Id id,
                                 size_t& index) const;
 
-      inline const GeoCoord& GetCoord(size_t index) const
+      const GeoCoord& GetCoord(size_t index) const
       {
         return nodes[index].GetCoord();
       }
@@ -197,32 +197,32 @@ namespace osmscout {
       void GetBoundingBox(GeoBox& boundingBox) const;
       GeoBox GetBoundingBox() const;
 
-      inline void SetType(const TypeInfoRef& type)
+      void SetType(const TypeInfoRef& type)
       {
         featureValueBuffer.SetType(type);
       }
 
-      inline void SetFeatures(const FeatureValueBuffer& buffer)
+      void SetFeatures(const FeatureValueBuffer& buffer)
       {
         featureValueBuffer.Set(buffer);
       }
 
-      inline void CopyMissingValues(const FeatureValueBuffer& buffer)
+      void CopyMissingValues(const FeatureValueBuffer& buffer)
       {
         featureValueBuffer.CopyMissingValues(buffer);
       }
 
-      inline void MarkAsMasterRing()
+      void MarkAsMasterRing()
       {
         ring=masterRingId;
       }
 
-      inline void MarkAsOuterRing()
+      void MarkAsOuterRing()
       {
         ring=outerRingId;
       }
 
-      inline void SetRing(uint8_t ring)
+      void SetRing(uint8_t ring)
       {
         this->ring=ring;
       }
@@ -240,29 +240,29 @@ namespace osmscout {
     std::vector<Ring> rings;
 
   public:
-    inline Area() = default;
+    Area() = default;
 
-    inline FileOffset GetFileOffset() const
+    FileOffset GetFileOffset() const
     {
       return fileOffset;
     }
 
-    inline FileOffset GetNextFileOffset() const
+    FileOffset GetNextFileOffset() const
     {
       return nextFileOffset;
     }
 
-    inline ObjectFileRef GetObjectFileRef() const
+    ObjectFileRef GetObjectFileRef() const
     {
       return {fileOffset,refArea};
     }
 
-    inline TypeInfoRef GetType() const
+    TypeInfoRef GetType() const
     {
       return rings.front().GetType();
     }
 
-    inline TypeInfoRef GetRingType(const Ring &ring) const
+    TypeInfoRef GetRingType(const Ring &ring) const
     {
       if (ring.IsTopOuter() ||
           (ring.IsOuter() && ring.GetType()->GetIgnore())) {
@@ -273,12 +273,12 @@ namespace osmscout {
 
     }
 
-    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return rings.front().GetFeatureValueBuffer();
     }
 
-    inline bool IsSimple() const
+    bool IsSimple() const
     {
       return rings.size()==1;
     }
@@ -296,7 +296,7 @@ namespace osmscout {
      * @return
      *    true on intersection, else false
      */
-    inline bool Intersects(const GeoBox& boundingBox) const
+    bool Intersects(const GeoBox& boundingBox) const
     {
       return GetBoundingBox().Intersects(boundingBox);
     }

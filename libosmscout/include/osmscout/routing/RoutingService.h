@@ -74,22 +74,22 @@ namespace osmscout {
                   size_t nodeIndex,
                   DatabaseId database);
 
-    inline bool IsValid() const
+    bool IsValid() const
     {
       return object.Valid();
     }
 
-    inline ObjectFileRef GetObjectFileRef() const
+    ObjectFileRef GetObjectFileRef() const
     {
       return object;
     }
 
-    inline size_t GetNodeIndex() const
+    size_t GetNodeIndex() const
     {
       return nodeIndex;
     }
 
-    inline DatabaseId GetDatabaseId() const
+    DatabaseId GetDatabaseId() const
     {
       return database;
     }
@@ -106,17 +106,17 @@ namespace osmscout {
 
     RoutePositionResult(const RoutePosition &routePosition, const Distance &distance);
 
-    inline RoutePosition GetRoutePosition() const
+    RoutePosition GetRoutePosition() const
     {
       return routePosition;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
 
-    inline bool IsValid() const
+    bool IsValid() const
     {
       return routePosition.IsValid();
     }
@@ -192,12 +192,12 @@ namespace osmscout {
     void SetBreaker(const BreakerRef& breaker);
     void SetProgress(const RoutingProgressRef& progress);
 
-    inline BreakerRef GetBreaker() const
+    BreakerRef GetBreaker() const
     {
       return breaker;
     }
 
-    inline RoutingProgressRef GetProgress() const
+    RoutingProgressRef GetProgress() const
     {
       return progress;
     }
@@ -258,12 +258,12 @@ namespace osmscout {
         // no code
       }
 
-      inline bool operator==(const RNode& other) const
+      bool operator==(const RNode& other) const
       {
         return id==other.id;
       }
 
-      inline bool operator<(const RNode& other) const
+      bool operator<(const RNode& other) const
       {
         return id<other.id;
       }
@@ -273,7 +273,7 @@ namespace osmscout {
 
     struct RNodeCostCompare
     {
-      inline bool operator()(const RNodeRef& a,
+      bool operator()(const RNodeRef& a,
                              const RNodeRef& b) const
       {
         if (a->overallCost==b->overallCost) {
@@ -309,19 +309,19 @@ namespace osmscout {
        *    True, if both objects are equal. Objects are currently equal
        *    if they have the same route node file offset.
        */
-      inline bool operator==(const VNode& other) const
+      bool operator==(const VNode& other) const
       {
         return currentNode==other.currentNode;
       }
 
       /**
-       * Simple inline constructor for searching for VNodes in the
+       * Simple constructor for searching for VNodes in the
        * ClosedSet.
        *
        * @param currentNode
        *    Offset of the node to search for
        */
-      inline explicit VNode(const DBId& currentNode)
+      explicit VNode(const DBId& currentNode)
         : currentNode(currentNode)
       {
         // no code
@@ -354,7 +354,7 @@ namespace osmscout {
      */
     struct ClosedNodeHasher
     {
-      inline size_t operator()(const VNode& node) const
+      size_t operator()(const VNode& node) const
       {
         return std::hash<Id>()(node.currentNode.id) ^
                std::hash<DatabaseId>()(node.currentNode.database);

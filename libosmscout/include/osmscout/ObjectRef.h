@@ -53,7 +53,7 @@ namespace osmscout {
     ObjectOSMRef() = default;
     ObjectOSMRef(const ObjectOSMRef& ref) = default;
 
-    inline ObjectOSMRef(OSMId id,
+    ObjectOSMRef(OSMId id,
                         OSMRefType type)
     : id(id),
       type(type)
@@ -61,66 +61,66 @@ namespace osmscout {
       // no code
     }
 
-    inline void Set(const OSMId& id,
+    void Set(const OSMId& id,
                     const OSMRefType& type)
     {
       this->id=id;
       this->type=type;
     }
 
-    inline void Invalidate()
+    void Invalidate()
     {
       this->id=0;
       this->type=osmRefNone;
     }
 
-    inline const OSMId& GetId() const
+    const OSMId& GetId() const
     {
       return id;
     }
 
-    inline const OSMRefType& GetType() const
+    const OSMRefType& GetType() const
     {
       return type;
     }
 
     std::string GetName() const;
 
-    inline bool Valid() const
+    bool Valid() const
     {
       return type!=osmRefNone;
     }
 
-    inline bool Invalid() const
+    bool Invalid() const
     {
       return type==osmRefNone;
     }
 
-    inline bool IsNode() const
+    bool IsNode() const
     {
       return type==osmRefNode;
     }
 
-    inline bool IsWay() const
+    bool IsWay() const
     {
       return type==osmRefWay;
     }
 
-    inline bool IsRelation() const
+    bool IsRelation() const
     {
       return type==osmRefRelation;
     }
-    inline bool operator<(const ObjectOSMRef& reference) const
+    bool operator<(const ObjectOSMRef& reference) const
     {
       return std::tie(type, id) < std::tie(reference.type, reference.id);
     }
 
-    inline bool operator==(const ObjectOSMRef& reference) const
+    bool operator==(const ObjectOSMRef& reference) const
     {
       return type==reference.type && id==reference.id;
     }
 
-    inline bool operator!=(const ObjectOSMRef& reference) const
+    bool operator!=(const ObjectOSMRef& reference) const
     {
       return type!=reference.type || id!=reference.id;
     }
@@ -150,7 +150,7 @@ namespace osmscout {
     ObjectFileRef() = default;
     ObjectFileRef(const ObjectFileRef& ref) = default;
 
-    inline ObjectFileRef(FileOffset offset,
+    ObjectFileRef(FileOffset offset,
                          RefType type)
     : offset(offset),
       type(type)
@@ -158,67 +158,67 @@ namespace osmscout {
       // no code
     }
 
-    inline void Set(const FileOffset& offset,
+    void Set(const FileOffset& offset,
                     const RefType& type)
     {
       this->offset=offset;
       this->type=type;
     }
 
-    inline void Invalidate()
+    void Invalidate()
     {
       this->offset=0;
       this->type=refNone;
     }
 
-    inline const FileOffset& GetFileOffset() const
+    const FileOffset& GetFileOffset() const
     {
       return offset;
     }
 
-    inline const RefType& GetType() const
+    const RefType& GetType() const
     {
       return type;
     }
 
     std::string GetName() const;
 
-    inline bool Valid() const
+    bool Valid() const
     {
       return type!=refNone;
     }
 
-    inline bool Invalid() const
+    bool Invalid() const
     {
       return type==refNone;
     }
 
-    inline bool IsNode() const
+    bool IsNode() const
     {
       return type==refNode;
     }
 
-    inline bool IsWay() const
+    bool IsWay() const
     {
       return type==refWay;
     }
 
-    inline bool IsArea() const
+    bool IsArea() const
     {
       return type==refArea;
     }
 
-    inline bool operator<(const ObjectFileRef& reference) const
+    bool operator<(const ObjectFileRef& reference) const
     {
       return std::tie(type, offset) < std::tie(reference.type, reference.offset);
     }
 
-    inline bool operator==(const ObjectFileRef& reference) const
+    bool operator==(const ObjectFileRef& reference) const
     {
       return type==reference.type && offset==reference.offset;
     }
 
-    inline bool operator!=(const ObjectFileRef& reference) const
+    bool operator!=(const ObjectFileRef& reference) const
     {
       return type!=reference.type || offset!=reference.offset;
     }
@@ -233,7 +233,7 @@ namespace osmscout {
   class OSMSCOUT_API ObjectFileRefByFileOffsetComparator CLASS_FINAL
   {
     public:
-    inline bool operator()(const ObjectFileRef& a,
+    bool operator()(const ObjectFileRef& a,
                            const ObjectFileRef& b) const
     {
       return a.GetFileOffset()<b.GetFileOffset();

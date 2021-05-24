@@ -128,7 +128,7 @@ namespace osmscout {
     DynamicFeatureReader(const TypeConfig& typeConfig,
                          const Feature& feature);
 
-    inline std::string GetFeatureName() const
+    std::string GetFeatureName() const
     {
       return featureName;
     }
@@ -326,7 +326,7 @@ namespace osmscout {
 
     if (index!=std::numeric_limits<size_t>::max() &&
         buffer.HasFeature(index)) {
-      V* value=dynamic_cast<V*>(buffer.GetValue(index));
+      auto* value=dynamic_cast<V*>(buffer.GetValue(index));
 
       if (value!=nullptr) {
         return value->GetLabel(Locale(), 0);
