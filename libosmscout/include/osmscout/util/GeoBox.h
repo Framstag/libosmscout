@@ -65,7 +65,7 @@ namespace osmscout {
     /**
      * Invalidate the bounding Box
      */
-    inline void Invalidate()
+    void Invalidate()
     {
       valid=false;
       minCoord.Set(0.0,0.0);
@@ -99,7 +99,7 @@ namespace osmscout {
      * @return
      *    True, if there is intersection, else false.
      */
-    template<typename P> inline bool Includes(const P& coord,
+    template<typename P> bool Includes(const P& coord,
                              bool openInterval=true) const
     {
       if (!valid){
@@ -130,7 +130,7 @@ namespace osmscout {
      *    True, if there is intersection, else false.
      *
      */
-    inline bool Intersects(const GeoBox& other,
+    bool Intersects(const GeoBox& other,
                            bool openInterval=true) const
     {
       if (!valid || !other.valid) {
@@ -162,7 +162,7 @@ namespace osmscout {
      * values assigned to the box. While being valid, the rectangle spanned by
      * the coordinate might still be degraded.
      */
-    inline bool IsValid() const
+    bool IsValid() const
     {
       return valid;
     }
@@ -170,7 +170,7 @@ namespace osmscout {
     /**
      * Return the coordinate with the minimum value for the lat/lon values of the area.
      */
-    inline GeoCoord GetMinCoord() const
+    GeoCoord GetMinCoord() const
     {
       return minCoord;
     }
@@ -178,7 +178,7 @@ namespace osmscout {
     /**
      * Return the coordinate with the maximum value for the lat/lon values of the area.
      */
-    inline GeoCoord GetMaxCoord() const
+    GeoCoord GetMaxCoord() const
     {
       return maxCoord;
     }
@@ -188,7 +188,7 @@ namespace osmscout {
     /**
      * Return the minimum latitude of the GeBox.
      */
-    inline double GetMinLat() const
+    double GetMinLat() const
     {
       return minCoord.GetLat();
     }
@@ -196,7 +196,7 @@ namespace osmscout {
     /**
      * Return the minimum longitude of the GeBox.
      */
-    inline double GetMinLon() const
+    double GetMinLon() const
     {
       return minCoord.GetLon();
     }
@@ -204,7 +204,7 @@ namespace osmscout {
     /**
      * Return the maximum latitude of the GeBox.
      */
-    inline double GetMaxLat() const
+    double GetMaxLat() const
     {
       return maxCoord.GetLat();
     }
@@ -212,7 +212,7 @@ namespace osmscout {
     /**
      * Return the maximum longitude of the GeBox.
      */
-    inline double GetMaxLon() const
+    double GetMaxLon() const
     {
       return maxCoord.GetLon();
     }
@@ -220,7 +220,7 @@ namespace osmscout {
     /**
      * Returns the width of the bounding box (maxLon-minLon).
      */
-    inline double GetWidth() const
+    double GetWidth() const
     {
       return maxCoord.GetLon()-minCoord.GetLon();
     }
@@ -228,7 +228,7 @@ namespace osmscout {
     /**
      * Returns the height of the bounding box (maxLat-minLat).
      */
-    inline double GetHeight() const
+    double GetHeight() const
     {
       return maxCoord.GetLat()-minCoord.GetLat();
     }
@@ -238,7 +238,7 @@ namespace osmscout {
      *
      * @return GetWidth()*GetHeight()
      */
-    inline double GetSize() const
+    double GetSize() const
     {
       return GetWidth()*GetHeight();
     }
@@ -246,7 +246,7 @@ namespace osmscout {
     /**
      * south-west corner
      */
-    inline GeoCoord GetBottomLeft() const
+    GeoCoord GetBottomLeft() const
     {
       return minCoord;
     }
@@ -254,7 +254,7 @@ namespace osmscout {
     /**
      * south-east corner
      */
-    inline GeoCoord GetBottomRight() const
+    GeoCoord GetBottomRight() const
     {
       return GeoCoord(minCoord.GetLat(),
                       maxCoord.GetLon());
@@ -263,7 +263,7 @@ namespace osmscout {
     /**
      * north-west corner
      */
-    inline GeoCoord GetTopLeft() const
+    GeoCoord GetTopLeft() const
     {
       return GeoCoord(maxCoord.GetLat(),
                       minCoord.GetLon());
@@ -272,7 +272,7 @@ namespace osmscout {
     /**
      * north-east corner
      */
-    inline GeoCoord GetTopRight() const
+    GeoCoord GetTopRight() const
     {
       return maxCoord;
     }

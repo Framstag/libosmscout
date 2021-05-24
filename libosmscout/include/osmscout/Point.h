@@ -40,7 +40,7 @@ namespace osmscout {
   public:
     Point() = default;
 
-    inline Point(uint8_t serial,
+    Point(uint8_t serial,
                  const GeoCoord& coords)
      : serial(serial),
        coord(coords)
@@ -48,34 +48,34 @@ namespace osmscout {
        // no code
      }
 
-    inline void Set(uint8_t serial,
+    void Set(uint8_t serial,
                     const GeoCoord& coords)
     {
       this->serial=serial;
       this->coord=coords;
     }
 
-    inline void SetSerial(uint8_t serial)
+    void SetSerial(uint8_t serial)
     {
       this->serial=serial;
     }
 
-    inline void ClearSerial()
+    void ClearSerial()
     {
       serial=0;
     }
 
-    inline void SetCoord(const GeoCoord& coords)
+    void SetCoord(const GeoCoord& coords)
     {
       this->coord=coords;
     }
 
-    inline uint8_t GetSerial() const
+    uint8_t GetSerial() const
     {
       return serial;
     }
 
-    inline bool IsRelevant() const
+    bool IsRelevant() const
     {
       return serial!=0;
     }
@@ -90,17 +90,17 @@ namespace osmscout {
      */
     Id GetId() const;
 
-    inline const GeoCoord& GetCoord() const
+    const GeoCoord& GetCoord() const
     {
       return coord;
     }
 
-    inline double GetLat() const
+    double GetLat() const
     {
       return coord.GetLat();
     }
 
-    inline double GetLon() const
+    double GetLon() const
     {
       return coord.GetLon();
     }
@@ -114,7 +114,7 @@ namespace osmscout {
      * @return
      *    true if identical, else false
      */
-    inline bool IsIdentical(const Point& other) const
+    bool IsIdentical(const Point& other) const
     {
       return serial==other.serial && coord==other.coord;
     }
@@ -129,7 +129,7 @@ namespace osmscout {
      * @return
      *    true if same location, else false
      */
-    inline bool IsSame(const Point& other) const
+    bool IsSame(const Point& other) const
     {
       return coord==other.coord;
     }
@@ -142,7 +142,7 @@ namespace osmscout {
      * @return
      *    true if same location, else false
      */
-    inline bool IsEqual(const Point& other) const
+    bool IsEqual(const Point& other) const
     {
       return coord==other.coord;
     }
@@ -156,7 +156,7 @@ namespace osmscout {
      * @return
      *    true or false
      */
-    inline bool operator<(const Point& other) const
+    bool operator<(const Point& other) const
     {
       return coord<other.GetCoord() ||
         (coord==other.GetCoord() && serial < other.serial);

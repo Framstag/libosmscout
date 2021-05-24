@@ -130,84 +130,84 @@ namespace osmscout {
     LineStyle& SetZIndex(int zIndex);
     LineStyle& SetOffsetRel(OffsetRel offsetRel);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return (displayWidth>0.0 ||
               width>0.0) &&
               lineColor.IsVisible();
     }
 
-    inline const std::string& GetSlot() const
+    const std::string& GetSlot() const
     {
       return slot;
     }
 
-    inline const Color& GetLineColor() const
+    const Color& GetLineColor() const
     {
       return lineColor;
     }
 
-    inline const Color& GetGapColor() const
+    const Color& GetGapColor() const
     {
       return gapColor;
     }
 
-    inline bool GetPreferColorFeature() const
+    bool GetPreferColorFeature() const
     {
       return preferColorFeature;
     }
 
-    inline double GetDisplayWidth() const
+    double GetDisplayWidth() const
     {
       return displayWidth;
     }
 
-    inline double GetWidth() const
+    double GetWidth() const
     {
       return width;
     }
 
-    inline double GetDisplayOffset() const
+    double GetDisplayOffset() const
     {
       return displayOffset;
     }
 
-    inline double GetOffset() const
+    double GetOffset() const
     {
       return offset;
     }
 
-    inline CapStyle GetJoinCap() const
+    CapStyle GetJoinCap() const
     {
       return joinCap;
     }
 
-    inline CapStyle GetEndCap() const
+    CapStyle GetEndCap() const
     {
       return endCap;
     }
 
-    inline bool HasDashes() const
+    bool HasDashes() const
     {
       return !dash.empty();
     }
 
-    inline const std::vector<double>& GetDash() const
+    const std::vector<double>& GetDash() const
     {
       return dash;
     }
 
-    inline int GetPriority() const
+    int GetPriority() const
     {
       return priority;
     }
 
-    inline int GetZIndex() const
+    int GetZIndex() const
     {
       return zIndex;
     }
 
-    inline OffsetRel GetOffsetRel() const
+    OffsetRel GetOffsetRel() const
     {
       return offsetRel;
     }
@@ -305,33 +305,33 @@ namespace osmscout {
     void SetPatternId(size_t id) const;
     FillStyle& SetPatternMinMag(const Magnification& mag);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return (fillColor.IsVisible() ||
               !pattern.empty());
     }
 
-    inline const Color& GetFillColor() const
+    const Color& GetFillColor() const
     {
       return fillColor;
     }
 
-    inline bool HasPattern() const
+    bool HasPattern() const
     {
       return !pattern.empty();
     }
 
-    inline std::string GetPatternName() const
+    std::string GetPatternName() const
     {
       return pattern;
     }
 
-    inline size_t GetPatternId() const
+    size_t GetPatternId() const
     {
       return patternId;
     }
 
-    inline const Magnification& GetPatternMinMag() const
+    const Magnification& GetPatternMinMag() const
     {
       return patternMinMag;
     }
@@ -395,52 +395,52 @@ namespace osmscout {
     BorderStyle& SetOffset(double value);
     BorderStyle& SetPriority(int priority);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return width>0 && color.IsVisible();
     }
 
-    inline const std::string& GetSlot() const
+    const std::string& GetSlot() const
     {
       return slot;
     }
 
-    inline const Color& GetColor() const
+    const Color& GetColor() const
     {
       return color;
     }
 
-    inline const Color& GetGapColor() const
+    const Color& GetGapColor() const
     {
       return gapColor;
     }
 
-    inline double GetWidth() const
+    double GetWidth() const
     {
       return width;
     }
 
-    inline bool HasDashes() const
+    bool HasDashes() const
     {
       return !dash.empty();
     }
 
-    inline const std::vector<double>& GetDash() const
+    const std::vector<double>& GetDash() const
     {
       return dash;
     }
 
-    inline double GetDisplayOffset() const
+    double GetDisplayOffset() const
     {
       return displayOffset;
     }
 
-    inline double GetOffset() const
+    double GetOffset() const
     {
       return offset;
     }
 
-    inline int GetPriority() const
+    int GetPriority() const
     {
       return priority;
     }
@@ -482,12 +482,12 @@ namespace osmscout {
 
     virtual LabelStyle& SetSize(double size);
 
-    inline size_t GetPriority() const
+    size_t GetPriority() const
     {
       return priority;
     }
 
-    inline double GetSize() const
+    double GetSize() const
     {
       return size;
     }
@@ -550,48 +550,48 @@ namespace osmscout {
     TextStyle& SetScaleAndFadeMag(const Magnification& mag);
     TextStyle& SetAutoSize(bool autoSize);
 
-    inline bool IsVisible() const override
+    bool IsVisible() const override
     {
       return label &&
              GetTextColor().IsVisible();
     }
 
-    inline double GetAlpha() const override
+    double GetAlpha() const override
     {
       return textColor.GetA();
     }
 
-    inline const std::string& GetSlot() const
+    const std::string& GetSlot() const
     {
       return slot;
     }
 
-    inline const LabelProviderRef& GetLabel() const
+    const LabelProviderRef& GetLabel() const
     {
       return label;
     }
 
-    inline size_t GetPosition() const
+    size_t GetPosition() const
     {
       return position;
     }
 
-    inline const Color& GetTextColor() const
+    const Color& GetTextColor() const
     {
       return textColor;
     }
 
-    inline const Style& GetStyle() const
+    const Style& GetStyle() const
     {
       return style;
     }
 
-    inline Magnification GetScaleAndFadeMag() const
+    Magnification GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
     }
 
-    inline bool GetAutoSize() const
+    bool GetAutoSize() const
     {
       return autoSize;
     }
@@ -654,33 +654,33 @@ namespace osmscout {
     ShieldStyle& SetBgColor(const Color& color);
     ShieldStyle& SetBorderColor(const Color& color);
 
-    inline bool IsVisible() const override
+    bool IsVisible() const override
     {
       return label &&
              GetTextColor().IsVisible();
     }
 
-    inline double GetAlpha() const override
+    double GetAlpha() const override
     {
       return textColor.GetA();
     }
 
-    inline const LabelProviderRef& GetLabel() const
+    const LabelProviderRef& GetLabel() const
     {
       return label;
     }
 
-    inline const Color& GetTextColor() const
+    const Color& GetTextColor() const
     {
       return textColor;
     }
 
-    inline const Color& GetBgColor() const
+    const Color& GetBgColor() const
     {
       return bgColor;
     }
 
-    inline const Color& GetBorderColor() const
+    const Color& GetBorderColor() const
     {
       return borderColor;
     }
@@ -732,52 +732,52 @@ namespace osmscout {
     PathShieldStyle& SetBorderColor(const Color& color);
     PathShieldStyle& SetShieldSpace(double shieldSpace);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return shieldStyle->IsVisible();
     }
 
-    inline double GetAlpha() const
+    double GetAlpha() const
     {
       return shieldStyle->GetAlpha();
     }
 
-    inline size_t GetPriority() const
+    size_t GetPriority() const
     {
       return shieldStyle->GetPriority();
     }
 
-    inline double GetSize() const
+    double GetSize() const
     {
       return shieldStyle->GetSize();
     }
 
-    inline const LabelProviderRef& GetLabel() const
+    const LabelProviderRef& GetLabel() const
     {
       return shieldStyle->GetLabel();
     }
 
-    inline const Color& GetTextColor() const
+    const Color& GetTextColor() const
     {
       return shieldStyle->GetTextColor();
     }
 
-    inline const Color& GetBgColor() const
+    const Color& GetBgColor() const
     {
       return shieldStyle->GetBgColor();
     }
 
-    inline const Color& GetBorderColor() const
+    const Color& GetBorderColor() const
     {
       return shieldStyle->GetBorderColor();
     }
 
-    inline double GetShieldSpace() const
+    double GetShieldSpace() const
     {
       return shieldSpace;
     }
 
-    inline const ShieldStyleRef& GetShieldStyle() const
+    const ShieldStyleRef& GetShieldStyle() const
     {
       return shieldStyle;
     }
@@ -832,38 +832,38 @@ namespace osmscout {
     PathTextStyle& SetOffset(double value);
     PathTextStyle& SetPriority(size_t value);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return label &&
              textColor.IsVisible();
     }
 
-    inline const LabelProviderRef& GetLabel() const
+    const LabelProviderRef& GetLabel() const
     {
       return label;
     }
 
-    inline double GetSize() const
+    double GetSize() const
     {
       return size;
     }
 
-    inline const Color& GetTextColor() const
+    const Color& GetTextColor() const
     {
       return textColor;
     }
 
-    inline double GetDisplayOffset() const
+    double GetDisplayOffset() const
     {
       return displayOffset;
     }
 
-    inline double GetOffset() const
+    double GetOffset() const
     {
       return offset;
     }
 
-    inline size_t GetPriority() const
+    size_t GetPriority() const
     {
       return priority;
     }
@@ -920,48 +920,48 @@ namespace osmscout {
     IconStyle& SetPriority(size_t priority);
     IconStyle& SetOverlay(bool overlay);
 
-    inline size_t GetPriority() const
+    size_t GetPriority() const
     {
       return priority;
     }
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return !iconName.empty() ||
               symbol;
     }
 
-    inline const SymbolRef& GetSymbol() const
+    const SymbolRef& GetSymbol() const
     {
       return symbol;
     }
 
-    inline std::string GetIconName() const
+    std::string GetIconName() const
     {
       return iconName;
     }
 
-    inline size_t GetIconId() const
+    size_t GetIconId() const
     {
       return iconId;
     }
 
-    inline unsigned int GetWidth() const
+    unsigned int GetWidth() const
     {
       return width;
     }
 
-    inline unsigned int GetHeight() const
+    unsigned int GetHeight() const
     {
       return height;
     }
 
-    inline size_t GetPosition() const
+    size_t GetPosition() const
     {
       return position;
     }
 
-    inline bool IsOverlay() const
+    bool IsOverlay() const
     {
       return overlay;
     }
@@ -997,17 +997,17 @@ namespace osmscout {
                   const BorderStyleRef& borderStyle);
     virtual ~DrawPrimitive() = default;
 
-    inline ProjectionMode GetProjectionMode() const
+    ProjectionMode GetProjectionMode() const
     {
       return projectionMode;
     }
 
-    inline const FillStyleRef& GetFillStyle() const
+    const FillStyleRef& GetFillStyle() const
     {
       return fillStyle;
     }
 
-    inline const BorderStyleRef& GetBorderStyle() const
+    const BorderStyleRef& GetBorderStyle() const
     {
       return borderStyle;
     }
@@ -1036,7 +1036,7 @@ namespace osmscout {
 
     void AddCoord(const Vertex2D& coord);
 
-    inline const std::list<Vertex2D>& GetCoords() const
+    const std::list<Vertex2D>& GetCoords() const
     {
       return coords;
     }
@@ -1068,17 +1068,17 @@ namespace osmscout {
                        const FillStyleRef& fillStyle,
                        const BorderStyleRef& borderStyle);
 
-    inline const Vertex2D& GetTopLeft() const
+    const Vertex2D& GetTopLeft() const
     {
       return topLeft;
     }
 
-    inline const double& GetWidth() const
+    const double& GetWidth() const
     {
       return width;
     }
 
-    inline const double& GetHeight() const
+    const double& GetHeight() const
     {
       return height;
     }
@@ -1108,12 +1108,12 @@ namespace osmscout {
                     const FillStyleRef& fillStyle,
                     const BorderStyleRef& borderStyle);
 
-    inline const Vertex2D& GetCenter() const
+    const Vertex2D& GetCenter() const
     {
       return center;
     }
 
-    inline const double& GetRadius() const
+    const double& GetRadius() const
     {
       return radius;
     }
@@ -1144,17 +1144,17 @@ namespace osmscout {
       double maxX{0};
       double maxY{0};
 
-      inline double GetWidth() const
+      double GetWidth() const
       {
         return maxX-minX;
       }
 
-      inline double GetHeight() const
+      double GetHeight() const
       {
         return maxY-minY;
       }
 
-      inline void Update(double minX, double minY, double maxX, double maxY)
+      void Update(double minX, double minY, double maxX, double maxY)
       {
         this->minX = std::min(this->minX, minX);
         this->minY = std::min(this->minY, minY);
@@ -1172,12 +1172,12 @@ namespace osmscout {
 
     void AddPrimitive(const DrawPrimitiveRef& primitive);
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
 
-    inline const std::list<DrawPrimitiveRef>& GetPrimitives() const
+    const std::list<DrawPrimitiveRef>& GetPrimitives() const
     {
       return primitives;
     }
@@ -1185,7 +1185,7 @@ namespace osmscout {
     /**
      * bounding box in pixels for given projection
      */
-    inline void GetBoundingBox(const Projection &projection,
+    void GetBoundingBox(const Projection &projection,
                                double& minX,
                                double& minY,
                                double& maxX,
@@ -1205,7 +1205,7 @@ namespace osmscout {
     /**
      * width in pixels for given projection
      */
-    inline double GetWidth(const Projection &projection) const
+    double GetWidth(const Projection &projection) const
     {
       return std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetWidth()),
                       projection.GetMeterInPixel() * groundBoundingBox.GetWidth());
@@ -1214,7 +1214,7 @@ namespace osmscout {
     /**
      * height in pixels for given projection
      */
-    inline double GetHeight(const Projection &projection) const
+    double GetHeight(const Projection &projection) const
     {
       return std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetHeight()),
                       projection.GetMeterInPixel() * groundBoundingBox.GetHeight());
@@ -1263,37 +1263,37 @@ namespace osmscout {
     PathSymbolStyle& SetOffset(double value);
     PathSymbolStyle& SetOffsetRel(OffsetRel offsetRel);
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return (bool)symbol;
     }
 
-    inline const std::string& GetSlot() const
+    const std::string& GetSlot() const
     {
       return slot;
     }
 
-    inline const SymbolRef& GetSymbol() const
+    const SymbolRef& GetSymbol() const
     {
       return symbol;
     }
 
-    inline double GetSymbolSpace() const
+    double GetSymbolSpace() const
     {
       return symbolSpace;
     }
 
-    inline double GetDisplayOffset() const
+    double GetDisplayOffset() const
     {
       return displayOffset;
     }
 
-    inline double GetOffset() const
+    double GetOffset() const
     {
       return offset;
     }
 
-    inline OffsetRel GetOffsetRel() const
+    OffsetRel GetOffsetRel() const
     {
       return offsetRel;
     }

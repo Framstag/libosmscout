@@ -47,12 +47,12 @@ namespace osmscout {
 
     virtual FeatureValue& operator=(const FeatureValue& other); // NOLINT
 
-    inline virtual std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const
+    virtual std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const
     {
       return "";
     }
 
-    inline virtual bool IsFlagSet(size_t /*flagIndex*/) const
+    virtual bool IsFlagSet(size_t /*flagIndex*/) const
     {
       assert(false);
 
@@ -75,7 +75,7 @@ namespace osmscout {
 
     virtual bool operator==(const FeatureValue& other) const = 0;
 
-    virtual inline bool operator!=(const FeatureValue& other) const
+    virtual bool operator!=(const FeatureValue& other) const
     {
       return !(*this==other);
     }
@@ -132,7 +132,7 @@ namespace osmscout {
      * If feature have value object, this method returns
      * alignment requirements of the value type (alignof( type-id )).
      */
-    inline virtual size_t GetValueAlignment() const
+    virtual size_t GetValueAlignment() const
     {
       return 0;
     }
@@ -141,7 +141,7 @@ namespace osmscout {
      * A feature, if set for an object, can hold a value. If there is no value object,
      * this method returns 0, else it returns the C++ size of the value object.
      */
-    inline virtual size_t GetValueSize() const
+    virtual size_t GetValueSize() const
     {
       return 0;
     }
@@ -154,7 +154,7 @@ namespace osmscout {
      * if a custom value object is too expensive. Space for feature bits is always reserved
      * even if the feature itself is not set for a certain object.
      */
-    inline virtual size_t GetFeatureBitCount() const
+    virtual size_t GetFeatureBitCount() const
     {
       return 0;
     }
@@ -162,7 +162,7 @@ namespace osmscout {
     /**
      * Returns 'true' if the feature has an value object.
      */
-    inline virtual bool HasValue() const
+    virtual bool HasValue() const
     {
       return GetValueSize()>0;
     }
@@ -170,7 +170,7 @@ namespace osmscout {
     /**
      * Returns 'true' if the feature provides labels.
      */
-    inline virtual bool HasLabel() const
+    virtual bool HasLabel() const
     {
       return !labels.empty();
     }
@@ -178,7 +178,7 @@ namespace osmscout {
     /**
      * Returns 'true' if the feature provides flags.
      */
-    inline virtual bool HasFlags() const
+    virtual bool HasFlags() const
     {
       return !flags.empty();
     }
@@ -201,7 +201,7 @@ namespace osmscout {
 
     std::string GetDescription(const std::string& languageCode) const;
 
-    inline const std::unordered_map<std::string,std::string>& GetDescriptions() const
+    const std::unordered_map<std::string,std::string>& GetDescriptions() const
     {
       return descriptions;
     };
@@ -245,7 +245,7 @@ namespace osmscout {
     /**
      * Return the feature itself.
      */
-    inline FeatureRef GetFeature() const
+    FeatureRef GetFeature() const
     {
       return feature;
     }
@@ -253,7 +253,7 @@ namespace osmscout {
     /**
      * Return a pointer back tot he type we are assigned to.
      */
-    inline const TypeInfo* GetType() const
+    const TypeInfo* GetType() const
     {
       return type;
     }
@@ -261,7 +261,7 @@ namespace osmscout {
     /**
      * return the index of this feature within the list of features of the type.
      */
-    inline size_t GetFeatureBit() const
+    size_t GetFeatureBit() const
     {
       return featureBit;
     }
@@ -269,7 +269,7 @@ namespace osmscout {
     /**
      * return the index of this feature within the list of features of the type.
      */
-    inline size_t GetIndex() const
+    size_t GetIndex() const
     {
       return index;
     }
@@ -277,7 +277,7 @@ namespace osmscout {
     /**
      * Return the file offset within the feature value buffer for the value of this feature.
      */
-    inline size_t GetOffset() const
+    size_t GetOffset() const
     {
       return offset;
     }

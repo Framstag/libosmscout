@@ -48,27 +48,27 @@ namespace osmscout {
   public:
     Node() = default;
 
-    inline FileOffset GetFileOffset() const
+    FileOffset GetFileOffset() const
     {
       return fileOffset;
     }
 
-    inline FileOffset GetNextFileOffset() const
+    FileOffset GetNextFileOffset() const
     {
       return nextFileOffset;
     }
 
-    inline ObjectFileRef GetObjectFileRef() const
+    ObjectFileRef GetObjectFileRef() const
     {
       return ObjectFileRef(fileOffset,refNode);
     }
 
-    inline TypeInfoRef GetType() const
+    TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
     }
 
-    inline const GeoCoord& GetCoords() const
+    const GeoCoord& GetCoords() const
     {
       return coords;
     }
@@ -81,32 +81,32 @@ namespace osmscout {
      * @return
      *    true on intersection, else false
      */
-    inline bool Intersects(const GeoBox& boundingBox) const
+    bool Intersects(const GeoBox& boundingBox) const
     {
       return boundingBox.Includes(coords);
     }
 
-    inline size_t GetFeatureCount() const
+    size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
-    inline bool HasFeature(size_t idx) const
+    bool HasFeature(size_t idx) const
     {
       return featureValueBuffer.HasFeature(idx);
     }
 
-    inline const FeatureInstance& GetFeature(size_t idx) const
+    const FeatureInstance& GetFeature(size_t idx) const
     {
       return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline void UnsetFeature(size_t idx)
+    void UnsetFeature(size_t idx)
     {
       featureValueBuffer.FreeValue(idx);
     }
 
-    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return featureValueBuffer;
     }

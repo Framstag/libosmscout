@@ -71,27 +71,27 @@ namespace osmscout {
   public:
     friend SimpleRoutingService;
 
-    inline ObjectFileRef GetObject() const
+    ObjectFileRef GetObject() const
     {
       return object;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
 
-    inline WayRef GetWay() const
+    WayRef GetWay() const
     {
       return way;
     }
 
-    inline AreaRef GetArea() const
+    AreaRef GetArea() const
     {
       return area;
     }
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }

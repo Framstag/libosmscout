@@ -40,23 +40,23 @@ namespace osmscout {
     NameFeatureValue() = default;
     NameFeatureValue(const NameFeatureValue& featureValue) = default;
 
-    inline explicit NameFeatureValue(const std::string& name)
+    explicit NameFeatureValue(const std::string& name)
     : name(name)
     {
       // no code
     }
 
-    inline void SetName(const std::string& name)
+    void SetName(const std::string& name)
     {
       this->name=name;
     }
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return name;
     }
@@ -107,23 +107,23 @@ namespace osmscout {
     NameAltFeatureValue() = default;
     NameAltFeatureValue(const NameAltFeatureValue& featureValue) = default;
 
-    inline explicit NameAltFeatureValue(const std::string& nameAlt)
+    explicit NameAltFeatureValue(const std::string& nameAlt)
     : nameAlt(nameAlt)
     {
       // no code
     }
 
-    inline void SetNameAlt(const std::string& nameAlt)
+    void SetNameAlt(const std::string& nameAlt)
     {
       this->nameAlt=nameAlt;
     }
 
-    inline std::string GetNameAlt() const
+    std::string GetNameAlt() const
     {
       return nameAlt;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return nameAlt;
     }
@@ -171,25 +171,25 @@ namespace osmscout {
     std::string nameShort;
 
   public:
-    inline NameShortFeatureValue() = default;
+    NameShortFeatureValue() = default;
 
-    inline explicit NameShortFeatureValue(const std::string& nameShort)
+    explicit NameShortFeatureValue(const std::string& nameShort)
     : nameShort(nameShort)
     {
       // no code
     }
 
-    inline void SetNameShort(const std::string& nameShort)
+    void SetNameShort(const std::string& nameShort)
     {
       this->nameShort=nameShort;
     }
 
-    inline std::string GetNameShort() const
+    std::string GetNameShort() const
     {
       return nameShort;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return nameShort;
     }
@@ -243,23 +243,23 @@ namespace osmscout {
     RefFeatureValue() = default;
     RefFeatureValue(const RefFeatureValue& featureValue) = default;
 
-    inline explicit RefFeatureValue(const std::string& ref)
+    explicit RefFeatureValue(const std::string& ref)
     : ref(ref)
     {
       // no code
     }
 
-    inline void SetRef(const std::string& ref)
+    void SetRef(const std::string& ref)
     {
       this->ref=ref;
     }
 
-    inline std::string GetRef() const
+    std::string GetRef() const
     {
       return ref;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return ref;
     }
@@ -311,23 +311,23 @@ namespace osmscout {
     LocationFeatureValue() = default;
     LocationFeatureValue(const LocationFeatureValue& featureValue) = default;
 
-    inline explicit LocationFeatureValue(const std::string& location)
+    explicit LocationFeatureValue(const std::string& location)
     : location(location)
     {
       // no code
     }
 
-    inline void SetLocation(const std::string& location)
+    void SetLocation(const std::string& location)
     {
       this->location=location;
     }
 
-    inline std::string GetLocation() const
+    std::string GetLocation() const
     {
       return location;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return location;
     }
@@ -388,23 +388,23 @@ namespace osmscout {
     AddressFeatureValue() = default;
     AddressFeatureValue(const AddressFeatureValue& featureValue) = default;
 
-    inline explicit AddressFeatureValue(const std::string& address)
+    explicit AddressFeatureValue(const std::string& address)
     : address(address)
     {
       // no code
     }
 
-    inline void SetAddress(const std::string& address)
+    void SetAddress(const std::string& address)
     {
       this->address=address;
     }
 
-    inline std::string GetAddress() const
+    std::string GetAddress() const
     {
       return address;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return address;
     }
@@ -472,28 +472,28 @@ namespace osmscout {
     AccessFeatureValue() = default;
     AccessFeatureValue(const AccessFeatureValue& other) = default;
 
-    inline explicit AccessFeatureValue(uint8_t access)
+    explicit AccessFeatureValue(uint8_t access)
     : access(access)
     {
       // no code
     }
 
-    inline void SetAccess(uint8_t access)
+    void SetAccess(uint8_t access)
     {
       this->access=access;
     }
 
-    inline uint8_t GetAccess() const
+    uint8_t GetAccess() const
     {
       return access;
     }
 
-    inline bool CanRoute() const
+    bool CanRoute() const
     {
       return (access & (footForward|footBackward|bicycleForward|bicycleBackward|carForward|carBackward))!=0;
     }
 
-    inline bool CanRoute(Vehicle vehicle) const
+    bool CanRoute(Vehicle vehicle) const
     {
       switch (vehicle)
       {
@@ -508,7 +508,7 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanRoute(VehicleMask vehicleMask) const
+    bool CanRoute(VehicleMask vehicleMask) const
     {
       if ((vehicleMask & vehicleFoot)!=0 &&
           (access & (footForward|footBackward))!=0) {
@@ -528,12 +528,12 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanRouteForward() const
+    bool CanRouteForward() const
     {
       return (access & (footForward|bicycleForward|carForward))!=0;
     }
 
-    inline bool CanRouteForward(Vehicle vehicle) const
+    bool CanRouteForward(Vehicle vehicle) const
     {
       switch (vehicle)
       {
@@ -548,12 +548,12 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanRouteBackward() const
+    bool CanRouteBackward() const
     {
       return (access & (footBackward|bicycleBackward|carBackward))!=0;
     }
 
-    inline bool CanRouteBackward(Vehicle vehicle) const
+    bool CanRouteBackward(Vehicle vehicle) const
     {
       switch (vehicle)
       {
@@ -568,65 +568,65 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanRouteFoot() const
+    bool CanRouteFoot() const
     {
       return (access & footForward)!=0 ||
              (access & footBackward)!=0;
     }
 
-    inline bool CanRouteFootForward() const
+    bool CanRouteFootForward() const
     {
       return (access & footForward)!=0;
     }
 
-    inline bool CanRouteFootBackward() const
+    bool CanRouteFootBackward() const
     {
       return (access & footBackward)!=0;
     }
 
-    inline bool CanRouteBicycle() const
+    bool CanRouteBicycle() const
     {
       return (access & bicycleForward)!=0 ||
              (access & bicycleBackward)!=0;
     }
 
-    inline bool CanRouteBicycleForward() const
+    bool CanRouteBicycleForward() const
     {
       return (access & bicycleForward)!=0;
     }
 
-    inline bool CanRouteBicycleBackward() const
+    bool CanRouteBicycleBackward() const
     {
       return (access & bicycleBackward)!=0;
     }
 
-    inline bool CanRouteCar() const
+    bool CanRouteCar() const
     {
       return (access & carForward)!=0 ||
              (access & carBackward)!=0;
     }
 
-    inline bool CanRouteCarForward() const
+    bool CanRouteCarForward() const
     {
       return (access & carForward)!=0;
     }
 
-    inline bool CanRouteCarBackward() const
+    bool CanRouteCarBackward() const
     {
       return (access & carBackward)!=0;
     }
 
-    inline bool IsOneway() const
+    bool IsOneway() const
     {
       return (access & (onewayForward|onewayBackward))!=0;
     }
 
-    inline bool IsOnewayForward() const
+    bool IsOnewayForward() const
     {
       return (access & onewayForward)!=0;
     }
 
-    inline bool IsOnewayBackward() const
+    bool IsOnewayBackward() const
     {
       return (access & onewayBackward)!=0;
     }
@@ -669,7 +669,7 @@ namespace osmscout {
     static const char* const NAME;
 
   private:
-    inline void ParseAccessFlag(const std::string& value,
+    void ParseAccessFlag(const std::string& value,
                                 uint8_t& access,
                                 uint8_t bit) const
     {
@@ -712,28 +712,28 @@ namespace osmscout {
   public:
     AccessRestrictedFeatureValue() = default;
 
-    inline explicit AccessRestrictedFeatureValue(uint8_t access)
+    explicit AccessRestrictedFeatureValue(uint8_t access)
     : access(access)
     {
       // no code
     }
 
-    inline void SetAccess(uint8_t access)
+    void SetAccess(uint8_t access)
     {
       this->access=access;
     }
 
-    inline uint8_t GetAccess() const
+    uint8_t GetAccess() const
     {
       return access;
     }
 
-    inline bool CanAccess() const
+    bool CanAccess() const
     {
       return (access & (foot|bicycle|car))!=0;
     }
 
-    inline bool CanAccess(Vehicle vehicle) const
+    bool CanAccess(Vehicle vehicle) const
     {
       switch (vehicle)
       {
@@ -748,7 +748,7 @@ namespace osmscout {
       return false;
     }
 
-    inline bool CanAccess(VehicleMask vehicleMask) const
+    bool CanAccess(VehicleMask vehicleMask) const
     {
       if ((vehicleMask & vehicleFoot)!=0 &&
           (access & foot)!=0) {
@@ -764,17 +764,17 @@ namespace osmscout {
              (access & car)!=0;
     }
 
-    inline bool CanAccessFoot() const
+    bool CanAccessFoot() const
     {
       return (access & foot)!=0;
     }
 
-    inline bool CanAccessBicycle() const
+    bool CanAccessBicycle() const
     {
       return (access & bicycle)!=0;
     }
 
-    inline bool CanAccessCar() const
+    bool CanAccessCar() const
     {
       return (access & car)!=0;
     }
@@ -833,18 +833,18 @@ namespace osmscout {
   public:
     LayerFeatureValue() = default;
 
-    inline explicit LayerFeatureValue(int8_t layer)
+    explicit LayerFeatureValue(int8_t layer)
     : layer(layer)
     {
       // no code
     }
 
-    inline void SetLayer(int8_t layer)
+    void SetLayer(int8_t layer)
     {
       this->layer=layer;
     }
 
-    inline int8_t GetLayer() const
+    int8_t GetLayer() const
     {
       return layer;
     }
@@ -890,18 +890,18 @@ namespace osmscout {
   public:
     WidthFeatureValue() = default;
 
-    inline explicit WidthFeatureValue(uint8_t width)
+    explicit WidthFeatureValue(uint8_t width)
     : width(width)
     {
       // no code
     }
 
-    inline void SetWidth(uint8_t width)
+    void SetWidth(uint8_t width)
     {
       this->width=width;
     }
 
-    inline uint8_t GetWidth() const
+    uint8_t GetWidth() const
     {
       return width;
     }
@@ -947,18 +947,18 @@ namespace osmscout {
   public:
     MaxSpeedFeatureValue() = default;
 
-    inline explicit MaxSpeedFeatureValue(uint8_t maxSpeed)
+    explicit MaxSpeedFeatureValue(uint8_t maxSpeed)
     : maxSpeed(maxSpeed)
     {
       // no code
     }
 
-    inline void SetMaxSpeed(uint8_t maxSpeed)
+    void SetMaxSpeed(uint8_t maxSpeed)
     {
       this->maxSpeed=maxSpeed;
     }
 
-    inline uint8_t GetMaxSpeed() const
+    uint8_t GetMaxSpeed() const
     {
       return maxSpeed;
     }
@@ -1014,18 +1014,18 @@ namespace osmscout {
   public:
     GradeFeatureValue() = default;
 
-    inline explicit GradeFeatureValue(uint8_t grade)
+    explicit GradeFeatureValue(uint8_t grade)
     : grade(grade)
     {
       // no code
     }
 
-    inline void SetGrade(uint8_t grade)
+    void SetGrade(uint8_t grade)
     {
       this->grade=grade;
     }
 
-    inline uint8_t GetGrade() const
+    uint8_t GetGrade() const
     {
       return grade;
     }
@@ -1073,7 +1073,7 @@ namespace osmscout {
   public:
     AdminLevelFeatureValue() = default;
 
-    inline AdminLevelFeatureValue(uint8_t adminLevel,
+    AdminLevelFeatureValue(uint8_t adminLevel,
                                   const std::string& isIn)
     : adminLevel(adminLevel),
       isIn(isIn)
@@ -1081,22 +1081,22 @@ namespace osmscout {
       // no code
     }
 
-    inline void SetAdminLevel(uint8_t adminLevel)
+    void SetAdminLevel(uint8_t adminLevel)
     {
       this->adminLevel=adminLevel;
     }
 
-    inline void SetIsIn(const std::string& isIn)
+    void SetIsIn(const std::string& isIn)
     {
       this->isIn=isIn;
     }
 
-    inline uint8_t GetAdminLevel() const
+    uint8_t GetAdminLevel() const
     {
       return adminLevel;
     }
 
-    inline std::string GetIsIn() const
+    std::string GetIsIn() const
     {
       return isIn;
     }
@@ -1143,23 +1143,23 @@ namespace osmscout {
   public:
     PostalCodeFeatureValue() = default;
 
-    inline explicit PostalCodeFeatureValue(const std::string& postalCode)
+    explicit PostalCodeFeatureValue(const std::string& postalCode)
     : postalCode(postalCode)
     {
       // no code
     }
 
-    inline void SetPostalCode(const std::string& postalCode)
+    void SetPostalCode(const std::string& postalCode)
     {
       this->postalCode=postalCode;
     }
 
-    inline std::string GetPostalCode() const
+    std::string GetPostalCode() const
     {
       return postalCode;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return postalCode;
     }
@@ -1302,18 +1302,18 @@ namespace osmscout {
   public:
     EleFeatureValue() = default;
 
-    inline explicit EleFeatureValue(uint32_t ele)
+    explicit EleFeatureValue(uint32_t ele)
     : ele(ele)
     {
       // no code
     }
 
-    inline void SetEle(uint32_t ele)
+    void SetEle(uint32_t ele)
     {
       this->ele=ele;
     }
 
-    inline uint32_t GetEle() const
+    uint32_t GetEle() const
     {
       return ele;
     }
@@ -1380,23 +1380,23 @@ namespace osmscout {
   public:
     DestinationFeatureValue() = default;
 
-    inline explicit DestinationFeatureValue(const std::string& destination)
+    explicit DestinationFeatureValue(const std::string& destination)
     : destination(destination)
     {
       // no code
     }
 
-    inline void SetDestination(const std::string& destination)
+    void SetDestination(const std::string& destination)
     {
       this->destination=destination;
     }
 
-    inline std::string GetDestination() const
+    std::string GetDestination() const
     {
       return destination;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return destination;
     }
@@ -1473,23 +1473,23 @@ namespace osmscout {
   public:
     WebsiteFeatureValue() = default;
 
-    inline explicit WebsiteFeatureValue(const std::string& website)
+    explicit WebsiteFeatureValue(const std::string& website)
     : website(website)
     {
       // no code
     }
 
-    inline void SetWebsite(const std::string& website)
+    void SetWebsite(const std::string& website)
     {
       this->website=website;
     }
 
-    inline std::string GetWebsite() const
+    std::string GetWebsite() const
     {
       return website;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return website;
     }
@@ -1544,23 +1544,23 @@ namespace osmscout {
   public:
     PhoneFeatureValue() = default;
 
-    inline explicit PhoneFeatureValue(const std::string& phone)
+    explicit PhoneFeatureValue(const std::string& phone)
     : phone(phone)
     {
       // no code
     }
 
-    inline void SetPhone(const std::string& phone)
+    void SetPhone(const std::string& phone)
     {
       this->phone=phone;
     }
 
-    inline std::string GetPhone() const
+    std::string GetPhone() const
     {
       return phone;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return phone;
     }
@@ -1615,18 +1615,18 @@ namespace osmscout {
   public:
     IsInFeatureValue() = default;
 
-    inline explicit IsInFeatureValue(const std::string& isIn)
+    explicit IsInFeatureValue(const std::string& isIn)
       : isIn(isIn)
     {
       // no code
     }
 
-    inline void SetIsIn(const std::string& isIn)
+    void SetIsIn(const std::string& isIn)
     {
       this->isIn=isIn;
     }
 
-    inline std::string GetIsIn() const
+    std::string GetIsIn() const
     {
       return isIn;
     }
@@ -1673,34 +1673,34 @@ namespace osmscout {
   public:
     ConstructionYearFeatureValue() = default;
 
-    inline ConstructionYearFeatureValue(int startYear, int endYear)
+    ConstructionYearFeatureValue(int startYear, int endYear)
       : startYear(startYear),
         endYear(endYear)
     {
       // no code
     }
 
-    inline void SetStartYear(int year)
+    void SetStartYear(int year)
     {
       this->startYear=year;
     }
 
-    inline int GetStartYear() const
+    int GetStartYear() const
     {
       return startYear;
     }
 
-    inline void SetEndYear(int year)
+    void SetEndYear(int year)
     {
       this->endYear=year;
     }
 
-    inline int GetEndYear() const
+    int GetEndYear() const
     {
       return endYear;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       if (startYear==endYear) {
         return std::to_string(startYear);
@@ -1768,42 +1768,42 @@ namespace osmscout {
   public:
     SidewayFeatureValue() = default;
 
-    inline bool IsFlagSet(size_t flagIndex) const override
+    bool IsFlagSet(size_t flagIndex) const override
     {
       return (featureSet & (1<< flagIndex))!=0;
     }
 
-    inline void SetFeatureSet(uint8_t featureSet)
+    void SetFeatureSet(uint8_t featureSet)
     {
       this->featureSet=featureSet;
     }
 
-    inline bool HasSidewalkTrackLeft() const
+    bool HasSidewalkTrackLeft() const
     {
       return (featureSet & sidewalkTrackLeft)!=0;
     }
 
-    inline bool HasSidewalkTrackRight() const
+    bool HasSidewalkTrackRight() const
     {
       return (featureSet & sidewalkTrackRight)!=0;
     }
 
-    inline bool HasCyclewayLaneLeft() const
+    bool HasCyclewayLaneLeft() const
     {
       return (featureSet & cyclewayLaneLeft)!=0;
     }
 
-    inline bool HasCyclewayLaneRight() const
+    bool HasCyclewayLaneRight() const
     {
       return (featureSet & cyclewayLaneRight)!=0;
     }
 
-    inline bool HasCyclewayTrackLeft() const
+    bool HasCyclewayTrackLeft() const
     {
       return (featureSet & cyclewayTrackLeft)!=0;
     }
 
-    inline bool HasCyclewayTrackRight() const
+    bool HasCyclewayTrackRight() const
     {
       return (featureSet & cyclewayTrackRight)!=0;
     }
@@ -1869,70 +1869,70 @@ namespace osmscout {
   public:
     LanesFeatureValue() = default;
 
-    inline explicit LanesFeatureValue(uint8_t lanes)
+    explicit LanesFeatureValue(uint8_t lanes)
       : lanes(lanes)
     {
       // no code
     }
 
-    inline void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
+    void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
     {
       this->lanes=((forwardLanes & (uint8_t)0x7) << 2) |
                   ((backwardLanes & (uint8_t)0x7) << 5);
     }
 
-    inline bool HasSingleLane() const
+    bool HasSingleLane() const
     {
       return GetLanes()==0;
     }
 
-    inline uint8_t GetForwardLanes() const
+    uint8_t GetForwardLanes() const
     {
       return (lanes >> 2) & (uint8_t)0x07;
     }
 
-    inline uint8_t GetBackwardLanes() const
+    uint8_t GetBackwardLanes() const
     {
       return (lanes >> 5) & (uint8_t)0x07;
     }
 
     uint8_t GetLanes() const;
 
-    inline void SetTurnLanes(const std::string& turnForward,
+    void SetTurnLanes(const std::string& turnForward,
                              const std::string& turnBawckard)
     {
       this->turnForward=turnForward;
       this->turnBackward=turnBawckard;
     }
 
-    inline std::string GetTurnForward() const
+    std::string GetTurnForward() const
     {
       return turnForward;
     }
 
-    inline std::string GetTurnBackward() const
+    std::string GetTurnBackward() const
     {
       return turnBackward;
     }
 
-    inline std::string GetDestinationForward() const
+    std::string GetDestinationForward() const
     {
       return destinationForward;
     }
 
-    inline std::string GetDestinationBackward() const
+    std::string GetDestinationBackward() const
     {
       return destinationBackward;
     }
 
-    inline void SetDestinationLanes(const std::string& destinationForward,
+    void SetDestinationLanes(const std::string& destinationForward,
                                     const std::string& destinationBawckard)
     {
       this->destinationForward=destinationForward;
       this->destinationBackward=destinationBawckard;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       if (HasSingleLane()) {
         return "1";
@@ -1999,23 +1999,23 @@ namespace osmscout {
     OperatorFeatureValue() = default;
     OperatorFeatureValue(const OperatorFeatureValue& featureValue) = default;
 
-    inline explicit OperatorFeatureValue(const std::string& op)
+    explicit OperatorFeatureValue(const std::string& op)
       : op(op)
     {
       // no code
     }
 
-    inline void SetOperator(const std::string& op)
+    void SetOperator(const std::string& op)
     {
       this->op=op;
     }
 
-    inline std::string GetOperator() const
+    std::string GetOperator() const
     {
       return op;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return op;
     }
@@ -2069,23 +2069,23 @@ namespace osmscout {
     NetworkFeatureValue() = default;
     NetworkFeatureValue(const NetworkFeatureValue& featureValue) = default;
 
-    inline explicit NetworkFeatureValue(const std::string& network)
+    explicit NetworkFeatureValue(const std::string& network)
       : network(network)
     {
       // no code
     }
 
-    inline void SetNetwork(const std::string& network)
+    void SetNetwork(const std::string& network)
     {
       this->network=network;
     }
 
-    inline std::string GetNetwork() const
+    std::string GetNetwork() const
     {
       return network;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return network;
     }
@@ -2140,7 +2140,7 @@ namespace osmscout {
     FromToFeatureValue() = default;
     FromToFeatureValue(const FromToFeatureValue& featureValue) = default;
 
-    inline explicit FromToFeatureValue(const std::string& from,
+    explicit FromToFeatureValue(const std::string& from,
                                        const std::string& to)
       : from(from),
         to(to)
@@ -2168,7 +2168,7 @@ namespace osmscout {
       FromToFeatureValue::to=to;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       if (!from.empty() && ! to.empty()) {
         return from + " => " + to;
@@ -2235,7 +2235,7 @@ namespace osmscout {
     ColorFeatureValue() = default;
     ColorFeatureValue(const ColorFeatureValue& featureValue) = default;
 
-    inline explicit ColorFeatureValue(const Color& color)
+    explicit ColorFeatureValue(const Color& color)
       : color(color)
     {
       // no code
@@ -2251,7 +2251,7 @@ namespace osmscout {
       ColorFeatureValue::color=color;
     }
 
-    inline std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
     {
       return color.ToHexString();
     }

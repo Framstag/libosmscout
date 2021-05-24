@@ -102,7 +102,7 @@ namespace osmscout {
       uint8_t    flags;       //!< Certain flags
       //uint8_t    bearing;   //!< Encoded initial and final bearing of this path
 
-      inline bool IsRestricted(Vehicle vehicle) const
+      bool IsRestricted(Vehicle vehicle) const
       {
         switch (vehicle) {
         case vehicleFoot:
@@ -126,22 +126,22 @@ namespace osmscout {
     std::vector<Path>       paths;      //!< List of paths that can in principle be used from this node
     std::vector<Exclude>    excludes;   //!< List of potential excludes regarding use of paths
 
-    inline FileOffset GetFileOffset() const
+    FileOffset GetFileOffset() const
     {
       return fileOffset;
     }
 
-    inline Id GetId() const
+    Id GetId() const
     {
       return point.GetId();
     }
 
-    inline GeoCoord GetCoord() const
+    GeoCoord GetCoord() const
     {
       return point.GetCoord();
     }
 
-    inline void Initialize(FileOffset fileOffset,
+    void Initialize(FileOffset fileOffset,
                            const Point& point)
     {
       this->fileOffset=fileOffset;

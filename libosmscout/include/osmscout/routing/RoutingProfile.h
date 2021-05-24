@@ -231,26 +231,26 @@ namespace osmscout {
                                    const std::map<std::string,double>& speedMap,
                                    double maxSpeed);
 
-    inline Vehicle GetVehicle() const override
+    Vehicle GetVehicle() const override
     {
       return vehicle;
     }
 
-    inline double GetVehicleMaxSpeed() const
+    double GetVehicleMaxSpeed() const
     {
       return vehicleMaxSpeed;
     }
 
     void SetCostLimitDistance(const Distance &costLimitDistance);
 
-    inline Distance GetCostLimitDistance() const override
+    Distance GetCostLimitDistance() const override
     {
       return costLimitDistance;
     }
 
     void SetCostLimitFactor(double costLimitFactor);
 
-    inline double GetCostLimitFactor() const override
+    double GetCostLimitFactor() const override
     {
       return costLimitFactor;
     }
@@ -285,13 +285,13 @@ namespace osmscout {
     bool CanUseForward(const Way& way) const override;
     bool CanUseBackward(const Way& way) const override;
 
-    inline Duration GetTime(const Area& area,
+    Duration GetTime(const Area& area,
                             const Distance &distance) const override
     {
       return GetTime2(area,distance);
     }
 
-    inline Duration GetTime(const Way& way,
+    Duration GetTime(const Way& way,
                             const Distance &distance) const override
     {
       return GetTime2(way,distance);
@@ -307,7 +307,7 @@ namespace osmscout {
   public:
     explicit ShortestPathRoutingProfile(const TypeConfigRef& typeConfig);
 
-    inline double GetCosts(const RouteNode& currentNode,
+    double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& /*objectVariantData*/,
                            size_t /*inPathIndex*/,
                            size_t outPathIndex) const override
@@ -315,19 +315,19 @@ namespace osmscout {
       return currentNode.paths[outPathIndex].distance.As<Kilometer>();
     }
 
-    inline double GetCosts(const Area& /*area*/,
+    double GetCosts(const Area& /*area*/,
                            const Distance &distance) const override
     {
       return distance.As<Kilometer>();
     }
 
-    inline double GetCosts(const Way& /*way*/,
+    double GetCosts(const Way& /*way*/,
                            const Distance &distance) const override
     {
       return distance.As<Kilometer>();
     }
 
-    inline double GetCosts(const Distance &distance) const override
+    double GetCosts(const Distance &distance) const override
     {
       return distance.As<Kilometer>();
     }
@@ -428,7 +428,7 @@ namespace osmscout {
       maxPenalty=d;
     }
 
-    inline double GetCosts(const RouteNode& currentNode,
+    double GetCosts(const RouteNode& currentNode,
                            const std::vector<ObjectVariantData>& objectVariantData,
                            size_t inPathIndex,
                            size_t outPathIndex) const override
@@ -485,21 +485,21 @@ namespace osmscout {
       return outPrice + junctionPenalty;
     }
 
-    inline double GetCosts(const Area& area,
+    double GetCosts(const Area& area,
                            const Distance &distance) const override
     {
       auto time=GetTime2(area,distance);
       return std::chrono::duration_cast<HourDuration>(time).count();
     }
 
-    inline double GetCosts(const Way& way,
+    double GetCosts(const Way& way,
                            const Distance &distance) const override
     {
       auto time=GetTime2(way,distance);
       return std::chrono::duration_cast<HourDuration>(time).count();
     }
 
-    inline double GetCosts(const Distance &distance) const override
+    double GetCosts(const Distance &distance) const override
     {
       double speed=maxSpeed;
 

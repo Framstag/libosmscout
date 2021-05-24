@@ -88,12 +88,12 @@ namespace osmscout {
       {
       }
 
-      inline ~BatchTransformer()
+      ~BatchTransformer()
       {
         Flush();
       }
 
-      inline void GeoToPixel(double lon,
+      void GeoToPixel(double lon,
                              double lat,
                              double& x,
                              double& y)
@@ -146,7 +146,7 @@ namespace osmscout {
      */
     virtual bool IsValidFor(const GeoCoord& coord) const = 0;
 
-    inline GeoCoord GetCenter() const
+    GeoCoord GetCenter() const
     {
       return GeoCoord(lat,lon);
     }
@@ -155,7 +155,7 @@ namespace osmscout {
      * Returns longitude coordinate of the region center.
      *
      */
-    inline double GetLon() const
+    double GetLon() const
     {
       return lon;
     }
@@ -164,7 +164,7 @@ namespace osmscout {
      * Returns latitude coordinate of the region center.
      *
      */
-    inline double GetLat() const
+    double GetLat() const
     {
       return lat;
     }
@@ -173,7 +173,7 @@ namespace osmscout {
      * Returns the angle in radians ([0..2*PI[) of the display in relation to the north. A degree of 0 means
      * north is to the top, a degree of PI, renders with the south to the top of the display).
      */
-    inline double GetAngle() const
+    double GetAngle() const
     {
       return angle;
     }
@@ -181,7 +181,7 @@ namespace osmscout {
     /**
      * Returns the width of the screen
      */
-    inline size_t GetWidth() const
+    size_t GetWidth() const
     {
       return width;
     }
@@ -189,7 +189,7 @@ namespace osmscout {
     /**
      * Returns the height of the screen
      */
-    inline size_t GetHeight() const
+    size_t GetHeight() const
     {
       return height;
     }
@@ -197,7 +197,7 @@ namespace osmscout {
     /**
      * Return the magnification as part of the projection.
      */
-    inline Magnification GetMagnification() const
+    Magnification GetMagnification() const
     {
       return magnification;
     }
@@ -205,7 +205,7 @@ namespace osmscout {
     /**
      * Return the DPI as part of the projection.
      */
-    inline double GetDPI() const
+    double GetDPI() const
     {
       return dpi;
     }
@@ -213,7 +213,7 @@ namespace osmscout {
     /**
      * Returns true, if the given geo coordinate is in the bounding box
      */
-    inline bool GeoIsIn(double lon, double lat) const
+    bool GeoIsIn(double lon, double lat) const
     {
       return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
     }
@@ -221,7 +221,7 @@ namespace osmscout {
     /**
      * Returns true, if the given bounding box is completely within the projection bounding box
      */
-    inline bool GeoIsIn(double lonMin, double latMin,
+    bool GeoIsIn(double lonMin, double latMin,
                         double lonMax, double latMax) const
     {
       return !(lonMin>this->lonMax ||
@@ -230,7 +230,7 @@ namespace osmscout {
                latMax<this->latMin);
     }
 
-    inline GeoBox GetDimensions() const
+    GeoBox GetDimensions() const
     {
       return GeoBox(GeoCoord(latMin,lonMin),
                     GeoCoord(latMax,lonMax));
@@ -239,7 +239,7 @@ namespace osmscout {
     /**
      * Returns the bounding box of the area covered
      */
-    inline void GetDimensions(GeoBox& boundingBox) const
+    void GetDimensions(GeoBox& boundingBox) const
     {
       boundingBox.Set(GeoCoord(latMin,lonMin),
                       GeoCoord(latMax,lonMax));
@@ -248,7 +248,7 @@ namespace osmscout {
     /**
      * Returns the size of a pixel in meter
      */
-    inline double GetPixelSize() const
+    double GetPixelSize() const
     {
       return pixelSize;
     }
@@ -256,7 +256,7 @@ namespace osmscout {
     /**
      * Returns the number of on screen pixel for one meter on the ground
      */
-    inline double GetMeterInPixel() const
+    double GetMeterInPixel() const
     {
       return meterInPixel;
     }
@@ -264,7 +264,7 @@ namespace osmscout {
     /**
      * Returns the number of on screen millimeters for one meter on the ground
      */
-    inline double GetMeterInMM() const
+    double GetMeterInMM() const
     {
       return meterInMM;
     }
@@ -277,7 +277,7 @@ namespace osmscout {
      * @return
      *    Width in screen pixel
      */
-    inline double ConvertWidthToPixel(double width) const
+    double ConvertWidthToPixel(double width) const
     {
       return width*dpi/25.4;
     }
@@ -290,7 +290,7 @@ namespace osmscout {
      * @return
      *    Width in mm
      */
-    inline double ConvertPixelToWidth(double pixel) const
+    double ConvertPixelToWidth(double pixel) const
     {
       return pixel*25.4/dpi;
     }
@@ -355,30 +355,30 @@ namespace osmscout {
 
     MercatorProjection();
 
-    inline bool CanBatch() const override
+    bool CanBatch() const override
     {
       return false;
     }
 
-    inline bool IsValid() const override
+    bool IsValid() const override
     {
       return valid;
     }
 
-    inline bool IsValidFor(const GeoCoord& coord) const override
+    bool IsValidFor(const GeoCoord& coord) const override
     {
       return coord.GetLat() >= MinLat && coord.GetLat() <= MaxLat &&
              coord.GetLon() >= MinLon && coord.GetLon() <= MaxLon;
     }
 
-    inline bool Set(const GeoCoord& coord,
+    bool Set(const GeoCoord& coord,
                     const Magnification& magnification,
                     size_t width,size_t height)
     {
       return Set(coord,0.0,magnification,GetDPI(),width,height);
     }
 
-    inline bool Set(const GeoCoord& coord,
+    bool Set(const GeoCoord& coord,
                     double angle,
                     const Magnification& magnification,
                     size_t width, size_t height)
@@ -386,7 +386,7 @@ namespace osmscout {
       return Set(coord,angle,magnification,GetDPI(),width,height);
     }
 
-    inline bool Set(const GeoCoord& coord,
+    bool Set(const GeoCoord& coord,
                     const Magnification& magnification,
                     double dpi,
                     size_t width, size_t height)
@@ -425,10 +425,11 @@ namespace osmscout {
     bool PixelToGeo(double x, double y,
                     double& lon, double& lat) const override;
 
-    inline bool PixelToGeo(double x, double y,
+    bool PixelToGeo(double x, double y,
                            GeoCoord &coord) const
     {
-      double lat,lon;
+      double lat;
+      double lon;
       if (PixelToGeo(x,y,lon,lat)){
         coord.Set(lat,lon);
         return true;
@@ -442,27 +443,27 @@ namespace osmscout {
     bool Move(double horizPixel,
               double vertPixel);
 
-    inline bool MoveUp(double pixel)
+    bool MoveUp(double pixel)
     {
       return Move(0,pixel);
     }
 
-    inline bool MoveDown(double pixel)
+    bool MoveDown(double pixel)
     {
       return Move(0,-pixel);
     }
 
-    inline bool MoveLeft(double pixel)
+    bool MoveLeft(double pixel)
     {
       return Move(-pixel,0);
     }
 
-    inline bool MoveRight(double pixel)
+    bool MoveRight(double pixel)
     {
       return Move(pixel,0);
     }
 
-    inline bool IsLinearInterpolationEnabled() const
+    bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }
@@ -471,7 +472,7 @@ namespace osmscout {
      * Switch to enable/disable linear interpolation of latitude to pixel computation.
      * It speedup GeoToPixel calculation with fractional error on small render area.
      */
-    inline void SetLinearInterpolationUsage(bool useLinearInterpolation)
+    void SetLinearInterpolationUsage(bool useLinearInterpolation)
     {
       this->useLinearInterpolation=useLinearInterpolation;
     }
@@ -519,23 +520,23 @@ namespace osmscout {
   public:
     TileProjection();
 
-    inline bool CanBatch() const override
+    bool CanBatch() const override
     {
       return true;
     }
 
-    inline bool IsValid() const override
+    bool IsValid() const override
     {
       return valid;
     }
 
-    inline bool IsValidFor(const GeoCoord& coord) const override
+    bool IsValidFor(const GeoCoord& coord) const override
     {
       return coord.GetLat() >= -85.0511 && coord.GetLat() <= +85.0511 &&
              coord.GetLon() >= -180.0   && coord.GetLon() <= +180.0;
     }
 
-    inline bool Set(const OSMTileId& tile,
+    bool Set(const OSMTileId& tile,
                     const Magnification& magnification,
                     size_t width, size_t height)
     {
@@ -558,7 +559,7 @@ namespace osmscout {
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const override;
 
-    inline bool IsLinearInterpolationEnabled() const
+    bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }
@@ -567,7 +568,7 @@ namespace osmscout {
      * Switch to enable/disable linear interpolation of latitude to pixel computation.
      * It speedup GeoToPixel calculation with fractional error on small render area.
      */
-    inline void SetLinearInterpolationUsage(bool b)
+    void SetLinearInterpolationUsage(bool b)
     {
       useLinearInterpolation = b;
     }
