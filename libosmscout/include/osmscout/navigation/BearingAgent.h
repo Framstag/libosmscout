@@ -44,7 +44,7 @@ namespace osmscout {
     Timestamp lastUpdate;
 
   public:
-    explicit BearingAgent();
+    explicit BearingAgent() = default;
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
 }

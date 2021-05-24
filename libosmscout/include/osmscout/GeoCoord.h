@@ -83,8 +83,8 @@ namespace osmscout {
     /**
      * Initialize the coordinate with the given latitude and longitude values.
      */
-    inline GeoCoord(double lat,
-                    double lon)
+    GeoCoord(double lat,
+             double lon)
      :lat(lat),lon(lon)
     {
       // no code
@@ -93,8 +93,8 @@ namespace osmscout {
     /**
      * Assign a new latitude and longitude value to the coordinate
      */
-    inline void Set(double lat,
-                    double lon)
+    void Set(double lat,
+             double lon)
     {
       this->lat=lat;
       this->lon=lon;
@@ -103,7 +103,7 @@ namespace osmscout {
     /**
      * Return the latitude value of the coordinate
      */
-    inline double GetLat() const
+    double GetLat() const
     {
       return lat;
     }
@@ -111,7 +111,7 @@ namespace osmscout {
     /**
      * Return the latitude value of the coordinate
      */
-    inline double GetLon() const
+    double GetLon() const
     {
       return lon;
     }
@@ -121,7 +121,7 @@ namespace osmscout {
      */
     std::string GetDisplayText() const;
 
-    inline std::ostream& operator<<(std::ostream& stream) const
+    std::ostream& operator<<(std::ostream& stream) const
     {
       stream << GetDisplayText();
       return stream;
@@ -140,10 +140,10 @@ namespace osmscout {
     /**
      * Encode the coordinate value into a buffer (with at least a size of coordByteSize).
      */
-    inline void EncodeToBuffer(unsigned char buffer[]) const // NOLINT
+    void EncodeToBuffer(unsigned char buffer[]) const // NOLINT
     {
-      uint32_t latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
-      uint32_t lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
+      auto latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
+      auto lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
 
       buffer[0]=((latValue >>  0u) & 0xffu);
       buffer[1]=((latValue >>  8u) & 0xffu);
@@ -159,11 +159,11 @@ namespace osmscout {
     /**
      * Encode the coordinate value into a number (the number has hash character).
      */
-    inline Id GetHash() const
+    Id GetHash() const
     {
-      uint64_t latValue=(uint64_t)round((lat+90.0)*latConversionFactor);
-      uint64_t lonValue=(uint64_t)round((lon+180.0)*lonConversionFactor);
-      uint64_t number=0;
+      auto     latValue=(uint64_t)round((lat+90.0)*latConversionFactor);
+      auto     lonValue=(uint64_t)round((lon+180.0)*lonConversionFactor);
+      uint64_t number  =0;
 
       for (size_t i=0; i<27; i++) {
         size_t bit=26-i;
@@ -181,7 +181,7 @@ namespace osmscout {
     /**
      * Decode the coordinate value from a buffer (with at least a size of coordByteSize).
      */
-    inline void DecodeFromBuffer(const unsigned char buffer[]) // NOLINT
+    void DecodeFromBuffer(const unsigned char buffer[]) // NOLINT
     {
       uint32_t latDat=  (buffer[0] <<  0u)
                       | (buffer[1] <<  8u)
@@ -200,7 +200,7 @@ namespace osmscout {
     /**
      * Return true if both coordinates are equal (using == operator)
      */
-    inline bool IsEqual(const GeoCoord& other) const
+    bool IsEqual(const GeoCoord& other) const
     {
       return lat==other.lat && lon==other.lon;
     }
@@ -264,7 +264,7 @@ namespace osmscout {
     /**
      * Return true if both coordinates are equals (using == operator)
      */
-    inline bool operator==(const GeoCoord& other) const
+    bool operator==(const GeoCoord& other) const
     {
       return lat==other.lat && lon==other.lon;
     }
@@ -272,12 +272,12 @@ namespace osmscout {
     /**
      * Return true if coordinates are not equal
      */
-    inline bool operator!=(const GeoCoord& other) const
+    bool operator!=(const GeoCoord& other) const
     {
       return lat!=other.lat || lon!=other.lon;
     }
 
-    inline bool operator<(const GeoCoord& other) const
+    bool operator<(const GeoCoord& other) const
     {
       return std::tie(lat, lon) < std::tie(other.lat, other.lon);
     }
@@ -287,7 +287,7 @@ namespace osmscout {
      */
     GeoCoord& operator=(const GeoCoord& other) = default;
 
-    inline Distance operator-(const GeoCoord& other) const
+    Distance operator-(const GeoCoord& other) const
     {
       return GetDistance(other);
     }

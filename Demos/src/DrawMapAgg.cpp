@@ -63,14 +63,14 @@ int main(int argc, char* argv[])
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
 
-  unsigned char *buffer=new unsigned char[args.width*args.height*3];
+  auto *buffer=new unsigned char[args.width*args.height*3];
 
   memset(buffer,255,args.width*args.height*3);
 
   agg::rendering_buffer rbuf(buffer,
-                             args.width,
-                             args.height,
-                             args.width*3);
+                             (unsigned int)args.width,
+                             (unsigned int)args.height,
+                             (int)(args.width*3));
 
   agg::pixfmt_rgb24 pf(rbuf);
 
@@ -79,7 +79,10 @@ int main(int argc, char* argv[])
                       drawDemo.drawParameter,
                       drawDemo.data,
                       &pf)) {
-    write_ppm(buffer,args.width,args.height,args.output.c_str());
+    write_ppm(buffer,
+              (unsigned int)args.width,
+              (unsigned int)args.height,
+              args.output.c_str());
   }
 
   return 0;

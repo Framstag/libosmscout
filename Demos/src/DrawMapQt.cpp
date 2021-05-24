@@ -20,7 +20,6 @@
 #include <DrawMap.h>
 
 #include <iostream>
-#include <iomanip>
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -60,15 +59,15 @@ public:
                                  const osmscout::FillStyleRef& fillStyle) const override
   {
 
-    osmscout::ConstructionYearFeatureValue* value=reader.GetValue(features);
+    const osmscout::ConstructionYearFeatureValue* value=reader.GetValue(features);
 
     if (value!=nullptr)  {
       std::cout << labelReader.GetLabel(features) << ": " << value->GetStartYear() << "-" << value->GetEndYear()
                 << std::endl;
 
       if (value->GetStartYear()>=MIN_YEAR && value->GetStartYear()<=MAX_YEAR) {
-        double                 factor     =(value->GetStartYear()-MIN_YEAR)/(MAX_YEAR-MIN_YEAR+1);
-        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+        double factor=(value->GetStartYear()-MIN_YEAR)/(MAX_YEAR-MIN_YEAR+1);
+        auto   customStyle=std::make_shared<osmscout::FillStyle>();
 
         customStyle->SetFillColor(osmscout::Color(factor,0.0,0.0));
 
@@ -98,7 +97,7 @@ public:
                                  const osmscout::FillStyleRef& fillStyle) const override
   {
 
-    osmscout::AddressFeatureValue* value=reader.GetValue(features);
+    const osmscout::AddressFeatureValue* value=reader.GetValue(features);
 
     if (value!=nullptr)  {
       std::cout << labelReader.GetLabel(features) << ": " << value->GetAddress() << std::endl;
@@ -106,7 +105,7 @@ public:
       size_t addressNumber;
 
       if (osmscout::StringToNumber(value->GetAddress(),addressNumber)) {
-        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+        auto customStyle=std::make_shared<osmscout::FillStyle>();
 
         if (addressNumber%2==0) {
           customStyle->SetFillColor(osmscout::Color::BLUE);
@@ -118,7 +117,7 @@ public:
         return customStyle;
       }
       else {
-        osmscout::FillStyleRef customStyle=std::make_shared<osmscout::FillStyle>();
+        auto customStyle=std::make_shared<osmscout::FillStyle>();
 
         customStyle->SetFillColor(osmscout::Color::RED);
 
@@ -144,10 +143,10 @@ int main(int argc, char* argv[])
 
   Arguments args = drawDemo.GetArguments();
 
-  QPixmap *pixmap=new QPixmap(static_cast<int>(args.width),
-                              static_cast<int>(args.height));
+  auto *pixmap=new QPixmap(static_cast<int>(args.width),
+                           static_cast<int>(args.height));
 
-  QPainter* painter=new QPainter(pixmap);
+  auto* painter=new QPainter(pixmap);
 
   osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig);
 

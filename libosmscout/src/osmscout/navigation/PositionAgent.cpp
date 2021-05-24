@@ -120,9 +120,9 @@ namespace osmscout {
       PositionAgent::Position position;
       position.coord=coord;
 
-      for (auto &e:routableObjects->dbMap){
+      for (const auto &e:routableObjects->dbMap){
         DatabaseId dbId=e.first;
-        RoutableDBObjects &objs=e.second;
+        const RoutableDBObjects &objs=e.second;
 
         for (auto &w:objs.ways){
           assert(w.second);
@@ -295,7 +295,7 @@ namespace osmscout {
           if (moveEstimate.AsMeter() > 0) {
             // we left tunnel right now, escape loop... Gps signal should appear soon.
             position.state = NoGpsSignal;
-            log.Debug() << "Leaving tunnel, waiting for GPS at " << position.coord.GetDisplayText();;
+            log.Debug() << "Leaving tunnel, waiting for GPS at " << position.coord.GetDisplayText();
           }
           break;
         }
@@ -377,7 +377,7 @@ namespace osmscout {
                                            GeoCoord &closestPosition,
                                            std::list<RouteDescription::Node>::const_iterator& foundNode,
                                            double& foundAbscissa,
-                                           double& minDistance)
+                                           double& minDistance) const
   {
     auto   nextNode=locationOnRoute;
     double abscissa=0.0;

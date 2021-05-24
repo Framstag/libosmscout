@@ -44,7 +44,7 @@ namespace osmscout {
     double meters=0.0;
 
   private:
-    explicit inline Distance(double meters):
+    explicit Distance(double meters):
       meters(meters)
     { }
 
@@ -56,92 +56,92 @@ namespace osmscout {
 
     Distance& operator=(const Distance &d) = default;
 
-    inline Distance(Distance &&d) noexcept
+     Distance(Distance &&d) noexcept
     {
       std::swap(meters, d.meters);
     }
 
-    inline Distance &operator=(Distance &&d) noexcept
+     Distance &operator=(Distance &&d) noexcept
     {
       std::swap(meters, d.meters);
       return *this;
     }
 
-    inline double AsMeter() const
+     double AsMeter() const
     {
       return meters;
     }
 
-    inline Distance& operator+=(const Distance &d)
+     Distance& operator+=(const Distance &d)
     {
       meters+=d.meters;
       return *this;
     }
 
-    inline Distance& operator-=(const Distance &d)
+     Distance& operator-=(const Distance &d)
     {
       meters-=d.meters;
       return *this;
     }
 
-    inline Distance& operator*=(double d)
+     Distance& operator*=(double d)
     {
       meters*=d;
       return *this;
     }
 
-    inline Distance& operator/=(double d)
+     Distance& operator/=(double d)
     {
       meters/=d;
       return *this;
     }
 
-    inline Distance operator-(const Distance &d) const
+     Distance operator-(const Distance &d) const
     {
       return Distance(meters-d.meters);
     }
 
-    inline Distance operator+(const Distance &d) const
+     Distance operator+(const Distance &d) const
     {
       return Distance(meters+d.meters);
     }
 
-    inline Distance operator*(double factor) const
+     Distance operator*(double factor) const
     {
       return Distance(meters*factor);
     }
 
-    inline Distance operator/(double factor) const
+     Distance operator/(double factor) const
     {
       return Distance(meters / factor);
     }
 
-    inline bool operator==(const Distance &d) const
+     bool operator==(const Distance &d) const
     {
       return meters == d.meters;
     }
 
-    inline bool operator!=(const Distance &d) const
+     bool operator!=(const Distance &d) const
     {
       return meters != d.meters;
     }
 
-    inline bool operator>(const Distance &d) const
+     bool operator>(const Distance &d) const
     {
       return meters > d.meters;
     }
 
-    inline bool operator<(const Distance &d) const
+     bool operator<(const Distance &d) const
     {
       return meters < d.meters;
     }
 
-    inline bool operator>=(const Distance &d) const
+     bool operator>=(const Distance &d) const
     {
       return meters >= d.meters;
     }
 
-    inline bool operator<=(const Distance &d) const
+     bool operator<=(const Distance &d) const
     {
       return meters <= d.meters;
     }
@@ -220,12 +220,12 @@ namespace osmscout {
       return "m";
     };
 
-    static inline double ToMeter(double m)
+    static  double ToMeter(double m)
     {
       return m;
     }
 
-    static inline double FromMeter(double m)
+    static  double FromMeter(double m)
     {
       return m;
     }
@@ -251,12 +251,12 @@ namespace osmscout {
       return "km";
     };
 
-    static inline double ToMeter(double km)
+    static  double ToMeter(double km)
     {
       return km*1000.0;
     }
 
-    static inline double FromMeter(double m)
+    static  double FromMeter(double m)
     {
       return m/1000.0;
     }
@@ -282,12 +282,12 @@ namespace osmscout {
       return "ft";
     };
 
-    static inline double ToMeter(double feet)
+    static  double ToMeter(double feet)
     {
       return feet * 0.3048;
     }
 
-    static inline double FromMeter(double m)
+    static  double FromMeter(double m)
     {
       return m/0.3048;
     }
@@ -313,12 +313,12 @@ namespace osmscout {
       return "yard";
     };
 
-    static inline double ToMeter(double yard)
+    static  double ToMeter(double yard)
     {
       return yard / 0.9144;
     }
 
-    static inline double FromMeter(double m)
+    static  double FromMeter(double m)
     {
       return m * 0.9144;
     }
@@ -344,22 +344,22 @@ namespace osmscout {
       return "mi";
     };
 
-    static inline double ToMeter(double mile)
+    static  double ToMeter(double mile)
     {
       return mile * 1609.344;
     }
 
-    static inline double FromMeter(double m)
+    static  double FromMeter(double m)
     {
       return m / 1609.344;
     }
   };
 
-  inline Distance Meters(double m){
+   inline Distance Meters(double m){
     return Distance::Of<Meter>(m);
   }
 
-  inline Distance Kilometers(double km){
+   inline Distance Kilometers(double km){
     return Distance::Of<Kilometer>(km);
   }
 

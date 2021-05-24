@@ -120,84 +120,84 @@ namespace osmscout {
       explicit Line(Destination& destination);
       virtual ~Line();
 
-      inline Line& operator<<(const std::string& value)
+      Line& operator<<(const std::string& value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(const std::string_view& value)
+      Line& operator<<(const std::string_view& value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(const char* value)
+      Line& operator<<(const char* value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(bool value)
+      Line& operator<<(bool value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(short value)
+      Line& operator<<(short value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(unsigned short value)
+      Line& operator<<(unsigned short value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(int value)
+      Line& operator<<(int value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(unsigned int value)
+      Line& operator<<(unsigned int value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(long value)
+      Line& operator<<(long value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(unsigned long value)
+      Line& operator<<(unsigned long value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(long long value)
+      Line& operator<<(long long value)
       {
         destination.Print(value);
 
         return *this;
       }
 
-      inline Line& operator<<(unsigned long long value)
+      Line& operator<<(unsigned long long value)
       {
         destination.Print(value);
 
@@ -208,14 +208,14 @@ namespace osmscout {
       Line& operator<<(double value);
       Line& operator<<(void* value);
 
-      inline Line& operator<<(const StopClock& value)
+      Line& operator<<(const StopClock& value)
       {
         destination.Print(value.ResultString());
 
         return *this;
       }
 
-      inline Line& operator<<(const Distance& value)
+      Line& operator<<(const Distance& value)
       {
         destination.Print(value.AsString());
 
@@ -269,67 +269,67 @@ namespace osmscout {
     class OSMSCOUT_API NoOpDestination : public Destination
     {
     public:
-      inline void Print(const std::string& /*value*/) override
+       void Print(const std::string& /*value*/) override
       {
         // no code
       }
 
-      inline void Print(const std::string_view& /*value*/) override
+       void Print(const std::string_view& /*value*/) override
       {
         // no code
       }
 
-      inline void Print(const char* /*value*/) override
+       void Print(const char* /*value*/) override
       {
         // no code
       }
 
-      inline void Print(bool /*value*/) override
+       void Print(bool /*value*/) override
       {
         // no code
       }
 
-      inline void Print(short /*value*/) override
+       void Print(short /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned short /*value*/) override
+       void Print(unsigned short /*value*/) override
       {
         // no code
       }
 
-      inline void Print(int /*value*/) override
+       void Print(int /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned int /*value*/) override
+       void Print(unsigned int /*value*/) override
       {
         // no code
       }
 
-      inline void Print(long /*value*/) override
+       void Print(long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned long /*value*/) override
+       void Print(unsigned long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(long long /*value*/) override
+       void Print(long long /*value*/) override
       {
         // no code
       }
 
-      inline void Print(unsigned long long /*value*/) override
+       void Print(unsigned long long /*value*/) override
       {
         // no code
       }
 
-      inline void PrintLn() override
+       void PrintLn() override
       {
         // no code
       }
@@ -339,7 +339,7 @@ namespace osmscout {
     NoOpDestination destination;
 
   public:
-    inline Line Log(Level /*level*/) override
+     Line Log(Level /*level*/) override
     {
       return Line(destination);
     }
@@ -425,29 +425,29 @@ namespace osmscout {
 
     void SetLogger(Logger* logger);
 
-    inline Log& Debug(bool state)
+     Log& Debug(bool state)
     {
       logDebug=state;
 
       return *this;
     }
 
-    inline bool IsDebug() const
+     bool IsDebug() const
     {
       return logDebug;
     }
 
-    inline bool IsInfo() const
+     bool IsInfo() const
     {
       return logInfo;
     }
 
-    inline bool IsWarn() const
+     bool IsWarn() const
     {
       return logWarn;
     }
 
-    inline bool IsError() const
+     bool IsError() const
     {
       return logError;
     }

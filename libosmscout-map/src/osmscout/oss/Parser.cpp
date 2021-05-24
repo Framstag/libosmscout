@@ -2182,7 +2182,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		   valueList.push_back(value);
 		
-		   for (const auto number : numberList) {
+		   for (const auto& number : numberList) {
 		     if (!StringToNumber(number,value)) {
 		       std::string e="Cannot parse number '"+number+"'";
 		

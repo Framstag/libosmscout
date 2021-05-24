@@ -43,7 +43,9 @@ int main(int argc, char* argv[])
 
   cairo_surface_t *surface;
 
-  surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,args.width,args.height);
+  surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                     (int)args.width,
+                                     (int)args.height);
 
   if (surface!=nullptr) {
     cairo_t *cairo=cairo_create(surface);

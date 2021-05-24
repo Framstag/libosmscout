@@ -41,7 +41,7 @@ namespace osmscout {
   private:
 
   public:
-    explicit ArrivalEstimateAgent();
+    explicit ArrivalEstimateAgent() = default;
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
   };
 }

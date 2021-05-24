@@ -266,14 +266,14 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  osmscout::TypeConfigRef typeConfig=std::make_shared<osmscout::TypeConfig>();
+  auto typeConfig=std::make_shared<osmscout::TypeConfig>();
 
   if (!typeConfig->LoadFromOSTFile(args.ostFile)) {
     std::cerr << "Cannot load OST file '" << args.ostFile << "'" << std::endl;
     return 1;
   }
 
-  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+  auto styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
   if (!styleConfig->Load(args.ossFile)) {
     std::cerr << "Cannot load OSS file '" << args.ostFile << "'" << std::endl;

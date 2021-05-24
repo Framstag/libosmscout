@@ -86,9 +86,15 @@ private:
   std::map<int,int> map;
 
 public:
-  StartStates() = default;
+  StartStates()
+  {
+    // no code
+  }
 
-  virtual ~StartStates() = default;
+  virtual ~StartStates()
+  {
+    // no code
+  }
 
   void set(int key, int val)
   {
@@ -116,9 +122,15 @@ private:
   std::map<std::string,int> map;
 
 public:
-  KeywordMap() = default;
+  KeywordMap()
+  {
+    // no code
+  }
 
-  virtual ~KeywordMap() = default;
+  virtual ~KeywordMap()
+  {
+    // no code
+  }
 
   void set(const char* key, int val)
   {

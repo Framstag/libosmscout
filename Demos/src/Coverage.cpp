@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     }
     else {
       std::cerr << "! Cannot open index file '" << indexFile << "'" << std::endl;
-    };
+    }
   }
 
   return 0;

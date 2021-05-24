@@ -26,15 +26,6 @@ namespace osmscout {
   {
   }
 
-  NavigationMessage::~NavigationMessage()
-  {
-  }
-
-
-  NavigationAgent::~NavigationAgent()
-  {
-  }
-
   InitializeMessage::InitializeMessage(const osmscout::Timestamp& timestamp)
     : NavigationMessage(timestamp)
   {
@@ -50,7 +41,7 @@ namespace osmscout {
   {
   }
 
-  std::list<NavigationMessageRef> NavigationEngine::Process(const NavigationMessageRef& message)
+  std::list<NavigationMessageRef> NavigationEngine::Process(const NavigationMessageRef& message) const
   {
     std::list<NavigationMessageRef> messageQueue{message};
     std::list<NavigationMessageRef> result;

@@ -32,16 +32,13 @@ namespace osmscout {
   {
   }
 
-  BearingAgent::BearingAgent()
-  {}
-
   std::list<NavigationMessageRef> BearingAgent::Process(const NavigationMessageRef& message)
   {
     std::list<NavigationMessageRef> result;
 
     auto now=message->timestamp;
 
-    if (auto* msg = dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
+    if (const auto* msg = dynamic_cast<osmscout::PositionAgent::PositionMessage*>(message.get());
         msg != nullptr) {
 
       auto coord=msg->position.coord;

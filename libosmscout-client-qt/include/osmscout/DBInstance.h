@@ -1,4 +1,4 @@
-#ifndef OSMSCOUT_CLIENT_QT_DBINSTANCE_H
+  #ifndef OSMSCOUT_CLIENT_QT_DBINSTANCE_H
 #define OSMSCOUT_CLIENT_QT_DBINSTANCE_H
 
 /*
@@ -69,14 +69,14 @@ class OSMSCOUT_CLIENT_QT_API StyleError
 public:
     StyleError(StyleErrorType type, int line, int column, const QString &text) :
         type(type), line(line), column(column), text(text){}
-    StyleError(QString msg);
+    explicit StyleError(QString msg);
 
-    StyleErrorType GetType(){ return type; }
+    StyleErrorType GetType() const { return type; }
     QString GetTypeName() const;
     int GetLine() const{ return line; }
     int GetColumn() const{ return column; }
-    const QString &GetText(){ return text; }
-    QString GetDescription(){return GetTypeName()+": "+GetText();}
+    const QString &GetText() const { return text; }
+    QString GetDescription() const {return GetTypeName()+": "+GetText();}
 
 private:
     StyleErrorType  type;
@@ -184,7 +184,7 @@ public:
     return locationService;
   }
 
-  inline osmscout::StyleConfigRef GetStyleConfig()
+  inline osmscout::StyleConfigRef GetStyleConfig() const
   {
     return styleConfig;
   }

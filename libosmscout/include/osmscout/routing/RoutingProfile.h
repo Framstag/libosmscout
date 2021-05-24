@@ -198,7 +198,7 @@ namespace osmscout {
     {
       double speed=vehicleMaxSpeed;
 
-      MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(obj.GetFeatureValueBuffer());
+      const MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader.GetValue(obj.GetFeatureValueBuffer());
 
       if (maxSpeedValue!=nullptr &&
           maxSpeedValue->GetMaxSpeed()>0 &&
@@ -207,7 +207,7 @@ namespace osmscout {
       }
 
       Grade grade=SolidGrade;
-      GradeFeatureValue *gradeValue=gradeReader.GetValue(obj.GetFeatureValueBuffer());
+      const GradeFeatureValue *gradeValue=gradeReader.GetValue(obj.GetFeatureValueBuffer());
       if (gradeValue!=nullptr){
         grade=static_cast<Grade>(gradeValue->GetGrade());
       }

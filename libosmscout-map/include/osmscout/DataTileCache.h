@@ -69,7 +69,7 @@ namespace osmscout {
 
     bool IsEmpty() const
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       return types.Empty();
     }
@@ -79,7 +79,7 @@ namespace osmscout {
      */
     void Invalidate()
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       complete=false;
     }
@@ -91,7 +91,7 @@ namespace osmscout {
     void AddPrefillData(const TypeInfoSet& types,
                         const std::vector<O>& data)
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       if (this->types.Empty()) {
         this->types=types;
@@ -118,7 +118,7 @@ namespace osmscout {
     void AddPrefillData(const TypeInfoSet& types,
                         std::vector<O>&& data)
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       if (this->types.Empty()) {
         this->types=types;
@@ -144,7 +144,7 @@ namespace osmscout {
     void AddData(const TypeInfoSet& types,
                  const std::vector<O>& data)
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       this->data.insert(this->data.end(), data.begin(), data.end());
       this->types.Add(types);
@@ -158,7 +158,7 @@ namespace osmscout {
     void SetData(const TypeInfoSet& types,
                  const std::vector<O>& data)
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       this->data=data;
       this->types=types;
@@ -172,7 +172,7 @@ namespace osmscout {
     void SetData(const TypeInfoSet& types,
                  std::vector<O>&& data)
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       this->data=std::move(data);
       this->types=types;
@@ -186,7 +186,7 @@ namespace osmscout {
      */
     void SetComplete()
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       complete=true;
     }
@@ -196,7 +196,7 @@ namespace osmscout {
      */
     bool IsComplete() const
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       return complete;
     }
@@ -209,21 +209,21 @@ namespace osmscout {
      */
     TypeInfoSet GetTypes() const
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       return types;
     }
 
     size_t GetDataSize() const
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       return prefillData.size()+data.size();
     }
 
     void CopyData(std::function<void(const O&)> function) const
     {
-      std::lock_guard<std::mutex> guard(mutex);
+      std::scoped_lock<std::mutex> guard(mutex);
 
       std::for_each(prefillData.begin(),prefillData.end(),function);
       std::for_each(data.begin(),data.end(),function);
@@ -291,7 +291,7 @@ namespace osmscout {
     /**
      * Return the id of the tile
      */
-    inline TileKey GetKey() const
+     TileKey GetKey() const
     {
       return key;
     }
@@ -299,7 +299,7 @@ namespace osmscout {
     /**
      * Get the magnification level of the tile
      */
-    inline uint32_t GetLevel() const
+     uint32_t GetLevel() const
     {
       return key.GetLevel();
     }
@@ -307,7 +307,7 @@ namespace osmscout {
     /**
      * Return the bounding box of the tile
      */
-    inline GeoBox GetBoundingBox() const
+     GeoBox GetBoundingBox() const
     {
       return boundingBox;
     }
@@ -315,7 +315,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the node data
      */
-    inline const TileNodeData& GetNodeData() const
+     const TileNodeData& GetNodeData() const
     {
       return nodeData;
     }
@@ -323,7 +323,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the way data
      */
-    inline const TileWayData& GetWayData() const
+     const TileWayData& GetWayData() const
     {
       return wayData;
     }
@@ -331,7 +331,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the area data
      */
-    inline const TileAreaData& GetAreaData() const
+     const TileAreaData& GetAreaData() const
     {
       return areaData;
     }
@@ -339,7 +339,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the route data
      */
-    inline const TileRouteData& GetRouteData() const
+     const TileRouteData& GetRouteData() const
     {
       return routeData;
     }
@@ -347,7 +347,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the optimized way data
      */
-    inline const TileWayData& GetOptimizedWayData() const
+     const TileWayData& GetOptimizedWayData() const
     {
       return optimizedWayData;
     }
@@ -355,7 +355,7 @@ namespace osmscout {
     /**
      * Return a read-only reference to the optimized area data
      */
-    inline const TileAreaData& GetOptimizedAreaData() const
+     const TileAreaData& GetOptimizedAreaData() const
     {
       return optimizedAreaData;
     }
@@ -363,7 +363,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the node data
      */
-    inline TileNodeData& GetNodeData()
+     TileNodeData& GetNodeData()
     {
       return nodeData;
     }
@@ -371,7 +371,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the way data
      */
-    inline TileWayData& GetWayData()
+     TileWayData& GetWayData()
     {
       return wayData;
     }
@@ -379,7 +379,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the area data
      */
-    inline TileAreaData& GetAreaData()
+     TileAreaData& GetAreaData()
     {
       return areaData;
     }
@@ -387,7 +387,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the area data
      */
-    inline TileRouteData& GetRouteData()
+     TileRouteData& GetRouteData()
     {
       return routeData;
     }
@@ -395,7 +395,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the optimized way data
      */
-    inline TileWayData& GetOptimizedWayData()
+     TileWayData& GetOptimizedWayData()
     {
       return optimizedWayData;
     }
@@ -403,7 +403,7 @@ namespace osmscout {
     /**
      * Return a read-write reference to the optimized area data
      */
-    inline TileAreaData& GetOptimizedAreaData()
+     TileAreaData& GetOptimizedAreaData()
     {
       return optimizedAreaData;
     }
@@ -411,7 +411,7 @@ namespace osmscout {
     /**
      * Return 'true' if no data at all has been assigned
      */
-    inline bool IsComplete() const
+     bool IsComplete() const
     {
       return nodeData.IsComplete() &&
              wayData.IsComplete() &&
@@ -424,7 +424,7 @@ namespace osmscout {
     /**
      * Return 'true' if no data for any type has been assigned
      */
-    inline bool IsEmpty() const
+     bool IsEmpty() const
     {
       return nodeData.IsEmpty() &&
              wayData.IsEmpty() &&
@@ -511,12 +511,12 @@ namespace osmscout {
 
     void SetSize(size_t cacheSize);
 
-    inline size_t GetSize() const
+     size_t GetSize() const
     {
       return cacheSize;
     }
 
-    inline size_t GetCurrentSize() const
+     size_t GetCurrentSize() const
     {
       return tileCache.size();
     }
