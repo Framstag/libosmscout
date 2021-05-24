@@ -309,9 +309,9 @@ namespace osmscout {
       labelInstances.clear();
     }
 
-    inline bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
-                                    const Mask &mask,
-                                    int64_t viewportHeight) const
+    bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
+                             const Mask &mask,
+                             int64_t viewportHeight) const
     {
       bool collision=false;
       for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
@@ -322,9 +322,9 @@ namespace osmscout {
       return collision;
     }
 
-    inline void MarkLabelPlace(std::vector<uint64_t> &canvas,
-                               const Mask &mask,
-                               int viewportHeight) const
+    void MarkLabelPlace(std::vector<uint64_t> &canvas,
+                        const Mask &mask,
+                        int viewportHeight) const
     {
       for (int r=std::max(0,mask.rowFrom); r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
         for (int c=std::max(0,mask.cellFrom); c<=std::min((int)mask.size()-1, mask.cellTo); c++){
@@ -334,7 +334,7 @@ namespace osmscout {
     }
 
     // Something is an overlay, if its alpha is <0.8
-    inline bool IsOverlay(const LabelData &labelData) const
+    bool IsOverlay(const LabelData &labelData) const
     {
       return labelData.alpha < 0.8;
     }

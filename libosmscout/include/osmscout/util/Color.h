@@ -29,6 +29,12 @@
 
 namespace osmscout {
 
+  /**
+   * Representation of a color with red, green and blue value
+   * (RGB) and a alpha channel.
+   *
+   * This class follow the "rule of zero" (see https://en.cppreference.com/w/cpp/language/rule_of_three)
+   */
   class OSMSCOUT_API Color CLASS_FINAL
   {
   public:
@@ -72,10 +78,10 @@ namespace osmscout {
     Color() = default;
     ~Color() = default;
 
-    inline Color(double r,
-                 double g,
-                 double b,
-                 double a) noexcept
+    Color(double r,
+          double g,
+          double b,
+          double a) noexcept
     : r(r),
       g(g),
       b(b),
@@ -87,9 +93,9 @@ namespace osmscout {
       assert(a>=0.0 && a<=1.0);
     }
 
-    inline Color(double r,
-                 double g,
-                 double b) noexcept
+    Color(double r,
+          double g,
+          double b) noexcept
     : r(r),
       g(g),
       b(b),
@@ -101,51 +107,37 @@ namespace osmscout {
       assert(a>=0.0 && a<=1.0);
     }
 
-    Color(const Color& other) = default;
-
-    inline Color& operator=(const Color& other)
-    {
-      if (&other!=this) {
-        this->r=other.r;
-        this->g=other.g;
-        this->b=other.b;
-        this->a=other.a;
-      }
-
-      return *this;
-    }
-
-    inline double GetR() const
+    double GetR() const
     {
       return r;
     }
 
-    inline double GetG() const
+    double GetG() const
     {
       return g;
     }
 
-    inline double GetB() const
+    double GetB() const
     {
       return b;
     }
 
-    inline double GetA() const
+    double GetA() const
     {
       return a;
     }
 
-    inline bool IsSolid() const
+    bool IsSolid() const
     {
       return a==1.0;
     }
 
-    inline bool IsVisible() const
+    bool IsVisible() const
     {
       return a>0.0;
     }
 
-    inline Color Lighten(double factor) const
+    Color Lighten(double factor) const
     {
       return Color(r+(1-r)*factor,
                    g+(1-g)*factor,
@@ -153,7 +145,7 @@ namespace osmscout {
                    a);
     }
 
-    inline Color Darken(double factor) const
+    Color Darken(double factor) const
     {
       return Color(r-r*factor,
                    g-g*factor,
@@ -161,7 +153,7 @@ namespace osmscout {
                    a);
     }
 
-    inline Color Alpha(double newAlpha) const
+    Color Alpha(double newAlpha) const
     {
       return Color(r,
                    g,
@@ -169,7 +161,7 @@ namespace osmscout {
                    newAlpha);
     }
 
-    inline Color Decolor() const
+    Color Decolor() const
     {
       double grey=(r+g+b)/3.0;
       return Color(grey,
@@ -180,12 +172,12 @@ namespace osmscout {
 
     std::string ToHexString() const;
 
-    inline bool operator==(const Color& other) const
+    bool operator==(const Color& other) const
     {
       return r==other.r && g==other.g && b==other.b && a==other.a;
     }
 
-    inline bool operator!=(const Color& other) const
+    bool operator!=(const Color& other) const
     {
       return r!=other.r || g!=other.g || b!=other.b || a!=other.a;
     }

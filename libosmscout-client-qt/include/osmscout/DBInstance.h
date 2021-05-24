@@ -118,12 +118,12 @@ public slots:
   void onThreadFinished();
 
 public:
-  inline DBInstance(const QString &path,
-                    osmscout::DatabaseRef database,
-                    osmscout::LocationServiceRef locationService,
-                    osmscout::LocationDescriptionServiceRef locationDescriptionService,
-                    osmscout::MapServiceRef mapService,
-                    osmscout::StyleConfigRef styleConfig):
+  DBInstance(const QString &path,
+             const osmscout::DatabaseRef& database,
+             const osmscout::LocationServiceRef& locationService,
+             const osmscout::LocationDescriptionServiceRef& locationDescriptionService,
+             const osmscout::MapServiceRef& mapService,
+             const osmscout::StyleConfigRef& styleConfig):
     path(path),
     database(database),
     locationService(locationService),
@@ -137,12 +137,12 @@ public:
     lastUsage.start();
   };
 
-  inline ~DBInstance() override
+  ~DBInstance() override
   {
     close();
   };
 
-  inline osmscout::GeoBox GetDBGeoBox() const
+  osmscout::GeoBox GetDBGeoBox() const
   {
     return dbBox;
   }
@@ -151,40 +151,40 @@ public:
    * return true if database is open
    * lastUsage is not udpated
    */
-  inline bool IsOpen() const
+  bool IsOpen() const
   {
     return database->IsOpen();
   }
 
-  inline osmscout::DatabaseRef GetDatabase()
+  osmscout::DatabaseRef GetDatabase()
   {
     QMutexLocker locker(&mutex);
     lastUsage.restart();
     return database;
   }
 
-  inline osmscout::MapServiceRef GetMapService()
+  osmscout::MapServiceRef GetMapService()
   {
     QMutexLocker locker(&mutex);
     lastUsage.restart();
     return mapService;
   }
 
-  inline osmscout::LocationDescriptionServiceRef GetLocationDescriptionService()
+  osmscout::LocationDescriptionServiceRef GetLocationDescriptionService()
   {
     QMutexLocker locker(&mutex);
     lastUsage.restart();
     return locationDescriptionService;
   }
 
-  inline osmscout::LocationServiceRef GetLocationService()
+  osmscout::LocationServiceRef GetLocationService()
   {
     QMutexLocker locker(&mutex);
     lastUsage.restart();
     return locationService;
   }
 
-  inline osmscout::StyleConfigRef GetStyleConfig() const
+  osmscout::StyleConfigRef GetStyleConfig() const
   {
     return styleConfig;
   }
@@ -192,7 +192,7 @@ public:
   /**
    * Returns the number of milliseconds since last database usage
    */
-  inline qint64 LastUsageMs() const
+  qint64 LastUsageMs() const
   {
     QMutexLocker locker(&mutex);
     return lastUsage.elapsed();

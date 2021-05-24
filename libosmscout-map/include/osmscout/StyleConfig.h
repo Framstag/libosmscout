@@ -376,74 +376,69 @@ namespace osmscout {
   struct PartialStyle : public PartialStyleBase
   {
     std::set<A>        attributes;
-    std::shared_ptr<S> style;
+    std::shared_ptr<S> style=std::make_shared<S>();
 
-    PartialStyle()
-    : style(std::make_shared<S>())
-    {
-      // no code
-    }
+    PartialStyle() = default;
 
-     void SetBoolValue(int attribute, bool value) override
+    void SetBoolValue(int attribute, bool value) override
     {
       style->SetBoolValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetStringValue(int attribute, const std::string& value) override
+    void SetStringValue(int attribute, const std::string& value) override
     {
       style->SetStringValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetColorValue(int attribute, const Color& value) override
+    void SetColorValue(int attribute, const Color& value) override
     {
       style->SetColorValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetMagnificationValue(int attribute, const Magnification& value) override
+    void SetMagnificationValue(int attribute, const Magnification& value) override
     {
       style->SetMagnificationValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetDoubleValue(int attribute, double value) override
+    void SetDoubleValue(int attribute, double value) override
     {
       style->SetDoubleValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetDoubleArrayValue(int attribute, const std::vector<double>& value) override
+    void SetDoubleArrayValue(int attribute, const std::vector<double>& value) override
     {
       style->SetDoubleArrayValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetSymbolValue(int attribute, const SymbolRef& value) override
+    void SetSymbolValue(int attribute, const SymbolRef& value) override
     {
       style->SetSymbolValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetIntValue(int attribute, int value) override
+    void SetIntValue(int attribute, int value) override
     {
       style->SetIntValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetUIntValue(int attribute, size_t value) override
+    void SetUIntValue(int attribute, size_t value) override
     {
       style->SetUIntValue(attribute,value);
       attributes.insert((A)attribute);
     }
 
-     void SetLabelValue(int attribute, const LabelProviderRef& value) override
+    void SetLabelValue(int attribute, const LabelProviderRef& value) override
     {
       style->SetLabelValue(attribute,value);
       attributes.insert((A)attribute);
     }
-
   };
 
   /**
