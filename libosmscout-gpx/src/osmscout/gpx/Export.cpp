@@ -402,6 +402,11 @@ bool GpxWritter::WriteTrack(const Track &track)
       return false;
     }
   }
+  if (track.type){
+    if (!WriteTextElement("type", *track.type)){
+      return false;
+    }
+  }
 
   // see https://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd
   Extensions trkext; // store node $/extensions/TrackExtension

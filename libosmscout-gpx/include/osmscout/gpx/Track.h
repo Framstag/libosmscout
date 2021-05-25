@@ -40,6 +40,7 @@ public:
   std::vector<TrackSegment> segments;
 
   std::optional<osmscout::Color> displayColor;
+  std::optional<std::string> type;
 
   /**
    * Compute track length in meters
