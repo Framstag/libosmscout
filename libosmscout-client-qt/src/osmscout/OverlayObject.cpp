@@ -79,6 +79,13 @@ void OverlayObject::setColor(const QString &c)
   }
 }
 
+void OverlayObject::setColorValue(Color &c)
+{
+  QMutexLocker locker(&lock);
+  color = QString::fromStdString(c.ToHexString());
+  colorValue = c;
+}
+
 void OverlayObject::clear()
 {
   QMutexLocker locker(&lock);
