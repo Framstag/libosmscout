@@ -843,6 +843,12 @@ public:
       });
     }
 
+    if (ns == NameSpace::Gpx && name=="type"){
+      return new SimpleValueContext("TypeContext", ctxt, parser, [&](const std::string &type){
+        track.type=std::make_optional<std::string>(type);
+      });
+    }
+
     if (ns == NameSpace::Gpx && name=="trkseg"){
       return new TrkSegContext(ctxt, track, parser);
     } else if (ns == NameSpace::Gpx && name=="extensions"){
