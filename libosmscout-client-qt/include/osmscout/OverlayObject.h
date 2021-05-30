@@ -146,6 +146,7 @@ public:
   }
 
   void setColor(const QString &c);
+  void setColorValue(Color &c);
 
   LocationEntry* getBBoxAsLocation() const;
   osmscout::GeoBox boundingBox() const;
