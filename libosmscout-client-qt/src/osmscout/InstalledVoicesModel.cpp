@@ -120,7 +120,12 @@ void InstalledVoicesModel::select(const QModelIndex &index)
     return;
   }
   auto voice=voices.at(index.row());
-  settings->SetVoiceDir(voice.getDir().absolutePath());
+  if (!voice.isValid()) {
+    // when voice is invalid, directory may be still valid (default-constructed QDir pointing to $PWD)
+    settings->SetVoiceDir("");
+  } else {
+    settings->SetVoiceDir(voice.getDir().absolutePath());
+  }
 }
 
 void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringList &sample)

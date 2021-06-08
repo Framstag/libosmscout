@@ -233,6 +233,7 @@ void NavigationModule::onTimeout()
 
 void NavigationModule::onVoiceChanged(const QString dir)
 {
+  qDebug() << "Voice dir changed to:" << dir;
   voiceDir = dir;
   if (!QDir(voiceDir).exists()){
     voiceDir.clear(); // disable voice
