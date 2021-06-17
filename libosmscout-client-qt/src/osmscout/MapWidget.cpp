@@ -26,6 +26,7 @@
 #include <osmscout/OSMScoutQt.h>
 #include <QtSvg/QSvgRenderer>
 #include <QtGlobal>
+#include <QQuickWindow>
 
 namespace osmscout {
 
@@ -97,11 +98,10 @@ MapWidget::~MapWidget()
 void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
 {
     assert(event);
-    QMouseEvent *mEvent = static_cast<QMouseEvent *>(event);
 
     QTouchEvent::TouchPoint touchPoint;
     touchPoint.setPressure(1);
-    touchPoint.setPos(mEvent->pos());
+    touchPoint.setPos(event->pos());
     touchPoint.setState(states);
 
     QList<QTouchEvent::TouchPoint> points;
@@ -192,6 +192,19 @@ void MapWidget::touchEvent(QTouchEvent *event)
             setupInputHandler(new MultitouchHandler(*view));
         }
         inputHandler->touch(*event);
+    }
+
+    if (preventMouseStealing) {
+       int activePoints = std::count_if(event->touchPoints().begin(), event->touchPoints().end(),
+                                        [](const auto &tp) { return tp.state() != Qt::TouchPointReleased; });
+
+       if (activePoints == 0) {
+         setKeepMouseGrab(false);
+         ungrabMouse();
+       } else if (!keepMouseGrab()) {
+         grabMouse();
+         setKeepMouseGrab(true);
+       }
     }
 
     event->accept();
