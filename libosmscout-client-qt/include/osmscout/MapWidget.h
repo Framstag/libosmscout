@@ -71,6 +71,13 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   Q_PROPERTY(QString  renderingType READ GetRenderingType WRITE SetRenderingType NOTIFY renderingTypeChanged)
 
+  /**
+   * This property holds whether the mouse events may be stolen from this Widget.
+   * By default this property is false.
+   * see https://doc.qt.io/qt-5/qml-qtquick-mousearea.html#preventStealing-prop
+   */
+  Q_PROPERTY(bool preventMouseStealing READ isPreventMouseStealing WRITE setPreventMouseStealing)
+
   Q_PROPERTY(bool stylesheetHasErrors           READ stylesheetHasErrors              NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorLine            READ firstStylesheetErrorLine         NOTIFY styleErrorsChanged)
   Q_PROPERTY(int stylesheetErrorColumn          READ firstStylesheetErrorColumn       NOTIFY styleErrorsChanged)
@@ -88,6 +95,8 @@ private:
 
   InputHandler     *inputHandler{nullptr};
   TapRecognizer    tapRecognizer;
+
+  bool preventMouseStealing{false};
 
   bool finished{false};
 
@@ -442,6 +451,16 @@ public:
 
   QString GetRenderingType() const;
   void SetRenderingType(QString type);
+
+  bool isPreventMouseStealing() const
+  {
+    return preventMouseStealing;
+  }
+
+  void  setPreventMouseStealing(bool b)
+  {
+    preventMouseStealing = b;
+  }
 
   /**
    * Helper for loading SVG graphics
