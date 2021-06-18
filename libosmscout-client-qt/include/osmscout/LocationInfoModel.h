@@ -83,7 +83,7 @@ public:
 
 public:
     LocationInfoModel();
-    virtual inline ~LocationInfoModel(){};
+    virtual ~LocationInfoModel();
 
     Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
     {
