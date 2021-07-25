@@ -5,8 +5,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 bool Equals(const std::vector<osmscout::Point>& coordsA, const std::vector<osmscout::Point>& coordsB)
 {

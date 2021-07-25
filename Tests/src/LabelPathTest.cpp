@@ -2,8 +2,7 @@
 #include <osmscout/LabelPath.h>
 #include <osmscout/util/Geometry.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 using namespace osmscout;
 

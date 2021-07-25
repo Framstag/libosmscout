@@ -9,8 +9,7 @@
 
 #include <osmscout/util/TagErrorReporter.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 std::string AccessToString(uint8_t access)
 {

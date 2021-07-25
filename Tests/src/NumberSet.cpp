@@ -2,8 +2,7 @@
 
 #include <osmscout/util/NumberSet.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 TEST_CASE()
 {

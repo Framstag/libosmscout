@@ -1,7 +1,6 @@
 #include <osmscout/util/Geometry.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 TEST_CASE("Simple point") {
   std::vector<osmscout::ScanCell> cells;

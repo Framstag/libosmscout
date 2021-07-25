@@ -23,8 +23,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/GeoCoord.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 using namespace std;
 

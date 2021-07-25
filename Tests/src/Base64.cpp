@@ -1,8 +1,6 @@
 #include <osmscout/util/Base64.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-
+#include <TestMain.h>
 
 const char TestString[] = "Lorem ipsum dolor sit amet, "
                                     "consectetuer adipiscing elit. "

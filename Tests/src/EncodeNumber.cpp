@@ -2,8 +2,7 @@
 
 #include <osmscout/util/Number.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)

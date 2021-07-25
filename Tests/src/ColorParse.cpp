@@ -2,8 +2,7 @@
 
 #include <osmscout/util/Color.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 struct TestData
 {

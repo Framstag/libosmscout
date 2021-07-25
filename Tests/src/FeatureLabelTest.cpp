@@ -1,8 +1,7 @@
 
 #include <osmscout/TypeFeatures.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 using namespace osmscout;
 

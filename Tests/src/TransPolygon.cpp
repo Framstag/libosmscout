@@ -25,8 +25,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Transformation.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 using namespace std;
 

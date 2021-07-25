@@ -1,7 +1,6 @@
 #include <osmscout/util/String.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 TEST_CASE("Parse ISO8601 time string") {
   osmscout::Timestamp ts;

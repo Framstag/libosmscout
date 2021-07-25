@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <TestSub.h>
 
 #include <osmscout/LocationService.h>
 

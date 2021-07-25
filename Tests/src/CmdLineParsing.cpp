@@ -2,8 +2,7 @@
 
 #include <osmscout/util/CmdLineParsing.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 class Arguments
 {

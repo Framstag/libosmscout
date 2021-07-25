@@ -21,8 +21,7 @@
 
 #include <osmscout/MapPainterNoOp.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 static const double ringCoords[] = {
   50.08336917, 14.41309835,

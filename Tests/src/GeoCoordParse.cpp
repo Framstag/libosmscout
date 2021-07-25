@@ -2,8 +2,7 @@
 
 #include <osmscout/GeoCoord.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 bool CheckParseFail(const std::string& text)
 {

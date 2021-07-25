@@ -2,8 +2,7 @@
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/Tiling.h>
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 TEST_CASE("TileIdBox calculation") {
   osmscout::Magnification magnification(osmscout::Magnification::magClose);

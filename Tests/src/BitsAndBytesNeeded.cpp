@@ -4,8 +4,7 @@
 
 int errors=0;
 
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <TestMain.h>
 
 bool CheckBitsNeededToEncodeNumber(unsigned long number, uint8_t expectedBits)
 {
