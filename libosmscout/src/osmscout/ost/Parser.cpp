@@ -78,7 +78,7 @@ void Parser::Get()
       dummyToken->pos = t->pos;
       dummyToken->col = t->col;
       dummyToken->line = t->line;
-      dummyToken->next = NULL;
+      dummyToken->next = nullptr;
       coco_string_delete(dummyToken->val);
       dummyToken->val = coco_string_create(t->val);
       t = dummyToken;
@@ -820,7 +820,7 @@ void Parser::UINT8(uint8_t& value) {
 
 void Parser::Parse()
 {
-  t = NULL;
+  t = nullptr;
   la = dummyToken = std::make_shared<Token>();
   la->val = coco_string_create("Dummy Token");
   Get();
@@ -834,8 +834,8 @@ Parser::Parser(Scanner *scanner,
 {
 	maxT = 60;
 
-  dummyToken = NULL;
-  t = la = NULL;
+  dummyToken = nullptr;
+  t = la = nullptr;
   minErrDist = 2;
   errDist = minErrDist;
   this->scanner = scanner;

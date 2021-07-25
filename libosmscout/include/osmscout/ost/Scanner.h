@@ -40,7 +40,7 @@ extern void  coco_string_delete(char* &data);
 
 class Token;
 
-typedef std::shared_ptr<Token> TokenRef;
+using TokenRef = std::shared_ptr<Token>;
 
 class Token
 {
@@ -72,7 +72,6 @@ public:
 
   int Read();
   int Peek();
-  //wchar_t* GetString(int beg, int end);
   int GetPos();
   void SetPos(int value);
 };
@@ -86,15 +85,8 @@ private:
   std::map<int,int> map;
 
 public:
-  StartStates()
-  {
-    // no code
-  }
-
-  virtual ~StartStates()
-  {
-    // no code
-  }
+  StartStates() = default;
+  virtual ~StartStates() = default;
 
   void set(int key, int val)
   {
@@ -122,15 +114,8 @@ private:
   std::map<std::string,int> map;
 
 public:
-  KeywordMap()
-  {
-    // no code
-  }
-
-  virtual ~KeywordMap()
-  {
-    // no code
-  }
+  KeywordMap() = default;
+  virtual ~KeywordMap() = default;
 
   void set(const char* key, int val)
   {
@@ -174,7 +159,7 @@ private:
   int           charPos;    // position by unicode characters starting with 0
   int           line;       // line number of current character
   int           col;        // column number of current character
-  int           oldEols;    // EOLs that appeared in a comment;
+  int           oldEols;    // EOLs that appeared in a comment
 
   TokenRef CreateToken();
   void AppendVal(TokenRef& t);
