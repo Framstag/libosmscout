@@ -61,6 +61,14 @@ LocationInfoModel::LocationInfoModel():
             Qt::QueuedConnection);
 }
 
+LocationInfoModel::~LocationInfoModel() noexcept
+{
+    if (lookupModule!=nullptr){
+        lookupModule->deleteLater();
+        lookupModule=nullptr;
+    }
+}
+
 void LocationInfoModel::setLocation(const double lat, const double lon)
 {
     location = osmscout::GeoCoord(lat, lon);
