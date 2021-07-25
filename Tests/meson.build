@@ -188,6 +188,12 @@ ScanConversion = executable('ScanConversion',
              link_with: [osmscout],
              install: false)
 
+StdByteTest = executable('StdByteTest',
+             'src/StdByteTest.cpp',
+             include_directories: [testIncDir],
+             dependencies: [mathDep],
+             install: false)
+
 StringUtils = executable('StringUtils',
              'src/StringUtils.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
