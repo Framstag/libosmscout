@@ -92,6 +92,9 @@ osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 #---- StringUtils
 osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 
+#---- StdByteTest
+osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
+
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 
