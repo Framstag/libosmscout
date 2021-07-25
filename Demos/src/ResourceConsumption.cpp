@@ -52,7 +52,8 @@ int main(int argc, char* argv[])
 {
   std::string         map;
   std::string         style;
-  size_t              width,height;
+  size_t              width;
+  size_t              height;
   std::vector<Action> actions;
 
   if (argc<5) {
@@ -116,8 +117,8 @@ int main(int argc, char* argv[])
 
     databaseParameter.SetAreaAreaIndexCacheSize(0);
 
-    osmscout::DatabaseRef database(new osmscout::Database(databaseParameter));
-    osmscout::MapServiceRef mapService(new osmscout::MapService(database));
+    auto database=std::make_shared<osmscout::Database>(databaseParameter);
+    auto mapService=std::make_shared<osmscout::MapService>(database);
 
     if (!database->Open(map.c_str())) {
       std::cerr << "Cannot open database" << std::endl;
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
 
     database->DumpStatistics();
 
-    osmscout::StyleConfigRef styleConfig(new osmscout::StyleConfig(database->GetTypeConfig()));
+    auto styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
     if (!styleConfig->Load(style)) {
       std::cerr << "Cannot open style" << std::endl;
