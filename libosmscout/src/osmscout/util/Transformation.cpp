@@ -259,6 +259,9 @@ namespace osmscout {
 
   size_t CoordBuffer::PushCoord(double x, double y)
   {
+    assert(!std::isnan(x));
+    assert(!std::isnan(y));
+
     if (usedPoints>=bufferSize) {
       bufferSize=bufferSize*2;
 
