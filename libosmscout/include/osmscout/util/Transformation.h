@@ -351,7 +351,7 @@ namespace osmscout {
    * The initial size of the buffer should be able to hold "enough" data. If you thus get reallocation
    * log warnings this is not an error, but if it happens too often you are either not reusing
    * CoordBuffer instances as much as possible or are pushing more geometric data than we expect to
-   * be sensible for mobile or desktop rendering. Check your allocation strategy for MapPainte rinstances
+   * be sensible for mobile or desktop rendering. Check your allocation strategy for MapPainter instances
    * or style sheet in this case,
    *
    * CoordBuffer also allows also higher level operations on the buffer to generate copies
