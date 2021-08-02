@@ -63,7 +63,6 @@ namespace osmscout {
   : lon(0),
     lat(0),
     angle(0),
-    magnification(0),
     dpi(0),
     width(0),
     height(0),

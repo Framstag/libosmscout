@@ -44,8 +44,9 @@ namespace osmscout {
 
   void Magnification::SetMagnification(double magnification)
   {
+    assert(magnification>=1);
     this->magnification=magnification;
-    this->level=(uint32_t)log2(this->magnification);
+    this->level=uint32_t(log2(this->magnification));
   }
 
   void Magnification::SetLevel(const MagnificationLevel& level)

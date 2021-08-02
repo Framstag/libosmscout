@@ -170,6 +170,10 @@ namespace osmscout {
 
     Magnification(const Magnification& other) = default;
 
+    /**
+     * Create specific magnification.
+     * @param magnification value, have to be valid - greater or equals to 1 (magnification level >= 0)
+     */
     inline explicit Magnification(double magnification) noexcept
     {
       SetMagnification(magnification);
@@ -180,6 +184,10 @@ namespace osmscout {
       SetLevel(level);
     }
 
+    /**
+     * Set magnification.
+     * @param magnification value, have to be valid - greater or equals to 1 (magnification level >= 0)
+     */
     void SetMagnification(double magnification);
 
     void SetLevel(const MagnificationLevel& level);

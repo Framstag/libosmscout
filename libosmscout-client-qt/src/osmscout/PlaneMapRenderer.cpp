@@ -45,10 +45,8 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
   currentImage(nullptr),
   currentCoord(0.0,0.0),
   currentAngle(0.0),
-  currentMagnification(0),
   finishedImage(nullptr),
-  finishedCoord(0.0,0.0),
-  finishedMagnification(0)
+  finishedCoord(0.0,0.0)
 {
   pendingRenderingTimer.setSingleShot(true);
 
