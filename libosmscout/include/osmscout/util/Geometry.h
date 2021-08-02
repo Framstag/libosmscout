@@ -925,6 +925,8 @@ namespace osmscout {
   /**
    * \ingroup Geometry
    *
+   * Normalize vector [x,y], result is set to [nx,ny].
+   * When vector length is zero, nx,ny are unchanged.
    */
   inline void Normalize(double x,
                         double y,
@@ -933,8 +935,10 @@ namespace osmscout {
   {
     double length=sqrt(x*x+y*y);
 
-    nx=x/length;
-    ny=y/length;
+    if (length!=0) {
+      nx=x/length;
+      ny=y/length;
+    }
   }
 
   /**
