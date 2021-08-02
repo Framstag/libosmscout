@@ -908,6 +908,7 @@ namespace osmscout {
   void MapPainterSVG::DrawPath(const Projection& /*projection*/,
                                const MapParameter& /*parameter*/,
                                const std::string& styleName,
+                               const std::optional<Color> &colorOverride,
                                double width,
                                LineStyle::CapStyle /*startCap*/,
                                LineStyle::CapStyle /*endCap*/,
@@ -915,6 +916,13 @@ namespace osmscout {
   {
     stream << "    <polyline";
     stream << " class=\"" << styleName  << "\"";
+    if (colorOverride) {
+      stream << " style=\"stroke:" << GetColorValue(*colorOverride);
+      if (!colorOverride->IsSolid()) {
+        stream << " stroke-opacity:" << colorOverride->GetA();
+      }
+      stream << "\"";
+    }
     stream << " stroke-width=\"" << width << "\"";
     stream << std::endl;
 
@@ -941,6 +949,9 @@ namespace osmscout {
 
     assert(styleNameEntry!=lineStyleNameMap.end());
 
+    std::optional<Color> colorOverride = data.color != data.lineStyle->GetLineColor() ?
+        std::make_optional(data.color) : std::nullopt;
+
     if (!data.lineStyle->GetDash().empty() &&
         data.lineStyle->GetGapColor().GetA()>0.0) {
       DrawPath(projection,
@@ -956,6 +967,7 @@ namespace osmscout {
     DrawPath(projection,
              parameter,
              styleNameEntry->second,
+             colorOverride,
              data.lineWidth,
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
