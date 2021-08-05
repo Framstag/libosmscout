@@ -29,6 +29,8 @@ struct Arguments
 {
   bool        help=false;
   std::string databaseDirectory;
+  std::size_t maxPrintedOffsets=5;
+  std::size_t maxUniqueResults=10;
 };
 
 void printDetails(const osmscout::FeatureValueBuffer& features)
@@ -59,6 +61,8 @@ void printDetails(const osmscout::FeatureValueBuffer& features)
 
 int main (int argc, char *argv[])
 {
+  using namespace std::string_literals;
+
   osmscout::CmdLineParser   argParser("LookupText",
                                       argc,argv);
   std::vector<std::string>  helpArgs{"h","help"};
@@ -70,6 +74,20 @@ int main (int argc, char *argv[])
                       helpArgs,
                       "Return argument help",
                       true);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+    args.maxPrintedOffsets=value;
+  }),
+                      "max-offsets",
+                      "Maximum of printed offsets for each result (default "s + std::to_string(args.maxPrintedOffsets) + ")"s,
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
+                        args.maxPrintedOffsets=value;
+                      }),
+                      "max-results",
+                      "Maximum of printed unique results (default "s + std::to_string(args.maxUniqueResults) + ")"s,
+                      false);
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
@@ -107,8 +125,8 @@ int main (int argc, char *argv[])
   }
 
   std::cout << "* Searches are case-sensitive\n"
-               "* Displays up to 10 unique text results\n"
-               "* Displays up to 5 file offsets for each result\n"
+               "* Displays up to " << args.maxUniqueResults << " unique text results\n"
+               "* Displays up to " << args.maxPrintedOffsets << " file offsets for each result\n"
                "* Input at least 3 characters or 'q' to quit\n" << std::endl;
 
 
@@ -156,8 +174,7 @@ int main (int argc, char *argv[])
     for(it=results.begin(); it != results.end(); ++it) {
       std::cout << "\"" <<it->first << "\" -> " << std::endl;
       std::vector<osmscout::ObjectFileRef> &refs=it->second;
-      std::size_t maxPrintedOffsets=5;
-      std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
+      std::size_t minRefCount=std::min(refs.size(),args.maxPrintedOffsets);
 
       for(size_t r=0; r < minRefCount; r++) {
         if(refs[r].GetType() == osmscout::refNode) {
@@ -182,17 +199,17 @@ int main (int argc, char *argv[])
           }
         }
       }
-      if(refs.size() > 10) {
-        std::cout << "... " << (refs.size()-10) << " more offsets";
+      if(refs.size() > args.maxPrintedOffsets) {
+        std::cout << " ... " << (refs.size()-args.maxPrintedOffsets) << " more offsets" << std::endl;
       }
       std::cout << std::endl;
       printCount++;
-      if(printCount == 10) {
+      if(printCount == args.maxUniqueResults) {
         break;
       }
     }
 
-    if(results.size() > 10) {
+    if(results.size() > args.maxUniqueResults) {
       std::cout << "... " << results.size()
                 << " total unique text results found" << std::endl;
     }
