@@ -209,6 +209,7 @@ namespace osmscout {
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
                   const std::string& styleName,
+                  const std::optional<Color> &colorOverride,
                   double width,
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
