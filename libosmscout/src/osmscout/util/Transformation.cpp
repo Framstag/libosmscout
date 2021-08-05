@@ -288,8 +288,8 @@ namespace osmscout {
     assert(org.GetEnd()<usedPoints);
 
     size_t start,end;
-    double oax,oay=0;
-    double obx,oby=0;
+    double oax=0,oay=0;
+    double obx=0,oby=0;
 
     Normalize(buffer[org.GetStart()].GetY()-buffer[org.GetStart()+1].GetY(),
               buffer[org.GetStart()+1].GetX()-buffer[org.GetStart()].GetX(),
