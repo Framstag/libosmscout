@@ -167,31 +167,25 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
                       /*searchPOIs*/ true, /*searchLocations*/ true,
                       /*searchRegions*/ true, /*searchOther*/ true,
                       resultsTxt);
-    osmscout::TextSearchIndex::ResultsMap::iterator it;
-    int count = 0;
-    for(it=resultsTxt.begin();
-      it != resultsTxt.end() && count < limit;
-      ++it, ++count)
-    {
-      std::vector<osmscout::ObjectFileRef> &refs=it->second;
 
-      std::size_t maxPrintedOffsets=5;
-      std::size_t minRefCount=std::min(refs.size(),maxPrintedOffsets);
+    for(const auto &e: resultsTxt) {
+      if (locations.size()>=limit) {
+        break;
+      }
+      QString title=QString::fromStdString(e.first);
+      const std::vector<osmscout::ObjectFileRef> &refs=e.second;
 
-      for(size_t r=0; r < minRefCount; r++){
+      for (const auto &fref:refs){
         if (locations.size()>=limit) {
           break;
         }
-
-        osmscout::ObjectFileRef fref = refs[r];
 
         if (objectSet.contains(fref)) {
           continue;
         }
 
         objectSet << fref;
-        BuildLocationEntry(fref, QString::fromStdString(it->first),
-                           db, adminRegionMap, locations);
+        BuildLocationEntry(fref, title, db, adminRegionMap, locations);
       }
     }
 
