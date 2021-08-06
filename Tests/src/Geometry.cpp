@@ -271,3 +271,23 @@ TEST_CASE("Distance conversions")
   // TO Distance static template method
   REQUIRE(Meters(1000).As<Kilometer>() == 1);
 }
+
+TEST_CASE("Vector normalize")
+{
+  double nx,ny;
+
+  osmscout::Normalize(1,0,nx,ny);
+  REQUIRE(nx==1);
+  REQUIRE(ny==0);
+
+  osmscout::Normalize(0,10,nx,ny);
+  REQUIRE(nx==0);
+  REQUIRE(ny==1);
+
+  nx=42;
+  ny=42;
+  // vector length is zero, nx and ny should be unchanged
+  osmscout::Normalize(0,0,nx,ny);
+  REQUIRE(nx==42);
+  REQUIRE(ny==42);
+}

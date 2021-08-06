@@ -259,6 +259,9 @@ namespace osmscout {
 
   size_t CoordBuffer::PushCoord(double x, double y)
   {
+    assert(!std::isnan(x));
+    assert(!std::isnan(y));
+
     if (usedPoints>=bufferSize) {
       bufferSize=bufferSize*2;
 
@@ -285,9 +288,8 @@ namespace osmscout {
     assert(org.GetEnd()<usedPoints);
 
     size_t start,end;
-    double oax,oay;
-    double obx,oby;
-
+    double oax=0,oay=0;
+    double obx=0,oby=0;
 
     Normalize(buffer[org.GetStart()].GetY()-buffer[org.GetStart()+1].GetY(),
               buffer[org.GetStart()+1].GetX()-buffer[org.GetStart()].GetX(),
