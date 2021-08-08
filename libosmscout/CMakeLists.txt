@@ -137,6 +137,31 @@ set(HEADER_FILES_NAVIGATION
     include/osmscout/navigation/SpeedAgent.h
     include/osmscout/navigation/VoiceInstructionAgent.h
     include/osmscout/navigation/LaneAgent.h)
+	
+set(HEADER_FILES_MAP
+	../libosmscout-map/include/osmscout/MapImportExport.h
+	../libosmscout-map/include/osmscout/oss/Parser.h
+	../libosmscout-map/include/osmscout/oss/Scanner.h
+	../libosmscout-map/include/osmscout/LabelLayouter.h
+	../libosmscout-map/include/osmscout/MapPainter.h
+	../libosmscout-map/include/osmscout/MapParameter.h
+	../libosmscout-map/include/osmscout/MapData.h
+	../libosmscout-map/include/osmscout/MapService.h
+	../libosmscout-map/include/osmscout/LabelProvider.h
+	../libosmscout-map/include/osmscout/LabelPath.h
+	../libosmscout-map/include/osmscout/Styles.h
+	../libosmscout-map/include/osmscout/StyleDescription.h
+	../libosmscout-map/include/osmscout/StyleConfig.h
+	../libosmscout-map/include/osmscout/StyleProcessor.h
+	../libosmscout-map/include/osmscout/DataTileCache.h
+	../libosmscout-map/include/osmscout/MapTileCache.h
+	../libosmscout-map/include/osmscout/MapPainterNoOp.h
+	../libosmscout-map/include/osmscout/MapFeatures.h
+)
+
+set(HEADER_FILES_MAP_IOSX
+	../libosmscout-map-iOSX/include/osmscout/MapPainterIOS.h
+)
 
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
@@ -264,7 +289,9 @@ set(HEADER_FILES
     ${HEADER_FILES_SYSTEM}
     ${HEADER_FILES_UTIL}
     ${HEADER_FILES_ROUTING}
-    ${HEADER_FILES_NAVIGATION})
+    ${HEADER_FILES_NAVIGATION}
+	${HEADER_FILES_MAP}
+	${HEADER_FILES_MAP_IOSX})
 
 osmscout_library_project(
     NAME OSMScout
@@ -303,6 +330,10 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/routing)
     set_source_files_properties(${HEADER_FILES_NAVIGATION}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/navigation)
+    set_source_files_properties(${HEADER_FILES_MAP}
+	    PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_MAP_IOSX}
+	    PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
 
     set_target_properties(OSMScout PROPERTIES
         FRAMEWORK TRUE
