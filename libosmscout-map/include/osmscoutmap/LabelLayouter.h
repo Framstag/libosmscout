@@ -24,10 +24,10 @@
 #include <set>
 #include <array>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
-#include <osmscout/StyleConfig.h>
-#include <osmscout/LabelPath.h>
+#include <osmscoutmap/StyleConfig.h>
+#include <osmscoutmap/LabelPath.h>
 #include <osmscout/system/Math.h>
 
 //#define DEBUG_LABEL_LAYOUTER

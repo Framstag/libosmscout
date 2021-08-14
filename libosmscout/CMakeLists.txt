@@ -310,7 +310,7 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
         MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
         #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
         CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-        OUTPUT_NAME "OSMScout")
+        OUTPUT_NAME "osmscout")
 
      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 endif()

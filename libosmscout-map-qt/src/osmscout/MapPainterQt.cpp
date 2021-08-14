@@ -18,7 +18,7 @@
 */
 
 #include <osmscout/MapPainterQt.h>
-#include <osmscout/LabelPath.h>
+#include <osmscoutmap/LabelPath.h>
 
 #include <iostream>
 #include <limits>

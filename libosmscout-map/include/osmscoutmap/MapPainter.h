@@ -23,7 +23,7 @@
 #include <list>
 #include <string>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 
@@ -33,11 +33,11 @@
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #include <osmscout/GroundTile.h>
 
-#include <osmscout/MapData.h>
+#include <osmscoutmap/MapData.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Geometry.h>
@@ -46,8 +46,8 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <osmscout/LabelLayouter.h>
-#include <osmscout/MapParameter.h>
+#include <osmscoutmap/LabelLayouter.h>
+#include <osmscoutmap/MapParameter.h>
 
 namespace osmscout {
 

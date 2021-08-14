@@ -1,5 +1,5 @@
 
-#include <osmscout/LabelPath.h>
+#include <osmscoutmap/LabelPath.h>
 #include <osmscout/util/Geometry.h>
 
 #include <TestMain.h>

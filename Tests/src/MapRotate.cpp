@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <osmscout/MapPainterNoOp.h>
+#include <osmscoutmap/MapPainterNoOp.h>
 
 #include <TestMain.h>
 

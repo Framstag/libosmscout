@@ -16,9 +16,8 @@
 #include <osmscout/WayDataFile.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/routing/RoutePostprocessor.h>
-#include <osmscout/StyleConfig.h>
-#include <osmscout/MapPainterIOS.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/StyleConfig.h>
+#include <osmscoutmap/MapService.h>
 #include <osmscout/LocationService.h>
 
 namespace osmscout {

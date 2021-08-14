@@ -25,7 +25,7 @@
 #include <osmscout/OSMScoutQt.h>
 #include <osmscout/Settings.h>
 #include <osmscout/DBThread.h>
-#include <osmscout/DataTileCache.h>
+#include <osmscoutmap/DataTileCache.h>
 #include <osmscout/MapWidget.h>
 #include <osmscout/ElevationChartWidget.h>
 #include <osmscout/PlaneMapRenderer.h>

@@ -41,7 +41,7 @@
 
 #include <iostream>
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Scanner.h>
 
 namespace osmscout {
 namespace oss {

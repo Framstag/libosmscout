@@ -23,7 +23,7 @@
 #include <list>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>

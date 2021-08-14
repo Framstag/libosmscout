@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/LabelPath.h>
+#include <osmscoutmap/LabelPath.h>
 #include <osmscout/system/Math.h>
 #include <osmscout/util/Geometry.h>
 

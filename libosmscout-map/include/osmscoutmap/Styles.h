@@ -24,13 +24,13 @@
 #include <set>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/Pixel.h>
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Projection.h>
 
-#include <osmscout/StyleDescription.h>
+#include <osmscoutmap/StyleDescription.h>
 
 namespace osmscout {
 

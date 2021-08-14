@@ -30,7 +30,7 @@
 #include <list>
 
 #include <osmscout/Database.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Geometry.h>

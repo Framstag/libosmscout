@@ -28,7 +28,7 @@
 
 #include <osmscout/MapQtImportExport.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 #include <QtGui/QTextLayout>
 

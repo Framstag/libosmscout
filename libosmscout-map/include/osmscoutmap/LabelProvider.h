@@ -22,12 +22,12 @@
 
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
 
-#include <osmscout/MapParameter.h>
+#include <osmscoutmap/MapParameter.h>
 
 namespace osmscout {
 

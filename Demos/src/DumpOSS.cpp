@@ -21,7 +21,7 @@
 #include <iostream>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 

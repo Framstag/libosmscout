@@ -1,5 +1,5 @@
 set(HEADER_FILES
-        include/osmscout/MapPainterIOS.h
+    include/osmscoutmapiosx/MapPainterIOS.h
 )
 
 set(SOURCE_FILES
@@ -16,14 +16,13 @@ osmscout_library_project(
 )
 
 set_target_properties(OSMScoutMapIOSX PROPERTIES
-  UNITY_BUILD OFF
   FRAMEWORK TRUE
   FRAMEWORK_VERSION A
   MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-  PUBLIC_HEADER     include/osmscout/MapPainterIOS.h
+  PUBLIC_HEADER  "${HEADER_FILES}"
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  OUTPUT_NAME "OSMScoutMapIOSX")
+  OUTPUT_NAME "osmscoutmapiosx")
 
 find_library(FOUNDATION Foundation)
 find_library(COREGRAPHICS CoreGraphics)

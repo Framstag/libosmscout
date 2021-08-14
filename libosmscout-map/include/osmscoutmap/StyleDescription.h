@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/system/Compiler.h>
 

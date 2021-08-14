@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/LabelLayouter.h>
+#include <osmscoutmap/LabelLayouter.h>
 
 namespace osmscout {
   OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)

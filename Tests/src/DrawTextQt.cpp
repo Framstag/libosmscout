@@ -28,9 +28,9 @@
 #include <QDebug>
 
 #include <osmscout/Database.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 
-#include <osmscout/LabelPath.h>
+#include <osmscoutmap/LabelPath.h>
 
 #include <DrawWindow.h>
 

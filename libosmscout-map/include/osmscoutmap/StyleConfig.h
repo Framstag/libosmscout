@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/Pixel.h>
 
@@ -43,9 +43,9 @@
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Transformation.h>
 
-#include <osmscout/LabelProvider.h>
-#include <osmscout/StyleDescription.h>
-#include <osmscout/Styles.h>
+#include <osmscoutmap/LabelProvider.h>
+#include <osmscoutmap/StyleDescription.h>
+#include <osmscoutmap/Styles.h>
 
 namespace osmscout {
 
