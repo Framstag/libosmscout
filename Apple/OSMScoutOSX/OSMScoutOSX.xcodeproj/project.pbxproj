@@ -28,15 +28,15 @@
 		E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5D1F4EF66E00EF6212 /* UIKit.framework */; };
 		E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5F1F4EF6B700EF6212 /* MapKit.framework */; };
 		E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B611F4EF79900EF6212 /* CoreLocation.framework */; };
-		E59C37DE26C875DC00C38713 /* osmscoutmapiosx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DB26C875DB00C38713 /* osmscoutmapiosx.framework */; };
-		E59C37DF26C875DC00C38713 /* osmscout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DC26C875DB00C38713 /* osmscout.framework */; };
-		E59C37E026C875DC00C38713 /* osmscoutmap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DD26C875DB00C38713 /* osmscoutmap.framework */; };
-		E59C37E126C8771500C38713 /* osmscout.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DC26C875DB00C38713 /* osmscout.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		E59C37E226C8771500C38713 /* osmscoutmap.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DD26C875DB00C38713 /* osmscoutmap.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		E59C37E326C8771500C38713 /* osmscoutmapiosx.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DB26C875DB00C38713 /* osmscoutmapiosx.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		E59C37E426C87A7C00C38713 /* osmscout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D726C8751500C38713 /* osmscout.framework */; };
-		E59C37E726C87A8000C38713 /* osmscoutmap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D626C8751500C38713 /* osmscoutmap.framework */; };
-		E59C37E926C87A8300C38713 /* osmscoutmapiosx.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D526C8751500C38713 /* osmscoutmapiosx.framework */; };
+		E59C37DE26C875DC00C38713 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DB26C875DB00C38713 /* OSMScoutMapIOSX.framework */; };
+		E59C37DF26C875DC00C38713 /* OSMScout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DC26C875DB00C38713 /* OSMScout.framework */; };
+		E59C37E026C875DC00C38713 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */; };
+		E59C37E126C8771500C38713 /* OSMScout.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DC26C875DB00C38713 /* OSMScout.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E59C37E226C8771500C38713 /* OSMScoutMap.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E59C37E326C8771500C38713 /* OSMScoutMapIOSX.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37DB26C875DB00C38713 /* OSMScoutMapIOSX.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E59C37E426C87A7C00C38713 /* OSMScout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D726C8751500C38713 /* OSMScout.framework */; };
+		E59C37E726C87A8000C38713 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D626C8751500C38713 /* OSMScoutMap.framework */; };
+		E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D526C8751500C38713 /* OSMScoutMapIOSX.framework */; };
 		E59C37EC26C87B8200C38713 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */; };
 		F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8315E59EAC00F0B370 /* bus_stop.png */; };
 		F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8415E59EAC00F0B370 /* cemetery.png */; };
@@ -71,9 +71,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E59C37E126C8771500C38713 /* osmscout.framework in Embed Frameworks */,
-				E59C37E226C8771500C38713 /* osmscoutmap.framework in Embed Frameworks */,
-				E59C37E326C8771500C38713 /* osmscoutmapiosx.framework in Embed Frameworks */,
+				E59C37E126C8771500C38713 /* OSMScout.framework in Embed Frameworks */,
+				E59C37E226C8771500C38713 /* OSMScoutMap.framework in Embed Frameworks */,
+				E59C37E326C8771500C38713 /* OSMScoutMapIOSX.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -113,12 +113,12 @@
 		E59C37D226C8638000C38713 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		E59C37D326C8638100C38713 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/OSMScoutIOSViewController_iPhone.xib; sourceTree = "<group>"; };
 		E59C37D426C8638100C38713 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/OSMScoutIOSViewController_iPad.xib; sourceTree = "<group>"; };
-		E59C37D526C8751500C38713 /* osmscoutmapiosx.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscoutmapiosx.framework; path = OSMScoutiOS/Frameworks/osmscoutmapiosx.framework; sourceTree = "<group>"; };
-		E59C37D626C8751500C38713 /* osmscoutmap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscoutmap.framework; path = OSMScoutiOS/Frameworks/osmscoutmap.framework; sourceTree = "<group>"; };
-		E59C37D726C8751500C38713 /* osmscout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscout.framework; path = OSMScoutiOS/Frameworks/osmscout.framework; sourceTree = "<group>"; };
-		E59C37DB26C875DB00C38713 /* osmscoutmapiosx.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscoutmapiosx.framework; path = OSMScoutOSX/Frameworks/osmscoutmapiosx.framework; sourceTree = "<group>"; };
-		E59C37DC26C875DB00C38713 /* osmscout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscout.framework; path = OSMScoutOSX/Frameworks/osmscout.framework; sourceTree = "<group>"; };
-		E59C37DD26C875DB00C38713 /* osmscoutmap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = osmscoutmap.framework; path = OSMScoutOSX/Frameworks/osmscoutmap.framework; sourceTree = "<group>"; };
+		E59C37D526C8751500C38713 /* OSMScoutMapIOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMapIOSX.framework; path = OSMScoutiOS/Frameworks/OSMScoutMapIOSX.framework; sourceTree = "<group>"; };
+		E59C37D626C8751500C38713 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutiOS/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
+		E59C37D726C8751500C38713 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutiOS/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
+		E59C37DB26C875DB00C38713 /* OSMScoutMapIOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMapIOSX.framework; path = OSMScoutOSX/Frameworks/OSMScoutMapIOSX.framework; sourceTree = "<group>"; };
+		E59C37DC26C875DB00C38713 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutOSX/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
+		E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutOSX/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
 		E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		F50CBE8315E59EAC00F0B370 /* bus_stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bus_stop.png; sourceTree = "<group>"; };
 		F50CBE8415E59EAC00F0B370 /* cemetery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cemetery.png; sourceTree = "<group>"; };
@@ -151,10 +151,10 @@
 				E51A611222C57BAC007316F9 /* AppKit.framework in Frameworks */,
 				E51A611122C57BA6007316F9 /* CoreLocation.framework in Frameworks */,
 				E51A610F22C57B91007316F9 /* Cocoa.framework in Frameworks */,
-				E59C37E026C875DC00C38713 /* osmscoutmap.framework in Frameworks */,
+				E59C37E026C875DC00C38713 /* OSMScoutMap.framework in Frameworks */,
 				E51A611022C57B9F007316F9 /* MapKit.framework in Frameworks */,
-				E59C37DF26C875DC00C38713 /* osmscout.framework in Frameworks */,
-				E59C37DE26C875DC00C38713 /* osmscoutmapiosx.framework in Frameworks */,
+				E59C37DF26C875DC00C38713 /* OSMScout.framework in Frameworks */,
+				E59C37DE26C875DC00C38713 /* OSMScoutMapIOSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,15 +162,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E59C37E726C87A8000C38713 /* osmscoutmap.framework in Frameworks */,
+				E59C37E726C87A8000C38713 /* OSMScoutMap.framework in Frameworks */,
 				E501876323CA99800055F4B2 /* libiconv.tbd in Frameworks */,
 				E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */,
 				E51A610422C57414007316F9 /* CoreText.framework in Frameworks */,
 				E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */,
 				E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */,
-				E59C37E426C87A7C00C38713 /* osmscout.framework in Frameworks */,
+				E59C37E426C87A7C00C38713 /* OSMScout.framework in Frameworks */,
 				E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */,
-				E59C37E926C87A8300C38713 /* osmscoutmapiosx.framework in Frameworks */,
+				E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,9 +211,9 @@
 		E50B832315E0136800C685B3 /* MacOS Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E59C37DC26C875DB00C38713 /* osmscout.framework */,
-				E59C37DD26C875DB00C38713 /* osmscoutmap.framework */,
-				E59C37DB26C875DB00C38713 /* osmscoutmapiosx.framework */,
+				E59C37DC26C875DB00C38713 /* OSMScout.framework */,
+				E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */,
+				E59C37DB26C875DB00C38713 /* OSMScoutMapIOSX.framework */,
 				E51A610122C573A3007316F9 /* libiconv.tbd */,
 				E51A610022C5738D007316F9 /* Cocoa.framework */,
 				E51A60FE22C5736B007316F9 /* MapKit.framework */,
@@ -256,9 +256,9 @@
 		E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E59C37D726C8751500C38713 /* osmscout.framework */,
-				E59C37D626C8751500C38713 /* osmscoutmap.framework */,
-				E59C37D526C8751500C38713 /* osmscoutmapiosx.framework */,
+				E59C37D726C8751500C38713 /* OSMScout.framework */,
+				E59C37D626C8751500C38713 /* OSMScoutMap.framework */,
+				E59C37D526C8751500C38713 /* OSMScoutMapIOSX.framework */,
 				E5653B611F4EF79900EF6212 /* CoreLocation.framework */,
 				E5653B5F1F4EF6B700EF6212 /* MapKit.framework */,
 				E5653B5D1F4EF66E00EF6212 /* UIKit.framework */,
