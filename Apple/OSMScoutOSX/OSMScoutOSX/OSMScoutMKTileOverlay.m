@@ -126,9 +126,8 @@
 }
 
 - (void)loadTileAtPath:(MKTileOverlayPath)path result:(void (^)(NSData *tileData, NSError *error))result {
+    double scale = 1;
     if(!_osmScout && _path){
-        
-        double scale = 1.0;
         NSInteger dpi = 163;
 #if TARGET_OS_IPHONE
         if([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)] &&
@@ -147,7 +146,7 @@
         [_drawQueue setMaxConcurrentOperationCount:1];
     }
     
-    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout x:path.x y:((1<<path.z) - 1)-path.y zoom:path.z scaleFactor:path.contentScaleFactor result:result];
+    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout x:path.x y:((1<<path.z) - 1)-path.y zoom:path.z scaleFactor:scale result:result];
     NSEnumerator *e = _drawQueue.operations.reverseObjectEnumerator;
     OSMScoutMKTileOperation *i;
     int count=0;
