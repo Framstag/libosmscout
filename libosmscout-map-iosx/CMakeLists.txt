@@ -22,7 +22,7 @@ set_target_properties(OSMScoutMapIOSX PROPERTIES
   #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
   PUBLIC_HEADER  "${HEADER_FILES}"
   CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-  OUTPUT_NAME "osmscoutmapiosx")
+  OUTPUT_NAME "OSMScoutMapIOSX")
 
 find_library(FOUNDATION Foundation)
 find_library(COREGRAPHICS CoreGraphics)
