@@ -12,6 +12,7 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_iosx"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR "osmscoutmapiosx"
 	TARGET OSMScout::OSMScout OSMScout::Map
 )
 

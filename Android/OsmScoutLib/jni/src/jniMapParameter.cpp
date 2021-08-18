@@ -21,7 +21,7 @@
 #include <string.h>
 #include <android/log.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 #include <jniObjectArray.h>
 

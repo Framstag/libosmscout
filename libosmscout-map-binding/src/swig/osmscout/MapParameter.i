@@ -1,5 +1,5 @@
 %{
-#include <osmscout/MapParameter.h>
+#include <osmscoutmap/MapParameter.h>
 %}
 
 %shared_ptr(osmscout::MapParameter)
