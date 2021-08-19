@@ -15,15 +15,14 @@ For more information regarding MSYS2 see:
 Required Packages
 =================
 
-We are using the MINGW64 - not the MSYS - environment, make sure to use the right shell (the MINGW
-one!) for building.
+We are using the MINGW64 - not the MSYS - environment, make sure to use the right shell
+(the MINGW64 one!) for building.
 
 Besides the base configuration as supplied by the installer and the following mandatory steps
 you need the following packages for building libosmscout:
 * git
 * autoconf
 * automake
-* make
 * mingw-w64-x86_64-toolchain
 * mingw-w64-x86_64-libtool
 
@@ -41,6 +40,7 @@ For the Qt5 backend you need additionally:
 For cmake you need additionally:
 * mingw-w64-x86_64-cmake
 * mingw-w64-x86_64-cmake-extra-modules
+* mingw-w64-x86_64-ninja
 
 packages can be installed using
 
