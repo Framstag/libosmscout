@@ -11,12 +11,16 @@
 
 @implementation OSMScoutIOSView
 
-// This should reference OSM data generated with the OSMScout Import tool
-// used when targeting the iPhone simulator 
-#define OSMSCOUTDATA @""
+// When targeting the iPhone simulator, OSMSCOUTDATA should point to a folder with the
+// files of a OSMScout database generated with the Import tool and the standard.oss
+// stylesheet file.
+// To test the app on a real device you should copy a OSMScout database files and a OSS
+// stylesheet file to the app sharing directory using the Finder to access the app files
+// (search the iPhone in Locations on Mac OSX >= 11.0 or use iTunes on earlier versions)
+#define OSMSCOUTDATA @"/Users/vyskocil/Documents/OSM/Malta.osmscout"
 // The center of the displayed map
-#define LATITUDE 43.694417
-#define LONGITUDE 7.279332
+#define LATITUDE 35.9449
+#define LONGITUDE 14.3796
 // The zoom level
 #define ZOOM 16
 

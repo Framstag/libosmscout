@@ -73,8 +73,14 @@
 #if TARGET_OS_IPHONE
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize),YES,0);
         CGContextRef cg = UIGraphicsGetCurrentContext();
-        CGFloat contentScale = [UIScreen mainScreen].scale;
-        if(contentScale!=1.0){
+        CGFloat contentScale;
+        if (@available(iOS 15, *)) {
+            contentScale = _scaleFactor;
+        } else {
+            contentScale = UIScreen.mainScreen.scale;
+        }
+        
+        if(contentScale != 1.0){
           CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
         }
         [_osmScout drawMapTo:cg x:_x y:_y zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
@@ -130,13 +136,10 @@
     if(!_osmScout && _path){
         NSInteger dpi = 163;
 #if TARGET_OS_IPHONE
-        if([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)] &&
-           UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad){
             dpi = 132;
         }
-        if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
-            scale = [[UIScreen mainScreen] scale];
-        }
+        scale = UIScreen.mainScreen.scale;
 #else
         dpi = 220;
 #endif
