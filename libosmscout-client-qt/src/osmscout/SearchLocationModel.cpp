@@ -97,8 +97,9 @@ void LocationListModel::onSearchResult(const QString searchPattern,
   int comparisonsCall=0;
 
   QList<LocationEntryRef> foundLocations;
-  for (const LocationEntry& e : foundLocationsConst)
+  for (const LocationEntry& e : foundLocationsConst) {
     foundLocations.push_back(std::make_shared<LocationEntry>(e));
+  }
 
   QQmlEngine *engine = qmlEngine(this);
   if (equalsFn.isCallable()){
@@ -133,6 +134,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
       bool merged=false;
       for (auto locB = locA+1; locB != foundLocations.end(); ++locB) {
         if (Equal(*locA, *locB)){
+          // qDebug() << "merge" << (*locA)->getLabel() << "with" << (*locB)->getLabel();
           (*locB)->mergeWith(**locA);
           merged=true;
           break;
@@ -150,7 +152,7 @@ void LocationListModel::onSearchResult(const QString searchPattern,
       bool merged=false;
       for (LocationEntryRef& modelLocation:locations) {
         if (Equal(modelLocation, *newLocation)){
-          // qDebug() << "Merge " << b.getLabel() << " to location " << a.getLabel();
+          // qDebug() << "Merge " << modelLocation->getLabel() << " to location " << (*newLocation)->getLabel();
           modelLocation->mergeWith(**newLocation);
           merged=true;
 
@@ -200,14 +202,17 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     auto position = 0;
     auto positionIt = locations.begin();
     for (auto &location : foundLocations) {
-      if (positionIt == locations.end() || Compare(location, *positionIt)){
-        emit beginInsertRows(QModelIndex(), position, position);
-        positionIt = locations.insert(positionIt, location);
-        // qDebug() << "Put " << location.getLabel() << " to position: " << position;
-        emit endInsertRows();
+      for (bool inserted = false; !inserted; ) {
+        if (positionIt == locations.end() || Compare(location, *positionIt)){
+          emit beginInsertRows(QModelIndex(), position, position);
+          positionIt = locations.insert(positionIt, location);
+          // qDebug() << "Put " << location->getLabel() << " to position: " << position;
+          emit endInsertRows();
+          inserted = true;
+        }
+        ++positionIt;
+        ++position;
       }
-      ++positionIt;
-      ++position;
     }
   } else {
     // no sorting, just append new entries to the end
