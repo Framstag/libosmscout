@@ -1,0 +1,42 @@
+OSS
+/*
+  See http://libosmscout.sourceforge.net/documentation/stylesheet/
+  for an description of the style sheet syntax.
+ */
+
+CONST
+
+  COLOR waterColor               = #9acffd;
+  COLOR landColor                = #70e070;
+  COLOR unknownColor             = #e0e0ff;
+  COLOR coastlineColor           = #ff0000;
+  COLOR countryBorderColor       = #ff00ff80;
+
+STYLE
+  // -------------------------------------------------------
+  //
+  // Synthetic
+  //
+
+  [MAG world-] {
+
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    
+    // [TYPE _tile_coast] AREA {color: #ff8080;}
+    
+    
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor; }
+
+    // [TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
+    // [TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }
+
+    [TYPE _tile_coastline] WAY {color: @coastlineColor; displayWidth: 0.08mm;}
+  }
+
+  [MAG continent-] {
+    [TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.15mm; dash: 7,3;}
+    [TYPE boundary_country] AREA.BORDER {color: @countryBorderColor; width: 0.15mm; dash: 7,3;}
+  }
+
+END
