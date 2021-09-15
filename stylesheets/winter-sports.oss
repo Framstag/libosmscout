@@ -1374,8 +1374,12 @@ STYLE
      [TYPE leisure_common] AREA { color: #bde3cb; }
 
      [TYPE leisure_marina,
-           leisure_fishing,
-           leisure_ice_rink] AREA { color: #b5d6f1; }
+           leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
+
+     [TYPE leisure_marina,
+           leisure_fishing] AREA { color: #b5d6f180; }
+
+     [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
    }
 
    [TYPE boundary_protected_area] {
