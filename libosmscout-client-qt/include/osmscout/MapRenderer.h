@@ -21,14 +21,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QObject>
-#include <QSettings>
-
 #include <osmscout/DataTileCache.h>
 #include <osmscout/DBThread.h>
 
 #include <osmscout/ClientQtImportExport.h>
 #include <osmscout/OverlayObject.h>
+
+#include <QObject>
+#include <QSettings>
+#include <QMutex>
 
 namespace osmscout {
 
@@ -76,7 +77,12 @@ protected:
   QThread     *thread;
   SettingsRef settings;
   DBThreadRef dbThread;
-  QMutex      lock;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0) /* For compatibility with QT 5.6 */
+  QMutex          lock{QMutex::Recursive};
+#else
+  QRecursiveMutex lock;
+#endif
 
   double      mapDpi;
   bool        renderSea;
