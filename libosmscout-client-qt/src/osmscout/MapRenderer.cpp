@@ -29,7 +29,6 @@ MapRenderer::MapRenderer(QThread *thread,
   thread(thread),
   settings(settings),
   dbThread(dbThread),
-  lock(QMutex::Recursive),
   iconDirectory(iconDirectory)
 {
   mapDpi = settings->GetMapDPI();
