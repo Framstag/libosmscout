@@ -148,10 +148,9 @@ endif
 
 if buildClientQt
 
-  demoMocs = qt5.preprocess(moc_headers : [
-                                'include/QtDemoApp.h'
-                               ],
-                               qresources: ['demo.qrc', '../OSMScout2/res.qrc'])
+  demoMocs = qt5.preprocess('qt-demo',
+                            moc_headers : ['include/QtDemoApp.h'],
+                            qresources: ['demo.qrc', '../OSMScout2/res.qrc'])
 
   ElevationProfileChart = executable('ElevationProfileChart',
                                 ['src/ElevationProfileChart.cpp',
