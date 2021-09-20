@@ -87,10 +87,8 @@ public:
   ~LocationEntry() override = default;
 
   //! copy assignment, Qt ownership is not changed
-  LocationEntry &operator=(LocationEntry& other);
-  LocationEntry &operator=(LocationEntry&& other) = delete;
-
-  void operator=(const LocationEntry&);
+  LocationEntry& operator=(const LocationEntry& other);
+  LocationEntry& operator=(LocationEntry&& other) = delete;
 
   void addReference(const osmscout::ObjectFileRef reference);
 
