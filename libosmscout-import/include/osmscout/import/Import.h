@@ -45,7 +45,7 @@ namespace osmscout {
 
   /**
     Does the import based on the given parameters. Feedback about the import progress
-    is given by the indivudal import modules calling the Progress instance as appropriate.
+    is given by the individual import modules calling the Progress instance as appropriate.
     */
   class OSMSCOUT_IMPORT_API Importer
   {
