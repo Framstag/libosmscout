@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/import/Import.h>
+#include <osmscout/private/Config.h>
 
 #include <algorithm>
 
@@ -72,6 +73,10 @@
 
 #if defined(OSMSCOUT_IMPORT_HAVE_LIB_MARISA)
 #include <osmscout/import/GenTextIndex.h>
+#endif
+
+#if defined(HAVE_STD_EXECUTION)
+#include "tbb/task_scheduler_init.h"
 #endif
 
 #include <osmscout/util/MemoryMonitor.h>
@@ -327,6 +332,12 @@ namespace osmscout {
 
   bool Importer::Import(ImportProgress& progress)
   {
+#if defined(HAVE_STD_EXECUTION)
+    // create tbb scheduler explicitly to avoid leaks by default scheduler
+    // NOTE that task_scheduler_init is deprecated, but there is no way to destruct global scheduler - it is leaking
+    [[maybe_unused]] tbb::task_scheduler_init task_scheduler;
+#endif
+
     TypeConfigRef typeConfig(std::make_shared<TypeConfig>());
     progress.StartImport(parameter);
 
