@@ -243,7 +243,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_QT_API MapPainterBatchQt:
       public MapPainterBatch<MapPainterQt*> {
   public:
-    MapPainterBatchQt(size_t expectedCount);
+    explicit MapPainterBatchQt(size_t expectedCount);
 
     ~MapPainterBatchQt() override;
 

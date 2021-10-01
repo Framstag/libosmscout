@@ -363,7 +363,7 @@ class PerformanceTestBackendNoOp: public PerformanceTestBackend {
 private:
   osmscout::MapPainterNoOp noOpMapPainter;
 public:
-  PerformanceTestBackendNoOp(const osmscout::StyleConfigRef& styleConfig)
+  explicit PerformanceTestBackendNoOp(const osmscout::StyleConfigRef& styleConfig)
   : noOpMapPainter(styleConfig)
   {}
 

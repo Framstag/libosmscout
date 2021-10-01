@@ -87,7 +87,7 @@ private:
 	DrawMapDemo*                    m_pBaseData;
 
 public:
-	DrawMapDirectX(DrawMapDemo* pDemoData) :
+	explicit DrawMapDirectX(DrawMapDemo* pDemoData) :
 		m_hwnd(NULL),
 		m_pDirect2dFactory(NULL),
 		m_pWriteFactory(NULL),
