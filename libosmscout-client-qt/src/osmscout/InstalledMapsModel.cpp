@@ -106,6 +106,12 @@ QVariant InstalledMapsModel::data(const QModelIndex &index, int role) const
       return dir.getDir().canonicalPath();
     case TimeRole:
       return dir.hasMetadata() ? dir.getCreation() : QVariant();
+    case ByteSizeRole:
+      return dir.byteSize();
+    case SizeRole:
+      return QString::fromStdString(osmscout::ByteSizeToString(double(dir.byteSize())));
+    case VersionRole:
+      return dir.hasMetadata() ? dir.getVersion() : 0;
     default:
       break;
   }
@@ -120,6 +126,9 @@ QHash<int, QByteArray> InstalledMapsModel::roleNames() const
   roles[PathRole]="path";
   roles[DirectoryRole]="directory";
   roles[TimeRole]="time";
+  roles[ByteSizeRole]="byteSize";
+  roles[SizeRole]="size";
+  roles[VersionRole]="version";
 
   return roles;
 }

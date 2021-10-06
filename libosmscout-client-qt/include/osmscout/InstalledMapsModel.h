@@ -52,6 +52,9 @@ public:
     PathRole = Qt::UserRole + 1, // logical path of map
     DirectoryRole = Qt::UserRole + 2, // directory
     TimeRole = Qt::UserRole + 3, // generating time of map
+    ByteSizeRole = Qt::UserRole + 4, // size on the disk in bytes
+    SizeRole = Qt::UserRole + 5, // human readable size on the disk
+    VersionRole = Qt::UserRole + 6,
   };
   Q_ENUM(Roles)
 

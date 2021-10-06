@@ -102,6 +102,16 @@ public:
     return dir;
   }
 
+  static QStringList mandatoryFiles();
+  static QStringList optionalFiles();
+  static QStringList metadataFiles();
+
+  /**
+   * byte size of all database files on disk
+   * @return
+   */
+  qint64 byteSize() const;
+
   /**
    * Delete complete database
    */
@@ -154,6 +164,11 @@ public:
     return creation;
   }
 
+  inline int getVersion() const
+  {
+    return version;
+  }
+
   inline bool operator<(const MapDirectory &o) const
   {
     if (getName() == o.getName()){
@@ -169,6 +184,7 @@ private:
   QString name;
   QStringList path;
   QDateTime creation;
+  int version{0};
 };
 
 /**
