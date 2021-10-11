@@ -8,7 +8,9 @@
 
 set(sdk_include)
 set(sdk_lib)
-if(WIN32)
+
+# These are only Visual Studio and Windows SDK specific paths
+if(MSVC)
   get_filename_component(sdk_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows;CurrentInstallFolder]" REALPATH)
   get_filename_component(kit_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot]" REALPATH)
   get_filename_component(kit81_dir "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots;KitsRoot81]" REALPATH)
@@ -52,6 +54,7 @@ FIND_PATH(Direct2D_INCLUDE_DIRS d2d1.h PATHS
     "$ENV{DXSDK_DIR}/Include"
     "$ENV{PROGRAMFILES}/Microsoft DirectX SDK*/Include"
 )
+message(STATUS "Direct2D_INCLUDE_DIRS: ${Direct2D_INCLUDE_DIRS}")
 
 GET_FILENAME_COMPONENT(DirectX_ROOT_DIR "${DirectX_INCLUDE_DIRS}/.." ABSOLUTE)
 
@@ -64,7 +67,11 @@ SET(Direct2D_LIBRARY_PATHS
 )
 
 FIND_LIBRARY(Direct2D_D2D1_LIBRARY d2d1 ${Direct2D_LIBRARY_PATHS} NO_DEFAULT_PATH)
+message(STATUS "Direct2D_D2D1_LIBRARY: ${Direct2D_D2D1_LIBRARY}")
+
 FIND_LIBRARY(Direct2D_DWRITE_LIBRARY dwrite ${Direct2D_LIBRARY_PATHS} NO_DEFAULT_PATH)
+message(STATUS "Direct2D_DWRITE_LIBRARY: ${Direct2D_DWRITE_LIBRARY}")
+
 SET(Direct2D_LIBRARIES ${Direct2D_D2D1_LIBRARY} ${Direct2D_DWRITE_LIBRARY})
 
 INCLUDE(FindPackageHandleStandardArgs)

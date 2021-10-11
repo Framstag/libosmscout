@@ -910,23 +910,17 @@ namespace osmscout {
             CGContextAddLineToPoint(cg,coordBuffer.buffer[i].GetX(),
                         coordBuffer.buffer[i].GetY());
         }
-        CGContextAddLineToPoint(cg,coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
-                                coordBuffer.buffer[area.coordRange.GetEnd()].GetY());
+        CGContextClosePath(cg);
 
         if (!area.clippings.empty()) {
-            for (std::list<PolyData>::const_iterator c=area.clippings.begin();
-                 c!=area.clippings.end();
-                 c++) {
-                const PolyData& data=*c;
-
+            for (const auto& data : area.clippings) {
                 CGContextMoveToPoint(cg,coordBuffer.buffer[data.transStart].GetX(),
                             coordBuffer.buffer[data.transStart].GetY());
                 for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
                     CGContextAddLineToPoint(cg,coordBuffer.buffer[i].GetX(),
                                 coordBuffer.buffer[i].GetY());
                 }
-                CGContextAddLineToPoint(cg,coordBuffer.buffer[data.transStart].GetX(),
-                                        coordBuffer.buffer[data.transStart].GetY());
+                CGContextClosePath(cg);
             }
         }
 

@@ -553,6 +553,11 @@ CONST
       AREA { color: #000000; } // horizontal bar
     }
 
+  SYMBOL mini_roundabout
+    CIRCLE GROUND 0,0 3 {
+      AREA {color: #8080ff; }
+    }
+
   SYMBOL speed_camera
     CIRCLE 0,0 0.8 {
       AREA {color: @red; }
@@ -919,6 +924,9 @@ STYLE
      WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; joinCap: butt; endCap: butt; }
      WAY {color: #0000ff; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.4mm;}
    }
+ }
+ [TYPE highway_mini_roundabout] {
+   [MAG closer-] NODE.ICON { symbol: mini_roundabout; name: mini_roundabout; }
  }
  [TYPE amenity_ferry_terminal] {
    [MAG detail-] NODE.ICON { symbol: ferry_terminal;}
@@ -1640,8 +1648,12 @@ STYLE
      [TYPE leisure_common] AREA { color: #bde3cb; }
 
      [TYPE leisure_marina,
-           leisure_fishing,
-           leisure_ice_rink] AREA { color: #b5d6f1; }
+           leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
+
+     [TYPE leisure_marina,
+           leisure_fishing] AREA { color: #b5d6f180; }
+
+     [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
    }
 
    [TYPE boundary_protected_area] {

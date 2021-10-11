@@ -201,6 +201,11 @@
 #cmakedefine HAVE_VISIBILITY 1
 #endif
 
+/* Define to 1 or 0, depending whether the compiler supports parallel execution algorithms. */
+#ifndef HAVE_STD_EXECUTION
+#cmakedefine HAVE_STD_EXECUTION 1
+#endif
+
 /* int16_t is available */
 #ifndef OSMSCOUT_HAVE_INT16_T
 #cmakedefine OSMSCOUT_HAVE_INT16_T 1

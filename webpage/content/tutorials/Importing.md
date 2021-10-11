@@ -76,7 +76,7 @@ You can use these polygon files directly as Import tool input beside standard da
   $ .../Import/src/Import  \
     --typefile ../stylesheets/map.ost \
     --destinationDirectory nordrhein-westfalen \
-    --bounding-polygon nordrhein-westfalen.poly\
+    --bounding-polygon nordrhein-westfalen.poly \
     nordrhein-westfalen.osm.pbf 
 ```
 
@@ -87,6 +87,23 @@ Italy without defined data polygon:
 With data polygon:
 
 <a class="screenshot" href="/images/ItalyWithDataPolygon.png"   ><img src="/images/ItalyWithDataPolygon.png"    width="460" height="380" alt="Italy imported with data polygon"/></a>
+
+## Coastline troubleshooting
+
+Import step evaluating coastlines and creating index for fast rendering of sea, land and unknown areas is sensitive for errors in coastline data.
+When this index (`water.idx`) is incorrect, try folowing steps:
+
+ - Verify that your cropping polygon match the imported data. 
+ - Check [online Geofabric coastline inspector](http://tools.geofabrik.de/osmi/?view=coastline) 
+   if all coastlines in imported area are connected, they are not crossing...
+ - Also check that there is no object with `natural=coastline` tag inside land area. 
+   [Overpass-Turbo tool](https://overpass-turbo.eu/s/1aMm) may be used for such check.
+
+To inspect where is the problem, you can use specialized `coastlines.oss` stylesheet.
+It displays just coastlines and areas (sea, land, unknown) from `water.idx` index 
+and country boundaries for simpler navigation. 
+
+<a class="screenshot" href="/images/ItalyCoastlines.png"   ><img src="/images/ItalyCoastlines.png"    width="460" height="380" alt="Italy coastlines"/></a>
 
 ## Adding contour lines
 

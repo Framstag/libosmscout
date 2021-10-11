@@ -61,7 +61,7 @@ LocationInfoModel::LocationInfoModel():
             Qt::QueuedConnection);
 }
 
-LocationInfoModel::~LocationInfoModel() noexcept
+LocationInfoModel::~LocationInfoModel()
 {
     if (lookupModule!=nullptr){
         lookupModule->deleteLater();

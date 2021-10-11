@@ -100,33 +100,7 @@ void MapDownloadJob::start()
     return;
   }
 
-  QStringList fileNames;
-  fileNames << "bounding.dat"
-            << "nodes.dat"
-            << "areas.dat"
-            << "ways.dat"
-            << "areanode.idx"
-            << "areaarea.idx"
-            << "areaway.idx"
-            << "areasopt.dat"
-            << "waysopt.dat"
-            << "location.idx"
-            << "water.idx"
-            << "intersections.dat"
-            << "intersections.idx"
-            << "route.dat"
-            << "arearoute.idx"
-            << "router.dat"
-            << "router2.dat"
-            << "textloc.dat"
-            << "textother.dat"
-            << "textpoi.dat"
-            << "textregion.dat"
-            << "coverage.idx";
-
-  // types.dat should be last, when download is interrupted,
-  // directory is not recognized as valid map
-  fileNames << "types.dat";
+  QStringList fileNames = MapDirectory::optionalFiles() + MapDirectory::mandatoryFiles();
 
   DownloadJob::start(map.getProvider().getUri()+"/"+map.getServerDirectory(), fileNames);
 }
@@ -134,25 +108,7 @@ void MapDownloadJob::start()
 MapDirectory::MapDirectory(QDir dir):
     dir(dir)
 {
-  QStringList fileNames;
-  fileNames << "bounding.dat"
-            << "nodes.dat"
-            << "areas.dat"
-            << "ways.dat"
-            << "areanode.idx"
-            << "areaarea.idx"
-            << "areaway.idx"
-            << "areasopt.dat"
-            << "waysopt.dat"
-            << "location.idx"
-            << "water.idx"
-            << "intersections.dat"
-            << "intersections.idx"
-            << "route.dat"
-            << "arearoute.idx"
-            << "router.dat"
-            << "router2.dat"
-            << "types.dat";
+  QStringList fileNames = mandatoryFiles();
   // coverage.idx is optional, introduced after database version 16
   // text*.dat files are optional, these files are missing
   // when database is build without Marisa support
@@ -177,20 +133,20 @@ MapDirectory::MapDirectory(QDir dir):
     QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
     QJsonObject metadataObject = doc.object();
     if (metadataObject.contains("name") &&
-                                    metadataObject.contains("map") &&
-                                    metadataObject.contains("creation") ){
+        metadataObject.contains("map") &&
+        metadataObject.contains("creation") &&
+        metadataObject.contains("version")) {
       name = metadataObject["name"].toString();
       path = metadataObject["map"].toString().split("/");
       creation.setTime_t(metadataObject["creation"].toDouble());
+      version = metadataObject["version"].toInt();
       metadata = true;
     }
   }
 }
 
-bool MapDirectory::deleteDatabase()
+QStringList MapDirectory::mandatoryFiles()
 {
-  valid=false;
-
   QStringList fileNames;
   fileNames << "bounding.dat"
             << "nodes.dat"
@@ -209,13 +165,48 @@ bool MapDirectory::deleteDatabase()
             << "arearoute.idx"
             << "router.dat"
             << "router2.dat"
-            << "textloc.dat"
+            // types.dat should be last, when download is interrupted,
+            // directory is not recognized as valid map
+            << "types.dat";
+
+  return fileNames;
+}
+
+QStringList MapDirectory::optionalFiles(){
+  QStringList fileNames;
+  fileNames << "textloc.dat"
             << "textother.dat"
             << "textpoi.dat"
             << "textregion.dat"
-            << "coverage.idx"
-            << "types.dat"
-            << MapDownloadJob::FILE_METADATA;
+            << "coverage.idx";
+  return fileNames;
+}
+
+QStringList MapDirectory::metadataFiles()
+{
+  QStringList fileNames;
+  fileNames << MapDownloadJob::FILE_METADATA;
+  return fileNames;
+}
+
+qint64 MapDirectory::byteSize() const
+{
+  qint64 size = 0;
+  QStringList fileNames = mandatoryFiles() + optionalFiles() + metadataFiles();
+
+  for (const auto &fileName: fileNames) {
+    if(dir.exists(fileName)){
+      size+=QFileInfo(dir, fileName).size();
+    }
+  }
+  return size;
+}
+
+bool MapDirectory::deleteDatabase()
+{
+  valid=false;
+
+  QStringList fileNames = mandatoryFiles() + optionalFiles() + metadataFiles();
 
   bool result=true;
   for (const auto &fileName: fileNames) {

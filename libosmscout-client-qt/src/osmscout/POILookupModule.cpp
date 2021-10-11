@@ -65,7 +65,7 @@ LocationEntry buildLocationEntry(T obj,
   LocationEntry location(LocationEntry::typeObject, title, objectType, adminRegionList,
                          dbPath, coordinates, bbox);
   location.addReference(obj->GetObjectFileRef());
-  return location;
+  return LocationEntry(location); // explicit copy. some older compilers (GCC 7.5.0) fails when tries to use deleted move constructor
 }
 
 QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,

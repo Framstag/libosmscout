@@ -48,7 +48,7 @@ private:
 	DrawMapDemo*                    m_pBaseData;
 
 public:
-	DrawMapGDI(DrawMapDemo* pBaseData)
+	explicit DrawMapGDI(DrawMapDemo* pBaseData)
 		: m_Painter(NULL)
 		, m_pBaseData(pBaseData)
 		, osmscout::MapPainterGDIWindow()

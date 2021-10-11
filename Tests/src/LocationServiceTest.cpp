@@ -92,11 +92,30 @@ int main(int argc, char* argv[])
     return 77;
   }
 
+  char*testsTmpDirEnv=getenv("TESTS_TMP_DIR");
+  std::string testsTmpDir;
+  if (testsTmpDirEnv==nullptr) {
+    std::cerr << "Environment variable 'TESTS_TMP_DIR' not set, using current dir" << std::endl;
+    testsTmpDir=".";
+  } else {
+    testsTmpDir=testsTmpDirEnv;
+  }
+
+  if (testsTmpDir.empty()) {
+    std::cerr << "Environment variable 'TESTS_TMP_DIR' is empty" << std::endl;
+    return 77;
+  }
+
+  if (!osmscout::IsDirectory(testsTmpDir)) {
+    std::cerr << "Environment variable 'TESTS_TMP_DIR' does not point to directory" << std::endl;
+    return 77;
+  }
+
   mapfiles.emplace_back(osmscout::AppendFileToDir(testsTopDir,"LocationTest.olt"));
 
   importParameter.SetTypefile(osmscout::AppendFileToDir(testsTopDir,"../stylesheets/map.ost"));
   importParameter.SetMapfiles(mapfiles);
-  importParameter.SetDestinationDirectory(".");
+  importParameter.SetDestinationDirectory(testsTmpDir);
   importParameter.SetPreprocessorFactory(std::make_shared<PreprocessorFactory>());
 
   try {
@@ -121,7 +140,7 @@ int main(int argc, char* argv[])
 
   database=std::make_shared<osmscout::Database>(dbParameter);
 
-  if (!database->Open(".")) {
+  if (!database->Open(testsTmpDir)) {
     std::cerr << "Cannot open database" << std::endl;
     return 77;
   }

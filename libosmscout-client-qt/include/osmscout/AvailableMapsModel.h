@@ -162,7 +162,7 @@ public:
 
 /**
  * Tree model with maps available by configured providers (see Settings::GetMapProviders).
- * Every map provider have to expose list of maps by json. Json format exammple:
+ * Every map provider have to expose list of maps by json. Json format example:
  *
  * <pre>
  * [
