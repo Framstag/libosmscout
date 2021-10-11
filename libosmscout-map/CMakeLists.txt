@@ -16,7 +16,7 @@ set(HEADER_FILES
 	include/osmscoutmap/DataTileCache.h
 	include/osmscoutmap/MapTileCache.h
 	include/osmscoutmap/MapPainterNoOp.h
-		include/osmscoutmap/MapFeatures.h.cmake
+	include/osmscoutmap/MapFeatures.h
 )
 
 set(SOURCE_FILES
@@ -45,7 +45,9 @@ osmscout_library_project(
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmap/MapFeatures.h.cmake
+	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutmap//MapFeatures.h
 	TARGET OSMScout::OSMScout
+	SKIP_HEADER
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
