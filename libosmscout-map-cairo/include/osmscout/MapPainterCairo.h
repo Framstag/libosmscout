@@ -38,7 +38,7 @@
 
 #include <osmscout/MapCairoImportExport.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 
 namespace osmscout {

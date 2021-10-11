@@ -26,8 +26,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext.hpp>
-#include <osmscout/MapParameter.h>
-#include <osmscout/MapPainter.h>
+
+#include <osmscoutmap/MapParameter.h>
+#include <osmscoutmap/MapPainter.h>
+
 #include <iostream>
 #include <fstream>
 

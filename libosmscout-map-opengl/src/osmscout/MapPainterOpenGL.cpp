@@ -20,7 +20,9 @@
 
 #include <utility>
 #include <GL/glew.h>
-#include <osmscout/MapPainter.h>
+
+#include <osmscoutmap/MapPainter.h>
+
 #include <osmscout/MapPainterOpenGL.h>
 #include <osmscout/Triangulate.h>
 #include <iostream>
