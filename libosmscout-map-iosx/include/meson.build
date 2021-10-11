@@ -1,7 +1,7 @@
 osmscoutmapiosxIncDir = include_directories('.')
 
 osmscoutmapiosxHeader = [
-            'osmscout/MapPainterIOS.h'
+            'osmscoutmapiosx/MapPainterIOS.h'
           ]
 
 install_headers(osmscoutmapiosxHeader)
