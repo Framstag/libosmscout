@@ -22,9 +22,9 @@
 
 
 #include <osmscout/Database.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>

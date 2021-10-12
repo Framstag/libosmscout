@@ -26,7 +26,7 @@
 #include <mutex>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>

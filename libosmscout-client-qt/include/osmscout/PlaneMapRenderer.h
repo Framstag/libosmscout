@@ -25,7 +25,7 @@
 #include <QSettings>
 #include <QElapsedTimer>
 
-#include <osmscout/DataTileCache.h>
+#include <osmscoutmap/DataTileCache.h>
 #include <osmscout/DBThread.h>
 #include <osmscout/MapRenderer.h>
 

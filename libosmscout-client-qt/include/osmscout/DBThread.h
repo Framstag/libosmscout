@@ -33,7 +33,7 @@
 #include <osmscout/BasemapDatabase.h>
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/Settings.h>

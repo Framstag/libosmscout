@@ -28,7 +28,7 @@
 
 #include <osmscout/BasemapDatabase.h>
 #include <osmscout/DBInstance.h>
-#include <osmscout/DataTileCache.h>
+#include <osmscoutmap/DataTileCache.h>
 
 #include <osmscout/ClientQtImportExport.h>
 

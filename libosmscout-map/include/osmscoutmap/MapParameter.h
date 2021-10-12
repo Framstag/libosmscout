@@ -23,9 +23,9 @@
 #include <list>
 #include <string>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
-#include <osmscout/StyleProcessor.h>
+#include <osmscoutmap/StyleProcessor.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/Transformation.h>

@@ -1,5 +1,5 @@
 subdir('include')
-subdir('include/osmscout/private')
+subdir('include/osmscoutmapiosx/private')
 subdir('src')
 
 osmscoutmapiosx = library('osmscout_map_iosx',

@@ -26,7 +26,7 @@
 
 #include <osmscout/MapDirectXImportExport.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 #include <osmscout/PathTextRenderer.h>
 

@@ -23,7 +23,7 @@
 #include <vector>
 
 #include <osmscout/Database.h>
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 #include <osmscout/util/CmdLineParsing.h>
 
 // TODO: configurable

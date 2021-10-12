@@ -33,9 +33,9 @@
 #include <osmscout/util/Transformation.h>
 
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Scanner.h>
 
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #ifdef CONST
   #undef CONST

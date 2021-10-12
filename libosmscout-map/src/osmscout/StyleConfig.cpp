@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #include <cstring>
 #include <set>
@@ -29,8 +29,8 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 
-#include <osmscout/oss/Parser.h>
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Parser.h>
+#include <osmscoutmap/oss/Scanner.h>
 
 namespace osmscout {
 

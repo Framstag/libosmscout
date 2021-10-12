@@ -1,21 +1,22 @@
 set(HEADER_FILES
-	include/osmscout/MapImportExport.h
-	include/osmscout/oss/Parser.h
-	include/osmscout/oss/Scanner.h
-	include/osmscout/LabelLayouter.h
-	include/osmscout/MapPainter.h
-	include/osmscout/MapParameter.h
-	include/osmscout/MapData.h
-	include/osmscout/MapService.h
-	include/osmscout/LabelProvider.h
-	include/osmscout/LabelPath.h
-	include/osmscout/Styles.h
-	include/osmscout/StyleDescription.h
-	include/osmscout/StyleConfig.h
-	include/osmscout/StyleProcessor.h
-	include/osmscout/DataTileCache.h
-	include/osmscout/MapTileCache.h
-	include/osmscout/MapPainterNoOp.h
+	include/osmscoutmap/MapImportExport.h
+	include/osmscoutmap/oss/Parser.h
+	include/osmscoutmap/oss/Scanner.h
+	include/osmscoutmap/LabelLayouter.h
+	include/osmscoutmap/MapPainter.h
+	include/osmscoutmap/MapParameter.h
+	include/osmscoutmap/MapData.h
+	include/osmscoutmap/MapService.h
+	include/osmscoutmap/LabelProvider.h
+	include/osmscoutmap/LabelPath.h
+	include/osmscoutmap/Styles.h
+	include/osmscoutmap/StyleDescription.h
+	include/osmscoutmap/StyleConfig.h
+	include/osmscoutmap/StyleProcessor.h
+	include/osmscoutmap/DataTileCache.h
+	include/osmscoutmap/MapTileCache.h
+	include/osmscoutmap/MapPainterNoOp.h
+	include/osmscoutmap/MapFeatures.h
 )
 
 set(SOURCE_FILES
@@ -43,8 +44,10 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapFeatures.h.cmake
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmap/MapFeatures.h.cmake
+	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutmap//MapFeatures.h
 	TARGET OSMScout::OSMScout
+	SKIP_HEADER
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)

@@ -25,20 +25,20 @@
 #include <thread>
 #include <vector>
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/Database.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/MapPainter.h>
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/MapPainter.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/WorkQueue.h>
 
-#include <osmscout/DataTileCache.h>
+#include <osmscoutmap/DataTileCache.h>
 
 namespace osmscout {
 

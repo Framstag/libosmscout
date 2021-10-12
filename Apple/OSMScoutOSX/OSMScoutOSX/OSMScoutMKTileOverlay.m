@@ -73,8 +73,14 @@
 #if TARGET_OS_IPHONE
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize),YES,0);
         CGContextRef cg = UIGraphicsGetCurrentContext();
-        CGFloat contentScale = [UIScreen mainScreen].scale;
-        if(contentScale!=1.0){
+        CGFloat contentScale;
+        if (@available(iOS 15, *)) {
+            contentScale = _scaleFactor;
+        } else {
+            contentScale = UIScreen.mainScreen.scale;
+        }
+        
+        if(contentScale != 1.0){
           CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
         }
         [_osmScout drawMapTo:cg x:_x y:_y zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
@@ -126,18 +132,14 @@
 }
 
 - (void)loadTileAtPath:(MKTileOverlayPath)path result:(void (^)(NSData *tileData, NSError *error))result {
+    double scale = 1;
     if(!_osmScout && _path){
-        
-        double scale = 1.0;
         NSInteger dpi = 163;
 #if TARGET_OS_IPHONE
-        if([[UIDevice currentDevice] respondsToSelector:@selector(userInterfaceIdiom)] &&
-           UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad){
             dpi = 132;
         }
-        if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
-            scale = [[UIScreen mainScreen] scale];
-        }
+        scale = UIScreen.mainScreen.scale;
 #else
         dpi = 220;
 #endif
@@ -147,7 +149,7 @@
         [_drawQueue setMaxConcurrentOperationCount:1];
     }
     
-    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout x:path.x y:((1<<path.z) - 1)-path.y zoom:path.z scaleFactor:path.contentScaleFactor result:result];
+    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout x:path.x y:((1<<path.z) - 1)-path.y zoom:path.z scaleFactor:scale result:result];
     NSEnumerator *e = _drawQueue.operations.reverseObjectEnumerator;
     OSMScoutMKTileOperation *i;
     int count=0;

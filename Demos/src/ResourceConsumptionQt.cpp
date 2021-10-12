@@ -24,7 +24,7 @@
 #include <QApplication>
 
 #include <osmscout/Database.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 
 #include <osmscout/MapPainterQt.h>
 

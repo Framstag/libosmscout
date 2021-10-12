@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/DataTileCache.h>
+#include <osmscoutmap/DataTileCache.h>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>

@@ -22,7 +22,7 @@
 
 #include <DrawMap.h>
 
-#include <osmscout/MapPainterIOS.h>
+#include <osmscoutmapiosx/MapPainterIOS.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top

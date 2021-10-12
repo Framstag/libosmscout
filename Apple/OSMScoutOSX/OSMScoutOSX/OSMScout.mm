@@ -10,8 +10,8 @@
 #include <iomanip>
 #include <cmath>
 
-#include "osmscout/MapPainterIOS.h"
-#include "osmscout/util/Tiling.h"
+#include <osmscoutmapiosx/MapPainterIOS.h>
+#include <osmscout/util/Tiling.h>
 #include "OSMScout.h"
 
 namespace osmscout {
@@ -57,7 +57,6 @@ namespace osmscout {
             drawParameter.SetDebugPerformance(false);
             drawBreaker = std::shared_ptr<MyBreaker>(new MyBreaker());
             drawParameter.SetBreaker(drawBreaker);
-            drawParameter.SetDropNotVisiblePointLabels(false);
             searchParameter.SetBreaker(drawBreaker);
             isMapPainterConfigured = true;
         }

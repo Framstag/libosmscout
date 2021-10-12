@@ -23,7 +23,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/LocationDescriptionService.h>
-#include <osmscout/MapService.h>
+#include <osmscoutmap/MapService.h>
 #include <osmscout/MapPainterQt.h>
 
 #include <osmscout/util/Breaker.h>

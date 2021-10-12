@@ -20,11 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapImportExport.h>
+#include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/TypeFeatures.h>
 
-#include <osmscout/Styles.h>
+#include <osmscoutmap/Styles.h>
 
 namespace osmscout {
   class OSMSCOUT_MAP_API FillStyleProcessor
