@@ -1,6 +1,9 @@
+#ifndef LIBOSMSCOUT_GPX_EXPORT_H
+#define LIBOSMSCOUT_GPX_EXPORT_H
+
 /*
   This source is part of the libosmscout-gpx library
-  Copyright (C) 2021 Lukas Karas
+  Copyright (C) 2017 Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,17 +20,25 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Extensions.h>
+#include <osmscoutgpx/GpxFile.h>
+#include <osmscoutgpx/Import.h>
+#include <osmscoutgpx/GPXImportExport.h>
 
-#include <osmscout/system/Assert.h>
+#include <osmscout/util/File.h>
+#include <osmscout/util/Exception.h>
+#include <osmscout/util/Breaker.h>
 
-using namespace osmscout::gpx;
+#include <cstdio>
+#include <string>
 
-Extensions::Element::Element(const std::string &ns, const std::string &elemName, const std::string &elemValue)
-  : name(), value(elemValue)
-{
-  size_t sz = ns.size() + 1 + elemName.size();
-  assert(sz > 1);
-  name.reserve(sz);
-  name.append(ns).append(":").append(elemName);
+namespace osmscout {
+namespace gpx {
+
+extern OSMSCOUT_GPX_API bool ExportGpx(const GpxFile &gpxFile,
+                                       const std::string &filePath,
+                                       BreakerRef breaker = nullptr,
+                                       ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
 }
+}
+
+#endif //LIBOSMSCOUT_GPX_EXPORT_H

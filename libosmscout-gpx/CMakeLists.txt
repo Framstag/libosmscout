@@ -1,31 +1,32 @@
 set(HEADER_FILES
-    include/osmscout/gpx/GpxFile.h
-    include/osmscout/gpx/GPXImportExport.h
-    include/osmscout/gpx/Route.h
-    include/osmscout/gpx/Track.h
-    include/osmscout/gpx/Waypoint.h
-    include/osmscout/gpx/TrackPoint.h
-    include/osmscout/gpx/TrackSegment.h
-    include/osmscout/gpx/Utils.h
-    include/osmscout/gpx/Extensions.h
+    include/osmscoutgpx/GpxFile.h
+    include/osmscoutgpx/GPXImportExport.h
+    include/osmscoutgpx/Route.h
+    include/osmscoutgpx/Track.h
+    include/osmscoutgpx/Waypoint.h
+    include/osmscoutgpx/TrackPoint.h
+    include/osmscoutgpx/TrackSegment.h
+    include/osmscoutgpx/Utils.h
+    include/osmscoutgpx/Extensions.h
+	${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutgpx/GPXFeatures.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/gpx/GpxFile.cpp
-    src/osmscout/gpx/Track.cpp
-    src/osmscout/gpx/TrackSegment.cpp
-    src/osmscout/gpx/Utils.cpp
-    src/osmscout/gpx/Extensions.cpp
+    src/osmscoutgpx/GpxFile.cpp
+    src/osmscoutgpx/Track.cpp
+    src/osmscoutgpx/TrackSegment.cpp
+    src/osmscoutgpx/Utils.cpp
+    src/osmscoutgpx/Extensions.cpp
 )
 
 if(LIBXML2_FOUND)
     list(APPEND HEADER_FILES
-        include/osmscout/gpx/Import.h
-        include/osmscout/gpx/Export.h
+        include/osmscoutgpx/Import.h
+        include/osmscoutgpx/Export.h
     )
     list(APPEND SOURCE_FILES
-        src/osmscout/gpx/Import.cpp
-        src/osmscout/gpx/Export.cpp
+        src/osmscoutgpx/Import.cpp
+        src/osmscoutgpx/Export.cpp
     )
 endif()
 
@@ -35,10 +36,10 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_gpx"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/gpx/GPXFeatures.h.cmake
-	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/gpx/GPXFeatures.h
+	INCLUDEDIR "osmscoutgpx"
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutgpx/GPXFeatures.h.cmake
+	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutgpx/GPXFeatures.h
 	TARGET OSMScout::OSMScout
-	SKIP_HEADER
 )
 
 if(LIBXML2_FOUND)
@@ -69,4 +70,4 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 endif()
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/gpx/GPXFeatures.h DESTINATION include/osmscout)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutgpx/GPXFeatures.h DESTINATION include/osmscout)

@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_GPX_GPXFILE_H
+#define OSMSCOUT_GPX_GPXFILE_H
+
 /*
   This source is part of the libosmscout-gpx library
   Copyright (C) 2017 Lukas Karas
@@ -17,26 +20,29 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/TrackSegment.h>
+#include <osmscoutgpx/Track.h>
+#include <osmscoutgpx/Route.h>
+#include <osmscoutgpx/Waypoint.h>
+#include <osmscoutgpx/Extensions.h>
 
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/Distance.h>
+#include <osmscoutgpx/GPXImportExport.h>
 
-using namespace osmscout;
-using namespace osmscout::gpx;
+#include <vector>
+#include <optional>
 
-Distance TrackSegment::GetLength() const
-{
-  Distance result;
-  auto it=points.begin();
-  if (it==points.end()){
-    return result;
-  }
-  GeoCoord previous=it->coord;
-  it++;
-  for (; it!=points.end(); it++){
-    result+=GetEllipsoidalDistance(previous, it->coord);
-    previous=it->coord;
-  }
-  return result;
+namespace osmscout {
+namespace gpx {
+
+class OSMSCOUT_GPX_API GpxFile {
+public:
+  std::optional<std::string> name;
+  std::optional<std::string> desc;
+  std::optional<Timestamp> time;
+
+  std::vector<Track>    tracks;
+  std::vector<Route>    routes;
+  std::vector<Waypoint> waypoints;
+};
 }
+}
+#endif //OSMSCOUT_GPX_GPXFILE_H

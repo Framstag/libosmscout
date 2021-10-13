@@ -25,7 +25,7 @@
 
 #include <libxml/parser.h>
 
-#include <osmscout/gpx/Import.h>
+#include <osmscoutgpx/Import.h>
 
 #include <osmscout/util/Logger.h>
 

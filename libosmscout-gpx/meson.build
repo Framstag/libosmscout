@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout/gpx')
-subdir('include/osmscout/private')
+subdir('include/osmscoutgpx')
+subdir('include/osmscoutgpx/private')
 subdir('src')
 
 osmscoutgpx = library('osmscout_gpx',

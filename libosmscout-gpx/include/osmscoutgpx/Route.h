@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_GPX_ROUTE_H
+#define OSMSCOUT_GPX_ROUTE_H
+
 /*
   This source is part of the libosmscout-gpx library
   Copyright (C) 2017 Lukas Karas
@@ -17,33 +20,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Track.h>
+#include <osmscoutgpx/TrackPoint.h>
 
-using namespace osmscout;
-using namespace osmscout::gpx;
+#include <osmscoutgpx/GPXImportExport.h>
 
-size_t Track::GetPointCount() const
-{
-  size_t result=0;
-  for (const auto &segment:segments){
-    result+=segment.points.size();
-  }
-  return result;
+#include <vector>
+#include <string>
+#include <optional>
+
+namespace osmscout {
+namespace gpx {
+
+class OSMSCOUT_GPX_API Route {
+public:
+  std::optional<std::string> name;
+  std::vector<TrackPoint> points;
+};
+}
 }
 
-Distance Track::GetLength() const
-{
-  Distance result;
-  for (const auto &segment:segments){
-    result+=segment.GetLength();
-  }
-  return result;
-}
-
-void Track::FilterPoints(std::function<void(std::vector<TrackPoint> &)> filter)
-{
-  for (auto &segment:segments){
-    filter(segment.points);
-  }
-}
-
+#endif //OSMSCOUT_GPX_ROUTE_H

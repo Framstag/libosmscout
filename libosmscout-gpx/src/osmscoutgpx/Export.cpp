@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Export.h>
+#include <osmscoutgpx/Export.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 

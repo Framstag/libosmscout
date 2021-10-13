@@ -20,9 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/TrackSegment.h>
+#include <osmscoutgpx/TrackSegment.h>
 
-#include <osmscout/gpx/GPXImportExport.h>
+#include <osmscoutgpx/GPXImportExport.h>
 
 #include <osmscout/util/Color.h>
 
