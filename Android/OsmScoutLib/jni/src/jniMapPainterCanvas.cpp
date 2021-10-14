@@ -25,7 +25,7 @@
 #include <osmscout/AdminRegion.h>
 #include <osmscout/Database.h>
 #include <osmscout/Node.h>
-#include <osmscout/MapPainter.h>
+#include <osmscoutmap/MapPainter.h>
 
 #include <jniMapPainterCanvas.h>
 #include <jniObjectArray.h>
