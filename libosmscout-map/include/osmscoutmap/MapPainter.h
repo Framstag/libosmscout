@@ -167,26 +167,20 @@ namespace osmscout {
       double                   mainSlotWidth;   //!< Width of main slot, used for relative positioning
     };
 
-    struct OSMSCOUT_MAP_API PolyData
-    {
-      size_t                   transStart;      //!< Start of coordinates in transformation buffer
-      size_t                   transEnd;        //!< End of coordinates in transformation buffer (inclusive)
-    };
-
     /**
      * Data structure for holding temporary data about areas
      */
     struct OSMSCOUT_MAP_API AreaData
     {
-      ObjectFileRef            ref;
-      TypeInfoRef              type;
-      const FeatureValueBuffer *buffer;         //!< Features of the line segment, can be NULL in case of border only areas
-      FillStyleRef             fillStyle;       //!< Fill style
-      BorderStyleRef           borderStyle;     //!< Border style
-      GeoBox                   boundingBox;     //!< Bounding box of the area
-      bool                     isOuter;         //!< flag if this area is outer ring of some relation
-      CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
-      std::list<PolyData>      clippings;       //!< Clipping polygons to be used during drawing of this area
+      ObjectFileRef               ref;
+      TypeInfoRef                 type;
+      const FeatureValueBuffer    *buffer;         //!< Features of the line segment, can be NULL in case of border only areas
+      FillStyleRef                fillStyle;       //!< Fill style
+      BorderStyleRef              borderStyle;     //!< Border style
+      GeoBox                      boundingBox;     //!< Bounding box of the area
+      bool                        isOuter;         //!< flag if this area is outer ring of some relation
+      CoordBufferRange            coordRange;      //!< Range of coordinates in transformation buffer
+      std::list<CoordBufferRange> clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
     using WayPathDataIt=std::list<WayPathData>::iterator;
@@ -315,6 +309,15 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
+
+    bool PrepareAreaRing(const StyleConfig& styleConfig,
+                         const Projection& projection,
+                         const MapParameter& parameter,
+                         const std::vector<CoordBufferRange>& coordRanges,
+                         const Area& area,
+                         const Area::Ring& ring,
+                         size_t i,
+                         const TypeInfoRef& type);
 
     void PrepareArea(const StyleConfig& styleConfig,
                      const Projection& projection,

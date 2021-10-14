@@ -976,10 +976,7 @@ namespace osmscout
       m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
     pPathGeometry->Release();
 
-    for (std::list<PolyData>::const_iterator c = area.clippings.begin();
-         c != area.clippings.end();
-         c++) {
-      const PolyData    &data = *c;
+    for (const auto& data : area.clippings) {
       ID2D1PathGeometry* pPathGeometry;
       HRESULT hr = m_pDirect2dFactory->CreatePathGeometry(&pPathGeometry);
       if (SUCCEEDED(hr))
@@ -988,9 +985,11 @@ namespace osmscout
         hr = pPathGeometry->Open(&pSink);
         if (SUCCEEDED(hr))
         {
-          pSink->BeginFigure(POINTF(coordBuffer.buffer[data.transStart].GetX(), coordBuffer.buffer[data.transStart].GetY()), D2D1_FIGURE_BEGIN_FILLED);
+          pSink->BeginFigure(POINTF(coordBuffer.buffer[data.GetStart()].GetX(),
+                                    coordBuffer.buffer[data.GetStart()].GetY()),
+                             D2D1_FIGURE_BEGIN_FILLED);
 
-          for (size_t i = data.transStart + 1; i <= data.transEnd; i++) {
+          for (size_t i = data.GetStart() + 1; i <= data.GetEnd(); i++) {
             pSink->AddLine(POINTF(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY()));
           }
           pSink->EndFigure(D2D1_FIGURE_END_CLOSED);

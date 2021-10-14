@@ -914,9 +914,9 @@ namespace osmscout {
 
         if (!area.clippings.empty()) {
             for (const auto& data : area.clippings) {
-                CGContextMoveToPoint(cg,coordBuffer.buffer[data.transStart].GetX(),
-                            coordBuffer.buffer[data.transStart].GetY());
-                for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+                CGContextMoveToPoint(cg,coordBuffer.buffer[data.GetStart()].GetX(),
+                            coordBuffer.buffer[data.GetStart()].GetY());
+                for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
                     CGContextAddLineToPoint(cg,coordBuffer.buffer[i].GetX(),
                                 coordBuffer.buffer[i].GetY());
                 }

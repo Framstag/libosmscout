@@ -59,6 +59,78 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
+  bool Projection::BoundingBoxToPixel(const GeoBox& boundingBox,
+                                      double& xMin,
+                                      double& yMin,
+                                      double& xMax,
+                                      double& yMax) const
+  {
+    assert(boundingBox.IsValid());
+
+    double x;
+    double y;
+
+    if (!GeoToPixel(boundingBox.GetMinCoord(),
+                    x,
+                    y)) {
+      return false;
+    }
+
+    xMin=x;
+    xMax=x;
+    yMin=y;
+    yMax=y;
+
+    if (!GeoToPixel(boundingBox.GetMaxCoord(),
+                    x,
+                    y)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  x);
+    xMax=std::max(xMax,
+                  x);
+    yMin=std::min(yMin,
+                  y);
+    yMax=std::max(yMax,
+                  y);
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
+                             boundingBox.GetMaxLon()),
+                    x,
+                    y)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  x);
+    xMax=std::max(xMax,
+                  x);
+    yMin=std::min(yMin,
+                  y);
+    yMax=std::max(yMax,
+                  y);
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
+                             boundingBox.GetMinLon()),
+                    x,
+                    y)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  x);
+    xMax=std::max(xMax,
+                  x);
+    yMin=std::min(yMin,
+                  y);
+    yMax=std::max(yMax,
+                  y);
+
+    return true;
+  }
+
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
                                const Magnification& magnification,

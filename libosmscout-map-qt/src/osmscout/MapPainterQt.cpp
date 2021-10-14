@@ -901,10 +901,10 @@ namespace osmscout {
 
     if (!area.clippings.empty()) {
       for (const auto& data : area.clippings) {
-        path.moveTo(coordBuffer.buffer[data.transStart].GetX(),
-                    coordBuffer.buffer[data.transStart].GetY());
+        path.moveTo(coordBuffer.buffer[data.GetStart()].GetX(),
+                    coordBuffer.buffer[data.GetStart()].GetY());
 
-        for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+        for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
           path.lineTo(coordBuffer.buffer[i].GetX(),
                       coordBuffer.buffer[i].GetY());
         }

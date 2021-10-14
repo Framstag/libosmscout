@@ -665,9 +665,9 @@ namespace osmscout {
       for (const auto& data : area.clippings) {
         agg::path_storage clipPath;
 
-         clipPath.move_to(coordBuffer.buffer[data.transStart].GetX(),
-                          coordBuffer.buffer[data.transStart].GetY());
-        for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+         clipPath.move_to(coordBuffer.buffer[data.GetStart()].GetX(),
+                          coordBuffer.buffer[data.GetStart()].GetY());
+        for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
           clipPath.line_to(coordBuffer.buffer[i].GetX(),
                            coordBuffer.buffer[i].GetY());
         }
