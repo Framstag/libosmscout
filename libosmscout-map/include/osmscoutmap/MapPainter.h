@@ -474,12 +474,6 @@ namespace osmscout {
                       const GeoBox& boundingBox,
                       double pixelOffset) const;
 
-    void Transform(const Projection& projection,
-                   const MapParameter& parameter,
-                   const GeoCoord& coord,
-                   double& x,
-                   double& y) const;
-
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,
                              double width) const;

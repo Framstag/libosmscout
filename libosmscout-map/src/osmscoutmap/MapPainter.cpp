@@ -271,20 +271,18 @@ namespace osmscout {
     for (const auto& ring : area->rings) {
       statistic.coordCount+=ring.nodes.size();
 
-      if (parameter.IsDebugData()) {
-        if (ring.IsMaster()) {
-          IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),
-                                                              ring.GetFeatureValueBuffer(),
-                                                              projection);
+      if (parameter.IsDebugData() && ring.IsMaster()) {
+        IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),
+                                                            ring.GetFeatureValueBuffer(),
+                                                            projection);
 
-          if (iconStyle) {
-            statistic.iconCount++;
-          }
-
-          statistic.labelCount+=styleConfig.GetAreaTextStyleCount(area->GetType(),
-                                                                  ring.GetFeatureValueBuffer(),
-                                                                  projection);
+        if (iconStyle) {
+          statistic.iconCount++;
         }
+
+        statistic.labelCount+=styleConfig.GetAreaTextStyleCount(area->GetType(),
+                                                                ring.GetFeatureValueBuffer(),
+                                                                projection);
       }
     }
   }
@@ -544,16 +542,6 @@ namespace osmscout {
              yMax<0);
   }
 
-  void MapPainter::Transform(const Projection& projection,
-                             const MapParameter& /*parameter*/,
-                             const GeoCoord& coord,
-                             double& x,
-                             double& y) const
-  {
-    projection.GeoToPixel(coord,
-                          x,y);
-  }
-
   double MapPainter::GetProjectedWidth(const Projection& projection,
                                        double minPixel,
                                        double width) const
@@ -603,7 +591,8 @@ namespace osmscout {
                                                 shieldGridSizeVert);
 
     for (const auto& gridPoint : gridPoints) {
-      double x,y;
+      double x;
+      double y;
 
       projection.GeoToPixel(gridPoint,x,y);
 
@@ -615,8 +604,7 @@ namespace osmscout {
       labelBox.style=style;
       labelBox.text=text;
 
-      std::vector<LabelData> vect;
-      vect.push_back(labelBox);
+      std::vector<LabelData> vect = {labelBox};
       RegisterRegularLabel(projection, parameter, vect, Vertex2D(x,y), /*proposedWidth*/ -1);
     }
   }
@@ -671,7 +659,8 @@ namespace osmscout {
         data.iconHeight=iconStyle->GetHeight();
 
         labelLayoutData.push_back(data);
-      } else if (iconStyle->GetSymbol()) {
+      }
+      else if (iconStyle->GetSymbol()) {
         LabelData data;
 
         data.type=LabelData::Type::Symbol;
@@ -701,8 +690,8 @@ namespace osmscout {
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag() &&
           parameter.GetDrawFadings()) {
         double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
-        data.fontSize=textStyle->GetSize()*pow(1.5,factor);
 
+        data.fontSize=textStyle->GetSize()*pow(1.5,factor);
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
@@ -712,7 +701,7 @@ namespace osmscout {
           continue;
         }
 
-        // Retricts the height of a label to maxHeight
+        // Restricts the height of a label to maxHeight
         double alpha=textStyle->GetAlpha();
         double maxHeight=projection.GetHeight()/5.0;
 
@@ -729,7 +718,6 @@ namespace osmscout {
       }
       else {
         data.fontSize=textStyle->GetSize();
-
         data.alpha=textStyle->GetAlpha();
       }
 
@@ -950,12 +938,12 @@ namespace osmscout {
     double           symbolSpace=projection.ConvertWidthToPixel(borderSymbolStyle->GetSymbolSpace());
     CoordBufferRange range=areaData.coordRange;
 
-    if (borderSymbolStyle->GetOffset()!=0.0) {
+    if (borderSymbolStyle->HasOffset()) {
       lineOffset+=GetProjectedWidth(projection,
                                     borderSymbolStyle->GetOffset());
     }
 
-    if (borderSymbolStyle->GetDisplayOffset()!=0.0) {
+    if (borderSymbolStyle->HasDisplayOffset()) {
       lineOffset+=projection.ConvertWidthToPixel(borderSymbolStyle->GetDisplayOffset());
     }
 
@@ -986,12 +974,11 @@ namespace osmscout {
                                  projection,
                                  textStyles);
 
-    double x,y;
+    double x;
+    double y;
 
-    Transform(projection,
-              parameter,
-              node->GetCoords(),
-              x,y);
+    projection.GeoToPixel(node->GetCoords(),
+                          x,y);
 
     LayoutPointLabels(projection,
                       parameter,
@@ -1048,21 +1035,11 @@ namespace osmscout {
     const LanesFeatureValue *lanesValue=nullptr;
     std::vector<OffsetRel>  laneTurns; // cached turns
 
-    for (const auto &pathSymbolStyle : symbolStyles) {
+    for (const auto& pathSymbolStyle : symbolStyles) {
       CoordBufferRange range=data.coordRange;
       double symbolSpace = projection.ConvertWidthToPixel(pathSymbolStyle->GetSymbolSpace());
 
-      if (pathSymbolStyle->GetOffsetRel() == OffsetRel::laneForwardLeft ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneForwardThroughLeft ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneForwardThrough ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneForwardThroughRight ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneForwardRight ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneBackwardLeft ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneBackwardThroughLeft ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneBackwardThrough ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneBackwardThroughRight ||
-          pathSymbolStyle->GetOffsetRel() == OffsetRel::laneBackwardRight ) {
-
+      if (IsLaneOffset(pathSymbolStyle->GetOffsetRel())) {
         if (lanesValue==nullptr) {
           lanesValue=lanesReader.GetValue(*data.buffer);
         }
@@ -1083,7 +1060,7 @@ namespace osmscout {
         for (const OffsetRel &laneTurn: laneTurns) {
           if (pathSymbolStyle->GetOffsetRel() == laneTurn) {
             range=coordBuffer.GenerateParallelWay(range,
-                                                   laneOffset);
+                                                  laneOffset);
 
             DrawContourSymbol(projection,
                               parameter,
@@ -1097,12 +1074,12 @@ namespace osmscout {
       else {
         double lineOffset = 0.0;
 
-        if (pathSymbolStyle->GetOffset() != 0.0) {
+        if (pathSymbolStyle->HasOffset()) {
           lineOffset += GetProjectedWidth(projection,
                                           pathSymbolStyle->GetOffset());
         }
 
-        if (pathSymbolStyle->GetDisplayOffset() != 0.0) {
+        if (pathSymbolStyle->HasDisplayOffset()) {
           lineOffset += projection.ConvertWidthToPixel(pathSymbolStyle->GetDisplayOffset());
         }
 
@@ -1324,28 +1301,24 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const AreaRef &area)
   {
-    std::vector<PolyData> td(area->rings.size());
+    std::vector<CoordBufferRange> td(area->rings.size()); // Polygon information for each ring
 
     for (size_t i=0; i<area->rings.size(); i++) {
       const Area::Ring &ring = area->rings[i];
       // The master ring does not have any nodes, so we skip it
       // Rings with less than 3 nodes should be skipped, too (no area)
       if (ring.IsMaster() || ring.nodes.size() < 3) {
-        td[i].transStart=0;
-        td[i].transEnd=0;
+        // td is initialized to empty by default
         continue;
       }
 
       if (ring.segments.size() <= 1){
-        CoordBufferRange range=TransformArea(ring.nodes,
-                                             transBuffer,
-                                             coordBuffer,
-                                             projection,
-                                             parameter.GetOptimizeAreaNodes(),
-                                             errorTolerancePixel);
-
-        td[i].transStart=range.GetStart();
-        td[i].transEnd=range.GetEnd();
+        td[i]=TransformArea(ring.nodes,
+                            transBuffer,
+                            coordBuffer,
+                            projection,
+                            parameter.GetOptimizeAreaNodes(),
+                            errorTolerancePixel);
       }
       else {
         std::vector<Point> nodes;
@@ -1354,21 +1327,19 @@ namespace osmscout {
           if (projection.GetDimensions().Intersects(segment.bbox, false)){
             // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
             nodes.insert(nodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
-          } else {
+          }
+          else {
             nodes.push_back(ring.nodes[segment.from]);
             nodes.push_back(ring.nodes[segment.to-1]);
           }
         }
 
-        CoordBufferRange range=TransformArea(nodes,
-                                             transBuffer,
-                                             coordBuffer,
-                                             projection,
-                                             parameter.GetOptimizeAreaNodes(),
-                                             errorTolerancePixel);
-
-        td[i].transStart=range.GetStart();
-        td[i].transEnd=range.GetEnd();
+        td[i]=TransformArea(nodes,
+                            transBuffer,
+                            coordBuffer,
+                            projection,
+                            parameter.GetOptimizeAreaNodes(),
+                            errorTolerancePixel);
       }
     }
 
@@ -1379,7 +1350,8 @@ namespace osmscout {
         // there may be nested outer rings
         return true;
       }
-      if (td[i].transStart==td[i].transEnd) {
+
+      if (!td[i].IsValid()) {
         return false; // ring was skipped or reduced to single point
       }
 
@@ -1433,8 +1405,13 @@ namespace osmscout {
       // we currently assume that it does not have alpha and paints over its region and clipping is
       // not required.
       area->VisitClippingRings(i, [&a, &td](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
-        if (type->GetIgnore() && td[j].transStart < td[j].transEnd) {
-          a.clippings.push_back(td[j]);
+        if (type->GetIgnore() && td[j].IsValid()) {
+          PolyData data;
+
+          data.transStart=td[j].GetStart();
+          data.transEnd=td[j].GetEnd();
+
+          a.clippings.push_back(data);
         }
         return true;
       });
@@ -1444,7 +1421,7 @@ namespace osmscout {
       a.buffer=&ring.GetFeatureValueBuffer();
       a.fillStyle=fillStyle;
       a.borderStyle=borderStyle;
-      a.coordRange=CoordBufferRange(td[i].transStart,td[i].transEnd);
+      a.coordRange=td[i];
 
       areaData.push_back(a);
 
@@ -1455,7 +1432,7 @@ namespace osmscout {
 
         double offset=0.0;
 
-        CoordBufferRange range=CoordBufferRange(td[i].transStart,td[i].transEnd);
+        CoordBufferRange range=td[i];
 
         if (borderStyle->GetOffset()!=0.0) {
           offset+=GetProjectedWidth(projection,
@@ -1591,7 +1568,8 @@ namespace osmscout {
         if (projection.GetDimensions().Intersects(segment.bbox, false)){
           // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
           nodes.insert(nodes.end(), way.nodes.data() + segment.from, way.nodes.data() + segment.to);
-        } else {
+        }
+        else {
           nodes.push_back(way.nodes[segment.from]);
           nodes.push_back(way.nodes[segment.to-1]);
         }
@@ -1780,17 +1758,7 @@ namespace osmscout {
           laneOffset+=lanesSpace;
         }
       }
-      else if (lineStyle->GetOffsetRel() == OffsetRel::laneForwardLeft ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneForwardThroughLeft ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneForwardThrough ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneForwardThroughRight ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneForwardRight ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneBackwardLeft ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneBackwardThroughLeft ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneBackwardThrough ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneBackwardThroughRight ||
-               lineStyle->GetOffsetRel() == OffsetRel::laneBackwardRight ) {
-
+      else if (IsLaneOffset(lineStyle->GetOffsetRel())) {
         if (lanesValue==nullptr || lanesValue->GetLanes()<1){
           continue;
         }

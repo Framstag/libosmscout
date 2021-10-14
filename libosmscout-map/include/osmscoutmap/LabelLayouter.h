@@ -606,47 +606,85 @@ namespace osmscout {
       }
     }
 
+    // should be made private
+    void ProcessLabel(const Projection& projection,
+                      const MapParameter& parameter,
+                      const Vertex2D& point,
+                      LabelInstanceType& instance,
+                      double& offset,
+                      const LabelData& data,
+                      double objectWidth)
+    {
+      typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
+      element.labelData=data;
+      if (data.type==LabelData::Type::Icon || data.type==LabelData::Type::Symbol){
+        instance.priority = std::min(data.priority, instance.priority);
+        element.x = point.GetX() - data.iconWidth / 2;
+        if (offset<0){
+          element.y = point.GetY() - data.iconHeight / 2;
+          offset = point.GetY() + data.iconHeight / 2;
+        } else {
+          element.y = offset;
+          offset += data.iconHeight;
+        }
+      }else {
+        instance.priority = std::min(data.priority, instance.priority);
+        // TODO: should we take style into account?
+        // Qt allows to split text layout and style setup
+        element.label = textLayouter->Layout(projection, parameter,
+                                             data.text, data.fontSize,
+                                             objectWidth,
+          /*enable wrapping*/ true,
+          /*contour label*/ false);
+        element.x = point.GetX() - element.label->width / 2;
+        if (offset<0){
+          element.y = point.GetY() - element.label->height / 2;
+          offset = point.GetY() + element.label->height / 2;
+        } else {
+          element.y = offset;
+          offset += element.label->height;
+        }
+      }
+      instance.elements.push_back(element);
+    }
+
     void RegisterLabel(const Projection& projection,
                        const MapParameter& parameter,
                        const Vertex2D& point,
-                       const std::vector<LabelData> &data,
+                       const LabelData& data,
                        double objectWidth = 10.0)
     {
       LabelInstanceType instance;
 
       double offset=-1;
-      for (const auto &d:data) {
-        typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
-        element.labelData=d;
-        if (d.type==LabelData::Type::Icon || d.type==LabelData::Type::Symbol){
-          instance.priority = std::min(d.priority, instance.priority);
-          element.x = point.GetX() - d.iconWidth / 2;
-          if (offset<0){
-            element.y = point.GetY() - d.iconHeight / 2;
-            offset = point.GetY() + d.iconHeight / 2;
-          } else {
-            element.y = offset;
-            offset += d.iconHeight;
-          }
-        }else {
-          instance.priority = std::min(d.priority, instance.priority);
-          // TODO: should we take style into account?
-          // Qt allows to split text layout and style setup
-          element.label = textLayouter->Layout(projection, parameter,
-                                               d.text, d.fontSize,
-                                               objectWidth,
-                                               /*enable wrapping*/ true,
-                                               /*contour label*/ false);
-          element.x = point.GetX() - element.label->width / 2;
-          if (offset<0){
-            element.y = point.GetY() - element.label->height / 2;
-            offset = point.GetY() + element.label->height / 2;
-          } else {
-            element.y = offset;
-            offset += element.label->height;
-          }
-        }
-        instance.elements.push_back(element);
+      ProcessLabel(projection,
+                   parameter,
+                   point,
+                   instance,
+                   offset,
+                   data,
+                   objectWidth);
+
+      labelInstances.push_back(instance);
+    }
+
+    void RegisterLabel(const Projection& projection,
+                       const MapParameter& parameter,
+                       const Vertex2D& point,
+                       const std::vector<LabelData>& data,
+                       double objectWidth = 10.0)
+    {
+      LabelInstanceType instance;
+
+      double offset=-1;
+      for (const auto& d : data) {
+        ProcessLabel(projection,
+                     parameter,
+                     point,
+                     instance,
+                     offset,
+                     d,
+                     objectWidth);
       }
 
       labelInstances.push_back(instance);

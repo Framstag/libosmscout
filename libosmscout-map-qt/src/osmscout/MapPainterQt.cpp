@@ -1016,7 +1016,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& /*data*/)
   {
-    if (delegateLabelLayouter){
+    if (delegateLabelLayouter !=nullptr){
       return;
     }
 
