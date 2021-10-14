@@ -23,6 +23,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Point.h>
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
@@ -43,22 +44,22 @@ namespace osmscout {
   class OSMSCOUT_API Projection
   {
   protected:
-    double        lon;            //!< Longitude coordinate of the center of the image
-    double        lat;            //!< Latitude coordinate of the center of the image
-    double        angle;          //!< Display rotation angle in radians, canvas clockwise
-    Magnification magnification;  //!< Current magnification
-    double        dpi;            //!< Screen DPI
-    size_t        width;          //!< Width of image
-    size_t        height;         //!< Height of image
+    double        lon=0.0;          //!< Longitude coordinate of the center of the image
+    double        lat=0.0;          //!< Latitude coordinate of the center of the image
+    double        angle=0.0;        //!< Display rotation angle in radians, canvas clockwise
+    Magnification magnification;    //!< Current magnification
+    double        dpi=0.0;          //!< Screen DPI
+    size_t        width=0;          //!< Width of image
+    size_t        height=0;         //!< Height of image
 
-    double        lonMin;         //!< Longitude of the upper left corner of the image
-    double        latMin;         //!< Latitude of the upper left corner of the image
-    double        lonMax;         //!< Longitude of the lower right corner of the image
-    double        latMax;         //!< Latitude of the lower right corner of the image
+    double        lonMin=0.0;       //!< Longitude of the upper left corner of the image
+    double        latMin=0.0;       //!< Latitude of the upper left corner of the image
+    double        lonMax=0.0;       //!< Longitude of the lower right corner of the image
+    double        latMax=0.0;       //!< Latitude of the lower right corner of the image
 
-    double        pixelSize;      //!< Size of a pixel in meter
-    double        meterInPixel;   //!< Number of on screen pixel for one meter on the ground
-    double        meterInMM;      //!< Number of on screen millimeters for one meter on the ground
+    double        pixelSize=0.0;    //!< Size of a pixel in meter
+    double        meterInPixel=0.0; //!< Number of on screen pixel for one meter on the ground
+    double        meterInMM=0.0;    //!< Number of on screen millimeters for one meter on the ground
 
   public:
 
@@ -93,15 +94,16 @@ namespace osmscout {
         Flush();
       }
 
-      void GeoToPixel(double lon,
-                             double lat,
-                             double& x,
-                             double& y)
+      BatchTransformer(const BatchTransformer& other) = delete;
+
+      void GeoToPixel(const GeoCoord& coord,
+                      double& x,
+                      double& y)
       {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (projection.CanBatch()) {
-          this->lon[count]=lon;
-          this->lat[count]=lat;
+          this->lon[count]=coord.GetLon();
+          this->lat[count]=coord.GetLat();
           xPointer[count]=&x;
           yPointer[count]=&y;
           count++;
@@ -112,11 +114,38 @@ namespace osmscout {
           }
         }
         else {
-          projection.GeoToPixel(GeoCoord(lat,lon),
+          projection.GeoToPixel(coord,
                                 x,y);
         }
 #else
-        projection.GeoToPixel(GeoCoord(lat,lon),
+        projection.GeoToPixel(coord,
+                              x,y);
+#endif
+      }
+
+      void GeoToPixel(const Point& coord,
+                      double& x,
+                      double& y)
+      {
+#ifdef OSMSCOUT_HAVE_SSE2
+        if (projection.CanBatch()) {
+          this->lon[count]=coord.GetCoord().GetLon();
+          this->lat[count]=coord.GetCoord().GetLat();
+          xPointer[count]=&x;
+          yPointer[count]=&y;
+          count++;
+
+          if (count==2) {
+            count=0;
+            projection.GeoToPixel(*this);
+          }
+        }
+        else {
+          projection.GeoToPixel(coord.GetCoord(),
+                                x,y);
+        }
+#else
+        projection.GeoToPixel(coord.GetCoord(),
                               x,y);
 #endif
       }
@@ -135,7 +164,7 @@ namespace osmscout {
       }
     };
 
-    Projection();
+    Projection() = default;
     virtual ~Projection() = default;
 
     virtual bool CanBatch() const = 0;
@@ -149,24 +178,6 @@ namespace osmscout {
     GeoCoord GetCenter() const
     {
       return GeoCoord(lat,lon);
-    }
-
-    /**
-     * Returns longitude coordinate of the region center.
-     *
-     */
-    double GetLon() const
-    {
-      return lon;
-    }
-
-    /**
-     * Returns latitude coordinate of the region center.
-     *
-     */
-    double GetLat() const
-    {
-      return lat;
     }
 
     /**
@@ -222,7 +233,7 @@ namespace osmscout {
      * Returns true, if the given bounding box is completely within the projection bounding box
      */
     bool GeoIsIn(double lonMin, double latMin,
-                        double lonMax, double latMax) const
+                 double lonMax, double latMax) const
     {
       return !(lonMin>this->lonMax ||
                lonMax<this->lonMin ||
@@ -303,7 +314,7 @@ namespace osmscout {
      * for this projection.
      */
     virtual bool PixelToGeo(double x, double y,
-                            double& lon, double& lat) const = 0;
+                            GeoCoord& coord) const = 0;
 
     /**
      * Converts a geo coordinate to a pixel coordinate.
@@ -333,19 +344,19 @@ namespace osmscout {
   class OSMSCOUT_API MercatorProjection : public Projection
   {
   protected:
-    bool   valid;          //!< projection is valid
+    bool   valid=false;    //!< projection is valid
 
-    double latOffset;      //!< Absolute and untransformed screen position of lat coordinate
+    double latOffset=0.0;  //!< Absolute and untransformed screen position of lat coordinate
     double angleSin;
     double angleCos;
     double angleNegSin;
     double angleNegCos;
 
-    double scale;
-    double scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double scale=1.0;
+    double scaleGradtorad ; //!< Precalculated scale*Gradtorad
 
     double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
-    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+    bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
   public:
     static const double MaxLat;
@@ -353,7 +364,7 @@ namespace osmscout {
     static const double MaxLon;
     static const double MinLon;
 
-    MercatorProjection();
+    MercatorProjection() = default;
 
     bool CanBatch() const override
     {
@@ -423,19 +434,7 @@ namespace osmscout {
              size_t width, size_t height);
 
     bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const override;
-
-    bool PixelToGeo(double x, double y,
-                           GeoCoord &coord) const
-    {
-      double lat;
-      double lon;
-      if (PixelToGeo(x,y,lon,lat)){
-        coord.Set(lat,lon);
-        return true;
-      }
-      return false;
-    }
+                    GeoCoord& coord) const override;
 
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const override;
@@ -491,15 +490,15 @@ namespace osmscout {
   class OSMSCOUT_API TileProjection : public Projection
   {
   protected:
-    bool   valid;          //!< projection is valid
+    bool   valid=false;          //!< projection is valid
 
-    double lonOffset;
-    double latOffset;
-    double scale;
+    double lonOffset=0.0;
+    double latOffset=0.0;
+    double scale=1.0;
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
     double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
-    bool   useLinearInterpolation; //!< switch to enable linear interpolation of latitude to pixel computation
+    bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
 #ifdef OSMSCOUT_HAVE_SSE2
     //some extra vars for special sse needs
@@ -518,7 +517,7 @@ namespace osmscout {
                              size_t width,size_t height);
 
   public:
-    TileProjection();
+    TileProjection() = default;
 
     bool CanBatch() const override
     {
@@ -554,7 +553,7 @@ namespace osmscout {
              size_t width, size_t height);
 
     bool PixelToGeo(double x, double y,
-                    double& lon, double& lat) const override;
+                    GeoCoord& coord) const override;
 
     bool GeoToPixel(const GeoCoord& coord,
                     double& x, double& y) const override;
