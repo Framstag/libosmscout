@@ -98,7 +98,7 @@ namespace osmscout {
 
       void GeoToPixel(const GeoCoord& coord,
                       double& x,
-                      double& y) const
+                      double& y)
       {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (projection.CanBatch()) {
@@ -125,7 +125,7 @@ namespace osmscout {
 
       void GeoToPixel(const Point& coord,
                       double& x,
-                      double& y) const
+                      double& y)
       {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (projection.CanBatch()) {
