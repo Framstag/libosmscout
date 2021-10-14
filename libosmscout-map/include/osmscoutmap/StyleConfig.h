@@ -751,6 +751,8 @@ namespace osmscout {
     void GetNodeTextStyles(const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
+    size_t GetNodeTextStyleCount(const FeatureValueBuffer& buffer,
+                                 const Projection& projection) const;
 
     IconStyleRef GetNodeIconStyle(const FeatureValueBuffer& buffer,
                                   const Projection& projection) const;
@@ -793,12 +795,17 @@ namespace osmscout {
                              const FeatureValueBuffer& buffer,
                              const Projection& projection,
                              std::vector<BorderStyleRef>& borderStyles) const;
+
     bool HasAreaTextStyles(const TypeInfoRef& type,
                            const Magnification& magnification) const;
     void GetAreaTextStyles(const TypeInfoRef& type,
                            const FeatureValueBuffer& buffer,
                            const Projection& projection,
                            std::vector<TextStyleRef>& textStyles) const;
+    size_t GetAreaTextStyleCount(const TypeInfoRef& type,
+                                 const FeatureValueBuffer& buffer,
+                                 const Projection& projection) const;
+
     IconStyleRef GetAreaIconStyle(const TypeInfoRef& type,
                                   const FeatureValueBuffer& buffer,
                                   const Projection& projection) const;
