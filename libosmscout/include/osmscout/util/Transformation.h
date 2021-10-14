@@ -340,6 +340,10 @@ namespace osmscout {
     {
       return end;
     }
+
+    bool IsValid() const {
+      return start!=std::numeric_limits<size_t>::max();
+    }
   };
 
   /**

@@ -24,6 +24,20 @@
 
 namespace osmscout {
 
+  bool IsLaneOffset(OffsetRel rel)
+  {
+    return rel==OffsetRel::laneForwardLeft ||
+           rel==OffsetRel::laneForwardThroughLeft ||
+           rel==OffsetRel::laneForwardThrough ||
+           rel==OffsetRel::laneForwardThroughRight ||
+           rel==OffsetRel::laneForwardRight ||
+           rel==OffsetRel::laneBackwardLeft ||
+           rel==OffsetRel::laneBackwardThroughLeft ||
+           rel==OffsetRel::laneBackwardThrough ||
+           rel==OffsetRel::laneBackwardThroughRight ||
+           rel==OffsetRel::laneBackwardRight;
+  }
+
   class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   {
   public:
