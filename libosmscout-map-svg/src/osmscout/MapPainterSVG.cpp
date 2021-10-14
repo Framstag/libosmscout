@@ -1013,13 +1013,9 @@ namespace osmscout {
     }
     stream << " Z";
 
-    for (std::list<PolyData>::const_iterator c=area.clippings.begin();
-        c!=area.clippings.end();
-        ++c) {
-      const PolyData    &data=*c;
-
-      stream << "M " << coordBuffer.buffer[data.transStart].GetX() << " " << coordBuffer.buffer[data.transStart].GetY();
-      for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+    for (const auto& data : area.clippings) {
+      stream << "M " << coordBuffer.buffer[data.GetStart()].GetX() << " " << coordBuffer.buffer[data.GetStart()].GetY();
+      for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
         stream << " L " << coordBuffer.buffer[i].GetX() << " " << coordBuffer.buffer[i].GetY();
       }
       stream << " Z";

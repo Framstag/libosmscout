@@ -747,13 +747,10 @@ namespace osmscout {
 			Gdiplus::Region* region;
 		};
 		std::vector<clippingRegion> clippingInfo;
-		for (std::list<PolyData>::const_iterator c = area.clippings.begin();
-			c != area.clippings.end();
-			++c) {
-			const PolyData &data = *c;
+		for (const auto& data : area.clippings) {
 			clippingRegion cr;
 			cr.points = new PointFBuffer();
-			for (size_t i = data.transStart; i <= data.transEnd; i++) {
+			for (size_t i = data.GetStart(); i <= data.GetEnd(); i++) {
 				cr.points->AddPoint(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY());
 			}
 			cr.points->Close();

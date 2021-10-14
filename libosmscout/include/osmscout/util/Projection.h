@@ -325,6 +325,16 @@ namespace osmscout {
     virtual bool GeoToPixel(const GeoCoord& coord,
                             double& x, double& y) const = 0;
 
+    /**
+     * Converts a valid GeoBox to its on screen pixel coordinates
+     *
+     * Return true on success,
+     * false if given coordinate is not valid for this projection.
+     */
+    bool BoundingBoxToPixel(const GeoBox& boundingBox,
+                            double& xMin, double& yMin,
+                            double& xMax, double& yMax) const;
+
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;
 
