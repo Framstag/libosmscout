@@ -129,8 +129,8 @@ namespace osmscout {
       {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (projection.CanBatch()) {
-          this->lon[count]=coord.GetLon();
-          this->lat[count]=coord.GetLat();
+          this->lon[count]=coord.GetCoord().GetLon();
+          this->lat[count]=coord.GetCoord().GetLat();
           xPointer[count]=&x;
           yPointer[count]=&y;
           count++;
@@ -141,7 +141,7 @@ namespace osmscout {
           }
         }
         else {
-          projection.GeoToPixel(coord,
+          projection.GeoToPixel(coord.GetCoord(),
                                 x,y);
         }
 #else
