@@ -279,7 +279,7 @@ namespace osmscout {
     //@{
     void DumpDataStatistics(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data);
+                            const MapData& data) const;
     //@}
 
     /**
@@ -478,7 +478,7 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const GeoCoord& coord,
                    double& x,
-                   double& y);
+                   double& y) const;
 
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,
@@ -649,7 +649,7 @@ namespace osmscout {
     std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
 
   public:
-    MapPainter(const StyleConfigRef& styleConfig);
+    explicit MapPainter(const StyleConfigRef& styleConfig);
     virtual ~MapPainter();
 
     bool Draw(const Projection& projection,

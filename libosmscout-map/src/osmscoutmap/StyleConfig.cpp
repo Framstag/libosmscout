@@ -1214,6 +1214,25 @@ namespace osmscout {
     }
   }
 
+  size_t StyleConfig::GetNodeTextStyleCount(const FeatureValueBuffer& buffer,
+                                            const Projection& projection) const
+  {
+    size_t count=0;
+
+    for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      TextStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         nodeTextStyleSelector[buffer.GetType()->GetIndex()],
+                                         buffer,
+                                         projection);
+
+      if (style) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
   IconStyleRef StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const
   {
@@ -1420,6 +1439,26 @@ namespace osmscout {
         textStyles.push_back(style);
       }
     }
+  }
+
+  size_t StyleConfig::GetAreaTextStyleCount(const TypeInfoRef& type,
+                                            const FeatureValueBuffer& buffer,
+                                            const Projection& projection) const
+  {
+    size_t count=0;
+
+    for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      TextStyleRef style=GetFeatureStyle(styleResolveContext,
+                                         areaTextStyleSelector[type->GetIndex()],
+                                         buffer,
+                                         projection);
+
+      if (style) {
+        count++;
+      }
+    }
+
+    return count;
   }
 
   IconStyleRef StyleConfig::GetAreaIconStyle(const TypeInfoRef& type,
