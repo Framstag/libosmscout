@@ -1,6 +1,3 @@
-#ifndef LIBOSMSCOUT_GPX_IMPORT_H
-#define LIBOSMSCOUT_GPX_IMPORT_H
-
 /*
   This source is part of the libosmscout-gpx library
   Copyright (C) 2017 Lukas Karas
@@ -20,27 +17,33 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/GpxFile.h>
-#include <osmscout/gpx/Utils.h>
-#include <osmscout/gpx/GPXImportExport.h>
+#include <osmscoutgpx/Track.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/Exception.h>
-#include <osmscout/util/Breaker.h>
+using namespace osmscout;
+using namespace osmscout::gpx;
 
-#include <cstdio>
-#include <string>
-
-namespace osmscout {
-namespace gpx {
-
-
-extern OSMSCOUT_GPX_API bool ImportGpx(const std::string &filePath,
-                                       GpxFile &output,
-                                       BreakerRef breaker =nullptr,
-                                       ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
-
-}
+size_t Track::GetPointCount() const
+{
+  size_t result=0;
+  for (const auto &segment:segments){
+    result+=segment.points.size();
+  }
+  return result;
 }
 
-#endif //LIBOSMSCOUT_GPX_IMPORT_H
+Distance Track::GetLength() const
+{
+  Distance result;
+  for (const auto &segment:segments){
+    result+=segment.GetLength();
+  }
+  return result;
+}
+
+void Track::FilterPoints(std::function<void(std::vector<TrackPoint> &)> filter)
+{
+  for (auto &segment:segments){
+    filter(segment.points);
+  }
+}
+

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GPX_GPXFILE_H
-#define OSMSCOUT_GPX_GPXFILE_H
+#ifndef LIBOSMSCOUT_GPX_IMPORT_H
+#define LIBOSMSCOUT_GPX_IMPORT_H
 
 /*
   This source is part of the libosmscout-gpx library
@@ -20,29 +20,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/Track.h>
-#include <osmscout/gpx/Route.h>
-#include <osmscout/gpx/Waypoint.h>
-#include <osmscout/gpx/Extensions.h>
+#include <osmscoutgpx/GpxFile.h>
+#include <osmscoutgpx/Utils.h>
+#include <osmscoutgpx/GPXImportExport.h>
 
-#include <osmscout/gpx/GPXImportExport.h>
+#include <osmscout/util/File.h>
+#include <osmscout/util/Exception.h>
+#include <osmscout/util/Breaker.h>
 
-#include <vector>
-#include <optional>
+#include <cstdio>
+#include <string>
 
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API GpxFile {
-public:
-  std::optional<std::string> name;
-  std::optional<std::string> desc;
-  std::optional<Timestamp> time;
 
-  std::vector<Track>    tracks;
-  std::vector<Route>    routes;
-  std::vector<Waypoint> waypoints;
-};
+extern OSMSCOUT_GPX_API bool ImportGpx(const std::string &filePath,
+                                       GpxFile &output,
+                                       BreakerRef breaker =nullptr,
+                                       ProcessCallbackRef callback = std::make_shared<ProcessCallback>());
+
 }
 }
-#endif //OSMSCOUT_GPX_GPXFILE_H
+
+#endif //LIBOSMSCOUT_GPX_IMPORT_H

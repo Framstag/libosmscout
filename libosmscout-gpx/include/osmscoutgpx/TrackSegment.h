@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GPX_WAYPOINT_H
-#define OSMSCOUT_GPX_WAYPOINT_H
+#ifndef OSMSCOUT_GPX_TRACKSEGMENT_H
+#define OSMSCOUT_GPX_TRACKSEGMENT_H
 
 /*
   This source is part of the libosmscout-gpx library
@@ -20,37 +20,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/gpx/TrackPoint.h>
 
-#include <osmscout/GeoCoord.h>
+#include <osmscoutgpx/TrackPoint.h>
 
-#include "GPXImportExport.h"
+#include <osmscoutgpx/GPXImportExport.h>
 
-#include <string>
-#include <optional>
+#include <vector>
 
 namespace osmscout {
 namespace gpx {
 
-class OSMSCOUT_GPX_API Waypoint {
+class OSMSCOUT_GPX_API TrackSegment {
 public:
-  explicit Waypoint(GeoCoord coord) :
-      coord(coord) {
-  }
+  std::vector<TrackPoint> points;
 
-  std::optional<std::string> name;
-  std::optional<std::string> description;
-  std::optional<std::string> symbol;
-
-  osmscout::GeoCoord coord;
-  std::optional<double> elevation; // meters above sea
-  std::optional<Timestamp> time;
-  std::optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
-  std::optional<double> hdop; // meters
-  std::optional<double> vdop; // meters
-  std::optional<double> pdop; // meters
+  /**
+   * Compute track length
+   * @return
+   */
+  Distance GetLength() const;
 };
 }
 }
 
-#endif //OSMSCOUT_GPX_WAYPOINT_H
+#endif //OSMSCOUT_GPX_TRACKSEGMENT_H

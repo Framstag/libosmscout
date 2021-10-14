@@ -1,21 +1,21 @@
 osmscoutgpxIncDir = include_directories('.')
 
 osmscoutgpxHeader = [
-            'osmscout/gpx/GPXImportExport.h',
-            'osmscout/gpx/GpxFile.h',
-            'osmscout/gpx/Utils.h',
-            'osmscout/gpx/Route.h',
-            'osmscout/gpx/Track.h',
-            'osmscout/gpx/Waypoint.h',
-            'osmscout/gpx/TrackPoint.h',
-            'osmscout/gpx/TrackSegment.h',
-            'osmscout/gpx/Extensions.h',
+            'osmscoutgpx/GPXImportExport.h',
+            'osmscoutgpx/GpxFile.h',
+            'osmscoutgpx/Utils.h',
+            'osmscoutgpx/Route.h',
+            'osmscoutgpx/Track.h',
+            'osmscoutgpx/Waypoint.h',
+            'osmscoutgpx/TrackPoint.h',
+            'osmscoutgpx/TrackSegment.h',
+            'osmscoutgpx/Extensions.h',
           ]
 
 if xml2Dep.found()
   osmscoutgpxHeader += [
-            'osmscout/gpx/Import.h',
-            'osmscout/gpx/Export.h',
+            'osmscoutgpx/Import.h',
+            'osmscoutgpx/Export.h',
           ]
 endif
 
