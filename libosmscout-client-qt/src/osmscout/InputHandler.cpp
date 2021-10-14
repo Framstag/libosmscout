@@ -847,12 +847,13 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
     return false;
   }
 
-  double lat, lon; // updated center
-  if (!projection.PixelToGeo(window.width()/2, window.height()/4, lon, lat)){
+  osmscout::GeoCoord coord;
+  if (!projection.PixelToGeo(window.width()/2, window.height()/4,
+                             coord)){
     return false;
   }
 
-  return JumpHandler::showCoordinates(osmscout::GeoCoord(lat, lon), magnification, bearing);
+  return JumpHandler::showCoordinates(coord, magnification, bearing);
 }
 bool VehicleFollowHandler::isLockedToPosition()
 {

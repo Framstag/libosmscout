@@ -1237,20 +1237,20 @@ namespace osmscout {
       startTileY--;
     }
 
-    std::vector<Point> points;
+    std::vector<GeoCoord> coords;
 
     // Horizontal lines
 
     for (uint32_t y=startTileY; y<=endTileY; y++) {
-      points.resize(endTileX-startTileX+1);
+      coords.resize(endTileX-startTileX+1);
 
       for (uint32_t x=startTileX; x<=endTileX; x++) {
-        points[x-startTileX].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
+        coords[x-startTileX]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
       CoordBufferRange transRange;
 
-      transRange=TransformWay(points,
+      transRange=TransformWay(coords,
                               transBuffer,
                               coordBuffer,
                               projection,
@@ -1276,15 +1276,15 @@ namespace osmscout {
     // Vertical lines
 
     for (uint32_t x=startTileX; x<=endTileX; x++) {
-      points.resize(endTileY-startTileY+1);
+      coords.resize(endTileY-startTileY+1);
 
       for (uint32_t y=startTileY; y<=endTileY; y++) {
-        points[y-startTileY].Set(0,OSMTileId(x,y).GetTopLeftCoord(magnification));
+        coords[y-startTileY]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
       CoordBufferRange transRange;
 
-      transRange=TransformWay(points,
+      transRange=TransformWay(coords,
                               transBuffer,
                               coordBuffer,
                               projection,
@@ -2328,14 +2328,14 @@ static void DumpGroundTile(const GroundTile& tile)
     std::set<GeoCoord> drawnLabels;
 #endif
 
-    FillStyleRef       landFill=styleConfig->GetLandFillStyle(projection);
-    FillStyleRef       seaFill=styleConfig->GetSeaFillStyle(projection);
-    FillStyleRef       coastFill=styleConfig->GetCoastFillStyle(projection);
-    FillStyleRef       unknownFill=styleConfig->GetUnknownFillStyle(projection);
-    LineStyleRef       coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
-    std::vector<Point> points;
-    size_t             start=0; // Make the compiler happy
-    size_t             end=0;   // Make the compiler happy
+    FillStyleRef          landFill=styleConfig->GetLandFillStyle(projection);
+    FillStyleRef          seaFill=styleConfig->GetSeaFillStyle(projection);
+    FillStyleRef          coastFill=styleConfig->GetCoastFillStyle(projection);
+    FillStyleRef          unknownFill=styleConfig->GetUnknownFillStyle(projection);
+    LineStyleRef          coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
+    std::vector<GeoCoord> coords;
+    size_t                start=0; // Make the compiler happy
+    size_t                end=0;   // Make the compiler happy
 
     if (!landFill) {
       landFill=this->landFill;
@@ -2415,7 +2415,7 @@ static void DumpGroundTile(const GroundTile& tile)
 #if defined(DEBUG_GROUNDTILES)
         std::cout << " >= sub" << std::endl;
 #endif
-        points.resize(tile.coords.size());
+        coords.resize(tile.coords.size());
 
         for (size_t i=0; i<tile.coords.size(); i++) {
           double lat;
@@ -2424,10 +2424,10 @@ static void DumpGroundTile(const GroundTile& tile)
           lat=groundTileData.boundingBox.GetMinCoord().GetLat() + double(tile.coords[i].y) / double(GroundTile::Coord::CELL_MAX) * (tile.cellHeight+pixelAsDegree);
           lon=groundTileData.boundingBox.GetMinCoord().GetLon() + double(tile.coords[i].x) / double(GroundTile::Coord::CELL_MAX) * (tile.cellWidth+pixelAsDegree);
 
-          points[i].SetCoord(GeoCoord(lat,lon));
+          coords[i]=GeoCoord(lat,lon);
         }
 
-        TransformArea(points,
+        TransformArea(coords,
                       transBuffer,
                       projection,
                       TransPolygon::none,

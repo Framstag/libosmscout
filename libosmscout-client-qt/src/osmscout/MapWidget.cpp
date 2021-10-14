@@ -128,10 +128,9 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 void MapWidget::hoverMoveEvent(QHoverEvent* event) {
     QQuickPaintedItem::hoverMoveEvent(event);
 
-    double lat;
-    double lon;
-    getProjection().PixelToGeo(event->pos().x(), event->pos().y(), lon, lat);
-    emit mouseMove(event->pos().x(), event->pos().y(), lat, lon, event->modifiers());
+    osmscout::GeoCoord coord;
+    getProjection().PixelToGeo(event->pos().x(), event->pos().y(), coord);
+    emit mouseMove(event->pos().x(), event->pos().y(), coord.GetLat(), coord.GetLon(), event->modifiers());
 }
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
@@ -692,27 +691,26 @@ OverlayNode *MapWidget::createOverlayNode(QString type)
 
 void MapWidget::onTap(const QPoint p)
 {
-    double lat;
-    double lon;
-    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
-    emit tap(p.x(), p.y(), lat, lon);
+  osmscout::GeoCoord coord;
+    getProjection().PixelToGeo(p.x(), p.y(),
+                               coord);
+    emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
 }
 
 void MapWidget::onDoubleTap(const QPoint p)
 {
     zoomIn(2.0, p);
-    double lat;
-    double lon;
-    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
-    emit doubleTap(p.x(), p.y(), lat, lon);
+    osmscout::GeoCoord coord;
+    getProjection().PixelToGeo(p.x(), p.y(),
+                               coord);
+    emit doubleTap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
 }
 
 void MapWidget::onLongTap(const QPoint p)
 {
-    double lat;
-    double lon;
-    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
-    emit longTap(p.x(), p.y(), lat, lon);
+  osmscout::GeoCoord coord;
+    getProjection().PixelToGeo(p.x(), p.y(), coord);
+    emit longTap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
 }
 
 void MapWidget::onTapAndDrag(const QPoint p)
@@ -728,10 +726,10 @@ void MapWidget::onTapLongTap(const QPoint p)
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
     setupInputHandler(new ZoomGestureHandler(*view, p, dbThread->GetPhysicalDpi()));
 
-    double lat;
-    double lon;
-    getProjection().PixelToGeo(p.x(), p.y(), lon, lat);
-    emit tapLongTap(p.x(), p.y(), lat, lon);
+    osmscout::GeoCoord coord;
+    getProjection().PixelToGeo(p.x(), p.y(),
+                               coord);
+    emit tapLongTap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
 }
 
 void MapWidget::onMapDPIChange(double dpi)

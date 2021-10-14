@@ -275,20 +275,18 @@ double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previo
 {
   double currentDiagonal=sqrt(pow(currentProjection.GetWidth(),2) + pow(currentProjection.GetHeight(),2));
 
-  double topLeftLon;
-  double topLeftLat;
-  currentProjection.PixelToGeo(0,0,topLeftLon,topLeftLat);
-  double bottomRightLon;
-  double bottomRightLat;
+  osmscout::GeoCoord topLeft;
+  currentProjection.PixelToGeo(0,0,topLeft);
+  osmscout::GeoCoord bottomRight;
   currentProjection.PixelToGeo(currentProjection.GetWidth(),currentProjection.GetHeight(),
-                               bottomRightLon,bottomRightLat);
+                               bottomRight);
 
   double x1;
   double y1;
-  previousProjection.GeoToPixel(osmscout::GeoCoord(topLeftLat,topLeftLon),x1,y1);
+  previousProjection.GeoToPixel(topLeft,x1,y1);
   double x2;
   double y2;
-  previousProjection.GeoToPixel(osmscout::GeoCoord(bottomRightLat,bottomRightLon),x2,y2);
+  previousProjection.GeoToPixel(bottomRight,x2,y2);
 
   double previousDiagonal=sqrt(pow(x2-x1,2) + pow(y2-y1,2));
   return currentDiagonal / previousDiagonal;

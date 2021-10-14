@@ -59,34 +59,6 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
-  Projection::Projection()
-  : lon(0),
-    lat(0),
-    angle(0),
-    dpi(0),
-    width(0),
-    height(0),
-    lonMin(0.0),
-    latMin(0.0),
-    lonMax(0.0),
-    latMax(0.0),
-    pixelSize(0.0),
-    meterInPixel(0.0),
-    meterInMM(0.0)
-  {
-    // no code
-  }
-
-  MercatorProjection::MercatorProjection()
-  : valid(false),
-    latOffset(0.0),
-    scale(1),
-    scaleGradtorad(0),
-    useLinearInterpolation(false)
-  {
-    // no code
-  }
-
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
                                const Magnification& magnification,
@@ -164,36 +136,32 @@ namespace osmscout {
 
     //std::cout << "Pixel size " << pixelSize << " meterInPixel " << meterInPixel << " meterInMM " << meterInMM << std::endl;
 
-    // top left
-    double tlLat;
-    double tlLon;
+    GeoCoord topLeft;
 
-    PixelToGeo(0.0,0.0,tlLon,tlLat);
+    PixelToGeo(0.0,0.0,topLeft);
 
-    // top right
-    double trLat;
-    double trLon;
+    GeoCoord topRight;
 
-    PixelToGeo((double)width,0.0,trLon,trLat);
+    PixelToGeo((double)width,0.0,topRight);
 
-    // bottom left
-    double blLat;
-    double blLon;
+    GeoCoord bottomLeft;
 
-    PixelToGeo(0.0,(double)height,blLon,blLat);
+    PixelToGeo(0.0,(double)height,bottomLeft);
 
-    // bottom right
-    double brLat;
-    double brLon;
+    GeoCoord bottomRight;
 
-    PixelToGeo((double)width,(double)height,brLon,brLat);
+    PixelToGeo((double)width,(double)height,bottomRight);
 
     // evaluate bounding box, crop bounding box to valid Mercator area
-    latMin=std::max(MinLat,std::min(std::min(tlLat,trLat),std::min(blLat,brLat)));
-    latMax=std::min(MaxLat,std::max(std::max(tlLat,trLat),std::max(blLat,brLat)));
+    latMin=std::max(MinLat,std::min(std::min(topLeft.GetLat(),topRight.GetLat()),
+                                    std::min(bottomLeft.GetLat(),bottomRight.GetLat())));
+    latMax=std::min(MaxLat,std::max(std::max(topLeft.GetLat(),topRight.GetLat()),
+                                    std::max(bottomLeft.GetLat(),bottomRight.GetLat())));
 
-    lonMin=std::max(MinLon,std::min(std::min(tlLon,trLon),std::min(blLon,brLon)));
-    lonMax=std::min(MaxLon,std::max(std::max(tlLon,trLon),std::max(blLon,brLon)));
+    lonMin=std::max(MinLon,std::min(std::min(topLeft.GetLon(),topRight.GetLon()),
+                                    std::min(bottomLeft.GetLon(),bottomRight.GetLon())));
+    lonMax=std::min(MaxLon,std::max(std::max(topLeft.GetLon(),topRight.GetLon()),
+                                    std::max(bottomLeft.GetLon(),bottomRight.GetLon())));
 
     // derivation of "latToYPixel" function in projection center
     double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
@@ -212,7 +180,7 @@ namespace osmscout {
   }
 
   bool MercatorProjection::PixelToGeo(double x, double y,
-                                      double& lon, double& lat) const
+                                      GeoCoord& coord) const
   {
     assert(valid);
 
@@ -229,10 +197,10 @@ namespace osmscout {
     }
 
     // Transform to absolute geo coordinate
-    lon=this->lon+x/scaleGradtorad;
-    lat=atan(sinh(y/scale+latOffset))/gradtorad;
+    coord.Set(atan(sinh(y/scale+latOffset))/gradtorad,
+              this->lon+x/scaleGradtorad);
 
-    return IsValidFor(GeoCoord(lat,lon));
+    return IsValidFor(coord);
   }
 
   bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
@@ -283,40 +251,28 @@ namespace osmscout {
     GeoToPixel(GeoCoord(lat,lon),
                x,y);
 
-    double lat;
-    double lon;
+    GeoCoord coord;
 
     if (!PixelToGeo(x+horizPixel,
                     y-vertPixel,
-                    lon,lat)) {
+                    coord)) {
       return false;
     }
 
-    if (lat<-85.0511 || lat>85.0511) {
+    if (coord.GetLat()<-85.0511 || coord.GetLat()>85.0511) {
       return false;
     }
 
-    if (lon<-180.0 || lon>180.0) {
+    if (coord.GetLon()<-180.0 || coord.GetLon()>180.0) {
       return false;
     }
 
-    return Set(GeoCoord(lat,lon),
+    return Set(coord,
                angle,
                magnification,
                dpi,
                width,
                height);
-  }
-
-  TileProjection::TileProjection()
-  : valid(false),
-    lonOffset(0.0),
-    latOffset(0.0),
-    scale(1),
-    scaleGradtorad(0),
-    useLinearInterpolation(false)
-  {
-    // no code
   }
 
   bool TileProjection::SetInternal(double lonMin,double latMin,
@@ -411,12 +367,12 @@ namespace osmscout {
   }
 
   bool TileProjection::PixelToGeo(double x, double y,
-                                  double& lon, double& lat) const
+                                  GeoCoord& coord) const
   {
-    lon=(x+lonOffset)/(scale*gradtorad);
-    lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
+    coord.Set(atan(sinh((height-y+latOffset)/scale))/gradtorad,
+              (x+lonOffset)/(scale*gradtorad));
 
-    return IsValidFor(GeoCoord(lat,lon));
+    return IsValidFor(coord);
   }
 
   #ifdef OSMSCOUT_HAVE_SSE2
@@ -465,5 +421,4 @@ namespace osmscout {
     }
 
   #endif
-
 }
