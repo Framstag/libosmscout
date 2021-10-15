@@ -295,6 +295,19 @@ namespace osmscout {
                            const Way& way,
                            WayPathData &pathData);
 
+    double CalculateLineWith(const Projection& projection,
+                             const FeatureValueBuffer& buffer,
+                             const LineStyle& lineStyle) const;
+
+    double CalculateLineOffset(const Projection& projection,
+                               const LineStyle& lineStyle,
+                               double lineWidth) const;
+
+    Color CalculateLineColor(const FeatureValueBuffer& buffer,
+                             const LineStyle& lineStyle) const;
+
+    int8_t CalculateLineLayer(const FeatureValueBuffer& buffer) const;
+
     void CalculatePaths(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
@@ -643,7 +656,7 @@ namespace osmscout {
 
     //@}
 
-    std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&);
+    std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&) const;
 
   public:
     explicit MapPainter(const StyleConfigRef& styleConfig);

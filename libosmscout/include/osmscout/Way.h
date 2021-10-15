@@ -136,6 +136,16 @@ namespace osmscout {
       return nodes.back().GetId();
     }
 
+    const Point& GetFront() const
+    {
+      return nodes.front();
+    }
+
+    const Point& GetBack() const
+    {
+      return nodes.back();
+    }
+
     const Point& GetPoint(size_t index) const
     {
       return nodes[index];

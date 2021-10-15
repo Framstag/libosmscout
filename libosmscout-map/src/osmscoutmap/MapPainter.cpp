@@ -631,7 +631,7 @@ namespace osmscout {
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
-        double height=std::abs((objectHeight)*0.1);
+        double height=std::abs(objectHeight*0.1);
 
         if (height==0 || height<standardFontSize) {
           continue;
@@ -1444,32 +1444,24 @@ namespace osmscout {
     }
   }
 
-  std::vector<OffsetRel> MapPainter::ParseLaneTurns(const LanesFeatureValue &lanesValue)
+  std::vector<OffsetRel> MapPainter::ParseLaneTurns(const LanesFeatureValue &lanesValue) const
   {
     std::vector<OffsetRel> laneTurns;
+
     laneTurns.reserve(lanesValue.GetLanes());
 
     // backward
+
     auto turns=SplitString(lanesValue.GetTurnBackward(), "|");
     int lanes=lanesValue.GetBackwardLanes();
     int lane=0;
+
     for (const std::string &turn: turns) {
       if (lane>=lanes){
         break;
       }
-      if (turn == "left" || turn == "merge_to_left" || turn == "slight_left" || turn == "sharp_left") {
-        laneTurns.push_back(OffsetRel::laneBackwardLeft);
-      } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
-        laneTurns.push_back(OffsetRel::laneBackwardThroughLeft);
-      } else if (turn == "through") {
-        laneTurns.push_back(OffsetRel::laneBackwardThrough);
-      } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
-        laneTurns.push_back(OffsetRel::laneBackwardThroughRight);
-      } else if (turn == "right" || turn == "merge_to_right" || turn == "slight_right" || turn == "sharp_right") {
-        laneTurns.push_back(OffsetRel::laneBackwardRight);
-      } else {
-        laneTurns.push_back(OffsetRel::base);
-      }
+
+      laneTurns.push_back(ParseBackwardTurnStringToOffset(turn));
       lane++;
     }
     for (;lane<lanes;lane++){
@@ -1477,26 +1469,17 @@ namespace osmscout {
     }
 
     // forward
+
     turns=SplitString(lanesValue.GetTurnForward(), "|");
     lanes=lanesValue.GetForwardLanes();
     lane=0;
+
     for (const std::string &turn: turns) {
       if (lane>=lanes){
         break;
       }
-      if (turn == "left" || turn == "merge_to_left" || turn == "slight_left" || turn == "sharp_left") {
-        laneTurns.push_back(OffsetRel::laneForwardLeft);
-      } else if (turn == "through;left" || turn == "through;slight_left" || turn == "through;sharp_left") {
-        laneTurns.push_back(OffsetRel::laneForwardThroughLeft);
-      } else if (turn == "through") {
-        laneTurns.push_back(OffsetRel::laneForwardThrough);
-      } else if (turn == "through;right" || turn == "through;slight_right" || turn == "through;sharp_right") {
-        laneTurns.push_back(OffsetRel::laneForwardThroughRight);
-      } else if (turn == "right" || turn == "merge_to_right" || turn == "slight_right" || turn == "sharp_right") {
-        laneTurns.push_back(OffsetRel::laneForwardRight);
-      } else {
-        laneTurns.push_back(OffsetRel::base);
-      }
+
+      laneTurns.push_back(ParseForwardTurnStringToOffset(turn));
       lane++;
     }
     for (;lane<lanes;lane++){
@@ -1541,13 +1524,111 @@ namespace osmscout {
     }
   }
 
+  double MapPainter::CalculateLineWith(const Projection& projection,
+                                       const FeatureValueBuffer& buffer,
+                                       const LineStyle& lineStyle) const
+  {
+    double lineWidth=0.0;
+
+    if (lineStyle.GetWidth()>0.0) {
+      const WidthFeatureValue *widthValue=widthReader.GetValue(buffer);
+
+
+      if (widthValue!=nullptr) {
+        lineWidth+=GetProjectedWidth(projection,
+                                     widthValue->GetWidth());
+      }
+      else {
+        lineWidth+=GetProjectedWidth(projection,
+                                     lineStyle.GetWidth());
+      }
+    }
+
+    if (lineStyle.GetDisplayWidth()>0.0) {
+      lineWidth+=projection.ConvertWidthToPixel(lineStyle.GetDisplayWidth());
+    }
+
+    return lineWidth;
+  }
+
+  double MapPainter::CalculateLineOffset(const Projection& projection,
+                                         const LineStyle& lineStyle,
+                                         double lineWidth) const
+  {
+    double lineOffset=0.0;
+
+    switch (lineStyle.GetOffsetRel()) {
+    case OffsetRel::base:
+    case OffsetRel::laneDivider:
+    case OffsetRel::laneForwardLeft:
+    case OffsetRel::laneForwardThroughLeft:
+    case OffsetRel::laneForwardThrough:
+    case OffsetRel::laneForwardThroughRight:
+    case OffsetRel::laneForwardRight:
+    case OffsetRel::laneBackwardLeft:
+    case OffsetRel::laneBackwardThroughLeft:
+    case OffsetRel::laneBackwardThrough:
+    case OffsetRel::laneBackwardThroughRight:
+    case OffsetRel::laneBackwardRight:
+      lineOffset=0.0;
+      break;
+    case OffsetRel::leftOutline:
+      lineOffset=-lineWidth/2.0;
+      break;
+    case OffsetRel::rightOutline:
+      lineOffset=lineWidth/2.0;
+      break;
+    case OffsetRel::sidecar:
+      lineOffset=-1.1 * lineWidth/2.0; // special handling not supported for ordinary ways
+      break;
+    }
+
+    if (lineStyle.GetOffset()!=0.0) {
+      lineOffset+=GetProjectedWidth(projection,
+                                    lineStyle.GetOffset());
+    }
+
+    if (lineStyle.GetDisplayOffset()!=0.0) {
+      lineOffset+=projection.ConvertWidthToPixel(lineStyle.GetDisplayOffset());
+    }
+
+    return lineOffset;
+  }
+
+  Color MapPainter::CalculateLineColor(const FeatureValueBuffer& buffer,
+                                       const LineStyle& lineStyle) const
+  {
+    Color color=lineStyle.GetLineColor();
+
+    if (lineStyle.GetPreferColorFeature()){
+      const ColorFeatureValue *colorValue=colorReader.GetValue(buffer);
+      if (colorValue != nullptr){
+        color=colorValue->GetColor();
+      }
+    }
+
+    return color;
+  }
+
+  int8_t MapPainter::CalculateLineLayer(const FeatureValueBuffer& buffer) const
+  {
+    const LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
+
+    if (layerValue!=nullptr) {
+      return layerValue->GetLayer();
+    }
+    else {
+      return 0;
+    }
+  }
+
   void MapPainter::CalculatePaths(const StyleConfig& styleConfig,
                                   const Projection& projection,
                                   const MapParameter& parameter,
                                   const Way& way)
   {
-    FileOffset ref = way.GetFileOffset();
-    const FeatureValueBuffer &buffer = way.GetFeatureValueBuffer();
+    FileOffset ref=way.GetFileOffset();
+    const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
 
     styleConfig.GetWayLineStyles(buffer,
                              projection,
@@ -1557,96 +1638,25 @@ namespace osmscout {
       return;
     }
 
-    WayPathData pathData;
-
-    pathData.ref=ref;
-    pathData.buffer=&buffer;
-    pathData.mainSlotWidth=0.0;
     bool transformed=false;
     const AccessFeatureValue *accessValue=nullptr;
     const LanesFeatureValue  *lanesValue=nullptr;
     std::vector<OffsetRel> laneTurns; // cached turns
 
+    WayPathData pathData;
+
+    pathData.ref=ref;
+    pathData.buffer=&buffer;
+    pathData.mainSlotWidth=0.0;
+
     for (const auto& lineStyle : lineStyles) {
-      double       lineWidth=0.0;
-      double       lineOffset=0.0;
-
-      if (lineStyle->GetWidth()>0.0) {
-        const WidthFeatureValue *widthValue=widthReader.GetValue(buffer);
-
-
-        if (widthValue!=nullptr) {
-          lineWidth+=GetProjectedWidth(projection,
-                                       widthValue->GetWidth());
-        }
-        else {
-          lineWidth+=GetProjectedWidth(projection,
-                                       lineStyle->GetWidth());
-        }
-      }
-
-      if (lineStyle->GetDisplayWidth()>0.0) {
-        lineWidth+=projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
-      }
-
-      if (lineStyle->GetSlot().empty()) {
-        pathData.mainSlotWidth=lineWidth;
-      }
+      double lineWidth=CalculateLineWith(projection,
+                                         buffer,
+                                         *lineStyle);
 
       if (lineWidth==0.0) {
         continue;
       }
-
-      switch (lineStyle->GetOffsetRel()) {
-      case OffsetRel::base:
-        lineOffset=0.0;
-        break;
-      case OffsetRel::leftOutline:
-        lineOffset=-pathData.mainSlotWidth/2.0;
-        break;
-      case OffsetRel::rightOutline:
-        lineOffset=pathData.mainSlotWidth/2.0;
-        break;
-      case OffsetRel::laneDivider:
-        lineOffset=0.0;
-        lanesValue=lanesReader.GetValue(buffer);
-        accessValue=accessReader.GetValue(buffer);
-
-        if (lanesValue==nullptr &&
-            accessValue==nullptr) {
-          continue;
-        }
-        break;
-      case OffsetRel::laneForwardLeft:
-      case OffsetRel::laneForwardThroughLeft:
-      case OffsetRel::laneForwardThrough:
-      case OffsetRel::laneForwardThroughRight:
-      case OffsetRel::laneForwardRight:
-      case OffsetRel::laneBackwardLeft:
-      case OffsetRel::laneBackwardThroughLeft:
-      case OffsetRel::laneBackwardThrough:
-      case OffsetRel::laneBackwardThroughRight:
-      case OffsetRel::laneBackwardRight:
-        lineOffset=0.0;
-        lanesValue=lanesReader.GetValue(buffer);
-        break;
-      case OffsetRel::sidecar:
-        lineOffset=-1.1 * pathData.mainSlotWidth/2.0; // special handling not supported for ordinary ways
-        break;
-      }
-
-      if (lineStyle->GetOffset()!=0.0) {
-        lineOffset+=GetProjectedWidth(projection,
-                                      lineStyle->GetOffset());
-      }
-
-      if (lineStyle->GetDisplayOffset()!=0.0) {
-        lineOffset+=projection.ConvertWidthToPixel(lineStyle->GetDisplayOffset());
-      }
-
-      WayData data;
-
-      data.lineWidth=lineWidth;
 
       if (!IsVisibleWay(projection,
                         way.GetBoundingBox(),
@@ -1654,34 +1664,46 @@ namespace osmscout {
         continue;
       }
 
+      if (lineStyle->GetSlot().empty()) {
+        pathData.mainSlotWidth=lineWidth;
+      }
+
+      if (lineStyle->GetOffsetRel()==OffsetRel::laneDivider) {
+        lanesValue=lanesReader.GetValue(buffer);
+        accessValue=accessReader.GetValue(buffer);
+
+        if (lanesValue==nullptr &&
+            accessValue==nullptr) {
+          continue;
+        }
+      }
+      else if (IsLaneOffset(lineStyle->GetOffsetRel())) {
+        lanesValue=lanesReader.GetValue(buffer);
+      }
+
+      double lineOffset=CalculateLineOffset(projection,
+                                            *lineStyle,
+                                            pathData.mainSlotWidth);
+
+      WayData data;
+
+      data.lineWidth=lineWidth;
+
       if (!transformed) {
         TransformPathData(projection, parameter, way, pathData);
         transformed=true;
         wayPathData.push_back(pathData);
       }
 
-      Color color=lineStyle->GetLineColor();
-      if (lineStyle->GetPreferColorFeature()){
-        const ColorFeatureValue *colorValue=colorReader.GetValue(buffer);
-        if (colorValue != nullptr){
-          color=colorValue->GetColor();
-        }
-      }
-
-      data.layer=0;
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.color=color;
+      data.layer=CalculateLineLayer(buffer);
+      data.color=CalculateLineColor(buffer,
+                                    *lineStyle);
       data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
       data.coordRange=pathData.coordRange;
-      data.startIsClosed=way.nodes[0].GetSerial()==0;
-      data.endIsClosed=way.nodes[way.nodes.size()-1].GetSerial()==0;
-
-      const LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
-
-      if (layerValue!=nullptr) {
-        data.layer=layerValue->GetLayer();
-      }
+      data.startIsClosed=!way.GetFront().IsRelevant();
+      data.endIsClosed=!way.GetBack().IsRelevant();
 
       if (lineOffset!=0.0) {
         data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
@@ -1705,8 +1727,8 @@ namespace osmscout {
           continue;
         }
 
-        double  lanesSpace=pathData.mainSlotWidth/lanes;
-        double  laneOffset=-pathData.mainSlotWidth/2.0+lanesSpace;
+        double lanesSpace=pathData.mainSlotWidth/lanes;
+        double laneOffset=-pathData.mainSlotWidth/2.0+lanesSpace;
 
         for (size_t lane=1; lane<lanes; lane++) {
           data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
@@ -1852,21 +1874,9 @@ namespace osmscout {
       PathTextStyleRef routeTextStyle=styleConfig.GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
                                                                         projection);
 
-      Color color=lineStyle->GetLineColor();
-      if (lineStyle->GetPreferColorFeature()){
-        const ColorFeatureValue *colorValue=colorReader.GetValue(route->GetFeatureValueBuffer());
-        if (colorValue != nullptr){
-          color=colorValue->GetColor();
-        }
-      }
+      Color color=CalculateLineColor(route->GetFeatureValueBuffer(),*lineStyle);
 
-      double lineWidth=0;
-      if (lineStyle->GetWidth()>0.0) {
-        lineWidth+=GetProjectedWidth(projection,lineStyle->GetWidth());
-      }
-      if (lineStyle->GetDisplayWidth()>0.0) {
-        lineWidth+=projection.ConvertWidthToPixel(lineStyle->GetDisplayWidth());
-      }
+      double lineWidth=CalculateLineWith(projection,route->GetFeatureValueBuffer(),*lineStyle);
 
       RouteData routeTmp;
       auto FlushRouteData = [&](){
