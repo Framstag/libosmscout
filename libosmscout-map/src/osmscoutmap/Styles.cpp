@@ -38,7 +38,52 @@ namespace osmscout {
            rel==OffsetRel::laneBackwardRight;
   }
 
-  class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
+  OffsetRel ParseForwardTurnStringToOffset(const std::string& turn)
+  {
+    if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
+      return OffsetRel::laneForwardLeft;
+    }
+    else if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+      return OffsetRel::laneForwardThroughLeft;
+    }
+    else if (turn=="through") {
+      return OffsetRel::laneForwardThrough;
+    }
+    else if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+      return OffsetRel::laneForwardThroughRight;
+    }
+    else if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+      return OffsetRel::laneForwardRight;
+    }
+    else {
+      return OffsetRel::base;
+    }
+  }
+
+  OffsetRel ParseBackwardTurnStringToOffset(const std::string& turn)
+  {
+    if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
+      return OffsetRel::laneBackwardLeft;
+    }
+    else if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+      return OffsetRel::laneBackwardThroughLeft;
+    }
+    else if (turn=="through") {
+      return OffsetRel::laneBackwardThrough;
+    }
+    else if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+      return OffsetRel::laneBackwardThroughRight;
+    }
+    else if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+      return OffsetRel::laneBackwardRight;
+    }
+    else {
+      return OffsetRel::base;
+    }
+  }
+
+
+class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   {
   public:
     LineStyleDescriptor()

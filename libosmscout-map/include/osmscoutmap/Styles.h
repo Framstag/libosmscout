@@ -60,6 +60,9 @@ namespace osmscout {
 
   extern bool IsLaneOffset(OffsetRel rel);
 
+  extern OffsetRel ParseForwardTurnStringToOffset(const std::string& turn);
+  extern OffsetRel ParseBackwardTurnStringToOffset(const std::string& turn);
+
   /**
    * \ingroup Stylesheet
    *
