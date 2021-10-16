@@ -1,66 +1,66 @@
 osmscoutimportIncDir = include_directories('.')
 
 osmscoutimportHeader = [
-            'osmscout/import/AreaIndexGenerator.h',
-            'osmscout/import/ImportImportExport.h',
-            'osmscout/import/RawCoastline.h',
-            'osmscout/import/RawCoord.h',
-            'osmscout/import/RawNode.h',
-            'osmscout/import/RawRelation.h',
-            'osmscout/import/RawRelIndexedDataFile.h',
-            'osmscout/import/RawWay.h',
-            'osmscout/import/RawWayIndexedDataFile.h',
-            'osmscout/import/WaterIndexProcessor.h',
-            'osmscout/import/GenAreaAreaIndex.h',
-            'osmscout/import/GenAreaNodeIndex.h',
-            'osmscout/import/GenAreaRouteIndex.h',
-            'osmscout/import/GenAreaWayIndex.h',
-            'osmscout/import/GenCoordDat.h',
-            'osmscout/import/GenCoverageIndex.h',
-            'osmscout/import/GenIntersectionIndex.h',
-            'osmscout/import/GenLocationIndex.h',
-            'osmscout/import/GenMergeAreas.h',
-            'osmscout/import/GenNumericIndex.h',
-            'osmscout/import/GenRawNodeIndex.h',
-            'osmscout/import/GenRawWayIndex.h',
-            'osmscout/import/GenRawRelIndex.h',
-            'osmscout/import/GenNodeDat.h',
-            'osmscout/import/GenOptimizeAreaWayIds.h',
-            'osmscout/import/GenOptimizeAreasLowZoom.h',
-            'osmscout/import/GenOptimizeWaysLowZoom.h',
-            'osmscout/import/GenPTRouteDat.h',
-            'osmscout/import/GenRelAreaDat.h',
-            'osmscout/import/GenRouteDat.h',
-            'osmscout/import/GenRoute2Dat.h',
-            'osmscout/import/GenTypeDat.h',
-            'osmscout/import/GenWaterIndex.h',
-            'osmscout/import/GenWayAreaDat.h',
-            'osmscout/import/GenWayWayDat.h',
-            'osmscout/import/MergeAreaData.h',
-            'osmscout/import/ShapeFileScanner.h',
-            'osmscout/import/SortDat.h',
-            'osmscout/import/SortNodeDat.h',
-            'osmscout/import/SortWayDat.h',
-            'osmscout/import/Import.h',
-            'osmscout/import/ImportErrorReporter.h',
-            'osmscout/import/ImportModule.h',
-            'osmscout/import/ImportParameter.h',
-            'osmscout/import/ImportProgress.h',
-            'osmscout/import/Preprocessor.h',
-            'osmscout/import/Preprocess.h',
-            'osmscout/import/PreprocessPoly.h'
+            'osmscoutimport/AreaIndexGenerator.h',
+            'osmscoutimport/ImportImportExport.h',
+            'osmscoutimport/RawCoastline.h',
+            'osmscoutimport/RawCoord.h',
+            'osmscoutimport/RawNode.h',
+            'osmscoutimport/RawRelation.h',
+            'osmscoutimport/RawRelIndexedDataFile.h',
+            'osmscoutimport/RawWay.h',
+            'osmscoutimport/RawWayIndexedDataFile.h',
+            'osmscoutimport/WaterIndexProcessor.h',
+            'osmscoutimport/GenAreaAreaIndex.h',
+            'osmscoutimport/GenAreaNodeIndex.h',
+            'osmscoutimport/GenAreaRouteIndex.h',
+            'osmscoutimport/GenAreaWayIndex.h',
+            'osmscoutimport/GenCoordDat.h',
+            'osmscoutimport/GenCoverageIndex.h',
+            'osmscoutimport/GenIntersectionIndex.h',
+            'osmscoutimport/GenLocationIndex.h',
+            'osmscoutimport/GenMergeAreas.h',
+            'osmscoutimport/GenNumericIndex.h',
+            'osmscoutimport/GenRawNodeIndex.h',
+            'osmscoutimport/GenRawWayIndex.h',
+            'osmscoutimport/GenRawRelIndex.h',
+            'osmscoutimport/GenNodeDat.h',
+            'osmscoutimport/GenOptimizeAreaWayIds.h',
+            'osmscoutimport/GenOptimizeAreasLowZoom.h',
+            'osmscoutimport/GenOptimizeWaysLowZoom.h',
+            'osmscoutimport/GenPTRouteDat.h',
+            'osmscoutimport/GenRelAreaDat.h',
+            'osmscoutimport/GenRouteDat.h',
+            'osmscoutimport/GenRoute2Dat.h',
+            'osmscoutimport/GenTypeDat.h',
+            'osmscoutimport/GenWaterIndex.h',
+            'osmscoutimport/GenWayAreaDat.h',
+            'osmscoutimport/GenWayWayDat.h',
+            'osmscoutimport/MergeAreaData.h',
+            'osmscoutimport/ShapeFileScanner.h',
+            'osmscoutimport/SortDat.h',
+            'osmscoutimport/SortNodeDat.h',
+            'osmscoutimport/SortWayDat.h',
+            'osmscoutimport/Import.h',
+            'osmscoutimport/ImportErrorReporter.h',
+            'osmscoutimport/ImportModule.h',
+            'osmscoutimport/ImportParameter.h',
+            'osmscoutimport/ImportProgress.h',
+            'osmscoutimport/Preprocessor.h',
+            'osmscoutimport/Preprocess.h',
+            'osmscoutimport/PreprocessPoly.h'
           ]
 
 if xml2Dep.found()
-  osmscoutimportHeader += ['osmscout/import/PreprocessOSM.h']
+  osmscoutimportHeader += ['osmscoutimport/PreprocessOSM.h']
 endif
 
 if protocCmd.found() and protobufDep.found()
-  osmscoutimportHeader += ['osmscout/import/PreprocessPBF.h']
+  osmscoutimportHeader += ['osmscoutimport/PreprocessPBF.h']
 endif
 
 if marisaDep.found()
-  osmscoutimportHeader += ['osmscout/import/GenTextIndex.h']
+  osmscoutimportHeader += ['osmscoutimport/GenTextIndex.h']
 endif
 
 install_headers(osmscoutimportHeader)

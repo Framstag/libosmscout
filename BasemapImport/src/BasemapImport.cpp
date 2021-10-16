@@ -30,10 +30,10 @@
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 
-#include <osmscout/import/Import.h>
-#include <osmscout/import/ShapeFileScanner.h>
+#include <osmscoutimport/Import.h>
+#include <osmscoutimport/ShapeFileScanner.h>
 
-#include <osmscout/import/WaterIndexProcessor.h>
+#include <osmscoutimport/WaterIndexProcessor.h>
 
 class CoastlineShapeFileVisitor : public osmscout::ShapeFileVisitor
 {
