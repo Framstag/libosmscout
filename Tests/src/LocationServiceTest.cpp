@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <osmscout/import/Import.h>
-#include <osmscout/import/ImportProgress.h>
+#include <osmscoutimport/Import.h>
+#include <osmscoutimport/ImportProgress.h>
 
 #include <osmscout-test/PreprocessOLT.h>
 

@@ -29,7 +29,7 @@
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 
-#include <osmscout/import/Import.h>
+#include <osmscoutimport/Import.h>
 
 static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 {

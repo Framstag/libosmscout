@@ -1,116 +1,116 @@
 set(HEADER_FILES
-    include/osmscout/import/AreaIndexGenerator.h
-    include/osmscout/import/GenAreaAreaIndex.h
-    include/osmscout/import/GenAreaNodeIndex.h
-    include/osmscout/import/GenAreaWayIndex.h
-    include/osmscout/import/GenCoordDat.h
-    include/osmscout/import/GenCoverageIndex.h
-    include/osmscout/import/GenIntersectionIndex.h
-    include/osmscout/import/GenLocationIndex.h
-    include/osmscout/import/GenMergeAreas.h
-    include/osmscout/import/GenNodeDat.h
-    include/osmscout/import/GenNumericIndex.h
-    include/osmscout/import/GenOptimizeAreasLowZoom.h
-    include/osmscout/import/GenOptimizeAreaWayIds.h
-    include/osmscout/import/GenOptimizeWaysLowZoom.h
-    include/osmscout/import/GenPTRouteDat.h
-    include/osmscout/import/GenRawNodeIndex.h
-    include/osmscout/import/GenRawRelIndex.h
-    include/osmscout/import/GenAreaRouteIndex.h
-    include/osmscout/import/GenRawWayIndex.h
-    include/osmscout/import/GenRelAreaDat.h
-    include/osmscout/import/GenRouteDat.h
-    include/osmscout/import/GenRoute2Dat.h
-    include/osmscout/import/GenTypeDat.h
-    include/osmscout/import/GenWaterIndex.h
-    include/osmscout/import/GenWayAreaDat.h
-    include/osmscout/import/GenWayWayDat.h
-    include/osmscout/import/Import.h
-    include/osmscout/import/ImportErrorReporter.h
-    include/osmscout/import/ImportModule.h
-    include/osmscout/import/ImportParameter.h
-    include/osmscout/import/ImportProgress.h
-    include/osmscout/import/MergeAreaData.h
-    include/osmscout/import/Preprocess.h
-    include/osmscout/import/Preprocessor.h
-    include/osmscout/import/PreprocessPoly.h
-    include/osmscout/import/RawCoastline.h
-    include/osmscout/import/RawCoord.h
-    include/osmscout/import/RawNode.h
-    include/osmscout/import/RawRelation.h
-    include/osmscout/import/RawRelIndexedDataFile.h
-    include/osmscout/import/RawWay.h
-    include/osmscout/import/RawWayIndexedDataFile.h
-    include/osmscout/import/ShapeFileScanner.h
-    include/osmscout/import/WaterIndexProcessor.h
-    include/osmscout/import/SortDat.h
-    include/osmscout/import/SortNodeDat.h
-    include/osmscout/import/SortWayDat.h
-    include/osmscout/import/ImportImportExport.h
+    include/osmscoutimport/AreaIndexGenerator.h
+    include/osmscoutimport/GenAreaAreaIndex.h
+    include/osmscoutimport/GenAreaNodeIndex.h
+    include/osmscoutimport/GenAreaWayIndex.h
+    include/osmscoutimport/GenCoordDat.h
+    include/osmscoutimport/GenCoverageIndex.h
+    include/osmscoutimport/GenIntersectionIndex.h
+    include/osmscoutimport/GenLocationIndex.h
+    include/osmscoutimport/GenMergeAreas.h
+    include/osmscoutimport/GenNodeDat.h
+    include/osmscoutimport/GenNumericIndex.h
+    include/osmscoutimport/GenOptimizeAreasLowZoom.h
+    include/osmscoutimport/GenOptimizeAreaWayIds.h
+    include/osmscoutimport/GenOptimizeWaysLowZoom.h
+    include/osmscoutimport/GenPTRouteDat.h
+    include/osmscoutimport/GenRawNodeIndex.h
+    include/osmscoutimport/GenRawRelIndex.h
+    include/osmscoutimport/GenAreaRouteIndex.h
+    include/osmscoutimport/GenRawWayIndex.h
+    include/osmscoutimport/GenRelAreaDat.h
+    include/osmscoutimport/GenRouteDat.h
+    include/osmscoutimport/GenRoute2Dat.h
+    include/osmscoutimport/GenTypeDat.h
+    include/osmscoutimport/GenWaterIndex.h
+    include/osmscoutimport/GenWayAreaDat.h
+    include/osmscoutimport/GenWayWayDat.h
+    include/osmscoutimport/Import.h
+    include/osmscoutimport/ImportErrorReporter.h
+    include/osmscoutimport/ImportModule.h
+    include/osmscoutimport/ImportParameter.h
+    include/osmscoutimport/ImportProgress.h
+    include/osmscoutimport/MergeAreaData.h
+    include/osmscoutimport/Preprocess.h
+    include/osmscoutimport/Preprocessor.h
+    include/osmscoutimport/PreprocessPoly.h
+    include/osmscoutimport/RawCoastline.h
+    include/osmscoutimport/RawCoord.h
+    include/osmscoutimport/RawNode.h
+    include/osmscoutimport/RawRelation.h
+    include/osmscoutimport/RawRelIndexedDataFile.h
+    include/osmscoutimport/RawWay.h
+    include/osmscoutimport/RawWayIndexedDataFile.h
+    include/osmscoutimport/ShapeFileScanner.h
+    include/osmscoutimport/WaterIndexProcessor.h
+    include/osmscoutimport/SortDat.h
+    include/osmscoutimport/SortNodeDat.h
+    include/osmscoutimport/SortWayDat.h
+    include/osmscoutimport/ImportImportExport.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/import/AreaIndexGenerator.cpp
-    src/osmscout/import/GenAreaAreaIndex.cpp
-    src/osmscout/import/GenAreaNodeIndex.cpp
-    src/osmscout/import/GenAreaWayIndex.cpp
-    src/osmscout/import/GenCoordDat.cpp
-    src/osmscout/import/GenCoverageIndex.cpp
-    src/osmscout/import/GenIntersectionIndex.cpp
-    src/osmscout/import/GenLocationIndex.cpp
-    src/osmscout/import/GenMergeAreas.cpp
-    src/osmscout/import/GenNodeDat.cpp
-    src/osmscout/import/GenNumericIndex.cpp
-    src/osmscout/import/GenOptimizeAreasLowZoom.cpp
-    src/osmscout/import/GenOptimizeAreaWayIds.cpp
-    src/osmscout/import/GenOptimizeWaysLowZoom.cpp
-    src/osmscout/import/GenRawNodeIndex.cpp
-    src/osmscout/import/GenRawRelIndex.cpp
-    src/osmscout/import/GenAreaRouteIndex.cpp
-    src/osmscout/import/GenRawWayIndex.cpp
-    src/osmscout/import/GenRelAreaDat.cpp
-    src/osmscout/import/GenPTRouteDat.cpp
-    src/osmscout/import/GenRouteDat.cpp
-    src/osmscout/import/GenRoute2Dat.cpp
-    src/osmscout/import/GenTypeDat.cpp
-    src/osmscout/import/GenWaterIndex.cpp
-    src/osmscout/import/GenWayAreaDat.cpp
-    src/osmscout/import/GenWayWayDat.cpp
-    src/osmscout/import/Import.cpp
-    src/osmscout/import/ImportErrorReporter.cpp
-    src/osmscout/import/ImportModule.cpp
-    src/osmscout/import/ImportParameter.cpp
-    src/osmscout/import/ImportProgress.cpp
-    src/osmscout/import/MergeAreaData.cpp
-    src/osmscout/import/Preprocess.cpp
-    src/osmscout/import/Preprocessor.cpp
-    src/osmscout/import/PreprocessPoly.cpp
-    src/osmscout/import/RawCoastline.cpp
-    src/osmscout/import/RawCoord.cpp
-    src/osmscout/import/RawNode.cpp
-    src/osmscout/import/RawRelation.cpp
-    src/osmscout/import/RawRelIndexedDataFile.cpp
-    src/osmscout/import/RawWay.cpp
-    src/osmscout/import/RawWayIndexedDataFile.cpp
-    src/osmscout/import/ShapeFileScanner.cpp
-    src/osmscout/import/WaterIndexProcessor.cpp
-    src/osmscout/import/SortDat.cpp
-    src/osmscout/import/SortNodeDat.cpp
-    src/osmscout/import/SortWayDat.cpp
+    src/osmscoutimport/AreaIndexGenerator.cpp
+    src/osmscoutimport/GenAreaAreaIndex.cpp
+    src/osmscoutimport/GenAreaNodeIndex.cpp
+    src/osmscoutimport/GenAreaWayIndex.cpp
+    src/osmscoutimport/GenCoordDat.cpp
+    src/osmscoutimport/GenCoverageIndex.cpp
+    src/osmscoutimport/GenIntersectionIndex.cpp
+    src/osmscoutimport/GenLocationIndex.cpp
+    src/osmscoutimport/GenMergeAreas.cpp
+    src/osmscoutimport/GenNodeDat.cpp
+    src/osmscoutimport/GenNumericIndex.cpp
+    src/osmscoutimport/GenOptimizeAreasLowZoom.cpp
+    src/osmscoutimport/GenOptimizeAreaWayIds.cpp
+    src/osmscoutimport/GenOptimizeWaysLowZoom.cpp
+    src/osmscoutimport/GenRawNodeIndex.cpp
+    src/osmscoutimport/GenRawRelIndex.cpp
+    src/osmscoutimport/GenAreaRouteIndex.cpp
+    src/osmscoutimport/GenRawWayIndex.cpp
+    src/osmscoutimport/GenRelAreaDat.cpp
+    src/osmscoutimport/GenPTRouteDat.cpp
+    src/osmscoutimport/GenRouteDat.cpp
+    src/osmscoutimport/GenRoute2Dat.cpp
+    src/osmscoutimport/GenTypeDat.cpp
+    src/osmscoutimport/GenWaterIndex.cpp
+    src/osmscoutimport/GenWayAreaDat.cpp
+    src/osmscoutimport/GenWayWayDat.cpp
+    src/osmscoutimport/Import.cpp
+    src/osmscoutimport/ImportErrorReporter.cpp
+    src/osmscoutimport/ImportModule.cpp
+    src/osmscoutimport/ImportParameter.cpp
+    src/osmscoutimport/ImportProgress.cpp
+    src/osmscoutimport/MergeAreaData.cpp
+    src/osmscoutimport/Preprocess.cpp
+    src/osmscoutimport/Preprocessor.cpp
+    src/osmscoutimport/PreprocessPoly.cpp
+    src/osmscoutimport/RawCoastline.cpp
+    src/osmscoutimport/RawCoord.cpp
+    src/osmscoutimport/RawNode.cpp
+    src/osmscoutimport/RawRelation.cpp
+    src/osmscoutimport/RawRelIndexedDataFile.cpp
+    src/osmscoutimport/RawWay.cpp
+    src/osmscoutimport/RawWayIndexedDataFile.cpp
+    src/osmscoutimport/ShapeFileScanner.cpp
+    src/osmscoutimport/WaterIndexProcessor.cpp
+    src/osmscoutimport/SortDat.cpp
+    src/osmscoutimport/SortNodeDat.cpp
+    src/osmscoutimport/SortWayDat.cpp
 )
 
 set(EXCLUDE_HEADER)
 
 if(MARISA_FOUND)
-    list(APPEND HEADER_FILES include/osmscout/import/GenTextIndex.h)
-    list(APPEND SOURCE_FILES src/osmscout/import/GenTextIndex.cpp)
+    list(APPEND HEADER_FILES include/osmscoutimport/GenTextIndex.h)
+    list(APPEND SOURCE_FILES src/osmscoutimport/GenTextIndex.cpp)
 else()
 	list(APPEND EXCLUDE_HEADER GenTextIndex.h)
 endif()
 
 if(LIBXML2_FOUND)
-    list(APPEND HEADER_FILES include/osmscout/import/PreprocessOSM.h)
-    list(APPEND SOURCE_FILES src/osmscout/import/PreprocessOSM.cpp)
+    list(APPEND HEADER_FILES include/osmscoutimport/PreprocessOSM.h)
+    list(APPEND SOURCE_FILES src/osmscoutimport/PreprocessOSM.cpp)
 else()
 	list(APPEND EXCLUDE_HEADER PreprocessOSM.h)
 endif()
@@ -119,8 +119,8 @@ if (PROTOBUF_FOUND)
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/fileformat.proto
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/osmformat.proto)
-    list(APPEND HEADER_FILES include/osmscout/import/PreprocessPBF.h)
-    list(APPEND SOURCE_FILES src/osmscout/import/PreprocessPBF.cpp)
+    list(APPEND HEADER_FILES include/osmscoutimport/PreprocessPBF.h)
+    list(APPEND SOURCE_FILES src/osmscoutimport/PreprocessPBF.cpp)
     list(APPEND HEADER_FILES ${PROTO_HDRS})
     list(APPEND SOURCE_FILES ${PROTO_SRCS})
 else()
@@ -133,8 +133,9 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_import"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/import/ImportFeatures.h.cmake
-	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h
+	INCLUDEDIR "osmscoutimport"
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutimport/ImportFeatures.h.cmake
+	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutimport/ImportFeatures.h
 	TARGET OSMScout::OSMScout
 	SKIP_HEADER
 )
@@ -201,4 +202,4 @@ else()
 	endforeach()
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" ${_exclude})
 endif()
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/import/ImportFeatures.h DESTINATION include/osmscout)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutimport/ImportFeatures.h DESTINATION include/osmscout)

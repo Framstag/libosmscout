@@ -22,7 +22,7 @@
 
 #include <map>
 
-#include <osmscout/import/Preprocessor.h>
+#include <osmscoutimport/Preprocessor.h>
 
 #include <osmscout/system/Compiler.h>
 
