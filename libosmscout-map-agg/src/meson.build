@@ -1,4 +1,4 @@
 osmscoutmapaggSrc = [
-            'src/osmscout/MapPainterAgg.cpp',
+            'src/osmscoutmapagg/MapPainterAgg.cpp',
           ]
 

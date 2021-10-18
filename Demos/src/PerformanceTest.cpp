@@ -38,7 +38,7 @@
 #include <osmscout/MapPainterQt.h>
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-#include <osmscout/MapPainterAgg.h>
+#include <osmscoutmapagg/MapPainterAgg.h>
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
 #include <osmscout/MapPainterOpenGL.h>

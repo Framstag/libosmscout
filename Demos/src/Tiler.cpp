@@ -28,7 +28,7 @@
 
 #include <osmscoutmap/MapService.h>
 
-#include <osmscout/MapPainterAgg.h>
+#include <osmscoutmapagg/MapPainterAgg.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
