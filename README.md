@@ -5,12 +5,12 @@ based on OpenStreetMap data.
 
 Supported platforms:
 * 32bit or 64 bit platforms in general are supported.
-* Requires a compiler that supports C++11.
+* Requires a compiler that supports C++17.
+* Supported build systems are CMake and Meson.
 * Linux using recent versions of gcc or clang.
 * Mac OS X and iOS using XCode/clang.
-* Windows using MinGW-based gcc compiler or Visual Studio 2015.
-* Android did work a while ago but is currently untested. Should work, if the
- compiler is C++11 aware.
+* Windows using MinGW-based gcc compiler or Visual Studio 2019.
+* Android 7 or newer using NDK 18b or newer (with C++17 support).
 
 # License
 
@@ -54,19 +54,21 @@ We plan to move all documentation for the repository to the homepage.
 
 # Automatic builds
 
-Automatic builds for Linux and Mac OS X can be found at
-[Travis](https://travis-ci.org/Framstag/libosmscout). The Linux builds are currently based on
-Ubuntu 14.04. For both operating systems clang and gcc is used as compiler.
-
-You can find automatic builds for Windows at
-[Appveyor](https://ci.appveyor.com/project/Framstag/libosmscout). There are builds
-for using MinGW (autoconf, cmake) and VisualStudio (cmake).
+Automatic builds can be found at [Github Actions](https://github.com/Framstag/libosmscout/actions),
+[Appveyor](https//ci.appveyor.com/project/Framstag/libosmscout) and [Wecker](https://app.wercker.com/project/byKey/39a4ba230c28d1d9e4ecae6158b283e8).
+Static code analysis on [Sonar cloud](https://sonarcloud.io/dashboard?id=Framstag_libosmscout).
+Goal is to check all supported platforms, compilers and build systems to keep project in good condition.
 
 Current build status:
 
 |Operating Systems|Provider|Status|
 |-----------------|--------|------|
-|Linux, Mac OS|Travis-CI|[![Build Status](https://travis-ci.org/Framstag/libosmscout.svg?branch=master)](https://travis-ci.org/Framstag/libosmscout)|
+|iOS|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml)|
+|Windows, MSYS/MINGW64|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml)|
+|Mac OS X|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml)|
+|Linux (Ubuntu 20.04)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_20_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_20_04.yml)|
+|Windows, Visual Studio 2019|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml)|
+|Android (on Ubuntu 18.04)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml)|
+|Linux (with sanitizers)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml)|
 |Windows|Appveyor|[![Build status](https://ci.appveyor.com/api/projects/status/s38jd7v5cwhwra8t?svg=true)](https//ci.appveyor.com/project/Framstag/libosmscout)|
-|Linux|Circle CI|[![Build Status](https://circleci.com/gh/Framstag/libosmscout.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/Framstag/libosmscout)|
 |Linux|Wercker|[![wercker status](https://app.wercker.com/status/39a4ba230c28d1d9e4ecae6158b283e8/s/master "wercker status")](https://app.wercker.com/project/byKey/39a4ba230c28d1d9e4ecae6158b283e8)|
