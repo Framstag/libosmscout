@@ -2384,7 +2384,7 @@ TYPES
       ROUTE
 
   TYPE route_hiking
-    = RELATION ("type"=="route" AND "route"=="hiking")
+    = RELATION ("type"=="route" AND ("route"=="hiking" OR "route"=="foot"))
       {Name, Ref, Operator, Network, Color}
       ROUTE
 
