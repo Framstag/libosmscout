@@ -1,12 +1,12 @@
 osmscoutmapcairoIncDir = include_directories('.')
 
 osmscoutmapcairoHeader = [
-            'osmscout/MapCairoImportExport.h',
-            'osmscout/MapPainterCairo.h'
+            'osmscoutmapcairo/MapCairoImportExport.h',
+            'osmscoutmapcairo/MapPainterCairo.h'
           ]
 
 if pngDep.found()
-  osmscoutmapcairoHeader += ['osmscout/LoaderPNG.h']
+  osmscoutmapcairoHeader += ['osmscoutmapcairo/LoaderPNG.h']
 endif
 
 install_headers(osmscoutmapcairoHeader)

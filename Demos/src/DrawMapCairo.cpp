@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include <osmscout/MapPainterCairo.h>
+#include <osmscoutmapcairo/MapPainterCairo.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in meson build directory):
