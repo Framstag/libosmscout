@@ -17,14 +17,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapPainterCairo.h>
+#include <osmscoutmapcairo/MapPainterCairo.h>
 
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
 
-#include <osmscout/LoaderPNG.h>
+#include <osmscoutmapcairo/LoaderPNG.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>

@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout')
-subdir('include/osmscout/private')
+subdir('include/osmscoutmapcairo')
+subdir('include/osmscoutmapcairo/private')
 subdir('src')
 
 # TODO: We either have only cairo or the complete pango/glib stack...

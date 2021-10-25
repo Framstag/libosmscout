@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapCairoFeatures.h>
+#include <osmscoutmapcairo/MapCairoFeatures.h>
 
 #include <mutex>
 #include <unordered_map>
@@ -36,7 +36,7 @@
   #include <pango/pango-glyph.h>
 #endif
 
-#include <osmscout/MapCairoImportExport.h>
+#include <osmscoutmapcairo/MapCairoImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 

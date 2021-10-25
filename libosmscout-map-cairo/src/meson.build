@@ -1,8 +1,8 @@
 osmscoutmapcairoSrc = [
-            'src/osmscout/MapPainterCairo.cpp',
+            'src/osmscoutmapcairo/MapPainterCairo.cpp',
           ]
 
 if pngDep.found()
-  osmscoutmapcairoSrc += ['src/osmscout/LoaderPNG.cpp']
+  osmscoutmapcairoSrc += ['src/osmscoutmapcairo/LoaderPNG.cpp']
 endif
 

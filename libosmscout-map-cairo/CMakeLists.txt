@@ -1,12 +1,12 @@
 set(HEADER_FILES
-    include/osmscout/MapCairoImportExport.h
-    include/osmscout/LoaderPNG.h
-    include/osmscout/MapPainterCairo.h
+    include/osmscoutmapcairo/MapCairoImportExport.h
+    include/osmscoutmapcairo/LoaderPNG.h
+    include/osmscoutmapcairo/MapPainterCairo.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/LoaderPNG.cpp
-    src/osmscout/MapPainterCairo.cpp
+    src/osmscoutmapcairo/LoaderPNG.cpp
+    src/osmscoutmapcairo/MapPainterCairo.cpp
 )
 
 osmscout_library_project(
@@ -15,8 +15,9 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_cairo"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR osmscoutmapcairo
 	INCLUDES ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapCairoFeatures.h.cmake
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapcairo/MapCairoFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES}
 )
 target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})

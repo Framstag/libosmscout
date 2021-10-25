@@ -28,7 +28,7 @@
 #include <osmscoutmap/MapService.h>
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
-#include <osmscout/MapPainterCairo.h>
+#include <osmscoutmapcairo/MapPainterCairo.h>
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
 #include <QApplication>
