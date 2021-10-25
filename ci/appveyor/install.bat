@@ -51,9 +51,9 @@ IF %COMPILER%==msys2 (
     7z x marisa.zip
     bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd marisa-trie-0.2.4 && ./configure --disable-shared && make -j2 && make install"
 
-    wget https://github.com/google/protobuf/releases/download/v3.1.0/protobuf-cpp-3.1.0.zip -O protobuf-cpp-3.1.0.zip
-    7z x protobuf-cpp-3.1.0.zip
-    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd protobuf-3.1.0 && ./configure --disable-shared && make -j2 && make install"
+    wget https://github.com/google/protobuf/releases/download/v3.19.0/protobuf-cpp-3.19.0.zip -O protobuf-cpp-3.19.0.zip
+    7z x protobuf-cpp-3.19.0.zip
+    bash -lc "cd ${APPVEYOR_BUILD_FOLDER} && cd protobuf-3.19.0 && ./configure --disable-shared && make -j2 && make install"
 
   )
 
