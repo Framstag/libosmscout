@@ -96,8 +96,8 @@ private:
   QList<VoiceProvider> voiceProviders;
 
 public:
-  Settings(QSettings *providedStorage=nullptr);
-  ~Settings() override;
+  explicit Settings(QSettings *providedStorage=nullptr);
+  ~Settings() override = default;
 
   double GetPhysicalDPI() const;
 

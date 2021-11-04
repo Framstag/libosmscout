@@ -51,11 +51,6 @@ Settings::Settings(QSettings *providedStorage):
     physicalDpi = (double)srn->physicalDotsPerInch();
 }
 
-Settings::~Settings()
-{
-    // QObject will delete view and settings if this is owner
-}
-
 double Settings::GetPhysicalDPI() const
 {
     return physicalDpi;
