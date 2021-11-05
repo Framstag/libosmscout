@@ -401,8 +401,8 @@ namespace osmscout {
                    bool stopParsing=false);
 
     void AddPositional(const CmdLineArgParserRef& parser,
-                       const std::string& helpString,
-                       const std::string& argumentName);
+                       const std::string& argumentName,
+                       const std::string& helpString);
 
     CmdLineParseResult Parse();
 
