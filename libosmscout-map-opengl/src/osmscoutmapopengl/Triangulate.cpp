@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 //#include <utility>
-#include <osmscout/Triangulate.h>
+#include <osmscoutmapopengl/Triangulate.h>
 
 #include <osmscout/system/Math.h>
 

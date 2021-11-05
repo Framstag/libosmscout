@@ -26,8 +26,8 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include <osmscout/OpenGLMapData.h>
-#include <osmscout/MapOpenGLImportExport.h>
+#include <osmscoutmapopengl/OpenGLMapData.h>
+#include <osmscoutmapopengl/MapOpenGLImportExport.h>
 
 namespace osmscout {
 

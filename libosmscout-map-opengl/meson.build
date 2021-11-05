@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout')
-subdir('include/osmscout/private')
+subdir('include/osmscoutmapopengl')
+subdir('include/osmscoutmapopengl/private')
 subdir('src')
 
 osmscoutmapopengl = library('osmscout_map_opengl',

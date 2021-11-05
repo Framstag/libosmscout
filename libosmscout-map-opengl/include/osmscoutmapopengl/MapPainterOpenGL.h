@@ -21,16 +21,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#define GLEW_STATIC
-
 #include <GL/glew.h>
 
-#include <osmscout/MapOpenGLFeatures.h>
-
-#include <osmscout/OpenGLMapData.h>
-
-#include <osmscout/MapOpenGLImportExport.h>
-#include <osmscout/TextLoader.h>
+#include <osmscoutmapopengl/MapOpenGLFeatures.h>
+#include <osmscoutmapopengl/OpenGLMapData.h>
+#include <osmscoutmapopengl/MapOpenGLImportExport.h>
+#include <osmscoutmapopengl/TextLoader.h>
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
