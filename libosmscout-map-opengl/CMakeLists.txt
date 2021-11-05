@@ -1,10 +1,10 @@
 set(HEADER_FILES
-        include/osmscout/MapOpenGLImportExport.h
-		include/osmscout/OpenGLMapData.h
-		include/osmscout/MapPainterOpenGL.h
-		include/osmscout/Triangulate.h
-		include/osmscout/PNGLoaderOpenGL.h
-		include/osmscout/TextLoader.h
+        include/osmscoutmapopengl/MapOpenGLImportExport.h
+		include/osmscoutmapopengl/OpenGLMapData.h
+		include/osmscoutmapopengl/MapPainterOpenGL.h
+		include/osmscoutmapopengl/Triangulate.h
+		include/osmscoutmapopengl/PNGLoaderOpenGL.h
+		include/osmscoutmapopengl/TextLoader.h
 		include/poly2tri/poly2tri.h
 		include/poly2tri/sweep/cdt.h
 		include/poly2tri/sweep/sweep.h
@@ -14,10 +14,10 @@ set(HEADER_FILES
 		)
 
 set(SOURCE_FILES
-		src/osmscout/MapPainterOpenGL.cpp
-		src/osmscout/Triangulate.cpp
-		src/osmscout/PNGLoaderOpenGL.cpp
-		src/osmscout/TextLoader.cpp
+		src/osmscoutmapopengl/MapPainterOpenGL.cpp
+		src/osmscoutmapopengl/Triangulate.cpp
+		src/osmscoutmapopengl/PNGLoaderOpenGL.cpp
+		src/osmscoutmapopengl/TextLoader.cpp
 		src/poly2tri/sweep/cdt.cc
 		src/poly2tri/common/shapes.cc
 		src/poly2tri/sweep/sweep.cc
@@ -30,8 +30,9 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_opengl"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR osmscoutmapopengl
 	INCLUDES ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapOpenGLFeatures.h.cmake
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapopengl/MapOpenGLFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map ${OPENGL_LIBRARIES} GLEW::GLEW ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES}
 )
 target_include_directories(OSMScoutMapOpenGL INTERFACE ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})

@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <osmscout/MapOpenGLImportExport.h>
-#include <osmscout/OpenGLMapData.h>
+#include <osmscoutmapopengl/MapOpenGLImportExport.h>
+#include <osmscoutmapopengl/OpenGLMapData.h>
 
 namespace osmscout {
   OSMSCOUT_MAP_OPENGL_API osmscout::OpenGLTextureRef LoadPNGOpenGL(const std::string& filename);

@@ -29,7 +29,7 @@
 
 #include <osmscoutmap/MapService.h>
 
-#include <osmscout/MapPainterOpenGL.h>
+#include <osmscoutmapopengl/MapPainterOpenGL.h>
 
 #include <GLFW/glfw3.h>
 

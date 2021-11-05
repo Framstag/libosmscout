@@ -41,7 +41,7 @@
 #include <osmscoutmapagg/MapPainterAgg.h>
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
-#include <osmscout/MapPainterOpenGL.h>
+#include <osmscoutmapopengl/MapPainterOpenGL.h>
 #include <GLFW/glfw3.h>
 #endif
 

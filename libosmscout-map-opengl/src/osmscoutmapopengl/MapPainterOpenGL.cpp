@@ -19,14 +19,15 @@
 */
 
 #include <utility>
-#include <GL/glew.h>
+#include <iostream>
 
 #include <osmscoutmap/MapPainter.h>
 
-#include <osmscout/MapPainterOpenGL.h>
-#include <osmscout/Triangulate.h>
-#include <iostream>
-#include <osmscout/PNGLoaderOpenGL.h>
+#include <osmscoutmapopengl/MapPainterOpenGL.h>
+#include <osmscoutmapopengl/Triangulate.h>
+#include <osmscoutmapopengl/PNGLoaderOpenGL.h>
+
+#include <GL/glew.h>
 
 namespace osmscout {
 
