@@ -1,8 +1,8 @@
 osmscoutmapsvgIncDir = include_directories('.')
 
 osmscoutmapsvgHeader = [
-            'osmscout/MapSVGImportExport.h',
-            'osmscout/MapPainterSVG.h'
+            'osmscoutmapsvg/MapSVGImportExport.h',
+            'osmscoutmapsvg/MapPainterSVG.h'
           ]
 
 install_headers(osmscoutmapsvgHeader)

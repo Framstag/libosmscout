@@ -1,10 +1,10 @@
 set(HEADER_FILES
-    include/osmscout/MapSVGImportExport.h
-    include/osmscout/MapPainterSVG.h
+    include/osmscoutmapsvg/MapSVGImportExport.h
+    include/osmscoutmapsvg/MapPainterSVG.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/MapPainterSVG.cpp
+    src/osmscoutmapsvg/MapPainterSVG.cpp
 )
 
 osmscout_library_project(
@@ -13,7 +13,8 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_svg"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapSVGFeatures.h.cmake
+	INCLUDEDIR osmscoutmapsvg
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapsvg/MapSVGFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map
 )
 
