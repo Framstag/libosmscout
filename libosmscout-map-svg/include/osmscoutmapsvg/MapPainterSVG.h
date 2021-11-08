@@ -27,13 +27,13 @@
 #include <set>
 #include <unordered_map>
 
-#include <osmscout/MapSVGFeatures.h>
+#include <osmscoutmapsvg/MapSVGFeatures.h>
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
   #include <pango/pangoft2.h>
 #endif
 
-#include <osmscout/MapSVGImportExport.h>
+#include <osmscoutmapsvg/MapSVGImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 

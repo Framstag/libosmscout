@@ -1,4 +1,4 @@
 osmscoutmapsvgSrc = [
-            'src/osmscout/MapPainterSVG.cpp',
+            'src/osmscoutmapsvg/MapPainterSVG.cpp',
           ]
 

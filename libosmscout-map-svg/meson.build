@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout')
-subdir('include/osmscout/private')
+subdir('include/osmscoutmapsvg')
+subdir('include/osmscoutmapsvg/private')
 subdir('src')
 
 osmscoutmapsvg = library('osmscout_map_svg',

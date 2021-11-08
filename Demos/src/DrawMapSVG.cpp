@@ -22,7 +22,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <osmscout/MapPainterSVG.h>
+#include <osmscoutmapsvg/MapPainterSVG.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
