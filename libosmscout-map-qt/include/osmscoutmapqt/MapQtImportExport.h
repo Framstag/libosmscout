@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapQtFeatures.h>
+#include <osmscoutmapqt/MapQtFeatures.h>
 
 // Shared library support
 #if defined _WIN32 || defined __CYGWIN__

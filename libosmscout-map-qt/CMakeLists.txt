@@ -2,12 +2,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-	include/osmscout/MapQtImportExport.h
-    include/osmscout/MapPainterQt.h
+	include/osmscoutmapqt/MapQtImportExport.h
+    include/osmscoutmapqt/MapPainterQt.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/MapPainterQt.cpp
+    src/osmscoutmapqt/MapPainterQt.cpp
 )
 
 osmscout_library_project(
@@ -16,8 +16,9 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_qt"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR osmscoutmapqt
 	INCLUDES ${QT5_INCLUDE_DIR}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapQtFeatures.h.cmake
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapqt/MapQtFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map Qt5::Gui Qt5::Svg
 )
 

@@ -26,7 +26,7 @@
 #include <osmscout/Database.h>
 #include <osmscoutmap/MapService.h>
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 
 #include <osmscout/util/StopClock.h>
 
