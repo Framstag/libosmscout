@@ -22,7 +22,7 @@
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/CmdLineParsing.h>
 
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QApplication>
 #include <QDesktopWidget>

@@ -19,7 +19,7 @@
 
 #include "FileIO.h"
 
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QFile>
 #include <QTextStream>

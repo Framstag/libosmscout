@@ -46,7 +46,7 @@ set(TRANSLATION_TS_FILES
 # source files that may contains translatable phrases (see tr, qsTr, QT_TRANSLATE_NOOP functions)
 set(TRANSLATION_SOURCE_FILES
 	${SOURCE_FILES}
-	../libosmscout-client-qt/src/osmscout/RouteDescriptionBuilder.cpp
+	../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp
 	)
 
 # See http://doc.qt.io/qt-5/cmake-manual.html

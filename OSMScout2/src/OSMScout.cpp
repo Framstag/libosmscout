@@ -27,7 +27,7 @@
 #include <QQmlContext>
 
 // OSM Scout library singleton
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 // Application theming
 #include "Theme.h"
