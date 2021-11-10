@@ -27,8 +27,8 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <osmscout/MapGDIImportExport.h>
-#include <osmscout/MapPainterGDI.h>
+#include <osmscoutmapgdi/MapGDIImportExport.h>
+#include <osmscoutmapgdi/MapPainterGDI.h>
 #include <mutex>
 
 namespace osmscout {

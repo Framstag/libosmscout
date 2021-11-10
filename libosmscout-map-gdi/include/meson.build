@@ -1,9 +1,9 @@
 osmscoutmapgdiIncDir = include_directories('.')
 
 osmscoutmapsvgHeader = [
-            'osmscout/MapGDIImportExport.h',
-            'osmscout/MapPainterGDI.h'
-            'osmscout/MapPainterGDIWindow.h'
+            'osmscoutmapgdi/MapGDIImportExport.h',
+            'osmscoutmapgdi/MapPainterGDI.h'
+            'osmscoutmapgdi/MapPainterGDIWindow.h'
           ]
 
 install_headers(osmscoutmapgdiHeader)

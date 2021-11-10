@@ -1,12 +1,12 @@
 set(HEADER_FILES
-    include/osmscout/MapGDIImportExport.h
-    include/osmscout/MapPainterGDI.h
-    include/osmscout/MapPainterGDIWindow.h
+    include/osmscoutmapgdi/MapGDIImportExport.h
+    include/osmscoutmapgdi/MapPainterGDI.h
+    include/osmscoutmapgdi/MapPainterGDIWindow.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/MapPainterGDI.cpp
-    src/osmscout/MapPainterGDIWindow.cpp
+    src/osmscoutmapgdi/MapPainterGDI.cpp
+    src/osmscoutmapgdi/MapPainterGDIWindow.cpp
 )
 
 osmscout_library_project(
@@ -15,5 +15,6 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_gdi"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR osmscoutmapgdi
 	TARGET OSMScout::OSMScout OSMScout::Map Gdiplus
 )
