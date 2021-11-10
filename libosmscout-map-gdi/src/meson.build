@@ -1,5 +1,5 @@
 osmscoutmapgdiSrc = [
-            'src/osmscout/MapPainterGDI.cpp',
-            'src/osmscout/MapPainterGDIWindow.cpp',
+            'src/osmscoutmapgdi/MapPainterGDI.cpp',
+            'src/osmscoutmapgdi/MapPainterGDIWindow.cpp',
           ]
 

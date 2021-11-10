@@ -29,7 +29,7 @@
 #endif
 #include <Windows.h>
 
-#include <osmscout/MapGDIImportExport.h>
+#include <osmscoutmapgdi/MapGDIImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 
