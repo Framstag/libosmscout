@@ -22,13 +22,13 @@
 
 #include <unordered_map>
 
-#include <osmscout/MapDirectXFeatures.h>
+#include <osmscoutmapdirectx/MapDirectXFeatures.h>
 
-#include <osmscout/MapDirectXImportExport.h>
+#include <osmscoutmapdirectx/MapDirectXImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 
-#include <osmscout/PathTextRenderer.h>
+#include <osmscoutmapdirectx/PathTextRenderer.h>
 
 #define NOMINMAX 1
 

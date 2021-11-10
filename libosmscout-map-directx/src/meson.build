@@ -1,4 +1,4 @@
 osmscoutmapdirectxSrc = [
-            'src/osmscout/MapPainterDirectX.cpp',
-            'src/osmscout/PathTextRenderer.cpp',
+            'src/osmscoutmapdirectx/MapPainterDirectX.cpp',
+            'src/osmscoutmapdirectx/PathTextRenderer.cpp',
           ]

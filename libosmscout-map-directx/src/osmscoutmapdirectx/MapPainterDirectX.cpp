@@ -17,14 +17,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapPainterDirectX.h>
+#include <osmscoutmapdirectx/MapPainterDirectX.h>
 
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
 
-#include <osmscout/PathTextRenderer.h>
+#include <osmscoutmapdirectx/PathTextRenderer.h>
 
 #include <osmscout/util/String.h>
 #include <osmscout/system/Assert.h>
