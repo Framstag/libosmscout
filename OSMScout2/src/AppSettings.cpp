@@ -19,8 +19,8 @@
 
 #include <QDebug>
 
-#include <osmscout/InputHandler.h>
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/InputHandler.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 #include "AppSettings.h"
 

@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout')
-subdir('include/osmscout/private')
+subdir('include/osmscoutclientqt')
+subdir('include/osmscoutclientqt/private')
 subdir('src')
 
 mocHeaders = []

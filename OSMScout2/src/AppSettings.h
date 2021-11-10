@@ -22,7 +22,7 @@
 
 #include <QSettings>
 
-#include <osmscout/InputHandler.h>
+#include <osmscoutclientqt/InputHandler.h>
 
 class AppSettings: public QObject{
   Q_OBJECT

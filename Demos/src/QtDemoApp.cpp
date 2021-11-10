@@ -19,7 +19,7 @@
 
 #include <QtDemoApp.h>
 
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QGuiApplication>
 #include <QApplication>

@@ -23,7 +23,7 @@
 
 #define OSMSCOUT_CLIENT_QT_FILEDOWNLOADER_TEST 1
 
-#include <osmscout/FileDownloader.h>
+#include <osmscoutclientqt/FileDownloader.h>
 
 #include <QObject>
 

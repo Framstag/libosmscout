@@ -25,8 +25,8 @@
 #include <QApplication>
 
 // OSMScout library
-#include <osmscout/Settings.h>
-#include <osmscout/OSMScoutQt.h>
+#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 // Main Window
 #include "MainWindow.h"

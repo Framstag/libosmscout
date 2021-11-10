@@ -20,7 +20,7 @@
 #ifndef LIBOSMSCOUT_CLIENTQTTHREADING_H
 #define LIBOSMSCOUT_CLIENTQTTHREADING_H
 
-#include <osmscout/StyleModule.h>
+#include <osmscoutclientqt/StyleModule.h>
 
 #include <QObject>
 #include <QStringList>
