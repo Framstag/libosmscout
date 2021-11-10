@@ -26,7 +26,7 @@
 #include <QPainter>
 #include <QMap>
 
-#include <osmscout/MapQtImportExport.h>
+#include <osmscoutmapqt/MapQtImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 

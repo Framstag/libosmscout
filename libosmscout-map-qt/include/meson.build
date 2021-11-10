@@ -1,8 +1,8 @@
 osmscoutmapqtIncDir = include_directories('.')
 
 osmscoutmapqtHeader = [
-            'osmscout/MapQtImportExport.h',
-            'osmscout/MapPainterQt.h'
+            'osmscoutmapqt/MapQtImportExport.h',
+            'osmscoutmapqt/MapPainterQt.h'
           ]
 
 install_headers(osmscoutmapqtHeader)

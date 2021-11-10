@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 #include <osmscoutmap/LabelPath.h>
 
 #include <iostream>

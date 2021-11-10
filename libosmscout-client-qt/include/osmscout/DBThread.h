@@ -34,7 +34,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscoutmap/MapService.h>
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 
 #include <osmscout/Settings.h>
 #include <osmscout/TileCache.h>

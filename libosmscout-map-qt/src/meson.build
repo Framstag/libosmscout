@@ -1,5 +1,5 @@
 osmscoutmapqtSrc = [
-            'src/osmscout/MapPainterQt.cpp'
+            'src/osmscoutmapqt/MapPainterQt.cpp'
           ]
 
 

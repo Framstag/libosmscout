@@ -30,7 +30,7 @@
 #include <osmscout/Database.h>
 #include <osmscoutmap/MapService.h>
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 
 /*
   Example for the nordrhein-westfalen.osm.pbf:

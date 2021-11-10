@@ -36,7 +36,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/CmdLineParsing.h>
 
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>

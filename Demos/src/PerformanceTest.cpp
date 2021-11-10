@@ -35,7 +35,7 @@
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
-#include <osmscout/MapPainterQt.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
 #include <osmscoutmapagg/MapPainterAgg.h>
