@@ -653,7 +653,12 @@ if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
 	install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif()
 
-set(config_install_dir "${CMAKE_INSTALL_PREFIX}/share/cmake/${PROJECT_NAME}")
+if(UNIX)
+  set(config_install_dir "${CMAKE_INSTALL_PREFIX}/lib/cmake/${PROJECT_NAME}")
+else()
+  set(config_install_dir CMake)
+endif()
+
 set(version_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 set(project_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
 include(CMakePackageConfigHelpers)
