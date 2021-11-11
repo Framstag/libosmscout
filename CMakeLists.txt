@@ -648,7 +648,7 @@ if(CCACHE_PROGRAM)
   message(STATUS "Using ccache:                    ${CCACHE_PROGRAM}")
 endif()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share/osmscout)
 if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
 	install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif()
