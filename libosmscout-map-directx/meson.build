@@ -9,8 +9,8 @@ if get_option('default_library')=='shared'
 endif
 
 subdir('include')
-subdir('include/osmscout')
-subdir('include/osmscout/private')
+subdir('include/osmscoutmapdirectx')
+subdir('include/osmscoutmapdirectx/private')
 subdir('src')
 
 osmscoutmapdirectx = library('osmscout_map_directx',

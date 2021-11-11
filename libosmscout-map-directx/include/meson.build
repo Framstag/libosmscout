@@ -1,9 +1,9 @@
 osmscoutmapdirectxIncDir = include_directories('.')
 
 osmscoutmapdirectxHeader = [
-            'osmscout/MapDirectXImportExport.h',
-            'osmscout/MapPainterDirectX.h',
-            'osmscout/PathTextRenderer.h'
+            'osmscoutmapdirectx/MapDirectXImportExport.h',
+            'osmscoutmapdirectx/MapPainterDirectX.h',
+            'osmscoutmapdirectx/PathTextRenderer.h'
           ]
 
 install_headers(osmscoutmapdirectxHeader)

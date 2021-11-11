@@ -1,12 +1,12 @@
 set(HEADER_FILES
-	include/osmscout/MapDirectXImportExport.h
-    include/osmscout/MapPainterDirectX.h
-    include/osmscout/PathTextRenderer.h
+	include/osmscoutmapdirectx/MapDirectXImportExport.h
+    include/osmscoutmapdirectx/MapPainterDirectX.h
+    include/osmscoutmapdirectx/PathTextRenderer.h
 )
 
 set(SOURCE_FILES
-    src/osmscout/MapPainterDirectX.cpp
-    src/osmscout/PathTextRenderer.cpp
+    src/osmscoutmapdirectx/MapPainterDirectX.cpp
+    src/osmscoutmapdirectx/PathTextRenderer.cpp
 )
 
 osmscout_library_project(
@@ -15,8 +15,9 @@ osmscout_library_project(
 	OUTPUT_NAME "osmscout_map_directx"
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
+	INCLUDEDIR osmscoutmapdirectx
 	INCLUDES ${Direct2D_INCLUDE_DIRS}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/MapDirectXFeatures.h.cmake
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapdirectx/MapDirectXFeatures.h.cmake
 	TARGET OSMScout::OSMScout OSMScout::Map ${Direct2D_LIBRARIES} Windowscodecs
 )
 target_compile_definitions(OSMScoutMapDirectX PRIVATE -DUNICODE -D_UNICODE)
