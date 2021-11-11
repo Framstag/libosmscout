@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   QGuiApplication app(argc,argv);
   int             result;
 
-  QGuiApplication::setOrganizationName("libosmscout");
+  QGuiApplication::setOrganizationName("osmscout");
   QGuiApplication::setOrganizationDomain("libosmscout.sf.net");
   QGuiApplication::setApplicationName("OSMScout2");
 
