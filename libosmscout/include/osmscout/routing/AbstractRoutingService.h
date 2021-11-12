@@ -226,7 +226,7 @@ namespace osmscout {
      * @param node
      *    Node instance to write the result back
      * @return
-     *    True, if the node couldbe loaded, else false
+     *    True, if the node could be loaded, else false
      */
     virtual bool GetRouteNode(const DBId &id,
                               RouteNodeRef &node) = 0;

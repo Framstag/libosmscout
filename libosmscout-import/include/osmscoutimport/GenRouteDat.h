@@ -139,14 +139,14 @@ namespace osmscout {
                                 std::map<OSMId,Id>& nodeMap);
 
     /**
-     * Resove the file offsets for the way ids given in the wayIdOffsetMap
+     * Resolve the file offsets for the way ids given in the wayIdOffsetMap
      */
     bool ResolveWayIds(const ImportParameter& parameter,
                        Progress& progress,
                        std::map<OSMId,FileOffset>& wayIdOffsetMap);
 
     /**
-     * Resove the node ids from the OSM node ids given in the nodeIdMap
+     * Resolve the node ids from the OSM node ids given in the nodeIdMap
      */
     bool ResolveNodeIds(const ImportParameter& parameter,
                         Progress& progress,

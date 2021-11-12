@@ -401,18 +401,18 @@ namespace osmscout {
 
           lookup++;
           while (true) {
-            // Next node does not exists or does not have a path?
+            // Next node does not exist or does not have a path?
             if (lookup==description.Nodes().end() ||
                 !lookup->HasPathObject()) {
               break;
             }
 
-            // Next node is to far away from last node?
+            // Next node is too far away from last node?
             if (lookup->GetDistance()-curveB->GetDistance()>curveMaxNodeDistance) {
               break;
             }
 
-            // Next node is to far away from turn origin?
+            // Next node is too far away from turn origin?
             if (forwardDistance+lookup->GetDistance()-curveB->GetDistance()>curveMaxDistance) {
               break;
             }

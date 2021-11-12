@@ -94,7 +94,7 @@ namespace osmscout {
                           const RouteDescription::NameDescriptionRef& nameDescription);
 
       /**
-       * Called if we enter a roundabound
+       * Called if we enter a roundabout
        *
        * @param roundaboutEnterDescription
        * @param crossingWaysDescription
@@ -103,7 +103,7 @@ namespace osmscout {
                                      const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
 
       /**
-       * Called if we leave a roundabound entered before
+       * Called if we leave a roundabout entered before
        *
        * @param roundaboutLeaveDescription
        * @param nameDescription
