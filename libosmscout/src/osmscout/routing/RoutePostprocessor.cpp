@@ -1705,9 +1705,9 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::ResolveAllAreasAndWays(const RouteDescription& description,
-                                                  DatabaseId dbId,
-                                                  Database& database)
+  bool RoutePostprocessor::ResolveAllPathObjects(const RouteDescription& description,
+                                                 DatabaseId dbId,
+                                                 Database& database)
   {
     std::set<FileOffset>         areaOffsets;
     std::vector<AreaRef>         areas;
@@ -2469,9 +2469,9 @@ namespace osmscout {
       miniRoundaboutTypes[dbId]=typeConfig->GetTypeInfo(miniRoundaboutTypeName);
 
       // load objects
-      if (!ResolveAllAreasAndWays(description,
-                                  dbId,
-                                  *database)) {
+      if (!ResolveAllPathObjects(description,
+                                 dbId,
+                                 *database)) {
         Cleanup();
         return false;
       }

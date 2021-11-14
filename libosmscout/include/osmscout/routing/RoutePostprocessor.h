@@ -374,9 +374,9 @@ namespace osmscout {
     std::unordered_map<DatabaseId,TypeInfoRef>                    miniRoundaboutTypes;
 
   private:
-    bool ResolveAllAreasAndWays(const RouteDescription& description,
-                                DatabaseId dbId,
-                                Database& database);
+    bool ResolveAllPathObjects(const RouteDescription& description,
+                               DatabaseId dbId,
+                               Database& database);
     void Cleanup();
 
   private:
