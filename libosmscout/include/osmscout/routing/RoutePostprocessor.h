@@ -362,6 +362,7 @@ namespace osmscout {
     std::unordered_map<DatabaseId,RefFeatureValueReader*>         refReaders;
     std::unordered_map<DatabaseId,BridgeFeatureReader*>           bridgeReaders;
     std::unordered_map<DatabaseId,RoundaboutFeatureReader*>       roundaboutReaders;
+    std::unordered_map<DatabaseId,ClockwiseDirectionFeatureReader*> clockwiseDirectionReaders;
     std::unordered_map<DatabaseId,DestinationFeatureValueReader*> destinationReaders;
     std::unordered_map<DatabaseId,MaxSpeedFeatureValueReader*>    maxSpeedReaders;
     std::unordered_map<DatabaseId,LanesFeatureValueReader*>       lanesReaders;

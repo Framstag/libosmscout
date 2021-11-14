@@ -1294,6 +1294,28 @@ namespace osmscout {
                FeatureValueBuffer& buffer) const override;
   };
 
+  class OSMSCOUT_API ClockwiseDirectionFeature : public Feature
+  {
+  private:
+    TagId tagDirection;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+  public:
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
   class OSMSCOUT_API EleFeatureValue : public FeatureValue
   {
   private:

@@ -873,7 +873,7 @@ namespace osmscout {
   // Forward declaration
   class TypeConfig;
 
-  static const uint32_t FILE_FORMAT_VERSION=22;
+  static const uint32_t FILE_FORMAT_VERSION=23;
 
   /**
    * \ingroup type

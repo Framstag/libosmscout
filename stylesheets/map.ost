@@ -442,7 +442,7 @@ TYPES
 
   TYPE highway_mini_roundabout
     = NODE ("highway"=="mini_roundabout")
-      {Name, NameAlt}
+      {Name, NameAlt, ClockwiseDirection}
 
   TYPE highway_bus_stop
     = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND ("public_transport" IN ["platform", "stop_position"])))

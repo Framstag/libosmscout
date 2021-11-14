@@ -655,7 +655,21 @@ namespace osmscout {
     if (incomingPath.type!=refWay) {
       return; // just ways are supported as roundabout exits
     }
-    roundaboutClockwise=false; // TODO implement ClockwiseDirectionFeature
+
+    auto clockwiseDirectionReader=postprocessor.clockwiseDirectionReaders.find(node.GetDatabaseId());
+    assert(clockwiseDirectionReader != postprocessor.clockwiseDirectionReaders.end());
+
+    roundaboutClockwise=false;
+    for (const auto &obj : node.GetObjects()){
+      if (obj.IsNode()) {
+        NodeRef n=postprocessor.GetNode(DBFileOffset(node.GetDatabaseId(),obj.GetFileOffset()));
+        if (clockwiseDirectionReader->second->IsSet(n->GetFeatureValueBuffer())) {
+          roundaboutClockwise=true;
+          break;
+        }
+      }
+    }
+
     roundaboutCrossingCounter=0;
     RouteDescription::RoundaboutEnterDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutEnterDescription>(roundaboutClockwise);
     node.AddDescription(RouteDescription::ROUNDABOUT_ENTER_DESC,desc);
@@ -671,7 +685,7 @@ namespace osmscout {
     WayRef outgoingWay=postprocessor.GetWay(DBFileOffset(node.GetDatabaseId(), node.GetPathObject().GetFileOffset()));
     Point nodePoint=outgoingWay->nodes[node.GetCurrentNodeIndex()];
     for (const ObjectFileRef &obj: node.GetObjects()) {
-      if (obj.type==refWay) {
+      if (obj.IsWay()) {
         WayRef way=postprocessor.GetWay(DBFileOffset(node.GetDatabaseId(), obj.GetFileOffset()));
         for (size_t ni=0; ni<way->nodes.size(); ++ni) {
           if (way->nodes[ni].IsIdentical(nodePoint)) {
@@ -1811,6 +1825,11 @@ namespace osmscout {
     }
     roundaboutReaders.clear();
 
+    for (const auto& p:clockwiseDirectionReaders){
+      delete p.second;
+    }
+    clockwiseDirectionReaders.clear();
+
     for (const auto& p:destinationReaders){
       delete p.second;
     }
@@ -2422,6 +2441,7 @@ namespace osmscout {
       refReaders[dbId]=new RefFeatureValueReader(*typeConfig);
       bridgeReaders[dbId]=new BridgeFeatureReader(*typeConfig);
       roundaboutReaders[dbId]=new RoundaboutFeatureReader(*typeConfig);
+      clockwiseDirectionReaders[dbId]=new ClockwiseDirectionFeatureReader(*typeConfig);
       destinationReaders[dbId]=new DestinationFeatureValueReader(*typeConfig);
       maxSpeedReaders[dbId]=new MaxSpeedFeatureValueReader(*typeConfig);
       lanesReaders[dbId]=new LanesFeatureValueReader(*typeConfig);

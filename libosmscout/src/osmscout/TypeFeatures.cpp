@@ -2043,6 +2043,33 @@ namespace osmscout {
     }
   }
 
+  const char* const ClockwiseDirectionFeature::NAME = "ClockwiseDirection";
+
+  void ClockwiseDirectionFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagDirection=tagRegistry.RegisterTag("direction");
+  }
+
+  std::string ClockwiseDirectionFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  void ClockwiseDirectionFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                                const TagRegistry& /*tagRegistry*/,
+                                const FeatureInstance& feature,
+                                const ObjectOSMRef& /*object*/,
+                                const TagMap& tags,
+                                FeatureValueBuffer& buffer) const
+  {
+    auto junction=tags.find(tagDirection);
+
+    if (junction!=tags.end() &&
+        junction->second=="clockwise") {
+      buffer.AllocateValue(feature.GetIndex());
+    }
+  }
+
   void EleFeatureValue::Read(FileScanner& scanner)
   {
     ele=scanner.ReadUInt32Number();
