@@ -988,7 +988,6 @@ namespace osmscout {
           node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
                                desc);
 
-          node=next;
           lastNode=node++;
 
           continue;
@@ -1004,7 +1003,6 @@ namespace osmscout {
           HandleDirectionChange(description.Nodes(),
                                 next);
 
-          node=next;
           lastNode=node++;
 
           continue;
@@ -1016,7 +1014,6 @@ namespace osmscout {
           node->AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
                                desc);
 
-          node=next;
           lastNode=node++;
 
           continue;
