@@ -222,11 +222,11 @@ void VoiceManager::remove(const AvailableVoice &voice)
         qWarning() << "Failed to remove " << v.getDir().absolutePath();
       }
       changed=true;
-      emit removed(voice);
     }
   }
   if (changed){
     reload();
+    emit removed(voice);
   }
 }
 
