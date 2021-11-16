@@ -21,6 +21,7 @@ set(SOURCE_FILES
     qml/main.qml
     qml/SearchDialog.qml
     qml/MapDownloadDialog.qml
+    qml/VoiceDownloadDialog.qml
     qml/custom/MapDialog.qml
     qml/custom/ScrollIndicator.qml
     qml/custom/LineEdit.qml

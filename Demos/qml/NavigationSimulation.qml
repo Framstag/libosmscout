@@ -219,6 +219,127 @@ Window {
     }
 
     Rectangle {
+
+        x: Theme.horizSpace
+        y: simulatorControl.y-height-Theme.vertSpace
+        width: voiceControl.width
+        height: voiceControl.height
+
+        border.color: "lightgrey"
+        border.width: 1
+        color: "white"
+
+
+        RowLayout {
+            id: voiceControl
+
+            spacing: Theme.mapButtonSpace
+
+            Text{
+                font.pixelSize: Theme.textFontSize
+                text: "Voice:"
+            }
+
+            ComboBox {
+                id: voiceComboBox
+                editable: true
+
+                property bool initialized: false
+
+                function getData(row, role){
+                    return voiceModel.data(voiceModel.index(row, 0), role);
+                }
+
+                function update(){
+                    initialized = false;
+
+                    var voices = [];
+                    for (var row = 0; row < voiceModel.rowCount(); row++){
+                        if (!getData(row, InstalledVoicesModel.ValidRole)){
+                            voices.push("No voice");
+                        } else {
+                            var voice = getData(row, InstalledVoicesModel.LangRole) + " - " + getData(row, InstalledVoicesModel.NameRole);
+                            console.log("voice[" + row + "] = " + voice);
+                            voices.push(voice);
+                        }
+                    }
+                    voiceComboBox.model = voices;
+
+                    for (var row = 0; row < voiceModel.rowCount(); row++){
+                        if (getData(row, InstalledVoicesModel.SelectedRole)){
+                            currentIndex = row;
+                            break;
+                        }
+                    }
+                    initialized = true;
+                }
+
+                InstalledVoicesModel{
+                    id: voiceModel
+
+                    onVoiceChanged: {
+                        voiceComboBox.update();
+                    }
+                    onRowsInserted: {
+                        voiceComboBox.update();
+                    }
+                    onRowsRemoved: {
+                        voiceComboBox.update();
+                    }
+                    onModelReset: {
+                        voiceComboBox.update();
+                    }
+                }
+                Component.onCompleted: {
+                    update();
+                }
+                onCurrentIndexChanged: {
+                    if (!initialized){
+                        return;
+                    }
+                    console.log("Set voice to "
+                                + getData(currentIndex, InstalledVoicesModel.LangRole) + " - "
+                                + getData(currentIndex, InstalledVoicesModel.NameRole));
+                    var indexObj = voiceModel.index(currentIndex, 0);
+                    voiceModel.select(indexObj);
+                }
+            }
+
+            MapButton {
+                id: downloadBtn
+                Image {
+                    id: downloadIcon
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width * 0.8
+                    height: parent.height * 0.8
+
+                    source: "qrc:///pics/Download.svg"
+                    fillMode: Image.PreserveAspectFit
+                    horizontalAlignment: Image.AlignHCenter
+                    verticalAlignment: Image.AlignVCenter
+                    sourceSize.width: width
+                    sourceSize.height: height
+                }
+
+                function openVoiceDownloadDialog() {
+                    var component = Qt.createComponent("VoiceDownloadDialog.qml")
+                    var dialog = component.createObject(mainWindow, {})
+
+                    //dialog.opened.connect(onDialogOpened)
+                    //dialog.closed.connect(onDialogClosed)
+                    dialog.open()
+                }
+
+                onClicked: {
+                    openVoiceDownloadDialog();
+                }
+            }
+        }
+    }
+
+    Rectangle {
         id: topContainer
         anchors.left: parent.left
         anchors.top: parent.top
