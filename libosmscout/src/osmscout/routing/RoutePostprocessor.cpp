@@ -761,14 +761,64 @@ namespace osmscout {
                         desc);
   }
 
-  bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(const std::list<RouteDescription::Node>& path,
-                                                                      std::list<RouteDescription::Node>::const_iterator& lastNode,
-                                                                      std::list<RouteDescription::Node>::iterator& node)
+  void RoutePostprocessor::InstructionPostprocessor::HandleMotorwayLink(const RoutePostprocessor& postprocessor,
+                                                                        const RouteDescription::NameDescriptionRef &originName,
+                                                                        const std::list<RouteDescription::Node>::const_iterator &lastNode,
+                                                                        const std::list<RouteDescription::Node>::iterator &node,
+                                                                        const std::list<RouteDescription::Node>::const_iterator &end)
+  {
+    bool                                 originIsMotorway=postprocessor.IsMotorway(*lastNode);
+    bool                                 targetIsMotorway=false;
+    auto                                 next=node;
+    RouteDescription::NameDescriptionRef nextName;
+
+    next++;
+    while (next!=end && next->HasPathObject()) {
+
+      nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
+
+      if (!postprocessor.IsMotorwayLink(*next)) {
+        break;
+      }
+
+      next++;
+    }
+
+    if (next->GetPathObject().Valid()) {
+      targetIsMotorway=postprocessor.IsMotorway(*next);
+    }
+
+    if (originIsMotorway && targetIsMotorway) {
+      RouteDescription::MotorwayChangeDescriptionRef desc=std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
+                                                                                                                        nextName);
+
+      node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
+                           desc);
+    }
+    else if (originIsMotorway && !targetIsMotorway) {
+      RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName);
+
+      node->AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
+                           desc);
+
+      HandleDirectionChange(next, end);
+    }
+    else if (!originIsMotorway && targetIsMotorway) {
+      RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
+
+      node->AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
+                           desc);
+    }
+  }
+
+  bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
+                                                                      std::list<RouteDescription::Node>::iterator& node,
+                                                                      const std::list<RouteDescription::Node>::const_iterator &end)
   {
     RouteDescription::NameDescriptionRef nextName;
     RouteDescription::NameDescriptionRef lastName;
 
-    if (lastNode==path.end()) {
+    if (lastNode==end) {
       return false;
     }
 
@@ -808,8 +858,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(const std::list<RouteDescription::Node>& path,
-                                                                           std::list<RouteDescription::Node>::iterator& node)
+  bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(std::list<RouteDescription::Node>::iterator& node,
+                                                                           const std::list<RouteDescription::Node>::const_iterator& end)
   {
     if (node->GetObjects().size()<=1){
       return false;
@@ -821,7 +871,7 @@ namespace osmscout {
 
     --lastNode;
 
-    if (lastNode==path.end()) {
+    if (lastNode==end) {
       return false;
     }
 
@@ -959,65 +1009,13 @@ namespace osmscout {
 
       if (!postprocessor.IsMotorwayLink(*lastNode) &&
                postprocessor.IsMotorwayLink(*node)) {
-        bool                                 originIsMotorway=postprocessor.IsMotorway(*lastNode);
-        bool                                 targetIsMotorway=false;
-        auto                                 next=node;
-        RouteDescription::NameDescriptionRef nextName;
 
-        next++;
-        while (next!=description.Nodes().end() &&
-               next->HasPathObject()) {
-
-          nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
-
-          if (!postprocessor.IsMotorwayLink(*next)) {
-            break;
-          }
-
-          next++;
-        }
-
-        if (next->GetPathObject().Valid()) {
-          targetIsMotorway=postprocessor.IsMotorway(*next);
-        }
-
-        if (originIsMotorway && targetIsMotorway) {
-          RouteDescription::MotorwayChangeDescriptionRef desc=std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
-                                                                                                                            nextName);
-
-          node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
-                               desc);
-
-          lastNode=node++;
-
-          continue;
-
-        }
-
-        if (originIsMotorway && !targetIsMotorway) {
-          RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName);
-
-          node->AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
-                               desc);
-
-          HandleDirectionChange(description.Nodes(),
-                                next);
-
-          lastNode=node++;
-
-          continue;
-        }
-
-        if (!originIsMotorway && targetIsMotorway) {
-          RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
-
-          node->AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
-                               desc);
-
-          lastNode=node++;
-
-          continue;
-        }
+        // adds MotorwayEnter, MotorwayChange or MotorwayLeave depending on what is after motorway_link
+        HandleMotorwayLink(postprocessor,
+                           originName,
+                           lastNode,
+                           node,
+                           description.Nodes().end());
 
         lastNode=node++;
 
@@ -1027,16 +1025,15 @@ namespace osmscout {
       if (inRoundabout) {
         HandleRoundaboutNode(*node);
       }
-      else if (HandleDirectionChange(description.Nodes(),
-                                     node)) {
+      else if (HandleDirectionChange(node, description.Nodes().end())) {
         lastNode=node++;
 
         continue;
       }
 
-      if (HandleNameChange(description.Nodes(),
-                           lastNode,
-                           node)) {
+      if (HandleNameChange(lastNode,
+                           node,
+                           description.Nodes().end())) {
         lastNode=node++;
 
         continue;
