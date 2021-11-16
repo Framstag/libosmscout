@@ -452,7 +452,7 @@ namespace osmscout {
      * TODO:
      * All Postprocessors are allowed to use our internal methods currently.
      * We should fix this by moving helper methods to a separate
-     * PostprocessorContext object that gets passed to the postprocessors explicitely.
+     * PostprocessorContext object that gets passed to the postprocessors explicitly.
      * This would also move state out of the RoutePostprocessor itself.
      */
     friend Postprocessor;
