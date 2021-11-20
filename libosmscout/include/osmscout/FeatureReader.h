@@ -107,11 +107,12 @@ namespace osmscout {
     return false;
   }
 
-  using AccessRestrictedFeatureReader = FeatureReader<AccessRestrictedFeature>;
-  using BridgeFeatureReader           = FeatureReader<BridgeFeature>;
-  using TunnelFeatureReader           = FeatureReader<TunnelFeature>;
-  using EmbankmentFeatureReader       = FeatureReader<EmbankmentFeature>;
-  using RoundaboutFeatureReader       = FeatureReader<RoundaboutFeature>;
+  using AccessRestrictedFeatureReader   = FeatureReader<AccessRestrictedFeature>;
+  using BridgeFeatureReader             = FeatureReader<BridgeFeature>;
+  using TunnelFeatureReader             = FeatureReader<TunnelFeature>;
+  using EmbankmentFeatureReader         = FeatureReader<EmbankmentFeature>;
+  using RoundaboutFeatureReader         = FeatureReader<RoundaboutFeature>;
+  using ClockwiseDirectionFeatureReader = FeatureReader<ClockwiseDirectionFeature>;
 
   /**
    * Variant of FeatureReader that is not type set and thus can easier get used

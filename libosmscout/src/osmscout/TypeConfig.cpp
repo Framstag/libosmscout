@@ -831,6 +831,8 @@ namespace osmscout {
     featureRoundabout=std::make_shared<RoundaboutFeature>();
     RegisterFeature(featureRoundabout);
 
+    RegisterFeature(std::make_shared<ClockwiseDirectionFeature>());
+
     RegisterFeature(std::make_shared<EleFeature>());
     RegisterFeature(std::make_shared<DestinationFeature>());
     RegisterFeature(std::make_shared<BuildingFeature>());

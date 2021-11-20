@@ -135,7 +135,7 @@ namespace osmscout {
     }
 
     /**
-     * Same semantics as IsSame(), implement for template compability with GeoCoord.
+     * Same semantics as IsSame(), implement for template compatibility with GeoCoord.
      *
      * @param other
      *    Other point to compare against

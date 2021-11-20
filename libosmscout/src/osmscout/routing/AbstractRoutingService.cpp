@@ -1292,7 +1292,7 @@ namespace osmscout {
     }
     else if (oneway) {
       // startNodeIndex>tragetNodeIndex, but this is a oneway we assume
-      // that the way is either an area or is a roundabound
+      // that the way is either an area or is a roundabout
       // TODO: proof this using the right assertions or checks
       size_t pos=startNodeIndex+1;
       size_t next;

@@ -702,6 +702,7 @@ namespace osmscout {
                                                       const NodeUseMap& nodeUseMap,
                                                       NodeIdObjectsMap& nodeObjectsMap)
   {
+    using namespace std::string_literals;
     FileScanner scanner;
 
     progress.Info("Scanning ways");
@@ -709,6 +710,7 @@ namespace osmscout {
     try {
       uint32_t junctionWayCount=0;
       uint32_t junctionAreaCount=0;
+      uint32_t junctionNodeCount=0;
 
       scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                    WayDataFile::WAYS_DAT),
@@ -807,8 +809,52 @@ namespace osmscout {
 
       scanner.Close();
 
+      TypeInfoSet junctionNodeTypes(typeConfig);
+      TypeInfoRef miniRoundabout = typeConfig.GetTypeInfo("highway_mini_roundabout");
+      if (miniRoundabout) {
+        junctionNodeTypes.Set(miniRoundabout);
+      } else {
+        progress.Warning("Unknown type \"highway_mini_roundabout\".");
+      }
+      if (!junctionNodeTypes.Empty()) {
+        progress.Info("Scanning nodes");
+
+        scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     NodeDataFile::NODES_DAT),
+                     FileScanner::Sequential,
+                     parameter.GetRawNodeDataMemoryMaped());
+
+        dataCount=scanner.ReadUInt32();
+        for (uint32_t d=1; d<=dataCount; d++) {
+          progress.SetProgress(d,dataCount);
+
+          Node node;
+
+          node.Read(typeConfig,
+                    scanner);
+
+          if (node.GetType()->GetIgnore() || !junctionNodeTypes.IsSet(node.GetType())) {
+            continue;
+          }
+
+          // Node doesn't have serial number, let's assign node to the first junction on these coordinates.
+          // It is possible that we don't assign junction node correctly, but such error should be rare.
+          Id id=Point(1, node.GetCoords()).GetId();
+
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(id)) {
+            nodeObjectsMap[id].push_back(node.GetObjectFileRef());
+            junctionNodeCount++;
+          } else {
+            progress.Warning("Cannot find junction for node offset "s + std::to_string(node.GetFileOffset()));
+          }
+        }
+
+        scanner.Close();
+      }
+
       progress.Info("Found "+std::to_string(nodeObjectsMap.size())+" routing nodes, with in sum "+
-                    std::to_string(junctionWayCount)+" ways and "+std::to_string(junctionAreaCount)+" areas");
+                    std::to_string(junctionWayCount)+" ways, "+std::to_string(junctionAreaCount)+" areas and "+
+                    std::to_string(junctionNodeCount)+" nodes");
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());
