@@ -800,8 +800,6 @@ namespace osmscout {
 
       node->AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
                            desc);
-
-      HandleDirectionChange(next, end);
     }
     else if (!originIsMotorway && targetIsMotorway) {
       RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
