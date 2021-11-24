@@ -402,11 +402,6 @@ namespace osmscout {
     RouteDescription::NameDescriptionRef GetNameDescription(DatabaseId dbId,
                                                             const Way& way) const;
 
-    bool LoadJunction(DatabaseId database,
-                      GeoCoord coord,
-                      std::string junctionRef,
-                      std::string junctionName) const;
-
     bool IsMotorwayLink(const RouteDescription::Node& node) const;
     bool IsMotorway(const RouteDescription::Node& node) const;
 

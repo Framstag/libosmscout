@@ -816,6 +816,12 @@ namespace osmscout {
       } else {
         progress.Warning("Unknown type \"highway_mini_roundabout\".");
       }
+      TypeInfoRef motorwayJunction = typeConfig.GetTypeInfo("highway_motorway_junction");
+      if (motorwayJunction) {
+        junctionNodeTypes.Set(motorwayJunction);
+      } else {
+        progress.Warning("Unknown type \"highway_motorway_junction\".");
+      }
       if (!junctionNodeTypes.Empty()) {
         progress.Info("Scanning nodes");
 
