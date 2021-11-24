@@ -395,7 +395,7 @@ namespace osmscout {
 
   std::string RouteDescription::DestinationDescription::GetDebugString() const
   {
-    return "Start: '"+description+"'";
+    return "Destination: '"+description+"'";
   }
 
   std::string RouteDescription::DestinationDescription::GetDescription() const
