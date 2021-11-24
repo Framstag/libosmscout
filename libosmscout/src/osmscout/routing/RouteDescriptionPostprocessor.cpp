@@ -261,14 +261,7 @@ namespace osmscout {
         callback.OnTargetReached(targetDescription);
       }
 
-      if (turnDescription) {
-        callback.OnTurn(turnDescription,
-                        crossingWaysDescription,
-                        directionDescription,
-                        typeNameDescription,
-                        nameDescription);
-      }
-      else {
+      if (roundaboutEnterDescription || roundaboutLeaveDescription) {
         if (roundaboutEnterDescription) {
           callback.OnRoundaboutEnter(roundaboutEnterDescription,
                                      crossingWaysDescription);
@@ -277,6 +270,13 @@ namespace osmscout {
           callback.OnRoundaboutLeave(roundaboutLeaveDescription,
                                      nameDescription);
         }
+      }
+      else if (turnDescription) {
+        callback.OnTurn(turnDescription,
+                        crossingWaysDescription,
+                        directionDescription,
+                        typeNameDescription,
+                        nameDescription);
       }
 
       if (motorwayEnterDescription) {
