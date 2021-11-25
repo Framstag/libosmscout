@@ -74,6 +74,7 @@ namespace osmscout {
 
   void RouteDescriptionPostprocessor::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& /*motorwayChangeDescription*/,
                                                                  const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
+                                                                 const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
                                                                  const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
   {
     // no code
@@ -287,6 +288,7 @@ namespace osmscout {
       else if (motorwayChangeDescription) {
         callback.OnMotorwayChange(motorwayChangeDescription,
                                   motorwayJunctionDescription,
+                                  directionDescription,
                                   crossingDestinationDescription);
       }
       else if (motorwayLeaveDescription) {

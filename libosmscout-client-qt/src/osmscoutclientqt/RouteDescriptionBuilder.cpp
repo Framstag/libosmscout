@@ -400,6 +400,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 
 void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                                                          const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
+                                                         const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
                                                          const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
 {
   RouteStep change = MkStep("change-motorway");

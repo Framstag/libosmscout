@@ -92,6 +92,7 @@ public:
 
     void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                           const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                          const RouteDescription::DirectionDescriptionRef& directionDescription,
                           const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override;
 
     void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
