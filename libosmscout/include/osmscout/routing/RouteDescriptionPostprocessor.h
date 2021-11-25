@@ -132,15 +132,17 @@ namespace osmscout {
       /**
        * Called if we are on a motorway an leave it to a non-motorway way.
        *
-       * @param motorwayLeaveDescription
-       * @param motorwayJunctionDescription
-       * @param directionDescription
-       * @param nameDescription
+       * @param motorwayLeaveDescription and and ref of leaving motorway
+       * @param motorwayJunctionDescription name and ref of the motorway exit
+       * @param directionDescription turn direction (right, left...)
+       * @param nameDescription name of the way used for leaving
+       * @param destinationDescription semicolon separated list of exit destinations
        */
       virtual void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                    const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                                    const RouteDescription::DirectionDescriptionRef& directionDescription,
-                                   const RouteDescription::NameDescriptionRef& nameDescription);
+                                   const RouteDescription::NameDescriptionRef& nameDescription,
+                                   const RouteDescription::DestinationDescriptionRef& destinationDescription);
 
       /**
        * Called anytime the way we are on changes its name.

@@ -424,7 +424,8 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
 void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                                         const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
                                                         const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
-                                                        const RouteDescription::NameDescriptionRef& nameDescription)
+                                                        const RouteDescription::NameDescriptionRef& nameDescription,
+                                                        const RouteDescription::DestinationDescriptionRef& /*destinationDescription*/)
 {
   RouteStep leave = MkStep("leave-motorway");
 

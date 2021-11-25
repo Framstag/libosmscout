@@ -523,20 +523,20 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
   void OnMotorwayLeave(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                        const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                        const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-                       const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+                       const osmscout::RouteDescription::NameDescriptionRef& nameDescription,
+                       const osmscout::RouteDescription::DestinationDescriptionRef& destinationDescription) override
   {
     NextLine(lineCount);
 
     if (motorwayJunctionDescription &&
         motorwayJunctionDescription->GetJunctionDescription()) {
-      std::cout << "At";
+      std::cout << "At exit";
 
+      if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+        std::cout << " " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << "";
+      }
       if (!motorwayJunctionDescription->GetJunctionDescription()->GetName().empty()) {
         std::cout << " '" << motorwayJunctionDescription->GetJunctionDescription()->GetName() << "'";
-
-        if (!motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
-          std::cout << " (exit " << motorwayJunctionDescription->GetJunctionDescription()->GetRef() << ")";
-        }
       }
 
       std::cout << std::endl;
@@ -560,6 +560,10 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     if (nameDescription &&
         nameDescription->HasName()) {
       std::cout << " into '" << nameDescription->GetDescription() << "'";
+    }
+
+    if (destinationDescription) {
+      std::cout << " destination '" << destinationDescription->GetDescription() << "'";
     }
 
     std::cout << std::endl;
