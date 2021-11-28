@@ -438,6 +438,20 @@ Window {
                     right: parent.right
                 }
             }
+            Text {
+                id: destinationsText
+                visible: navigationModel.nextRouteStep.destinations.length > 0
+                opacity: 0.7
+                text: qsTr("Destinations: %1").arg(navigationModel.nextRouteStep.destinations.join(", "))
+                font.pixelSize: Theme.textFontSize
+                wrapMode: Text.NoWrap
+                clip: true
+                anchors{
+                    top: nextStepDescription.bottom
+                    left: nextStepIcon.right
+                    right: parent.right
+                }
+            }
         }
 
         LaneTurns {

@@ -53,6 +53,7 @@ class OSMSCOUT_CLIENT_QT_API RouteStep : public QObject
   Q_PROPERTY(QString description      READ getDescription         NOTIFY update)
   Q_PROPERTY(QString shortDescription READ getShortDescription    NOTIFY update)
   Q_PROPERTY(QStringList streetNames  READ getStreetNames         NOTIFY update)
+  Q_PROPERTY(QStringList destinations READ getDestinations        NOTIFY update)
   Q_PROPERTY(int roundaboutExit       READ getRoundaboutExit      NOTIFY update)
   Q_PROPERTY(bool roundaboutClockwise READ getRoundaboutClockwise NOTIFY update)
 
@@ -72,7 +73,9 @@ public:
     distanceDeltaRole = Qt::UserRole + 9,
     distanceToRole = Qt::UserRole + 10,
     timeRole = Qt::UserRole + 11,
-    timeDeltaRole = Qt::UserRole + 12
+    timeDeltaRole = Qt::UserRole + 12,
+    streetNamesRole = Qt::UserRole + 13,
+    destinationsRole = Qt::UserRole + 14
   };
   Q_ENUM(Roles)
 
@@ -87,6 +90,7 @@ public:
   QString description;      //!< Formatted (html) verbose description (translated already)
   QString shortDescription; //!< Plain short description (translated already)
   QStringList streetNames;  //!< Street names leading to this step
+  QStringList destinations; //!< Destinations, visible on road sign usually
   int roundaboutExit{-1};   //!< when type is "leave-roundabout" this property indicate number of exit
 
   /**
@@ -178,6 +182,11 @@ public:
   QStringList getStreetNames() const
   {
     return streetNames;
+  }
+
+  QStringList getDestinations() const
+  {
+    return destinations;
   }
 
   int getRoundaboutExit() const

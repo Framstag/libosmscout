@@ -22,12 +22,14 @@
 
 #include <set>
 #include <sstream>
+#include <string>
 
 #include <QMetaType>
 #include <QVariant>
 
 #include <osmscout/routing/RouteDescription.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -190,6 +192,15 @@ static QString FormatMotorwayJunctionName(const RouteDescription::NameDescriptio
   return osmscout::RouteDescriptionBuilder::tr("On exit %1 \"%2\"")
     .arg(QString::fromStdString(ref))
     .arg(QString::fromStdString(name));
+}
+
+static QStringList SplitDestinations(const std::string &destinations)
+{
+  QStringList result;
+  for (const std::string &destination: SplitString(destinations, ";")) {
+    result << QString::fromStdString(destination);
+  }
+  return result;
 }
 
 static QString CrossingWaysDescriptionToString(const RouteDescription::CrossingWaysDescription& crossingWaysDescription)
@@ -430,7 +441,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                                                          const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                                                          const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
-                                                         const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
+                                                         const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
 {
   RouteStep change = MkStep("change-motorway");
 
@@ -469,6 +480,10 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
     }
   }
 
+  if (crossingDestinationDescription) {
+    change.destinations = SplitDestinations(crossingDestinationDescription->GetDescription());
+  }
+
   routeSteps.push_back(change);
 }
 
@@ -476,7 +491,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
                                                         const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                                                         const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
                                                         const RouteDescription::NameDescriptionRef& nameDescription,
-                                                        const RouteDescription::DestinationDescriptionRef& /*destinationDescription*/)
+                                                        const RouteDescription::DestinationDescriptionRef& destinationDescription)
 {
   RouteStep leave = MkStep("leave-motorway");
 
@@ -526,6 +541,10 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
       leave.description=osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong>")
           .arg(exitDescription);
     }
+  }
+
+  if (destinationDescription) {
+    leave.destinations = SplitDestinations(destinationDescription->GetDescription());
   }
 
   routeSteps.push_back(leave);
