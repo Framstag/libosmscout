@@ -440,10 +440,22 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 
 void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                                                          const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                                         const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
+                                                         const RouteDescription::DirectionDescriptionRef& directionDescription,
                                                          const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
 {
-  RouteStep change = MkStep("change-motorway");
+  QString stepName="change-motorway";
+  if (directionDescription) {
+    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+      stepName="change-motorway-left";
+    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+      stepName="change-motorway-right";
+    }
+  }
+  RouteStep change = MkStep(stepName);
 
   change.shortDescription=osmscout::RouteDescriptionBuilder::tr("Change motorway");
 
@@ -489,11 +501,23 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
 
 void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                                         const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                                        const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
+                                                        const RouteDescription::DirectionDescriptionRef& directionDescription,
                                                         const RouteDescription::NameDescriptionRef& nameDescription,
                                                         const RouteDescription::DestinationDescriptionRef& destinationDescription)
 {
-  RouteStep leave = MkStep("leave-motorway");
+  QString stepName="leave-motorway";
+  if (directionDescription) {
+    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+      stepName="leave-motorway-left";
+    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+      stepName="leave-motorway-right";
+    }
+  }
+  RouteStep leave = MkStep(stepName);
 
   leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Leave motorway");
 
@@ -504,7 +528,6 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
     exitDescription = FormatMotorwayJunctionName(*(motorwayJunctionDescription->GetJunctionDescription()));
   }
 
-  // TODO: should we add leave direction to phrase? directionDescription->GetCurve()
   if (motorwayLeaveDescription->GetFromDescription() &&
       motorwayLeaveDescription->GetFromDescription()->HasName()) {
 

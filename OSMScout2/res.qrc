@@ -25,13 +25,15 @@
         <file>pics/Plus.svg</file>
         <file>pics/Download.svg</file>
 
-        <file>pics/routestep/change-motorway.svg</file>
+        <file>pics/routestep/enter-motorway.svg</file>
         <file>pics/routestep/continue-straight-on.svg</file>
         <file>pics/routestep/drive-along.svg</file>
         <file>pics/routestep/enter-roundabout.svg</file>
         <file>pics/routestep/information.svg</file>
         <file>pics/routestep/invalid-straight.svg</file>
         <file>pics/routestep/leave-motorway.svg</file>
+        <file>pics/routestep/leave-motorway-left.svg</file>
+        <file>pics/routestep/leave-motorway-right.svg</file>
         <file>pics/routestep/start.svg</file>
         <file>pics/routestep/target.svg</file>
         <file>pics/routestep/turn-left.svg</file>
