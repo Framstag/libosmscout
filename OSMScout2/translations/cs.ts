@@ -17,7 +17,7 @@
     <message>
         <location filename="../qml/custom/RoutingStep.qml" line="46"/>
         <source>Destinations: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Směr: %1</translation>
     </message>
 </context>
 <context>
@@ -25,13 +25,13 @@
     <message>
         <location filename="../qml/custom/Utils.js" line="45"/>
         <source>meters</source>
-        <translation type="unfinished">metrů</translation>
+        <translation>metrů</translation>
     </message>
     <message>
         <location filename="../qml/custom/Utils.js" line="48"/>
         <location filename="../qml/custom/Utils.js" line="50"/>
         <source>km</source>
-        <translation type="unfinished">km</translation>
+        <translation>km</translation>
     </message>
 </context>
 <context>
@@ -186,25 +186,25 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="181"/>
         <source>On unnamed exit</source>
         <extracomment>unnamed motorway exit</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Na nepojmenovaném exitu</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="185"/>
         <source>On exit %1</source>
         <extracomment>motorway exit just with ref</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Na exitu %1</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="189"/>
         <source>On exit &quot;%1&quot;</source>
         <extracomment>motorway exit with name, without ref</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Na exitu &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="192"/>
         <source>On exit %1 &quot;%2&quot;</source>
         <extracomment>motorway exit with ref (%1) and name (%2)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Na exitu %1 &quot;%2&quot;</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="268"/>
@@ -317,7 +317,7 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="480"/>
         <source>%1 &lt;strong&gt;Change motorway&lt;/strong&gt; from %2 to %3</source>
         <extracomment>%1 is motorway exit description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1 &lt;strong&gt;změna dálnice&lt;/strong&gt; z %2 na %3</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="487"/>
@@ -328,7 +328,7 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="490"/>
         <source>%1 &lt;strong&gt;Change motorway&lt;/strong&gt;</source>
         <extracomment>%1 is motorway exit description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1 &lt;strong&gt;Změna dálnice&lt;/strong&gt;</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="522"/>
@@ -344,7 +344,7 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="543"/>
         <source>%1 &lt;strong&gt;Leave motorway&lt;/strong&gt; %2 into %3</source>
         <extracomment>%1 is motorway exit description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1 &lt;strong&gt;sjeďte z dálnice&lt;/strong&gt; %2 na %3</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="550"/>
@@ -355,7 +355,7 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="554"/>
         <source>%1 &lt;strong&gt;Leave motorway&lt;/strong&gt; %2</source>
         <extracomment>%1 is motorway exit description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1 &lt;strong&gt;sjeďte z dálnice&lt;/strong&gt; %2</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="561"/>
@@ -366,7 +366,7 @@
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="564"/>
         <source>%1 &lt;strong&gt;Leave motorway&lt;/strong&gt;</source>
         <extracomment>%1 is motorway exit description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1 &lt;strong&gt;sjeďte z dálnice&lt;/strong&gt;</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp" line="598"/>
