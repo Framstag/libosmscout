@@ -7,7 +7,7 @@ Item {
 
     anchors.right: parent.right;
     anchors.left: parent.left;
-    height: Math.max(text.implicitHeight+5, icon.height)
+    height: Math.max(text.implicitHeight + (destinationsText.visible ? destinationsText.implicitHeight : 0) +5, icon.height)
 
     RouteStepIcon{
         id: icon
@@ -30,6 +30,21 @@ Item {
         anchors.left: icon.right
         width: parent.width - 4 - icon.width
         text: description
+        font.pixelSize: Theme.textFontSize
+        wrapMode: Text.Wrap
+    }
+    Text {
+        id: destinationsText
+
+        y: 2
+        x: 2
+        visible: destinations.length > 0
+        anchors.left: icon.right
+        anchors.top: text.bottom
+        width: parent.width - 4 - icon.width
+
+        text: qsTr("Destinations: %1").arg(destinations.join(", "))
+
         font.pixelSize: Theme.textFontSize
         wrapMode: Text.Wrap
     }

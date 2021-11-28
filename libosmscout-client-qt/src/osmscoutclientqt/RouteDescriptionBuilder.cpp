@@ -22,12 +22,14 @@
 
 #include <set>
 #include <sstream>
+#include <string>
 
 #include <QMetaType>
 #include <QVariant>
 
 #include <osmscout/routing/RouteDescription.h>
 #include <osmscout/util/Logger.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -152,15 +154,53 @@ static QString FormatName(const RouteDescription::NameDescription &nameDescripti
   std::string ref=nameDescription.GetRef();
   if (name.empty() &&
       ref.empty()) {
+    //: unknown road name
     return osmscout::RouteDescriptionBuilder::tr("unnamed road");
   }
   if (name.empty()){
+    //: road just with ref number
     return osmscout::RouteDescriptionBuilder::tr("(%1)").arg(QString::fromStdString(ref));
   }
   if (ref.empty()){
+    //: road just with name, without ref
     return osmscout::RouteDescriptionBuilder::tr("\"%1\"").arg(QString::fromStdString(name));
   }
-  return osmscout::RouteDescriptionBuilder::tr("\"%1\" (%2)").arg(QString::fromStdString(name)).arg(QString::fromStdString(ref));
+  //: road with name (%1) and ref (%2)
+  return osmscout::RouteDescriptionBuilder::tr("\"%1\" (%2)")
+    .arg(QString::fromStdString(name))
+    .arg(QString::fromStdString(ref));
+}
+
+static QString FormatMotorwayJunctionName(const RouteDescription::NameDescription &nameDescription)
+{
+  std::string name=nameDescription.GetName();
+  std::string ref=nameDescription.GetRef();
+  if (name.empty() &&
+      ref.empty()) {
+    //: unnamed motorway exit
+    return osmscout::RouteDescriptionBuilder::tr("On unnamed exit");
+  }
+  if (name.empty()){
+    //: motorway exit just with ref
+    return osmscout::RouteDescriptionBuilder::tr("On exit %1").arg(QString::fromStdString(ref));
+  }
+  if (ref.empty()){
+    //: motorway exit with name, without ref
+    return osmscout::RouteDescriptionBuilder::tr("On exit \"%1\"").arg(QString::fromStdString(name));
+  }
+  //: motorway exit with ref (%1) and name (%2)
+  return osmscout::RouteDescriptionBuilder::tr("On exit %1 \"%2\"")
+    .arg(QString::fromStdString(ref))
+    .arg(QString::fromStdString(name));
+}
+
+static QStringList SplitDestinations(const std::string &destinations)
+{
+  QStringList result;
+  for (const std::string &destination: SplitString(destinations, ";")) {
+    result << QString::fromStdString(destination);
+  }
+  return result;
 }
 
 static QString CrossingWaysDescriptionToString(const RouteDescription::CrossingWaysDescription& crossingWaysDescription)
@@ -399,53 +439,135 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 }
 
 void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                                                         const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
-                                                         const RouteDescription::DestinationDescriptionRef& /*crossingDestinationDescription*/)
+                                                         const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                                         const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                                         const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
 {
-  RouteStep change = MkStep("change-motorway");
+  QString stepName="change-motorway";
+  if (directionDescription) {
+    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+      stepName="change-motorway-left";
+    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+      stepName="change-motorway-right";
+    }
+  }
+  RouteStep change = MkStep(stepName);
 
   change.shortDescription=osmscout::RouteDescriptionBuilder::tr("Change motorway");
+
+  QString exitDescription;
+  if (motorwayJunctionDescription &&
+      motorwayJunctionDescription->GetJunctionDescription() &&
+      motorwayJunctionDescription->GetJunctionDescription()->HasName()) {
+    exitDescription = FormatMotorwayJunctionName(*(motorwayJunctionDescription->GetJunctionDescription()));
+  }
 
   if (motorwayChangeDescription->GetFromDescription() &&
       motorwayChangeDescription->GetFromDescription()->HasName() &&
       motorwayChangeDescription->GetToDescription() &&
       motorwayChangeDescription->GetToDescription()->HasName()) {
 
-    change.description=osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
-        .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
-        .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
+    if (exitDescription.isEmpty()) {
+      change.description = osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
+          .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
+          .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
+    } else {
+      //: %1 is motorway exit description
+      change.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong> from %2 to %3")
+          .arg(exitDescription)
+          .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
+          .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
+    }
   }else{
-    change.description=osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
+    if (exitDescription.isEmpty()) {
+      change.description = osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
+    } else {
+      //: %1 is motorway exit description
+      change.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong>")
+          .arg(exitDescription);
+    }
+  }
+
+  if (crossingDestinationDescription) {
+    change.destinations = SplitDestinations(crossingDestinationDescription->GetDescription());
   }
 
   routeSteps.push_back(change);
 }
 
 void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                                                        const RouteDescription::MotorwayJunctionDescriptionRef& /*motorwayJunctionDescription*/,
-                                                        const RouteDescription::DirectionDescriptionRef& /*directionDescription*/,
-                                                        const RouteDescription::NameDescriptionRef& nameDescription)
+                                                        const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                                                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                                        const RouteDescription::NameDescriptionRef& nameDescription,
+                                                        const RouteDescription::DestinationDescriptionRef& destinationDescription)
 {
-  RouteStep leave = MkStep("leave-motorway");
+  QString stepName="leave-motorway";
+  if (directionDescription) {
+    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+      stepName="leave-motorway-left";
+    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+      stepName="leave-motorway-right";
+    }
+  }
+  RouteStep leave = MkStep(stepName);
 
   leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Leave motorway");
 
-  // TODO: should we add leave direction to phrase? directionDescription->GetCurve()
+  QString exitDescription;
+  if (motorwayJunctionDescription &&
+      motorwayJunctionDescription->GetJunctionDescription() &&
+      motorwayJunctionDescription->GetJunctionDescription()->HasName()) {
+    exitDescription = FormatMotorwayJunctionName(*(motorwayJunctionDescription->GetJunctionDescription()));
+  }
+
   if (motorwayLeaveDescription->GetFromDescription() &&
       motorwayLeaveDescription->GetFromDescription()->HasName()) {
 
     if (nameDescription &&
         nameDescription->HasName()) {
 
-      leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
-          .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
-          .arg(FormatName(*nameDescription));
+      if (exitDescription.isEmpty()) {
+        leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
+            .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
+            .arg(FormatName(*nameDescription));
+      } else {
+        //: %1 is motorway exit description
+        leave.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2 into %3")
+            .arg(exitDescription)
+            .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
+            .arg(FormatName(*nameDescription));
+      }
     }else{
-      leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
-          .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
+      if (exitDescription.isEmpty()) {
+        leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
+            .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
+      } else {
+        //: %1 is motorway exit description
+        leave.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2")
+            .arg(exitDescription)
+            .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
+      }
     }
   }else{
-    leave.description=osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
+    if (exitDescription.isEmpty()) {
+      leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
+    } else {
+      //: %1 is motorway exit description
+      leave.description=osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong>")
+          .arg(exitDescription);
+    }
+  }
+
+  if (destinationDescription) {
+    leave.destinations = SplitDestinations(destinationDescription->GetDescription());
   }
 
   routeSteps.push_back(leave);

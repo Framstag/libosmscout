@@ -92,12 +92,14 @@ public:
 
     void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                           const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                          const RouteDescription::DirectionDescriptionRef& directionDescription,
                           const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override;
 
     void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                          const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
                          const RouteDescription::DirectionDescriptionRef& directionDescription,
-                         const RouteDescription::NameDescriptionRef& nameDescription) override;
+                         const RouteDescription::NameDescriptionRef& nameDescription,
+                         const RouteDescription::DestinationDescriptionRef& destinationDescription) override;
 
     void OnPathNameChange(const RouteDescription::NameChangedDescriptionRef& nameChangedDescription) override;
 
