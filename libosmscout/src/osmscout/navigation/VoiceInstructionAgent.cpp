@@ -283,7 +283,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   // triggering GpsFound / GpsLost messages
   bool gpsSignal = positionMessage->position.state != PositionAgent::PositionState::NoGpsSignal;
 
-  // PositionAgent reports NoGpsSignal when there is no udpate for longer than 2 seconds
+  // PositionAgent reports NoGpsSignal when there is no update for longer than 2 seconds
   // or accuracy is lower than 100 meters. It is fine for UI but too strict for voice
   // notification. For that reason we are using lastSeenGpsSignal time
   // and triggers GpsLost message after longer time.
