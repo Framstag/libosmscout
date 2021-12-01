@@ -51,6 +51,45 @@ public:
     distance=node.GetDistance();
   }
 
+  void OnMotorwayLeave(const RouteDescription::DirectionDescriptionRef& directionDescription)
+  {
+    VoiceInstructionAgent::MessageType type=VoiceInstructionAgent::MessageType::LeaveMotorway;
+    if (directionDescription) {
+      if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+          directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+          directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+        type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
+      } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+        type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
+      }
+    }
+
+    if (!nextMessage){
+      nextMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+    } else if (!thenMessage){
+      thenMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+    }
+  }
+
+  void OnMotorwayChange([[maybe_unused]] const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                        [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
+  {
+    OnMotorwayLeave(directionDescription);
+  }
+
+  void OnMotorwayLeave([[maybe_unused]] const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                       [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                       const RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
+                       [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& destinationDescription) override
+  {
+    OnMotorwayLeave(directionDescription);
+  }
+
   void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
                          [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
@@ -197,6 +236,16 @@ void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::Voice
       break;
     case MessageType::SharpRight:
       samples.push_back(VoiceSample::SharpRight);
+      break;
+
+    case MessageType::LeaveMotorway:
+      samples.push_back(VoiceSample::MwExit);
+      break;
+    case MessageType::LeaveMotorwayRight:
+      samples.push_back(VoiceSample::MwExitRight);
+      break;
+    case MessageType::LeaveMotorwayLeft:
+      samples.push_back(VoiceSample::MwExitLeft);
       break;
 
     default:

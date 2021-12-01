@@ -134,8 +134,11 @@ public:
     TurnLeft,
     StraightOn,
     TurnRight,
-    SharpRight
+    SharpRight,
 
+    LeaveMotorway,
+    LeaveMotorwayRight,
+    LeaveMotorwayLeft
   };
 
   struct MessageStruct {
