@@ -44,18 +44,17 @@ public:
       distance{distanceFromStart}
   {}
 
-   ~PostprocessorCallback() override = default;
+  ~PostprocessorCallback() override = default;
 
   void BeforeNode(const RouteDescription::Node& node) override
   {
     distance=node.GetDistance();
   }
 
-   void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                 [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                         [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(roundaboutLeaveDescription);
-    assert(nameDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     MessageType type = MessageType::NoMessage;
