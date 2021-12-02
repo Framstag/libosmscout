@@ -340,7 +340,8 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
       lastMessagePosition=distanceFromStart;
     } else {
       Distance distFromLast = distanceFromStart - lastMessagePosition;
-      if (distFromLast.AsMeter() < 0 ||
+      if (!lastMessage ||
+          distFromLast.AsMeter() < -50 ||
           (distanceInUnits < 550 && distFromLast > Meters(300)) ||
           (distanceInUnits < 150 && distFromLast > Meters(200)) ||
           (distanceInUnits < 60 && distFromLast > Meters(100))) {
