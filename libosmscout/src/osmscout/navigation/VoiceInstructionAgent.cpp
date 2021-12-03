@@ -322,7 +322,14 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   Distance distanceFromStart = prevRouteNode->GetDistance() + GetEllipsoidalDistance(coord, prevRouteNode->GetLocation());
   PostprocessorCallback callback(distanceFromStart, distanceFromStart + Kilometers(2));
 
-  postprocessor.GenerateDescription(positionMessage->position.routeNode,
+  // start postprocessor with the first node before us (positionMessage->position.routeNode is behind us)
+  RouteDescription::NodeIterator nodeBefore=positionMessage->position.routeNode;
+  while (nodeBefore != positionMessage->route->Nodes().end() &&
+      nodeBefore->GetDistance() > Distance::Zero() &&
+      nodeBefore->GetDistance() < distanceFromStart) {
+    ++nodeBefore;
+  }
+  postprocessor.GenerateDescription(nodeBefore,
                                     positionMessage->route->Nodes().end(),
                                     callback);
 
