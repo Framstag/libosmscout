@@ -799,6 +799,10 @@ namespace osmscout {
                            desc);
     }
     else if (!originIsMotorway && targetIsMotorway) {
+
+      // add direction description howto enter motorway link
+      HandleDirectionChange(postprocessor, node, end);
+
       RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
 
       node->AddDescription(RouteDescription::MOTORWAY_ENTER_DESC,
@@ -854,7 +858,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(const RoutePostprocessor& postprocessor,
-                                                                           std::list<RouteDescription::Node>::iterator& node,
+                                                                           const std::list<RouteDescription::Node>::iterator& node,
                                                                            const std::list<RouteDescription::Node>::const_iterator& end)
   {
     if (node->GetObjects().size()<=1){
