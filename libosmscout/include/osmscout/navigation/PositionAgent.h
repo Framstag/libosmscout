@@ -77,7 +77,7 @@ namespace osmscout {
     };
 
     /**
-     * Message with estimated possition
+     * Message with estimated position
      */
     struct OSMSCOUT_API PositionMessage CLASS_FINAL : public NavigationMessage
     {
