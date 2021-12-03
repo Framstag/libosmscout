@@ -44,18 +44,56 @@ public:
       distance{distanceFromStart}
   {}
 
-   ~PostprocessorCallback() override = default;
+  ~PostprocessorCallback() override = default;
 
   void BeforeNode(const RouteDescription::Node& node) override
   {
     distance=node.GetDistance();
   }
 
-   void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
-                                 [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
+  void OnMotorwayLeave(const RouteDescription::DirectionDescriptionRef& directionDescription)
+  {
+    VoiceInstructionAgent::MessageType type=VoiceInstructionAgent::MessageType::LeaveMotorway;
+    if (directionDescription) {
+      if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
+          directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
+          directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+        type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
+      } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
+                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
+                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+        type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
+      }
+    }
+
+    if (!nextMessage){
+      nextMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+    } else if (!thenMessage){
+      thenMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+    }
+  }
+
+  void OnMotorwayChange([[maybe_unused]] const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                        [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
+  {
+    OnMotorwayLeave(directionDescription);
+  }
+
+  void OnMotorwayLeave([[maybe_unused]] const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                       [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                       const RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
+                       [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& destinationDescription) override
+  {
+    OnMotorwayLeave(directionDescription);
+  }
+
+  void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                         [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(roundaboutLeaveDescription);
-    assert(nameDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     MessageType type = MessageType::NoMessage;
@@ -200,6 +238,16 @@ void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::Voice
       samples.push_back(VoiceSample::SharpRight);
       break;
 
+    case MessageType::LeaveMotorway:
+      samples.push_back(VoiceSample::MwExit);
+      break;
+    case MessageType::LeaveMotorwayRight:
+      samples.push_back(VoiceSample::MwExitRight);
+      break;
+    case MessageType::LeaveMotorwayLeft:
+      samples.push_back(VoiceSample::MwExitLeft);
+      break;
+
     default:
       log.Error() << "Message type " << static_cast<int>(type) << " is not handled!";
       assert(false);
@@ -283,7 +331,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   // triggering GpsFound / GpsLost messages
   bool gpsSignal = positionMessage->position.state != PositionAgent::PositionState::NoGpsSignal;
 
-  // PositionAgent reports NoGpsSignal when there is no udpate for longer than 2 seconds
+  // PositionAgent reports NoGpsSignal when there is no update for longer than 2 seconds
   // or accuracy is lower than 100 meters. It is fine for UI but too strict for voice
   // notification. For that reason we are using lastSeenGpsSignal time
   // and triggers GpsLost message after longer time.

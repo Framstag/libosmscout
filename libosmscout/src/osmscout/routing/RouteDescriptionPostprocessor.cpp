@@ -141,7 +141,6 @@ namespace osmscout {
   {
     callback.BeforeRoute();
 
-    auto prevNode=last;
     for (auto node=first;
          node!=last && callback.Continue();
          ++node) {
@@ -311,8 +310,6 @@ namespace osmscout {
       }
 
       callback.AfterNode(*node);
-
-      prevNode=node;
     }
   }
 }
