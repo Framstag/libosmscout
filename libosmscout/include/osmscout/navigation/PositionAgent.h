@@ -77,7 +77,7 @@ namespace osmscout {
     };
 
     /**
-     * Message with estimated possition
+     * Message with estimated position
      */
     struct OSMSCOUT_API PositionMessage CLASS_FINAL : public NavigationMessage
     {
@@ -85,6 +85,7 @@ namespace osmscout {
       Position position;
 
       PositionMessage(const Timestamp& timestamp, const RouteDescriptionRef &route, const Position &position);
+      ~PositionMessage() override = default;
 
       template<typename Description>
       std::shared_ptr<Description> GetRouteDescription(const char* name) const
@@ -112,7 +113,8 @@ namespace osmscout {
     Distance snapDistanceInMeters{Meters(20)}; // max distance from the route path to consider being on route
 
   public:
-    PositionAgent();
+    PositionAgent() = default;
+    ~PositionAgent() override = default;
 
     std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 

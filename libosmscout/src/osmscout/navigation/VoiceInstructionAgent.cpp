@@ -364,13 +364,20 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   }
 
   RouteDescriptionPostprocessor postprocessor;
-  auto prevRoteNode = positionMessage->position.routeNode;
+  auto prevRouteNode = positionMessage->position.routeNode;
   auto coord = positionMessage->position.coord;
   // our current distance from route start
-  Distance distanceFromStart = prevRoteNode->GetDistance() + GetEllipsoidalDistance(coord, prevRoteNode->GetLocation());
+  Distance distanceFromStart = prevRouteNode->GetDistance() + GetEllipsoidalDistance(coord, prevRouteNode->GetLocation());
   PostprocessorCallback callback(distanceFromStart, distanceFromStart + Kilometers(2));
 
-  postprocessor.GenerateDescription(positionMessage->position.routeNode,
+  // start postprocessor with the first node before us (positionMessage->position.routeNode is behind us)
+  RouteDescription::NodeIterator nodeBefore=positionMessage->position.routeNode;
+  while (nodeBefore != positionMessage->route->Nodes().end() &&
+      nodeBefore->GetDistance() > Distance::Zero() &&
+      nodeBefore->GetDistance() < distanceFromStart) {
+    ++nodeBefore;
+  }
+  postprocessor.GenerateDescription(nodeBefore,
                                     positionMessage->route->Nodes().end(),
                                     callback);
 
@@ -388,7 +395,8 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
       lastMessagePosition=distanceFromStart;
     } else {
       Distance distFromLast = distanceFromStart - lastMessagePosition;
-      if (distFromLast.AsMeter() < 0 ||
+      if (!lastMessage ||
+          distFromLast.AsMeter() < -50 ||
           (distanceInUnits < 550 && distFromLast > Meters(300)) ||
           (distanceInUnits < 150 && distFromLast > Meters(200)) ||
           (distanceInUnits < 60 && distFromLast > Meters(100))) {
