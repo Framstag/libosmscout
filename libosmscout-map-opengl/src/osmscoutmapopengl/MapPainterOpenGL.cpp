@@ -31,66 +31,59 @@
 
 namespace osmscout {
 
-  osmscout::MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
-                                               std::string fontPath)
+  MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
+                                     const std::string &fontPath, const std::string &shaderDir)
       : width(width),
         height(height),
         dpi(dpi),
-        screenWidth(
-            screenWidth),
-        screenHeight(
-            screenHeight),
-        Textloader(fontPath, 10) {
+        screenWidth(screenWidth),
+        screenHeight(screenHeight),
+        Textloader(fontPath, 10)
+  {
     glewExperimental = GL_TRUE;
     GLenum res = glewInit();
     if (res != GLEW_OK) {
       log.Error() <<"Glew init error: " << glewGetErrorString(res);
     }
 
-    AreaRenderer.LoadVertexShader("AreaVertexShader.vert");
-    AreaRenderer.LoadFragmentShader("AreaFragmentShader.frag");
-    bool success = AreaRenderer.InitContext();
-    if (!success) {
+    if (!(AreaRenderer.LoadVertexShader(shaderDir, "AreaVertexShader.vert") &&
+          AreaRenderer.LoadFragmentShader(shaderDir, "AreaFragmentShader.frag") &&
+          AreaRenderer.InitContext())) {
       log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
-    GroundTileRenderer.LoadVertexShader("GroundVertexShader.vert");
-    GroundTileRenderer.LoadFragmentShader("GroundFragmentShader.frag");
-    success = GroundTileRenderer.InitContext();
-    if (!success) {
+    if (!(GroundTileRenderer.LoadVertexShader(shaderDir, "GroundVertexShader.vert") &&
+          GroundTileRenderer.LoadFragmentShader(shaderDir, "GroundFragmentShader.frag") &&
+          GroundTileRenderer.InitContext())) {
+      log.Error() << "Could not initialize context for ground tile rendering!";
+      return;
+    }
+
+    if (!(GroundRenderer.LoadVertexShader(shaderDir, "GroundVertexShader.vert") &&
+          GroundRenderer.LoadFragmentShader(shaderDir, "GroundFragmentShader.frag") &&
+          GroundRenderer.InitContext())) {
+      log.Error() << "Could not initialize context for ground rendering!";
+      return;
+    }
+
+    if (!(WayRenderer.LoadVertexShader(shaderDir, "PathVertexShader.vert") &&
+          WayRenderer.LoadFragmentShader(shaderDir, "PathFragmentShader.frag") &&
+          WayRenderer.InitContext())) {
       log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
-    GroundRenderer.LoadVertexShader("GroundVertexShader.vert");
-    GroundRenderer.LoadFragmentShader("GroundFragmentShader.frag");
-    success = GroundRenderer.InitContext();
-    if (!success) {
-      log.Error() << "Could not initialize context for area rendering!";
-      return;
-    }
-
-    WayRenderer.LoadVertexShader("PathVertexShader.vert");
-    WayRenderer.LoadFragmentShader("PathFragmentShader.frag");
-    success = WayRenderer.InitContext();
-    if (!success) {
-      log.Error() << "Could not initialize context for area rendering!";
-      return;
-    }
-
-    ImageRenderer.LoadVertexShader("QuadVertexShader.vert");
-    ImageRenderer.LoadFragmentShader("QuadFragmentShader.frag");
-    success = ImageRenderer.InitContext();
-    if (!success) {
+    if (!(ImageRenderer.LoadVertexShader(shaderDir, "QuadVertexShader.vert") &&
+          ImageRenderer.LoadFragmentShader(shaderDir, "QuadFragmentShader.frag") &&
+          ImageRenderer.InitContext())) {
       log.Error() << "Could not initialize context for image rendering!";
       return;
     }
 
-    TextRenderer.LoadVertexShader("TextVertexShader.vert");
-    TextRenderer.LoadFragmentShader("TextFragmentShader.frag");
-    success = TextRenderer.InitContext();
-    if (!success) {
+    if (!(TextRenderer.LoadVertexShader(shaderDir, "TextVertexShader.vert") &&
+          TextRenderer.LoadFragmentShader(shaderDir, "TextFragmentShader.frag") &&
+          TextRenderer.InitContext())) {
       log.Error() << "Could not initialize context for text rendering!";
       return;
     }

@@ -40,6 +40,7 @@ struct Arguments {
   size_t width=0;
   size_t height=0;
   std::string fontPath;
+  std::string shaderPath=SHADER_INSTALL_DIR;
   bool debug=false;
 };
 
@@ -222,6 +223,13 @@ int main(int argc, char *argv[]) {
                       "Font file (.ttf)",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.shaderPath=value;
+                      }),
+                      "shaders",
+                      "Path to shaders (default: " + args.shaderPath + ")",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
                             args.databaseDirectory = value;
                           }),
@@ -335,7 +343,7 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath);
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath, args.shaderPath);
   if (!renderer->IsInitialized()) {
     glfwDestroyWindow(window);
     glfwTerminate();

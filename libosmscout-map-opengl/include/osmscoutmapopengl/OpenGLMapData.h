@@ -29,6 +29,7 @@
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapPainter.h>
+#include <osmscout/util/File.h>
 
 #include <iostream>
 #include <fstream>
@@ -81,34 +82,30 @@ namespace osmscout {
 
     std::string VertexShaderSource;
     std::string FragmentShaderSource;
-    int VertexShaderLength;
-    int FragmentShaderLength;
 
     glm::mat4 Model;
     glm::mat4 View;
     glm::mat4 Projection;
 
-    std::string LoadShader(std::string name) {
-      std::string result;
-      std::string line;
-      std::string filePath = std::string(__FILE__);
-
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-      std::string dirPath = filePath.substr(0, filePath.rfind("\\"));
-#else
-      std::string dirPath = filePath.substr(0, filePath.rfind("/"));
-#endif
-
-      std::ifstream myfile(dirPath + "/private/" + name);
-      if (myfile.is_open()) {
-        while (getline(myfile, line)) {
-          result.append(line + "\n");
-        }
-        myfile.close();
+    bool LoadShader(const std::string &dirPath, const std::string &name, std::string &result) {
+      std::string filePath = dirPath + "/" + name;
+      if (!ExistsInFilesystem(filePath)) {
+        log.Error() << "Shader file " << filePath << " doesn't exists";
+        return false;
       }
 
-      return result;
+      std::string line;
+      std::ifstream myfile(filePath);
+      if (!myfile.is_open()) {
+        return false;
+      }
 
+      while (getline(myfile, line)) {
+        result.append(line + "\n");
+      }
+      myfile.close();
+
+      return true;
     }
 
     void LoadVBO() {
@@ -217,6 +214,7 @@ namespace osmscout {
 
       VertexShader = glCreateShader(GL_VERTEX_SHADER);
       const char *VertexSourceC = VertexShaderSource.c_str();
+      int VertexShaderLength = VertexShaderSource.length();
       glShaderSource(VertexShader, 1, &VertexSourceC, &VertexShaderLength);
       glCompileShader(VertexShader);
 
@@ -239,6 +237,7 @@ namespace osmscout {
 
       FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
       const char *FragmentSourceC = FragmentShaderSource.c_str();
+      int FragmentShaderLength = FragmentShaderSource.length();
       glShaderSource(FragmentShader, 1, &FragmentSourceC, &FragmentShaderLength);
       glCompileShader(FragmentShader);
 
@@ -286,14 +285,12 @@ namespace osmscout {
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
-    void LoadFragmentShader(std::string fileName) {
-      FragmentShaderSource = this->LoadShader(fileName);
-      FragmentShaderLength = FragmentShaderSource.length();
+    bool LoadFragmentShader(const std::string &dir, const std::string &fileName) {
+      return this->LoadShader(dir, fileName, FragmentShaderSource);
     }
 
-    void LoadVertexShader(std::string fileName) {
-      VertexShaderSource = this->LoadShader(fileName);
-      VertexShaderLength = VertexShaderSource.length();
+    bool LoadVertexShader(const std::string &dir, const std::string &fileName) {
+      return this->LoadShader(dir, fileName, VertexShaderSource);
     }
 
     void LoadVertices() {
