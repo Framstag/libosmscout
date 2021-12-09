@@ -33,20 +33,14 @@
 #include <GLFW/glfw3.h>
 
 struct Arguments {
-  bool help;
+  bool help=false;
   std::string databaseDirectory;
   std::string styleFileDirectory;
   std::string iconDirectory;
-  size_t width;
-  size_t height;
+  size_t width=0;
+  size_t height=0;
   std::string fontPath;
-  Arguments()
-  : help(false),
-    width(0),
-    height(0)
-  {
-    // no code
-  }
+  bool debug=false;
 };
 
 osmscout::DatabaseParameter databaseParameter;
@@ -214,6 +208,13 @@ int main(int argc, char *argv[]) {
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.fontPath=value;
                       }),
@@ -262,6 +263,8 @@ int main(int argc, char *argv[]) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
+
+  osmscout::log.Debug(args.debug);
 
   database = osmscout::DatabaseRef(new osmscout::Database(databaseParameter));
   mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
