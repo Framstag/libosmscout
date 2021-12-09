@@ -42,7 +42,10 @@ namespace osmscout {
             screenHeight),
         Textloader(fontPath, 10) {
     glewExperimental = GL_TRUE;
-    glewInit();
+    GLenum res = glewInit();
+    if (res != GLEW_OK) {
+      log.Error() <<"Glew init error: " << glewGetErrorString(res);
+    }
 
     AreaRenderer.LoadVertexShader("AreaVertexShader.vert");
     AreaRenderer.LoadFragmentShader("AreaFragmentShader.frag");
@@ -105,6 +108,8 @@ namespace osmscout {
     ImageRenderer.SetTextureHeight(7);
     TextRenderer.clearData();
     TextRenderer.SetVerticesSize(11);
+
+    initialized = true;
   }
 
   void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,

@@ -30,8 +30,9 @@
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
-   {
+  {
   private:
+    bool initialized = false;
 
     int width;
     int height;
@@ -125,6 +126,11 @@ namespace osmscout {
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
 
     ~MapPainterOpenGL();
+
+    bool IsInitialized() const
+    {
+      return initialized;
+    }
 
     /**
      * Zooms on the map.

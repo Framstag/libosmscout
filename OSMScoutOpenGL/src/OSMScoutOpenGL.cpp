@@ -333,6 +333,12 @@ int main(int argc, char *argv[]) {
   glfwMakeContextCurrent(window);
 
   renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath);
+  if (!renderer->IsInitialized()) {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 1;
+  }
+
   renderer->ProcessData(data, drawParameter, projection, styleConfig);
   renderer->SwapData();
   unsigned long long currentTime;
