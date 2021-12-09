@@ -51,7 +51,7 @@ namespace osmscout {
     AreaRenderer.LoadFragmentShader("AreaFragmentShader.frag");
     bool success = AreaRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for area rendering!" << std::endl;
+      log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
@@ -59,7 +59,7 @@ namespace osmscout {
     GroundTileRenderer.LoadFragmentShader("GroundFragmentShader.frag");
     success = GroundTileRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for area rendering!" << std::endl;
+      log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
@@ -67,7 +67,7 @@ namespace osmscout {
     GroundRenderer.LoadFragmentShader("GroundFragmentShader.frag");
     success = GroundRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for area rendering!" << std::endl;
+      log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
@@ -75,7 +75,7 @@ namespace osmscout {
     WayRenderer.LoadFragmentShader("PathFragmentShader.frag");
     success = WayRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for area rendering!" << std::endl;
+      log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
@@ -83,7 +83,7 @@ namespace osmscout {
     ImageRenderer.LoadFragmentShader("QuadFragmentShader.frag");
     success = ImageRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for image rendering!" << std::endl;
+      log.Error() << "Could not initialize context for image rendering!";
       return;
     }
 
@@ -91,7 +91,7 @@ namespace osmscout {
     TextRenderer.LoadFragmentShader("TextFragmentShader.frag");
     success = TextRenderer.InitContext();
     if (!success) {
-      std::cerr << "Could not initialize context for text rendering!" << std::endl;
+      log.Error() << "Could not initialize context for text rendering!";
       return;
     }
 
