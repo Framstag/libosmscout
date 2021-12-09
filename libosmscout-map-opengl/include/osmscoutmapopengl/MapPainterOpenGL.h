@@ -125,7 +125,7 @@ namespace osmscout {
 
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight, std::string fontPath);
 
-    ~MapPainterOpenGL();
+    ~MapPainterOpenGL() = default;
 
     bool IsInitialized() const
     {

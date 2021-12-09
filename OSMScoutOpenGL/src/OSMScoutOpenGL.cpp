@@ -336,6 +336,7 @@ int main(int argc, char *argv[]) {
   if (!renderer->IsInitialized()) {
     glfwDestroyWindow(window);
     glfwTerminate();
+    delete renderer;
     return 1;
   }
 
@@ -384,6 +385,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  delete renderer;
   glfwDestroyWindow(window);
   glfwTerminate();
 
