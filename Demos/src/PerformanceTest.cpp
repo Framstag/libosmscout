@@ -340,12 +340,13 @@ public:
                                                     dpi,
                                                     tileWidth,
                                                     tileHeight,
-                                                    "/usr/share/fonts/TTF/DejaVuSans.ttf");
+                                                    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+                                                    SHADER_INSTALL_DIR);
   }
 
   ~PerformanceTestBackendOGL()
   {
-    //leaks openglMapPainter;
+    delete openglMapPainter;
   }
 
   void DrawMap(const osmscout::TileProjection &projection,

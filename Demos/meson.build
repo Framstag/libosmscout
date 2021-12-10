@@ -102,11 +102,11 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     endif
   endif
 
-  # TODO: This build is not working, maybe a missing dependency?... (cmake counterpart works)
   if buildMapOpenGL
     includes += osmscoutmapopenglIncDir
     deps += openGLDep
     deps += glfwDep
+    deps += glewDep
     links += osmscoutmapopengl
   endif
 
@@ -266,12 +266,12 @@ if buildMapQt
                          install: true)
 endif
 
-if buildMapOpenGL and glfwDep.found() and ftDep.found()
+if buildMapOpenGL and glfwDep.found() and ftDep.found() and glewDep.found()
   DrawMapOpenGL = executable('DrawMapOpenGL',
                          'src/DrawMapOpenGL.cpp',
                          cpp_args: ['-fPIC'],
                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapopenglIncDir, demoIncDir],
-                         dependencies: [mathDep, openmpDep, openGLDep, ftDep, glfwDep],
+                         dependencies: [mathDep, openmpDep, openGLDep, ftDep, glfwDep, threadDep, glewDep],
                          link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
                          install: true)
 endif

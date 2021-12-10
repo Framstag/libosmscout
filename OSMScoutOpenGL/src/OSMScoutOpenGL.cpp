@@ -33,20 +33,15 @@
 #include <GLFW/glfw3.h>
 
 struct Arguments {
-  bool help;
+  bool help=false;
   std::string databaseDirectory;
   std::string styleFileDirectory;
   std::string iconDirectory;
-  size_t width;
-  size_t height;
+  size_t width=0;
+  size_t height=0;
   std::string fontPath;
-  Arguments()
-  : help(false),
-    width(0),
-    height(0)
-  {
-    // no code
-  }
+  std::string shaderPath=SHADER_INSTALL_DIR;
+  bool debug=false;
 };
 
 osmscout::DatabaseParameter databaseParameter;
@@ -214,11 +209,25 @@ int main(int argc, char *argv[]) {
                       "Return argument help",
                       true);
 
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.fontPath=value;
                       }),
                       "font",
                       "Font file (.ttf)",
+                      false);
+
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.shaderPath=value;
+                      }),
+                      "shaders",
+                      "Path to shaders (default: " + args.shaderPath + ")",
                       false);
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
@@ -262,6 +271,8 @@ int main(int argc, char *argv[]) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
+
+  osmscout::log.Debug(args.debug);
 
   database = osmscout::DatabaseRef(new osmscout::Database(databaseParameter));
   mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
@@ -332,7 +343,14 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath);
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath, args.shaderPath);
+  if (!renderer->IsInitialized()) {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    delete renderer;
+    return 1;
+  }
+
   renderer->ProcessData(data, drawParameter, projection, styleConfig);
   renderer->SwapData();
   unsigned long long currentTime;
@@ -378,6 +396,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  delete renderer;
   glfwDestroyWindow(window);
   glfwTerminate();
 

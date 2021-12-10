@@ -24,6 +24,29 @@ set(SOURCE_FILES
 		src/poly2tri/sweep/sweep_context.cc
 		src/poly2tri/sweep/advancing_front.cc)
 
+set(SHADER_FILES
+	data/shaders/AreaFragmentShader.frag
+	data/shaders/TextVertexShader.vert
+	data/shaders/QuadFragmentShader.frag
+	data/shaders/QuadVertexShader.vert
+	data/shaders/PathFragmentShader.frag
+	data/shaders/AreaVertexShader.vert
+	data/shaders/GroundFragmentShader.frag
+	data/shaders/PathVertexShader.vert
+	data/shaders/GroundVertexShader.vert
+	data/shaders/TextFragmentShader.frag)
+
+# install shaders
+if(APPLE)
+	set(SHADER_INSTALL_DIR "/Library/Application Support/osmscout/shaders")
+elseif(WIN32)
+	set(SHADER_INSTALL_DIR "C:/ProgramData/osmscout/shaders")
+else() # Linux
+	set(SHADER_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/osmscout/shaders")
+endif()
+install(FILES ${SHADER_FILES}
+		DESTINATION ${SHADER_INSTALL_DIR})
+
 osmscout_library_project(
 	NAME OSMScoutMapOpenGL
 	ALIAS MapOpenGL

@@ -43,6 +43,14 @@
 int main(int argc, char* argv[]) {
   DrawMapDemo drawDemo("DrawMapOpenGL", argc, argv);
 
+  std::string shaderPath=SHADER_INSTALL_DIR;
+  drawDemo.argParser.AddOption(osmscout::CmdLineStringOption([&shaderPath](const std::string& value) {
+                                 shaderPath=value;
+                               }),
+                               "shaders",
+                               "Path to shaders (default: " + shaderPath + ")",
+                               false);
+
   if (!drawDemo.OpenDatabase()){
     return 2;
   }
@@ -69,7 +77,7 @@ int main(int argc, char* argv[]) {
   }
   glfwMakeContextCurrent(offscreen_context);
 
-  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(args.width, args.height, args.dpi, args.width, args.height, args.fontName);
+  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(args.width, args.height, args.dpi, args.width, args.height, args.fontName, shaderPath);
 
   painter->ProcessData(drawDemo.data, drawDemo.drawParameter, drawDemo.projection, drawDemo.styleConfig);
   painter->SwapData();
@@ -88,6 +96,7 @@ int main(int argc, char* argv[]) {
     }
   }
   delete[] image;
+  delete painter;
 
   return 0;
 }
