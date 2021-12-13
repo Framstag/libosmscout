@@ -460,33 +460,33 @@ namespace osmscout {
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 1 : 5, borderWidth,
+                            color, t == 0 ? TStart : TL, borderWidth,
                             glm::vec3(1, 0, 0));
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 2 : 6, borderWidth,
+                            color, t == 0 ? BStart : BL, borderWidth,
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, (t == p.size() - 2 ? 7 : 3), borderWidth,
+                            color, (t == p.size() - 2 ? TEnd : TR), borderWidth,
                             glm::vec3(0, 0, 1));
               //second triangle
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, (t == p.size() - 2) ? 7 : 3, borderWidth,
+                            color, (t == p.size() - 2) ? TEnd : TR, borderWidth,
                             glm::vec3(1, 0, 0));
               AddPathVertex(p[t],
                             t == 0 ? p[t] : p[t - 1],
                             p[t + 1],
-                            color, t == 0 ? 2 : 6, borderWidth,
+                            color, t == 0 ? BStart : BL, borderWidth,
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
                             p[t + 2],
-                            color, t == p.size() - 2 ? 8 : 4, borderWidth,
+                            color, t == p.size() - 2 ? BEnd : BR, borderWidth,
                             glm::vec3(0, 0, 1));
 
               int num;
@@ -630,38 +630,38 @@ namespace osmscout {
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 1 : 5, lineWidth,
+                        color, i == 0 ? TStart : TL, lineWidth,
                         glm::vec3(1, 0, 1),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 2 : 6, lineWidth,
+                        color, i == 0 ? BStart : BL, lineWidth,
                         glm::vec3(0, 1, 1),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, (i == way->nodes.size() - 2 ? 7 : 3), lineWidth,
+                        color, (i == way->nodes.size() - 2 ? TEnd : TR), lineWidth,
                         glm::vec3(0, 0, 1),
                         border, z, dashSize, length, gapColor);
           //second triangle
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, (i == way->nodes.size() - 2) ? 7 : 3, lineWidth,
+                        color, (i == way->nodes.size() - 2) ? TEnd : TR, lineWidth,
                         glm::vec3(1, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 2 : 6, lineWidth,
+                        color, i == 0 ? BStart : BL, lineWidth,
                         glm::vec3(0, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(0, 1, 1),
                         border, z, dashSize, length, gapColor);
 
@@ -673,38 +673,38 @@ namespace osmscout {
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 1 : 5, lineWidth,
+                        color, i == 0 ? TStart : TL, lineWidth,
                         glm::vec3(1, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(0, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 2 : 6, lineWidth,
+                        color, i == 0 ? BStart : BL, lineWidth,
                         glm::vec3(0, 1, 1),
                         border, z, dashSize, length, gapColor);
           //
           AddPathVertex(way->nodes[i],
                         i == 0 ? way->nodes[i] : way->nodes[i - 1],
                         way->nodes[i + 1],
-                        color, i == 0 ? 1 : 5, lineWidth,
+                        color, i == 0 ? TStart : TL, lineWidth,
                         glm::vec3(1, 0, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, i == way->nodes.size() - 2 ? 8 : 4, lineWidth,
+                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(1, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
                         way->nodes[i + 2],
-                        color, i == way->nodes.size() - 2 ? 7 : 3, lineWidth,
+                        color, i == way->nodes.size() - 2 ? TEnd : TR, lineWidth,
                         glm::vec3(1, 0, 1),
                         border, z, dashSize, length, gapColor);
 
@@ -716,11 +716,10 @@ namespace osmscout {
     }
   }
 
-  void
-  osmscout::MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
-                                            osmscout::Color color, int type, float width, glm::vec3 barycentric,
-                                            int border, double z, float dashsize, float length,
-                                            osmscout::Color gapcolor) {
+  void MapPainterOpenGL::AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
+                                       osmscout::Color color, PathVertexType type, float width, glm::vec3 barycentric,
+                                       int border, double z, float dashsize, float length,
+                                       osmscout::Color gapcolor) {
     WayRenderer.AddNewVertex(current.GetLon());
     WayRenderer.AddNewVertex(current.GetLat());
 
@@ -740,7 +739,7 @@ namespace osmscout {
     WayRenderer.AddNewVertex(gapcolor.GetB());
     WayRenderer.AddNewVertex(gapcolor.GetA());
 
-    WayRenderer.AddNewVertex(type);
+    WayRenderer.AddNewVertex(int(type));
 
     WayRenderer.AddNewVertex(width);
 

@@ -9,6 +9,12 @@ in float index;          // Type of the vertex. It is necessary for creating the
                          // the joints correctly.
                          // It represents which vertex is it in the quad, and is it the first/last vertex
                          // or is it one of the middle ones.
+                         //
+                         //  1 ----------- 3 5 ----------- 3 5 ----------- 7
+                         //  |       _____/| |       _____/| |       _____/|
+                         //  |  ____/      | |  ____/      | |  ____/      |
+                         //  2 /__________ 4 6 /---------- 4 6 /---------- 8
+                         //
 in float thickness;      // Thickness of way in pixel
 in float border;         // Decides whether it is a border or not
 in vec3 barycentric;     // Barycentric coordinates a vertex. Necessary for anti-aliasing

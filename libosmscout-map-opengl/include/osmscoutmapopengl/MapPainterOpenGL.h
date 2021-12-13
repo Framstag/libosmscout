@@ -32,6 +32,26 @@ namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
   {
   private:
+    /**
+     * Type of the line vertex.
+     * It is necessary for joining triangles correctly.
+     *
+     *  1 ----------- 3 5 ----------- 3 5 ----------- 7
+     *  |       _____/| |       _____/| |       _____/|
+     *  |  ____/      | |  ____/      | |  ____/      |
+     *  2 /__________ 4 6 /---------- 4 6 /---------- 8
+     */
+    enum PathVertexType: int {
+      TStart = 1,
+      BStart = 2,
+      TR = 3,
+      BR = 4,
+      TL = 5,
+      BL = 6,
+      TEnd = 7,
+      BEnd = 8
+    };
+  private:
     bool initialized = false;
 
     int width;
@@ -113,7 +133,7 @@ namespace osmscout {
     void SwapWayData();
 
     void AddPathVertex(osmscout::Point current, osmscout::Point previous, osmscout::Point next,
-                       osmscout::Color color, int type, float width, glm::vec3 barycentric, int border = 0,
+                       osmscout::Color color, PathVertexType type, float width, glm::vec3 barycentric, int border = 0,
                        double z = 0, float dashsize = 0.0, float length = 1,
                        osmscout::Color gapcolor = osmscout::Color(1.0, 1.0, 1.0, 1.0));
 
