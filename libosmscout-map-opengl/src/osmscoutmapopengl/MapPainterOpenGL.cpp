@@ -469,13 +469,13 @@ namespace osmscout {
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
-                            p[t + 2],
+                            (t == p.size() - 2 ? p[t + 1] : p[t + 2]),
                             color, (t == p.size() - 2 ? TEnd : TR), borderWidth,
                             glm::vec3(0, 0, 1));
               //second triangle
               AddPathVertex(p[t + 1],
                             p[t],
-                            p[t + 2],
+                            (t == p.size() - 2 ? p[t + 1] : p[t + 2]),
                             color, (t == p.size() - 2) ? TEnd : TR, borderWidth,
                             glm::vec3(1, 0, 0));
               AddPathVertex(p[t],
@@ -485,7 +485,7 @@ namespace osmscout {
                             glm::vec3(0, 1, 0));
               AddPathVertex(p[t + 1],
                             p[t],
-                            p[t + 2],
+                            (t == p.size() - 2 ? p[t + 1] : p[t + 2]),
                             color, t == p.size() - 2 ? BEnd : BR, borderWidth,
                             glm::vec3(0, 0, 1));
 
@@ -641,14 +641,14 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, (i == way->nodes.size() - 2 ? TEnd : TR), lineWidth,
                         glm::vec3(0, 0, 1),
                         border, z, dashSize, length, gapColor);
           //second triangle
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, (i == way->nodes.size() - 2) ? TEnd : TR, lineWidth,
                         glm::vec3(1, 1, 0),
                         border, z, dashSize, length, gapColor);
@@ -660,7 +660,7 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(0, 1, 1),
                         border, z, dashSize, length, gapColor);
@@ -678,7 +678,7 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(0, 1, 0),
                         border, z, dashSize, length, gapColor);
@@ -697,13 +697,13 @@ namespace osmscout {
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
                         glm::vec3(1, 1, 0),
                         border, z, dashSize, length, gapColor);
           AddPathVertex(way->nodes[i + 1],
                         way->nodes[i],
-                        way->nodes[i + 2],
+                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
                         color, i == way->nodes.size() - 2 ? TEnd : TR, lineWidth,
                         glm::vec3(1, 0, 1),
                         border, z, dashSize, length, gapColor);
