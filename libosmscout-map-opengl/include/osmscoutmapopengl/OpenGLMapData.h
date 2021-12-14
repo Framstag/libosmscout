@@ -60,13 +60,13 @@ namespace osmscout {
     std::vector<GLfloat> VerticesBuffer;
     std::vector<GLuint> Elements;
     std::vector<GLuint> ElementsBuffer;
-    unsigned char *Textures;
+    unsigned char *Textures=nullptr;
     std::vector<OpenGLTextureRef> TexturesBuffer;
-    int textureSize;
-    int textureSizeBuffer;
-    int textureWidth;
-    int textureWidthBuffer;
-    int textureHeight;
+    int textureSize=0;
+    int textureSizeBuffer=0;
+    int textureWidth=0;
+    int textureWidthBuffer=0;
+    int textureHeight=0;
 
     GLuint shaderProgram;
     GLuint VAO;
@@ -121,15 +121,33 @@ namespace osmscout {
     }
 
   public:
+    OpenGLMapData() = default;
+
+    ~OpenGLMapData()
+    {
+      clearData();
+
+      glDeleteProgram(shaderProgram);
+      glDeleteShader(FragmentShader);
+      glDeleteShader(VertexShader);
+
+      glDeleteBuffers(1, &EBO);
+      glDeleteBuffers(1, &VBO);
+
+      glDeleteVertexArrays(1, &VAO);
+    }
+
+    OpenGLMapData(const OpenGLMapData&) = delete;
+    OpenGLMapData(OpenGLMapData&&) = delete;
+    OpenGLMapData &operator=(const OpenGLMapData&) = delete;
+    OpenGLMapData &operator=(OpenGLMapData&&) = delete;
 
     void SwapData() {
       delete[] Textures;
-      this->Vertices.clear();
-      this->Vertices = this->VerticesBuffer;
-      this->VerticesBuffer.clear();
-      this->Elements.clear();
-      this->Elements = this->ElementsBuffer;
-      this->ElementsBuffer.clear();
+      Vertices = std::move(VerticesBuffer);
+      VerticesBuffer.clear();
+      Elements = std::move(ElementsBuffer);
+      ElementsBuffer.clear();
 
       textureSize = textureSizeBuffer;
       textureSizeBuffer = 0;
@@ -138,7 +156,7 @@ namespace osmscout {
 
       textureHeight = 14;
 
-      this->Textures = new unsigned char[textureWidth*textureHeight*4];
+      Textures = new unsigned char[textureWidth*textureHeight*4];
 
       int index = 0;
       for (int i = 0; i < textureHeight; i++) {
@@ -155,20 +173,19 @@ namespace osmscout {
     }
 
     void SwapData(int stride) {
+      // TODO: merge with SwapData()
       delete[] Textures;
-      this->Vertices.clear();
-      this->Vertices = this->VerticesBuffer;
-      this->VerticesBuffer.clear();
-      this->Elements.clear();
-      this->Elements = this->ElementsBuffer;
-      this->ElementsBuffer.clear();
+      Vertices = std::move(VerticesBuffer);
+      VerticesBuffer.clear();
+      Elements = std::move(ElementsBuffer);
+      ElementsBuffer.clear();
 
       textureSize = textureSizeBuffer;
       textureSizeBuffer = 0;
       textureWidth = textureWidthBuffer;
       textureWidthBuffer = 0;
 
-      this->Textures = new unsigned char[textureWidth*textureHeight*stride];
+      Textures = new unsigned char[textureWidth*textureHeight*stride];
 
       int index = 0;
       for (int i = 0; i < textureHeight; i++) {
@@ -187,7 +204,10 @@ namespace osmscout {
     void clearData() {
       Vertices.clear();
       Elements.clear();
-      Textures = nullptr;
+      if (Textures != nullptr) {
+        delete[] Textures;
+        Textures = nullptr;
+      }
       TexturesBuffer.clear();
       textureSize = 0;
       textureWidth = 0;
@@ -426,17 +446,6 @@ namespace osmscout {
 
     void Draw() {
       glDrawElements(GL_TRIANGLES, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
-    }
-
-    ~OpenGLMapData() {
-      glDeleteProgram(shaderProgram);
-      glDeleteShader(FragmentShader);
-      glDeleteShader(VertexShader);
-
-      glDeleteBuffers(1, &EBO);
-      glDeleteBuffers(1, &VBO);
-
-      glDeleteVertexArrays(1, &VAO);
     }
 
   };
