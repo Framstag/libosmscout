@@ -110,14 +110,12 @@ namespace osmscout {
 
     void LoadVBO() {
       glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(std::vector<GLfloat>) + (sizeof(GLfloat) * Vertices.size()), &Vertices[0],
-                   GL_DYNAMIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * Vertices.size(), &Vertices[0], GL_DYNAMIC_DRAW);
     }
 
     void LoadEBO() {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(std::vector<GLfloat>) + (sizeof(GLfloat) * Elements.size()),
-                   &Elements[0], GL_DYNAMIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * Elements.size(), &Elements[0], GL_DYNAMIC_DRAW);
     }
 
   public:
