@@ -38,15 +38,25 @@ namespace osmscout {
 
   class OpenGLTexture {
   public:
-    size_t width;
-    size_t height;
-    size_t size;
-    unsigned char *data;
+    size_t width=0;
+    size_t height=0;
+    size_t size=0;
+    unsigned char *data=nullptr;
 
-    size_t fromOriginY;
+    size_t fromOriginY=0;
+
+    OpenGLTexture() = default;
+
+    OpenGLTexture(const OpenGLTexture&) = delete;
+    OpenGLTexture(OpenGLTexture&&) = delete;
+    OpenGLTexture &operator=(const OpenGLTexture&) = delete;
+    OpenGLTexture &operator=(OpenGLTexture&&) = delete;
 
     ~OpenGLTexture(){
-      delete []data;
+      if (data!=nullptr) {
+        delete[] data;
+        data=nullptr;
+      }
     }
 
   };
