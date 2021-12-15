@@ -41,6 +41,7 @@ struct Arguments {
   size_t height=0;
   std::string fontPath;
   long defaultTextSize=18;
+  double dpi=0;
   std::string shaderPath=SHADER_INSTALL_DIR;
   bool debug=false;
 };
@@ -75,6 +76,7 @@ unsigned long long lastZoom;
 bool loadData = 0;
 bool loadingInProgress = 0;
 int offset;
+double dpi;
 
 bool LoadData() {
   data.ClearDBData();
@@ -86,7 +88,7 @@ bool LoadData() {
   osmscout::log.Info() << "Zoom level: " << s << " " << magnification.GetLevel();
   projection.Set(center,
                  magnification,
-                 96,
+                 dpi,
                  width,
                  height);
 
@@ -238,6 +240,13 @@ int main(int argc, char *argv[]) {
                       "Path to shaders (default: " + args.shaderPath + ")",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
+                        args.dpi=value;
+                      }),
+                      "dpi",
+                      "Rendering dpi (default is screen dpi)",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
                             args.databaseDirectory = value;
                           }),
@@ -309,18 +318,6 @@ int main(int argc, char *argv[]) {
   level = 6;
   magnification.SetLevel(osmscout::MagnificationLevel(level));
 
-  projection.Set(center,
-                 magnification,
-                 96,
-                 width,
-                 height);
-
-  searchParameter.SetUseLowZoomOptimization(false);
-  mapService->LookupTiles(projection, tiles);
-  mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
-  mapService->AddTileDataToMapData(tiles, data);
-  mapService->GetGroundTiles(projection, data.groundTiles);
-
   glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;
   glfwSetErrorCallback(ErrorCallback);
@@ -335,10 +332,15 @@ int main(int argc, char *argv[]) {
   int screenWidth = mode->width;
   int screenHeight = mode->height;
 
-  int widthMM, heightMM;
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
-  const double dpi = mode->width / (widthMM / 25.4);
+  if (args.dpi > 0) {
+    dpi = args.dpi;
+  } else {
+    int widthMM, heightMM;
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+    dpi = mode->width / (widthMM / 25.4);
+    osmscout::log.Debug() << "Using screen dpi: " << dpi;
+  }
 
   window = glfwCreateWindow(width, height, "OSMScoutOpenGL", nullptr, nullptr);
   if (!window) {
@@ -360,8 +362,10 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  renderer->ProcessData(data, drawParameter, projection, styleConfig);
+  // initial synchronous rendering
+  LoadData();
   renderer->SwapData();
+
   unsigned long long currentTime;
   while (!glfwWindowShouldClose(window)) {
     glfwSwapBuffers(window);
