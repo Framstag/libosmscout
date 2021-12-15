@@ -40,6 +40,7 @@ struct Arguments {
   size_t width=0;
   size_t height=0;
   std::string fontPath;
+  long defaultTextSize=18;
   std::string shaderPath=SHADER_INSTALL_DIR;
   bool debug=false;
 };
@@ -223,6 +224,13 @@ int main(int argc, char *argv[]) {
                       "Font file (.ttf)",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.defaultTextSize=value;
+                      }),
+                      "fontsize",
+                      "Default font size (default: " + std::to_string(args.defaultTextSize) + ")",
+                      false);
+
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.shaderPath=value;
                       }),
@@ -293,7 +301,7 @@ int main(int argc, char *argv[]) {
 
   database.get()->GetBoundingBox(boundingBox);
 
-  drawParameter.SetFontSize(12);
+  drawParameter.SetFontSize(args.defaultTextSize);
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
@@ -343,7 +351,8 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight, args.fontPath, args.shaderPath);
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight,
+                                            args.fontPath, args.shaderPath, args.defaultTextSize);
   if (!renderer->IsInitialized()) {
     glfwDestroyWindow(window);
     glfwTerminate();
