@@ -32,13 +32,14 @@
 namespace osmscout {
 
   MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
-                                     const std::string &fontPath, const std::string &shaderDir)
+                                     const std::string &fontPath, const std::string &shaderDir,
+                                     long defaultTextSize)
       : width(width),
         height(height),
         dpi(dpi),
         screenWidth(screenWidth),
         screenHeight(screenHeight),
-        Textloader(fontPath, 10)
+        Textloader(fontPath, defaultTextSize)
   {
     glewExperimental = GL_TRUE;
     GLenum res = glewInit();

@@ -144,7 +144,8 @@ namespace osmscout {
   public:
 
     MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
-                     const std::string &fontPath, const std::string &shaderDir);
+                     const std::string &fontPath, const std::string &shaderDir,
+                     long defaultTextSize=12);
 
     ~MapPainterOpenGL() = default;
 
