@@ -221,12 +221,12 @@ namespace osmscout {
     ImageRenderer.SetView(lookX, lookY);
 
     TextRenderer.SetTextureHeight(Textloader.GetHeight());
-    TextRenderer.SwapData(1);
+    TextRenderer.SwapData();
 
     TextRenderer.BindBuffers();
     TextRenderer.LoadProgram();
     TextRenderer.LoadVertices();
-    TextRenderer.LoadGreyTextures();
+    TextRenderer.LoadTextures();
 
     TextRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
     TextRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));

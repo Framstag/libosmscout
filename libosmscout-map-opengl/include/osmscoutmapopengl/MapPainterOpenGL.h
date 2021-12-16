@@ -69,12 +69,12 @@ namespace osmscout {
     float lookX;
     float lookY;
 
-    OpenGLMapData AreaRenderer;
-    OpenGLMapData GroundTileRenderer;
-    OpenGLMapData GroundRenderer;
-    OpenGLMapData WayRenderer;
-    OpenGLMapData ImageRenderer;
-    OpenGLMapData TextRenderer;
+    OpenGLMapData<GL_RGBA, 4> AreaRenderer;
+    OpenGLMapData<GL_RGBA, 4> GroundTileRenderer;
+    OpenGLMapData<GL_RGBA, 4> GroundRenderer;
+    OpenGLMapData<GL_RGBA, 4> WayRenderer;
+    OpenGLMapData<GL_RGBA, 4> ImageRenderer;
+    OpenGLMapData<GL_RED, 1> TextRenderer;
 
     TextLoader Textloader;
 
