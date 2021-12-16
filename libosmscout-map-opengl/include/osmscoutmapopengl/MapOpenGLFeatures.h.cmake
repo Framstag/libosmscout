@@ -5,4 +5,8 @@
 #cmakedefine SHADER_INSTALL_DIR "${SHADER_INSTALL_DIR}"
 #endif
 
+#ifndef DEFAULT_FONT_FILE
+#cmakedefine DEFAULT_FONT_FILE "${DEFAULT_FONT_FILE}"
+#endif
+
 #endif

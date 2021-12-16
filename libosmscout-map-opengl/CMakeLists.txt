@@ -36,16 +36,26 @@ set(SHADER_FILES
 	data/shaders/GroundVertexShader.vert
 	data/shaders/TextFragmentShader.frag)
 
+set(FONT_FILES
+	data/fonts/LiberationSans-Regular.ttf
+	data/fonts/LICENSE)
+
 # install shaders
 if(APPLE)
 	set(SHADER_INSTALL_DIR "/Library/Application Support/osmscout/shaders")
+	set(FONTS_INSTALL_DIR "/Library/Application Support/osmscout/fonts")
 elseif(WIN32)
 	set(SHADER_INSTALL_DIR "C:/ProgramData/osmscout/shaders")
+	set(FONTS_INSTALL_DIR "C:/ProgramData/osmscout/fonts")
 else() # Linux
 	set(SHADER_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/osmscout/shaders")
+	set(FONTS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/osmscout/fonts")
 endif()
 install(FILES ${SHADER_FILES}
 		DESTINATION ${SHADER_INSTALL_DIR})
+install(FILES ${FONT_FILES}
+	    DESTINATION ${FONTS_INSTALL_DIR})
+set(DEFAULT_FONT_FILE "${FONTS_INSTALL_DIR}/LiberationSans-Regular.ttf")
 
 osmscout_library_project(
 	NAME OSMScoutMapOpenGL

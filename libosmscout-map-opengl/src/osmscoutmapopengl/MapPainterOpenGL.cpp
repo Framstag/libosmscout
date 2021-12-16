@@ -39,12 +39,18 @@ namespace osmscout {
         dpi(dpi),
         screenWidth(screenWidth),
         screenHeight(screenHeight),
-        Textloader(fontPath, defaultTextSize)
+        Textloader(fontPath, defaultTextSize, dpi)
   {
+    if (!Textloader.IsInitialized()) {
+      log.Error() << "Failed to initialize text loader!";
+      return;
+    }
+
     glewExperimental = GL_TRUE;
     GLenum res = glewInit();
     if (res != GLEW_OK) {
-      log.Error() <<"Glew init error: " << glewGetErrorString(res);
+      log.Error() << "Glew init error: " << glewGetErrorString(res);
+      return;
     }
 
     if (!(AreaRenderer.LoadVertexShader(shaderDir, "AreaVertexShader.vert") &&
@@ -107,8 +113,8 @@ namespace osmscout {
   }
 
   void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                                            const osmscout::Projection &projection,
-                                            const osmscout::StyleConfigRef &styleConfig) {
+                                               const osmscout::Projection &projection,
+                                               const osmscout::StyleConfigRef &styleConfig) {
     landFill=styleConfig.get()->GetLandFillStyle(projection);
     seaFill=styleConfig.get()->GetSeaFillStyle(projection);
 
