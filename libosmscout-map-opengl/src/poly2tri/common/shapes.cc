@@ -130,7 +130,7 @@ void Triangle::Legalize(Point& point)
   points_[2] = &point;
 }
 
-// Legalize triagnle by rotating clockwise around oPoint
+// Legalize triangle by rotating clockwise around oPoint
 void Triangle::Legalize(Point& opoint, Point& npoint)
 {
   if (&opoint == points_[0]) {
@@ -209,7 +209,7 @@ void Triangle::MarkConstrainedEdge(Point* p, Point* q)
 }
 
 // The point counter-clockwise to given point
-Point* Triangle::PointCW(Point& point)
+Point* Triangle::PointCW(const Point& point) const
 {
   if (&point == points_[0]) {
     return points_[2];
@@ -222,7 +222,7 @@ Point* Triangle::PointCW(Point& point)
 }
 
 // The point counter-clockwise to given point
-Point* Triangle::PointCCW(Point& point)
+Point* Triangle::PointCCW(const Point& point) const
 {
   if (&point == points_[0]) {
     return points_[1];

@@ -158,9 +158,9 @@ bool constrained_edge[3];
 /// Flags to determine if an edge is a Delauney edge
 bool delaunay_edge[3];
 
-Point* GetPoint(const int& index);
-Point* PointCW(Point& point);
-Point* PointCCW(Point& point);
+Point* GetPoint(const int& index) const;
+Point* PointCW(const Point& point) const;
+Point* PointCCW(const Point& point) const;
 Point* OppositePoint(Triangle& t, Point& p);
 
 Triangle* GetNeighbor(const int& index);
@@ -283,7 +283,7 @@ inline Point Cross(const double s, const Point& a)
   return Point(-s * a.y, s * a.x);
 }
 
-inline Point* Triangle::GetPoint(const int& index)
+inline Point* Triangle::GetPoint(const int& index) const
 {
   return points_[index];
 }

@@ -321,8 +321,9 @@ namespace osmscout {
             continue;
           }
 
-          if (!ring.IsTopOuter() && ring.GetType()->GetIgnore())
+          if (!ring.IsTopOuter() && ring.GetType()->GetIgnore()) {
             continue;
+          }
 
           TypeInfoRef type;
           FillStyleRef fillStyle;
@@ -361,11 +362,9 @@ namespace osmscout {
             }
           }
 
-          if (p.size() < 3)
+          if (p.size() < 3) {
             continue;
-
-          if (!osmscout::AreaIsSimple(p))
-            continue;
+          }
 
           osmscout::GeoBox ringBoundingBox;
           ring.GetBoundingBox(ringBoundingBox);
@@ -402,32 +401,37 @@ namespace osmscout {
 
           if (!IsVisibleArea(projection,
                              ringBoundingBox,
-                             borderWidth / 2.0))
+                             borderWidth / 2.0)) {
             continue;
+          }
 
-
-          if (hasClippings == 1) {
-            for (auto &ring: r) {
-              for (int i = ring.nodes.size() - 1; i >= 0; i--) {
-                for (int j = 0; j < i; j++) {
-                  if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
-                      fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
-                    ring.nodes.erase(ring.nodes.begin() + i);
+          try {
+            if (hasClippings == 1) {
+              for (auto &ring: r) {
+                for (int i = ring.nodes.size() - 1; i >= 0; i--) {
+                  for (int j = 0; j < i; j++) {
+                    if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
+                        fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
+                      ring.nodes.erase(ring.nodes.begin() + i);
+                    }
                   }
                 }
               }
-            }
 
-            std::vector<std::vector<osmscout::Point>> polygons;
-            polygons.push_back(p);
-            for (const auto &ring: r) {
-              if (ring.nodes.size() >= 3) {
-                polygons.push_back(ring.nodes);
+              std::vector<std::vector<osmscout::Point>> polygons;
+              polygons.push_back(p);
+              for (const auto &ring: r) {
+                if (ring.nodes.size() >= 3) {
+                  polygons.push_back(ring.nodes);
+                }
               }
+              points = osmscout::Triangulate::TriangulateWithHoles(polygons);
+            } else {
+              points = osmscout::Triangulate::TriangulatePolygon(p);
             }
-            points = osmscout::Triangulate::TriangulateWithHoles(polygons);
-          } else {
-            points = osmscout::Triangulate::TriangulatePolygon(p);
+          } catch (const std::runtime_error &e) {
+            log.Warn() << "Skip area " << area->GetFileOffset() << ", triangulation failed: " << e.what();
+            continue;
           }
 
           for (size_t t = 0; t < points.size(); t++) {
