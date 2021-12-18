@@ -21,7 +21,6 @@
 #include <osmscoutmapopengl/PNGLoaderOpenGL.h>
 
 #include <cstdio>
-#include <cstdlib>
 
 #include <png.h>
 
@@ -132,18 +131,9 @@ namespace osmscout {
     rowbytes=png_get_rowbytes(png_ptr,info_ptr);
     channels=(int)png_get_channels(png_ptr,info_ptr);
 
-    if ((image_data=(unsigned char *)malloc(rowbytes*height)) == nullptr) {
-      png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
-      std::fclose(file);
-      return nullptr;
-    }
+    image_data=new unsigned char[rowbytes*height];
 
-    if ((row_pointers=(png_bytepp)malloc(height*sizeof(png_bytep))) == nullptr) {
-      png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
-      free(image_data);
-      std::fclose(file);
-      return nullptr;
-    }
+    row_pointers=new png_bytep[height];
 
     for (size_t i=0;  i<height; ++i) {
       row_pointers[i]=image_data+i*rowbytes;
@@ -151,13 +141,13 @@ namespace osmscout {
 
     png_read_image(png_ptr,row_pointers);
 
-    free(row_pointers);
+    delete[] row_pointers;
     row_pointers=nullptr;
 
     png_read_end(png_ptr,nullptr);
 
     int stride = width*4;
-    data=(unsigned char *)malloc(stride*height);
+    data=new unsigned char[stride*height];
 
     size_t off=0;
     size_t s=0;
@@ -209,7 +199,7 @@ namespace osmscout {
     }
 
     png_destroy_read_struct(&png_ptr,&info_ptr,nullptr);
-    free(image_data);
+    delete[] image_data;
     std::fclose(file);
 
     osmscout::OpenGLTextureRef texture(new osmscout::OpenGLTexture());
