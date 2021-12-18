@@ -409,6 +409,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  if (loadingInProgress) {
+    osmscout::log.Debug() << "Waiting for loading thread";
+    result.wait();
+    osmscout::log.Info() << "Data loading ended.";
+  }
+
   delete renderer;
   glfwDestroyWindow(window);
   glfwTerminate();
