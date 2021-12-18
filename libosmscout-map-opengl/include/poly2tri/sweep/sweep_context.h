@@ -83,7 +83,7 @@ Point* GetPoints();
 
 void RemoveFromMap(Triangle* triangle);
 
-void AddHole(std::vector<Point*> polyline);
+void AddHole(const std::vector<Point*> &polyline);
 
 void AddPoint(Point* point);
 
