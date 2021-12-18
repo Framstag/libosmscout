@@ -36,6 +36,7 @@ osmscoutHeader = [
             'osmscout/util/ProcessingQueue.h',
             'osmscout/util/Progress.h',
             'osmscout/util/Projection.h',
+            'osmscout/util/ScopeGuard.h',
             'osmscout/util/StopClock.h',
             'osmscout/util/String.h',
             'osmscout/util/StringMatcher.h',

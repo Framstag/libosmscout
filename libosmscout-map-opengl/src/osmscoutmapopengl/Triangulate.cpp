@@ -16,9 +16,10 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
-//#include <utility>
+
 #include <osmscoutmapopengl/Triangulate.h>
 
+#include <osmscout/util/ScopeGuard.h>
 #include <osmscout/system/Math.h>
 
 #include <poly2tri/poly2tri.h>
@@ -90,10 +91,14 @@ namespace osmscout {
     std::vector<p2t::Point *> polyline;
     std::for_each(points.begin(), points.end(),
                   [&polyline](osmscout::GeoCoord g) { polyline.push_back(new p2t::Point(g.GetLon(), g.GetLat())); });
-    p2t::CDT *cdt = new p2t::CDT(polyline);
-    cdt->Triangulate();
+    ScopeGuard polylineDeleter([&polyline]() noexcept {
+      std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+    });
+
+    p2t::CDT cdt(polyline);
+    cdt.Triangulate();
     std::vector<p2t::Triangle *> triangles;
-    triangles = cdt->GetTriangles();
+    triangles = cdt.GetTriangles();
     for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
@@ -106,12 +111,7 @@ namespace osmscout {
       result.emplace_back(c.y);
     }
 
-    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
-    delete cdt;
-    cdt = nullptr;
-
     return result;
-
   }
 
   std::vector<GLfloat> osmscout::Triangulate::TriangulateWithHoles(std::vector<std::vector<osmscout::Point>> points) {
@@ -119,7 +119,11 @@ namespace osmscout {
     std::vector<p2t::Point *> polyline;
     std::for_each(points[0].begin(), points[0].end(),
                   [&polyline](osmscout::Point p) { polyline.push_back(new p2t::Point(p.GetLon(), p.GetLat())); });
-    p2t::CDT *cdt = new p2t::CDT(polyline);
+    p2t::CDT cdt(polyline);
+
+    ScopeGuard polylineDeleter([&polyline]() noexcept {
+      std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
+    });
 
     std::vector<std::vector<p2t::Point *>> holes;
 
@@ -130,12 +134,19 @@ namespace osmscout {
       holes.push_back(hole);
     }
 
-    for (const auto& hole: holes)
-      cdt->AddHole(hole);
+    ScopeGuard holesDeleter([&holes]() noexcept {
+      for (const auto &hole: holes) {
+        std::for_each(hole.begin(), hole.end(), [](p2t::Point *p){delete p;});
+      }
+    });
 
-    cdt->Triangulate();
+    for (const auto& hole: holes) {
+      cdt.AddHole(hole);
+    }
+
+    cdt.Triangulate();
     std::vector<p2t::Triangle *> triangles;
-    triangles = cdt->GetTriangles();
+    triangles = cdt.GetTriangles();
     for (size_t i = 0; i < triangles.size(); i++) {
       p2t::Point a = *triangles[i]->GetPoint(0);
       p2t::Point b = *triangles[i]->GetPoint(1);
@@ -148,17 +159,7 @@ namespace osmscout {
       result.emplace_back(c.y);
     }
 
-    std::for_each(polyline.begin(), polyline.end(), [](p2t::Point *p){delete p;});
-
-    for(size_t i = 0; i < holes.size(); i++){
-      std::for_each(holes[i].begin(), holes[i].end(), [](p2t::Point *p){delete p;});
-    }
-
-    delete cdt;
-    cdt = nullptr;
-
     return result;
-
   }
 
 }
