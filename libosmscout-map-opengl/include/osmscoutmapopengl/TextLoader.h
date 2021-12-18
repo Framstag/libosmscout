@@ -77,6 +77,8 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_OPENGL_API TextLoader {
   private:
+    bool initialized = false;
+
     FT_Library ft;
     FT_Face face;
 
@@ -88,15 +90,18 @@ namespace osmscout {
     std::map<std::pair<char32_t, int>, int> characterIndices;
     std::vector<osmscout::CharacterTextureRef> characters;
 
-    void LoadFace();
-
-    void LoadFace(std::string);
+    bool LoadFace(const std::string &path, double dpi);
 
   public:
 
+    TextLoader(const std::string &path, long defaultSize, double dpi);
+
     ~TextLoader();
 
-    TextLoader(std::string path, long defaultSize);
+    bool IsInitialized() const
+    {
+      return initialized;
+    }
 
     /**
      * Returns width of a texture at given index in pixel.

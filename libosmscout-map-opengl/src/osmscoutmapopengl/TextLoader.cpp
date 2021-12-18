@@ -26,17 +26,16 @@
 
 namespace osmscout {
 
-  TextLoader::TextLoader(std::string path, long defaultSize) {
-    if (FT_Init_FreeType(&ft))
-      std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+  TextLoader::TextLoader(const std::string &path, long defaultSize, double dpi) {
+    if (FT_Init_FreeType(&ft)) {
+      log.Error() << "ERROR::FREETYPE: Could not init FreeType Library";
+      return;
+    }
 
     sumWidth = 0;
     maxHeight = 0;
     defaultFontSize = defaultSize;
-    if (path.empty())
-      LoadFace();
-    else
-      LoadFace(path);
+    initialized=LoadFace(path, dpi);
   }
 
   std::vector<int> TextLoader::AddCharactersToTextureAtlas(std::string text, double size) {
@@ -142,50 +141,26 @@ namespace osmscout {
     return result;
   }
 
-  void TextLoader::LoadFace() {
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-      std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
-    std::string filePath = std::string(__FILE__);
-
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-    std::string dirPath = filePath.substr(0, filePath.rfind("\\"));
-#else
-    std::string dirPath = filePath.substr(0, filePath.rfind("/src"));
-#endif
-
-    //Liberation Sans is licensed under SIL Open Font License (OFL)
-    std::string fontPath = dirPath + "/data/fonts/LiberationSans-Regular.ttf";
-    const char *path = fontPath.c_str();
-
-    if (FT_New_Face(ft, path, 0, &face))
-      std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-    FT_Set_Char_Size(face, defaultFontSize << 6, defaultFontSize << 6, 96, 96);
-
-    FT_Select_Charmap(
-        face,
-        FT_ENCODING_UNICODE);
-
-  }
-
-  void TextLoader::LoadFace(std::string path) {
-    std::string fontPath = path;
-    const char *pathCstr = fontPath.c_str();
-
-    if (FT_New_Face(ft, pathCstr, 0, &face)) {
-      std::cout << "ERROR::FREETYPE: Failed to load font from path. Loading default font." << std::endl;
-      LoadFace();
-      return;
+  bool TextLoader::LoadFace(const std::string &path, double dpi) {
+    if (!ExistsInFilesystem(path)) {
+      log.Error() << "Font file " << path << " doesn't exists";
+      return false;
     }
 
-    FT_Set_Char_Size(face, defaultFontSize << 6, defaultFontSize << 6, 96, 96);
+    std::string fontPath = path;
+
+    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
+      log.Error() << "ERROR::FREETYPE: Failed to load font from " << path;
+      return false;
+    }
+
+    FT_Set_Char_Size(face, defaultFontSize << 6, defaultFontSize << 6, dpi, dpi);
 
     FT_Select_Charmap(
         face,
         FT_ENCODING_UNICODE);
 
+    return true;
   }
 
   int TextLoader::GetStartWidth(int index) {
@@ -214,8 +189,8 @@ namespace osmscout {
   }
 
   TextLoader::~TextLoader() {
-    FT_Done_Face    ( face );
-    FT_Done_FreeType( ft );
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
   }
 
 }

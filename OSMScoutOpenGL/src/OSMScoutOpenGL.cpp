@@ -39,7 +39,7 @@ struct Arguments {
   std::string iconDirectory;
   size_t width=0;
   size_t height=0;
-  std::string fontPath;
+  std::string fontPath=DEFAULT_FONT_FILE;
   long defaultTextSize=18;
   double dpi=0;
   std::string shaderPath=SHADER_INSTALL_DIR;
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
                         args.fontPath=value;
                       }),
                       "font",
-                      "Font file (.ttf)",
+                      "Font file (*.ttf, default: " + args.fontPath + ")",
                       false);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
