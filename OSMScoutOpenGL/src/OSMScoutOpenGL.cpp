@@ -35,7 +35,7 @@
 struct Arguments {
   bool help=false;
   std::string databaseDirectory;
-  std::string styleFileDirectory;
+  std::string styleFile;
   std::string iconDirectory;
   size_t width=0;
   size_t height=0;
@@ -254,10 +254,10 @@ int main(int argc, char *argv[]) {
                           "Directory of the database to use");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
-                            args.styleFileDirectory = value;
+                            args.styleFile = value;
                           }),
                           "STYLEFILE",
-                          "Directory of the stylefile to use");
+                          "Map stylesheet file to use");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
                             args.iconDirectory = value;
@@ -301,8 +301,9 @@ int main(int argc, char *argv[]) {
 
   styleConfig = osmscout::StyleConfigRef(new osmscout::StyleConfig(database->GetTypeConfig()));
 
-  if (!styleConfig->Load(args.styleFileDirectory)) {
+  if (!styleConfig->Load(args.styleFile)) {
     std::cerr << "Cannot open style" << std::endl;
+    return 1;
   }
 
   width = args.width;
@@ -321,8 +322,9 @@ int main(int argc, char *argv[]) {
   glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;
   glfwSetErrorCallback(ErrorCallback);
-  if (!glfwInit())
+  if (!glfwInit()) {
     return -1;
+  }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
