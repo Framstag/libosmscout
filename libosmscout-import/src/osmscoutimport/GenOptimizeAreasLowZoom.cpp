@@ -203,7 +203,8 @@ namespace osmscout
                         transBuffer,
                         projection,
                         optimizeAreaMethod,
-                        pixel/8.0);
+                        pixel/8.0,
+                        TransPolygon::OutputConstraint::simple);
 
           transBuffer.GetBoundingBox(xmin,ymin,xmax,ymax);
 
