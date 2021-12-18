@@ -93,6 +93,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
     include/osmscout/util/Projection.h
+    include/osmscout/util/ScopeGuard.h
     include/osmscout/util/StopClock.h
     include/osmscout/util/String.h
     include/osmscout/util/StringMatcher.h

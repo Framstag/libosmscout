@@ -62,9 +62,15 @@ void Sweep::FinalizationPolygon(SweepContext& tcx)
 {
   // Get an Internal triangle to start with
   Triangle* t = tcx.front()->head()->next->triangle;
+  if (t==nullptr) {
+    throw std::runtime_error("Provided polygon is not simple");
+  }
   Point* p = tcx.front()->head()->next->point;
   while (!t->GetConstrainedEdgeCW(*p)) {
     t = t->NeighborCCW(*p);
+    if (t==nullptr) {
+      throw std::runtime_error("Provided polygon is not simple");
+    }
   }
 
   // Collect interior triangles constrained by edges
@@ -121,8 +127,7 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       triangle = &triangle->NeighborAcross(point);
       EdgeEvent( tcx, ep, *p1, triangle, *p1 );
     } else {
-      std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
+      throw std::runtime_error("EdgeEvent - collinear points not supported");
     }
     return;
   }
@@ -138,8 +143,7 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       triangle = &triangle->NeighborAcross(point);
       EdgeEvent( tcx, ep, *p2, triangle, *p2 );
     } else {
-      std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
+      throw std::runtime_error("EdgeEvent - collinear points not supported");
     }
     return;
   }
@@ -702,12 +706,6 @@ void Sweep::FlipEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* t, 
   Triangle& ot = t->NeighborAcross(p);
   Point& op = *ot.OppositePoint(*t, p);
 
-  //if (ot == nullptr) {
-  // If we want to integrate the fillEdgeEvent do it here
-  // With current implementation we should never get here
-  // throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");
-  //}
-
   if (InScanArea(p, *t->PointCCW(p), *t->PointCW(p), op)) {
     // Lets rotate shared edge one vertex CW
     RotateTrianglePair(*t, p, ot, op);
@@ -755,7 +753,7 @@ Triangle& Sweep::NextFlipTriangle(SweepContext& tcx, int o, Triangle& t, Triangl
   return ot;
 }
 
-Point& Sweep::NextFlipPoint(Point& ep, Point& eq, Triangle& ot, Point& op)
+Point& Sweep::NextFlipPoint(const Point& ep, const Point& eq, const Triangle& ot, const Point& op)
 {
   Orientation o2d = Orient2d(eq, op, ep);
   if (o2d == CW) {
@@ -765,8 +763,7 @@ Point& Sweep::NextFlipPoint(Point& ep, Point& eq, Triangle& ot, Point& op)
     // Left
     return *ot.PointCW(op);
   } else{
-    //throw new RuntimeException("[Unsupported] Opposing point on constrained edge");
-    assert(0);
+    throw std::runtime_error("[Unsupported] Opposing point on constrained edge");
   }
 }
 
@@ -775,12 +772,6 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
 {
   Triangle& ot = t.NeighborAcross(p);
   Point& op = *ot.OppositePoint(t, p);
-
-  //if (&t.NeighborAcross(p) == nullptr) {
-  //  If we want to integrate the fillEdgeEvent do it here
-  //  With current implementation we should never get here
-  //  throw new RuntimeException( "[BUG:FIXME] FLIP failed due to missing triangle");
-  //}
 
   if (InScanArea(eq, *flip_triangle.PointCCW(eq), *flip_triangle.PointCW(eq), op)) {
     // flip with new edge op->eq

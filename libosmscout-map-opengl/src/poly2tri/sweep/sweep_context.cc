@@ -50,7 +50,7 @@ SweepContext::SweepContext(const std::vector<Point*> &polyline) :
   InitEdges(points_);
 }
 
-void SweepContext::AddHole(std::vector<Point*> polyline)
+void SweepContext::AddHole(const std::vector<Point*> &polyline)
 {
   InitEdges(polyline);
   for(unsigned int i = 0; i < polyline.size(); i++) {
