@@ -41,7 +41,7 @@ namespace osmscout {
     size_t width=0;
     size_t height=0;
     size_t size=0;
-    unsigned char *data=nullptr;
+    unsigned char *data=nullptr; // owned, have to be allocated by new []
 
     size_t fromOriginY=0;
 
