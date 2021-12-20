@@ -69,22 +69,22 @@ namespace osmscout {
     float lookX;
     float lookY;
 
-    OpenGLMapData<GL_RGBA, 4> AreaRenderer;
-    OpenGLMapData<GL_RGBA, 4> GroundTileRenderer;
-    OpenGLMapData<GL_RGBA, 4> GroundRenderer;
-    OpenGLMapData<GL_RGBA, 4> WayRenderer;
-    OpenGLMapData<GL_RGBA, 4> ImageRenderer;
-    OpenGLMapData<GL_RED, 1> TextRenderer;
+    OpenGLMapData<GL_RGBA, 4> areaRenderer;
+    OpenGLMapData<GL_RGBA, 4> groundTileRenderer;
+    OpenGLMapData<GL_RGBA, 4> groundRenderer;
+    OpenGLMapData<GL_RGBA, 4> wayRenderer;
+    OpenGLMapData<GL_RGBA, 4> imageRenderer;
+    OpenGLMapData<GL_RED, 1> textRenderer;
 
-    TextLoader Textloader;
+    TextLoader textLoader;
 
-    osmscout::MapData MapData;
+    osmscout::MapData mapData;
     osmscout::StyleConfigRef styleConfig;
-    osmscout::MapParameter Parameter;
+    osmscout::MapParameter parameter;
     osmscout::FillStyleRef landFill;
     osmscout::FillStyleRef seaFill;
-    osmscout::GeoCoord Center;
-    osmscout::Magnification Magnification;
+    osmscout::GeoCoord center;
+    osmscout::Magnification magnification;
 
     /**
      * Processes OSM area data, and converts to the format required by the OpenGL pipeline
