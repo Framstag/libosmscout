@@ -650,7 +650,7 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"-noSort")==0) {
+    else if (strcmp(argv[i],"--noSort")==0) {
       parameter.SetSortObjects(false);
 
       i++;
