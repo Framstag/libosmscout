@@ -333,6 +333,10 @@ namespace osmscout {
 
   std::string FileScanner::GetFilename() const
   {
+    if (file==nullptr && filename.empty()) {
+      throw IOException(filename,"Cannot get filename of file","File was not opened");
+    }
+
     return filename;
   }
 
