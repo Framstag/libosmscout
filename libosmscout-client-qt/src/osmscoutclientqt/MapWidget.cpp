@@ -523,6 +523,17 @@ void MapWidget::setFollowVehicle(bool follow){
   }
 }
 
+void MapWidget::setVehicleAutoRotateMap(bool b)
+{
+  if (vehicle.autoRotateMap != b) {
+    vehicle.autoRotateMap = b;
+    if (inputHandler->isFollowVehicle() && vehicle.position) {
+      inputHandler->vehiclePosition(*vehicle.position, vehicle.autoRotateMap);
+    }
+    emit vehicleAutoRotateMapChanged();
+  }
+}
+
 void MapWidget::showCoordinates(osmscout::GeoCoord coord, osmscout::Magnification magnification)
 {
     assert(view);
@@ -778,7 +789,7 @@ void MapWidget::SetVehiclePosition(QObject *o)
       setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
     }
 
-    inputHandler->vehiclePosition(*vehicle.position);
+    inputHandler->vehiclePosition(*vehicle.position, vehicle.autoRotateMap);
   }
   redraw();
 }

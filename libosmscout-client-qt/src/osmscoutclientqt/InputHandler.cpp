@@ -227,7 +227,7 @@ bool InputHandler::currentPosition(bool /*locationValid*/, osmscout::GeoCoord /*
 {
     return false;
 }
-bool InputHandler::vehiclePosition(const VehiclePosition& /*vehiclePosition*/)
+bool InputHandler::vehiclePosition(const VehiclePosition& /*vehiclePosition*/, bool /*autoRotateMap*/)
 {
     return false;
 }
@@ -795,12 +795,12 @@ VehicleFollowHandler::VehicleFollowHandler(const MapView &view, const QSizeF &wi
     JumpHandler(view), window(widgetSize)
 {}
 
-bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition)
+bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePosition, bool autoRotateMap)
 {
-  Bearing bearing = vehiclePosition.getBearing() ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
-  log.Debug() << "bearing: " << bearing.LongDisplayString();
+  Bearing mapBearing = vehiclePosition.getBearing() && autoRotateMap ? *(vehiclePosition.getBearing()) : osmscout::Bearing();
+  log.Debug() << "map bearing: " << mapBearing.LongDisplayString();
   // clockwise to counterclockwise (car bearing to canvas rotation)
-  bearing = Bearing::Radians(2*M_PI - bearing.AsRadians());
+  mapBearing = Bearing::Radians(2 * M_PI - mapBearing.AsRadians());
 
   Magnification magnification = view.magnification;
   if(vehiclePosition.getNextStepCoord()) {
@@ -839,7 +839,7 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
   osmscout::MercatorProjection projection;
 
   if (!projection.Set(vehiclePosition.getCoord(),
-                      bearing.AsRadians(),
+                      mapBearing.AsRadians(),
                       magnification,
                       view.mapDpi,
                       window.width(), window.height()
@@ -848,12 +848,13 @@ bool VehicleFollowHandler::vehiclePosition(const VehiclePosition &vehiclePositio
   }
 
   osmscout::GeoCoord coord;
-  if (!projection.PixelToGeo(window.width()/2, window.height()/4,
+  if (!projection.PixelToGeo(window.width()/2,
+                             autoRotateMap ? window.height()/4 : window.height()/2,
                              coord)){
     return false;
   }
 
-  return JumpHandler::showCoordinates(coord, magnification, bearing);
+  return JumpHandler::showCoordinates(coord, magnification, mapBearing);
 }
 bool VehicleFollowHandler::isLockedToPosition()
 {
