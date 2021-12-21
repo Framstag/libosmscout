@@ -46,18 +46,18 @@ namespace osmscout {
 
     struct CellEntry
     {
-      uint8_t                              type;
-      Id                                   id;
-      typename std::list<Source>::iterator source;
-      FileOffset                           fileOffset;
-      Id                                   sortId;
+      uint8_t    type;
+      Id         id;
+      Source     &source;
+      FileOffset fileOffset;
+      Id         sortId;
 
-      inline CellEntry(uint8_t type,
-                       Id id,
-                       const typename std::list<Source>::iterator source,
-                       FileOffset fileOffset,
-                       Id sortId)
-      : type(type),
+      CellEntry(uint8_t type,
+                Id id,
+                Source& source,
+                FileOffset fileOffset,
+                Id sortId)
+        : type(type),
         id(id),
         source(source),
         fileOffset(fileOffset),
@@ -66,7 +66,7 @@ namespace osmscout {
         // no code
       }
 
-      inline bool operator<(const CellEntry& other) const
+      bool operator<(const CellEntry& other) const
       {
         return sortId<other.sortId;
       }
@@ -107,6 +107,11 @@ namespace osmscout {
     std::list<ProcessingFilterRef> filters;
 
   private:
+    bool ExecuteFilter(Progress& progress,
+                       FileOffset fileOffset,
+                       N& data,
+                       bool& save);
+
     bool Renumber(const TypeConfig& typeConfig,
                   const ImportParameter& parameter,
                   Progress& progress);
@@ -135,10 +140,7 @@ namespace osmscout {
   };
 
   template <class N>
-  SortDataGenerator<N>::ProcessingFilter::~ProcessingFilter()
-  {
-    // no code
-  }
+  SortDataGenerator<N>::ProcessingFilter::~ProcessingFilter() = default;
 
   template <class N>
   SortDataGenerator<N>::SortDataGenerator(const std::string& dataFilename,
@@ -174,6 +176,32 @@ namespace osmscout {
   }
 
   template <class N>
+  bool SortDataGenerator<N>::ExecuteFilter(Progress& progress,
+                                           FileOffset fileOffset,
+                                           N& data,
+                                           bool& save)
+  {
+    save=true;
+
+    for (const auto& filter : filters) {
+      if (!filter->Process(progress,
+                           fileOffset,
+                           data,
+                           save)) {
+        progress.Error(std::string("Error while processing data entry"));
+
+        return false;
+      }
+
+      if (!save) {
+        break;
+      }
+    }
+
+    return true;
+  }
+
+  template <class N>
   bool SortDataGenerator<N>::Renumber(const TypeConfig& typeConfig,
                                       const ImportParameter& parameter,
                                       Progress& progress)
@@ -192,8 +220,12 @@ namespace osmscout {
       size_t   minIndex=0;
 
       for (auto& source : sources) {
-        source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                            source.filename),
+        std::string sourceFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                   source.filename);
+
+        progress.Info("Scanning file '"+sourceFilename+"'");
+
+        source.scanner.Open(sourceFilename,
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
@@ -203,7 +235,6 @@ namespace osmscout {
 
         overallDataCount+=dataCount;
       }
-
 
       dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       dataFilename));
@@ -221,26 +252,24 @@ namespace osmscout {
         size_t                                 currentEntries=0;
         std::map<size_t,std::list<CellEntry> > dataByCellMap;
 
-        for (typename std::list<Source>::iterator source=sources.begin();
-             source!=sources.end();
-             ++source) {
-          progress.Info("Reading objects from file '"+source->scanner.GetFilename()+"'");
+        for (auto& source :sources) {
+          progress.Info("Reading objects from file '"+source.scanner.GetFilename()+"'");
 
-          source->scanner.GotoBegin();
+          source.scanner.GotoBegin();
 
-          uint32_t dataCount=source->scanner.ReadUInt32();
+          uint32_t dataCount=source.scanner.ReadUInt32();
           uint32_t current=1;
 
           while (current<=dataCount) {
-            N  data;
+            N data;
 
             progress.SetProgress(current,dataCount);
 
-            uint8_t type=source->scanner.ReadUInt8();
-            Id      id=source->scanner.ReadUInt64();
+            uint8_t type=source.scanner.ReadUInt8();
+            Id      id=source.scanner.ReadUInt64();
 
             data.Read(typeConfig,
-                      source->scanner);
+                      source.scanner);
 
             GeoCoord coord;
 
@@ -299,43 +328,29 @@ namespace osmscout {
         progress.Info(std::string("Copy renumbered data to '")+dataWriter.GetFilename()+"'");
 
         size_t copyCount=0;
-        for (typename std::map<size_t,std::list<CellEntry> >::iterator iter=dataByCellMap.begin();
-             iter!=dataByCellMap.end();
-             ++iter) {
+        for (auto& cell : dataByCellMap) {
+          cell.second.sort();
 
-          iter->second.sort();
-
-          for (auto& entry : iter->second) {
+          for (auto& entry : cell.second) {
             progress.SetProgress(copyCount,currentEntries);
 
             copyCount++;
 
             N data;
 
-            entry.source->scanner.SetPos(entry.fileOffset);
+            entry.source.scanner.SetPos(entry.fileOffset);
 
             data.Read(typeConfig,
-                      entry.source->scanner);
+                      entry.source.scanner);
 
-            FileOffset fileOffset;
+            FileOffset fileOffset=dataWriter.GetPos();
             bool       save=true;
 
-            fileOffset=dataWriter.GetPos();
-
-            for (const auto& filter : filters) {
-              if (!filter->Process(progress,
-                                   fileOffset,
-                                   data,
-                                   save)) {
-                progress.Error(std::string("Error while processing data entry to file '")+
-                               dataWriter.GetFilename()+"'");
-
-                return false;
-              }
-
-              if (!save) {
-                break;
-              }
+            if (!ExecuteFilter(progress,
+                               fileOffset,
+                               data,
+                               save)) {
+              return false;
             }
 
             if (!save) {
@@ -384,7 +399,7 @@ namespace osmscout {
       dataWriter.Close();
       mapWriter.Close();
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       progress.Error(e.GetDescription());
 
       for (auto& source : sources) {
@@ -412,6 +427,7 @@ namespace osmscout {
 
     try {
       uint32_t overallDataCount=0;
+      uint32_t dataCopiedCount=0;
 
       dataWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       dataFilename));
@@ -427,7 +443,7 @@ namespace osmscout {
         std::string sourceFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
                                                    source.filename);
 
-        progress.Info("Copying from file '"+sourceFilename+"'");
+        progress.Info("Scanning file '"+sourceFilename+"'");
 
         source.scanner.Open(sourceFilename,
                             FileScanner::Sequential,
@@ -450,25 +466,14 @@ namespace osmscout {
           data.Read(typeConfig,
                     source.scanner);
 
-          FileOffset fileOffset;
+          FileOffset fileOffset=dataWriter.GetPos();
           bool       save=true;
 
-          fileOffset=dataWriter.GetPos();
-
-          for (auto& filter : filters) {
-            if (!filter->Process(progress,
-                                 fileOffset,
-                                 data,
-                                 save)) {
-              progress.Error(std::string("Error while processing data entry to file '")+
-                             dataWriter.GetFilename()+"'");
-
-              return false;
-            }
-
-            if (!save) {
-              break;
-            }
+          if (!ExecuteFilter(progress,
+                             fileOffset,
+                             data,
+                             save)) {
+            return false;
           }
 
           if (!save) {
@@ -481,23 +486,27 @@ namespace osmscout {
           mapWriter.Write(id);
           mapWriter.Write(type);
           mapWriter.WriteFileOffset(fileOffset);
+
+          dataCopiedCount++;
         }
 
         source.scanner.Close();
       }
 
+      assert(overallDataCount>=dataCopiedCount);
+
       dataWriter.SetPos(0);
-      dataWriter.Write(overallDataCount);
+      dataWriter.Write(dataCopiedCount);
 
       mapWriter.SetPos(0);
-      mapWriter.Write(overallDataCount);
+      mapWriter.Write(dataCopiedCount);
 
-      progress.Info(std::to_string(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
+      progress.Info(std::to_string(dataCopiedCount)+" of " +std::to_string(overallDataCount) + " object(s) written to file '"+dataWriter.GetFilename()+"'");
 
       dataWriter.Close();
       mapWriter.Close();
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       progress.Error(e.GetDescription());
 
       for (auto& source : sources) {
