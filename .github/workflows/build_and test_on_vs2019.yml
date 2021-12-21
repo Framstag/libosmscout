@@ -20,7 +20,7 @@ jobs:
         # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
       - name: Restore from cache and install vcpkg
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
-        uses: lukka/run-vcpkg@v6
+        uses: lukka/run-vcpkg@v10
         with:
           setupOnly: true
           vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
