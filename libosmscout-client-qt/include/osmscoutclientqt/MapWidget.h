@@ -68,6 +68,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
   Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPossitionChanged)
   Q_PROPERTY(bool     followVehicle READ isFollowVehicle WRITE setFollowVehicle NOTIFY followVehicleChanged)
+  Q_PROPERTY(bool     vehicleAutoRotateMap READ isVehicleAutoRotateMap WRITE setVehicleAutoRotateMap NOTIFY vehicleAutoRotateMapChanged)
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
   Q_PROPERTY(QString  renderingType READ GetRenderingType WRITE SetRenderingType NOTIFY renderingTypeChanged)
 
@@ -122,6 +123,7 @@ private:
 
     /// input handler control
     bool follow{false};
+    bool autoRotateMap{true};
     QElapsedTimer lastGesture; // when there is some gesture, we will not follow vehicle for some short time
 
     QString standardIconFile{"vehicle.svg"}; // state == OnRoute | OffRoute
@@ -155,6 +157,7 @@ signals:
   void viewChanged();
   void lockToPossitionChanged();
   void followVehicleChanged();
+  void vehicleAutoRotateMapChanged();
   void finishedChanged(bool finished);
 
   void mouseMove(const int screenX, const int screenY, const double lat, const double lon, const Qt::KeyboardModifiers modifiers);
@@ -409,6 +412,13 @@ public:
   }
 
   void setFollowVehicle(bool);
+
+  inline bool isVehicleAutoRotateMap() const
+  {
+    return vehicle.autoRotateMap;
+  }
+
+  void setVehicleAutoRotateMap(bool);
 
   inline osmscout::MercatorProjection getProjection() const
   {

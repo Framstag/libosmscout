@@ -261,7 +261,7 @@ public:
     virtual bool rotateBy(double angleChange);
     virtual bool touch(const QTouchEvent &event);
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
-    virtual bool vehiclePosition(const VehiclePosition &vehiclePosition);
+    virtual bool vehiclePosition(const VehiclePosition &vehiclePosition, bool autoRotateMap);
     virtual bool isLockedToPosition();
     virtual bool isFollowVehicle();
     virtual bool focusOutEvent(QFocusEvent *event);
@@ -476,7 +476,7 @@ public:
   VehicleFollowHandler(const MapView &view, const QSizeF &widgetSize);
   ~VehicleFollowHandler() override = default;
 
-  bool vehiclePosition(const VehiclePosition &vehiclePosition) override;
+  bool vehiclePosition(const VehiclePosition &vehiclePosition, bool autoRotateMap) override;
   bool isLockedToPosition() override;
   bool isFollowVehicle() override;
   void widgetResized(const QSizeF &widgetSize) override;
