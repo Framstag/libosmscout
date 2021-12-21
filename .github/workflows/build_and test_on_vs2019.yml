@@ -43,22 +43,31 @@ jobs:
         run:  mkdir dist
       - name: Collect libosmscout
         run: copy /Y build\libosmscout\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-import
         run: copy /Y build\libosmscout-import\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-map
         run: copy /Y build\libosmscout-map\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-map-cairo
         run: copy /Y build\libosmscout-map-cairo\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-map-directx
         run: copy /Y build\libosmscout-map-directx\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-map-gdi
         run: copy /Y build\libosmscout-map-gdi\Debug\*.dll dist
+        shell: cmd
       - name: Collect libosmscout-map-svg
         run: copy /Y build\libosmscout-map-svg\Debug\*.dll dist
+        shell: cmd
       - name: Collect Import
         run: copy /Y build\Import\Debug\*.exe dist
+        shell: cmd
       - name: Collect Demos
         run: copy /Y build\Demos\Debug\*.exe dist
+        shell: cmd
       - name: Generating dist archive
         uses: papeloto/action-zip@v1
         with:
