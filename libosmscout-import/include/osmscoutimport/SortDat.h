@@ -424,10 +424,12 @@ namespace osmscout {
       mapWriter.Write(overallDataCount);
 
       for (auto& source : sources) {
-        progress.Info("Copying from file '"+source.scanner.GetFilename()+"'");
+        std::string sourceFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                   source.filename);
 
-        source.scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                            source.filename),
+        progress.Info("Copying from file '"+sourceFilename+"'");
+
+        source.scanner.Open(sourceFilename,
                             FileScanner::Sequential,
                             parameter.GetWayDataMemoryMaped());
 
