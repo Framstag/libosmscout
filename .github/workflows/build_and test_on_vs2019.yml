@@ -68,16 +68,11 @@ jobs:
       - name: Collect Demos
         run: copy /Y build\Demos\Debug\*.exe dist
         shell: cmd
-      - name: Generating dist archive
-        uses: papeloto/action-zip@v1
-        with:
-          files: dist/
-          dest: Libosmscout_Windows.zip
       - name: Upload distribution archive
         uses: actions/upload-artifact@v2
         with:
           name: Libosmscout_Windows.zip
-          path: Libosmscout_Windows.zip
+          path: dist
 
   build_meson:
     name: meson
