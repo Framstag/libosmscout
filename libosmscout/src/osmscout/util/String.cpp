@@ -657,14 +657,14 @@ namespace osmscout {
     // remove potential byte order marks
     if (sizeof(wchar_t)==4) {
       // strip off potential BOM if ICONV_WCHAR_T is UTF-32
-      if (res[0] == 0xfeff) {
-        return std::wstring(res.data() + 1, res.length() - 2);
+      if (res[0] == 0xfeff || res[0] == wchar_t(0xfffe0000)) {
+        return std::wstring(res.data() + 1, res.length() - 1);
       }
     }
     else if (sizeof(wchar_t)==2) {
       // strip off potential BOM if ICONV_WCHAR_T is UTF-16
       if (res[0] == 0xfeff || res[0] == 0xfffe) {
-        return std::wstring(res.data() + 1, res.length() - 2);
+        return std::wstring(res.data() + 1, res.length() - 1);
       }
     }
 
@@ -695,8 +695,8 @@ namespace osmscout {
     }
 
     // remove potential byte order marks
-    if (res[0]==0xfeff) {
-      return std::u32string(res.data()+1,res.length()-2);
+    if (res[0] == 0xfeff || res[0] == char32_t(0xfffe0000)) {
+      return std::u32string(res.data() + 1,res.length() - 1);
     }
 
     return res;

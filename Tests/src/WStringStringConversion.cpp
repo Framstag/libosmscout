@@ -78,5 +78,11 @@ TEST_CASE("Check UTF8StringToU32String")
   std::u32string u32Text = osmscout::UTF8StringToU32String("");
   REQUIRE(u32Text.empty());
   u32Text = osmscout::UTF8StringToU32String("test");
-  REQUIRE(u32Text == std::u32string{'t', 'e', 's', 't'});
+  REQUIRE(u32Text.size() == 4);
+  if (u32Text[0] == 't') {
+    REQUIRE(u32Text == std::u32string{'t', 'e', 's', 't'});
+  } else {
+    REQUIRE(u32Text ==
+            std::u32string{char32_t(0x74000000), char32_t(0x65000000), char32_t(0x73000000), char32_t(0x74000000)});
+  }
 }
