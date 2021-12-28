@@ -65,3 +65,18 @@ TEST_CASE("Check German umlauts upper and lower case and euro-sign to upper")
 	std::string uText = osmscout::UTF8StringToUpper("\xc3\x84\xc3\x96\xc3\x9c\xc3\xa4\xc3\xb6\xc3\xbc\xe2\x82\xac");
 	REQUIRE(uText == "\xc3\x84\xc3\x96\xc3\x9c\xc3\x84\xc3\x96\xc3\x9c\xe2\x82\xac");
 }
+
+TEST_CASE("Check UTF8StringToU32String")
+{
+  try
+  {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::exception& e) {
+    std::cerr << "ERROR: Cannot set locale: " << e.what() << std::endl;
+  }
+  std::u32string u32Text = osmscout::UTF8StringToU32String("");
+  REQUIRE(u32Text.empty());
+  u32Text = osmscout::UTF8StringToU32String("test");
+  REQUIRE(u32Text == std::u32string{'t', 'e', 's', 't'});
+}
