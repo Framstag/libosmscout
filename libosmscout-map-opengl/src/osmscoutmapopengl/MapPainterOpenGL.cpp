@@ -327,10 +327,6 @@ namespace osmscout {
             continue;
           }
 
-          if (!ring.IsTopOuter() && ring.GetType()->GetIgnore()) {
-            continue;
-          }
-
           TypeInfoRef type;
           FillStyleRef fillStyle;
           std::vector<BorderStyleRef> borderStyles;
