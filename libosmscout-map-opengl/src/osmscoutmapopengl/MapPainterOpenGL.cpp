@@ -1094,8 +1094,9 @@ namespace osmscout {
           continue;
         }
 
-        if (hasIcon)
+        if (hasIcon) {
           offset = 15;
+        }
 
         double alpha = 1.0;
         double fontSize = 1.0;
