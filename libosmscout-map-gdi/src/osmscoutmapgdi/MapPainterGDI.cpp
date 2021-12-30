@@ -178,9 +178,15 @@ namespace osmscout {
 			return m_SolidBrushes[colorGdi.GetValue()];
 		}
 
-		inline Gdiplus::SolidBrush* GetSolidBrush(FillStyleRef fillstyle) { return GetSolidBrush(fillstyle->GetFillColor()); }
+		inline Gdiplus::SolidBrush* GetSolidBrush(FillStyleRef fillstyle)
+		{
+			return GetSolidBrush(fillstyle->GetFillColor());
+		}
 
-		Gdiplus::Pen* GetPen(const osmscout::Color color = osmscout::Color::BLACK, double width = 1.0, const std::vector<double>& dash = std::vector<double>(), osmscout::LineStyle::CapStyle startCap = osmscout::LineStyle::CapStyle::capButt, osmscout::LineStyle::CapStyle endCap = osmscout::LineStyle::CapStyle::capButt)
+		Gdiplus::Pen* GetPen(const osmscout::Color color = osmscout::Color::BLACK, double width = 1.0,
+		                     const std::vector<double>& dash = std::vector<double>(),
+							 osmscout::LineStyle::CapStyle startCap = osmscout::LineStyle::CapStyle::capButt,
+							 osmscout::LineStyle::CapStyle endCap = osmscout::LineStyle::CapStyle::capButt)
 		{
 			PENDEF key = {
 				(BYTE)((int)(color.GetA() * 255.0)),
@@ -193,34 +199,49 @@ namespace osmscout {
 				(BYTE)startCap,
 				(BYTE)endCap
 			};
-			for (size_t uj = 0; uj < dash.size(); uj++) key.dashs += (float)dash[uj];
-			if (m_Pens.find(key) == m_Pens.end())
-			{
-				m_Pens[key] = new Gdiplus::Pen(GetSolidBrush(color), (Gdiplus::REAL)width);
-				switch (startCap)
-				{
-				case LineStyle::CapStyle::capRound: m_Pens[key]->SetStartCap(Gdiplus::LineCap::LineCapRound); break;
-				case LineStyle::CapStyle::capSquare: m_Pens[key]->SetStartCap(Gdiplus::LineCap::LineCapSquare); break;
-				default: break;
-				}
-				switch (endCap)
-				{
-				case LineStyle::CapStyle::capRound: m_Pens[key]->SetEndCap(Gdiplus::LineCap::LineCapRound); break;
-				case LineStyle::CapStyle::capSquare: m_Pens[key]->SetEndCap(Gdiplus::LineCap::LineCapSquare); break;
-				default: break;
-				}
-				if (dash.size() > 0)
-				{
-					Gdiplus::REAL* dashArray = new Gdiplus::REAL[dash.size()];
-					for (size_t uj = 0; uj < dash.size(); uj++) dashArray[uj] = (Gdiplus::REAL)dash[uj];
-					m_Pens[key]->SetDashPattern(dashArray, (INT)dash.size());
-					delete dashArray;
-				}
+			
+			for (size_t uj = 0; uj < dash.size(); uj++) {
+				key.dashs += (float)dash[uj];
 			}
-			return m_Pens[key];
+
+			auto existingPen = m_Pens.find(key);
+
+			if (existingPen != m_Pens.end()) {
+				return existingPen->second;
+			}
+
+            Gdiplus::Pen* pen = new Gdiplus::Pen(GetSolidBrush(color), (Gdiplus::REAL)width);
+			
+			switch (startCap)
+			{
+			case LineStyle::CapStyle::capRound: pen->SetStartCap(Gdiplus::LineCap::LineCapRound); break;
+			case LineStyle::CapStyle::capSquare: pen->SetStartCap(Gdiplus::LineCap::LineCapSquare); break;
+			default: break;
+			}
+			
+			switch (endCap)
+			{
+			case LineStyle::CapStyle::capRound: pen->SetEndCap(Gdiplus::LineCap::LineCapRound); break;
+			case LineStyle::CapStyle::capSquare: pen->SetEndCap(Gdiplus::LineCap::LineCapSquare); break;
+			default: break;
+			}
+
+			if (dash.size() > 0) {
+				Gdiplus::REAL* dashArray = new Gdiplus::REAL[dash.size()];
+				for (size_t uj = 0; uj < dash.size(); uj++) dashArray[uj] = (Gdiplus::REAL)dash[uj];
+				pen->SetDashPattern(dashArray, (INT)dash.size());
+				delete dashArray;
+			}
+
+            m_Pens[key]=pen;
+
+			return pen;
 		}
 
-		inline Gdiplus::Pen* GetPen(BorderStyleRef border) { return GetPen(border->GetColor(), border->GetWidth(), border->GetDash()); }
+		inline Gdiplus::Pen* GetPen(BorderStyleRef border)
+		{
+			return GetPen(border->GetColor(), border->GetWidth(), border->GetDash());
+		}
 
 		Gdiplus::Font* GetFont(std::string fontname, double fontsize)
 		{

@@ -144,6 +144,17 @@ int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 #ifdef _MSC_VER
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nShowCmd)
 {
+	AllocConsole();
+	FILE* fDummy;
+
+	freopen_s(&fDummy,"CONOUT$","w",stdout);
+	freopen_s(&fDummy,"CONOUT$","w",stderr);
+	freopen_s(&fDummy,"CONIN$","r",stdin);
+	std::cout.clear();
+	std::clog.clear();
+	std::cerr.clear();
+	std::cin.clear();
+
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	char** argv = NULL;
