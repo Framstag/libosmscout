@@ -108,6 +108,7 @@ public:
 
 	virtual void OnTileUpdate()
 	{
+		m_pBaseData->data.ClearDBData();
 		m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
 		m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
 		m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
@@ -145,6 +146,7 @@ int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nShowCmd)
 {
 	AllocConsole();
+
 	FILE* fDummy;
 
 	freopen_s(&fDummy,"CONOUT$","w",stdout);
