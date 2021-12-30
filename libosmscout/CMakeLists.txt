@@ -97,6 +97,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/StopClock.h
     include/osmscout/util/String.h
     include/osmscout/util/StringMatcher.h
+    include/osmscout/util/SunriseSunset.h
     include/osmscout/util/TagErrorReporter.h
     include/osmscout/util/Tiling.h
     include/osmscout/util/Time.h
@@ -175,6 +176,7 @@ set(SOURCE_FILES
     src/osmscout/util/utf8helper.cpp
     src/osmscout/util/utf8helper_charmap.cpp
     src/osmscout/util/WorkQueue.cpp
+    src/osmscout/util/SunriseSunset.cpp
     src/osmscout/util/TagErrorReporter.cpp
     src/osmscout/routing/RouteData.cpp
     src/osmscout/routing/RouteDescription.cpp

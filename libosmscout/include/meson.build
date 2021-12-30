@@ -40,6 +40,7 @@ osmscoutHeader = [
             'osmscout/util/StopClock.h',
             'osmscout/util/String.h',
             'osmscout/util/StringMatcher.h',
+            'osmscout/util/SunriseSunset.h',
             'osmscout/util/Tiling.h',
             'osmscout/util/Time.h',
             'osmscout/util/TileId.h',

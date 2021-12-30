@@ -208,6 +208,13 @@ ThreadedDatabase = executable('ThreadedDatabase',
              link_with: [osmscoutmap, osmscout],
              install: false)
 
+SunriseSunset = executable('SunriseSunset',
+             'src/SunriseSunsetTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, threadDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 TilingTest = executable('TilingTest',
              'src/TilingTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -279,6 +286,7 @@ test('Check threaded database', ThreadedDatabase, args : [
         meson.current_source_dir() + '/data/testregion',
         meson.current_source_dir() + '/../stylesheets/standard.oss'])
 
+test('Check SunriseSunset utility', SunriseSunset)
 test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)
 test('Check File access implementation', FileScannerWriter)
