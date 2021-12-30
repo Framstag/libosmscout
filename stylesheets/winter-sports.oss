@@ -20,18 +20,18 @@ FLAG
   elevationContours = true;
   
   IF daylight {
-    natural         = true;
-    railway         = true;
-    leisure         = true;
-    building        = true;
-    minorBuilding   = true;
+    _natural         = true;
+    _railway         = true;
+    _leisure         = true;
+    _building        = true;
+    _minorBuilding   = true;
   }
   ELSE {
-    natural         = false;
-    railway         = false;
-    leisure         = false;
-    building        = false;
-    minorBuilding   = false;
+    _natural         = false;
+    _railway         = false;
+    _leisure         = false;
+    _building        = false;
+    _minorBuilding   = false;
   }
 
 ORDER WAYS
@@ -545,7 +545,7 @@ STYLE
   // natural_* (without coastline)
   //
 
-  IF natural {
+  IF _natural {
     [MAG state-] {
       [TYPE natural_glacier] AREA { color: @glacierColor; }
       [TYPE natural_grassland] AREA { color: @grassColor; }
@@ -1177,7 +1177,7 @@ STYLE
  // railway
  //
 
- IF railway {
+ IF _railway {
    [MAG suburb-] {
      [TYPE railway_rail] {
        [SIZE 5m 0.25mm:3px<] {
@@ -1359,7 +1359,7 @@ STYLE
  // Leisure
  //
 
- IF leisure {
+ IF _leisure {
    [MAG county-] {
      [TYPE leisure_pitch,
            leisure_fitness_station] {
@@ -1658,7 +1658,7 @@ STYLE
    [TYPE leisure_stadium] AREA { color: #33cb98; }
  }
 
- IF building {
+ IF _building {
    [MAG @buildingMag-] {
      [TYPE landuse_farmyard_building] {
         AREA { color: #bcbcbc; }
@@ -1736,7 +1736,7 @@ STYLE
    }
  }
 
- IF minorBuilding {
+ IF _minorBuilding {
    [MAG @minorBuildingMag-] {
      [TYPE building_garage] AREA { color: #bcbcbc; }
    }
@@ -1771,7 +1771,7 @@ STYLE
    }
  }
 
- IF building {
+ IF _building {
    [MAG @labelBuildingMag-] {
      [FEATURE Address] {
        NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }

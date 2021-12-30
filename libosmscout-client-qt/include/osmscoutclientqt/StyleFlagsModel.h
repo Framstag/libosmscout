@@ -59,7 +59,7 @@ public:
   Q_ENUM(Roles)
 
   StyleFlagsModel();
-  virtual ~StyleFlagsModel();
+  ~StyleFlagsModel() override;
 
   Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
   {
