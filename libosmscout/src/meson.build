@@ -29,6 +29,7 @@ osmscoutSrc = [
             'src/osmscout/util/StopClock.cpp',
             'src/osmscout/util/String.cpp',
             'src/osmscout/util/StringMatcher.cpp',
+            'src/osmscout/util/SunriseSunset.cpp',
             'src/osmscout/util/Tiling.cpp',
             'src/osmscout/util/TileId.cpp',
             'src/osmscout/util/Transformation.cpp',

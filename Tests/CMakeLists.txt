@@ -163,3 +163,6 @@ if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::C
 else()
 	message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")
 endif()
+
+#---- SunriseSunsetTest
+osmscout_test_project(NAME SunriseSunsetTest SOURCES src/SunriseSunsetTest.cpp)

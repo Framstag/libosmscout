@@ -62,7 +62,7 @@ public class GeoPos {
     double dLat1=Math.toRadians(mLat);
 
     double dLon2=Math.toRadians(pos.getLon());
-    double dLat2=Math.toRadians(pos.getLat());
+    double dLat2=Math.ToRadians(pos.getLat());
 
     double dDistance=Math.acos(Math.sin(dLat1)*Math.sin(dLat2)+
                Math.cos(dLat1)*Math.cos(dLat2)*Math.cos(dLon2-dLon1))*EARTH_RADIUS;
