@@ -56,6 +56,11 @@ void StyleFlagsModel::onStyleFlagsChanged(QMap<QString,bool> flags)
 {
   beginResetModel();
   mapFlags=flags;
+  for (auto const &key: mapFlags.keys()){
+    if (key.startsWith('_')) {
+      mapFlags.remove(key);
+    }
+  }
   endResetModel();
 }
 
