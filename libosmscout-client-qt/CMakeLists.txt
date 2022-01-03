@@ -34,6 +34,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/LookupModule.h
     include/osmscoutclientqt/SearchModule.h
     include/osmscoutclientqt/StyleModule.h
+    include/osmscoutclientqt/SunriseSunset.h
     include/osmscoutclientqt/MapRenderer.h
     include/osmscoutclientqt/PlaneMapRenderer.h
     include/osmscoutclientqt/TiledMapRenderer.h
@@ -89,6 +90,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/LookupModule.cpp
     src/osmscoutclientqt/SearchModule.cpp
     src/osmscoutclientqt/StyleModule.cpp
+    src/osmscoutclientqt/SunriseSunset.cpp
     src/osmscoutclientqt/MapRenderer.cpp
     src/osmscoutclientqt/PlaneMapRenderer.cpp
     src/osmscoutclientqt/TiledMapRenderer.cpp

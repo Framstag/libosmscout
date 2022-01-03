@@ -39,6 +39,7 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/LookupModule.h',
             'osmscoutclientqt/SearchModule.h',
             'osmscoutclientqt/StyleModule.h',
+            'osmscoutclientqt/SunriseSunset.h',
             'osmscoutclientqt/MapRenderer.h',
             'osmscoutclientqt/PlaneMapRenderer.h',
             'osmscoutclientqt/TiledMapRenderer.h',
