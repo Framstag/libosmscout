@@ -86,22 +86,14 @@ DBThread::~DBThread()
   backgroundThread->quit(); // deleteLater() is invoked when thread is finished
 }
 
-/**
- * check if DBThread is initialized without acquire lock
- *
- * @return true if all databases are open
- */
 bool DBThread::isInitializedInternal()
 {
-  for (const auto& db:databases){
-    if (!db->IsOpen()){
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(databases.begin(), databases.end(),
+                     [](const auto &db) { return db->IsOpen(); });
 }
 
-bool DBThread::isInitialized(){
+bool DBThread::isInitialized()
+{
   QReadLocker locker(&lock);
   return isInitializedInternal();
 }
@@ -350,19 +342,17 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
 void DBThread::ToggleDaylight()
 {
-  {
-    QWriteLocker locker(&lock);
+  QWriteLocker locker(&lock);
 
-    if (!isInitializedInternal()) {
-        return;
-    }
-    qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
-    daylight=!daylight;
-    stylesheetFlags["daylight"] = daylight;
+  if (!isInitializedInternal()) {
+      return;
   }
 
-  ReloadStyle();
+  qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
+  daylight=!daylight;
+  stylesheetFlags["daylight"] = daylight;
 
+  LoadStyleInternal(stylesheetFilename, stylesheetFlags);
   qDebug() << "Toggling daylight done.";
 }
 
@@ -376,15 +366,15 @@ void DBThread::onMapDPIChange(double dpi)
 
 void DBThread::SetStyleFlag(const QString &key, bool value)
 {
-  {
-    QWriteLocker locker(&lock);
+  qDebug() << "SetStyleFlag" << key << "to" << value;
+  QWriteLocker locker(&lock);
 
-    if (!isInitializedInternal()) {
-        return;
-    }
-    stylesheetFlags[key.toStdString()] = value;
+  if (!isInitializedInternal()) {
+      return;
   }
-  ReloadStyle();
+
+  stylesheetFlags[key.toStdString()] = value;
+  LoadStyleInternal(stylesheetFilename, stylesheetFlags);
 }
 
 void DBThread::ReloadStyle(const QString &suffix)
@@ -399,7 +389,13 @@ void DBThread::LoadStyle(QString stylesheetFilename,
                          const QString &suffix)
 {
   QWriteLocker locker(&lock);
+  LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
+}
 
+void DBThread::LoadStyleInternal(QString stylesheetFilename,
+                                 std::unordered_map<std::string,bool> stylesheetFlags,
+                                 const QString &suffix)
+{
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
 
