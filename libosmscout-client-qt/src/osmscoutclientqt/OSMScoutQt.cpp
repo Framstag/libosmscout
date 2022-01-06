@@ -50,6 +50,7 @@
 #include <osmscoutclientqt/AvailableVoicesModel.h>
 #include <osmscoutclientqt/InstalledVoicesModel.h>
 #include <osmscoutclientqt/QmlRoutingProfile.h>
+#include <osmscoutclientqt/SunriseSunset.h>
 
 #include <optional>
 
@@ -192,6 +193,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<InstalledMapsModel>(uri, versionMajor, versionMinor, "InstalledMapsModel");
   qmlRegisterType<AvailableVoicesModel>(uri, versionMajor, versionMinor, "AvailableVoicesModel");
   qmlRegisterType<InstalledVoicesModel>(uri, versionMajor, versionMinor, "InstalledVoicesModel");
+  qmlRegisterType<SunriseSunset>(uri, versionMajor, versionMinor, "SunriseSunset");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()
