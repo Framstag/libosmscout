@@ -97,7 +97,7 @@ enum DatabaseCoverage{
  *
  * List of databases is protected by read-write lock. There may be multiple
  * readers at one time. DBThread warrants that none database will be closed
- * or modified (except thread-safe caches) when read lock is hodl.
+ * or modified (except thread-safe caches) when read lock is hold.
  * Databases may be accessed via \see RunJob or \see RunSynchronousJob methods.
  */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
@@ -161,7 +161,23 @@ protected:
 
 protected:
 
+  /**
+   * Check if DBThread is initialized without acquire lock
+   *
+   * @return true if all databases are open
+   */
   bool isInitializedInternal();
+
+  /**
+   * Load stylesheet for all databases, write lock needs to be hold
+   *
+   * @param stylesheetFilename
+   * @param stylesheetFlags
+   * @param suffix
+   */
+  void LoadStyleInternal(QString stylesheetFilename,
+                         std::unordered_map<std::string,bool> stylesheetFlags,
+                         const QString &suffix="");
 
 public:
   DBThread(QThread *backgroundThread,
