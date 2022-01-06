@@ -1115,7 +1115,7 @@ namespace osmscout {
 
   /**
    * Load all missing data for the given tiles based on the given style config. The
-   * method returns, either after an error occured or all tiles have been successfully
+   * method returns, either after an error occurred or all tiles have been successfully
    * loaded.
    */
   bool MapService::LoadMissingTileData(const AreaSearchParameter& parameter,

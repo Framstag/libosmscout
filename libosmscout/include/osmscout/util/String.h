@@ -50,7 +50,7 @@ namespace osmscout {
    * @param string
    *    string with a potential boolean value (either 'true' or 'false')
    * @param value
-   *    value to copy the result to if no error occured
+   *    value to copy the result to if no error occurred
    * @return
    *    'true' if the value was parsed, else 'false'
    */
