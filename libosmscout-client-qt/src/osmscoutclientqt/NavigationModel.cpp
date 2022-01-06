@@ -162,6 +162,7 @@ void NavigationModel::onPositionEstimate(const PositionAgent::PositionState stat
                                          const GeoCoord coord,
                                          const std::optional<Bearing> bearing)
 {
+  PositionAgent::PositionState oldState=this->vehicleState;
   this->vehicleState=state;
   this->vehicleCoord=coord;
   this->vehicleBearing=bearing;
@@ -169,6 +170,10 @@ void NavigationModel::onPositionEstimate(const PositionAgent::PositionState stat
                         coord.GetLat(), coord.GetLon(),
                         bearing ? QString::fromStdString(bearing->LongDisplayString()) : "");
   emit vehiclePositionChanged();
+  if (oldState!=state &&
+      (oldState==PositionAgent::EstimateInTunnel || state==PositionAgent::EstimateInTunnel)) {
+    emit positionEstimateInTunnelChanged();
+  }
 }
 
 void NavigationModel::onTargetReached(const osmscout::Bearing targetBearing,
@@ -248,6 +253,7 @@ void NavigationModel::setRoute(QObject *o)
   emit arrivalUpdate();
   emit routeChanged(this->route, vehicle);
   emit vehiclePositionChanged();
+  emit positionEstimateInTunnelChanged();
   emit update();
   emit currentSpeedUpdate(0);
   emit maxAllowedSpeedUpdate(0);

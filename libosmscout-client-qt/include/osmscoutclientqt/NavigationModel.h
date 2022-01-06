@@ -47,6 +47,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(QObject *nextRouteStep  READ getNextRoutStep   NOTIFY update)
 
   Q_PROPERTY(QObject *vehiclePosition  READ getVehiclePosition    NOTIFY vehiclePositionChanged)
+  Q_PROPERTY(bool positionEstimateInTunnel READ getPositionEstimateInTunnel NOTIFY positionEstimateInTunnelChanged)
 
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
   Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
@@ -75,6 +76,8 @@ signals:
 
   void positionChange(osmscout::GeoCoord coord,
                       bool horizontalAccuracyValid, double horizontalAccuracy);
+
+  void positionEstimateInTunnelChanged();
 
   void rerouteRequest(double fromLat, double fromLon,
                       const QString bearing,
@@ -158,6 +161,11 @@ public:
     }
     return new VehiclePosition(vehicle, vehicleState, vehicleCoord, vehicleBearing,
         nextRouteStep.getType().isEmpty() ? std::nullopt : std::optional<GeoCoord>(nextRouteStep.GetCoord()));
+  }
+
+  inline bool getPositionEstimateInTunnel() const
+  {
+    return vehicleState==PositionAgent::EstimateInTunnel;
   }
 
   inline QDateTime getArrivalEstimate() const
