@@ -48,6 +48,9 @@ namespace osmscout {
 		osmscout::MapParameter*   m_pParameter;
 		osmscout::MapData*        m_pData;
 
+    private:
+        void LogStatus();
+
 	public:
 		/**
 		@brief Default constructor
@@ -63,7 +66,7 @@ namespace osmscout {
 		@param[in] hWndParent Handle of parent Windows or NULL for non-child window.
 		@param[in] hInstance hInstance of the program or NULL for default.
 		*/
-		MapPainterGDIWindow(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance = NULL);
+		MapPainterGDIWindow(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance = nullptr);
 
 		/**
 		@brief Default destructor
@@ -79,7 +82,7 @@ namespace osmscout {
 		@param[in] hWndParent Handle of parent Windows or NULL for non-child window.
 		@param[in] hInstance hInstance of the program or NULL for default.
 		*/
-		bool CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent = NULL, HINSTANCE hInstance = NULL);
+		bool CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent = nullptr, HINSTANCE hInstance = nullptr);
 
 		/**
 		@brief Function for Windows message handling

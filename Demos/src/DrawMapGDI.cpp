@@ -51,17 +51,12 @@ private:
 
 public:
 	explicit DrawMapGDI(DrawMapDemo* pBaseData)
-		: m_Painter(NULL)
+		: m_Painter(nullptr)
 		, m_pBaseData(pBaseData)
-		, osmscout::MapPainterGDIWindow()
 	{
 	}
 
-	~DrawMapGDI()
-	{
-	}
-
-	bool DrawMapGDI::initialize(HINSTANCE hInstance, int nShowCmd)
+	bool initialize(HINSTANCE hInstance, int  /*nShowCmd*/)
 	{
 		Arguments args = m_pBaseData->GetArguments();
 		RECT size = {
@@ -70,15 +65,20 @@ public:
 			(GetSystemMetrics(SM_CXSCREEN) + args.width) / 2,
 			(GetSystemMetrics(SM_CYSCREEN) + args.height) / 2
 		};
-		if (!CreateCanvas(m_pBaseData->styleConfig, size, NULL, hInstance)) return false;
+
+        if (!CreateCanvas(m_pBaseData->styleConfig, size, nullptr, hInstance))
+        {
+            return false;
+        }
+
 		Set(&m_pBaseData->projection, &m_pBaseData->drawParameter, &m_pBaseData->data);
 		return true;
 	}
 
-	int DrawMapGDI::run()
+	int run()
 	{
 		MSG msg = { };
-		while (GetMessage(&msg, NULL, 0, 0))
+		while (GetMessage(&msg, nullptr, 0, 0))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -86,7 +86,7 @@ public:
 		return EXIT_SUCCESS;
 	}
 
-	virtual LRESULT OnWinMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT OnWinMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override
 	{
 		switch (uMsg)
 		{
@@ -98,20 +98,40 @@ public:
 			return 0;
 
 		case WM_MOUSEWHEEL:
-			m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(), osmscout::Magnification(m_pBaseData->projection.GetMagnification().GetMagnification() + 100.0 * GET_WHEEL_DELTA_WPARAM(wParam)), m_pBaseData->projection.GetDPI(), m_pBaseData->projection.GetWidth(), m_pBaseData->projection.GetHeight());
+            osmscout::log.Info() << "WM_MOUSEWHEEL...";
+
+            double newMagnification=m_pBaseData->projection.GetMagnification().GetMagnification() + 100.0 * GET_WHEEL_DELTA_WPARAM(wParam);
+
+            if (newMagnification<1.0) {
+                newMagnification=1.0;
+            }
+
+            osmscout::log.Info() << " Change magnification from " << m_pBaseData->projection.GetMagnification().GetMagnification() << " to " << newMagnification;
+
+            m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(),
+                                        osmscout::Magnification(newMagnification),
+                                        m_pBaseData->projection.GetDPI(),
+                                        m_pBaseData->projection.GetWidth(),
+                                        m_pBaseData->projection.GetHeight());
 			OnTileUpdate();
 			InvalidateWindow();
+            osmscout::log.Info() << "WM_MOUSEWHEEL done";
 			break;
 		}
 		return MapPainterGDIWindow::OnWinMsg(hwnd, uMsg, wParam, lParam);
 	}
 
-	virtual void OnTileUpdate()
+	void OnTileUpdate() override
 	{
-		m_pBaseData->data.ClearDBData();
+        osmscout::log.Info() << "OnTileUpdate()...";
+        m_pBaseData->data.ClearDBData();
 		m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
 		m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
 		m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
+        osmscout::log.Info() << "Nodes: "  << m_pBaseData->data.nodes.size();
+        osmscout::log.Info() << "Ways: "  << m_pBaseData->data.ways.size();
+        osmscout::log.Info() << "Areas: "  << m_pBaseData->data.areas.size();
+        osmscout::log.Info() << "OnTileUpdate() done";
 	}
 };
 
@@ -127,7 +147,7 @@ int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 
 	if (!drawDemo.OpenDatabase()) {
 		bool bHelp = drawDemo.GetArguments().help;
-		MessageBoxA(NULL, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapGDI", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
+		MessageBoxA(nullptr, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapGDI", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
 		std::cerr.rdbuf(oldCerrStreamBuf);
 		std::cout.rdbuf(oldCoutStreamBuf);
 		return EXIT_FAILURE;
@@ -138,7 +158,12 @@ int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 	drawDemo.LoadData();
 
 	DrawMapGDI app(&drawDemo);
-	if (!app.initialize(hinstance, nShowCmd)) return EXIT_FAILURE;
+
+    if (!app.initialize(hinstance, nShowCmd))
+    {
+        return EXIT_FAILURE;
+    }
+
 	return app.run();
 }
 
@@ -159,16 +184,16 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	char** argv = NULL;
-	if (w_argv)
+	char** argv = nullptr;
+	if (w_argv != nullptr)
 	{
 		argv = new char*[argc];
 		for (int i = 0; i < argc; ++i)
 		{
 			int w_len = lstrlenW(w_argv[i]);
-			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
+			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, nullptr, 0, nullptr, nullptr);
 			argv[i] = new char[len + 1];
-			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, NULL, NULL);
+			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, nullptr, nullptr);
 			argv[i][len] = 0;
 		}
 		LocalFree(w_argv);
@@ -176,9 +201,13 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 	int result = app_main(argc, argv, hinstance, nShowCmd);
 
-	if (argv != NULL)
+	if (argv != nullptr)
 	{
-		for (int i = 0; i < argc; i++) delete argv[i];
+		for (int i = 0; i < argc; i++)
+        {
+            delete argv[i];
+        }
+
 		delete argv;
 	}
 

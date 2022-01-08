@@ -57,7 +57,7 @@ namespace osmscout {
 		friend GdiLabelLayouter;
 
 		GdiLabelLayouter                   m_labelLayouter;
-		void*                              m_pBuffer;
+		void                               *m_pBuffer;
 		static ULONG_PTR                   m_gdiplusToken;
 		static DWORD                       m_gdiplusInstCount;
 
@@ -80,7 +80,7 @@ namespace osmscout {
 
 		void DrawGlyphs(const Projection &projection,
 			const MapParameter &parameter,
-			const osmscout::PathTextStyleRef style,
+			const osmscout::PathTextStyleRef& style,
 			const std::vector<GdiGlyph> &glyphs);
 
 	protected:
@@ -116,7 +116,7 @@ namespace osmscout {
 		  Register regular label with given text at the given pixel coordinate
 		  in a style defined by the given LabelStyle.
 		 */
-		virtual void RegisterRegularLabel(const Projection &projection,
+        void RegisterRegularLabel(const Projection &projection,
 			const MapParameter &parameter,
 			const std::vector<LabelData> &labels,
 			const Vertex2D &position,
@@ -125,12 +125,12 @@ namespace osmscout {
 		/**
 		 * Register contour label
 		 */
-		virtual void RegisterContourLabel(const Projection &projection,
+		void RegisterContourLabel(const Projection &projection,
 			const MapParameter &parameter,
 			const PathLabelData &label,
 			const LabelPath &labelPath) override;
 
-		virtual void DrawLabels(const Projection& projection,
+		void DrawLabels(const Projection& projection,
 			const MapParameter& parameter,
 			const MapData& data) override;
 

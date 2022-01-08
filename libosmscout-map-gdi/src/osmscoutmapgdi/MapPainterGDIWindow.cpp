@@ -28,50 +28,72 @@ namespace osmscout {
 			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)((LPCREATESTRUCT(lParam))->lpCreateParams));
 		}
 		MapPainterGDIWindow* pWnd = (MapPainterGDIWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		if (pWnd)
+		if (pWnd != nullptr) {
 			return pWnd->WinMsgHandler(hwnd, uMsg, wParam, lParam);
-		else
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		}
+        else {
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
 	}
 
 	MapPainterGDIWindow::MapPainterGDIWindow()
-		: m_hInstance(NULL)
-		, m_hWnd(NULL)
-		, m_hWndParent(NULL)
-		, m_pPainter(NULL)
-		, m_pProjection(NULL)
-		, m_pParameter(NULL)
-		, m_pData(NULL)
+		: m_hInstance(nullptr)
+		, m_hWnd(nullptr)
+		, m_hWndParent(nullptr)
+		, m_pPainter(nullptr)
+		, m_pProjection(nullptr)
+		, m_pParameter(nullptr)
+		, m_pData(nullptr)
 	{
 	}
 
 	MapPainterGDIWindow::MapPainterGDIWindow(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance)
 		: m_hInstance(hInstance)
-		, m_hWnd(NULL)
-		, m_hWndParent(NULL)
-		, m_pPainter(NULL)
-		, m_pProjection(NULL)
-		, m_pParameter(NULL)
-		, m_pData(NULL)
+		, m_hWnd(nullptr)
+		, m_hWndParent(nullptr)
+		, m_pPainter(nullptr)
+		, m_pProjection(nullptr)
+		, m_pParameter(nullptr)
+		, m_pData(nullptr)
 	{
 		CreateCanvas(styleConfig, position, hWndParent, hInstance);
 	}
 
 	MapPainterGDIWindow::~MapPainterGDIWindow()
 	{
-		if (m_pPainter != NULL)
+		if (m_pPainter != nullptr)
 		{
 			delete m_pPainter;
-			m_pPainter = NULL;
+			m_pPainter = nullptr;
 		}
 	}
 
+    void MapPainterGDIWindow::LogStatus()
+    {
+        if (m_pProjection != nullptr)
+        {
+            log.Info() << "Magnification: " << m_pProjection->GetMagnification().GetMagnification();
+            log.Info() << "Dimension: " << m_pProjection->GetDimensions().GetDisplayText();
+            log.Info() << "Rect: " << m_pProjection->GetWidth() << "x" << m_pProjection->GetHeight();
+        }
+    }
+
 	bool MapPainterGDIWindow::CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance)
 	{
-		if (m_hWnd != NULL) return true;
-		m_hInstance = hInstance;
-		if (m_hInstance == NULL) m_hInstance = GetModuleHandle(NULL);
-		if (m_pPainter == NULL) m_pPainter = new MapPainterGDI(styleConfig);
+		if (m_hWnd != nullptr) {
+            return true;
+        }
+
+        m_hInstance = hInstance;
+
+        if (m_hInstance == nullptr) {
+            m_hInstance = GetModuleHandle(nullptr);
+        }
+
+		if (m_pPainter == nullptr) {
+            m_pPainter = new MapPainterGDI(styleConfig);
+        }
+
 		const wchar_t CLASS_NAME[] = L"MapPainterGDIWindow";
 		WNDCLASSEX wcx;
 		memset(&wcx, 0, sizeof(WNDCLASSEX));
@@ -86,17 +108,17 @@ namespace osmscout {
 		m_hWnd = CreateWindowEx(0,
 			CLASS_NAME,
 			CLASS_NAME,
-			(hWndParent == NULL ? WS_OVERLAPPEDWINDOW : WS_CHILD) | WS_VISIBLE,
+			(hWndParent == nullptr ? WS_OVERLAPPEDWINDOW : WS_CHILD) | WS_VISIBLE,
 			position.left,
 			position.top,
 			position.right - position.left,
 			position.bottom - position.top,
 			hWndParent,
-			NULL,
+			nullptr,
 			m_hInstance,
 			(void*)this
 		);
-		return m_hWnd != NULL;
+		return m_hWnd != nullptr;
 	}
 
 	LRESULT MapPainterGDIWindow::OnWinMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -108,82 +130,128 @@ namespace osmscout {
 	{
 	}
 
-	void MapPainterGDIWindow::Set(osmscout::Projection* pProjection, osmscout::MapParameter* pParameter, osmscout::MapData* pData)
+	void MapPainterGDIWindow::Set(osmscout::Projection* pProjection,
+                                  osmscout::MapParameter* pParameter,
+                                  osmscout::MapData* pData)
 	{
 		m_pProjection = pProjection;
 		m_pParameter = pParameter;
 		m_pData = pData;
 	}
 
-	LRESULT MapPainterGDIWindow::WinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT MapPainterGDIWindow::WinMsgHandler(HWND hwnd,
+                                               UINT uMsg,
+                                               WPARAM wParam,
+                                               LPARAM lParam)
 	{
 		switch (uMsg)
 		{
 		case WM_CREATE:
-		{
-			RECT tmp;
-			GetClientRect(hwnd, &tmp);
-			InvalidateRect(hwnd, &tmp, TRUE);
-		}
-		break;
+            InvalidateWindow();
+    		break;
 
 		case WM_SIZE:
 		{
-			RECT tmp;
+            log.Info() << "WM_SIZE...";
+
+            log.Info() << "Status before:";
+            LogStatus();
+
+            RECT tmp;
 			GetClientRect(hwnd, &tmp);
-			if (MercatorProjection* mercator = dynamic_cast<MercatorProjection*>(m_pProjection); mercator != nullptr)
+
+            LONG width=tmp.right-tmp.left+1;
+            LONG height=tmp.bottom-tmp.top+1;
+
+            osmscout::log.Info() << "New window dimension: "  << width << "x" << height;
+
+            if (MercatorProjection* mercator = dynamic_cast<MercatorProjection*>(m_pProjection); mercator != nullptr)
 			{
-				mercator->Set(m_pProjection->GetCenter(), m_pProjection->GetMagnification(), m_pProjection->GetDPI(), m_pProjection->GetWidth(), m_pProjection->GetHeight());
+                log.Info() << "Update projection...";
+				mercator->Set(m_pProjection->GetCenter(),
+                              m_pProjection->GetMagnification(),
+                              m_pProjection->GetDPI(),
+                              width,
+                              height);
 			}
-			else
-			{
-			}
+
 			OnTileUpdate();
+
+            log.Info() << "Status after:";
+            LogStatus();
+
+            log.Info() << "InvalidateRect...";
 			InvalidateRect(hwnd, &tmp, TRUE);
+            log.Info() << "WM_SIZE done";
 		}
 		break;
 
 		case WM_CLOSE:
-			if (m_pPainter != NULL)
+			if (m_pPainter != nullptr)
 			{
 				delete m_pPainter;
-				m_pPainter = NULL;
+				m_pPainter = nullptr;
 			}
 			break;
 
 		case WM_DESTROY:
-			if (m_pPainter != NULL)
+			if (m_pPainter != nullptr)
 			{
 				delete m_pPainter;
-				m_pPainter = NULL;
+				m_pPainter = nullptr;
 			}
 			break;
 
 		case WM_PAINT:
 		{
 			std::lock_guard<std::mutex> guard(m_mutex);
+
+            log.Info() << "WM_PAINT...";
+
+            LogStatus();
+
 			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hwnd, &ps);
-			if (m_pPainter != NULL && m_pProjection != NULL && m_pParameter != NULL && m_pData != NULL)
+			HDC hdc = BeginPaint(hwnd,
+                                 &ps);
+
+            log.Info() << "Drawing rect: [" << ps.rcPaint.left << " - " << ps.rcPaint.right << "] x [" << ps.rcPaint.top << " - " << ps.rcPaint.bottom << "]";
+
+			if (m_pPainter != nullptr &&
+                m_pProjection != nullptr &&
+                m_pParameter != nullptr &&
+                m_pData != nullptr)
 			{
-				/*bool result = */m_pPainter->DrawMap(*m_pProjection, *m_pParameter, *m_pData, hdc, ps.rcPaint);
+				/*bool result = */m_pPainter->DrawMap(*m_pProjection,
+                                                      *m_pParameter,
+                                                      *m_pData,
+                                                      hdc,
+                                                      ps.rcPaint);
 			}
+
 			EndPaint(hwnd, &ps);
+            log.Info() << "WM_PAINT done";
 		}
 		return 0;
 
 		}
+
 		return OnWinMsg(hwnd, uMsg, wParam, lParam);
 	}
 
 	void MapPainterGDIWindow::MoveWindow(RECT position, bool bRepaint)
 	{
-		::MoveWindow(m_hWnd, position.left, position.top, position.right - position.left, position.bottom - position.top, bRepaint ? TRUE : FALSE);
+		::MoveWindow(m_hWnd,
+                     position.left,
+                     position.top,
+                     position.right - position.left,
+                     position.bottom - position.top,
+                     bRepaint ? TRUE : FALSE);
 	}
 
 	void MapPainterGDIWindow::InvalidateWindow()
 	{
 		RECT wndSize;
+
 		GetClientRect(m_hWnd, &wndSize);
 		InvalidateRect(m_hWnd, &wndSize, TRUE);
 	}
