@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Update package list
+        run:  sudo apt-get update
       - name: Install additional tools
         run: sudo apt-get install python3-pygments python-pygments doxygen lftp
       - name: Download Hugo static webpage builder
