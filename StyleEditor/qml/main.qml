@@ -1,8 +1,10 @@
 import QtQuick 2.2
-import QtQuick.Controls 1.1
-import QtQuick.Dialogs 1.1
+import QtQuick.Controls 2.15
+import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
+
+import net.sf.libosmscout.map 1.0
 
 ApplicationWindow {
     id: mainWindow
@@ -49,6 +51,47 @@ ApplicationWindow {
                 }
             }
         }
+
+        Menu {
+            id: styleFlagMenu
+            title: "Style flags"
+
+            Component {
+                id: menuAction
+                Action {
+                    checkable: true
+                    onCheckedChanged: {
+                        if (styleFlagsModel.ready) {
+                            styleFlagsModel.setFlag(text, checked);
+                        }
+                    }
+                }
+            }
+
+            StyleFlagsModel {
+                id: styleFlagsModel
+                property bool ready: false
+                onModelReset: {
+                    ready = false;
+                    while (styleFlagMenu.count > 0) {
+                        var action = styleFlagMenu.actionAt(0);
+                        styleFlagMenu.removeAction(action);
+                    }
+
+                    for (var row = 0; row < styleFlagsModel.rowCount(); row++) {
+                        var index = styleFlagsModel.index(row, 0);
+                        var key = styleFlagsModel.data(index, StyleFlagsModel.KeyRole);
+                        var value = styleFlagsModel.data(index, StyleFlagsModel.ValueRole);
+                        console.log("flag " + key+ ": " + value);
+                        var action = menuAction.createObject(styleFlagMenu, { text: key, checked: value });
+                        styleFlagMenu.addAction(action);
+                    }
+
+                    ready = true;
+                    console.log("reset");
+                }
+            }
+        }
     }
 
     SplitView {
@@ -59,8 +102,8 @@ ApplicationWindow {
 
         Grid {
             Layout.fillWidth: true
-            width: parent.width*0.6
-            Layout.minimumWidth: 200
+            SplitView.preferredWidth: parent.width*0.6
+            SplitView.minimumWidth: 200
             columnSpacing: 6
             rowSpacing: 6
             columns: 1
@@ -90,7 +133,7 @@ ApplicationWindow {
 
         TextEditor {
             id: textEditor
-            width: parent.width*0.4
+            SplitView.preferredWidth: parent.width*0.4
             map: map1
             source: map1.stylesheetFilename
         }
