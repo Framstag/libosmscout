@@ -1000,10 +1000,15 @@ namespace osmscout {
         cairo_stroke(draw);
       }
       else /* emphasize */ {
+
+        double er = style->GetEmphasizeColor().GetR();
+        double eg = style->GetEmphasizeColor().GetG();
+        double eb = style->GetEmphasizeColor().GetB();
+
         pango_cairo_layout_path(draw,
                                 layout.get());
 
-        cairo_set_source_rgba(draw, 1, 1, 1, label.alpha);
+        cairo_set_source_rgba(draw, er, eg, eb, label.alpha);
         cairo_set_line_width(draw, 2.0);
         cairo_stroke_preserve(draw);
 

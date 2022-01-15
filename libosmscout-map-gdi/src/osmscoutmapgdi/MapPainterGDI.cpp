@@ -444,7 +444,9 @@ namespace osmscout {
 				pFont->GetFamily(&fontFamily);
 				Gdiplus::GraphicsPath path;
 				path.AddString(text.c_str(), (INT)text.length(), &fontFamily, pFont->GetStyle(), projection.ConvertWidthToPixel(label.fontSize * parameter.GetFontSize()), rectF, &stringFormat);
-				Gdiplus::Pen* pPen = pRender->GetPen(osmscout::Color::WHITE);
+				osmscout::Color fill = style->GetEmphasizeColor();
+				if (label.alpha != 1.0) fill = osmscout::Color(fill.GetR(), fill.GetG(), fill.GetB(), label.alpha);
+				Gdiplus::Pen* pPen = pRender->GetPen(fill);
 				pRender->m_pGraphics->DrawPath(pPen, &path);
 				pRender->m_pGraphics->FillPath(pBrush, &path);
 			}

@@ -519,6 +519,7 @@ namespace osmscout {
       attrLabel,
       attrPosition,
       attrTextColor,
+      attrEmphasizeColor,
       attrStyle,
       attrScaleAndFadeMag,
       attrAutoSize
@@ -529,6 +530,7 @@ namespace osmscout {
     LabelProviderRef label;           //!< The label - a reference to a feature and its label index
     size_t           position;        //!< Relative vertical position of the label
     Color            textColor;       //!< Color of text
+    Color            emphasizeColor;  //!< Color of text emphasize
     Style            style;           //!< Style of the text
     Magnification    scaleAndFadeMag; //!< Automatic pseudo-autoSize scaling for nodes
     bool             autoSize;        //!< Calculate the size of the label base don the height of the area
@@ -551,6 +553,7 @@ namespace osmscout {
     TextStyle& SetLabel(const LabelProviderRef& label);
     TextStyle& SetPosition(size_t position);
     TextStyle& SetTextColor(const Color& color);
+    TextStyle& SetEmphasizeColor(const Color& color);
     TextStyle& SetStyle(Style style);
     TextStyle& SetScaleAndFadeMag(const Magnification& mag);
     TextStyle& SetAutoSize(bool autoSize);
@@ -584,6 +587,11 @@ namespace osmscout {
     const Color& GetTextColor() const
     {
       return textColor;
+    }
+
+    const Color& GetEmphasizeColor() const
+    {
+      return emphasizeColor;
     }
 
     const Style& GetStyle() const

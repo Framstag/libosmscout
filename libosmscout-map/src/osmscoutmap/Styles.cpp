@@ -830,6 +830,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
       AddAttribute(std::make_shared<StyleLabelAttributeDescriptor>("label",TextStyle::attrLabel));
       AddAttribute(std::make_shared<TextStyleEnumAttributeDescriptor>("style",TextStyle::attrStyle));
       AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("color",TextStyle::attrTextColor));
+      AddAttribute(std::make_shared<StyleColorAttributeDescriptor>("emphasizeColor",TextStyle::attrEmphasizeColor));
       AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("size",TextStyle::attrSize));
       AddAttribute(std::make_shared<StyleMagnificationAttributeDescriptor>("scaleMag",TextStyle::attrScaleAndFadeMag));
       AddAttribute(std::make_shared<StyleBoolAttributeDescriptor>("autoSize",TextStyle::attrAutoSize));
@@ -843,6 +844,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   TextStyle::TextStyle()
    : position(0),
      textColor(0,0,0),
+     emphasizeColor(1,1,1),
      style(normal),
      scaleAndFadeMag(1000000),
      autoSize(false)
@@ -880,6 +882,9 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     switch (attribute) {
     case attrTextColor:
       SetTextColor(value);
+      break;
+    case attrEmphasizeColor:
+      SetEmphasizeColor(value);
       break;
     default:
       assert(false);
@@ -979,6 +984,13 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     return *this;
   }
 
+  TextStyle& TextStyle::SetEmphasizeColor(const Color& color)
+  {
+    this->emphasizeColor=color;
+
+    return *this;
+  }
+
   TextStyle& TextStyle::SetStyle(Style style)
   {
     this->style=style;
@@ -1024,6 +1036,9 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
         break;
       case attrTextColor:
         textColor=other.textColor;
+        break;
+      case attrEmphasizeColor:
+        emphasizeColor=other.emphasizeColor;
         break;
       case attrStyle:
         style=other.style;
