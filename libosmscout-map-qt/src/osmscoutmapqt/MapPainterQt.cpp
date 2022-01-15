@@ -312,13 +312,14 @@ namespace osmscout {
     if (const auto *style = dynamic_cast<const TextStyle*>(label.style.get());
         style != nullptr) {
 
-      double      r=style->GetTextColor().GetR();
-      double      g=style->GetTextColor().GetG();
-      double      b=style->GetTextColor().GetB();
+      double r=style->GetTextColor().GetR();
+      double g=style->GetTextColor().GetG();
+      double b=style->GetTextColor().GetB();
 
       if (style->GetStyle()==TextStyle::normal) {
 
-        QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
+        QColor textColor=QColor::fromRgbF(r,g,b,label.alpha);
+
         QList<QTextLayout::FormatRange> formatList;
         QTextLayout::FormatRange        range;
 
@@ -328,8 +329,13 @@ namespace osmscout {
       }
       else if (style->GetStyle()==TextStyle::emphasize) {
 
-        QColor                          textColor=QColor::fromRgbF(r,g,b,label.alpha);
-        QColor                          outlineColor=QColor::fromRgbF(1.0,1.0,1.0,label.alpha);
+        QColor textColor=QColor::fromRgbF(r,g,b,label.alpha);
+
+        r=style->GetEmphasizeColor().GetR();
+        g=style->GetEmphasizeColor().GetG();
+        b=style->GetEmphasizeColor().GetB();
+
+        QColor outlineColor=QColor::fromRgbF(r,g,b,label.alpha);
 
         /**
          * Use text outline for emphasize is better

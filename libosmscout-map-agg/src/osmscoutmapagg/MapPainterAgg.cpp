@@ -286,7 +286,11 @@ namespace osmscout {
 
       } else if (style->GetStyle()==TextStyle::emphasize) {
 
-        renderer_aa->color(agg::rgba(1,1,1,label.alpha));
+        double er = style->GetEmphasizeColor().GetR();
+        double eg = style->GetEmphasizeColor().GetG();
+        double eb = style->GetEmphasizeColor().GetB();
+
+        renderer_aa->color(agg::rgba(er,eg,eb,label.alpha));
 
         DrawGlyphVector(labelRectangle.x -1, labelRectangle.y + labelRectangle.height, layout.glyphs);
         DrawGlyphVector(labelRectangle.x +1, labelRectangle.y + labelRectangle.height, layout.glyphs);

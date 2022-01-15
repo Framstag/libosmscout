@@ -350,15 +350,16 @@ Currently allowed instances:
 
 The text style for point labels has the following attributes:
 
-Name         |Type                         |Default |Description
--------------|-----------------------------|--------|-----------
-label        |FeatureAttr or LabelProvider |        |The name of the feature attribute to be rendered or name of label provider.
-style        |TextStyle                    |normal  |Depending on the value (normal or emphasize) the label is either drawn normal or (depending on the backend the visualisation may be different) somehow emphasized.
-color        |Color                        |black   |The color of the text
-size         |Int                          |1       |The size of the text relative to the standard text size. 2.0 for example generates a text twice as height as normal.
-scaleMag     |Magnification                |1000000 |Starting with the given magnification in the label is drawn bigger but on the same time with increasing transparency with increasing magnification, genrating an overlay-like effect.
-priority     |Int                          |max(Int)|numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
-autoSize     |Bool                         |false   |The size of the label is automatically scaled to fit the height of the area itself. Thus bigger areas will get bigger labels, label with not be higher than the actual area.
+Name           |Type                         | Default  |Description
+---------------|-----------------------------|----------|-----------
+label          |FeatureAttr or LabelProvider |          |The name of the feature attribute to be rendered or name of label provider.
+style          |TextStyle                    | normal   |Depending on the value (normal or emphasize) the label is either drawn normal or (depending on the backend the visualisation may be different) somehow emphasized.
+color          |Color                        | black    |The color of the text
+emphasizeColor |Color                        | white    |The color of the text emphasize (alpha channel is ignored)
+size           |Int                          | 1        |The size of the text relative to the standard text size. 2.0 for example generates a text twice as height as normal.
+scaleMag       |Magnification                | 1000000  |Starting with the given magnification in the label is drawn bigger but on the same time with increasing transparency with increasing magnification, genrating an overlay-like effect.
+priority       |Int                          | max(Int) |numeric value defining a relative priority between labels. Labels with a lower value will be drawn in favour of labels with a higher priority value. Note that labels with a certain alpha value will be ignored (so giant scaleMag labels will not "kill" all other labels beneeth).
+autoSize       |Bool                         | false    |The size of the label is automatically scaled to fit the height of the area itself. Thus bigger areas will get bigger labels, label with not be higher than the actual area.
 
 ### PathTextStyle - Draw labels onto ways, routes and area borders
 
