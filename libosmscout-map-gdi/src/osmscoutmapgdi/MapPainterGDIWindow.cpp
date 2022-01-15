@@ -202,6 +202,11 @@ namespace osmscout {
 			}
 			break;
 
+        case WM_ERASEBKGND:
+            log.Info() << "WM_ERASEBKGND...";
+            log.Info() << "WM_ERASEBKGND done";
+            return 1;
+
 		case WM_PAINT:
 		{
 			std::lock_guard<std::mutex> guard(m_mutex);

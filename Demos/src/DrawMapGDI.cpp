@@ -97,6 +97,46 @@ public:
 			PostQuitMessage(0);
 			return 0;
 
+        case WM_KEYDOWN:
+            if (wParam == VK_OEM_MINUS)
+            {
+                osmscout::log.Info() << "Zoom out...";
+
+                double newMagnification=m_pBaseData->projection.GetMagnification().GetMagnification() / 2;
+
+                if (newMagnification<1.0) {
+                    newMagnification=1.0;
+                }
+
+                osmscout::log.Info() << " Change magnification from " << m_pBaseData->projection.GetMagnification().GetMagnification() << " to " << newMagnification;
+
+                m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(),
+                                            osmscout::Magnification(newMagnification),
+                                            m_pBaseData->projection.GetDPI(),
+                                            m_pBaseData->projection.GetWidth(),
+                                            m_pBaseData->projection.GetHeight());
+                OnTileUpdate();
+                InvalidateWindow();
+
+            }
+            else if (wParam == VK_OEM_PLUS)
+            {
+                osmscout::log.Info() << "Zoom in...";
+
+                double newMagnification=m_pBaseData->projection.GetMagnification().GetMagnification()*2;
+
+                osmscout::log.Info() << " Change magnification from " << m_pBaseData->projection.GetMagnification().GetMagnification() << " to " << newMagnification;
+
+                m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(),
+                                            osmscout::Magnification(newMagnification),
+                                            m_pBaseData->projection.GetDPI(),
+                                            m_pBaseData->projection.GetWidth(),
+                                            m_pBaseData->projection.GetHeight());
+                OnTileUpdate();
+                InvalidateWindow();
+            }
+            break;
+
 		case WM_MOUSEWHEEL:
             osmscout::log.Info() << "WM_MOUSEWHEEL...";
 
