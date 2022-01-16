@@ -858,6 +858,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     label(style.label),
     position(style.position),
     textColor(style.textColor),
+    emphasizeColor(style.emphasizeColor),
     style(style.style),
     scaleAndFadeMag(style.scaleAndFadeMag),
     autoSize(style.autoSize)
