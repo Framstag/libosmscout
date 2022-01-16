@@ -2139,7 +2139,7 @@ STYLE
  //
 
  [MAG world-continent] {
-   [TYPE place_continent] NODE.TEXT {label: IName; style: emphasize; emphasizeColor: @emphasizeColor; size: 1.6; color: @labelColor; priority: @labelPrioContinent; }
+   [TYPE place_continent] NODE.TEXT {label: IName; style: emphasize; emphasizeColor: @emphasizeColor; size: 1.6; color: alpha(@labelColor, 0.5); priority: @labelPrioContinent; }
  }
  [MAG 2-] { [TYPE place_continent] NODE.TEXT { size: 4; color: alpha(@labelColor, 0.37); }}
  [MAG continent-] { [TYPE place_continent] NODE.TEXT { size: 6; color: alpha(@labelColor, 0.25); }}
