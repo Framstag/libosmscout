@@ -34,6 +34,10 @@
 #cmakedefine HAVE_LIB_OPENGL 1
 #cmakedefine HAVE_LIB_OSMSCOUTMAPOPENGL 1
 
+/* GDI detected */
+/* GDI detected */
+#cmakedefine HAVE_LIB_OSMSCOUTMAPGDI 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine HAVE_MEMORY_H 1
 

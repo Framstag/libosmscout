@@ -45,6 +45,10 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#if defined(HAVE_LIB_OSMSCOUTMAPGDI)
+#include <osmscoutmapgdi/MapPainterGDI.h>
+#endif
+
 #if defined(HAVE_LIB_GPERFTOOLS)
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
@@ -221,7 +225,7 @@ public:
     cairoMapPainter = new osmscout::MapPainterCairo(styleConfig);
   }
 
-  ~PerformanceTestBackendCairo()
+  ~PerformanceTestBackendCairo() override
   {
     cairo_destroy(cairo);
     cairo_surface_destroy(cairoSurface);
@@ -360,6 +364,66 @@ public:
 };
 #endif
 
+#if defined(HAVE_LIB_OSMSCOUTMAPGDI)
+class PerformanceTestBackendGDI: public PerformanceTestBackend {
+private:
+  HDC                      hdc;
+  HBITMAP                  bitmap;
+  RECT                     paintRect;
+  osmscout::MapPainterGDI* gdiMapPainter{nullptr};
+  osmscout::StyleConfigRef styleConfig;
+public:
+  PerformanceTestBackendGDI(size_t tileWidth,
+                            size_t tileHeight,
+                            size_t dpi,
+                            osmscout::StyleConfigRef styleConfig):
+    styleConfig{styleConfig}
+  {
+    // Create the offscreen renderer
+    hdc=CreateCompatibleDC(nullptr);
+
+    bitmap=CreateCompatibleBitmap(nullptr,
+                                  (int)tileWidth,
+                                  (int)tileHeight);
+/*
+    bitmap=CreateBitmap((int)tileWidth,
+                        (int)tileHeight,
+                        1,
+                        32,
+                        nullptr);*/
+
+    SelectObject(hdc,bitmap);
+
+    paintRect.left=0;
+    paintRect.top=0;
+    paintRect.right=LONG(tileWidth);
+    paintRect.bottom=LONG(tileHeight);
+
+    // This driver need a valid existing context
+    gdiMapPainter=new osmscout::MapPainterGDI(styleConfig);
+  }
+
+  ~PerformanceTestBackendGDI() override
+  {
+    DeleteObject(hdc);
+    DeleteObject(bitmap);
+
+    delete gdiMapPainter;
+  }
+
+  void DrawMap(const osmscout::TileProjection &projection,
+               const osmscout::MapParameter &drawParameter,
+               const osmscout::MapData &data) override
+  {
+    gdiMapPainter->DrawMap(projection,
+                           drawParameter,
+                           data,
+                           hdc,
+                           paintRect);
+  }
+};
+#endif
+
 class PerformanceTestBackendNoOp: public PerformanceTestBackend {
 private:
   osmscout::MapPainterNoOp noOpMapPainter;
@@ -425,7 +489,20 @@ PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments
     std::cerr << "Driver 'OpenGL' is not enabled" << std::endl;
     return nullptr;
 #endif
-  }
+  } else if (args.driver == "gdi") {
+    std::cout << "Using driver 'GDI'..." << std::endl;
+#if defined(HAVE_LIB_OSMSCOUTMAPGDI)
+    try{
+          return std::make_shared<PerformanceTestBackendGDI>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig);
+        } catch (std::runtime_error &e){
+          std::cerr << e.what() << std::endl;
+          return nullptr;
+        }
+#else
+    std::cerr << "Driver 'gdi' is not enabled" << std::endl;
+    return nullptr;
+#endif
+}
   else if (args.driver=="noop") {
     std::cout << "Using driver 'noop'..." << std::endl;
     return std::make_shared<PerformanceTestBackendNoOp>(styleConfig);
@@ -593,7 +670,8 @@ int main(int argc, char* argv[])
     std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
-  else if (args.help) {
+
+  if (args.help) {
     std::cout << argParser.GetHelp() << std::endl;
     return 0;
   }
