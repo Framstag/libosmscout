@@ -233,7 +233,7 @@ else
 endif
 
 # GDI
-if gdiplusDep.found()
+if build_machine.system()=='windows' and gdiplusDep.found()
   buildMapGDI=true
 else
   buildMapGDI=false
