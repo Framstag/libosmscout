@@ -110,6 +110,12 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     links += osmscoutmapopengl
   endif
 
+  if buildMapGDI
+    includes += osmscoutmapgdiIncDir
+    deps += gdiplusDep
+    links += osmscoutmapgdi
+  endif
+
   PerformanceTest = executable('PerformanceTest',
                                'src/PerformanceTest.cpp',
                                cpp_args: ['-fPIC'],
@@ -284,6 +290,16 @@ if buildMapDirectX
                               link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
                               gui_app: true,
                               install: true)
+endif
+
+if buildMapGDI
+    DrawMapGDI = executable('DrawMapGDI',
+                            'src/DrawMapGDI.cpp',
+                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapgdiIncDir, demoIncDir],
+                            dependencies: [mathDep, openmpDep, gdiplusDep],
+                            link_with: [osmscout, osmscoutmap, osmscoutmapgdi],
+                            gui_app: true,
+                            install: true)
 endif
 
 if buildGpx

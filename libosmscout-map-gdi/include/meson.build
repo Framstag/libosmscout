@@ -1,8 +1,8 @@
 osmscoutmapgdiIncDir = include_directories('.')
 
-osmscoutmapsvgHeader = [
+osmscoutmapgdiHeader = [
             'osmscoutmapgdi/MapGDIImportExport.h',
-            'osmscoutmapgdi/MapPainterGDI.h'
+            'osmscoutmapgdi/MapPainterGDI.h',
             'osmscoutmapgdi/MapPainterGDIWindow.h'
           ]
 

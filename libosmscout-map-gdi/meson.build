@@ -17,7 +17,7 @@ osmscoutmapgdi = library('osmscout_map_gdi',
                          osmscoutmapgdiSrc,
                          include_directories: [osmscoutmapgdiIncDir, osmscoutmapIncDir, osmscoutIncDir],
                          cpp_args: cppArgs,
-                         dependencies: [mathDep, threadDep],
+                         dependencies: [mathDep, threadDep, gdiplusDep],
                          link_with: [osmscoutmap, osmscout],
                          install: true)
         

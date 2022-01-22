@@ -159,11 +159,13 @@ pngDep = dependency('libpng', required: false)
 gobjectDep = dependency('gobject-2.0',required: false)
 
 # DirectX
-
 d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)
 winCodecsDep = compiler.find_library('Windowscodecs', required: false)
 d2dlHeaderAvailable = compiler.has_header('d2d1.h')
+
+# GdiPlus
+gdiplusDep = compiler.find_library('gdiplus', required: false)
 
 # Qt
 qt5 = import('qt5')
@@ -224,11 +226,17 @@ else
 endif
 
 # DirectX
-
 if d2d1Dep.found() and dwriteDep.found() and winCodecsDep.found() and d2dlHeaderAvailable and get_option('enableMapDirectX')
   buildMapDirectX=true
 else
   buildMapDirectX=false
+endif
+
+# GDI
+if build_machine.system()=='windows' and gdiplusDep.found()
+  buildMapGDI=true
+else
+  buildMapGDI=false
 endif
 
 # GPX
@@ -299,6 +307,7 @@ message('libosmscout-map:         @0@'.format(true))
 message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
 message('libosmscout-map-cairo:   @0@'.format(buildMapCairo))
 message('libosmscout-map-directx: @0@'.format(buildMapDirectX))
+message('libosmscout-map-gdi:     @0@'.format(buildMapGDI))
 message('libosmscout-map-iosx:    @0@'.format(buildMapIOSX))
 message('libosmscout-map-opengl:  @0@'.format(buildMapOpenGL))
 message('libosmscout-map-qt:      @0@'.format(buildMapQt))
@@ -330,6 +339,10 @@ endif
 
 if buildMapDirectX
   subdir('libosmscout-map-directx')
+endif
+
+if buildMapGDI
+  subdir('libosmscout-map-gdi')
 endif
 
 if buildMapIOSX
