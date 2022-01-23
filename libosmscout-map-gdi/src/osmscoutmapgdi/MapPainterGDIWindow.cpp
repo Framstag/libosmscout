@@ -17,6 +17,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+// Including Windows and Gdiplus is a pain
+// We get compiler errors in gdi, if someone includes
+// Windows headers before us using other settings...
+#ifndef UNICODE
+#define UNICODE
+#endif
+#define NOMINMAX // msvc issue with std::max/min
+#define WIN32_LEAN_AND_MEAN
+
+#include <windows.h>
+
 #include <osmscoutmapgdi/MapPainterGDIWindow.h>
 
 namespace osmscout {

@@ -20,22 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef UNICODE
-#define UNICODE
-#endif
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-
 #include <osmscoutmapgdi/MapGDIImportExport.h>
 
 #include <osmscoutmap/MapPainter.h>
 
 namespace osmscout {
 
-	class OSMSCOUT_MAP_GDI_API MapPainterGDI : public MapPainter
+  class OSMSCOUT_MAP_GDI_API MapPainterGDI : public MapPainter
 	{
 	public:
 		struct NativeLabel {
@@ -43,11 +34,13 @@ namespace osmscout {
 			void* font;
 			void* render;
 		};
+
 		struct NativeGlyph {
 			std::string character;
 			double width;
 			double height;
 		};
+
 		using GdiLabel = Label<NativeGlyph, NativeLabel>;
 
 	private:
@@ -57,7 +50,7 @@ namespace osmscout {
 		friend GdiLabelLayouter;
 
 		GdiLabelLayouter                   m_labelLayouter;
-		void                               *m_pBuffer;
+    void                               *m_pBuffer;
 		static ULONG_PTR                   m_gdiplusToken;
 		static DWORD                       m_gdiplusInstCount;
 

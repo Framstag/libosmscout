@@ -20,15 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef UNICODE
-#define UNICODE
-#endif
-#define WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <osmscoutmapgdi/MapGDIImportExport.h>
+
 #include <osmscoutmapgdi/MapPainterGDI.h>
+
 #include <mutex>
 
 namespace osmscout {
