@@ -55,118 +55,122 @@ namespace osmscout {
 		static DWORD                       m_gdiplusInstCount;
 
 	private:
-		osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
 
-		std::shared_ptr<GdiLabel> Layout(const Projection& projection,
-			const MapParameter& parameter,
-			const std::string& text,
-			double fontSize,
-			double objectWidth,
-			bool enableWrapping = false,
-			bool contourLabel = false);
+    std::shared_ptr<GdiLabel> Layout(const Projection &projection,
+                                     const MapParameter &parameter,
+                                     const std::string &text,
+                                     double fontSize,
+                                     double objectWidth,
+                                     bool enableWrapping = false,
+                                     bool contourLabel = false);
 
-		void DrawLabel(const Projection& projection,
-			const MapParameter& parameter,
-			const DoubleRectangle& labelRectangle,
-			const LabelData& label,
-			const NativeLabel& layout);
+    void DrawLabel(const Projection &projection,
+                   const MapParameter &parameter,
+                   const DoubleRectangle &labelRectangle,
+                   const LabelData &label,
+                   const NativeLabel &layout);
 
-		void DrawGlyphs(const Projection &projection,
-			const MapParameter &parameter,
-			const osmscout::PathTextStyleRef& style,
-			const std::vector<GdiGlyph> &glyphs);
+    void DrawGlyphs(const Projection &projection,
+                    const MapParameter &parameter,
+                    const osmscout::PathTextStyleRef &style,
+                    const std::vector<GdiGlyph> &glyphs);
 
 	protected:
-		void AfterPreprocessing(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			const MapData& data) override;
+    void AfterPreprocessing(const StyleConfig &styleConfig,
+                            const Projection &projection,
+                            const MapParameter &parameter,
+                            const MapData &data) override;
 
-		void BeforeDrawing(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			const MapData& data) override;
+    void BeforeDrawing(const StyleConfig &styleConfig,
+                       const Projection &projection,
+                       const MapParameter &parameter,
+                       const MapData &data) override;
 
-		void AfterDrawing(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			const MapData& data) override;
+    void AfterDrawing(const StyleConfig &styleConfig,
+                      const Projection &projection,
+                      const MapParameter &parameter,
+                      const MapData &data) override;
 
-		bool HasIcon(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			IconStyle& style) override;
+    bool HasIcon(const StyleConfig &styleConfig,
+                 const Projection &projection,
+                 const MapParameter &parameter,
+                 IconStyle &style) override;
 
-		double GetFontHeight(const Projection& projection,
-			const MapParameter& parameter,
-			double fontSize) override;
+    double GetFontHeight(const Projection &projection,
+                         const MapParameter &parameter,
+                         double fontSize) override;
 
-		void DrawGround(const Projection& projection,
-			const MapParameter& parameter,
-			const FillStyle& style) override;
+    void DrawGround(const Projection &projection,
+                    const MapParameter &parameter,
+                    const FillStyle &style) override;
 
-		/**
-		  Register regular label with given text at the given pixel coordinate
-		  in a style defined by the given LabelStyle.
-		 */
-        void RegisterRegularLabel(const Projection &projection,
-			const MapParameter &parameter,
-			const std::vector<LabelData> &labels,
-			const Vertex2D &position,
-			double objectWidth) override;
+    /**
+      Register regular label with given text at the given pixel coordinate
+      in a style defined by the given LabelStyle.
+     */
+    void RegisterRegularLabel(const Projection &projection,
+                              const MapParameter &parameter,
+                              const std::vector<LabelData> &labels,
+                              const Vertex2D &position,
+                              double objectWidth) override;
 
-		/**
-		 * Register contour label
-		 */
-		void RegisterContourLabel(const Projection &projection,
-			const MapParameter &parameter,
-			const PathLabelData &label,
-			const LabelPath &labelPath) override;
+    /**
+     * Register contour label
+     */
+    void RegisterContourLabel(const Projection &projection,
+                              const MapParameter &parameter,
+                              const PathLabelData &label,
+                              const LabelPath &labelPath) override;
 
-		void DrawLabels(const Projection& projection,
-			const MapParameter& parameter,
-			const MapData& data) override;
+    void DrawLabels(const Projection &projection,
+                    const MapParameter &parameter,
+                    const MapData &data) override;
 
-		void DrawSymbol(const Projection& projection,
-			const MapParameter& parameter,
-			const Symbol& style,
-			double x, double y) override;
+    void DrawSymbol(const Projection &projection,
+                    const MapParameter &parameter,
+                    const Symbol &style,
+                    double x, double y) override;
 
-		void DrawIcon(const IconStyle* style,
-			double centerX, double centerY,
-			double width, double height) override;
+    void DrawIcon(const IconStyle *style,
+                  double centerX, double centerY,
+                  double width, double height) override;
 
-		void DrawPath(const Projection& projection,
-			const MapParameter& parameter,
-			const Color& color,
-			double width,
-			const std::vector<double>& dash,
-			LineStyle::CapStyle startCap,
-			LineStyle::CapStyle endCap,
-			size_t transStart, size_t transEnd) override;
+    void DrawPath(const Projection &projection,
+                  const MapParameter &parameter,
+                  const Color &color,
+                  double width,
+                  const std::vector<double> &dash,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
+                  size_t transStart, size_t transEnd) override;
 
-		void DrawWayOutline(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			const WayData& data);
+    void DrawWayOutline(const StyleConfig &styleConfig,
+                        const Projection &projection,
+                        const MapParameter &parameter,
+                        const WayData &data);
 
-		void DrawWay(const StyleConfig& styleConfig,
-			const Projection& projection,
-			const MapParameter& parameter,
-			const WayData& data) override;
+    void DrawWay(const StyleConfig &styleConfig,
+                 const Projection &projection,
+                 const MapParameter &parameter,
+                 const WayData &data) override;
 
-		void DrawContourSymbol(const Projection& projection,
-			const MapParameter& parameter,
-			const Symbol& symbol,
-			double space,
-			size_t transStart, size_t transEnd) override;
+    void DrawContourSymbol(const Projection &projection,
+                           const MapParameter &parameter,
+                           const Symbol &symbol,
+                           double space,
+                           size_t transStart, size_t transEnd) override;
 
-		void DrawArea(const Projection& projection,
-			const MapParameter& parameter,
-			const AreaData& area) override;
+    void DrawArea(const Projection &projection,
+                  const MapParameter &parameter,
+                  const AreaData &area) override;
 
 	public:
-		bool DrawMap(const Projection& projection, const MapParameter& parameter, const MapData& data, HDC hdc, RECT paintRect);
+		bool DrawMap(const Projection& projection,
+                 const MapParameter& parameter,
+                 const MapData& data,
+                 HDC hdc,
+                 RECT paintRect);
 
 		/**
 		@brief Default constructor
