@@ -9,3 +9,4 @@ set -xe
 ./debian_bullseye_gcc_meson/build.sh
 ./ubuntu_18.04_gcc_cmake/build.sh
 ./ubuntu_20.04_gcc_cmake/build.sh
+./ubuntu_21.10_aarch64_gcc_cmake/build.sh

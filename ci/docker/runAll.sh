@@ -23,27 +23,33 @@ RESULT_ubuntu_18_04_gcc_cmake=$?
 ./ubuntu_20.04_gcc_cmake/run.sh "$@"
 RESULT_ubuntu_20_04_gcc_cmake=$?
 
+./ubuntu_21.10_aarch64_gcc_cmake/run.sh "$@"
+RESULT_ubuntu_21_10_aarch64_gcc_cmake=$?
+
 # print results
 set +x
 echo 
 
-echo -ne "archlinux_clang_cmake        "
+echo -ne "archlinux_clang_cmake          "
 if [ $RESULT_archlinux_clang_cmake       -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "archlinux_gcc_cmake          "
+echo -ne "archlinux_gcc_cmake            "
 if [ $RESULT_archlinux_gcc_cmake         -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "archlinux_gcc_meson          "
+echo -ne "archlinux_gcc_meson            "
 if [ $RESULT_archlinux_gcc_meson         -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_buster_gcc_meson      "
+echo -ne "debian_buster_gcc_meson        "
 if [ $RESULT_debian_buster_gcc_meson     -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_bullseye_gcc_meson    "
+echo -ne "debian_bullseye_gcc_meson      "
 if [ $RESULT_debian_bullseye_gcc_meson   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "ubuntu_18.04_gcc_cmake       "
+echo -ne "ubuntu_18.04_gcc_cmake         "
 if [ $RESULT_ubuntu_18_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "ubuntu_20.04_gcc_cmake       "
+echo -ne "ubuntu_20.04_gcc_cmake         "
 if [ $RESULT_ubuntu_20_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_21.10_aarch64_gcc_cmake "
+if [ $RESULT_ubuntu_21_10_aarch64_gcc_cmake -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
