@@ -183,7 +183,8 @@ namespace osmscout {
     /**
     * OpenGL draw call. Draws all feature of the map to the context.
     */
-    void DrawMap();
+    void DrawMap(RenderSteps startStep=RenderSteps::FirstStep,
+                 RenderSteps endStep=RenderSteps::LastStep);
 
   };
 }

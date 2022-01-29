@@ -309,12 +309,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                        const osmscout::MapParameter &drawParameter,
-                       const osmscout::MapData &data) override
+                       const osmscout::MapData &data,
+                       osmscout::RenderSteps step) override
   {
     qtMapPainter.DrawMap(projection,
                          drawParameter,
                          data,
-                         &qtPainter);
+                         &qtPainter,
+                         step,
+                         step);
   }
 };
 #endif
@@ -343,12 +346,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
     aggMapPainter.DrawMap(projection,
                           drawParameter,
                           data,
-                          pf);
+                          pf,
+                          step,
+                          step);
   }
 };
 #endif
@@ -359,7 +365,10 @@ private:
   osmscout::MapPainterOpenGL* openglMapPainter{nullptr};
   osmscout::StyleConfigRef styleConfig;
 public:
-  PerformanceTestBackendOGL(size_t tileWidth, size_t tileHeight, size_t dpi, osmscout::StyleConfigRef styleConfig):
+  PerformanceTestBackendOGL(size_t tileWidth,
+                            size_t tileHeight,
+                            size_t dpi,
+                            const osmscout::StyleConfigRef& styleConfig):
     styleConfig{styleConfig}
   {
     // Create the offscreen renderer
@@ -402,11 +411,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
-    openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
-    openglMapPainter->SwapData();
-    openglMapPainter->DrawMap();
+    if (step==osmscout::RenderSteps::Initialize) {
+      openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
+      openglMapPainter->SwapData();
+      openglMapPainter->DrawMap(step,
+                                step);
+    }
   }
 };
 #endif

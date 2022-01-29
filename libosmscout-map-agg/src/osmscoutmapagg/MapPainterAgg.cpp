@@ -713,39 +713,47 @@ namespace osmscout {
   bool MapPainterAgg::DrawMap(const Projection& projection,
                               const MapParameter& parameter,
                               const MapData& data,
-                              AggPixelFormat* pf)
+                              AggPixelFormat* pf,
+                              RenderSteps startStep,
+                              RenderSteps endStep)
   {
     std::lock_guard<std::mutex> guard(mutex);
     bool                        result;
 
-    this->pf=pf;
+    if (startStep==RenderSteps::Initialize) {
+      this->pf=pf;
 
-    renderer_base=new AggRenderBase(*pf);
-    rasterizer=new AggScanlineRasterizer();
-    scanlineP8=new AggScanline();
-    renderer_aa=new AggScanlineRendererAA(*renderer_base);
-    renderer_bin=new AggScanlineRendererBin(*renderer_base);
-    fontEngine=new AggFontEngine();
-    fontCacheManager=new AggFontManager(*fontEngine);
+      renderer_base=new AggRenderBase(*pf);
+      rasterizer=new AggScanlineRasterizer();
+      scanlineP8=new AggScanline();
+      renderer_aa=new AggScanlineRendererAA(*renderer_base);
+      renderer_bin=new AggScanlineRendererBin(*renderer_base);
+      fontEngine=new AggFontEngine();
+      fontCacheManager=new AggFontManager(*fontEngine);
 
-    convTextCurves=new AggTextCurveConverter(fontCacheManager->path_adaptor());
-    convTextCurves->approximation_scale(2.0);
+      convTextCurves=new AggTextCurveConverter(fontCacheManager->path_adaptor());
+      convTextCurves->approximation_scale(2.0);
 
-    convTextContours= new AggTextContourConverter(*convTextCurves);
+      convTextContours= new AggTextContourConverter(*convTextCurves);
+    }
 
     result=Draw(projection,
                 parameter,
-                data);
+                data,
+                startStep,
+                endStep);
 
-    delete convTextCurves;
-    delete convTextContours;
-    delete fontEngine;
-    delete fontCacheManager;
-    delete renderer_bin;
-    delete renderer_aa;
-    delete scanlineP8;
-    delete rasterizer;
-    delete renderer_base;
+    if (endStep==RenderSteps::Postrender) {
+      delete convTextCurves;
+      delete convTextContours;
+      delete fontEngine;
+      delete fontCacheManager;
+      delete renderer_bin;
+      delete renderer_aa;
+      delete scanlineP8;
+      delete rasterizer;
+      delete renderer_base;
+    }
 
     return result;
   }
