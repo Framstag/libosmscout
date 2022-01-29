@@ -147,10 +147,6 @@ namespace osmscout {
 
   class GdiRender {
   private:
-    Gdiplus::Bitmap *m_pMemBitmap;
-    INT m_width;
-    INT m_height;
-
     std::map<PENDEF, Gdiplus::Pen *> m_Pens;
     std::map<FONTDEF, Gdiplus::Font *> m_Fonts;
     std::map<size_t, Gdiplus::Image *> m_Images;
@@ -159,10 +155,8 @@ namespace osmscout {
     Gdiplus::Graphics *m_pGraphics;
     PointFBuffer pointBuffer;
 
-    GdiRender(INT width, INT height)
-      : m_pMemBitmap(nullptr), m_width(width), m_height(height) {
-      m_pMemBitmap = new Gdiplus::Bitmap(width, height);
-      m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
+    GdiRender(HDC hdc) {
+      m_pGraphics = Gdiplus::Graphics::FromHDC(hdc);
       m_pGraphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
       m_pGraphics->SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
       m_pGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
@@ -190,29 +184,6 @@ namespace osmscout {
 
       delete m_pGraphics;
       m_pGraphics = nullptr;
-
-      delete m_pMemBitmap;
-      m_pMemBitmap = nullptr;
-    }
-
-    void Resize(INT width, INT height) {
-      if (width == m_width && height == m_height) {
-        return;
-      }
-
-      if (width == 0 || height == 0) {
-        return;
-      }
-
-      Release();
-
-      m_width = width;
-      m_height = height;
-      m_pMemBitmap = new Gdiplus::Bitmap(width, height);
-      m_pGraphics = Gdiplus::Graphics::FromImage(m_pMemBitmap);
-      m_pGraphics->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-      m_pGraphics->SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
-      m_pGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
     }
 
     Gdiplus::Color ColorToGdiColor(const osmscout::Color &color) {
@@ -222,10 +193,6 @@ namespace osmscout {
         (BYTE) ((int) (color.GetG() * 255.0)),
         (BYTE) ((int) (color.GetB() * 255.0))
       };
-    }
-
-    inline void Paint(Gdiplus::Graphics *pGraphics, INT x = 0, INT y = 0) {
-      pGraphics->DrawImage(m_pMemBitmap, x, y);
     }
 
     Gdiplus::Pen *GetPen(const osmscout::Color &color = osmscout::Color::BLACK,
@@ -334,14 +301,6 @@ namespace osmscout {
 
       return m_Images[iconID];
     }
-
-    inline INT GetWidth() const {
-      return m_width;
-    }
-
-    inline INT GetHeight() const {
-      return m_height;
-    }
   };
 
 #define RENDEROBJECT(r) if (m_pBuffer == NULL) return; \
@@ -350,15 +309,15 @@ namespace osmscout {
   GdiRender* r = (GdiRender*)m_pBuffer
 
   MapPainterGDI::MapPainterGDI(const StyleConfigRef &styleConfig)
-    : MapPainter(styleConfig), m_labelLayouter(this), m_pBuffer(nullptr) {
+    : MapPainter(styleConfig),
+      m_labelLayouter(this),
+      m_pBuffer(nullptr) {
     if (m_gdiplusInstCount == 0) {
       Gdiplus::GdiplusStartupInput gdiplusStartupInput;
       Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, nullptr);
     }
 
     m_gdiplusInstCount++;
-
-    m_pBuffer = new GdiRender(100, 100);
   }
 
   MapPainterGDI::~MapPainterGDI() {
@@ -908,19 +867,22 @@ namespace osmscout {
                               const MapParameter &parameter,
                               const MapData &data,
                               HDC hdc,
-                              RECT paintRect) {
-    INT width = paintRect.right - paintRect.left;
-    INT height = paintRect.bottom - paintRect.top;
-
-    ((GdiRender *) m_pBuffer)->Resize(width, height);
-
-    if (Draw(projection, parameter, data)) {
-      Gdiplus::Graphics g(hdc);
-      ((GdiRender *) m_pBuffer)->Paint(&g, paintRect.left, paintRect.top);
-
-      return true;
+                              RenderSteps startStep,
+                              RenderSteps endStep) {
+    if (startStep==RenderSteps::Initialize) {
+      if (m_pBuffer == nullptr || ((GdiRender *) m_pBuffer)->m_pGraphics->GetHDC()!=hdc) {
+        if (m_pBuffer != nullptr) {
+          ((GdiRender *) m_pBuffer)->Release();
+          delete ((GdiRender *) m_pBuffer);
+        }
+        m_pBuffer = new GdiRender(hdc);
+      }
     }
 
-    return false;
+    return Draw(projection,
+                parameter,
+                data,
+                startStep,
+                endStep);
   }
 }

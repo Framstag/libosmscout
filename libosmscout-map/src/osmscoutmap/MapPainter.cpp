@@ -2065,6 +2065,7 @@ namespace osmscout {
   {
     assert(startStep>=RenderSteps::FirstStep);
     assert(startStep<=RenderSteps::LastStep);
+    assert(startStep<=endStep);
 
     for (size_t step=startStep; step<=endStep; step++) {
       StepMethod stepMethod=stepMethods[step];

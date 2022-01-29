@@ -1392,7 +1392,9 @@ namespace osmscout {
   bool MapPainterCairo::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data,
-                                cairo_t *draw)
+                                cairo_t *draw,
+                                RenderSteps startStep,
+                                RenderSteps endStep)
   {
     std::lock_guard<std::mutex> guard(mutex);
 
@@ -1402,6 +1404,8 @@ namespace osmscout {
 
     return Draw(projection,
                 parameter,
-                data);
+                data,
+                startStep,
+                endStep);
   }
 }

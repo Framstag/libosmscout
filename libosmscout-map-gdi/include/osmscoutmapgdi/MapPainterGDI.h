@@ -170,7 +170,8 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const MapData& data,
                  HDC hdc,
-                 RECT paintRect);
+                 RenderSteps startStep=RenderSteps::FirstStep,
+                 RenderSteps endStep=RenderSteps::LastStep);
 
 		/**
 		@brief Default constructor
