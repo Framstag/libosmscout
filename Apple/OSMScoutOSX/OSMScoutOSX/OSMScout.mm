@@ -47,7 +47,7 @@ namespace osmscout {
             drawParameter.SetFontName("GillSans");
             drawParameter.SetFontSize(1.0);
             std::list<std::string> paths;
-            NSString *path = NSSearchPathForDirectoriesInDomains (NSDocumentDirectory, NSUserDomainMask, YES)[0];
+            NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingString: @"/map.osmscout"];
             paths.push_back([path UTF8String]);
             NSString *imagePath = [[path stringByAppendingPathComponent: @"icons"] stringByAppendingString:@"/"];
             paths.push_back([imagePath UTF8String]);
@@ -84,7 +84,6 @@ namespace osmscout {
         mapPainter->DrawMap(*styleConfig, projection, drawParameter, data, paintCG);
     }
     
-    
     void OSMScoutCpp::abortDrawing(){
         if(drawBreaker){
             std::cout<<"abortDrawing !"<<std::endl;
@@ -98,7 +97,6 @@ namespace osmscout {
             drawBreaker->Reset();
         }
     }
-    
     
 }
 
@@ -125,7 +123,10 @@ static NSString* osmScoutRootPath = @"";
 -(id)initWithPath:(NSString *)path dpi:(double)dpi {
     if((self = [super init])){
         _osmScoutCpp = new osmscout::OSMScoutCpp([path UTF8String]);
-        _osmScoutCpp->initDraw(dpi);
+        BOOL success = _osmScoutCpp->initDraw(dpi);
+        if (!success) {
+            self = nil;
+        }
     }
     return self;
 }

@@ -34,7 +34,7 @@ namespace osmscout {
 
     MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
     : MapPainter(styleConfig), labelLayouter(this){
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         contentScale = [[UIScreen mainScreen] scale];
 #else
         contentScale = [[NSScreen mainScreen] backingScaleFactor];

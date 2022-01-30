@@ -38,16 +38,32 @@
 		E59C37E726C87A8000C38713 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D626C8751500C38713 /* OSMScoutMap.framework */; };
 		E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D526C8751500C38713 /* OSMScoutMapIOSX.framework */; };
 		E59C37EC26C87B8200C38713 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */; };
-		F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8315E59EAC00F0B370 /* bus_stop.png */; };
-		F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8415E59EAC00F0B370 /* cemetery.png */; };
-		F50CBE8C15E59EAC00F0B370 /* forest.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8515E59EAC00F0B370 /* forest.png */; };
-		F50CBE8D15E59EAC00F0B370 /* hospital.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8615E59EAC00F0B370 /* hospital.png */; };
-		F50CBE8E15E59EAC00F0B370 /* parking.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8715E59EAC00F0B370 /* parking.png */; };
-		F50CBE8F15E59EAC00F0B370 /* pharmacy.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8815E59EAC00F0B370 /* pharmacy.png */; };
-		F50CBE9015E59EAC00F0B370 /* scrub.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8915E59EAC00F0B370 /* scrub.png */; };
+		E5F711EF27A5565700890F3C /* map.osmscout in Resources */ = {isa = PBXBuildFile; fileRef = E5F711EE27A5565700890F3C /* map.osmscout */; };
+		E5F711F027A5565700890F3C /* map.osmscout in Resources */ = {isa = PBXBuildFile; fileRef = E5F711EE27A5565700890F3C /* map.osmscout */; };
+		E5F711F227A5C9B600890F3C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
+		E5F711F527A5CA2E00890F3C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
+		E5F711F627A5CA2E00890F3C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
+		E5F711F727A5CA2E00890F3C /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
+		E5F711F827A5CA2E00890F3C /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
+		E5F711F927A5CA2E00890F3C /* OSMScoutIOSView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */; };
+		E5F711FA27A5CA2E00890F3C /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
+		E5F711FD27A5CA2E00890F3C /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E501876223CA99800055F4B2 /* libiconv.tbd */; };
+		E5F711FE27A5CA2E00890F3C /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B611F4EF79900EF6212 /* CoreLocation.framework */; };
+		E5F711FF27A5CA2E00890F3C /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610322C573CA007316F9 /* CoreText.framework */; };
+		E5F7120027A5CA2E00890F3C /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5F1F4EF6B700EF6212 /* MapKit.framework */; };
+		E5F7120127A5CA2E00890F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5D1F4EF66E00EF6212 /* UIKit.framework */; };
+		E5F7120327A5CA2E00890F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */; };
+		E5F7120627A5CA2E00890F3C /* OSMScoutIOSViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */; };
+		E5F7120727A5CA2E00890F3C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
+		E5F7120827A5CA2E00890F3C /* OSMScoutIOSViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */; };
+		E5F7120927A5CA2E00890F3C /* map.osmscout in Resources */ = {isa = PBXBuildFile; fileRef = E5F711EE27A5565700890F3C /* map.osmscout */; };
+		E5F7120A27A5CA2E00890F3C /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E501875723CA77610055F4B2 /* Media.xcassets */; };
+		E5F7120B27A5CA2E00890F3C /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */; };
+		E5F7121A27A5CCB200890F3C /* OSMScout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5F7121227A5CB3000890F3C /* OSMScout.framework */; };
+		E5F7121B27A5CCB200890F3C /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5F7121327A5CB3000890F3C /* OSMScoutMap.framework */; };
+		E5F7121C27A5CCB200890F3C /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5F7121427A5CB3000890F3C /* OSMScoutMapIOSX.framework */; };
 		F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		F5D6036B18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
-		F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
 		F5DD1BC2160B880500084E83 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
 		F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
 		F5DD1BCF160B880500084E83 /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
@@ -55,13 +71,6 @@
 		F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */; };
 		F5DD1BDA160B88EA00084E83 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
 		F5DD1C15160D1DFA00084E83 /* OSMScoutIOSView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */; };
-		F5DD1C16160D22A500084E83 /* bus_stop.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8315E59EAC00F0B370 /* bus_stop.png */; };
-		F5DD1C17160D22A500084E83 /* cemetery.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8415E59EAC00F0B370 /* cemetery.png */; };
-		F5DD1C18160D22A500084E83 /* forest.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8515E59EAC00F0B370 /* forest.png */; };
-		F5DD1C19160D22A500084E83 /* hospital.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8615E59EAC00F0B370 /* hospital.png */; };
-		F5DD1C1A160D22A500084E83 /* parking.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8715E59EAC00F0B370 /* parking.png */; };
-		F5DD1C1B160D22A500084E83 /* pharmacy.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8815E59EAC00F0B370 /* pharmacy.png */; };
-		F5DD1C1C160D22A500084E83 /* scrub.png in Resources */ = {isa = PBXBuildFile; fileRef = F50CBE8915E59EAC00F0B370 /* scrub.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -120,13 +129,13 @@
 		E59C37DC26C875DB00C38713 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutOSX/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
 		E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutOSX/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
 		E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
-		F50CBE8315E59EAC00F0B370 /* bus_stop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bus_stop.png; sourceTree = "<group>"; };
-		F50CBE8415E59EAC00F0B370 /* cemetery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cemetery.png; sourceTree = "<group>"; };
-		F50CBE8515E59EAC00F0B370 /* forest.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = forest.png; sourceTree = "<group>"; };
-		F50CBE8615E59EAC00F0B370 /* hospital.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hospital.png; sourceTree = "<group>"; };
-		F50CBE8715E59EAC00F0B370 /* parking.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = parking.png; sourceTree = "<group>"; };
-		F50CBE8815E59EAC00F0B370 /* pharmacy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pharmacy.png; sourceTree = "<group>"; };
-		F50CBE8915E59EAC00F0B370 /* scrub.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scrub.png; sourceTree = "<group>"; };
+		E5F711EE27A5565700890F3C /* map.osmscout */ = {isa = PBXFileReference; lastKnownFileType = folder; path = map.osmscout; sourceTree = "<group>"; };
+		E5F711F127A57B4B00890F3C /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
+		E5F7120F27A5CA2E00890F3C /* OSMScoutiOS Simulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OSMScoutiOS Simulator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5F7121227A5CB3000890F3C /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutiOS/Frameworks_simulator/OSMScout.framework; sourceTree = "<group>"; };
+		E5F7121327A5CB3000890F3C /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutiOS/Frameworks_simulator/OSMScoutMap.framework; sourceTree = "<group>"; };
+		E5F7121427A5CB3000890F3C /* OSMScoutMapIOSX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMapIOSX.framework; path = OSMScoutiOS/Frameworks_simulator/OSMScoutMapIOSX.framework; sourceTree = "<group>"; };
+		E5F7121D27A6F31100890F3C /* OSMScoutiOS Simulator-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "OSMScoutiOS Simulator-Info.plist"; sourceTree = "<group>"; };
 		F5D6036818875EE000D8242B /* OSMScoutMKTileOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScoutMKTileOverlay.h; path = OSMScoutOSX/OSMScoutMKTileOverlay.h; sourceTree = "<group>"; };
 		F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OSMScoutMKTileOverlay.m; path = OSMScoutOSX/OSMScoutMKTileOverlay.m; sourceTree = "<group>"; };
 		F5DD1BB3160B880400084E83 /* OSMScoutiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSMScoutiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,19 +167,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E5F711FB27A5CA2E00890F3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5F7121A27A5CCB200890F3C /* OSMScout.framework in Frameworks */,
+				E5F7121B27A5CCB200890F3C /* OSMScoutMap.framework in Frameworks */,
+				E5F7121C27A5CCB200890F3C /* OSMScoutMapIOSX.framework in Frameworks */,
+				E5F711FD27A5CA2E00890F3C /* libiconv.tbd in Frameworks */,
+				E5F711FE27A5CA2E00890F3C /* CoreLocation.framework in Frameworks */,
+				E5F711FF27A5CA2E00890F3C /* CoreText.framework in Frameworks */,
+				E5F7120027A5CA2E00890F3C /* MapKit.framework in Frameworks */,
+				E5F7120127A5CA2E00890F3C /* UIKit.framework in Frameworks */,
+				E5F7120327A5CA2E00890F3C /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F5DD1BB0160B880400084E83 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E59C37E426C87A7C00C38713 /* OSMScout.framework in Frameworks */,
 				E59C37E726C87A8000C38713 /* OSMScoutMap.framework in Frameworks */,
+				E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */,
 				E501876323CA99800055F4B2 /* libiconv.tbd in Frameworks */,
 				E5653B621F4EF79900EF6212 /* CoreLocation.framework in Frameworks */,
 				E51A610422C57414007316F9 /* CoreText.framework in Frameworks */,
 				E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */,
 				E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */,
-				E59C37E426C87A7C00C38713 /* OSMScout.framework in Frameworks */,
 				E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */,
-				E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,10 +205,10 @@
 		E50B831215E0136800C685B3 = {
 			isa = PBXGroup;
 			children = (
+				E5F711F127A57B4B00890F3C /* Readme.md */,
 				F5DD1BD9160B889600084E83 /* Common */,
 				E50B832715E0136800C685B3 /* OSMScoutOSX */,
 				F5DD1BBB160B880500084E83 /* OSMScoutiOS */,
-				F50CBE7E15E59E7F00F0B370 /* Resources */,
 				E50B832015E0136800C685B3 /* Frameworks */,
 				E50B831E15E0136800C685B3 /* Products */,
 			);
@@ -194,6 +219,7 @@
 			children = (
 				E50B831D15E0136800C685B3 /* OSMScoutOSX.app */,
 				F5DD1BB3160B880400084E83 /* OSMScoutiOS.app */,
+				E5F7120F27A5CA2E00890F3C /* OSMScoutiOS Simulator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -203,6 +229,7 @@
 			children = (
 				E501876223CA99800055F4B2 /* libiconv.tbd */,
 				E5653B5A1F4EF5AA00EF6212 /* iOS frameworks */,
+				E5F7121127A5CA6700890F3C /* iOS simulator frameworks */,
 				E50B832315E0136800C685B3 /* MacOS Frameworks */,
 			);
 			name = Frameworks;
@@ -268,43 +295,22 @@
 			name = "iOS frameworks";
 			sourceTree = "<group>";
 		};
-		F50CBE7E15E59E7F00F0B370 /* Resources */ = {
+		E5F711ED27A5563700890F3C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F50CBE8015E59EAC00F0B370 /* icons */,
+				E5F711EE27A5565700890F3C /* map.osmscout */,
 			);
-			name = Resources;
-			path = OSMScoutOSX;
+			path = Resources;
 			sourceTree = "<group>";
 		};
-		F50CBE8015E59EAC00F0B370 /* icons */ = {
+		E5F7121127A5CA6700890F3C /* iOS simulator frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F50CBE8115E59EAC00F0B370 /* 14x14 */,
+				E5F7121227A5CB3000890F3C /* OSMScout.framework */,
+				E5F7121327A5CB3000890F3C /* OSMScoutMap.framework */,
+				E5F7121427A5CB3000890F3C /* OSMScoutMapIOSX.framework */,
 			);
-			path = icons;
-			sourceTree = "<group>";
-		};
-		F50CBE8115E59EAC00F0B370 /* 14x14 */ = {
-			isa = PBXGroup;
-			children = (
-				F50CBE8215E59EAC00F0B370 /* standard */,
-			);
-			path = 14x14;
-			sourceTree = "<group>";
-		};
-		F50CBE8215E59EAC00F0B370 /* standard */ = {
-			isa = PBXGroup;
-			children = (
-				F50CBE8315E59EAC00F0B370 /* bus_stop.png */,
-				F50CBE8415E59EAC00F0B370 /* cemetery.png */,
-				F50CBE8515E59EAC00F0B370 /* forest.png */,
-				F50CBE8615E59EAC00F0B370 /* hospital.png */,
-				F50CBE8715E59EAC00F0B370 /* parking.png */,
-				F50CBE8815E59EAC00F0B370 /* pharmacy.png */,
-				F50CBE8915E59EAC00F0B370 /* scrub.png */,
-			);
-			path = standard;
+			name = "iOS simulator frameworks";
 			sourceTree = "<group>";
 		};
 		F5DD1BBB160B880500084E83 /* OSMScoutiOS */ = {
@@ -320,6 +326,7 @@
 				F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */,
 				E501875723CA77610055F4B2 /* Media.xcassets */,
 				F5DD1BBC160B880500084E83 /* Supporting Files */,
+				E5F711ED27A5563700890F3C /* Resources */,
 			);
 			path = OSMScoutiOS;
 			sourceTree = "<group>";
@@ -328,6 +335,7 @@
 			isa = PBXGroup;
 			children = (
 				F5DD1BBD160B880500084E83 /* OSMScoutiOS-Info.plist */,
+				E5F7121D27A6F31100890F3C /* OSMScoutiOS Simulator-Info.plist */,
 				F5DD1BBE160B880500084E83 /* InfoPlist.strings */,
 				F5DD1BC1160B880500084E83 /* main.m */,
 				F5DD1BC3160B880500084E83 /* OSMScoutiOS-Prefix.pch */,
@@ -368,6 +376,23 @@
 			productReference = E50B831D15E0136800C685B3 /* OSMScoutOSX.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E5F711F327A5CA2E00890F3C /* OSMScoutiOS Simulator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5F7120C27A5CA2E00890F3C /* Build configuration list for PBXNativeTarget "OSMScoutiOS Simulator" */;
+			buildPhases = (
+				E5F711F427A5CA2E00890F3C /* Sources */,
+				E5F711FB27A5CA2E00890F3C /* Frameworks */,
+				E5F7120527A5CA2E00890F3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "OSMScoutiOS Simulator";
+			productName = OSMScoutiOS;
+			productReference = E5F7120F27A5CA2E00890F3C /* OSMScoutiOS Simulator.app */;
+			productType = "com.apple.product-type.application";
+		};
 		F5DD1BB2160B880400084E83 /* OSMScoutiOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F5DD1BD6160B880500084E83 /* Build configuration list for PBXNativeTarget "OSMScoutiOS" */;
@@ -398,8 +423,13 @@
 						DevelopmentTeam = TE75LNDCJS;
 						ProvisioningStyle = Automatic;
 					};
+					E5F711F327A5CA2E00890F3C = {
+						DevelopmentTeam = TE75LNDCJS;
+						ProvisioningStyle = Automatic;
+					};
 					F5DD1BB2160B880400084E83 = {
 						DevelopmentTeam = TE75LNDCJS;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -418,6 +448,7 @@
 			targets = (
 				E50B831C15E0136800C685B3 /* OSMScoutOSX */,
 				F5DD1BB2160B880400084E83 /* OSMScoutiOS */,
+				E5F711F327A5CA2E00890F3C /* OSMScoutiOS Simulator */,
 			);
 		};
 /* End PBXProject section */
@@ -429,15 +460,22 @@
 			files = (
 				E50B832C15E0136800C685B3 /* InfoPlist.strings in Resources */,
 				E50B833215E0136800C685B3 /* Credits.rtf in Resources */,
+				E5F711EF27A5565700890F3C /* map.osmscout in Resources */,
 				E50B833815E0136900C685B3 /* MainMenu.xib in Resources */,
-				F50CBE8A15E59EAC00F0B370 /* bus_stop.png in Resources */,
-				F50CBE8B15E59EAC00F0B370 /* cemetery.png in Resources */,
 				E501875623CA771A0055F4B2 /* Media.xcassets in Resources */,
-				F50CBE8C15E59EAC00F0B370 /* forest.png in Resources */,
-				F50CBE8D15E59EAC00F0B370 /* hospital.png in Resources */,
-				F50CBE8E15E59EAC00F0B370 /* parking.png in Resources */,
-				F50CBE8F15E59EAC00F0B370 /* pharmacy.png in Resources */,
-				F50CBE9015E59EAC00F0B370 /* scrub.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5F7120527A5CA2E00890F3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5F7120627A5CA2E00890F3C /* OSMScoutIOSViewController_iPhone.xib in Resources */,
+				E5F7120727A5CA2E00890F3C /* InfoPlist.strings in Resources */,
+				E5F7120827A5CA2E00890F3C /* OSMScoutIOSViewController_iPad.xib in Resources */,
+				E5F7120927A5CA2E00890F3C /* map.osmscout in Resources */,
+				E5F7120A27A5CA2E00890F3C /* Media.xcassets in Resources */,
+				E5F7120B27A5CA2E00890F3C /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,18 +483,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5DD1BC0160B880500084E83 /* InfoPlist.strings in Resources */,
 				F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */,
+				E5F711F227A5C9B600890F3C /* InfoPlist.strings in Resources */,
 				F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */,
-				F5DD1C16160D22A500084E83 /* bus_stop.png in Resources */,
-				F5DD1C17160D22A500084E83 /* cemetery.png in Resources */,
+				E5F711F027A5565700890F3C /* map.osmscout in Resources */,
 				E501875823CA77610055F4B2 /* Media.xcassets in Resources */,
 				E59C37EC26C87B8200C38713 /* Launch Screen.storyboard in Resources */,
-				F5DD1C18160D22A500084E83 /* forest.png in Resources */,
-				F5DD1C19160D22A500084E83 /* hospital.png in Resources */,
-				F5DD1C1A160D22A500084E83 /* parking.png in Resources */,
-				F5DD1C1B160D22A500084E83 /* pharmacy.png in Resources */,
-				F5DD1C1C160D22A500084E83 /* scrub.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +505,19 @@
 				E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */,
 				E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */,
 				F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5F711F427A5CA2E00890F3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5F711F527A5CA2E00890F3C /* main.m in Sources */,
+				E5F711F627A5CA2E00890F3C /* AppDelegate.m in Sources */,
+				E5F711F727A5CA2E00890F3C /* OSMScoutIOSViewController.m in Sources */,
+				E5F711F827A5CA2E00890F3C /* OSMScout.mm in Sources */,
+				E5F711F927A5CA2E00890F3C /* OSMScoutIOSView.m in Sources */,
+				E5F711FA27A5CA2E00890F3C /* OSMScoutMKTileOverlay.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,13 +732,75 @@
 			};
 			name = Release;
 		};
+		E5F7120D27A5CA2E00890F3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = TE75LNDCJS;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks_simulator",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
+				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS Simulator-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = libosmscout.OSMScoutiOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		E5F7120E27A5CA2E00890F3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = TE75LNDCJS;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+					"$(PROJECT_DIR)/OSMScoutiOS/Frameworks_simulator",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
+				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS Simulator-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PRODUCT_BUNDLE_IDENTIFIER = libosmscout.OSMScoutiOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 		F5DD1BD7160B880500084E83 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_WARN_EMPTY_BODY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TE75LNDCJS;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -707,6 +814,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -719,7 +827,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_WARN_EMPTY_BODY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TE75LNDCJS;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -734,6 +844,7 @@
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -758,6 +869,15 @@
 			buildConfigurations = (
 				E50B835015E0136900C685B3 /* Debug */,
 				E50B835115E0136900C685B3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E5F7120C27A5CA2E00890F3C /* Build configuration list for PBXNativeTarget "OSMScoutiOS Simulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5F7120D27A5CA2E00890F3C /* Debug */,
+				E5F7120E27A5CA2E00890F3C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

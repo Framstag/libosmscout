@@ -12,15 +12,15 @@
 
 @implementation OSMScoutMKTileOperation
 
--(id)initWithOsmScout: (OSMScout *)osmScout x:(NSUInteger)x y:(NSUInteger)y zoom:(NSInteger)zoom scaleFactor: (CGFloat)scaleFactor result: (OSMScoutMKTileOperationCB)result {
-    if((self = [super init])){
+-(id)initWithOsmScout: (OSMScout *)osmScout x:(NSUInteger)x y:(NSUInteger)y zoom:(NSInteger)zoom contentScaleFactor:(CGFloat)contentScaleFactor result: (OSMScoutMKTileOperationCB)result {
+    if ((self = [super init])) {
         executing = NO;
         finished = NO;
         _osmScout = osmScout;
         _x = x;
         _y = y;
         _zoom = zoom;
-        _scaleFactor = scaleFactor;
+        _contentScaleFactor = contentScaleFactor;
         _result = [result copy];
     }
     return self;
@@ -40,8 +40,7 @@
 
 - (void)start {
     // Always check for cancellation before launching the task.
-    if ([self isCancelled])
-    {
+    if ([self isCancelled]) {
         // Must move the operation to the finished state if it is canceled.
         [self willChangeValueForKey:@"isFinished"];
         finished = YES;
@@ -71,18 +70,14 @@
     
     @try {
 #if TARGET_OS_IPHONE
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize),YES,0);
-        CGContextRef cg = UIGraphicsGetCurrentContext();
         CGFloat contentScale;
         if (@available(iOS 15, *)) {
-            contentScale = _scaleFactor;
+            contentScale = _contentScaleFactor;
         } else {
-            contentScale = UIScreen.mainScreen.scale;
+            contentScale = 1;
         }
-        
-        if(contentScale != 1.0){
-          CGContextScaleCTM(cg, 1/contentScale, 1/contentScale);
-        }
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(kOSMScoutDefaultTileSize, kOSMScoutDefaultTileSize), YES, contentScale);
+        CGContextRef cg = UIGraphicsGetCurrentContext();
         [_osmScout drawMapTo:cg x:_x y:_y zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
         UIImage* img = UIGraphicsGetImageFromCurrentImageContext();
         NSData *imgData = UIImagePNGRepresentation(img);
@@ -93,7 +88,7 @@
         NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort:bitmapContext flipped:YES];
         [NSGraphicsContext setCurrentContext:nsgc];
         CGContextRef cg = [nsgc graphicsPort];
-        CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, kOSMScoutDefaultTileSize*_scaleFactor);
+        CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, kOSMScoutDefaultTileSize);
         CGContextConcatCTM(cg, flipVertical);
         [_osmScout drawMapTo:cg x:_x y:_y zoom:1<<_zoom width:kOSMScoutDefaultTileSize height:kOSMScoutDefaultTileSize];
         CGImageRef cgImage = CGBitmapContextCreateImage(bitmapContext);
@@ -117,7 +112,44 @@
 #pragma mark -
 
 @implementation OSMScoutMKTileOverlay
-@synthesize path = _path;
+static NSString* _path;
+static OSMScout* _osmScout;
+static NSOperationQueue *_drawQueue;
+
++(NSString *)path {
+    return _path;
+}
+
++(void) setPath:(NSString *)path {
+    _path = [path copy];
+}
+
++(OSMScout *)osmScout {
+    if (_osmScout == nil) {
+        double scale = 1;
+        NSInteger dpi = 163;
+#if TARGET_OS_IPHONE
+        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad){
+            dpi = 132;
+        }
+        scale = UIScreen.mainScreen.scale;
+#else
+        dpi = 220;
+#endif
+        dpi *= scale;
+        _osmScout = [OSMScout OSMScoutWithPath:OSMScoutMKTileOverlay.path dpi:dpi];
+    }
+    
+    return _osmScout;
+}
+
++(NSOperationQueue *)drawQueue {
+    if (_drawQueue == nil) {
+        _drawQueue = [[NSOperationQueue alloc] init];
+        [_drawQueue setMaxConcurrentOperationCount:1];
+    }
+    return _drawQueue;
+}
 
 -(id)initWithURLTemplate: (NSString *)urlTemplate {
     self = [super initWithURLTemplate:urlTemplate];
@@ -131,39 +163,10 @@
     return self;
 }
 
-- (void)loadTileAtPath:(MKTileOverlayPath)path result:(void (^)(NSData *tileData, NSError *error))result {
-    double scale = 1;
-    if(!_osmScout && _path){
-        NSInteger dpi = 163;
-#if TARGET_OS_IPHONE
-        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad){
-            dpi = 132;
-        }
-        scale = UIScreen.mainScreen.scale;
-#else
-        dpi = 220;
-#endif
-        dpi *= scale;
-        _osmScout = [OSMScout OSMScoutWithPath:_path dpi:dpi];
-        _drawQueue = [[NSOperationQueue alloc] init];
-        [_drawQueue setMaxConcurrentOperationCount:1];
-    }
-    
-    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: _osmScout x:path.x y:((1<<path.z) - 1)-path.y zoom:path.z scaleFactor:scale result:result];
-    NSEnumerator *e = _drawQueue.operations.reverseObjectEnumerator;
-    OSMScoutMKTileOperation *i;
-    int count=0;
-    while((i = [e nextObject])){
-        if(!i.isFinished && !i.isCancelled){
-            if(count<RENDER_QUEUE_MAX_LEN-1){
-                [i addDependency:drawOp];
-            } else {
-                [i cancel];
-            }
-            count++;
-        }
-    }
-    [_drawQueue addOperation:drawOp];
+- (void)loadTileAtPath:(MKTileOverlayPath)tilePath result:(void (^)(NSData *tileData, NSError *error))result {
+    NSInteger tileY = ((1<<tilePath.z) - 1) - tilePath.y;
+    OSMScoutMKTileOperation *drawOp = [[OSMScoutMKTileOperation alloc] initWithOsmScout: OSMScoutMKTileOverlay.osmScout x:tilePath.x y:tileY zoom:tilePath.z contentScaleFactor:tilePath.contentScaleFactor result:result];
+    [OSMScoutMKTileOverlay.drawQueue addOperation:drawOp];
 }
 
 @end
