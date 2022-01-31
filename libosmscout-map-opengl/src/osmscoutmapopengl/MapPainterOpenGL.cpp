@@ -293,7 +293,7 @@ namespace osmscout {
                                            const osmscout::Projection &projection,
                                            const osmscout::StyleConfigRef &styleConfig) {
 
-    osmscout::log.Info() << "Area: " << data.areas.size();
+    //osmscout::log.Info() << "Area: " << data.areas.size();
 
     std::vector<AreaRef> areas = data.areas;
 
@@ -557,7 +557,7 @@ namespace osmscout {
     WidthFeatureValueReader widthReader(*styleConfig->GetTypeConfig());
     LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
 
-    osmscout::log.Info() << "Ways: " << data.ways.size();
+    //osmscout::log.Info() << "Ways: " << data.ways.size();
 
     for (const auto &way: data.ways) {
 
@@ -914,7 +914,7 @@ namespace osmscout {
                                            const osmscout::Projection &projection,
                                            const osmscout::StyleConfigRef &styleConfig) {
 
-    osmscout::log.Info() << "Nodes: " << data.nodes.size();
+    // osmscout::log.Info() << "Nodes: " << data.nodes.size();
 
     std::vector<int> icons;
     for (const auto &node: data.nodes) {
@@ -1207,7 +1207,12 @@ namespace osmscout {
     return center;
   }
 
-  void osmscout::MapPainterOpenGL::DrawMap() {
+  void osmscout::MapPainterOpenGL::DrawMap(RenderSteps startStep,
+                                           RenderSteps /*endStep*/) {
+    if (startStep!=RenderSteps::Initialize) {
+      return;
+    }
+
     glClearColor(this->landFill.get()->GetFillColor().GetR(),
                  this->landFill.get()->GetFillColor().GetB(),
                  this->landFill.get()->GetFillColor().GetG(),

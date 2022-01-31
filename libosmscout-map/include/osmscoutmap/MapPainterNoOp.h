@@ -101,7 +101,9 @@ namespace osmscout {
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data);
+                 const MapData& data,
+                 RenderSteps startStep=RenderSteps::FirstStep,
+                 RenderSteps endStep=RenderSteps::LastStep);
   };
 
 }

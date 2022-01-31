@@ -216,7 +216,9 @@ namespace osmscout {
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
-                 cairo_t *draw);
+                 cairo_t *draw,
+                 RenderSteps startStep=RenderSteps::FirstStep,
+                 RenderSteps endStep=RenderSteps::LastStep);
   };
 }
 

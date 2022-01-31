@@ -129,11 +129,15 @@ namespace osmscout {
 
   bool MapPainterNoOp::DrawMap(const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data)
+                               const MapData& data,
+                               RenderSteps startStep,
+                               RenderSteps endStep)
   {
     Draw(projection,
          parameter,
-         data);
+         data,
+         startStep,
+         endStep);
 
     return true;
   }

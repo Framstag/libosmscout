@@ -17,6 +17,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+// Including Windows and Gdiplus is a pain
+// We get compiler errors in gdi, if someone includes
+// Windows headers before us using other settings...
+#ifndef UNICODE
+#define UNICODE
+#endif
+#define NOMINMAX // msvc issue with std::max/min
+#define WIN32_LEAN_AND_MEAN
+
+#include <windows.h>
+
 #include <osmscoutmapgdi/MapPainterGDIWindow.h>
 
 namespace osmscout {
@@ -217,24 +228,35 @@ namespace osmscout {
 
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hwnd,
-                                 &ps);
+                           &ps);
 
-            log.Info() << "Drawing rect: [" << ps.rcPaint.left << " - " << ps.rcPaint.right << "] x [" << ps.rcPaint.top << " - " << ps.rcPaint.bottom << "]";
+      log.Info() << "Drawing rect: [" << ps.rcPaint.left << " - " << ps.rcPaint.right << "] x [" << ps.rcPaint.top << " - " << ps.rcPaint.bottom << "]";
 
 			if (m_pPainter != nullptr &&
-                m_pProjection != nullptr &&
-                m_pParameter != nullptr &&
-                m_pData != nullptr)
+          m_pProjection != nullptr &&
+          m_pParameter != nullptr &&
+          m_pData != nullptr)
 			{
-				/*bool result = */m_pPainter->DrawMap(*m_pProjection,
-                                                      *m_pParameter,
-                                                      *m_pData,
-                                                      hdc,
-                                                      ps.rcPaint);
-			}
+        RECT rc;
+        GetClientRect(hwnd, &rc);
+        HDC memdc = CreateCompatibleDC(hdc);
+        HBITMAP hbitmap = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
+        HGDIOBJ oldbmp = SelectObject(memdc, hbitmap);
+
+        /*bool result = */m_pPainter->DrawMap(*m_pProjection,
+                                              *m_pParameter,
+                                              *m_pData,
+                                              memdc);
+
+        BitBlt(hdc, 0, 0, rc.right, rc.bottom, memdc, 0, 0, SRCCOPY);
+
+        SelectObject(memdc, oldbmp);
+        DeleteObject(hbitmap);
+        DeleteDC(memdc);
+  		}
 
 			EndPaint(hwnd, &ps);
-            log.Info() << "WM_PAINT done";
+      log.Info() << "WM_PAINT done";
 		}
 		return 0;
 

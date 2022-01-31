@@ -1158,7 +1158,9 @@ namespace osmscout {
   bool MapPainterQt::DrawMap(const Projection& projection,
                              const MapParameter& parameter,
                              const MapData& data,
-                             QPainter* painter)
+                             QPainter* painter,
+                             RenderSteps startStep,
+                             RenderSteps endStep)
   {
     std::lock_guard<std::mutex> guard(mutex);
 
@@ -1169,7 +1171,9 @@ namespace osmscout {
 
     return Draw(projection,
                 parameter,
-                data);
+                data,
+                startStep,
+                endStep);
   }
 
   template<> std::vector<QtGlyph> QtLabel::ToGlyphs() const

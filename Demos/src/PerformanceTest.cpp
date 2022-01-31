@@ -133,35 +133,79 @@ struct Arguments {
   }
 };
 
+class Stats
+{
+private:
+  double   minTime;
+  double   maxTime;
+  double   totalTime=0.0;
+  uint32_t count=0;
+
+public:
+  Stats()
+  : minTime(std::numeric_limits<double>::max()),
+    maxTime(std::numeric_limits<double>::min())
+  {
+  }
+
+  void AddEvent(double time)
+  {
+    minTime=std::min(minTime,time);
+    maxTime=std::max(maxTime,time);
+    totalTime+=time;
+    count++;
+  }
+
+  bool HasValue() const
+  {
+    return count>0;
+  }
+
+  double GetMinTime() const
+  {
+    return minTime;
+  }
+
+  double GetMaxTime() const
+  {
+    return maxTime;
+  }
+
+  double GetTotalTime() const
+  {
+    return totalTime;
+  }
+
+  double GetAverageTime() const
+  {
+    if (HasValue()) {
+      return totalTime/(1.0*count);
+    }
+
+    return NAN;
+  }
+};
+
 struct LevelStats
 {
-  size_t level;
+  size_t             level;
 
-  double dbMinTime;
-  double dbMaxTime;
-  double dbTotalTime;
+  Stats              dbStats;
+  Stats              drawStats;
 
-  double drawMinTime;
-  double drawMaxTime;
-  double drawTotalTime;
+  std::vector<Stats> drawLevelStats;
 
-  double allocMax;
-  double allocSum;
+  double             allocMax;
+  double             allocSum;
 
-  size_t nodeCount;
-  size_t wayCount;
-  size_t areaCount;
+  size_t             nodeCount;
+  size_t             wayCount;
+  size_t             areaCount;
 
-  size_t tileCount;
+  size_t             tileCount;
 
   explicit LevelStats(size_t level)
   : level(level),
-    dbMinTime(std::numeric_limits<double>::max()),
-    dbMaxTime(0.0),
-    dbTotalTime(0.0),
-    drawMinTime(std::numeric_limits<double>::max()),
-    drawMaxTime(0.0),
-    drawTotalTime(0.0),
     allocMax(0.0),
     allocSum(0.0),
     nodeCount(0),
@@ -169,7 +213,7 @@ struct LevelStats
     areaCount(0),
     tileCount(0)
   {
-    // no code
+    drawLevelStats.resize(osmscout::RenderSteps::LastStep-osmscout::RenderSteps::FirstStep+1);
   }
 };
 
@@ -193,12 +237,10 @@ class PerformanceTestBackend {
 public:
   virtual ~PerformanceTestBackend() = default;
 
-  virtual void DrawMap(const osmscout::TileProjection &/*projection*/,
-                       const osmscout::MapParameter &/*drawParameter*/,
-                       const osmscout::MapData &/*data*/)
-  {
-    // none
-  }
+  virtual void DrawMap(const osmscout::TileProjection &projection,
+                       const osmscout::MapParameter &drawParameter,
+                       const osmscout::MapData &data,
+                       osmscout::RenderSteps step) = 0;
 };
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
@@ -212,7 +254,9 @@ public:
   PerformanceTestBackendCairo(size_t tileWidth, size_t tileHeight,
                               const osmscout::StyleConfigRef& styleConfig)
   {
-    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,tileWidth,tileHeight);
+    cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                            int(tileWidth),
+                                            int(tileHeight));
     if (cairoSurface==nullptr) {
       throw std::runtime_error("Cannot create cairo image cairoSurface");
     }
@@ -233,12 +277,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
     cairoMapPainter->DrawMap(projection,
                             drawParameter,
                             data,
-                            cairo);
+                            cairo,
+                            step,
+                            step);
   }
 };
 #endif
@@ -262,12 +309,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                        const osmscout::MapParameter &drawParameter,
-                       const osmscout::MapData &data) override
+                       const osmscout::MapData &data,
+                       osmscout::RenderSteps step) override
   {
     qtMapPainter.DrawMap(projection,
                          drawParameter,
                          data,
-                         &qtPainter);
+                         &qtPainter,
+                         step,
+                         step);
   }
 };
 #endif
@@ -296,12 +346,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
     aggMapPainter.DrawMap(projection,
                           drawParameter,
                           data,
-                          pf);
+                          pf,
+                          step,
+                          step);
   }
 };
 #endif
@@ -312,7 +365,10 @@ private:
   osmscout::MapPainterOpenGL* openglMapPainter{nullptr};
   osmscout::StyleConfigRef styleConfig;
 public:
-  PerformanceTestBackendOGL(size_t tileWidth, size_t tileHeight, size_t dpi, osmscout::StyleConfigRef styleConfig):
+  PerformanceTestBackendOGL(size_t tileWidth,
+                            size_t tileHeight,
+                            size_t dpi,
+                            const osmscout::StyleConfigRef& styleConfig):
     styleConfig{styleConfig}
   {
     // Create the offscreen renderer
@@ -355,11 +411,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
-    openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
-    openglMapPainter->SwapData();
-    openglMapPainter->DrawMap();
+    if (step==osmscout::RenderSteps::Initialize) {
+      openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
+      openglMapPainter->SwapData();
+      openglMapPainter->DrawMap(step,
+                                step);
+    }
   }
 };
 #endif
@@ -376,7 +436,7 @@ public:
   PerformanceTestBackendGDI(size_t tileWidth,
                             size_t tileHeight,
                             size_t dpi,
-                            osmscout::StyleConfigRef styleConfig):
+                            const osmscout::StyleConfigRef& styleConfig):
     styleConfig{styleConfig}
   {
     // Create the offscreen renderer
@@ -413,13 +473,15 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
     gdiMapPainter->DrawMap(projection,
                            drawParameter,
                            data,
                            hdc,
-                           paintRect);
+                           step,
+                           step);
   }
 };
 #endif
@@ -434,17 +496,36 @@ public:
 
   void DrawMap(const osmscout::TileProjection &projection,
                const osmscout::MapParameter &drawParameter,
-               const osmscout::MapData &data) override
+               const osmscout::MapData &data,
+               osmscout::RenderSteps step) override
   {
     noOpMapPainter.DrawMap(projection,
                            drawParameter,
-                           data);
+                           data,
+                           step,
+                           step);
   }
 };
 
-using PerformanceTestBackendPtr = std::shared_ptr<PerformanceTestBackend>;
+class PerformanceTestBackendNone: public PerformanceTestBackend {
+public:
+  explicit PerformanceTestBackendNone() = default;
 
-PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments &args, osmscout::StyleConfigRef styleConfig)
+  void DrawMap(const osmscout::TileProjection &/*projection*/,
+               const osmscout::MapParameter &/*drawParameter*/,
+               const osmscout::MapData &/*data*/,
+               osmscout::RenderSteps /*step*/) override
+  {
+    // no code
+  }
+};
+
+using PerformanceTestBackendRef = std::shared_ptr<PerformanceTestBackend>;
+
+PerformanceTestBackendRef PrepareBackend(int argc,
+                                         char* argv[],
+                                         const Arguments &args,
+                                         const osmscout::StyleConfigRef& styleConfig)
 {
   if (args.driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
@@ -492,12 +573,15 @@ PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments
   } else if (args.driver == "gdi") {
     std::cout << "Using driver 'GDI'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPGDI)
-    try{
-          return std::make_shared<PerformanceTestBackendGDI>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig);
-        } catch (std::runtime_error &e){
-          std::cerr << e.what() << std::endl;
-          return nullptr;
-        }
+    try {
+      return std::make_shared<PerformanceTestBackendGDI>(args.TileWidth(),
+                                                         args.TileHeight(),
+                                                         args.dpi, styleConfig);
+    }
+    catch (std::runtime_error &e) {
+      std::cerr << e.what() << std::endl;
+      return nullptr;
+    }
 #else
     std::cerr << "Driver 'gdi' is not enabled" << std::endl;
     return nullptr;
@@ -509,7 +593,7 @@ PerformanceTestBackendPtr PrepareBackend(int argc, char* argv[], const Arguments
   }
   else if (args.driver=="none") {
     std::cout << "Using driver 'none'..." << std::endl;
-    return std::make_shared<PerformanceTestBackend>();
+    return std::make_shared<PerformanceTestBackendNone>();
   }
   else {
     std::cerr << "Unsupported driver '" << args.driver << "'" << std::endl;
@@ -694,8 +778,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  PerformanceTestBackendPtr backendPtr = PrepareBackend(argc, argv, args, styleConfig);
-  if (!backendPtr){
+  PerformanceTestBackendRef backend = PrepareBackend(argc, argv, args, styleConfig);
+  if (!backend) {
     return 1;
   }
 
@@ -750,8 +834,8 @@ int main(int argc, char* argv[])
         std::cout << current*100/tileCount << "% " << current;
 
         if (stats.tileCount>0) {
-          std::cout << " " << stats.dbTotalTime/stats.tileCount;
-          std::cout << " " << stats.drawTotalTime/stats.tileCount;
+          std::cout << " " << std::fixed << std::setprecision(2) << stats.dbStats.GetAverageTime();
+          std::cout << " " << std::fixed << std::setprecision(2) << stats.drawStats.GetAverageTime();
         }
 
         std::cout << std::endl;
@@ -807,11 +891,7 @@ int main(int argc, char* argv[])
         mapService->SetCacheSize(25);
         dbTimer.Stop();
 
-        double dbTime = dbTimer.GetMilliseconds();
-
-        stats.dbMinTime = std::min(stats.dbMinTime, dbTime);
-        stats.dbMaxTime = std::max(stats.dbMaxTime, dbTime);
-        stats.dbTotalTime += dbTime;
+        stats.dbStats.AddEvent(dbTimer.GetMilliseconds());
 
         if (args.flushCache) {
           tiles.clear(); // following flush method removes only tiles with use_count() == 1
@@ -846,16 +926,24 @@ int main(int argc, char* argv[])
       stats.areaCount+=data.areas.size();
 
       stats.tileCount++;
-      for (size_t i=0; i<args.drawRepeat; i++) {
+      for (size_t repetition=1; repetition <= args.drawRepeat; repetition++) {
         osmscout::StopClock drawTimer;
-        backendPtr->DrawMap(projection, drawParameter, data);
+
+        for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
+          osmscout::StopClock stepTimer;
+
+          backend->DrawMap(projection,
+                           drawParameter,
+                           data,
+                           (osmscout::RenderSteps)step);
+
+          stepTimer.Stop();
+
+          stats.drawLevelStats[step].AddEvent(stepTimer.GetMilliseconds());
+        }
         drawTimer.Stop();
 
-        double drawTime = drawTimer.GetMilliseconds();
-
-        stats.drawMinTime = std::min(stats.drawMinTime, drawTime);
-        stats.drawMaxTime = std::max(stats.drawMaxTime, drawTime);
-        stats.drawTotalTime += drawTime;
+        stats.drawStats.AddEvent(drawTimer.GetMilliseconds());
       }
 
       current++;
@@ -895,20 +983,25 @@ int main(int argc, char* argv[])
     }
 
     std::cout << " DB         : ";
-    std::cout << "total: " << stats.dbTotalTime << " ";
-    std::cout << "min: " << stats.dbMinTime << " ";
-    if (stats.tileCount>0) {
-      std::cout << "avg: " << stats.dbTotalTime/(stats.tileCount * args.loadRepeat) << " ";
-    }
-    std::cout << "max: " << stats.dbMaxTime << " " << std::endl;
+    std::cout << "total: " << std::fixed << std::setprecision(2) << stats.dbStats.GetTotalTime() << " ";
+    std::cout << "min: " << std::fixed << std::setprecision(2) << stats.dbStats.GetMinTime() << " ";
+    std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.dbStats.GetAverageTime() << " ";
+    std::cout << "max: " << std::fixed << std::setprecision(2) << stats.dbStats.GetMaxTime() << " " << std::endl;
 
     std::cout << " Map        : ";
-    std::cout << "total: " << stats.drawTotalTime << " ";
-    std::cout << "min: " << stats.drawMinTime << " ";
-    if (stats.tileCount>0) {
-      std::cout << "avg: " << stats.drawTotalTime/(stats.tileCount * args.drawRepeat) << " ";
+    std::cout << "total: " << std::fixed << std::setprecision(2) << stats.drawStats.GetTotalTime() << " ";
+    std::cout << "min: " << std::fixed << std::setprecision(2) << stats.drawStats.GetMinTime() << " ";
+    std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawStats.GetAverageTime() << " ";
+    std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawStats.GetMaxTime() << std::endl;
+
+    for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
+      std::cout << "               #" << step << " ";
+      std::cout << std::fixed << std::setprecision(0) << 100.0*stats.drawLevelStats[step].GetTotalTime()/stats.drawStats.GetTotalTime() << "% ";
+      std::cout << "total: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetTotalTime() << " ";
+      std::cout << "min: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMinTime() << " ";
+      std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetAverageTime() << " ";
+      std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMaxTime() << std::endl;
     }
-    std::cout << "max: " << stats.drawMaxTime << std::endl;
   }
 
   database->Close();
