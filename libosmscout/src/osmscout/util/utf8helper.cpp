@@ -50,39 +50,40 @@ codepoint TransformNop(const character* ch, int context) {
   return ch->code;
 }
 
-codepoint TransformUpper(const character* ch, int context) {
-  (void)context;
+codepoint TransformUpper(const character* ch, [[maybe_unused]] int context) {
   return ch->upper;
 }
 
-codepoint TransformLower(const character* ch, int context) {
-  (void)context;
+codepoint TransformLower(const character* ch, [[maybe_unused]] int context) {
   return ch->lower;
 }
 
 codepoint TransformNormalize(const character* ch, int context) {
-  if (((IsSpace | IsBreaker) & ch->category)) {
-    if (((IsSpace | IsBreaker) & context))
+  if ((IsSpace | IsBreaker) & ch->category) {
+    if ((IsSpace | IsBreaker) & context) {
       return NullCodepoint;
+    }
     return 0x20;
   }
-  if ((ch->category & IsControl))
+  if (ch->category & IsControl) {
     return NullCodepoint;
+  }
   return ch->lower;
 }
 
 codepoint TransformCapitalize(const character* ch, int context) {
-  if ((context & (IsSpace | IsBreaker | IsControl)))
+  if (context & (IsSpace | IsBreaker | IsControl)) {
     return ch->upper;
+  }
   return ch->lower;
 }
 
 codepoint TransformTransliterate(const character* ch, int context) {
   codepoint c = NullCodepoint;
-  if ((IsSpace & context & ch->category))
+  if (IsSpace & context & ch->category) {
     return c;
-  const char* b = ch->translate;
-  for (; *b; ++b) {
+  }
+  for (const char* b = ch->translate; *b; ++b) {
     c <<= 8;
     c |= static_cast<byte>(*b);
   }
@@ -158,13 +159,15 @@ void UTF8String::WriteByte(char cc) {
 
 bool UTF8String::Remove(size_t pos, size_t n) {
   if (pos < Size()) {
-    if (n > (store.size() - pos))
+    if (n > (store.size() - pos)) {
       n = store.size() - pos;
+    }
     size_t bc = 0;
     storage_type::const_iterator beg = store.cbegin() + pos;
     storage_type::const_iterator end = beg + n;
-    for (storage_type::const_iterator it = beg; it != end; ++it)
+    for (storage_type::const_iterator it = beg; it != end; ++it) {
       bc += _u_size(*it);
+    }
     store.erase(beg, end);
     rawSize -= bc;
     return true;
@@ -269,8 +272,9 @@ std::string UTF8String::ToStdString() const {
 
 std::string UTF8String::Substr(size_t pos, size_t n) const {
   if (pos < store.size()) {
-    if (n > (store.size() - pos))
+    if (n > (store.size() - pos)) {
       n = store.size() - pos;
+    }
     std::string tmp(sizeof(codepoint) * n, '$');
     storage_type::const_iterator it = store.cbegin() + pos;
     char* b = &tmp[0];
@@ -318,8 +322,9 @@ static Parser::Exit _p0(Parser* p, byte bb) {
   if (bb < 0x80) {
     const character* c = &charmap_us7ascii[bb];
     codepoint u = p->func(c, p->context);
-    if (u == NullCodepoint)
+    if (u == NullCodepoint) {
       return Parser::Continue;
+    }
     p->u = u;
     p->context = c->category;
     p->u_size = _u_size(p->u);
