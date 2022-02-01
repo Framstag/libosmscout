@@ -322,7 +322,7 @@ static Parser::Exit _p0(Parser* p, byte bb) {
       return Parser::Continue;
     p->u = u;
     p->context = c->category;
-    p->u_size = 1;
+    p->u_size = _u_size(p->u);
     return Parser::Done;
   }
   else if (bb < 0xc2) {
@@ -365,7 +365,7 @@ static Parser::Exit _p1_u2(Parser* p, byte bb) {
       p->u = (p->b[0] << 8) | bb;
       p->context = None;
     }
-    p->u_size = 2;
+    p->u_size = _u_size(p->u);
     return Parser::Done;
   }
   // invalid codepoint: restart
@@ -412,7 +412,7 @@ static Parser::Exit _p2_u3(Parser* p, byte bb) {
       p->u = (p->b[0] << 16) | (p->b[1] << 8) | bb;
       p->context = None;
     }
-    p->u_size = 3;
+    p->u_size = _u_size(p->u);
     return Parser::Done;
   }
   // invalid codepoint: restart
@@ -476,7 +476,7 @@ static Parser::Exit _p3_u4(Parser* p, byte bb) {
       p->u = (p->b[0] << 24) | (p->b[1] << 16) | (p->b[2] << 8) | bb;
       p->context = None;
     }
-    p->u_size = 4;
+    p->u_size = _u_size(p->u);
     return Parser::Done;
   }
   // invalid codepoint: restart

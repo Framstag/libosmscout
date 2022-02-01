@@ -234,6 +234,19 @@ TEST_CASE("Normalize for lookup")
   REQUIRE(transformed == "baker street");
 }
 
+TEST_CASE("Check UTF8 string buffer integrity")
+{
+  /* Transliterate 24 POUND SIGN: IN = 48 bytes , OUT = 72 bytes */
+  auto transformed=osmscout::UTF8Transliterate(
+    "\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3"
+    "\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3"
+    "\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3\xc2\xa3"
+  );
+
+  REQUIRE(transformed ==
+    "GBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBPGBP");
+}
+
 TEST_CASE("Parse illegal UTF8 sequence")
 {
   auto transformed=osmscout::UTF8Transliterate("\xef\xbb\xbf\x2f\xc0\xae\x2e\x2f");
