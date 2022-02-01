@@ -11,12 +11,13 @@
 
 @implementation OSMScoutView
 
-// This should point to OSM data generated with the OSMScout Import tool
-// If not defined the data would be looked at in the App Document dir
-#define OSMSCOUTDATA @""
+// The OpenStreetMap imported data used to draw the map are provided by the map.osmscout folder
+// in the Resources of the project, by default this is the Greater London from GeoFabrik
+// (https://download.geofabrik.de/europe/great-britain/england/greater-london.html)
+
 // The center of the displayed map
-#define LATITUDE 43.694417
-#define LONGITUDE 7.279332
+#define LATITUDE 51.5102
+#define LONGITUDE -0.1024
 // The zoom level
 #define ZOOM 16
 
@@ -26,12 +27,8 @@
     [self setRegion:MKCoordinateRegionMake(centerCoordinate, span) animated:NO];
     self.delegate = self;
     OSMScoutMKTileOverlay *overlay = [[OSMScoutMKTileOverlay alloc] initWithURLTemplate: nil];
-#ifdef OSMSCOUTDATA
-    overlay.path = OSMSCOUTDATA;
-#else
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    overlay.path = [paths objectAtIndex:0];
-#endif
+    NSString *path = [[[NSBundle mainBundle] resourcePath] stringByAppendingString: @"/map.osmscout"];
+    OSMScoutMKTileOverlay.path = path;    
     tileOverlay = overlay;
     [self insertOverlay:tileOverlay atIndex:0 level:MKOverlayLevelAboveLabels];
 }

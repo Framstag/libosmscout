@@ -26,20 +26,18 @@ typedef void (^OSMScoutMKTileOperationCB)(NSData *tileData, NSError *error) ;
     NSInteger   _zoom;
     NSUInteger  _x;
     NSUInteger  _y;
-    NSInteger   _scaleFactor;
+    CGFloat     _contentScaleFactor;
     OSMScoutMKTileOperationCB _result;
 }
 
--(id)initWithOsmScout: (OSMScout *)osmScout x:(NSUInteger)x y:(NSUInteger)y zoom:(NSInteger)zoom scaleFactor: (CGFloat)scaleFactor result: (OSMScoutMKTileOperationCB)result ;
+-(id)initWithOsmScout: (OSMScout *)osmScout x:(NSUInteger)x y:(NSUInteger)y zoom:(NSInteger)zoom contentScaleFactor:(CGFloat)contentScaleFactor  result:(OSMScoutMKTileOperationCB)result;
 @end
 
-@interface OSMScoutMKTileOverlay : MKTileOverlay {
-    NSString                 *_path;
-    OSMScout                *_osmScout;
-    NSOperationQueue        *_drawQueue;
+@interface OSMScoutMKTileOverlay : MKTileOverlay
 
-}
-@property (retain, nonatomic) NSString *path;
+@property (class, retain, nonatomic) NSString *path;
+@property (class, retain, nonatomic, readonly) OSMScout *osmScout;
+@property (class, retain, nonatomic, readonly) NSOperationQueue *drawQueue;
 
 -(id)initWithURLTemplate: (NSString *)urlTemplate;
 
