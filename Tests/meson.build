@@ -215,6 +215,13 @@ SunriseSunset = executable('SunriseSunset',
              link_with: [osmscout],
              install: false)
 
+PolygonCenter = executable('PolygonCenter',
+             'src/PolygonCenter.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, threadDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 TilingTest = executable('TilingTest',
              'src/TilingTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -302,6 +309,7 @@ else
 endif
 
 test('Check correctness of NumberSet class', NumberSet)
+test('Check PolygonCenter utility', PolygonCenter)
 test('Check scan conversion code', ScanConversion)
 test('Check string utils', StringUtils)
 test('Check tiling calculation code', TilingTest)

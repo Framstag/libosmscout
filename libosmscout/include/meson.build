@@ -33,6 +33,7 @@ osmscoutHeader = [
             'osmscout/util/NumberSet.h',
             'osmscout/util/ObjectPool.h',
             'osmscout/util/Parsing.h',
+            'osmscout/util/PolygonCenter.h',
             'osmscout/util/ProcessingQueue.h',
             'osmscout/util/Progress.h',
             'osmscout/util/Projection.h',
