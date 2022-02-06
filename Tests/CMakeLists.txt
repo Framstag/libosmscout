@@ -166,3 +166,6 @@ endif()
 
 #---- SunriseSunsetTest
 osmscout_test_project(NAME SunriseSunsetTest SOURCES src/SunriseSunsetTest.cpp)
+
+#---- PolygonCenterTest
+osmscout_test_project(NAME PolygonCenterTest SOURCES src/PolygonCenter.cpp)

@@ -24,6 +24,7 @@ osmscoutSrc = [
             'src/osmscout/util/Number.cpp',
             'src/osmscout/util/NumberSet.cpp',
             'src/osmscout/util/Parsing.cpp',
+            'src/osmscout/util/PolygonCenter.cpp',
             'src/osmscout/util/Progress.cpp',
             'src/osmscout/util/Projection.cpp',
             'src/osmscout/util/StopClock.cpp',
