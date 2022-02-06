@@ -21,6 +21,7 @@
 */
 
 #include <memory>
+#include <optional>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
@@ -106,6 +107,8 @@ namespace osmscout {
       std::vector<Point>          nodes;        //!< The array of coordinates
       std::vector<SegmentGeoBox>  segments;     //!< Precomputed (cache) segment bounding boxes for optimisation
       GeoBox                      bbox;         //!< Precomputed (cache) bounding box
+      std::optional<GeoCoord>     center;       //!< "visual" polygon center (pole of inaccessibility).
+                                                //!< It is computed just for rings when center is far from bounding box center
 
     public:
       Ring() = default;

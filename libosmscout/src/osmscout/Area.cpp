@@ -222,6 +222,7 @@ namespace osmscout {
     TypeId             ringType;
     bool               multipleRings;
     bool               hasMaster;
+    bool               hasCenter;
     uint32_t           ringCount=1;
     FeatureValueBuffer featureValueBuffer;
 
@@ -235,7 +236,8 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner,
                             multipleRings,
-                            hasMaster);
+                            hasMaster,
+                            hasCenter);
 
     if (multipleRings) {
       ringCount=scanner.ReadUInt32Number();
@@ -255,6 +257,9 @@ namespace osmscout {
       rings[0].MarkAsOuterRing();
     }
 
+    if (hasCenter) {
+      rings[0].center=scanner.ReadCoord();
+    }
     scanner.Read(rings[0].nodes,
                  rings[0].segments,
                  rings[0].bbox,
@@ -269,7 +274,10 @@ namespace osmscout {
       ring.SetType(type);
 
       if (ring.GetType()->GetAreaId()!=typeIgnore) {
-        ring.featureValueBuffer.Read(scanner);
+        ring.featureValueBuffer.Read(scanner, hasCenter);
+        if (hasCenter) {
+          ring.center=scanner.ReadCoord();
+        }
       }
 
       ring.ring=scanner.ReadUInt8();
@@ -364,6 +372,7 @@ namespace osmscout {
     TypeId             ringType;
     bool               multipleRings;
     bool               hasMaster;
+    bool               hasCenter;
     uint32_t           ringCount=1;
     FeatureValueBuffer featureValueBuffer;
 
@@ -377,7 +386,8 @@ namespace osmscout {
 
     featureValueBuffer.Read(scanner,
                             multipleRings,
-                            hasMaster);
+                            hasMaster,
+                            hasCenter);
 
     if (multipleRings) {
       ringCount=scanner.ReadUInt32Number();
@@ -397,6 +407,9 @@ namespace osmscout {
       rings[0].MarkAsOuterRing();
     }
 
+    if (hasCenter) {
+      rings[0].center=scanner.ReadCoord();
+    }
     scanner.Read(rings[0].nodes,
                  rings[0].segments,
                  rings[0].bbox,
@@ -411,7 +424,10 @@ namespace osmscout {
       ring.SetType(type);
 
       if (ring.featureValueBuffer.GetType()->GetAreaId()!=typeIgnore) {
-        ring.featureValueBuffer.Read(scanner);
+        ring.featureValueBuffer.Read(scanner, hasCenter);
+        if (hasCenter) {
+          ring.center=scanner.ReadCoord();
+        }
       }
 
       ring.ring=scanner.ReadUInt8();
@@ -452,12 +468,16 @@ namespace osmscout {
 
     ring->featureValueBuffer.Write(writer,
                                    multipleRings,
-                                   hasMaster);
+                                   hasMaster,
+                                   ring->center.has_value());
 
     if (multipleRings) {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
+    if (ring->center.has_value()) {
+      writer.WriteCoord(ring->center.value());
+    }
     writer.Write(ring->nodes,
                  ring->GetType()->CanRoute());
 
@@ -470,7 +490,11 @@ namespace osmscout {
                          typeConfig.GetAreaTypeIdBytes());
 
       if (ring->GetType()->GetAreaId()!=typeIgnore) {
-        ring->featureValueBuffer.Write(writer);
+        ring->featureValueBuffer.Write(writer,
+                                       ring->center.has_value());
+        if (ring->center.has_value()) {
+          writer.WriteCoord(ring->center.value());
+        }
       }
 
       writer.Write(ring->ring);
@@ -550,12 +574,16 @@ namespace osmscout {
 
     ring->featureValueBuffer.Write(writer,
                                    multipleRings,
-                                   hasMaster);
+                                   hasMaster,
+                                   ring->center.has_value());
 
     if (multipleRings) {
       writer.WriteNumber((uint32_t)(rings.size()-1));
     }
 
+    if (ring->center.has_value()) {
+      writer.WriteCoord(ring->center.value());
+    }
     writer.Write(ring->nodes,
                  false);
 
@@ -568,7 +596,11 @@ namespace osmscout {
                          typeConfig.GetAreaTypeIdBytes());
 
       if (ring->GetType()->GetAreaId()!=typeIgnore) {
-        ring->featureValueBuffer.Write(writer);
+        ring->featureValueBuffer.Write(writer,
+                                       ring->center.has_value());
+        if (ring->center.has_value()) {
+          writer.WriteCoord(ring->center.value());
+        }
       }
 
       writer.Write(ring->ring);
