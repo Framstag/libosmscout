@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <array>
 
 #include <osmscout/CoreImportExport.h>
 
@@ -37,6 +38,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/TagErrorReporter.h>
+#include <osmscout/util/Number.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -832,22 +834,182 @@ namespace osmscout {
                const ObjectOSMRef& object,
                const TagMap& tags);
 
+    /**
+     * Read the FeatureValueBuffer from the given FileScanner.
+     *
+     * @throws IOException
+     */
     void Read(FileScanner& scanner);
+
+    /**
+     * Reads the FeatureValueBuffer to the given FileScanner.
+     * It also reads the value of the special flag as passed to the Write method.
+     *
+     * @throws IOException
+     */
     void Read(FileScanner& scanner,
               bool& specialFlag);
+
+    /**
+     * Reads the FeatureValueBuffer to the given FileScanner.
+     * It also reads the value of two special flags as passed to the Write method.
+     *
+     * @throws IOException
+     */
     void Read(FileScanner& scanner,
               bool& specialFlag1,
               bool& specialFlag2);
+
+    /**
+     * Reads the FeatureValueBuffer to the given FileScanner.
+     * It also reads the value of three special flags as passed to the Write method.
+     *
+     * @throws IOException
+     */
+    void Read(FileScanner& scanner,
+              bool& specialFlag1,
+              bool& specialFlag2,
+              bool& specialFlag3);
+
+    /**
+     * Writes the FeatureValueBuffer to the given FileWriter.
+     *
+     * @throws IOException
+     */
     void Write(FileWriter& writer) const;
+
+    /**
+     * Writes the FeatureValueBuffer to the given FileWriter.
+     * It also writes the value of the special flag passed. The flag can later be retrieved
+     * by using the matching Read method.
+     *
+     * @throws IOException
+     */
     void Write(FileWriter& writer,
                bool specialFlag) const;
+
+    /**
+     * Writes the FeatureValueBuffer to the given FileWriter.
+     * It also writes the value of the special flag passed. The flag can later be retrieved
+     * by using the matching Read method.
+     *
+     * @throws IOException
+     */
     void Write(FileWriter& writer,
                bool specialFlag1,
                bool specialFlag2) const;
 
+
+    /**
+     * Writes the FeatureValueBuffer to the given FileWriter.
+     * It also writes the value of the special flag passed. The flag can later be retrieved
+     * by using the matching Read method.
+     *
+     * @throws IOException
+     */
+    void Write(FileWriter& writer,
+               bool specialFlag1,
+               bool specialFlag2,
+               bool specialFlag3) const;
+
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;
     bool operator!=(const FeatureValueBuffer& other) const;
+
+    /**
+     * Reads the FeatureValueBuffer to the given FileScanner.
+     * It also reads the array of special flags (up to 8) as passed to the Write method.
+     *
+     * @throws IOException
+     */
+    template<std::size_t FlagCnt>
+    void Read(FileScanner& scanner, std::array<bool,FlagCnt> &specialFlags)
+    {
+      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
+        featureBits[i]=scanner.ReadUInt8();
+      }
+
+      if (!specialFlags.empty()) {
+        static_assert(FlagCnt <= 8);
+        uint8_t flagByte;
+        if (BitsToBytes(type->GetFeatureCount()) == BitsToBytes(type->GetFeatureCount() + specialFlags.size())) {
+          flagByte = featureBits[type->GetFeatureMaskBytes() - 1];
+        } else {
+          flagByte = scanner.ReadUInt8();
+        }
+        uint8_t mask=0x80;
+        for (bool &specialFlag: specialFlags) {
+          specialFlag = (flagByte & mask) != 0;
+          mask = mask >> 1;
+        }
+      }
+
+      for (const auto &feature : type->GetFeatures()) {
+        size_t idx=feature.GetIndex();
+
+        if (HasFeature(idx) &&
+            feature.GetFeature()->HasValue()) {
+          FeatureValue* value=feature.GetFeature()->AllocateValue(GetValueAndAllocateBuffer(idx));
+
+          value->Read(scanner);
+        }
+      }
+    }
+
+    /**
+     * Writes the FeatureValueBuffer to the given FileWriter.
+     * It also writes the value of the special flags passed. The flag can later be retrieved
+     * by using the matching Read method.
+     *
+     * @throws IOException
+     */
+    template<std::size_t FlagCnt>
+    void Write(FileWriter& writer,
+               const std::array<bool,FlagCnt> &specialFlags) const
+    {
+      static_assert(FlagCnt <= 8);
+      if (BitsToBytes(type->GetFeatureCount()) == BitsToBytes(type->GetFeatureCount() + specialFlags.size())) {
+        uint8_t mask=0x80;
+        for (const bool &specialFlag: specialFlags) {
+          if (specialFlag) {
+            featureBits[type->GetFeatureMaskBytes() - 1] |= mask;
+          } else {
+            featureBits[type->GetFeatureMaskBytes() - 1] &= ~mask;
+          }
+          mask = mask >> 1;
+        }
+
+        for (size_t i = 0; i < type->GetFeatureMaskBytes(); i++) {
+          writer.Write(featureBits[i]);
+        }
+      } else {
+        for (size_t i = 0; i < type->GetFeatureMaskBytes(); i++) {
+          writer.Write(featureBits[i]);
+        }
+
+        uint8_t flagByte = 0;
+        uint8_t mask=0x80;
+        for (const bool &specialFlag: specialFlags) {
+          if (specialFlag) {
+            flagByte |= mask;
+          }
+          mask = mask >> 1;
+        }
+
+        writer.Write(flagByte);
+      }
+
+      for (const auto &feature : type->GetFeatures()) {
+        size_t idx=feature.GetIndex();
+
+        if (HasFeature(idx) &&
+            feature.GetFeature()->HasValue()) {
+          FeatureValue* value=GetValue(idx);
+
+          value->Write(writer);
+        }
+      }
+    }
 
     template<class T> const T* findValue() const
     {
@@ -873,7 +1035,7 @@ namespace osmscout {
   // Forward declaration
   class TypeConfig;
 
-  static const uint32_t FILE_FORMAT_VERSION=23;
+  static const uint32_t FILE_FORMAT_VERSION=24;
 
   /**
    * \ingroup type

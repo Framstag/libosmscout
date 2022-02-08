@@ -22,6 +22,7 @@
 
 #include <list>
 #include <string>
+#include <optional>
 
 #include <osmscoutmap/MapImportExport.h>
 
@@ -178,6 +179,7 @@ namespace osmscout {
       FillStyleRef                fillStyle;       //!< Fill style
       BorderStyleRef              borderStyle;     //!< Border style
       GeoBox                      boundingBox;     //!< Bounding box of the area
+      std::optional<GeoCoord>     center;          //!< "visual" polygon center (pole of inaccessibility)
       bool                        isOuter;         //!< flag if this area is outer ring of some relation
       CoordBufferRange            coordRange;      //!< Range of coordinates in transformation buffer
       std::list<CoordBufferRange> clippings;       //!< Clipping polygons to be used during drawing of this area

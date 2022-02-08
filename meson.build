@@ -8,7 +8,7 @@ project('libosmscout',
 if build_machine.system()=='darwin'
   add_languages(['objcpp'])
   # Workarounds...
-  add_project_arguments(['-fobjc-arc', '-std=c++11'], language: 'objcpp')
+  add_project_arguments(['-fobjc-arc', '-std=c++17'], language: 'objcpp')
   add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
 endif
 

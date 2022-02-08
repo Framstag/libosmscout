@@ -465,224 +465,66 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Read the FeatureValueBuffer from the given FileScanner.
-   *
-   * @throws IOException
-   */
   void FeatureValueBuffer::Read(FileScanner& scanner)
   {
-    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      featureBits[i]=scanner.ReadUInt8();
-    }
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValueAndAllocateBuffer(idx));
-
-        value->Read(scanner);
-      }
-    }
+    std::array<bool,0> specialFlags;
+    Read<0>(scanner, specialFlags);
   }
 
-  /**
-   * Reads the FeatureValueBuffer to the given FileScanner.
-   * It also reads the value of the special flag as passed to the Write method.
-   *
-   * @throws IOException
-   */
   void FeatureValueBuffer::Read(FileScanner& scanner,
                                 bool& specialFlag)
   {
-    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      featureBits[i]=scanner.ReadUInt8();
-    }
-
-    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
-      specialFlag=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
-    }
-    else {
-      uint8_t addByte=scanner.ReadUInt8();
-
-      specialFlag=(addByte & 0x80)!=0;
-    }
-
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValueAndAllocateBuffer(idx));
-
-        value->Read(scanner);
-      }
-    }
+    std::array<bool,1> specialFlags;
+    Read<1>(scanner, specialFlags);
+    specialFlag=specialFlags[0];
   }
 
-  /**
-   * Reads the FeatureValueBuffer to the given FileScanner.
-   * It also reads the value of two special flags as passed to the Write method.
-   *
-   * @throws IOException
-   */
   void FeatureValueBuffer::Read(FileScanner& scanner,
                                 bool& specialFlag1,
                                 bool& specialFlag2)
   {
-    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      featureBits[i]=scanner.ReadUInt8();
-    }
-
-    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
-      specialFlag1=(featureBits[type->GetFeatureMaskBytes()-1] & 0x80)!=0;
-      specialFlag2=(featureBits[type->GetFeatureMaskBytes()-1] & 0x40)!=0;
-    }
-    else {
-      uint8_t addByte=scanner.ReadUInt8();
-
-      specialFlag1=(addByte & 0x80)!=0;
-      specialFlag2=(addByte & 0x40)!=0;
-    }
-
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=feature.GetFeature()->AllocateValue(GetValueAndAllocateBuffer(idx));
-
-        value->Read(scanner);
-      }
-    }
+    std::array<bool,2> specialFlags;
+    Read<2>(scanner, specialFlags);
+    specialFlag1=specialFlags[0];
+    specialFlag2=specialFlags[1];
   }
 
-  /**
-   * Writes the FeatureValueBuffer to the given FileWriter.
-   *
-   * @throws IOException
-   */
+  void FeatureValueBuffer::Read(FileScanner& scanner,
+                                bool& specialFlag1,
+                                bool& specialFlag2,
+                                bool& specialFlag3)
+  {
+    std::array<bool,3> specialFlags;
+    Read<3>(scanner, specialFlags);
+    specialFlag1=specialFlags[0];
+    specialFlag2=specialFlags[1];
+    specialFlag3=specialFlags[2];
+  }
+
   void FeatureValueBuffer::Write(FileWriter& writer) const
   {
-    for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-      writer.Write(featureBits[i]);
-    }
-
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=GetValue(idx);
-
-        value->Write(writer);
-      }
-    }
+    Write<0>(writer, std::array<bool,0>());
   }
 
-  /**
-   * Writes the FeatureValueBuffer to the given FileWriter.
-   * It also writes the value of the special flag passed. The flag can later be retrieved
-   * by using the matching Read method.
-   *
-   * @throws IOException
-   */
   void FeatureValueBuffer::Write(FileWriter& writer,
                                  bool specialFlag) const
   {
-    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+1)) {
-      if (specialFlag) {
-        featureBits[type->GetFeatureMaskBytes()-1]|=0x80;
-      }
-      else {
-        featureBits[type->GetFeatureMaskBytes()-1]&=~0x80;
-      }
-
-      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        writer.Write(featureBits[i]);
-      }
-    }
-    else {
-      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        writer.Write(featureBits[i]);
-      }
-
-      uint8_t addByte=specialFlag ? 0x80 : 0x00;
-
-      writer.Write(addByte);
-    }
-
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=GetValue(idx);
-
-        value->Write(writer);
-      }
-    }
+    Write<1>(writer, std::array<bool,1>{specialFlag});
   }
 
-  /**
-   * Writes the FeatureValueBuffer to the given FileWriter.
-   * It also writes the value of the special flag passed. The flag can later be retrieved
-   * by using the matching Read method.
-   *
-   * @throws IOException
-   */
   void FeatureValueBuffer::Write(FileWriter& writer,
                                  bool specialFlag1,
                                  bool specialFlag2) const
   {
-    if (BitsToBytes(type->GetFeatureCount())==BitsToBytes(type->GetFeatureCount()+2)) {
-      if (specialFlag1) {
-        featureBits[type->GetFeatureMaskBytes()-1]|=0x80;
-      }
-      else {
-        featureBits[type->GetFeatureMaskBytes()-1]&=~0x80;
-      }
+    Write<2>(writer, std::array<bool,2>{specialFlag1, specialFlag2});
+  }
 
-      if (specialFlag2) {
-        featureBits[type->GetFeatureMaskBytes()-1]|=0x40;
-      }
-      else {
-        featureBits[type->GetFeatureMaskBytes()-1]&=~0x40;
-      }
-
-      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        writer.Write(featureBits[i]);
-      }
-    }
-    else {
-      for (size_t i=0; i<type->GetFeatureMaskBytes(); i++) {
-        writer.Write(featureBits[i]);
-      }
-
-      uint8_t addByte=0;
-
-      if (specialFlag1) {
-        addByte|= 0x80;
-      }
-
-      if (specialFlag2) {
-        addByte|= 0x40;
-      }
-
-      writer.Write(addByte);
-    }
-
-    for (const auto &feature : type->GetFeatures()) {
-      size_t idx=feature.GetIndex();
-
-      if (HasFeature(idx) &&
-          feature.GetFeature()->HasValue()) {
-        FeatureValue* value=GetValue(idx);
-
-        value->Write(writer);
-      }
-    }
+  void FeatureValueBuffer::Write(FileWriter& writer,
+                                 bool specialFlag1,
+                                 bool specialFlag2,
+                                 bool specialFlag3) const
+  {
+    Write<3>(writer, std::array<bool,3>{specialFlag1, specialFlag2, specialFlag3});
   }
 
   FeatureValueBuffer& FeatureValueBuffer::operator=(const FeatureValueBuffer& other)

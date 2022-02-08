@@ -31,6 +31,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/PolygonCenter.h>
 
 #include <osmscout/DataFile.h>
 #include <osmscoutimport/GenMergeAreas.h>
@@ -69,6 +70,28 @@ namespace osmscout {
       progress(progress),
       usedIdAtLeastTwiceSet(usedIdAtLeastTwiceSet)
     {
+    }
+
+    std::optional<GeoCoord> OptionalRingCenter(const Area::Ring &ring)
+    {
+      // TODO: compute center just for types where we need
+      // (types with Name feature, where it is expected that will be used for label)
+      if (ring.nodes.empty()) {
+        return std::nullopt;
+      }
+      auto bbox=ring.GetBoundingBox();
+      double dimension=std::max(bbox.GetWidth(), bbox.GetHeight());
+      auto center=PolygonCenter(ring.nodes,
+                                dimension * 0.01);
+      // when computed center is close to bbox center (20% of longest bbox side),
+      // it is not necessary to store center coordinates to Ring
+      auto bboxCenter=bbox.GetCenter();
+      auto a=bboxCenter.GetLat()-center.GetLat();
+      auto b=bboxCenter.GetLon()-center.GetLon();
+      if (sqrt(a*a + b*b) < dimension * 0.2) {
+        return std::nullopt;
+      }
+      return center;
     }
 
     bool operator()() override
@@ -111,6 +134,7 @@ namespace osmscout {
                 idClearedCount++;
               }
             }
+            ring.center=OptionalRingCenter(ring);
           }
 
           writer.Write(type);

@@ -789,13 +789,23 @@ namespace osmscout {
     projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
                           x2,y2);
 
+    double labelX;
+    double labelY;
+    if (areaData.center.has_value()){
+      projection.GeoToPixel(areaData.center.value(),
+                            labelX, labelY);
+    } else {
+      labelX = (x1+x2)/2;
+      labelY = (y1+y2)/2;
+    }
+
     LayoutPointLabels(projection,
                       parameter,
                       *areaData.buffer,
                       iconStyle,
                       textStyles,
-                      (x1+x2)/2,
-                      (y1+y2)/2,
+                      labelX,
+                      labelY,
                       std::max(x1, x2) - std::min(x1, x2),
                       std::max(y1, y2) - std::min(y1, y2));
   }
@@ -1290,7 +1300,7 @@ namespace osmscout {
     double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
     a.boundingBox=ring.GetBoundingBox();
-    a.isOuter = ring.IsOuter();
+    a.isOuter=ring.IsOuter();
 
     if (!IsVisibleArea(projection,
                        a.boundingBox,
@@ -1313,6 +1323,7 @@ namespace osmscout {
     a.ref=area.GetObjectFileRef();
     a.type=type;
     a.buffer=&ring.GetFeatureValueBuffer();
+    a.center=ring.center;
     a.fillStyle=fillStyle;
     a.borderStyle=borderStyle;
     a.coordRange=coordRanges[i];
