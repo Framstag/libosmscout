@@ -64,14 +64,12 @@ bool SunriseSunsetTest(const osmscout::Timestamp &day,
 }
 
 TEST_CASE("Compute Prague sunrise and sunset at winter solstice") {
-  osmscout::Timestamp ts;
   std::string winterSolstice="2021-12-21T12:00:00.0Z";
   osmscout::GeoCoord pragueLoc(50.083, 14.422);
   REQUIRE(SunriseSunsetString(winterSolstice, pragueLoc, +1) == "2021-12-21T07:59:58.0Z - 2021-12-21T16:03:24.0Z");
 }
 
 TEST_CASE("Polar night at Tromso at winter solstice") {
-  osmscout::Timestamp ts;
   std::string winterSolstice="2021-12-21T12:00:00.0Z";
   osmscout::GeoCoord tromsoLoc(69.6523, 18.9753);
   REQUIRE(SunriseSunsetString(winterSolstice, tromsoLoc, +1) == "nullopt");
