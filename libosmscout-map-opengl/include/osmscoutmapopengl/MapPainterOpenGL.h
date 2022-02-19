@@ -58,9 +58,6 @@ namespace osmscout {
     int height;
     double dpi;
 
-    int screenWidth;
-    int screenHeight;
-
     float minLon;
     float minLat;
     float maxLon;
@@ -143,7 +140,7 @@ namespace osmscout {
 
   public:
 
-    MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
+    MapPainterOpenGL(int width, int height, double dpi,
                      const std::string &fontPath, const std::string &shaderDir,
                      long defaultTextSize=12);
 
@@ -158,6 +155,8 @@ namespace osmscout {
      * Zooms on the map.
      */
     void OnZoom(float zoomDirection);
+
+    void SetSize(int width, int height);
 
     /**
      *  Translates the map to the given direction.
@@ -176,13 +175,13 @@ namespace osmscout {
                      const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
     /**
-    * Swaps currently drawn data and processed data.
-    */
+     * Swaps currently drawn data and processed data.
+     */
     void SwapData();
 
     /**
-    * OpenGL draw call. Draws all feature of the map to the context.
-    */
+     * OpenGL draw call. Draws all feature of the map to the context.
+     */
     void DrawMap(RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);
 
