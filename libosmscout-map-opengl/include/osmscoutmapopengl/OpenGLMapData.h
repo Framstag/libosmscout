@@ -259,8 +259,31 @@ namespace osmscout {
 
       glEnable(GL_PROGRAM_POINT_SIZE);
 
-      return true;
+      shaderProgram = glCreateProgram();
+      glAttachShader(shaderProgram, VertexShader);
+      glAttachShader(shaderProgram, FragmentShader);
+      glBindFragDataLocation(shaderProgram, 0, "outColor");
+      glLinkProgram(shaderProgram);
 
+      GLint isLinked = 0;
+      glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinked);
+      if (isLinked == GL_FALSE) {
+        GLint maxLength = 0;
+        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> errorLog(maxLength);
+        glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, errorLog.data());
+        assert(!errorLog.empty() && errorLog.back() == 0);
+        log.Error() << "Error while linking shader program: " << errorLog.data();
+
+        return false;
+      }
+
+      // Always detach shaders after a successful link.
+      glDetachShader(shaderProgram, VertexShader);
+      glDetachShader(shaderProgram, FragmentShader);
+
+      return true;
     }
 
     void LoadTextures() {
@@ -299,12 +322,7 @@ namespace osmscout {
       return (this->VerticesBuffer.size()) / (this->VerticesSize);
     }
 
-    void LoadProgram() {
-      shaderProgram = glCreateProgram();
-      glAttachShader(shaderProgram, VertexShader);
-      glAttachShader(shaderProgram, FragmentShader);
-      glBindFragDataLocation(shaderProgram, 0, "outColor");
-      glLinkProgram(shaderProgram);
+    void UseProgram() {
       glUseProgram(shaderProgram);
     }
 

@@ -145,7 +145,7 @@ namespace osmscout {
     areaRenderer.SwapData();
 
     areaRenderer.BindBuffers();
-    areaRenderer.LoadProgram();
+    areaRenderer.UseProgram();
     areaRenderer.LoadVertices();
 
     areaRenderer.SetProjection(width, height);
@@ -166,7 +166,7 @@ namespace osmscout {
     groundTileRenderer.SwapData();
 
     groundTileRenderer.BindBuffers();
-    groundTileRenderer.LoadProgram();
+    groundTileRenderer.UseProgram();
     groundTileRenderer.LoadVertices();
 
     groundTileRenderer.SetProjection(width, height);
@@ -186,7 +186,7 @@ namespace osmscout {
 
     groundRenderer.BindBuffers();
 
-    groundRenderer.LoadProgram();
+    groundRenderer.UseProgram();
     groundRenderer.LoadVertices();
 
     groundRenderer.SetProjection(width, height);
@@ -205,7 +205,7 @@ namespace osmscout {
     imageRenderer.SwapData();
 
     imageRenderer.BindBuffers();
-    imageRenderer.LoadProgram();
+    imageRenderer.UseProgram();
     imageRenderer.LoadVertices();
     imageRenderer.LoadTextures();
 
@@ -231,7 +231,7 @@ namespace osmscout {
     textRenderer.SwapData();
 
     textRenderer.BindBuffers();
-    textRenderer.LoadProgram();
+    textRenderer.UseProgram();
     textRenderer.LoadVertices();
     textRenderer.LoadTextures();
 
@@ -261,7 +261,7 @@ namespace osmscout {
     wayRenderer.SwapData();
 
     wayRenderer.BindBuffers();
-    wayRenderer.LoadProgram();
+    wayRenderer.UseProgram();
     wayRenderer.LoadVertices();
 
     wayRenderer.SetProjection(width, height);
