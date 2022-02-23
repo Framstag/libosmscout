@@ -221,6 +221,8 @@ namespace osmscout {
       glShaderSource(VertexShader, 1, &VertexSourceC, &VertexShaderLength);
       glCompileShader(VertexShader);
 
+      static_assert(std::is_same<GLchar, char>::value, "GLchar must be char for usage with logger");
+
       GLint isCompiled = 0;
       glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &isCompiled);
       if (isCompiled == GL_FALSE) {
@@ -228,12 +230,9 @@ namespace osmscout {
         glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 
         std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(VertexShader, maxLength, &maxLength, &errorLog[0]);
-
-        for (glm::uint i = 0; i < errorLog.size(); i++)
-          std::cout << errorLog.at(i);
-
-        std::cout << std::endl;
+        glGetShaderInfoLog(VertexShader, maxLength, &maxLength, errorLog.data());
+        assert(!errorLog.empty() && errorLog.back() == 0);
+        log.Error() << "Error while loading vertex shader: " << errorLog.data();
 
         return false;
       }
@@ -251,12 +250,9 @@ namespace osmscout {
         glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
 
         std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(FragmentShader, maxLength, &maxLength, &errorLog[0]);
-
-        for (glm::uint i = 0; i < errorLog.size(); i++)
-          std::cout << errorLog.at(i);
-
-        std::cout << std::endl;
+        glGetShaderInfoLog(FragmentShader, maxLength, &maxLength, errorLog.data());
+        assert(!errorLog.empty() && errorLog.back() == 0);
+        log.Error() << "Error while loading fragment shader: " << errorLog.data();
 
         return false;
       }
