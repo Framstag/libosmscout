@@ -215,45 +215,11 @@ namespace osmscout {
       textureWidthBuffer = 0;
       textureHeight = 0;
 
-      vertexShader = glCreateShader(GL_VERTEX_SHADER);
-      const char *vertexSourceC = vertexShaderSource.c_str();
-      int vertexShaderLength = vertexShaderSource.length();
-      glShaderSource(vertexShader, 1, &vertexSourceC, &vertexShaderLength);
-      glCompileShader(vertexShader);
-
-      static_assert(std::is_same<GLchar, char>::value, "GLchar must be char for usage with logger");
-
-      GLint isCompiled = 0;
-      glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-      if (isCompiled == GL_FALSE) {
-        GLint maxLength = 0;
-        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, errorLog.data());
-        assert(!errorLog.empty() && errorLog.back() == 0);
-        log.Error() << "Error while loading vertex shader: " << errorLog.data();
-
+      if (!LoadShader(&vertexShader, GL_VERTEX_SHADER, "vertex", vertexShaderSource)){
         return false;
       }
 
-      fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-      const char *fragmentSourceC = fragmentShaderSource.c_str();
-      int fragmentShaderLength = fragmentShaderSource.length();
-      glShaderSource(fragmentShader, 1, &fragmentSourceC, &fragmentShaderLength);
-      glCompileShader(fragmentShader);
-
-      isCompiled = 0;
-      glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-      if (isCompiled == GL_FALSE) {
-        GLint maxLength = 0;
-        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, errorLog.data());
-        assert(!errorLog.empty() && errorLog.back() == 0);
-        log.Error() << "Error while loading fragment shader: " << errorLog.data();
-
+      if (!LoadShader(&fragmentShader, GL_FRAGMENT_SHADER, "fragment", fragmentShaderSource)){
         return false;
       }
 
@@ -283,6 +249,35 @@ namespace osmscout {
       glDetachShader(shaderProgram, vertexShader);
       glDetachShader(shaderProgram, fragmentShader);
 
+      return true;
+    }
+
+    static bool LoadShader(GLuint *shader,
+                           GLenum type,
+                           const std::string &name,
+                           const std::string &shaderSource)
+    {
+      static_assert(std::is_same<GLchar, char>::value, "GLchar must be char for usage with logger");
+
+      *shader = glCreateShader(type);
+      const char *sourceC = shaderSource.c_str();
+      int shaderLength = shaderSource.length();
+      glShaderSource(*shader, 1, &sourceC, &shaderLength);
+      glCompileShader(*shader);
+
+      GLint isCompiled = 0;
+      glGetShaderiv(*shader, GL_COMPILE_STATUS, &isCompiled);
+      if (isCompiled == GL_FALSE) {
+        GLint maxLength = 0;
+        glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(*shader, maxLength, &maxLength, errorLog.data());
+        assert(!errorLog.empty() && errorLog.back() == 0);
+        log.Error() << "Error while loading " << name << " shader: " << errorLog.data();
+
+        return false;
+      }
       return true;
     }
 
