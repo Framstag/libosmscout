@@ -4,6 +4,7 @@ set(HEADER_FILES
 		include/osmscoutmapopengl/MapPainterOpenGL.h
 		include/osmscoutmapopengl/Triangulate.h
 		include/osmscoutmapopengl/PNGLoaderOpenGL.h
+		include/osmscoutmapopengl/ShaderUtils.h
 		include/osmscoutmapopengl/TextLoader.h
 		include/poly2tri/poly2tri.h
 		include/poly2tri/sweep/cdt.h
@@ -17,6 +18,7 @@ set(SOURCE_FILES
 		src/osmscoutmapopengl/MapPainterOpenGL.cpp
 		src/osmscoutmapopengl/Triangulate.cpp
 		src/osmscoutmapopengl/PNGLoaderOpenGL.cpp
+		src/osmscoutmapopengl/ShaderUtils.cpp
 		src/osmscoutmapopengl/TextLoader.cpp
 		src/poly2tri/sweep/cdt.cc
 		src/poly2tri/common/shapes.cc

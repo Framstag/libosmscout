@@ -6,6 +6,7 @@ osmscoutmapopenglHeader = [
             'osmscoutmapopengl/OpenGLMapData.h',
             'osmscoutmapopengl/Triangulate.h',
             'osmscoutmapopengl/PNGLoaderOpenGL.h',
+            'osmscoutmapopengl/ShaderUtils.h',
             'osmscoutmapopengl/TextLoader.h',
             'poly2tri/poly2tri.h',
             'poly2tri/sweep/cdt.h',

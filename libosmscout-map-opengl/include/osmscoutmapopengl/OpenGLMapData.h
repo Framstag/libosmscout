@@ -20,12 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/ext.hpp>
+#include <osmscoutmapopengl/ShaderUtils.h>
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapPainter.h>
@@ -33,6 +28,12 @@
 
 #include <iostream>
 #include <fstream>
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 
 namespace osmscout {
 
@@ -102,27 +103,6 @@ namespace osmscout {
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
-
-    bool LoadShader(const std::string &dirPath, const std::string &name, std::string &result) {
-      std::string filePath = dirPath + "/" + name;
-      if (!ExistsInFilesystem(filePath)) {
-        log.Error() << "Shader file " << filePath << " doesn't exists";
-        return false;
-      }
-
-      std::string line;
-      std::ifstream myfile(filePath);
-      if (!myfile.is_open()) {
-        return false;
-      }
-
-      while (getline(myfile, line)) {
-        result.append(line + "\n");
-      }
-      myfile.close();
-
-      return true;
-    }
 
     void LoadVBO() {
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -252,35 +232,6 @@ namespace osmscout {
       return true;
     }
 
-    static bool LoadShader(GLuint *shader,
-                           GLenum type,
-                           const std::string &name,
-                           const std::string &shaderSource)
-    {
-      static_assert(std::is_same<GLchar, char>::value, "GLchar must be char for usage with logger");
-
-      *shader = glCreateShader(type);
-      const char *sourceC = shaderSource.c_str();
-      int shaderLength = shaderSource.length();
-      glShaderSource(*shader, 1, &sourceC, &shaderLength);
-      glCompileShader(*shader);
-
-      GLint isCompiled = 0;
-      glGetShaderiv(*shader, GL_COMPILE_STATUS, &isCompiled);
-      if (isCompiled == GL_FALSE) {
-        GLint maxLength = 0;
-        glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(*shader, maxLength, &maxLength, errorLog.data());
-        assert(!errorLog.empty() && errorLog.back() == 0);
-        log.Error() << "Error while loading " << name << " shader: " << errorLog.data();
-
-        return false;
-      }
-      return true;
-    }
-
     void LoadTextures() {
       glActiveTexture(GL_TEXTURE0);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -293,11 +244,11 @@ namespace osmscout {
     }
 
     bool LoadFragmentShader(const std::string &dir, const std::string &fileName) {
-      return this->LoadShader(dir, fileName, fragmentShaderSource);
+      return LoadShaderSource(dir, fileName, fragmentShaderSource);
     }
 
     bool LoadVertexShader(const std::string &dir, const std::string &fileName) {
-      return this->LoadShader(dir, fileName, vertexShaderSource);
+      return LoadShaderSource(dir, fileName, vertexShaderSource);
     }
 
     void LoadVertices() {
