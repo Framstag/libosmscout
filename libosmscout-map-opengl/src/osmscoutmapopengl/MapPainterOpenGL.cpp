@@ -26,6 +26,7 @@
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 #include <osmscoutmapopengl/Triangulate.h>
 #include <osmscoutmapopengl/PNGLoaderOpenGL.h>
+#include <osmscoutmapopengl/ShaderUtils.h>
 
 #include <GL/glew.h>
 
@@ -51,44 +52,57 @@ namespace osmscout {
       return;
     }
 
-    if (!(areaRenderer.LoadVertexShader(shaderDir, "AreaVertexShader.vert") &&
-          areaRenderer.LoadFragmentShader(shaderDir, "AreaFragmentShader.frag") &&
-          areaRenderer.InitContext())) {
+    if (std::string projectionSource;
+        !(LoadShaderSource(shaderDir, "Projection.vert", projectionSource) &&
+          LoadShader(projectionShader, GL_VERTEX_SHADER, "projection", projectionSource))) {
+      log.Error() << "Could not load projection shader!";
+      return;
+    }
+
+    if (!areaRenderer.InitContext(shaderDir,
+                                  "AreaVertexShader.vert",
+                                  "AreaFragmentShader.frag",
+                                  projectionShader)) {
       log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
-    if (!(groundTileRenderer.LoadVertexShader(shaderDir, "GroundVertexShader.vert") &&
-          groundTileRenderer.LoadFragmentShader(shaderDir, "GroundFragmentShader.frag") &&
-          groundTileRenderer.InitContext())) {
+    if (!groundTileRenderer.InitContext(shaderDir,
+                                        "GroundVertexShader.vert",
+                                        "GroundFragmentShader.frag",
+                                        projectionShader)) {
       log.Error() << "Could not initialize context for ground tile rendering!";
       return;
     }
 
-    if (!(groundRenderer.LoadVertexShader(shaderDir, "GroundVertexShader.vert") &&
-          groundRenderer.LoadFragmentShader(shaderDir, "GroundFragmentShader.frag") &&
-          groundRenderer.InitContext())) {
+    if (!groundRenderer.InitContext(shaderDir,
+                                    "GroundVertexShader.vert",
+                                    "GroundFragmentShader.frag",
+                                    projectionShader)) {
       log.Error() << "Could not initialize context for ground rendering!";
       return;
     }
 
-    if (!(wayRenderer.LoadVertexShader(shaderDir, "PathVertexShader.vert") &&
-          wayRenderer.LoadFragmentShader(shaderDir, "PathFragmentShader.frag") &&
-          wayRenderer.InitContext())) {
+    if (!wayRenderer.InitContext(shaderDir,
+                                  "PathVertexShader.vert",
+                                 "PathFragmentShader.frag",
+                                 projectionShader)) {
       log.Error() << "Could not initialize context for area rendering!";
       return;
     }
 
-    if (!(imageRenderer.LoadVertexShader(shaderDir, "QuadVertexShader.vert") &&
-          imageRenderer.LoadFragmentShader(shaderDir, "QuadFragmentShader.frag") &&
-          imageRenderer.InitContext())) {
+    if (!imageRenderer.InitContext(shaderDir,
+                                   "QuadVertexShader.vert",
+                                   "QuadFragmentShader.frag",
+                                   projectionShader)) {
       log.Error() << "Could not initialize context for image rendering!";
       return;
     }
 
-    if (!(textRenderer.LoadVertexShader(shaderDir, "TextVertexShader.vert") &&
-          textRenderer.LoadFragmentShader(shaderDir, "TextFragmentShader.frag") &&
-          textRenderer.InitContext())) {
+    if (!textRenderer.InitContext(shaderDir,
+                                  "TextVertexShader.vert",
+                                  "TextFragmentShader.frag",
+                                  projectionShader)) {
       log.Error() << "Could not initialize context for text rendering!";
       return;
     }
@@ -108,6 +122,11 @@ namespace osmscout {
     textRenderer.SetVerticesSize(11);
 
     initialized = true;
+  }
+
+  osmscout::MapPainterOpenGL::~MapPainterOpenGL()
+  {
+    glDeleteShader(projectionShader);
   }
 
   void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
@@ -143,7 +162,7 @@ namespace osmscout {
     areaRenderer.SwapData();
 
     areaRenderer.BindBuffers();
-    areaRenderer.LoadProgram();
+    areaRenderer.UseProgram();
     areaRenderer.LoadVertices();
 
     areaRenderer.SetProjection(width, height);
@@ -164,7 +183,7 @@ namespace osmscout {
     groundTileRenderer.SwapData();
 
     groundTileRenderer.BindBuffers();
-    groundTileRenderer.LoadProgram();
+    groundTileRenderer.UseProgram();
     groundTileRenderer.LoadVertices();
 
     groundTileRenderer.SetProjection(width, height);
@@ -184,7 +203,7 @@ namespace osmscout {
 
     groundRenderer.BindBuffers();
 
-    groundRenderer.LoadProgram();
+    groundRenderer.UseProgram();
     groundRenderer.LoadVertices();
 
     groundRenderer.SetProjection(width, height);
@@ -203,7 +222,7 @@ namespace osmscout {
     imageRenderer.SwapData();
 
     imageRenderer.BindBuffers();
-    imageRenderer.LoadProgram();
+    imageRenderer.UseProgram();
     imageRenderer.LoadVertices();
     imageRenderer.LoadTextures();
 
@@ -229,7 +248,7 @@ namespace osmscout {
     textRenderer.SwapData();
 
     textRenderer.BindBuffers();
-    textRenderer.LoadProgram();
+    textRenderer.UseProgram();
     textRenderer.LoadVertices();
     textRenderer.LoadTextures();
 
@@ -259,7 +278,7 @@ namespace osmscout {
     wayRenderer.SwapData();
 
     wayRenderer.BindBuffers();
-    wayRenderer.LoadProgram();
+    wayRenderer.UseProgram();
     wayRenderer.LoadVertices();
 
     wayRenderer.SetProjection(width, height);

@@ -20,12 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/ext.hpp>
+#include <osmscoutmapopengl/ShaderUtils.h>
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapPainter.h>
@@ -33,6 +28,12 @@
 
 #include <iostream>
 #include <fstream>
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 
 namespace osmscout {
 
@@ -72,12 +73,12 @@ namespace osmscout {
   class OpenGLMapData {
   private:
 
-    std::vector<GLfloat> Vertices;
-    std::vector<GLfloat> VerticesBuffer;
-    std::vector<GLuint> Elements;
-    std::vector<GLuint> ElementsBuffer;
-    unsigned char *Textures=nullptr;
-    std::vector<OpenGLTextureRef> TexturesBuffer;
+    std::vector<GLfloat> vertices;
+    std::vector<GLfloat> verticesBuffer;
+    std::vector<GLuint> elements;
+    std::vector<GLuint> elementsBuffer;
+    unsigned char *textures=nullptr;
+    std::vector<OpenGLTextureRef> texturesBuffer;
     int textureSize=0;
     int textureSizeBuffer=0;
     int textureWidth=0;
@@ -85,53 +86,29 @@ namespace osmscout {
     int textureHeight=14;
 
     GLuint shaderProgram;
-    GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
-    GLuint Tex;
+    GLuint vao;
+    GLuint vbo;
+    GLuint ebo;
+    GLuint tex;
 
-    int VerticesSize;
+    int verticesSize;
     float zoom;
 
-    GLuint VertexShader;
-    GLuint FragmentShader;
+    GLuint vertexShader;
+    GLuint fragmentShader;
 
-    std::string VertexShaderSource;
-    std::string FragmentShaderSource;
-
-    glm::mat4 Model;
-    glm::mat4 View;
-    glm::mat4 Projection;
-
-    bool LoadShader(const std::string &dirPath, const std::string &name, std::string &result) {
-      std::string filePath = dirPath + "/" + name;
-      if (!ExistsInFilesystem(filePath)) {
-        log.Error() << "Shader file " << filePath << " doesn't exists";
-        return false;
-      }
-
-      std::string line;
-      std::ifstream myfile(filePath);
-      if (!myfile.is_open()) {
-        return false;
-      }
-
-      while (getline(myfile, line)) {
-        result.append(line + "\n");
-      }
-      myfile.close();
-
-      return true;
-    }
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
 
     void LoadVBO() {
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * Vertices.size(), &Vertices[0], GL_DYNAMIC_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
     }
 
     void LoadEBO() {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * Elements.size(), &Elements[0], GL_DYNAMIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * elements.size(), &elements[0], GL_DYNAMIC_DRAW);
     }
 
   public:
@@ -142,13 +119,13 @@ namespace osmscout {
       clearData();
 
       glDeleteProgram(shaderProgram);
-      glDeleteShader(FragmentShader);
-      glDeleteShader(VertexShader);
+      glDeleteShader(fragmentShader);
+      glDeleteShader(vertexShader);
 
-      glDeleteBuffers(1, &EBO);
-      glDeleteBuffers(1, &VBO);
+      glDeleteBuffers(1, &ebo);
+      glDeleteBuffers(1, &vbo);
 
-      glDeleteVertexArrays(1, &VAO);
+      glDeleteVertexArrays(1, &vao);
     }
 
     OpenGLMapData(const OpenGLMapData&) = delete;
@@ -157,114 +134,108 @@ namespace osmscout {
     OpenGLMapData &operator=(OpenGLMapData&&) = delete;
 
     void SwapData() {
-      delete[] Textures;
-      Vertices = std::move(VerticesBuffer);
-      VerticesBuffer.clear();
-      Elements = std::move(ElementsBuffer);
-      ElementsBuffer.clear();
+      delete[] textures;
+      vertices = std::move(verticesBuffer);
+      verticesBuffer.clear();
+      elements = std::move(elementsBuffer);
+      elementsBuffer.clear();
 
       textureSize = textureSizeBuffer;
       textureSizeBuffer = 0;
       textureWidth = textureWidthBuffer;
       textureWidthBuffer = 0;
 
-      Textures = new unsigned char[textureWidth*textureHeight*TexturePixelSize];
+      textures = new unsigned char[textureWidth * textureHeight * TexturePixelSize];
 
       int index = 0;
       for (int i = 0; i < textureHeight; i++) {
-        for (unsigned int j = 0; j < TexturesBuffer.size(); j++) {
-          int start = i * TexturesBuffer[j]->width * TexturePixelSize;
-          for (unsigned int k = start; k < start + (TexturesBuffer[j]->width * TexturePixelSize); k++) {
-            Textures[index] = (TexturesBuffer[j]->data[k]);
+        for (unsigned int j = 0; j < texturesBuffer.size(); j++) {
+          int start = i * texturesBuffer[j]->width * TexturePixelSize;
+          for (unsigned int k = start; k < start + (texturesBuffer[j]->width * TexturePixelSize); k++) {
+            textures[index] = (texturesBuffer[j]->data[k]);
             index++;
           }
         }
       }
 
-      TexturesBuffer.clear();
+      texturesBuffer.clear();
     }
 
     void clearData() {
-      Vertices.clear();
-      Elements.clear();
-      if (Textures != nullptr) {
-        delete[] Textures;
-        Textures = nullptr;
+      vertices.clear();
+      elements.clear();
+      if (textures != nullptr) {
+        delete[] textures;
+        textures = nullptr;
       }
-      TexturesBuffer.clear();
+      texturesBuffer.clear();
       textureSize = 0;
       textureWidth = 0;
     }
 
     void BindBuffers() {
-      glBindVertexArray(VAO);
+      glBindVertexArray(vao);
     }
 
-    bool InitContext() {
-      glGenVertexArrays(1, &VAO);
-      glBindVertexArray(VAO);
-      glGenBuffers(1, &VBO);
-      glGenBuffers(1, &EBO);
-      glGenTextures(1, &Tex);
+    bool InitContext(const std::string &shaderDir,
+                     const std::string &vertexShaderFileName,
+                     const std::string &fragmentShaderFileName,
+                     GLuint projectionShader) {
+      glGenVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+      glGenBuffers(1, &vbo);
+      glGenBuffers(1, &ebo);
+      glGenTextures(1, &tex);
 
       zoom = 45.0f;
-      Model = glm::mat4(1.0f);
+      model = glm::mat4(1.0f);
       textureSize = 0;
       textureSizeBuffer = 0;
       textureWidth = 0;
       textureWidthBuffer = 0;
       textureHeight = 0;
 
-      VertexShader = glCreateShader(GL_VERTEX_SHADER);
-      const char *VertexSourceC = VertexShaderSource.c_str();
-      int VertexShaderLength = VertexShaderSource.length();
-      glShaderSource(VertexShader, 1, &VertexSourceC, &VertexShaderLength);
-      glCompileShader(VertexShader);
-
-      GLint isCompiled = 0;
-      glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &isCompiled);
-      if (isCompiled == GL_FALSE) {
-        GLint maxLength = 0;
-        glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(VertexShader, maxLength, &maxLength, &errorLog[0]);
-
-        for (glm::uint i = 0; i < errorLog.size(); i++)
-          std::cout << errorLog.at(i);
-
-        std::cout << std::endl;
-
+      if (std::string vertexShaderSource;
+          !(LoadShaderSource(shaderDir, vertexShaderFileName, vertexShaderSource) &&
+            LoadShader(vertexShader, GL_VERTEX_SHADER, "vertex", vertexShaderSource))) {
         return false;
       }
 
-      FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-      const char *FragmentSourceC = FragmentShaderSource.c_str();
-      int FragmentShaderLength = FragmentShaderSource.length();
-      glShaderSource(FragmentShader, 1, &FragmentSourceC, &FragmentShaderLength);
-      glCompileShader(FragmentShader);
-
-      isCompiled = 0;
-      glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &isCompiled);
-      if (isCompiled == GL_FALSE) {
-        GLint maxLength = 0;
-        glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(FragmentShader, maxLength, &maxLength, &errorLog[0]);
-
-        for (glm::uint i = 0; i < errorLog.size(); i++)
-          std::cout << errorLog.at(i);
-
-        std::cout << std::endl;
-
+      if (std::string fragmentShaderSource;
+          !(LoadShaderSource(shaderDir, fragmentShaderFileName, fragmentShaderSource) &&
+            LoadShader(fragmentShader, GL_FRAGMENT_SHADER, "fragment", fragmentShaderSource))) {
         return false;
       }
 
       glEnable(GL_PROGRAM_POINT_SIZE);
 
-      return true;
+      shaderProgram = glCreateProgram();
+      glAttachShader(shaderProgram, vertexShader);
+      glAttachShader(shaderProgram, fragmentShader);
+      glAttachShader(shaderProgram, projectionShader);
+      glBindFragDataLocation(shaderProgram, 0, "outColor");
+      glLinkProgram(shaderProgram);
 
+      GLint isLinked = 0;
+      glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinked);
+      if (isLinked == GL_FALSE) {
+        GLint maxLength = 0;
+        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> errorLog(maxLength);
+        glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, errorLog.data());
+        assert(!errorLog.empty() && errorLog.back() == 0);
+        log.Error() << "Error while linking shader program: " << errorLog.data();
+
+        return false;
+      }
+
+      // Always detach shaders after a successful link.
+      glDetachShader(shaderProgram, vertexShader);
+      glDetachShader(shaderProgram, fragmentShader);
+      glDetachShader(shaderProgram, projectionShader);
+
+      return true;
     }
 
     void LoadTextures() {
@@ -274,16 +245,8 @@ namespace osmscout {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glPixelStorei(GL_UNPACK_ALIGNMENT, TexturePixelSize);
-      glBindTexture(GL_TEXTURE_2D, Tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, TexturePixelType, textureWidth, textureHeight, 0, TexturePixelType, GL_UNSIGNED_BYTE, Textures);
-    }
-
-    bool LoadFragmentShader(const std::string &dir, const std::string &fileName) {
-      return this->LoadShader(dir, fileName, FragmentShaderSource);
-    }
-
-    bool LoadVertexShader(const std::string &dir, const std::string &fileName) {
-      return this->LoadShader(dir, fileName, VertexShaderSource);
+      glBindTexture(GL_TEXTURE_2D, tex);
+      glTexImage2D(GL_TEXTURE_2D, 0, TexturePixelType, textureWidth, textureHeight, 0, TexturePixelType, GL_UNSIGNED_BYTE, textures);
     }
 
     void LoadVertices() {
@@ -292,32 +255,27 @@ namespace osmscout {
     }
 
     void AddNewVertex(GLfloat vertex) {
-      this->VerticesBuffer.push_back(vertex);
+      this->verticesBuffer.push_back(vertex);
     }
 
     void AddNewElement(GLuint element) {
-      this->ElementsBuffer.push_back(element);
+      this->elementsBuffer.push_back(element);
     }
 
     int GetVerticesNumber() {
-      return (this->VerticesBuffer.size()) / (this->VerticesSize);
+      return (this->verticesBuffer.size()) / (this->verticesSize);
     }
 
-    void LoadProgram() {
-      shaderProgram = glCreateProgram();
-      glAttachShader(shaderProgram, VertexShader);
-      glAttachShader(shaderProgram, FragmentShader);
-      glBindFragDataLocation(shaderProgram, 0, "outColor");
-      glLinkProgram(shaderProgram);
+    void UseProgram() {
       glUseProgram(shaderProgram);
     }
 
     void SetVerticesSize(int size) {
-      this->VerticesSize = size;
+      this->verticesSize = size;
     }
 
     int GetNumOfVertices() {
-      return this->VerticesBuffer.size();
+      return this->verticesBuffer.size();
     }
 
     /*void AddNewTexture(OpenGLTexture *texture) {
@@ -329,7 +287,7 @@ namespace osmscout {
     }*/
 
     void AddNewTexture(OpenGLTextureRef texture) {
-      TexturesBuffer.push_back(texture);
+      texturesBuffer.push_back(texture);
 
       textureWidthBuffer += texture->width;
 
@@ -346,13 +304,13 @@ namespace osmscout {
     }
 
     int GetTextureWidth(int index){
-      return TexturesBuffer[index]->width;
+      return texturesBuffer[index]->width;
     }
 
     int GetTextureWidthSum(int index){
       int sum = 0;
       for(int i = 0; i < index+1; i++)
-        sum += TexturesBuffer[i]->width;
+        sum += texturesBuffer[i]->width;
 
       return sum;
     }
@@ -363,29 +321,29 @@ namespace osmscout {
 
     void SetModel() {
       GLuint uniform = glGetUniformLocation(shaderProgram, "Model");
-      glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(Model));
+      glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(model));
     }
 
     void SetView(float /*lookX*/, float /*lookY*/) {
-      View = glm::lookAt(
+      view = glm::lookAt(
           glm::vec3(0.0, 0.0, 1.0f), //position
           glm::vec3(0.0f, 0.0f, 0.0f), //look
           glm::vec3(0.0f, 1.0f, 0.0f) //up
       );
       GLint uniView = glGetUniformLocation(shaderProgram, "View");
-      glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(View));
+      glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
     }
 
     void SetProjection(float width, float height) {
-      Projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
+      projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
-      glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(Projection));
+      glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(projection));
     }
 
     void AddAttrib(std::string attribName, GLint length, GLuint type, size_t positionOffset) {
       GLint attrib = glGetAttribLocation(shaderProgram, attribName.c_str());
       glEnableVertexAttribArray(attrib);
-      glVertexAttribPointer(attrib, length, type, GL_FALSE, VerticesSize * sizeof(GLfloat), (void *) positionOffset);
+      glVertexAttribPointer(attrib, length, type, GL_FALSE, verticesSize * sizeof(GLfloat), (void *) positionOffset);
     }
 
     void AddUniform(std::string uniformName, float value) {
@@ -394,11 +352,11 @@ namespace osmscout {
     }
 
     GLuint getVAO() {
-      return this->VAO;
+      return this->vao;
     }
 
     GLuint GetTexture() {
-      return this->Tex;
+      return this->tex;
     }
 
     GLuint getShaderProgram() {
@@ -406,19 +364,19 @@ namespace osmscout {
     }
 
     const glm::mat4 &GetModel() const {
-      return Model;
+      return model;
     }
 
     const glm::mat4 &GetView() const {
-      return View;
+      return view;
     }
 
     const glm::mat4 &GetProjection() const {
-      return Projection;
+      return projection;
     }
 
     void Draw() {
-      glDrawElements(GL_TRIANGLES, (GLsizei) Elements.size(), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, (GLsizei) elements.size(), GL_UNSIGNED_INT, 0);
     }
 
   };
