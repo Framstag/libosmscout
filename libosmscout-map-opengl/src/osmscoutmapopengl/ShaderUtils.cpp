@@ -53,27 +53,27 @@ bool LoadShaderSource(const std::string &dirPath, const std::string &name, std::
   return true;
 }
 
-bool LoadShader(GLuint *shader,
+bool LoadShader(GLuint &shader,
                 GLenum type,
                 const std::string &name,
                 const std::string &shaderSource)
 {
   static_assert(std::is_same<GLchar, char>::value, "GLchar must be char for usage with logger");
 
-  *shader = glCreateShader(type);
+  shader = glCreateShader(type);
   const char *sourceC = shaderSource.c_str();
   int shaderLength = shaderSource.length();
-  glShaderSource(*shader, 1, &sourceC, &shaderLength);
-  glCompileShader(*shader);
+  glShaderSource(shader, 1, &sourceC, &shaderLength);
+  glCompileShader(shader);
 
   GLint isCompiled = 0;
-  glGetShaderiv(*shader, GL_COMPILE_STATUS, &isCompiled);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
   if (isCompiled == GL_FALSE) {
     GLint maxLength = 0;
-    glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &maxLength);
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
     std::vector<GLchar> errorLog(maxLength);
-    glGetShaderInfoLog(*shader, maxLength, &maxLength, errorLog.data());
+    glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
     assert(!errorLog.empty() && errorLog.back() == 0);
     log.Error() << "Error while loading " << name << " shader: " << errorLog.data();
 

@@ -69,6 +69,8 @@ namespace osmscout {
     float lookX;
     float lookY;
 
+    GLuint projectionShader;
+
     OpenGLMapData<GL_RGBA, 4> areaRenderer;
     OpenGLMapData<GL_RGBA, 4> groundTileRenderer;
     OpenGLMapData<GL_RGBA, 4> groundRenderer;
@@ -147,7 +149,7 @@ namespace osmscout {
                      const std::string &fontPath, const std::string &shaderDir,
                      long defaultTextSize=12);
 
-    ~MapPainterOpenGL() = default;
+    ~MapPainterOpenGL();
 
     bool IsInitialized() const
     {

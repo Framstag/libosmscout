@@ -97,9 +97,6 @@ namespace osmscout {
     GLuint vertexShader;
     GLuint fragmentShader;
 
-    std::string vertexShaderSource;
-    std::string fragmentShaderSource;
-
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
@@ -180,7 +177,10 @@ namespace osmscout {
       glBindVertexArray(vao);
     }
 
-    bool InitContext() {
+    bool InitContext(const std::string &shaderDir,
+                     const std::string &vertexShaderFileName,
+                     const std::string &fragmentShaderFileName,
+                     GLuint projectionShader) {
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
       glGenBuffers(1, &vbo);
@@ -195,11 +195,15 @@ namespace osmscout {
       textureWidthBuffer = 0;
       textureHeight = 0;
 
-      if (!LoadShader(&vertexShader, GL_VERTEX_SHADER, "vertex", vertexShaderSource)){
+      if (std::string vertexShaderSource;
+          !(LoadShaderSource(shaderDir, vertexShaderFileName, vertexShaderSource) &&
+            LoadShader(vertexShader, GL_VERTEX_SHADER, "vertex", vertexShaderSource))) {
         return false;
       }
 
-      if (!LoadShader(&fragmentShader, GL_FRAGMENT_SHADER, "fragment", fragmentShaderSource)){
+      if (std::string fragmentShaderSource;
+          !(LoadShaderSource(shaderDir, fragmentShaderFileName, fragmentShaderSource) &&
+            LoadShader(fragmentShader, GL_FRAGMENT_SHADER, "fragment", fragmentShaderSource))) {
         return false;
       }
 
@@ -208,6 +212,7 @@ namespace osmscout {
       shaderProgram = glCreateProgram();
       glAttachShader(shaderProgram, vertexShader);
       glAttachShader(shaderProgram, fragmentShader);
+      glAttachShader(shaderProgram, projectionShader);
       glBindFragDataLocation(shaderProgram, 0, "outColor");
       glLinkProgram(shaderProgram);
 
@@ -228,6 +233,7 @@ namespace osmscout {
       // Always detach shaders after a successful link.
       glDetachShader(shaderProgram, vertexShader);
       glDetachShader(shaderProgram, fragmentShader);
+      glDetachShader(shaderProgram, projectionShader);
 
       return true;
     }
@@ -241,14 +247,6 @@ namespace osmscout {
       glPixelStorei(GL_UNPACK_ALIGNMENT, TexturePixelSize);
       glBindTexture(GL_TEXTURE_2D, tex);
       glTexImage2D(GL_TEXTURE_2D, 0, TexturePixelType, textureWidth, textureHeight, 0, TexturePixelType, GL_UNSIGNED_BYTE, textures);
-    }
-
-    bool LoadFragmentShader(const std::string &dir, const std::string &fileName) {
-      return LoadShaderSource(dir, fileName, fragmentShaderSource);
-    }
-
-    bool LoadVertexShader(const std::string &dir, const std::string &fileName) {
-      return LoadShaderSource(dir, fileName, vertexShaderSource);
     }
 
     void LoadVertices() {

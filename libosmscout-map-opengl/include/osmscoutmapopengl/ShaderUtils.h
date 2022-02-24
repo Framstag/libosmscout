@@ -30,7 +30,7 @@ namespace osmscout {
 
 bool OSMSCOUT_MAP_OPENGL_API LoadShaderSource(const std::string &dirPath, const std::string &name, std::string &result);
 
-bool OSMSCOUT_MAP_OPENGL_API LoadShader(GLuint *shader,
+bool OSMSCOUT_MAP_OPENGL_API LoadShader(GLuint &shader,
                                         GLenum type,
                                         const std::string &name,
                                         const std::string &shaderSource);
