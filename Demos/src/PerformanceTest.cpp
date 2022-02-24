@@ -398,8 +398,6 @@ public:
     openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
                                                     tileHeight,
                                                     dpi,
-                                                    tileWidth,
-                                                    tileHeight,
                                                     "/usr/share/fonts/TTF/DejaVuSans.ttf",
                                                     SHADER_INSTALL_DIR);
   }

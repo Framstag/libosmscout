@@ -64,15 +64,16 @@ osmscout::MapPainterOpenGL *renderer;
 
 std::string map;
 std::string style;
-size_t width;
-size_t height;
+// framebuffer dimensions
+int width;
+int height;
 std::future<bool> result;
 
 double prevX;
 double prevY;
 int level;
 int zoom;
-unsigned long long lastZoom;
+std::chrono::steady_clock::time_point lastEvent=std::chrono::steady_clock::time_point::min();
 bool loadData = 0;
 bool loadingInProgress = 0;
 int offset;
@@ -147,9 +148,7 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
     loadData = 1;
   }
 
-  lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::steady_clock::now().time_since_epoch()).count();
-
+  lastEvent = std::chrono::steady_clock::now();
 }
 
 bool button_down = false;
@@ -174,8 +173,7 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 
 static void scroll_callback(GLFWwindow */*window*/, double /*xoffset*/, double yoffset) {
   offset = yoffset;
-  lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::steady_clock::now().time_since_epoch()).count();
+  lastEvent = std::chrono::steady_clock::now();
   loadData = 1;
   zoom = 1;
   osmscout::log.Info() << "Zoom level: " << magnification.GetLevel();
@@ -188,14 +186,23 @@ static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double
     renderer->OnTranslation(prevX, prevY, xpos, ypos);
     center = renderer->GetCenter();
     loadData = 1;
-    lastZoom = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
+    lastEvent = std::chrono::steady_clock::now();
     osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
                          << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
     osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLat() << "]";
   }
   prevX = xpos;
   prevY = ypos;
+}
+
+static void framebuffer_size_callback(GLFWwindow */*window*/, int w, int h) {
+  width=w;
+  height=h;
+  osmscout::log.Info() << "Window resize " << width << " x " << height;
+  glViewport(0, 0, width, height);
+  renderer->SetSize(width, height);
+  loadData = 1;
+  lastEvent = std::chrono::steady_clock::now();
 }
 
 int main(int argc, char *argv[]) {
@@ -306,9 +313,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  width = args.width;
-  height = args.height;
-
   database.get()->GetBoundingBox(boundingBox);
 
   drawParameter.SetFontSize(args.defaultTextSize);
@@ -330,32 +334,34 @@ int main(int argc, char *argv[]) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-  int screenWidth = mode->width;
-  int screenHeight = mode->height;
-
   if (args.dpi > 0) {
     dpi = args.dpi;
   } else {
     int widthMM, heightMM;
+    const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
     dpi = mode->width / (widthMM / 25.4);
     osmscout::log.Debug() << "Using screen dpi: " << dpi;
   }
 
-  window = glfwCreateWindow(width, height, "OSMScoutOpenGL", nullptr, nullptr);
+  window = glfwCreateWindow(args.width, args.height, "OSMScoutOpenGL", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     return -1;
   }
+
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+
   glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwMakeContextCurrent(window);
 
-  renderer = new osmscout::MapPainterOpenGL(width, height, dpi, screenWidth, screenHeight,
+  renderer = new osmscout::MapPainterOpenGL(width, height, dpi,
                                             args.fontPath, args.shaderPath, args.defaultTextSize);
   if (!renderer->IsInitialized()) {
     glfwDestroyWindow(window);
@@ -368,7 +374,7 @@ int main(int argc, char *argv[]) {
   LoadData();
   renderer->SwapData();
 
-  unsigned long long currentTime;
+  std::chrono::steady_clock::time_point currentTime;
   while (!glfwWindowShouldClose(window)) {
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -376,9 +382,9 @@ int main(int argc, char *argv[]) {
     renderer->DrawMap();
 
     if (loadData) {
-      currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-          std::chrono::steady_clock::now().time_since_epoch()).count();
-      if (((currentTime - lastZoom) > 100) && (!loadingInProgress)) {
+      currentTime = std::chrono::steady_clock::now();
+      if (( std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastEvent).count() > 100)
+            && (!loadingInProgress)) {
         double x, y;
         glfwGetCursorPos(window, &x, &y);
         if(zoom) {

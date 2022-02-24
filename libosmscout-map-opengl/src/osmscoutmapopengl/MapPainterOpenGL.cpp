@@ -31,14 +31,12 @@
 
 namespace osmscout {
 
-  MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi, int screenWidth, int screenHeight,
+  MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi,
                                      const std::string &fontPath, const std::string &shaderDir,
                                      long defaultTextSize)
       : width(width),
         height(height),
         dpi(dpi),
-        screenWidth(screenWidth),
-        screenHeight(screenHeight),
         textLoader(fontPath, defaultTextSize, dpi)
   {
     if (!textLoader.IsInitialized()) {
@@ -1165,6 +1163,11 @@ namespace osmscout {
       magnification.SetLevel(MagnificationLevel(magnification.GetLevel() - 1));
     else if (zoomDirection > 0)
       magnification.SetLevel(MagnificationLevel(magnification.GetLevel() + 1));
+  }
+
+  void osmscout::MapPainterOpenGL::SetSize(int width, int height) {
+    this->width = width;
+    this->height = height;
   }
 
   void osmscout::MapPainterOpenGL::OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
