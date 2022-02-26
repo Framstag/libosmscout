@@ -126,7 +126,9 @@ namespace osmscout {
 
   osmscout::MapPainterOpenGL::~MapPainterOpenGL()
   {
-    glDeleteShader(projectionShader);
+    if (projectionShader!=0) {
+      glDeleteShader(projectionShader);
+    }
   }
 
   void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,

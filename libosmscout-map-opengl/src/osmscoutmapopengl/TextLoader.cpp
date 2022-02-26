@@ -189,8 +189,12 @@ namespace osmscout {
   }
 
   TextLoader::~TextLoader() {
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
+    if (face!=nullptr) {
+      FT_Done_Face(face);
+    }
+    if (ft!=nullptr) {
+      FT_Done_FreeType(ft);
+    }
   }
 
 }

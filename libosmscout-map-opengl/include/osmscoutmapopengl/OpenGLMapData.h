@@ -85,17 +85,17 @@ namespace osmscout {
     int textureWidthBuffer=0;
     int textureHeight=14;
 
-    GLuint shaderProgram;
-    GLuint vao;
-    GLuint vbo;
-    GLuint ebo;
-    GLuint tex;
+    GLuint shaderProgram=0;
+    GLuint vao=0;
+    GLuint vbo=0;
+    GLuint ebo=0;
+    GLuint tex=0;
 
     int verticesSize;
     float zoom;
 
-    GLuint vertexShader;
-    GLuint fragmentShader;
+    GLuint vertexShader=0;
+    GLuint fragmentShader=0;
 
     glm::mat4 model;
     glm::mat4 view;
@@ -118,14 +118,26 @@ namespace osmscout {
     {
       clearData();
 
-      glDeleteProgram(shaderProgram);
-      glDeleteShader(fragmentShader);
-      glDeleteShader(vertexShader);
+      if (shaderProgram!=0) {
+        glDeleteProgram(shaderProgram);
+      }
+      if (fragmentShader!=0) {
+        glDeleteShader(fragmentShader);
+      }
+      if (vertexShader!=0) {
+        glDeleteShader(vertexShader);
+      }
 
-      glDeleteBuffers(1, &ebo);
-      glDeleteBuffers(1, &vbo);
+      if (ebo!=0) {
+        glDeleteBuffers(1, &ebo);
+      }
+      if (vbo!=0) {
+        glDeleteBuffers(1, &vbo);
+      }
 
-      glDeleteVertexArrays(1, &vao);
+      if (vao!=0) {
+        glDeleteVertexArrays(1, &vao);
+      }
     }
 
     OpenGLMapData(const OpenGLMapData&) = delete;
