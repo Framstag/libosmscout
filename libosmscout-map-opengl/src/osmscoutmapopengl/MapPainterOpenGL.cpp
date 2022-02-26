@@ -312,7 +312,10 @@ namespace osmscout {
 
     //osmscout::log.Info() << "Area: " << data.areas.size();
 
-    std::vector<AreaRef> areas = data.areas;
+    std::vector<AreaRef> areas;
+    areas.reserve(data.areas.size() + data.poiAreas.size());
+    areas.insert(areas.end(), data.areas.begin(), data.areas.end());
+    areas.insert(areas.end(), data.poiAreas.begin(), data.poiAreas.end());
 
     std::sort(areas.begin(), areas.end(),
               [](const AreaRef &a, const AreaRef &b) -> bool {
@@ -565,6 +568,172 @@ namespace osmscout {
              yMax < 0);
   }
 
+  void osmscout::MapPainterOpenGL::ProcessWay(const osmscout::WayRef &way,
+                                              const osmscout::Projection &projection,
+                                              const osmscout::StyleConfigRef &styleConfig,
+                                              const WidthFeatureValueReader &widthReader)
+  {
+    std::vector<LineStyleRef> lineStyles;
+
+    styleConfig->GetWayLineStyles(way->GetFeatureValueBuffer(),
+                                  projection,
+                                  lineStyles);
+
+    if (lineStyles.empty()) {
+      return;
+    }
+
+    FeatureValueBuffer buffer(way->GetFeatureValueBuffer());
+
+    for (int l = lineStyles.size() - 1; l >= 0; l--) {
+      Color color = lineStyles[l]->GetLineColor();
+
+      int border = l;
+      double lineWidth = 0.0;
+      double lineOffset = 0.0;
+      double z;
+      if (l == 0)
+        z = 0.001;
+      else
+        z = 0.0;
+
+      if (lineStyles[l]->GetWidth() > 0.0) {
+        WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
+
+        if (widthValue != nullptr) {
+          lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
+        } else {
+          lineWidth += lineStyles[l]->GetWidth() / projection.GetPixelSize();
+        }
+      }
+
+      if (lineStyles[l]->GetDisplayWidth() > 0.0) {
+        lineWidth += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayWidth());
+      }
+
+      if (lineWidth == 0.0) {
+        return;
+      }
+
+      if (lineStyles[l]->GetOffset() != 0.0) {
+        lineOffset += lineStyles[l]->GetOffset() / projection.GetPixelSize();
+      }
+
+      if (lineStyles[l]->GetDisplayOffset() != 0.0) {
+        lineOffset += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayOffset());
+      }
+
+      osmscout::Color gapColor;
+      if (!lineStyles[l]->GetDash().empty())
+        gapColor = lineStyles[l]->GetGapColor();
+      else
+        gapColor = lineStyles[l]->GetLineColor();
+
+      for (size_t i = 0; i < way->nodes.size() - 1; i++) {
+        double length = 1;
+        double dashSize = 0;
+        if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
+          for (size_t d = 0; d < lineStyles[l]->GetDash().size(); d++) {
+            if (lineStyles[l]->GetDash()[d] != 0) {
+              dashSize = lineStyles[l]->GetDash()[d];
+              break;
+            }
+          }
+          double distance = sqrt(osmscout::DistanceSquare(way->nodes[i], way->nodes[i + 1]));
+          double degreeToMeter = std::abs(0.00001 * std::cos(way->nodes[i].GetLat()));
+          double distanceMeter = distance / degreeToMeter;
+          double result = projection.GetMeterInPixel() * distanceMeter;
+          length = result;
+        }
+        //first triangle
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? TStart : TL, lineWidth,
+                      glm::vec3(1, 0, 1),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? BStart : BL, lineWidth,
+                      glm::vec3(0, 1, 1),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, (i == way->nodes.size() - 2 ? TEnd : TR), lineWidth,
+                      glm::vec3(0, 0, 1),
+                      border, z, dashSize, length, gapColor);
+        //second triangle
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, (i == way->nodes.size() - 2) ? TEnd : TR, lineWidth,
+                      glm::vec3(1, 1, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? BStart : BL, lineWidth,
+                      glm::vec3(0, 1, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
+                      glm::vec3(0, 1, 1),
+                      border, z, dashSize, length, gapColor);
+
+        int num;
+        num = wayRenderer.GetVerticesNumber() - 6;
+        for (unsigned int n = 0; n < 6; n++)
+          wayRenderer.AddNewElement(num + n);
+
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? TStart : TL, lineWidth,
+                      glm::vec3(1, 1, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
+                      glm::vec3(0, 1, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? BStart : BL, lineWidth,
+                      glm::vec3(0, 1, 1),
+                      border, z, dashSize, length, gapColor);
+        //
+        AddPathVertex(way->nodes[i],
+                      i == 0 ? way->nodes[i] : way->nodes[i - 1],
+                      way->nodes[i + 1],
+                      color, i == 0 ? TStart : TL, lineWidth,
+                      glm::vec3(1, 0, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
+                      glm::vec3(1, 1, 0),
+                      border, z, dashSize, length, gapColor);
+        AddPathVertex(way->nodes[i + 1],
+                      way->nodes[i],
+                      (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
+                      color, i == way->nodes.size() - 2 ? TEnd : TR, lineWidth,
+                      glm::vec3(1, 0, 1),
+                      border, z, dashSize, length, gapColor);
+
+        num = wayRenderer.GetVerticesNumber() - 6;
+        for (unsigned int n = 0; n < 6; n++)
+          wayRenderer.AddNewElement(num + n);
+      }
+    }
+  }
+
   void
   osmscout::MapPainterOpenGL::ProcessWays(const osmscout::MapData &data,
                                           const osmscout::MapParameter &/*parameter*/,
@@ -572,171 +741,15 @@ namespace osmscout {
                                           const osmscout::StyleConfigRef &styleConfig) {
 
     WidthFeatureValueReader widthReader(*styleConfig->GetTypeConfig());
-    LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
+    // LayerFeatureValueReader layerReader(*styleConfig->GetTypeConfig());
 
     //osmscout::log.Info() << "Ways: " << data.ways.size();
 
     for (const auto &way: data.ways) {
-
-      std::vector<LineStyleRef> lineStyles;
-
-      styleConfig->GetWayLineStyles(way->GetFeatureValueBuffer(),
-                                    projection,
-                                    lineStyles);
-
-      if (lineStyles.empty()) {
-        continue;
-      }
-
-      FeatureValueBuffer buffer(way->GetFeatureValueBuffer());
-
-      for (int l = lineStyles.size() - 1; l >= 0; l--) {
-        Color color = lineStyles[l]->GetLineColor();
-
-        int border = l;
-        double lineWidth = 0.0;
-        double lineOffset = 0.0;
-        double z;
-        if (l == 0)
-          z = 0.001;
-        else
-          z = 0.0;
-
-        if (lineStyles[l]->GetWidth() > 0.0) {
-          WidthFeatureValue *widthValue = widthReader.GetValue(buffer);
-
-          if (widthValue != nullptr) {
-            lineWidth += widthValue->GetWidth() / projection.GetPixelSize();
-          } else {
-            lineWidth += lineStyles[l]->GetWidth() / projection.GetPixelSize();
-          }
-        }
-
-        if (lineStyles[l]->GetDisplayWidth() > 0.0) {
-          lineWidth += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayWidth());
-        }
-
-        if (lineWidth == 0.0) {
-          return;
-        }
-
-        if (lineStyles[l]->GetOffset() != 0.0) {
-          lineOffset += lineStyles[l]->GetOffset() / projection.GetPixelSize();
-        }
-
-        if (lineStyles[l]->GetDisplayOffset() != 0.0) {
-          lineOffset += projection.ConvertWidthToPixel(lineStyles[l]->GetDisplayOffset());
-        }
-
-        osmscout::Color gapColor;
-        if (!lineStyles[l]->GetDash().empty())
-          gapColor = lineStyles[l]->GetGapColor();
-        else
-          gapColor = lineStyles[l]->GetLineColor();
-
-        for (size_t i = 0; i < way->nodes.size() - 1; i++) {
-          double length = 1;
-          double dashSize = 0;
-          if (!lineStyles[l]->GetDash().empty() && (l == 0)) {
-            for (size_t d = 0; d < lineStyles[l]->GetDash().size(); d++) {
-              if (lineStyles[l]->GetDash()[d] != 0) {
-                dashSize = lineStyles[l]->GetDash()[d];
-                break;
-              }
-            }
-            double distance = sqrt(osmscout::DistanceSquare(way->nodes[i], way->nodes[i + 1]));
-            double degreeToMeter = std::abs(0.00001 * std::cos(way->nodes[i].GetLat()));
-            double distanceMeter = distance / degreeToMeter;
-            double result = projection.GetMeterInPixel() * distanceMeter;
-            length = result;
-          }
-          //first triangle
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? TStart : TL, lineWidth,
-                        glm::vec3(1, 0, 1),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? BStart : BL, lineWidth,
-                        glm::vec3(0, 1, 1),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, (i == way->nodes.size() - 2 ? TEnd : TR), lineWidth,
-                        glm::vec3(0, 0, 1),
-                        border, z, dashSize, length, gapColor);
-          //second triangle
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, (i == way->nodes.size() - 2) ? TEnd : TR, lineWidth,
-                        glm::vec3(1, 1, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? BStart : BL, lineWidth,
-                        glm::vec3(0, 1, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
-                        glm::vec3(0, 1, 1),
-                        border, z, dashSize, length, gapColor);
-
-          int num;
-          num = wayRenderer.GetVerticesNumber() - 6;
-          for (unsigned int n = 0; n < 6; n++)
-            wayRenderer.AddNewElement(num + n);
-
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? TStart : TL, lineWidth,
-                        glm::vec3(1, 1, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
-                        glm::vec3(0, 1, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? BStart : BL, lineWidth,
-                        glm::vec3(0, 1, 1),
-                        border, z, dashSize, length, gapColor);
-          //
-          AddPathVertex(way->nodes[i],
-                        i == 0 ? way->nodes[i] : way->nodes[i - 1],
-                        way->nodes[i + 1],
-                        color, i == 0 ? TStart : TL, lineWidth,
-                        glm::vec3(1, 0, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, i == way->nodes.size() - 2 ? BEnd : BR, lineWidth,
-                        glm::vec3(1, 1, 0),
-                        border, z, dashSize, length, gapColor);
-          AddPathVertex(way->nodes[i + 1],
-                        way->nodes[i],
-                        (i == way->nodes.size() - 2 ? way->nodes[i + 1] : way->nodes[i + 2]),
-                        color, i == way->nodes.size() - 2 ? TEnd : TR, lineWidth,
-                        glm::vec3(1, 0, 1),
-                        border, z, dashSize, length, gapColor);
-
-          num = wayRenderer.GetVerticesNumber() - 6;
-          for (unsigned int n = 0; n < 6; n++)
-            wayRenderer.AddNewElement(num + n);
-        }
-      }
+      ProcessWay(way, projection, styleConfig, widthReader);
+    }
+    for (const auto &way: data.poiWays) {
+      ProcessWay(way, projection, styleConfig, widthReader);
     }
   }
 
@@ -925,6 +938,249 @@ namespace osmscout {
     }
   }
 
+  void osmscout::MapPainterOpenGL::ProcessNode(const osmscout::NodeRef &node,
+                                               const osmscout::MapParameter &parameter,
+                                               const osmscout::Projection &projection,
+                                               const osmscout::StyleConfigRef &styleConfig,
+                                               std::vector<int> &icons)
+  {
+    FeatureValueBuffer buffer = node->GetFeatureValueBuffer();
+    IconStyleRef iconStyle=styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
+                                                         projection);
+
+    std::vector<TextStyleRef> textStyles;
+    styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
+                                   projection,
+                                   textStyles);
+
+    bool hasIcon = false;
+    if (iconStyle) {
+      //has icon?
+      OpenGLTextureRef image;
+      int IconIndex = 0;
+      for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
+           path != parameter.GetIconPaths().end();
+           ++path) {
+        std::string filename = *path + iconStyle->GetIconName() + ".png";
+
+        int id = iconStyle->GetIconId();
+        bool loaded = false;
+        for (unsigned int i = 0; i < icons.size(); i++) {
+          if (id == icons[i]) {
+            IconIndex = i;
+            hasIcon = true;
+            loaded = true;
+            break;
+          }
+        }
+
+        if (loaded)
+          break;
+
+        image = osmscout::LoadPNGOpenGL(filename);
+
+        if (image != nullptr) {
+          imageRenderer.AddNewTexture(image);
+          icons.push_back(id);
+          hasIcon = true;
+          IconIndex = icons.size() - 1;
+          break;
+        }
+      }
+
+      if (!iconStyle->GetIconName().empty() && hasIcon) {
+        osmscout::GeoCoord coords = node->GetCoords();
+        size_t textureWidth = imageRenderer.GetTextureWidth(IconIndex);
+        size_t startWidth = imageRenderer.GetTextureWidthSum(IconIndex) - textureWidth;
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(1);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(2);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(3);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(3);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(1);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        imageRenderer.AddNewVertex(coords.GetLon());
+        imageRenderer.AddNewVertex(coords.GetLat());
+        imageRenderer.AddNewVertex(4);
+        imageRenderer.AddNewVertex(startWidth);
+        imageRenderer.AddNewVertex(textureWidth);
+
+        int num;
+        if (imageRenderer.GetNumOfVertices() <= 30) {
+          num = 0;
+        } else {
+          num = imageRenderer.GetVerticesNumber() - 6;
+        }
+        imageRenderer.AddNewElement(num);
+        imageRenderer.AddNewElement(num + 1);
+        imageRenderer.AddNewElement(num + 2);
+        imageRenderer.AddNewElement(num + 3);
+        imageRenderer.AddNewElement(num + 4);
+        imageRenderer.AddNewElement(num + 5);
+
+
+      } else if (iconStyle->GetSymbol()) {
+        osmscout::SymbolRef symbol = iconStyle->GetSymbol();
+
+        double minX;
+        double minY;
+        double maxX;
+        double maxY;
+        symbol->GetBoundingBox(projection, minX, minY, maxX, maxY);
+
+        double centerX = (minX + maxX) / 2;
+        double centerY = (minY + maxY) / 2;
+
+        for (const auto &p : symbol->GetPrimitives()) {
+          DrawPrimitive *primitive = p.get();
+          FillStyleRef fillStyle = primitive->GetFillStyle();
+
+          if (PolygonPrimitive *polygon = dynamic_cast<PolygonPrimitive *>(primitive);
+              polygon !=nullptr) {
+
+            double meterPerPixelLat = (40075.016686 * 1000) * std::cos(node->GetCoords().GetLat()) /
+                                      (float) (std::pow(2, (magnification.GetLevel() + 9)));
+            double meterPerPixel = (40075.016686 * 1000) / (float) (std::pow(2, (magnification.GetLevel() + 9)));
+            std::vector<osmscout::Vertex2D> vertices;
+            for (const auto &pixel : polygon->GetCoords()) {
+              double meterToDegreeLat = std::cos(node->GetCoords().GetLat()) * 0.00001;
+              double meterToDegree = 0.00001;
+              double scale = -1 * meterPerPixel * meterToDegree;
+              double scaleLat = -1 * meterPerPixelLat * meterToDegreeLat;
+
+              double x =
+                  node->GetCoords().GetLon() + ((projection.ConvertWidthToPixel(pixel.GetX()) - centerX) * scale);
+              double y = node->GetCoords().GetLat() +
+                         ((projection.ConvertWidthToPixel(pixel.GetY()) - centerY) * scaleLat);
+
+              vertices.push_back(osmscout::Vertex2D(x, y));
+            }
+
+            std::vector<GLfloat> points = osmscout::Triangulate::TriangulatePolygon(vertices);
+
+            Color color = fillStyle->GetFillColor();
+
+            for (size_t t = 0; t < points.size(); t++) {
+              if (t % 2 == 0) {
+                areaRenderer.AddNewVertex(points[t]);
+              } else {
+                areaRenderer.AddNewVertex(points[t]);
+                areaRenderer.AddNewVertex(color.GetR());
+                areaRenderer.AddNewVertex(color.GetG());
+                areaRenderer.AddNewVertex(color.GetB());
+                areaRenderer.AddNewVertex(color.GetA());
+
+                if (areaRenderer.GetNumOfVertices() <= 6) {
+                  areaRenderer.AddNewElement(0);
+                } else {
+                  areaRenderer.AddNewElement(areaRenderer.GetVerticesNumber() - 1);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (const auto& textStyle : textStyles) {
+      std::string label = textStyle->GetLabel()->GetLabel(parameter,
+                                                          buffer);
+
+      int offset = 0;
+
+      if (label.empty()) {
+        continue;
+      }
+
+      if (hasIcon) {
+        offset = 15;
+      }
+
+      double alpha = 1.0;
+      double fontSize = 1.0;
+
+      if (projection.GetMagnification() > textStyle->GetScaleAndFadeMag() &&
+          parameter.GetDrawFadings()) {
+        double factor = projection.GetMagnification().GetLevel() - textStyle->GetScaleAndFadeMag().GetLevel();
+        fontSize = textStyle->GetSize() * pow(1.5, factor);
+        alpha = std::min(textStyle->GetAlpha() / factor, 1.0);
+
+      } else if (textStyle->GetAutoSize()) {
+        //fontSize = textStyle->GetSize();
+        alpha = textStyle->GetAlpha();
+        //TODO
+        continue;
+      } else {
+        fontSize = textStyle->GetSize();
+        alpha = textStyle->GetAlpha();
+      }
+
+      Color color = textStyle->GetTextColor();
+      std::vector<int> textureAtlasIndices = textLoader.AddCharactersToTextureAtlas(label, fontSize);
+      int widthSum = 0;
+      for (int index: textureAtlasIndices) {
+        osmscout::GeoCoord coords = node->GetCoords();
+        size_t textureWidth = textLoader.GetWidth(index);
+        size_t startWidth = textLoader.GetStartWidth(index);
+
+        int shaderIndices[] = {1, 2, 3, 3, 1, 4};
+        for (int i: shaderIndices) {
+          textRenderer.AddNewVertex(coords.GetLon());
+          textRenderer.AddNewVertex(coords.GetLat());
+          textRenderer.AddNewVertex(color.GetR());
+          textRenderer.AddNewVertex(color.GetG());
+          textRenderer.AddNewVertex(color.GetB());
+          textRenderer.AddNewVertex(alpha);
+          textRenderer.AddNewVertex(i);
+          textRenderer.AddNewVertex(startWidth);
+          textRenderer.AddNewVertex(textureWidth);
+          textRenderer.AddNewVertex(widthSum);
+          textRenderer.AddNewVertex(offset);
+        }
+
+        widthSum += textureWidth + 1;
+
+        int num;
+        if (textRenderer.GetNumOfVertices() <= 60) {
+          num = 0;
+        } else {
+          num = textRenderer.GetVerticesNumber() - 6;
+        }
+        textRenderer.AddNewElement(num);
+        textRenderer.AddNewElement(num + 1);
+        textRenderer.AddNewElement(num + 2);
+        textRenderer.AddNewElement(num + 3);
+        textRenderer.AddNewElement(num + 4);
+        textRenderer.AddNewElement(num + 5);
+
+      }
+    }
+  }
+
   void
   osmscout::MapPainterOpenGL::ProcessNodes(const osmscout::MapData &data,
                                            const osmscout::MapParameter &parameter,
@@ -935,241 +1191,10 @@ namespace osmscout {
 
     std::vector<int> icons;
     for (const auto &node: data.nodes) {
-      FeatureValueBuffer buffer = node->GetFeatureValueBuffer();
-      IconStyleRef iconStyle=styleConfig->GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                                           projection);
-
-      std::vector<TextStyleRef> textStyles;
-      styleConfig->GetNodeTextStyles(node->GetFeatureValueBuffer(),
-                                     projection,
-                                     textStyles);
-
-      bool hasIcon = false;
-      if (iconStyle) {
-        //has icon?
-        OpenGLTextureRef image;
-        int IconIndex = 0;
-        for (std::list<std::string>::const_iterator path = parameter.GetIconPaths().begin();
-             path != parameter.GetIconPaths().end();
-             ++path) {
-          std::string filename = *path + iconStyle->GetIconName() + ".png";
-
-          int id = iconStyle->GetIconId();
-          bool loaded = false;
-          for (unsigned int i = 0; i < icons.size(); i++) {
-            if (id == icons[i]) {
-              IconIndex = i;
-              hasIcon = true;
-              loaded = true;
-              break;
-            }
-          }
-
-          if (loaded)
-            break;
-
-          image = osmscout::LoadPNGOpenGL(filename);
-
-          if (image != nullptr) {
-            imageRenderer.AddNewTexture(image);
-            icons.push_back(id);
-            hasIcon = true;
-            IconIndex = icons.size() - 1;
-            break;
-          }
-        }
-
-        if (!iconStyle->GetIconName().empty() && hasIcon) {
-          osmscout::GeoCoord coords = node->GetCoords();
-          size_t textureWidth = imageRenderer.GetTextureWidth(IconIndex);
-          size_t startWidth = imageRenderer.GetTextureWidthSum(IconIndex) - textureWidth;
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(1);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(2);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(3);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(3);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(1);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          imageRenderer.AddNewVertex(coords.GetLon());
-          imageRenderer.AddNewVertex(coords.GetLat());
-          imageRenderer.AddNewVertex(4);
-          imageRenderer.AddNewVertex(startWidth);
-          imageRenderer.AddNewVertex(textureWidth);
-
-          int num;
-          if (imageRenderer.GetNumOfVertices() <= 30) {
-            num = 0;
-          } else {
-            num = imageRenderer.GetVerticesNumber() - 6;
-          }
-          imageRenderer.AddNewElement(num);
-          imageRenderer.AddNewElement(num + 1);
-          imageRenderer.AddNewElement(num + 2);
-          imageRenderer.AddNewElement(num + 3);
-          imageRenderer.AddNewElement(num + 4);
-          imageRenderer.AddNewElement(num + 5);
-
-
-        } else if (iconStyle->GetSymbol()) {
-          osmscout::SymbolRef symbol = iconStyle->GetSymbol();
-
-          double minX;
-          double minY;
-          double maxX;
-          double maxY;
-          symbol->GetBoundingBox(projection, minX, minY, maxX, maxY);
-
-          double centerX = (minX + maxX) / 2;
-          double centerY = (minY + maxY) / 2;
-
-          for (const auto &p : symbol->GetPrimitives()) {
-            DrawPrimitive *primitive = p.get();
-            FillStyleRef fillStyle = primitive->GetFillStyle();
-
-            if (PolygonPrimitive *polygon = dynamic_cast<PolygonPrimitive *>(primitive);
-                polygon !=nullptr) {
-
-              double meterPerPixelLat = (40075.016686 * 1000) * std::cos(node->GetCoords().GetLat()) /
-                                        (float) (std::pow(2, (magnification.GetLevel() + 9)));
-              double meterPerPixel = (40075.016686 * 1000) / (float) (std::pow(2, (magnification.GetLevel() + 9)));
-              std::vector<osmscout::Vertex2D> vertices;
-              for (const auto &pixel : polygon->GetCoords()) {
-                double meterToDegreeLat = std::cos(node->GetCoords().GetLat()) * 0.00001;
-                double meterToDegree = 0.00001;
-                double scale = -1 * meterPerPixel * meterToDegree;
-                double scaleLat = -1 * meterPerPixelLat * meterToDegreeLat;
-
-                double x =
-                    node->GetCoords().GetLon() + ((projection.ConvertWidthToPixel(pixel.GetX()) - centerX) * scale);
-                double y = node->GetCoords().GetLat() +
-                           ((projection.ConvertWidthToPixel(pixel.GetY()) - centerY) * scaleLat);
-
-                vertices.push_back(osmscout::Vertex2D(x, y));
-              }
-
-              std::vector<GLfloat> points = osmscout::Triangulate::TriangulatePolygon(vertices);
-
-              Color color = fillStyle->GetFillColor();
-
-              for (size_t t = 0; t < points.size(); t++) {
-                if (t % 2 == 0) {
-                  areaRenderer.AddNewVertex(points[t]);
-                } else {
-                  areaRenderer.AddNewVertex(points[t]);
-                  areaRenderer.AddNewVertex(color.GetR());
-                  areaRenderer.AddNewVertex(color.GetG());
-                  areaRenderer.AddNewVertex(color.GetB());
-                  areaRenderer.AddNewVertex(color.GetA());
-
-                  if (areaRenderer.GetNumOfVertices() <= 6) {
-                    areaRenderer.AddNewElement(0);
-                  } else {
-                    areaRenderer.AddNewElement(areaRenderer.GetVerticesNumber() - 1);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      for (const auto& textStyle : textStyles) {
-        std::string label = textStyle->GetLabel()->GetLabel(parameter,
-                                                            buffer);
-
-        int offset = 0;
-
-        if (label.empty()) {
-          continue;
-        }
-
-        if (hasIcon) {
-          offset = 15;
-        }
-
-        double alpha = 1.0;
-        double fontSize = 1.0;
-
-        if (projection.GetMagnification() > textStyle->GetScaleAndFadeMag() &&
-            parameter.GetDrawFadings()) {
-          double factor = projection.GetMagnification().GetLevel() - textStyle->GetScaleAndFadeMag().GetLevel();
-          fontSize = textStyle->GetSize() * pow(1.5, factor);
-          alpha = std::min(textStyle->GetAlpha() / factor, 1.0);
-
-        } else if (textStyle->GetAutoSize()) {
-          //fontSize = textStyle->GetSize();
-          alpha = textStyle->GetAlpha();
-          //TODO
-          continue;
-        } else {
-          fontSize = textStyle->GetSize();
-          alpha = textStyle->GetAlpha();
-        }
-
-        Color color = textStyle->GetTextColor();
-        std::vector<int> textureAtlasIndices = textLoader.AddCharactersToTextureAtlas(label, fontSize);
-        int widthSum = 0;
-        for (int index: textureAtlasIndices) {
-          osmscout::GeoCoord coords = node->GetCoords();
-          size_t textureWidth = textLoader.GetWidth(index);
-          size_t startWidth = textLoader.GetStartWidth(index);
-
-          int shaderIndices[] = {1, 2, 3, 3, 1, 4};
-          for (int i: shaderIndices) {
-            textRenderer.AddNewVertex(coords.GetLon());
-            textRenderer.AddNewVertex(coords.GetLat());
-            textRenderer.AddNewVertex(color.GetR());
-            textRenderer.AddNewVertex(color.GetG());
-            textRenderer.AddNewVertex(color.GetB());
-            textRenderer.AddNewVertex(alpha);
-            textRenderer.AddNewVertex(i);
-            textRenderer.AddNewVertex(startWidth);
-            textRenderer.AddNewVertex(textureWidth);
-            textRenderer.AddNewVertex(widthSum);
-            textRenderer.AddNewVertex(offset);
-          }
-
-          widthSum += textureWidth + 1;
-
-          int num;
-          if (textRenderer.GetNumOfVertices() <= 60) {
-            num = 0;
-          } else {
-            num = textRenderer.GetVerticesNumber() - 6;
-          }
-          textRenderer.AddNewElement(num);
-          textRenderer.AddNewElement(num + 1);
-          textRenderer.AddNewElement(num + 2);
-          textRenderer.AddNewElement(num + 3);
-          textRenderer.AddNewElement(num + 4);
-          textRenderer.AddNewElement(num + 5);
-
-        }
-      }
+      ProcessNode(node, parameter, projection, styleConfig, icons);
+    }
+    for (const auto &node: data.poiNodes) {
+      ProcessNode(node, parameter, projection, styleConfig, icons);
     }
 
     OpenGLTextureRef t = textLoader.CreateTexture();
