@@ -41,7 +41,7 @@
  */
 
 int main(int argc, char* argv[]) {
-  DrawMapDemo drawDemo("DrawMapOpenGL", argc, argv);
+  DrawMapDemo drawDemo("DrawMapOpenGL", argc, argv, 96.0, ARG_WS_CONSOLE, DEFAULT_FONT_FILE);
 
   std::string shaderPath=SHADER_INSTALL_DIR;
   drawDemo.argParser.AddOption(osmscout::CmdLineStringOption([&shaderPath](const std::string& value) {
