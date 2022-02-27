@@ -79,8 +79,8 @@ namespace osmscout {
   private:
     bool initialized = false;
 
-    FT_Library ft;
-    FT_Face face;
+    FT_Library ft=nullptr;
+    FT_Face face=nullptr;
 
     long defaultFontSize;
 

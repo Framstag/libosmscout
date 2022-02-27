@@ -66,7 +66,7 @@ namespace osmscout {
     float lookX;
     float lookY;
 
-    GLuint projectionShader;
+    GLuint projectionShader=0;
 
     OpenGLMapData<GL_RGBA, 4> areaRenderer;
     OpenGLMapData<GL_RGBA, 4> groundTileRenderer;
