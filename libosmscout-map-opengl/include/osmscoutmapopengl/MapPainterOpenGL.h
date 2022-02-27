@@ -97,12 +97,23 @@ namespace osmscout {
     void ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                        const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
 
+    void ProcessWay(const osmscout::WayRef &way,
+                    const osmscout::Projection &projection,
+                    const osmscout::StyleConfigRef &styleConfig,
+                    const WidthFeatureValueReader &widthReader);
+
     /**
     * Processes OSM way data, and converts to the format required by the OpenGL pipeline
     */
     void ProcessWays(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
                      const osmscout::Projection &projection,
                      const osmscout::StyleConfigRef &styleConfig);
+
+    void ProcessNode(const osmscout::NodeRef &node,
+                     const osmscout::MapParameter &parameter,
+                     const osmscout::Projection &projection,
+                     const osmscout::StyleConfigRef &styleConfig,
+                     std::vector<int> &icons);
 
     /**
     * Processes OSM node data, and converts to the format required by the OpenGL pipeline
