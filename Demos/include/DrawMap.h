@@ -57,11 +57,7 @@ struct Arguments {
   std::list<std::string> iconPaths;
 
   double fontSize{3.0};
-#ifdef _WIN32
-  std::string fontName{ "C:\\Windows\\Fonts\\arial.ttf" };
-#else
-  std::string fontName{"/usr/share/fonts/TTF/LiberationSans-Regular.ttf"};
-#endif
+  std::string fontName;
 };
 
 enum DrawMapArgParserWindowStyle
@@ -69,6 +65,12 @@ enum DrawMapArgParserWindowStyle
   ARG_WS_CONSOLE,
   ARG_WS_WINDOW
 };
+
+#ifdef _WIN32
+#define DEMO_DEFAULT_FONT_FILE "C:\\Windows\\Fonts\\arial.ttf"
+#else
+#define DEMO_DEFAULT_FONT_FILE "/usr/share/fonts/TTF/LiberationSans-Regular.ttf"
+#endif
 
 class DrawMapArgParser: public osmscout::CmdLineParser
 {
@@ -79,10 +81,12 @@ public:
   DrawMapArgParser(const std::string& appName,
                    int argc, char* argv[],
                    double dpi,
-                   DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE)
+                   DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE,
+                   const std::string &fontFile=DEMO_DEFAULT_FONT_FILE)
                    : osmscout::CmdLineParser(appName, argc, argv)
   {
     args.dpi = dpi;
+    args.fontName = fontFile;
 
     AddOption(osmscout::CmdLineFlag([this](const bool& value) {
                 args.help=value;
@@ -242,8 +246,9 @@ public:
   DrawMapDemo(const std::string& appName,
               int argc, char* argv[],
               double dpi=96.0,
-              DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE):
-      argParser(appName, argc, argv, dpi, windowStyle)
+              DrawMapArgParserWindowStyle windowStyle=ARG_WS_CONSOLE,
+              const std::string &fontFile=DEMO_DEFAULT_FONT_FILE):
+      argParser(appName, argc, argv, dpi, windowStyle, fontFile)
   {
 
   }
