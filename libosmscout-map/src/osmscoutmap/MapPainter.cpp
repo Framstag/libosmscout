@@ -39,8 +39,8 @@
 namespace osmscout {
 
   static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
-                            double gridSizeHoriz,
-                            double gridSizeVert)
+                                          double gridSizeHoriz,
+                                          double gridSizeVert)
   {
     assert(nodes.size()>=2);
 
@@ -187,7 +187,11 @@ namespace osmscout {
 
     stepMethods[RenderSteps::Initialize]=&MapPainter::InitializeRender;
     stepMethods[RenderSteps::DumpStatistics]=&MapPainter::DumpStatistics;
-    stepMethods[RenderSteps::PreprocessData]=&MapPainter::PreprocessData;
+    stepMethods[RenderSteps::CalculatePaths]=&MapPainter::CalculatePaths;
+    stepMethods[RenderSteps::CalculateWayShields]=&MapPainter::CalculateWayShields;
+    stepMethods[RenderSteps::ProcessAreas]=&MapPainter::ProcessAreas;
+    stepMethods[RenderSteps::ProcessRoutes]=&MapPainter::ProcessRoutes;
+    stepMethods[RenderSteps::AfterPreprocessing]=&MapPainter::AfterPreprocessing;
     stepMethods[RenderSteps::Prerender]=&MapPainter::Prerender;
     stepMethods[RenderSteps::DrawBaseMapTiles]=&MapPainter::DrawBaseMapTiles;
     stepMethods[RenderSteps::DrawGroundTiles]=&MapPainter::DrawGroundTiles;
@@ -521,7 +525,7 @@ namespace osmscout {
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
   {
-    const LabelStyleRef& style=shieldStyle->GetShieldStyle();
+    LabelStyleRef style=shieldStyle->GetShieldStyle();
     std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
                                                 shieldGridSizeHoriz,
                                                 shieldGridSizeVert);
@@ -541,7 +545,11 @@ namespace osmscout {
       labelBox.text=text;
 
       std::vector<LabelData> vect = {labelBox};
-      RegisterRegularLabel(projection, parameter, vect, Vertex2D(x,y), /*proposedWidth*/ -1);
+      RegisterRegularLabel(projection,
+                           parameter,
+                           vect,
+                           Vertex2D(x,y),
+                           /*proposedWidth*/ -1);
     }
   }
 
@@ -1048,9 +1056,9 @@ namespace osmscout {
   bool MapPainter::CalculateWayShieldLabels(const StyleConfig& styleConfig,
                                             const Projection& projection,
                                             const MapParameter& parameter,
-                                            const Way& data)
+                                            const Way& way)
   {
-    PathShieldStyleRef shieldStyle=styleConfig.GetWayPathShieldStyle(data.GetFeatureValueBuffer(),
+    PathShieldStyleRef shieldStyle=styleConfig.GetWayPathShieldStyle(way.GetFeatureValueBuffer(),
                                                                      projection);
 
     if (!shieldStyle) {
@@ -1058,7 +1066,7 @@ namespace osmscout {
     }
 
     std::string shieldLabel=shieldStyle->GetLabel()->GetLabel(parameter,
-                                                              data.GetFeatureValueBuffer());
+                                                              way.GetFeatureValueBuffer());
 
     if (shieldLabel.empty()) {
       return false;
@@ -1068,7 +1076,7 @@ namespace osmscout {
                           parameter,
                           shieldStyle,
                           shieldLabel,
-                          data.nodes);
+                          way.nodes);
 
     return true;
   }
@@ -1429,8 +1437,7 @@ namespace osmscout {
     });
   }
 
-  void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
-                                const Projection& projection,
+  void MapPainter::ProcessAreas(const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
@@ -1438,17 +1445,15 @@ namespace osmscout {
 
     //Areas
     for (const auto& area : data.areas) {
-      PrepareArea(styleConfig,
-                   projection,
-                   parameter,
-                   area);
+      PrepareArea(*styleConfig,
+                  projection,
+                  parameter,
+                  area);
     }
-
-    areaData.sort(AreaSorter);
 
     // POI Areas
     for (const auto& area : data.poiAreas) {
-      PrepareArea(styleConfig,
+      PrepareArea(*styleConfig,
                   projection,
                   parameter,
                   area);
@@ -1633,10 +1638,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::CalculatePaths(const StyleConfig& styleConfig,
-                                  const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const Way& way)
+  void MapPainter::CalculateWayPaths(const StyleConfig& styleConfig,
+                                     const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const Way& way)
   {
     FileOffset ref=way.GetFileOffset();
     const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
@@ -1777,50 +1782,64 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::PrepareWays(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data)
+  void MapPainter::CalculatePaths(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data)
   {
-    bool hasShieldLabels = styleConfig.HasWayPathShieldStyle(projection);
+    wayData.clear();
+    wayPathData.clear();
+
+    for (const auto& way : data.ways) {
+      if (way->nodes.size() >= 2) {
+        CalculateWayPaths(*styleConfig,
+                          projection,
+                          parameter,
+                          *way);
+      }
+    }
+
+    for (const auto& way : data.poiWays) {
+      if (way->nodes.size() >= 2) {
+        CalculateWayPaths(*styleConfig,
+                          projection,
+                          parameter,
+                          *way);
+      }
+    }
+  }
+
+  void MapPainter::CalculateWayShields(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const MapData& data)
+  {
+    if (!styleConfig->HasWayPathShieldStyle(projection)) {
+      return;
+    }
 
     for (const auto& way : data.ways) {
       if (way->nodes.size() < 2) {
         continue; // algorithms require at least two points
       }
-      CalculatePaths(styleConfig,
-                     projection,
-                     parameter,
-                     *way);
 
-      if (hasShieldLabels) {
-        CalculateWayShieldLabels(styleConfig,
-                                 projection,
-                                 parameter,
-                                 *way);
-      }
+      CalculateWayShieldLabels(*styleConfig,
+                               projection,
+                               parameter,
+                               *way);
     }
 
     for (const auto& way : data.poiWays) {
-      if (way->nodes.size() < 2) {
+      if (way->nodes.size()<2) {
         continue; // algorithms require at least two points
       }
-      CalculatePaths(styleConfig,
-                     projection,
-                     parameter,
-                     *way);
 
-      if (hasShieldLabels) {
-        CalculateWayShieldLabels(styleConfig,
-                                 projection,
-                                 parameter,
-                                 *way);
-      }
+      CalculateWayShieldLabels(*styleConfig,
+                               projection,
+                               parameter,
+                               *way);
     }
   }
 
-  void MapPainter::PrepareRoutes(const StyleConfig& styleConfig,
-                                 const Projection& projection,
+  void MapPainter::ProcessRoutes(const Projection& projection,
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
@@ -1872,9 +1891,9 @@ namespace osmscout {
         continue;
       }
 
-      styleConfig.GetRouteLineStyles(route->GetFeatureValueBuffer(),
-                                     projection,
-                                     lineStyles);
+      styleConfig->GetRouteLineStyles(route->GetFeatureValueBuffer(),
+                                      projection,
+                                      lineStyles);
 
       if (lineStyles.empty()){
         continue;
@@ -1882,8 +1901,8 @@ namespace osmscout {
       LineStyleRef lineStyle=lineStyles.front(); // slots for routes are not supported yet
       assert(lineStyle);
 
-      PathTextStyleRef routeTextStyle=styleConfig.GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
-                                                                        projection);
+      PathTextStyleRef routeTextStyle=styleConfig->GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
+                                                                         projection);
 
       Color color=CalculateLineColor(route->GetFeatureValueBuffer(),*lineStyle);
 
@@ -2148,68 +2167,18 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::PreprocessData(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const MapData& data)
+  void MapPainter::AfterPreprocessing(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& data)
   {
-    StopClock prepareWaysTimer;
-
-    wayData.clear();
-    wayPathData.clear();
-
-    PrepareWays(*styleConfig,
-                projection,
-                parameter,
-                data);
-
-    prepareWaysTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return;
-    }
-
-    StopClock prepareRoutesTimer;
-    routeLabelData.clear();
-
-    PrepareRoutes(*styleConfig,
-                  projection,
-                  parameter,
-                  data);
-
     wayData.sort();
-
-    prepareRoutesTimer.Stop();
-
-    if (parameter.IsAborted()) {
-      return;
-    }
-
-    StopClock prepareAreasTimer;
-
-    PrepareAreas(*styleConfig,
-                 projection,
-                 parameter,
-                 data);
-
-    prepareAreasTimer.Stop();
+    areaData.sort(AreaSorter);
 
     // Optional callback after preprocessing data
     AfterPreprocessing(*styleConfig,
                        projection,
                        parameter,
                        data);
-
-    if (parameter.IsDebugPerformance() &&
-        (prepareWaysTimer.IsSignificant() ||
-         prepareAreasTimer.IsSignificant() ||
-         prepareRoutesTimer.IsSignificant())) {
-
-      log.Info()
-        << "Prep: "
-        << prepareWaysTimer.ResultString() << " (sec) "
-        << prepareAreasTimer.ResultString() << " (sec) "
-        << prepareRoutesTimer.ResultString() << " (sec)";
-    }
   }
 
   void MapPainter::Prerender(const Projection& projection,

@@ -57,25 +57,29 @@ namespace osmscout {
     FirstStep             =  0,
     Initialize            =  0, //!< Setup internal state of renderer for executing next steps with current projection and parameters
     DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer parameter
-    PreprocessData        =  2, //!< Convert geographical coordinates of object points to screen coordinates,
-    Prerender             =  3, //!< Implementation specific preparison
-    DrawBaseMapTiles      =  4, //!< Draw unknown/sea/land tiles and tiles with "coastlines" from base map
-    DrawGroundTiles       =  5, //!< Same as previous, but from main database
-    DrawOSMTileGrids      =  6, //!< If special style exists, renders grid corresponding to OSM tiles
-    DrawAreas             =  7,
-    DrawWays              =  8,
-    DrawWayDecorations    =  9,
-    DrawWayContourLabels  = 10,
-    PrepareAreaLabels     = 11,
-    DrawAreaBorderLabels  = 12,
-    DrawAreaBorderSymbols = 13,
-    PrepareNodeLabels     = 14,
-    PrepareRouteLabels    = 15,
-    DrawContourLines      = 16,
-    DrawHillShading       = 17,
-    DrawLabels            = 18,
-    Postrender            = 19, //!< Implementation specific final step
-    LastStep              = 19
+    CalculatePaths        =  2, //!< Calculate the paths to draw based on the given ways
+    CalculateWayShields   =  3, //!< Calculate the label shields on the ways
+    ProcessAreas          =  4, //!< Process (complex) areas for rendering
+    ProcessRoutes         =  5, //!< Process routes for rendering
+    AfterPreprocessing    =  6, //!< Additional postprocessing
+    Prerender             =  7, //!< Implementation specific preparison
+    DrawBaseMapTiles      =  8, //!< Draw unknown/sea/land tiles and tiles with "coastlines" from base map
+    DrawGroundTiles       =  9, //!< Same as previous, but from main database
+    DrawOSMTileGrids      = 10, //!< If special style exists, renders grid corresponding to OSM tiles
+    DrawAreas             = 11,
+    DrawWays              = 12,
+    DrawWayDecorations    = 13,
+    DrawWayContourLabels  = 14,
+    PrepareAreaLabels     = 15,
+    DrawAreaBorderLabels  = 16,
+    DrawAreaBorderSymbols = 17,
+    PrepareNodeLabels     = 18,
+    PrepareRouteLabels    = 19,
+    DrawContourLines      = 20,
+    DrawHillShading       = 21,
+    DrawLabels            = 22,
+    Postrender            = 23, //!< Implementation specific final step
+    LastStep              = 23
   };
 
   /**
@@ -223,7 +227,6 @@ namespace osmscout {
     std::list<AreaData>          areaData;           //!< Internal processing list for area rendering
     std::list<WayData>           wayData;            //!< Internal processing list for way rendering
     std::list<WayPathData>       wayPathData;
-    // std::list<RouteData>         routeData;
     std::list<RouteLabelData>    routeLabelData;
 
     std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
@@ -310,20 +313,10 @@ namespace osmscout {
 
     int8_t CalculateLineLayer(const FeatureValueBuffer& buffer) const;
 
-    void CalculatePaths(const StyleConfig& styleConfig,
-                        const Projection& projection,
-                        const MapParameter& parameter,
-                        const Way& way);
-
-    void PrepareWays(const StyleConfig& styleConfig,
-                     const Projection& projection,
-                     const MapParameter& parameter,
-                     const MapData& data);
-
-    void PrepareRoutes(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data);
+    void CalculateWayPaths(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const Way& way);
 
     bool PrepareAreaRing(const StyleConfig& styleConfig,
                          const Projection& projection,
@@ -343,11 +336,6 @@ namespace osmscout {
                           const Projection& projection,
                           const MapParameter& parameter,
                           const AreaData& areaData);
-
-    void PrepareAreas(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const MapData& data);
 
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
@@ -372,7 +360,7 @@ namespace osmscout {
     bool CalculateWayShieldLabels(const StyleConfig& styleConfig,
                                   const Projection& projection,
                                   const MapParameter& parameter,
-                                  const Way& data);
+                                  const Way& way);
 
     bool DrawWayContourLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
@@ -418,9 +406,25 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const MapData& data);
 
-    void PreprocessData(const Projection& projection,
+    void CalculatePaths(const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data);
+
+    void CalculateWayShields(const Projection& projection,
+                             const MapParameter& parameter,
+                             const MapData& data);
+
+    void ProcessAreas(const Projection& projection,
+                      const MapParameter& parameter,
+                      const MapData& data);
+
+    void ProcessRoutes(const Projection& projection,
+                       const MapParameter& parameter,
+                       const MapData& data);
+
+    void AfterPreprocessing(const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
 
     void Prerender(const Projection& projection,
                    const MapParameter& parameter,
