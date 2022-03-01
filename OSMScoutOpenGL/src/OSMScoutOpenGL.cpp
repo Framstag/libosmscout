@@ -364,9 +364,9 @@ int main(int argc, char *argv[]) {
   renderer = new osmscout::MapPainterOpenGL(width, height, dpi,
                                             args.fontPath, args.shaderPath, args.defaultTextSize);
   if (!renderer->IsInitialized()) {
+    delete renderer;
     glfwDestroyWindow(window);
     glfwTerminate();
-    delete renderer;
     return 1;
   }
 

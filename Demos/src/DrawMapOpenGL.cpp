@@ -104,6 +104,9 @@ int main(int argc, char* argv[]) {
   delete[] image;
   delete painter;
 
+  glfwDestroyWindow(offscreen_context);
+  glfwTerminate();
+
   return 0;
 }
 
