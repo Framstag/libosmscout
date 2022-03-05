@@ -21,6 +21,7 @@
 */
 
 #include <osmscoutmapopengl/ShaderUtils.h>
+#include <osmscoutmapopengl/MapProjection.h>
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapPainter.h>
@@ -361,6 +362,16 @@ namespace osmscout {
     void AddUniform(std::string uniformName, float value) {
       GLuint uniform = glGetUniformLocation(shaderProgram, uniformName.c_str());
       glUniform1f(uniform, value);
+    }
+
+    void SetMapProjection(const MapProjection &mapProjection)
+    {
+      AddUniform("windowWidth", mapProjection.width);
+      AddUniform("windowHeight", mapProjection.height);
+      AddUniform("centerLat", mapProjection.center.GetLat());
+      AddUniform("centerLon", mapProjection.center.GetLon());
+      AddUniform("magnification", mapProjection.magnification.GetMagnification());
+      AddUniform("dpi", mapProjection.dpi);
     }
 
     GLuint getVAO() {

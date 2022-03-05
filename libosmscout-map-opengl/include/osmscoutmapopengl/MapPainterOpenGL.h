@@ -26,6 +26,7 @@
 #include <osmscoutmapopengl/MapOpenGLFeatures.h>
 #include <osmscoutmapopengl/OpenGLMapData.h>
 #include <osmscoutmapopengl/MapOpenGLImportExport.h>
+#include <osmscoutmapopengl/MapProjection.h>
 #include <osmscoutmapopengl/TextLoader.h>
 
 namespace osmscout {
@@ -54,21 +55,7 @@ namespace osmscout {
   private:
     bool initialized = false;
 
-    struct View
-    {
-      osmscout::GeoCoord center;
-      osmscout::Magnification magnification;
-      double dpi;
-      int width;
-      int height;
-
-      MercatorProjection Mercator() const
-      {
-        MercatorProjection mercator;
-        mercator.Set(center, magnification, dpi, width, height);
-        return mercator;
-      }
-    } mapProjection;
+    MapProjection mapProjection;
 
     float lookX;
     float lookY;

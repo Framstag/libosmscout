@@ -155,148 +155,22 @@ namespace osmscout {
 
   void osmscout::MapPainterOpenGL::SwapAreaData() {
     areaRenderer.SwapData();
-
-    areaRenderer.BindBuffers();
-    areaRenderer.UseProgram();
-    areaRenderer.LoadVertices();
-
-    areaRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    areaRenderer.SetModel();
-    areaRenderer.SetView(lookX, lookY);
-    areaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    areaRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    areaRenderer.AddUniform("windowWidth", mapProjection.width);
-    areaRenderer.AddUniform("windowHeight", mapProjection.height);
-    areaRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    areaRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    areaRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    areaRenderer.AddUniform("dpi", mapProjection.dpi);
   }
 
   void osmscout::MapPainterOpenGL::SwapGroundData() {
     groundTileRenderer.SwapData();
-
-    groundTileRenderer.BindBuffers();
-    groundTileRenderer.UseProgram();
-    groundTileRenderer.LoadVertices();
-
-    groundTileRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    groundTileRenderer.SetModel();
-    groundTileRenderer.SetView(lookX, lookY);
-    groundTileRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    groundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    groundTileRenderer.AddUniform("windowWidth", mapProjection.width);
-    groundTileRenderer.AddUniform("windowHeight", mapProjection.height);
-    groundTileRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    groundTileRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    groundTileRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    groundTileRenderer.AddUniform("dpi", mapProjection.dpi);
-
     groundRenderer.SwapData();
-
-    groundRenderer.BindBuffers();
-
-    groundRenderer.UseProgram();
-    groundRenderer.LoadVertices();
-
-    groundRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    groundRenderer.SetModel();
-    groundRenderer.SetView(lookX, lookY);
-    groundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    groundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
-
-    groundRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    groundRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    groundRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    groundRenderer.AddUniform("dpi", mapProjection.dpi);
   }
 
   void osmscout::MapPainterOpenGL::SwapNodeData() {
     imageRenderer.SwapData();
 
-    imageRenderer.BindBuffers();
-    imageRenderer.UseProgram();
-    imageRenderer.LoadVertices();
-    imageRenderer.LoadTextures();
-
-    imageRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    imageRenderer.AddAttrib("index", 1, GL_FLOAT, 2 * sizeof(GLfloat));
-    imageRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 3 * sizeof(GLfloat));
-    imageRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 4 * sizeof(GLfloat));
-    imageRenderer.AddUniform("windowWidth", mapProjection.width);
-    imageRenderer.AddUniform("windowHeight", mapProjection.height);
-    imageRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    imageRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    imageRenderer.AddUniform("quadWidth", 14);
-    imageRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    imageRenderer.AddUniform("textureWidthSum", imageRenderer.GetTextureWidth());
-    imageRenderer.AddUniform("dpi", mapProjection.dpi);
-    imageRenderer.AddUniform("z", 0.001);
-
-    imageRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    imageRenderer.SetModel();
-    imageRenderer.SetView(lookX, lookY);
-
     textRenderer.SetTextureHeight(textLoader.GetHeight());
     textRenderer.SwapData();
-
-    textRenderer.BindBuffers();
-    textRenderer.UseProgram();
-    textRenderer.LoadVertices();
-    textRenderer.LoadTextures();
-
-    textRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    textRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
-    textRenderer.AddAttrib("index", 1, GL_FLOAT, 6 * sizeof(GLfloat));
-    textRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 7 * sizeof(GLfloat));
-    textRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 8 * sizeof(GLfloat));
-    textRenderer.AddAttrib("positionOffset", 1, GL_FLOAT, 9 * sizeof(GLfloat));
-    textRenderer.AddAttrib("startOffset", 1, GL_FLOAT, 10 * sizeof(GLfloat));
-    textRenderer.AddUniform("windowWidth", mapProjection.width);
-    textRenderer.AddUniform("windowHeight", mapProjection.height);
-    textRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    textRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    textRenderer.AddUniform("textureHeight", textLoader.GetHeight());
-    textRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    textRenderer.AddUniform("textureWidthSum", imageRenderer.GetTextureWidth());
-    textRenderer.AddUniform("dpi", mapProjection.dpi);
-    textRenderer.AddUniform("z", 0.001);
-
-    textRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    textRenderer.SetModel();
-    textRenderer.SetView(lookX, lookY);
   }
 
   void osmscout::MapPainterOpenGL::SwapWayData() {
     wayRenderer.SwapData();
-
-    wayRenderer.BindBuffers();
-    wayRenderer.UseProgram();
-    wayRenderer.LoadVertices();
-
-    wayRenderer.SetProjection(mapProjection.width, mapProjection.height);
-    wayRenderer.SetModel();
-    wayRenderer.SetView(lookX, lookY);
-    wayRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
-    wayRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("color", 4, GL_FLOAT, 6 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("gapcolor", 4, GL_FLOAT, 10 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("index", 1, GL_FLOAT, 14 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("thickness", 1, GL_FLOAT, 15 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("border", 1, GL_FLOAT, 16 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("barycentric", 3, GL_FLOAT, 17 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("z", 1, GL_FLOAT, 20 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("dashsize", 1, GL_FLOAT, 21 * sizeof(GLfloat));
-    wayRenderer.AddAttrib("length", 1, GL_FLOAT, 22 * sizeof(GLfloat));
-    wayRenderer.AddUniform("windowWidth", mapProjection.width);
-    wayRenderer.AddUniform("windowHeight", mapProjection.height);
-    wayRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    wayRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    wayRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    wayRenderer.AddUniform("dpi", mapProjection.dpi);
   }
 
   void MapPainterOpenGL::ProcessAreas(const osmscout::MapData &data,
@@ -1178,7 +1052,6 @@ namespace osmscout {
 
     OpenGLTextureRef t = textLoader.CreateTexture();
     textRenderer.AddNewTexture(t);
-
   }
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
@@ -1278,78 +1151,84 @@ namespace osmscout {
     glDepthFunc(GL_LEQUAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glBindVertexArray(groundTileRenderer.getVAO());
-    glUseProgram(groundTileRenderer.getShaderProgram());
+    groundTileRenderer.BindBuffers();
+    groundTileRenderer.UseProgram();
 
-    groundTileRenderer.AddUniform("windowWidth", mapProjection.width);
-    groundTileRenderer.AddUniform("windowHeight", mapProjection.height);
-    groundTileRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    groundTileRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    groundTileRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    groundTileRenderer.AddUniform("dpi", mapProjection.dpi);
+    groundTileRenderer.LoadVertices();
 
+    groundTileRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    groundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
+
+    groundTileRenderer.SetMapProjection(mapProjection);
     groundTileRenderer.SetProjection(mapProjection.width, mapProjection.height);
     groundTileRenderer.SetModel();
     groundTileRenderer.SetView(lookX, lookY);
     groundTileRenderer.Draw();
 
-    glBindVertexArray(groundRenderer.getVAO());
-    glUseProgram(groundRenderer.getShaderProgram());
+    groundRenderer.BindBuffers();
+    groundRenderer.UseProgram();
+    groundRenderer.LoadVertices();
 
-    groundRenderer.AddUniform("windowWidth", mapProjection.width);
-    groundRenderer.AddUniform("windowHeight", mapProjection.height);
-    groundRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    groundRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    groundRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    groundRenderer.AddUniform("dpi", mapProjection.dpi);
+    groundRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    groundRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
+
+    groundRenderer.SetMapProjection(mapProjection);
 
     groundRenderer.SetProjection(mapProjection.width, mapProjection.height);
     groundRenderer.SetModel();
     groundRenderer.SetView(lookX, lookY);
     groundRenderer.Draw();
 
-    glBindVertexArray(areaRenderer.getVAO());
-    glUseProgram(areaRenderer.getShaderProgram());
+    areaRenderer.BindBuffers();
+    areaRenderer.UseProgram();
+    areaRenderer.LoadVertices();
 
-    areaRenderer.AddUniform("windowWidth", mapProjection.width);
-    areaRenderer.AddUniform("windowHeight", mapProjection.height);
-    areaRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    areaRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    areaRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    areaRenderer.AddUniform("dpi", mapProjection.dpi);
+    areaRenderer.SetMapProjection(mapProjection);
 
     areaRenderer.SetProjection(mapProjection.width, mapProjection.height);
     areaRenderer.SetModel();
     areaRenderer.SetView(lookX, lookY);
+    areaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    areaRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
     areaRenderer.Draw();
 
-    glBindVertexArray(wayRenderer.getVAO());
-    glUseProgram(wayRenderer.getShaderProgram());
+    wayRenderer.BindBuffers();
+    wayRenderer.UseProgram();
+    wayRenderer.LoadVertices();
 
-    wayRenderer.AddUniform("windowWidth", mapProjection.width);
-    wayRenderer.AddUniform("windowHeight", mapProjection.height);
-    wayRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    wayRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
-    wayRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
-    wayRenderer.AddUniform("dpi", mapProjection.dpi);
+    wayRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    wayRenderer.AddAttrib("previous", 2, GL_FLOAT, 2 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("next", 2, GL_FLOAT, 4 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("color", 4, GL_FLOAT, 6 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("gapcolor", 4, GL_FLOAT, 10 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("index", 1, GL_FLOAT, 14 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("thickness", 1, GL_FLOAT, 15 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("border", 1, GL_FLOAT, 16 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("barycentric", 3, GL_FLOAT, 17 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("z", 1, GL_FLOAT, 20 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("dashsize", 1, GL_FLOAT, 21 * sizeof(GLfloat));
+    wayRenderer.AddAttrib("length", 1, GL_FLOAT, 22 * sizeof(GLfloat));
+
+    wayRenderer.SetMapProjection(mapProjection);
 
     wayRenderer.SetProjection(mapProjection.width, mapProjection.height);
     wayRenderer.SetModel();
     wayRenderer.SetView(lookX, lookY);
     wayRenderer.Draw();
 
-    glBindVertexArray(imageRenderer.getVAO());
-    glBindTexture(GL_TEXTURE_2D, imageRenderer.GetTexture());
-    glUseProgram(imageRenderer.getShaderProgram());
+    imageRenderer.BindBuffers();
+    imageRenderer.LoadTextures();
+    imageRenderer.UseProgram();
+    imageRenderer.LoadVertices();
 
-    imageRenderer.AddUniform("windowWidth", mapProjection.width);
-    imageRenderer.AddUniform("windowHeight", mapProjection.height);
-    imageRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    imageRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
+    imageRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    imageRenderer.AddAttrib("index", 1, GL_FLOAT, 2 * sizeof(GLfloat));
+    imageRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 3 * sizeof(GLfloat));
+    imageRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 4 * sizeof(GLfloat));
+
+    imageRenderer.SetMapProjection(mapProjection);
     imageRenderer.AddUniform("quadWidth", 14);
-    imageRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
     imageRenderer.AddUniform("textureWidthSum", imageRenderer.GetTextureWidth());
-    imageRenderer.AddUniform("dpi", mapProjection.dpi);
     imageRenderer.AddUniform("z", 0.001);
 
     imageRenderer.SetProjection(mapProjection.width, mapProjection.height);
@@ -1357,25 +1236,28 @@ namespace osmscout {
     imageRenderer.SetView(lookX, lookY);
     imageRenderer.Draw();
 
-    glBindVertexArray(textRenderer.getVAO());
-    glBindTexture(GL_TEXTURE_2D, textRenderer.GetTexture());
-    glUseProgram(textRenderer.getShaderProgram());
+    textRenderer.BindBuffers();
+    textRenderer.LoadTextures();
+    textRenderer.UseProgram();
+    textRenderer.LoadVertices();
 
-    textRenderer.AddUniform("windowWidth", mapProjection.width);
-    textRenderer.AddUniform("windowHeight", mapProjection.height);
-    textRenderer.AddUniform("centerLat", mapProjection.center.GetLat());
-    textRenderer.AddUniform("centerLon", mapProjection.center.GetLon());
+    textRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
+    textRenderer.AddAttrib("color", 4, GL_FLOAT, 2 * sizeof(GLfloat));
+    textRenderer.AddAttrib("index", 1, GL_FLOAT, 6 * sizeof(GLfloat));
+    textRenderer.AddAttrib("textureStart", 1, GL_FLOAT, 7 * sizeof(GLfloat));
+    textRenderer.AddAttrib("textureWidth", 1, GL_FLOAT, 8 * sizeof(GLfloat));
+    textRenderer.AddAttrib("positionOffset", 1, GL_FLOAT, 9 * sizeof(GLfloat));
+    textRenderer.AddAttrib("startOffset", 1, GL_FLOAT, 10 * sizeof(GLfloat));
+
+    textRenderer.SetMapProjection(mapProjection);
     textRenderer.AddUniform("textureHeight", textRenderer.GetTextureHeight());
-    textRenderer.AddUniform("magnification", mapProjection.magnification.GetMagnification());
     textRenderer.AddUniform("textureWidthSum", textRenderer.GetTextureWidth());
-    textRenderer.AddUniform("dpi", mapProjection.dpi);
     textRenderer.AddUniform("z", 0.001);
 
     textRenderer.SetProjection(mapProjection.width, mapProjection.height);
     textRenderer.SetModel();
     textRenderer.SetView(lookX, lookY);
     textRenderer.Draw();
-
   }
 
 }
