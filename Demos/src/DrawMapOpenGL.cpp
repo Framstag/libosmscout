@@ -78,14 +78,14 @@ int main(int argc, char* argv[]) {
   }
   glfwMakeContextCurrent(offscreen_context);
 
-  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(args.width, args.height, args.dpi, args.fontName, shaderPath);
+  osmscout::MapPainterOpenGL* painter = new osmscout::MapPainterOpenGL(args.width, args.height, args.dpi, args.fontName, shaderPath, drawDemo.drawParameter);
 
   if (!painter->IsInitialized()) {
     delete painter;
     return 1;
   }
 
-  painter->ProcessData(drawDemo.data, drawDemo.drawParameter, drawDemo.projection, drawDemo.styleConfig);
+  painter->ProcessData(drawDemo.data, drawDemo.projection, drawDemo.styleConfig);
   painter->SwapData();
 
   painter->DrawMap();

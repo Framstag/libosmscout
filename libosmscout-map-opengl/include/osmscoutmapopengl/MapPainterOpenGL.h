@@ -155,7 +155,7 @@ namespace osmscout {
 
     MapPainterOpenGL(int width, int height, double dpi,
                      const std::string &fontPath, const std::string &shaderDir,
-                     long defaultTextSize=12);
+                     const osmscout::MapParameter &parameter);
 
     ~MapPainterOpenGL();
 
@@ -182,10 +182,11 @@ namespace osmscout {
     osmscout::GeoCoord GetCenter();
 
     /**
-    * Processes all OSM data, and converts to the format required by the OpenGL pipeline.
-    */
-    void ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                     const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+     * Processes all OSM data, and converts to the format required by the OpenGL pipeline.
+     */
+    void ProcessData(const osmscout::MapData &data,
+                     const osmscout::Projection &projection,
+                     const osmscout::StyleConfigRef &styleConfig);
 
     /**
      * Swaps currently drawn data and processed data.

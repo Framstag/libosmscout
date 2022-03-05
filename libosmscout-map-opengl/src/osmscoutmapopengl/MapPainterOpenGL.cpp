@@ -34,11 +34,12 @@ namespace osmscout {
 
   MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi,
                                      const std::string &fontPath, const std::string &shaderDir,
-                                     long defaultTextSize)
+                                     const osmscout::MapParameter &parameter)
       : width(width),
         height(height),
         dpi(dpi),
-        textLoader(fontPath, defaultTextSize, dpi)
+        textLoader(fontPath, parameter.GetFontSize(), dpi),
+        parameter(parameter)
   {
     if (!textLoader.IsInitialized()) {
       log.Error() << "Failed to initialize text loader!";
@@ -131,17 +132,14 @@ namespace osmscout {
     }
   }
 
-  void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
+  void osmscout::MapPainterOpenGL::ProcessData(const osmscout::MapData &data,
                                                const osmscout::Projection &projection,
                                                const osmscout::StyleConfigRef &styleConfig) {
     landFill=styleConfig.get()->GetLandFillStyle(projection);
     seaFill=styleConfig.get()->GetSeaFillStyle(projection);
 
-    textLoader.SetDefaultFontSize(parameter.GetFontSize());
-
     this->magnification = projection.GetMagnification();
     this->center = projection.GetCenter();
-    this->parameter = parameter;
 
     ProcessAreas(data, parameter, projection, styleConfig);
 

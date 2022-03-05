@@ -48,7 +48,6 @@ struct Arguments {
 
 osmscout::DatabaseParameter databaseParameter;
 osmscout::AreaSearchParameter searchParameter;
-osmscout::MapParameter drawParameter;
 osmscout::DatabaseRef database;
 osmscout::MapServiceRef mapService;
 osmscout::StyleConfigRef styleConfig;
@@ -99,7 +98,7 @@ bool LoadData() {
   mapService->AddTileDataToMapData(tiles, data);
   mapService->GetGroundTiles(projection, data.groundTiles);
   osmscout::log.Info() << "Start processing data...";
-  renderer->ProcessData(data, drawParameter, projection, styleConfig);
+  renderer->ProcessData(data, projection, styleConfig);
   osmscout::log.Info() << "Ended processing data.";
 
   return true;
@@ -315,6 +314,7 @@ int main(int argc, char *argv[]) {
 
   database.get()->GetBoundingBox(boundingBox);
 
+  osmscout::MapParameter drawParameter;
   drawParameter.SetFontSize(args.defaultTextSize);
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
@@ -362,7 +362,9 @@ int main(int argc, char *argv[]) {
   glfwMakeContextCurrent(window);
 
   renderer = new osmscout::MapPainterOpenGL(width, height, dpi,
-                                            args.fontPath, args.shaderPath, args.defaultTextSize);
+                                            args.fontPath,
+                                            args.shaderPath,
+                                            drawParameter);
   if (!renderer->IsInitialized()) {
     delete renderer;
     glfwDestroyWindow(window);
