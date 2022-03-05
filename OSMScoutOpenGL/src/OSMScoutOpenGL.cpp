@@ -405,6 +405,15 @@ int main(int argc, char *argv[]) {
           }
 
           osmscout::log.Info() << "Data loading ended.";
+
+          auto viewProjection=renderer->GetProjection();
+          if (projection.GetCenter() != viewProjection.GetCenter() ||
+              projection.GetMagnification() != viewProjection.GetMagnification() ||
+              projection.GetWidth() != viewProjection.GetWidth() ||
+              projection.GetHeight() != viewProjection.GetHeight()){
+            projection = renderer->GetProjection();
+            loadData = 1;
+          }
         }
       }
     }
