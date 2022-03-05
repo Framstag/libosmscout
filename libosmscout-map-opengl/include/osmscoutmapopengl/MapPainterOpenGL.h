@@ -54,14 +54,21 @@ namespace osmscout {
   private:
     bool initialized = false;
 
-    int width;
-    int height;
-    double dpi;
+    struct View
+    {
+      osmscout::GeoCoord center;
+      osmscout::Magnification magnification;
+      double dpi;
+      int width;
+      int height;
 
-    float minLon;
-    float minLat;
-    float maxLon;
-    float maxLat;
+      MercatorProjection Mercator() const
+      {
+        MercatorProjection mercator;
+        mercator.Set(center, magnification, dpi, width, height);
+        return mercator;
+      }
+    } mapProjection;
 
     float lookX;
     float lookY;
@@ -79,47 +86,45 @@ namespace osmscout {
 
     osmscout::MapData mapData;
     osmscout::StyleConfigRef styleConfig;
+    osmscout::StyleConfigRef dataStyleConfig;
     osmscout::MapParameter parameter;
-    osmscout::FillStyleRef landFill;
-    osmscout::FillStyleRef seaFill;
-    osmscout::GeoCoord center;
-    osmscout::Magnification magnification;
 
     /**
      * Processes OSM area data, and converts to the format required by the OpenGL pipeline
      */
-    void ProcessAreas(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                      const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+    void ProcessAreas(const osmscout::MapData &data,
+                      const osmscout::Projection &loadProjection,
+                      const osmscout::StyleConfigRef &styleConfig);
 
     /**
     * Processes OSM ground data, and converts to the format required by the OpenGL pipeline
     */
-    void ProcessGround(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                       const osmscout::Projection &projection, const osmscout::StyleConfigRef &styleConfig);
+    void ProcessGround(const osmscout::MapData &data,
+                       const osmscout::Projection &loadProjection,
+                       const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessWay(const osmscout::WayRef &way,
-                    const osmscout::Projection &projection,
+                    const osmscout::Projection &loadProjection,
                     const osmscout::StyleConfigRef &styleConfig,
                     const WidthFeatureValueReader &widthReader);
 
     /**
     * Processes OSM way data, and converts to the format required by the OpenGL pipeline
     */
-    void ProcessWays(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                     const osmscout::Projection &projection,
+    void ProcessWays(const osmscout::MapData &data,
+                     const osmscout::Projection &loadProjection,
                      const osmscout::StyleConfigRef &styleConfig);
 
     void ProcessNode(const osmscout::NodeRef &node,
-                     const osmscout::MapParameter &parameter,
-                     const osmscout::Projection &projection,
+                     const osmscout::Projection &loadProjection,
                      const osmscout::StyleConfigRef &styleConfig,
                      std::vector<int> &icons);
 
     /**
     * Processes OSM node data, and converts to the format required by the OpenGL pipeline
     */
-    void ProcessNodes(const osmscout::MapData &data, const osmscout::MapParameter &parameter,
-                      const osmscout::Projection &projection,
+    void ProcessNodes(const osmscout::MapData &data,
+                      const osmscout::Projection &loadProjection,
                       const osmscout::StyleConfigRef &styleConfig);
 
     /**
@@ -179,13 +184,21 @@ namespace osmscout {
     /**
      * Returns the visual center of the map.
      */
-    osmscout::GeoCoord GetCenter();
+    osmscout::GeoCoord GetCenter() const;
+
+    void SetCenter(const osmscout::GeoCoord &center);
+
+    osmscout::Magnification GetMagnification() const;
+
+    void SetMagnification(const osmscout::Magnification &magnification);
+
+    MercatorProjection GetProjection() const;
 
     /**
      * Processes all OSM data, and converts to the format required by the OpenGL pipeline.
      */
     void ProcessData(const osmscout::MapData &data,
-                     const osmscout::Projection &projection,
+                     const osmscout::Projection &loadProjection,
                      const osmscout::StyleConfigRef &styleConfig);
 
     /**

@@ -415,6 +415,9 @@ public:
                osmscout::RenderSteps step) override
   {
     if (step==osmscout::RenderSteps::Initialize) {
+      openglMapPainter->SetCenter(projection.GetCenter());
+      openglMapPainter->SetMagnification(projection.GetMagnification());
+
       openglMapPainter->ProcessData(data, projection, styleConfig);
       openglMapPainter->SwapData();
       openglMapPainter->DrawMap(step,

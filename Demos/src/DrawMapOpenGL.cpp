@@ -85,6 +85,9 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  painter->SetCenter(drawDemo.projection.GetCenter());
+  painter->SetMagnification(drawDemo.projection.GetMagnification());
+
   painter->ProcessData(drawDemo.data, drawDemo.projection, drawDemo.styleConfig);
   painter->SwapData();
 

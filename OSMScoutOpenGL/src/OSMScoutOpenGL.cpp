@@ -54,24 +54,21 @@ osmscout::StyleConfigRef styleConfig;
 std::list <osmscout::TileRef> tiles;
 osmscout::MapData data;
 
-osmscout::MercatorProjection projection;
-osmscout::Magnification magnification;
-osmscout::GeoBox boundingBox;
-osmscout::GeoCoord center;
+osmscout::MercatorProjection projection; // projection used for data loading
 
 osmscout::MapPainterOpenGL *renderer;
 
 std::string map;
 std::string style;
+
 // framebuffer dimensions
 int width;
 int height;
+
 std::future<bool> result;
 
 double prevX;
 double prevY;
-int level;
-int zoom;
 std::chrono::steady_clock::time_point lastEvent=std::chrono::steady_clock::time_point::min();
 bool loadData = 0;
 bool loadingInProgress = 0;
@@ -81,16 +78,14 @@ double dpi;
 bool LoadData() {
   data.ClearDBData();
   tiles.clear();
-  magnification.SetLevel(osmscout::MagnificationLevel(level));
-  osmscout::MagnificationConverter mm;
-  std::string s;
-  mm.Convert(osmscout::MagnificationLevel(level), s);
-  osmscout::log.Info() << "Zoom level: " << s << " " << magnification.GetLevel();
-  projection.Set(center,
-                 magnification,
-                 dpi,
-                 width,
-                 height);
+
+  {
+    int level = projection.GetMagnification().GetLevel();
+    osmscout::MagnificationConverter mm;
+    std::string s;
+    mm.Convert(osmscout::MagnificationLevel(level), s);
+    osmscout::log.Info() << "Load zoom level: " << s << " " << level;
+  }
 
   searchParameter.SetUseLowZoomOptimization(true);
   mapService->LookupTiles(projection, tiles);
@@ -115,35 +110,29 @@ static void key_callback(GLFWwindow *window, int key, int /*scancode*/, int acti
   if (key == GLFW_KEY_LEFT) {
     renderer->OnTranslation(prevX, prevY, prevX + 10, prevY);
     prevX = prevX + 10;
-    center = renderer->GetCenter();
     loadData = 1;
   }
   if (key == GLFW_KEY_RIGHT) {
     renderer->OnTranslation(prevX, prevY, prevX - 10, prevY);
     prevX = prevX - 10;
-    center = renderer->GetCenter();
     loadData = 1;
   }
   if (key == GLFW_KEY_UP) {
     renderer->OnTranslation(prevX, prevY, prevX, prevY + 10);
     prevY = prevY + 10;
-    center = renderer->GetCenter();
     loadData = 1;
   }
   if (key == GLFW_KEY_DOWN) {
     renderer->OnTranslation(prevX, prevY, prevX, prevY - 10);
     prevY = prevY - 10;
-    center = renderer->GetCenter();
     loadData = 1;
   }
   if (key == GLFW_KEY_KP_ADD || key == GLFW_KEY_I) {
-    offset = 1;
-    zoom = 1;
+    renderer->OnZoom(1);
     loadData = 1;
   }
   if (key == GLFW_KEY_KP_SUBTRACT || key == GLFW_KEY_O) {
-    offset = -1;
-    zoom = 1;
+    renderer->OnZoom(-1);
     loadData = 1;
   }
 
@@ -171,24 +160,24 @@ static void mouse_button_callback(GLFWwindow *window, int button, int action, in
 }
 
 static void scroll_callback(GLFWwindow */*window*/, double /*xoffset*/, double yoffset) {
-  offset = yoffset;
+  renderer->OnZoom(yoffset);
   lastEvent = std::chrono::steady_clock::now();
   loadData = 1;
-  zoom = 1;
-  osmscout::log.Info() << "Zoom level: " << magnification.GetLevel();
-  osmscout::log.Info() << "Magnification: " << magnification.GetMagnification();
-  projection.GetDimensions(boundingBox);
+  osmscout::log.Info() << "Zoom level: " << renderer->GetMagnification().GetLevel();
+  osmscout::log.Info() << "Magnification: " << renderer->GetMagnification().GetMagnification();
 }
 
 static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double ypos) {
   if (button_down) {
     renderer->OnTranslation(prevX, prevY, xpos, ypos);
-    center = renderer->GetCenter();
     loadData = 1;
     lastEvent = std::chrono::steady_clock::now();
+
+    osmscout::GeoBox boundingBox;
+    renderer->GetProjection().GetDimensions(boundingBox);
     osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
                          << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
-    osmscout::log.Info() << "Center: [" << center.GetLon() << " " << center.GetLat() << "]";
+    osmscout::log.Info() << "Center: [" << renderer->GetCenter().GetLon() << " " << renderer->GetCenter().GetLat() << "]";
   }
   prevX = xpos;
   prevY = ypos;
@@ -312,16 +301,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  database.get()->GetBoundingBox(boundingBox);
-
   osmscout::MapParameter drawParameter;
   drawParameter.SetFontSize(args.defaultTextSize);
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
-  center = boundingBox.GetCenter();
-  level = 6;
-  magnification.SetLevel(osmscout::MagnificationLevel(level));
 
   glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;
@@ -372,32 +356,39 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  // set initial view
+  {
+    osmscout::GeoBox boundingBox;
+    database->GetBoundingBox(boundingBox);
+    renderer->SetCenter(boundingBox.GetCenter());
+  }
+  {
+    int level = 6;
+    osmscout::Magnification magnification;
+    magnification.SetLevel(osmscout::MagnificationLevel(level));
+    renderer->SetMagnification(magnification);
+  }
+
   // initial synchronous rendering
+  projection = renderer->GetProjection();
   LoadData();
   renderer->SwapData();
 
   std::chrono::steady_clock::time_point currentTime;
   while (!glfwWindowShouldClose(window)) {
-    glfwSwapBuffers(window);
-    glfwPollEvents();
 
     renderer->DrawMap();
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 
     if (loadData) {
       currentTime = std::chrono::steady_clock::now();
       if (( std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastEvent).count() > 100)
             && (!loadingInProgress)) {
-        double x, y;
-        glfwGetCursorPos(window, &x, &y);
-        if(zoom) {
-          renderer->OnZoom(offset);
-          if (offset < 0 && level > 0)
-            level--;
-          else if(offset > 0 && level < 20)
-            level++;
-        }
-        zoom = 0;
+        // double x, y;
+        // glfwGetCursorPos(window, &x, &y);
         osmscout::log.Info() << "Loading data...";
+        projection = renderer->GetProjection();
         result = std::future<bool>(std::async(std::launch::async, LoadData));
         loadingInProgress = 1;
       }
