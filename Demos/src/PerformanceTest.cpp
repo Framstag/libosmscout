@@ -368,7 +368,8 @@ public:
   PerformanceTestBackendOGL(size_t tileWidth,
                             size_t tileHeight,
                             size_t dpi,
-                            const osmscout::StyleConfigRef& styleConfig):
+                            const osmscout::StyleConfigRef& styleConfig,
+                            const osmscout::MapParameter &drawParameter):
     styleConfig{styleConfig}
   {
     // Create the offscreen renderer
@@ -399,7 +400,8 @@ public:
                                                     tileHeight,
                                                     dpi,
                                                     "/usr/share/fonts/TTF/DejaVuSans.ttf",
-                                                    SHADER_INSTALL_DIR);
+                                                    SHADER_INSTALL_DIR,
+                                                    drawParameter);
   }
 
   ~PerformanceTestBackendOGL()
@@ -408,12 +410,15 @@ public:
   }
 
   void DrawMap(const osmscout::TileProjection &projection,
-               const osmscout::MapParameter &drawParameter,
+               const osmscout::MapParameter &/*drawParameter*/,
                const osmscout::MapData &data,
                osmscout::RenderSteps step) override
   {
     if (step==osmscout::RenderSteps::Initialize) {
-      openglMapPainter->ProcessData(data, drawParameter, projection, styleConfig);
+      openglMapPainter->SetCenter(projection.GetCenter());
+      openglMapPainter->SetMagnification(projection.GetMagnification());
+
+      openglMapPainter->ProcessData(data, projection, styleConfig);
       openglMapPainter->SwapData();
       openglMapPainter->DrawMap(step,
                                 step);
@@ -523,7 +528,8 @@ using PerformanceTestBackendRef = std::shared_ptr<PerformanceTestBackend>;
 PerformanceTestBackendRef PrepareBackend(int argc,
                                          char* argv[],
                                          const Arguments &args,
-                                         const osmscout::StyleConfigRef& styleConfig)
+                                         const osmscout::StyleConfigRef& styleConfig,
+                                         const osmscout::MapParameter &drawParameter)
 {
   if (args.driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
@@ -559,7 +565,7 @@ PerformanceTestBackendRef PrepareBackend(int argc,
     std::cout << "Using driver 'OpenGL'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     try{
-      return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig);
+      return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig, drawParameter);
     } catch (std::runtime_error &e){
       std::cerr << e.what() << std::endl;
       return nullptr;
@@ -776,17 +782,6 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  PerformanceTestBackendRef backend = PrepareBackend(argc, argv, args, styleConfig);
-  if (!backend) {
-    return 1;
-  }
-
-#if defined(HAVE_LIB_GPERFTOOLS)
-  if (args.heapProfile){
-    HeapProfilerStart(args.heapProfilePrefix.c_str());
-  }
-#endif
-
   osmscout::TileProjection      projection;
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
@@ -797,6 +792,18 @@ int main(int argc, char* argv[])
   drawParameter.SetPatternPaths(args.icons); // for simplicity use same directories for lookup
   drawParameter.SetIconMode(osmscout::MapParameter::IconMode::Scalable);
   drawParameter.SetPatternMode(osmscout::MapParameter::PatternMode::Scalable);
+
+  PerformanceTestBackendRef backend = PrepareBackend(argc, argv, args, styleConfig, drawParameter);
+  if (!backend) {
+    return 1;
+  }
+
+#if defined(HAVE_LIB_GPERFTOOLS)
+  if (args.heapProfile){
+    HeapProfilerStart(args.heapProfilePrefix.c_str());
+  }
+#endif
+
   searchParameter.SetUseMultithreading(true);
 
   for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(args.startZoom,args.endZoom));
