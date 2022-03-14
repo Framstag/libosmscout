@@ -222,7 +222,7 @@ if(THREADS_HAVE_PTHREAD_ARG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${THREADS_PTHREAD_ARG}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
 endif()
-find_package(TBB QUIET)
+find_package(TBB 2021.1.1 QUIET)
 
 find_program(HUGO_PATH hugo)
 
