@@ -223,6 +223,11 @@ if(THREADS_HAVE_PTHREAD_ARG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
 endif()
 find_package(TBB QUIET)
+if (TBB_FOUND)
+  try_compile(TBB_HAS_SCHEDULER_INIT "${PROJECT_BINARY_DIR}"
+      "${PROJECT_SOURCE_DIR}/cmake/TestTBBSchedulerInit.cpp"
+      LINK_LIBRARIES TBB::tbb)
+endif()
 
 find_program(HUGO_PATH hugo)
 

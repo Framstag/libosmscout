@@ -206,6 +206,11 @@
 #cmakedefine HAVE_STD_EXECUTION 1
 #endif
 
+/* Define to 1 or 0, depending whether the tbb::task_scheduler_init exists. */
+#ifndef TBB_HAS_SCHEDULER_INIT
+#cmakedefine TBB_HAS_SCHEDULER_INIT 1
+#endif
+
 /* int16_t is available */
 #ifndef OSMSCOUT_HAVE_INT16_T
 #cmakedefine OSMSCOUT_HAVE_INT16_T 1
