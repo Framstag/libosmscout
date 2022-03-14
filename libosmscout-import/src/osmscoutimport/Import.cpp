@@ -335,6 +335,7 @@ namespace osmscout {
 #if defined(HAVE_STD_EXECUTION) and defined(TBB_HAS_SCHEDULER_INIT)
     // create tbb scheduler explicitly to avoid leaks by default scheduler
     // NOTE that task_scheduler_init is deprecated, but there is no way to destruct global scheduler - it is leaking
+    // TODO: use oneapi::tbb::finalize when it becomes official
     [[maybe_unused]] tbb::task_scheduler_init task_scheduler;
 #endif
 
