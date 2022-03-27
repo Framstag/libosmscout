@@ -2486,7 +2486,8 @@ static void DumpGroundTile(const GroundTile& tile)
                            parameter,
                            vect,
                            Vertex2D(px,py),
-                           /*proposedWidth*/ -1);
+                           /*proposedWidth*/ -1,
+                           ObjectFileRef());
 
       drawnLabels.insert(GeoCoord(x,y));
 #endif
