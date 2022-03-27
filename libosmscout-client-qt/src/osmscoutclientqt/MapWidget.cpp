@@ -703,9 +703,10 @@ OverlayNode *MapWidget::createOverlayNode(QString type)
 void MapWidget::onTap(const QPoint p)
 {
   osmscout::GeoCoord coord;
-    getProjection().PixelToGeo(p.x(), p.y(),
-                               coord);
-    emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
+  getProjection().PixelToGeo(p.x(), p.y(),
+                             coord);
+  emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
+  renderer->GetMapIcon(p);
 }
 
 void MapWidget::onDoubleTap(const QPoint p)

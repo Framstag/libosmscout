@@ -303,7 +303,7 @@ public:
     application(argc, argv, true),
     qtPixmap{tileWidth,tileHeight},
     qtPainter{&qtPixmap},
-    qtMapPainter{styleConfig}
+    qtMapPainter{styleConfig, 0}
   {
   }
 

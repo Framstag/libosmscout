@@ -341,7 +341,8 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const PathShieldStyleRef& style,
                                const std::string& text,
-                               const std::vector<Point>& nodes);
+                               const std::vector<Point>& nodes,
+                               const ObjectFileRef &objectRef);
 
     void LayoutPointLabels(const Projection& projection,
                            const MapParameter& parameter,
@@ -349,6 +350,7 @@ namespace osmscout {
                            const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            double x, double y,
+                           const ObjectFileRef &objectRef,
                            double objectWidth=0,
                            double objectHeight=0);
 
@@ -577,7 +579,8 @@ namespace osmscout {
                                       const MapParameter &parameter,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
-                                      double objectWidth) = 0;
+                                      double objectWidth,
+                                      const ObjectFileRef &objectRef) = 0;
 
     /**
      * Register contour label

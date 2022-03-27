@@ -37,8 +37,9 @@
 
 namespace osmscout {
 
-  MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
+  MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig, DatabaseId databaseId)
   : MapPainter(styleConfig),
+    databaseId(databaseId),
     painter(nullptr),
     labelLayouter(this)
   {
@@ -1005,9 +1006,10 @@ namespace osmscout {
                                           const MapParameter &parameter,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
-                                          double objectWidth)
+                                          double objectWidth,
+                                          const ObjectFileRef &objectRef)
   {
-    GetLayouter().RegisterLabel(projection, parameter, position, labels, objectWidth);
+    GetLayouter().RegisterLabel(projection, parameter, position, labels, databaseId, objectRef, objectWidth);
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,

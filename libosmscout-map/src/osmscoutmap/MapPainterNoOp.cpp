@@ -57,7 +57,8 @@ namespace osmscout {
                                             const MapParameter& /*parameter*/,
                                             const std::vector<LabelData> &/*labels*/,
                                             const Vertex2D& /*position*/,
-                                            const double /*objectWidth*/)
+                                            const double /*objectWidth*/,
+                                            const ObjectFileRef &/*objectRef*/)
   {
     // no code
   }

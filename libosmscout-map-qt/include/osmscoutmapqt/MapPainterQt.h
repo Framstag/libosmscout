@@ -74,16 +74,17 @@ namespace osmscout {
     };
 
   private:
-    QPainter                   *painter{nullptr}; //! non-owning pointer to Qt painter
+    DatabaseId                   databaseId;
+    QPainter                     *painter{nullptr}; //! non-owning pointer to Qt painter
 
-    QtLabelLayouter            labelLayouter;
+    QtLabelLayouter              labelLayouter;
 
     /**
      * non-owning pointer to layouter
      * when it is not null, all labels are registered to it
      * and DrawLabels method is no-op
      */
-    QtLabelLayouter            *delegateLabelLayouter{nullptr};
+    QtLabelLayouter              *delegateLabelLayouter{nullptr};
 
     std::map<std::string,QImage> images;        //! map of QImage for icons, key is name of the icon
                                                 //! - it should be independent on the specific style configuration
@@ -176,7 +177,8 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const std::vector<LabelData>& labels,
                               const Vertex2D& position,
-                              double objectWidth) override;
+                              double objectWidth,
+                              const ObjectFileRef &objectRef) override;
 
     /**
      * Register contour label
@@ -219,7 +221,7 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterQt(const StyleConfigRef& styleConfig);
+    MapPainterQt(const StyleConfigRef& styleConfig, DatabaseId databaseId);
     ~MapPainterQt() override;
 
     void DrawGroundTiles(const Projection& projection,

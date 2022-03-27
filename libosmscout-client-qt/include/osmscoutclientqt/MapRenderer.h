@@ -27,6 +27,7 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/OverlayObject.h>
+#include <osmscoutclientqt/LookupModule.h>
 
 #include <QObject>
 #include <QSettings>
@@ -66,6 +67,14 @@ public:
   inline bool IsSuccess() const{
     return success;
   };
+};
+
+class OSMSCOUT_CLIENT_QT_API MapIcon: public QObject {
+public:
+  DatabaseId databaseId;
+  ObjectFileRef objectRef;
+  LookupModule::ObjectInfo object;
+  // symbol or icon
 };
 
 /**
@@ -136,6 +145,8 @@ public:
    */
   virtual bool RenderMap(QPainter& painter,
                          const MapViewStruct& request) = 0;
+
+  virtual std::optional<MapIcon> GetMapIcon(const QPoint &screenPosition) = 0;
 
   void addOverlayObject(int id, const OverlayObjectRef& obj);
 

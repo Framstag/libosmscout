@@ -146,6 +146,7 @@ protected:
   osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
   osmscout::BasemapDatabaseRef       basemapDatabase;
   osmscout::DatabaseParameter        databaseParameter;
+  Id                                 lastDatabaseId=0;
   std::list<DBInstanceRef>           databases;
 
   QString                            stylesheetFilename;

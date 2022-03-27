@@ -102,8 +102,10 @@ public:
    * @param request
    * @return true if rendered map is complete
    */
-  virtual bool RenderMap(QPainter& painter,
-                         const MapViewStruct& request);
+  bool RenderMap(QPainter& painter,
+                 const MapViewStruct& request) override;
+
+  std::optional<MapIcon> GetMapIcon(const QPoint &screenPosition) override;
 
 private:
   double computeScale(const osmscout::MercatorProjection &previousProjection,

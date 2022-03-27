@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 
   auto* painter=new QPainter(pixmap);
 
-  osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig);
+  osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig, 0);
 
   osmscout::TypeInfoRef         buildingType=drawDemo.database->GetTypeConfig()->GetTypeInfo("building");
 

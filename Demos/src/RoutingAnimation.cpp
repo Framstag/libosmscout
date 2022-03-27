@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
-      osmscout::MapPainterQt        mapPainter(styleConfig);
+      osmscout::MapPainterQt        mapPainter(styleConfig, 0);
 
       drawParameter.SetFontSize(3.0);
 

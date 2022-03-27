@@ -98,6 +98,7 @@ class OSMSCOUT_CLIENT_QT_API DBInstance : public QObject
   Q_OBJECT
 
 public:
+  const DatabaseId                        id;
   const QString                           path;
 
 private:
@@ -118,12 +119,14 @@ public slots:
   void onThreadFinished();
 
 public:
-  DBInstance(const QString &path,
+  DBInstance(DatabaseId id,
+             const QString &path,
              const osmscout::DatabaseRef& database,
              const osmscout::LocationServiceRef& locationService,
              const osmscout::LocationDescriptionServiceRef& locationDescriptionService,
              const osmscout::MapServiceRef& mapService,
              const osmscout::StyleConfigRef& styleConfig):
+    id(id),
     path(path),
     database(database),
     locationService(locationService),

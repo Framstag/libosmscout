@@ -106,16 +106,16 @@ namespace osmscout {
     };
   public:
     Type              type{Type::Text};
-    size_t            priority{0}; //!< Priority of the entry
-    size_t            position{0}; //!< Relative position of the label
+    size_t            priority{0};      //!< Priority of the entry
+    size_t            position{0};      //!< Relative position of the label
 
-    double            alpha{1.0};   //!< Alpha value of the label; 0.0 = fully transparent, 1.0 = solid
-    double            fontSize{0};  //!< Font size to be used
+    double            alpha{1.0};       //!< Alpha value of the label; 0.0 = fully transparent, 1.0 = solid
+    double            fontSize{0};      //!< Font size to be used
 
-    LabelStyleRef     style;    //!< Style for drawing
-    std::string       text;     //!< The label text (type==Text|PathText)
+    LabelStyleRef     style;            //!< Style for drawing
+    std::string       text;             //!< The label text (type==Text|PathText)
 
-    IconStyleRef      iconStyle; //!< Icon or symbol style
+    IconStyleRef      iconStyle;        //!< Icon or symbol style
     double            iconWidth{0};
     double            iconHeight{0};
 
@@ -150,12 +150,12 @@ namespace osmscout {
     double                  height{-1};
 
     double                  fontSize{1}; //!< Font size to be used
-    std::string             text;     //!< The label text
+    std::string             text;        //!< The label text
 
     Label() = default;
 
     template<typename... Args>
-    Label(Args&&... args):
+    explicit Label(Args&&... args):
       label(std::forward<Args>(args)...)
     {}
 
@@ -182,9 +182,24 @@ namespace osmscout {
     };
 
   public:
-    size_t                priority{std::numeric_limits<size_t>::max()}; //!< Priority of the entry (minimum of priority label elements)
-    // TODO: move priority from label to element
+    DatabaseId            databaseId;
+    ObjectFileRef         objectRef;
+
+    size_t                priority; //!< Priority of the labels (minimum of priority label elements)
     std::vector<Element>  elements;
+
+    LabelInstance(const DatabaseId databaseId,
+                  const ObjectFileRef &objectRef,
+                  size_t priority=std::numeric_limits<size_t>::max(),
+                  const std::vector<Element> &elements=std::vector<Element>()):
+      databaseId(databaseId), objectRef(objectRef), priority(priority), elements(elements)
+    {}
+
+    LabelInstance(const LabelInstance&) = default;
+    LabelInstance(LabelInstance&&) = default;
+    ~LabelInstance() = default;
+    LabelInstance& operator=(const LabelInstance&) = default;
+    LabelInstance& operator=(LabelInstance&&) = default;
   };
 
   template<class NativeGlyph>
@@ -458,14 +473,16 @@ namespace osmscout {
             //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
 #endif
           }
-          LabelInstanceType instanceCopy;
-          instanceCopy.priority = currentLabel->priority;
-          instanceCopy.elements = visibleElements;
-          if (!instanceCopy.elements.empty()) {
+
+          if (!visibleElements.empty()) {
+            LabelInstanceType instanceCopy(currentLabel->databaseId,
+                                           currentLabel->objectRef,
+                                           currentLabel->priority,
+                                           visibleElements);
             labelInstances.push_back(instanceCopy);
 
             // mark all labels at once
-            for (size_t eli=0; eli < currentLabel->elements.size(); eli++) {
+            for (size_t eli=0; eli < instanceCopy.elements.size(); eli++) {
               if (canvases[eli] != nullptr) {
                 MarkLabelPlace(*(canvases[eli]), masks[eli], layoutViewport.height);
               }
@@ -652,9 +669,11 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const Vertex2D& point,
                        const LabelData& data,
+                       const DatabaseId databaseId=0,
+                       const ObjectFileRef &fileOffset=ObjectFileRef(),
                        double objectWidth = 10.0)
     {
-      LabelInstanceType instance;
+      LabelInstanceType instance(databaseId, fileOffset);
 
       double offset=-1;
       ProcessLabel(projection,
@@ -672,9 +691,11 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const Vertex2D& point,
                        const std::vector<LabelData>& data,
+                       const DatabaseId databaseId=0,
+                       const ObjectFileRef &fileOffset=ObjectFileRef(),
                        double objectWidth = 10.0)
     {
-      LabelInstanceType instance;
+      LabelInstanceType instance(databaseId, fileOffset);
 
       double offset=-1;
       for (const auto& d : data) {

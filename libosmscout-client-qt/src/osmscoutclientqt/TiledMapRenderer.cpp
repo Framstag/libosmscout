@@ -193,6 +193,11 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   return onlineTileCache.isRequestQueueEmpty() && offlineTileCache.isRequestQueueEmpty();
 }
 
+std::optional<MapIcon> TiledMapRenderer::GetMapIcon(const QPoint &screenPosition)
+{
+  return std::nullopt;
+}
+
 DatabaseCoverage TiledMapRenderer::databaseCoverageOfTile(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile)
 {
   GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);

@@ -39,6 +39,11 @@ namespace osmscout {
    * size).
    */
   using Id = uint64_t;
+  /**
+   * \ingroup Util
+   * Unique database id, used by utilities that support operations with multiple databases
+   */
+  using DatabaseId = uint64_t;
   using PageId = uint64_t;
   /**
    * \ingroup Util

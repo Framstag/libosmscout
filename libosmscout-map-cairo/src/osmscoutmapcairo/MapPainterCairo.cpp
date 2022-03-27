@@ -1107,9 +1107,10 @@ namespace osmscout {
                                              const MapParameter &parameter,
                                              const std::vector<LabelData> &labels,
                                              const Vertex2D &position,
-                                             double objectWidth)
+                                             double objectWidth,
+                                             const ObjectFileRef &objectRef)
   {
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth, objectRef);
   }
 
   /**

@@ -27,8 +27,6 @@
 
 namespace osmscout{
 
-  using DatabaseId = uint32_t;
-
   /**
    * \ingroup Routing
    *

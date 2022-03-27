@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
-  osmscout::MapPainterQt        mapPainter(styleConfig);
+  osmscout::MapPainterQt        mapPainter(styleConfig, 0);
 
   for (std::vector<Action>::const_iterator action=actions.begin();
        action!=actions.end();

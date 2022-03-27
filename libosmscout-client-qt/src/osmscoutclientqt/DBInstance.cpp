@@ -144,11 +144,12 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
 osmscout::MapPainterQt* DBInstance::GetPainter()
 {
   QMutexLocker locker(&mutex);
-  if (!styleConfig)
+  if (!styleConfig) {
     return nullptr;
+  }
 
   if (!painterHolder.contains(QThread::currentThread())){
-    painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig);
+    painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig, id);
     connect(QThread::currentThread(), &QThread::finished,
             this, &DBInstance::onThreadFinished);
   }

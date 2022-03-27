@@ -270,6 +270,11 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   return needsNoRepaint;
 }
 
+std::optional<MapIcon> PlaneMapRenderer::GetMapIcon(const QPoint &screenPosition)
+{
+  return std::nullopt;
+}
+
 double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previousProjection,
                                       const osmscout::MercatorProjection &currentProjection)
 {

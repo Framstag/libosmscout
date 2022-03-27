@@ -523,7 +523,8 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const PathShieldStyleRef& shieldStyle,
                                          const std::string& text,
-                                         const std::vector<Point>& nodes)
+                                         const std::vector<Point>& nodes,
+                                         const ObjectFileRef &objectRef)
   {
     LabelStyleRef style=shieldStyle->GetShieldStyle();
     std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
@@ -549,7 +550,8 @@ namespace osmscout {
                            parameter,
                            vect,
                            Vertex2D(x,y),
-                           /*proposedWidth*/ -1);
+                           /*proposedWidth*/ -1,
+                           objectRef);
     }
   }
 
@@ -570,6 +572,7 @@ namespace osmscout {
    *    X position to place the label at (currently always the center of the area or the coordinate of the node)
    * @param y
    *    Y position to place the label at (currently always the center of the area or the coordinate of the node)
+   * @param objectRef reference of label object
    * @param objectWidth
    *    The (rough) width of the object
    * @param objectHeight
@@ -582,6 +585,7 @@ namespace osmscout {
                                      const std::vector<TextStyleRef>& textStyles,
                                      double x,
                                      double y,
+                                     const ObjectFileRef &objectRef,
                                      double objectWidth,
                                      double objectHeight)
   {
@@ -680,7 +684,7 @@ namespace osmscout {
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
-    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), objectWidth);
+    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), objectWidth, objectRef);
   }
 
   double MapPainter::GetProposedLabelWidth(const MapParameter& parameter,
@@ -814,6 +818,7 @@ namespace osmscout {
                       textStyles,
                       labelX,
                       labelY,
+                      areaData.ref,
                       std::max(x1, x2) - std::min(x1, x2),
                       std::max(y1, y2) - std::min(y1, y2));
   }
@@ -925,8 +930,8 @@ namespace osmscout {
                                                         projection);
 
     styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
-                                 projection,
-                                 textStyles);
+                                  projection,
+                                  textStyles);
 
     double x;
     double y;
@@ -939,7 +944,8 @@ namespace osmscout {
                       node->GetFeatureValueBuffer(),
                       iconStyle,
                       textStyles,
-                      x,y);
+                      x,y,
+                      node->GetObjectFileRef());
   }
 
   void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
@@ -1076,7 +1082,8 @@ namespace osmscout {
                           parameter,
                           shieldStyle,
                           shieldLabel,
-                          way.nodes);
+                          way.nodes,
+                          way.GetObjectFileRef());
 
     return true;
   }
@@ -3182,7 +3189,7 @@ static void DumpGroundTile(const GroundTile& tile)
 
               std::vector<LabelData> vect;
               vect.push_back(labelBox);
-              RegisterRegularLabel(projection, parameter, vect, Vertex2D(xPos,yPos), /*proposedWidth*/ -1);
+              RegisterRegularLabel(projection, parameter, vect, Vertex2D(xPos,yPos), /*proposedWidth*/ -1, ObjectFileRef());
             }
 
             // chess pattern
