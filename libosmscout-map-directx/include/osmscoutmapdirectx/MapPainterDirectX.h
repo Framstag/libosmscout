@@ -166,7 +166,8 @@ namespace osmscout {
 		const MapParameter &parameter,
 		const std::vector<LabelData> &labels,
 		const Vertex2D &position,
-		double objectWidth);
+		double objectWidth,
+		const ObjectFileRef &objectRef);
 
 	/**
 	* Register contour label
