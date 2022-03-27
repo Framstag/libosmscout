@@ -155,7 +155,7 @@ namespace osmscout {
     Label() = default;
 
     template<typename... Args>
-    explicit Label(Args&&... args):
+    Label(Args&&... args):
       label(std::forward<Args>(args)...)
     {}
 
