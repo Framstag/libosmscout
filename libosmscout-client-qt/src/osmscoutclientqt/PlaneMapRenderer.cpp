@@ -270,9 +270,46 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
   return needsNoRepaint;
 }
 
-std::optional<MapIcon> PlaneMapRenderer::GetMapIcon(const QPoint &screenPosition)
+std::optional<IconInstance> PlaneMapRenderer::GetMapIcon(const QPoint &screenPosition,
+                                                         const MapViewStruct& request)
 {
-  return std::nullopt;
+  QMutexLocker locker(&finishedMutex);
+
+  osmscout::MercatorProjection requestProjection;
+
+  if (!requestProjection.Set(request.coord,
+                             request.angle.AsRadians(),
+                             request.magnification,
+                             mapDpi,
+                             request.width,
+                             request.height)) {
+    osmscout::log.Warn() << "Invalid request projection!";
+    return std::nullopt;
+  }
+
+  osmscout::MercatorProjection finalImgProjection;
+
+  if (!finalImgProjection.Set(finishedCoord,
+                              finishedAngle,
+                              finishedMagnification,
+                              mapDpi,
+                              finishedImage->width(),
+                              finishedImage->height())) {
+    osmscout::log.Warn() << "Invalid finished projection!";
+    return std::nullopt;
+  }
+
+  GeoCoord coord;
+  requestProjection.PixelToGeo(screenPosition.x(), screenPosition.y(), coord);
+  double x,y;
+  finalImgProjection.GeoToPixel(coord, x, y);
+
+  auto it = std::find_if(finishedIcons.begin(), finishedIcons.end(),
+                         [x, y](const auto &icon) -> bool {
+                           return x >= icon.x && x <= icon.x + icon.width &&
+                                  y >= icon.y && y <= icon.y + icon.height;
+                         });
+  return it == finishedIcons.end() ? std::nullopt : std::make_optional(*it);
 }
 
 double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previousProjection,
@@ -388,6 +425,7 @@ void PlaneMapRenderer::DrawMap()
     projection.GetDimensions(renderBox);
     getOverlayObjects(overlayObjects, renderBox);
 
+    std::vector<IconInstance> icons;
     bool success;
     {
       DBRenderJob job(renderProjection,
@@ -397,6 +435,7 @@ void PlaneMapRenderer::DrawMap()
                       overlayObjects,
                       /*drawCanvasBackground*/ true);
       dbThread->RunJob(&job);
+      icons=job.GetIcons();
       success=job.IsSuccess();
     }
 
@@ -426,6 +465,7 @@ void PlaneMapRenderer::DrawMap()
       finishedAngle=currentAngle;
       finishedMagnification=currentMagnification;
       finishedEpoch=currentEpoch;
+      finishedIcons=icons;
 
       lastRendering.restart();
     }

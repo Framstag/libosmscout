@@ -49,6 +49,7 @@ private:
   bool drawCanvasBackground;
   bool renderBasemap;
   std::vector<OverlayObjectRef> overlayObjects;
+  std::vector<IconInstance> icons;
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
@@ -58,15 +59,22 @@ public:
               std::vector<OverlayObjectRef> overlayObjects,
               bool drawCanvasBackground=true,
               bool renderBasemap=true);
-  virtual ~DBRenderJob();
+
+  ~DBRenderJob() override = default;
 
   void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
            const std::list<DBInstanceRef> &databases,
            QReadLocker *locker) override;
 
-  inline bool IsSuccess() const{
+  inline bool IsSuccess() const
+  {
     return success;
   };
+
+  inline std::vector<IconInstance> GetIcons() const
+  {
+    return icons;
+  }
 };
 
 class OSMSCOUT_CLIENT_QT_API MapIcon: public QObject {
@@ -146,7 +154,8 @@ public:
   virtual bool RenderMap(QPainter& painter,
                          const MapViewStruct& request) = 0;
 
-  virtual std::optional<MapIcon> GetMapIcon(const QPoint &screenPosition) = 0;
+  virtual std::optional<IconInstance> GetMapIcon(const QPoint &screenPosition,
+                                                 const MapViewStruct& view) = 0;
 
   void addOverlayObject(int id, const OverlayObjectRef& obj);
 

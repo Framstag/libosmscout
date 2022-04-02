@@ -116,7 +116,8 @@ public:
   bool RenderMap(QPainter& painter,
                  const MapViewStruct& request) override;
 
-  std::optional<MapIcon> GetMapIcon(const QPoint &screenPosition) override;
+  std::optional<IconInstance> GetMapIcon(const QPoint &screenPosition,
+                                         const MapViewStruct& view) override;
 };
 
 }

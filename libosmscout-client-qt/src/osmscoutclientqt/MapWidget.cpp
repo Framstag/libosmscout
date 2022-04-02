@@ -258,19 +258,12 @@ void MapWidget::paint(QPainter *painter)
     painter->setRenderHint(QPainter::TextAntialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
 
-    MapViewStruct request;
-    QRectF        boundingBox = contentsBoundingRect();
-
-    request.coord = view->center;
-    request.angle = view->angle;
-    request.magnification = view->magnification;
-    request.width = boundingBox.width();
-    request.height = boundingBox.height();
-    request.dpi = view->mapDpi;
+    MapViewStruct request = GetViewStruct();
+    QRectF boundingBox = contentsBoundingRect();
 
     bool oldFinished = finished;
     assert(renderer);
-    finished = renderer->RenderMap(*painter,request);
+    finished = renderer->RenderMap(*painter, request);
     if (oldFinished != finished){
         emit finishedChanged(finished);
     }
@@ -706,7 +699,18 @@ void MapWidget::onTap(const QPoint p)
   getProjection().PixelToGeo(p.x(), p.y(),
                              coord);
   emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
-  renderer->GetMapIcon(p);
+
+  auto icon = renderer->GetMapIcon(p, GetViewStruct());
+  if (icon.has_value() && icon->iconStyle->IsVisible()) {
+    if (!icon->iconStyle->GetIconName().empty()) {
+      qDebug() << "Object:" << QString::fromStdString(icon->objectRef.GetName())
+               << "icon:" << QString::fromStdString(icon->iconStyle->GetIconName());
+    } else {
+      assert(icon->iconStyle->GetSymbol());
+      qDebug() << "Object:" << QString::fromStdString(icon->objectRef.GetName())
+               << "symbol:" << QString::fromStdString(icon->iconStyle->GetSymbol()->GetName());
+    }
+  }
 }
 
 void MapWidget::onDoubleTap(const QPoint p)

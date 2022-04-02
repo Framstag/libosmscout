@@ -1024,7 +1024,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& /*data*/)
   {
-    if (delegateLabelLayouter !=nullptr){
+    if (delegateLabelLayouter != nullptr){
       return;
     }
 
@@ -1033,6 +1033,16 @@ namespace osmscout {
     labelLayouter.DrawLabels(projection,
                              parameter,
                              this);
+  }
+
+  void MapPainterQt::AfterDrawing(const StyleConfig& /*styleConfig*/,
+                                  const Projection& /*projection*/,
+                                  const MapParameter& /*parameter*/,
+                                  const MapData& /*data*/)
+  {
+    if (delegateLabelLayouter != nullptr){
+      return;
+    }
 
     labelLayouter.Reset();
   }
@@ -1219,11 +1229,10 @@ namespace osmscout {
   MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):
     MapPainterBatch(expectedCount) {}
 
-  MapPainterBatchQt::~MapPainterBatchQt(){}
-
   bool MapPainterBatchQt::paint(const Projection& projection,
                                 const MapParameter& parameter,
-                                QPainter* qPainter)
+                                QPainter* qPainter,
+                                std::vector<IconInstance> &icons)
   {
     assert(data.size() == painters.size());
     if (painters.empty()){
@@ -1252,6 +1261,10 @@ namespace osmscout {
     for (size_t step=osmscout::RenderSteps::FirstStep;
          step<=osmscout::RenderSteps::LastStep;
          step++){
+
+      if (step==RenderSteps::LastStep) {
+        icons=lastPainter->labelLayouter.Icons();
+      }
 
       for (size_t i=0;i<data.size(); i++){
         const MapData &d=*(data[i]);

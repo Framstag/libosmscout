@@ -35,6 +35,7 @@
 #include <QDebug>
 
 #include <osmscout/util/GeoBox.h>
+#include <osmscoutmap/LabelLayouter.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 //#define DEBUG_TILE_CACHE
@@ -72,6 +73,7 @@ struct TileCacheVal
   QElapsedTimer lastAccess;
   QPixmap image;
   size_t epoch;
+  std::vector<IconInstance> icons;
 };
 
 /**
@@ -141,7 +143,11 @@ public:
    * @return true if there was such request
    */
   bool removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
-  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch = 0);
+
+  void put(uint32_t zoomLevel, uint32_t x, uint32_t y,
+           QImage image,
+           const std::vector<IconInstance> &icons=std::vector<IconInstance>(),
+           size_t epoch = 0);
 
   void cleanupCache();
 

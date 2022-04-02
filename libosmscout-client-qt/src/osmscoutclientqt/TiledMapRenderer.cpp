@@ -193,8 +193,11 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   return onlineTileCache.isRequestQueueEmpty() && offlineTileCache.isRequestQueueEmpty();
 }
 
-std::optional<MapIcon> TiledMapRenderer::GetMapIcon(const QPoint &screenPosition)
+std::optional<IconInstance> TiledMapRenderer::GetMapIcon(const QPoint &screenPosition,
+                                                         const MapViewStruct& view)
 {
+  QMutexLocker locker(&tileCacheMutex);
+
   return std::nullopt;
 }
 
@@ -322,7 +325,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     }else{
         // put Null image
         QMutexLocker locker(&tileCacheMutex);
-        offlineTileCache.put(zoomLevel, xtile, ytile, QImage(), loadEpoch);
+        offlineTileCache.put(zoomLevel, xtile, ytile, QImage(), std::vector<IconInstance>(), loadEpoch);
     }
 }
 
@@ -470,6 +473,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     getOverlayObjects(overlayObjects, renderBox);
 
     //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());
+    std::vector<IconInstance> icons;
     bool success;
     {
       DBRenderJob job(projection,
@@ -480,6 +484,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                       /*drawCanvasBackground*/ false,
                       /*renderBasemap*/ !onlineTilesEnabled);
       dbThread->RunJob(&job);
+      // TODO: pickup icons
       success=job.IsSuccess();
     }
 
@@ -502,18 +507,30 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
         }
 
         if (width == 1 && height == 1){
-            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas, loadEpoch);
+            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas, icons, loadEpoch);
         }else{
             for (uint32_t y = loadYFrom; y <= loadYTo; ++y){
                 for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
 
-                    QImage tile = canvas.copy(
-                            (double)(x - loadXFrom) * osmTileDimension,
-                            (double)(y - loadYFrom) * osmTileDimension,
-                            osmTileDimension, osmTileDimension
-                            );
+                    QRect tileRect(double(x - loadXFrom) * osmTileDimension,
+                                   double(y - loadYFrom) * osmTileDimension,
+                                   osmTileDimension, osmTileDimension);
+                    QImage tile = canvas.copy(tileRect);
 
-                    offlineTileCache.put(loadZ.Get(), x, y, tile, loadEpoch);
+                    std::vector<IconInstance> tileIcons;
+                    for (const auto &icon: icons) {
+                      QRect iconRect(icon.x, icon.y, icon.width, icon.height);
+                      if (tileRect.intersects(iconRect)) {
+                        tileIcons.push_back(IconInstance{icon.iconStyle,
+                                                         icon.x - tileRect.x(),
+                                                         icon.y - tileRect.y(),
+                                                         icon.width,
+                                                         icon.height,
+                                                         icon.databaseId,
+                                                         icon.objectRef});
+                      }
+                    }
+                    offlineTileCache.put(loadZ.Get(), x, y, tile, tileIcons, loadEpoch);
                 }
             }
         }

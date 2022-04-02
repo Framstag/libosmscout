@@ -124,6 +124,20 @@ namespace osmscout {
     ~LabelData() = default;
   };
 
+  class IconInstance
+  {
+  public:
+    IconStyleRef      iconStyle;        //!< Icon or symbol style
+
+    double            x;                //!< Coordinate of the left, top edge of the icon / symbol
+    double            y;                //!< Coordinate of the left, top edge of the icon / symbol
+    double            width{0};
+    double            height{0};
+
+    DatabaseId        databaseId;
+    ObjectFileRef     objectRef;
+  };
+
 
   template<class NativeGlyph>
   class Glyph {
@@ -550,7 +564,7 @@ namespace osmscout {
       {
         labelInstances.reserve(allSortedLabels.size());
         contourLabelInstances.reserve(allSortedContourLabels.size());
-        
+
         auto labelIter = allSortedLabels.begin();
         auto contourLabelIter = allSortedContourLabels.begin();
         while (labelIter != allSortedLabels.end()
@@ -905,6 +919,27 @@ namespace osmscout {
     const std::vector<LabelInstanceType>& Labels() const
     {
       return labelInstances;
+    }
+
+    std::vector<IconInstance> Icons() const
+    {
+      std::vector<IconInstance> result;
+      result.reserve(labelInstances.size() / 2);
+      for (const LabelInstanceType &instance: labelInstances) {
+        for (const typename LabelInstanceType::Element &elem: instance.elements) {
+          if (elem.labelData.type==LabelData::Icon || elem.labelData.type==LabelData::Symbol) {
+            result.push_back(IconInstance{
+              elem.labelData.iconStyle,
+              elem.x,
+              elem.y,
+              elem.labelData.iconWidth,
+              elem.labelData.iconHeight,
+              instance.databaseId,
+              instance.objectRef});
+          }
+        }
+      }
+      return result;
     }
 
     const std::vector<ContourLabelType>& ContourLabels() const

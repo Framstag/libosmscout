@@ -193,14 +193,17 @@ bool TileCache::removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)
     return requests.remove(key) > 0;
 }
 
-void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch)
+void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y,
+                    QImage image,
+                    const std::vector<IconInstance> &icons,
+                    size_t epoch)
 {
     QPixmap pixmap = QPixmap::fromImage(image);
     removeRequest(zoomLevel, x, y);
     TileCacheKey key = {zoomLevel, x, y};
     QElapsedTimer now;
     now.start();
-    TileCacheVal val = {now, pixmap, epoch};
+    TileCacheVal val = {now, pixmap, epoch, std::move(icons)};
 
 #ifdef DEBUG_TILE_CACHE
     qDebug() << this << "inserting tile" << key;

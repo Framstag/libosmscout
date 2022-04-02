@@ -232,10 +232,6 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
 {
 }
 
-DBRenderJob::~DBRenderJob()
-{
-}
-
 void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                       const std::list<DBInstanceRef> &databases,
                       QReadLocker *locker)
@@ -366,7 +362,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   // draw databases
   success &= batch.paint(renderProjection,
                          *drawParameter,
-                         p);
+                         p,
+                         icons);
   Close();
 }
 }

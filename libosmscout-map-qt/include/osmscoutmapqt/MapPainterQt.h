@@ -220,6 +220,11 @@ namespace osmscout {
                   const MapParameter& parameter,
                   const AreaData& area) override;
 
+    void AfterDrawing(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const MapData& data) override;
+
   public:
     MapPainterQt(const StyleConfigRef& styleConfig, DatabaseId databaseId);
     ~MapPainterQt() override;
@@ -249,11 +254,12 @@ namespace osmscout {
   public:
     explicit MapPainterBatchQt(size_t expectedCount);
 
-    ~MapPainterBatchQt() override;
+    ~MapPainterBatchQt() override = default;
 
     bool paint(const Projection& projection,
                const MapParameter& parameter,
-               QPainter* painter);
+               QPainter* painter,
+               std::vector<IconInstance> &icons);
   };
 }
 

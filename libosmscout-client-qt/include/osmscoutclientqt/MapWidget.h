@@ -285,6 +285,20 @@ public:
       return view; // We should be owner, parent is set http://doc.qt.io/qt-5/qqmlengine.html#objectOwnership
   }
 
+  inline MapViewStruct GetViewStruct() const
+  {
+    MapViewStruct result;
+    QRectF        boundingBox = contentsBoundingRect();
+
+    result.coord = view->center;
+    result.angle = view->angle;
+    result.magnification = view->magnification;
+    result.width = boundingBox.width();
+    result.height = boundingBox.height();
+    result.dpi = view->mapDpi;
+    return result;
+  };
+
   inline void SetMapView(QObject *o)
   {
     MapView *updated = dynamic_cast<MapView*>(o);
