@@ -26,6 +26,7 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/MapProvider.cpp',
             'src/osmscoutclientqt/AvailableMapsModel.cpp',
             'src/osmscoutclientqt/FileDownloader.cpp',
+            'src/osmscoutclientqt/IconLookup.cpp',
             'src/osmscoutclientqt/MapManager.cpp',
             'src/osmscoutclientqt/MapDownloadsModel.cpp',
             'src/osmscoutclientqt/MapObjectInfoModel.cpp',

@@ -35,6 +35,7 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/OverlayObject.h>
 #include <osmscoutclientqt/VehiclePosition.h>
+#include <osmscoutclientqt/IconLookup.h>
 
 namespace osmscout {
 
@@ -89,6 +90,8 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(QString vehicleInTunnelIconFile    READ getVehicleInTunnelIconFile     WRITE setVehicleInTunnelIconFile)
   Q_PROPERTY(double vehicleIconSize             READ getVehicleIconSize             WRITE setVehicleIconSize)
 
+  Q_PROPERTY(bool interactiveIcons READ hasInteractiveIcons WRITE setInteractiveIcons)
+
 private:
   MapRenderer      *renderer{nullptr};
 
@@ -96,6 +99,8 @@ private:
 
   InputHandler     *inputHandler{nullptr};
   TapRecognizer    tapRecognizer;
+
+  IconLookup       *iconLookup{nullptr};
 
   bool preventMouseStealing{false};
 
@@ -253,6 +258,8 @@ public slots:
    */
   void setVehicleScaleFactor(float factor);
 
+  void onIconFound(QPoint lookupCoord, MapIcon icon);
+
 private slots:
 
   virtual void onTap(const QPoint p);
@@ -299,6 +306,8 @@ public:
       changeView(*updated);
     }
   }
+
+  MapViewStruct GetViewStruct() const;
 
   inline VehiclePosition* GetVehiclePosition() const
   {
@@ -353,6 +362,13 @@ public:
     loadVehicleIcons();
     redraw();
   }
+
+  bool hasInteractiveIcons() const
+  {
+    return iconLookup!=nullptr;
+  }
+
+  void setInteractiveIcons(bool b);
 
   inline double GetLat() const
   {
