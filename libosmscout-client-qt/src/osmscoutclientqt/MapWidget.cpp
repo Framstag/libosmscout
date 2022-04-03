@@ -70,6 +70,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
     connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
 
+    connect(&iconAnimation, &IconAnimation::update, this, &MapWidget::redraw);
+
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
@@ -271,6 +273,8 @@ void MapWidget::paint(QPainter *painter)
     if (oldFinished != finished){
         emit finishedChanged(finished);
     }
+
+    iconAnimation.paint(painter, projection);
 
     // render vehicle
     if (vehicle.position && !vehicle.getIcon().isNull()){
@@ -703,6 +707,7 @@ void MapWidget::onTap(const QPoint p)
   getProjection().PixelToGeo(p.x(), p.y(),
                              coord);
   emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
+  iconAnimation.deactivateAll();
   if (iconLookup!=nullptr) {
     iconLookup->RequestIcon(GetViewStruct(), p, renderer->getOverlayObjects());
   }
@@ -720,6 +725,12 @@ void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
                << "symbol:" << QString::fromStdString(icon.iconStyle->GetSymbol()->GetName());
     }
   }
+
+  iconAnimation.activate(icon);
+
+  emit iconTapped(icon.screenCoord, icon.coord.GetLat(), icon.coord.GetLon(), icon.databasePath,
+                  QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(),
+                  icon.type, icon.name, icon.phone, icon.website);
 }
 
 void MapWidget::onDoubleTap(const QPoint p)

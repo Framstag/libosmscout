@@ -125,7 +125,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
         }
 
         findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, iconStyle,
-                                    databasePath, objectRef,
+                                    databasePath, objectRef, QString::fromStdString(featureBuffer.GetType()->GetName()),
                                     name, phone, website, QImage()});
       }
     }

@@ -43,6 +43,7 @@ struct OSMSCOUT_CLIENT_QT_API MapIcon {
   IconStyleRef iconStyle;
   QString databasePath;
   ObjectFileRef objectRef;
+  QString type;
   QString name;
   QString phone;
   QString website;

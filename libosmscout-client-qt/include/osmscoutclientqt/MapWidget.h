@@ -35,6 +35,7 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/OverlayObject.h>
 #include <osmscoutclientqt/VehiclePosition.h>
+#include <osmscoutclientqt/IconAnimation.h>
 #include <osmscoutclientqt/IconLookup.h>
 
 namespace osmscout {
@@ -101,6 +102,7 @@ private:
   TapRecognizer    tapRecognizer;
 
   IconLookup       *iconLookup{nullptr};
+  IconAnimation    iconAnimation;
 
   bool preventMouseStealing{false};
 
@@ -170,6 +172,10 @@ signals:
   void doubleTap(const int screenX, const int screenY, const double lat, const double lon);
   void longTap(const int screenX, const int screenY, const double lat, const double lon);
   void tapLongTap(const int screenX, const int screenY, const double lat, const double lon);
+
+  void iconTapped(QPoint screenCoord, double lat, double lon, QString databasePath,
+                  QString objectType, quint64 objectId, QString type,
+                  QString name, QString phone, QString website);
 
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
