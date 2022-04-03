@@ -4,10 +4,12 @@ set(CMAKE_AUTORCC ON)
 set(HEADER_FILES
 	include/osmscoutmapqt/MapQtImportExport.h
     include/osmscoutmapqt/MapPainterQt.h
+    include/osmscoutmapqt/SymbolRendererQt.h
 )
 
 set(SOURCE_FILES
     src/osmscoutmapqt/MapPainterQt.cpp
+    src/osmscoutmapqt/SymbolRendererQt.cpp
 )
 
 osmscout_library_project(
