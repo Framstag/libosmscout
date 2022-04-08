@@ -652,7 +652,7 @@ int main(int argc, char* argv[])
                         args.driver = value;
                       }),
                       "driver",
-                      "Rendering driver (cairo|Qt|agg|opengl|noop|none), default: " + args.driver,
+                      "Rendering driver (cairo|Qt|agg|opengl|dgi|noop|none), default: " + args.driver,
                       false);
   argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
                         if (value > 0) {
