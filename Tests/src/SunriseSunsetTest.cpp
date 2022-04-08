@@ -20,7 +20,7 @@ std::string ToString(const osmscout::SunriseSunsetRes &sunriseSunset, int tzOffs
     stream << "nullopt";
   }
   return stream.str();
-};
+}
 
 std::string SunriseSunsetString(const std::string &day,
                                 const osmscout::GeoCoord &location,
