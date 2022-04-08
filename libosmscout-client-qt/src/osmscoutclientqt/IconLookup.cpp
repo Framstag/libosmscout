@@ -17,9 +17,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscoutmapqt/SymbolRendererQt.h>
 #include <osmscoutclientqt/IconLookup.h>
+
 #include <QSvgRenderer>
-#include "osmscoutmapqt/SymbolRendererQt.h"
+
+#include <cmath>
 
 namespace osmscout {
 
@@ -87,6 +90,8 @@ void IconLookup::lookupIcons(const QString &databasePath,
   overlayObjects.clear();
 
   double iconSize = projection.ConvertWidthToPixel(drawParameter.GetIconSize());
+  double tapSizePixels = tapSize*dbThread->GetPhysicalDpi()/25.4;
+  QRectF tapRectangle(lookupCoord.x()-tapSizePixels/2, lookupCoord.y()-tapSizePixels/2, tapSizePixels, tapSizePixels);
 
   auto CheckIcon=[&](const IconStyleRef &iconStyle,
                      const GeoCoord &coord,
@@ -106,7 +111,9 @@ void IconLookup::lookupIcons(const QString &databasePath,
         double h=symbol->GetHeight(projection);
         iconRect=QRectF(x - w/2, y-h/2, w, h);
       }
-      if (iconRect.contains(lookupCoord)) {
+      if (iconRect.intersects(tapRectangle)) {
+        double distanceSquare=iconRect.contains(lookupCoord) ? 0 :
+          std::pow(lookupCoord.x()-x,2)+std::pow(lookupCoord.y()-y,2);
 
         QString name;
         QString phone;
@@ -124,7 +131,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
           website=QString::fromStdString(websiteValue->GetWebsite());
         }
 
-        findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, iconStyle,
+        findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, distanceSquare, iconStyle,
                                     databasePath, objectRef, QString::fromStdString(featureBuffer.GetType()->GetName()),
                                     name, phone, website, QImage()});
       }
@@ -177,10 +184,13 @@ void IconLookup::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles)
 void IconLookup::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> /*tiles*/)
 {
   std::stable_sort(findIcons.begin(), findIcons.end(), [](const MapIcon &a, const MapIcon &b){
-    if (a.iconStyle->GetPriority() == b.iconStyle->GetPriority()) {
-      return a.screenCoord.x() < b.screenCoord.x();
+    if (a.distanceSquare != b.distanceSquare) {
+      return a.distanceSquare < b.distanceSquare;
     }
-    return a.iconStyle->GetPriority() < b.iconStyle->GetPriority();
+    if (a.iconStyle->GetPriority() != b.iconStyle->GetPriority()) {
+      return a.iconStyle->GetPriority() < b.iconStyle->GetPriority();
+    }
+    return a.screenCoord.x() < b.screenCoord.x();
   });
   if (!findIcons.empty()){
 

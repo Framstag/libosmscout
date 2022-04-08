@@ -40,6 +40,7 @@ struct OSMSCOUT_CLIENT_QT_API MapIcon {
   QPoint screenCoord;
   QRectF dimensions;
   GeoCoord coord;
+  double distanceSquare;
   IconStyleRef iconStyle;
   QString databasePath;
   ObjectFileRef objectRef;
@@ -57,6 +58,7 @@ class OSMSCOUT_CLIENT_QT_API IconLookup : public QObject {
   Q_OBJECT
 private:
   static constexpr int iconImageUpscale=3;
+  static constexpr double tapSize=4;
   QThread     *thread;
   DBThreadRef dbThread;
   DBLoadJob   *loadJob;
