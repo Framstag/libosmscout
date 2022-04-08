@@ -16,7 +16,7 @@
 #cmakedefine HAVE_LIB_OSMSCOUTMAPCAIRO 1
 
 /* Gperftools detected */
-#cmakedefine HAVE_LIB_GPERFTOOLS 1
+#cmakedefine PERF_TEST_GPERFTOOLS_USAGE 1
 
 /* pango detected */
 #cmakedefine OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO 1
