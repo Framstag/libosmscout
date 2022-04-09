@@ -60,35 +60,6 @@ void IconLookup::lookupIcons(const QString &databasePath,
                              const TypeConfigRef &typeConfig,
                              const StyleConfigRef &styleConfig)
 {
-  for (auto const &o:overlayObjects){
-    if (o->getObjectType()==osmscout::RefType::refWay){
-      OverlayWay *ow=dynamic_cast<OverlayWay*>(o.get());
-      if (ow != nullptr) {
-        osmscout::WayRef w = std::make_shared<osmscout::Way>();
-        if (ow->toWay(w, *typeConfig)) {
-          data.poiWays.push_back(w);
-        }
-      }
-    } else if (o->getObjectType()==osmscout::RefType::refArea){
-      OverlayArea *oa=dynamic_cast<OverlayArea*>(o.get());
-      if (oa != nullptr) {
-        osmscout::AreaRef a = std::make_shared<osmscout::Area>();
-        if (oa->toArea(a, *typeConfig)) {
-          data.poiAreas.push_back(a);
-        }
-      }
-    } else if (o->getObjectType()==osmscout::RefType::refNode){
-      OverlayNode *oo=dynamic_cast<OverlayNode*>(o.get());
-      if (oo != nullptr) {
-        osmscout::NodeRef n = std::make_shared<osmscout::Node>();
-        if (oo->toNode(n, *typeConfig)) {
-          data.poiNodes.push_back(n);
-        }
-      }
-    }
-  }
-  overlayObjects.clear();
-
   double iconSize = projection.ConvertWidthToPixel(drawParameter.GetIconSize());
   double tapSizePixels = tapSize*dbThread->GetPhysicalDpi()/25.4;
   QRectF tapRectangle(lookupCoord.x()-tapSizePixels/2, lookupCoord.y()-tapSizePixels/2, tapSizePixels, tapSizePixels);
@@ -96,6 +67,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
   auto CheckIcon=[&](const IconStyleRef &iconStyle,
                      const GeoCoord &coord,
                      const ObjectFileRef &objectRef,
+                     int poiId,
                      const FeatureValueBuffer& featureBuffer) {
     if (iconStyle && iconStyle->IsVisible() && !iconStyle->IsOverlay()) {
       double x, y;
@@ -132,18 +104,18 @@ void IconLookup::lookupIcons(const QString &databasePath,
         }
 
         findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, distanceSquare, iconStyle,
-                                    databasePath, objectRef, QString::fromStdString(featureBuffer.GetType()->GetName()),
+                                    databasePath, objectRef, poiId, QString::fromStdString(featureBuffer.GetType()->GetName()),
                                     name, phone, website, QImage()});
       }
     }
   };
 
-  auto VisitArea=[&](const AreaRef a) {
+  auto VisitArea=[&](const AreaRef a, int poiId) {
     a->VisitRings([&](size_t, const Area::Ring&r, const TypeInfoRef& type) -> bool {
       if (!type->GetIgnore()) {
         auto iconStyle = styleConfig->GetAreaIconStyle(type, r.GetFeatureValueBuffer(), projection);
         auto coord = r.center.value_or(r.GetBoundingBox().GetCenter());
-        CheckIcon(iconStyle, coord, a->GetObjectFileRef(), a->GetFeatureValueBuffer());
+        CheckIcon(iconStyle, coord, a->GetObjectFileRef(), poiId, a->GetFeatureValueBuffer());
       }
       return true;
     });
@@ -151,18 +123,33 @@ void IconLookup::lookupIcons(const QString &databasePath,
 
   for (auto const &n:data.nodes) {
     auto iconStyle = styleConfig->GetNodeIconStyle(n->GetFeatureValueBuffer(), projection);
-    CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), n->GetFeatureValueBuffer());
-  }
-  for (auto const &n:data.poiNodes) {
-    auto iconStyle = styleConfig->GetNodeIconStyle(n->GetFeatureValueBuffer(), projection);
-    CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), n->GetFeatureValueBuffer());
+    CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), 0, n->GetFeatureValueBuffer());
   }
   for (auto const &a:data.areas) {
-    VisitArea(a);
+    VisitArea(a, 0);
   }
-  for (auto const &a:data.poiAreas) {
-    VisitArea(a);
+
+  for (auto const &o:overlayObjects){
+    if (o.second->getObjectType()==osmscout::RefType::refArea){
+      OverlayArea *oa=dynamic_cast<OverlayArea*>(o.second.get());
+      if (oa != nullptr) {
+        osmscout::AreaRef a = std::make_shared<osmscout::Area>();
+        if (oa->toArea(a, *typeConfig)) {
+          VisitArea(a, o.first);
+        }
+      }
+    } else if (o.second->getObjectType()==osmscout::RefType::refNode){
+      OverlayNode *oo=dynamic_cast<OverlayNode*>(o.second.get());
+      if (oo != nullptr) {
+        osmscout::NodeRef n = std::make_shared<osmscout::Node>();
+        if (oo->toNode(n, *typeConfig)) {
+          auto iconStyle = styleConfig->GetNodeIconStyle(n->GetFeatureValueBuffer(), projection);
+          CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), o.first, n->GetFeatureValueBuffer());
+        }
+      }
+    }
   }
+  overlayObjects.clear();
 }
 
 void IconLookup::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles)
@@ -259,10 +246,7 @@ void IconLookup::onIconRequest(const MapViewStruct &view,
   projection.Set(view.coord, view.angle.AsRadians(), view.magnification, view.dpi, view.width, view.height);
   projection.SetLinearInterpolationUsage(view.magnification.GetLevel() >= 10);
 
-  overlayObjects.clear();
-  for (const auto &e: overlayObjectMap) {
-    overlayObjects.push_back(e.second);
-  }
+  overlayObjects=overlayObjectMap;
 
   unsigned long maximumAreaLevel=4;
   if (view.magnification.GetLevel() >= 15) {

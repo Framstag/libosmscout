@@ -729,7 +729,7 @@ void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
   iconAnimation.activate(icon);
 
   emit iconTapped(icon.screenCoord, icon.coord.GetLat(), icon.coord.GetLon(), icon.databasePath,
-                  QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(),
+                  QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(), icon.poiId,
                   icon.type, icon.name, icon.phone, icon.website);
 }
 

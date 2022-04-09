@@ -44,6 +44,7 @@ struct OSMSCOUT_CLIENT_QT_API MapIcon {
   IconStyleRef iconStyle;
   QString databasePath;
   ObjectFileRef objectRef;
+  int poiId;
   QString type;
   QString name;
   QString phone;
@@ -63,7 +64,7 @@ private:
   DBThreadRef dbThread;
   DBLoadJob   *loadJob;
   osmscout::MercatorProjection projection;
-  std::vector<OverlayObjectRef> overlayObjects;
+  std::map<int,OverlayObjectRef> overlayObjects;
   MapParameter drawParameter;
   QPoint lookupCoord;
   std::vector<MapIcon> findIcons;

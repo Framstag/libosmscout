@@ -174,7 +174,7 @@ signals:
   void tapLongTap(const int screenX, const int screenY, const double lat, const double lon);
 
   void iconTapped(QPoint screenCoord, double lat, double lon, QString databasePath,
-                  QString objectType, quint64 objectId, QString type,
+                  QString objectType, quint64 objectId, int poiId, QString type,
                   QString name, QString phone, QString website);
 
   void stylesheetFilenameChanged();
