@@ -1788,6 +1788,7 @@ namespace osmscout {
   {
     wayData.clear();
     wayPathData.clear();
+    routeLabelData.clear();
 
     for (const auto& way : data.ways) {
       if (way->nodes.size() >= 2) {
@@ -1843,6 +1844,8 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
+    routeLabelData.clear();
+
     if (data.routes.empty()){
       return;
     }
