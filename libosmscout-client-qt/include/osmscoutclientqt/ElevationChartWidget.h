@@ -165,7 +165,7 @@ public:
 protected:
   void reset();
 
-private:
+protected:
   ElevationModule* elevationModule=nullptr;
   std::shared_ptr<OverlayWay> way;
   osmscout::BreakerRef breaker;
