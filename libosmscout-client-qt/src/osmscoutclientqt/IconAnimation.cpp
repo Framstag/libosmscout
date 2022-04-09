@@ -19,6 +19,8 @@
 
 #include <osmscoutclientqt/IconAnimation.h>
 
+#include <cmath>
+
 namespace osmscout {
 
 IconAnimation::IconAnimation():
@@ -63,6 +65,13 @@ void IconAnimation::paint(QPainter *painter, const MercatorProjection &projectio
     projection.GeoToPixel(animation.icon.coord, x, y);
     double w = animation.size;
     double h = animation.icon.image.height() * (w / animation.icon.image.width());
+
+    // draw semitransparent black circle as background
+    double r = std::sqrt(std::pow(w, 2) + std::pow(h, 2)) / 2;
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(QBrush(QColor::fromRgbF(0, 0, 0, 0.1)));
+    painter->drawEllipse(QPointF(x, y) ,r ,r);
+
     painter->drawImage(QRectF(x-w/2, y-h/2, w, h), animation.icon.image);
   }
 }
