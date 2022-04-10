@@ -47,6 +47,9 @@ struct OSMSCOUT_CLIENT_QT_API MapIcon {
   int poiId;
   QString type;
   QString name;
+  QString altName;
+  QString ref;
+  QString operatorName;
   QString phone;
   QString website;
   QImage image;

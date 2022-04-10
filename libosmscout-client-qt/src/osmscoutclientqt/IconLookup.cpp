@@ -88,11 +88,26 @@ void IconLookup::lookupIcons(const QString &databasePath,
           std::pow(lookupCoord.x()-x,2)+std::pow(lookupCoord.y()-y,2);
 
         QString name;
+        QString altName;
+        QString ref;
+        QString operatorName;
         QString phone;
         QString website;
         if (const osmscout::NameFeatureValue *nameValue=featureBuffer.findValue<osmscout::NameFeatureValue>();
             nameValue!=nullptr){
           name=QString::fromStdString(nameValue->GetLabel(Locale(), 0));
+        }
+        if (const osmscout::NameAltFeatureValue *altNameValue=featureBuffer.findValue<osmscout::NameAltFeatureValue>();
+            altNameValue != nullptr){
+          altName=QString::fromStdString(altNameValue->GetLabel(Locale(), 0));
+        }
+        if (const osmscout::RefFeatureValue *refValue=featureBuffer.findValue<osmscout::RefFeatureValue>();
+            refValue != nullptr){
+          ref=QString::fromStdString(refValue->GetLabel(Locale(), 0));
+        }
+        if (const osmscout::OperatorFeatureValue *operatorValue=featureBuffer.findValue<osmscout::OperatorFeatureValue>();
+            operatorValue != nullptr){
+          operatorName=QString::fromStdString(operatorValue->GetLabel(Locale(), 0));
         }
         if (const osmscout::PhoneFeatureValue *phoneValue=featureBuffer.findValue<osmscout::PhoneFeatureValue>();
             phoneValue!=nullptr){
@@ -105,7 +120,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
 
         findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, distanceSquare, iconStyle,
                                     databasePath, objectRef, poiId, QString::fromStdString(featureBuffer.GetType()->GetName()),
-                                    name, phone, website, QImage()});
+                                    name, altName, ref, operatorName, phone, website, QImage()});
       }
     }
   };

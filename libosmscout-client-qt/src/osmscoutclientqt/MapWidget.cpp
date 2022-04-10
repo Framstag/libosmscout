@@ -718,11 +718,13 @@ void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
   if (icon.iconStyle->IsVisible()) {
     if (!icon.iconStyle->GetIconName().empty()) {
       qDebug() << "Object:" << QString::fromStdString(icon.objectRef.GetName())
-               << "icon:" << QString::fromStdString(icon.iconStyle->GetIconName());
+               << "icon:" << QString::fromStdString(icon.iconStyle->GetIconName())
+               << "name:" << icon.name;
     } else {
       assert(icon.iconStyle->GetSymbol());
       qDebug() << "Object:" << QString::fromStdString(icon.objectRef.GetName())
-               << "symbol:" << QString::fromStdString(icon.iconStyle->GetSymbol()->GetName());
+               << "symbol:" << QString::fromStdString(icon.iconStyle->GetSymbol()->GetName())
+               << "name:" << icon.name;
     }
   }
 
@@ -730,7 +732,7 @@ void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
 
   emit iconTapped(icon.screenCoord, icon.coord.GetLat(), icon.coord.GetLon(), icon.databasePath,
                   QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(), icon.poiId,
-                  icon.type, icon.name, icon.phone, icon.website);
+                  icon.type, icon.name, icon.altName, icon.ref, icon.operatorName, icon.phone, icon.website);
 }
 
 void MapWidget::onDoubleTap(const QPoint p)

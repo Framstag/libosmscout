@@ -175,7 +175,7 @@ signals:
 
   void iconTapped(QPoint screenCoord, double lat, double lon, QString databasePath,
                   QString objectType, quint64 objectId, int poiId, QString type,
-                  QString name, QString phone, QString website);
+                  QString name, QString altName, QString ref, QString operatorName, QString phone, QString website);
 
   void stylesheetFilenameChanged();
   void styleErrorsChanged();
