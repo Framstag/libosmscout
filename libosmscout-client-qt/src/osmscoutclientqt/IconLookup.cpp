@@ -68,6 +68,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
                      const GeoCoord &coord,
                      const ObjectFileRef &objectRef,
                      int poiId,
+                     const TypeInfoRef& type,
                      const FeatureValueBuffer& featureBuffer) {
     if (iconStyle && iconStyle->IsVisible() && !iconStyle->IsOverlay()) {
       double x, y;
@@ -119,7 +120,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
         }
 
         findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, distanceSquare, iconStyle,
-                                    databasePath, objectRef, poiId, QString::fromStdString(featureBuffer.GetType()->GetName()),
+                                    databasePath, objectRef, poiId, QString::fromStdString(type->GetName()),
                                     name, altName, ref, operatorName, phone, website, QImage()});
       }
     }
@@ -130,7 +131,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
       if (!type->GetIgnore()) {
         auto iconStyle = styleConfig->GetAreaIconStyle(type, r.GetFeatureValueBuffer(), projection);
         auto coord = r.center.value_or(r.GetBoundingBox().GetCenter());
-        CheckIcon(iconStyle, coord, a->GetObjectFileRef(), poiId, a->GetFeatureValueBuffer());
+        CheckIcon(iconStyle, coord, a->GetObjectFileRef(), poiId, type, r.GetFeatureValueBuffer());
       }
       return true;
     });
@@ -138,7 +139,12 @@ void IconLookup::lookupIcons(const QString &databasePath,
 
   for (auto const &n:data.nodes) {
     auto iconStyle = styleConfig->GetNodeIconStyle(n->GetFeatureValueBuffer(), projection);
-    CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), 0, n->GetFeatureValueBuffer());
+    CheckIcon(iconStyle,
+              n->GetCoords(),
+              n->GetObjectFileRef(),
+              0,
+              n->GetFeatureValueBuffer().GetType(),
+              n->GetFeatureValueBuffer());
   }
   for (auto const &a:data.areas) {
     VisitArea(a, 0);
@@ -159,7 +165,12 @@ void IconLookup::lookupIcons(const QString &databasePath,
         osmscout::NodeRef n = std::make_shared<osmscout::Node>();
         if (oo->toNode(n, *typeConfig)) {
           auto iconStyle = styleConfig->GetNodeIconStyle(n->GetFeatureValueBuffer(), projection);
-          CheckIcon(iconStyle, n->GetCoords(), n->GetObjectFileRef(), o.first, n->GetFeatureValueBuffer());
+          CheckIcon(iconStyle,
+                    n->GetCoords(),
+                    n->GetObjectFileRef(),
+                    o.first,
+                    n->GetFeatureValueBuffer().GetType(),
+                    n->GetFeatureValueBuffer());
         }
       }
     }
