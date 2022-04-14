@@ -700,6 +700,10 @@ OverlayNode *MapWidget::createOverlayNode(QString type)
   return result;
 }
 
+void MapWidget::deactivateIcons()
+{
+  iconAnimation.deactivateAll();
+}
 
 void MapWidget::onTap(const QPoint p)
 {

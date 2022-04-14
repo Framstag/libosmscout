@@ -253,6 +253,8 @@ public slots:
   OverlayArea *createOverlayArea(QString type="_highlighted");
   OverlayNode *createOverlayNode(QString type="_highlighted");
 
+  void deactivateIcons();
+
   bool toggleDebug();
   bool toggleInfo();
 
