@@ -106,7 +106,7 @@ private:
 /**
  * \ingroup QtAPI
  */
-typedef std::shared_ptr<IconLookup> IconLookupRef;
+using IconLookupRef = std::shared_ptr<IconLookup> ;
 
 }
 #endif //OSMSCOUT_CLIENT_QT_ICONLOOKUP_H
