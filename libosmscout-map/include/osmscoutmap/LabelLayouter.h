@@ -309,206 +309,276 @@ namespace osmscout {
       labelInstances.clear();
     }
 
-    bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
-                             const Mask &mask,
-                             int64_t viewportHeight) const
-    {
-      bool collision=false;
-      for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
-        for (int c=std::max(0,mask.cellFrom); !collision && c<=std::min((int)mask.size()-1,mask.cellTo); c++){
-          collision |= (mask.d[c] & canvas[r*mask.size() + c]) != 0;
-        }
-      }
-      return collision;
-    }
-
-    void MarkLabelPlace(std::vector<uint64_t> &canvas,
-                        const Mask &mask,
-                        int viewportHeight) const
-    {
-      for (int r=std::max(0,mask.rowFrom); r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
-        for (int c=std::max(0,mask.cellFrom); c<=std::min((int)mask.size()-1, mask.cellTo); c++){
-          canvas[r*mask.size() + c] = mask.d[c] | canvas[r*mask.size() + c];
-        }
-      }
-    }
-
     // Something is an overlay, if its alpha is <0.8
-    bool IsOverlay(const LabelData &labelData) const
+    static bool IsOverlay(const LabelData &labelData)
     {
       return labelData.alpha < 0.8;
     }
 
-    void Layout(const Projection& projection,
-                const MapParameter& parameter)
-    {
+    /**
+     * Layout job initializes separate canvases for icons/symbols, labels and overlay labels.
+     * Then takes all registered labels and contour labels and sort them by priority.
+     * Note that labels includes standard labels, icons/symbols and overlay labels.
+     * As final step process labels and contour labels (from highest priority) and check
+     * its visual rectangle in corresponding canvas. When pixels are not occupied yet,
+     * it is added and pixels on canvas mark.
+     */
+    struct LayoutJob {
+      DoubleRectangle layoutViewport;
+
+      double iconPadding;
+      double labelPadding;
+      double shieldLabelPadding;
+      double contourLabelPadding;
+      double overlayLabelPadding;
+
+      int64_t rowSize;
+
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
 
-      double iconPadding = projection.ConvertWidthToPixel(parameter.GetIconPadding());
-      double labelPadding = projection.ConvertWidthToPixel(parameter.GetLabelPadding());
-      double shieldLabelPadding = projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding());
-      double contourLabelPadding = projection.ConvertWidthToPixel(parameter.GetContourLabelPadding());
-      double overlayLabelPadding = projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding());
+      std::vector<uint64_t> iconCanvas;
+      std::vector<uint64_t> labelCanvas;
+      std::vector<uint64_t> overlayCanvas;
 
-      std::swap(allSortedLabels, labelInstances);
-      std::swap(allSortedContourLabels, contourLabelInstances);
+      LayoutJob(const DoubleRectangle &layoutViewport,
+                const Projection& projection,
+                const MapParameter& parameter):
+        layoutViewport(layoutViewport),
+        iconPadding(projection.ConvertWidthToPixel(parameter.GetIconPadding())),
+        labelPadding(projection.ConvertWidthToPixel(parameter.GetLabelPadding())),
+        shieldLabelPadding(projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding())),
+        contourLabelPadding(projection.ConvertWidthToPixel(parameter.GetContourLabelPadding())),
+        overlayLabelPadding(projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())),
+        rowSize((int64_t(layoutViewport.width) / 64)+1)
+      {
+        iconCanvas.resize((size_t)(rowSize*layoutViewport.height));
+        labelCanvas.resize((size_t)(rowSize*layoutViewport.height));
+        overlayCanvas.resize((size_t)(rowSize*layoutViewport.height));
+      }
 
-      // sort labels by priority and position (to be deterministic)
-      std::stable_sort(allSortedLabels.begin(),
-                       allSortedLabels.end(),
-                       LabelInstanceSorter<NativeGlyph, NativeLabel>);
-      std::stable_sort(allSortedContourLabels.begin(),
-                       allSortedContourLabels.end(),
-                       ContourLabelSorter<NativeGlyph>);
+      LayoutJob(const LayoutJob&) = delete;
+      LayoutJob(LayoutJob&&) = delete;
+      ~LayoutJob() = default;
+      LayoutJob& operator=(const LayoutJob&) = delete;
+      LayoutJob& operator=(LayoutJob&&) = delete;
 
-      // compute collisions, hide some labels
-      int64_t rowSize = (layoutViewport.width / 64)+1;
-      std::vector<uint64_t> iconCanvas((size_t)(rowSize*layoutViewport.height));
-      std::vector<uint64_t> labelCanvas((size_t)(rowSize*layoutViewport.height));
-      std::vector<uint64_t> overlayCanvas((size_t)(rowSize*layoutViewport.height));
+      void Swap(std::vector<LabelInstanceType> &labelInstances,
+                std::vector<ContourLabelType> &contourLabelInstances)
+      {
+        std::swap(allSortedLabels, labelInstances);
+        std::swap(allSortedContourLabels, contourLabelInstances);
+      }
 
-      auto labelIter = allSortedLabels.begin();
-      auto contourLabelIter = allSortedContourLabels.begin();
-      while (labelIter != allSortedLabels.end()
-             || contourLabelIter != allSortedContourLabels.end()) {
+      void SortLabels()
+      {
+        // sort labels by priority and position (to be deterministic)
+        std::stable_sort(allSortedLabels.begin(),
+                         allSortedLabels.end(),
+                         LabelInstanceSorter<NativeGlyph, NativeLabel>);
+        std::stable_sort(allSortedContourLabels.begin(),
+                         allSortedContourLabels.end(),
+                         ContourLabelSorter<NativeGlyph>);
+      }
 
-        auto currentLabel = labelIter;
-        auto currentContourLabel = contourLabelIter;
-        if (currentLabel != allSortedLabels.end()
-            && currentContourLabel != allSortedContourLabels.end()) {
-          if (currentLabel->priority != currentContourLabel->priority) {
-            if (currentLabel->priority < currentContourLabel->priority) {
-              currentContourLabel = allSortedContourLabels.end();
-            } else {
-              currentLabel = allSortedLabels.end();
-            }
+      void MarkLabelPlace(std::vector<uint64_t> &canvas,
+                          const Mask &mask,
+                          int viewportHeight) const
+      {
+        for (int r=std::max(0,mask.rowFrom); r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
+          for (int c=std::max(0,mask.cellFrom); c<=std::min((int)mask.size()-1, mask.cellTo); c++){
+            canvas[r*mask.size() + c] = mask.d[c] | canvas[r*mask.size() + c];
           }
         }
+      }
 
-        if (currentLabel != allSortedLabels.end()){
-          Mask m(rowSize);
-          std::vector<Mask> masks(currentLabel->elements.size(), m);
-          std::vector<std::vector<uint64_t> *> canvases(currentLabel->elements.size(), nullptr);
-
-          std::vector<typename LabelInstance<NativeGlyph, NativeLabel>::Element> visibleElements;
-
-          for (size_t eli=0; eli < currentLabel->elements.size(); eli++){
-            const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel->elements[eli];
-            Mask& row=masks[eli];
-
-            double padding;
-            if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol) {
-              padding = iconPadding;
-            } else if (IsOverlay(element.labelData)) {
-              padding = overlayLabelPadding;
-            } else if (dynamic_cast<const ShieldStyle*>(element.labelData.style.get())!=nullptr){
-              padding = shieldLabelPadding;
-            } else {
-              padding = labelPadding;
-            }
-
-            IntRectangle rectangle{ (int)std::floor(element.x - layoutViewport.x - padding),
-                                    (int)std::floor(element.y - layoutViewport.y - padding),
-                                    0, 0 };
-            std::vector<uint64_t> *canvas = &labelCanvas;
-            if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
-              if (element.labelData.iconStyle->IsOverlay()) {
-                rectangle.width = 0;
-                rectangle.height = 0;
-              }
-              else {
-                rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
-                rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
-              }
-              canvas = &iconCanvas;
-#ifdef DEBUG_LABEL_LAYOUTER
-              if (element.labelData.type==LabelData::Icon) {
-                std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
-                             " prio " << currentLabel->priority;
-              }else{
-                std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName() <<
-                             " prio " << currentLabel->priority;
-              }
-#endif
-            } else {
-#ifdef DEBUG_LABEL_LAYOUTER
-              std::cout << "Test " << (IsOverlay(element.labelData) ? "overlay " : "") <<
-                           "label prio " << currentLabel->priority << ": " <<
-                           element.labelData.text;
-#endif
-
-              rectangle.width = std::ceil(element.label->width + 2*padding);
-              rectangle.height = std::ceil(element.label->height + 2*padding);
-
-              if (IsOverlay(element.labelData)){
-                canvas = &overlayCanvas;
-              }
-            }
-            row.prepare(rectangle);
-            bool collision = CheckLabelCollision(*canvas, row, layoutViewport.height);
-            if (!collision) {
-              visibleElements.push_back(element);
-              canvases[eli]=canvas;
-            }
-#ifdef DEBUG_LABEL_LAYOUTER
-            std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
-            // p->DrawRectangle(rectangle.x, rectangle.y,
-            //                  rectangle.width, rectangle.height,
-            //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
-#endif
+      bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
+                               const Mask &mask,
+                               int64_t viewportHeight) const
+      {
+        bool collision=false;
+        for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
+          for (int c=std::max(0,mask.cellFrom); !collision && c<=std::min((int)mask.size()-1,mask.cellTo); c++){
+            collision |= (mask.d[c] & canvas[r*mask.size() + c]) != 0;
           }
-          LabelInstanceType instanceCopy;
-          instanceCopy.priority = currentLabel->priority;
-          instanceCopy.elements = visibleElements;
-          if (!instanceCopy.elements.empty()) {
-            labelInstances.push_back(instanceCopy);
-
-            // mark all labels at once
-            for (size_t eli=0; eli < currentLabel->elements.size(); eli++) {
-              if (canvases[eli] != nullptr) {
-                MarkLabelPlace(*(canvases[eli]), masks[eli], layoutViewport.height);
-              }
-            }
-          }
-
-          labelIter++;
         }
+        return collision;
+      }
 
-        if (currentContourLabel != allSortedContourLabels.end()){
-          int glyphCnt=currentContourLabel->glyphs.size();
+      double LabelPadding(const LabelData &labelData) const
+      {
+        if (labelData.type==LabelData::Icon || labelData.type==LabelData::Symbol) {
+          return iconPadding;
+        }
+        if (IsOverlay(labelData)) {
+          return overlayLabelPadding;
+        }
+        if (dynamic_cast<const ShieldStyle*>(labelData.style.get())!=nullptr){
+          return shieldLabelPadding;
+        }
+        return labelPadding;
+      }
 
+      void ProcessLabelInstance(const LabelInstanceType &currentLabel,
+                                std::vector<LabelInstanceType> &labelInstances)
+      {
+        size_t elementCount = currentLabel.elements.size();
+        std::vector<Mask> masks(elementCount, Mask(rowSize));
+        std::vector<std::vector<uint64_t> *> canvases(elementCount, nullptr);
+
+        std::vector<typename LabelInstance<NativeGlyph, NativeLabel>::Element> visibleElements;
+
+        for (size_t eli=0; eli < elementCount; eli++){
+          const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel.elements[eli];
+          Mask& row=masks[eli];
+
+          double padding = LabelPadding(element.labelData);
+
+          IntRectangle rectangle{ (int)std::floor(element.x - layoutViewport.x - padding),
+                                  (int)std::floor(element.y - layoutViewport.y - padding),
+                                  0, 0 };
+          std::vector<uint64_t> *canvas = &labelCanvas;
+          if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
+            if (element.labelData.iconStyle->IsOverlay()) {
+              rectangle.width = 0;
+              rectangle.height = 0;
+            }
+            else {
+              rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
+              rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
+            }
+            canvas = &iconCanvas;
 #ifdef DEBUG_LABEL_LAYOUTER
-          std::cout << "Test contour label prio " << currentContourLabel->priority << ": " << currentContourLabel->text;
+            if (element.labelData.type==LabelData::Icon) {
+              std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
+                        " prio " << currentLabel.priority;
+            }else{
+              std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName() <<
+                        " prio " << currentLabel.priority;
+            }
+#endif
+          } else {
+#ifdef DEBUG_LABEL_LAYOUTER
+            std::cout << "Test " << (IsOverlay(element.labelData) ? "overlay " : "") <<
+                      "label prio " << currentLabel.priority << ": " <<
+                      element.labelData.text;
 #endif
 
-          Mask m(rowSize);
-          std::vector<Mask> masks(glyphCnt, m);
-          bool collision=false;
-          for (int gi=0; !collision && gi<glyphCnt; gi++) {
+            rectangle.width = std::ceil(element.label->width + 2*padding);
+            rectangle.height = std::ceil(element.label->height + 2*padding);
 
-            auto glyph=currentContourLabel->glyphs[gi];
-            IntRectangle rect{
-                (int)(glyph.trPosition.GetX() - layoutViewport.x - contourLabelPadding),
-                (int)(glyph.trPosition.GetY() - layoutViewport.y - contourLabelPadding),
-                (int)(glyph.trWidth + 2*contourLabelPadding),
-                (int)(glyph.trHeight + 2*contourLabelPadding)
-            };
-            masks[gi].prepare(rect);
-            collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);
+            if (IsOverlay(element.labelData)){
+              canvas = &overlayCanvas;
+            }
           }
+          row.prepare(rectangle);
+          bool collision = CheckLabelCollision(*canvas, row, layoutViewport.height);
           if (!collision) {
-            for (int gi=0; gi<glyphCnt; gi++) {
-              MarkLabelPlace(labelCanvas, masks[gi], layoutViewport.height);
-            }
-            contourLabelInstances.push_back(*currentContourLabel);
+            visibleElements.push_back(element);
+            canvases[eli]=canvas;
           }
 #ifdef DEBUG_LABEL_LAYOUTER
           std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
+          // p->DrawRectangle(rectangle.x, rectangle.y,
+          //                  rectangle.width, rectangle.height,
+          //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
 #endif
-          contourLabelIter++;
+        }
+
+        if (!visibleElements.empty()) {
+          LabelInstanceType instanceCopy{currentLabel.priority, visibleElements};
+          labelInstances.push_back(instanceCopy);
+
+          // mark all labels at once
+          size_t visibleCount = instanceCopy.elements.size();
+          for (size_t eli=0; eli < visibleCount; eli++) {
+            if (canvases[eli] != nullptr) {
+              MarkLabelPlace(*(canvases[eli]), masks[eli], layoutViewport.height);
+            }
+          }
         }
       }
+
+      void ProcessLabelContourLabel(const ContourLabelType &currentContourLabel,
+                                    std::vector<ContourLabelType> &contourLabelInstances)
+      {
+        int glyphCnt=currentContourLabel.glyphs.size();
+
+#ifdef DEBUG_LABEL_LAYOUTER
+        std::cout << "Test contour label prio " << currentContourLabel.priority << ": " << currentContourLabel.text;
+#endif
+
+        Mask m(rowSize);
+        std::vector<Mask> masks(glyphCnt, m);
+        bool collision=false;
+        for (int gi=0; !collision && gi<glyphCnt; gi++) {
+
+          auto glyph=currentContourLabel.glyphs[gi];
+          IntRectangle rect{
+            (int)(glyph.trPosition.GetX() - layoutViewport.x - contourLabelPadding),
+            (int)(glyph.trPosition.GetY() - layoutViewport.y - contourLabelPadding),
+            (int)(glyph.trWidth + 2*contourLabelPadding),
+            (int)(glyph.trHeight + 2*contourLabelPadding)
+          };
+          masks[gi].prepare(rect);
+          collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);
+        }
+        if (!collision) {
+          for (int gi=0; gi<glyphCnt; gi++) {
+            MarkLabelPlace(labelCanvas, masks[gi], layoutViewport.height);
+          }
+          contourLabelInstances.push_back(currentContourLabel);
+        }
+#ifdef DEBUG_LABEL_LAYOUTER
+        std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
+#endif
+      };
+
+      void ProcessLabels(std::vector<LabelInstanceType> &labelInstances,
+                         std::vector<ContourLabelType> &contourLabelInstances)
+      {
+        labelInstances.reserve(allSortedLabels.size());
+        contourLabelInstances.reserve(allSortedContourLabels.size());
+        
+        auto labelIter = allSortedLabels.begin();
+        auto contourLabelIter = allSortedContourLabels.begin();
+        while (labelIter != allSortedLabels.end()
+               || contourLabelIter != allSortedContourLabels.end()) {
+
+          auto currentLabel = labelIter;
+          auto currentContourLabel = contourLabelIter;
+          if (currentLabel != allSortedLabels.end()
+              && currentContourLabel != allSortedContourLabels.end()) {
+            if (currentLabel->priority != currentContourLabel->priority) {
+              if (currentLabel->priority < currentContourLabel->priority) {
+                currentContourLabel = allSortedContourLabels.end();
+              } else {
+                currentLabel = allSortedLabels.end();
+              }
+            }
+          }
+
+          if (currentLabel != allSortedLabels.end()){
+            ProcessLabelInstance(*currentLabel, labelInstances);
+            labelIter++;
+          }
+
+          if (currentContourLabel != allSortedContourLabels.end()){
+            ProcessLabelContourLabel(*currentContourLabel, contourLabelInstances);
+            contourLabelIter++;
+          }
+        }
+      }
+    };
+
+    void Layout(const Projection& projection,
+                const MapParameter& parameter)
+    {
+      // compute collisions, hide some labels
+      LayoutJob job(layoutViewport, projection, parameter);
+      job.Swap(labelInstances, contourLabelInstances);
+      job.SortLabels();
+      job.ProcessLabels(labelInstances, contourLabelInstances);
     }
 
     /**
