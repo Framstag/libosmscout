@@ -1,6 +1,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeatures.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 COMPILER OST
@@ -37,15 +38,53 @@ IGNORE '\t' + '\r' + '\n'
 
 PRODUCTIONS
   OST         = SYNC "OST"
+                [IMPORTS]
                 [MAXSPEEDS]
+                [IMPORTS]
                 [GRADES]
+                [IMPORTS]
                 [FEATURES]
+                [IMPORTS]
                 [TYPES]
+                [IMPORTS]
                 "END"
                 .
 
+  IMPORTS     = IMPORT {IMPORT}
+                .
+
+  IMPORT      = SYNC "MODULE"
+                (.
+                  std::string moduleName;
+                .)
+                STRING<moduleName>
+                (.
+                  std::string directory=osmscout::GetDirectory(filename);
+
+                  std::string moduleFileName;
+
+                  if (!directory.empty()) {
+                     moduleFileName=osmscout::AppendFileToDir(directory,moduleName)+".ost";
+                  }
+                  else {
+                    moduleFileName=moduleName+".ost";
+                  }
+
+                  bool success=config.LoadFromOSTFile(moduleFileName);
+
+                  if (!success) {
+                    std::string e="Cannot load module '"+moduleFileName+"'";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
+
   MAXSPEEDS   = SYNC "MAX" "SPEEDS"
-                MAXSPEED {MAXSPEED}
+                MAXSPEED
+                {
+                  MAXSPEED
+                }
                 .
 
   MAXSPEED    = (.
@@ -152,7 +191,10 @@ PRODUCTIONS
                 .
 
   TYPES       = SYNC "TYPES"
-                TYPE {TYPE}
+                TYPE
+                {
+                  TYPE
+                }
                 .
 
   TYPE        = (.

@@ -65,6 +65,7 @@ private:
   TokenRef t;  // last recognized token
   TokenRef la; // lookahead token
 
+  std::string filename;
   TypeConfig& config;
 
 public:
@@ -73,6 +74,7 @@ public:
 -->declarations
 
   Parser(Scanner *scanner,
+         const std::string& filename,
          TypeConfig& config);
   ~Parser();
   void SemErr(const char* msg);
@@ -213,8 +215,10 @@ void Parser::Parse()
 }
 
 Parser::Parser(Scanner *scanner,
+               const std::string& filename,
                TypeConfig& config)
- : config(config)
+ : filename(filename),
+   config(config)
 {
 -->constants
   dummyToken = nullptr;

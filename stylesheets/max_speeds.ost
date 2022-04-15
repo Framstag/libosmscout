@@ -1,0 +1,41 @@
+OST
+
+/*
+  List of max speeds aliases. Normally value for the tag "maxspeed" should always
+  have a numeric value and the source of the speed limit should be placed into
+  the value of the tag "source:maxspeed" containing an alias name.
+  In some country this is not (only) the case, the alias is also sometimes
+  placed into "maxspeed" itself. This table helps to resolve these aliases
+  to numeric values again.
+
+  https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed
+  https://wiki.openstreetmap.org/wiki/Speed_limits
+*/
+MAX SPEEDS
+  SPEED "CZ:urban"         =  50 km/h
+  SPEED "CZ:rural"         =  90 km/h
+  SPEED "CZ:motorway"      = 130 km/h
+
+  SPEED "DE:living_street" =  10 km/h
+  SPEED "DE:urban"         =  50 km/h
+  SPEED "DE:rural"         = 100 km/h
+
+  SPEED "FR:walk"          =   6 km/h
+  SPEED "FR:urban"         =  50 km/h
+  SPEED "FR:rural"         =  90 km/h
+  SPEED "FR:motorway"      = 130 km/h
+
+  SPEED "SK:urban"         =  50 km/h
+  SPEED "SK:rural"         =  90 km/h
+  SPEED "SK:motorway"      = 130 km/h
+
+  SPEED "IT:urban"         =  50 km/h
+  SPEED "IT:rural"         =  90 km/h
+  SPEED "IT:trunk"         = 110 km/h
+  SPEED "IT:motorway"      = 130 km/h
+
+  SPEED "RU:living_street" =  20 km/h
+  SPEED "RU:urban"         =  60 km/h
+  SPEED "RU:rural"         =  90 km/h
+  SPEED "RU:motorway"      = 110 km/h
+END

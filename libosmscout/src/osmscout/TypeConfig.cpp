@@ -1119,6 +1119,7 @@ namespace osmscout {
       ost::Scanner *scanner=new ost::Scanner(content,
                                              fileSize);
       ost::Parser  *parser=new ost::Parser(scanner,
+                                           filename,
                                            *this);
 
       delete [] content;
@@ -1130,7 +1131,7 @@ namespace osmscout {
       delete parser;
       delete scanner;
     }
-    catch (IOException& e) {
+    catch (IOException const& e) {
       log.Error() << e.GetDescription();
     }
 
