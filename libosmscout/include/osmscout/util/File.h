@@ -64,6 +64,14 @@ namespace osmscout {
   /**
    * \ingroup File
    *
+   * Return everything (including the delimiter) before the last path delimiter.
+   * Returns empty string, if there is no delimiter.
+   */
+  extern OSMSCOUT_API std::string GetDirectory(const std::string& file);
+
+  /**
+   * \ingroup File
+   *
    * Append the filename 'name' to the directory name 'name' correctly adding directory
    * delimiter if necessary.
    */
