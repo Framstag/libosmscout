@@ -119,6 +119,24 @@ namespace osmscout {
                   newFilename.c_str())==0;
   }
 
+  std::string GetDirectory(const std::string& file)
+  {
+#if defined(__WIN32__) || defined(WIN32)
+    std::string delimiter="\\";
+#else
+    std::string delimiter="/";
+#endif
+
+    std::string::size_type pos=file.find_last_of(delimiter);
+
+    if (pos==std::string::npos) {
+      return "";
+    }
+
+    return file.substr(0,pos+1);
+  }
+
+
   std::string AppendFileToDir(const std::string& dir, const std::string& file)
   {
 #if defined(__WIN32__) || defined(WIN32)
