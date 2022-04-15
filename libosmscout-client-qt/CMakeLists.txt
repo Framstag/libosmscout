@@ -8,6 +8,8 @@ set(HEADER_FILES
     include/osmscoutclientqt/ElevationChartWidget.h
     include/osmscoutclientqt/ElevationModule.h
     include/osmscoutclientqt/FileDownloader.h
+    include/osmscoutclientqt/IconAnimation.h
+    include/osmscoutclientqt/IconLookup.h
     include/osmscoutclientqt/InputHandler.h
     include/osmscoutclientqt/LocationEntry.h
     include/osmscoutclientqt/LocationInfoModel.h
@@ -65,6 +67,8 @@ set(SOURCE_FILES
     src/osmscoutclientqt/ElevationChartWidget.cpp
     src/osmscoutclientqt/ElevationModule.cpp
     src/osmscoutclientqt/FileDownloader.cpp
+    src/osmscoutclientqt/IconAnimation.cpp
+    src/osmscoutclientqt/IconLookup.cpp
     src/osmscoutclientqt/InputHandler.cpp
     src/osmscoutclientqt/LocationEntry.cpp
     src/osmscoutclientqt/LocationInfoModel.cpp

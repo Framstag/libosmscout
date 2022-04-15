@@ -34,6 +34,7 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
+#include <osmscoutmapqt/SymbolRendererQt.h>
 
 namespace osmscout {
 
@@ -641,172 +642,12 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,
-                                const MapParameter& parameter,
+                                const MapParameter& /*parameter*/,
                                 const Symbol& symbol,
                                 double x, double y)
   {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-    double centerX;
-    double centerY;
-
-    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-
-    centerX=(minX+maxX)/2;
-    centerY=(minY+maxY)/2;
-
-    for (const auto& primitive : symbol.GetPrimitives()) {
-      const DrawPrimitive *primitivePtr=primitive.get();
-
-      if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-          polygon != nullptr) {
-
-        FillStyleRef   fillStyle=polygon->GetFillStyle();
-        BorderStyleRef borderStyle=polygon->GetBorderStyle();
-
-        if (fillStyle) {
-          SetFill(projection,
-                  parameter,
-                  *fillStyle);
-        }
-        else {
-          painter->setBrush(Qt::NoBrush);
-        }
-
-        if (borderStyle) {
-          SetBorder(projection,
-                    parameter,
-                    *borderStyle);
-        }
-        else {
-          painter->setPen(Qt::NoPen);
-        }
-
-        QPainterPath path;
-
-        if (polygon->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          for (auto pixel=polygon->GetCoords().begin();
-               pixel!=polygon->GetCoords().end();
-               ++pixel) {
-            if (pixel==polygon->GetCoords().begin()) {
-              path.moveTo(x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                          y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
-            }
-            else {
-              path.lineTo(x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                          y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
-            }
-          }
-        }
-        else {
-          for (auto pixel=polygon->GetCoords().begin();
-               pixel!=polygon->GetCoords().end();
-               ++pixel) {
-            if (pixel==polygon->GetCoords().begin()) {
-              path.moveTo(x+projection.GetMeterInPixel()*pixel->GetX()-centerX,
-                          y+projection.GetMeterInPixel()*pixel->GetY()-centerY);
-            }
-            else {
-              path.lineTo(x+projection.GetMeterInPixel()*pixel->GetX()-centerX,
-                          y+projection.GetMeterInPixel()*pixel->GetY()-centerY);
-
-            }
-          }
-        }
-
-        painter->drawPath(path);
-      }
-      else if (const auto *rectangle = dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-               rectangle != nullptr) {
-
-        FillStyleRef   fillStyle=rectangle->GetFillStyle();
-        BorderStyleRef borderStyle=rectangle->GetBorderStyle();
-
-        if (fillStyle) {
-          SetFill(projection,
-                  parameter,
-                  *fillStyle);
-        }
-        else {
-          painter->setBrush(Qt::NoBrush);
-        }
-
-        if (borderStyle) {
-          SetBorder(projection,
-                    parameter,
-                    *borderStyle);
-        }
-        else {
-          painter->setPen(Qt::NoPen);
-        }
-
-        QPainterPath path;
-
-        if (rectangle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          path.addRect(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
-                       y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
-                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
-        }
-        else {
-          path.addRect(x+projection.GetMeterInPixel()*rectangle->GetTopLeft().GetX()-centerX,
-                       y+projection.GetMeterInPixel()*rectangle->GetTopLeft().GetY()-centerY,
-                       projection.GetMeterInPixel()*rectangle->GetWidth(),
-                       projection.GetMeterInPixel()*rectangle->GetHeight());
-        }
-
-        painter->drawPath(path);
-      }
-      else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
-               circle != nullptr) {
-
-        FillStyleRef   fillStyle=circle->GetFillStyle();
-        BorderStyleRef borderStyle=circle->GetBorderStyle();
-        QPointF        center;
-        double         radius;
-
-        if (circle->GetProjectionMode()==DrawPrimitive::ProjectionMode::MAP) {
-          center=QPointF(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
-                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY);
-
-          radius=projection.ConvertWidthToPixel(circle->GetRadius());
-        }
-        else {
-          center=QPointF(x+projection.GetMeterInPixel()*circle->GetCenter().GetX()-centerX,
-                         y+projection.GetMeterInPixel()*circle->GetCenter().GetY()-centerY);
-
-          radius=projection.GetMeterInPixel()*circle->GetRadius();
-        }
-
-        if (fillStyle) {
-          SetFill(projection,
-                  parameter,
-                  *fillStyle);
-        }
-        else {
-          painter->setBrush(Qt::NoBrush);
-        }
-
-        if (borderStyle) {
-          SetBorder(projection,
-                    parameter,
-                    *borderStyle);
-        }
-        else {
-          painter->setPen(Qt::NoPen);
-        }
-
-        QPainterPath path;
-
-        path.addEllipse(center,
-                        radius,
-                        radius);
-
-        painter->drawPath(path);
-      }
-    }
+    SymbolRendererQt renderer(painter);
+    renderer.Render(symbol, Vertex2D(x, y), projection);
   }
 
   void MapPainterQt::DrawPath(const Projection& /*projection*/,

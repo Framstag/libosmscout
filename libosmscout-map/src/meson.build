@@ -15,5 +15,6 @@ osmscoutmapSrc = [
             'src/osmscoutmap/MapData.cpp',
             'src/osmscoutmap/MapService.cpp',
             'src/osmscoutmap/MapPainterNoOp.cpp',
+            'src/osmscoutmap/SymbolRenderer.cpp'
           ]
 

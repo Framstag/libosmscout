@@ -70,6 +70,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
     connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
 
+    connect(&iconAnimation, &IconAnimation::update, this, &MapWidget::redraw);
+
     // TODO, open last position, move to current position or get as constructor argument...
     view = new MapView(this,
                        osmscout::GeoCoord(0.0, 0.0),
@@ -92,6 +94,10 @@ MapWidget::~MapWidget()
     if (renderer!=nullptr){
       renderer->deleteLater();
       renderer=nullptr;
+    }
+    if (iconLookup!=nullptr) {
+      iconLookup->deleteLater();
+      iconLookup = nullptr;
     }
 }
 
@@ -258,15 +264,8 @@ void MapWidget::paint(QPainter *painter)
     painter->setRenderHint(QPainter::TextAntialiasing, !animationInProgress);
     painter->setRenderHint(QPainter::SmoothPixmapTransform, !animationInProgress);
 
-    MapViewStruct request;
-    QRectF        boundingBox = contentsBoundingRect();
-
-    request.coord = view->center;
-    request.angle = view->angle;
-    request.magnification = view->magnification;
-    request.width = boundingBox.width();
-    request.height = boundingBox.height();
-    request.dpi = view->mapDpi;
+    MapViewStruct request=GetViewStruct();
+    QRectF boundingBox = contentsBoundingRect();
 
     bool oldFinished = finished;
     assert(renderer);
@@ -274,6 +273,8 @@ void MapWidget::paint(QPainter *painter)
     if (oldFinished != finished){
         emit finishedChanged(finished);
     }
+
+    iconAnimation.paint(painter, projection);
 
     // render vehicle
     if (vehicle.position && !vehicle.getIcon().isNull()){
@@ -699,13 +700,43 @@ OverlayNode *MapWidget::createOverlayNode(QString type)
   return result;
 }
 
+void MapWidget::deactivateIcons()
+{
+  iconAnimation.deactivateAll();
+}
 
 void MapWidget::onTap(const QPoint p)
 {
   osmscout::GeoCoord coord;
-    getProjection().PixelToGeo(p.x(), p.y(),
-                               coord);
-    emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
+  getProjection().PixelToGeo(p.x(), p.y(),
+                             coord);
+  emit tap(p.x(), p.y(), coord.GetLat(), coord.GetLon());
+  iconAnimation.deactivateAll();
+  if (iconLookup!=nullptr) {
+    iconLookup->RequestIcon(GetViewStruct(), p, renderer->getOverlayObjects());
+  }
+}
+
+void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
+{
+  if (icon.iconStyle->IsVisible()) {
+    if (!icon.iconStyle->GetIconName().empty()) {
+      qDebug() << "Object:" << QString::fromStdString(icon.objectRef.GetName())
+               << "icon:" << QString::fromStdString(icon.iconStyle->GetIconName())
+               << "name:" << icon.name;
+    } else {
+      assert(icon.iconStyle->GetSymbol());
+      qDebug() << "Object:" << QString::fromStdString(icon.objectRef.GetName())
+               << "symbol:" << QString::fromStdString(icon.iconStyle->GetSymbol()->GetName())
+               << "name:" << icon.name;
+    }
+  }
+
+  iconAnimation.activate(icon);
+
+  emit iconTapped(icon.screenCoord, icon.coord.GetLat(), icon.coord.GetLon(), icon.databasePath,
+                  QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(), icon.poiId,
+                  icon.type, icon.name, icon.altName, icon.ref, icon.operatorName, icon.phone, icon.website);
 }
 
 void MapWidget::onDoubleTap(const QPoint p)
@@ -759,6 +790,20 @@ void MapWidget::onMapDPIChange(double dpi)
 void MapWidget::onResize()
 {
     inputHandler->widgetResized(QSizeF(width(), height()));
+}
+
+MapViewStruct MapWidget::GetViewStruct() const
+{
+  MapViewStruct result;
+  QRectF boundingBox = contentsBoundingRect();
+
+  result.coord = view->center;
+  result.angle = view->angle;
+  result.magnification = view->magnification;
+  result.width = boundingBox.width();
+  result.height = boundingBox.height();
+  result.dpi = view->mapDpi;
+  return result;
 }
 
 void MapWidget::SetVehiclePosition(QObject *o)
@@ -820,6 +865,21 @@ void MapWidget::loadVehicleIcons()
   vehicle.standardIcon=loadSVGIcon(iconDirectory, vehicle.standardIconFile, iconPixelSize);
   vehicle.noGpsSignalIcon=loadSVGIcon(iconDirectory, vehicle.noGpsSignalIconFile, iconPixelSize);
   vehicle.inTunnelIcon=loadSVGIcon(iconDirectory, vehicle.inTunnelIconFile, iconPixelSize);
+}
+
+void MapWidget::setInteractiveIcons(bool b)
+{
+  if (iconLookup!=nullptr && !b) {
+    iconLookup->deleteLater();
+    iconLookup = nullptr;
+    return;
+  }
+  if (iconLookup==nullptr && b) {
+    iconLookup=OSMScoutQt::GetInstance().MakeIconLookup();
+    connect(iconLookup, &IconLookup::iconFound,
+            this, &MapWidget::onIconFound,
+            Qt::QueuedConnection);
+  }
 }
 
 QString MapWidget::GetStylesheetFilename() const

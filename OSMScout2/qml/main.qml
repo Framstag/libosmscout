@@ -114,6 +114,7 @@ Window {
             Layout.fillHeight: true
             focus: true
             renderingType: "plane" // or "tiled"
+            interactiveIcons: true
 
             function getFreeRect() {
                 return Qt.rect(Theme.horizSpace,

@@ -29,6 +29,8 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/MapProvider.h',
             'osmscoutclientqt/AvailableMapsModel.h',
             'osmscoutclientqt/FileDownloader.h',
+            'osmscoutclientqt/IconAnimation.h',
+            'osmscoutclientqt/IconLookup.h',
             'osmscoutclientqt/MapManager.h',
             'osmscoutclientqt/MapDownloadsModel.h',
             'osmscoutclientqt/MapObjectInfoModel.h',

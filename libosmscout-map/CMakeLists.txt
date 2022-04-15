@@ -16,6 +16,7 @@ set(HEADER_FILES
 	include/osmscoutmap/DataTileCache.h
 	include/osmscoutmap/MapTileCache.h
 	include/osmscoutmap/MapPainterNoOp.h
+	include/osmscoutmap/SymbolRenderer.h
 	${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutmap/MapFeatures.h
 )
 
@@ -36,6 +37,7 @@ set(SOURCE_FILES
 	src/osmscoutmap/DataTileCache.cpp
 	src/osmscoutmap/MapTileCache.cpp
 	src/osmscoutmap/MapPainterNoOp.cpp
+	src/osmscoutmap/SymbolRenderer.cpp
 )
 
 osmscout_library_project(

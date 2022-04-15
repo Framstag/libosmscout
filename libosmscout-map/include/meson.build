@@ -17,7 +17,8 @@ osmscoutmapHeader = [
             'osmscoutmap/MapTileCache.h',
             'osmscoutmap/MapData.h',
             'osmscoutmap/MapService.h',
-            'osmscoutmap/MapPainterNoOp.h'
+            'osmscoutmap/MapPainterNoOp.h',
+            'osmscoutmap/SymbolRenderer.h'
           ]
 
 install_headers(osmscoutmapHeader)

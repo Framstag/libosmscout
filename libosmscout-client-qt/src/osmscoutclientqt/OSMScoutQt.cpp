@@ -167,6 +167,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<OverlayNode*>("OverlayNode*");
   qRegisterMetaType<QList<LookupModule::ObjectInfo>>("QList<LookupModule::ObjectInfo>");
   qRegisterMetaType<ElevationModule::ElevationPoints>("ElevationModule::ElevationPoints");
+  qRegisterMetaType<std::map<int,OverlayObjectRef>>("std::map<int,OverlayObjectRef>");
+  qRegisterMetaType<MapIcon>("MapIcon");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -363,6 +365,15 @@ ElevationModule *OSMScoutQt::MakeElevationModule()
   module->moveToThread(thread);
   thread->start();
   return module;
+}
+
+IconLookup* OSMScoutQt::MakeIconLookup()
+{
+  QThread *thread=makeThread("IconLookup");
+  IconLookup *iconLookup=new IconLookup(thread, dbThread, iconDirectory);
+  iconLookup->moveToThread(thread);
+  thread->start();
+  return iconLookup;
 }
 
 MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
