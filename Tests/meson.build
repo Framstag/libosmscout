@@ -96,6 +96,13 @@ FeatureLabelTest = executable('FeatureLabelTest',
              link_with: [osmscout],
              install: false)
 
+File = executable('File',
+             'src/File.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: false)
+
 FileScannerWriter = executable('FileScannerWriter',
              'src/FileScannerWriter.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -296,6 +303,7 @@ test('Check threaded database', ThreadedDatabase, args : [
 test('Check SunriseSunset utility', SunriseSunset)
 test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)
+test('Check File utilities', File)
 test('Check File access implementation', FileScannerWriter)
 test('Check parsing of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)

@@ -17,18 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/private/Config.h>
-
 #include <cstdio>
 #include <cstdlib>
 
-#if defined(HAVE_SYS_STAT_H)
-#include <sys/stat.h>
-#endif
-
-#if defined(__WIN32__) || defined(WIN32)
-#include <windows.h>
-#endif
+#include <filesystem>
 
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/File.h>
@@ -39,74 +31,24 @@ namespace osmscout {
 
   FileOffset GetFileSize(const std::string& filename)
   {
-    FILE *file;
-
-    file=fopen(filename.c_str(),"rb");
-
-    if (file==nullptr) {
-      throw IOException(filename,"Opening file");
+    try {
+      return std::filesystem::file_size(filename);
     }
-
-#if defined(__WIN32__) || defined(WIN32)
-  if (_fseeki64(file, 0L, SEEK_END) != 0) {
-    fclose(file);
-    throw IOException(filename, "Seeking end of file");
-  }
-
-  const __int64 size = _ftelli64(file);
-
-  if (size == -1) {
-    fclose(file);
-
-    throw IOException(filename, "Getting current file position");
-  }
-
-  fclose(file);
-
-  return (FileOffset)size;
-#elif defined(HAVE_FSEEKO)
-    if (fseeko(file,0L,SEEK_END)!=0) {
-      fclose(file);
-
-      throw IOException(filename,"Seeking end of file");
+    catch (std::filesystem::filesystem_error& e) {
+      throw IOException(filename,"Cannot read size of file",e);
     }
-
-    off_t pos=ftello(file);
-
-    if (pos==-1) {
-      fclose(file);
-
-      throw IOException(filename,"Getting current file position");
-    }
-
-    fclose(file);
-
-    return (FileOffset)pos;
-
-#else
-    if (fseek(file,0L,SEEK_END)!=0) {
-      fclose(file);
-
-      throw IOException(filename,"Seeking end of file");
-    }
-
-    long int pos=ftell(file);
-
-    if (pos==-1) {
-      fclose(file);
-
-      throw IOException(filename,"Getting current file position");
-    }
-
-    fclose(file);
-
-    return (FileOffset)pos;
-#endif
   }
 
   bool RemoveFile(const std::string& filename)
   {
-    return remove(filename.c_str())==0;
+    try {
+      std::filesystem::remove(filename);
+
+      return true;
+    }
+    catch (std::filesystem::filesystem_error& e) {
+      return false;
+    }
   }
 
   /**
@@ -115,51 +57,34 @@ namespace osmscout {
   bool RenameFile(const std::string& oldFilename,
                   const std::string& newFilename)
   {
-    return rename(oldFilename.c_str(),
-                  newFilename.c_str())==0;
+    try {
+      std::filesystem::rename(oldFilename,
+                             newFilename);
+
+      return true;
+    }
+    catch (std::filesystem::filesystem_error& e) {
+      return false;
+    }
   }
 
   std::string GetDirectory(const std::string& file)
   {
-#if defined(__WIN32__) || defined(WIN32)
-    std::string delimiter="\\";
-#else
-    std::string delimiter="/";
-#endif
+    std::filesystem::path filePath=file;
 
-    std::string::size_type pos=file.find_last_of(delimiter);
-
-    if (pos==std::string::npos) {
-      return "";
+    if (!filePath.has_filename()) {
+      return filePath.make_preferred().string();
     }
 
-    return file.substr(0,pos+1);
+    return filePath.remove_filename().make_preferred().string();
   }
 
 
   std::string AppendFileToDir(const std::string& dir, const std::string& file)
   {
-#if defined(__WIN32__) || defined(WIN32)
-    std::string result(dir);
+    std::filesystem::path dirPath=dir;
 
-    if (result.length()>0 && result[result.length()-1]!='\\') {
-      result.append("\\");
-    }
-
-    result.append(file);
-
-    return result;
-#else
-    std::string result(dir);
-
-    if (result.length()>0 && result[result.length()-1]!='/') {
-      result.append("/");
-    }
-
-    result.append(file);
-
-    return result;
-#endif
+    return dirPath.append(file).make_preferred().string();
   }
 
   uint8_t BytesNeededToAddressFileData(const std::string& filename)
@@ -171,38 +96,22 @@ namespace osmscout {
 
   bool ExistsInFilesystem(const std::string& filename)
   {
-#if defined(__WIN32__) || defined(WIN32)
-    return GetFileAttributes(filename.c_str())!=INVALID_FILE_ATTRIBUTES;
-#elif defined(HAVE_SYS_STAT_H)
-    struct stat s;
-    return stat(filename.c_str(),&s)==0;
-#else
-    throw IOException(filename,"Is file directory","Not implemented");
-#endif
+    try {
+      return std::filesystem::exists(filename);
+    }
+    catch (std::filesystem::filesystem_error& e) {
+      return false;
+    }
   }
 
   bool IsDirectory(const std::string& filename)
   {
-#if defined(__WIN32__) || defined(WIN32)
-    DWORD attributes=GetFileAttributes(filename.c_str());
-
-    if (attributes==INVALID_FILE_ATTRIBUTES) {
-      throw IOException(filename,"Is file directory");
+    try {
+      return std::filesystem::is_directory(filename);
     }
-
-    return (attributes & FILE_ATTRIBUTE_DIRECTORY)!=0;
-#elif defined(HAVE_SYS_STAT_H)
-    struct stat s;
-
-    if (stat(filename.c_str(),
-             &s)!=0) {
-      throw IOException(filename,"Is file directory");
+    catch (std::filesystem::filesystem_error& e) {
+      return false;
     }
-
-    return (s.st_mode & S_IFDIR)!=0;
-#else
-    throw IOException(filename,"Is file directory","Not implemented");
-#endif
   }
 
   bool ReadFile(const std::string& filename, std::vector<char> &contentOut)
@@ -240,6 +149,4 @@ namespace osmscout {
     }
     return true;
   }
-
-
 }
