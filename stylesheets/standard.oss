@@ -60,6 +60,8 @@ ORDER WAYS
   GROUP waterway_weir, waterway_waterfall, route_ferry
   GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
 
+MODULE "land_sea_color"
+
 CONST
   MAG stepsMag                     = veryClose;
   MAG labelPathsMag                = veryClose;
@@ -138,9 +140,6 @@ CONST
   // For debugging :-)
   COLOR red                        = #ff0000;
 
-  // Pseudo types
-  COLOR routeColor                 = #ff000088;
-
   // Default label color
   IF daylight {
     COLOR labelColor               = #000000;
@@ -151,21 +150,12 @@ CONST
     COLOR emphasizeColor           = #707070;
   }
 
-  // Ground tiles
-
   IF daylight {
-    COLOR waterColor               = #9acffd;
     COLOR waterLabelColor          = darken(@waterColor, 0.5);
-    COLOR landColor                = #f1eee9;
-    COLOR unknownColor             = @waterColor;
   }
   ELSE {
-    COLOR waterColor               = darken(#9acffd, 0.5);
     COLOR waterLabelColor          = darken(@waterColor, 0.5);
-    COLOR landColor                = #333333;
-    COLOR unknownColor             = #000000;
   }
-  COLOR coastColor                 = lighten(@waterColor,0.5);
 
   // Borders
   COLOR countryBorderColor         = #ff0000;
@@ -656,6 +646,8 @@ CONST
       AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
     }
 
+MODULE "route"
+MODULE "land_sea"
 
 STYLE
   // -------------------------------------------------------
@@ -671,13 +663,6 @@ STYLE
     ICON { name: target;} */
 
   [MAG world-] {
-    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
-
-    [TYPE _tile_sea] AREA {color: @waterColor;}
-    //[TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
-    [TYPE _tile_land] AREA {color: @landColor;}
-    [TYPE _tile_unknown] AREA {color: @unknownColor;}
-
     //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
     //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }
 

@@ -81,7 +81,7 @@ void StyleAnalyser::onContentsChanged()
 void StyleAnalyser::update(QString content)
 {
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent(content.toStdString());
+  styleConfig->LoadContent("main.oss", content.toStdString());
 
   QSet<int> errorLines;
   QSet<int> warningLines;

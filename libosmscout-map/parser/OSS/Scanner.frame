@@ -207,7 +207,7 @@ public:
 
 #include <iostream>
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Scanner.h>
 
 -->namespace_open
 

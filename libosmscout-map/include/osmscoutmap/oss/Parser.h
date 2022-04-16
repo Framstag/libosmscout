@@ -29,6 +29,7 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 
@@ -115,6 +116,7 @@ private:
 public:
   Errors  *errors;
 
+std::string                           filename;
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
@@ -213,6 +215,7 @@ void AddFeatureToFilter(StyleFilter& filter,
 
 
   Parser(Scanner *scanner,
+         const std::string& filename,
          StyleConfig& config,
          osmscout::ColorPostprocessor colorPostprocessor=nullptr);
   ~Parser();
@@ -221,11 +224,14 @@ void AddFeatureToFilter(StyleFilter& filter,
   void SemWarning(const char* msg);
 
 	void OSS();
+	void IMPORTS();
 	void FLAGSECTION();
 	void WAYORDER();
 	void CONSTSECTION();
 	void SYMBOLSECTION();
 	void STYLESECTION();
+	void IMPORT();
+	void STRING(std::string& value);
 	void FLAGBLOCK(bool state);
 	void FLAGDEF();
 	void FLAGCONDBLOCK(bool state);
@@ -297,7 +303,6 @@ void AddFeatureToFilter(StyleFilter& filter,
 	void ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor);
 	void COLOR_VALUE(Color& color);
 	void CONSTANT(StyleConstantRef& constant);
-	void STRING(std::string& value);
 
   void Parse();
 

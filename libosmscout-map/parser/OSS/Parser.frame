@@ -5,9 +5,9 @@
 
 -->headerdef
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Scanner.h>
 
-#include <osmscout/StyleConfig.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #ifdef CONST
   #undef CONST
@@ -78,6 +78,7 @@ public:
 -->declarations
 
   Parser(Scanner *scanner,
+         const std::string& filename,
          StyleConfig& config,
          osmscout::ColorPostprocessor colorPostprocessor=nullptr);
   ~Parser();
@@ -115,7 +116,7 @@ public:
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/oss/Parser.h>
+#include <osmscoutmap/oss/Parser.h>
 
 #include <sstream>
 
@@ -124,7 +125,7 @@ public:
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscoutmap/oss/Scanner.h>
 
 -->namespace_open
 
@@ -234,9 +235,11 @@ void Parser::Parse()
 }
 
 Parser::Parser(Scanner *scanner,
+               const std::string& filename,
                StyleConfig& config,
                osmscout::ColorPostprocessor colorPostprocessor)
- : config(config)
+ : filename(filename),
+   config(config)
 {
 -->constants
   dummyToken = NULL;

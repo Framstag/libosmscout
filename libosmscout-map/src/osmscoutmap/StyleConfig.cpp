@@ -32,6 +32,7 @@
 #include <osmscoutmap/oss/Parser.h>
 #include <osmscoutmap/oss/Scanner.h>
 
+#include <iostream>
 namespace osmscout {
 
   StyleResolveContext::StyleResolveContext(const TypeConfigRef& typeConfig)
@@ -1624,12 +1625,14 @@ namespace osmscout {
     }
   }
 
-  bool StyleConfig::LoadContent(const std::string& content,
+  bool StyleConfig::LoadContent(const std::string& filename,
+                                const std::string& content,
                                 ColorPostprocessor colorPostprocessor)
   {
     oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
                                            content.length());
     oss::Parser  *parser=new oss::Parser(scanner,
+                                         filename,
                                          *this,
                                          colorPostprocessor);
     parser->Parse();
@@ -1665,6 +1668,19 @@ namespace osmscout {
     return success;
   }
 
+  /**
+   * Load the given *.oss file into the current style config object.
+   *
+   * The sytle config will not be reset(). If you want a fresh style config either
+   * initialize a new one or call Reset() on the existing one,
+   *
+   * @param styleFile
+   *    The file to load
+   * @param colorPostprocessor
+   *    Optional function to post process color values
+   * @return
+   *     true, if loading was successful, else false
+   */
   bool StyleConfig::Load(const std::string& styleFile,
                          ColorPostprocessor colorPostprocessor)
   {
@@ -1674,8 +1690,6 @@ namespace osmscout {
     try {
       FILE*      file;
       FileOffset fileSize;
-
-      Reset();
 
       fileSize=GetFileSize(styleFile);
 
@@ -1698,7 +1712,8 @@ namespace osmscout {
 
       fclose(file);
 
-      success=LoadContent(std::string((const char *)content,fileSize),
+      success=LoadContent(styleFile,
+                          std::string((const char *)content,fileSize),
                           colorPostprocessor);
 
       delete [] content;

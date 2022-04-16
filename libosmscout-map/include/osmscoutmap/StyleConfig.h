@@ -669,7 +669,7 @@ namespace osmscout {
     void AddFlag(const std::string& name,
                  bool value);
 
-     std::unordered_map<std::string,bool> GetFlags() const
+    std::unordered_map<std::string,bool> GetFlags() const
     {
       return flags;
     }
@@ -844,7 +844,8 @@ namespace osmscout {
      * Methods for loading a concrete OSS style sheet
      */
     //@{
-    bool LoadContent(const std::string& content,
+    bool LoadContent(const std::string& filename,
+                     const std::string& content,
                     ColorPostprocessor colorPostprocessor=nullptr);
     bool Load(const std::string& styleFile,
               ColorPostprocessor colorPostprocessor=nullptr);
