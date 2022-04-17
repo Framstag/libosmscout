@@ -77,6 +77,9 @@ osmscout_test_project(NAME EncodeNumber SOURCES src/EncodeNumber.cpp)
 #---- FeatureLabelTest
 osmscout_test_project(NAME FeatureLabelTest SOURCES src/FeatureLabelTest.cpp)
 
+#---- File
+osmscout_test_project(NAME File SOURCES src/File.cpp)
+
 #---- FileScannerWriter
 osmscout_test_project(NAME FileScannerWriter SOURCES src/FileScannerWriter.cpp)
 
