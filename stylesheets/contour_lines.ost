@@ -1,0 +1,22 @@
+OST
+
+TYPES
+  //
+  // contour lines
+  //
+
+  TYPE elevation_contour_major
+    = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_major")
+      {Ele}
+      IGNORESEALAND PIN_WAY
+
+  TYPE elevation_contour_medium
+    = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_medium")
+      {Ele}
+      IGNORESEALAND PIN_WAY
+
+  TYPE elevation_contour_minor
+    = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_minor")
+      {Ele}
+      IGNORESEALAND PIN_WAY
+END
