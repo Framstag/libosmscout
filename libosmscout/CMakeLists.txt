@@ -295,6 +295,11 @@ if(CMAKE_THREAD_LIBS_INIT)
     target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL "8.3"))
+    # GCC <= 8.3 needs explicit filesystem library linking
+    target_link_libraries(OSMScout -lstdc++fs)
+endif()
+
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_ROOT}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
