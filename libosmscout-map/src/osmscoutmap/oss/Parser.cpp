@@ -262,7 +262,8 @@ void Parser::IMPORT() {
 		}
 		
 		bool success=config.Load(moduleFileName,
-		                        colorPostprocessor);
+		                        colorPostprocessor,
+		                        true);
 		
 		if (!success) {
 		 std::string e="Cannot load module '"+moduleFileName+"'";
