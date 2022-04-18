@@ -6,11 +6,13 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 
 COMPILER OSS
 
+std::string                           filename;
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
@@ -130,23 +132,61 @@ IGNORE ' ' + '\t' + '\r' + '\n'
 PRODUCTIONS
   OSS         = SYNC "OSS"
                 (. state=true; .)
+                [IMPORTS]
                 {
                   FLAGSECTION
                 }
+                [IMPORTS]
                 [
                   WAYORDER
                 ]
+                [IMPORTS]
                 {
                   CONSTSECTION
                 }
+                [IMPORTS]
                 {
                   SYMBOLSECTION
                 }
+                [IMPORTS]
                 {
                   STYLESECTION
                 }
+                [IMPORTS]
                 "END"
                 .
+
+  IMPORTS = IMPORT
+            {
+              IMPORT
+            }
+            .
+
+  IMPORT = SYNC "MODULE"
+           (. std::string moduleName; .)
+           STRING<moduleName>
+           (.
+             std::string directory=osmscout::GetDirectory(filename);
+
+             std::string moduleFileName;
+
+             if (!directory.empty()) {
+               moduleFileName=osmscout::AppendFileToDir(directory,moduleName)+".oss";
+             }
+             else {
+               moduleFileName=moduleName+".ost";
+             }
+
+             bool success=config.Load(moduleFileName,
+                                      colorPostprocessor);
+
+             if (!success) {
+               std::string e="Cannot load module '"+moduleFileName+"'";
+
+               SemErr(e.c_str());
+             }
+           .)
+           .
 
   FLAGSECTION = SYNC "FLAG"
                 FLAGBLOCK<true>

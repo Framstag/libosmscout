@@ -1,0 +1,11 @@
+OSS
+
+STYLE
+  [MAG world-] {
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    //[TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor;}
+  }
+
+END

@@ -1,0 +1,16 @@
+OSS
+
+CONST
+  IF daylight {
+    COLOR waterColor               = #9acffd;
+    COLOR landColor                = #f1eee9;
+    COLOR unknownColor             = @waterColor;
+  }
+  ELSE {
+    COLOR waterColor               = darken(#9acffd, 0.5);
+    COLOR landColor                = #333333;
+    COLOR unknownColor             = #000000;
+  }
+
+  COLOR coastColor                 = lighten(@waterColor,0.5);
+END

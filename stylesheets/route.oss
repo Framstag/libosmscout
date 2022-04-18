@@ -1,0 +1,11 @@
+OSS
+
+CONST
+  COLOR routeColor = #ff000088;
+
+STYLE
+  [MAG world-] {
+    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
+  }
+
+END

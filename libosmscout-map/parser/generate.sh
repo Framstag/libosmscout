@@ -22,8 +22,8 @@ sed -i s/wchar_t/char/g OSS/Scanner.cpp
 
 sed -i s/L\"/\"/g OSS/Parser.cpp
 
-cp OSS/Scanner.h ../include/osmscout/oss/
-cp OSS/Scanner.cpp ../src/osmscout/oss
+cp OSS/Scanner.h ../include/osmscoutmap/oss/
+cp OSS/Scanner.cpp ../src/osmscoutmap/oss
 
-cp OSS/Parser.h ../include/osmscout/oss/
-cp OSS/Parser.cpp ../src/osmscout/oss
+cp OSS/Parser.h ../include/osmscoutmap/oss/
+cp OSS/Parser.cpp ../src/osmscoutmap/oss
