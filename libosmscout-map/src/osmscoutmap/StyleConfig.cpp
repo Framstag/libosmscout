@@ -1627,7 +1627,8 @@ namespace osmscout {
 
   bool StyleConfig::LoadContent(const std::string& filename,
                                 const std::string& content,
-                                ColorPostprocessor colorPostprocessor)
+                                ColorPostprocessor colorPostprocessor,
+                                bool submodule)
   {
     oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
                                            content.length());
@@ -1663,26 +1664,27 @@ namespace osmscout {
 
     delete parser;
     delete scanner;
-
-    Postprocess();
+    if (!submodule) {
+      Postprocess();
+    }
     return success;
   }
 
   /**
    * Load the given *.oss file into the current style config object.
    *
-   * The sytle config will not be reset(). If you want a fresh style config either
-   * initialize a new one or call Reset() on the existing one,
-   *
    * @param styleFile
    *    The file to load
    * @param colorPostprocessor
    *    Optional function to post process color values
+   * @param submodule
+   *    Before loading submodule, style config is not reset and post-process after.
    * @return
    *     true, if loading was successful, else false
    */
   bool StyleConfig::Load(const std::string& styleFile,
-                         ColorPostprocessor colorPostprocessor)
+                         ColorPostprocessor colorPostprocessor,
+                         bool submodule)
   {
     StopClock  timer;
     bool       success=false;
@@ -1690,6 +1692,10 @@ namespace osmscout {
     try {
       FILE*      file;
       FileOffset fileSize;
+
+      if (!submodule) {
+        Reset();
+      }
 
       fileSize=GetFileSize(styleFile);
 
@@ -1714,7 +1720,8 @@ namespace osmscout {
 
       success=LoadContent(styleFile,
                           std::string((const char *)content,fileSize),
-                          colorPostprocessor);
+                          colorPostprocessor,
+                          submodule);
 
       delete [] content;
 
