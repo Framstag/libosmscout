@@ -202,6 +202,7 @@ if(${OSMSCOUT_BUILD_MAP})
 				--debug
 				--driver ${DRIVER}
 				--icons "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout/data/icons/svg/standard"
+				--font "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../Tests/data/testregion"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET}"
 				50.3806 14.5418 50.3806 14.5418)

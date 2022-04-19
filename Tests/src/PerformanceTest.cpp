@@ -362,6 +362,7 @@ public:
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
 class PerformanceTestBackendOGL: public PerformanceTestBackend {
 private:
+  GLFWwindow* offscreen_context{nullptr};
   osmscout::MapPainterOpenGL* openglMapPainter{nullptr};
   osmscout::StyleConfigRef styleConfig;
 public:
@@ -376,15 +377,16 @@ public:
     glfwSetErrorCallback([](int, const char *err_str) {
       std::cerr << "GLFW Error: " << err_str << std::endl;
     });
-    if (!glfwInit())
-      throw std::runtime_error("Can't initilise GLFW library");
+    if (!glfwInit()) {
+      throw std::runtime_error("Can't initialise GLFW library");
+    }
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, false);
-    GLFWwindow* offscreen_context;
+
     offscreen_context=glfwCreateWindow(tileWidth,
                                        tileHeight,
                                        "",
@@ -399,14 +401,23 @@ public:
     openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
                                                     tileHeight,
                                                     dpi,
-                                                    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+                                                    drawParameter.GetFontName(),
                                                     SHADER_INSTALL_DIR,
                                                     drawParameter);
+
+    if (!openglMapPainter->IsInitialized()) {
+      delete openglMapPainter;
+      glfwDestroyWindow(offscreen_context);
+      glfwTerminate();
+      throw std::runtime_error("Can't initialise OpenGL painter");
+    }
   }
 
   ~PerformanceTestBackendOGL()
   {
     delete openglMapPainter;
+    glfwDestroyWindow(offscreen_context);
+    glfwTerminate();
   }
 
   void DrawMap(const osmscout::TileProjection &projection,
