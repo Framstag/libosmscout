@@ -540,7 +540,7 @@ PerformanceTestBackendRef PrepareBackend(int argc,
                                          char* argv[],
                                          const Arguments &args,
                                          const osmscout::StyleConfigRef& styleConfig,
-                                         const osmscout::MapParameter &drawParameter)
+                                         [[maybe_unused]] const osmscout::MapParameter &drawParameter)
 {
   if (args.driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
