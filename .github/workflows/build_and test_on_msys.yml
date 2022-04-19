@@ -34,7 +34,8 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run:  PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test ctest -j 4 --output-on-failure
+        run:  "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test
+               ctest -j 4 --output-on-failure --exclude-regex PerformanceTest"
         working-directory: build
 
   build_gcc_meson:
