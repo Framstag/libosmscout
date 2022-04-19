@@ -489,9 +489,8 @@ namespace osmscout {
           LabelInstanceType instanceCopy{currentLabel.priority, visibleElements};
           labelInstances.push_back(instanceCopy);
 
-          // mark all labels at once
-          size_t visibleCount = instanceCopy.elements.size();
-          for (size_t eli=0; eli < visibleCount; eli++) {
+          // mark all labels at once (elements of single label may have no padding)
+          for (size_t eli=0; eli < elementCount; eli++) {
             if (canvases[eli] != nullptr) {
               MarkLabelPlace(*(canvases[eli]), masks[eli], layoutViewport.height);
             }
