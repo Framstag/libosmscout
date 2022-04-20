@@ -195,23 +195,17 @@ struct LevelStats
 
   std::vector<Stats> drawLevelStats;
 
-  double             allocMax;
-  double             allocSum;
+  double             allocMax=0.0;
+  double             allocSum=0.0;
 
-  size_t             nodeCount;
-  size_t             wayCount;
-  size_t             areaCount;
+  size_t             nodeCount=0;
+  size_t             wayCount=0;
+  size_t             areaCount=0;
 
-  size_t             tileCount;
+  size_t             tileCount=0;
 
   explicit LevelStats(size_t level)
-  : level(level),
-    allocMax(0.0),
-    allocSum(0.0),
-    nodeCount(0),
-    wayCount(0),
-    areaCount(0),
-    tileCount(0)
+  : level(level)
   {
     drawLevelStats.resize(osmscout::RenderSteps::LastStep-osmscout::RenderSteps::FirstStep+1);
   }
@@ -248,7 +242,7 @@ class PerformanceTestBackendCairo: public PerformanceTestBackend {
 private:
   cairo_surface_t *cairoSurface = nullptr;
   cairo_t *cairo = nullptr;
-  osmscout::MapPainterCairo *cairoMapPainter{nullptr};
+  std::shared_ptr<osmscout::MapPainterCairo> cairoMapPainter;
 
 public:
   PerformanceTestBackendCairo(size_t tileWidth, size_t tileHeight,
@@ -266,7 +260,7 @@ public:
       cairo_surface_destroy(cairoSurface);
       throw std::runtime_error("Cannot create cairo_t for image cairoSurface");
     }
-    cairoMapPainter = new osmscout::MapPainterCairo(styleConfig);
+    cairoMapPainter = std::make_shared<osmscout::MapPainterCairo>(styleConfig);
   }
 
   ~PerformanceTestBackendCairo() override
@@ -444,12 +438,11 @@ private:
   HDC                      hdc;
   HBITMAP                  bitmap;
   RECT                     paintRect;
-  osmscout::MapPainterGDI* gdiMapPainter{nullptr};
+  std::shared_ptr<osmscout::MapPainterGDI> gdiMapPainter;
   osmscout::StyleConfigRef styleConfig;
 public:
   PerformanceTestBackendGDI(size_t tileWidth,
                             size_t tileHeight,
-                            size_t dpi,
                             const osmscout::StyleConfigRef& styleConfig):
     styleConfig{styleConfig}
   {
@@ -474,15 +467,13 @@ public:
     paintRect.bottom=LONG(tileHeight);
 
     // This driver need a valid existing context
-    gdiMapPainter=new osmscout::MapPainterGDI(styleConfig);
+    gdiMapPainter=std::make_shared<osmscout::MapPainterGDI>(styleConfig);
   }
 
   ~PerformanceTestBackendGDI() override
   {
     DeleteObject(hdc);
     DeleteObject(bitmap);
-
-    delete gdiMapPainter;
   }
 
   void DrawMap(const osmscout::TileProjection &projection,
@@ -591,7 +582,7 @@ PerformanceTestBackendRef PrepareBackend(int argc,
     try {
       return std::make_shared<PerformanceTestBackendGDI>(args.TileWidth(),
                                                          args.TileHeight(),
-                                                         args.dpi, styleConfig);
+                                                         styleConfig);
     }
     catch (std::runtime_error &e) {
       std::cerr << e.what() << std::endl;
@@ -923,11 +914,11 @@ int main(int argc, char* argv[])
         if (args.flushDiskCache) {
           // Linux specific
           if (osmscout::ExistsInFilesystem("/proc/sys/vm/drop_caches")){
-            osmscout::FileWriter f;
+            osmscout::FileWriter writer;
             try {
-              f.Open("/proc/sys/vm/drop_caches");
-              f.Write(std::string("3"));
-              f.Close();
+              writer.Open("/proc/sys/vm/drop_caches");
+              writer.Write(std::string("3"));
+              writer.Close();
             }catch(const osmscout::IOException &e){
               std::cerr << "Can't flush disk cache: " << e.what() << std::endl;
             }

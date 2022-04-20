@@ -50,31 +50,55 @@ int main(int argc, char* argv[])
   if (stricmp(ext1, ".ttf") == 0 || stricmp(ext1, ".otf") == 0)
   {
     char drive2[_MAX_DRIVE], dir2[_MAX_DIR], fname2[_MAX_FNAME], ext2[_MAX_EXT];
-    HKEY hKey = NULL;
-    if (RegOpenKey(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", &hKey) == ERROR_SUCCESS)
+    HKEY hKey = nullptr;
+    if (RegOpenKey(HKEY_LOCAL_MACHINE, R"(SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts)", &hKey) == ERROR_SUCCESS)
     {
       DWORD cValues = 0, cchMaxValue, cbMaxValueData, cbSecurityDescriptor, cchName = 16383, cchValue = 16383, cType = 0;
       FILETIME ftLastWriteTime;
       char achName[16383], achValue[16383];
-      DWORD retCode = RegQueryInfoKey(hKey, NULL, NULL, NULL, NULL, NULL, NULL, &cValues, &cchMaxValue, &cbMaxValueData, &cbSecurityDescriptor, &ftLastWriteTime);
-      if (cValues)
+      DWORD retCode = RegQueryInfoKey(hKey,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr,
+                                      &cValues,
+                                      &cchMaxValue,
+                                      &cbMaxValueData,
+                                      &cbSecurityDescriptor,
+                                      &ftLastWriteTime);
+      if (retCode == ERROR_SUCCESS && cValues > 0)
       {
-        for (DWORD i = 0, retCode = ERROR_SUCCESS; i < cValues; i++)
+        for (DWORD i = 0; i < cValues; i++)
         {
           cchName = 16383;
           achName[0] = '\0';
           cchValue = 16383;
           achValue[0] = '\0';
-          if (RegEnumValueA(hKey, i, achName, &cchName, NULL, &cType, (LPBYTE)achValue, &cchValue) == ERROR_SUCCESS)
+
+          if (RegEnumValueA(hKey,
+                            i,
+                            achName,
+                            &cchName,
+                            nullptr,
+                            &cType,
+                            (LPBYTE) achValue,
+                            &cchValue) == ERROR_SUCCESS)
           {
             _splitpath(achValue, drive2, dir2, fname2, ext2);
             if (stricmp(fname1, fname2) == 0 && stricmp(ext1, ext2) == 0)
             {
-              retCode = strlen(achName);
-              if (retCode > 11)
+              size_t length = strlen(achName);
+
+              if (length > 11)
               {
-                if (strcmp(achName + retCode - 11, " (TrueType)") == 0) achName[retCode - 11] = 0;
+                if (strcmp(achName + length - 11, " (TrueType)") == 0)
+                {
+                  achName[length - 11] = 0;
+                }
               }
+
               drawDemo.drawParameter.SetFontName(std::string(achName));
               break;
             }
