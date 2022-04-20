@@ -15,6 +15,8 @@ RUN pacman --noconfirm --needed -S \
           cmake make pkg-config \
           gcc
 
+ENV QT_QPA_PLATFORM offscreen
+
 RUN mkdir /work
 
 COPY data/build.sh /work

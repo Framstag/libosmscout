@@ -73,58 +73,6 @@ ReverseLocationLookup = executable('ReverseLocationLookup',
                                    link_with: [osmscout],
                                    install: true)
 
-if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
-  includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
-  deps = [mathDep, openmpDep]
-  links = [osmscout, osmscoutmap]
-
-  if buildMapCairo and pangocairoDep.found()
-    includes += osmscoutmapcairoIncDir
-    deps += pangocairoDep
-    links += osmscoutmapcairo
-  endif
-
-  if buildMapQt
-    includes += osmscoutmapqtIncDir
-    deps += [qt5WidgetsDep, qt5GuiDep]
-    links += osmscoutmapqt
-  endif
-
-  if buildMapAgg
-    includes += osmscoutmapaggIncDir
-    deps += [mathDep, threadDep, aggDep, ftDep]
-    links += osmscoutmapagg
-
-    if aggftpicDep.found()
-      deps += aggftpicDep
-    else
-      deps += aggftDep
-    endif
-  endif
-
-  if buildMapOpenGL
-    includes += osmscoutmapopenglIncDir
-    deps += openGLDep
-    deps += glfwDep
-    deps += glewDep
-    links += osmscoutmapopengl
-  endif
-
-  if buildMapGDI
-    includes += osmscoutmapgdiIncDir
-    deps += gdiplusDep
-    links += osmscoutmapgdi
-  endif
-
-  PerformanceTest = executable('PerformanceTest',
-                               'src/PerformanceTest.cpp',
-                               cpp_args: ['-fPIC'],
-                               include_directories: includes,
-                               dependencies: deps,
-                               link_with: links,
-                               install: true)
-endif
-
 ResourceConsumption = executable('ResourceConsumption',
                                  'src/ResourceConsumption.cpp',
                                  include_directories: [osmscoutmapIncDir, osmscoutIncDir],

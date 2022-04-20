@@ -49,7 +49,7 @@
 #include <osmscoutmapgdi/MapPainterGDI.h>
 #endif
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
 #include <gperftools/tcmalloc.h>
 #include <gperftools/heap-profiler.h>
 #include <malloc.h> // mallinfo
@@ -97,7 +97,7 @@ struct Arguments {
   bool flushCache{false};
   bool flushDiskCache{false};
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
   bool heapProfile{false};
   std::string heapProfilePrefix;
 #endif
@@ -362,6 +362,7 @@ public:
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
 class PerformanceTestBackendOGL: public PerformanceTestBackend {
 private:
+  GLFWwindow* offscreen_context{nullptr};
   osmscout::MapPainterOpenGL* openglMapPainter{nullptr};
   osmscout::StyleConfigRef styleConfig;
 public:
@@ -376,15 +377,16 @@ public:
     glfwSetErrorCallback([](int, const char *err_str) {
       std::cerr << "GLFW Error: " << err_str << std::endl;
     });
-    if (!glfwInit())
-      throw std::runtime_error("Can't initilise GLFW library");
+    if (!glfwInit()) {
+      throw std::runtime_error("Can't initialise GLFW library");
+    }
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, false);
-    GLFWwindow* offscreen_context;
+
     offscreen_context=glfwCreateWindow(tileWidth,
                                        tileHeight,
                                        "",
@@ -399,14 +401,23 @@ public:
     openglMapPainter=new osmscout::MapPainterOpenGL(tileWidth,
                                                     tileHeight,
                                                     dpi,
-                                                    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+                                                    drawParameter.GetFontName(),
                                                     SHADER_INSTALL_DIR,
                                                     drawParameter);
+
+    if (!openglMapPainter->IsInitialized()) {
+      delete openglMapPainter;
+      glfwDestroyWindow(offscreen_context);
+      glfwTerminate();
+      throw std::runtime_error("Can't initialise OpenGL painter");
+    }
   }
 
   ~PerformanceTestBackendOGL()
   {
     delete openglMapPainter;
+    glfwDestroyWindow(offscreen_context);
+    glfwTerminate();
   }
 
   void DrawMap(const osmscout::TileProjection &projection,
@@ -529,7 +540,7 @@ PerformanceTestBackendRef PrepareBackend(int argc,
                                          char* argv[],
                                          const Arguments &args,
                                          const osmscout::StyleConfigRef& styleConfig,
-                                         const osmscout::MapParameter &drawParameter)
+                                         [[maybe_unused]] const osmscout::MapParameter &drawParameter)
 {
   if (args.driver=="cairo") {
     std::cout << "Using driver 'cairo'..." << std::endl;
@@ -652,7 +663,7 @@ int main(int argc, char* argv[])
                         args.driver = value;
                       }),
                       "driver",
-                      "Rendering driver (cairo|Qt|agg|opengl|noop|none), default: " + args.driver,
+                      "Rendering driver (cairo|Qt|agg|opengl|dgi|noop|none), default: " + args.driver,
                       false);
   argParser.AddOption(osmscout::CmdLineDoubleOption([&args](const double& value) {
                         if (value > 0) {
@@ -721,7 +732,7 @@ int main(int argc, char* argv[])
                       "Used font, default: " + args.font,
                       false);
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
   argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
                         args.heapProfilePrefix = value;
                         args.heapProfile = !args.heapProfilePrefix.empty();
@@ -798,7 +809,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
   if (args.heapProfile){
     HeapProfilerStart(args.heapProfilePrefix.c_str());
   }
@@ -874,7 +885,7 @@ int main(int argc, char* argv[])
         mapService->LoadMissingTileData(searchParameter, *styleConfig, tiles);
         mapService->AddTileDataToMapData(tiles, data);
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
         if (args.heapProfile) {
           std::ostringstream buff;
           buff << "load-" << level << "-" << tile.GetX() << "-" << tile.GetY();
@@ -886,7 +897,7 @@ int main(int argc, char* argv[])
         struct mallinfo alloc_info = mallinfo();
 #endif
 #endif
-#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
+#if defined(HAVE_MALLINFO) || defined(PERF_TEST_GPERFTOOLS_USAGE)
         std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
         stats.allocMax = std::max(stats.allocMax, (double) alloc_info.uordblks);
         stats.allocSum = stats.allocSum + (double) alloc_info.uordblks;
@@ -957,7 +968,7 @@ int main(int argc, char* argv[])
     statistics.push_back(stats);
   }
 
-#if defined(HAVE_LIB_GPERFTOOLS)
+#if defined(PERF_TEST_GPERFTOOLS_USAGE)
   if (args.heapProfile){
     HeapProfilerStop();
   }
@@ -969,7 +980,7 @@ int main(int argc, char* argv[])
     std::cout << "Level: " << stats.level << std::endl;
     std::cout << "Tiles: " << stats.tileCount << " (load " << args.loadRepeat << "x, drawn " << args.drawRepeat << "x)" << std::endl;
 
-#if defined(HAVE_MALLINFO) || defined(HAVE_LIB_GPERFTOOLS)
+#if defined(HAVE_MALLINFO) || defined(PERF_TEST_GPERFTOOLS_USAGE)
     std::cout << " Used memory: ";
     std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
     std::cout << "avg: " << formatAlloc(stats.allocSum / (stats.tileCount * args.loadRepeat)) << std::endl;

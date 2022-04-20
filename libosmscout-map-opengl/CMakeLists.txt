@@ -1,5 +1,5 @@
 set(HEADER_FILES
-        include/osmscoutmapopengl/MapOpenGLImportExport.h
+		include/osmscoutmapopengl/MapOpenGLImportExport.h
 		include/osmscoutmapopengl/OpenGLMapData.h
 		include/osmscoutmapopengl/MapPainterOpenGL.h
 		include/osmscoutmapopengl/MapProjection.h
@@ -36,6 +36,7 @@ set(SHADER_FILES
 	data/shaders/AreaVertexShader.vert
 	data/shaders/GroundFragmentShader.frag
 	data/shaders/PathVertexShader.vert
+	data/shaders/Projection.vert
 	data/shaders/GroundVertexShader.vert
 	data/shaders/TextFragmentShader.frag)
 

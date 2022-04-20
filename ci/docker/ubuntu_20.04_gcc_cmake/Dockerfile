@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.utf8
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+ENV QT_QPA_PLATFORM offscreen
 
 RUN apt-get update && apt-get install -y \
           cmake \

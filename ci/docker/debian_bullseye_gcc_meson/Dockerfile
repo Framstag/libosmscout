@@ -22,6 +22,7 @@ RUN locale-gen
 ENV LANG en_US.utf8
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+ENV QT_QPA_PLATFORM offscreen
 
 RUN apt-get update && apt-get install -y \
           g++ \
