@@ -45,31 +45,33 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 class DrawMapGDI : public osmscout::MapPainterGDIWindow
 {
 private:
-	osmscout::MapPainterGDI*	    m_Painter;
 	std::list<osmscout::TileRef>	m_Tiles;
-	DrawMapDemo*                    m_pBaseData;
+	DrawMapDemo*                  m_pBaseData;
 
 public:
 	explicit DrawMapGDI(DrawMapDemo* pBaseData)
-		: m_Painter(nullptr)
-		, m_pBaseData(pBaseData)
+	:	m_pBaseData(pBaseData)
 	{
 	}
 
 	bool initialize(HINSTANCE hInstance, int  /*nShowCmd*/)
 	{
 		Arguments args = m_pBaseData->GetArguments();
+
+    LONG screenWidth=GetSystemMetrics(SM_CXSCREEN);
+    LONG screenHeight=GetSystemMetrics(SM_CYSCREEN);
+
 		RECT size = {
-			(GetSystemMetrics(SM_CXSCREEN) - args.width) / 2,
-			(GetSystemMetrics(SM_CYSCREEN) - args.height) / 2,
-			(GetSystemMetrics(SM_CXSCREEN) + args.width) / 2,
-			(GetSystemMetrics(SM_CYSCREEN) + args.height) / 2
+			(screenWidth - LONG(args.width)) / 2,
+			(screenHeight - LONG(args.height)) / 2,
+			(screenWidth + LONG(args.width)) / 2,
+			(screenHeight + LONG(args.height)) / 2
 		};
 
-        if (!CreateCanvas(m_pBaseData->styleConfig, size, nullptr, hInstance))
-        {
-            return false;
-        }
+    if (!CreateCanvas(m_pBaseData->styleConfig, size, nullptr, hInstance))
+    {
+        return false;
+    }
 
 		Set(&m_pBaseData->projection, &m_pBaseData->drawParameter, &m_pBaseData->data);
 		return true;
@@ -187,7 +189,10 @@ int app_main(int argc, char *argv[], HINSTANCE hinstance, int nShowCmd)
 
 	if (!drawDemo.OpenDatabase()) {
 		bool bHelp = drawDemo.GetArguments().help;
-		MessageBoxA(nullptr, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapGDI", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
+		MessageBoxA(nullptr,
+                bHelp ? strCout.str().c_str() : strCerr.str().c_str(),
+                "DrawMapGDI",
+                MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
 		std::cerr.rdbuf(oldCerrStreamBuf);
 		std::cout.rdbuf(oldCoutStreamBuf);
 		return EXIT_FAILURE;
@@ -231,9 +236,23 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		for (int i = 0; i < argc; ++i)
 		{
 			int w_len = lstrlenW(w_argv[i]);
-			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, nullptr, 0, nullptr, nullptr);
+			int len = WideCharToMultiByte(CP_ACP,
+                                    0,
+                                    w_argv[i],
+                                    w_len,
+                                    nullptr,
+                                    0,
+                                    nullptr,
+                                    nullptr);
 			argv[i] = new char[len + 1];
-			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, nullptr, nullptr);
+			WideCharToMultiByte(CP_ACP,
+                          0,
+                          w_argv[i],
+                          w_len,
+                          argv[i],
+                          len,
+                          nullptr,
+                          nullptr);
 			argv[i][len] = 0;
 		}
 		LocalFree(w_argv);
