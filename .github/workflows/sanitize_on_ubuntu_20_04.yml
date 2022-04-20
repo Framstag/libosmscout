@@ -25,6 +25,7 @@ jobs:
         run: "sudo apt-get install -y
               libxml2-dev
               libprotobuf-dev protobuf-compiler
+              libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
               libmarisa-dev"
       - name: Configure build project
         run: "cmake -B build
@@ -49,7 +50,7 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(opengl|agg|Qt|cairo)"
+        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
 
   sanitize_gcc:
@@ -66,7 +67,8 @@ jobs:
         run:  "sudo apt-get update && sudo apt-get install -y
                libxml2-dev
                libprotobuf-dev protobuf-compiler
-               libmarisa-dev"
+               libmarisa-dev
+               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev"
       - name: Configure build project
         run: "cmake -B build
               -DCMAKE_BUILD_TYPE=Debug
@@ -81,7 +83,8 @@ jobs:
               -DOSMSCOUT_DEBUG_GROUNDTILES=ON
               -DOSMSCOUT_DEBUG_COASTLINE=ON
               -DOSMSCOUT_DEBUG_TILING=ON
-              -DOSMSCOUT_DEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
+              -DOSMSCOUT_DEBUG_ROUTING=ON
+              -DCMAKE_CXX_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
         env:
@@ -90,5 +93,5 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(opengl|agg|Qt|cairo)"
+        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
