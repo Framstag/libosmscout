@@ -90,6 +90,7 @@ jobs:
                qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
                qttools5-dev qtmultimedia5-dev
                libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               xvfb
                libmarisa-dev"
       - name: Configure build project
         run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
@@ -99,7 +100,7 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure
+        run: xvfb-run ctest -j 2 --output-on-failure
         env:
           QT_QPA_PLATFORM: offscreen
         working-directory: build

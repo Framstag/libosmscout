@@ -26,7 +26,8 @@ jobs:
               libxml2-dev
               libprotobuf-dev protobuf-compiler
               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
-              libmarisa-dev"
+              libmarisa-dev
+              xvfb"
       - name: Configure build project
         run: "cmake -B build
               -DCMAKE_BUILD_TYPE=Debug
@@ -50,7 +51,7 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
+        run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
 
   sanitize_gcc:
@@ -68,7 +69,8 @@ jobs:
                libxml2-dev
                libprotobuf-dev protobuf-compiler
                libmarisa-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev"
+               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               xvfb"
       - name: Configure build project
         run: "cmake -B build
               -DCMAKE_BUILD_TYPE=Debug
@@ -93,5 +95,5 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
+        run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
