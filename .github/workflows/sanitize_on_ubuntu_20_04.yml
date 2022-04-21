@@ -50,6 +50,8 @@ jobs:
           CC: clang
       - name: Build project
         run: cmake --build build
+      - name: Install project
+        run: sudo cmake --install build
       - name: Run tests
         run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
@@ -94,6 +96,8 @@ jobs:
           CC: gcc-10
       - name: Build project
         run: cmake --build build
+      - name: Install project
+        run: sudo cmake --install build
       - name: Run tests
         run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
         working-directory: build
