@@ -66,7 +66,10 @@ namespace osmscout {
       DWRITE_TEXT_METRICS m_TextMetrics;
 
     public:
-      DirectXTextLayout(IDWriteFactory* m_pWriteFactory, double fontSize, IDWriteTextFormat* font, std::string text);
+      DirectXTextLayout(IDWriteFactory* m_pWriteFactory,
+                        double fontSize,
+                        IDWriteTextFormat* font,
+                        const std::string& text);
       ~DirectXTextLayout();
     };
 
@@ -77,16 +80,16 @@ namespace osmscout {
     friend DirectXLabelLayouter;
 
   private:
-    typedef std::unordered_map<uint32_t, IDWriteTextFormat*> FontMap;
+    using FontMap = std::unordered_map<uint32_t, IDWriteTextFormat *>;
     FontMap m_Fonts;
-    typedef std::unordered_map<uint32_t, ID2D1SolidColorBrush*> BrushMap;
+    using BrushMap = std::unordered_map<uint32_t, ID2D1SolidColorBrush *>;
     BrushMap m_Brushs;
-    typedef std::unordered_map<uint64_t, ID2D1PathGeometry*> GeometryMap;
+    using GeometryMap = std::unordered_map<uint64_t, ID2D1PathGeometry *>;
     GeometryMap m_Geometries;
     GeometryMap m_Polygons;
-    typedef std::unordered_map<uint64_t, ID2D1Bitmap*> BitmapMap;
+    using BitmapMap = std::unordered_map<uint64_t, ID2D1Bitmap *>;
     BitmapMap m_Bitmaps;
-    typedef std::unordered_map<uint64_t, ID2D1StrokeStyle*> StrokeStyleMap;
+    using StrokeStyleMap = std::unordered_map<uint64_t, ID2D1StrokeStyle *>;
     StrokeStyleMap m_StrokeStyles;
     ID2D1StrokeStyle* m_dashLessStrokeStyle;
 
@@ -112,30 +115,30 @@ namespace osmscout {
     IDWriteTextFormat* GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
 
   protected:
-    virtual void AfterPreprocessing(const StyleConfig& styleConfig,
-                                    const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const MapData& data);
+    void AfterPreprocessing(const StyleConfig &styleConfig,
+                            const Projection &projection,
+                            const MapParameter &parameter,
+                            const MapData &data) override;
 
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data);
+    void BeforeDrawing(const StyleConfig &styleConfig,
+                       const Projection &projection,
+                       const MapParameter &parameter,
+                       const MapData &data) override;
 
-    virtual void AfterDrawing(const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              const MapParameter& parameter,
-                              const MapData& data);
+    void AfterDrawing(const StyleConfig &styleConfig,
+                      const Projection &projection,
+                      const MapParameter &parameter,
+                      const MapData &data) override;
 
-    virtual bool HasIcon(const StyleConfig& styleConfig,
-                         const Projection& projection,
-                         const MapParameter& parameter,
-                         IconStyle& style);
+    bool HasIcon(const StyleConfig &styleConfig,
+                 const Projection &projection,
+                 const MapParameter &parameter,
+                 IconStyle &style) override;
 
 
-	virtual double GetFontHeight(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 double fontSize);
+    double GetFontHeight(const Projection &projection,
+                         const MapParameter &parameter,
+                         double fontSize) override;
 
 	DoubleRectangle GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
@@ -143,9 +146,9 @@ namespace osmscout {
                                    double fontSize,
                                    const std::string& text);
 
-    virtual void DrawGround(const Projection& projection,
-                            const MapParameter& parameter,
-                            const FillStyle& style);
+    void DrawGround(const Projection &projection,
+                    const MapParameter &parameter,
+                    const FillStyle &style) override;
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
@@ -155,48 +158,48 @@ namespace osmscout {
 
     void DrawGlyphs(const Projection &projection,
                     const MapParameter &parameter,
-                    const osmscout::PathTextStyleRef style,
+                    const osmscout::PathTextStyleRef& style,
                     const std::vector<osmscout::Glyph<DirectXNativeGlyph>> &glyphs);
 
 	/**
 	Register regular label with given text at the given pixel coordinate
 	in a style defined by the given LabelStyle.
 	*/
-	virtual void RegisterRegularLabel(const Projection &projection,
-		const MapParameter &parameter,
-		const std::vector<LabelData> &labels,
-		const Vertex2D &position,
-		double objectWidth);
+  void RegisterRegularLabel(const Projection &projection,
+                            const MapParameter &parameter,
+                            const std::vector<LabelData> &labels,
+                            const Vertex2D &position,
+                            double objectWidth) override;
 
 	/**
 	* Register contour label
 	*/
-	virtual void RegisterContourLabel(const Projection &projection,
-		const MapParameter &parameter,
-		const PathLabelData &label,
-		const LabelPath &labelPath);
+  void RegisterContourLabel(const Projection &projection,
+                            const MapParameter &parameter,
+                            const PathLabelData &label,
+                            const LabelPath &labelPath) override;
 
-	virtual void DrawLabels(const Projection& projection,
-		const MapParameter& parameter,
-		const MapData& data);
+    void DrawLabels(const Projection &projection,
+                    const MapParameter &parameter,
+                    const MapData &data) override;
 
-    virtual void DrawIcon(const IconStyle* style,
-                          double centerX, double centerY,
-                          double width, double height);
+    void DrawIcon(const IconStyle *style,
+                  double centerX, double centerY,
+                  double width, double height) override;
 
-    virtual void DrawSymbol(const Projection& projection,
-                            const MapParameter& parameter,
-                            const Symbol& symbol,
-                            double x, double y);
+    void DrawSymbol(const Projection &projection,
+                    const MapParameter &parameter,
+                    const Symbol &symbol,
+                    double x, double y) override;
 
-    virtual void DrawPath(const Projection& projection,
-                          const MapParameter& parameter,
-                          const Color& color,
-                          double width,
-                          const std::vector<double>& dash,
-                          LineStyle::CapStyle startCap,
-                          LineStyle::CapStyle endCap,
-                          size_t transStart, size_t transEnd);
+    void DrawPath(const Projection &projection,
+                  const MapParameter &parameter,
+                  const Color &color,
+                  double width,
+                  const std::vector<double> &dash,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
+                  size_t transStart, size_t transEnd) override;
 
     std::shared_ptr<DirectXLabel> Layout(const Projection& projection,
                                          const MapParameter& parameter,
@@ -217,21 +220,22 @@ namespace osmscout {
                                   ContourLabelHelper& helper);
 	*/
 
-    virtual void DrawContourSymbol(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const Symbol& symbol,
-                                   double space,
-                                   size_t transStart, size_t transEnd);
+  void DrawContourSymbol(const Projection &projection,
+                         const MapParameter &parameter,
+                         const Symbol &symbol,
+                         double space,
+                         size_t transStart, size_t transEnd) override;
 
-    virtual void DrawArea(const Projection& projection,
-                          const MapParameter& parameter,
-                          const AreaData& area);
+    void DrawArea(const Projection &projection,
+                  const MapParameter &parameter,
+                  const AreaData &area) override;
 
   public:
-    MapPainterDirectX(const StyleConfigRef& styleConfig,
-                      ID2D1Factory* pDirect2dFactory,
-                      IDWriteFactory* pWriteFactory);
-    virtual ~MapPainterDirectX();
+    MapPainterDirectX(const StyleConfigRef &styleConfig,
+                      ID2D1Factory *pDirect2dFactory,
+                      IDWriteFactory *pWriteFactory);
+
+    ~MapPainterDirectX() override;
 
     void DiscardDeviceResources();
 

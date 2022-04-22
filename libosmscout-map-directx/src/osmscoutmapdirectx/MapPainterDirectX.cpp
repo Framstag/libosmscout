@@ -77,20 +77,32 @@ namespace osmscout
 
   std::wstring s2w(const std::string& str)
   {
-    if (str.empty()) return std::wstring();
-    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), nullptr, 0);
+    if (str.empty())
+    {
+      return std::wstring();
+    }
+
+    int size_needed = MultiByteToWideChar(CP_UTF8,
+                                          0,
+                                          &str.data()[0],
+                                          (int)str.size(),
+                                          nullptr,
+                                          0);
     std::wstring wstrTo(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    MultiByteToWideChar(CP_UTF8,
+                        0,
+                        &str.data()[0],
+                        (int)str.size(),
+                        &wstrTo[0],
+                        size_needed);
     return wstrTo;
   }
 
   MapPainterDirectX::DirectXTextLayout::DirectXTextLayout(IDWriteFactory* pWriteFactory,
                                                           double fontSize,
                                                           IDWriteTextFormat* font,
-                                                          std::string text)
+                                                          const std::string& text)
   {
-	  DoubleRectangle dimension;
-
     m_pWriteFactory=pWriteFactory;
 
 #ifdef MBUC
@@ -196,9 +208,12 @@ namespace osmscout
     ID2D1SolidColorBrush* solidColorBrush;
     HRESULT hr = m_pRenderTarget->CreateSolidColorBrush(GetColorValue(color), &solidColorBrush);
     if (SUCCEEDED(hr))
+    {
       return m_Brushs.insert(std::make_pair(clr, solidColorBrush)).first->second;
-    else
+    }
+    else {
       return nullptr;
+    }
   }
 
   ID2D1SolidColorBrush* MapPainterDirectX::GetColorBrush(D2D1_COLOR_F& color)
@@ -215,20 +230,30 @@ namespace osmscout
     ID2D1SolidColorBrush* solidColorBrush;
     HRESULT hr = m_pRenderTarget->CreateSolidColorBrush(color, &solidColorBrush);
     if (SUCCEEDED(hr))
+    {
       return m_Brushs.insert(std::make_pair(clr, solidColorBrush)).first->second;
+    }
     else
+    {
       return nullptr;
+    }
   }
 
   ID2D1StrokeStyle* MapPainterDirectX::GetStrokeStyle(const std::vector<double>& dash)
   {
-    if (dash.size() > 0)
+    if (!dash.empty())
     {
       float* dashes = new float[dash.size()];
-      for (size_t uj = 0; uj < dash.size(); uj++) dashes[uj] = (float)dash[uj];
+      for (size_t uj = 0; uj < dash.size(); uj++)
+      {
+        dashes[uj] = (float)dash[uj];
+      }
+
       uint64_t id = crc64((const unsigned char*)dashes, dash.size() * sizeof(float));
       if (m_StrokeStyles.find(id) != m_StrokeStyles.end())
+      {
         return m_StrokeStyles[id];
+      }
       else
       {
         ID2D1StrokeStyle* pStrokeStyle = nullptr;
@@ -325,27 +350,27 @@ namespace osmscout
       );
     }
 
-    if (pDecoder)
+    if (pDecoder != nullptr)
     {
       pDecoder->Release();
       pDecoder = nullptr;
     }
-    if (pSource)
+    if (pSource != nullptr)
     {
       pSource->Release();
       pSource = nullptr;
     }
-    if (pStream)
+    if (pStream != nullptr)
     {
       pStream->Release();
       pStream = nullptr;
     }
-    if (pConverter)
+    if (pConverter != nullptr)
     {
       pConverter->Release();
       pConverter = nullptr;
     }
-    if (pScaler)
+    if (pScaler != nullptr)
     {
       pScaler->Release();
       pScaler = nullptr;
@@ -389,10 +414,9 @@ namespace osmscout
     if (SUCCEEDED(hr)) {
       return m_Fonts.insert(std::make_pair(hash, pTextFormat)).first->second;
     }
-    else {
-      std::cerr << "Could not get font " << parameter.GetFontName() << " " << fontSize << std::endl;
-      return nullptr;
-    }
+
+    std::cerr << "Could not get font " << parameter.GetFontName() << " " << fontSize << std::endl;
+    return nullptr;
   }
 
   void MapPainterDirectX::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
@@ -493,16 +517,16 @@ namespace osmscout
                                           double fontSize)
   {
     if (fontHeightMap.find(fontSize) != fontHeightMap.end())
-      return fontHeightMap[fontSize];
-    else
     {
-      DoubleRectangle dimension;
-
-      dimension = GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
-      fontHeightMap[fontSize] = dimension.height;
-
-      return dimension.height;
+      return fontHeightMap[fontSize];
     }
+
+    DoubleRectangle dimension;
+
+    dimension = GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
+    fontHeightMap[fontSize] = dimension.height;
+
+    return dimension.height;
   }
 
   DoubleRectangle MapPainterDirectX::GetTextDimension(
@@ -615,7 +639,7 @@ namespace osmscout
 
   void MapPainterDirectX::DrawGlyphs(const Projection &projection,
                                      const MapParameter &parameter,
-                                     const osmscout::PathTextStyleRef style,
+                                     const osmscout::PathTextStyleRef& style,
                                      const std::vector<osmscout::Glyph<DirectXNativeGlyph>> &glyphs)
   {
     //std::cout << "Draw glyphs..." << std::endl;
@@ -836,7 +860,7 @@ namespace osmscout
   {
     // TODO: Evaluate objectWidth and enableWrapping to
     // support multi-line layouted labels
-    auto font = GetFont(projection, parameter, fontSize);
+    auto *font = GetFont(projection, parameter, fontSize);
     auto label = std::make_shared<MapPainterDirectX::DirectXLabel>(m_pWriteFactory, fontSize, font, text);
 
     label->text=text;
@@ -971,9 +995,15 @@ namespace osmscout
       }
     }
     if (hasFilling)
+    {
       m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+    }
+
     if (hasBorder)
+    {
       m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+    }
+
     pPathGeometry->Release();
 
     for (const auto& data : area.clippings) {
@@ -999,9 +1029,14 @@ namespace osmscout
         }
       }
       if (hasFilling)
+      {
         m_pRenderTarget->FillGeometry(pPathGeometry, GetColorBrush(fillStyle->GetFillColor()));
+      }
+
       if (hasBorder)
-	    m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+      {
+	      m_pRenderTarget->DrawGeometry(pPathGeometry, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+      }
       pPathGeometry->Release();
     }
   }
@@ -1024,11 +1059,9 @@ namespace osmscout
   {
     pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
     HRESULT hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&m_pImagingFactory);
-    if (SUCCEEDED(hr))
-    {
-    }
-    else
+    if (!SUCCEEDED(hr)) {
       m_pImagingFactory = nullptr;
+    }
   }
 
   MapPainterDirectX::~MapPainterDirectX()
@@ -1055,7 +1088,7 @@ namespace osmscout
       }
     }
     m_StrokeStyles.clear();
-    if (m_pImagingFactory)
+    if (m_pImagingFactory != nullptr)
     {
       m_pImagingFactory->Release();
       m_pImagingFactory = nullptr;
@@ -1094,14 +1127,20 @@ namespace osmscout
   {
     bool result = true;
 
-    if (m_pDirect2dFactory == nullptr) return false;
+    if (m_pDirect2dFactory == nullptr)
+    {
+      return false;
+    }
+
     typeConfig = styleConfig->GetTypeConfig();
     m_pRenderTarget = renderTarget;
 
     IDWriteRenderingParams* renderingParams;
     HRESULT hr = m_pWriteFactory->CreateRenderingParams(&renderingParams);
     if (FAILED(hr))
+    {
       return false;
+    }
 
     PathTextRenderer::CreatePathTextRenderer(this->dpiX / 96.0f, &m_pPathTextRenderer);
 
@@ -1116,7 +1155,9 @@ namespace osmscout
 
     renderTarget->SetTextRenderingParams(m_pRenderingParams);
     if (FAILED(hr))
+    {
       return false;
+    }
 
     renderingParams->Release();
 
