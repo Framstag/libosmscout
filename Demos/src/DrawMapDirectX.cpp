@@ -61,11 +61,11 @@ inline void SafeRelease(
 	Interface **ppInterfaceToRelease
 )
 {
-	if (*ppInterfaceToRelease != NULL)
+	if (*ppInterfaceToRelease != nullptr)
 	{
 		(*ppInterfaceToRelease)->Release();
 
-		(*ppInterfaceToRelease) = NULL;
+		(*ppInterfaceToRelease) = nullptr;
 	}
 }
 
@@ -77,36 +77,29 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 class DrawMapDirectX
 {
 private:
-	HWND							m_hwnd;
-	ID2D1Factory*					m_pDirect2dFactory;
-	IDWriteFactory*					m_pWriteFactory;
-	ID2D1HwndRenderTarget*			m_pRenderTarget;
-	ID2D1SolidColorBrush*			m_pLightSlateGrayBrush;
-	ID2D1SolidColorBrush*			m_pCornflowerBlueBrush;
+	HWND							            m_hwnd=0;
+	ID2D1Factory*					        m_pDirect2dFactory=nullptr;
+	IDWriteFactory*					      m_pWriteFactory=nullptr;
+	ID2D1HwndRenderTarget*			  m_pRenderTarget=nullptr;
+	ID2D1SolidColorBrush*			    m_pLightSlateGrayBrush=nullptr;
+	ID2D1SolidColorBrush*			    m_pCornflowerBlueBrush=nullptr;
 
-	osmscout::MapPainterDirectX*	m_Painter;
+	osmscout::MapPainterDirectX*	m_Painter=nullptr;
 	std::list<osmscout::TileRef>	m_Tiles;
-	DrawMapDemo*                    m_pBaseData;
+	DrawMapDemo*                  m_pBaseData;
 
 public:
 	explicit DrawMapDirectX(DrawMapDemo* pDemoData) :
-		m_hwnd(NULL),
-		m_pDirect2dFactory(NULL),
-		m_pWriteFactory(NULL),
-		m_pRenderTarget(NULL),
-		m_pLightSlateGrayBrush(NULL),
-		m_pCornflowerBlueBrush(NULL),
-		m_Painter(NULL),
 		m_pBaseData(pDemoData)
 	{
 	}
 
 	~DrawMapDirectX()
 	{
-		if (m_Painter != NULL)
+		if (m_Painter != nullptr)
 		{
 			delete m_Painter;
-			m_Painter = NULL;
+			m_Painter = nullptr;
 		}
 		SafeRelease(&m_pWriteFactory);
 		SafeRelease(&m_pDirect2dFactory);
@@ -133,15 +126,17 @@ public:
 		std::cout << "Device independent resources created." << std::endl;
 
 		// Register the window class.
-		WNDCLASSEX wcex = { sizeof(WNDCLASSEX) };
+		WNDCLASSEX wcex;
+
+    wcex.cbSize= sizeof(WNDCLASSEX);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
 		wcex.lpfnWndProc = DrawMapDirectX::WndProc;
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = sizeof(LONG_PTR);
 		wcex.hInstance = HINST_THISCOMPONENT;
-		wcex.hbrBackground = NULL;
-		wcex.lpszMenuName = NULL;
-		wcex.hCursor = LoadCursor(NULL, IDI_APPLICATION);
+		wcex.hbrBackground = nullptr;
+		wcex.lpszMenuName = nullptr;
+		wcex.hCursor = LoadCursor(nullptr, IDI_APPLICATION);
 		wcex.lpszClassName = _T("DemoDrawMapDirectX");
 
 		RegisterClassEx(&wcex);
@@ -166,13 +161,13 @@ public:
 			(GetSystemMetrics(SM_CYSCREEN) - args.height) / 2,
 			args.width,
 			args.height,
-			NULL,
-			NULL,
+			nullptr,
+			nullptr,
 			HINST_THISCOMPONENT,
 			this
 		);
 
-		hr = m_hwnd ? S_OK : E_FAIL;
+		hr = m_hwnd!=0 ? S_OK : E_FAIL;
 
 		if (!SUCCEEDED(hr))
 		{
@@ -193,7 +188,7 @@ public:
 	{
 		MSG msg;
 
-		while (GetMessage(&msg, NULL, 0, 0))
+		while (GetMessage(&msg, nullptr, 0, 0))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -223,7 +218,7 @@ private:
 	{
 		HRESULT hr = S_OK;
 
-		if (!m_pRenderTarget)
+		if (m_pRenderTarget == nullptr)
 		{
 			RECT rc;
 			GetClientRect(m_hwnd, &rc);
@@ -330,7 +325,7 @@ private:
 			m_pRenderTarget->DrawRectangle(&rectangle2, m_pCornflowerBlueBrush);
 			*/
 
-			if (m_Painter != NULL)
+			if (m_Painter != nullptr)
 			{
 				m_Painter->DrawMap(m_pBaseData->projection, m_pBaseData->drawParameter, m_pBaseData->data, m_pRenderTarget);
 			}
@@ -349,7 +344,7 @@ private:
 	// Resize the render target.
 	void OnResize(UINT width, UINT height)
 	{
-		if (m_pRenderTarget)
+		if (m_pRenderTarget != nullptr)
 		{
 			// Note: This method can fail, but it's okay to ignore the
 			// error here, because the error will be returned again
@@ -388,7 +383,9 @@ private:
 
 			result = 1;
 
-			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_pBaseData->styleConfig, pDemoApp->m_pDirect2dFactory, pDemoApp->m_pWriteFactory);
+			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_pBaseData->styleConfig,
+                                                            pDemoApp->m_pDirect2dFactory,
+                                                            pDemoApp->m_pWriteFactory);
 		}
 		else
 		{
@@ -401,7 +398,7 @@ private:
 
 			bool wasHandled = false;
 
-			if (pDemoApp)
+			if (pDemoApp!= nullptr)
 			{
 				switch (message)
 				{
@@ -417,7 +414,7 @@ private:
 
 				case WM_DISPLAYCHANGE:
 				{
-					InvalidateRect(hWnd, NULL, FALSE);
+					InvalidateRect(hWnd, nullptr, FALSE);
 				}
 				result = 0;
 				wasHandled = true;
@@ -426,7 +423,7 @@ private:
 				case WM_PAINT:
 				{
 					pDemoApp->OnRender();
-					ValidateRect(hWnd, NULL);
+					ValidateRect(hWnd, nullptr);
 				}
 				result = 0;
 				wasHandled = true;
@@ -464,7 +461,7 @@ int app_main(int argc, char* argv[])
 
 	if (!drawDemo.OpenDatabase()) {
 		bool bHelp = drawDemo.GetArguments().help;
-		MessageBoxA(NULL, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapDirectX", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
+		MessageBoxA(nullptr, bHelp ? strCout.str().c_str() : strCerr.str().c_str(), "DrawMapDirectX", MB_OK | (bHelp ? MB_ICONINFORMATION : MB_ICONERROR));
 		std::cerr.rdbuf(oldCerrStreamBuf);
 		std::cout.rdbuf(oldCoutStreamBuf);
 		return EXIT_FAILURE;
@@ -479,9 +476,9 @@ int app_main(int argc, char* argv[])
 	// by the process.
 	// The return value is ignored, because we want to continue running in the
 	// unlikely event that HeapSetInformation fails.
-	HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+	HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
 
-	if (SUCCEEDED(CoInitialize(NULL)))
+	if (SUCCEEDED(CoInitialize(nullptr)))
 	{
 		{
 			DrawMapDirectX app(&drawDemo);
@@ -502,16 +499,30 @@ int WINAPI WinMain(HINSTANCE /*hinstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 {
 	int argc = 0;
 	LPWSTR* w_argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	char** argv = NULL;
-	if (w_argv)
+	char** argv = nullptr;
+	if (w_argv != nullptr)
 	{
 		argv = new char*[argc];
 		for (int i = 0; i < argc; ++i)
 		{
 			int w_len = lstrlenW(w_argv[i]);
-			int len = WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, NULL, 0, NULL, NULL);
+			int len = WideCharToMultiByte(CP_ACP,
+                                    0,
+                                    w_argv[i],
+                                    w_len,
+                                    nullptr,
+                                    0,
+                                    nullptr,
+                                    nullptr);
 			argv[i] = new char[len + 1];
-			WideCharToMultiByte(CP_ACP, 0, w_argv[i], w_len, argv[i], len, NULL, NULL);
+			WideCharToMultiByte(CP_ACP,
+                          0,
+                          w_argv[i],
+                          w_len,
+                          argv[i],
+                          len,
+                          nullptr,
+                          nullptr);
 			argv[i][len] = 0;
 		}
 		LocalFree(w_argv);
@@ -519,9 +530,13 @@ int WINAPI WinMain(HINSTANCE /*hinstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /
 
 	int result = app_main(argc, argv);
 
-	if (argv != NULL)
+	if (argv != nullptr)
 	{
-		for (int i = 0; i < argc; i++) delete argv[i];
+		for (int i = 0; i < argc; i++)
+    {
+      delete argv[i];
+    }
+
 		delete argv;
 	}
 
