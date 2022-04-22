@@ -64,7 +64,7 @@ struct PathTextDrawingContext
     ID2D1Brush* brush;
 };
 
-class PathTextRenderer : public IDWriteTextRenderer
+class PathTextRenderer final : public IDWriteTextRenderer
 {
 public:
   // Static creation method that takes care of allocating a renderer

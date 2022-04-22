@@ -67,7 +67,10 @@ void PathTextRenderer::CreatePathTextRenderer(float pixelsPerDip, PathTextRender
 void PathTextRenderer::DestroyPathTextRenderer(PathTextRenderer *textRenderer)
 {
   if (textRenderer == nullptr)
+  {
     return;
+  }
+
   textRenderer->Release();
 }
 
@@ -96,7 +99,9 @@ HRESULT PathTextRenderer::DrawGlyphRun(
 )
 {
   if (clientDrawingContext == nullptr)
+  {
     return S_OK;
+  }
 
   HRESULT hr;
 
@@ -112,10 +117,12 @@ HRESULT PathTextRenderer::DrawGlyphRun(
   hr = dc->geometry->ComputeLength(
     prevTransform, &maxLength);
   if (FAILED(hr))
+  {
     return hr;
+  }
 
   float totalRunLength = 0;
-  for (int idx = 0; idx < glyphRun->glyphCount; ++idx) {
+  for (UINT32 idx = 0; idx < glyphRun->glyphCount; ++idx) {
     totalRunLength += glyphRun->glyphAdvances[idx];
   }
 
@@ -162,7 +169,9 @@ HRESULT PathTextRenderer::DrawGlyphRun(
       hr = dc->geometry->ComputePointAtLength(middle, D2D1::IdentityMatrix(), &pathOffset, &pathTangent);
 
       if (hr != S_OK)
+      {
         return hr;
+      }
 
       // Lifted from the Microsoft sample.
       // Create a rotation matrix to align the cluster to the path.
@@ -210,7 +219,7 @@ HRESULT PathTextRenderer::DrawUnderline(
   float /*baselineOriginX*/,
   float /*baselineOriginY*/,
   _In_ DWRITE_UNDERLINE const* /*underline*/,
-  _In_opt_ IUnknown* clientDrawingEffect
+  _In_opt_ IUnknown* /*clientDrawingEffect*/
 )
 {
   // NOPE.
@@ -252,7 +261,7 @@ HRESULT PathTextRenderer::IsPixelSnappingDisabled(
 )
 {
   // yes, we want pixel snapping ?
-  *isDisabled = false;
+  *isDisabled = FALSE;
   return S_OK;
 }
 
