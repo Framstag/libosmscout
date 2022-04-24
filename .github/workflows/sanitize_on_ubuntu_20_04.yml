@@ -53,7 +53,13 @@ jobs:
       - name: Install project
         run: sudo cmake --install build
       - name: Run tests
-        run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
+        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest"
+        working-directory: build
+      - name: Run PerformanceTest tests
+        # UI libraries leaks memory on exit, lets ignore it...
+        run: xvfb-run ctest -j 2 --output-on-failure --tests-regex "PerformanceTest"
+        env:
+          ASAN_OPTIONS: detect_leaks=0
         working-directory: build
 
   sanitize_gcc:
@@ -99,5 +105,11 @@ jobs:
       - name: Install project
         run: sudo cmake --install build
       - name: Run tests
-        run: xvfb-run ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest-(agg|Qt|cairo)"
+        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest"
+        working-directory: build
+      - name: Run PerformanceTest tests
+        # UI libraries leaks memory on exit, lets ignore it...
+        run: xvfb-run ctest -j 2 --output-on-failure --tests-regex "PerformanceTest"
+        env:
+          ASAN_OPTIONS: detect_leaks=0
         working-directory: build
