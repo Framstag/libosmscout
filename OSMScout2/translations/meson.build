@@ -18,6 +18,5 @@ osmscout2Trs = qt5.compile_translations(ts_files : [
                                             'en.ts',
                                         ],
                                         build_by_default : true,
-                                        install: true,
                                         install_dir: translationInstallDir
                                         )
