@@ -499,7 +499,7 @@ STYLE
     ICON { name: target;} */
 
   [MAG world-] {
-    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; priority: 100; }
+    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100;}
 
     [TYPE _tile_sea] AREA {color: @waterColor;}
     //[TYPE _tile_coast] AREA {color: @waterColor;}
