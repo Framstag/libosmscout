@@ -336,6 +336,7 @@ public:
   {
     delete pf;
     delete rbuf;
+    delete[] buffer;
   }
 
   void DrawMap(const osmscout::TileProjection &projection,
