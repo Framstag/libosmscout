@@ -1623,6 +1623,10 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
         assert(false);
     }
 
+    if (primitive->GetBorderStyle() && primitive->GetBorderStyle()->IsVisible()) {
+      maxBorderWidth=std::max(maxBorderWidth, primitive->GetBorderStyle()->GetWidth());
+    }
+
     primitives.push_back(primitive);
   }
 

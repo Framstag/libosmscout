@@ -1179,6 +1179,7 @@ namespace osmscout {
 
     BoundingBox mapBoundingBox;     //!< bounding box in map canvas coordinates [mm]
     BoundingBox groundBoundingBox;  //!< bounding box in ground coordinates [m]
+    double maxBorderWidth=0;        //!< maximum border width [mm]
 
   public:
     explicit Symbol(const std::string& name);
@@ -1199,10 +1200,10 @@ namespace osmscout {
      * bounding box in pixels for given projection
      */
     void GetBoundingBox(const Projection &projection,
-                               double& minX,
-                               double& minY,
-                               double& maxX,
-                               double& maxY) const
+                        double& minX,
+                        double& minY,
+                        double& maxX,
+                        double& maxY) const
     {
       minX=std::min(projection.ConvertWidthToPixel(mapBoundingBox.minX),
                     projection.GetMeterInPixel() * groundBoundingBox.minX);
@@ -1213,6 +1214,18 @@ namespace osmscout {
                     projection.GetMeterInPixel() * groundBoundingBox.maxX);
       maxY=std::max(projection.ConvertWidthToPixel(mapBoundingBox.maxY),
                     projection.GetMeterInPixel() * groundBoundingBox.maxY);
+    }
+
+    /**
+     * Maximum border width. As border is not accounted to bounding box and symbol dimension,
+     * it is good to use this value as symbol margin to make sure that symbol is to cropped.
+     *
+     * @param projection
+     * @return width in pixels
+     */
+    double GetMaxBorderWidth(const Projection &projection) const
+    {
+      return projection.ConvertWidthToPixel(maxBorderWidth);
     }
 
     /**
