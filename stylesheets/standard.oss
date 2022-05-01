@@ -60,7 +60,7 @@ ORDER WAYS
   GROUP waterway_weir, waterway_waterfall, route_ferry
   GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
 
-MODULE "land_sea_color"
+MODULE "include/land_sea_color"
 
 CONST
   MAG stepsMag                     = veryClose;
@@ -646,8 +646,8 @@ CONST
       AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
     }
 
-MODULE "route"
-MODULE "land_sea"
+MODULE "include/route"
+MODULE "include/land_sea"
 
 STYLE
   // -------------------------------------------------------
