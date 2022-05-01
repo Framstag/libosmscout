@@ -390,6 +390,7 @@ stylesheets = [
             'railways.oss',
             'motorways.oss',
             'public-transport.oss',
+            'cycle.oss'
             ]
 
 foreach stylesheet : stylesheets

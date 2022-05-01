@@ -123,7 +123,8 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 		boundaries.oss
 		railways.oss
 		motorways.oss
-		public-transport.oss)
+		public-transport.oss
+		cycle.oss)
 
 	foreach(STYLESHEET ${STYLESHEETS})
 		add_test(NAME CheckStyleSheet-${STYLESHEET}
@@ -193,7 +194,8 @@ if(${OSMSCOUT_BUILD_MAP})
 		boundaries.oss
 		railways.oss
 		motorways.oss
-		public-transport.oss)
+		public-transport.oss
+		cycle.oss)
 
 	foreach(DRIVER ${PERFORMANCE_TEST_DRIVERS})
 		foreach(STYLESHEET ${STYLESHEETS})
