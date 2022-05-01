@@ -229,19 +229,23 @@ void IconLookup::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout:
         }
       }
     } else {
-      findIcon.image = QImage(findIcon.dimensions.width()*iconImageUpscale,
-                              findIcon.dimensions.height()*iconImageUpscale,
+      SymbolRef symbol=findIcon.iconStyle->GetSymbol();
+      double margin=symbol->GetMaxBorderWidth(projection)+1;
+      findIcon.image = QImage((findIcon.dimensions.width()+margin)*iconImageUpscale,
+                              (findIcon.dimensions.height()+margin)*iconImageUpscale,
                               QImage::Format_ARGB32);
       findIcon.image.fill(Qt::transparent);
 
       QPainter painter(&findIcon.image);
+      painter.setRenderHint(QPainter::Antialiasing, true);
+      painter.setRenderHint(QPainter::TextAntialiasing, true);
       SymbolRendererQt renderer(&painter);
-      SymbolRef symbol=findIcon.iconStyle->GetSymbol();
 
       double minX, minY, maxX, maxY;
       symbol->GetBoundingBox(projection,minX,minY,maxX,maxY);
       renderer.Render(*symbol,
-                      Vertex2D(minX*-1*iconImageUpscale,minY*-1*iconImageUpscale),
+                      Vertex2D((minX*-1 + margin/2) * iconImageUpscale,
+                               (minY*-1 + margin/2) * iconImageUpscale),
                       projection.GetMeterInPixel()*iconImageUpscale,
                       projection.ConvertWidthToPixel(iconImageUpscale));
       painter.end();
