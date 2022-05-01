@@ -24,11 +24,9 @@ OSS
       AREA {color: #00ff0055; }
     }
 
+  MODULE "include/land_sea"
+
   STYLE
-    [TYPE _tile_sea] AREA {color: @waterColor;}
-    [TYPE _tile_coast] AREA {color: @waterColor;}
-    [TYPE _tile_land] AREA {color: @landColor;}
-    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
     [MAG continent-] {
       [TYPE railway_rail] {

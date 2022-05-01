@@ -22,11 +22,9 @@ OSS
       AREA {color: #ff000055; }
     }
 
+  MODULE "include/land_sea"
+
   STYLE
-    [TYPE _tile_sea] AREA {color: @waterColor;}
-    [TYPE _tile_coast] AREA {color: @waterColor;}
-    [TYPE _tile_land] AREA {color: @landColor;}
-    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
     [TYPE highway_motorway] {
       WAY { color: #809bc0; displayWidth: 0.45mm; width: 20m; }

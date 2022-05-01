@@ -129,9 +129,6 @@ CONST
   // For debugging :-)
   COLOR red                        = #ff0000;
 
-  // Pseudo types
-  COLOR routeColor                 = #ff000088;
-
   // Ground tiles
 
   IF daylight {
@@ -485,35 +482,10 @@ CONST
       AREA {color: #ff0000; }
     }
 
+MODULE "include/route"
+MODULE "include/land_sea"
+
 STYLE
-  // -------------------------------------------------------
-  //
-  // Synthetic
-  //
-
-  /*
-  NODE "internal_start"
-    ICON { name: start;}
-
-  NODE "internal_target"
-    ICON { name: target;} */
-
-  [MAG world-] {
-    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100;}
-
-    [TYPE _tile_sea] AREA {color: @waterColor;}
-    //[TYPE _tile_coast] AREA {color: @waterColor;}
-    //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
-    [TYPE _tile_land] AREA {color: @landColor;}
-    [TYPE _tile_unknown] AREA {color: @unknownColor;}
-
-    //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
-    //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }
-
-    // [TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
-
-    //[TYPE boundary_country] WAY {color: @countryBorderColor; displayWidth: 0.4mm; dash: 7,3;}
-  }
 
   // -------------------------------------------------------
   //
