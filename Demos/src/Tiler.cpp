@@ -25,6 +25,7 @@
 
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Tiling.h>
+#include <osmscout/util/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
 
@@ -176,61 +177,93 @@ void MergeTilesToMapData(const std::list<osmscout::TileRef>& centerTiles,
   }
 }
 
+struct Arguments {
+  bool help{false};
+  bool debug{false};
+  std::string databaseDirectory{"."};
+  std::string style{"stylesheets/standard.oss"};
+  std::string font{"/usr/share/fonts/TTF/DejaVuSans.ttf"};
+  osmscout::MagnificationLevel startZoom{0};
+  osmscout::MagnificationLevel endZoom{20};
+  osmscout::GeoCoord coordTopLeft;
+  osmscout::GeoCoord coordBottomRight;
+};
+
 int main(int argc, char* argv[])
 {
-  std::string  map;
-  std::string  style;
-  double       latTop,latBottom,lonLeft,lonRight;
-  unsigned int startLevel;
-  unsigned int endLevel;
+  osmscout::CmdLineParser     argParser("Tiler",
+                                        argc,argv);
+  Arguments                   args;
 
-  if (argc!=9) {
-    std::cerr << "DrawMap ";
-    std::cerr << "<map directory> <style-file> ";
-    std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
-    std::cerr << "<start_zoom>" << std::endl;
-    std::cerr << "<end_zoom>" << std::endl;
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      std::vector<std::string>{"h","help"},
+                      "Display help",
+                      true);
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.debug=value;
+                      }),
+                      "debug",
+                      "Enable debug output",
+                      false);
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.font=value;
+                      }),
+                      "font",
+                      "Used font, default: " + args.font,
+                      false);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "databaseDir",
+                          "Database directory");
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.style=value;
+                          }),
+                          "stylesheet",
+                          "Map stylesheet");
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& coord) {
+                            args.coordTopLeft = coord;
+                          }),
+                          "lat_top lon_left",
+                          "Bounding box top-left coordinate");
+  argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& coord) {
+                            args.coordBottomRight = coord;
+                          }),
+                          "lat_bottom lon_right",
+                          "Bounding box bottom-right coordinate");
+  argParser.AddPositional(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                            args.startZoom=osmscout::MagnificationLevel(value);
+                          }),
+                          "start-zoom",
+                          "Start zoom");
+  argParser.AddPositional(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                            args.endZoom=osmscout::MagnificationLevel(value);
+                          }),
+                          "end-zoom",
+                          "End zoom");
+
+  osmscout::CmdLineParseResult argResult=argParser.Parse();
+  if (argResult.HasError()) {
+    std::cerr << "ERROR: " << argResult.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
     return 1;
   }
 
-  map=argv[1];
-  style=argv[2];
-
-  if (sscanf(argv[3],"%lf",&latTop)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
+  if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+    return 0;
   }
 
-  if (sscanf(argv[4],"%lf",&lonLeft)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&latBottom)!=1) {
-    std::cerr << "lon is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[6],"%lf",&lonRight)!=1) {
-    std::cerr << "lat is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[7],"%u",&startLevel)!=1) {
-    std::cerr << "start zoom is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[8],"%u",&endLevel)!=1) {
-    std::cerr << "end zoom is not numeric!" << std::endl;
-    return 1;
-  }
+  osmscout::log.Debug(args.debug);
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
-  if (!database->Open(map)) {
+  if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -238,7 +271,7 @@ int main(int argc, char* argv[])
 
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
 
-  if (!styleConfig->Load(style)) {
+  if (!styleConfig->Load(args.style)) {
     std::cerr << "Cannot open style" << std::endl;
   }
 
@@ -247,8 +280,7 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
 
   // Change this, to match your system
-  drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
-  drawParameter.SetFontName("/usr/share/fonts/TTF/DejaVuSans.ttf");
+  drawParameter.SetFontName(args.font);
   drawParameter.SetFontSize(2.0);
   // Fadings make problems with tile approach, we disable it
   drawParameter.SetDrawFadings(false);
@@ -258,15 +290,15 @@ int main(int argc, char* argv[])
 
   osmscout::MapPainterAgg painter(styleConfig);
 
-  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(startLevel,endLevel));
-       level<=osmscout::MagnificationLevel(std::max(startLevel,endLevel));
+  for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(args.startZoom,args.endZoom));
+       level<=osmscout::MagnificationLevel(std::max(args.startZoom,args.endZoom));
        level++) {
     osmscout::Magnification magnification(level);
 
     osmscout::OSMTileId     tileA(osmscout::OSMTileId::GetOSMTile(magnification,
-                                                                  osmscout::GeoCoord(latBottom,lonLeft)));
+                                                                  args.coordBottomRight));
     osmscout::OSMTileId     tileB(osmscout::OSMTileId::GetOSMTile(magnification,
-                                                                  osmscout::GeoCoord(latTop,lonRight)));
+                                                                  args.coordTopLeft));
     uint32_t                xTileStart=std::min(tileA.GetX(),tileB.GetX());
     uint32_t                xTileEnd=std::max(tileA.GetX(),tileB.GetX());
     uint32_t                xTileCount=xTileEnd-xTileStart+1;
