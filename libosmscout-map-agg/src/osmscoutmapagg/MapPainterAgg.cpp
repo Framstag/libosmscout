@@ -59,9 +59,8 @@ namespace osmscout {
     if (!fontEngine->load_font(parameter.GetFontName().c_str(),
                                0,
                                renderingType)) {
-      std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
+      log.Error() << "Cannot load font '" << parameter.GetFontName() << "'";
       return;
-
     }
 
     //fontEngine->resolution(72);
