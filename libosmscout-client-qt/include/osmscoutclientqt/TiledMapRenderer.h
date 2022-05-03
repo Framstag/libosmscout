@@ -56,7 +56,7 @@ private:
   TileCache                     onlineTileCache;
   TileCache                     offlineTileCache;
 
-  OsmTileDownloader             *tileDownloader;
+  OsmTileDownloader             *tileDownloader=nullptr;
 
   std::atomic_bool              onlineTilesEnabled;
   std::atomic_bool              offlineTilesEnabled;
@@ -65,7 +65,7 @@ private:
   int                           screenHeight;
 
   // data loading request
-  DBLoadJob                     *loadJob;
+  DBLoadJob                     *loadJob=nullptr;
   uint32_t                      loadXFrom;
   uint32_t                      loadXTo;
   uint32_t                      loadYFrom;
