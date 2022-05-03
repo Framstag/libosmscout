@@ -268,7 +268,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     bool render = (state != DatabaseCoverage::Outside) || (!onlineTilesEnabled);
     if (render) {
         // tile rendering have sub-linear complexity with area size
-        // it means that it is advatage to merge more tile requests with same zoom
+        // it means that it is advantage to merge more tile requests with same zoom
         // and render bigger area
         {
             QMutexLocker locker(&tileCacheMutex);
