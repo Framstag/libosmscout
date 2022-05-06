@@ -80,12 +80,8 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
 TiledMapRenderer::~TiledMapRenderer()
 {
   qDebug() << "~TiledMapRenderer";
-  if (tileDownloader != nullptr){
-    delete tileDownloader;
-  }
-  if (loadJob!=nullptr){
-    delete loadJob;
-  }
+  delete tileDownloader;
+  delete loadJob;
 }
 
 void TiledMapRenderer::Initialize()
@@ -128,7 +124,7 @@ void TiledMapRenderer::onStylesheetFilenameChanged()
 
     dbThread->RunSynchronousJob(
       [this,&unknownFillStyle,&projection](const std::list<DBInstanceRef>& databases) {
-        for (auto &db:databases){
+        for (const auto &db:databases){
           auto styledConfig=db->GetStyleConfig();
           if (styledConfig) {
             unknownFillStyle=styledConfig->GetUnknownFillStyle(projection);
@@ -171,8 +167,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   QElapsedTimer start;
   start.start();
   QMutexLocker locker(&tileCacheMutex);
-  int elapsed = start.elapsed();
-  if (elapsed > 1){
+  if (auto elapsed = start.elapsed(); elapsed > 1){
     osmscout::log.Warn() << "Mutex acquire took " << elapsed << " ms";
   }
 
@@ -256,7 +251,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
         return;
     }
     {
-        QMutexLocker locker(&tileCacheMutex);
+        QMutexLocker tileCacheLocker(&tileCacheMutex);
         if (!offlineTileCache.startRequestProcess(zoomLevel, xtile, ytile)) // request was canceled or started already
             return;
 
@@ -268,10 +263,10 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     bool render = (state != DatabaseCoverage::Outside) || (!onlineTilesEnabled);
     if (render) {
         // tile rendering have sub-linear complexity with area size
-        // it means that it is advatage to merge more tile requests with same zoom
+        // it means that it is advantage to merge more tile requests with same zoom
         // and render bigger area
         {
-            QMutexLocker locker(&tileCacheMutex);
+            QMutexLocker tileCacheLocker(&tileCacheMutex);
             offlineTileCache.mergeAndStartRequests(zoomLevel, xtile, ytile,
                                                    loadXFrom, loadXTo, loadYFrom, loadYTo,
                                                    /*maxWidth*/ 5, /*maxHeight*/ 5);
@@ -316,7 +311,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
 
     }else{
         // put Null image
-        QMutexLocker locker(&tileCacheMutex);
+        QMutexLocker tileCacheLocker(&tileCacheMutex);
         offlineTileCache.put(zoomLevel, xtile, ytile, QImage(), loadEpoch);
     }
 }
@@ -490,7 +485,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     p.end();
 
     {
-        QMutexLocker locker(&tileCacheMutex);
+        QMutexLocker tileCacheLocker(&tileCacheMutex);
 
         if (loadEpoch != offlineTileCache.getEpoch()){
           qWarning() << "Rendered from outdated data" << loadEpoch << "!=" << offlineTileCache.getEpoch();
