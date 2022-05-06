@@ -1663,7 +1663,7 @@ STYLE
 
  // Buildings
  [MAG @specialBuildingMag-] {
-   [TYPE christian_church_color] {
+   [TYPE christian_church_building] {
        AREA { color: @churchBuildingColor; }
        AREA.BORDER { color: @churchBuildingBorderColor; width: 0.1mm;}
    }
