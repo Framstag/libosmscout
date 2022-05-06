@@ -59,9 +59,8 @@ namespace osmscout {
     if (!fontEngine->load_font(parameter.GetFontName().c_str(),
                                0,
                                renderingType)) {
-      std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
+      log.Error() << "Cannot load font '" << parameter.GetFontName() << "'";
       return;
-
     }
 
     //fontEngine->resolution(72);
@@ -383,7 +382,9 @@ namespace osmscout {
     double h=fontEngine->height();
     for (wchar_t i : label.text) {
       const agg::glyph_cache *glyph = fontCacheManager->glyph(i);
-      assert(glyph);
+      if (glyph==nullptr) {
+        continue; // silently skip glyph
+      }
       fontCacheManager->add_kerning(&x, &y);
       label.glyphs.emplace_back(MapPainterAgg::NativeGlyph{x, y, glyph});
 
