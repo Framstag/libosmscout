@@ -74,7 +74,7 @@ CONST
 
   MAG minorBuildingMag             = veryClose;
 
-  // read width
+  // road width
   WIDTH motorwayWidth               = 20m;
   WIDTH trunkWidth                  = 18m;
   WIDTH primaryWidth                = 14m;
