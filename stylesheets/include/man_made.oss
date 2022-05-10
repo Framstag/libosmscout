@@ -1,0 +1,171 @@
+OSS
+STYLE
+ // -------------------------------------------------------
+ //
+ // Man made:
+ // amenity, tourism, history, military, power, barrier
+ //
+ [MAG city-] {
+   [TYPE tourism_theme_park,
+         tourism_zoo,
+         historic_archaeological_site,
+         historic_battlefield] AREA { color: @tourismColor; }
+ }
+
+ [MAG city-] {
+
+   [TYPE military_airfield,
+         military_danger_area,
+         military_range,
+         military_naval_base] AREA { color: #f59897; }
+
+   [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
+ }
+
+ [MAG detail-] {
+   [TYPE amenity_grave_yard] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.8;}
+ }
+
+ [MAG detail-] {
+   [TYPE tourism_alpine_hut,
+         tourism_camp_site,
+         tourism_caravan_site,
+         tourism_attraction,
+         tourism_artwork,
+         tourism_chalet,
+         tourism_guest_house,
+         tourism_hostel,
+         tourism_hotel,
+         tourism_information,
+         tourism_motel,
+         tourism_museum,
+         tourism_picnic_site,
+         historic_castle,
+         historic_monument,
+         historic_memorial,
+         historic_ruins,
+         historic_wreck] AREA { color: @tourismColor; }
+
+   [TYPE power_generator] AREA { color: #bca9a9; }
+
+   // Special amenities
+   [TYPE amenity_post_office] AREA { color: @postColor; }
+
+   [TYPE amenity_hospital] {
+     AREA { color: @hospitalColor;}
+     AREA.BORDER { color: @hospitalBorderColor; width: 0.1mm; }
+   }
+
+   [TYPE amenity_taxi] AREA { color: #d2d2d2; }
+
+   // (Major) Amenities without special color
+   [TYPE amenity,
+         amenity_bank,
+         amenity_cafe,
+         amenity_fast_food,
+         amenity_fuel,
+         amenity_kindergarten,
+         amenity_library,
+         amenity_restaurant,
+         amenity_school] AREA { color: @amenityColor; }
+ }
+
+ [MAG close-] {
+   // (Minor) Amenities without special color
+   [TYPE amenity_atm,
+         amenity_recycling] AREA { color: @amenityColor; }
+
+   [TYPE man_made_pier] {
+     [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
+     [SIZE 5m <0.1mm:3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
+     AREA { color: #ffffff; }
+   }
+
+   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
+ }
+
+ [MAG closer-] {
+   [TYPE amenity_hospital,
+         amenity_hospital_building] {
+     AREA.ICON { symbol: amenity_hospital; name: hospital; }
+     NODE.ICON { symbol: amenity_hospital; name: hospital; }
+   }
+
+   [TYPE amenity_parking_building] {
+     NODE.ICON { symbol: amenity_parking; name: parking; }
+     AREA.ICON { symbol: amenity_parking; name: parking;}
+   }
+
+   [TYPE amenity_parking] {
+     NODE.ICON { symbol: amenity_parking; name: parking; }
+     AREA.ICON { symbol: amenity_parking; name: parking;}
+   }
+
+   [TYPE amenity_parking] {
+     AREA { color: @parkingColor;}
+     AREA.BORDER { color: @parkingBorderColor; width: 0.1mm; }
+   }
+
+   [TYPE railway_station] AREA.ICON { symbol: railway_station; }
+
+
+   [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
+   [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
+
+   [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
+   [TYPE barrier_city_wall] WAY#decor {color: @wallColor;
+             dash: 1,5; displayOffset: 0.09mm; offset: 0.5m; joinCap: butt; endCap: butt;
+             displayWidth: 0.1mm; width: 0.5m;
+   }
+   [TYPE barrier_wall]           {
+     AREA {color: lighten(@wallColor, 0.5); }
+     AREA.BORDER {color: @wallColor; width: 0.1mm; }
+   }
+
+   [TYPE barrier_retaining_wall] {
+     AREA {color: lighten(@wallColor, 0.5); }
+     AREA.BORDER {color: @wallColor; width: 0.1mm; }
+   }
+
+   [TYPE barrier_city_wall] {
+     AREA {color: lighten(@wallColor, 0.5);}
+     AREA.BORDER {color: @wallColor; width: 0.3mm; }
+   }
+ }
+
+ [MAG veryClose-] {
+   [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy; name: pharmacy; }
+
+   [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
+
+   [TYPE amenity_post_office] NODE.ICON { symbol: amenity_post_office; }
+
+   [TYPE amenity_drinking_water] NODE.ICON { symbol: amenity_drinking_water; }
+
+   // Amenities without special color
+   [TYPE amenity,
+         amenity_bank,
+         amenity_cafe,
+         amenity_fast_food,
+         amenity_fuel,
+         amenity_kindergarten,
+         amenity_library,
+         amenity_recycling,
+         amenity_restaurant,
+         amenity_school] {
+         NODE.ICON { symbol: amenity; }
+   }
+
+   [TYPE barrier_fence] {
+      WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+      AREA.BORDER {color: #aaaaaa; width: 0.1mm;}
+   }
+ }
+
+ [MAG block-] {
+   [TYPE railway_subway_entrance] {
+     NODE.ICON { symbol: railway_subway_entrance; }
+   }
+ }
+
+END
