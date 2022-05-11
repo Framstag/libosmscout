@@ -1,0 +1,279 @@
+OSS
+CONST
+
+  COLOR turnSymbolColor            = #ffffff80;
+  COLOR turnSymbolOutlineColor     = #a0a0a080;
+
+  SYMBOL viaFerrataEasyCross
+    POLYGON -0.5,-0.5 0.5,0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataEasyColor;  }
+    }
+    POLYGON -0.5,0.5 0.5,-0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataEasyColor;  }
+    }
+
+  SYMBOL viaFerrataModerateCross
+    POLYGON -0.5,-0.5 0.5,0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataModerateColor;  }
+    }
+    POLYGON -0.5,0.5 0.5,-0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataModerateColor; }
+    }
+
+  SYMBOL viaFerrataDifficultCross
+    POLYGON -0.5,-0.5 0.5,0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataDifficultColor;  }
+    }
+    POLYGON -0.5,0.5 0.5,-0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataDifficultColor;  }
+    }
+
+  SYMBOL viaFerrataExtremeCross
+    POLYGON -0.5,-0.5 0.5,0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataExtremeColor;  }
+    }
+    POLYGON -0.5,0.5 0.5,-0.5 {
+      AREA.BORDER { width: 0.1mm; color:  @viaFerrataExtremeColor;  }
+    }
+
+  SYMBOL oneway_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 {
+      AREA { color:  @onewayArrowColor; }
+    }
+
+  SYMBOL stream_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 {
+      AREA { color: @waterLabelColor; }
+    }
+
+  SYMBOL natural_spring
+    CIRCLE 0,0 1.0 {
+      AREA.BORDER {color: @waterLabelColor; width: 0.2mm; }
+    }
+    CIRCLE 0,0 0.3 {
+      AREA {color: @waterLabelColor; }
+    }
+
+  SYMBOL natural_tree
+    CIRCLE GROUND 0,0 5 {
+      AREA {color: #9acd3250; }
+    }
+    CIRCLE GROUND 0,0 0.3 {
+      AREA {color: #8b4513; }
+    }
+
+  SYMBOL amenity_charging_station
+    RECTANGLE -1,-1 2 x 2 {
+      AREA { color: #0000ff; }
+    }
+    CIRCLE 0,0 0.8 {
+      AREA {color: #ffffff; }
+    }
+
+  SYMBOL amenity_drinking_water
+    CIRCLE 0,0 0.4 {
+      AREA {color: @waterLabelColor; }
+    }
+
+  SYMBOL waterway_waterfall
+    RECTANGLE 0,0 1.75 x 0.5 {
+      AREA { color: darken(@waterColor, 0.4); }
+    }
+    POLYGON 1.75,0.5 2.0,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+    POLYGON 1.25,0.5 1.5,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+    POLYGON 0.75,0.5 1,1 {
+      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    }
+
+  SYMBOL waterway_weir
+    RECTANGLE 0,0 2 x 0.5 {
+      AREA { color: darken(@waterColor, 0.4); }
+    }
+    CIRCLE 0.25,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+    CIRCLE 1,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+    CIRCLE 1.75,0.8 0.25 {
+      AREA {color: darken(@waterColor, 0.2); }
+    }
+
+  SYMBOL natural_peak
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @peakSymbolColor; }
+    }
+
+  SYMBOL railway_station
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+  SYMBOL railway_halt
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+  SYMBOL railway_subway_entrance
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @railwaySymbolColor; }
+    }
+    RECTANGLE 0.5,0.5 1 x 1 {
+      AREA { color: #ffffff; }
+    }
+
+  SYMBOL railway_tram_stop
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+  SYMBOL highway_bus_stop
+    CIRCLE 0,0 1.5 {
+      AREA {color: @busSymbolColor; }
+    }
+
+  SYMBOL ferry_terminal
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: #30307080; }
+    }
+
+  SYMBOL amenity
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: #b89c9c; }
+    }
+
+  SYMBOL amenity_hospital
+    CIRCLE 0,0 2.0 {
+      AREA.BORDER {color: @hospitalSymbolColor; width: 0.2mm; }
+    }
+    // Horizontal bar
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
+      AREA { color: @hospitalSymbolColor; }
+    }
+    // Vertical bar
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
+      AREA { color: @hospitalSymbolColor; }
+    }
+
+  SYMBOL amenity_pharmacy
+    // Box
+    RECTANGLE -1,-1 2 x 2 {
+      AREA.BORDER {color: @pharmacySymbolColor; width: 0.2mm; }
+    }
+    // Horizontal bar
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
+      AREA { color: @pharmacySymbolColor; }
+    }
+    // Vertical bar
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
+      AREA {color: @pharmacySymbolColor; }
+    }
+
+  SYMBOL amenity_parking
+    CIRCLE 0,0 1.5 {
+      AREA {color: #4bb2da; }
+    }
+
+  SYMBOL amenity_post_box
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @postSymbolColor; }
+    }
+
+  SYMBOL amenity_post_office
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @postSymbolColor; }
+    }
+
+  SYMBOL christian_church_cross
+    RECTANGLE 0.5,-2 0.5 x 2 {
+      AREA { color: #000000; }   // vertical bar
+    }
+    RECTANGLE 0,-1.5 1.5 x 0.5 {
+      AREA { color: #000000; } // horizontal bar
+    }
+
+  SYMBOL mini_roundabout
+    CIRCLE GROUND 0,0 3 {
+      AREA {color: #8080ff; }
+    }
+
+  SYMBOL speed_camera
+    CIRCLE 0,0 1.5 {
+      AREA {color: @red; }
+    }
+
+  SYMBOL highway_street_lamp
+    CIRCLE GROUND 0,0 20 {
+      AREA {color: #f5fb5b44; }
+    }
+
+  SYMBOL marker
+    CIRCLE 0,0 1.5 {
+      AREA {color: #ff0000; }
+    }
+
+  SYMBOL turn_forward_left
+    POLYGON 2.04,1.92 2.65,1.38 2.98,1.57 3.01,0.60 2.04,0.90 2.36,1.14 1.93,1.52 -0.32,1.53 -0.33,1.93 2.04,1.92 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_forward_through_left
+    POLYGON 1.90,1.87 3.10,1.27 1.90,0.67 1.90,1.07 0.79,1.07 1.18,0.48 1.51,0.67 1.54,-0.30 0.61,0.08 0.90,0.29 0.40,1.07 -0.60,1.07 -0.60,1.47 1.90,1.47 1.90,1.87 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_forward_through
+    POLYGON 1.90,0.90 3.10,0.30 1.90,-0.30 1.90,0.10 -0.60,0.10 -0.60,0.50 1.90,0.50  {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_forward_through_right
+    POLYGON 1.90,0.30 3.10,0.90 1.90,1.50 1.90,1.10 0.79,1.10 1.18,1.69 1.51,1.50 1.54,2.47 0.61,2.10 0.90,1.88 0.40,1.10 -0.60,1.10 -0.60,0.70 1.90,0.70 1.90,0.30 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_forward_right
+    POLYGON 2.04,-0.59 2.65,-0.05 2.98,-0.24 3.01,0.73 2.04,0.43 2.36,0.19 1.93,-0.19 -0.32,-0.20 -0.33,-0.60  {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_backward_left
+    POLYGON 1.31,1.92 0.69,1.38 0.36,1.57 0.33,0.60 1.30,0.90 0.98,1.14 1.41,1.52 3.66,1.53 3.67,1.93 1.31,1.92 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_backward_through_left
+    POLYGON 1.80,1.87 0.60,1.27 1.80,0.67 1.80,1.07 2.91,1.07 2.52,0.48 2.19,0.67 2.16,-0.30 3.09,0.08 2.80,0.29 3.30,1.07 4.30,1.07 4.30,1.47 1.80,1.47 1.80,1.87 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_backward_through
+    POLYGON 1.80,0.90 0.60,0.30 1.80,-0.30 1.80,0.10 4.30,0.10 4.30,0.50 1.80,0.50 1.80,0.90 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_backward_through_right
+    POLYGON 1.80,0.30 0.60,0.90 1.80,1.50 1.80,1.10 2.91,1.10 2.52,1.69 2.19,1.50 2.16,2.47 3.09,2.10 2.80,1.88 3.30,1.10 4.30,1.10 4.30,0.70 1.80,0.70 1.80,0.30 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+  SYMBOL turn_backward_right
+    POLYGON 1.31,-0.59 0.69,-0.05 0.36,-0.24 0.33,0.73 1.30,0.43 0.98,0.19 1.41,-0.19 3.66,-0.20 3.67,-0.60 1.31,-0.59 {
+      AREA { color: @turnSymbolColor; }
+      AREA.BORDER { width: 0.1mm; color:  @turnSymbolOutlineColor; }
+    }
+
+END
