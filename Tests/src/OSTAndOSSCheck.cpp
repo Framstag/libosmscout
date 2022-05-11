@@ -169,6 +169,7 @@ struct Arguments {
   bool analyze = false;
   std::string ostFile;
   std::string ossFile;
+  std::vector<std::string> customPoiTypes;
 };
 
 int main(int argc, char** argv)
@@ -199,11 +200,18 @@ int main(int argc, char** argv)
                       "Show detailed analysis of stylesheet",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.customPoiTypes.push_back(value);
+                      }),
+                      "poi-type",
+                      "Register custom type in type definition",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.ostFile=value;
                           }),
                           "OST_FILE",
-                          "Typedefinition file (*.ost)");
+                          "Type definition file (*.ost)");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.ossFile=value;
@@ -232,6 +240,16 @@ int main(int argc, char** argv)
   if (typeConfig->LoadFromOSTFile(ostFilepath)) {
     std::cout << "OST file '" << ostFilepath << "' => OK" << std::endl;
 
+    for (const std::string &typeName:args.customPoiTypes){
+      osmscout::TypeInfoRef typeInfo=std::make_shared<osmscout::TypeInfo>(typeName);
+
+      typeInfo->SetInternal()
+        .CanBeWay(true)
+        .CanBeArea(true)
+        .CanBeNode(true);
+
+      typeConfig->RegisterType(typeInfo);
+    }
 
     StyleConfigAnalyzerRef styleConfig=std::make_shared<StyleConfigAnalyzer>(typeConfig);
     std::string            ossFilepath=args.ossFile;
