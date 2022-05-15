@@ -37,7 +37,7 @@ jobs:
       - name: Install build tool
         run:  brew install cmake ninja
       - name: Install dependencies
-        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
+        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig libomp
       - name: Configure build project
         run: cmake -B build -DCMAKE_PREFIX_PATH=/usr/local/opt/qt -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
       - name: Build project
