@@ -1522,7 +1522,7 @@ TYPES
       GROUP historic, building, routingPOI
 
   TYPE historic
-    = NODE AREA (EXISTS "historic" AND !("historic" IN ["citywalls"]))
+    = NODE AREA (EXISTS "historic" AND !("historic" IN ["citywalls"]) AND !("barrier"=="city_wall"))
       {Name, NameAlt}
       ADDRESS POI
       GROUP historic
