@@ -199,6 +199,7 @@ CONST
   COLOR greenFieldColor            = #dcdcc8;
   COLOR heathColor                 = #ffffc0;
   COLOR industrialColor            = #dfd1d6;
+  COLOR damColor                   = #b2a7ab;
 
   IF daylight {
     COLOR landFillColor            = #b6b591;
