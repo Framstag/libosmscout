@@ -176,6 +176,14 @@ namespace osmscout {
                                   const MapData& data,
                                   CGContextRef paintCG);
         
+        OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
+                                  const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const MapData& data,
+                                  CGContextRef paintCG,
+                                  RenderSteps startStep,
+                                  RenderSteps endStep);
+        
         OSMSCOUT_API void DrawGroundTiles(const Projection& projection,
                                           const MapParameter& parameter,
                                           const std::list<GroundTile>& groundTiles,
