@@ -139,14 +139,17 @@ namespace osmscout {
 
   private:
     /**
-     * We forbid copying of TypeInfo instances
+     * We forbid copying and moving of TypeInfo instances
      */
     TypeInfo(const TypeInfo& other) = delete;
+    TypeInfo(TypeInfo&& other) = delete;
 
     TypeInfo& operator=(const TypeInfo& other) = delete;
+    TypeInfo& operator=(const TypeInfo&& other) = delete;
 
   public:
     explicit TypeInfo(const std::string& name);
+    ~TypeInfo() = default;
 
     /**
      * Set the id of this type
