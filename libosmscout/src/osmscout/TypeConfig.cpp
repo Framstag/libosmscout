@@ -318,18 +318,18 @@ namespace osmscout {
     return typeInfo;
   }
 
-  FeatureValueBuffer::FeatureValueBuffer()
-    : featureBits(nullptr),
-      featureValueBuffer(nullptr)
-  {
-    // no code
-  }
-
   FeatureValueBuffer::FeatureValueBuffer(const FeatureValueBuffer& other)
     : featureBits(nullptr),
       featureValueBuffer(nullptr)
   {
     Set(other);
+  }
+
+  FeatureValueBuffer::FeatureValueBuffer(FeatureValueBuffer&& other)
+  {
+    std::swap(type, other.type);
+    std::swap(featureBits, other.featureBits);
+    std::swap(featureValueBuffer, other.featureValueBuffer);
   }
 
   FeatureValueBuffer::~FeatureValueBuffer()
@@ -338,6 +338,21 @@ namespace osmscout {
       DeleteData();
     }
   }
+
+  FeatureValueBuffer& FeatureValueBuffer::operator=(const FeatureValueBuffer& other)
+  {
+    Set(other);
+    return *this;
+  }
+
+  FeatureValueBuffer& FeatureValueBuffer::operator=(FeatureValueBuffer&& other)
+  {
+    std::swap(type, other.type);
+    std::swap(featureBits, other.featureBits);
+    std::swap(featureValueBuffer, other.featureValueBuffer);
+    return *this;
+  }
+
 
   void FeatureValueBuffer::Set(const FeatureValueBuffer& other)
   {
@@ -525,13 +540,6 @@ namespace osmscout {
                                  bool specialFlag3) const
   {
     Write<3>(writer, std::array<bool,3>{specialFlag1, specialFlag2, specialFlag3});
-  }
-
-  FeatureValueBuffer& FeatureValueBuffer::operator=(const FeatureValueBuffer& other)
-  {
-    Set(other);
-
-    return *this;
   }
 
   bool FeatureValueBuffer::operator==(const FeatureValueBuffer& other) const

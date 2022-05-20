@@ -727,8 +727,8 @@ namespace osmscout {
   {
   private:
     TypeInfoRef type;
-    uint8_t     *featureBits;
-    char        *featureValueBuffer;
+    uint8_t     *featureBits=nullptr;
+    char        *featureValueBuffer=nullptr;
 
   private:
     void DeleteData();
@@ -746,9 +746,13 @@ namespace osmscout {
     }
 
   public:
-    FeatureValueBuffer();
+    FeatureValueBuffer() = default;
     FeatureValueBuffer(const FeatureValueBuffer& other);
+    FeatureValueBuffer(FeatureValueBuffer&& other);
     ~FeatureValueBuffer();
+
+    FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
+    FeatureValueBuffer& operator=(FeatureValueBuffer&& other);
 
     /**
      * Deletes the current feature values and assign the type and values
@@ -912,7 +916,6 @@ namespace osmscout {
                bool specialFlag2,
                bool specialFlag3) const;
 
-    FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
     bool operator==(const FeatureValueBuffer& other) const;
     bool operator!=(const FeatureValueBuffer& other) const;
 
