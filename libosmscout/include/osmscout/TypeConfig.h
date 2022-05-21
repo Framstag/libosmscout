@@ -972,14 +972,14 @@ namespace osmscout {
     void Write(FileWriter& writer,
                const std::array<bool,FlagCnt> &specialFlags) const
     {
-      static_assert(FlagCnt <= 8);
+      static_assert(FlagCnt <= 8u);
       if (BitsToBytes(type->GetFeatureCount()) == BitsToBytes(type->GetFeatureCount() + specialFlags.size())) {
-        uint8_t mask=0x80;
+        uint8_t mask=0x80u;
         for (const bool &specialFlag: specialFlags) {
           if (specialFlag) {
-            featureBits[type->GetFeatureMaskBytes() - 1] |= mask;
+            featureBits[type->GetFeatureMaskBytes() - 1u] |= mask;
           } else {
-            featureBits[type->GetFeatureMaskBytes() - 1] &= ~mask;
+            featureBits[type->GetFeatureMaskBytes() - 1u] &= uint8_t(~mask);
           }
           mask = mask >> 1;
         }
@@ -992,13 +992,13 @@ namespace osmscout {
           writer.Write(featureBits[i]);
         }
 
-        uint8_t flagByte = 0;
-        uint8_t mask=0x80;
+        uint8_t flagByte=0u;
+        uint8_t mask=0x80u;
         for (const bool &specialFlag: specialFlags) {
           if (specialFlag) {
             flagByte |= mask;
           }
-          mask = mask >> 1;
+          mask = mask >> 1u;
         }
 
         writer.Write(flagByte);

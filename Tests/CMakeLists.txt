@@ -10,6 +10,9 @@ osmscout_test_project(NAME Bearing SOURCES src/Bearing.cpp)
 #---- BitsAndBytesNeeded
 osmscout_test_project(NAME BitsAndBytesNeeded SOURCES src/BitsAndBytesNeeded.cpp)
 
+#---- ByteTest
+osmscout_test_project(NAME ByteTest SOURCES src/ByteTest.cpp)
+
 #---- CachePerformance
 osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COMMAND --size 1000)
 
