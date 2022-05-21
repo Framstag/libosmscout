@@ -1,5 +1,5 @@
 ---
-Checks:          '-*,bugprone-*,cert-*,clang-analyzer-*,cppcoreguidelines,misc-*,modernize-*,performance-*,readability-*,clang-diagnostic-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability-redundant-access-specifiers,-readability-uppercase-literal-suffix,-readability-magic-numbers,-readability-isolate-declaration,-modernize-use-auto,-misc-non-private-member-variables-in-classes,-cert-dcl21-cpp,-modernize-pass-by-value,-readability-convert-member-functions-to-static'
+Checks:          '-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,cppcoreguidelines,misc-*,modernize-*,performance-*,readability-*,clang-diagnostic-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability-redundant-access-specifiers,-readability-uppercase-literal-suffix,-readability-magic-numbers,-readability-isolate-declaration,-modernize-use-auto,-misc-non-private-member-variables-in-classes,-cert-dcl21-cpp,-modernize-pass-by-value,-readability-convert-member-functions-to-static,-readability-identifier-length,-bugprone-too-small-loop-variable'
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*/libosmscout.*/.*'
 AnalyzeTemporaryDtors: false
