@@ -137,7 +137,10 @@ namespace osmscout {
     std::unordered_set<std::string>             groups;                        //!< Set of idents that server as categorizing groups
     std::unordered_map<std::string,std::string> descriptions;                  //!< Map of descriptions for given language codes
 
-  private:
+  public:
+    explicit TypeInfo(const std::string& name);
+    ~TypeInfo() = default;
+
     /**
      * We forbid copying and moving of TypeInfo instances
      */
@@ -146,10 +149,6 @@ namespace osmscout {
 
     TypeInfo& operator=(const TypeInfo& other) = delete;
     TypeInfo& operator=(const TypeInfo&& other) = delete;
-
-  public:
-    explicit TypeInfo(const std::string& name);
-    ~TypeInfo() = default;
 
     /**
      * Set the id of this type
@@ -751,11 +750,11 @@ namespace osmscout {
   public:
     FeatureValueBuffer() = default;
     FeatureValueBuffer(const FeatureValueBuffer& other);
-    FeatureValueBuffer(FeatureValueBuffer&& other);
+    FeatureValueBuffer(FeatureValueBuffer&& other) noexcept;
     ~FeatureValueBuffer();
 
     FeatureValueBuffer& operator=(const FeatureValueBuffer& other);
-    FeatureValueBuffer& operator=(FeatureValueBuffer&& other);
+    FeatureValueBuffer& operator=(FeatureValueBuffer&& other) noexcept;
 
     /**
      * Deletes the current feature values and assign the type and values
@@ -1328,7 +1327,7 @@ namespace osmscout {
      * Returns the type definition for the given type name. If there is no
      * type definition for the given name and invalid reference is returned.
      */
-    const TypeInfoRef GetTypeInfo(const std::string& name) const;
+    TypeInfoRef GetTypeInfo(const std::string& name) const;
 
     /**
      * Return a node type (or an invalid reference if no type got detected)
