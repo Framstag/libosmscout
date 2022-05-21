@@ -241,6 +241,23 @@ namespace osmscout {
   }
 
   /**
+ *
+ * @throws IOException
+ */
+  void FileWriter::Write(std::byte byteValue)
+  {
+    if (HasError()) {
+      throw IOException(filename,"Cannot write byte","File already in error state");
+    }
+
+    hasError=fwrite((const char*)&byteValue,sizeof(char),1,file)!=1;
+
+    if (hasError) {
+      throw IOException(filename,"Cannot write byte");
+    }
+  }
+
+  /**
    *
    * @throws IOException
    */
