@@ -35,6 +35,12 @@ BitsAndBytesNeeded = executable('BitsAndBytesNeeded',
              link_with: [osmscout],
              install: false)
 
+ByteTest = executable('ByteTest',
+             'src/ByteTest.cpp',
+             include_directories: [testIncDir],
+             dependencies: [mathDep],
+             install: false)
+
 CachePerformance = executable('CachePerformance',
              'src/CachePerformance.cpp',
              include_directories: [osmscoutIncDir],
@@ -338,6 +344,7 @@ test('Check parsing of access rights', AccessParse)
 test('Check parsing of time string', TimeParse)
 test('Check calculation of bearing', Bearing)
 test('Check encoding of numbers', BitsAndBytesNeeded)
+test('Check std::byte behaviour', ByteTest)
 test('Check cache functionality with CachePerformance', CachePerformance, args : ['--size', '1000'])
 test('Check position accuracy with coordinate bits', CalculateResolution)
 test('Check parsing of command line args', CmdLineParsing)
