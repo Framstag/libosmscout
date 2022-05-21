@@ -711,11 +711,13 @@ namespace osmscout {
 
         for (size_t i=0;i<data.size(); i++){
           const MapData &d=*(data[i]);
-          success &= painters[i]->Draw(projection,
-                                       parameter,
-                                       d,
-                                       (RenderSteps)step,
-                                       (RenderSteps)step);
+          if (!painters[i]->Draw(projection,
+                                 parameter,
+                                 d,
+                                 (RenderSteps) step,
+                                 (RenderSteps) step)) {
+            success=false;
+          }
         }
       }
       return success;
