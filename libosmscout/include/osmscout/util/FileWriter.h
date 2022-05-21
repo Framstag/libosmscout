@@ -87,6 +87,8 @@ namespace osmscout {
 
     void Write(bool boolean);
 
+    void Write(std::byte byteValue);
+
     void Write(int8_t number);
     void Write(int16_t number);
     void Write(int32_t number);

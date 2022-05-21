@@ -215,6 +215,8 @@ namespace osmscout {
 
     bool ReadBool();
 
+    std::byte ReadByte();
+
     int8_t ReadInt8();
     int16_t ReadInt16();
     int32_t ReadInt32();

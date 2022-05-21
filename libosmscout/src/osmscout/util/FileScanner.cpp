@@ -582,6 +582,37 @@ namespace osmscout {
     return ConvertBool(value);
   }
 
+  std::byte FileScanner::ReadByte()
+  {
+    if (HasError()) {
+      throw IOException(filename,"Cannot read byte","File already in error state");
+    }
+
+    std::byte value;
+
+#if defined(HAVE_MMAP) || defined(_WIN32)
+    if (mmap!=nullptr) {
+      if (offset>=size) {
+        hasError=true;
+        throw IOException(filename,"Cannot read byte","Cannot read beyond end of file");
+      }
+
+      value=std::byte(mmap[offset]);
+      offset++;
+
+      return value;
+    }
+#endif
+
+    hasError=fread(&value,1,1,file)!=1;
+
+    if (hasError) {
+      throw IOException(filename,"Cannot read byte");
+    }
+
+    return value;
+  }
+
   int8_t FileScanner::ReadInt8()
   {
     if (HasError()) {
