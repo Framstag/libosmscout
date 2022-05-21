@@ -73,18 +73,32 @@ namespace osmscout {
     }
 
     /*
+     * DrawMap() with start and end RenderSteps
+     */
+    bool MapPainterIOS::DrawMap(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data,
+                                CGContextRef paintCG,
+                                RenderSteps startStep,
+                                RenderSteps endStep){
+        cg = paintCG;
+        return Draw(projection,
+                    parameter,
+                    data,
+                    startStep,
+                    endStep);
+    }
+
+    /*
      * DrawMap()
      */
-    bool MapPainterIOS::DrawMap(const StyleConfig& /*styleConfig*/,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data,
-                               CGContextRef paintCG){
-        cg = paintCG;
-        Draw(projection,
-             parameter,
-             data);
-        return true;
+    bool MapPainterIOS::DrawMap(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data,
+                            CGContextRef paintCG) {
+        return DrawMap(styleConfig, projection, parameter, data, paintCG, RenderSteps::FirstStep, RenderSteps::LastStep);
     }
 
     /*
