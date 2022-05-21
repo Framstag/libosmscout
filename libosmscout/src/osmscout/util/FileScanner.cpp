@@ -53,21 +53,6 @@
 
 namespace osmscout {
 
-  FileScanner::FileScanner()
-   : file(nullptr),
-     hasError(true),
-     mmap(nullptr),
-     size(0),
-     offset(0),
-     byteBuffer(nullptr),
-     byteBufferSize(0)
-#if defined(_WIN32)
-     ,mmfHandle((HANDLE)0)
-#endif
-  {
-    // no code
-  }
-
   FileScanner::~FileScanner()
   {
     if (IsOpen()) {
@@ -445,7 +430,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (this->mmap!=nullptr) {
-      if (offset+(FileOffset)bytes-1>=size) {
+      if (offset+bytes-1u>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
       }
@@ -475,7 +460,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(_WIN32)
     if (this->mmap!=nullptr) {
-      if (offset+(FileOffset)bytes-1>=size) {
+      if (offset+bytes-1u>=size) {
         hasError=true;
         throw IOException(filename,"Cannot read byte array","Cannot read beyond end of file");
       }
@@ -689,12 +674,12 @@ namespace osmscout {
     const unsigned char *dataPtr=buffer.data();
     int16_t             add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
 
@@ -716,8 +701,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read int32_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&mmap[offset];
-      int32_t add;
+      const char *dataPtr=&mmap[offset];
+      int32_t    add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -752,25 +737,25 @@ namespace osmscout {
       throw IOException(filename,"Cannot read int32_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    int32_t       add;
+    const unsigned char *dataPtr=buffer.data();
+    int32_t             add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 16;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 24;
     number|=add;
 
@@ -792,8 +777,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read int64_t","Cannot read beyond end of file");
       }
 
-      char    *dataPtr=&mmap[offset];
-      int64_t add;
+      const char *dataPtr=&mmap[offset];
+      int64_t    add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -848,45 +833,45 @@ namespace osmscout {
       throw IOException(filename,"Cannot read int64_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    int64_t       add;
+    const unsigned char *dataPtr=buffer.data();
+    int64_t             add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 16;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 24;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 32;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 40;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 48;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 56;
     number|=add;
 
@@ -940,8 +925,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read uint16_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint16_t add;
+      const char *dataPtr=&mmap[offset];
+      uint16_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -966,15 +951,15 @@ namespace osmscout {
       throw IOException(filename,"Cannot read uint16_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint16_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint16_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
 
@@ -996,8 +981,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read uint32_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint32_t add;
+      const char *dataPtr=&mmap[offset];
+      uint32_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -1032,25 +1017,25 @@ namespace osmscout {
       throw IOException(filename,"Cannot read uint32_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint32_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint32_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 16;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 24;
     number|=add;
 
@@ -1072,8 +1057,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read uint64_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint64_t add;
+      const char *dataPtr=&mmap[offset];
+      uint64_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -1128,45 +1113,45 @@ namespace osmscout {
       throw IOException(filename,"Cannot read uint64_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint64_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint64_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 16;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 24;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 32;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 40;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 48;
     number|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 56;
     number|=add;
 
@@ -1188,8 +1173,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read size limited uint16_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint16_t add;
+      const char *dataPtr=&mmap[offset];
+      uint16_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -1216,16 +1201,16 @@ namespace osmscout {
       throw IOException(filename,"Cannot read size limited uint16_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint16_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint16_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
     if (bytes>=2) {
-      add=(unsigned char)(*dataPtr);
+      add=*dataPtr;
       add=add << 8;
       number|=add;
     }
@@ -1248,8 +1233,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read size limited uint32_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint32_t add;
+      const char *dataPtr=&mmap[offset];
+      uint32_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -1290,28 +1275,28 @@ namespace osmscout {
       throw IOException(filename,"Cannot read size limited uint32_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint32_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint32_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
     if (bytes>=2) {
-      add=(unsigned char)(*dataPtr);
+      add=*dataPtr;
       add=add << 8;
       number|=add;
       dataPtr++;
 
       if (bytes>=3) {
-        add=(unsigned char)(*dataPtr);
+        add=*dataPtr;
         add=add << 16;
         number|=add;
         dataPtr++;
 
         if (bytes>=4) {
-          add=(unsigned char)(*dataPtr);
+          add=*dataPtr;
           add=add << 24;
           number|=add;
         }
@@ -1336,8 +1321,8 @@ namespace osmscout {
         throw IOException(filename,"Cannot read size limited uint64_t","Cannot read beyond end of file");
       }
 
-      char     *dataPtr=&mmap[offset];
-      uint64_t add;
+      const char *dataPtr=&mmap[offset];
+      uint64_t   add;
 
       add=(unsigned char)(*dataPtr);
       add=add << 0;
@@ -1406,52 +1391,52 @@ namespace osmscout {
       throw IOException(filename,"Cannot read size limited uint64_t");
     }
 
-    unsigned char *dataPtr=buffer.data();
-    uint64_t      add;
+    const unsigned char *dataPtr=buffer.data();
+    uint64_t            add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     number|=add;
     dataPtr++;
 
     if (bytes>=2) {
-      add=(unsigned char)(*dataPtr);
+      add=*dataPtr;
       add=add << 8;
       number|=add;
       dataPtr++;
 
       if (bytes>=3) {
-        add=(unsigned char)(*dataPtr);
+        add=*dataPtr;
         add=add << 16;
         number|=add;
         dataPtr++;
 
         if (bytes>=4) {
-          add=(unsigned char)(*dataPtr);
+          add=*dataPtr;
           add=add << 24;
           number|=add;
           dataPtr++;
 
           if (bytes>=5) {
-            add=(unsigned char)(*dataPtr);
+            add=*dataPtr;
             add=add << 32;
             number|=add;
             dataPtr++;
 
             if (bytes>=6) {
-              add=(unsigned char)(*dataPtr);
+              add=*dataPtr;
               add=add << 40;
               number|=add;
               dataPtr++;
 
               if (bytes>=7) {
-                add=(unsigned char)(*dataPtr);
+                add=*dataPtr;
                 add=add << 48;
                 number|=add;
                 dataPtr++;
 
                 if (bytes>=8) {
-                  add=(unsigned char)(*dataPtr);
+                  add=*dataPtr;
                   add=add << 56;
                   number|=add;
                 }
@@ -1589,42 +1574,42 @@ namespace osmscout {
     const unsigned char *dataPtr=buffer.data();
     FileOffset          add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 8;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 16;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 24;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 32;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 40;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 48;
     fileOffset|=add;
     dataPtr++;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 56;
     fileOffset|=add;
 
@@ -1721,49 +1706,49 @@ namespace osmscout {
     const unsigned char *dataPtr=buffer.data();
     FileOffset          add;
 
-    add=(unsigned char)(*dataPtr);
+    add=*dataPtr;
     add=add << 0;
     fileOffset|=add;
     dataPtr++;
 
     if (bytes>=2) {
-      add=(unsigned char)(*dataPtr);
+      add=*dataPtr;
       add=add << 8;
       fileOffset|=add;
       dataPtr++;
 
       if (bytes>=3) {
-        add=(unsigned char)(*dataPtr);
+        add=*dataPtr;
         add=add << 16;
         fileOffset|=add;
         dataPtr++;
 
         if (bytes>=4) {
-          add=(unsigned char)(*dataPtr);
+          add=*dataPtr;
           add=add << 24;
           fileOffset|=add;
           dataPtr++;
 
           if (bytes>=5) {
-            add=(unsigned char)(*dataPtr);
+            add=*dataPtr;
             add=add << 32;
             fileOffset|=add;
             dataPtr++;
 
             if (bytes>=6) {
-              add=(unsigned char)(*dataPtr);
+              add=*dataPtr;
               add=add << 40;
               fileOffset|=add;
               dataPtr++;
 
               if (bytes>=7) {
-                add=(unsigned char)(*dataPtr);
+                add=*dataPtr;
                 add=add << 48;
                 fileOffset|=add;
                 dataPtr++;
 
                 if (bytes>=8) {
-                  add=(unsigned char)(*dataPtr);
+                  add=*dataPtr;
                   add=add << 56;
                   fileOffset|=add;
                 }
@@ -1811,13 +1796,13 @@ namespace osmscout {
     unsigned int shift=0;
 
     // negative form
-    if ((buffer & 0x01)!=0) {
-      int16_t      val=(buffer & 0x7e) >> 1;
+    if ((buffer & 0x01u)!=0) {
+      int16_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=-1;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
@@ -1825,7 +1810,7 @@ namespace osmscout {
         }
 
         number^=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -1833,12 +1818,12 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int16_t      val=(buffer & 0x7e) >> 1;
+      int16_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=0;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
@@ -1846,7 +1831,7 @@ namespace osmscout {
         }
 
         number|=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -1892,13 +1877,13 @@ namespace osmscout {
     unsigned int shift=0;
 
     // negative form
-    if ((buffer & 0x01)!=0) {
-      int32_t      val=(buffer & 0x7e) >> 1;
+    if ((buffer & 0x01u)!=0) {
+      int32_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=-1;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
@@ -1906,7 +1891,7 @@ namespace osmscout {
         }
 
         number^=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -1914,12 +1899,12 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int32_t      val=(buffer & 0x7e) >> 1;
+      int32_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=0;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
 
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
@@ -1927,7 +1912,7 @@ namespace osmscout {
         }
 
         number|=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -1973,20 +1958,20 @@ namespace osmscout {
     unsigned int shift=0;
 
     // negative form
-    if ((buffer & 0x01)!=0) {
-      int64_t      val=(buffer & 0x7e) >> 1;
+    if ((buffer & 0x01u)!=0) {
+      int64_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=-1;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
         }
 
         number^=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -1994,19 +1979,19 @@ namespace osmscout {
       number^=static_cast<num_t>(val) << shift;
     }
     else {
-      int64_t      val=(buffer & 0x7e) >> 1;
+      int64_t      val=(buffer & 0x7eu) >> 1;
       unsigned int nextShift=6;
 
       number=0;
 
-      while ((buffer & 0x80)!=0) {
+      while ((buffer & 0x80u)!=0) {
         if (fread(&buffer,1,1,file)!=1) {
           hasError=true;
           throw IOException(filename,"Cannot read int64_t number");
         }
 
         number|=(val << shift);
-        val=buffer & 0x7f;
+        val=buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
       }
@@ -2030,9 +2015,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint16_t>(mmap[offset] & 0x7f) << shift;
+        number|=static_cast<uint16_t>(mmap[offset] & 0x7fu) << shift;
 
-        if ((mmap[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80u)==0) {
           offset++;
           return number;
         }
@@ -2055,9 +2040,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint16_t>(buffer & 0x7f) << shift;
+      number|=static_cast<uint16_t>(buffer & 0x7fu) << shift;
 
-      if ((buffer & 0x80)==0) {
+      if ((buffer & 0x80u)==0) {
         return number;
       }
 
@@ -2083,9 +2068,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint32_t>(mmap[offset] & 0x7f) << shift;
+        number|=static_cast<uint32_t>(mmap[offset] & 0x7fu) << shift;
 
-        if ((mmap[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80u)==0) {
           offset++;
           return number;
         }
@@ -2108,9 +2093,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint32_t>(buffer & 0x7f) << shift;
+      number|=static_cast<uint32_t>(buffer & 0x7fu) << shift;
 
-      if ((buffer & 0x80)==0) {
+      if ((buffer & 0x80u)==0) {
         return number;
       }
 
@@ -2136,9 +2121,9 @@ namespace osmscout {
       unsigned int shift=0;
 
       for (; offset<size; offset++) {
-        number|=static_cast<uint64_t>(mmap[offset] & 0x7f) << shift;
+        number|=static_cast<uint64_t>(mmap[offset] & 0x7fu) << shift;
 
-        if ((mmap[offset] & 0x80)==0) {
+        if ((mmap[offset] & 0x80u)==0) {
           offset++;
           return number;
         }
@@ -2161,9 +2146,9 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number|=static_cast<uint64_t>(buffer & 0x7f) << shift;
+      number|=static_cast<uint64_t>(buffer & 0x7fu) << shift;
 
-      if ((buffer & 0x80)==0) {
+      if ((buffer & 0x80u)==0) {
         return number;
       }
 
@@ -2198,12 +2183,12 @@ namespace osmscout {
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
              | ((unsigned char) dataPtr[2] << 16)
-             | ((unsigned char) (dataPtr[6] & 0x0f) << 24);
+             | ((unsigned char) (dataPtr[6] & 0x0fu) << 24);
 
       lonDat=  ((unsigned char) dataPtr[3] <<  0)
              | ((unsigned char) dataPtr[4] <<  8)
              | ((unsigned char) dataPtr[5] << 16)
-             | ((unsigned char) (dataPtr[6] & 0xf0) << 20);
+             | ((unsigned char) (dataPtr[6] & 0xf0u) << 20);
 
       offset+=coordByteSize;
 
@@ -2222,12 +2207,12 @@ namespace osmscout {
     latDat=  (buffer[0] <<  0)
            | (buffer[1] <<  8)
            | (buffer[2] << 16)
-           | ((buffer[6] & 0x0f) << 24);
+           | ((buffer[6] & 0x0fu) << 24);
 
     lonDat=  (buffer[3] <<  0)
            | (buffer[4] <<  8)
            | (buffer[5] << 16)
-           | ((buffer[6] & 0xf0) << 20);
+           | ((buffer[6] & 0xf0u) << 20);
 
     return CreateCoord(latDat, lonDat);
   }
@@ -2256,17 +2241,17 @@ namespace osmscout {
       latDat=  ((unsigned char) dataPtr[0] <<  0)
              | ((unsigned char) dataPtr[1] <<  8)
              | ((unsigned char) dataPtr[2] << 16)
-             | ((unsigned char) (dataPtr[6] & 0x0f) << 24);
+             | ((unsigned char) (dataPtr[6] & 0x0fu) << 24);
 
       lonDat=  ((unsigned char) dataPtr[3] <<  0)
              | ((unsigned char) dataPtr[4] <<  8)
              | ((unsigned char) dataPtr[5] << 16)
-             | ((unsigned char) (dataPtr[6] & 0xf0) << 20);
+             | ((unsigned char) (dataPtr[6] & 0xf0u) << 20);
 
       offset+=coordByteSize;
 
-      if (latDat==0xfffffff &&
-          lonDat==0xfffffff) {
+      if (latDat==0xfffffffu &&
+          lonDat==0xfffffffu) {
         isSet=false;
       }
       else  {
@@ -2289,15 +2274,15 @@ namespace osmscout {
     latDat=  (buffer[0] <<  0)
            | (buffer[1] <<  8)
            | (buffer[2] << 16)
-           | ((buffer[6] & 0x0f) << 24);
+           | ((buffer[6] & 0x0fu) << 24);
 
     lonDat=  (buffer[3] <<  0)
            | (buffer[4] <<  8)
            | (buffer[5] << 16)
-           | ((buffer[6] & 0xf0) << 20);
+           | ((buffer[6] & 0xf0u) << 20);
 
-    if (latDat==0xfffffff &&
-        lonDat==0xfffffff) {
+    if (latDat==0xfffffffu &&
+        lonDat==0xfffffffu) {
       isSet=false;
     }
     else  {
@@ -2327,31 +2312,31 @@ namespace osmscout {
     size_t nodeCount;
 
     if (readIds) {
-      hasNodes=(sizeByte & 0x04)!=0;
+      hasNodes=(sizeByte & 0x04u)!=0;
 
-      if ((sizeByte & 0x03) == 0) {
+      if ((sizeByte & 0x03u) == 0) {
         coordBitSize=16;
       }
-      else if ((sizeByte & 0x03) == 1) {
+      else if ((sizeByte & 0x03u) == 1) {
         coordBitSize=32;
       }
       else {
         coordBitSize=48;
       }
 
-      nodeCount=(sizeByte & 0x78) >> 3;
+      nodeCount=(sizeByte & 0x78u) >> 3;
 
-      if ((sizeByte & 0x80) != 0) {
+      if ((sizeByte & 0x80u) != 0) {
         sizeByte=ReadUInt8();
 
-        nodeCount|=(sizeByte & 0x7f) << 4;
+        nodeCount|=(sizeByte & 0x7fu) << 4;
 
-        if ((sizeByte & 0x80) != 0) {
+        if ((sizeByte & 0x80u) != 0) {
           sizeByte=ReadUInt8();
 
-          nodeCount|=(sizeByte & 0x7f) << 11;
+          nodeCount|=(sizeByte & 0x7fu) << 11;
 
-          if ((sizeByte & 0x80) != 0) {
+          if ((sizeByte & 0x80u) != 0) {
             sizeByte=ReadUInt8();
 
              nodeCount|=sizeByte << 18;
@@ -2362,29 +2347,29 @@ namespace osmscout {
     else {
       hasNodes=false;
 
-      if ((sizeByte & 0x03) == 0) {
+      if ((sizeByte & 0x03u) == 0) {
         coordBitSize=16;
       }
-      else if ((sizeByte & 0x03) == 1) {
+      else if ((sizeByte & 0x03u) == 1) {
         coordBitSize=32;
       }
       else {
         coordBitSize=48;
       }
 
-      nodeCount=(sizeByte & 0x7c) >> 2;
+      nodeCount=(sizeByte & 0x7cu) >> 2;
 
-      if ((sizeByte & 0x80) != 0) {
+      if ((sizeByte & 0x80u) != 0) {
         sizeByte=ReadUInt8();
 
-        nodeCount|=(sizeByte & 0x7f) << 5;
+        nodeCount|=(sizeByte & 0x7fu) << 5;
 
-        if ((sizeByte & 0x80) != 0) {
+        if ((sizeByte & 0x80u) != 0) {
           sizeByte=ReadUInt8();
 
-          nodeCount|=(sizeByte & 0x7f) << 12;
+          nodeCount|=(sizeByte & 0x7fu) << 12;
 
-          if ((sizeByte & 0x80) != 0) {
+          if ((sizeByte & 0x80u) != 0) {
             sizeByte=ReadUInt8();
 
             nodeCount|=sizeByte << 19;
@@ -2430,8 +2415,8 @@ namespace osmscout {
         int32_t  latDelta;
         int32_t  lonDelta;
 
-        if (latUDelta & 0x8000) {
-          latDelta=(int32_t)(latUDelta | 0xffff0000);
+        if (latUDelta & 0x8000u) {
+          latDelta=(int32_t)(latUDelta | 0xffff0000u);
         }
         else {
           latDelta=(int32_t)latUDelta;
@@ -2439,8 +2424,8 @@ namespace osmscout {
 
         latValue+=latDelta;
 
-        if (lonUDelta & 0x8000) {
-          lonDelta=(int32_t)(lonUDelta | 0xffff0000);
+        if (lonUDelta & 0x8000u) {
+          lonDelta=(int32_t)(lonUDelta | 0xffff0000u);
         }
         else {
           lonDelta=(int32_t)lonUDelta;
@@ -2462,8 +2447,8 @@ namespace osmscout {
         int32_t  latDelta;
         int32_t  lonDelta;
 
-        if (latUDelta & 0x800000) {
-          latDelta=(int32_t)(latUDelta | 0xff000000);
+        if (latUDelta & 0x800000u) {
+          latDelta=(int32_t)(latUDelta | 0xff000000u);
         }
         else {
           latDelta=(int32_t)latUDelta;
@@ -2471,8 +2456,8 @@ namespace osmscout {
 
         latValue+=latDelta;
 
-        if (lonUDelta & 0x800000) {
-          lonDelta=(int32_t)(lonUDelta | 0xff000000);
+        if (lonUDelta & 0x800000u) {
+          lonDelta=(int32_t)(lonUDelta | 0xff000000u);
         }
         else {
           lonDelta=(int32_t)lonUDelta;
@@ -2586,8 +2571,7 @@ namespace osmscout {
   }
 
   ObjectFileRefStreamReader::ObjectFileRefStreamReader(FileScanner& reader)
-  : reader(reader),
-    lastFileOffset(0)
+  : reader(reader)
   {
     // no code
   }
