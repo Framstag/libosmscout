@@ -707,13 +707,13 @@ int main(int argc, char* argv[])
   };
 
   osmscout::RoutePostprocessor             postprocessor;
-  std::set<std::string>                    motorwayTypeNames{"highway_motorway",
+  std::set<std::string,std::less<>>        motorwayTypeNames{"highway_motorway",
                                                              "highway_motorway_trunk",
                                                              "highway_trunk",
                                                              "highway_motorway_primary"};
-  std::set<std::string>                    motorwayLinkTypeNames{"highway_motorway_link",
+  std::set<std::string,std::less<>>        motorwayLinkTypeNames{"highway_motorway_link",
                                                                  "highway_trunk_link"};
-  std::set<std::string>                    junctionTypeNames{"highway_motorway_junction"};
+  std::set<std::string,std::less<>>        junctionTypeNames{"highway_motorway_junction"};
 
   std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
   std::vector<osmscout::DatabaseRef>       databases{database};

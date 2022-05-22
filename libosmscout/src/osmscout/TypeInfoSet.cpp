@@ -24,7 +24,6 @@
 namespace osmscout {
 
   TypeInfoSet::TypeInfoSet(const TypeConfig& typeConfig)
-  : count(0)
   {
     types.resize(typeConfig.GetTypeCount());
   }
@@ -38,7 +37,6 @@ namespace osmscout {
 
   TypeInfoSet::TypeInfoSet(const std::vector<TypeInfoRef>& types)
   {
-    count=0;
     for (const auto& type : types) {
       Set(type);
     }

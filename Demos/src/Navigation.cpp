@@ -610,9 +610,9 @@ int main(int argc, char *argv[]){
     postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::MotorwayJunctionPostprocessor>());
     postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::DestinationPostprocessor>());
 
-    std::set<std::string> motorwayTypeNames;
-    std::set<std::string> motorwayLinkTypeNames;
-    std::set<std::string> junctionTypeNames;
+    std::set<std::string,std::less<>> motorwayTypeNames;
+    std::set<std::string,std::less<>> motorwayLinkTypeNames;
+    std::set<std::string,std::less<>> junctionTypeNames;
     auto*instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
     if(vehicle == osmscout::vehicleCar){
         motorwayTypeNames = {"highway_motorway", "highway_motorway_trunk", "highway_motorway_primary"};

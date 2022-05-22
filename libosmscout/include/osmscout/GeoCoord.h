@@ -183,15 +183,15 @@ namespace osmscout {
      */
     void DecodeFromBuffer(const unsigned char buffer[]) // NOLINT
     {
-      uint32_t latDat=  (buffer[0] <<  0u)
-                      | (buffer[1] <<  8u)
-                      | (buffer[2] << 16u)
-                      | ((buffer[6] & 0x0fu) << 24u);
+      uint32_t latDat=  uint32_t(buffer[0] <<  0u)
+                      | uint32_t(buffer[1] <<  8u)
+                      | uint32_t(buffer[2] << 16u)
+                      | uint32_t(uint32_t(buffer[6] & 0x0fu) << 24u);
 
-      uint32_t lonDat=  (buffer[3] <<  0u)
-                      | (buffer[4] <<  8u)
-                      | (buffer[5] << 16u)
-                      | ((buffer[6] & 0xf0u) << 20u);
+      uint32_t lonDat=  uint32_t(buffer[3] <<  0u)
+                      | uint32_t(buffer[4] <<  8u)
+                      | uint32_t(buffer[5] << 16u)
+                      | uint32_t(uint32_t(buffer[6] & 0xf0u) << 20u);
 
       lat=latDat/latConversionFactor-90.0;
       lon=lonDat/lonConversionFactor-180.0;

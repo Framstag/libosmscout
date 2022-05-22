@@ -247,7 +247,6 @@ namespace osmscout {
   const size_t      NameShortFeature::NAME_LABEL_INDEX = 0;
 
   NameShortFeature::NameShortFeature()
-  : tagShortName(0)
   {
     RegisterLabel(NAME_LABEL_INDEX,
                   NAME_LABEL);
@@ -328,7 +327,6 @@ namespace osmscout {
   const size_t      RefFeature::NAME_LABEL_INDEX = 0;
 
   RefFeature::RefFeature()
-  : tagRef(0)
   {
     RegisterLabel(NAME_LABEL_INDEX,
                   NAME_LABEL);
@@ -499,9 +497,6 @@ namespace osmscout {
 
 
   AddressFeature::AddressFeature()
-  : tagAddrHouseNr(0),
-    tagAddrStreet(0),
-    tagAddrPlace(0)
   {
     RegisterLabel(NAME_LABEL_INDEX,
                   NAME_LABEL);
@@ -1890,7 +1885,7 @@ namespace osmscout {
     // object may hold multiple phone tags - phone, contact:phone, contact:mobile
     // we will append all unique values to one string separated by semicolon
     // note: when some tag contains multiple phones separated by semicolon, deduplication is not working
-    std::set<std::string> knownPhones;
+    std::set<std::string,std::less<>> knownPhones;
     std::vector<TagId> phoneTags{tagPhone, tagContactPhone, tagContactMobile};
     for (auto tagId:phoneTags) {
       auto phone = tags.find(tagId);
@@ -2139,7 +2134,6 @@ namespace osmscout {
   const size_t      EleFeature::IN_LOCALE_UNIT_LABEL_INDEX = 2;
 
   EleFeature::EleFeature()
-  : tagEle(0)
   {
     RegisterLabel(IN_METER_LABEL_INDEX,
                   IN_METER_LABEL);
@@ -2267,9 +2261,6 @@ namespace osmscout {
   const size_t      DestinationFeature::NAME_LABEL_INDEX = 0;
 
   DestinationFeature::DestinationFeature()
-  : tagDestination(0),
-    tagDestinationRef(0),
-    tagDestinationForward(0)
   {
     RegisterLabel(NAME_LABEL_INDEX,
                   NAME_LABEL);
@@ -2544,7 +2535,7 @@ namespace osmscout {
       std::string endValue=strValue.substr(pos+1);
 
       if (!startValue.empty() &&
-        !endValue.empty() &&
+          !endValue.empty() &&
         osmscout::StringToNumber(startValue,startYear) &&
         osmscout::StringToNumber(endValue,endYear)) {
 
@@ -2762,7 +2753,7 @@ namespace osmscout {
   {
     lanes=scanner.ReadUInt8();
 
-    if ((lanes & 0x01)!=0) {
+    if ((lanes & 0x01u)!=0) {
       turnForward=scanner.ReadString();
       turnBackward=scanner.ReadString();
       destinationForward=scanner.ReadString();
@@ -2776,15 +2767,15 @@ namespace osmscout {
         turnBackward.empty() &&
         destinationForward.empty() &&
         destinationBackward.empty()) {
-      lanes=lanes & ~0x01;
+      lanes=lanes & uint8_t(~0x01u);
     }
     else {
-      lanes=lanes | 0x01;
+      lanes=lanes | 0x01u;
     }
 
     writer.Write(lanes);
 
-    if ((lanes & 0x01)!=0) {
+    if ((lanes & 0x01u)!=0) {
       writer.Write(turnForward);
       writer.Write(turnBackward);
       writer.Write(destinationForward);
@@ -2828,9 +2819,6 @@ namespace osmscout {
   const size_t      LanesFeature::NAME_LABEL_INDEX = 0;
 
   LanesFeature::LanesFeature()
-    : tagOneway(0),
-       tagLanes(0)
-
   {
     RegisterLabel(NAME_LABEL_INDEX,
                   NAME_LABEL);

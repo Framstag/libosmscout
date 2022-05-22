@@ -52,7 +52,7 @@ namespace osmscout {
 
   private:
     std::vector<DatabaseHandle> handles;
-    bool                        isOpen;
+    bool                        isOpen=false;
 
   private:
     Vehicle GetVehicle(const MultiDBRoutingState& state) override;
@@ -133,7 +133,7 @@ namespace osmscout {
                                  const RoutePosition &target,
                                  const RoutingParameter &parameter);
 
-    RoutingResult CalculateRoute(std::vector<osmscout::GeoCoord> via,
+    RoutingResult CalculateRoute(const std::vector<osmscout::GeoCoord>& via,
                                  const Distance &radius,
                                  const RoutingParameter& parameter);
 
