@@ -40,13 +40,12 @@ namespace osmscout {
 
   MultiDBRoutingService::MultiDBRoutingService(const RouterParameter& parameter,
                                                const std::vector<DatabaseRef> &databases):
-    AbstractRoutingService<MultiDBRoutingState>(parameter),
-    isOpen(false)
+    AbstractRoutingService<MultiDBRoutingState>(parameter)
   {
     this->handles.resize(databases.size());
 
     DatabaseId id=0;
-    for (auto& db : databases) {
+    for (const auto& db : databases) {
       handles[id].dbId=id;
       handles[id].database=db;
 
@@ -117,7 +116,7 @@ namespace osmscout {
   {
     RoutePositionResult position, closestPosition;
 
-    for (auto& handle : handles) {
+    for (const auto& handle : handles) {
       position=handle.router->GetClosestRoutableNode(coord,
                                                      *handle.profile,
                                                      radius);
@@ -296,7 +295,7 @@ namespace osmscout {
 
   bool MultiDBRoutingService::ResolveRouteDataJunctions(RouteData& route)
   {
-    for (auto& handle : handles) {
+    for (auto const& handle : handles) {
       std::set<Id>       nodeIds;
 
       for (const auto& routeEntry : route.Entries()) {
@@ -410,7 +409,7 @@ namespace osmscout {
      * @return
      *    A RoutingResult object
      */
-    RoutingResult MultiDBRoutingService::CalculateRoute(std::vector<osmscout::GeoCoord> via,
+    RoutingResult MultiDBRoutingService::CalculateRoute(const std::vector<osmscout::GeoCoord>& via,
                                                         const Distance &radius,
                                                         const RoutingParameter& parameter)
     {
@@ -459,31 +458,31 @@ namespace osmscout {
   bool MultiDBRoutingService::PostProcessRouteDescription(RouteDescription &description,
                                                           const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors)
   {
-    std::set<std::string> motorwayTypeNames;
-    std::set<std::string> motorwayLinkTypeNames;
-    std::set<std::string> junctionTypeNames;
+    std::set<std::string,std::less<>> motorwayTypeNames;
+    std::set<std::string,std::less<>> motorwayLinkTypeNames;
+    std::set<std::string,std::less<>> junctionTypeNames;
 
-    junctionTypeNames.insert("highway_motorway_junction");
+    junctionTypeNames.emplace("highway_motorway_junction");
 
-    motorwayTypeNames.insert("highway_motorway");
-    motorwayLinkTypeNames.insert("highway_motorway_link");
+    motorwayTypeNames.emplace("highway_motorway");
+    motorwayLinkTypeNames.emplace("highway_motorway_link");
 
-    motorwayTypeNames.insert("highway_motorway_trunk");
-    motorwayTypeNames.insert("highway_trunk");
+    motorwayTypeNames.emplace("highway_motorway_trunk");
+    motorwayTypeNames.emplace("highway_trunk");
 
-    motorwayLinkTypeNames.insert("highway_trunk_link");
-    motorwayTypeNames.insert("highway_motorway_primary");
+    motorwayLinkTypeNames.emplace("highway_trunk_link");
+    motorwayTypeNames.emplace("highway_motorway_primary");
 
     RoutePostprocessor routePostprocessor;
 
     std::vector<RoutingProfileRef> profiles;
     std::vector<DatabaseRef>       databases;
 
-    std::transform(handles.begin(),handles.end(),std::back_inserter(profiles),[](DatabaseHandle& handle) {
+    std::transform(handles.begin(),handles.end(),std::back_inserter(profiles),[](const DatabaseHandle& handle) {
       return handle.profile;
     });
 
-    std::transform(handles.begin(),handles.end(),std::back_inserter(databases),[](DatabaseHandle& handle) {
+    std::transform(handles.begin(),handles.end(),std::back_inserter(databases),[](const DatabaseHandle& handle) {
       return handle.database;
     });
 
@@ -499,7 +498,7 @@ namespace osmscout {
   std::map<DatabaseId, std::string> MultiDBRoutingService::GetDatabaseMapping() const
   {
     std::map<DatabaseId, std::string> mapping;
-    for (auto &handle:handles){
+    for (const auto &handle:handles){
       mapping[handle.dbId]=handle.database->GetPath();
     }
     return mapping;

@@ -204,7 +204,7 @@ namespace osmscout {
   class OSMSCOUT_API NameShortFeature : public Feature
   {
   private:
-      TagId tagShortName;
+      TagId tagShortName=0;
 
   public:
     /** Name of this feature */
@@ -274,7 +274,7 @@ namespace osmscout {
   class OSMSCOUT_API RefFeature : public Feature
   {
   private:
-    TagId tagRef;
+    TagId tagRef=0;
 
   public:
     /** Name of this feature */
@@ -419,9 +419,9 @@ namespace osmscout {
   class OSMSCOUT_API AddressFeature : public Feature
   {
   private:
-    TagId tagAddrHouseNr;
-    TagId tagAddrStreet;
-    TagId tagAddrPlace;
+    TagId tagAddrHouseNr=0;
+    TagId tagAddrStreet=0;
+    TagId tagAddrPlace=0;
 
   public:
     /** Name of this feature */
@@ -670,10 +670,10 @@ namespace osmscout {
 
   private:
     void ParseAccessFlag(const std::string& value,
-                                uint8_t& access,
-                                uint8_t bit) const
+                         uint8_t& access,
+                         uint8_t bit) const
     {
-      access&=~bit;
+      access&=uint8_t(~bit);
 
       if (!(value=="no")) {
         access|=bit;
@@ -1352,7 +1352,7 @@ namespace osmscout {
   class OSMSCOUT_API EleFeature : public Feature
   {
   private:
-    TagId tagEle;
+    TagId tagEle=0;
 
   public:
     /** Name of this feature */
@@ -1433,9 +1433,9 @@ namespace osmscout {
   class OSMSCOUT_API DestinationFeature : public Feature
   {
   private:
-    TagId tagDestination;
-    TagId tagDestinationRef;
-    TagId tagDestinationForward;
+    TagId tagDestination=0;
+    TagId tagDestinationRef=0;
+    TagId tagDestinationForward=0;
 
   public:
     /** Name of this feature */
@@ -1897,10 +1897,11 @@ namespace osmscout {
       // no code
     }
 
-    void SetLanes(uint8_t forwardLanes, uint8_t backwardLanes)
+    void SetLanes(uint8_t forwardLanes,
+                  uint8_t backwardLanes)
     {
-      this->lanes=((forwardLanes & (uint8_t)0x7) << 2) |
-                  ((backwardLanes & (uint8_t)0x7) << 5);
+      this->lanes=((forwardLanes & uint8_t(0x7u)) << 2) |
+                  ((backwardLanes & uint8_t(0x7u)) << 5);
     }
 
     bool HasSingleLane() const
@@ -1921,7 +1922,7 @@ namespace osmscout {
     uint8_t GetLanes() const;
 
     void SetTurnLanes(const std::string& turnForward,
-                             const std::string& turnBawckard)
+                      const std::string& turnBawckard)
     {
       this->turnForward=turnForward;
       this->turnBackward=turnBawckard;
@@ -1948,7 +1949,7 @@ namespace osmscout {
     }
 
     void SetDestinationLanes(const std::string& destinationForward,
-                                    const std::string& destinationBawckard)
+                             const std::string& destinationBawckard)
     {
       this->destinationForward=destinationForward;
       this->destinationBackward=destinationBawckard;
@@ -1973,16 +1974,16 @@ namespace osmscout {
   class OSMSCOUT_API LanesFeature : public Feature
   {
   private:
-    TagId tagOneway;
-    TagId tagLanes;
-    TagId tagLanesForward;
-    TagId tagLanesBackward;
-    TagId tagTurnLanes;
-    TagId tagTurnLanesForward;
-    TagId tagTurnLanesBackward;
-    TagId tagDestinationLanes;
-    TagId tagDestinationLanesForward;
-    TagId tagDestinationLanesBackward;
+    TagId tagOneway=0;
+    TagId tagLanes=0;
+    TagId tagLanesForward=0;
+    TagId tagLanesBackward=0;
+    TagId tagTurnLanes=0;
+    TagId tagTurnLanesForward=0;
+    TagId tagTurnLanesBackward=0;
+    TagId tagDestinationLanes=0;
+    TagId tagDestinationLanesForward=0;
+    TagId tagDestinationLanesBackward=0;
 
   public:
     /** Name of this feature */
@@ -2163,7 +2164,7 @@ namespace osmscout {
     FromToFeatureValue(const FromToFeatureValue& featureValue) = default;
 
     explicit FromToFeatureValue(const std::string& from,
-                                       const std::string& to)
+                                const std::string& to)
       : from(from),
         to(to)
     {

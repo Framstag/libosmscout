@@ -399,7 +399,9 @@ namespace osmscout {
         bool collision=false;
         for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
           for (int c=std::max(0,mask.cellFrom); !collision && c<=std::min((int)mask.size()-1,mask.cellTo); c++){
-            collision |= ((mask.d[c] & canvas[r*mask.size() + c]) != 0);
+            if ((mask.d[c] & canvas[r*mask.size() + c]) != 0u) {
+              collision = true;
+            }
           }
         }
         return collision;

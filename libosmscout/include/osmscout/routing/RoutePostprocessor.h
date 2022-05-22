@@ -466,9 +466,9 @@ namespace osmscout {
                                      const std::vector<RoutingProfileRef>& profiles,
                                      const std::vector<DatabaseRef>& databases,
                                      const std::list<PostprocessorRef>& processors,
-                                     const std::set<std::string>& motorwayTypeNames=std::set<std::string>(),
-                                     const std::set<std::string>& motorwayLinkTypeNames=std::set<std::string>(),
-                                     const std::set<std::string>& junctionTypeNames=std::set<std::string>(),
+                                     const std::set<std::string,std::less<>>& motorwayTypeNames=std::set<std::string,std::less<>>(),
+                                     const std::set<std::string,std::less<>>& motorwayLinkTypeNames=std::set<std::string,std::less<>>(),
+                                     const std::set<std::string,std::less<>>& junctionTypeNames=std::set<std::string,std::less<>>(),
                                      const std::string& miniRoundaboutTypeName="highway_mini_roundabout");
   };
 }

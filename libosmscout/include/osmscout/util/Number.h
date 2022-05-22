@@ -55,17 +55,17 @@ namespace osmscout {
 
     if (number<0) {
       number^=static_cast<N>(-1);
-      val=static_cast<char>((number & 0x3f) << 1 | 0x01);
+      val=static_cast<char>((number & 0x3fu) << 1 | 0x01u);
     }
     else {
-      val=static_cast<char>((number & 0x3f) << 1);
+      val=static_cast<char>((number & 0x3fu) << 1);
     }
 
     number>>=6;
 
     while (number!=0) {
-      *(buffer++)=val | 0x80;
-      val=static_cast<char>(number & 0x7f);
+      *(buffer++)=val | 0x80u;
+      val=static_cast<char>(number & 0x7fu);
       number>>=7;
       bytes++;
     }
@@ -192,15 +192,15 @@ namespace osmscout {
     unsigned int bytes=1;
 
     // negative form
-    if ((*buffer & 0x01)!=0) {
-      N val=(*buffer & 0x7e) >> 1;
+    if ((*buffer & 0x01u)!=0) {
+      N val=(*buffer & 0x7eu) >> 1;
 
       number=-1;
       nextShift=6;
 
-      while ((*(buffer++) & 0x80)!=0) {
+      while ((*(buffer++) & 0x80u)!=0) {
         number^=(val << shift);
-        val=*buffer & 0x7f;
+        val=*buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
         bytes++;
@@ -209,14 +209,14 @@ namespace osmscout {
       number^=static_cast<N>(val) << shift;
     }
     else {
-      N val=(*buffer & 0x7e) >> 1;
+      N val=(*buffer & 0x7eu) >> 1;
 
       number=0;
       nextShift=6;
 
-      while ((*(buffer++) & 0x80)!=0) {
+      while ((*(buffer++) & 0x80u)!=0) {
         number|=(val << shift);
-        val=*buffer & 0x7f;
+        val=*buffer & 0x7fu;
         shift=nextShift;
         nextShift+=7;
         bytes++;
