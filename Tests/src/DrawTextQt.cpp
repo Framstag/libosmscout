@@ -91,8 +91,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::La
   int           fontHeight=12;
 
   font.setPixelSize(fontHeight);
-  font.setStyleStrategy(QFont::PreferAntialias);
-  font.setStyleStrategy(QFont::PreferMatch);
+  font.setStyleStrategy(static_cast<QFont::StyleStrategy>(QFont::PreferAntialias | QFont::PreferMatch));
 
   pen.setColor(QColor::fromRgbF(0,0,0));
   painter->setPen(pen);
@@ -123,8 +122,7 @@ void DrawWindow::drawText2(QPainter *painter, QString string, const osmscout::La
   double        pLength=p.GetLength();
 
   font.setPixelSize(fontHeight);
-  font.setStyleStrategy(QFont::PreferAntialias);
-  font.setStyleStrategy(QFont::PreferMatch);
+  font.setStyleStrategy(static_cast<QFont::StyleStrategy>(QFont::PreferAntialias | QFont::PreferMatch));
 
   pen.setColor(QColor::fromRgbF(0,0,0));
   painter->setPen(pen);

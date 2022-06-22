@@ -75,8 +75,7 @@ namespace osmscout {
                descriptor.italic);
 
     font.setPixelSize(descriptor.fontSize);
-    font.setStyleStrategy(QFont::PreferAntialias);
-    font.setStyleStrategy(QFont::PreferMatch);
+    font.setStyleStrategy(static_cast<QFont::StyleStrategy>(QFont::PreferAntialias | QFont::PreferMatch));
 
     fonts[descriptor]=font;
     return font;
