@@ -337,6 +337,8 @@ public:
     assert(mapService);
     assert(styleConfig);
 
+    data.ClearDBData();
+
     mapService->LookupTiles(projection,tiles);
     mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
     mapService->AddTileDataToMapData(tiles,data);
