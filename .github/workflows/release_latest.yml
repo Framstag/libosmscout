@@ -1,0 +1,26 @@
+name: Release Latest
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create_latest_release:
+    name: Create latest release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          body: "Release of the latest code in master"
+          draft: false
+          prerelease: true
+          generateReleaseNotes: true
+          name: latest
+          removeArtifacts: true
+          replacesArtifacts: true
+          tag: latest
