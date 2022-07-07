@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install jq, python3-pip, g++-10
-        run: sudo apt-get install -y jq python3-pip g++-10
+      - name: Install jq, python3-pip, g++-10, ninja
+        run: sudo apt-get install -y jq python3-pip g++-10 ninja-build
       - name: Install meson
         run: sudo pip3 install meson
       - name: Initialize meson project
