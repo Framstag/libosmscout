@@ -12,15 +12,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install jq and meson
-        run: sudo apt-get install -y jq meson
+      - name: Install jq, python3-pip, g++-10
+        run: sudo apt-get install -y jq python3-pip g++-10
+      - name: Install meson
+        run: sudo pip3 install meson
       - name: Initialize meson project
-        run:  meson setup dist
+        run:  meson setup dist --wrap-mode nofallback
         env:
           CXX: g++-10
           CC: gcc-10
       - name: Create distribution archive
-        run:  meson dist -C dist --no-tests --formats "xztar,zip"
+        run:  meson dist -C dist --formats "xztar,zip" --no-tests
       - name: Prepare archives
         run: |
           cp dist/meson-dist/libosmscout-$(cd dist && meson introspect --projectinfo | jq -r .version).tar.xz libosmscout-latest.tar.xz
