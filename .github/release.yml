@@ -1,0 +1,14 @@
+changelog:
+  categories:
+    - title: Features
+      labels:
+        - Feature
+    - title: Bug Fixes
+      labels:
+        - Bugfix
+    - title: Cleanups and refactorings
+      labels:
+        - Refactoring
+    - title: Other changes
+      labels:
+        - "*"
