@@ -271,24 +271,12 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
-                                                 const unsigned char buffer2[])
-  {
-    for (size_t i=0; i<coordByteSize; i++) {
-      if (buffer1[i]!=buffer2[i]) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   bool AreaNodeReductionProcessorFilter::RemoveDuplicateNodes(Progress& progress,
                                                               const FileOffset& offset,
                                                               Area& area,
                                                               bool& save)
   {
-    unsigned char buffers[2][coordByteSize];
+    GeoCoord::GeoCoordBuffer buffers[2];
 
     auto ring=area.rings.begin();
 
@@ -308,8 +296,7 @@ namespace osmscout {
         for (size_t n=1; n<ring->nodes.size(); n++) {
           ring->GetCoord(n).EncodeToBuffer(buffers[currentIndex]);
 
-          if (IsEqual(buffers[lastIndex],
-                      buffers[currentIndex])) {
+          if (buffers[lastIndex]==buffers[currentIndex]) {
             if (ring->GetSerial(n)==0) {
               reduced=true;
             }

@@ -770,19 +770,19 @@ namespace osmscout {
     uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
 
-    char buffer[coordByteSize];
+    std::array<std::byte,coordByteSize> buffer;
 
-    buffer[0]=uint8_t((latValue >>  0u) & 0xff);
-    buffer[1]=uint8_t((latValue >>  8u) & 0xff);
-    buffer[2]=uint8_t((latValue >> 16u) & 0xff);
+    buffer[0]=std::byte(latValue >>  0u);
+    buffer[1]=std::byte(latValue >>  8u);
+    buffer[2]=std::byte(latValue >> 16u);
 
-    buffer[3]=uint8_t((lonValue >>  0u) & 0xff);
-    buffer[4]=uint8_t((lonValue >>  8u) & 0xff);
-    buffer[5]=uint8_t((lonValue >> 16u) & 0xff);
+    buffer[3]=std::byte(lonValue >>  0u);
+    buffer[4]=std::byte(lonValue >>  8u);
+    buffer[5]=std::byte(lonValue >> 16u);
 
-    buffer[6]=uint8_t(((latValue >> 24u) & 0x07) | ((lonValue >> 20u) & 0x70));
+    buffer[6]=std::byte((latValue >> 24u) & 0x07) | std::byte((lonValue >> 20u) & 0x70);
 
-    hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
+    hasError=fwrite(buffer.data(),1,buffer.size(),file)!=coordByteSize;
 
     if (hasError) {
       throw IOException(filename,"Cannot write coordinate");
