@@ -21,8 +21,6 @@
 
 #include <algorithm>
 
-#include <osmscout/system/Assert.h>
-
 #include <osmscout/util/Geometry.h>
 
 namespace osmscout {
@@ -95,8 +93,9 @@ namespace osmscout {
 
   GeoBox GeoBox::Intersection(const GeoBox& other) const
   {
-    if (!valid || !other.valid || !Intersects(other))
-      return GeoBox();
+    if (!valid || !other.valid || !Intersects(other)) {
+      return {};
+    }
 
     GeoCoord cornerMin( std::max( other.GetMinLat(), GetMinLat()),
                         std::max( other.GetMinLon(), GetMinLon()));
@@ -104,13 +103,13 @@ namespace osmscout {
     GeoCoord cornerMax( std::min( other.GetMaxLat(), GetMaxLat()),
                         std::min( other.GetMaxLon(), GetMaxLon()));
 
-    return GeoBox(cornerMin, cornerMax);
+    return {cornerMin, cornerMax};
   }
 
   GeoCoord GeoBox::GetCenter() const
   {
-    return GeoCoord((minCoord.GetLat()+maxCoord.GetLat())/2,
-                    (minCoord.GetLon()+maxCoord.GetLon())/2);
+    return {(minCoord.GetLat()+maxCoord.GetLat())/2,
+            (minCoord.GetLon()+maxCoord.GetLon())/2};
   }
 
   /**

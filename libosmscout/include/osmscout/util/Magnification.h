@@ -40,67 +40,67 @@ namespace osmscout {
   public:
     MagnificationLevel() = default;
 
-    inline explicit MagnificationLevel(uint32_t level) noexcept
+    explicit MagnificationLevel(uint32_t level) noexcept
       : level(level)
     {
     }
 
     MagnificationLevel(const MagnificationLevel& level) = default;
 
-    inline uint32_t Get() const
+    uint32_t Get() const
     {
       return level;
     }
 
     MagnificationLevel& operator=(const MagnificationLevel& other) = default;
 
-    inline MagnificationLevel& operator++()
+    MagnificationLevel& operator++()
     {
       ++level;
 
       return *this;
     }
 
-    inline MagnificationLevel operator++(int)
+    MagnificationLevel operator++(int)
     {
       ++level;
 
       return *this;
     }
 
-    inline MagnificationLevel& operator+=(uint32_t increment)
+    MagnificationLevel& operator+=(uint32_t increment)
     {
       level+=increment;
 
       return *this;
     }
 
-    inline bool operator==(const MagnificationLevel& other) const
+    bool operator==(const MagnificationLevel& other) const
     {
       return level==other.level;
     }
 
-    inline bool operator!=(const MagnificationLevel& other) const
+    bool operator!=(const MagnificationLevel& other) const
     {
       return level!=other.level;
     }
 
-    inline bool operator<(const MagnificationLevel& other) const
+    bool operator<(const MagnificationLevel& other) const
     {
       return level<other.level;
     }
 
-    inline bool operator<=(const MagnificationLevel& other) const
+    bool operator<=(const MagnificationLevel& other) const
     {
       return level<=other.level;
     }
 
-    inline bool operator>=(const MagnificationLevel& other) const
+    bool operator>=(const MagnificationLevel& other) const
     {
       return level>=other.level;
     }
 
-    inline bool operator>(const MagnificationLevel& other) const
+    bool operator>(const MagnificationLevel& other) const
     {
       return level>other.level;
     }
@@ -166,20 +166,17 @@ namespace osmscout {
 
   public:
     Magnification() = default;
-    ~Magnification() = default;
-
-    Magnification(const Magnification& other) = default;
 
     /**
      * Create specific magnification.
      * @param magnification value, have to be valid - greater or equals to 1 (magnification level >= 0)
      */
-    inline explicit Magnification(double magnification) noexcept
+    explicit Magnification(double magnification) noexcept
     {
       SetMagnification(magnification);
     }
 
-    inline explicit Magnification(const MagnificationLevel& level) noexcept
+    explicit Magnification(const MagnificationLevel& level) noexcept
     {
       SetLevel(level);
     }
@@ -192,57 +189,47 @@ namespace osmscout {
 
     void SetLevel(const MagnificationLevel& level);
 
-    inline double GetMagnification() const
+    double GetMagnification() const
     {
       return magnification;
     }
 
-    inline uint32_t GetLevel() const
+    uint32_t GetLevel() const
     {
       return level;
     }
 
-    inline Magnification& operator=(const Magnification& other)
-    {
-      if (this!=&other) {
-        this->magnification=other.magnification;
-        this->level=other.level;
-      }
-
-      return *this;
-    }
-
-    inline bool operator==(const Magnification& other) const
+    bool operator==(const Magnification& other) const
     {
       return magnification==other.magnification;
     }
 
-    inline bool operator!=(const Magnification& other) const
+    bool operator!=(const Magnification& other) const
     {
       return magnification!=other.magnification;
     }
 
-    inline bool operator<(const Magnification& other) const
+    bool operator<(const Magnification& other) const
     {
       return magnification<other.magnification;
     }
 
-    inline bool operator<=(const Magnification& other) const
+    bool operator<=(const Magnification& other) const
     {
       return magnification<=other.magnification;
     }
 
-    inline bool operator>=(const Magnification& other) const
+    bool operator>=(const Magnification& other) const
     {
       return magnification>=other.magnification;
     }
 
-    inline bool operator>(const Magnification& other) const
+    bool operator>(const Magnification& other) const
     {
       return magnification>other.magnification;
     }
 
-    inline Magnification& operator++()
+    Magnification& operator++()
     {
       magnification*=2.0;
       level+=1;
@@ -250,7 +237,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline Magnification operator++(int)
+    Magnification operator++(int)
     {
       magnification*=2.0;
       level+=1;

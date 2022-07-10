@@ -181,9 +181,8 @@ namespace osmscout {
     if (level==DEBUG || level==INFO) {
       return Line(infoDestination);
     }
-    else {
-      return Line(errorDestination);
-    }
+
+    return Line(errorDestination);
   }
 
   ConsoleLogger::ConsoleLogger()
@@ -193,11 +192,7 @@ namespace osmscout {
   }
 
   Log::Log()
-  : logger(new ConsoleLogger()),
-    logDebug(false),
-    logInfo(true),
-    logWarn(true),
-    logError(true)
+  : logger(new ConsoleLogger())
   {
     Debug() << "Initializing Logging";
   }
@@ -224,9 +219,8 @@ namespace osmscout {
     if (logDebug) {
       return logger->Debug();
     }
-    else {
-      return noOpLogger.Debug();
-    }
+
+    return noOpLogger.Debug();
   }
 
   Logger::Line Log::Info()
@@ -234,9 +228,8 @@ namespace osmscout {
     if (logInfo) {
       return logger->Info();
     }
-    else {
-      return noOpLogger.Debug();
-    }
+
+    return noOpLogger.Debug();
   }
 
   Logger::Line Log::Warn()
@@ -244,9 +237,8 @@ namespace osmscout {
     if (logWarn) {
       return logger->Warn();
     }
-    else {
-      return noOpLogger.Debug();
-    }
+
+    return noOpLogger.Debug();
   }
 
   Logger::Line Log::Error()
@@ -254,9 +246,8 @@ namespace osmscout {
     if (logError) {
       return logger->Error();
     }
-    else {
-      return noOpLogger.Debug();
-    }
+
+    return noOpLogger.Debug();
   }
 }
 
