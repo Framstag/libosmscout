@@ -179,7 +179,7 @@ if (HAVE_STD_EXECUTION)
 endif()
 
 if(OpenMP_CXX_FOUND)
-	target_link_libraries(OSMScoutImport PUBLIC OpenMP::OpenMP_CXX)
+	target_link_libraries(OSMScoutImport OpenMP::OpenMP_CXX)
 endif()
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
