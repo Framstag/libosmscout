@@ -197,18 +197,6 @@ namespace osmscout {
     return true;
   }
 
-  bool WayNodeReductionProcessorFilter::IsEqual(const unsigned char buffer1[],
-                                                const unsigned char buffer2[])
-  {
-    for (size_t i=0; i<coordByteSize; i++) {
-      if (buffer1[i]!=buffer2[i]) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   bool WayNodeReductionProcessorFilter::RemoveDuplicateNodes(Progress& progress,
                                                              const FileOffset& offset,
                                                              Way& way,
@@ -217,7 +205,7 @@ namespace osmscout {
     bool reduced=false;
 
     if (way.nodes.size()>=2) {
-      unsigned char buffers[2][coordByteSize];
+      GeoCoord::GeoCoordBuffer buffers[2];
       size_t        lastIndex=0;
       size_t        currentIndex=1;
 
@@ -231,8 +219,7 @@ namespace osmscout {
       for (size_t n=1; n<way.nodes.size(); n++) {
         way.nodes[n].GetCoord().EncodeToBuffer(buffers[currentIndex]);
 
-        if (IsEqual(buffers[lastIndex],
-                    buffers[currentIndex])) {
+        if (buffers[lastIndex]==buffers[currentIndex]) {
           if (way.GetSerial(n)==0) {
             duplicateCount++;
             reduced=true;

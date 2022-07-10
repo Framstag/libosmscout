@@ -414,10 +414,10 @@ namespace osmscout {
   private:
     Logger*    logger;
     NoOpLogger noOpLogger;
-    bool       logDebug;
-    bool       logInfo;
-    bool       logWarn;
-    bool       logError;
+    bool       logDebug=false;
+    bool       logInfo=true;
+    bool       logWarn=true;
+    bool       logError=true;
 
   public:
     Log();

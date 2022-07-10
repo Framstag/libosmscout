@@ -168,7 +168,7 @@ namespace osmscout {
   {
   private:
     FileWriter& writer;
-    FileOffset  lastFileOffset;
+    FileOffset  lastFileOffset=0;
 
   public:
     explicit ObjectFileRefStreamWriter(FileWriter& writer);

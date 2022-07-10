@@ -354,7 +354,7 @@ namespace osmscout {
     class OSMSCOUT_API SuggestedLanesPostprocessor : public RoutePostprocessor::Postprocessor
     {
     public:
-      SuggestedLanesPostprocessor(const Distance &distanceBefore=Meters(500)) :
+      explicit SuggestedLanesPostprocessor(const Distance &distanceBefore=Meters(500)) :
         Postprocessor(), distanceBefore(distanceBefore) {};
 
       bool Process(const RoutePostprocessor& postprocessor,

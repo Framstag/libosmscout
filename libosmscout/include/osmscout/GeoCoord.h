@@ -22,6 +22,8 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <array>
+#include <cstddef>
 #include <string>
 #include <tuple>
 
@@ -71,6 +73,9 @@ namespace osmscout {
   private:
     double lat = 0.0;
     double lon = 0.0;
+
+  public:
+    using GeoCoordBuffer = std::array<std::byte,7>;
 
   public:
     /**
@@ -138,22 +143,25 @@ namespace osmscout {
     Id GetId() const;
 
     /**
-     * Encode the coordinate value into a buffer (with at least a size of coordByteSize).
+     * Encode the coordinate value into a buffer - as it would be done by FileScanner/FileWriter classes
+     *
+     * The coord will be encoded with the maximum resolution (of the library),
+     * Coords with the same buffer value thus will in effect equal.
      */
-    void EncodeToBuffer(unsigned char buffer[]) const // NOLINT
+    void EncodeToBuffer(GeoCoordBuffer& buffer) const // NOLINT
     {
       auto latValue=(uint32_t)round((lat+90.0)*latConversionFactor);
       auto lonValue=(uint32_t)round((lon+180.0)*lonConversionFactor);
 
-      buffer[0]=((latValue >>  0u) & 0xffu);
-      buffer[1]=((latValue >>  8u) & 0xffu);
-      buffer[2]=((latValue >> 16u) & 0xffu);
+      buffer[0]=std:: byte(latValue >>  0u);
+      buffer[1]=std::byte(latValue >>  8u);
+      buffer[2]=std::byte(latValue >> 16u);
 
-      buffer[3]=((lonValue >>  0u) & 0xffu);
-      buffer[4]=((lonValue >>  8u) & 0xffu);
-      buffer[5]=((lonValue >> 16u) & 0xffu);
+      buffer[3]=std::byte(lonValue >>  0u);
+      buffer[4]=std::byte(lonValue >>  8u);
+      buffer[5]=std::byte(lonValue >> 16u);
 
-      buffer[6]=((latValue >> 24u) & 0x07u) | ((lonValue >> 20u) & 0x70u);
+      buffer[6]=std::byte((latValue >> 24u) & 0x07u) | std::byte((lonValue >> 20u) & 0x70u);
     }
 
     /**
@@ -176,25 +184,6 @@ namespace osmscout {
       }
 
       return number;
-    }
-
-    /**
-     * Decode the coordinate value from a buffer (with at least a size of coordByteSize).
-     */
-    void DecodeFromBuffer(const unsigned char buffer[]) // NOLINT
-    {
-      uint32_t latDat=  uint32_t(buffer[0] <<  0u)
-                      | uint32_t(buffer[1] <<  8u)
-                      | uint32_t(buffer[2] << 16u)
-                      | uint32_t(uint32_t(buffer[6] & 0x0fu) << 24u);
-
-      uint32_t lonDat=  uint32_t(buffer[3] <<  0u)
-                      | uint32_t(buffer[4] <<  8u)
-                      | uint32_t(buffer[5] << 16u)
-                      | uint32_t(uint32_t(buffer[6] & 0xf0u) << 20u);
-
-      lat=latDat/latConversionFactor-90.0;
-      lon=lonDat/lonConversionFactor-180.0;
     }
 
     /**

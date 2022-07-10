@@ -249,11 +249,7 @@ namespace osmscout {
       : id(id),
         node(node),
         prev(prev),
-        object(object),
-        currentCost(0),
-        estimateCost(0),
-        overallCost(0),
-        access(true)
+        object(object)
       {
         // no code
       }

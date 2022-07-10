@@ -53,7 +53,7 @@ namespace osmscout {
       std::list<Entry> areas;
     };
 
-    typedef std::map<Pixel,AreaLeaf> Level;
+    using Level = std::map<Pixel, AreaLeaf>;
 
   private:
     std::list<SortDataGenerator<Area>::ProcessingFilterRef> filters;

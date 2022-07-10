@@ -68,8 +68,8 @@ public:
   }
 
   size_t ElevationProfile(const std::vector<GeoCoord> &way,
-                          std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)> callback,
-                          BreakerRef breaker=nullptr)
+                          const std::function<void(const Distance &distance, const std::vector<ElevationPoint> &points)>& callback,
+                          const BreakerRef& breaker=nullptr)
   {
     if (way.empty()){
       return 0;

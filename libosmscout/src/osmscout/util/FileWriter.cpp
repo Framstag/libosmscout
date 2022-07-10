@@ -280,8 +280,8 @@ namespace osmscout {
 
     std::array<std::byte,2> buffer;
 
-    buffer[0]=std::byte(number >> 0u);
-    buffer[1]=std::byte(number >> 8u);
+    buffer[0]=std::byte(number >>  0u);
+    buffer[1]=std::byte(number >>  8u);
 
     hasError=fwrite(buffer.data(),1,2,file)!=2;
 
@@ -300,14 +300,14 @@ namespace osmscout {
       throw IOException(filename,"Cannot write int32_t","File already in error state");
     }
 
-    char buffer[4];
+    std::array<std::byte,4> buffer;
 
-    buffer[0]=((number >>  0u) & 0xff);
-    buffer[1]=((number >>  8u) & 0xff);
-    buffer[2]=((number >> 16u) & 0xff);
-    buffer[3]=((number >> 24u) & 0xff);
+    buffer[0]=std::byte(number >>  0u);
+    buffer[1]=std::byte(number >>  8u);
+    buffer[2]=std::byte(number >> 16u);
+    buffer[3]=std::byte(number >> 24u);
 
-    hasError=fwrite(buffer,1,4,file)!=4;
+    hasError=fwrite(buffer.data(),1,4,file)!=4;
 
     if (hasError) {
       throw IOException(filename,"Cannot write int32_t");
@@ -324,18 +324,18 @@ namespace osmscout {
       throw IOException(filename,"Cannot write int64_t","File already in error state");
     }
 
-    char buffer[8];
+    std::array<std::byte,8> buffer;
 
-    buffer[0]=((number >>  0u) & 0xff);
-    buffer[1]=((number >>  8u) & 0xff);
-    buffer[2]=((number >> 16u) & 0xff);
-    buffer[3]=((number >> 24u) & 0xff);
-    buffer[4]=((number >> 32u) & 0xff);
-    buffer[5]=((number >> 40u) & 0xff);
-    buffer[6]=((number >> 48u) & 0xff);
-    buffer[7]=((number >> 56u) & 0xff);
+    buffer[0]=std::byte(number >>  0u);
+    buffer[1]=std::byte(number >>  8u);
+    buffer[2]=std::byte(number >> 16u);
+    buffer[3]=std::byte(number >> 24u);
+    buffer[4]=std::byte(number >> 32u);
+    buffer[5]=std::byte(number >> 40u);
+    buffer[6]=std::byte(number >> 48u);
+    buffer[7]=std::byte(number >> 56u);
 
-    hasError=fwrite(buffer,1,8,file)!=8;
+    hasError=fwrite(buffer.data(),1,8,file)!=8;
 
     if (hasError) {
       throw IOException(filename,"Cannot write int64_t");
@@ -770,19 +770,19 @@ namespace osmscout {
     uint32_t latValue=(uint32_t)round((coord.GetLat()+90.0)*latConversionFactor);
     uint32_t lonValue=(uint32_t)round((coord.GetLon()+180.0)*lonConversionFactor);
 
-    char buffer[coordByteSize];
+    std::array<std::byte,coordByteSize> buffer;
 
-    buffer[0]=uint8_t((latValue >>  0u) & 0xff);
-    buffer[1]=uint8_t((latValue >>  8u) & 0xff);
-    buffer[2]=uint8_t((latValue >> 16u) & 0xff);
+    buffer[0]=std::byte(latValue >>  0u);
+    buffer[1]=std::byte(latValue >>  8u);
+    buffer[2]=std::byte(latValue >> 16u);
 
-    buffer[3]=uint8_t((lonValue >>  0u) & 0xff);
-    buffer[4]=uint8_t((lonValue >>  8u) & 0xff);
-    buffer[5]=uint8_t((lonValue >> 16u) & 0xff);
+    buffer[3]=std::byte(lonValue >>  0u);
+    buffer[4]=std::byte(lonValue >>  8u);
+    buffer[5]=std::byte(lonValue >> 16u);
 
-    buffer[6]=uint8_t(((latValue >> 24u) & 0x07) | ((lonValue >> 20u) & 0x70));
+    buffer[6]=std::byte((latValue >> 24u) & 0x07) | std::byte((lonValue >> 20u) & 0x70);
 
-    hasError=fwrite(buffer,1,coordByteSize,file)!=coordByteSize;
+    hasError=fwrite(buffer.data(),1,buffer.size(),file)!=coordByteSize;
 
     if (hasError) {
       throw IOException(filename,"Cannot write coordinate");
@@ -1358,13 +1358,9 @@ namespace osmscout {
 
     bytesToWrite=blockSize-(currentPos%blockSize);
 
-    char *buffer=new char[blockSize];
+    std::vector<std::byte> buffer(bytesToWrite,std::byte(0));
 
-    memset(buffer,0,bytesToWrite);
-
-    hasError=fwrite(buffer,sizeof(char),bytesToWrite,file)!=bytesToWrite;
-
-    delete [] buffer;
+    hasError=fwrite(buffer.data(),1,bytesToWrite,file)!=bytesToWrite;
 
     if (hasError) {
       throw IOException(filename,"Cannot write data to flush current block");
@@ -1409,8 +1405,7 @@ namespace osmscout {
   }
 
   ObjectFileRefStreamWriter::ObjectFileRefStreamWriter(FileWriter& writer)
-  : writer(writer),
-    lastFileOffset(0)
+  : writer(writer)
   {
     // no code
   }

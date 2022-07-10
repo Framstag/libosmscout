@@ -248,7 +248,8 @@ namespace osmscout {
     void AddEnumValue(const std::string& name,
                      int value)
     {
-      enumMap.insert(std::make_pair(name,value));
+      enumMap.try_emplace(name,
+                          value);
     }
 
     int GetEnumValue(const std::string& name) const

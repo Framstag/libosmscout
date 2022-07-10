@@ -55,13 +55,13 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API StyleResolveContext
+  class OSMSCOUT_MAP_API StyleResolveContext CLASS_FINAL
   {
   private:
-    TypeConfigRef                     typeConfig;
-    std::map<std::string,size_t>      featureReaderMap; //< Map that maps feature names to index in the feature reader vector
-    std::vector<DynamicFeatureReader> featureReaders;   //< List of feature readers
-    AccessFeatureValueReader          accessReader;
+    TypeConfigRef                            typeConfig;
+    std::map<std::string,size_t,std::less<>> featureReaderMap; //< Map that maps feature names to index in the feature reader vector
+    std::vector<DynamicFeatureReader>        featureReaders;   //< List of feature readers
+    AccessFeatureValueReader                 accessReader;
 
   public:
     explicit StyleResolveContext(const TypeConfigRef& typeConfig);
@@ -105,7 +105,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API StyleConstantColor : public StyleConstant
+  class OSMSCOUT_MAP_API StyleConstantColor CLASS_FINAL : public StyleConstant
   {
   private:
     Color color;
@@ -123,7 +123,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API StyleConstantMag : public StyleConstant
+  class OSMSCOUT_MAP_API StyleConstantMag CLASS_FINAL : public StyleConstant
   {
   private:
     Magnification magnification;
@@ -141,7 +141,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API StyleConstantUInt : public StyleConstant
+  class OSMSCOUT_MAP_API StyleConstantUInt CLASS_FINAL : public StyleConstant
   {
   private:
     size_t value;
@@ -159,7 +159,7 @@ namespace osmscout {
  * \ingroup Stylesheet
  *
  */
-  class OSMSCOUT_MAP_API StyleConstantWidth : public StyleConstant
+  class OSMSCOUT_MAP_API StyleConstantWidth CLASS_FINAL : public StyleConstant
   {
   public:
     enum class Unit {
@@ -217,7 +217,7 @@ namespace osmscout {
 
   using SizeConditionRef = std::shared_ptr<SizeCondition>;
 
-  struct OSMSCOUT_MAP_API FeatureFilterData
+  struct OSMSCOUT_MAP_API FeatureFilterData CLASS_FINAL
   {
     size_t featureFilterIndex;
     size_t flagIndex;
@@ -238,7 +238,7 @@ namespace osmscout {
    * Holds the all accumulated filter conditions as defined in the style sheet
    * for a style.
    */
-  class OSMSCOUT_MAP_API StyleFilter
+  class OSMSCOUT_MAP_API StyleFilter CLASS_FINAL
   {
   private:
     bool                         filtersByType;
@@ -251,7 +251,6 @@ namespace osmscout {
 
   public:
     StyleFilter();
-    StyleFilter(const StyleFilter& other);
 
     StyleFilter& SetTypes(const TypeInfoSet& types);
     StyleFilter& SetMinLevel(size_t level);
@@ -317,18 +316,15 @@ namespace osmscout {
    * directly handled by the lookup table) for a concrete style which have to
    * evaluated during runtime.
    */
-  class OSMSCOUT_MAP_API StyleCriteria
+  class OSMSCOUT_MAP_API StyleCriteria CLASS_FINAL
   {
   private:
     std::list<FeatureFilterData> features;
-    bool                         oneway;
+    bool                         oneway=false;
     SizeConditionRef             sizeCondition;
 
   public:
-    StyleCriteria();
-
     explicit StyleCriteria(const StyleFilter& other);
-    StyleCriteria(const StyleCriteria& other);
 
     bool operator==(const StyleCriteria& other) const;
     bool operator!=(const StyleCriteria& other) const;

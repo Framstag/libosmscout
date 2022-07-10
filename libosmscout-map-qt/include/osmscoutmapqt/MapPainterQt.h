@@ -85,7 +85,7 @@ namespace osmscout {
      */
     QtLabelLayouter            *delegateLabelLayouter{nullptr};
 
-    std::map<std::string,QImage> images;        //! map of QImage for icons, key is name of the icon
+    std::map<std::string,QImage,std::less<>> images;        //! map of QImage for icons, key is name of the icon
                                                 //! - it should be independent on the specific style configuration
     std::vector<QImage>          patternImages; //! vector of QImage for fill patterns, index is patter id
     std::vector<QBrush>          patterns;      //! vector of QBrush for fill patterns
