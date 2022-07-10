@@ -47,12 +47,11 @@ private:
     qreal mmToPixel(qreal mm) const;
     qreal pointToPixel(qreal point) const;
 
-    mutable int textFontSize;
-    mutable int averageCharWidth;
-    mutable int numberCharWidth;
+    mutable int textFontSize=0;
+    mutable int averageCharWidth=0;
+    mutable int numberCharWidth=0;
 
 public:
-    Theme();
     ~Theme() override = default;
 
     qreal GetDPI() const;

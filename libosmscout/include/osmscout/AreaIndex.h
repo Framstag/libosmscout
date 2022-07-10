@@ -57,20 +57,23 @@ namespace osmscout {
       FileOffset GetCellOffset(size_t x, size_t y) const;
     };
 
+  private:
     std::string           indexFileName;
     std::string           fullIndexFileName;  //!< Full path and name of the data file
-    mutable FileScanner   scanner;            //!< Scanner instance for reading this file
 
     std::vector<TypeData> typeData;
 
     mutable std::mutex    lookupMutex;
 
   protected:
+    mutable FileScanner   scanner;            //!< Scanner instance for reading this file
+
+  protected:
     void GetOffsets(const TypeData& typeData,
                     const GeoBox& boundingBox,
                     std::unordered_set<FileOffset>& offsets) const;
 
-    AreaIndex(const std::string &indexFileName);
+    explicit AreaIndex(const std::string &indexFileName);
 
     virtual void ReadTypeData(const TypeConfigRef& typeConfig,
                               TypeData &data) = 0;
@@ -91,12 +94,12 @@ namespace osmscout {
               const std::string& path,
               bool memoryMappedData);
 
-    inline bool IsOpen() const
+    bool IsOpen() const
     {
       return scanner.IsOpen();
     }
 
-    inline std::string GetFilename() const
+    std::string GetFilename() const
     {
       return fullIndexFileName;
     }

@@ -109,8 +109,7 @@ namespace osmscout {
      * caller is responsible for deleting it.
      */
     explicit Navigation(OutputDescription<NodeDescriptionTmpl>* outputDescr)
-      : route(nullptr),
-        outputDescription(outputDescr),
+      : outputDescription(outputDescr),
         snapDistanceInMeters(Distance::Of<Meter>(25.0))
     {
     }
@@ -137,7 +136,7 @@ namespace osmscout {
       route=nullptr;
     }
 
-    bool HasRoute()
+    bool HasRoute() const
     {
       return route!=nullptr;
     }
@@ -152,7 +151,7 @@ namespace osmscout {
       return distanceFromStart;
     }
 
-    Duration GetDurationFromStart()
+    Duration GetDurationFromStart() const
     {
       return durationFromStart;
     }
@@ -162,7 +161,7 @@ namespace osmscout {
       return distance;
     }
 
-    Duration GetDuration()
+    Duration GetDuration() const
     {
       return duration;
     }
@@ -172,7 +171,7 @@ namespace osmscout {
       return outputDescription->GetDescription();
     }
 
-    const RouteDescription::Node& GetCurrentNode()
+    const RouteDescription::Node& GetCurrentNode() const
     {
       return *locationOnRoute;
     }
@@ -243,7 +242,7 @@ namespace osmscout {
     }
 
   private:
-    RouteDescription* route;                 // current route description
+    RouteDescription* route=nullptr;                                         // current route description
     std::list<RouteDescription::Node>::const_iterator locationOnRoute;       // last passed node on the route
     std::list<RouteDescription::Node>::const_iterator nextWaypoint;          // next node with routing instructions
     OutputDescription<NodeDescriptionTmpl>            * outputDescription;    // next routing instructions

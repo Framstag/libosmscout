@@ -122,9 +122,22 @@ namespace osmscout {
     TypeInfoSet(const TypeInfoSet& other) = default;
     TypeInfoSet(TypeInfoSet&& other) noexcept;
 
+    TypeInfoSet& operator=(const TypeInfoSet& other)
+    {
+      if (&other!=this) {
+        this->types=other.types;
+        this->count=other.count;
+      }
+
+      return *this;
+    }
+
+    bool operator==(const TypeInfoSet& other) const;
+    bool operator!=(const TypeInfoSet& other) const;
+
     void Adapt(const TypeConfig& typeConfig);
 
-    inline void Clear()
+    void Clear()
     {
       if (count>0) {
         types.clear();
@@ -144,7 +157,7 @@ namespace osmscout {
 
     void Intersection(const TypeInfoSet& otherTypes);
 
-    inline bool IsSet(const TypeInfoRef& type) const
+    bool IsSet(const TypeInfoRef& type) const
     {
       assert(type);
 
@@ -152,38 +165,25 @@ namespace osmscout {
              types[type->GetIndex()];
     }
 
-    inline bool Empty() const
+    bool Empty() const
     {
       return count==0;
     }
 
-    inline size_t Size() const
+    size_t Size() const
     {
       return count;
     }
 
     bool Intersects(const TypeInfoSet& otherTypes) const;
 
-    inline TypeInfoSet& operator=(const TypeInfoSet& other)
-    {
-      if (&other!=this) {
-        this->types=other.types;
-        this->count=other.count;
-      }
-
-      return *this;
-    }
-
-    bool operator==(const TypeInfoSet& other) const;
-    bool operator!=(const TypeInfoSet& other) const;
-
-    inline TypeInfoSetConstIterator begin() const
+    TypeInfoSetConstIterator begin() const
     {
       return TypeInfoSetConstIterator(types.begin(),
                                       types.end());
     }
 
-    inline TypeInfoSetConstIterator end() const
+    TypeInfoSetConstIterator end() const
     {
       return TypeInfoSetConstIterator(types.end(),
                                       types.end());

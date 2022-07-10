@@ -68,7 +68,7 @@ namespace osmscout {
    *
    * Style options for a line.
    */
-  class OSMSCOUT_MAP_API LineStyle : public Style
+  class OSMSCOUT_MAP_API LineStyle CLASS_FINAL : public Style
   {
   public:
     enum CapStyle {
@@ -111,7 +111,6 @@ namespace osmscout {
 
   public:
     LineStyle();
-    LineStyle(const LineStyle& style);
 
     void SetColorValue(int attribute, const Color& value) override;
     void SetDoubleValue(int attribute, double value) override;
@@ -282,7 +281,7 @@ namespace osmscout {
    *
    * Style options for filling an area.
    */
-  class OSMSCOUT_MAP_API FillStyle : public Style
+  class OSMSCOUT_MAP_API FillStyle CLASS_FINAL : public Style
   {
   public:
     enum Attribute {
@@ -299,7 +298,6 @@ namespace osmscout {
 
   public:
     FillStyle();
-    FillStyle(const FillStyle& style);
 
     void SetStringValue(int attribute, const std::string& value) override;
     void SetColorValue(int attribute, const Color& value) override;
@@ -358,7 +356,7 @@ namespace osmscout {
    *
    * Style options for borders around an area.
    */
-  class OSMSCOUT_MAP_API BorderStyle : public Style
+  class OSMSCOUT_MAP_API BorderStyle CLASS_FINAL : public Style
   {
   public:
     enum Attribute {
@@ -383,7 +381,6 @@ namespace osmscout {
 
   public:
     BorderStyle();
-    BorderStyle(const BorderStyle& style);
 
     void SetColorValue(int attribute, const Color& value) override;
     void SetDoubleValue(int attribute, double value) override;
@@ -476,9 +473,6 @@ namespace osmscout {
 
   public:
     LabelStyle();
-    LabelStyle(const LabelStyle& style);
-
-    ~LabelStyle() override = default;
 
     virtual bool IsVisible() const = 0;
     virtual double GetAlpha() const = 0;
@@ -505,7 +499,7 @@ namespace osmscout {
    *
    * A textual label.
    */
-  class OSMSCOUT_MAP_API TextStyle : public LabelStyle
+  class OSMSCOUT_MAP_API TextStyle CLASS_FINAL : public LabelStyle
   {
   public:
     enum Style {
@@ -537,7 +531,6 @@ namespace osmscout {
 
   public:
     TextStyle();
-    TextStyle(const TextStyle& style);
 
     void SetBoolValue(int attribute, bool value) override;
     void SetColorValue(int attribute, const Color& value) override;
@@ -659,7 +652,6 @@ namespace osmscout {
 
   public:
     ShieldStyle();
-    ShieldStyle(const ShieldStyle& style);
 
     ShieldStyle& SetLabel(const LabelProviderRef& label);
     ShieldStyle& SetSize(double size) override;
@@ -730,7 +722,12 @@ namespace osmscout {
 
   public:
     PathShieldStyle();
+    // Explicit copy constructor because of shieldStyle attribute
     PathShieldStyle(const PathShieldStyle& style);
+    PathShieldStyle(const PathShieldStyle&& style);
+
+    PathShieldStyle& operator=(const PathShieldStyle& style) = delete;
+    PathShieldStyle& operator=(const PathShieldStyle&& style) = delete;
 
     void SetLabelValue(int attribute, const LabelProviderRef& value) override;
     void SetColorValue(int attribute, const Color& value) override;
@@ -809,7 +806,7 @@ namespace osmscout {
    * A style for drawing text onto a path, the text following the
    * contour of the path.
    */
-  class OSMSCOUT_MAP_API PathTextStyle : public Style
+  class OSMSCOUT_MAP_API PathTextStyle CLASS_FINAL : public Style
   {
   public:
     enum Attribute {
@@ -831,7 +828,6 @@ namespace osmscout {
 
   public:
     PathTextStyle();
-    PathTextStyle(const PathTextStyle& style);
 
     void SetColorValue(int attribute, const Color& value) override;
     void SetDoubleValue(int attribute, double value) override;
@@ -894,7 +890,7 @@ namespace osmscout {
    *
    * The icon style allow the rendering of external images or internal symbols.
    */
-  class OSMSCOUT_MAP_API IconStyle : public Style
+  class OSMSCOUT_MAP_API IconStyle CLASS_FINAL : public Style
   {
   public:
     enum Attribute {
@@ -917,7 +913,6 @@ namespace osmscout {
 
   public:
     IconStyle();
-    IconStyle(const IconStyle& style);
 
     void SetBoolValue(int attribute, bool value) override;
     void SetStringValue(int attribute, const std::string& value) override;
@@ -1037,7 +1032,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
+  class OSMSCOUT_MAP_API PolygonPrimitive CLASS_FINAL : public DrawPrimitive
   {
   private:
     std::list<Vertex2D> coords;
@@ -1066,7 +1061,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
+  class OSMSCOUT_MAP_API RectanglePrimitive CLASS_FINAL : public DrawPrimitive
   {
   private:
     Vertex2D topLeft;
@@ -1108,7 +1103,7 @@ namespace osmscout {
    * \ingroup Stylesheet
    *
    */
-  class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
+  class OSMSCOUT_MAP_API CirclePrimitive CLASS_FINAL : public DrawPrimitive
   {
   private:
     Vertex2D center;
@@ -1145,7 +1140,7 @@ namespace osmscout {
    * Definition of a symbol. A symbol consists of a list of DrawPrimitives
    * with with assigned rendering styles.
    */
-  class OSMSCOUT_MAP_API Symbol
+  class OSMSCOUT_MAP_API Symbol CLASS_FINAL
   {
   private:
     std::string                 name;
@@ -1253,7 +1248,7 @@ namespace osmscout {
    *
    * Style for repetive drawing of symbols on top of a path.
    */
-  class OSMSCOUT_MAP_API PathSymbolStyle : public Style
+  class OSMSCOUT_MAP_API PathSymbolStyle CLASS_FINAL : public Style
   {
   public:
 
@@ -1275,7 +1270,6 @@ namespace osmscout {
 
   public:
     PathSymbolStyle();
-    PathSymbolStyle(const PathSymbolStyle& style);
 
     void SetDoubleValue(int attribute, double value) override;
     void SetSymbolValue(int attribute, const SymbolRef& value) override;

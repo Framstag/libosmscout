@@ -379,10 +379,10 @@ namespace osmscout {
     std::string    appName;
     CmdLineScanner scanner;
 
-    std::map<std::string,CmdLineOption> options;
-    std::list<CmdLinePositional>        positionals;
-    std::list<CmdLineArgHelp>           optionHelps;
-    std::list<CmdLineArgHelp>           positionalHelps;
+    std::map<std::string,CmdLineOption,std::less<>> options;
+    std::list<CmdLinePositional>                    positionals;
+    std::list<CmdLineArgHelp>                       optionHelps;
+    std::list<CmdLineArgHelp>                       positionalHelps;
 
   public:
     CmdLineParser(const std::string& appName,

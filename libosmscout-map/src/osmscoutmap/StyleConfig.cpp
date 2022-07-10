@@ -196,17 +196,6 @@ namespace osmscout {
   {
   }
 
-  StyleFilter::StyleFilter(const StyleFilter& other)
-  {
-    this->filtersByType=other.filtersByType;
-    this->types=other.types;
-    this->minLevel=other.minLevel;
-    this->maxLevel=other.maxLevel;
-    this->features=other.features;
-    this->oneway=other.oneway;
-    this->sizeCondition=other.sizeCondition;
-  }
-
   StyleFilter& StyleFilter::SetTypes(const TypeInfoSet& types)
   {
     this->types=types;
@@ -251,24 +240,11 @@ namespace osmscout {
     return *this;
   }
 
-  StyleCriteria::StyleCriteria()
-  : oneway(false)
-  {
-    // no code
-  }
-
   StyleCriteria::StyleCriteria(const StyleFilter& other)
   {
     this->features=other.GetFeatures();
     this->oneway=other.GetOneway();
     this->sizeCondition=other.GetSizeCondition();
-  }
-
-  StyleCriteria::StyleCriteria(const StyleCriteria& other)
-  {
-    this->features=other.features;
-    this->oneway=other.oneway;
-    this->sizeCondition=other.sizeCondition;
   }
 
   bool StyleCriteria::operator==(const StyleCriteria& other) const

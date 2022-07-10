@@ -46,16 +46,9 @@ namespace osmscout
   private:
     struct TrieInfo
     {
-      marisa::Trie *trie;
+      marisa::Trie *trie=nullptr;
       std::string  file;
-      bool         isAvail;
-
-      TrieInfo() :
-        trie(nullptr),
-        isAvail(false)
-      {
-        // no code
-      }
+      bool         isAvail=false;
     };
 
   public:

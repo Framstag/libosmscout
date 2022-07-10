@@ -50,10 +50,10 @@ namespace osmscout {
     double endDistance;
 
   public:
-    LabelPath(double minSegmentLength=5);
+    explicit LabelPath(double minSegmentLength=5);
     virtual ~LabelPath();
     void AddPoint(double x,double y);
-    inline double GetLength() const {
+    double GetLength() const {
       return length+endDistance;
     }
     Vertex2D PointAtLength(double offset) const;

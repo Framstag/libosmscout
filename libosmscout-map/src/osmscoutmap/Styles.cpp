@@ -123,25 +123,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  LineStyle::LineStyle(const LineStyle& style)
-  : slot(style.slot),
-    lineColor(style.lineColor),
-    gapColor(style.gapColor),
-    preferColorFeature(style.preferColorFeature),
-    displayWidth(style.displayWidth),
-    width(style.width),
-    displayOffset(style.displayOffset),
-    offset(style.offset),
-    joinCap(style.joinCap),
-    endCap(style.endCap),
-    dash(style.dash),
-    priority(style.priority),
-    zIndex(style.zIndex),
-    offsetRel(style.offsetRel)
-  {
-    // no code
-  }
-
   void LineStyle::SetColorValue(int attribute, const Color& value)
   {
     switch (attribute) {
@@ -463,14 +444,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  FillStyle::FillStyle(const FillStyle& style)
-  {
-    this->fillColor=style.fillColor;
-    this->pattern=style.pattern;
-    this->patternId=style.patternId;
-    this->patternMinMag=style.patternMinMag;
-  }
-
   FillStyle& FillStyle::SetFillColor(const Color& color)
   {
     fillColor=color;
@@ -604,18 +577,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     this->slot=slot;
 
     return *this;
-  }
-
-  BorderStyle::BorderStyle(const BorderStyle& style):
-    slot(style.slot),
-    color(style.color),
-    gapColor(style.gapColor),
-    width(style.width),
-    dash(style.dash),
-    displayOffset(style.displayOffset),
-    offset(style.offset),
-    priority(style.priority)
-  {
   }
 
   void BorderStyle::SetColorValue(int attribute, const Color& value)
@@ -802,12 +763,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  LabelStyle::LabelStyle(const LabelStyle& style)
-  {
-    this->priority=style.priority;
-    this->size=style.size;
-  }
-
   LabelStyle& LabelStyle::SetPriority(size_t priority)
   {
     this->priority=priority;
@@ -848,20 +803,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
      style(normal),
      scaleAndFadeMag(1000000),
      autoSize(false)
-  {
-    // no code
-  }
-
-  TextStyle::TextStyle(const TextStyle& style)
-  : LabelStyle(style),
-    slot(style.slot),
-    label(style.label),
-    position(style.position),
-    textColor(style.textColor),
-    emphasizeColor(style.emphasizeColor),
-    style(style.style),
-    scaleAndFadeMag(style.scaleAndFadeMag),
-    autoSize(style.autoSize)
   {
     // no code
   }
@@ -1099,15 +1040,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  ShieldStyle::ShieldStyle(const ShieldStyle& style)
-  : LabelStyle(style)
-  {
-    this->label=style.label;
-    this->textColor=style.textColor;
-    this->bgColor=style.bgColor;
-    this->borderColor=style.borderColor;
-  }
-
   ShieldStyle& ShieldStyle::SetLabel(const LabelProviderRef& label)
   {
     this->label=label;
@@ -1197,6 +1129,13 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   PathShieldStyle::PathShieldStyle(const PathShieldStyle& style)
    : shieldStyle(std::make_shared<ShieldStyle>(*style.GetShieldStyle())),
      shieldSpace(style.shieldSpace)
+  {
+    // no code
+  }
+
+  PathShieldStyle::PathShieldStyle(const PathShieldStyle&& style)
+    : shieldStyle(std::make_shared<ShieldStyle>(*style.GetShieldStyle())),
+      shieldSpace(style.shieldSpace)
   {
     // no code
   }
@@ -1364,15 +1303,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
      priority(0)
   {
     // no code
-  }
-
-  PathTextStyle::PathTextStyle(const PathTextStyle& style)
-  {
-    this->label=style.label;
-    this->size=style.size;
-    this->textColor=style.textColor;
-    this->displayOffset=style.displayOffset;
-    this->offset=style.offset;
   }
 
   void PathTextStyle::SetColorValue(int attribute, const Color& value)
@@ -1656,18 +1586,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  IconStyle::IconStyle(const IconStyle& style)
-  : iconName(style.iconName),
-    iconId(style.iconId),
-    width(style.width),
-    height(style.height),
-    position(style.position),
-    priority(style.priority),
-    overlay(style.overlay)
-  {
-    // no code
-  }
-
   void IconStyle::SetBoolValue(int attribute, bool value)
   {
     switch (attribute) {
@@ -1822,16 +1740,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   : symbolSpace(15),
     displayOffset(0.0),
     offset(0.0)
-  {
-    // no code
-  }
-
-  PathSymbolStyle::PathSymbolStyle(const PathSymbolStyle& style)
-  : symbol(style.symbol),
-    symbolSpace(style.symbolSpace),
-    displayOffset(style.displayOffset),
-    offset(style.offset),
-    offsetRel(style.offsetRel)
   {
     // no code
   }
