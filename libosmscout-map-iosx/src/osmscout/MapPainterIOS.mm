@@ -75,7 +75,7 @@ namespace osmscout {
     /*
      * DrawMap() with start and end RenderSteps
      */
-    bool MapPainterIOS::DrawMap(const StyleConfig& styleConfig,
+    bool MapPainterIOS::DrawMap(const StyleConfig& /*styleConfig*/,
                                 const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data,
@@ -321,8 +321,8 @@ namespace osmscout {
         return result;
     }
 
-    void MapPainterIOS::DrawGlyphs(const Projection &projection,
-                    const MapParameter &parameter,
+    void MapPainterIOS::DrawGlyphs(const Projection &/*projection*/,
+                    const MapParameter &/*parameter*/,
                     const osmscout::PathTextStyleRef style,
                     const std::vector<IOSGlyph> &glyphs){
         if(glyphs.size() == 0){
@@ -363,7 +363,7 @@ namespace osmscout {
                                                     double fontSize,
                                                     double objectWidth,
                                                     bool enableWrapping,
-                                                    bool contourLabel) {
+                                                    bool /*contourLabel*/) {
         std::shared_ptr<IOSLabel> result = std::make_shared<IOSLabel>();
         CGRect rect = CGRectZero;
 
@@ -421,7 +421,7 @@ namespace osmscout {
         return result;
     }
 
-    void MapPainterIOS::LayoutDrawLabel(const IOSLabel& layout,
+    void MapPainterIOS::LayoutDrawLabel(const IOSRunInLine& layout,
                                         const CGPoint& coords,
                                         const Color &color,
                                         bool emphasize){
@@ -429,13 +429,13 @@ namespace osmscout {
         double g = color.GetG();
         double b = color.GetB();
         double a = color.GetA();
-        CGFloat lineHeight = layout.label.lineHeight;
-        CGFloat width = layout.label.lineWidth;
+        CGFloat lineHeight = layout.lineHeight;
+        CGFloat width = layout.lineWidth;
 
         log.Debug() << "LayoutDrawLabel lineWidth=" << width << " lineHeight=" << lineHeight;
 
         int lineNumber = 0;
-        for (CTRunRef run : layout.label.run) {
+        for (CTRunRef run : layout.run) {
             const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
             CFIndex glyphCount = CTRunGetGlyphCount(run);
             CGGlyph glyphs[glyphCount];
@@ -477,11 +477,11 @@ namespace osmscout {
         }
     }
 
-    void MapPainterIOS::DrawLabel(const Projection& projection,
-                                  const MapParameter& parameter,
+    void MapPainterIOS::DrawLabel(const Projection& /*projection*/,
+                                  const MapParameter& /*parameter*/,
                                   const DoubleRectangle& labelRect,
                                   const LabelData& label,
-                                  const IOSLabel& layout) {
+                                  const IOSRunInLine& layout) {
 
         if (const auto *style = dynamic_cast<const TextStyle*>(label.style.get());
             style != nullptr) {
@@ -518,7 +518,7 @@ namespace osmscout {
                                             labelRect.height + 10 - 4));
             CGContextDrawPath(cg, kCGPathStroke);
 
-            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y - layout.label.lineHeight/3), style->GetTextColor(), false);
+            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y - layout.lineHeight/3), style->GetTextColor(), false);
 
             CGContextRestoreGState(cg);
 
@@ -527,10 +527,10 @@ namespace osmscout {
         }
     }
 
-    void MapPainterIOS::BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                       const MapData& data){
+    void MapPainterIOS::BeforeDrawing(const StyleConfig& /*styleConfig*/,
+                                      const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& /*data*/){
         labelLayouter.SetViewport(DoubleRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
         labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
@@ -552,7 +552,7 @@ namespace osmscout {
 
     void MapPainterIOS::DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data) {
+                            const MapData& /*data*/) {
         labelLayouter.Layout(projection, parameter);
         labelLayouter.DrawLabels(projection,
                                  parameter,

@@ -178,6 +178,10 @@ if (HAVE_STD_EXECUTION)
 	target_link_libraries(OSMScoutImport TBB::tbb)
 endif()
 
+if(OpenMP_CXX_FOUND)
+	target_link_libraries(OSMScoutImport OpenMP::OpenMP_CXX)
+endif()
+
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutImport PROPERTIES
         FRAMEWORK TRUE

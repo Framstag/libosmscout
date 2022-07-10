@@ -21,10 +21,6 @@
 
 #include <algorithm>
 
-#if _OPENMP
-#include <omp.h>
-#endif
-
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
