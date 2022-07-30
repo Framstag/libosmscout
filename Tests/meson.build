@@ -77,15 +77,27 @@ CoordinateEncoding = executable('CoordinateEncoding',
              install: false)
 
 if buildMapQt
-  drawtextMocs = qt5.preprocess(moc_headers : ['include/DrawWindow.h'])
+  if get_option('qtVersion') == 5
+    drawtextMocs = qt5.preprocess(moc_headers : ['include/DrawWindow.h'])
 
-  DrawTextQt = executable('DrawTextQt',
-               'src/DrawTextQt.cpp',
-               drawtextMocs,
-               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
-               dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
-               link_with: [osmscoutmapqt, osmscoutmap, osmscout],
-               install: false)
+    DrawTextQt = executable('DrawTextQt',
+                 'src/DrawTextQt.cpp',
+                 drawtextMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                 dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout],
+                 install: false)
+  elif get_option('qtVersion') == 6
+    drawtextMocs = qt6.preprocess(moc_headers : ['include/DrawWindow.h'])
+
+    DrawTextQt = executable('DrawTextQt',
+                 'src/DrawTextQt.cpp',
+                 drawtextMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                 dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout],
+                 install: false)
+  endif
 endif
 
 EncodeNumber = executable('EncodeNumber',
@@ -200,7 +212,11 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
 
   if buildMapQt
     includes += osmscoutmapqtIncDir
-    deps += [qt5WidgetsDep, qt5GuiDep]
+    if get_option('qtVersion') == 5
+      deps += [qt5WidgetsDep, qt5GuiDep]
+    elif get_option('qtVersion') == 6
+      deps += [qt6WidgetsDep, qt6GuiDep]
+    endif
     links += osmscoutmapqt
   endif
 
@@ -409,26 +425,50 @@ foreach stylesheet : stylesheets
 endforeach
 
 if buildClientQt
-  threadingMocs = qt5.preprocess(moc_headers : ['include/ClientQtThreading.h'])
+  if get_option('qtVersion') == 5
+    threadingMocs = qt5.preprocess(moc_headers : ['include/ClientQtThreading.h'])
 
-  ClientQtThreading = executable('ClientQtThreading',
-               'src/ClientQtThreading.cpp',
-               threadingMocs,
-               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
-               link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-               install: false)
+    ClientQtThreading = executable('ClientQtThreading',
+                 'src/ClientQtThreading.cpp',
+                 threadingMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
+                 dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 install: false)
+  elif get_option('qtVersion') == 6
+    threadingMocs = qt6.preprocess(moc_headers : ['include/ClientQtThreading.h'])
+
+    ClientQtThreading = executable('ClientQtThreading',
+                 'src/ClientQtThreading.cpp',
+                 threadingMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
+                 dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 install: false)
+  endif
 endif
 
 if buildClientQt
-  testMocs = qt5.preprocess(moc_headers : ['include/DownloaderTest.h'])
+  if get_option('qtVersion') == 5
+    testMocs = qt5.preprocess(moc_headers : ['include/DownloaderTest.h'])
 
-  QtFileDownloader = executable('QtFileDownloader',
-               'src/QtFileDownloader.cpp',
-               testMocs,
-               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-               dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
-               link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-               install: false)
+    QtFileDownloader = executable('QtFileDownloader',
+                 'src/QtFileDownloader.cpp',
+                 testMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
+                 dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 install: false)
+  elif get_option('qtVersion') == 5
+    testMocs = qt6.preprocess(moc_headers : ['include/DownloaderTest.h'])
+
+    QtFileDownloader = executable('QtFileDownloader',
+                 'src/QtFileDownloader.cpp',
+                 testMocs,
+                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
+                 dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 install: false)
+  endif
 endif
 
