@@ -9,22 +9,43 @@ styleeditorSrc = [
 
 styleeditorIncDir = include_directories('src')
 
-styleeditorMocs = qt5.preprocess(moc_headers : [
-                                    'src/MainWindow.h',
-                                    'src/SettingsDialog.h',
-                                    'src/FileIO.h',
-                                    'src/Highlighter.h',
-                                    'src/StyleAnalyser.h'
-                                    ],
-                                 include_directories: include_directories('src'),
-                                 qresources: ['StyleEditor.qrc'])
+if get_option('qtVersion') == 5
+  styleeditorMocs = qt5.preprocess(moc_headers : [
+                                      'src/MainWindow.h',
+                                      'src/SettingsDialog.h',
+                                      'src/FileIO.h',
+                                      'src/Highlighter.h',
+                                      'src/StyleAnalyser.h'
+                                      ],
+                                   include_directories: include_directories('src'),
+                                   qresources: ['StyleEditor.qrc'])
 
-OSMScout2 = executable('StyleEditor',
-                       styleeditorSrc,
-                       styleeditorMocs,
-                       cpp_args: ['-fPIC'],
-                       include_directories: [styleeditorIncDir, osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
-                       dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
-                       link_with: [osmscoutclientqt, osmscoutmapqt, osmscoutmap, osmscout],
-                       install: true)
+  OSMScout2 = executable('StyleEditor',
+                         styleeditorSrc,
+                         styleeditorMocs,
+                         cpp_args: ['-fPIC'],
+                         include_directories: [styleeditorIncDir, osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                         dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
+                         link_with: [osmscoutclientqt, osmscoutmapqt, osmscoutmap, osmscout],
+                         install: true)
+elif get_option('qtVersion') == 6
+  styleeditorMocs = qt6.preprocess(moc_headers : [
+                                      'src/MainWindow.h',
+                                      'src/SettingsDialog.h',
+                                      'src/FileIO.h',
+                                      'src/Highlighter.h',
+                                      'src/StyleAnalyser.h'
+                                      ],
+                                   include_directories: include_directories('src'),
+                                   qresources: ['StyleEditor.qrc'])
+
+  OSMScout2 = executable('StyleEditor',
+                         styleeditorSrc,
+                         styleeditorMocs,
+                         cpp_args: ['-fPIC'],
+                         include_directories: [styleeditorIncDir, osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                         dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6SvgDep, qt6NetworkDep, qt6LocationDep, qt6MultimediaDep],
+                         link_with: [osmscoutclientqt, osmscoutmapqt, osmscoutmap, osmscout],
+                         install: true)
+endif
 

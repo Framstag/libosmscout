@@ -168,28 +168,56 @@ d2dlHeaderAvailable = compiler.has_header('d2d1.h')
 gdiplusDep = compiler.find_library('gdiplus', required: false)
 
 # Qt
-qt5 = import('qt5')
-qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
-qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
-qt5QuickDep = dependency('qt5', modules: 'Quick', required: false)
-qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
-qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
-qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
-qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
-qt5MultimediaDep = dependency('qt5', modules: 'Multimedia', required: false)
 
-message('Qt version : @0@ (required >= 5.6)'.format(qt5GuiDep.version()))
+if get_option('qtVersion') == 5
+  qt5 = import('qt5')
+  qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
+  qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
+  qt5QuickDep = dependency('qt5', modules: 'Quick', required: false)
+  qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
+  qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
+  qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
+  qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
+  qt5MultimediaDep = dependency('qt5', modules: 'Multimedia', required: false)
 
-if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.6') and qt5WidgetsDep.found() and get_option('enableMapQt')
-  buildMapQt=true
-else
-  buildMapQt=false
-endif
+  message('Qt5 version : @0@ (required >= 5.6)'.format(qt5GuiDep.version()))
 
-if buildMapQt and qt5MultimediaDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5NetworkDep.found() and get_option('enableClientQt')
-  buildClientQt=true
-else
-  buildClientQt=false
+  if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.6') and qt5WidgetsDep.found() and get_option('enableMapQt')
+    buildMapQt=true
+  else
+    buildMapQt=false
+  endif
+
+  if buildMapQt and qt5MultimediaDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5NetworkDep.found() and get_option('enableClientQt')
+    buildClientQt=true
+  else
+    buildClientQt=false
+  endif
+
+elif get_option('qtVersion') == 6
+  qt6 = import('qt6')
+  qt6GuiDep = dependency('qt6', modules: [ 'Core', 'Gui'], required: false)
+  qt6QmlDep = dependency('qt6', modules: 'Qml', required: false)
+  qt6QuickDep = dependency('qt6', modules: 'Quick', required: false)
+  qt6WidgetsDep = dependency('qt6', modules: 'Widgets', required: false)
+  qt6SvgDep = dependency('qt6', modules: 'Svg', required: false)
+  qt6NetworkDep = dependency('qt6', modules: 'Network', required: false)
+  qt6LocationDep = dependency('qt6', modules: 'Location', required: false)
+  qt6MultimediaDep = dependency('qt6', modules: 'Multimedia', required: false)
+
+  message('Qt6 version : @0@ (required >= 6.0)'.format(qt6GuiDep.version()))
+
+  if qt6GuiDep.found() and qt6GuiDep.version().version_compare('>=6.0') and qt6WidgetsDep.found() and get_option('enableMapQt')
+    buildMapQt=true
+  else
+    buildMapQt=false
+  endif
+
+  if buildMapQt and qt6MultimediaDep.found() and qt6QmlDep.found() and qt6QuickDep.found() and qt6NetworkDep.found() and get_option('enableClientQt')
+    buildClientQt=true
+  else
+    buildClientQt=false
+  endif
 endif
 
 # OpenGL
@@ -288,8 +316,13 @@ else
   buildBinding=false
 endif
 
-buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
-buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
+if get_option('qtVersion') == 5
+  buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
+  buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
+elif get_option('qtVersion') == 6
+  buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt6SvgDep.found()
+  buildStyleEditor=buildMapQt and buildClientQt and qt6SvgDep.found()
+endif
 
 message('Build OS:                @0@'.format(build_machine.system()))
 message('Host OS:                 @0@'.format(host_machine.system()))
