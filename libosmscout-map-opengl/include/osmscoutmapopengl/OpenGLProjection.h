@@ -60,8 +60,8 @@ namespace osmscout {
       SetGLf("angle", angle);
       SetGLf("angleNegSin", angleNegSin);
       SetGLf("angleNegCos", angleNegCos);
-      SetGLf("height", height);
-      SetGLf("width", width);
+      SetGLf("windowHeight", height);
+      SetGLf("windowWidth", width);
     }
   };
 }

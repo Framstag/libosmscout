@@ -10,8 +10,8 @@ uniform float scale;
 uniform float angle;
 uniform float angleNegSin;
 uniform float angleNegCos;
-uniform float height;
-uniform float width;
+uniform float windowWidth;
+uniform float windowHeight;
 
 uniform float PI = 3.1415926535897;
 uniform float MaxLat = +85.0511;
@@ -23,6 +23,8 @@ uniform float Gradtorad = 1.745329251994330e-02; // 2*PI/360;
  * see MercatorProjection::GeoToPixel
  */
 vec2 GeoToPixel(in float lon, in float lat){
+    float width = windowWidth;
+    float height = windowHeight;
     // Calculations for Mercator projection
 
     // Screen coordinate relative to center of image
