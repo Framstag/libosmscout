@@ -21,6 +21,8 @@
 
 #include <osmscout/util/Logger.h>
 
+#include <QRegExp>
+
 namespace osmscout {
 
 QBreaker::QBreaker()

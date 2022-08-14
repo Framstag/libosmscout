@@ -141,16 +141,20 @@ void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringLis
   if (mediaPlayer==nullptr){
     assert(currentPlaylist==nullptr);
     mediaPlayer = new QMediaPlayer(this);
+#if QT_VERSION < 0x060000
     currentPlaylist = new QMediaPlaylist(mediaPlayer);
     mediaPlayer->setPlaylist(currentPlaylist);
+#endif
   }
 
   currentPlaylist->clear();
 
   for (const auto& file : sample){
     auto sampleUrl = QUrl::fromLocalFile(voice.getDir().path() + QDir::separator() + file);
+#if QT_VERSION < 0x060000
     qDebug() << "Adding to playlist:" << sampleUrl;
     currentPlaylist->addMedia(sampleUrl);
+#endif
   }
 
   currentPlaylist->setCurrentIndex(0);
