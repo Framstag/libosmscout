@@ -22,6 +22,8 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
+#include <iomanip>
 
 #include <osmscout/Database.h>
 #include <osmscout/util/CmdLineParsing.h>
@@ -32,6 +34,62 @@
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 
 #include <GLFW/glfw3.h>
+
+void GLAPIENTRY MessageCallback([[maybe_unused]] GLenum source,
+                                GLenum type,
+                                [[maybe_unused]] GLuint id,
+                                GLenum severity,
+                                [[maybe_unused]] GLsizei length,
+                                const GLchar* message,
+                                [[maybe_unused]] const void* userParam)
+{
+  std::stringstream msgType;
+
+  switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+      msgType << "ERROR";
+      break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+      msgType << "DEPRECATED_BEHAVIOR";
+      break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+      msgType << "UNDEFINED_BEHAVIOR";
+      break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+      msgType << "PORTABILITY";
+      break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+      msgType << "PERFORMANCE";
+      break;
+    case GL_DEBUG_TYPE_OTHER:
+      msgType << "OTHER";
+      break;
+    default:
+      msgType << "type " << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(type);
+  }
+
+  msgType << " (";
+  switch (severity) {
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+      msgType << "notification";
+      break;
+    case GL_DEBUG_SEVERITY_HIGH:
+      msgType << "high";
+      break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+      msgType << "medium";
+      break;
+    case GL_DEBUG_SEVERITY_LOW:
+      msgType << "low";
+      break;
+    default:
+      msgType << "severity " << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(severity);
+  }
+  msgType << ")";
+
+  osmscout::log.Debug() << "GL " << msgType.str() << ": " << message ;
+}
+
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -92,6 +150,11 @@ int main(int argc, char* argv[]) {
   painter->SwapData();
 
   painter->DrawMap();
+
+  if (args.debug) {
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
+  }
 
   // Save to file
   unsigned char* image = new unsigned char[3 * args.width * args.height];
