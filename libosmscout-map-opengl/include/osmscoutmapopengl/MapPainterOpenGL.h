@@ -26,7 +26,6 @@
 #include <osmscoutmapopengl/MapOpenGLFeatures.h>
 #include <osmscoutmapopengl/OpenGLMapData.h>
 #include <osmscoutmapopengl/MapOpenGLImportExport.h>
-#include <osmscoutmapopengl/MapProjection.h>
 #include <osmscoutmapopengl/TextLoader.h>
 
 namespace osmscout {
@@ -55,7 +54,8 @@ namespace osmscout {
   private:
     bool initialized = false;
 
-    MapProjection mapProjection;
+    // TODO: add support for inclination
+    MercatorProjection mapProjection;
 
     float lookX;
     float lookY;
@@ -138,8 +138,6 @@ namespace osmscout {
                        osmscout::Color color, PathVertexType type, float width, glm::vec3 barycentric, int border = 0,
                        double z = 0, float dashsize = 0.0, float length = 1,
                        osmscout::Color gapcolor = osmscout::Color(1.0, 1.0, 1.0, 1.0));
-
-    bool PixelToGeo(double x, double y, double &lon, double &lat);
 
     bool IsVisibleArea(const Projection &projection, const GeoBox &boundingBox, double pixelOffset);
 

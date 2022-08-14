@@ -3,7 +3,6 @@ osmscoutmapopenglIncDir = include_directories('.')
 osmscoutmapopenglHeader = [
             'osmscoutmapopengl/MapOpenGLImportExport.h',
             'osmscoutmapopengl/MapPainterOpenGL.h',
-            'osmscoutmapopengl/MapProjection.h',
             'osmscoutmapopengl/OpenGLMapData.h',
             'osmscoutmapopengl/Triangulate.h',
             'osmscoutmapopengl/PNGLoaderOpenGL.h',
