@@ -3,6 +3,7 @@ set(HEADER_FILES
 		include/osmscoutmapopengl/OpenGLMapData.h
 		include/osmscoutmapopengl/MapPainterOpenGL.h
 		include/osmscoutmapopengl/Triangulate.h
+		include/osmscoutmapopengl/OpenGLProjection.h
 		include/osmscoutmapopengl/PNGLoaderOpenGL.h
 		include/osmscoutmapopengl/ShaderUtils.h
 		include/osmscoutmapopengl/TextLoader.h

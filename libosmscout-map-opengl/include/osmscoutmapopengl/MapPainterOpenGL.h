@@ -27,6 +27,7 @@
 #include <osmscoutmapopengl/OpenGLMapData.h>
 #include <osmscoutmapopengl/MapOpenGLImportExport.h>
 #include <osmscoutmapopengl/TextLoader.h>
+#include <osmscoutmapopengl/OpenGLProjection.h>
 
 namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL
@@ -54,8 +55,7 @@ namespace osmscout {
   private:
     bool initialized = false;
 
-    // TODO: add support for inclination
-    MercatorProjection mapProjection;
+    OpenGLProjection mapProjection;
 
     float lookX;
     float lookY;
