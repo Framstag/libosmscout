@@ -196,7 +196,7 @@ if get_option('qtVersion') == 5
 
 elif get_option('qtVersion') == 6
   qt6 = import('qt6')
-  qt6GuiDep = dependency('qt6', modules: [ 'Core', 'Gui'], required: false)
+  qt6GuiDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui'], required: false)
   qt6QmlDep = dependency('qt6', modules: 'Qml', required: false)
   qt6QuickDep = dependency('qt6', modules: 'Quick', required: false)
   qt6WidgetsDep = dependency('qt6', modules: 'Widgets', required: false)
