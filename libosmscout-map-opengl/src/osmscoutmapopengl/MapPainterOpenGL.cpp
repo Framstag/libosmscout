@@ -1113,6 +1113,7 @@ namespace osmscout {
                       mapProjection.GetDPI(),
                       mapProjection.GetWidth(),
                       mapProjection.GetHeight());
+    mapProjection.SetLinearInterpolationUsage(magnification.GetLevel() >= 10);
   }
 
   MercatorProjection MapPainterOpenGL::GetProjection() const
