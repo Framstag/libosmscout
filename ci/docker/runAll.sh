@@ -23,6 +23,9 @@ RESULT_ubuntu_18_04_gcc_cmake=$?
 ./ubuntu_20.04_gcc_cmake/run.sh "$@"
 RESULT_ubuntu_20_04_gcc_cmake=$?
 
+./ubuntu_22.04_gcc_cmake/run.sh "$@"
+RESULT_ubuntu_22_04_gcc_cmake=$?
+
 ./ubuntu_22.04_aarch64_gcc_cmake/run.sh "$@"
 RESULT_ubuntu_22_04_aarch64_gcc_cmake=$?
 
@@ -50,6 +53,9 @@ if [ $RESULT_ubuntu_18_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "ubuntu_20.04_gcc_cmake         "
 if [ $RESULT_ubuntu_20_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_22.04_gcc_cmake         "
+if [ $RESULT_ubuntu_22_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_22.04_aarch64_gcc_cmake "
 if [ $RESULT_ubuntu_22_04_aarch64_gcc_cmake -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
