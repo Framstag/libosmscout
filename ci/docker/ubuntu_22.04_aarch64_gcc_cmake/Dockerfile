@@ -1,4 +1,4 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 
 # disable interactive functions
 ENV DEBIAN_FRONTEND noninteractive
