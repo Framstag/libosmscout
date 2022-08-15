@@ -33,6 +33,13 @@ namespace osmscout {
   class OSMSCOUT_MAP_OPENGL_API OpenGLProjection : public MercatorProjection {
     // TODO: add support for inclination
   public:
+    OpenGLProjection() = default;
+    OpenGLProjection(const OpenGLProjection&) = default;
+    OpenGLProjection(OpenGLProjection&&) = default;
+    OpenGLProjection& operator=(const OpenGLProjection&) = default;
+    OpenGLProjection& operator=(OpenGLProjection&&) = default;
+    ~OpenGLProjection() override = default;
+
     /**
      * Setup projection shader uniforms
      * @param shaderProgram
