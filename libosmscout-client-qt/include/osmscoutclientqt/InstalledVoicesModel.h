@@ -27,7 +27,9 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QMediaPlayer>
+#if QT_VERSION < 0x060000
 #include <QMediaPlaylist>
+#endif
 
 namespace osmscout {
 
@@ -80,7 +82,9 @@ private:
   SettingsRef settings;
 
   // we setup QObject parents, objects are cleaned after Module destruction
+#if QT_VERSION < 0x060000
   QMediaPlaylist *currentPlaylist{nullptr};
+#endif
   QMediaPlayer *mediaPlayer{nullptr};
 };
 }

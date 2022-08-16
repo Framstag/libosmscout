@@ -18,6 +18,7 @@
  */
 
 #include <osmscoutclientqt/NavigationModule.h>
+
 #include <osmscout/util/Logger.h>
 
 namespace osmscout {
@@ -56,11 +57,21 @@ void NavigationModule::InitPlayer()
   }
 
   if (mediaPlayer==nullptr){
+#if QT_VERSION < 0x060000
     assert(currentPlaylist==nullptr);
+#endif
     mediaPlayer = new QMediaPlayer(this);
+#if QT_VERSION < 0x060000
     currentPlaylist = new QMediaPlaylist(mediaPlayer);
+#endif
+#if QT_VERSION < 0x060000
     connect(mediaPlayer, &QMediaPlayer::stateChanged, this, &NavigationModule::playerStateChanged);
+#else
+    connect(mediaPlayer, &QMediaPlayer::playbackStateChanged, this, &NavigationModule::playerStateChanged);
+#endif
+#if QT_VERSION < 0x060000
     mediaPlayer->setPlaylist(currentPlaylist);
+#endif
   }
 }
 
@@ -128,9 +139,13 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
         nextMessage = voiceInstructionMessage->message;
         InitPlayer();
         assert(mediaPlayer);
+#if QT_VERSION < 0x060000
         playerStateChanged(mediaPlayer->state());
+#else
+        playerStateChanged(mediaPlayer->playbackState());
+#endif
       }
-    } else if (auto laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
+    } else if (auto* laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
                laneMessage != nullptr) {
 
       emit laneUpdate(laneMessage->lane);
@@ -159,7 +174,7 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
       DatabaseId databaseId=dbIdIt->second;
 
       MapService::TypeDefinition routableTypes;
-      for (auto &type:database->GetTypeConfig()->GetTypes()){
+      for (const auto &type:database->GetTypeConfig()->GetTypes()){
         if (type->CanRoute(vehicle)){
           if (type->CanBeArea()){
             routableTypes.areaTypes.Set(type);
@@ -183,7 +198,7 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
 
       RoutableDBObjects &objects=data->dbMap[databaseId];
       objects.typeConfig=database->GetTypeConfig();
-      for (auto &tile:tiles){
+      for (const auto &tile:tiles){
         tile->GetWayData().CopyData([&](const WayRef &way){objects.ways[way->GetFileOffset()]=way;});
         tile->GetAreaData().CopyData([&](const AreaRef &area){objects.areas[area->GetFileOffset()]=area;});
       }
@@ -315,26 +330,38 @@ QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSam
   }
 }
 
-void NavigationModule::playerStateChanged(QMediaPlayer::State state)
+#if QT_VERSION < 0x060000
+  void NavigationModule::playerStateChanged(QMediaPlayer::State state)
+#else
+  void NavigationModule::playerStateChanged(QMediaPlayer::PlaybackState state)
+#endif
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
 
+#if QT_VERSION < 0x060000
   qDebug() << "Voice player state:" << mediaPlayer->state() << "(" << currentPlaylist->currentIndex() << "/" << currentPlaylist->mediaCount() << ")";
+#endif
   if (!voiceDir.isEmpty() &&
       !nextMessage.empty() &&
       state == QMediaPlayer::StoppedState) {
 
+#if QT_VERSION < 0x060000
     currentPlaylist->clear();
+#endif
 
     for (const auto& sample : nextMessage){
       auto sampleUrl = QUrl::fromLocalFile(voiceDir + QDir::separator() + sampleFile(sample));
+#if QT_VERSION < 0x060000
       qDebug() << "Adding to playlist:" << sampleUrl;
       currentPlaylist->addMedia(sampleUrl);
+#endif
     }
     nextMessage.clear();
+#if QT_VERSION < 0x060000
     currentPlaylist->setCurrentIndex(0);
+#endif
     mediaPlayer->play();
   }
 }

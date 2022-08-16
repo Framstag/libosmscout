@@ -39,14 +39,25 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
+#include <QtGlobal>
 #include <QObject>
 #include <QTimer>
 #include <QMediaPlayer>
-#include <QMediaPlaylist>
+
+#if QT_VERSION < 0x060000
+  #include <QMediaPlaylist>
+#endif
 
 #include <optional>
 
 namespace osmscout {
+
+#if QT_VERSION < 0x060000
+  using QtMediaPlayerState = QMediaPlayer::State;
+#else
+  using QtMediaPlayerState = QMediaPlayer::PlaybackState;
+#endif
+
 
 /**
  * \ingroup QtAPI
@@ -94,7 +105,7 @@ public slots:
 
   void onVoiceChanged(const QString);
 
-  void playerStateChanged(QMediaPlayer::State state);
+  void playerStateChanged(QtMediaPlayerState state);
 
 public:
   NavigationModule(QThread *thread,
@@ -125,7 +136,9 @@ private:
   QString voiceDir;
   // player and playlist should be created in module thread, not in UI thread (constructor)
   // we setup QObject parents, objects are cleaned after Module destruction
+#if QT_VERSION < 0x060000
   QMediaPlaylist *currentPlaylist{nullptr};
+#endif
   QMediaPlayer *mediaPlayer{nullptr};
   std::vector<osmscout::VoiceInstructionMessage::VoiceSample> nextMessage;
 

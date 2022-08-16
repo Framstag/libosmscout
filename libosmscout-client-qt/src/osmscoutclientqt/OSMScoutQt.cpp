@@ -66,7 +66,7 @@ OSMScoutQtBuilder::OSMScoutQtBuilder()
 
   cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
 
-  voiceLookupDirectory = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + QDir::separator() + "voices";
+  voiceLookupDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QDir::separator() + "voices";
 }
 
 OSMScoutQtBuilder::~OSMScoutQtBuilder()
@@ -123,7 +123,7 @@ bool OSMScoutQtBuilder::Init()
                                   offlineTileCacheSize,
                                   userAgent,
                                   customPoiTypes);
-                                  
+
   return true;
 }
 
