@@ -17,12 +17,18 @@ subdir('include/osmscout')
 subdir('include/osmscout/private')
 subdir('src')
 
+link_args = []
+if compiler.get_id()=='gcc' and compiler.version().version_compare('<=8.3.0')
+  # GCC <= 8.3 needs explicit filesystem library linking
+  link_args += '-lstdc++fs'
+endif
 
 osmscout = library('osmscout',
                    osmscoutSrc,
                    include_directories: osmscoutIncDir,
                    cpp_args: cppArgs,
                    dependencies: [mathDep, threadDep, openmpDep, iconvDep, marisaDep],
+                   link_args: link_args,
                    install: true)
 
 # TODO: Generate PKG_CONFIG file
