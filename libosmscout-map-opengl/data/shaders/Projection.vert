@@ -1,105 +1,58 @@
 #version 150 core
 
-uniform float minLon;
-uniform float minLat;
-uniform float maxLon;
-uniform float maxLat;
-uniform float windowWidth;
-uniform float windowHeight;
 uniform float centerLat;
 uniform float centerLon;
-
-uniform float magnification;
-uniform float dpi = 96.0;
+uniform float scaleGradtorad;
+uniform uint useLinearInterpolation;
+uniform float scaledLatDeriv;
+uniform float latOffset;
+uniform float scale;
+uniform float angle;
+uniform float angleNegSin;
+uniform float angleNegCos;
+uniform float windowWidth;
+uniform float windowHeight;
 
 uniform float PI = 3.1415926535897;
+uniform float MaxLat = +85.0511;
+uniform float MinLat = -85.0511;
+uniform float Gradtorad = 1.745329251994330e-02; // 2*PI/360;
 
 /**
- *  Converts a screen pixel to geographic coordinates
+ * Converts a geographic coordinate to screen pixel
+ * see MercatorProjection::GeoToPixel
  */
-vec2 PixelToGeo(in float x, in float y, in float latOffset)
-{
-    float tileDPI=96.0;
-    float gradtorad=2*PI/360;
-    float earthRadiusMeter=6378137.0;
-    float earthExtentMeter=2*PI*earthRadiusMeter;
-    float tileWidthZoom0Aquator=earthExtentMeter;
-    float equatorTileWidth=tileWidthZoom0Aquator/magnification;
-    float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/dpi;
-    float groundWidthEquatorMeter=windowWidth*equatorCorrectedEquatorTileResolution;
+vec2 GeoToPixel(in float lon, in float lat){
+    float width = windowWidth;
+    float height = windowHeight;
+    // Calculations for Mercator projection
 
-    float scale=windowWidth/(2*PI*groundWidthEquatorMeter/earthExtentMeter);
-    float scaleGradtorad=scale*gradtorad;
+    // Screen coordinate relative to center of image
+    float x=(lon-centerLon)*scaleGradtorad;
+    float y;
 
-    x-=windowWidth/2;
-    y=windowHeight/2-y;
+    if (useLinearInterpolation==1u) {
+        y=(lat-centerLat)*scaledLatDeriv;
+    }
+    else {
+        // Mercator is defined just for latitude +-85.0511
+        // For values outside this range is better to result projection border
+        // than some invalid coordinate, like INFINITY
+        float lat = min(max(lat, MinLat), MaxLat);
+        y=(atanh(sin(lat*Gradtorad))-latOffset)*scale;
+    }
 
-    float lon=centerLon+x/scaleGradtorad;
-    float lat=atan(sinh(y/scale+latOffset))/gradtorad;
+    if (angle!=0.0) {
+        float xn=x*angleNegCos-y*angleNegSin;
+        float yn=x*angleNegSin+y*angleNegCos;
 
-    vec2 result = vec2(lon,lat);
-    return (result);
-}
+        x=xn;
+        y=yn;
+    }
 
-/**
- *  Converts a geographic coordinate to screen pixel
- */
-vec2 GeoToPixel(in float posx, in float posy){
-    //Calculations for Mercator projection
-    float tileDPI=96.0;
-    float gradtorad=2*PI/360;
-    float earthRadiusMeter=6378137.0;
-    float earthExtentMeter=2*PI*earthRadiusMeter;
-    float tileWidthZoom0Aquator=earthExtentMeter;
-    float equatorTileWidth=tileWidthZoom0Aquator/magnification;
-    float equatorTileResolution=equatorTileWidth/256.0;
-    float equatorCorrectedEquatorTileResolution=equatorTileResolution*tileDPI/dpi;
-    float groundWidthEquatorMeter=windowWidth*equatorCorrectedEquatorTileResolution;
-    float groundWidthVisibleMeter=groundWidthEquatorMeter*cos(posy*gradtorad);
-
-    float latOffset=atanh(sin(centerLat*gradtorad));
-
-    vec2 tl = PixelToGeo(0.0,0.0,latOffset);
-    vec2 tr = PixelToGeo(windowWidth,0.0,latOffset);
-    vec2 bl = PixelToGeo(0.0,windowHeight,latOffset);
-    vec2 br = PixelToGeo(windowWidth,windowHeight,latOffset);
-
-    float MaxLat = +85.0511;
-    float MinLat = -85.0511;
-    float MaxLon = +180.0;
-    float MinLon = -180.0;
-
-    float latMin=max(MinLat,min(min(tl.y,tr.y),min(bl.y,br.y)));
-    float latMax=min(MaxLat,max(max(tl.y,tr.y),max(bl.y,br.y)));
-
-    float lonMin=max(MinLon,min(min(tl.x,tr.x),min(bl.x,br.x)));
-    float lonMax=min(MaxLon,max(max(tl.x,tr.x),max(bl.x,br.x)));
-
-    float scale=windowWidth/(2*PI*groundWidthEquatorMeter/earthExtentMeter);
-    float scaleGradtorad=scale*gradtorad;
-
-    float latDeriv = 1.0 / sin( (2 * centerLat * gradtorad + PI) /  2);
-    float scaledLatDeriv = latDeriv * gradtorad * scale;
-
-    float windowPosX=(posx-centerLon)*scaledLatDeriv;
-    float windowPosY=(atanh(sin(posy*gradtorad))-latOffset)*scale;
-
-    // Window position in pixel
-    windowPosY=windowHeight/2-windowPosY;
-    windowPosX += windowWidth/2;
-
-    float MinX = (lonMin-centerLon)*scaledLatDeriv + windowWidth/2;
-    float MinY = windowHeight/2 - (atanh(sin(latMin*gradtorad))-latOffset)*scale;
-    float MaxX = (lonMax-centerLon)*scaledLatDeriv + windowWidth/2;
-    float MaxY = windowHeight/2 - (atanh(sin(latMax*gradtorad))-latOffset)*scale;
-
-    float newWidth = windowWidth/windowHeight;
-    float newHeight = 1;
-
-    // OpenGL position
-    float screenX = ((2*newWidth)*(windowPosX - (MinX))/((MaxX)-(MinX)))-newWidth;
-    float screenY = ((2*newHeight)*(windowPosY - (MinY))/((MaxY)-(MinY)))-newHeight;
+    // Transform to OpenGL position
+    float screenX = (x / (width/2)) * (width/height);
+    float screenY = y / (height/2);
 
     vec2 result = vec2(screenX, screenY);
     return(result);

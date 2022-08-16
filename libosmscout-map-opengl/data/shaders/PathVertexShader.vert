@@ -37,8 +37,6 @@ uniform mat4 Projection;
 
 uniform float windowWidth;
 
-vec2 PixelToGeo(in float x, in float y, in float latOffset);
-
 vec2 GeoToPixel(in float posx, in float posy);
 
 

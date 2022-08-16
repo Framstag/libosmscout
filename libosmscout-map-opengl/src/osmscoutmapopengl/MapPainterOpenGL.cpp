@@ -35,10 +35,10 @@ namespace osmscout {
   MapPainterOpenGL::MapPainterOpenGL(int width, int height, double dpi,
                                      const std::string &fontPath, const std::string &shaderDir,
                                      const osmscout::MapParameter &parameter)
-      : mapProjection{GeoCoord(), Magnification(), dpi, width, height},
-        textLoader(fontPath, parameter.GetFontSize(), dpi),
+      : textLoader(fontPath, parameter.GetFontSize(), dpi),
         parameter(parameter)
   {
+    mapProjection.Set(GeoCoord(), Magnification(), dpi, width, height);
     if (!textLoader.IsInitialized()) {
       log.Error() << "Failed to initialize text loader!";
       return;
@@ -918,8 +918,8 @@ namespace osmscout {
               polygon !=nullptr) {
 
             double meterPerPixelLat = (40075.016686 * 1000) * std::cos(node->GetCoords().GetLat()) /
-                                      (float) (std::pow(2, (mapProjection.magnification.GetLevel() + 9)));
-            double meterPerPixel = (40075.016686 * 1000) / (float) (std::pow(2, (mapProjection.magnification.GetLevel() + 9)));
+                                      (float) (std::pow(2, (mapProjection.GetMagnification().GetLevel() + 9)));
+            double meterPerPixel = (40075.016686 * 1000) / (float) (std::pow(2, (mapProjection.GetMagnification().GetLevel() + 9)));
             std::vector<osmscout::Vertex2D> vertices;
             for (const auto &pixel : polygon->GetCoords()) {
               double meterToDegreeLat = std::cos(node->GetCoords().GetLat()) * 0.00001;
@@ -1055,77 +1055,70 @@ namespace osmscout {
   }
 
   void osmscout::MapPainterOpenGL::OnZoom(float zoomDirection) {
+    Magnification magnification;
     if (zoomDirection < 0) {
-      mapProjection.magnification.SetLevel(MagnificationLevel(mapProjection.magnification.GetLevel() - 1));
+      magnification.SetLevel(MagnificationLevel(mapProjection.GetMagnification().GetLevel() - 1));
     }
     else if (zoomDirection > 0) {
-      mapProjection.magnification.SetLevel(MagnificationLevel(mapProjection.magnification.GetLevel() + 1));
+      magnification.SetLevel(MagnificationLevel(mapProjection.GetMagnification().GetLevel() + 1));
     }
+    SetMagnification(magnification);
   }
 
   void osmscout::MapPainterOpenGL::SetSize(int width, int height) {
-    mapProjection.width = width;
-    mapProjection.height = height;
+    mapProjection.Set(mapProjection.GetCenter(),
+                      mapProjection.GetAngle(),
+                      mapProjection.GetMagnification(),
+                      mapProjection.GetDPI(),
+                      width,
+                      height);
   }
 
   void osmscout::MapPainterOpenGL::OnTranslation(int startPointX, int startPointY, int endPointX, int endPointY) {
-    double endLat, endLon, startLat, startLon;
-    PixelToGeo(startPointX, startPointY, startLon, startLat);
-    PixelToGeo(endPointX, endPointY, endLon, endLat);
-    double offsetX = (startLon - endLon);
-    double offsetY = (startLat - endLat);
+    GeoCoord start;
+    GeoCoord end;
+    mapProjection.PixelToGeo(startPointX, startPointY, start);
+    mapProjection.PixelToGeo(endPointX, endPointY, end);
+    double offsetX = start.GetLon() - end.GetLon();
+    double offsetY = start.GetLat() - end.GetLat();
 
-    mapProjection.center.Set(mapProjection.center.GetLat() + offsetY / 2, mapProjection.center.GetLon() + offsetX / 2);
-  }
-
-  bool osmscout::MapPainterOpenGL::PixelToGeo(double x, double y,
-                                              double &lon, double &lat) {
-    double tileDPI = 96.0;
-    double gradtorad = 2 * M_PI / 360;
-    double earthRadiusMeter = 6378137.0;
-    double earthExtentMeter = 2 * M_PI * earthRadiusMeter;
-    double tileWidthZoom0Aquator = earthExtentMeter;
-    double equatorTileWidth = tileWidthZoom0Aquator / mapProjection.magnification.GetMagnification();
-    double equatorTileResolution = equatorTileWidth / 256.0;
-    double equatorCorrectedEquatorTileResolution = equatorTileResolution * tileDPI / mapProjection.dpi;
-    double groundWidthEquatorMeter = mapProjection.width * equatorCorrectedEquatorTileResolution;
-    double latOffset = atanh(sin(mapProjection.center.GetLat() * gradtorad));
-
-    double scale = mapProjection.width / (2 * M_PI * groundWidthEquatorMeter / earthExtentMeter);
-    double scaleGradtorad = scale * gradtorad;
-
-    x -= mapProjection.width / 2;
-    y = mapProjection.height / 2 - y;
-
-    lon = mapProjection.center.GetLon() + x / scaleGradtorad;
-    lat = atan(sinh(y / scale + latOffset)) / gradtorad;
-
-    return true;
+    SetCenter(GeoCoord(mapProjection.GetCenter().GetLat() + offsetY / 2, mapProjection.GetCenter().GetLon() + offsetX / 2 ));
   }
 
   osmscout::GeoCoord MapPainterOpenGL::GetCenter() const
   {
-    return mapProjection.center;
+    return mapProjection.GetCenter();
   }
 
   void MapPainterOpenGL::SetCenter(const osmscout::GeoCoord &center)
   {
-    mapProjection.center = center;
+    mapProjection.Set(center,
+                      mapProjection.GetAngle(),
+                      mapProjection.GetMagnification(),
+                      mapProjection.GetDPI(),
+                      mapProjection.GetWidth(),
+                      mapProjection.GetHeight());
   }
 
   osmscout::Magnification MapPainterOpenGL::GetMagnification() const
   {
-    return mapProjection.magnification;
+    return mapProjection.GetMagnification();
   }
 
   void MapPainterOpenGL::SetMagnification(const osmscout::Magnification &magnification)
   {
-    mapProjection.magnification = magnification;
+    mapProjection.Set(mapProjection.GetCenter(),
+                      mapProjection.GetAngle(),
+                      magnification,
+                      mapProjection.GetDPI(),
+                      mapProjection.GetWidth(),
+                      mapProjection.GetHeight());
+    mapProjection.SetLinearInterpolationUsage(magnification.GetLevel() >= 10);
   }
 
   MercatorProjection MapPainterOpenGL::GetProjection() const
   {
-    return mapProjection.Mercator();
+    return mapProjection;
   }
 
   void MapPainterOpenGL::DrawMap(RenderSteps startStep,
@@ -1134,9 +1127,8 @@ namespace osmscout {
       return;
     }
 
-    auto projection = mapProjection.Mercator();
     assert(styleConfig); // ProcessData and SwapData needs to be called before DrawMap
-    FillStyleRef landFill=styleConfig->GetLandFillStyle(projection);
+    FillStyleRef landFill=styleConfig->GetLandFillStyle(mapProjection);
 
     glClearColor(landFill->GetFillColor().GetR(),
                  landFill->GetFillColor().GetB(),
@@ -1160,7 +1152,7 @@ namespace osmscout {
     groundTileRenderer.AddAttrib("color", 3, GL_FLOAT, 2 * sizeof(GLfloat));
 
     groundTileRenderer.SetMapProjection(mapProjection);
-    groundTileRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    groundTileRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     groundTileRenderer.SetModel();
     groundTileRenderer.SetView(lookX, lookY);
     groundTileRenderer.Draw();
@@ -1174,7 +1166,7 @@ namespace osmscout {
 
     groundRenderer.SetMapProjection(mapProjection);
 
-    groundRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    groundRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     groundRenderer.SetModel();
     groundRenderer.SetView(lookX, lookY);
     groundRenderer.Draw();
@@ -1185,7 +1177,7 @@ namespace osmscout {
 
     areaRenderer.SetMapProjection(mapProjection);
 
-    areaRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    areaRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     areaRenderer.SetModel();
     areaRenderer.SetView(lookX, lookY);
     areaRenderer.AddAttrib("position", 2, GL_FLOAT, 0);
@@ -1211,7 +1203,7 @@ namespace osmscout {
 
     wayRenderer.SetMapProjection(mapProjection);
 
-    wayRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    wayRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     wayRenderer.SetModel();
     wayRenderer.SetView(lookX, lookY);
     wayRenderer.Draw();
@@ -1231,7 +1223,7 @@ namespace osmscout {
     imageRenderer.AddUniform("textureWidthSum", imageRenderer.GetTextureWidth());
     imageRenderer.AddUniform("z", 0.001);
 
-    imageRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    imageRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     imageRenderer.SetModel();
     imageRenderer.SetView(lookX, lookY);
     imageRenderer.Draw();
@@ -1254,7 +1246,7 @@ namespace osmscout {
     textRenderer.AddUniform("textureWidthSum", textRenderer.GetTextureWidth());
     textRenderer.AddUniform("z", 0.001);
 
-    textRenderer.SetProjection(mapProjection.width, mapProjection.height);
+    textRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     textRenderer.SetModel();
     textRenderer.SetView(lookX, lookY);
     textRenderer.Draw();

@@ -165,6 +165,10 @@ namespace osmscout {
     };
 
     Projection() = default;
+    Projection(const Projection&) = default;
+    Projection(Projection&&) = default;
+    Projection& operator=(const Projection&) = default;
+    Projection& operator=(Projection&&) = default;
     virtual ~Projection() = default;
 
     virtual bool CanBatch() const = 0;
@@ -375,6 +379,11 @@ namespace osmscout {
     static const double MinLon;
 
     MercatorProjection() = default;
+    MercatorProjection(const MercatorProjection&) = default;
+    MercatorProjection(MercatorProjection&&) = default;
+    MercatorProjection& operator=(const MercatorProjection&) = default;
+    MercatorProjection& operator=(MercatorProjection&&) = default;
+    ~MercatorProjection() override = default;
 
     bool CanBatch() const override
     {
@@ -528,6 +537,11 @@ namespace osmscout {
 
   public:
     TileProjection() = default;
+    TileProjection(const TileProjection&) = default;
+    TileProjection(TileProjection&&) = default;
+    TileProjection& operator=(const TileProjection&) = default;
+    TileProjection& operator=(TileProjection&&) = default;
+    ~TileProjection() override = default;
 
     bool CanBatch() const override
     {

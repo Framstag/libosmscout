@@ -21,8 +21,6 @@ uniform float textureWidthSum;
 
 uniform float z;
 
-vec2 PixelToGeo(in float x, in float y, in float latOffset);
-
 vec2 GeoToPixel(in float posx, in float posy);
 
 void main() {

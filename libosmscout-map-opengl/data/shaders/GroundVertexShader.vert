@@ -9,8 +9,6 @@ uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
 
-vec2 PixelToGeo(in float x, in float y, in float latOffset);
-
 vec2 GeoToPixel(in float posx, in float posy);
 
 void main() {
