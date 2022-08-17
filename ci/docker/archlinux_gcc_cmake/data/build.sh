@@ -21,5 +21,5 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=DEBUG -DOSMSCOUT_BUILD_BINDING_JAVA=OFF ..
 make -j `nproc` install
-ctest --output-on-failure
+xvfb-run ctest --output-on-failure
 

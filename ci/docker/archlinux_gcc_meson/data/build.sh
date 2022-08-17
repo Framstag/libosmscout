@@ -23,5 +23,5 @@ cd libosmscout
 meson debug
 cd debug
 ninja
-meson test
+xvfb-run meson test
 
