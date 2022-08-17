@@ -17,6 +17,10 @@ RUN pacman --noconfirm --needed -S \
 
 ENV QT_QPA_PLATFORM offscreen
 
+RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+RUN locale-gen
+ENV LANG en_US.UTF-8
+
 RUN mkdir /work
 
 COPY data/build.sh /work
