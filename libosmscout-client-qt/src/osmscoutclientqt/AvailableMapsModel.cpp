@@ -176,7 +176,11 @@ void AvailableMapsModel::listDownloaded(const MapProvider &provider, QNetworkRep
             timestamp.isDouble() && version.isDouble()){
 
           QDateTime creation;
+#if QT_VERSION > QT_VERSION_CHECK(5, 8, 0) /* For compatibility with QT 5.6 */
           creation.setSecsSinceEpoch(timestamp.toDouble());
+#else
+          creation.setTime_t(timestamp.toDouble());
+#endif
 
           append(new AvailableMapsModelMap(name.toString(), map.toString().split('/'), description.toString(),
                                            provider, size, serverDirectory.toString(),
