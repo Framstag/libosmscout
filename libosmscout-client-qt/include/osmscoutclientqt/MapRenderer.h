@@ -73,6 +73,7 @@ public:
   };
 
 private:
+  bool addBasemapData(MapDataRef data) const;
   bool addOverlayObjectData(MapDataRef data, TypeConfigRef typeConfig) const;
 };
 

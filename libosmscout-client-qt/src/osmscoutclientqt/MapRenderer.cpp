@@ -306,17 +306,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
     if (first) {
       // draw base map
-      if (renderBasemap && basemapDatabase) {
-        osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
-        if (waterIndex) {
-          osmscout::GeoBox boundingBox;
-          renderProjection.GetDimensions(boundingBox);
-          if (waterIndex->GetRegions(boundingBox,
-                                     renderProjection.GetMagnification(),
-                                     data->baseMapTiles)) {
-          }
-          skip = false;
-        }
+      if (renderBasemap) {
+        skip = !addBasemapData(data);
       }
     }
 
@@ -347,6 +338,9 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   std::unique_ptr<MapPainterQt> painter;
   if (databases.empty()) {
     osmscout::MapDataRef data = std::make_shared<osmscout::MapData>();
+    if (renderBasemap) {
+      addBasemapData(data);
+    }
     addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig());
     painter=std::make_unique<osmscout::MapPainterQt>(emptyStyleConfig);
     MapPainterQt *p = painter.get();
@@ -358,6 +352,22 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                          *drawParameter,
                          p);
   Close();
+}
+
+bool DBRenderJob::addBasemapData(MapDataRef data) const
+{
+  if (!basemapDatabase) {
+    return false;
+  }
+  osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
+  if (!waterIndex) {
+    return false;
+  }
+  osmscout::GeoBox boundingBox;
+  renderProjection.GetDimensions(boundingBox);
+  return waterIndex->GetRegions(boundingBox,
+                                renderProjection.GetMagnification(),
+                                data->baseMapTiles);
 }
 
 bool DBRenderJob::addOverlayObjectData(MapDataRef data, TypeConfigRef typeConfig) const
