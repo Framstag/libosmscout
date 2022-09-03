@@ -148,6 +148,9 @@ protected:
   osmscout::DatabaseParameter        databaseParameter;
   std::list<DBInstanceRef>           databases;
 
+  TypeConfigRef                      emptyTypeConfig; // type config just with special and custom poi types
+  StyleConfigRef                     emptyStyleConfig;
+
   QString                            stylesheetFilename;
   QString                            iconDirectory;
   std::unordered_map<std::string,bool>
@@ -178,6 +181,10 @@ protected:
   void LoadStyleInternal(QString stylesheetFilename,
                          std::unordered_map<std::string,bool> stylesheetFlags,
                          const QString &suffix="");
+
+  void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
+
+  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig) const;
 
 public:
   DBThread(QThread *backgroundThread,
@@ -216,6 +223,12 @@ public:
   const QList<StyleError> &GetStyleErrors() const
   {
       return styleErrors;
+  }
+
+  StyleConfigRef GetEmptyStyleConfig() const
+  {
+    QReadLocker locker(&lock);
+    return emptyStyleConfig;
   }
 
   const QMap<QString,bool> GetStyleFlags() const;
