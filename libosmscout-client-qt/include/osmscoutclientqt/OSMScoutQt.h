@@ -50,9 +50,9 @@ class OSMSCOUT_CLIENT_QT_API OSMScoutQtBuilder{
 private:
   QSettings *settingsStorage{nullptr};
 
-  QString onlineTileProviders;
-  QString mapProviders;
-  QString voiceProviders;
+  QStringList onlineTileProviders;
+  QStringList mapProviders;
+  QStringList voiceProviders;
   QStringList mapLookupDirectories;
   QString basemapLookupDirectory;
   QString cacheLocation;
@@ -84,21 +84,21 @@ public:
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithOnlineTileProviders(const QString &onlineTileProviders)
+  inline OSMScoutQtBuilder& AddOnlineTileProviders(const QString &onlineTileProviders)
   {
-    this->onlineTileProviders=onlineTileProviders;
+    this->onlineTileProviders << onlineTileProviders;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithMapProviders(const QString &mapProviders)
+  inline OSMScoutQtBuilder& AddMapProviders(const QString &mapProviders)
   {
-    this->mapProviders=mapProviders;
+    this->mapProviders << mapProviders;
     return *this;
   }
 
-  inline OSMScoutQtBuilder& WithVoiceProviders(const QString &voiceProviders)
+  inline OSMScoutQtBuilder& AddVoiceProviders(const QString &voiceProviders)
   {
-    this->voiceProviders=voiceProviders;
+    this->voiceProviders << voiceProviders;
     return *this;
   }
 
@@ -214,8 +214,8 @@ enum RenderingType {
  *      .WithStyleSheetFile(stylesheetFileName)
  *      .WithIconDirectory(iconDirectory)
  *      .WithMapLookupDirectories(mapLookupDirectories)
- *      .WithOnlineTileProviders(":/resources/online-tile-providers.json")
- *      .WithMapProviders(":/resources/map-providers.json")
+ *      .AddOnlineTileProviders(":/resources/online-tile-providers.json")
+ *      .AddMapProviders(":/resources/map-providers.json")
  *      .Init();
  *
  * if (!success){

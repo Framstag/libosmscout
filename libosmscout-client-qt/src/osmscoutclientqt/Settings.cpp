@@ -130,27 +130,31 @@ void Settings::SetOnlineTileProviderId(QString id){
     }
 }
 
-bool Settings::loadOnlineTileProviders(QString path)
+bool Settings::loadOnlineTileProviders(const QStringList &paths)
 {
     // load online tile providers
-    QFile loadFile(path);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
+    bool result = true;
+    for (const auto &path : paths) {
+      QFile loadFile(path);
+      if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
-        return false;
-    }
-    qDebug() << "Loading online tile providers from " << loadFile.fileName();
+        result = false;
+        continue;
+      }
+      qDebug() << "Loading online tile providers from " << loadFile.fileName();
 
-    QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
-    for (auto obj: doc.array()){
+      QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
+      for (auto obj: doc.array()) {
         OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
-        if (!provider.isValid()){
-            qWarning() << "Can't parse online provider from json value" << obj;
-        }else{
-            if (!onlineProviderMap.contains(provider.getId())){
-              onlineProviderMap[provider.getId()] = provider;
-              onlineProviders << provider;
-            }
+        if (!provider.isValid()) {
+          qWarning() << "Can't parse online provider from json value" << obj;
+        } else {
+          if (!onlineProviderMap.contains(provider.getId())) {
+            onlineProviderMap[provider.getId()] = provider;
+            onlineProviders << provider;
+          }
         }
+      }
     }
 
     // check if current provider is valid...
@@ -162,7 +166,7 @@ bool Settings::loadOnlineTileProviders(QString path)
     }
 
     emit OnlineTileProviderIdChanged(GetOnlineTileProviderId());
-    return true;
+    return result && !onlineProviders.empty();
 }
 
 namespace { // anonymous namespace
@@ -190,14 +194,22 @@ bool loadResourceProviders(const QString &path, QList<Provider> &providers)
 }
 }
 
-bool Settings::loadMapProviders(QString path)
+bool Settings::loadMapProviders(const QStringList &paths)
 {
-  return loadResourceProviders<MapProvider>(path, mapProviders);
+  bool result = true;
+  for (const auto &path:paths) {
+    result &= loadResourceProviders<MapProvider>(path, mapProviders);
+  }
+  return !mapProviders.empty() && result;
 }
 
-bool Settings::loadVoiceProviders(QString path)
+bool Settings::loadVoiceProviders(const QStringList &paths)
 {
-  return loadResourceProviders<VoiceProvider>(path, voiceProviders);
+  bool result = true;
+  for (const auto &path:paths) {
+    result &= loadResourceProviders<VoiceProvider>(path, voiceProviders);
+  }
+  return !voiceProviders.empty() && result;
 }
 
 bool Settings::GetOfflineMap() const
