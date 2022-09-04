@@ -86,7 +86,11 @@ void MapDownloadJob::start()
   mapMetadata["name"] = map.getName();
   mapMetadata["map"] = map.getPath().join("/");
   mapMetadata["version"] = map.getVersion();
+#if QT_VERSION > QT_VERSION_CHECK(5, 8, 0) /* For compatibility with QT 5.6 */
   mapMetadata["creation"] = (double)map.getCreation().toSecsSinceEpoch();
+#else
+  mapMetadata["creation"] = (double)map.getCreation().toTime_t();
+#endif
 
   QJsonDocument doc(mapMetadata);
   QFile metadataFile(target.filePath(FILE_METADATA));
@@ -138,7 +142,11 @@ MapDirectory::MapDirectory(QDir dir):
         metadataObject.contains("version")) {
       name = metadataObject["name"].toString();
       path = metadataObject["map"].toString().split("/");
+#if QT_VERSION > QT_VERSION_CHECK(5, 8, 0) /* For compatibility with QT 5.6 */
       creation.setSecsSinceEpoch(metadataObject["creation"].toDouble());
+#else
+      creation.setTime_t(metadataObject["creation"].toDouble());
+#endif
       version = metadataObject["version"].toInt();
       metadata = true;
     }
