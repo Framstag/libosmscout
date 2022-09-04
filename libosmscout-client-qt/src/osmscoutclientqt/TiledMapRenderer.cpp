@@ -175,9 +175,9 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   if (onlineTilesEnabled){
     layerCaches << &onlineTileCache;
   }
-  if (offlineTilesEnabled){
-    layerCaches << &offlineTileCache;
-  }
+
+  layerCaches << &offlineTileCache;
+
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
 
@@ -193,7 +193,10 @@ DatabaseCoverage TiledMapRenderer::databaseCoverageOfTile(uint32_t zoomLevel, ui
   GeoBox tileBoundingBox = OSMTile::tileBoundingBox(zoomLevel, xtile, ytile);
   MagnificationLevel level(zoomLevel);
   Magnification magnification(level);
-  DatabaseCoverage state=dbThread->databaseCoverage(magnification,tileBoundingBox);
+  DatabaseCoverage state = offlineTilesEnabled
+                         ? dbThread->databaseCoverage(magnification,tileBoundingBox)
+                         : DatabaseCoverage::Outside;
+
   if (state==DatabaseCoverage::Outside &&
       overlayObjectsBox().Intersects(tileBoundingBox)){
     return DatabaseCoverage::Intersects;
@@ -307,7 +310,12 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
         connect(loadJob, &DBLoadJob::finished,
                 this, &TiledMapRenderer::onLoadJobFinished);
 
-        dbThread->RunJob(loadJob);
+        if (offlineTilesEnabled) {
+          dbThread->RunJob(loadJob);
+        } else {
+          // offline map rendering is disabled but there are some overlay objects intersecting with the tile...
+          onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>());
+        }
 
     }else{
         // put Null image
@@ -377,9 +385,10 @@ void TiledMapRenderer::onOfflineMapChanged(bool b)
         offlineTilesEnabled = b;
 
         QMutexLocker cacheLocker(&tileCacheMutex);
-        onlineTileCache.invalidate(); // overlapp areas will change
+        onlineTileCache.invalidate(); // overlap areas will change
         offlineTileCache.invalidate();
         offlineTileCache.clearPendingRequests();
+        offlineTileCache.incEpoch();
     }
     emit Redraw();
 }
@@ -467,8 +476,10 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                       &drawParameter,
                       &p,
                       overlayObjects,
+                      dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ false,
-                      /*renderBasemap*/ !onlineTilesEnabled);
+                      /*renderBasemap*/ !onlineTilesEnabled,
+                      offlineTilesEnabled);
       dbThread->RunJob(&job);
       success=job.IsSuccess();
     }

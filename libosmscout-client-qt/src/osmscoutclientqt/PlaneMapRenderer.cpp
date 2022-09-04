@@ -390,6 +390,7 @@ void PlaneMapRenderer::DrawMap()
                       &drawParameter,
                       &p,
                       overlayObjects,
+                      dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ true);
       dbThread->RunJob(&job);
       success=job.IsSuccess();

@@ -147,7 +147,6 @@ void MapRenderer::addOverlayObject(int id, const OverlayObjectRef& obj)
     overlayObjectMap[id]=obj;
   }
   InvalidateVisualCache();
-  emit Redraw();
 }
 
 void MapRenderer::removeOverlayObject(int id)
@@ -219,8 +218,10 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
                          osmscout::MapParameter *drawParameter,
                          QPainter *p,
                          std::vector<OverlayObjectRef> overlayObjects,
+                         StyleConfigRef emptyStyleConfig,
                          bool drawCanvasBackground,
-                         bool renderBasemap):
+                         bool renderBasemap,
+                         bool renderDatabases):
   renderProjection(renderProjection),
   tiles(tiles),
   drawParameter(drawParameter),
@@ -228,25 +229,27 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
   success(false),
   drawCanvasBackground(drawCanvasBackground),
   renderBasemap(renderBasemap),
-  overlayObjects(overlayObjects)
-{
-}
-
-DBRenderJob::~DBRenderJob()
+  renderDatabases(renderDatabases),
+  overlayObjects(overlayObjects),
+  emptyStyleConfig(emptyStyleConfig)
 {
 }
 
 void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
-                      const std::list<DBInstanceRef> &databases,
+                      const std::list<DBInstanceRef> &allDatabases,
                       QReadLocker *locker)
 {
+  std::list<DBInstanceRef> databases; // enabled databases for rendering
+  if (renderDatabases) {
+    databases = allDatabases;
+  }
   DBJob::Run(basemapDatabase,databases,locker);
 
-  bool backgroundRendered=false;
   success=true;
 
   // draw background
   if (drawCanvasBackground){
+    bool backgroundRendered=false;
     for (const auto &db:databases){
       // fill background with "unknown" color
       if (!backgroundRendered && db->GetStyleConfig()){
@@ -262,15 +265,21 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
             break;
           }
       }
-      if (!backgroundRendered){
-        // as backup, when "unknown" style is not defined, use black color
+    }
+    if (!backgroundRendered && emptyStyleConfig) {
+      osmscout::FillStyleRef unknownFillStyle=emptyStyleConfig->GetUnknownFillStyle(renderProjection);
+      if (unknownFillStyle){
+        osmscout::Color backgroundColor=unknownFillStyle->GetFillColor();
         p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
-                    QBrush(QColor::fromRgbF(0,0,0,1)));
+                    QColor::fromRgbF(backgroundColor.GetR(),
+                                     backgroundColor.GetG(),
+                                     backgroundColor.GetB(),
+                                     1));
         backgroundRendered=true;
-        break;
       }
     }
     if (!backgroundRendered){
+      // as backup, when "unknown" style is not defined, use black color
       p->fillRect(QRectF(0,0,renderProjection.GetWidth(),renderProjection.GetHeight()),
                   QBrush(QColor::fromRgbF(0,0,0,1)));
     }
@@ -279,88 +288,63 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   // prepare data for batch
   osmscout::MapPainterBatchQt batch(databases.size());
   size_t i=0;
-  for (const auto &db:databases){
-    bool first=(i==0);
-    bool last=(i==databases.size()-1);
-    bool skip=true;
+  for (const auto &db: databases) {
+    bool first = (i == 0);
+    bool last = (i == databases.size() - 1);
+    bool skip = true;
     ++i;
 
     std::list<osmscout::TileRef> tileList;
-    if (tiles.contains(db->path)){
+    if (tiles.contains(db->path)) {
       auto list = tiles[db->path].values();
-      tileList=std::list<osmscout::TileRef>(list.begin(), list.end());
-      skip=false;
+      tileList = std::list<osmscout::TileRef>(list.begin(), list.end());
+      skip = false;
     }
 
-    osmscout::MapDataRef data=std::make_shared<osmscout::MapData>();
-    db->GetMapService()->AddTileDataToMapData(tileList,*data);
+    osmscout::MapDataRef data = std::make_shared<osmscout::MapData>();
+    db->GetMapService()->AddTileDataToMapData(tileList, *data);
 
-    if (first){
+    if (first) {
       // draw base map
-      if (renderBasemap && basemapDatabase) {
-        osmscout::WaterIndexRef waterIndex=basemapDatabase->GetWaterIndex();
-        if (waterIndex) {
-          osmscout::GeoBox                boundingBox;
-          renderProjection.GetDimensions(boundingBox);
-          if (waterIndex->GetRegions(boundingBox,
-                                     renderProjection.GetMagnification(),
-                                     data->baseMapTiles)) {
-          }
-          skip=false;
-        }
+      if (renderBasemap) {
+        skip = !addBasemapData(data);
       }
     }
 
-    if (last){
-      osmscout::TypeConfigRef typeConfig=db->GetDatabase()->GetTypeConfig();
-      for (auto const &o:overlayObjects){
-
-        if (o->getObjectType()==osmscout::RefType::refWay){
-          OverlayWay *ow=dynamic_cast<OverlayWay*>(o.get());
-          if (ow != nullptr) {
-            osmscout::WayRef w = std::make_shared<osmscout::Way>();
-            if (ow->toWay(w, *typeConfig)) {
-              data->poiWays.push_back(w);
-            }
-          }
-        } else if (o->getObjectType()==osmscout::RefType::refArea){
-          OverlayArea *oa=dynamic_cast<OverlayArea*>(o.get());
-          if (oa != nullptr) {
-            osmscout::AreaRef a = std::make_shared<osmscout::Area>();
-            if (oa->toArea(a, *typeConfig)) {
-              data->poiAreas.push_back(a);
-            }
-          }
-        } else if (o->getObjectType()==osmscout::RefType::refNode){
-          OverlayNode *oo=dynamic_cast<OverlayNode*>(o.get());
-          if (oo != nullptr) {
-            osmscout::NodeRef n = std::make_shared<osmscout::Node>();
-            if (oo->toNode(n, *typeConfig)) {
-              data->poiNodes.push_back(n);
-            }
-          }
-        }
-      }
-      skip&=overlayObjects.empty();
+    if (last) {
+      osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
+      skip &= !addOverlayObjectData(data, typeConfig);
     }
 
-    if (skip){
+    if (skip) {
       osmscout::log.Debug() << "Skip database " << db->path.toStdString();
       continue;
     }
 
     if (drawParameter->GetRenderSeaLand()) {
       db->GetMapService()->GetGroundTiles(renderProjection,
-                                       data->groundTiles);
+                                          data->groundTiles);
     }
 
-    auto *painter=db->GetPainter();
+    auto *painter = db->GetPainter();
     if (painter != nullptr) {
       batch.addData(data, painter);
-    }else{
+    } else {
       osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();
-      success=false;
+      success = false;
     }
+  }
+
+  std::unique_ptr<MapPainterQt> painter;
+  if (databases.empty()) {
+    osmscout::MapDataRef data = std::make_shared<osmscout::MapData>();
+    if (renderBasemap) {
+      addBasemapData(data);
+    }
+    addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig());
+    painter=std::make_unique<osmscout::MapPainterQt>(emptyStyleConfig);
+    MapPainterQt *p = painter.get();
+    batch.addData(data, p);
   }
 
   // draw databases
@@ -368,5 +352,55 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                          *drawParameter,
                          p);
   Close();
+}
+
+bool DBRenderJob::addBasemapData(MapDataRef data) const
+{
+  if (!basemapDatabase) {
+    return false;
+  }
+  osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
+  if (!waterIndex) {
+    return false;
+  }
+  osmscout::GeoBox boundingBox;
+  renderProjection.GetDimensions(boundingBox);
+  return waterIndex->GetRegions(boundingBox,
+                                renderProjection.GetMagnification(),
+                                data->baseMapTiles);
+}
+
+bool DBRenderJob::addOverlayObjectData(MapDataRef data, TypeConfigRef typeConfig) const
+{
+  for (auto const &o: overlayObjects) {
+
+    if (o->getObjectType() == osmscout::RefType::refWay) {
+      OverlayWay *ow = dynamic_cast<OverlayWay *>(o.get());
+      if (ow != nullptr) {
+        osmscout::WayRef w = std::make_shared<osmscout::Way>();
+        if (ow->toWay(w, *typeConfig)) {
+          data->poiWays.push_back(w);
+        }
+      }
+    } else if (o->getObjectType() == osmscout::RefType::refArea) {
+      OverlayArea *oa = dynamic_cast<OverlayArea *>(o.get());
+      if (oa != nullptr) {
+        osmscout::AreaRef a = std::make_shared<osmscout::Area>();
+        if (oa->toArea(a, *typeConfig)) {
+          data->poiAreas.push_back(a);
+        }
+      }
+    } else if (o->getObjectType() == osmscout::RefType::refNode) {
+      OverlayNode *oo = dynamic_cast<OverlayNode *>(o.get());
+      if (oo != nullptr) {
+        osmscout::NodeRef n = std::make_shared<osmscout::Node>();
+        if (oo->toNode(n, *typeConfig)) {
+          data->poiNodes.push_back(n);
+        }
+      }
+    }
+  }
+
+  return !overlayObjects.empty();
 }
 }

@@ -60,6 +60,10 @@ DBThread::DBThread(QThread *backgroundThread,
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
+  emptyTypeConfig=std::make_shared<TypeConfig>();
+  registerCustomPoiTypes(emptyTypeConfig);
+  emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
+
   connect(settings.get(), &Settings::MapDPIChange,
           this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
@@ -281,36 +285,8 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
 
       if (typeConfig) {
-
-        for (const std::string &typeName:customPoiTypes){
-          osmscout::TypeInfoRef typeInfo=std::make_shared<osmscout::TypeInfo>(typeName);
-          typeInfo->SetInternal()
-            .CanBeWay(true)
-            .CanBeArea(true)
-            .CanBeNode(true);
-
-          osmscout::FeatureRef nameFeature = typeConfig->GetFeature(NameFeature::NAME);
-          if (nameFeature)
-            typeInfo->AddFeature(nameFeature);
-
-          osmscout::FeatureRef colorFeature = typeConfig->GetFeature(ColorFeature::NAME);
-          if (colorFeature)
-            typeInfo->AddFeature(colorFeature);
-
-          typeConfig->RegisterType(typeInfo);
-        }
-
-        styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-
-        // setup flag overrides before load
-        for (const auto& flag : stylesheetFlags) {
-            styleConfig->AddFlag(flag.first,flag.second);
-        }
-
-        if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
-          qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
-          styleConfig=nullptr;
-        }
+        registerCustomPoiTypes(typeConfig);
+        styleConfig=makeStyleConfig(typeConfig);
       }
       else {
         qWarning() << "TypeConfig invalid!";
@@ -338,6 +314,46 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 
   emit databaseLoadFinished(boundingBox);
   emit stylesheetFilenameChanged();
+}
+
+void DBThread::registerCustomPoiTypes(osmscout::TypeConfigRef typeConfig) const
+{
+  for (const std::string &typeName:customPoiTypes){
+    osmscout::TypeInfoRef typeInfo=std::make_shared<osmscout::TypeInfo>(typeName);
+    typeInfo->SetInternal()
+      .CanBeWay(true)
+      .CanBeArea(true)
+      .CanBeNode(true);
+
+    osmscout::FeatureRef nameFeature = typeConfig->GetFeature(NameFeature::NAME);
+    if (nameFeature) {
+      typeInfo->AddFeature(nameFeature);
+    }
+
+    osmscout::FeatureRef colorFeature = typeConfig->GetFeature(ColorFeature::NAME);
+    if (colorFeature) {
+      typeInfo->AddFeature(colorFeature);
+    }
+
+    typeConfig->RegisterType(typeInfo);
+  }
+}
+
+StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig) const
+{
+  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+
+  // setup flag overrides before load
+  for (const auto& flag : stylesheetFlags) {
+    styleConfig->AddFlag(flag.first,flag.second);
+  }
+
+  if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+    qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
+    styleConfig=nullptr;
+  }
+
+  return styleConfig;
 }
 
 void DBThread::ToggleDaylight()
@@ -398,6 +414,8 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
 {
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
+
+  emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
 
   bool prevErrs = !styleErrors.isEmpty();
   styleErrors.clear();

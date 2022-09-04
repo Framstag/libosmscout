@@ -47,7 +47,9 @@ private:
   bool success;
   bool drawCanvasBackground;
   bool renderBasemap;
+  bool renderDatabases;
   std::vector<OverlayObjectRef> overlayObjects;
+  StyleConfigRef emptyStyleConfig;
 
 public:
   DBRenderJob(osmscout::MercatorProjection renderProjection,
@@ -55,17 +57,24 @@ public:
               osmscout::MapParameter *drawParameter,
               QPainter *p,
               std::vector<OverlayObjectRef> overlayObjects,
+              StyleConfigRef emptyStyleConfig,
               bool drawCanvasBackground=true,
-              bool renderBasemap=true);
-  virtual ~DBRenderJob();
+              bool renderBasemap=true,
+              bool renderDatabases=true);
+
+  ~DBRenderJob() override = default;
 
   void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
-           const std::list<DBInstanceRef> &databases,
+           const std::list<DBInstanceRef> &allDatabases,
            QReadLocker *locker) override;
 
   inline bool IsSuccess() const{
     return success;
   };
+
+private:
+  bool addBasemapData(MapDataRef data) const;
+  bool addOverlayObjectData(MapDataRef data, TypeConfigRef typeConfig) const;
 };
 
 /**

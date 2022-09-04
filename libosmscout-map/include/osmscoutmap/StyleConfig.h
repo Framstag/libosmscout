@@ -543,7 +543,7 @@ namespace osmscout {
    *
    * Internals:
    * * Fastpath: Fastpath means, that we can directly return the style definition from the style sheet. This is normally
-   * the case, if there is excactly one match in the style sheet. If there are multiple matches a new style has to be
+   * the case, if there is exactly one match in the style sheet. If there are multiple matches a new style has to be
    * allocated and composed from all matches.
    */
   class OSMSCOUT_MAP_API StyleConfig
