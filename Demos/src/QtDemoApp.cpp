@@ -167,9 +167,9 @@ int QtDemoApp::Run(const Arguments &args, const QUrl &qmlFileUrl)
       .WithIconDirectory(args.iconDirectory)
       .WithMapLookupDirectories(args.mapLookupDirectories)
       .WithBasemapLookupDirectory(args.basemapDir)
-      .WithOnlineTileProviders(":/resources/online-tile-providers.json")
-      .WithMapProviders(":/resources/map-providers.json")
-      .WithVoiceProviders(":/resources/voice-providers.json")
+      .AddOnlineTileProviders(":/resources/online-tile-providers.json")
+      .AddMapProviders(":/resources/map-providers.json")
+      .AddVoiceProviders(":/resources/voice-providers.json")
       .WithUserAgent(QApplication::applicationName(), QApplication::applicationVersion());
 
   if (!builder.Init()){

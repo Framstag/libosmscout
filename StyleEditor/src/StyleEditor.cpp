@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   builder
     .WithIconDirectory(iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
-    .WithOnlineTileProviders(":/resources/online-tile-providers.json")
+    .AddOnlineTileProviders(":/resources/online-tile-providers.json")
     .WithUserAgent("OSMScoutStyleEditor", "v?");
 
   if (!builder.Init()){
