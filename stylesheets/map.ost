@@ -255,10 +255,6 @@ TYPES
     = NODE ("highway"=="mini_roundabout")
       {Name, NameAlt, ClockwiseDirection}
 
-  TYPE highway_bus_stop
-    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND ("public_transport" IN ["platform", "stop_position"])))
-      {Name, NameAlt}
-
   TYPE highway_turning_cycle
     = NODE ("highway"=="turning_cycle")
       {Name, NameAlt}
@@ -430,6 +426,14 @@ TYPES
   TYPE railway_turntable
     = NODE AREA ("railway"=="turntable")
       {Bridge, Tunnel}
+
+  //
+  // Other public transport (not railway)
+  //
+
+  TYPE highway_bus_stop
+    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND ("public_transport" IN ["platform", "stop_position"])))
+      {Name, NameAlt}
 
   TYPE public_transport_platform
      = WAY AREA ("public_transport"=="platform" OR
