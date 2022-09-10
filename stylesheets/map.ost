@@ -1206,6 +1206,10 @@ TYPES
       POI
       GROUP amenity
 
+  TYPE amenity_shelter
+    = NODE ("amenity"=="shelter")
+      GROUP amenity
+
   // Churches
   TYPE christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
