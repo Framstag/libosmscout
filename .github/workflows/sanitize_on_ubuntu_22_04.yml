@@ -11,7 +11,7 @@ on:
 jobs:
   sanitize_clang:
     name: clang
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install clang compiler, meson and ninja
-        run: sudo apt-get -y install clang libc++-10-dev ccache libtool pkg-config cmake ninja-build
+        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
               libxml2-dev
@@ -64,14 +64,14 @@ jobs:
 
   sanitize_gcc:
     name: gcc
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, cmake and ninja
-        run:  sudo apt-get -y install gcc-10 g++-10 libtbb-dev ccache libtool pkg-config cmake ninja-build
+        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                libxml2-dev
@@ -98,8 +98,8 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
         env:
-          CXX: g++-10
-          CC: gcc-10
+          CXX: g++-12
+          CC: gcc-12
       - name: Build project
         run: cmake --build build
       - name: Install project
