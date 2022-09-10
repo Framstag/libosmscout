@@ -23,6 +23,7 @@
 #include <memory>
 
 #include <QSettings>
+#include <QStringList>
 
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscoutclientqt/InputHandler.h>
@@ -119,9 +120,9 @@ public:
   const QString GetOnlineTileProviderId() const;
   void SetOnlineTileProviderId(QString id);
 
-  bool loadOnlineTileProviders(QString path);
-  bool loadMapProviders(QString path);
-  bool loadVoiceProviders(QString path);
+  bool loadOnlineTileProviders(const QStringList &paths);
+  bool loadMapProviders(const QStringList &paths);
+  bool loadVoiceProviders(const QStringList &paths);
 
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);

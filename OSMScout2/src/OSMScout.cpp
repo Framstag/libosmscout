@@ -216,9 +216,9 @@ int main(int argc, char* argv[])
     .WithStyleSheetFile(stylesheetFile.fileName())
     .WithIconDirectory(args.iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
-    .WithOnlineTileProviders(":/resources/online-tile-providers.json")
-    .WithMapProviders(":/resources/map-providers.json")
-    .WithVoiceProviders(":/resources/voice-providers.json")
+    .AddOnlineTileProviders(":/resources/online-tile-providers.json")
+    .AddMapProviders(":/resources/map-providers.json")
+    .AddVoiceProviders(":/resources/voice-providers.json")
     .WithUserAgent("OSMScout2DemoApp", "v?");
 
   if (!builder.Init()){
