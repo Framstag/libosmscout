@@ -204,7 +204,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   deps = [mathDep, openmpDep]
   links = [osmscout, osmscoutmap]
 
-  if buildMapCairo and pangocairoDep.found()
+  if buildMapCairo
     includes += osmscoutmapcairoIncDir
     deps += pangocairoDep
     links += osmscoutmapcairo
