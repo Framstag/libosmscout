@@ -122,7 +122,7 @@ jobs:
                qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
                qt6-tools-dev qt6-multimedia-dev"
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --unity on -D qtVersion=6 debug
+        run:  meson setup --buildtype debugoptimized --unity on --wrap-mode=nofallback -D qtVersion=6 debug
         env:
           CXX: g++-12
           CC: gcc-12
