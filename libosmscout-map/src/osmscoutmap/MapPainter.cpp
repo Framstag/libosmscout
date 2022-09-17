@@ -1163,6 +1163,7 @@ namespace osmscout {
           coordBuffer.buffer[j].GetX(),
           coordBuffer.buffer[j].GetY());
     }
+
     RegisterContourLabel(projection,
                          parameter,
                          labelData,

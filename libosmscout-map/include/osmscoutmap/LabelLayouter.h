@@ -782,13 +782,20 @@ namespace osmscout {
 
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
-      double pLength=labelPath.GetLength();
-      double offset=labelData.contourLabelOffset;
+      double pathLength=labelPath.GetLength();
+      size_t countLabels=(pathLength-labelData.contourLabelSpace)/(label->width+labelData.contourLabelSpace);
 
-      while (offset+label->width < pLength){
-        double labelSpaceCount=size_t(label->width/labelData.contourLabelSpace)+1;
+      // We do not to see new label appear and disappear during zoom too often.
+      // We want new labels to be "between" existing labels
+      // We thus, only draw labels in an amount of a multiple of 2
+      countLabels=(size_t)pow(2.0,floor(log2(double(countLabels))));
 
-        double nextOffset = offset+labelSpaceCount*labelData.contourLabelSpace;
+      double labelSpace=(pathLength-countLabels*label->width)/(countLabels+1);
+
+      double offset=labelSpace;
+
+      while (offset+label->width<pathLength){
+        double nextOffset =offset+label->width+labelSpace;
 
         // skip string rendering when path is too much squiggly at this offset
         if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI_4)){
