@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <osmscout/Database.h>
-#include <osmscout/Pixel.h>
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 
