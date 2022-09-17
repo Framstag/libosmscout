@@ -799,9 +799,14 @@ namespace osmscout
       else if (CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
                circle != nullptr)
       {
-        D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), float(projection.ConvertWidthToPixel(circle->GetRadius())), float(projection.ConvertWidthToPixel(circle->GetRadius())));
+        D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(center.GetX(), center.GetY()),
+                                             float(projection.ConvertWidthToPixel(circle->GetRadius())),
+                                             float(projection.ConvertWidthToPixel(circle->GetRadius())));
         m_pRenderTarget->FillEllipse(ellipse, GetColorBrush(fillStyle->GetFillColor()));
-        if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+        if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse,
+                                                    GetColorBrush(borderStyle->GetColor()),
+                                                    borderWidth,
+                                                    GetStrokeStyle(borderStyle->GetDash()));
       }
       else
       {

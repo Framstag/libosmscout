@@ -111,7 +111,7 @@ bool OSMScoutQtBuilder::Init()
       .arg(qVersion());
 
   if(strcmp(qVersion(), QT_VERSION_STR) != 0) {
-    qWarning() << "Runtime Qt version" << qVersion() << "is different that compile time version" << QT_VERSION_STR;
+    qWarning() << "Runtime Qt version" << qVersion() << "is different to compile time version" << QT_VERSION_STR;
   }
 
   osmScoutInstance=new OSMScoutQt(settings,

@@ -889,7 +889,7 @@ namespace osmscout {
     using namespace std::chrono;
 
     std::ostringstream stream;
-    double secondsVal = duration_cast<seconds>(duration).count();
+    seconds::rep secondsVal = duration_cast<seconds>(duration).count();
     if (secondsVal < 60){
       stream << std::fixed << std::setprecision(1) << secondsVal << " s";
       return stream.str();
