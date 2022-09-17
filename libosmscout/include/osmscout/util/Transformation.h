@@ -310,45 +310,8 @@ namespace osmscout {
                                                 double optimizeErrorTolerance,
                                                 TransPolygon::OutputConstraint constraint=TransPolygon::noConstraint);
 
-  /**
-   * Hold a reference to a range of data within a CoordBuffer.
-   *
-   * \ingroup Geometry
-   */
-  class OSMSCOUT_API CoordBufferRange CLASS_FINAL
-  {
-  private:
-    size_t start=std::numeric_limits<size_t>::max();
-    size_t end=std::numeric_limits<size_t>::max();
-
-  public:
-    CoordBufferRange() = default;
-    CoordBufferRange(const CoordBufferRange& other) = default;
-
-    CoordBufferRange(size_t start, size_t end)
-      : start(start),
-        end(end)
-    {
-    }
-
-    size_t GetStart() const
-    {
-      return start;
-    }
-
-    size_t GetEnd() const
-    {
-      return end;
-    }
-
-    size_t GetSize() const {
-      return end-start+1;
-    }
-
-    bool IsValid() const {
-      return start!=std::numeric_limits<size_t>::max();
-    }
-  };
+  // Forward declaration for CoordBuffer
+  class CoordBufferRange;
 
   /**
    * Buffer structure for Vertex2D data. You can add coordinates to the buffer and get the position
@@ -369,16 +332,21 @@ namespace osmscout {
   class OSMSCOUT_API CoordBuffer CLASS_FINAL
   {
   private:
-    size_t   bufferSize;
-    size_t   usedPoints;
+    size_t   bufferSize=131072;
+    size_t   usedPoints=0;
 
   public:
-    Vertex2D *buffer;
+    static CoordBuffer emptyCoordBuffer;
 
   public:
-    CoordBuffer();
-    CoordBuffer(const CoordBuffer& other)   = delete;
+    Vertex2D *buffer{new Vertex2D[bufferSize]()};
+
+  public:
+    CoordBuffer() = default;
     ~CoordBuffer();
+
+    CoordBuffer(const CoordBuffer& other) = delete;
+    CoordBuffer& operator=(const CoordBuffer& other) = delete;
 
     void Reset();
 
@@ -405,6 +373,123 @@ namespace osmscout {
      */
     CoordBufferRange GenerateParallelWay(const CoordBufferRange& org,
                                          double offset);
+  };
+
+  /**
+ * Hold a reference to a range of data within a CoordBuffer.
+ *
+ * \ingroup Geometry
+ */
+  class OSMSCOUT_API CoordBufferRange CLASS_FINAL
+  {
+  private:
+    CoordBuffer* coordBuffer=&CoordBuffer::emptyCoordBuffer;
+    size_t start=std::numeric_limits<size_t>::max();
+    size_t end=std::numeric_limits<size_t>::max();
+    mutable double length=-1;
+
+  public:
+    CoordBufferRange() = default;
+    CoordBufferRange(const CoordBufferRange& other) = default;
+
+    CoordBufferRange(CoordBuffer& coordBuffer, size_t start, size_t end)
+      : coordBuffer(&coordBuffer),
+        start(start),
+        end(end)
+    {
+    }
+
+    CoordBufferRange& operator=(const CoordBufferRange& other)
+    {
+      if (this!=&other) {
+        this->coordBuffer=other.coordBuffer;
+        this->start=other.start;
+        this->end=other.end;
+      }
+
+      return *this;
+    }
+
+    /**
+     * Return the first element on the path
+     * @return first element
+     */
+    Vertex2D GetFirst() const
+    {
+      return coordBuffer->buffer[start];
+    }
+
+    /**
+     * Return the last element on the path
+     * @return last element
+     */
+    Vertex2D GetLast() const
+    {
+      return coordBuffer->buffer[end];
+    }
+
+    /**
+     * Return the index of the first element
+     * @return index
+     */
+    size_t GetStart() const
+    {
+      return start;
+    }
+
+    /**
+     * Return the element with the given index
+     * @param index where index>=start && index<=end
+     * @return the element at the given index
+     */
+    Vertex2D Get(size_t index) const
+    {
+      return coordBuffer->buffer[index];
+    }
+
+    /**
+     * THe index of the last element
+     * @return index
+     */
+    size_t GetEnd() const
+    {
+      return end;
+    }
+
+    /**
+     * Returns the number of elements (end-start+1)
+     * @return number of elements
+     */
+    size_t GetSize() const
+    {
+      return end-start+1;
+    }
+
+    /**
+     * Returns the on-screen length of the path fro the first to the llast element
+     * @return length of path
+     */
+    double GetLength() const
+    {
+      if (length<0.0) {
+        Vertex2D lastCoord=GetFirst();
+
+        length=0.0;
+        for (size_t j = start+1; j <= end; j++) {
+          Vertex2D currentCoord=Get(j);
+          length += sqrt(pow(currentCoord.GetX() - lastCoord.GetX(), 2) +
+                         pow(currentCoord.GetY() - lastCoord.GetY(), 2));
+
+          lastCoord=currentCoord;
+        }
+      }
+
+      return length;
+    }
+
+    bool IsValid() const {
+      return start!=std::numeric_limits<size_t>::max();
+    }
   };
 
   extern OSMSCOUT_API CoordBufferRange CopyPolygonToCoordBuffer(const TransBuffer& transBuffer,

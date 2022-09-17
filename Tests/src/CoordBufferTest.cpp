@@ -15,7 +15,7 @@ TEST_CASE("Check bounding box of generated parallel way")
   buffer.PushCoord(5,1);
   buffer.PushCoord(0,0);
 
-  range=buffer.GenerateParallelWay(CoordBufferRange(0,3), /*offset*/-1);
+  range=buffer.GenerateParallelWay(CoordBufferRange(buffer,0,3), /*offset*/-1);
   REQUIRE(range.GetEnd() - range.GetStart() >= 3);
   REQUIRE(range.GetStart() > 3);
 
@@ -36,6 +36,6 @@ TEST_CASE("Check bounding box of generated parallel way")
   REQUIRE(minY >= -1);
   REQUIRE(maxY < 3);
 
-  range=buffer.GenerateParallelWay(CoordBufferRange(0,3), /*offset*/1);
+  range=buffer.GenerateParallelWay(CoordBufferRange(buffer,0,3), /*offset*/1);
   REQUIRE(range.GetStart() > 7);
 }
