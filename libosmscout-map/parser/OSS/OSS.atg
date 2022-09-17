@@ -619,7 +619,7 @@ PRODUCTIONS
                   StyleConstantRef         constant;
                   double                   width;
                   std::string              unitValue;
-                  StyleConstantWidth::Unit unit;
+                  StyleConstantWidth::Unit unit=StyleConstantWidth::Unit::mm;
                 .)
                 "WIDTH"
                 IDENT<name>

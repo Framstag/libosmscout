@@ -395,7 +395,7 @@ void DBThread::SetStyleFlag(const QString &key, bool value)
 
 void DBThread::ReloadStyle(const QString &suffix)
 {
-  qDebug() << "Reloading style" << stylesheetFilename << suffix << "...";
+  qDebug() << "Reloading style " << stylesheetFilename << suffix << "...";
   LoadStyle(stylesheetFilename, stylesheetFlags,suffix);
   qDebug() << "Reloading style done.";
 }
@@ -420,7 +420,9 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
   bool prevErrs = !styleErrors.isEmpty();
   styleErrors.clear();
   for (const auto& db: databases){
+    qDebug() << "Loading style " << stylesheetFilename << suffix << "...";
     db->LoadStyle(stylesheetFilename+suffix, stylesheetFlags, styleErrors);
+    qDebug() << "Loading style done";
   }
   if (prevErrs || (!styleErrors.isEmpty())){
     qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);

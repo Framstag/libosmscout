@@ -116,7 +116,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     newStyleConfig->AddFlag(flag.first,flag.second);
   }
 
-  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data(),nullptr, false)) {
     // Tear down
     qDeleteAll(painterHolder);
     painterHolder.clear();
@@ -124,7 +124,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
 
-    osmscout::log.Info()<< "Create new style with " << stylesheetFilename.toStdString();
+    osmscout::log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
   }
   else {
     std::list<std::string> errorsStrings=newStyleConfig->GetErrors();

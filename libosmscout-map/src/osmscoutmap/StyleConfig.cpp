@@ -1665,6 +1665,8 @@ namespace osmscout {
     StopClock  timer;
     bool       success=false;
 
+    log.Debug() << "Opening StyleConfig '" << styleFile << "'...";
+
     try {
       FILE*      file;
       FileOffset fileSize;
@@ -1703,21 +1705,21 @@ namespace osmscout {
 
       timer.Stop();
 
-      log.Debug() << "Opening StyleConfig: " << timer.ResultString();
+      log.Debug() << "Opening StyleConfig '" << styleFile << "' " << timer.ResultString();
     }
-    catch (IOException& e) {
+    catch (const IOException& e) {
       log.Error() << e.GetDescription();
     }
 
     return success;
   }
 
-  const std::list<std::string>& StyleConfig::GetErrors()
+  const std::list<std::string>& StyleConfig::GetErrors() const
   {
     return errors;
   }
 
-  const std::list<std::string>& StyleConfig::GetWarnings()
+  const std::list<std::string>& StyleConfig::GetWarnings() const
   {
     return warnings;
   }
