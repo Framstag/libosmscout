@@ -94,6 +94,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
     include/osmscout/util/Projection.h
+    include/osmscout/util/ScreenBox.h
     include/osmscout/util/ScopeGuard.h
     include/osmscout/util/StopClock.h
     include/osmscout/util/String.h
@@ -168,6 +169,7 @@ set(SOURCE_FILES
     src/osmscout/util/PolygonCenter.cpp
     src/osmscout/util/Progress.cpp
     src/osmscout/util/Projection.cpp
+    src/osmscout/util/ScreenBox.cpp
     src/osmscout/util/StopClock.cpp
     src/osmscout/util/String.cpp
     src/osmscout/util/StringMatcher.cpp

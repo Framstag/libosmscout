@@ -104,7 +104,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef lineStyleDescriptor=std::make_shared<LineStyleDescriptor>();
+  static const StyleDescriptorRef lineStyleDescriptor=std::make_shared<LineStyleDescriptor>();
 
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
@@ -434,7 +434,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef fillStyleDescriptor=std::make_shared<FillStyleDescriptor>();
+  static const StyleDescriptorRef fillStyleDescriptor=std::make_shared<FillStyleDescriptor>();
 
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
@@ -560,7 +560,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef borderStyleDescriptor=std::make_shared<BorderStyleDescriptor>();
+  static const StyleDescriptorRef borderStyleDescriptor=std::make_shared<BorderStyleDescriptor>();
 
   BorderStyle::BorderStyle()
     : color(1.0,0.0,0.0,0.0),
@@ -794,7 +794,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef textStyleDescriptor=std::make_shared<TextStyleDescriptor>();
+  static const StyleDescriptorRef textStyleDescriptor=std::make_shared<TextStyleDescriptor>();
 
   TextStyle::TextStyle()
    : position(0),
@@ -1117,7 +1117,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef pathShieldStyleDescriptor=std::make_shared<PathShieldStyleDescriptor>();
+  static const StyleDescriptorRef pathShieldStyleDescriptor=std::make_shared<PathShieldStyleDescriptor>();
 
   PathShieldStyle::PathShieldStyle()
    : shieldStyle(std::make_shared<ShieldStyle>()),
@@ -1293,7 +1293,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef pathTextStyleDescriptor=std::make_shared<PathTextStyleDescriptor>();
+  static const StyleDescriptorRef pathTextStyleDescriptor=std::make_shared<PathTextStyleDescriptor>();
 
   PathTextStyle::PathTextStyle()
    : size(1),
@@ -1449,15 +1449,12 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  void PolygonPrimitive::GetBoundingBox(double& minX,
-                                        double& minY,
-                                        double& maxX,
-                                        double& maxY) const
+  ScreenBox PolygonPrimitive::GetBoundingBox() const
   {
-    minX=std::numeric_limits<double>::max();
-    minY=std::numeric_limits<double>::max();
-    maxX=-std::numeric_limits<double>::max();
-    maxY=-std::numeric_limits<double>::max();
+    double minX=std::numeric_limits<double>::max();
+    double minY=std::numeric_limits<double>::max();
+    double maxX=-std::numeric_limits<double>::min();
+    double maxY=-std::numeric_limits<double>::min();
 
     for (const auto& coord : coords) {
       minX=std::min(minX,coord.GetX());
@@ -1466,6 +1463,8 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
       maxX=std::max(maxX,coord.GetX());
       maxY=std::max(maxY,coord.GetY());
     }
+
+    return {Vertex2D(minX,minY),Vertex2D(maxX,maxY)};
   }
 
   void PolygonPrimitive::AddCoord(const Vertex2D& coord)
@@ -1489,16 +1488,9 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  void RectanglePrimitive::GetBoundingBox(double& minX,
-                                          double& minY,
-                                          double& maxX,
-                                          double& maxY) const
+  ScreenBox RectanglePrimitive::GetBoundingBox() const
   {
-    minX=topLeft.GetX();
-    minY=topLeft.GetY();
-
-    maxX=topLeft.GetX()+width;
-    maxY=topLeft.GetY()+height;
+    return {topLeft,Vertex2D(topLeft.GetX()+width,topLeft.GetY()+height)};
   }
 
   CirclePrimitive::CirclePrimitive(ProjectionMode projectionMode,
@@ -1515,16 +1507,12 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     // no code
   }
 
-  void CirclePrimitive::GetBoundingBox(double& minX,
-                                       double& minY,
-                                       double& maxX,
-                                       double& maxY) const
+  ScreenBox CirclePrimitive::GetBoundingBox() const
   {
-    minX=center.GetX()-radius;
-    minY=center.GetY()-radius;
-
-    maxX=center.GetX()+radius;
-    maxY=center.GetY()+radius;
+    return {Vertex2D(center.GetX()-radius,
+                     center.GetY()-radius),
+            Vertex2D(center.GetX()+radius,
+                     center.GetY()+radius)};
   }
 
   Symbol::Symbol(const std::string& name)
@@ -1535,19 +1523,14 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
 
   void Symbol::AddPrimitive(const DrawPrimitiveRef& primitive)
   {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-
-    primitive->GetBoundingBox(minX,minY,maxX,maxY);
+    ScreenBox screenBox = primitive->GetBoundingBox();
 
     switch (primitive->GetProjectionMode()){
       case DrawPrimitive::ProjectionMode::MAP:
-        mapBoundingBox.Update(minX,minY,maxX,maxY);
+        mapBoundingBox=mapBoundingBox.Merge(screenBox);
         break;
       case DrawPrimitive::ProjectionMode::GROUND:
-        groundBoundingBox.Update(minX,minY,maxX,maxY);
+        groundBoundingBox=groundBoundingBox.Merge(screenBox);
         break;
       default:
         assert(false);
@@ -1573,7 +1556,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   };
 
-  static StyleDescriptorRef iconStyleDescriptor=std::make_shared<IconStyleDescriptor>();
+  static const StyleDescriptorRef iconStyleDescriptor=std::make_shared<IconStyleDescriptor>();
 
   IconStyle::IconStyle()
    : iconId(0),
@@ -1734,7 +1717,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
       AddAttribute(std::make_shared<OffsetRelAttributeDescriptor>("offsetRel",PathSymbolStyle::attrOffsetRel));    }
   };
 
-  static StyleDescriptorRef pathSymbolStyleDescriptor=std::make_shared<PathSymbolStyleDescriptor>();
+  static const StyleDescriptorRef pathSymbolStyleDescriptor=std::make_shared<PathSymbolStyleDescriptor>();
 
   PathSymbolStyle::PathSymbolStyle()
   : symbolSpace(15),
