@@ -847,8 +847,8 @@ namespace osmscout {
     bool Load(const std::string& styleFile,
               ColorPostprocessor colorPostprocessor=nullptr,
               bool submodule=false);
-    const std::list<std::string>&  GetErrors();
-    const std::list<std::string>&  GetWarnings();
+    const std::list<std::string>&  GetErrors() const;
+    const std::list<std::string>&  GetWarnings() const;
     //@}
   };
 

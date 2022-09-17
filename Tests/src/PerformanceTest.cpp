@@ -539,7 +539,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
     try{
       return std::make_shared<PerformanceTestBackendCairo>(args.TileWidth(),args.TileHeight(),styleConfig);
-    } catch (std::runtime_error &e){
+    } catch (const std::runtime_error &e){
       std::cerr << e.what() << std::endl;
       return nullptr;
     }
@@ -569,7 +569,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     try{
       return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig, drawParameter);
-    } catch (std::runtime_error &e){
+    } catch (const std::runtime_error &e){
       std::cerr << e.what() << std::endl;
       return nullptr;
     }

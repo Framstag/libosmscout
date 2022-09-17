@@ -772,7 +772,7 @@ void Parser::WIDTHCONSTDEF() {
 		StyleConstantRef         constant;
 		double                   width;
 		std::string              unitValue;
-		StyleConstantWidth::Unit unit;
+		StyleConstantWidth::Unit unit=StyleConstantWidth::Unit::mm;
 		
 		Expect(35 /* "WIDTH" */);
 		IDENT(name);
