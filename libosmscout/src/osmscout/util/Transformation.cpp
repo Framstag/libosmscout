@@ -241,7 +241,7 @@ namespace osmscout {
   }
 
   // Global empty default coord buffer for default constructor of CoordBufferRange
-  CoordBuffer CoordBuffer::emptyCoordBuffer=CoordBuffer();
+  CoordBuffer CoordBuffer::emptyCoordBuffer;
 
   void CoordBuffer::Reset()
   {

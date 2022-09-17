@@ -643,8 +643,8 @@ namespace osmscout {
     Gdiplus::Pen *pPen;
 
     RENDEROBJECT(pRender);
-    SystemBox boundingBox=symbol.GetBoundingBox(projection);
-    Vertex2D center.boundingBox.GetCenter();
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    Vertex2D center=boundingBox.GetCenter();
 
     for (const auto &primitive: symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr = primitive.get();
