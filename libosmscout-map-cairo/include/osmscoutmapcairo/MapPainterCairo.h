@@ -175,10 +175,7 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const DrawPrimitiveRef& primitive,
                            double x, double y,
-                           double minX,
-                           double minY,
-                           double maxX,
-                           double maxY);
+                           const ScreenBox& boundingBox);
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,

@@ -203,10 +203,10 @@ void Scanner::Init() {
 	keywords.set("WAYS", 19);
 	keywords.set("GROUP", 20);
 	keywords.set("SYMBOL", 22);
-	keywords.set("BORDER", 23);
-	keywords.set("AREA", 24);
-	keywords.set("POLYGON", 26);
-	keywords.set("GROUND", 27);
+	keywords.set("GROUND", 23);
+	keywords.set("BORDER", 24);
+	keywords.set("AREA", 25);
+	keywords.set("POLYGON", 27);
 	keywords.set("RECTANGLE", 28);
 	keywords.set("x", 29);
 	keywords.set("CIRCLE", 30);
@@ -471,7 +471,7 @@ TokenRef Scanner::NextToken() {
 		case 23:
 			{t->kind = 21; break;}
 		case 24:
-			{t->kind = 25; break;}
+			{t->kind = 26; break;}
 		case 25:
 			{t->kind = 39; break;}
 		case 26:

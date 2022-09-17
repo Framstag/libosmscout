@@ -989,27 +989,15 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API DrawPrimitive
   {
-  public:
-    enum class ProjectionMode {
-      MAP,
-      GROUND
-    };
 
   private:
-    ProjectionMode projectionMode;
     FillStyleRef   fillStyle;
     BorderStyleRef borderStyle;
 
   public:
-    DrawPrimitive(ProjectionMode projectionMode,
-                  const FillStyleRef& fillStyle,
+    DrawPrimitive(const FillStyleRef& fillStyle,
                   const BorderStyleRef& borderStyle);
     virtual ~DrawPrimitive() = default;
-
-    ProjectionMode GetProjectionMode() const
-    {
-      return projectionMode;
-    }
 
     const FillStyleRef& GetFillStyle() const
     {
@@ -1036,8 +1024,7 @@ namespace osmscout {
     std::list<Vertex2D> coords;
 
   public:
-    PolygonPrimitive(ProjectionMode projectionMode,
-                     const FillStyleRef& fillStyle,
+    PolygonPrimitive(const FillStyleRef& fillStyle,
                      const BorderStyleRef& borderStyle);
 
     void AddCoord(const Vertex2D& coord);
@@ -1064,8 +1051,7 @@ namespace osmscout {
     double   height;
 
   public:
-    RectanglePrimitive(ProjectionMode projectionMode,
-                       const Vertex2D& topLeft,
+    RectanglePrimitive(const Vertex2D& topLeft,
                        double width,
                        double height,
                        const FillStyleRef& fillStyle,
@@ -1102,8 +1088,7 @@ namespace osmscout {
     double   radius;
 
   public:
-    CirclePrimitive(ProjectionMode projectionMode,
-                    const Vertex2D& center,
+    CirclePrimitive(const Vertex2D& center,
                     double radius,
                     const FillStyleRef& fillStyle,
                     const BorderStyleRef& borderStyle);
@@ -1131,22 +1116,34 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API Symbol CLASS_FINAL
   {
-  private:
-    std::string                 name;
-    std::list<DrawPrimitiveRef> primitives;
+  public:
+    enum class ProjectionMode {
+      MAP,
+      GROUND
+    };
 
-    ScreenBox mapBoundingBox;     //!< bounding box in map canvas coordinates [mm]
-    ScreenBox groundBoundingBox;  //!< bounding box in ground coordinates [m]
-    double maxBorderWidth=0;      //!< maximum border width [mm]
+  private:
+    std::string                 name;               //!< The name of the symbol for reference
+    ProjectionMode              projectionMode;     //!< Symbol is either in ground or map coordinates
+    std::list<DrawPrimitiveRef> primitives;         //!< List of drawing priitive instances that make up the symbol shape
+    ScreenBox                   mapBoundingBox;     //!< bounding box in map canvas coordinates [mm]
+    ScreenBox                   groundBoundingBox;  //!< bounding box in ground coordinates [m]
+    double                      maxBorderWidth=0;   //!< maximum border width [mm]
 
   public:
-    explicit Symbol(const std::string& name);
+    explicit Symbol(const std::string& name,
+                    ProjectionMode projectionMode);
 
     void AddPrimitive(const DrawPrimitiveRef& primitive);
 
     std::string GetName() const
     {
       return name;
+    }
+
+    Symbol::ProjectionMode GetProjectionMode() const
+    {
+      return projectionMode;
     }
 
     const std::list<DrawPrimitiveRef>& GetPrimitives() const
@@ -1157,21 +1154,20 @@ namespace osmscout {
     /**
      * bounding box in pixels for given projection
      */
-    void GetBoundingBox(const Projection &projection,
-                        double& minX,
-                        double& minY,
-                        double& maxX,
-                        double& maxY) const
+    ScreenBox GetBoundingBox(const Projection &projection) const
     {
-      minX=std::min(projection.ConvertWidthToPixel(mapBoundingBox.GetMinX()),
-                    projection.GetMeterInPixel() * groundBoundingBox.GetMinX());
-      minY=std::min(projection.ConvertWidthToPixel(mapBoundingBox.GetMinY()),
-                    projection.GetMeterInPixel() * groundBoundingBox.GetMinY());
-
-      maxX=std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetMaxX()),
-                    projection.GetMeterInPixel() * groundBoundingBox.GetMaxX());
-      maxY=std::max(projection.ConvertWidthToPixel(mapBoundingBox.GetMaxY()),
-                    projection.GetMeterInPixel() * groundBoundingBox.GetMaxY());
+      if (projectionMode==ProjectionMode::GROUND) {
+        return {Vertex2D(projection.GetMeterInPixel() * groundBoundingBox.GetMinX(),
+                         projection.GetMeterInPixel() * groundBoundingBox.GetMinY()),
+                Vertex2D(projection.GetMeterInPixel() * groundBoundingBox.GetMaxX(),
+                         projection.GetMeterInPixel() * groundBoundingBox.GetMaxY())};
+      }
+      else {
+        return {Vertex2D(projection.ConvertWidthToPixel(mapBoundingBox.GetMinX()),
+                         projection.ConvertWidthToPixel(mapBoundingBox.GetMinY())),
+                Vertex2D(projection.ConvertWidthToPixel(mapBoundingBox.GetMaxX()),
+                         projection.ConvertWidthToPixel(mapBoundingBox.GetMaxY()))};
+      }
     }
 
     /**
@@ -1214,7 +1210,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PathSymbolStyle CLASS_FINAL : public Style
   {
   public:
-
     enum Attribute {
       attrSymbol,
       attrSymbolSpace,

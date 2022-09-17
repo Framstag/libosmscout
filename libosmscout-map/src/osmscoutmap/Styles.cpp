@@ -1429,21 +1429,17 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   }
 
-  DrawPrimitive::DrawPrimitive(ProjectionMode projectionMode,
-                               const FillStyleRef& fillStyle,
+  DrawPrimitive::DrawPrimitive(const FillStyleRef& fillStyle,
                                const BorderStyleRef& borderStyle)
-  : projectionMode(projectionMode),
-    fillStyle(fillStyle),
+  : fillStyle(fillStyle),
     borderStyle(borderStyle)
   {
     // no code
   }
 
-  PolygonPrimitive::PolygonPrimitive(ProjectionMode projectionMode,
-                                     const FillStyleRef& fillStyle,
+  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle,
                                      const BorderStyleRef& borderStyle)
-  : DrawPrimitive(projectionMode,
-                  fillStyle,
+  : DrawPrimitive(fillStyle,
                   borderStyle)
   {
     // no code
@@ -1472,14 +1468,12 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     coords.push_back(coord);
   }
 
-  RectanglePrimitive::RectanglePrimitive(ProjectionMode projectionMode,
-                                         const Vertex2D& topLeft,
+  RectanglePrimitive::RectanglePrimitive(const Vertex2D& topLeft,
                                          double width,
                                          double height,
                                          const FillStyleRef& fillStyle,
                                          const BorderStyleRef& borderStyle)
-  : DrawPrimitive(projectionMode,
-                  fillStyle,
+  : DrawPrimitive(fillStyle,
                   borderStyle),
     topLeft(topLeft),
     width(width),
@@ -1493,13 +1487,11 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     return {topLeft,Vertex2D(topLeft.GetX()+width,topLeft.GetY()+height)};
   }
 
-  CirclePrimitive::CirclePrimitive(ProjectionMode projectionMode,
-                                   const Vertex2D& center,
+  CirclePrimitive::CirclePrimitive(const Vertex2D& center,
                                    double radius,
                                    const FillStyleRef& fillStyle,
                                    const BorderStyleRef& borderStyle)
-  : DrawPrimitive(projectionMode,
-                  fillStyle,
+  : DrawPrimitive(fillStyle,
                   borderStyle),
     center(center),
     radius(radius)
@@ -1515,8 +1507,10 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
                      center.GetY()+radius)};
   }
 
-  Symbol::Symbol(const std::string& name)
-  : name(name)
+  Symbol::Symbol(const std::string& name,
+                 ProjectionMode projectionMode)
+  : name(name),
+    projectionMode(projectionMode)
   {
     // no code
   }
@@ -1525,11 +1519,11 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   {
     ScreenBox screenBox = primitive->GetBoundingBox();
 
-    switch (primitive->GetProjectionMode()){
-      case DrawPrimitive::ProjectionMode::MAP:
+    switch (projectionMode){
+      case ProjectionMode::MAP:
         mapBoundingBox=mapBoundingBox.Merge(screenBox);
         break;
-      case DrawPrimitive::ProjectionMode::GROUND:
+      case ProjectionMode::GROUND:
         groundBoundingBox=groundBoundingBox.Merge(screenBox);
         break;
       default:

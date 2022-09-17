@@ -33,23 +33,34 @@ namespace osmscout {
 class OSMSCOUT_MAP_API SymbolRenderer
 {
 public:
-virtual ~SymbolRenderer() = default;
+  virtual ~SymbolRenderer() = default;
 
-virtual void Render(const Symbol &symbol, const Vertex2D &zeroCoord,
-                    double groundMeterInPixel, double screenMmInPixel) const;
+  virtual void Render(const Symbol &symbol,
+                      const Vertex2D &center,
+                      double groundMeterInPixel,
+                      double screenMmInPixel,
+                      double scaleFactor=1.0) const;
 
-virtual void Render(const Symbol &symbol, const Vertex2D &center, const Projection &projection) const;
+  virtual void Render(const Symbol &symbol,
+                      const Vertex2D &center,
+                      const Projection &projection) const;
 
 protected:
-virtual void SetFill(const FillStyleRef &fillStyle) const = 0;
+  virtual void SetFill(const FillStyleRef &fillStyle) const = 0;
 
-virtual void SetBorder(const BorderStyleRef &borderStyle, double screenMmInPixel) const = 0;
+  virtual void SetBorder(const BorderStyleRef &borderStyle,
+                         double screenMmInPixel) const = 0;
 
-virtual void DrawPolygon(const std::vector<Vertex2D> &polygonPixels) const = 0;
+  virtual void DrawPolygon(const std::vector<Vertex2D> &polygonPixels) const = 0;
 
-virtual void DrawRect(double x, double y, double w, double h) const = 0;
+  virtual void DrawRect(double x,
+                        double y,
+                        double w,
+                        double h) const = 0;
 
-virtual void DrawCircle(double x, double y, double radius) const = 0;
+  virtual void DrawCircle(double x,
+                          double y,
+                          double radius) const = 0;
 };
 }
 

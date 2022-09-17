@@ -324,11 +324,16 @@ PRODUCTIONS
   SYMBOLSECTION
               = SYNC "SYMBOL"
                 (.
+                  Symbol::ProjectionMode projectionMode=Symbol::ProjectionMode::MAP;
                   std::string name;
                 .)
+                [
+                  "GROUND" (. projectionMode=Symbol::ProjectionMode::GROUND; .)
+                ]
                 IDENT<name>
                 (.
-                  SymbolRef symbol=std::make_shared<Symbol>(name);
+                  SymbolRef symbol=std::make_shared<Symbol>(name,
+                                                            projectionMode);
                 .)
                 {
                   POLYGON<*symbol>
@@ -378,19 +383,14 @@ PRODUCTIONS
               = SYNC "POLYGON"
                 (.
                   StyleFilter         filter;
-                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
                   FillPartialStyle    fillStyle;
                   BorderPartialStyle  borderStyle;
                   PolygonPrimitiveRef polygon;
                   Vertex2D            coord;
                 .)
-                [
-                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
-                ]
 
                 (.
-                  polygon=std::make_shared<PolygonPrimitive>(projectionMode,
-                                                             fillStyle.style,
+                  polygon=std::make_shared<PolygonPrimitive>(fillStyle.style,
                                                              borderStyle.style);
                 .)
 
@@ -407,16 +407,12 @@ PRODUCTIONS
               = SYNC "RECTANGLE"
                 (.
                   StyleFilter        filter;
-                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
                   FillPartialStyle   fillStyle;
                   BorderPartialStyle borderStyle;
                   Vertex2D           topLeft;
                   double             width;
                   double             height;
                 .)
-                [
-                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
-                ]
                 COORD<topLeft>
                 UDOUBLE<width>
                 "x"
@@ -424,8 +420,7 @@ PRODUCTIONS
 
                 AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
-                  symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(projectionMode,
-                                                                           topLeft,
+                  symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
                                                                            width,height,
                                                                            fillStyle.style,
                                                                            borderStyle.style));
@@ -436,21 +431,16 @@ PRODUCTIONS
               = SYNC "CIRCLE"
                 (.
                   StyleFilter                   filter;
-                  DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
                   FillPartialStyle              fillStyle;
                   BorderPartialStyle            borderStyle;
                   Vertex2D                      center;
                   double                        radius;
                 .)
-                [
-                  "GROUND" (. projectionMode=DrawPrimitive::ProjectionMode::GROUND; .)
-                ]
                 COORD<center>
                 UDOUBLE<radius>
                 AREASYMBOLSTYLE<fillStyle,borderStyle>
                 (.
-                  symbol.AddPrimitive(std::make_shared<CirclePrimitive>(projectionMode,
-                                                                        center,
+                  symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
                                                                         radius,
                                                                         fillStyle.style,
                                                                         borderStyle.style));

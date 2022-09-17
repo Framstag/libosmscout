@@ -54,11 +54,11 @@ CONST
       AREA {color: @waterLabelColor; }
     }
 
-  SYMBOL natural_tree
-    CIRCLE GROUND 0,0 5 {
+  SYMBOL GROUND natural_tree
+    CIRCLE 0,0 5 {
       AREA {color: #9acd3250; }
     }
-    CIRCLE GROUND 0,0 0.3 {
+    CIRCLE 0,0 0.3 {
       AREA {color: #8b4513; }
     }
 
@@ -196,8 +196,8 @@ CONST
       AREA { color: #000000; } // horizontal bar
     }
 
-  SYMBOL mini_roundabout
-    CIRCLE GROUND 0,0 3 {
+  SYMBOL GROUND mini_roundabout
+    CIRCLE 0,0 3 {
       AREA {color: #8080ff; }
     }
 
@@ -206,8 +206,8 @@ CONST
       AREA {color: @red; }
     }
 
-  SYMBOL highway_street_lamp
-    CIRCLE GROUND 0,0 20 {
+  SYMBOL GROUND highway_street_lamp
+    CIRCLE 0,0 20 {
       AREA {color: #f5fb5b44; }
     }
 
