@@ -139,10 +139,15 @@ STYLE
  }
 
  [MAG veryClose-] {
+   // Eating
+   [TYPE amenity_fast_food] NODE.ICON { name: fast_food; }
+   [TYPE amenity_restaurant] NODE.ICON { name: restaurant; }
+
+   // Health
    [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy; name: pharmacy; }
 
+   // Logistic
    [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
-
    [TYPE amenity_post_office] NODE.ICON { symbol: amenity_post_office; }
 
    [TYPE amenity_drinking_water] NODE.ICON { symbol: amenity_drinking_water; }
@@ -151,12 +156,10 @@ STYLE
    [TYPE amenity,
          amenity_bank,
          amenity_cafe,
-         amenity_fast_food,
          amenity_fuel,
          amenity_kindergarten,
          amenity_library,
          amenity_recycling,
-         amenity_restaurant,
          amenity_school] {
          NODE.ICON { symbol: amenity; }
    }
