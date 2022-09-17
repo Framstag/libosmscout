@@ -1264,7 +1264,7 @@ namespace osmscout {
                                  const std::vector<double>& dash,
                                  LineStyle::CapStyle startCap,
                                  LineStyle::CapStyle endCap,
-                                 size_t transStart, size_t transEnd)
+                                 const CoordBufferRange& coordRange)
   {
     SetLineAttributes(color,width,dash);
 
@@ -1280,8 +1280,8 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
     }
 
-    for (size_t i=transStart; i<=transEnd; i++) {
-      if (i==transStart) {
+    for (size_t i=coordRange.GetStart(); i<=coordRange.GetEnd(); i++) {
+      if (i==coordRange.GetStart()) {
         cairo_new_path(draw);
         cairo_move_to(draw,
                       coordBuffer.buffer[i].GetX(),
@@ -1306,11 +1306,11 @@ namespace osmscout {
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
-                      coordBuffer.buffer[transStart].GetX(),
-                      coordBuffer.buffer[transStart].GetY());
+                      coordBuffer.buffer[coordRange.GetStart()].GetX(),
+                      coordBuffer.buffer[coordRange.GetStart()].GetY());
         cairo_line_to(draw,
-                      coordBuffer.buffer[transStart].GetX(),
-                      coordBuffer.buffer[transStart].GetY());
+                      coordBuffer.buffer[coordRange.GetStart()].GetX(),
+                      coordBuffer.buffer[coordRange.GetStart()].GetY());
         cairo_stroke(draw);
       }
 
@@ -1321,11 +1321,11 @@ namespace osmscout {
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
-                      coordBuffer.buffer[transEnd].GetX(),
-                      coordBuffer.buffer[transEnd].GetY());
+                      coordBuffer.buffer[coordRange.GetEnd()].GetX(),
+                      coordBuffer.buffer[coordRange.GetEnd()].GetY());
         cairo_line_to(draw,
-                      coordBuffer.buffer[transEnd].GetX(),
-                      coordBuffer.buffer[transEnd].GetY());
+                      coordBuffer.buffer[coordRange.GetEnd()].GetX(),
+                      coordBuffer.buffer[coordRange.GetEnd()].GetY());
         cairo_stroke(draw);
       }
     }

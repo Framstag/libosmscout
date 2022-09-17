@@ -524,7 +524,8 @@ namespace osmscout {
     }
 
     hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
-    origin.Set(coordBuffer.buffer[hnd.transStart].GetX(), coordBuffer.buffer[hnd.transStart].GetY());
+    origin.Set(coordBuffer.buffer[hnd.transStart].GetX(),
+               coordBuffer.buffer[hnd.transStart].GetY());
   }
 
   bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
@@ -577,8 +578,32 @@ namespace osmscout {
 
     symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
-    double           widthPx=maxX-minX;
-    bool             isClosed=false;
+    double symbolWidth=maxX-minX;
+
+    double length=0.0;
+    double xo=coordBuffer.buffer[data.coordRange.GetStart()].GetX();
+    double yo=coordBuffer.buffer[data.coordRange.GetStart()].GetY();
+
+    for (size_t index=data.coordRange.GetStart()+1; index<=data.coordRange.GetEnd(); index++) {
+      length += sqrt(pow(coordBuffer.buffer[index].GetX() - xo, 2) +
+                     pow(coordBuffer.buffer[index].GetY() - yo, 2));
+      xo=coordBuffer.buffer[index].GetX();
+      yo=coordBuffer.buffer[index].GetY();
+    }
+
+    double offset=0.0;
+
+    size_t countLabels=(length-data.symbolSpace)/(symbolWidth+data.symbolSpace);
+
+    size_t labelCountExp=log2(countLabels);
+
+    countLabels=pow(2,labelCountExp);
+
+    double space=(length-countLabels*symbolWidth)/(countLabels+1);
+
+    offset=space;
+
+    bool   isClosed   =false;
     Vertex2D         origin;
     double           x1,y1,x2,y2,x3,y3,slope;
     FollowPathHandle followPathHnd;
@@ -591,7 +616,7 @@ namespace osmscout {
                    true);
 
     if (!isClosed &&
-        !FollowPath(followPathHnd,data.symbolOffset,origin)) {
+        !FollowPath(followPathHnd,offset,origin)) {
       return;
     }
 
@@ -602,12 +627,12 @@ namespace osmscout {
     while (loop) {
       x1=origin.GetX();
       y1=origin.GetY();
-      loop=FollowPath(followPathHnd, widthPx/2, origin);
+      loop=FollowPath(followPathHnd,symbolWidth/2,origin);
 
       if (loop) {
         x2=origin.GetX();
         y2=origin.GetY();
-        loop=FollowPath(followPathHnd, widthPx/2, origin);
+        loop=FollowPath(followPathHnd,symbolWidth/2,origin);
 
         if (loop) {
           x3=origin.GetX();
@@ -617,7 +642,7 @@ namespace osmscout {
           t.rotateRadians(slope);
           painter->setTransform(t);
           DrawSymbol(projection, parameter, symbol, 0, 0);
-          loop=FollowPath(followPathHnd, data.symbolSpace, origin);
+          loop=FollowPath(followPathHnd, space, origin);
         }
       }
     }
@@ -654,7 +679,7 @@ namespace osmscout {
                               const std::vector<double>& dash,
                               LineStyle::CapStyle startCap,
                               LineStyle::CapStyle endCap,
-                              size_t transStart, size_t transEnd)
+                              const CoordBufferRange& coordRange)
   {
     QPen pen(QColor::fromRgbF(color.GetR(),
                               color.GetG(),
@@ -691,9 +716,9 @@ namespace osmscout {
 
     QPainterPath p;
 
-    p.moveTo(coordBuffer.buffer[transStart].GetX(),
-             coordBuffer.buffer[transStart].GetY());
-    for (size_t i=transStart+1; i<=transEnd; i++) {
+    p.moveTo(coordBuffer.buffer[coordRange.GetStart()].GetX(),
+             coordBuffer.buffer[coordRange.GetStart()].GetY());
+    for (size_t i=coordRange.GetStart()+1; i<=coordRange.GetEnd(); i++) {
       p.lineTo(coordBuffer.buffer[i].GetX(),
                coordBuffer.buffer[i].GetY());
     }
@@ -709,8 +734,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer.buffer[transStart].GetX(),
-                                   coordBuffer.buffer[transStart].GetY()),
+      painter->drawEllipse(QPointF(coordBuffer.buffer[coordRange.GetStart()].GetX(),
+                                   coordBuffer.buffer[coordRange.GetStart()].GetY()),
                                    width/2,width/2);
     }
 
@@ -723,8 +748,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer.buffer[transEnd].GetX(),
-                                   coordBuffer.buffer[transEnd].GetY()),
+      painter->drawEllipse(QPointF(coordBuffer.buffer[coordRange.GetEnd()].GetX(),
+                                   coordBuffer.buffer[coordRange.GetEnd()].GetY()),
                                    width/2,width/2);
     }
   }

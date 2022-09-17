@@ -206,7 +206,7 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
-                  size_t transStart, size_t transEnd) override;
+                  const CoordBufferRange& coordRange) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,

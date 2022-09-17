@@ -807,7 +807,7 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   LineStyle::CapStyle startCap,
                   LineStyle::CapStyle endCap,
-                  size_t transStart, size_t transEnd){
+                  const CoordBufferRange& coordRange){
 
         CGContextSaveGState(cg);
         CGContextSetRGBStrokeColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
@@ -826,22 +826,22 @@ namespace osmscout {
             CGContextSetLineCap(cg, kCGLineCapButt);
         }
         CGContextBeginPath(cg);
-        CGContextMoveToPoint(cg,coordBuffer.buffer[transStart].GetX(),coordBuffer.buffer[transStart].GetY());
-        for (size_t i=transStart+1; i<=transEnd; i++) {
+        CGContextMoveToPoint(cg,coordBuffer.buffer[coordRange.GetStart()].GetX(),coordBuffer.buffer[coordRange.GetStart()].GetY());
+        for (size_t i=coordRange.GetStart()+1; i<=coordRange.GetEnd(); i++) {
             CGContextAddLineToPoint (cg,coordBuffer.buffer[i].GetX(),coordBuffer.buffer[i].GetY());
         }
         CGContextStrokePath(cg);
         if (startCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[transStart].GetX()-width/2,
-                                                     coordBuffer.buffer[transStart].GetY()-width/2,
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[coordRange.GetStart()].GetX()-width/2,
+                                                     coordBuffer.buffer[coordRange.GetStart()].GetY()-width/2,
                                                      width,width));
         }
         if (endCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[transEnd].GetX()-width/2,
-                                                     coordBuffer.buffer[transEnd].GetY()-width/2,
-                                                     width,width));
+            CGContextFillEllipseInRect(cg, CGRectMake(coordBuffer.buffer[coordRange.GetEnd()].GetX()-width/2,
+                                                      coordBuffer.buffer[coordRange.GetEnd()].GetY()-width/2,
+                                                      width,width));
         }
         CGContextRestoreGState(cg);
     }

@@ -103,8 +103,7 @@ namespace osmscout {
                                 const std::vector<double>& /*dash*/,
                                 LineStyle::CapStyle /*startCap*/,
                                 LineStyle::CapStyle /*endCap*/,
-                                size_t /*transStart*/,
-                                size_t /*transEnd*/)
+                                const CoordBufferRange& /*coordRange*/)
   {
     // no code
   }
