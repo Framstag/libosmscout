@@ -200,6 +200,13 @@ namespace osmscout {
       std::map<PathTextStyleRef,std::set<std::string>> labels;
     };
 
+    struct OSMSCOUT_MAP_API ContourSymbolData
+    {
+      double            symbolOffset; //!< Initial offset of the symbol
+      double            symbolSpace;  //!< Space between individual symbols on the contour
+      CoordBufferRange  coordRange;   //!< Range of coordinates of the path in transformation buffer
+    };
+
   protected:
     /**
      Internal coordinate transformation data structures
@@ -628,14 +635,12 @@ namespace osmscout {
                           size_t transStart, size_t transEnd) = 0;
 
     /**
-      Draw the given text as a contour of the given path in a style defined
-      by the given LabelStyle.
+      Draw the given Symbol on top of the contour of the given path.
      */
     virtual void DrawContourSymbol(const Projection& projection,
                                    const MapParameter& parameter,
                                    const Symbol& symbol,
-                                   double space,
-                                   size_t transStart, size_t transEnd) = 0;
+                                   const ContourSymbolData& data) = 0;
 
     /**
       Draw the given area using the given FillStyle

@@ -568,9 +568,7 @@ namespace osmscout {
   void MapPainterQt::DrawContourSymbol(const Projection& projection,
                                        const MapParameter& parameter,
                                        const Symbol& symbol,
-                                       double space,
-                                       size_t transStart,
-                                       size_t transEnd)
+                                       const ContourSymbolData& data)
   {
     double           minX;
     double           minY;
@@ -587,13 +585,13 @@ namespace osmscout {
 
     FollowPathInit(followPathHnd,
                    origin,
-                   transStart,
-                   transEnd,
+                   data.coordRange.GetStart(),
+                   data.coordRange.GetEnd(),
                    isClosed,
                    true);
 
     if (!isClosed &&
-        !FollowPath(followPathHnd,space/2,origin)) {
+        !FollowPath(followPathHnd,data.symbolOffset,origin)) {
       return;
     }
 
@@ -619,7 +617,7 @@ namespace osmscout {
           t.rotateRadians(slope);
           painter->setTransform(t);
           DrawSymbol(projection, parameter, symbol, 0, 0);
-          loop=FollowPath(followPathHnd, space, origin);
+          loop=FollowPath(followPathHnd, data.symbolSpace, origin);
         }
       }
     }

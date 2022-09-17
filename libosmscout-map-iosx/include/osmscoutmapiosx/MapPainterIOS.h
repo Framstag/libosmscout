@@ -204,8 +204,7 @@ namespace osmscout {
         void DrawContourSymbol(const Projection& projection,
                                const MapParameter& parameter,
                                const Symbol& symbol,
-                               double space,
-                               size_t transStart, size_t transEnd) override;
+                               const ContourSymbolData& data) override;
 
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,

@@ -618,8 +618,7 @@ namespace osmscout {
     void MapPainterIOS::DrawContourSymbol(const Projection& projection,
                                           const MapParameter& parameter,
                                           const Symbol& symbol,
-                                          double space,
-                                          size_t transStart, size_t transEnd){
+                                          const ContourSymbolData& data){
 
         double minX,minY,maxX,maxY;
         symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
@@ -632,8 +631,8 @@ namespace osmscout {
         double slope;
         double x1,y1,x2,y2,x3,y3;
         FollowPathHandle followPathHnd;
-        followPathInit(followPathHnd, origin, transStart, transEnd, isClosed, true);
-        if(!isClosed && !followPath(followPathHnd, space/2, origin)){
+        followPathInit(followPathHnd, origin, data.coordRange.GetStart(), data.coordRange.GetEnd(), isClosed, true);
+        if(!isClosed && !followPath(followPathHnd, data.symbolOffset, origin)){
             return;
         }
         bool loop = true;
@@ -655,7 +654,7 @@ namespace osmscout {
                     CGContextConcatCTM(cg, ct);
                     DrawSymbol(projection, parameter, symbol, 0, 0);
                     CGContextRestoreGState(cg);
-                    loop = followPath(followPathHnd, space, origin);
+                    loop = followPath(followPathHnd, data.symbolSpace, origin);
                 }
             }
         }
