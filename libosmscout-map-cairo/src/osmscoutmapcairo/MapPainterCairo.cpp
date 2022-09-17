@@ -593,8 +593,7 @@ namespace osmscout {
   void MapPainterCairo::DrawContourSymbol(const Projection &projection,
                                           const MapParameter &parameter,
                                           const Symbol &symbol,
-                                          double space,
-                                          size_t transStart, size_t transEnd)
+                                          const ContourSymbolData& data)
   {
     double lineLength = 0;
     double xo = 0;
@@ -604,8 +603,8 @@ namespace osmscout {
 
     cairo_new_path(draw);
 
-    for (size_t j = transStart; j <= transEnd; j++) {
-      if (j == transStart) {
+    for (size_t j = data.coordRange.GetStart(); j <= data.coordRange.GetEnd(); j++) {
+      if (j == data.coordRange.GetStart()) {
         cairo_move_to(draw,
                       coordBuffer.buffer[j].GetX(),
                       coordBuffer.buffer[j].GetY());
@@ -637,26 +636,26 @@ namespace osmscout {
       FillStyleRef fillStyle = primitive->GetFillStyle();
       BorderStyleRef borderStyle = primitive->GetBorderStyle();
 
-      double offset = space / 2.0;
+      double currentPos = data.symbolOffset;
 
       cairo_new_path(draw);
 
-      while (offset + width < lineLength) {
+      while (data.symbolOffset + width < lineLength) {
         DrawPrimitivePath(projection,
                           parameter,
                           primitive,
-                          offset + width / 2, 0,
+                          currentPos+width/2,0,
                           minX,
                           minY,
                           maxX,
                           maxY);
 
-        offset += width + space;
+        currentPos +=width+data.symbolSpace;
       }
 
       cairo_path_t *patternPath = cairo_copy_path_flat(draw);
 
-      // Now transform the text path so that it maps to the contour of the line
+      // Now transform the (partial) symbol path so that it maps to the contour of the line
       MapPathOnPath(draw,
                     patternPath,
                     path,
@@ -1109,7 +1108,11 @@ namespace osmscout {
                                              const Vertex2D &position,
                                              double objectWidth)
   {
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    labelLayouter.RegisterLabel(projection,
+                                parameter,
+                                position,
+                                labels,
+                                objectWidth);
   }
 
   /**
@@ -1120,7 +1123,10 @@ namespace osmscout {
                                     const PathLabelData &label,
                                     const LabelPath &labelPath)
   {
-    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    labelLayouter.RegisterContourLabel(projection,
+                                       parameter,
+                                       label,
+                                       labelPath);
   }
 
   void MapPainterCairo::DrawLabels(const Projection& projection,

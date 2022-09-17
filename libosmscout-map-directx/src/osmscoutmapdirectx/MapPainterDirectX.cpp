@@ -958,9 +958,7 @@ namespace osmscout
   void MapPainterDirectX::DrawContourSymbol(const Projection& /*projection*/,
                                             const MapParameter& /*parameter*/,
                                             const Symbol& /*symbol*/,
-                                            double /*space*/,
-                                            size_t /*transStart*/,
-                                            size_t /*transEnd*/)
+                                            const ContourSymbolData& /*data*/)
   {
     // Not implemented yet
   }

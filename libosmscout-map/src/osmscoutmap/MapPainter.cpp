@@ -906,12 +906,16 @@ namespace osmscout {
                                              lineOffset);
     }
 
+    ContourSymbolData data;
+
+    data.coordRange=range;
+    data.symbolOffset=0.0;
+    data.symbolSpace=symbolSpace;
+
     DrawContourSymbol(projection,
                       parameter,
                       *borderSymbolStyle->GetSymbol(),
-                      symbolSpace,
-                      range.GetStart(),
-                      range.GetEnd());
+                      data);
 
     return true;
   }
@@ -1016,11 +1020,17 @@ namespace osmscout {
             range=coordBuffer.GenerateParallelWay(range,
                                                   laneOffset);
 
+            ContourSymbolData data;
+
+            data.symbolSpace=symbolSpace;
+            data.symbolOffset=symbolSpace/2.0;
+            data.coordRange=range;
+
+
             DrawContourSymbol(projection,
                               parameter,
                               *pathSymbolStyle->GetSymbol(),
-                              symbolSpace,
-                              range.GetStart(), range.GetEnd());
+                              data);
           }
           laneOffset+=lanesSpace;
         }
@@ -1039,15 +1049,19 @@ namespace osmscout {
 
         if (lineOffset != 0.0) {
           range=coordBuffer.GenerateParallelWay(range,
-                                                 lineOffset);
+                                                lineOffset);
         }
+
+        ContourSymbolData data;
+
+        data.symbolSpace=symbolSpace;
+        data.symbolOffset=symbolSpace/2.0;
+        data.coordRange=range;
 
         DrawContourSymbol(projection,
                           parameter,
                           *pathSymbolStyle->GetSymbol(),
-                          symbolSpace,
-                          range.GetStart(),
-                          range.GetEnd());
+                          data);
       }
     }
     return true;
@@ -1129,7 +1143,7 @@ namespace osmscout {
 
     if (lineOffset!=0.0) {
       range=coordBuffer.GenerateParallelWay(range,
-                                             lineOffset);
+                                            lineOffset);
     }
 
     PathLabelData labelData;
@@ -1149,7 +1163,10 @@ namespace osmscout {
           coordBuffer.buffer[j].GetX(),
           coordBuffer.buffer[j].GetY());
     }
-    RegisterContourLabel(projection, parameter, labelData, labelPath);
+    RegisterContourLabel(projection,
+                         parameter,
+                         labelData,
+                         labelPath);
 
     return true;
   }

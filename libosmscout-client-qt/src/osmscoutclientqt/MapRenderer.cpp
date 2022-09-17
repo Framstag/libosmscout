@@ -316,6 +316,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       skip &= !addOverlayObjectData(data, typeConfig);
     }
 
+    skip=false;
     if (skip) {
       osmscout::log.Debug() << "Skip database " << db->path.toStdString();
       continue;
