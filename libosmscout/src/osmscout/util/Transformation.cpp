@@ -121,7 +121,7 @@ namespace osmscout {
 
     bool IsValid() const
     {
-      return !(xdelta==0 && ydelta==0);
+      return xdelta!=0 || ydelta!=0;
     }
 
     double CalculateDistanceSquared(const TransPoint& p) const
@@ -163,7 +163,8 @@ namespace osmscout {
 
     double u=((p.x-a.x)*xdelta+(p.y-a.y)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
 
-    double cx,cy;
+    double cx;
+    double cy;
 
     if (u<0) {
       cx=a.x;
@@ -239,18 +240,8 @@ namespace osmscout {
                                    optimizeErrorToleranceSquared);
   }
 
-  CoordBuffer::CoordBuffer()
-    : bufferSize(131072),
-      usedPoints(0),
-      buffer(new Vertex2D[bufferSize])
-  {
-    // no code
-  }
-
-  CoordBuffer::~CoordBuffer()
-  {
-    delete [] buffer;
-  }
+  // Global empty default coord buffer for default constructor of CoordBufferRange
+  CoordBuffer CoordBuffer::emptyCoordBuffer=CoordBuffer();
 
   void CoordBuffer::Reset()
   {
@@ -265,7 +256,7 @@ namespace osmscout {
     if (usedPoints>=bufferSize) {
       bufferSize=bufferSize*2;
 
-      auto* newBuffer=new Vertex2D[bufferSize];
+      Vertex2D *newBuffer=new Vertex2D[bufferSize];
 
       std::memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
 
@@ -287,9 +278,12 @@ namespace osmscout {
     assert(org.GetStart()<org.GetEnd());
     assert(org.GetEnd()<usedPoints);
 
-    size_t start,end;
-    double oax=0,oay=0;
-    double obx=0,oby=0;
+    size_t start;
+    size_t end;
+    double oax=0;
+    double oay=0;
+    double obx=0;
+    double oby=0;
 
     Normalize(buffer[org.GetStart()].GetY()-buffer[org.GetStart()+1].GetY(),
               buffer[org.GetStart()+1].GetX()-buffer[org.GetStart()].GetX(),
@@ -356,7 +350,12 @@ namespace osmscout {
     end=PushCoord(buffer[org.GetEnd()].GetX()+oax,
                   buffer[org.GetEnd()].GetY()+oay);
 
-    return CoordBufferRange(start,end);
+    return CoordBufferRange(*this,start,end);
+  }
+
+  CoordBuffer::~CoordBuffer()
+  {
+    delete [] buffer;
   }
 
   static void DropSimilarPoints(TransBuffer &buffer,double optimizeErrorTolerance)
@@ -545,17 +544,17 @@ namespace osmscout {
     {
       TransPoint *p;
 
-      inline double GetLat() const
+      double GetLat() const
       {
         return p->x;
       }
 
-      inline double GetLon() const
+      double GetLon() const
       {
         return p->y;
       }
 
-      inline bool IsEqual(const TransPointRef &other) const
+      bool IsEqual(const TransPointRef &other) const
       {
         return p==other.p;
       }
@@ -717,7 +716,7 @@ namespace osmscout {
       }
     }
 
-    return CoordBufferRange(start,end);
+    return CoordBufferRange(coordBuffer,start,end);
   }
 
   CoordBufferRange TransformBoundingBox(const GeoBox& boundingBox,

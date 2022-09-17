@@ -851,7 +851,7 @@ namespace osmscout {
 
     if (lineOffset!=0.0) {
       range=coordBuffer.GenerateParallelWay(range,
-                                             lineOffset);
+                                            lineOffset);
     }
 
     // TODO: use coordBuffer for label path
@@ -859,8 +859,8 @@ namespace osmscout {
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
       labelPath.AddPoint(
-          coordBuffer.buffer[j].GetX(),
-          coordBuffer.buffer[j].GetY());
+          range.Get(j).GetX(),
+          range.Get(j).GetY());
     }
 
     PathLabelData labelData;
@@ -1158,8 +1158,8 @@ namespace osmscout {
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
       labelPath.AddPoint(
-          coordBuffer.buffer[j].GetX(),
-          coordBuffer.buffer[j].GetY());
+          range.Get(j).GetX(),
+          range.Get(j).GetY());
     }
 
     RegisterContourLabel(projection,
@@ -1942,7 +1942,7 @@ namespace osmscout {
             segmentWay.lineStyle=lineStyle;
             segmentWay.color=color;
             segmentWay.wayPriority=lineStyle->GetPriority();
-            segmentWay.coordRange=CoordBufferRange(segment.transStart,segment.transEnd);
+            segmentWay.coordRange=CoordBufferRange(coordBuffer,segment.transStart,segment.transEnd);
             segmentWay.lineWidth=lineWidth;
             segmentWay.startIsClosed=(i==0);
             segmentWay.endIsClosed=(i==size-1);
@@ -2437,7 +2437,7 @@ static void DumpGroundTile(const GroundTile& tile)
               wd.lineStyle=coastlineLine;
               wd.color=coastlineLine->GetLineColor();
               wd.wayPriority=std::numeric_limits<size_t>::max();
-              wd.coordRange=CoordBufferRange(start+lineStart,start+lineEnd);
+              wd.coordRange=CoordBufferRange(coordBuffer,start+lineStart,start+lineEnd);
               wd.lineWidth=GetProjectedWidth(projection,
                                              projection.ConvertWidthToPixel(coastlineLine->GetDisplayWidth()),
                                              coastlineLine->GetWidth());
@@ -2453,7 +2453,7 @@ static void DumpGroundTile(const GroundTile& tile)
       }
 
       groundTileData.ref=ObjectFileRef();
-      groundTileData.coordRange=CoordBufferRange(start,end);
+      groundTileData.coordRange=CoordBufferRange(coordBuffer,start,end);
 
       DrawArea(projection,parameter,groundTileData);
 

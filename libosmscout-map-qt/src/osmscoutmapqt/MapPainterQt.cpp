@@ -579,18 +579,7 @@ namespace osmscout {
     symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
 
     double symbolWidth=maxX-minX;
-
-    double length=0.0;
-    double xo=coordBuffer.buffer[data.coordRange.GetStart()].GetX();
-    double yo=coordBuffer.buffer[data.coordRange.GetStart()].GetY();
-
-    for (size_t index=data.coordRange.GetStart()+1; index<=data.coordRange.GetEnd(); index++) {
-      length += sqrt(pow(coordBuffer.buffer[index].GetX() - xo, 2) +
-                     pow(coordBuffer.buffer[index].GetY() - yo, 2));
-      xo=coordBuffer.buffer[index].GetX();
-      yo=coordBuffer.buffer[index].GetY();
-    }
-
+    double length=data.coordRange.GetLength();
     double offset=0.0;
 
     size_t countLabels=(length-data.symbolSpace)/(symbolWidth+data.symbolSpace);
@@ -716,11 +705,11 @@ namespace osmscout {
 
     QPainterPath p;
 
-    p.moveTo(coordBuffer.buffer[coordRange.GetStart()].GetX(),
-             coordBuffer.buffer[coordRange.GetStart()].GetY());
+    p.moveTo(coordRange.GetFirst().GetX(),
+             coordRange.GetFirst().GetY());
     for (size_t i=coordRange.GetStart()+1; i<=coordRange.GetEnd(); i++) {
-      p.lineTo(coordBuffer.buffer[i].GetX(),
-               coordBuffer.buffer[i].GetY());
+      p.lineTo(coordRange.Get(i).GetX(),
+               coordRange.Get(i).GetY());
     }
 
     painter->strokePath(p,pen);
@@ -734,8 +723,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer.buffer[coordRange.GetStart()].GetX(),
-                                   coordBuffer.buffer[coordRange.GetStart()].GetY()),
+      painter->drawEllipse(QPointF(coordRange.GetFirst().GetX(),
+                                   coordRange.GetFirst().GetY()),
                                    width/2,width/2);
     }
 
@@ -748,8 +737,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(coordBuffer.buffer[coordRange.GetEnd()].GetX(),
-                                   coordBuffer.buffer[coordRange.GetEnd()].GetY()),
+      painter->drawEllipse(QPointF(coordRange.GetLast().GetX(),
+                                   coordRange.GetLast().GetY()),
                                    width/2,width/2);
     }
   }
@@ -760,22 +749,22 @@ namespace osmscout {
   {
     QPainterPath path;
 
-    path.moveTo(coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
-                coordBuffer.buffer[area.coordRange.GetStart()].GetY());
+    path.moveTo(area.coordRange.GetFirst().GetX(),
+                area.coordRange.GetFirst().GetY());
     for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
-      path.lineTo(coordBuffer.buffer[i].GetX(),
-                  coordBuffer.buffer[i].GetY());
+      path.lineTo(area.coordRange.Get(i).GetX(),
+                  area.coordRange.Get(i).GetY());
     }
     path.closeSubpath();
 
     if (!area.clippings.empty()) {
       for (const auto& data : area.clippings) {
-        path.moveTo(coordBuffer.buffer[data.GetStart()].GetX(),
-                    coordBuffer.buffer[data.GetStart()].GetY());
+        path.moveTo(data.GetFirst().GetX(),
+                    data.GetFirst().GetY());
 
         for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
-          path.lineTo(coordBuffer.buffer[i].GetX(),
-                      coordBuffer.buffer[i].GetY());
+          path.lineTo(data.Get(i).GetX(),
+                      data.Get(i).GetY());
         }
 
         path.closeSubpath();
@@ -809,8 +798,10 @@ namespace osmscout {
 
       if (idx<patterns.size() && !patterns[idx].textureImage().isNull()) {
         patterns[idx].setTransform(QTransform::fromTranslate(
-                                          remainder(coordBuffer.buffer[area.coordRange.GetStart()].GetX(),patterns[idx].textureImage().width()),
-                                          remainder(coordBuffer.buffer[area.coordRange.GetStart()].GetY(),patterns[idx].textureImage().height())));
+                                          remainder(area.coordRange.GetFirst().GetX(),
+                                                    patterns[idx].textureImage().width()),
+                                          remainder(area.coordRange.GetFirst().GetY(),
+                                                    patterns[idx].textureImage().height())));
         painter->setBrush(patterns[idx]);
         restoreTransform = true;
       }

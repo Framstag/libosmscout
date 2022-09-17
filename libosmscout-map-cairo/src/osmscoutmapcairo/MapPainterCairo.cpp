@@ -595,29 +595,20 @@ namespace osmscout {
                                           const Symbol &symbol,
                                           const ContourSymbolData& data)
   {
-    double lineLength = 0;
-    double xo = 0;
-    double yo = 0;
+    double lineLength = data.coordRange.GetLength();
 
     cairo_save(draw);
-
     cairo_new_path(draw);
 
-    for (size_t j = data.coordRange.GetStart(); j <= data.coordRange.GetEnd(); j++) {
-      if (j == data.coordRange.GetStart()) {
-        cairo_move_to(draw,
-                      coordBuffer.buffer[j].GetX(),
-                      coordBuffer.buffer[j].GetY());
-      } else {
-        cairo_line_to(draw,
-                      coordBuffer.buffer[j].GetX(),
-                      coordBuffer.buffer[j].GetY());
-        lineLength += sqrt(pow(coordBuffer.buffer[j].GetX() - xo, 2) +
-                           pow(coordBuffer.buffer[j].GetY() - yo, 2));
-      }
+    cairo_move_to(draw,
+                  data.coordRange.GetFirst().GetX(),
+                  data.coordRange.GetFirst().GetY());
 
-      xo = coordBuffer.buffer[j].GetX();
-      yo = coordBuffer.buffer[j].GetY();
+    for (size_t j = data.coordRange.GetStart()+1; j <= data.coordRange.GetEnd(); j++) {
+      Vertex2D currentCoord=data.coordRange.Get(j);
+      cairo_line_to(draw,
+                    currentCoord.GetX(),
+                    currentCoord.GetY());
     }
 
     cairo_path_t *path = cairo_copy_path_flat(draw);
@@ -1280,18 +1271,15 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
     }
 
-    for (size_t i=coordRange.GetStart(); i<=coordRange.GetEnd(); i++) {
-      if (i==coordRange.GetStart()) {
-        cairo_new_path(draw);
-        cairo_move_to(draw,
-                      coordBuffer.buffer[i].GetX(),
-                      coordBuffer.buffer[i].GetY());
-      }
-      else {
-        cairo_line_to(draw,
-                      coordBuffer.buffer[i].GetX(),
-                      coordBuffer.buffer[i].GetY());
-      }
+    cairo_new_path(draw);
+    cairo_move_to(draw,
+                  coordRange.GetFirst().GetX(),
+                  coordRange.GetFirst().GetY());
+
+    for (size_t i=coordRange.GetStart()+1; i<=coordRange.GetEnd(); i++) {
+      cairo_line_to(draw,
+                    coordRange.Get(i).GetX(),
+                    coordRange.Get(i).GetY());
     }
 
     cairo_stroke(draw);
@@ -1306,11 +1294,11 @@ namespace osmscout {
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
-                      coordBuffer.buffer[coordRange.GetStart()].GetX(),
-                      coordBuffer.buffer[coordRange.GetStart()].GetY());
+                      coordRange.GetFirst().GetX(),
+                      coordRange.GetFirst().GetY());
         cairo_line_to(draw,
-                      coordBuffer.buffer[coordRange.GetStart()].GetX(),
-                      coordBuffer.buffer[coordRange.GetStart()].GetY());
+                      coordRange.GetFirst().GetX(),
+                      coordRange.GetFirst().GetY());
         cairo_stroke(draw);
       }
 
@@ -1321,11 +1309,11 @@ namespace osmscout {
         cairo_set_line_width(draw,width);
 
         cairo_move_to(draw,
-                      coordBuffer.buffer[coordRange.GetEnd()].GetX(),
-                      coordBuffer.buffer[coordRange.GetEnd()].GetY());
+                      coordRange.GetLast().GetX(),
+                      coordRange.GetLast().GetY());
         cairo_line_to(draw,
-                      coordBuffer.buffer[coordRange.GetEnd()].GetX(),
-                      coordBuffer.buffer[coordRange.GetEnd()].GetY());
+                      coordRange.GetLast().GetX(),
+                      coordRange.GetLast().GetY());
         cairo_stroke(draw);
       }
     }
@@ -1343,12 +1331,12 @@ namespace osmscout {
 
     cairo_new_path(draw);
     cairo_move_to(draw,
-                  coordBuffer.buffer[area.coordRange.GetStart()].GetX(),
-                  coordBuffer.buffer[area.coordRange.GetStart()].GetY());
+                  area.coordRange.GetFirst().GetX(),
+                  area.coordRange.GetFirst().GetY());
     for (size_t i=area.coordRange.GetStart()+1; i<=area.coordRange.GetEnd(); i++) {
       cairo_line_to(draw,
-                    coordBuffer.buffer[i].GetX(),
-                    coordBuffer.buffer[i].GetY());
+                    area.coordRange.Get(i).GetX(),
+                    area.coordRange.Get(i).GetY());
     }
     cairo_close_path(draw);
 
@@ -1358,12 +1346,12 @@ namespace osmscout {
         cairo_new_sub_path(draw);
         cairo_set_line_width(draw,0.0);
         cairo_move_to(draw,
-                      coordBuffer.buffer[data.GetStart()].GetX(),
-                      coordBuffer.buffer[data.GetStart()].GetY());
+                      data.GetFirst().GetX(),
+                      data.GetFirst().GetY());
         for (size_t i=data.GetStart()+1; i<=data.GetEnd(); i++) {
           cairo_line_to(draw,
-                        coordBuffer.buffer[i].GetX(),
-                        coordBuffer.buffer[i].GetY());
+                        data.Get(i).GetX(),
+                        data.Get(i).GetY());
         }
         cairo_close_path(draw);
       }
