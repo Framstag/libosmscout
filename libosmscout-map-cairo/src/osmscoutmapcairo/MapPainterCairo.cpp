@@ -640,7 +640,7 @@ namespace osmscout {
 
       cairo_new_path(draw);
 
-      while (data.symbolOffset + width < lineLength) {
+      while (currentPos + width < lineLength) {
         DrawPrimitivePath(projection,
                           parameter,
                           primitive,
