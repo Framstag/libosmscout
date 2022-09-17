@@ -620,11 +620,9 @@ namespace osmscout {
                                           const Symbol& symbol,
                                           const ContourSymbolData& data){
 
-        double minX,minY,maxX,maxY;
-        symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-
-        double width=maxX-minX;
-        double height=maxY-minY;
+        ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+        double width=boundingBox.GetWidth();
+        double height=boundingBox.GetHeight();
         bool isClosed = false;
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         Vertex2D origin;
@@ -693,14 +691,8 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const Symbol& symbol,
                     double x, double y){
-        double minX;
-        double minY;
-        double maxX;
-        double maxY;
-        symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-
-        double centerX=(maxX+minX)/2;
-        double centerY=(maxY+minY)/2;
+        ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+        Vertex2D center=boundingBox.GetCenter();
 
         CGContextSaveGState(cg);
         for (const auto& primitive : symbol.GetPrimitives()) {
@@ -730,11 +722,11 @@ namespace osmscout {
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                                             y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
+                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                                             y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
                     } else {
-                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                                                y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
+                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                                                y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
                     }
                 }
 
@@ -756,8 +748,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
-                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
+                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
@@ -779,8 +771,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
-                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY,
+                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
+                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);
