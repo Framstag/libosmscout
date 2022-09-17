@@ -571,12 +571,12 @@ namespace osmscout {
                                const std::vector<double>& dash,
                                LineStyle::CapStyle startCap,
                                LineStyle::CapStyle endCap,
-                               size_t transStart, size_t transEnd)
+                               const CoordBufferRange& coordRange)
   {
     agg::path_storage p;
 
-    for (size_t i=transStart; i<=transEnd; i++) {
-      if (i==transStart) {
+    for (size_t i=coordRange.GetStart(); i<=coordRange.GetEnd(); i++) {
+      if (i==coordRange.GetStart()) {
         p.move_to(coordBuffer.buffer[i].GetX(),
                   coordBuffer.buffer[i].GetY());
       }

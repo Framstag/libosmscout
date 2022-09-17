@@ -341,6 +341,10 @@ namespace osmscout {
       return end;
     }
 
+    size_t GetSize() const {
+      return end-start+1;
+    }
+
     bool IsValid() const {
       return start!=std::numeric_limits<size_t>::max();
     }

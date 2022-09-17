@@ -961,8 +961,7 @@ namespace osmscout {
                emptyDash,
                data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-               data.coordRange.GetStart(),
-               data.coordRange.GetEnd());
+               data.coordRange);
     }
 
     DrawPath(projection,
@@ -972,8 +971,7 @@ namespace osmscout {
              data.lineStyle->GetDash(),
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-             data.coordRange.GetStart(),
-             data.coordRange.GetEnd());
+             data.coordRange);
   }
 
   bool MapPainter::DrawWayDecoration(const StyleConfig& styleConfig,
@@ -1208,14 +1206,12 @@ namespace osmscout {
         coords[x-startTileX]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
-      CoordBufferRange transRange;
-
-      transRange=TransformWay(coords,
-                              transBuffer,
-                              coordBuffer,
-                              projection,
-                              parameter.GetOptimizeWayNodes(),
-                              errorTolerancePixel);
+      CoordBufferRange transRange=TransformWay(coords,
+                                               transBuffer,
+                                               coordBuffer,
+                                               projection,
+                                               parameter.GetOptimizeWayNodes(),
+                                               errorTolerancePixel);
 
       WayData data;
 
@@ -1242,14 +1238,12 @@ namespace osmscout {
         coords[y-startTileY]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
-      CoordBufferRange transRange;
-
-      transRange=TransformWay(coords,
-                              transBuffer,
-                              coordBuffer,
-                              projection,
-                              parameter.GetOptimizeWayNodes(),
-                              errorTolerancePixel);
+      CoordBufferRange transRange=TransformWay(coords,
+                                               transBuffer,
+                                               coordBuffer,
+                                               projection,
+                                               parameter.GetOptimizeWayNodes(),
+                                               errorTolerancePixel);
 
       WayData data;
 

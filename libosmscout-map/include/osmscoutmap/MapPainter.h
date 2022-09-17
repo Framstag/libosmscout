@@ -632,7 +632,7 @@ namespace osmscout {
                           const std::vector<double>& dash,
                           LineStyle::CapStyle startCap,
                           LineStyle::CapStyle endCap,
-                          size_t transStart, size_t transEnd) = 0;
+                          const CoordBufferRange& coordRange) = 0;
 
     /**
       Draw the given Symbol on top of the contour of the given path.

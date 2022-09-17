@@ -868,7 +868,7 @@ namespace osmscout {
                                const std::vector<double>& dash,
                                LineStyle::CapStyle /*startCap*/,
                                LineStyle::CapStyle /*endCap*/,
-                               size_t transStart, size_t transEnd)
+                               const CoordBufferRange& coordRange)
   {
     stream << "    <polyline";
     stream << " fill=\"none\"";
@@ -892,8 +892,8 @@ namespace osmscout {
 
     stream << "              points=\"";
 
-    for (size_t i=transStart; i<=transEnd; i++) {
-      if (i!=transStart) {
+    for (size_t i=coordRange.GetStart(); i<=coordRange.GetEnd(); i++) {
+      if (i!=coordRange.GetStart()) {
         stream << " ";
       }
 
@@ -960,7 +960,7 @@ namespace osmscout {
                emptyDash,
                data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-               data.coordRange.GetStart(),data.coordRange.GetEnd());
+               data.coordRange);
     }
 
     DrawPath(projection,

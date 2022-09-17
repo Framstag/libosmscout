@@ -745,12 +745,12 @@ namespace osmscout {
                                const std::vector<double> &dash,
                                LineStyle::CapStyle startCap,
                                LineStyle::CapStyle endCap,
-                               size_t transStart, size_t transEnd) {
+                               const CoordBufferRange& coordRange) {
     RENDEROBJECT(pRender);
     Gdiplus::Pen *pPen = pRender->GetPen(color, width, dash, startCap, endCap);
 
-    pRender->pointBuffer.ResetAndReserve(transEnd - transStart + 1);
-    for (size_t i = transStart; i <= transEnd; i++) {
+    pRender->pointBuffer.ResetAndReserve(coordRange.GetSize());
+    for (size_t i = coordRange.GetStart(); i <= coordRange.GetEnd(); i++) {
       pRender->pointBuffer.AddPoint(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY());
     }
 

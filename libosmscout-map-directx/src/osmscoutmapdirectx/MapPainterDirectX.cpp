@@ -822,7 +822,7 @@ namespace osmscout
                                    const std::vector<double>& dash,
                                    LineStyle::CapStyle /*startCap*/,
                                    LineStyle::CapStyle /*endCap*/,
-                                   size_t transStart, size_t transEnd)
+                                   const CoordBufferRange& coordRange)
   {
     // TODO: Evaluate capStyle
     ID2D1PathGeometry* pPathGeometry;
@@ -833,11 +833,11 @@ namespace osmscout
       hr = pPathGeometry->Open(&pSink);
       if (SUCCEEDED(hr))
       {
-        pSink->BeginFigure(POINTF(coordBuffer.buffer[transStart].GetX(),
-                                  coordBuffer.buffer[transStart].GetY()),
+        pSink->BeginFigure(POINTF(coordBuffer.buffer[coordRange.GetStart()].GetX(),
+                                  coordBuffer.buffer[coordRange.GetStart()].GetY()),
                                   D2D1_FIGURE_BEGIN_HOLLOW);
 
-        for (size_t i = transStart + 1; i <= transEnd; i++) {
+        for (size_t i = coordRange.GetStart() + 1; i <= coordRange.GetEnd(); i++) {
           pSink->AddLine(POINTF(coordBuffer.buffer[i].GetX(), coordBuffer.buffer[i].GetY()));
         }
         pSink->EndFigure(D2D1_FIGURE_END_OPEN);
