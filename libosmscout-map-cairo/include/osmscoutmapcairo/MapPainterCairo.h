@@ -171,12 +171,6 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const MapData& data) override;
 
-    void DrawPrimitivePath(const Projection& projection,
-                           const MapParameter& parameter,
-                           const DrawPrimitiveRef& primitive,
-                           double x, double y,
-                           const ScreenBox& boundingBox);
-
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,

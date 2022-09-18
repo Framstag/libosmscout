@@ -2,7 +2,8 @@ osmscoutmapcairoIncDir = include_directories('.')
 
 osmscoutmapcairoHeader = [
             'osmscoutmapcairo/MapCairoImportExport.h',
-            'osmscoutmapcairo/MapPainterCairo.h'
+            'osmscoutmapcairo/MapPainterCairo.h',
+            'osmscoutmapcairo/SymbolRendererCairo.h'
           ]
 
 if pngDep.found()

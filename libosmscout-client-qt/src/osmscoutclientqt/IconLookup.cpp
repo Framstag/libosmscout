@@ -242,11 +242,10 @@ void IconLookup::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout:
       SymbolRendererQt renderer(&painter);
 
       ScreenBox symbolBoundingBox=symbol->GetBoundingBox(projection);
-      renderer.Render(*symbol,
+      renderer.Render(projection,
+                      *symbol,
                       Vertex2D((symbolBoundingBox.GetMinX()*-1 + margin/2) * iconImageUpscale,
-                               (symbolBoundingBox.GetMinY()*-1 + margin/2) * iconImageUpscale),
-                      projection.GetMeterInPixel()*iconImageUpscale,
-                      projection.ConvertWidthToPixel(iconImageUpscale));
+                               (symbolBoundingBox.GetMinY()*-1 + margin/2) * iconImageUpscale));
       painter.end();
     }
 
