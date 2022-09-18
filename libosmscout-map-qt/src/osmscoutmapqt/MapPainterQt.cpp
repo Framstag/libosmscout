@@ -665,9 +665,9 @@ namespace osmscout {
                                 double scaleFactor)
   {
     SymbolRendererQt renderer(painter);
-    renderer.Render(symbol,
+    renderer.Render(projection,
+                    symbol,
                     Vertex2D(x, y),
-                    projection,
                     scaleFactor);
   }
 

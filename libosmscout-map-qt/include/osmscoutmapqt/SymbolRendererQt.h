@@ -47,11 +47,11 @@ public:
   SymbolRendererQt& operator=(SymbolRendererQt&&) = default;
 
 protected:
-  void SetFill(const FillStyleRef &fillStyle) const override;
-  void SetBorder(const BorderStyleRef &borderStyle, double screenMmInPixel) const override;
-  void DrawPolygon(const std::vector<Vertex2D> &polygonPixels) const override;
-  void DrawRect(double x, double y, double w, double h) const override;
-  void DrawCircle(double x, double y, double radius) const override;
+  void SetFill(const FillStyleRef &fillStyle) override;
+  void SetBorder(const BorderStyleRef &borderStyle, double screenMmInPixel) override;
+  void DrawPolygon(const std::vector<Vertex2D> &polygonPixels) override;
+  void DrawRect(double x, double y, double w, double h) override;
+  void DrawCircle(double x, double y, double radius) override;
 };
 }
 

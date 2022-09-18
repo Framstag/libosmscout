@@ -28,7 +28,7 @@ SymbolRendererQt::SymbolRendererQt(QPainter *painter):
   painter(painter)
 {}
 
-void SymbolRendererQt::SetFill(const FillStyleRef &fillStyle) const
+void SymbolRendererQt::SetFill(const FillStyleRef &fillStyle)
 {
   if (fillStyle) {
     if (fillStyle->HasPattern()) {
@@ -47,7 +47,7 @@ void SymbolRendererQt::SetFill(const FillStyleRef &fillStyle) const
   }
 }
 
-void SymbolRendererQt::SetBorder(const BorderStyleRef &borderStyle, double screenMmInPixel) const
+void SymbolRendererQt::SetBorder(const BorderStyleRef &borderStyle, double screenMmInPixel)
 {
   if (borderStyle) {
     double borderWidth=borderStyle->GetWidth() * screenMmInPixel;
@@ -61,7 +61,7 @@ void SymbolRendererQt::SetBorder(const BorderStyleRef &borderStyle, double scree
                                     borderStyle->GetColor().GetA()));
       pen.setWidthF(borderWidth);
 
-      if (borderStyle->GetDash().empty()) {
+      if (!borderStyle->HasDashes()) {
         pen.setStyle(Qt::SolidLine);
         pen.setCapStyle(Qt::RoundCap);
       }
@@ -86,7 +86,7 @@ void SymbolRendererQt::SetBorder(const BorderStyleRef &borderStyle, double scree
   }
 }
 
-void SymbolRendererQt::DrawPolygon(const std::vector<Vertex2D> &polygonPixels) const
+void SymbolRendererQt::DrawPolygon(const std::vector<Vertex2D> &polygonPixels)
 {
   QPainterPath path;
 
@@ -102,16 +102,18 @@ void SymbolRendererQt::DrawPolygon(const std::vector<Vertex2D> &polygonPixels) c
   painter->drawPath(path);
 }
 
-void SymbolRendererQt::DrawRect(double x, double y, double w, double h) const
+void SymbolRendererQt::DrawRect(double x, double y, double w, double h)
 {
   QPainterPath path;
+
   path.addRect(x, y, w, h);
   painter->drawPath(path);
 }
 
-void SymbolRendererQt::DrawCircle(double x, double y, double radius) const
+void SymbolRendererQt::DrawCircle(double x, double y, double radius)
 {
     QPainterPath path;
+
     path.addEllipse(QPointF(x,y), radius, radius);
     painter->drawPath(path);
 }

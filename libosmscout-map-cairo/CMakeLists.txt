@@ -2,11 +2,13 @@ set(HEADER_FILES
     include/osmscoutmapcairo/MapCairoImportExport.h
     include/osmscoutmapcairo/LoaderPNG.h
     include/osmscoutmapcairo/MapPainterCairo.h
+	include/osmscoutmapcairo/SymbolRendererCairo.h
 )
 
 set(SOURCE_FILES
     src/osmscoutmapcairo/LoaderPNG.cpp
     src/osmscoutmapcairo/MapPainterCairo.cpp
+	src/osmscoutmapcairo/SymbolRendererCairo.cpp
 )
 
 osmscout_library_project(

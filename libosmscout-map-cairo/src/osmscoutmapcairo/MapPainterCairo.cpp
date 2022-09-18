@@ -25,6 +25,7 @@
 #include <list>
 
 #include <osmscoutmapcairo/LoaderPNG.h>
+#include <osmscoutmapcairo/SymbolRendererCairo.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -237,7 +238,7 @@ namespace osmscout {
   }
 
 
-  /* Projects the current text path of cr onto the provided path. */
+  /* Projects the current path of cr onto the provided path. */
   static void MapPathOnPath(cairo_t *draw,
                             cairo_path_t *srcPath,
                             cairo_path_t *dstPath,
@@ -246,7 +247,7 @@ namespace osmscout {
   {
     double *segmentLengths = CalculatePathSegmentLengths(dstPath);
 
-    // Center text on path
+    // Center on path
     TransformPathOntoPath(srcPath,
                           dstPath,
                           segmentLengths,
@@ -591,7 +592,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawContourSymbol(const Projection &projection,
-                                          const MapParameter &parameter,
+                                          const MapParameter &/*parameter*/,
                                           const Symbol &symbol,
                                           const ContourSymbolData& data)
   {
@@ -617,39 +618,30 @@ namespace osmscout {
     double    width=boundingBox.GetWidth();
     double    height=boundingBox.GetHeight();
 
-    for (const auto &primitive : symbol.GetPrimitives()) {
-      FillStyleRef fillStyle = primitive->GetFillStyle();
-      BorderStyleRef borderStyle = primitive->GetBorderStyle();
+    double currentPos = data.symbolOffset;
 
-      double currentPos = data.symbolOffset;
+    while (currentPos + width < lineLength) {
+      SymbolRendererCairo renderer(draw);
 
-      cairo_new_path(draw);
+      cairo_path_t* patternPath;
 
-      while (currentPos + width < lineLength) {
-        DrawPrimitivePath(projection,
-                          parameter,
-                          primitive,
-                          currentPos+width/2,0,
-                          boundingBox);
+      renderer.Render(projection,
+                      symbol,
+                      Vertex2D(currentPos+width/2.0, 0.0),
+                      [&patternPath,this,&path,&height]() {
+                        patternPath=cairo_copy_path_flat(draw);
+                        MapPathOnPath(draw,
+                                      patternPath,
+                                      path,
+                                      0,
+                                      height/2);
+                      },
+                      [&patternPath]() {
+                        cairo_path_destroy(patternPath);
+                      },
+      data.symbolScale);
 
-        currentPos+=width+data.symbolSpace;
-      }
-
-      cairo_path_t *patternPath = cairo_copy_path_flat(draw);
-
-      // Now transform the (partial) symbol path so that it maps to the contour of the line
-      MapPathOnPath(draw,
-                    patternPath,
-                    path,
-                    0,
-                    height / 2);
-
-      DrawFillStyle(projection,
-                    parameter,
-                    fillStyle,
-                    borderStyle);
-
-      cairo_path_destroy(patternPath);
+      currentPos+=width+data.symbolSpace;
     }
 
     cairo_path_destroy(path);
@@ -1124,80 +1116,18 @@ namespace osmscout {
     labelLayouter.Reset();
   }
 
-  void MapPainterCairo::DrawPrimitivePath(const Projection& projection,
-                                          const MapParameter& /*parameter*/,
-                                          const DrawPrimitiveRef& p,
-                                          double x, double y,
-                                          const ScreenBox& boundingBox)
-  {
-    DrawPrimitive* primitive=p.get();
-    Vertex2D center=boundingBox.GetCenter();
-
-    if (const auto* polygon = dynamic_cast<const PolygonPrimitive*>(primitive);
-        polygon != nullptr) {
-
-      for (auto pixel=polygon->GetCoords().begin();
-           pixel!=polygon->GetCoords().end();
-           ++pixel) {
-        if (pixel==polygon->GetCoords().begin()) {
-          cairo_move_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                        y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
-        }
-        else {
-          cairo_line_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                        y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
-        }
-      }
-
-      cairo_close_path(draw);
-    }
-    else if (const auto* rectangle = dynamic_cast<const RectanglePrimitive*>(primitive);
-             rectangle != nullptr) {
-
-      cairo_rectangle(draw,
-                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
-                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
-                      projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                      projection.ConvertWidthToPixel(rectangle->GetHeight()));
-    }
-    else if (const auto* circle = dynamic_cast<const CirclePrimitive*>(primitive);
-             circle != nullptr) {
-
-      cairo_arc(draw,
-                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
-                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
-                projection.ConvertWidthToPixel(circle->GetRadius()),
-                0,2*M_PI);
-    }
-  }
-
   void MapPainterCairo::DrawSymbol(const Projection& projection,
-                                   const MapParameter& parameter,
+                                   const MapParameter& /*parameter*/,
                                    const Symbol& symbol,
                                    double x, double y,
-                                   double /*scaleFactor*/)
+                                   double scaleFactor)
   {
-    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    SymbolRendererCairo renderer(draw);
 
-    for (const auto& primitive: symbol.GetPrimitives()) {
-      FillStyleRef   fillStyle=primitive->GetFillStyle();
-      BorderStyleRef borderStyle=primitive->GetBorderStyle();
-
-      cairo_new_path(draw);
-
-      DrawPrimitivePath(projection,
-                        parameter,
-                        primitive,
-                        x,y,
-                        boundingBox);
-
-      DrawFillStyle(projection,
-                    parameter,
-                    fillStyle,
-                    borderStyle);
-    }
+    renderer.Render(projection,
+                    symbol,
+                    Vertex2D(x, y),
+                    scaleFactor);
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,

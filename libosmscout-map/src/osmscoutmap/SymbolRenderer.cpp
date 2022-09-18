@@ -21,16 +21,22 @@
 #include <osmscout/util/Logger.h>
 #include <osmscoutmap/SymbolRenderer.h>
 
-#include <cassert>
-
 namespace osmscout {
 
-void SymbolRenderer::Render(const Symbol &symbol,
-                            const Vertex2D &center,
-                            double groundMeterInPixel,
-                            double screenMmInPixel,
-                            double scaleFactor) const
+void SymbolRenderer::Render(const Projection& projection,
+                            const Symbol &symbol,
+                            const Vertex2D &mapCenter,
+                            std::function<void()> afterRenderTransformer,
+                            std::function<void()> afterEndTransformer,
+                            double scaleFactor)
 {
+  ScreenBox boundingBox = symbol.GetBoundingBox(projection);
+  Vertex2D boxCenter = boundingBox.GetCenter();
+  Vertex2D center=Vertex2D(mapCenter.GetX()-boxCenter.GetY(),
+                           mapCenter.GetY()-boxCenter.GetY());
+  double groundMeterInPixel=projection.GetMeterInPixel();
+  double screenMmInPixel=projection.ConvertWidthToPixel(1);
+
   if (symbol.GetProjectionMode()==Symbol::ProjectionMode::MAP) {
     scaleFactor*=screenMmInPixel;
   }
@@ -40,6 +46,8 @@ void SymbolRenderer::Render(const Symbol &symbol,
 
   for (const auto& primitive : symbol.GetPrimitives()) {
     const DrawPrimitive *primitivePtr=primitive.get();
+
+    BeginPrimitive();
 
     if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
       polygon != nullptr) {
@@ -85,24 +93,25 @@ void SymbolRenderer::Render(const Symbol &symbol,
                  center.GetY()+circle->GetCenter().GetY()*scaleFactor,
                  circle->GetRadius() * scaleFactor);
     }
+
+    afterRenderTransformer();
+
+    EndPrimitive();
+
+    afterEndTransformer();
   }
 }
 
-void SymbolRenderer::Render(const Symbol &symbol,
-                            const Vertex2D &center,
-                            const Projection& projection,
-                            double scaleFactor) const
-{
-  ScreenBox boundingBox = symbol.GetBoundingBox(projection);
-
-  Vertex2D boxCenter = boundingBox.GetCenter();
-
-  Render(symbol,
-         Vertex2D(center.GetX()-boxCenter.GetY(),
-                  center.GetY()-boxCenter.GetY()),
-         projection.GetMeterInPixel(),
-         projection.ConvertWidthToPixel(1),
-         scaleFactor);
-}
-
+  void SymbolRenderer::Render(const Projection& projection,
+                              const Symbol& symbol,
+                              const Vertex2D& mapCenter,
+                              double scaleFactor)
+  {
+    Render(projection,
+           symbol,
+           mapCenter,
+           []() {},
+           []() {},
+           scaleFactor);
+  }
 }
