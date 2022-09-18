@@ -29,6 +29,7 @@
 
 #include <osmscout/system/Compiler.h>
 
+#include <ostream>
 #include <string>
 #include <array>
 #include <type_traits>
