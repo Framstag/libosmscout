@@ -517,7 +517,7 @@ STYLE
 
  [PATH
   MAG veryClose-
-  ONEWAY] WAY.SYMBOL {symbol: oneway_arrow; }
+  ONEWAY] WAY.SYMBOL {symbol: oneway_arrow; symbolSpace: 10mm; renderMode: scale; scale: 0.5; }
 
  // Special objects
 

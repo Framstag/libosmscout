@@ -71,7 +71,8 @@ namespace osmscout {
                     const MapParameter& parameter,
                     const Symbol& symbol,
                     double x,
-                    double y) override;
+                    double y,
+                    double scaleFactor) override;
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,

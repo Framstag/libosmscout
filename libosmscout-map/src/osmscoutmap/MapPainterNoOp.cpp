@@ -90,7 +90,8 @@ namespace osmscout {
                                   const MapParameter& /*parameter*/,
                                   const Symbol& /*symbol*/,
                                   double /*x*/,
-                                  double /*y*/)
+                                  double /*y*/,
+                                  double /*scaleFactor*/)
   {
     // no code
   }

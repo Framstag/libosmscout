@@ -90,7 +90,8 @@ void SymbolRenderer::Render(const Symbol &symbol,
 
 void SymbolRenderer::Render(const Symbol &symbol,
                             const Vertex2D &center,
-                            const Projection& projection) const
+                            const Projection& projection,
+                            double scaleFactor) const
 {
   ScreenBox boundingBox = symbol.GetBoundingBox(projection);
 
@@ -100,7 +101,8 @@ void SymbolRenderer::Render(const Symbol &symbol,
          Vertex2D(center.GetX()-boxCenter.GetY(),
                   center.GetY()-boxCenter.GetY()),
          projection.GetMeterInPixel(),
-         projection.ConvertWidthToPixel(1));
+         projection.ConvertWidthToPixel(1),
+         scaleFactor);
 }
 
 }

@@ -1210,8 +1210,15 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PathSymbolStyle CLASS_FINAL : public Style
   {
   public:
+    enum class RenderMode : int {
+      fixed,
+      scale
+    };
+
     enum Attribute {
       attrSymbol,
+      attrRenderMode,
+      attrScale,
       attrSymbolSpace,
       attrDisplayOffset,
       attrOffset,
@@ -1221,13 +1228,15 @@ namespace osmscout {
   private:
     std::string slot;
     SymbolRef   symbol;
-    double      symbolSpace;
-    double      displayOffset;
-    double      offset;
+    RenderMode  renderMode=RenderMode::fixed;
+    double      scale=1.0;
+    double      symbolSpace=15.0;
+    double      displayOffset=0.0;
+    double      offset=0.0;
     OffsetRel   offsetRel{OffsetRel::base};
 
   public:
-    PathSymbolStyle();
+    PathSymbolStyle() = default;
 
     void SetDoubleValue(int attribute, double value) override;
     void SetSymbolValue(int attribute, const SymbolRef& value) override;
@@ -1236,6 +1245,8 @@ namespace osmscout {
     PathSymbolStyle& SetSlot(const std::string& slot);
 
     PathSymbolStyle& SetSymbol(const SymbolRef& symbol);
+    PathSymbolStyle& SetRenderMode(RenderMode renderMode);
+    PathSymbolStyle& SetScale(double scale);
     PathSymbolStyle& SetSymbolSpace(double space);
     PathSymbolStyle& SetDisplayOffset(double value);
     PathSymbolStyle& SetOffset(double value);
@@ -1254,6 +1265,16 @@ namespace osmscout {
     const SymbolRef& GetSymbol() const
     {
       return symbol;
+    }
+
+    RenderMode GetRenderMode() const
+    {
+      return renderMode;
+    }
+
+    double GetScale() const
+    {
+      return scale;
     }
 
     double GetSymbolSpace() const
@@ -1293,6 +1314,20 @@ namespace osmscout {
   };
 
   using PathSymbolStyleRef = std::shared_ptr<PathSymbolStyle>;
+
+  class OSMSCOUT_MAP_API RenderModeEnumAttributeDescriptor CLASS_FINAL : public StyleEnumAttributeDescriptor
+  {
+  public:
+    RenderModeEnumAttributeDescriptor(const std::string& name,
+                                      int attribute)
+      : StyleEnumAttributeDescriptor(name,
+                                     attribute)
+    {
+      AddEnumValue("fixed",(int)PathSymbolStyle::RenderMode::fixed);
+      AddEnumValue("scale",(int)PathSymbolStyle::RenderMode::scale);
+    }
+  };
+
 }
 
 #endif
