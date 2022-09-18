@@ -1022,6 +1022,7 @@ namespace osmscout {
 
             data.symbolSpace=symbolSpace;
             data.symbolOffset=symbolSpace/2.0;
+            data.symbolScale=1.0;
             data.coordRange=range;
 
 
@@ -1054,7 +1055,16 @@ namespace osmscout {
 
         ScreenBox symbolBoundingBox=symbol->GetBoundingBox(projection);
 
-        double symbolWidth=symbolBoundingBox.GetWidth();
+        double symbolScale;
+
+        if (pathSymbolStyle->GetRenderMode()==PathSymbolStyle::RenderMode::scale) {
+          symbolScale=data.mainSlotWidth*pathSymbolStyle->GetScale()/symbolBoundingBox.GetHeight();
+        }
+        else {
+          symbolScale=1.0;
+        }
+
+        double symbolWidth=symbolBoundingBox.GetWidth()*symbolScale;
         double length=data.coordRange.GetLength();
         size_t countLabels=(length-symbolSpace)/(symbolWidth+symbolSpace);
         size_t labelCountExp=log2(countLabels);
@@ -1068,6 +1078,7 @@ namespace osmscout {
         symbolData.symbolSpace =space;
         symbolData.symbolOffset=space;
         symbolData.coordRange  =range;
+        symbolData.symbolScale=symbolScale;
 
         DrawContourSymbol(projection,
                           parameter,
@@ -1658,9 +1669,8 @@ namespace osmscout {
     if (layerValue!=nullptr) {
       return layerValue->GetLayer();
     }
-    else {
-      return 0;
-    }
+
+    return 0;
   }
 
   void MapPainter::CalculateWayPaths(const StyleConfig& styleConfig,

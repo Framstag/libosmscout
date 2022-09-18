@@ -43,21 +43,24 @@ namespace osmscout {
     if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
       return OffsetRel::laneForwardLeft;
     }
-    else if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+
+    if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
       return OffsetRel::laneForwardThroughLeft;
     }
-    else if (turn=="through") {
+
+    if (turn=="through") {
       return OffsetRel::laneForwardThrough;
     }
-    else if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+
+    if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
       return OffsetRel::laneForwardThroughRight;
     }
-    else if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+
+    if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
       return OffsetRel::laneForwardRight;
     }
-    else {
-      return OffsetRel::base;
-    }
+
+    return OffsetRel::base;
   }
 
   OffsetRel ParseBackwardTurnStringToOffset(const std::string& turn)
@@ -65,21 +68,24 @@ namespace osmscout {
     if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
       return OffsetRel::laneBackwardLeft;
     }
-    else if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+
+    if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
       return OffsetRel::laneBackwardThroughLeft;
     }
-    else if (turn=="through") {
+
+    if (turn=="through") {
       return OffsetRel::laneBackwardThrough;
     }
-    else if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+
+    if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
       return OffsetRel::laneBackwardThroughRight;
     }
-    else if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+
+    if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
       return OffsetRel::laneBackwardRight;
     }
-    else {
-      return OffsetRel::base;
-    }
+
+    return OffsetRel::base;
   }
 
 
@@ -1705,6 +1711,8 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     PathSymbolStyleDescriptor()
     {
       AddAttribute(std::make_shared<StyleSymbolAttributeDescriptor>("symbol",PathSymbolStyle::attrSymbol));
+      AddAttribute(std::make_shared<RenderModeEnumAttributeDescriptor>("renderMode",PathSymbolStyle::attrRenderMode));
+      AddAttribute(std::make_shared<StyleUDoubleAttributeDescriptor>("scale",PathSymbolStyle::attrScale));
       AddAttribute(std::make_shared<StyleUDisplayAttributeDescriptor>("symbolSpace",PathSymbolStyle::attrSymbolSpace));
       AddAttribute(std::make_shared<StyleDisplayAttributeDescriptor>("displayOffset",PathSymbolStyle::attrDisplayOffset));
       AddAttribute(std::make_shared<StyleUMapAttributeDescriptor>("offset",PathSymbolStyle::attrOffset));
@@ -1712,14 +1720,6 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   };
 
   static const StyleDescriptorRef pathSymbolStyleDescriptor=std::make_shared<PathSymbolStyleDescriptor>();
-
-  PathSymbolStyle::PathSymbolStyle()
-  : symbolSpace(15),
-    displayOffset(0.0),
-    offset(0.0)
-  {
-    // no code
-  }
 
   PathSymbolStyle& PathSymbolStyle::SetSlot(const std::string& slot)
   {
@@ -1731,6 +1731,20 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
   PathSymbolStyle& PathSymbolStyle::SetSymbol(const SymbolRef& symbol)
   {
     this->symbol=symbol;
+
+    return *this;
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetRenderMode(RenderMode renderMode)
+  {
+    this->renderMode=renderMode;
+
+    return *this;
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetScale(double scale)
+  {
+    this->scale=scale;
 
     return *this;
   }
@@ -1776,6 +1790,12 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
       case attrSymbol:
         symbol=other.symbol;
         break;
+      case attrRenderMode:
+        renderMode=other.renderMode;
+        break;
+      case attrScale:
+        scale=other.scale;
+        break;
       case attrSymbolSpace:
         symbolSpace=other.symbolSpace;
         break;
@@ -1786,7 +1806,7 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
         offset=other.offset;
         break;
       case attrOffsetRel:
-        offset=other.offset;
+        offsetRel=other.offsetRel;
         break;
       }
     }
@@ -1796,6 +1816,9 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
                                        double value)
   {
     switch (attribute) {
+    case attrScale:
+      SetScale(value);
+      break;
     case attrOffset:
       SetOffset(value);
       break;
@@ -1822,16 +1845,18 @@ class LineStyleDescriptor CLASS_FINAL : public StyleDescriptor
     }
   }
 
-  void PathSymbolStyle::SetIntValue(int attribute, int value)
+  void PathSymbolStyle::SetIntValue(int attribute,
+                                    int value)
   {
     switch (attribute) {
-      case attrOffsetRel:
-        SetOffsetRel((OffsetRel)value);
-        break;
-      default:
-        assert(false);
+    case attrRenderMode:
+      SetRenderMode((PathSymbolStyle::RenderMode)value);
+      break;
+    case attrOffsetRel:
+      SetOffsetRel((OffsetRel)value);
+      break;
+    default:
+      assert(false);
     }
   }
-
 }
-

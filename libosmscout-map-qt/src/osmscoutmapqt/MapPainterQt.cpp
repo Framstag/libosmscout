@@ -632,7 +632,8 @@ namespace osmscout {
           DrawSymbol(projection,
                      parameter,
                      symbol,
-                     0,0);
+                     0,0,
+                     data.symbolScale);
           loop=FollowPath(followPathHnd,
                           data.coordRange,
                           space,
@@ -660,12 +661,14 @@ namespace osmscout {
   void MapPainterQt::DrawSymbol(const Projection& projection,
                                 const MapParameter& /*parameter*/,
                                 const Symbol& symbol,
-                                double x, double y)
+                                double x, double y,
+                                double scaleFactor)
   {
     SymbolRendererQt renderer(painter);
     renderer.Render(symbol,
                     Vertex2D(x, y),
-                    projection);
+                    projection,
+                    scaleFactor);
   }
 
   void MapPainterQt::DrawPath(const Projection& /*projection*/,

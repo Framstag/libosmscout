@@ -180,7 +180,8 @@ namespace osmscout {
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,
-                    double x, double y) override;
+                    double x, double y,
+                    double scaleFactor) override;
 
     void DrawIcon(const IconStyle* style,
                   double centerX, double centerY,

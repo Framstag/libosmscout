@@ -779,7 +779,8 @@ namespace osmscout {
   void MapPainterSVG::DrawSymbol(const Projection& projection,
                                  const MapParameter& /*parameter*/,
                                  const Symbol& symbol,
-                                 double x, double y)
+                                 double x, double y,
+                                 double /*scaleFactor*/)
   {
     ScreenBox boundingBox=symbol.GetBoundingBox(projection);
     Vertex2D center=boundingBox.GetCenter();

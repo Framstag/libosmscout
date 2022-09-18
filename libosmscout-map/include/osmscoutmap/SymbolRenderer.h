@@ -43,7 +43,8 @@ public:
 
   virtual void Render(const Symbol &symbol,
                       const Vertex2D &center,
-                      const Projection &projection) const;
+                      const Projection &projection,
+                      double scaleFactor=1.0) const;
 
 protected:
   virtual void SetFill(const FillStyleRef &fillStyle) const = 0;

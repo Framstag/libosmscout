@@ -205,6 +205,7 @@ namespace osmscout {
       double            symbolOffset; //!< Initial offset of the symbol
       double            symbolSpace;  //!< Space between individual symbols on the contour
       CoordBufferRange  coordRange;   //!< Range of coordinates of the path in transformation buffer
+      double            symbolScale;  //!< Potential magnification of the symbol
     };
 
   protected:
@@ -619,7 +620,8 @@ namespace osmscout {
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,
                             const Symbol& symbol,
-                            double x, double y) = 0;
+                            double x, double y,
+                            double scaleFactor=1.0) = 0;
 
     /**
       Draw simple line with the given style,the given color, the given width
