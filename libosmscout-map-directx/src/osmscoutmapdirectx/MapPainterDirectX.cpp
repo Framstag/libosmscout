@@ -728,7 +728,8 @@ namespace osmscout
                                      const MapParameter& /*parameter*/,
                                      const Symbol& symbol,
                                      double x,
-                                     double y)
+                                     double y,
+                                     double /*scaleFactor*/)
   {
     ScreenBox boundingBox=symbol.GetBoundingBox(projection);
     Vertex2D center=boundingBox.GetCenter();
