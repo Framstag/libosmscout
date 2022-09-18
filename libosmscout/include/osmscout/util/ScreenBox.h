@@ -99,6 +99,16 @@ namespace osmscout {
       return maxCoord.GetY()-minCoord.GetY();
     }
 
+    /**
+     * Returns the center coordinates of the box
+     * @return the center coordinates
+     */
+    Vertex2D GetCenter() const
+    {
+      return {(minCoord.GetX()+maxCoord.GetX())/2,
+              (minCoord.GetY()+maxCoord.GetY())/2};
+    }
+
     ScreenBox Merge(const ScreenBox& other) const;
   };
 }

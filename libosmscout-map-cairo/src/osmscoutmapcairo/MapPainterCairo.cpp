@@ -613,15 +613,9 @@ namespace osmscout {
 
     cairo_path_t *path = cairo_copy_path_flat(draw);
 
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-
-    symbol.GetBoundingBox(projection,minX, minY, maxX, maxY);
-
-    double width = maxX - minX;
-    double height = maxY - minY;
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    double    width=boundingBox.GetWidth();
+    double    height=boundingBox.GetHeight();
 
     for (const auto &primitive : symbol.GetPrimitives()) {
       FillStyleRef fillStyle = primitive->GetFillStyle();
@@ -636,12 +630,9 @@ namespace osmscout {
                           parameter,
                           primitive,
                           currentPos+width/2,0,
-                          minX,
-                          minY,
-                          maxX,
-                          maxY);
+                          boundingBox);
 
-        currentPos +=width+data.symbolSpace;
+        currentPos+=width+data.symbolSpace;
       }
 
       cairo_path_t *patternPath = cairo_copy_path_flat(draw);
@@ -1137,14 +1128,10 @@ namespace osmscout {
                                           const MapParameter& /*parameter*/,
                                           const DrawPrimitiveRef& p,
                                           double x, double y,
-                                          double minX,
-                                          double minY,
-                                          double maxX,
-                                          double maxY)
+                                          const ScreenBox& boundingBox)
   {
     DrawPrimitive* primitive=p.get();
-    double         centerX=(minX+maxX)/2;
-    double         centerY=(minY+maxY)/2;
+    Vertex2D center=boundingBox.GetCenter();
 
     if (const auto* polygon = dynamic_cast<const PolygonPrimitive*>(primitive);
         polygon != nullptr) {
@@ -1154,13 +1141,13 @@ namespace osmscout {
            ++pixel) {
         if (pixel==polygon->GetCoords().begin()) {
           cairo_move_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                        y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
+                        x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                        y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
         }
         else {
           cairo_line_to(draw,
-                        x+projection.ConvertWidthToPixel(pixel->GetX())-centerX,
-                        y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
+                        x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                        y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
         }
       }
 
@@ -1170,8 +1157,8 @@ namespace osmscout {
              rectangle != nullptr) {
 
       cairo_rectangle(draw,
-                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX,
-                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY,
+                      x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
+                      y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
                       projection.ConvertWidthToPixel(rectangle->GetWidth()),
                       projection.ConvertWidthToPixel(rectangle->GetHeight()));
     }
@@ -1179,8 +1166,8 @@ namespace osmscout {
              circle != nullptr) {
 
       cairo_arc(draw,
-                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX,
-                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY,
+                x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
+                y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
                 projection.ConvertWidthToPixel(circle->GetRadius()),
                 0,2*M_PI);
     }
@@ -1191,12 +1178,7 @@ namespace osmscout {
                                    const Symbol& symbol,
                                    double x, double y)
   {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-
-    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
 
     for (const auto& primitive: symbol.GetPrimitives()) {
       FillStyleRef   fillStyle=primitive->GetFillStyle();
@@ -1208,10 +1190,7 @@ namespace osmscout {
                         parameter,
                         primitive,
                         x,y,
-                        minX,
-                        minY,
-                        maxX,
-                        maxY);
+                        boundingBox);
 
       DrawFillStyle(projection,
                     parameter,

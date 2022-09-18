@@ -19,7 +19,6 @@
 
 #include <osmscout/util/ScreenBox.h>
 
-
 namespace osmscout {
 
   ScreenBox::ScreenBox(const Vertex2D& coordA,

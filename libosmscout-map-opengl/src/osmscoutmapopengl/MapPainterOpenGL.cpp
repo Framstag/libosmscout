@@ -899,16 +899,9 @@ namespace osmscout {
 
 
       } else if (iconStyle->GetSymbol()) {
-        osmscout::SymbolRef symbol = iconStyle->GetSymbol();
-
-        double minX;
-        double minY;
-        double maxX;
-        double maxY;
-        symbol->GetBoundingBox(loadProjection, minX, minY, maxX, maxY);
-
-        double centerX = (minX + maxX) / 2;
-        double centerY = (minY + maxY) / 2;
+        osmscout::SymbolRef symbol     = iconStyle->GetSymbol();
+        ScreenBox           boundingBox= symbol->GetBoundingBox(loadProjection);
+        Vertex2D            center     =boundingBox.GetCenter();
 
         for (const auto &p : symbol->GetPrimitives()) {
           DrawPrimitive *primitive = p.get();
@@ -928,9 +921,9 @@ namespace osmscout {
               double scaleLat = -1 * meterPerPixelLat * meterToDegreeLat;
 
               double x =
-                  node->GetCoords().GetLon() + ((loadProjection.ConvertWidthToPixel(pixel.GetX()) - centerX) * scale);
+                  node->GetCoords().GetLon() + ((loadProjection.ConvertWidthToPixel(pixel.GetX()) - center.GetX()) * scale);
               double y = node->GetCoords().GetLat() +
-                         ((loadProjection.ConvertWidthToPixel(pixel.GetY()) - centerY) * scaleLat);
+                         ((loadProjection.ConvertWidthToPixel(pixel.GetY()) - center.GetY()) * scaleLat);
 
               vertices.push_back(osmscout::Vertex2D(x, y));
             }

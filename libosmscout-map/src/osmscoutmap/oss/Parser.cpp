@@ -218,13 +218,19 @@ void Parser::CONSTSECTION() {
 void Parser::SYMBOLSECTION() {
 		while (!(la->kind == _EOF || la->kind == 22 /* "SYMBO" */)) {SynErr(71); Get();}
 		Expect(22 /* "SYMBO" */);
+		Symbol::ProjectionMode projectionMode=Symbol::ProjectionMode::MAP;
 		std::string name;
 		
+		if (la->kind == 23 /* "GROUND" */) {
+			Get();
+			projectionMode=Symbol::ProjectionMode::GROUND; 
+		}
 		IDENT(name);
-		SymbolRef symbol=std::make_shared<Symbol>(name);
+		SymbolRef symbol=std::make_shared<Symbol>(name,
+		                                         projectionMode);
 		
-		while (la->kind == 26 /* "POLYGON" */ || la->kind == 28 /* "RECTANGLE" */ || la->kind == 30 /* "CIRCLE" */) {
-			if (la->kind == 26 /* "POLYGON" */) {
+		while (la->kind == 27 /* "POLYGON" */ || la->kind == 28 /* "RECTANGLE" */ || la->kind == 30 /* "CIRCLE" */) {
+			if (la->kind == 27 /* "POLYGON" */) {
 				POLYGON(*symbol);
 			} else if (la->kind == 28 /* "RECTANGLE" */) {
 				RECTANGLE(*symbol);
@@ -444,21 +450,15 @@ void Parser::WAYGROUP(size_t priority) {
 }
 
 void Parser::POLYGON(Symbol& symbol) {
-		while (!(la->kind == _EOF || la->kind == 26 /* "POLYGON" */)) {SynErr(74); Get();}
-		Expect(26 /* "POLYGON" */);
+		while (!(la->kind == _EOF || la->kind == 27 /* "POLYGON" */)) {SynErr(74); Get();}
+		Expect(27 /* "POLYGON" */);
 		StyleFilter         filter;
-		DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
 		FillPartialStyle    fillStyle;
 		BorderPartialStyle  borderStyle;
 		PolygonPrimitiveRef polygon;
 		Vertex2D            coord;
 		
-		if (la->kind == 27 /* "GROUND" */) {
-			Get();
-			projectionMode=DrawPrimitive::ProjectionMode::GROUND; 
-		}
-		polygon=std::make_shared<PolygonPrimitive>(projectionMode,
-		                                          fillStyle.style,
+		polygon=std::make_shared<PolygonPrimitive>(fillStyle.style,
 		                                          borderStyle.style);
 		
 		COORD(coord);
@@ -477,24 +477,18 @@ void Parser::RECTANGLE(Symbol& symbol) {
 		while (!(la->kind == _EOF || la->kind == 28 /* "RECTANGLE" */)) {SynErr(75); Get();}
 		Expect(28 /* "RECTANGLE" */);
 		StyleFilter        filter;
-		DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
 		FillPartialStyle   fillStyle;
 		BorderPartialStyle borderStyle;
 		Vertex2D           topLeft;
 		double             width;
 		double             height;
 		
-		if (la->kind == 27 /* "GROUND" */) {
-			Get();
-			projectionMode=DrawPrimitive::ProjectionMode::GROUND; 
-		}
 		COORD(topLeft);
 		UDOUBLE(width);
 		Expect(29 /* "x" */);
 		UDOUBLE(height);
 		AREASYMBOLSTYLE(fillStyle,borderStyle);
-		symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(projectionMode,
-		                                                        topLeft,
+		symbol.AddPrimitive(std::make_shared<RectanglePrimitive>(topLeft,
 		                                                        width,height,
 		                                                        fillStyle.style,
 		                                                        borderStyle.style));
@@ -505,21 +499,15 @@ void Parser::CIRCLE(Symbol& symbol) {
 		while (!(la->kind == _EOF || la->kind == 30 /* "CIRCLE" */)) {SynErr(76); Get();}
 		Expect(30 /* "CIRCLE" */);
 		StyleFilter                   filter;
-		DrawPrimitive::ProjectionMode projectionMode=DrawPrimitive::ProjectionMode::MAP;
 		FillPartialStyle              fillStyle;
 		BorderPartialStyle            borderStyle;
 		Vertex2D                      center;
 		double                        radius;
 		
-		if (la->kind == 27 /* "GROUND" */) {
-			Get();
-			projectionMode=DrawPrimitive::ProjectionMode::GROUND; 
-		}
 		COORD(center);
 		UDOUBLE(radius);
 		AREASYMBOLSTYLE(fillStyle,borderStyle);
-		symbol.AddPrimitive(std::make_shared<CirclePrimitive>(projectionMode,
-		                                                     center,
+		symbol.AddPrimitive(std::make_shared<CirclePrimitive>(center,
 		                                                     radius,
 		                                                     fillStyle.style,
 		                                                     borderStyle.style));
@@ -541,8 +529,8 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 }
 
 void Parser::AREABORDERSYMSTYLE(BorderPartialStyle& borderStyle) {
-		while (!(la->kind == _EOF || la->kind == 23 /* "BORDER" */)) {SynErr(78); Get();}
-		Expect(23 /* "BORDER" */);
+		while (!(la->kind == _EOF || la->kind == 24 /* "BORDER" */)) {SynErr(78); Get();}
+		Expect(24 /* "BORDER" */);
 		Expect(12 /* "{" */);
 		while (la->kind == _ident || la->kind == 59 /* "name" */) {
 			BORDERSTYLEATTR(borderStyle);
@@ -558,12 +546,12 @@ void Parser::BORDERSTYLEATTR(BorderPartialStyle& style) {
 void Parser::AREASYMBOLSTYLE(FillPartialStyle& fillStyle, BorderPartialStyle& borderStyle) {
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(79); Get();}
 		Expect(12 /* "{" */);
-		while (la->kind == 24 /* "AREA" */) {
-			while (!(la->kind == _EOF || la->kind == 24 /* "AREA" */)) {SynErr(80); Get();}
+		while (la->kind == 25 /* "AREA" */) {
+			while (!(la->kind == _EOF || la->kind == 25 /* "AREA" */)) {SynErr(80); Get();}
 			Get();
 			if (la->kind == 12 /* "{" */) {
 				AREAFILLSYMSTYLE(fillStyle);
-			} else if (la->kind == 25 /* "." */) {
+			} else if (la->kind == 26 /* "." */) {
 				Get();
 				AREABORDERSYMSTYLE(borderStyle);
 			} else SynErr(81);
@@ -1043,7 +1031,7 @@ void Parser::STYLEDEF(StyleFilter filter, bool state) {
 			NODESTYLEDEF(filter,state);
 		} else if (la->kind == 54 /* "WAY" */) {
 			WAYSTYLEDEF(filter,state);
-		} else if (la->kind == 24 /* "AREA" */) {
+		} else if (la->kind == 25 /* "AREA" */) {
 			AREASTYLEDEF(filter,state);
 		} else if (la->kind == 58 /* "ROUTE" */) {
 			ROUTESTYLEDEF(filter,state);
@@ -1214,7 +1202,7 @@ void Parser::STYLEFILTER_FEATURE_ENTRY(StyleFilter& filter, TypeInfoSet& types) 
 		std::string flagName;
 		
 		IDENT(featureName);
-		if (la->kind == 25 /* "." */) {
+		if (la->kind == 26 /* "." */) {
 			Get();
 			IDENT(flagName);
 		}
@@ -1318,7 +1306,7 @@ void Parser::UMAP(double& width) {
 void Parser::NODESTYLEDEF(StyleFilter filter, bool state) {
 		while (!(la->kind == _EOF || la->kind == 50 /* "NODE" */)) {SynErr(93); Get();}
 		Expect(50 /* "NODE" */);
-		Expect(25 /* "." */);
+		Expect(26 /* "." */);
 		if (la->kind == 51 /* "TEXT" */) {
 			NODETEXTSTYLE(filter,state);
 		} else if (la->kind == 53 /* "ICON" */) {
@@ -1331,7 +1319,7 @@ void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
 		Expect(54 /* "WAY" */);
 		if (la->kind == 12 /* "{" */ || la->kind == 52 /* "#" */) {
 			WAYSTYLE(filter,state);
-		} else if (la->kind == 25 /* "." */) {
+		} else if (la->kind == 26 /* "." */) {
 			Get();
 			if (la->kind == 51 /* "TEXT" */) {
 				WAYPATHTEXTSTYLE(filter,state);
@@ -1344,17 +1332,17 @@ void Parser::WAYSTYLEDEF(StyleFilter filter, bool state) {
 }
 
 void Parser::AREASTYLEDEF(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 24 /* "AREA" */)) {SynErr(98); Get();}
-		Expect(24 /* "AREA" */);
+		while (!(la->kind == _EOF || la->kind == 25 /* "AREA" */)) {SynErr(98); Get();}
+		Expect(25 /* "AREA" */);
 		if (la->kind == 12 /* "{" */) {
 			AREASTYLE(filter,state);
-		} else if (la->kind == 25 /* "." */) {
+		} else if (la->kind == 26 /* "." */) {
 			Get();
 			if (la->kind == 51 /* "TEXT" */) {
 				AREATEXTSTYLE(filter,state);
 			} else if (la->kind == 53 /* "ICON" */) {
 				AREAICONSTYLE(filter,state);
-			} else if (la->kind == 23 /* "BORDER" */) {
+			} else if (la->kind == 24 /* "BORDER" */) {
 				AREABORDERSTYLE(filter,state);
 			} else if (la->kind == 56 /* "BORDERTEXT" */) {
 				AREABORDERTEXTSTYLE(filter,state);
@@ -1369,7 +1357,7 @@ void Parser::ROUTESTYLEDEF(StyleFilter filter, bool state) {
 		Expect(58 /* "ROUTE" */);
 		if (la->kind == 12 /* "{" */) {
 			ROUTESTYLE(filter,state);
-		} else if (la->kind == 25 /* "." */) {
+		} else if (la->kind == 26 /* "." */) {
 			Get();
 			ROUTEPATHTEXTSTYLE(filter,state);
 		} else SynErr(102);
@@ -1610,8 +1598,8 @@ void Parser::AREAICONSTYLE(StyleFilter filter, bool state) {
 }
 
 void Parser::AREABORDERSTYLE(StyleFilter filter, bool state) {
-		while (!(la->kind == _EOF || la->kind == 23 /* "BORDER" */)) {SynErr(131); Get();}
-		Expect(23 /* "BORDER" */);
+		while (!(la->kind == _EOF || la->kind == 24 /* "BORDER" */)) {SynErr(131); Get();}
+		Expect(24 /* "BORDER" */);
 		BorderPartialStyle style;
 		std::string        slot;
 		
@@ -1742,7 +1730,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 				Get();
 				ident="alpha"; valueType=ValueType::IDENT; 
 			}
-			if (la->kind == 25 /* "." */ || la->kind == 63 /* "(" */) {
+			if (la->kind == 26 /* "." */ || la->kind == 63 /* "(" */) {
 				if (la->kind == 63 /* "(" */) {
 					Get();
 					valueType=ValueType::COLOR;
@@ -2488,12 +2476,12 @@ bool Parser::StartOf(int s)
   const bool x = false;
 
 	static bool set[7][68] = {
-		{T,x,x,x, x,x,x,T, x,T,T,x, T,T,x,x, x,x,T,x, T,x,T,T, T,x,T,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x},
-		{T,T,x,x, x,x,x,T, x,T,T,x, T,T,x,x, x,x,T,x, T,x,T,T, T,x,T,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,T, x,T,T,x, T,T,x,x, x,x,T,x, T,x,T,x, T,T,x,T, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x},
+		{T,T,x,x, x,x,x,T, x,T,T,x, T,T,x,x, x,x,T,x, T,x,T,x, T,T,x,T, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,T,x, x,x,T,x, x,x,x,x, x,x,x,x},
 		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,x, x,x,x,x}
 	};
 
@@ -2550,11 +2538,11 @@ void Errors::SynErr(int line, int col, int n)
 			case 20: s = coco_string_create("\"GROUP\" expected"); break;
 			case 21: s = coco_string_create("\",\" expected"); break;
 			case 22: s = coco_string_create("\"SYMBOL\" expected"); break;
-			case 23: s = coco_string_create("\"BORDER\" expected"); break;
-			case 24: s = coco_string_create("\"AREA\" expected"); break;
-			case 25: s = coco_string_create("\".\" expected"); break;
-			case 26: s = coco_string_create("\"POLYGON\" expected"); break;
-			case 27: s = coco_string_create("\"GROUND\" expected"); break;
+			case 23: s = coco_string_create("\"GROUND\" expected"); break;
+			case 24: s = coco_string_create("\"BORDER\" expected"); break;
+			case 25: s = coco_string_create("\"AREA\" expected"); break;
+			case 26: s = coco_string_create("\".\" expected"); break;
+			case 27: s = coco_string_create("\"POLYGON\" expected"); break;
 			case 28: s = coco_string_create("\"RECTANGLE\" expected"); break;
 			case 29: s = coco_string_create("\"x\" expected"); break;
 			case 30: s = coco_string_create("\"CIRCLE\" expected"); break;

@@ -495,15 +495,14 @@ namespace osmscout {
   }
 
   void MapPainterQt::FollowPathInit(FollowPathHandle &hnd,
+                                    const CoordBufferRange& coordRange,
                                     Vertex2D &origin,
-                                    size_t transStart,
-                                    size_t transEnd,
                                     bool isClosed,
                                     bool keepOrientation)
   {
     hnd.i=0;
-    hnd.nVertex=transEnd >= transStart ? transEnd - transStart : transStart-transEnd;
-    bool isReallyClosed=(coordBuffer.buffer[transStart]==coordBuffer.buffer[transEnd]);
+    hnd.nVertex=coordRange.GetEnd() >= coordRange.GetStart() ? coordRange.GetEnd() - coordRange.GetStart() : coordRange.GetStart()-coordRange.GetEnd();
+    bool isReallyClosed=(coordRange.GetFirst()==coordRange.GetLast());
 
     if (isClosed && !isReallyClosed) {
       hnd.nVertex++;
@@ -514,45 +513,48 @@ namespace osmscout {
     }
 
     if (keepOrientation ||
-        coordBuffer.buffer[transStart].GetX()<coordBuffer.buffer[transEnd].GetX()) {
-      hnd.transStart=transStart;
-      hnd.transEnd=transEnd;
+        coordRange.GetFirst().GetX()<coordRange.GetLast().GetX()) {
+      hnd.transStart=coordRange.GetStart();
+      hnd.transEnd=coordRange.GetEnd();
     }
     else {
-      hnd.transStart=transEnd;
-      hnd.transEnd=transStart;
+      hnd.transStart=coordRange.GetEnd();
+      hnd.transEnd=coordRange.GetStart();
     }
 
     hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
-    origin.Set(coordBuffer.buffer[hnd.transStart].GetX(),
-               coordBuffer.buffer[hnd.transStart].GetY());
+    origin.Set(coordRange.Get(hnd.transStart).GetX(),
+               coordRange.Get(hnd.transStart).GetY());
   }
 
   bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
+                                const CoordBufferRange& coordRange,
                                 double l,
                                 Vertex2D &origin)
   {
     double x=origin.GetX();
     double y=origin.GetY();
-    double x2,y2;
-    double deltaX,deltaY,len,fracToGo;
+    double x2;
+    double y2;
 
     while (hnd.i<hnd.nVertex) {
       if (hnd.closeWay && hnd.nVertex-hnd.i==1) {
-        x2=coordBuffer.buffer[hnd.transStart].GetX();
-        y2=coordBuffer.buffer[hnd.transStart].GetY();
+        x2=coordRange.Get(hnd.transStart).GetX();
+        y2=coordRange.Get(hnd.transStart).GetY();
       }
       else {
-        x2=coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetX();
-        y2=coordBuffer.buffer[hnd.transStart+(hnd.i+1)*hnd.direction].GetY();
+        x2=coordRange.Get(hnd.transStart+(hnd.i+1)*hnd.direction).GetX();
+        y2=coordRange.Get(hnd.transStart+(hnd.i+1)*hnd.direction).GetY();
       }
-      deltaX=(x2-x);
-      deltaY=(y2-y);
-      len=sqrt(deltaX*deltaX + deltaY*deltaY);
 
-      fracToGo=l/len;
+      double deltaX=(x2-x);
+      double deltaY=(y2-y);
+      double len=sqrt(deltaX*deltaX + deltaY*deltaY);
+      double fracToGo=l/len;
+
       if (fracToGo<=1.0) {
-        origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
+        origin.Set(x + deltaX*fracToGo,
+                   y + deltaY*fracToGo);
         return true;
       }
 
@@ -571,41 +573,32 @@ namespace osmscout {
                                        const Symbol& symbol,
                                        const ContourSymbolData& data)
   {
-    double           minX;
-    double           minY;
-    double           maxX;
-    double           maxY;
+    double symbolWidth=symbol.GetWidth(projection);
+    double space=data.symbolSpace;
+    double offset=data.symbolOffset;
 
-    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-
-    double symbolWidth=maxX-minX;
-    double length=data.coordRange.GetLength();
-    double offset=0.0;
-
-    size_t countLabels=(length-data.symbolSpace)/(symbolWidth+data.symbolSpace);
-
-    size_t labelCountExp=log2(countLabels);
-
-    countLabels=pow(2,labelCountExp);
-
-    double space=(length-countLabels*symbolWidth)/(countLabels+1);
-
-    offset=space;
-
-    bool   isClosed   =false;
+    bool             isClosed=false;
     Vertex2D         origin;
-    double           x1,y1,x2,y2,x3,y3,slope;
+    double           x1;
+    double           y1;
+    double           x2;
+    double           y2;
+    double           x3;
+    double           y3;
+    double           slope;
     FollowPathHandle followPathHnd;
 
     FollowPathInit(followPathHnd,
+                   data.coordRange,
                    origin,
-                   data.coordRange.GetStart(),
-                   data.coordRange.GetEnd(),
                    isClosed,
                    true);
 
     if (!isClosed &&
-        !FollowPath(followPathHnd,offset,origin)) {
+        !FollowPath(followPathHnd,
+                    data.coordRange,
+                    offset,
+                    origin)) {
       return;
     }
 
@@ -616,12 +609,18 @@ namespace osmscout {
     while (loop) {
       x1=origin.GetX();
       y1=origin.GetY();
-      loop=FollowPath(followPathHnd,symbolWidth/2,origin);
+      loop=FollowPath(followPathHnd,
+                      data.coordRange,
+                      symbolWidth/2,
+                      origin);
 
       if (loop) {
         x2=origin.GetX();
         y2=origin.GetY();
-        loop=FollowPath(followPathHnd,symbolWidth/2,origin);
+        loop=FollowPath(followPathHnd,
+                        data.coordRange,
+                        symbolWidth/2,
+                        origin);
 
         if (loop) {
           x3=origin.GetX();
@@ -630,8 +629,14 @@ namespace osmscout {
           t=QTransform::fromTranslate(x2, y2);
           t.rotateRadians(slope);
           painter->setTransform(t);
-          DrawSymbol(projection, parameter, symbol, 0, 0);
-          loop=FollowPath(followPathHnd, space, origin);
+          DrawSymbol(projection,
+                     parameter,
+                     symbol,
+                     0,0);
+          loop=FollowPath(followPathHnd,
+                          data.coordRange,
+                          space,
+                          origin);
         }
       }
     }
@@ -658,7 +663,9 @@ namespace osmscout {
                                 double x, double y)
   {
     SymbolRendererQt renderer(painter);
-    renderer.Render(symbol, Vertex2D(x, y), projection);
+    renderer.Render(symbol,
+                    Vertex2D(x, y),
+                    projection);
   }
 
   void MapPainterQt::DrawPath(const Projection& /*projection*/,

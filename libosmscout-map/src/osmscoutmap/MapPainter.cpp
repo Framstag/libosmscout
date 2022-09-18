@@ -1050,16 +1050,29 @@ namespace osmscout {
                                                 lineOffset);
         }
 
-        ContourSymbolData data;
+        SymbolRef symbol=pathSymbolStyle->GetSymbol();
 
-        data.symbolSpace=symbolSpace;
-        data.symbolOffset=symbolSpace/2.0;
-        data.coordRange=range;
+        ScreenBox symbolBoundingBox=symbol->GetBoundingBox(projection);
+
+        double symbolWidth=symbolBoundingBox.GetWidth();
+        double length=data.coordRange.GetLength();
+        size_t countLabels=(length-symbolSpace)/(symbolWidth+symbolSpace);
+        size_t labelCountExp=log2(countLabels);
+
+        countLabels=pow(2,labelCountExp);
+
+        double space=(length-countLabels*symbolWidth)/(countLabels+1);
+
+        ContourSymbolData symbolData;
+
+        symbolData.symbolSpace =space;
+        symbolData.symbolOffset=space;
+        symbolData.coordRange  =range;
 
         DrawContourSymbol(projection,
                           parameter,
-                          *pathSymbolStyle->GetSymbol(),
-                          data);
+                          *symbol,
+                          symbolData);
       }
     }
     return true;

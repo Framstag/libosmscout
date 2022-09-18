@@ -730,14 +730,8 @@ namespace osmscout
                                      double x,
                                      double y)
   {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-
-    symbol.GetBoundingBox(projection, minX, minY, maxX, maxY);
-    double centerX = (minX + maxX) / 2.0;
-    double centerY = (minY + maxY) / 2.0;
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    Vertex2D center=boundingBox.GetCenter();
 
     for (std::list<DrawPrimitiveRef>::const_iterator p = symbol.GetPrimitives().begin(); p != symbol.GetPrimitives().end(); ++p)
     {
@@ -795,19 +789,24 @@ namespace osmscout
       else if (RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
                rectangle != nullptr)
       {
-        D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX,
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY,
-                                 x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX + projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY + projection.ConvertWidthToPixel(rectangle->GetHeight()));
+        D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX(),
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY(),
+                                 x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX() + projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY() + projection.ConvertWidthToPixel(rectangle->GetHeight()));
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }
       else if (CirclePrimitive* circle = dynamic_cast<CirclePrimitive*>(primitive);
                circle != nullptr)
       {
-        D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(centerX, centerY), float(projection.ConvertWidthToPixel(circle->GetRadius())), float(projection.ConvertWidthToPixel(circle->GetRadius())));
+        D2D1_ELLIPSE ellipse = D2D1::Ellipse(POINTF(center.GetX(), center.GetY()),
+                                             float(projection.ConvertWidthToPixel(circle->GetRadius())),
+                                             float(projection.ConvertWidthToPixel(circle->GetRadius())));
         m_pRenderTarget->FillEllipse(ellipse, GetColorBrush(fillStyle->GetFillColor()));
-        if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
+        if (hasBorder) m_pRenderTarget->DrawEllipse(ellipse,
+                                                    GetColorBrush(borderStyle->GetColor()),
+                                                    borderWidth,
+                                                    GetStrokeStyle(borderStyle->GetDash()));
       }
       else
       {

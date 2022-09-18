@@ -46,7 +46,7 @@ namespace osmscout {
 
       return true;
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error& /*e*/) {
       return false;
     }
   }
@@ -63,7 +63,7 @@ namespace osmscout {
 
       return true;
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error& /*e*/) {
       return false;
     }
   }
@@ -99,7 +99,7 @@ namespace osmscout {
     try {
       return std::filesystem::exists(filename);
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error& /*e*/) {
       return false;
     }
   }
@@ -109,7 +109,7 @@ namespace osmscout {
     try {
       return std::filesystem::is_directory(filename);
     }
-    catch (const std::filesystem::filesystem_error& e) {
+    catch (const std::filesystem::filesystem_error& /*e*/) {
       return false;
     }
   }

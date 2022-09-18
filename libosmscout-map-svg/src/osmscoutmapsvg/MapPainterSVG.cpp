@@ -781,17 +781,8 @@ namespace osmscout {
                                  const Symbol& symbol,
                                  double x, double y)
   {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-    double centerX;
-    double centerY;
-
-    symbol.GetBoundingBox(projection,minX,minY,maxX,maxY);
-
-    centerX=(minX+maxX)/2;
-    centerY=(minY+maxY)/2;
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    Vertex2D center=boundingBox.GetCenter();
 
     stream << "    <!-- symbol: " << symbol.GetName() << " -->" << std::endl;
     for (const auto& primitive : symbol.GetPrimitives()) {
@@ -818,8 +809,8 @@ namespace osmscout {
             stream << " ";
           }
 
-          stream << (x+projection.ConvertWidthToPixel(pixel->GetX())-centerX)
-                 << "," << (y+projection.ConvertWidthToPixel(pixel->GetY())-centerY);
+          stream << (x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX())
+                 << "," << (y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
         }
 
         stream << "\" />" << std::endl;
@@ -829,8 +820,8 @@ namespace osmscout {
         BorderStyleRef borderStyle=rectangle->GetBorderStyle();
 
         stream << "    <rect";
-        stream << " x=\"" << ((x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-centerX)) << "\"";
-        stream << " y=\"" << ((y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-centerY)) << "\"";
+        stream << " x=\"" << ((x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX())) << "\"";
+        stream << " y=\"" << ((y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY())) << "\"";
         stream << " width=\"" << (projection.ConvertWidthToPixel(rectangle->GetWidth())) << "\"";
         stream << " height=\"" << (projection.ConvertWidthToPixel(rectangle->GetHeight())) << "\"";
 
@@ -842,8 +833,8 @@ namespace osmscout {
         BorderStyleRef borderStyle=circle->GetBorderStyle();
 
         stream << "    <circle";
-        stream << " cx=\"" << (x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-centerX) << "\"";
-        stream << " cy=\"" << (y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-centerY) << "\"";
+        stream << " cx=\"" << (x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX()) << "\"";
+        stream << " cy=\"" << (y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY()) << "\"";
         stream << " r=\"" << (projection.ConvertWidthToPixel(circle->GetRadius())) << "\"";
 
         SetupFillAndStroke(fillStyle, borderStyle);

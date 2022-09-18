@@ -640,19 +640,11 @@ namespace osmscout {
                                  const MapParameter & /*parameter*/,
                                  const Symbol &symbol,
                                  double x, double y) {
-    double minX;
-    double minY;
-    double maxX;
-    double maxY;
-    double centerX;
-    double centerY;
     Gdiplus::Pen *pPen;
 
     RENDEROBJECT(pRender);
-    symbol.GetBoundingBox(projection, minX, minY, maxX, maxY);
-
-    centerX = (minX + maxX) / 2;
-    centerY = (minY + maxY) / 2;
+    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
+    Vertex2D center=boundingBox.GetCenter();
 
     for (const auto &primitive: symbol.GetPrimitives()) {
       const DrawPrimitive *primitivePtr = primitive.get();
@@ -667,8 +659,8 @@ namespace osmscout {
         pRender->pointBuffer.ResetAndReserve(polygon->GetCoords().size());
 
         for (const auto &pixel: polygon->GetCoords()) {
-          pRender->pointBuffer.AddPoint(x + projection.ConvertWidthToPixel(pixel.GetX()) - centerX,
-                                        y + projection.ConvertWidthToPixel(pixel.GetY()) - centerY);
+          pRender->pointBuffer.AddPoint(x + projection.ConvertWidthToPixel(pixel.GetX()) - center.GetX(),
+                                        y + projection.ConvertWidthToPixel(pixel.GetY()) - center.GetY());
         }
 
         if (polygon->GetFillStyle()) {
@@ -687,8 +679,8 @@ namespace osmscout {
       } else if (rectangle != nullptr) {
         pPen = (rectangle->GetBorderStyle()) ? pRender->GetPen(rectangle->GetBorderStyle()) : nullptr;
         Gdiplus::RectF rect(
-          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - centerX),
-          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - centerY),
+          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX()),
+          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY()),
           (Gdiplus::REAL) (projection.ConvertWidthToPixel(rectangle->GetWidth())),
           (Gdiplus::REAL) (projection.ConvertWidthToPixel(rectangle->GetHeight()))
         );
@@ -705,9 +697,9 @@ namespace osmscout {
       } else if (circle != nullptr) {
         pPen = (circle->GetBorderStyle()) ? pRender->GetPen(circle->GetBorderStyle()) : nullptr;
         Gdiplus::RectF rect(
-          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(circle->GetCenter().GetX()) - centerX -
+          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(circle->GetCenter().GetX()) - center.GetX() -
                            2 * projection.ConvertWidthToPixel(circle->GetRadius())),
-          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(circle->GetCenter().GetY()) - centerY -
+          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(circle->GetCenter().GetY()) - center.GetY() -
                            2 * projection.ConvertWidthToPixel(circle->GetRadius())),
           (Gdiplus::REAL) (2 * projection.ConvertWidthToPixel(circle->GetRadius())),
           (Gdiplus::REAL) (2 * projection.ConvertWidthToPixel(circle->GetRadius()))
@@ -778,7 +770,7 @@ namespace osmscout {
                emptyDash,
                data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-               data.coordRange.GetStart(), data.coordRange.GetEnd());
+               data.coordRange);
     }
 
     DrawPath(projection,
@@ -788,7 +780,7 @@ namespace osmscout {
              data.lineStyle->GetDash(),
              data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
-             data.coordRange.GetStart(), data.coordRange.GetEnd());
+             data.coordRange);
   }
 
   void MapPainterGDI::DrawContourSymbol(const Projection & /*projection*/,

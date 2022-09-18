@@ -107,9 +107,15 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const BorderStyle& borderStyle);
 
-    bool FollowPath(FollowPathHandle &hnd, double l, Vertex2D &origin);
-    void FollowPathInit(FollowPathHandle &hnd, Vertex2D &origin, size_t transStart, size_t transEnd,
-                        bool isClosed, bool keepOrientation);
+    bool FollowPath(FollowPathHandle &hnd,
+                    const CoordBufferRange& coordRange,
+                    double l,
+                    Vertex2D &origin);
+    void FollowPathInit(FollowPathHandle &hnd,
+                        const CoordBufferRange& coordRange,
+                        Vertex2D &origin,
+                        bool isClosed,
+                        bool keepOrientation);
 
     void SetupTransformation(QPainter* painter,
                              const QPointF center,
