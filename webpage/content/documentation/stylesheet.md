@@ -421,12 +421,14 @@ Currently allowed instances:
 * `WAY.SYMBOL`
 * `AREA.BORDERSYMBOL`
 
-Name         |Type         |Default |Description
--------------|-------------|--------|-----------
-symbol       |String       |        |The name of the symbol to draw
-symbolSpace  |ScreenSize   |15      |Space between each symbol on a path.
-displayOffset|ScreenSize   |0       |Offset of drawn symbol in relation to the actual path.
-offset       |GroundSize   |0       |Offset of the drawn symbol in relation to the actual path.
+Name         | Type           | Default |Description
+-------------|----------------|---------|-----------
+symbol       | String         |         |The name of the symbol to draw
+renderMode   | scale or fixed | fixed   |If scale, the symbol will be scaled in height by scale factor to the width of the way
+scale        | Double>0       | 1.0     | Scale factor if renderMode==scale
+symbolSpace  | ScreenSize     | 15      |Space between each symbol on a path.
+displayOffset| ScreenSize     | 0       |Offset of drawn symbol in relation to the actual path.
+offset       | GroundSize     | 0       |Offset of the drawn symbol in relation to the actual path.
 
 ## Label and icon placement
 

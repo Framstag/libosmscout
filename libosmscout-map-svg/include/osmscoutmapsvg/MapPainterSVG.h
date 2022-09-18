@@ -1,3 +1,4 @@
+
 #ifndef OSMSCOUT_MAP_MAPPAINTERSVG_H
 #define OSMSCOUT_MAP_MAPPAINTERSVG_H
 
@@ -192,7 +193,8 @@ namespace osmscout {
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& style,
-                    double x, double y) override;
+                    double x, double y,
+                    double scaleFactor) override;
 
     void DrawIcon(const IconStyle* style,
                   double centerX, double centerY,
