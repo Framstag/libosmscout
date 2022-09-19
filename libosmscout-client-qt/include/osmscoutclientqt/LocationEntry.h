@@ -81,14 +81,17 @@ public:
 
   explicit LocationEntry(QObject* parent = nullptr);
 
-  //! copy constructor, Qt ownership is copied
+  //! copy constructor copies Qt ownership
   LocationEntry(const LocationEntry& other);
-  LocationEntry(LocationEntry&& other) = delete;
+  //! move constructor copies Qt ownership
+  LocationEntry(LocationEntry&& other);
+
   ~LocationEntry() override = default;
 
   //! copy assignment, Qt ownership is not changed
   LocationEntry& operator=(const LocationEntry& other);
-  LocationEntry& operator=(LocationEntry&& other) = delete;
+  //! move assignment copies Qt ownership
+  LocationEntry& operator=(LocationEntry&& other);
 
   void addReference(const osmscout::ObjectFileRef reference);
 
