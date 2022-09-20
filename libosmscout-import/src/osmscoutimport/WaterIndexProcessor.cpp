@@ -2280,7 +2280,7 @@ namespace osmscout {
         c=coastlines.erase(c);
       }
       else {
-        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
+        coastStartMap.emplace(coast->frontNodeId,coast);
 
         ++c;
       }

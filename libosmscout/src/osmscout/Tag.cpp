@@ -247,7 +247,7 @@ namespace osmscout {
   {
     TagId tagId=RegisterTag(tagName);
 
-    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+    nameTagIdToPrioMap.emplace(tagId,priority);
 
     return tagId;
   }
@@ -256,7 +256,7 @@ namespace osmscout {
   {
     TagId tagId=RegisterTag(tagName);
 
-    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+    nameAltTagIdToPrioMap.emplace(tagId,priority);
 
     return tagId;
   }
@@ -327,8 +327,7 @@ namespace osmscout {
     if (grade!=normGrade) {
       log.Warn() << "Grade " << grade << " out of range <1,5>";
     }
-    surfaceToGradeMap.insert(std::make_pair(surface,
-                                            normGrade));
+    surfaceToGradeMap.emplace(surface, normGrade);
   }
 
   bool TagRegistry::GetGradeForSurface(const std::string& surfaceStr,
@@ -349,8 +348,7 @@ namespace osmscout {
   void TagRegistry::RegisterMaxSpeedAlias(const std::string& alias,
                                           uint8_t maxSpeed)
   {
-    nameToMaxSpeedMap.insert(std::make_pair(alias,
-                                            maxSpeed));
+    nameToMaxSpeedMap.emplace(alias, maxSpeed);
   }
 
   bool TagRegistry::GetMaxSpeedFromAlias(const std::string& alias,

@@ -145,7 +145,7 @@ namespace osmscout {
                           featureBit,
                           index,
                           offset);
-    nameToFeatureMap.insert(std::make_pair(feature->GetName(),index));
+    nameToFeatureMap.emplace(feature->GetName(),index);
 
     size_t featureBitCount=0;
 

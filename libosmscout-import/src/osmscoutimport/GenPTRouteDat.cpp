@@ -175,7 +175,7 @@ namespace osmscout {
                     routeScanner);
 
         for (const auto& member : rawRel.members) {
-          idMap.insert(std::make_pair(member.GetObjectOSMRef(),ObjectFileRef()));
+          idMap.emplace(member.GetObjectOSMRef(),ObjectFileRef());
         }
       }
 

@@ -37,7 +37,7 @@ namespace osmscout {
     auto entry=map.find(offset);
 
     if (entry==map.end()) {
-      entry=map.insert(std::make_pair(offset,Bitset())).first;
+      entry=map.emplace(offset,Bitset()).first;
     }
 
     size_t index=resolvedId%4096;

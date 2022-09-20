@@ -366,7 +366,7 @@ namespace osmscout {
 
     assert(options.find(option.argument)==options.end());
 
-    options.insert(std::make_pair(option.argument,option));
+    options.emplace(option.argument,option);
 
     std::string callDescription=option.argument;
     std::string argumentType=parser->GetOptionHint();
@@ -407,7 +407,7 @@ namespace osmscout {
 
       assert(options.find(option.argument)==options.end());
 
-      options.insert(std::make_pair(option.argument,option));
+      options.emplace(option.argument,option);
 
       std::string callDescription=option.argument;
       std::string argumentType=parser->GetOptionHint();

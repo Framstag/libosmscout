@@ -289,7 +289,7 @@ namespace osmscout {
     std::unordered_map<Id,JunctionRef> junctionMap;
 
     for (const auto& junction : junctions) {
-      junctionMap.insert(std::make_pair(junction->GetId(),junction));
+      junctionMap.emplace(junction->GetId(),junction);
     }
 
     junctions.clear();

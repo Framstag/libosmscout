@@ -82,7 +82,7 @@ namespace osmscout {
 
         for (const auto &member: route.members){
           if (member.type==RawRelation::memberWay){
-            routeMembers.insert(std::make_pair(member.id, route.GetId()));
+            routeMembers.emplace(member.id, route.GetId());
           }
         }
       }
@@ -120,8 +120,8 @@ namespace osmscout {
 
         restriction->Read(scanner);
 
-        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
-        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.emplace(restriction->GetFrom(),restriction);
+        restrictions.restrictions.emplace(restriction->GetTo(),restriction);
       }
 
       progress.Info(std::string("Read ")+std::to_string(restrictionCount)+" turn restrictions");
@@ -267,12 +267,12 @@ namespace osmscout {
     for (auto &restriction : oldRestrictions) {
       if (restriction->GetFrom()==oldId) {
         restriction->SetFrom(newId);
-        restrictions.restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+        restrictions.restrictions.emplace(restriction->GetFrom(),restriction);
       }
 
       if (restriction->GetTo()==oldId) {
         restriction->SetTo(newId);
-        restrictions.restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+        restrictions.restrictions.emplace(restriction->GetTo(),restriction);
       }
     }
   }

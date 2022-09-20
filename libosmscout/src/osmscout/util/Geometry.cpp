@@ -657,7 +657,7 @@ namespace osmscout {
 
         nodes.push_back(node);
 
-        currentNode=nodeIdIndexMap.insert(std::make_pair(node.GetId(),nodes.size()-1)).first;
+        currentNode=nodeIdIndexMap.emplace(node.GetId(),nodes.size()-1).first;
       }
 
       if (nextNode==nodeIdIndexMap.end()) {
@@ -665,7 +665,7 @@ namespace osmscout {
 
         nodes.push_back(node);
 
-        nextNode=nodeIdIndexMap.insert(std::make_pair(node.GetId(),nodes.size()-1)).first;
+        nextNode=nodeIdIndexMap.emplace(node.GetId(),nodes.size()-1).first;
       }
 
       Edge edge;
