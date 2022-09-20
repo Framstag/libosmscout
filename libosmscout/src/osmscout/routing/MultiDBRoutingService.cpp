@@ -78,7 +78,7 @@ namespace osmscout {
         return false;
       }
 
-      handle.router=router;
+      handle.router=std::move(router);
       handle.profile=profileBuilder(handle.database);
 
       RoutingDatabaseRef routingDatabase=std::make_shared<RoutingDatabase>();
@@ -87,7 +87,7 @@ namespace osmscout {
         return false;
       }
 
-      handle.routingDatabase=routingDatabase;
+      handle.routingDatabase=std::move(routingDatabase);
 
     }
 

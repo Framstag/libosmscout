@@ -160,7 +160,7 @@ namespace osmscout {
                 ++it;
               }
             }
-            tailWay=newTail;
+            tailWay=std::move(newTail);
           }
           route.segments.push_back(std::move(segment));
         }

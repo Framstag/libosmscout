@@ -325,7 +325,7 @@ namespace osmscout {
     rings.clear();
     rings.resize(ringCount);
 
-    rings[0].featureValueBuffer=featureValueBuffer;
+    rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (hasMaster) {
       rings[0].MarkAsMasterRing();
@@ -398,7 +398,7 @@ namespace osmscout {
     rings.clear();
     rings.resize(ringCount);
 
-    rings[0].featureValueBuffer=featureValueBuffer;
+    rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (hasMaster) {
       rings[0].MarkAsMasterRing();

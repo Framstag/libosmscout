@@ -181,7 +181,7 @@ namespace osmscout {
     textStyle->SetTextColor(Color(0,0,0,0.9));
     textStyle->SetSize(0.7);
 
-    debugLabel=textStyle;
+    debugLabel=std::move(textStyle);
 
     stepMethods.resize(RenderSteps::LastStep-RenderSteps::FirstStep+1);
 
@@ -865,7 +865,7 @@ namespace osmscout {
 
     PathLabelData labelData;
     labelData.priority=borderTextStyle->GetPriority();
-    labelData.style=borderTextStyle;
+    labelData.style=std::move(borderTextStyle);
     labelData.text=label;
     labelData.contourLabelOffset=contourLabelOffset;
     labelData.contourLabelSpace=contourLabelSpace;
@@ -1368,7 +1368,7 @@ namespace osmscout {
     a.type=type;
     a.buffer=&ring.GetFeatureValueBuffer();
     a.center=ring.center;
-    a.fillStyle=fillStyle;
+    a.fillStyle=std::move(fillStyle);
     a.borderStyle=borderStyle;
     a.coordRange=coordRanges[i];
 

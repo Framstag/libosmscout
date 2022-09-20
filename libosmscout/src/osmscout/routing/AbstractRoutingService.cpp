@@ -1140,10 +1140,10 @@ namespace osmscout {
       }
     }
     else if (targetBackwardFinalNode) {
-      targetFinalNode=targetBackwardFinalNode;
+      targetFinalNode=std::move(targetBackwardFinalNode);
     }
     else if (targetForwardFinalNode) {
-      targetFinalNode=targetForwardFinalNode;
+      targetFinalNode=std::move(targetForwardFinalNode);
     }
 
     clock.Stop();

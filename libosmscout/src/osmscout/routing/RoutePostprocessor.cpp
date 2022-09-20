@@ -187,7 +187,7 @@ namespace osmscout {
           if (lastDesc &&
               lastDesc->GetRef()==nameDesc->GetRef() &&
               lastDesc->GetName()!=nameDesc->GetName()) {
-            nameDesc=lastDesc;
+            nameDesc=std::move(lastDesc);
           }
         }
 
@@ -1427,7 +1427,7 @@ namespace osmscout {
             POIAtRoute poiAtRoute;
 
             poiAtRoute.distance=distance;
-            poiAtRoute.name=name;
+            poiAtRoute.name=std::move(name);
             poiAtRoute.object=candidate;
             poiAtRoute.node=routeNode;
 

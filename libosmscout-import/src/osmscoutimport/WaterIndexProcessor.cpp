@@ -1856,7 +1856,7 @@ namespace osmscout {
         intersectCell=pathCellIntersection ? true : false;
 
         if (pathCellIntersection) {
-          outgoingEnd=pathCellIntersection;
+          outgoingEnd=std::move(pathCellIntersection);
         }
         else {
           outgoingEnd=std::make_shared<Intersection>();
@@ -2096,7 +2096,7 @@ namespace osmscout {
             it=intersectionsCW.erase(it);
             continue;
           }
-          previous=current;
+          previous=std::move(current);
           ++it;
         }
       }

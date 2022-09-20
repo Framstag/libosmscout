@@ -937,7 +937,7 @@ namespace osmscout {
       way->Read(typeConfig,
                 scanner);
 
-      waysMap[offset]=way;
+      waysMap[offset]=std::move(way);
     }
 
     scanner.SetPos(oldPos);
@@ -978,7 +978,7 @@ namespace osmscout {
       area->Read(typeConfig,
                  scanner);
 
-      areasMap[offset]=area;
+      areasMap[offset]=std::move(area);
     }
 
     scanner.SetPos(oldPos);
