@@ -307,9 +307,8 @@ namespace osmscout {
       TileKey parentTileKey=tile.GetKey().GetParent();
       TileRef parentTile=GetCachedTile(parentTileKey);
 
-      GeoBox boundingBox=tile.GetBoundingBox();
-
       if (parentTile) {
+        GeoBox boundingBox = tile.GetBoundingBox();
         ResolveNodesFromParent(tile,*parentTile,boundingBox,nodeTypes);
         ResolveWaysFromParent(tile,*parentTile,boundingBox,wayTypes);
         ResolveAreasFromParent(tile,*parentTile,boundingBox,areaTypes);

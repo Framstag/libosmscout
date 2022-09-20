@@ -14512,7 +14512,7 @@ namespace TestCaseTracking {
         bool complete = true;
 
         if (m_filters.empty()
-            || m_filters[0] == ""
+            || m_filters[0].empty()
             || std::find(m_filters.begin(), m_filters.end(), m_trimmed_name) != m_filters.end()) {
             complete = TrackerBase::isComplete();
         }

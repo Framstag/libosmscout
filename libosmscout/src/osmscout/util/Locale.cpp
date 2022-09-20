@@ -24,7 +24,7 @@ namespace osmscout {
 
   namespace { // anonymous namespace
 
-  std::string GetCountryCode(std::string localeName) {
+  std::string GetCountryCode(const std::string& localeName) {
     if (localeName.size()>=5 && localeName[2]=='_'  &&
         localeName[3]>='A' && localeName[3]<='Z' &&
         localeName[4]>='A' && localeName[4]<='Z'){

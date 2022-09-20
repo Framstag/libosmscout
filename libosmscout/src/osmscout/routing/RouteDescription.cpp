@@ -574,7 +574,7 @@ namespace osmscout {
     descriptionMap[name]=description;
   }
 
-  void RouteDescription::SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping)
+  void RouteDescription::SetDatabaseMapping(const std::map<DatabaseId, std::string>& databaseMapping)
   {
     this->databaseMapping = databaseMapping;
   }

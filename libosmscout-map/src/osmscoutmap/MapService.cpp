@@ -889,9 +889,8 @@ namespace osmscout {
     std::list<std::future<bool>> results;
 
     for (auto& tile : tiles) {
-      GeoBox          tileBoundingBox(tile->GetBoundingBox());
-
       if (!tile->IsComplete()) {
+        GeoBox        tileBoundingBox(tile->GetBoundingBox());
         StopClock     tileLoadingTime;
         Magnification magnification(MagnificationLevel(tile->GetKey().GetLevel()));
 
@@ -1015,9 +1014,8 @@ namespace osmscout {
     std::list<std::future<bool>> results;
 
     for (auto& tile : tiles) {
-      GeoBox tileBoundingBox(tile->GetBoundingBox());
-
       if (!tile->IsComplete()) {
+        GeoBox tileBoundingBox(tile->GetBoundingBox());
         StopClock  tileLoadingTime;
 
         //std::cout << "Loading tile: " << (std::string)tile->GetId() << std::endl;

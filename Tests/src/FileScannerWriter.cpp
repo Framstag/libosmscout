@@ -87,10 +87,13 @@ TEST_CASE("FileScannerWriter")
   osmscout::GeoCoord    outCoord1(51.57231, 7.46418);
 
   std::vector<osmscout::Point> outCoords1;
+  outCoords1.reserve(4);
   std::vector<osmscout::Point> outCoords2;
   std::vector<osmscout::Point> outCoords3;
+  outCoords3.reserve(22);
   std::vector<osmscout::Point> outCoords4;
   std::vector<osmscout::Point> outCoords5;
+  outCoords5.reserve(3);
   std::vector<osmscout::Point> outCoords6;
   std::vector<osmscout::Point> outCoords7;
 

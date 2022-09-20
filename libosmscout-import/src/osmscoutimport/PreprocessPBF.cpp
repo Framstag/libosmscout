@@ -597,7 +597,7 @@ namespace osmscout {
           return false;
         }
 
-        std::unique_ptr<OSMPBF::PrimitiveBlock> block(new OSMPBF::PrimitiveBlock());
+        auto block = std::make_unique<OSMPBF::PrimitiveBlock>();
 
         if (!ReadPrimitiveBlock(progress,
                                 file,

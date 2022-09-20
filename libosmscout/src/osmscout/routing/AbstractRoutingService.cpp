@@ -40,9 +40,7 @@
 
 namespace osmscout {
 
-  RoutingResult::RoutingResult()
-  {
-  }
+  RoutingResult::RoutingResult() = default;
 
   RoutePoints::RoutePoints(const std::list<Point>& points)
   : points(points.begin(),points.end())

@@ -471,8 +471,8 @@ namespace osmscout {
      std::string             junctionName;
 
      for (auto& node: description.Nodes()) {
-       junctionName="";
-       junctionRef="";
+       junctionName.clear();
+       junctionRef.clear();
 
        const DatabaseId dbId=node.GetDatabaseId();
 

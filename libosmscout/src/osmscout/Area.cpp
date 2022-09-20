@@ -649,8 +649,8 @@ namespace osmscout {
          j<rings.size() && rings[j].GetRing()>=ringId+1;
          j++) {
       const Ring &ring=rings[j];
-      TypeInfoRef type=GetRingType(ring);
       if (ring.GetRing()==ringId+1) {
+        TypeInfoRef type = GetRingType(ring);
         visitor(j,ring,type);
       }
     }
