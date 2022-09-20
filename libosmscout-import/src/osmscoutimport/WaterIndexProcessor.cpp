@@ -2264,7 +2264,7 @@ namespace osmscout {
     progress.SetAction("Merging coastlines");
 
     std::map<Id,WaterIndexProcessor::CoastRef> coastStartMap;
-    std::list<WaterIndexProcessor::CoastRef>   mergedCoastlines;
+    std::vector<WaterIndexProcessor::CoastRef> mergedCoastlines;
     std::set<Id>                               blacklist;
     size_t                                     wayCoastCount=0;
     size_t                                     areaCoastCount=0;
@@ -2348,7 +2348,7 @@ namespace osmscout {
 
     progress.Info(std::to_string(wayCoastCount)+" way coastline(s), "+std::to_string(areaCoastCount)+" area coastline(s)");
 
-    coastlines=mergedCoastlines;
+    std::move(mergedCoastlines.begin(), mergedCoastlines.end(), std::back_inserter(coastlines));
   }
 
   void WaterIndexProcessor::SynthesizeCoastlines2(Progress& progress,

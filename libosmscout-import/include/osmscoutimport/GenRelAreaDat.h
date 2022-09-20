@@ -188,7 +188,7 @@ namespace osmscout {
 
     void ConsumeSubs(Progress& progress,
                      const std::list<MultipolygonPart>& rings,
-                     std::list<MultipolygonPart>& groups,
+                     std::vector<MultipolygonPart>& groups,
                      GroupingState& state,
                      size_t topIndex,
                      uint8_t id);

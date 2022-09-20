@@ -412,7 +412,7 @@ void Parser::TYPEKINDS(unsigned char& types) {
 }
 
 void Parser::TAGCONDITION(TagConditionRef& condition) {
-		std::list<TagConditionRef> conditions;
+		std::vector<TagConditionRef> conditions;
 		TagConditionRef            subCond;
 		
 		TAGANDCOND(subCond);
@@ -510,7 +510,7 @@ void Parser::TYPEDESCS(TypeInfo& typeInfo) {
 }
 
 void Parser::TAGANDCOND(TagConditionRef& condition) {
-		std::list<TagConditionRef> conditions;
+		std::vector<TagConditionRef> conditions;
 		TagConditionRef            subCond;
 		
 		TAGBOOLCOND(subCond);
@@ -717,7 +717,7 @@ void Parser::TAGGREATEREQUALCOND(const std::string& tagName,TagConditionRef& con
 }
 
 void Parser::TAGISINCOND(const std::string& tagName,TagConditionRef& condition) {
-		std::list<std::string> values;
+		std::vector<std::string> values;
 		
 		Expect(36 /* "IN" */);
 		Expect(37 /* "[" */);

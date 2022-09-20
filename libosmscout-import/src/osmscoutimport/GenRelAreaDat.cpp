@@ -121,7 +121,7 @@ namespace osmscout {
    */
   void RelAreaDataGenerator::ConsumeSubs(Progress& progress,
                                          const std::list<MultipolygonPart>& rings,
-                                         std::list<MultipolygonPart>& groups,
+                                         std::vector<MultipolygonPart>& groups,
                                          GroupingState& state,
                                          size_t topIndex,
                                          uint8_t id)
@@ -159,7 +159,7 @@ namespace osmscout {
                                         const TypeInfoRef& type,
                                         std::list<MultipolygonPart>& parts)
   {
-    std::list<MultipolygonPart>                 rings;
+    std::vector<MultipolygonPart>               rings;
     bool                                        allArea=true;
 
     std::map<Id, std::list<MultipolygonPart*> > partsByEnd;
@@ -322,7 +322,7 @@ namespace osmscout {
       }
     }
 
-    parts=rings;
+    std::move(rings.begin(), rings.end(), std::back_inserter(parts));
 
     return true;
   }
@@ -340,7 +340,7 @@ namespace osmscout {
                                                  const TypeInfoRef& type,
                                                  std::list<MultipolygonPart>& parts)
   {
-    std::list<MultipolygonPart> groups;
+    std::vector<MultipolygonPart> groups;
 
     //
     // Ring assignment
@@ -433,7 +433,7 @@ namespace osmscout {
     // Copy back data
     //
 
-    parts=groups;
+    std::move(groups.begin(), groups.end(), std::back_inserter(parts));
 
     return true;
   }
