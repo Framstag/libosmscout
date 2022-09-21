@@ -412,7 +412,7 @@ void Parser::TYPEKINDS(unsigned char& types) {
 }
 
 void Parser::TAGCONDITION(TagConditionRef& condition) {
-		std::vector<TagConditionRef> conditions;
+		std::list<TagConditionRef> conditions;
 		TagConditionRef            subCond;
 		
 		TAGANDCOND(subCond);

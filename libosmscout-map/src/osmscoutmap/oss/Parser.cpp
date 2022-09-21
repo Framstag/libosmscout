@@ -1662,6 +1662,7 @@ void Parser::AREABORDERSYMBOLSTYLE(StyleFilter filter, bool state) {
 
 void Parser::ROUTESTYLE(StyleFilter filter, bool state) {
 		LinePartialStyle style;
+		std::string      slot;
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(140); Get();}
 		Expect(12 /* "{" */);
