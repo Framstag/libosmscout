@@ -103,7 +103,7 @@ namespace osmscout {
     PostalArea postalArea("");
 
     // Always add a empty postal area for fallback to the index, to avoid "lookup and insert" on demand coast-
-    defaultPostalArea=postalAreas.insert(std::make_pair(postalArea.name, postalArea)).first;
+    defaultPostalArea=postalAreas.emplace(postalArea.name, postalArea).first;
   }
 
   void LocationIndexGenerator::Region::CalculateMinMax()
@@ -342,7 +342,7 @@ namespace osmscout {
       if (postalAreaEntry==postalAreas.end()) {
         PostalArea postalArea(postalCode);
 
-        postalAreaEntry=postalAreas.insert(std::make_pair(postalCode,postalArea)).first;
+        postalAreaEntry=postalAreas.emplace(postalCode,postalArea).first;
       }
 
       postalAreaEntry->second.AddLocationObject(name,
@@ -444,7 +444,7 @@ namespace osmscout {
           auto entry=ignoreTokens.find(*token);
 
           if (entry==ignoreTokens.end()) {
-            ignoreTokens.insert(std::make_pair(*token,1));
+            ignoreTokens.emplace(*token,1);
           }
           else {
             entry->second++;
@@ -461,7 +461,7 @@ namespace osmscout {
           auto entry=ignoreTokens.find(composition);
 
           if (entry==ignoreTokens.end()) {
-            ignoreTokens.insert(std::make_pair(composition,1));
+            ignoreTokens.emplace(composition,1);
           }
           else {
             entry->second++;
@@ -1634,7 +1634,7 @@ namespace osmscout {
       if (postalAreaEntry==region.postalAreas.end()) {
         PostalArea postalArea(postalCode);
 
-        postalAreaEntry=region.postalAreas.insert(std::make_pair(postalCode,postalArea)).first;
+        postalAreaEntry=region.postalAreas.emplace(postalCode,postalArea).first;
       }
     }
 

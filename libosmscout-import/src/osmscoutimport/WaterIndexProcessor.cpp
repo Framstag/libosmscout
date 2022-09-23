@@ -1856,7 +1856,7 @@ namespace osmscout {
         intersectCell=pathCellIntersection ? true : false;
 
         if (pathCellIntersection) {
-          outgoingEnd=pathCellIntersection;
+          outgoingEnd=std::move(pathCellIntersection);
         }
         else {
           outgoingEnd=std::make_shared<Intersection>();
@@ -2096,7 +2096,7 @@ namespace osmscout {
             it=intersectionsCW.erase(it);
             continue;
           }
-          previous=current;
+          previous=std::move(current);
           ++it;
         }
       }
@@ -2264,7 +2264,7 @@ namespace osmscout {
     progress.SetAction("Merging coastlines");
 
     std::map<Id,WaterIndexProcessor::CoastRef> coastStartMap;
-    std::list<WaterIndexProcessor::CoastRef>   mergedCoastlines;
+    std::vector<WaterIndexProcessor::CoastRef> mergedCoastlines;
     std::set<Id>                               blacklist;
     size_t                                     wayCoastCount=0;
     size_t                                     areaCoastCount=0;
@@ -2280,7 +2280,7 @@ namespace osmscout {
         c=coastlines.erase(c);
       }
       else {
-        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
+        coastStartMap.emplace(coast->frontNodeId,coast);
 
         ++c;
       }
@@ -2348,7 +2348,7 @@ namespace osmscout {
 
     progress.Info(std::to_string(wayCoastCount)+" way coastline(s), "+std::to_string(areaCoastCount)+" area coastline(s)");
 
-    coastlines=mergedCoastlines;
+    std::move(mergedCoastlines.begin(), mergedCoastlines.end(), std::back_inserter(coastlines));
   }
 
   void WaterIndexProcessor::SynthesizeCoastlines2(Progress& progress,

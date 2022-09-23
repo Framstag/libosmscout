@@ -129,9 +129,7 @@ namespace osmscout {
           continue;
         }
 
-        resultMap.insert(std::make_pair(id,
-                                        Point(serial,
-                                                 coord)));
+        resultMap.emplace(id, Point(serial, coord));
       }
     }
     catch (const IOException& e) {

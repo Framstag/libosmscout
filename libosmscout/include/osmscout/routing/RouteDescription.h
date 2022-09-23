@@ -786,7 +786,7 @@ namespace osmscout {
     RouteDescription() = default;
     virtual ~RouteDescription() = default;
 
-    void SetDatabaseMapping(std::map<DatabaseId, std::string> databaseMapping);
+    void SetDatabaseMapping(const std::map<DatabaseId, std::string>& databaseMapping);
 
     std::map<DatabaseId, std::string> GetDatabaseMapping() const;
 

@@ -1703,18 +1703,18 @@ void Parser::ATTRIBUTE(PartialStyleBase& style, const StyleDescriptor& descripto
 }
 
 void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescriptor& descriptor) {
-		ValueType              valueType=ValueType::NO_VALUE;
-		bool                   negate=false;
-		std::string            ident;
-		std::string            subIdent;
-		std::string            stringValue;
-		std::string            function;
-		double                 factor=-1;
-		std::string            unit;
-		std::string            number;
-		std::list<std::string> numberList;
-		Color                  color;
-		StyleConstantRef       constant;
+		ValueType                valueType=ValueType::NO_VALUE;
+		bool                     negate=false;
+		std::string              ident;
+		std::string              subIdent;
+		std::string              stringValue;
+		std::string              function;
+		double                   factor=-1;
+		std::string              unit;
+		std::string              number;
+		std::vector<std::string> numberList;
+		Color                    color;
+		StyleConstantRef         constant;
 		
 		if (StartOf(6)) {
 			if (la->kind == _ident) {

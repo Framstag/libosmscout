@@ -38,7 +38,7 @@ namespace osmscout {
     Map::iterator entry=nodeUseMap.find(offset);
 
     if (entry==nodeUseMap.end()) {
-      entry=nodeUseMap.insert(std::make_pair(offset,Bitset())).first;
+      entry=nodeUseMap.emplace(offset,Bitset()).first;
     }
 
     uint32_t index=(resolvedId%(4096/2))*2;

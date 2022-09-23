@@ -289,7 +289,7 @@ namespace osmscout {
     std::unordered_map<Id,JunctionRef> junctionMap;
 
     for (const auto& junction : junctions) {
-      junctionMap.insert(std::make_pair(junction->GetId(),junction));
+      junctionMap.emplace(junction->GetId(),junction);
     }
 
     junctions.clear();
@@ -699,12 +699,12 @@ namespace osmscout {
 
       result.distance=closestDistance;
       if (closestWay) {
-        result.way=closestWay;
+        result.way=std::move(closestWay);
         result.object=result.way->GetObjectFileRef();
         result.name=nameFeatureLabelReader.GetLabel(result.way->GetFeatureValueBuffer());
       }
       else {
-        result.area=closestArea;
+        result.area=std::move(closestArea);
         result.object=result.area->GetObjectFileRef();
         result.name=nameFeatureLabelReader.GetLabel(result.area->GetFeatureValueBuffer());
       }

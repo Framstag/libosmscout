@@ -514,8 +514,7 @@ namespace osmscout {
 
     if (candidate) {
       atLeastOneCandidate=true;
-      adminRegions.insert(std::make_pair(region.regionOffset,
-                                         std::make_shared<AdminRegion>(region)));
+      adminRegions.emplace(region.regionOffset, std::make_shared<AdminRegion>(region));
       if (lookupPoi){
         if (!locationIndex.VisitPOIs(region,
                                      poiVisitor,

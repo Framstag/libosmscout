@@ -325,7 +325,7 @@ namespace osmscout {
     rings.clear();
     rings.resize(ringCount);
 
-    rings[0].featureValueBuffer=featureValueBuffer;
+    rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (hasMaster) {
       rings[0].MarkAsMasterRing();
@@ -398,7 +398,7 @@ namespace osmscout {
     rings.clear();
     rings.resize(ringCount);
 
-    rings[0].featureValueBuffer=featureValueBuffer;
+    rings[0].featureValueBuffer=std::move(featureValueBuffer);
 
     if (hasMaster) {
       rings[0].MarkAsMasterRing();
@@ -649,8 +649,8 @@ namespace osmscout {
          j<rings.size() && rings[j].GetRing()>=ringId+1;
          j++) {
       const Ring &ring=rings[j];
-      TypeInfoRef type=GetRingType(ring);
       if (ring.GetRing()==ringId+1) {
+        TypeInfoRef type = GetRingType(ring);
         visitor(j,ring,type);
       }
     }

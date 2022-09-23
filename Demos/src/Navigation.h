@@ -89,7 +89,7 @@ namespace osmscout {
       do {
 
         description.roundaboutExitNumber=-1;
-        description.instructions        ="";
+        description.instructions.clear();
 
         do {
 
@@ -228,7 +228,7 @@ namespace osmscout {
             description=DumpNameChangedDescription(nameChangedDescription);
           }
           else {
-            description.instructions="";
+            description.instructions.clear();
           }
         }
         while ((description.instructions.empty() || roundaboutCrossingCounter>0) && advanceToNextWaypoint(waypoint,

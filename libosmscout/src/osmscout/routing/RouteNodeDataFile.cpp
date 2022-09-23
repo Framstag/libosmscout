@@ -40,7 +40,7 @@ namespace osmscout {
         RouteNodeRef node=std::make_shared<RouteNode>();
 
         node->Read(scanner);
-        nodeMap.insert(std::make_pair(node->GetId(),node));
+        nodeMap.emplace(node->GetId(),node);
 
         fileOffset=scanner.GetPos();
 

@@ -113,7 +113,7 @@ namespace osmscout {
 
     std::istream::pos_type length;
 
-    currentFilename=patchFilename;
+    currentFilename=std::move(patchFilename);
 
     if (heights!=nullptr) {
       delete heights;

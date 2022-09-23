@@ -40,9 +40,7 @@
 
 namespace osmscout {
 
-  RoutingResult::RoutingResult()
-  {
-  }
+  RoutingResult::RoutingResult() = default;
 
   RoutePoints::RoutePoints(const std::list<Point>& points)
   : points(points.begin(),points.end())
@@ -1142,10 +1140,10 @@ namespace osmscout {
       }
     }
     else if (targetBackwardFinalNode) {
-      targetFinalNode=targetBackwardFinalNode;
+      targetFinalNode=std::move(targetBackwardFinalNode);
     }
     else if (targetForwardFinalNode) {
-      targetFinalNode=targetForwardFinalNode;
+      targetFinalNode=std::move(targetForwardFinalNode);
     }
 
     clock.Stop();

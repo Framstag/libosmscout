@@ -75,7 +75,7 @@ namespace osmscout {
 
         FileOffset fileOffset=wayIdScanner.ReadFileOffset();
 
-        wayIdMap.insert(std::make_pair(id, fileOffset));
+        wayIdMap.emplace(id, fileOffset);
       }
 
       wayIdScanner.Close();
@@ -116,8 +116,8 @@ namespace osmscout {
               assert(way);
               assert(!way->nodes.empty());
 
-              wayPointMap.insert(std::make_pair(way->GetFrontId(),way));
-              wayPointMap.insert(std::make_pair(way->GetBackId(),way));
+              wayPointMap.emplace(way->GetFrontId(),way);
+              wayPointMap.emplace(way->GetBackId(),way);
               route.bbox.Include(way->GetBoundingBox());
             }
           }
@@ -160,7 +160,7 @@ namespace osmscout {
                 ++it;
               }
             }
-            tailWay=newTail;
+            tailWay=std::move(newTail);
           }
           route.segments.push_back(std::move(segment));
         }

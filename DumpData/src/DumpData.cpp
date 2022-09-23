@@ -1024,7 +1024,7 @@ int main(int argc, char* argv[])
         std::cerr << "Error loading route nodes by id" << std::endl;
         continue;
       }
-      routeNodeMap[id]=node;
+      routeNodeMap[id]=std::move(node);
     }
   }
 

@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
   encoders.push_back(new StaticOptimizedDeltaEncoder());
 
   std::string mapDirectory=argv[1];
-  std::string areaDatFilename=osmscout::AppendFileToDir(mapDirectory,"areas.dat");
+  //std::string areaDatFilename=osmscout::AppendFileToDir(mapDirectory,"areas.dat");
   std::string wayDatFilename=osmscout::AppendFileToDir(mapDirectory,"ways.dat");
 
   osmscout::TypeConfig  typeConfig;

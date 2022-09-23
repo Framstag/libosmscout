@@ -117,8 +117,8 @@ namespace osmscout {
 
         if (ids.find(osmRef)!=ids.end() ||
             fileOffsets.find(fileRef)!=fileOffsets.end()) {
-          idFileOffsetMap.insert(std::make_pair(osmRef,fileRef));
-          fileOffsetIdMap.insert(std::make_pair(fileRef,osmRef));
+          idFileOffsetMap.emplace(osmRef,fileRef);
+          fileOffsetIdMap.emplace(fileRef,osmRef);
         }
       }
 
