@@ -7,7 +7,7 @@
    id="svg2816"
    version="1.1"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
-   sodipodi:docname="fast_food.svg"
+   sodipodi:docname="bench.svg"
    inkscape:export-filename="../../14x14/standard/fast_food.png"
    inkscape:export-xdpi="21"
    inkscape:export-ydpi="21"
@@ -54,7 +54,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="13.755725"
-     inkscape:cx="19.66454"
+     inkscape:cx="19.737237"
      inkscape:cy="32.495561"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -113,31 +113,25 @@
        sodipodi:start="0"
        sodipodi:end="1.7822085" />
     <rect
-       style="fill:#c87137;stroke:none;stroke-width:0.43454;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="rect1258"
-       width="48.505089"
-       height="10.068252"
-       x="7.1416287"
-       y="39.917755" />
+       style="fill:#2b1100;stroke-width:0.275809;stroke-linecap:round;stroke-linejoin:bevel"
+       id="rect2023"
+       width="7.8785377"
+       height="23.190912"
+       x="6.0574212"
+       y="36.901962" />
     <rect
-       style="fill:#c87137;stroke:none;stroke-width:0.302633;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="rect1260"
-       width="48.647644"
-       height="4.5989375"
-       x="6.9559107"
-       y="28.46599" />
-    <path
-       style="fill:#c87137;stroke:none;stroke-width:0.985057;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="path1268"
-       sodipodi:type="arc"
-       sodipodi:cx="-31.220022"
-       sodipodi:cy="-22.400049"
-       sodipodi:rx="24.260387"
-       sodipodi:ry="12.916213"
-       sodipodi:start="0"
-       sodipodi:end="3.1387155"
-       sodipodi:arc-type="slice"
-       d="M -6.9596348,-22.400049 A 24.260387,12.916213 0 0 1 -31.185122,-9.4838495 24.260387,12.916213 0 0 1 -55.480309,-22.362887 l 24.260287,-0.03716 z"
-       transform="scale(-1)" />
+       style="fill:#2b1100;stroke-width:0.276385;stroke-linecap:round;stroke-linejoin:bevel"
+       id="rect2023-3"
+       width="7.9469752"
+       height="23.087261"
+       x="49.952072"
+       y="36.968414" />
+    <rect
+       style="fill:#2b1100;stroke-width:0.3;stroke-linecap:round;stroke-linejoin:bevel"
+       id="rect2054"
+       width="61.896671"
+       height="4.5640087"
+       x="0.7914319"
+       y="31.347746" />
   </g>
 </svg>

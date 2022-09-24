@@ -359,6 +359,8 @@ STYLE
  [MAG block-] {
     [TYPE amenity_charging_station] NODE.ICON { symbol: amenity_charging_station; name: charging_station; }
     [TYPE natural_tree] NODE.ICON { symbol: natural_tree; overlay: true; }
+    [TYPE amenity_bench] NODE.ICON { name: bench; overlay: true; }
+    [TYPE amenity_waste_basket] NODE.ICON { name: waste_basket; overlay: true; }
 
    [TYPE highway_cycleway] {
      WAY#outline {color: #ffffff50; displayWidth: 1.2mm; joinCap: butt; endCap: butt;}
@@ -578,7 +580,6 @@ STYLE
       WAY.SYMBOL#laneBackwardThrough       { symbol: turn_backward_through; symbolSpace: 10mm; offsetRel: laneBackwardThrough; }
       WAY.SYMBOL#laneBackwardThroughRight  { symbol: turn_backward_through_right; symbolSpace: 10mm; offsetRel: laneBackwardThroughRight; }
       WAY.SYMBOL#laneBackwardRight         { symbol: turn_backward_right; symbolSpace: 10mm; offsetRel: laneBackwardRight; }
-
     }
   }
 
