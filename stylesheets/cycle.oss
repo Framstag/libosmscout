@@ -222,9 +222,6 @@ CONST
 
   COLOR marshColor                 = #efe8ff;
 
-  COLOR militaryColor              = #fe989822;
-  COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
-
   COLOR quarryColor                = #b3b3b3;
 
   IF daylight {
@@ -385,6 +382,7 @@ MODULE "include/man_made"
 
 MODULE "include/aeroway"
 MODULE "include/historic"
+MODULE "include/military"
 MODULE "include/office"
 MODULE "include/shop"
 MODULE "include/tourism"
@@ -726,14 +724,6 @@ STYLE
      [TYPE landuse_residential] AREA { color: @residentialColor; }
    }
 
-   [MAG city-] {
-     // Semiransparent overlay
-     [TYPE landuse_military] {
-       AREA { color: @militaryColor; }
-       AREA.BORDER { color: #fe9898; width: 0.2mm;}
-     }
-   }
-
    [MAG suburb-] {
      [TYPE landuse_basin] {
         AREA { color: @waterColor; }
@@ -767,7 +757,6 @@ STYLE
 
    // Labels
    [MAG suburb-] {
-     [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
      [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
      [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
      [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
@@ -962,11 +951,6 @@ STYLE
         AREA.BORDER { color: #887b7b; width: 0.1mm; }
      }
 
-     [TYPE military_bunker,
-           military_barracks] AREA { color: #f59897; }
-
-     [TYPE military_bunker_building] AREA { color: #f59897; }
-
      [TYPE power_sub_station] AREA { color: #bca9a9; }
 
      [TYPE sport_building] {
@@ -1021,14 +1005,6 @@ STYLE
 
  // Labels
 
- [MAG close-] {
-   [TYPE military_airfield,
-         military_danger_area,
-         military_range,
-         military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; autoSize: true; }
-
- }
-
  [MAG @labelSpecialBuildingMag-] {
    [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor;}
 
@@ -1058,9 +1034,6 @@ STYLE
      [TYPE building] {
        AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
      }
-
-     [TYPE military_bunker,
-           military_barracks] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; }
 
      [TYPE leisure_building,
            sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; }
@@ -1190,38 +1163,5 @@ STYLE
  [MAG close-] {
    [TYPE place_locality] NODE.TEXT {label: Name.name; style: normal; size: 0.9; color: #555555; priority: 13;}
 }
-
- // -------------------------------------------------------
- //
- // Aeroway
- //
-
- [MAG city-] {
-   [TYPE aeroway_aerodrome,
-         aeroway_helipad] AREA { color: @aerowayColor; }
- }
-
- [MAG suburb-] {
-   [TYPE aeroway_runway] WAY {color: @motorwayColor; displayWidth: 0.5mm; width: 20m;}
-   [TYPE aeroway_taxiway] WAY {color: @motorwayColor; displayWidth: 0.5mm; width: 15m;}
- }
-
- IF _building {
-   [MAG suburb-] {
-     [TYPE aeroway_terminal] AREA { color: #cc99ff; }
-     [TYPE aeroway_apron] AREA { color: #e8d1fe; }
-   }
- }
-
- [MAG close-] {
-   [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.TEXT { label: Name.name; priority: @labelPrioAeroway; }
-
-   [TYPE aeroway_aerodrome,
-         aeroway_terminal,
-         aeroway_helipad,
-         aeroway_runway,
-         aeroway_apron] AREA.TEXT { label: Name.name; }
- }
 
 END
