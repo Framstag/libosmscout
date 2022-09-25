@@ -1206,23 +1206,73 @@ TYPES
     = NODE ("amenity"=="shelter")
       GROUP amenity
 
-  // Churches
+  // Religious
+  TYPE temple_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "building"=="temple")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE shrine_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "building"=="shrine")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
   TYPE christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
-            EXISTS "building" AND !("building" IN ["no","false","0"]))
+            "building"=="church")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP routingPOI
+      GROUP religious, routingPOI
 
+  TYPE christian_cathedral_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="christian" AND
+            "building"=="cathedral")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
 
-  TYPE christian_church
+  TYPE christian_chapel_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="christian" AND
+            "building"=="chapel")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE christian_worship
     = NODE ("amenity"=="place_of_worship" AND
             "religion"=="christian")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP routingPOI
+      GROUP religious, routingPOI
 
+  TYPE jewish_synagogue_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="jewish" AND
+            "building"=="synagogue")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE muslim_mosque_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="muslin" AND
+            "building"=="mosque")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE worship_building
+    = AREA ("amenity"=="place_of_worship" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building
