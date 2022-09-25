@@ -823,7 +823,7 @@ STYLE
        AREA { color: @playgroundColor;}
        AREA.BORDER { color: @playgroundBorderColor; width: 0.1mm;}
      }
-     [TYPE leisure_garden] AREA { color: #ceeca8; }
+     [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "garden"; patternMinMag: detail;}
    }
 
    // Labels

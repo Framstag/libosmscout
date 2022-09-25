@@ -3,16 +3,10 @@ STYLE
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, history, military, power, barrier
+ // amenity, power, barrier
  //
 
  [MAG city-] {
-
-   [TYPE military_airfield,
-         military_danger_area,
-         military_range,
-         military_naval_base] AREA { color: #f59897; }
-
    [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
  }
 
