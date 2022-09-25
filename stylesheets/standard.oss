@@ -130,6 +130,8 @@ CONST
 
   UINT labelPrioAmenity             = 45;
   UINT labelPrioShop                = 50;
+  UINT labelPrioHistoric            = 51;
+  UINT labelPrioOffice              = 52;
 
   UINT labelPrioHighwayJunction     = 55;
 
@@ -356,31 +358,14 @@ CONST
 
   COLOR wallColor                  = #663e1b;
 
-  IF daylight {
-    COLOR aerodromeColor           = #d5ddbd;
-    COLOR aerodromeTerminalColor   = #cc99ff;
-    COLOR aerodromeRunwayColor     = #bbbbcc;
-    COLOR aerodromeApron           = #e8d1fe;
-  }
-  ELSE {
-    COLOR aerodromeColor           = darken(#d5ddbd, 0.6);
-    COLOR aerodromeTerminalColor   = darken(#cc99ff, 0.6);
-    COLOR aerodromeRunwayColor     = darken(#bbbbcc, 0.6);
-    COLOR aerodromeApron           = darken(#e8d1fe, 0.6);
-  }
-
-  COLOR historicColor               = #c8c8db;
-  COLOR historicSymbolColor         = darken(@historicColor, 0.2);
-  COLOR historicBuildingBorderColor = darken(@historicColor, 0.3);
-  COLOR historicLabelColor          = darken(@historicColor, 0.5);
-
-
 MODULE "include/symbols"
 MODULE "include/route"
 MODULE "include/land_sea"
 MODULE "include/roads"
 MODULE "include/man_made"
 
+MODULE "include/aeroway"
+MODULE "include/historic"
 MODULE "include/office"
 MODULE "include/shop"
 MODULE "include/tourism"
@@ -959,11 +944,6 @@ STYLE
        AREA.BORDER { color: @parkingBuildingBorderColor; width: 0.1mm; }
      }
 
-     [GROUP historic, building] {
-       AREA { color: @buildingColor; }
-       AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
-     }
-
      [TYPE building] {
        AREA { color: @buildingColor; }
        AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
@@ -1032,14 +1012,7 @@ STYLE
      [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @buildingLabelColor; }
 
      [TYPE power_sub_station,
-           power_generator,
-           historic_archaeological_site,
-           historic_battlefield,
-           historic_castle,
-           historic_monument,
-           historic_memorial,
-           historic_ruins,
-           historic_wreck] {
+           power_generator] {
        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
      }
@@ -1162,36 +1135,6 @@ STYLE
 
  [MAG close-] {
    [TYPE place_locality] NODE.TEXT {label: IName; style: emphasize; emphasizeColor: @emphasizeColor; size: 1.1; color: @labelColor; priority: @labelPrioLocality;}
- }
-
- // -------------------------------------------------------
- //
- // Aeroway
- //
-
- [MAG city-] {
-   [TYPE aeroway_aerodrome,
-         aeroway_helipad] AREA { color: @aerodromeColor; }
-
-   [TYPE aeroway_terminal] AREA { color: @aerodromeTerminalColor; }
-   [TYPE aeroway_runway] AREA { color: @aerodromeRunwayColor; }
-   [TYPE aeroway_apron] AREA { color: @aerodromeApron; }
- }
-
- [MAG suburb-] {
-   [TYPE aeroway_runway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 20m;}
-   [TYPE aeroway_taxiway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 15m;}
- }
-
- [MAG close-] {
-   [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioAeroway; }
-
-   [TYPE aeroway_aerodrome,
-         aeroway_terminal,
-         aeroway_helipad,
-         aeroway_runway,
-         aeroway_apron] AREA.TEXT { label: Name.name; color: @labelColor; }
  }
 
  // -------------------------------------------------------

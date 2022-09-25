@@ -33,7 +33,7 @@ OSS
           emphasizeColor: @emphasizeColor;
           color: @officeLabelColor;
           size: 0.8;
-          priority: @labelPrioShop;}
+          priority: @labelPrioOffice;}
       }
     }
 
@@ -45,7 +45,7 @@ OSS
           emphasizeColor: @emphasizeColor;
           color: @officeLabelColor;
           size: 0.8;
-          priority: @labelPrioShop;}
+          priority: @labelPrioOffice;}
       }
     }
 
