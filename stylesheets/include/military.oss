@@ -17,6 +17,13 @@ OSS
       }
     }
 
+    [MAG city-] {
+      [TYPE military_airfield,
+            military_danger_area,
+            military_range,
+            military_naval_base] AREA { color: #f59897; }
+    }
+
     [MAG suburb-] {
       [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
     }
