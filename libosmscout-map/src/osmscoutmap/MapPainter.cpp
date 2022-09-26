@@ -1682,8 +1682,8 @@ namespace osmscout {
     const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
 
     styleConfig.GetWayLineStyles(buffer,
-                             projection,
-                             lineStyles);
+                                 projection,
+                                 lineStyles);
 
     if (lineStyles.empty()) {
       return;
@@ -1692,7 +1692,7 @@ namespace osmscout {
     bool transformed=false;
     const AccessFeatureValue *accessValue=nullptr;
     const LanesFeatureValue  *lanesValue=nullptr;
-    std::vector<OffsetRel> laneTurns; // cached turns
+    std::vector<OffsetRel>   laneTurns; // cached turns
 
     WayPathData pathData;
 
@@ -1700,10 +1700,30 @@ namespace osmscout {
     pathData.buffer=&buffer;
     pathData.mainSlotWidth=0.0;
 
+    // Calculate mainSlotWidth
     for (const auto& lineStyle : lineStyles) {
-      double lineWidth=CalculateLineWith(projection,
-                                         buffer,
-                                         *lineStyle);
+      if (lineStyle->GetSlot().empty()) {
+        pathData.mainSlotWidth=CalculateLineWith(projection,
+                                                 buffer,
+                                                 *lineStyle);
+      }
+    }
+
+    if (pathData.mainSlotWidth==0.0) {
+      log.Warn() << "Line style for way " << way.GetFileOffset() << " of type " << way.GetType()->GetName() << " results in empty mainSlotWidth";
+    }
+
+    for (const auto& lineStyle : lineStyles) {
+      double lineWidth;
+
+      if (lineStyle->GetSlot().empty()) {
+        lineWidth=pathData.mainSlotWidth;
+      }
+      else {
+        lineWidth=CalculateLineWith(projection,
+                                    buffer,
+                                    *lineStyle);
+      }
 
       if (lineWidth==0.0) {
         continue;
@@ -1713,10 +1733,6 @@ namespace osmscout {
                         way.GetBoundingBox(),
                         lineWidth/2)) {
         continue;
-      }
-
-      if (lineStyle->GetSlot().empty()) {
-        pathData.mainSlotWidth=lineWidth;
       }
 
       if (lineStyle->GetOffsetRel()==OffsetRel::laneDivider) {
