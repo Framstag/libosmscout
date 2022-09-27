@@ -2174,8 +2174,8 @@ namespace osmscout {
   {
     errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
     areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
-    contourLabelOffset =GetProjectedWidth(projection,parameter.GetContourLabelOffset());
-    contourLabelSpace  =GetProjectedWidth(projection,parameter.GetContourLabelSpace());
+    contourLabelOffset =projection.ConvertWidthToPixel(parameter.GetContourLabelOffset());
+    contourLabelSpace  =projection.ConvertWidthToPixel(parameter.GetContourLabelSpace());
 
     shieldGridSizeHoriz=360.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
     shieldGridSizeVert=180.0/(std::pow(2,projection.GetMagnification().GetLevel()+1));
