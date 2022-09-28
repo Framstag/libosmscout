@@ -33,10 +33,13 @@
 #include <osmscout/util/Tiling.h>
 #include <osmscout/util/Geometry.h>
 
-//#define DEBUG_GROUNDTILES
-//#define DEBUG_NODE_DRAW
-
 namespace osmscout {
+
+#ifdef OSMSCOUT_DEBUG_GROUNDTILES
+constexpr bool debugGroundTiles = true;
+#else
+constexpr bool debugGroundTiles = false;
+#endif
 
   static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
                                           double gridSizeHoriz,
@@ -716,56 +719,19 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
-#if defined(DEBUG_NODE_DRAW)
-    std::vector<double> times;
-
-    times.resize(styleConfig.GetTypeConfig()->GetMaxTypeId()+1,0.0);
-#endif
-
     for (const auto& node : data.nodes) {
-#if defined(DEBUG_NODE_DRAW)
-      StopClockNano nodeTimer;
-#endif
-
       PrepareNode(styleConfig,
                   projection,
                   parameter,
                   node);
-
-#if defined(DEBUG_NODE_DRAW)
-      nodeTimer.Stop();
-
-      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
-#endif
     }
 
     for (const auto& node : data.poiNodes) {
-#if defined(DEBUG_NODE_DRAW)
-      StopClockNano nodeTimer;
-#endif
-
       PrepareNode(styleConfig,
                   projection,
                   parameter,
                   node);
-
-#if defined(DEBUG_NODE_DRAW)
-      nodeTimer.Stop();
-
-      times[node->GetType()->GetNodeId()]+=nodeTimer.GetNanoseconds();
-#endif
     }
-
-#if defined(DEBUG_NODE_DRAW)
-    for (auto type : styleConfig.GetTypeConfig()->GetTypes())
-    {
-      double overallTime=times[type->GetNodeId()];
-
-      if (overallTime>0.0) {
-        std::cout << "Node type " << type->GetName() << " " << times[type->GetNodeId()] << " nsecs" << std::endl;
-      }
-    }
-#endif
   }
 
   void MapPainter::PrepareAreaLabel(const StyleConfig& styleConfig,
@@ -2262,25 +2228,23 @@ namespace osmscout {
     DrawGroundTiles(projection, parameter, data.groundTiles);
   }
 
-#if defined(DEBUG_GROUNDTILES)
-static void DumpGroundTile(const GroundTile& tile)
+  static void DumpGroundTile(const GroundTile& tile)
   {
     switch (tile.type) {
-    case GroundTile::land:
-      std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
-      break;
-    case GroundTile::water:
-      std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
-      break;
-    case GroundTile::coast:
-      std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
-      break;
-    case GroundTile::unknown:
-      std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
-      break;
+      case GroundTile::land:
+        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        break;
+      case GroundTile::water:
+        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        break;
+      case GroundTile::coast:
+        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        break;
+      case GroundTile::unknown:
+        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        break;
     }
   }
-#endif
 
   void MapPainter::DrawGroundTiles(const Projection& projection,
                                    const MapParameter& parameter,
@@ -2290,9 +2254,7 @@ static void DumpGroundTile(const GroundTile& tile)
       return;
     }
 
-#if defined(DEBUG_GROUNDTILES)
-    std::set<GeoCoord> drawnLabels;
-#endif
+    [[maybe_unused]] std::set<GeoCoord> drawnLabels; // used when debugGroundTiles == true
 
     FillStyleRef          landFill=styleConfig->GetLandFillStyle(projection);
     FillStyleRef          seaFill=styleConfig->GetSeaFillStyle(projection);
@@ -2319,9 +2281,9 @@ static void DumpGroundTile(const GroundTile& tile)
     for (const auto& tile : groundTiles) {
       AreaData groundTileData;
 
-#if defined(DEBUG_GROUNDTILES)
-      DumpGroundTile(tile);
-#endif
+      if constexpr (debugGroundTiles) {
+        DumpGroundTile(tile);
+      }
 
       if (tile.type==GroundTile::unknown &&
           !parameter.GetRenderUnknowns()) {
@@ -2356,17 +2318,17 @@ static void DumpGroundTile(const GroundTile& tile)
 
       // skip tiles that are completely outside projection
       if (!projection.GetDimensions().Intersects(groundTileData.boundingBox)){
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
-                  << " " << groundTileData.boundingBox.GetDisplayText() << std::endl;
-#endif
+        if constexpr (debugGroundTiles) {
+          std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
+                    << " " << groundTileData.boundingBox.GetDisplayText() << std::endl;
+        }
         continue;
       }
 
       if (tile.coords.empty()) {
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << " >= fill" << std::endl;
-#endif
+        if constexpr (debugGroundTiles) {
+          std::cout << " >= fill" << std::endl;
+        }
         CoordBufferRange range=TransformBoundingBox(groundTileData.boundingBox,
                                                     transBuffer,
                                                     coordBuffer,
@@ -2378,9 +2340,9 @@ static void DumpGroundTile(const GroundTile& tile)
         end=range.GetEnd();
       }
       else {
-#if defined(DEBUG_GROUNDTILES)
-        std::cout << " >= sub" << std::endl;
-#endif
+        if constexpr (debugGroundTiles) {
+          std::cout << " >= sub" << std::endl;
+        }
         coords.resize(tile.coords.size());
 
         for (size_t i=0; i<tile.coords.size(); i++) {
@@ -2481,47 +2443,47 @@ static void DumpGroundTile(const GroundTile& tile)
 
       DrawArea(projection,parameter,groundTileData);
 
-#if defined(DEBUG_GROUNDTILES)
-      GeoCoord cc=groundTileData.boundingBox.GetCenter();
+      if constexpr (debugGroundTiles) {
+        GeoCoord cc = groundTileData.boundingBox.GetCenter();
 
-      std::string label;
+        std::string label;
 
-      size_t x=(cc.GetLon()+180)/tile.cellWidth;
-      size_t y=(cc.GetLat()+90)/tile.cellHeight;
+        size_t x = (cc.GetLon() + 180) / tile.cellWidth;
+        size_t y = (cc.GetLat() + 90) / tile.cellHeight;
 
-      label=std::to_string(tile.xRel)+","+std::to_string(tile.yRel);
+        label = std::to_string(tile.xRel) + "," + std::to_string(tile.yRel);
 
-      double lon=(x*tile.cellWidth+tile.cellWidth/2)-180.0;
-      double lat=(y*tile.cellHeight+tile.cellHeight/2)-90.0;
+        double lon = (x * tile.cellWidth + tile.cellWidth / 2) - 180.0;
+        double lat = (y * tile.cellHeight + tile.cellHeight / 2) - 90.0;
 
-      double px;
-      double py;
+        double px;
+        double py;
 
-      projection.GeoToPixel(GeoCoord(lat,lon),
-                            px,py);
+        projection.GeoToPixel(GeoCoord(lat, lon),
+                              px, py);
 
-      if (drawnLabels.find(GeoCoord(x,y))!=drawnLabels.end()) {
-        continue;
+        if (drawnLabels.find(GeoCoord(x, y)) != drawnLabels.end()) {
+          continue;
+        }
+
+        LabelData labelBox;
+
+        labelBox.priority = 0;
+        labelBox.alpha = debugLabel->GetAlpha();;
+        labelBox.fontSize = debugLabel->GetSize();
+        labelBox.style = debugLabel;
+        labelBox.text = label;
+
+        std::vector<LabelData> vect;
+        vect.push_back(labelBox);
+        RegisterRegularLabel(projection,
+                             parameter,
+                             vect,
+                             Vertex2D(px, py),
+                             /*proposedWidth*/ -1);
+
+        drawnLabels.insert(GeoCoord(x, y));
       }
-
-      LabelData labelBox;
-
-      labelBox.priority=0;
-      labelBox.alpha=debugLabel->GetAlpha();;
-      labelBox.fontSize=debugLabel->GetSize();
-      labelBox.style=debugLabel;
-      labelBox.text=label;
-
-      std::vector<LabelData> vect;
-      vect.push_back(labelBox);
-      RegisterRegularLabel(projection,
-                           parameter,
-                           vect,
-                           Vertex2D(px,py),
-                           /*proposedWidth*/ -1);
-
-      drawnLabels.insert(GeoCoord(x,y));
-#endif
     }
   }
 

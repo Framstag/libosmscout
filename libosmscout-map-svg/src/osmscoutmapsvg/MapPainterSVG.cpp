@@ -30,8 +30,6 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/Base64.h>
 
-// #define DEBUG_LABEL_LAYOUTER
-
 namespace osmscout {
 
   static const char* valueChar="0123456789abcdef";
@@ -162,9 +160,9 @@ namespace osmscout {
     double horizontalOffset = extends.x * -1.0;
     std::vector<Glyph<MapPainterSVG::NativeGlyph>> result;
 
-#ifdef DEBUG_LABEL_LAYOUTER
-    std::cout << " = getting glyphs for label: " << text << std::endl;
-#endif
+    if constexpr (debugLabelLayouter) {
+      std::cout << " = getting glyphs for label: " << text << std::endl;
+    }
 
     for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
          iter != nullptr;){
@@ -179,12 +177,12 @@ namespace osmscout {
                                                                    g_object_unref);
       g_object_ref(font.get());
 
-#ifdef DEBUG_LABEL_LAYOUTER
-      std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs, " <<
-                wstr.size() << " length, " <<
-                run->item->num_chars << " chars " <<
-                "(font " << font.get() << "):" << std::endl;
-#endif
+      if constexpr (debugLabelLayouter) {
+        std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs, " <<
+                  wstr.size() << " length, " <<
+                  run->item->num_chars << " chars " <<
+                  "(font " << font.get() << "):" << std::endl;
+      }
 
       for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
         result.emplace_back();
@@ -211,10 +209,10 @@ namespace osmscout {
         result.back().glyph.glyphString = singleGlyphStr;
         result.back().glyph.character = WStringToUTF8String(wstr.substr(gi, 1));
 
-#ifdef DEBUG_LABEL_LAYOUTER
-        std::cout << "     " << glyphInfo.glyph << " \"" << result.back().glyph.character << "\": " <<
-            result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
-#endif
+        if constexpr (debugLabelLayouter) {
+          std::cout << "     " << glyphInfo.glyph << " \"" << result.back().glyph.character << "\": " <<
+                    result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
+        }
       }
 
       if (!pango_layout_iter_next_run(iter)){

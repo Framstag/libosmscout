@@ -679,9 +679,9 @@ namespace osmscout {
     double horizontalOffset = extends.x * -1.0;
     std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
 
-#ifdef DEBUG_LABEL_LAYOUTER
-    std::cout << " = getting glyphs for label: " << text << std::endl;
-#endif
+    if constexpr (debugLabelLayouter) {
+      std::cout << " = getting glyphs for label: " << text << std::endl;
+    }
 
     for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
          iter != nullptr;){
@@ -695,9 +695,9 @@ namespace osmscout {
                                                                    g_object_unref);
       g_object_ref(font.get());
 
-#ifdef DEBUG_LABEL_LAYOUTER
-      std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << "):" << std::endl;
-#endif
+      if constexpr (debugLabelLayouter) {
+        std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << "):" << std::endl;
+      }
 
       for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
         result.emplace_back();
@@ -717,9 +717,10 @@ namespace osmscout {
         result.back().position.SetX(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset);
         result.back().position.SetY((double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
 
-#ifdef DEBUG_LABEL_LAYOUTER
-        std::cout << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x " << result.back().position.GetY() << std::endl;
-#endif
+        if constexpr (debugLabelLayouter) {
+          std::cout << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x "
+                    << result.back().position.GetY() << std::endl;
+        }
 
         glyphInfo.geometry.x_offset = 0;
         glyphInfo.geometry.y_offset = 0;
@@ -824,24 +825,24 @@ namespace osmscout {
     }
 
     cairo_set_matrix(draw, &matrix);
-#ifdef DEBUG_LABEL_LAYOUTER
-    for (auto const &glyph:glyphs) {
-      cairo_set_source_rgba(draw, 1, 0, 0, 1);
-      cairo_arc(draw,
-                glyph.trPosition.GetX(), glyph.trPosition.GetY(),
-                0.5,
-                0,
-                2*M_PI);
-      cairo_fill(draw);
+    if constexpr (debugLabelLayouter) {
+      for (auto const &glyph: glyphs) {
+        cairo_set_source_rgba(draw, 1, 0, 0, 1);
+        cairo_arc(draw,
+                  glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                  0.5,
+                  0,
+                  2 * M_PI);
+        cairo_fill(draw);
 
-      cairo_set_source_rgba(draw, 0, 0, 1, 1);
-      cairo_set_line_width(draw,0.2);
-      cairo_rectangle(draw,
-                      glyph.trPosition.GetX(), glyph.trPosition.GetY(),
-                      glyph.trWidth, glyph.trHeight);
-      cairo_stroke(draw);
+        cairo_set_source_rgba(draw, 0, 0, 1, 1);
+        cairo_set_line_width(draw, 0.2);
+        cairo_rectangle(draw,
+                        glyph.trPosition.GetX(), glyph.trPosition.GetY(),
+                        glyph.trWidth, glyph.trHeight);
+        cairo_stroke(draw);
+      }
     }
-#endif
   }
 
 

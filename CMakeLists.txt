@@ -65,26 +65,17 @@ option(OSMSCOUT_BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution
 if(APPLE)
   option(OSMSCOUT_BUILD_FRAMEWORKS "Enable build of libraries as frameworks" ON)
 endif()
+
+# options for extra debugging of map renderer
 option(OSMSCOUT_DEBUG_LABEL_LAYOUTER "Print extra debug messages during label layouting" OFF)
-if (OSMSCOUT_DEBUG_LABEL_LAYOUTER)
-  add_definitions(-DDEBUG_LABEL_LAYOUTER)
-endif()
 option(OSMSCOUT_DEBUG_GROUNDTILES "Print extra debug messages while rendering ground tiles" OFF)
-if (OSMSCOUT_DEBUG_GROUNDTILES)
-  add_definitions( -DDEBUG_GROUNDTILES)
-endif()
+
+# options for extra debugging of import
 option(OSMSCOUT_DEBUG_COASTLINE "Print extra debug messages while importing coastline" OFF)
-if (OSMSCOUT_DEBUG_COASTLINE)
-  add_definitions( -DDEBUG_COASTLINE)
-endif()
 option(OSMSCOUT_DEBUG_TILING "Print extra debug messages related with map tiles" OFF)
-if (OSMSCOUT_DEBUG_TILING)
-  add_definitions( -DDEBUG_TILING)
-endif()
+
+# options for extra debugging of routing
 option(OSMSCOUT_DEBUG_ROUTING "Print extra debug messages while routing" OFF)
-if (OSMSCOUT_DEBUG_ROUTING)
-  add_definitions( -DDEBUG_ROUTING)
-endif()
 
 # compiler settings
 include(CheckCXXCompilerFlag)

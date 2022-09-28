@@ -40,6 +40,11 @@
 #include <osmscout/routing/MultiDBRoutingState.h>
 
 namespace osmscout {
+#ifdef OSMSCOUT_DEBUG_ROUTING
+constexpr bool debugRouting = true;
+#else
+constexpr bool debugRouting = false;
+#endif
 
   /**
    * Result of a routing calculation. This object is always returned.

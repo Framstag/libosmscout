@@ -32,15 +32,18 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Geometry.h>
 
-#if !defined(DEBUG_COASTLINE)
-//#define DEBUG_COASTLINE
-#endif
-
-#if !defined(DEBUG_TILING)
-//#define DEBUG_TILING
-#endif
-
 namespace osmscout {
+#ifdef OSMSCOUT_DEBUG_COASTLINE
+constexpr bool debugCoastline = true;
+#else
+constexpr bool debugCoastline = false;
+#endif
+
+#ifdef OSMSCOUT_DEBUG_TILING
+constexpr bool debugTiling = true;
+#else
+constexpr bool debugTiling = false;
+#endif
 
   template<typename PointSequence>
   void WriteGpx(const PointSequence &path, const std::string& name)
@@ -80,9 +83,9 @@ namespace osmscout {
     assert(cellXCount>0);
     assert(cellYCount>0);
 
-#if defined(DEBUG_TILING)
-    std::cout << "Setting state box to: " << cellXStart << " - " << cellXEnd << " x " << cellYStart << " - " << cellYEnd << std::endl;
-#endif
+    if constexpr (debugTiling) {
+      std::cout << "Setting state box to: " << cellXStart << " - " << cellXEnd << " x " << cellYStart << " - " << cellYEnd << std::endl;
+    }
     uint32_t size=(cellXCount*cellYCount)/4;
 
     if ((cellXCount*cellYCount)%4>0) {
@@ -253,9 +256,9 @@ namespace osmscout {
       for (const auto& coord : coords) {
         if (stateMap.IsInAbsolute(coord.x,coord.y)) {
           if (stateMap.GetStateAbsolute(coord.x,coord.y)==unknown) {
-#if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << coord.GetDisplayText() << " " << coastline->id << std::endl;
-#endif
+            if constexpr (debugTiling) {
+              std::cout << "Coastline: " << coord.GetDisplayText() << " " << coastline->id << std::endl;
+            }
             stateMap.SetStateAbsolute(coord.x,coord.y,coast);
           }
         }
@@ -368,9 +371,9 @@ namespace osmscout {
       if (coord.y<stateMap.GetYCount()-1 &&
         stateMap.GetState(coord.x,coord.y+1)==unknown) {
         if (state[0]!=unknown) {
-#if defined(DEBUG_TILING)
-          std::cout << "Assume " << StateToString(state[0]) << " above coast: " << coord.x << "," << coord.y+1 << std::endl;
-#endif
+          if constexpr (debugTiling) {
+            std::cout << "Assume " << StateToString(state[0]) << " above coast: " << coord.x << "," << coord.y+1 << std::endl;
+          }
           stateMap.SetState(coord.x,coord.y+1,state[0]);
         }
       }
@@ -378,9 +381,9 @@ namespace osmscout {
       if (coord.x<stateMap.GetXCount()-1 &&
         stateMap.GetState(coord.x+1,coord.y)==unknown) {
         if (state[1]!=unknown) {
-#if defined(DEBUG_TILING)
-          std::cout << "Assume " << StateToString(state[1]) << " right of coast: " << coord.x+1 << "," << coord.y << std::endl;
-#endif
+          if constexpr (debugTiling) {
+            std::cout << "Assume " << StateToString(state[1]) << " right of coast: " << coord.x+1 << "," << coord.y << std::endl;
+          }
           stateMap.SetState(coord.x+1,coord.y,state[1]);
         }
       }
@@ -388,9 +391,9 @@ namespace osmscout {
       if (coord.y>0 &&
         stateMap.GetState(coord.x,coord.y-1)==unknown) {
         if (state[2]!=unknown) {
-#if defined(DEBUG_TILING)
-          std::cout << "Assume " << StateToString(state[2]) << " below coast: " << coord.x << "," << coord.y-1 << std::endl;
-#endif
+          if constexpr (debugTiling) {
+            std::cout << "Assume " << StateToString(state[2]) << " below coast: " << coord.x << "," << coord.y-1 << std::endl;
+          }
           stateMap.SetState(coord.x,coord.y-1,state[2]);
         }
       }
@@ -398,9 +401,9 @@ namespace osmscout {
       if (coord.x>0 &&
         stateMap.GetState(coord.x-1,coord.y)==unknown) {
         if (state[3]!=unknown) {
-#if defined(DEBUG_TILING)
-          std::cout << "Assume " << StateToString(state[3]) << " left of coast: " << coord.x-1 << "," << coord.y << std::endl;
-#endif
+          if constexpr (debugTiling) {
+            std::cout << "Assume " << StateToString(state[3]) << " left of coast: " << coord.x-1 << "," << coord.y << std::endl;
+          }
           stateMap.SetState(coord.x-1,coord.y,state[3]);
         }
       }
@@ -447,36 +450,36 @@ namespace osmscout {
 
             if (y>0) {
               if (level.stateMap.GetState(x,y-1)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water below water: " << x << "," << y-1 << std::endl;
-#endif
+                if constexpr (debugTiling) {
+                  std::cout << "Water below water: " << x << "," << y-1 << std::endl;
+                }
                 newLevel.stateMap.SetState(x,y-1,water);
               }
             }
 
             if (y<level.stateMap.GetYCount()-1) {
               if (level.stateMap.GetState(x,y+1)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water above water: " << x << "," << y+1 << std::endl;
-#endif
+                if constexpr (debugTiling) {
+                  std::cout << "Water above water: " << x << "," << y+1 << std::endl;
+                }
                 newLevel.stateMap.SetState(x,y+1,water);
               }
             }
 
             if (x>0) {
               if (level.stateMap.GetState(x-1,y)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water left of water: " << x-1 << "," << y << std::endl;
-#endif
+                if constexpr (debugTiling) {
+                  std::cout << "Water left of water: " << x-1 << "," << y << std::endl;
+                }
                 newLevel.stateMap.SetState(x-1,y,water);
               }
             }
 
             if (x<level.stateMap.GetXCount()-1) {
               if (level.stateMap.GetState(x+1,y)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water right of water: " << x+1 << "," << y << std::endl;
-#endif
+                if constexpr (debugTiling) {
+                  std::cout << "Water right of water: " << x+1 << "," << y << std::endl;
+                }
                 newLevel.stateMap.SetState(x+1,y,water);
               }
             }
@@ -606,9 +609,9 @@ namespace osmscout {
 
       if (fillWater) {
         GroundTile groundTile(GroundTile::water);
-#if defined(DEBUG_TILING)
-        std::cout << "Add water base to tile with islands: " << coord.GetDisplayText() << std::endl;
-#endif
+        if constexpr (debugTiling) {
+          std::cout << "Add water base to tile with islands: " << coord.GetDisplayText() << std::endl;
+        }
 
         groundTile.coords.push_back(cellBoundaries.borderCoords[0]);
         groundTile.coords.push_back(cellBoundaries.borderCoords[1]);
@@ -665,9 +668,9 @@ namespace osmscout {
               else if (stateMap.GetState(x,y)==coast || stateMap.GetState(x,y)==land) {
                 if (start<stateMap.GetXCount() && end<stateMap.GetXCount() && start<=end) {
                   for (uint32_t i=start; i<=end; i++) {
-#if defined(DEBUG_TILING)
-                    std::cout << "Land between: " << i << "," << y << std::endl;
-#endif
+                    if constexpr (debugTiling) {
+                      std::cout << "Land between: " << i << "," << y << std::endl;
+                    }
                     stateMap.SetState(i,y,land);
                     cont=true;
                   }
@@ -717,9 +720,9 @@ namespace osmscout {
               else if (stateMap.GetState(x,y)==coast || stateMap.GetState(x,y)==land) {
                 if (start<stateMap.GetYCount() && end<stateMap.GetYCount() && start<=end) {
                   for (uint32_t i=start; i<=end; i++) {
-#if defined(DEBUG_TILING)
-                    std::cout << "Land between: " << x << "," << i << std::endl;
-#endif
+                    if constexpr (debugTiling) {
+                      std::cout << "Land between: " << x << "," << i << std::endl;
+                    }
                     stateMap.SetState(x,i,land);
                     cont=true;
                   }
@@ -806,9 +809,9 @@ namespace osmscout {
       if (!groundTile.coords.empty()) {
         groundTile.coords.back().coast=false;
 
-#if defined(DEBUG_TILING)
-        std::cout << "    Coastline " << coastline->id << " in cell: " << coord.GetDisplayText() << std::endl;
-#endif
+        if constexpr (debugTiling) {
+          std::cout << "    Coastline " << coastline->id << " in cell: " << coord.GetDisplayText() << std::endl;
+        }
 
         cellGroundTileMap[coord].push_back(groundTile);
       }
@@ -1898,10 +1901,10 @@ namespace osmscout {
                                      const IntersectionRef pathEnd,
                                      CoastlineDataRef coastline)
   {
-#if defined(DEBUG_COASTLINE)
-      std::cout << "     ... path from " << pathStart->point.GetDisplayText() <<
+      if constexpr (debugCoastline) {
+        std::cout << "     ... path from " << pathStart->point.GetDisplayText() <<
                                   " to " << pathEnd->point.GetDisplayText() << std::endl;
-#endif
+      }
       if (pathStart->direction==Direction::out){
         WalkPathBack(groundTile,
                      stateMap,
@@ -1932,10 +1935,10 @@ namespace osmscout {
                                            Data& data,
                                            const std::vector<size_t>& containingPaths)
   {
-#if defined(DEBUG_COASTLINE)
+    if constexpr (debugCoastline) {
       std::cout << "   walk around " << TypeToString(groundTile.type) <<
-        " from " << startIntersection->point.GetDisplayText() << std::endl;
-#endif
+                " from " << startIntersection->point.GetDisplayText() << std::endl;
+    }
 
     groundTile.coords.push_back(Transform(startIntersection->point,
                                           stateMap,
@@ -1954,9 +1957,9 @@ namespace osmscout {
                                                       intersectionsCW,
                                                       coastline->isArea);
       if (!pathEnd) {
-#if defined(DEBUG_COASTLINE)
-        std::cout << "     can't found sibling intersection for " << pathStart->point.GetDisplayText() << std::endl;
-#endif
+        if constexpr (debugCoastline) {
+          std::cout << "     can't found sibling intersection for " << pathStart->point.GetDisplayText() << std::endl;
+        }
         GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
 
         // create synthetic end
@@ -1979,10 +1982,10 @@ namespace osmscout {
           if (coastline->isArea) {
             return false; // area can't be part of tripoint, it should not happen
           }
-#if defined(DEBUG_COASTLINE)
-          GeoCoord tripoint=(pathStart->direction==Direction::in) ? coastline->points.back() : coastline->points.front();
-          std::cout << "     found tripoint " << tripoint.GetDisplayText() << std::endl;
-#endif
+          if constexpr (debugCoastline) {
+            GeoCoord tripoint = (pathStart->direction == Direction::in) ? coastline->points.back() : coastline->points.front();
+            std::cout << "     found tripoint " << tripoint.GetDisplayText() << std::endl;
+          }
 
           // handle coastline Tripoint
           if (!WalkFromTripoint(groundTile,
@@ -2061,22 +2064,24 @@ namespace osmscout {
 
       intersectionsCW.sort(IntersectionCWComparator());
 
-#if defined(DEBUG_COASTLINE)
-      std::cout.precision(5);
-      std::cout << "    cell boundaries" <<
-        ": " << cellBoundaries.latMin << " " << cellBoundaries.lonMin <<
-        "; " << cellBoundaries.latMin << " " << cellBoundaries.lonMax <<
-        "; " << cellBoundaries.latMax << " " << cellBoundaries.lonMin <<
-        "; " << cellBoundaries.latMax << " " << cellBoundaries.lonMax <<
-        std::endl;
-      std::cout << "    intersections:" << std::endl;
-      for (const auto &intersection: intersectionsCW){
-        std::cout << "      " << intersection->point.GetDisplayText() << " (" << intersection->coastline << ", ";
-        std::cout << (intersection->direction==Direction::touch? "touch" : (intersection->direction==Direction::out ? "out" : "in"));
-        std::cout << ", " << intersection->prevWayPointIndex << ", " << intersection->distanceSquare;
-        std::cout << ")" << std::endl;
+      if constexpr (debugCoastline) {
+        std::cout.precision(5);
+        std::cout << "    cell boundaries" <<
+                  ": " << cellBoundaries.latMin << " " << cellBoundaries.lonMin <<
+                  "; " << cellBoundaries.latMin << " " << cellBoundaries.lonMax <<
+                  "; " << cellBoundaries.latMax << " " << cellBoundaries.lonMin <<
+                  "; " << cellBoundaries.latMax << " " << cellBoundaries.lonMax <<
+                  std::endl;
+        std::cout << "    intersections:" << std::endl;
+        for (const auto &intersection: intersectionsCW) {
+          std::cout << "      " << intersection->point.GetDisplayText() << " (" << intersection->coastline << ", ";
+          std::cout
+            << (intersection->direction == Direction::touch ? "touch" : (intersection->direction == Direction::out ? "out"
+                                                                                                                   : "in"));
+          std::cout << ", " << intersection->prevWayPointIndex << ", " << intersection->distanceSquare;
+          std::cout << ")" << std::endl;
+        }
       }
-#endif
 
       // check if there are two intersections of the same coastline
       // at the same point and the same direction, if yes, remove second one...
@@ -2169,9 +2174,9 @@ namespace osmscout {
       progress.SetProgress(currentCell,data.cellCoastlines.size());
       currentCell++;
 
-#if defined(DEBUG_COASTLINE)
-      std::cout << " - cell " << cellEntry.first.GetDisplayText() << "" << std::endl;
-#endif
+      if constexpr (debugCoastline) {
+        std::cout << " - cell " << cellEntry.first.GetDisplayText() << "" << std::endl;
+      }
 
       HandleCoastlineCell(progress,
                           cellEntry.first,
@@ -2429,14 +2434,14 @@ namespace osmscout {
           PathIntersection int1=candidateIntersections[ii];
           PathIntersection int2=candidateIntersections[(ii+1)%candidateIntersections.size()];
 
-#if defined(DEBUG_COASTLINE)
-          std::cout.precision(5);
-          std::cout << "    Cut data polygon from " <<
-            int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
-            int2.point.GetLat() << " " << int2.point.GetLon() << " left state: " <<
-            (int1.orientation>0 ?"water":"land") <<
-            std::endl;
-#endif
+          if constexpr (debugCoastline) {
+            std::cout.precision(5);
+            std::cout << "    Cut data polygon from " <<
+                      int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+                      int2.point.GetLat() << " " << int2.point.GetLon() << " left state: " <<
+                      (int1.orientation > 0 ? "water" : "land") <<
+                      std::endl;
+          }
 
           CoastRef part=std::make_shared<Coast>();
 
@@ -2509,13 +2514,13 @@ namespace osmscout {
           continue;
         }
 
-#if defined(DEBUG_COASTLINE)
-        std::cout.precision(5);
-        std::cout << "    Cut coastline from " <<
-          int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
-          int2.point.GetLat() << " " << int2.point.GetLon() <<
-          std::endl;
-#endif
+if constexpr (debugCoastline) {
+  std::cout.precision(5);
+  std::cout << "    Cut coastline from " <<
+            int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+            int2.point.GetLat() << " " << int2.point.GetLon() <<
+            std::endl;
+}
 
         CoastRef part=std::make_shared<Coast>();
 
