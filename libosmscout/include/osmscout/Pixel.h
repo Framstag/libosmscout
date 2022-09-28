@@ -167,6 +167,10 @@ namespace osmscout {
     }
   };
 
+  OSMSCOUT_API Vertex2D operator-(const Vertex2D &a, const Vertex2D &b);
+
+  OSMSCOUT_API Vertex2D operator+(const Vertex2D &a, const Vertex2D &b);
+
   // make sure that we may use std::memcpy on Vertex2D
   static_assert(std::is_trivially_copyable_v<Vertex2D>);
   static_assert(std::is_trivially_assignable_v<Vertex2D,Vertex2D>);

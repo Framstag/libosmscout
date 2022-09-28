@@ -32,8 +32,7 @@ void SymbolRenderer::Render(const Projection& projection,
 {
   ScreenBox boundingBox = symbol.GetBoundingBox(projection);
   Vertex2D boxCenter = boundingBox.GetCenter();
-  Vertex2D center=Vertex2D(mapCenter.GetX()-boxCenter.GetX(),
-                           mapCenter.GetY()-boxCenter.GetY());
+  Vertex2D center = mapCenter-boxCenter;
   double groundMeterInPixel=projection.GetMeterInPixel();
   double screenMmInPixel=projection.ConvertWidthToPixel(1);
 

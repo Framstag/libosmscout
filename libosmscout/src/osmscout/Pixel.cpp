@@ -31,4 +31,17 @@ namespace osmscout {
 
     return stream.str();
   }
+
+  Vertex2D operator-(const Vertex2D &a, const Vertex2D &b)
+  {
+    return Vertex2D(a.GetX()-b.GetX(),
+                    a.GetY()-b.GetY());
+  }
+
+  Vertex2D operator+(const Vertex2D &a, const Vertex2D &b)
+  {
+    return Vertex2D(a.GetX()+b.GetX(),
+                    a.GetY()+b.GetY());
+  }
+
 }
