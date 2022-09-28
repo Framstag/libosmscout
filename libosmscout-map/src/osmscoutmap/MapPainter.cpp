@@ -1059,6 +1059,7 @@ namespace osmscout {
 
         if (pathSymbolStyle->GetRenderMode()==PathSymbolStyle::RenderMode::scale) {
           symbolScale=data.mainSlotWidth*pathSymbolStyle->GetScale()/symbolBoundingBox.GetHeight();
+          symbolSpace*=symbolScale;
         }
         else {
           symbolScale=1.0;
@@ -1066,19 +1067,19 @@ namespace osmscout {
 
         double symbolWidth=symbolBoundingBox.GetWidth()*symbolScale;
         double length=data.coordRange.GetLength();
-        size_t countLabels=(length-symbolSpace)/(symbolWidth+symbolSpace);
-        size_t labelCountExp=log2(countLabels);
+        size_t countSymbols=(length-symbolSpace)/(symbolWidth+symbolSpace);
+        size_t labelCountExp=log2(countSymbols);
 
-        countLabels=pow(2,labelCountExp);
+        countSymbols=pow(2, labelCountExp);
 
-        double space=(length-countLabels*symbolWidth)/(countLabels+1);
+        double space = (length-countSymbols*symbolWidth) / (countSymbols+1);
 
         ContourSymbolData symbolData;
 
-        symbolData.symbolSpace =space;
-        symbolData.symbolOffset=space;
-        symbolData.coordRange  =range;
-        symbolData.symbolScale=symbolScale;
+        symbolData.symbolSpace = space;
+        symbolData.symbolOffset = space;
+        symbolData.coordRange = range;
+        symbolData.symbolScale = symbolScale;
 
         DrawContourSymbol(projection,
                           parameter,
