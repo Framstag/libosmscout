@@ -156,10 +156,12 @@ STYLE
    [TYPE amenity,
          amenity_bank,
          amenity_cafe,
+         amenity_fast_food,
          amenity_fuel,
          amenity_kindergarten,
          amenity_library,
          amenity_recycling,
+         amenity_restaurant,
          amenity_school] {
          NODE.ICON { symbol: amenity; }
    }
