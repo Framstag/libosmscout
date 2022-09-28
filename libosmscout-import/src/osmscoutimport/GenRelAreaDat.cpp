@@ -322,8 +322,10 @@ namespace osmscout {
       }
     }
 
-    if (parts.empty())
-        parts.clear();
+    if (!parts.empty()) {
+      parts.clear();
+    }
+
     std::move(rings.begin(), rings.end(), std::back_inserter(parts));
 
     return true;
@@ -435,8 +437,10 @@ namespace osmscout {
     // Copy back data
     //
 
-    if (parts.empty())
-        parts.clear();
+    if (!parts.empty()) {
+      parts.clear();
+    }
+
     std::move(groups.begin(), groups.end(), std::back_inserter(parts));
 
     return true;

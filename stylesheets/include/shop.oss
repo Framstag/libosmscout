@@ -1,0 +1,58 @@
+OSS
+
+  //
+  // Shop
+  //
+
+  CONST
+    COLOR shopColor                  = #d9bb98;
+    COLOR shopSymbolColor            = darken(@shopColor, 0.2);
+    COLOR shopBorderColor            = darken(@shopColor, 0.3);
+    COLOR shopLabelColor             = darken(@shopColor, 0.8);
+
+  SYMBOL shop
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: @shopSymbolColor; }
+    }
+
+  STYLE
+    IF _building {
+      [MAG @buildingMag-] {
+        [GROUP shop, building] {
+          AREA { color: @shopColor;}
+          AREA.BORDER { color: @shopBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
+    [MAG @labelBuildingMag-] {
+      [GROUP shop, building] {
+        AREA.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @shopLabelColor;
+          size: 1.0;
+          priority: @labelPrioShop;}
+
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP shop] {
+        NODE.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @shopLabelColor;
+          size: 1.0;
+          priority: @labelPrioShop;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP shop] {
+        NODE.ICON { symbol: shop; }
+      }
+    }
+END

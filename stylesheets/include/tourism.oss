@@ -1,0 +1,88 @@
+OSS
+
+  //
+  // Tourism
+  //
+
+  CONST
+    COLOR tourismColor               = #c8c8db;
+    COLOR tourismSymbolColor         = darken(@tourismColor, 0.2);
+    COLOR tourismBuildingBorderColor = darken(@tourismColor, 0.3);
+    COLOR tourismLabelColor          = darken(@tourismColor, 0.7);
+
+  SYMBOL tourism
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: @tourismSymbolColor; }
+    }
+
+  STYLE
+    // General
+
+    IF _building {
+      [MAG @buildingMag-] {
+        [GROUP tourism, building] {
+          AREA { color: @tourismColor; }
+          AREA.BORDER { color: @tourismBuildingBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
+    [MAG @labelBuildingMag-] {
+      [GROUP tourism, building] {
+        AREA.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @tourismLabelColor;
+          size: 0.8;
+          priority: @labelPrioBuilding;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP tourism] {
+        NODE.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @tourismLabelColor;
+          size: 0.8;
+          priority: @labelPrioBuilding;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP tourism] {
+        NODE.ICON { symbol: tourism; }
+      }
+    }
+
+    // Special, make them appear earlier
+
+    [MAG city-] {
+      [TYPE tourism_theme_park,
+            tourism_zoo,
+            historic_archaeological_site,
+            historic_battlefield] {
+        AREA { color: @tourismColor; }
+      }
+    }
+
+    [MAG detail-] {
+      [TYPE tourism_alpine_hut,
+            tourism_camp_site,
+            tourism_caravan_site,
+            tourism_attraction,
+            tourism_artwork,
+            tourism_chalet,
+            tourism_guest_house,
+            tourism_hostel,
+            tourism_hotel,
+            tourism_information,
+            tourism_motel,
+            tourism_museum,
+            tourism_picnic_site] {
+        AREA { color: @tourismColor; }
+      }
+    }
+END

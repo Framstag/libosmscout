@@ -1,0 +1,45 @@
+OSS
+
+  //
+  // Aeroway
+  //
+  CONST
+    IF daylight {
+      COLOR aerodromeColor           = #d5ddbd;
+      COLOR aerodromeTerminalColor   = #cc99ff;
+      COLOR aerodromeRunwayColor     = #bbbbcc;
+      COLOR aerodromeApron           = #e8d1fe;
+    }
+    ELSE {
+      COLOR aerodromeColor           = darken(#d5ddbd, 0.6);
+      COLOR aerodromeTerminalColor   = darken(#cc99ff, 0.6);
+      COLOR aerodromeRunwayColor     = darken(#bbbbcc, 0.6);
+      COLOR aerodromeApron           = darken(#e8d1fe, 0.6);
+    }
+
+  STYLE
+    [MAG city-] {
+      [TYPE aeroway_aerodrome,
+            aeroway_helipad] AREA { color: @aerodromeColor; }
+
+      [TYPE aeroway_terminal] AREA { color: @aerodromeTerminalColor; }
+      [TYPE aeroway_runway] AREA { color: @aerodromeRunwayColor; }
+      [TYPE aeroway_apron] AREA { color: @aerodromeApron; }
+    }
+
+    [MAG suburb-] {
+      [TYPE aeroway_runway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 20m;}
+      [TYPE aeroway_taxiway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 15m;}
+    }
+
+    [MAG close-] {
+      [TYPE aeroway_taxiway,
+            aeroway_runway] WAY.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioAeroway; }
+
+      [TYPE aeroway_aerodrome,
+            aeroway_terminal,
+            aeroway_helipad,
+            aeroway_runway,
+            aeroway_apron] AREA.TEXT { label: Name.name; color: @labelColor; }
+    }
+END

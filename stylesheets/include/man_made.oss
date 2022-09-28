@@ -3,22 +3,10 @@ STYLE
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, tourism, history, military, power, barrier
+ // amenity, power, barrier
  //
- [MAG city-] {
-   [TYPE tourism_theme_park,
-         tourism_zoo,
-         historic_archaeological_site,
-         historic_battlefield] AREA { color: @tourismColor; }
- }
 
  [MAG city-] {
-
-   [TYPE military_airfield,
-         military_danger_area,
-         military_range,
-         military_naval_base] AREA { color: #f59897; }
-
    [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
  }
 
@@ -27,25 +15,6 @@ STYLE
  }
 
  [MAG detail-] {
-   [TYPE tourism_alpine_hut,
-         tourism_camp_site,
-         tourism_caravan_site,
-         tourism_attraction,
-         tourism_artwork,
-         tourism_chalet,
-         tourism_guest_house,
-         tourism_hostel,
-         tourism_hotel,
-         tourism_information,
-         tourism_motel,
-         tourism_museum,
-         tourism_picnic_site,
-         historic_castle,
-         historic_monument,
-         historic_memorial,
-         historic_ruins,
-         historic_wreck] AREA { color: @tourismColor; }
-
    [TYPE power_generator] AREA { color: #bca9a9; }
 
    // Special amenities
@@ -67,13 +36,17 @@ STYLE
          amenity_kindergarten,
          amenity_library,
          amenity_restaurant,
-         amenity_school] AREA { color: @amenityColor; }
+         amenity_school] {
+     AREA { color: @amenityColor; }
+   }
  }
 
  [MAG close-] {
    // (Minor) Amenities without special color
    [TYPE amenity_atm,
-         amenity_recycling] AREA { color: @amenityColor; }
+         amenity_recycling] {
+     AREA { color: @amenityColor; }
+   }
 
    [TYPE man_made_pier] {
      [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
@@ -163,7 +136,7 @@ STYLE
          amenity_recycling,
          amenity_restaurant,
          amenity_school] {
-         NODE.ICON { symbol: amenity; }
+     NODE.ICON { symbol: amenity; }
    }
 
    [TYPE barrier_fence] {

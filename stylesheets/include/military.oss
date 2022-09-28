@@ -1,0 +1,51 @@
+OSS
+
+  //
+  // Military
+  //
+
+  CONST
+    COLOR militaryColor              = #fe989822;
+    COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
+
+  STYLE
+    [MAG proximity-] {
+      // Semiransparent overlay
+      [TYPE landuse_military] {
+        AREA { color: @militaryColor;}
+        AREA.BORDER { color: #fe9898; width: 0.2mm;}
+      }
+    }
+
+    [MAG city-] {
+      [TYPE military_airfield,
+            military_danger_area,
+            military_range,
+            military_naval_base] AREA { color: #f59897; }
+    }
+
+    [MAG suburb-] {
+      [TYPE landuse_military] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @militaryLabelColor; autoSize: true;}
+    }
+
+    IF _building {
+      [MAG @buildingMag-] {
+        [TYPE military_bunker,
+              military_barracks] AREA { color: #f59897; }
+
+        [TYPE military_bunker_building] AREA { color: #f59897; }
+      }
+      [MAG @labelBuildingMag-] {
+        [TYPE military_bunker,
+              military_barracks] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @buildingLabelColor; }
+      }
+    }
+
+    [MAG close-] {
+      [TYPE military_airfield,
+            military_danger_area,
+            military_range,
+            military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+
+    }
+END

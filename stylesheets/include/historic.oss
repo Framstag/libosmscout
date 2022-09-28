@@ -1,0 +1,85 @@
+OSS
+
+  //
+  // Historic
+  //
+
+  CONST
+    COLOR historicColor       = #b6845a;
+    COLOR historicSymbolColor = darken(@historicColor, 0.2);
+    COLOR historicBorderColor = darken(@historicColor, 0.3);
+    COLOR historicLabelColor  = darken(@historicColor, 0.5);
+
+  SYMBOL historic
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: @historicSymbolColor; }
+    }
+
+  STYLE
+    [MAG detail-] {
+       [TYPE historic_castle,
+             historic_monument,
+             historic_memorial,
+             historic_ruins,
+             historic_wreck] AREA { color: @historicColor; }
+    }
+
+    IF _building {
+      [MAG @buildingMag-] {
+        [GROUP historic, building] {
+          AREA { color: @historicColor;}
+          AREA.BORDER { color: @historicBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
+    [MAG @labelBuildingMag-] {
+      [GROUP historic, building] {
+        AREA.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @historicLabelColor;
+          size: 1.0;
+          priority: @labelPrioHistoric;}
+      }
+
+     [TYPE historic_archaeological_site,
+           historic_battlefield,
+           historic_castle,
+           historic_monument,
+           historic_memorial,
+           historic_ruins,
+           historic_wreck] {
+       NODE.TEXT {
+         label: Name.name;
+         style: emphasize;
+         emphasizeColor: @emphasizeColor;
+         color: @labelColor;
+         size: 1.0;
+         priority: @labelPrioMajorBuilding;
+       }
+       AREA.TEXT {
+        label: Name.name;
+        style: emphasize;
+        emphasizeColor: @emphasizeColor;
+        color: @labelColor;
+        size: 0.9;
+        priority: @labelPrioMajorBuilding;}
+     }
+
+    }
+
+    [MAG veryClose-] {
+      [GROUP historic] {
+        NODE.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @historicLabelColor;
+          size: 0.8;
+          priority: @labelPrioHistoric;}
+        NODE.ICON { symbol: historic; }
+      }
+    }
+END

@@ -1,0 +1,68 @@
+OSS
+
+  //
+  // Religious
+  //
+
+  CONST
+    COLOR religiousColor                = #cccccc;
+    COLOR religiousLabelColor           = darken(@religiousColor, 0.5);
+    COLOR religiousBuildingColor        = #bfbfbf;
+    COLOR religiousBuildingBorderColor  = darken(@religiousBuildingColor, 0.3);
+
+  STYLE
+    IF _building {
+      [MAG @specialBuildingMag-] {
+        [TYPE temple_building,
+              shrine_building,
+              christian_cathedral_building,
+              christian_church_building,
+              christian_chapel_building,
+              jewish_synagogue_building,
+              muslim_mosque_building,
+              worship_building] {
+          AREA {
+           color: @religiousBuildingColor;
+          }
+
+          AREA.BORDER {
+            color: @religiousBuildingBorderColor;
+            width: 0.1mm;}
+        }
+      }
+
+      [MAG @labelSpecialBuildingMag-] {
+        [TYPE temple_building,
+              shrine_building,
+              christian_cathedral_building,
+              christian_church_building,
+              christian_chapel_building,
+              jewish_synagogue_building,
+              muslim_mosque_building,
+              worship_building] {
+          AREA.TEXT {
+            label: Name.name;
+            style: emphasize;
+            emphasizeColor: @emphasizeColor;
+            color: @religiousLabelColor;
+            size: 1.0;
+            priority: @labelPrioSpecialBuilding;}
+        }
+
+        [TYPE christian_cathedral_building,
+              christian_church_building,
+              christian_chapel_building] {
+          AREA.ICON {
+            symbol: christian_church_cross;
+          }
+        }
+      }
+    }
+
+    [MAG veryClose-] {
+      [TYPE christian_worship] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: christian_church_cross; }
+      }
+    }
+END

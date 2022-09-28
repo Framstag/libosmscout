@@ -277,7 +277,7 @@ TYPES
      // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
 
-  // Since rendering of speed cameras is not allowed everwhere, it is disabled by default
+  // Since rendering of speed cameras is not allowed everywhere, it is disabled by default
   TYPE speed_camera
     IGNORE
     = NODE ("highway"=="speed_camera")
@@ -768,7 +768,6 @@ TYPES
       {Name, NameAlt}
 
   TYPE natural_tree
-    //IGNORE // Too many for mobile?
     = NODE ("natural"=="tree")
 
   TYPE natural_volcano
@@ -949,7 +948,6 @@ TYPES
       GROUP amenity, building
 
   TYPE amenity_bench
-    IGNORE // Too many for mobile?
     = NODE ("amenity"=="bench")
       GROUP amenity
 
@@ -1181,12 +1179,10 @@ TYPES
       GROUP amenity
 
   TYPE amenity_waste_disposal
-    IGNORE // Too many for mobile?
     = NODE ("amenity"=="waste_disposal")
       GROUP amenity
 
   TYPE amenity_waste_basket
-    IGNORE // Too many for mobile?
     = NODE ("amenity"=="waste_basket")
       GROUP amenity
 
@@ -1210,23 +1206,73 @@ TYPES
     = NODE ("amenity"=="shelter")
       GROUP amenity
 
-  // Churches
+  // Religious
+  TYPE temple_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "building"=="temple")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE shrine_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "building"=="shrine")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
   TYPE christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
-            EXISTS "building" AND !("building" IN ["no","false","0"]))
+            "building"=="church")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP routingPOI
+      GROUP religious, routingPOI
 
+  TYPE christian_cathedral_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="christian" AND
+            "building"=="cathedral")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
 
-  TYPE christian_church
+  TYPE christian_chapel_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="christian" AND
+            "building"=="chapel")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE christian_worship
     = NODE ("amenity"=="place_of_worship" AND
             "religion"=="christian")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP routingPOI
+      GROUP religious, routingPOI
 
+  TYPE jewish_synagogue_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="jewish" AND
+            "building"=="synagogue")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE muslim_mosque_building
+    = AREA ("amenity"=="place_of_worship" AND
+            "religion"=="muslin" AND
+            "building"=="mosque")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE worship_building
+    = AREA ("amenity"=="place_of_worship" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building
@@ -1245,19 +1291,33 @@ TYPES
   // Shops
   //
 
-  // Everything else is just an 'amenity' for now
   TYPE shop_building
     = AREA (EXISTS "shop" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
-      GROUP amenity, building, routingPOI
+      GROUP shop, building, routingPOI
 
-  // Currently all shops are the same...
   TYPE shop
     = NODE AREA (EXISTS "shop")
       {Name, NameAlt}
       ADDRESS
-      GROUP amenity, routingPOI
+      GROUP shop, routingPOI
+
+  //
+  // Office
+  //
+
+  TYPE office_building
+    = AREA (EXISTS "office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office
+    = NODE AREA (EXISTS "office")
+      {Name, NameAlt}
+      ADDRESS
+      GROUP office, routingPOI
 
   //
   // Tourism

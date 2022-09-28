@@ -7,8 +7,8 @@
    id="svg2816"
    version="1.1"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
-   sodipodi:docname="fast_food.svg"
-   inkscape:export-filename="../../14x14/standard/fast_food.png"
+   sodipodi:docname="waste_basket.svg"
+   inkscape:export-filename="../../14x14/standard/waste_basket.png"
    inkscape:export-xdpi="21"
    inkscape:export-ydpi="21"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -54,7 +54,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="13.755725"
-     inkscape:cx="19.66454"
+     inkscape:cx="18.574085"
      inkscape:cy="32.495561"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -112,32 +112,24 @@
        d="m 43.000001,24.985571 a 11.377913,7.0144286 0 0 1 -13.765464,6.858256 l 2.38755,-6.858256 z"
        sodipodi:start="0"
        sodipodi:end="1.7822085" />
-    <rect
-       style="fill:#c87137;stroke:none;stroke-width:0.43454;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="rect1258"
-       width="48.505089"
-       height="10.068252"
-       x="7.1416287"
-       y="39.917755" />
-    <rect
-       style="fill:#c87137;stroke:none;stroke-width:0.302633;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="rect1260"
-       width="48.647644"
-       height="4.5989375"
-       x="6.9559107"
-       y="28.46599" />
     <path
-       style="fill:#c87137;stroke:none;stroke-width:0.985057;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1"
-       id="path1268"
-       sodipodi:type="arc"
-       sodipodi:cx="-31.220022"
-       sodipodi:cy="-22.400049"
-       sodipodi:rx="24.260387"
-       sodipodi:ry="12.916213"
-       sodipodi:start="0"
-       sodipodi:end="3.1387155"
-       sodipodi:arc-type="slice"
-       d="M -6.9596348,-22.400049 A 24.260387,12.916213 0 0 1 -31.185122,-9.4838495 24.260387,12.916213 0 0 1 -55.480309,-22.362887 l 24.260287,-0.03716 z"
-       transform="scale(-1)" />
+       style="fill:#2b1100;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 50.094483,59.881034 55.064289,26.945882 9.3733709,26.86921 15.172377,60.085778 Z"
+       id="path2207"
+       sodipodi:nodetypes="ccccc" />
+    <rect
+       style="fill:#2b1100;fill-opacity:1;stroke-width:0.3;stroke-linecap:round;stroke-linejoin:bevel"
+       id="rect2258"
+       width="40.315315"
+       height="3.2986267"
+       x="12.13898"
+       y="13.643908" />
+    <rect
+       style="fill:#2b1100;fill-opacity:1;stroke-width:0.3;stroke-linecap:round;stroke-linejoin:bevel"
+       id="rect2260"
+       width="5.6783175"
+       height="4.886034"
+       x="29.895792"
+       y="8.9506912" />
   </g>
 </svg>

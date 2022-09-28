@@ -1,0 +1,57 @@
+OSS
+
+  //
+  // Office
+  //
+
+  CONST
+    COLOR officeColor                = #9090ff;
+    COLOR officeSymbolColor          = darken(@officeColor, 0.2);
+    COLOR officeBorderColor          = darken(@officeColor, 0.3);
+    COLOR officeLabelColor           = darken(@officeColor, 0.8);
+
+  SYMBOL office
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: @officeSymbolColor; }
+    }
+
+  STYLE
+    IF _building {
+      [MAG @buildingMag-] {
+        [GROUP office, building] {
+          AREA { color: @officeColor;}
+          AREA.BORDER { color: @officeBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
+    [MAG @labelBuildingMag-] {
+      [GROUP office, building] {
+        AREA.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @officeLabelColor;
+          size: 0.8;
+          priority: @labelPrioOffice;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP office] {
+        NODE.TEXT {
+          label: Name.name;
+          style: emphasize;
+          emphasizeColor: @emphasizeColor;
+          color: @officeLabelColor;
+          size: 0.8;
+          priority: @labelPrioOffice;}
+      }
+    }
+
+    [MAG veryClose-] {
+      [GROUP office] {
+        NODE.ICON { symbol: office; }
+      }
+    }
+END
