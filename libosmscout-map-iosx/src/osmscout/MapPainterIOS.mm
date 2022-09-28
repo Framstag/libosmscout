@@ -672,8 +672,8 @@ namespace osmscout {
         assert(idx<images.size());
         assert(images[idx]);
 
-        CGFloat w = CGImageGetWidth(images[idx])/contentScale;
-        CGFloat h = CGImageGetHeight(images[idx])/contentScale;
+        CGFloat w = CGImageGetWidth(images[idx]);
+        CGFloat h = CGImageGetHeight(images[idx]);
         CGRect rect = CGRectMake(x-w/2, -h/2-y, w, h);
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
