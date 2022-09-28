@@ -64,7 +64,7 @@ LocationEntry::LocationEntry(QObject* parent)
 }
 
 LocationEntry::LocationEntry(const LocationEntry& other)
- : QObject(other.parent()),
+ : QObject(other.parent()), // make copy of Qt ownership
    type(other.type),
    label(other.label),
    objectType(other.objectType),
@@ -79,6 +79,7 @@ LocationEntry::LocationEntry(const LocationEntry& other)
 
 LocationEntry& LocationEntry::operator=(const LocationEntry& other)
 {
+    // Qt ownership is unchanged
     type=other.type;
     label=other.label;
     objectType=other.objectType;
@@ -87,6 +88,33 @@ LocationEntry& LocationEntry::operator=(const LocationEntry& other)
     references=other.references;
     coord=other.coord;
     bbox=other.bbox;
+    return *this;
+}
+
+LocationEntry::LocationEntry(LocationEntry&& other)
+ : QObject(other.parent()), // make copy of Qt ownership
+   type(std::move(other.type)),
+   label(std::move(other.label)),
+   objectType(std::move(other.objectType)),
+   adminRegionList(std::move(other.adminRegionList)),
+   database(std::move(other.database)),
+   references(std::move(other.references)),
+   coord(std::move(other.coord)),
+   bbox(std::move(other.bbox))
+{
+  // no code
+}
+
+LocationEntry& LocationEntry::operator=(LocationEntry&& other) {
+    setParent(other.parent()); // make copy of Qt ownership
+    type=std::move(other.type);
+    label=std::move(other.label);
+    objectType=std::move(other.objectType);
+    adminRegionList=std::move(other.adminRegionList);
+    database=std::move(other.database);
+    references=std::move(other.references);
+    coord=std::move(other.coord);
+    bbox=std::move(other.bbox);
     return *this;
 }
 

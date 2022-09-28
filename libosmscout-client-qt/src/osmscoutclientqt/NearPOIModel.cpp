@@ -157,7 +157,7 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
   if (requestId!=currentRequest){
     return;
   }
-  for (LocationEntry &location:newLocations){
+  for (const LocationEntry &location:newLocations){
     int position=0;
     Distance distance=osmscout::GetSphericalDistance(location.getCoord(), searchCenter);
     if (distance > maxDistance){
