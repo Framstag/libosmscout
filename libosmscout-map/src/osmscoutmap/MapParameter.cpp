@@ -49,7 +49,7 @@ namespace osmscout {
     patternSize(3.7),
     labelLayouterOverlap(30),
     contourLabelOffset(50.0),
-    contourLabelSpace(100.0),
+    contourLabelSpace(50.0),
     contourLabelPadding(1.0),
     routeLabelSeparator(", "),
     renderBackground(true),

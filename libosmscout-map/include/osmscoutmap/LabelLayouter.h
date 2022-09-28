@@ -788,11 +788,10 @@ namespace osmscout {
 
       // We do not to see new label appear and disappear during zoom too often.
       // We want new labels to be "between" existing labels
-      // We thus, only draw labels in an amount of a multiple of 2
+      // We thus only draw labels in an amount of a multiple of 2
       countLabels=(size_t)pow(2.0,floor(log2(double(countLabels))));
 
       double labelSpace=(pathLength-countLabels*label->width)/(countLabels+1);
-
       double offset=labelSpace;
 
       while (offset+label->width<pathLength){
