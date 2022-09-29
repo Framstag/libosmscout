@@ -11,4 +11,9 @@
 #cmakedefine OSMSCOUT_HAVE_LIB_MARISA
 #endif
 
+#ifndef OSMSCOUT_DEBUG_ROUTING
+/* Extra debugging of routing */
+#cmakedefine OSMSCOUT_DEBUG_ROUTING
+#endif
+
 #endif

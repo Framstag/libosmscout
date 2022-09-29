@@ -30,13 +30,15 @@
 #include <osmscoutmap/LabelPath.h>
 #include <osmscout/system/Math.h>
 
-//#define DEBUG_LABEL_LAYOUTER
-
-#ifdef DEBUG_LABEL_LAYOUTER
 #include <iostream>
-#endif
 
 namespace osmscout {
+
+#ifdef OSMSCOUT_DEBUG_LABEL_LAYOUTER
+constexpr bool debugLabelLayouter = true;
+#else
+constexpr bool debugLabelLayouter = false;
+#endif
 
   template <typename T>
   struct Rectangle {
@@ -191,7 +193,7 @@ namespace osmscout {
   class ContourLabel
   {
   public:
-#ifdef DEBUG_LABEL_LAYOUTER
+#ifdef OSMSCOUT_DEBUG_LABEL_LAYOUTER
     std::string text;
 #endif
     size_t priority;
@@ -450,21 +452,21 @@ namespace osmscout {
               rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
             }
             canvas = &iconCanvas;
-#ifdef DEBUG_LABEL_LAYOUTER
-            if (element.labelData.type==LabelData::Icon) {
-              std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
-                        " prio " << currentLabel.priority;
-            }else{
-              std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName() <<
-                        " prio " << currentLabel.priority;
+            if constexpr (debugLabelLayouter) {
+              if (element.labelData.type == LabelData::Icon) {
+                std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
+                          " prio " << currentLabel.priority;
+              } else {
+                std::cout << "Test symbol " << element.labelData.iconStyle->GetSymbol()->GetName() <<
+                          " prio " << currentLabel.priority;
+              }
             }
-#endif
           } else {
-#ifdef DEBUG_LABEL_LAYOUTER
-            std::cout << "Test " << (IsOverlay(element.labelData) ? "overlay " : "") <<
-                      "label prio " << currentLabel.priority << ": " <<
-                      element.labelData.text;
-#endif
+            if constexpr (debugLabelLayouter) {
+              std::cout << "Test " << (IsOverlay(element.labelData) ? "overlay " : "")
+                        << "label prio " << currentLabel.priority << ": "
+                        << element.labelData.text;
+            }
 
             rectangle.width = std::ceil(element.label->width + 2*padding);
             rectangle.height = std::ceil(element.label->height + 2*padding);
@@ -479,12 +481,12 @@ namespace osmscout {
             visibleElements.push_back(element);
             canvases[eli]=canvas;
           }
-#ifdef DEBUG_LABEL_LAYOUTER
-          std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
-          // p->DrawRectangle(rectangle.x, rectangle.y,
-          //                  rectangle.width, rectangle.height,
-          //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
-#endif
+          if constexpr (debugLabelLayouter) {
+            std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
+            // p->DrawRectangle(rectangle.x, rectangle.y,
+            //                  rectangle.width, rectangle.height,
+            //                  collision ? Color(0.8, 0, 0, 0.8): Color(0, 0.8, 0, 0.8));
+          }
         }
 
         if (!visibleElements.empty()) {
@@ -505,9 +507,9 @@ namespace osmscout {
       {
         int glyphCnt=currentContourLabel.glyphs.size();
 
-#ifdef DEBUG_LABEL_LAYOUTER
-        std::cout << "Test contour label prio " << currentContourLabel.priority << ": " << currentContourLabel.text;
-#endif
+        if constexpr (debugLabelLayouter) {
+          std::cout << "Test contour label prio " << currentContourLabel.priority << ": " << currentContourLabel.text;
+        }
 
         Mask m(rowSize);
         std::vector<Mask> masks(glyphCnt, m);
@@ -530,9 +532,9 @@ namespace osmscout {
           }
           contourLabelInstances.push_back(currentContourLabel);
         }
-#ifdef DEBUG_LABEL_LAYOUTER
-        std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
-#endif
+        if constexpr (debugLabelLayouter) {
+          std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
+        }
       };
 
       void ProcessLabels(std::vector<LabelInstanceType> &labelInstances,
@@ -808,9 +810,9 @@ namespace osmscout {
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
 
-#if defined(DEBUG_LABEL_LAYOUTER)
-        cLabel.text = labelData.text;
-#endif
+        if constexpr (debugLabelLayouter) {
+          cLabel.text = labelData.text;
+        }
 
         // do the magic to make sure that we don't render label upside-down
 
