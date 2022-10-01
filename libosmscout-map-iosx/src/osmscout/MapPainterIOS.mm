@@ -650,7 +650,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, 0,1.0);
+                    DrawSymbol(projection, parameter, symbol, 0, 0, data.symbolScale);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, data.symbolSpace, origin);
                 }
@@ -685,7 +685,7 @@ namespace osmscout {
      * DrawSymbol(const Projection& projection,
      *            const MapParameter& parameter,
      *            const SymbolRef& symbol,
-     *            double x, double y)
+     *            double x, double y, double scaleFactor)
      */
     void MapPainterIOS::DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
@@ -696,6 +696,9 @@ namespace osmscout {
         Vertex2D center=boundingBox.GetCenter();
 
         CGContextSaveGState(cg);
+        if (scaleFactor != 0.0) {
+            CGContextConcatCTM(cg, CGAffineTransformMakeScale(scaleFactor, scaleFactor));
+        }
         for (const auto& primitive : symbol.GetPrimitives()) {
             const DrawPrimitive *primitivePtr=primitive.get();
 
