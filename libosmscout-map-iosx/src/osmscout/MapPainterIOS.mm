@@ -696,7 +696,6 @@ namespace osmscout {
         Vertex2D center=boundingBox.GetCenter();
 
         CGContextSaveGState(cg);
-        log.Warn() << "DrawSymbol scaleFactor=" << scaleFactor;
         if (scaleFactor != 0.0) {
             CGContextConcatCTM(cg, CGAffineTransformMakeScale(scaleFactor, scaleFactor));
         }
