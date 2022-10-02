@@ -526,12 +526,14 @@ constexpr bool debugLabelLayouter = false;
           masks[gi].prepare(rect);
           collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);
         }
+
         if (!collision) {
           for (int gi=0; gi<glyphCnt; gi++) {
             MarkLabelPlace(labelCanvas, masks[gi], layoutViewport.height);
           }
           contourLabelInstances.push_back(currentContourLabel);
         }
+
         if constexpr (debugLabelLayouter) {
           std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
         }
@@ -786,18 +788,54 @@ constexpr bool debugLabelLayouter = false;
       std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
 
       double pathLength=labelPath.GetLength();
-      size_t countLabels=(pathLength-labelData.contourLabelSpace)/(label->width+labelData.contourLabelSpace);
+      double minimalSpace=2*labelData.contourLabelOffset;
+      size_t workingLabelCount  =0;
+      size_t labelCountIncrement=0;
 
-      // We do not to see new label appear and disappear during zoom too often.
-      // We want new labels to be "between" existing labels
-      // We thus only draw labels in an amount of a multiple of 2
-      countLabels=std::max(size_t(1), size_t(pow(2.0,floor(log2(double(countLabels))))));
+      while (true) {
+        size_t newLabelCount;
 
-      double labelSpace=(pathLength-countLabels*label->width)/(countLabels+1);
-      double offset=labelSpace;
+        if (workingLabelCount==0) {
+          newLabelCount      =1;
+          labelCountIncrement=1;
+        }
+        else {
+          labelCountIncrement*=2;
+          newLabelCount=workingLabelCount+labelCountIncrement;
+        }
+
+        double length=minimalSpace+double(newLabelCount-1)*labelData.contourLabelSpace+newLabelCount*label->width;
+
+        if (length<=pathLength) {
+          workingLabelCount=newLabelCount;
+          continue;
+        }
+        break;
+      }
+
+      size_t countLabels=workingLabelCount;
+
+      if (countLabels==0) {
+        if (label->width<=pathLength) {
+          countLabels=1;
+        }
+        else {
+          return;
+        }
+      }
+
+      double offset=labelData.contourLabelOffset;
+      double labelSpace=0.0;
+
+      if (countLabels==1) {
+        offset=(pathLength-label->width)/2;
+      }
+      else {
+        labelSpace=(pathLength-minimalSpace-countLabels*label->width)/(countLabels-1);
+      }
 
       while (offset+label->width<pathLength){
-        double nextOffset =offset+label->width+labelSpace;
+        double nextOffset=offset+label->width+labelSpace;
 
         // skip string rendering when path is too much squiggly at this offset
         if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI_4)){
