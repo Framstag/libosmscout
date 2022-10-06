@@ -20,6 +20,69 @@
 #include <osmscoutmap/LabelLayouter.h>
 
 namespace osmscout {
+  ContourLabelPositioner::Position ContourLabelPositioner::calculatePositions(const Projection& /*projection*/,
+                                                                              const MapParameter& /*parameter*/,
+                                                                              const PathLabelData& labelData,
+                                                                              double pathLength,
+                                                                              double labelWidth) const
+  {
+    double minimalSpace=2*labelData.contourLabelOffset;
+    size_t workingLabelCount  =0;
+    size_t labelCountIncrement=0;
+
+    while (true) {
+      size_t newLabelCount;
+
+      if (workingLabelCount==0) {
+        newLabelCount      =1;
+        labelCountIncrement=1;
+      }
+      else {
+        labelCountIncrement*=2;
+        newLabelCount=workingLabelCount+labelCountIncrement;
+      }
+
+      double length=minimalSpace+
+                    double(newLabelCount-1)*labelData.contourLabelSpace+
+                    double(newLabelCount)*labelWidth;
+
+      if (length>pathLength) {
+        // labels + spaces exceed the length of the path
+        break;
+      }
+
+      workingLabelCount=newLabelCount;
+    }
+
+    size_t countLabels=workingLabelCount;
+    double offset=labelData.contourLabelOffset;
+    double labelSpace=0.0;
+
+    if (countLabels==0) {
+      if (labelWidth>pathLength) {
+        return {0,0.0,0.0};
+      }
+
+      countLabels=1;
+    }
+
+    if (countLabels==1) {
+      // If we have one label, we center it
+      offset=(pathLength-labelWidth)/2;
+      assert(offset>=0.0);
+    }
+    else {
+      // else we increase the labelSpace
+      labelSpace=(pathLength-minimalSpace-double(countLabels)*labelWidth)/double(countLabels-1);
+      assert(labelSpace>=labelData.contourLabelSpace);
+    }
+
+    assert((countLabels % 2)!=0);
+
+    return {countLabels, offset, labelSpace};
+  }
+
+
   OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)
   {
     // clear
