@@ -20,6 +20,88 @@
 #include <osmscoutmap/LabelLayouter.h>
 
 namespace osmscout {
+  ContourLabelPositioner::Position ContourLabelPositioner::calculatePositions(const Projection& /*projection*/,
+                                                                              const MapParameter& /*parameter*/,
+                                                                              const PathLabelData& labelData,
+                                                                              double pathLength,
+                                                                              double labelWidth) const
+  {
+    double minimalSpace       =2*labelData.contourLabelOffset;
+    size_t countLabels        =0;
+    size_t labelCountIncrement=0;
+
+    while (true) {
+      size_t newLabelCount;
+
+      if (countLabels==0) {
+        newLabelCount      =1;
+      }
+      else if (countLabels==1) {
+        newLabelCount      =3;
+      }
+      else if (countLabels==3) {
+        newLabelCount      =5;
+        labelCountIncrement=newLabelCount-1;
+      }
+      else {
+        newLabelCount=countLabels+labelCountIncrement;
+        labelCountIncrement=newLabelCount-1;
+      }
+
+      double length=minimalSpace+
+                    double(newLabelCount-1)*labelData.contourLabelSpace+
+                    double(newLabelCount)*labelWidth;
+
+      if (length>pathLength) {
+        // labels + spaces exceed the length of the path
+        break;
+      }
+
+      countLabels=newLabelCount;
+    }
+
+    double offset;
+    double labelSpace;
+
+    if (countLabels==0) {
+      if (labelWidth>pathLength) {
+        return {0,0.0,0.0};
+      }
+
+      countLabels=1;
+    }
+
+    if (countLabels==1) {
+      // If we have one label, we center it
+
+      offset=(pathLength-labelWidth)/2;
+      labelSpace=0.0;
+    }
+    else {
+      // else we increase the labelSpace
+
+      double offsetsSpace    =2*labelData.contourLabelOffset;
+      double labelsWidth     =double(countLabels)*labelWidth;
+      double minLabelsSpace  =double(countLabels-1)*labelData.contourLabelSpace;
+      double minPathSpace    =minLabelsSpace;
+      double currentPathSpace=pathLength-labelsWidth-offsetsSpace;
+      double scaleFactor     =currentPathSpace/minPathSpace;
+
+      assert(scaleFactor>=1.0);
+
+      offset=labelData.contourLabelOffset;
+      labelSpace=labelData.contourLabelSpace*scaleFactor;
+
+      assert(labelSpace>=labelData.contourLabelSpace);
+    }
+
+    assert(offset>=0);
+    assert((countLabels%2)!=0);
+
+    return {countLabels,offset,labelSpace};
+  }
+
+
   OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)
   {
     // clear

@@ -126,6 +126,22 @@ constexpr bool debugLabelLayouter = false;
     ~LabelData() = default;
   };
 
+  class OSMSCOUT_MAP_API ContourLabelPositioner CLASS_FINAL
+  {
+  public:
+    struct Position
+    {
+      size_t labelCount; //!< Number of labels rendered
+      double offset;     //!< Offset of the first label
+      double labelSpace; //!< Space between individual labels
+    };
+  public:
+    Position calculatePositions(const Projection& projection,
+                                const MapParameter& parameter,
+                                const PathLabelData &labelData,
+                                double pathLength,
+                                double labelWidth) const;
+  };
 
   template<class NativeGlyph>
   class Glyph {
@@ -194,11 +210,13 @@ constexpr bool debugLabelLayouter = false;
   {
   public:
 #ifdef OSMSCOUT_DEBUG_LABEL_LAYOUTER
-    std::string text;
+    std::string                     text;     //!< The original label (if debug))
+    double                          offset;   //!< The offset of the label in relation the the way start (if debug))
+    Vertex2D                        start;    //!< Screen coordinates of the start of the path
 #endif
-    size_t priority;
-    std::vector<Glyph<NativeGlyph>> glyphs;
-    osmscout::PathTextStyleRef style;    //!< Style for drawing
+    size_t                          priority; //!< Priority of the label
+    std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphs of the label text (see text)
+    osmscout::PathTextStyleRef      style;    //!< Style for drawing the text of the label
   };
 
   class Mask
@@ -526,12 +544,14 @@ constexpr bool debugLabelLayouter = false;
           masks[gi].prepare(rect);
           collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);
         }
+
         if (!collision) {
           for (int gi=0; gi<glyphCnt; gi++) {
             MarkLabelPlace(labelCanvas, masks[gi], layoutViewport.height);
           }
           contourLabelInstances.push_back(currentContourLabel);
         }
+
         if constexpr (debugLabelLayouter) {
           std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
         }
@@ -582,6 +602,14 @@ constexpr bool debugLabelLayouter = false;
       job.Swap(labelInstances, contourLabelInstances);
       job.SortLabels();
       job.ProcessLabels(labelInstances, contourLabelInstances);
+    }
+
+    template<class Painter>
+    void DrawTextLabels(const Projection& projection,
+                        const MapParameter& parameter,
+                        Painter *p)
+    {
+
     }
 
     /**
@@ -674,9 +702,11 @@ constexpr bool debugLabelLayouter = false;
                      el->labelData, el->label->label);
       }
 
-      for (const ContourLabelType &label:ContourLabels()){
-        p->DrawGlyphs(projection, parameter,
-                      label.style, label.glyphs);
+      for (const ContourLabelType& label : ContourLabels()){
+        p->DrawGlyphs(projection,
+                      parameter,
+                      label.style,
+                      label.glyphs);
       }
     }
 
@@ -770,34 +800,33 @@ constexpr bool debugLabelLayouter = false;
                               const LabelPath &labelPath)
     {
       // TODO: cache label for string and font parameters
-      LabelPtr label = textLayouter->Layout(
-          projection,
-          parameter,
-          labelData.text,
-          labelData.height,
-          /* object width */ 0.0,
-          /*enable wrapping*/ false,
-          /*contour label*/ true);
+      LabelPtr label=textLayouter->Layout(projection,
+                                          parameter,
+                                          labelData.text,
+                                          labelData.height,
+                                          /* object width */ 0.0,
+                                          /*enable wrapping*/ false,
+                                          /*contour label*/ true);
 
       // text should be rendered with 0x0 coordinate as left baseline
-      // we want to move label little bit bottom, near to line center
-      double textBaselineOffset = label->height * 0.25;
+      // we want to move label a bit to the bottom, near to line center
+      double                           textBaselineOffset = label->height * 0.25;
 
-      std::vector<Glyph<NativeGlyph>> glyphs = label->ToGlyphs();
+      std::vector<Glyph<NativeGlyph>>  glyphs = label->ToGlyphs();
+      double                           pathLength=labelPath.GetLength();
+      ContourLabelPositioner           positioner;
+      ContourLabelPositioner::Position position=positioner.calculatePositions(projection,
+                                                                              parameter,
+                                                                              labelData,
+                                                                              pathLength,
+                                                                              label->width);
 
-      double pathLength=labelPath.GetLength();
-      size_t countLabels=(pathLength-labelData.contourLabelSpace)/(label->width+labelData.contourLabelSpace);
+      double offset=position.offset;
+      size_t currentCount=1;
+      while (currentCount<=position.labelCount){
+        double nextOffset=offset+label->width+position.labelSpace;
 
-      // We do not to see new label appear and disappear during zoom too often.
-      // We want new labels to be "between" existing labels
-      // We thus only draw labels in an amount of a multiple of 2
-      countLabels=std::max(size_t(1), size_t(pow(2.0,floor(log2(double(countLabels))))));
-
-      double labelSpace=(pathLength-countLabels*label->width)/(countLabels+1);
-      double offset=labelSpace;
-
-      while (offset+label->width<pathLength){
-        double nextOffset =offset+label->width+labelSpace;
+        currentCount++;
 
         // skip string rendering when path is too much squiggly at this offset
         if (!labelPath.TestAngleVariance(offset,offset+label->width,M_PI_4)){
@@ -807,11 +836,14 @@ constexpr bool debugLabelLayouter = false;
         }
 
         ContourLabelType cLabel;
+
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
 
         if constexpr (debugLabelLayouter) {
           cLabel.text = labelData.text;
+          cLabel.offset = offset;
+          cLabel.start = labelPath.PointAtLength(0);
         }
 
         // do the magic to make sure that we don't render label upside-down
@@ -819,6 +851,7 @@ constexpr bool debugLabelLayouter = false;
         // direction of path at the label drawing starting point
         double initialAngle=std::abs(labelPath.AngleAtLengthDeg(offset));
         bool upwards=initialAngle>90 && initialAngle<270;
+
 
         for (const Glyph<NativeGlyph> &glyph:glyphs){
           double glyphOffset = upwards ?
