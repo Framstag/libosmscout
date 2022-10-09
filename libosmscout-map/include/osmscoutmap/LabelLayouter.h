@@ -215,8 +215,8 @@ constexpr bool debugLabelLayouter = false;
     Vertex2D                        start;    //!< Screen coordinates of the start of the path
 #endif
     size_t                          priority; //!< Priority of the label
-    std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphd
-    osmscout::PathTextStyleRef      style;    //!< Style for drawing
+    std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphs of the label text (see text)
+    osmscout::PathTextStyleRef      style;    //!< Style for drawing the text of the label
   };
 
   class Mask
