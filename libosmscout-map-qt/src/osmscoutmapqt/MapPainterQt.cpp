@@ -928,11 +928,11 @@ namespace osmscout {
   {
     const Color &color = style->GetTextColor();
     QPen pen;
+
     pen.setColor(QColor::fromRgbF(color.GetR(),color.GetG(),color.GetB(),color.GetA()));
     painter->setPen(pen);
 
-    for (const Glyph<QGlyphRun> &glyph:glyphs) {
-
+    for (const Glyph<QGlyphRun> &glyph : glyphs) {
       DrawGlyph(painter, glyph);
     }
   }

@@ -26,20 +26,26 @@ namespace osmscout {
                                                                               double pathLength,
                                                                               double labelWidth) const
   {
-    double minimalSpace=2*labelData.contourLabelOffset;
-    size_t workingLabelCount  =0;
+    double minimalSpace       =2*labelData.contourLabelOffset;
+    size_t countLabels        =0;
     size_t labelCountIncrement=0;
 
     while (true) {
       size_t newLabelCount;
 
-      if (workingLabelCount==0) {
+      if (countLabels==0) {
         newLabelCount      =1;
-        labelCountIncrement=1;
+      }
+      else if (countLabels==1) {
+        newLabelCount      =3;
+      }
+      else if (countLabels==3) {
+        newLabelCount      =5;
+        labelCountIncrement=newLabelCount-1;
       }
       else {
-        labelCountIncrement*=2;
-        newLabelCount=workingLabelCount+labelCountIncrement;
+        newLabelCount=countLabels+labelCountIncrement;
+        labelCountIncrement=newLabelCount-1;
       }
 
       double length=minimalSpace+
@@ -51,12 +57,11 @@ namespace osmscout {
         break;
       }
 
-      workingLabelCount=newLabelCount;
+      countLabels=newLabelCount;
     }
 
-    size_t countLabels=workingLabelCount;
-    double offset=labelData.contourLabelOffset;
-    double labelSpace=0.0;
+    double offset;
+    double labelSpace;
 
     if (countLabels==0) {
       if (labelWidth>pathLength) {
@@ -68,18 +73,32 @@ namespace osmscout {
 
     if (countLabels==1) {
       // If we have one label, we center it
+
       offset=(pathLength-labelWidth)/2;
-      assert(offset>=0.0);
+      labelSpace=0.0;
     }
     else {
       // else we increase the labelSpace
-      labelSpace=(pathLength-minimalSpace-double(countLabels)*labelWidth)/double(countLabels-1);
+
+      double offsetsSpace    =2*labelData.contourLabelOffset;
+      double labelsWidth     =double(countLabels)*labelWidth;
+      double minLabelsSpace  =double(countLabels-1)*labelData.contourLabelSpace;
+      double minPathSpace    =minLabelsSpace;
+      double currentPathSpace=pathLength-labelsWidth-offsetsSpace;
+      double scaleFactor     =currentPathSpace/minPathSpace;
+
+      assert(scaleFactor>=1.0);
+
+      offset=labelData.contourLabelOffset;
+      labelSpace=labelData.contourLabelSpace*scaleFactor;
+
       assert(labelSpace>=labelData.contourLabelSpace);
     }
 
-    assert((countLabels % 2)!=0);
+    assert(offset>=0);
+    assert((countLabels%2)!=0);
 
-    return {countLabels, offset, labelSpace};
+    return {countLabels,offset,labelSpace};
   }
 
 

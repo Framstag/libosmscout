@@ -210,11 +210,13 @@ constexpr bool debugLabelLayouter = false;
   {
   public:
 #ifdef OSMSCOUT_DEBUG_LABEL_LAYOUTER
-    std::string text;
+    std::string                     text;     //!< The original label (if debug))
+    double                          offset;   //!< The offset of the label in relation the the way start (if debug))
+    Vertex2D                        start;    //!< Screen coordinates of the start of the path
 #endif
-    size_t priority;
-    std::vector<Glyph<NativeGlyph>> glyphs;
-    osmscout::PathTextStyleRef style;    //!< Style for drawing
+    size_t                          priority; //!< Priority of the label
+    std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphd
+    osmscout::PathTextStyleRef      style;    //!< Style for drawing
   };
 
   class Mask
@@ -602,6 +604,14 @@ constexpr bool debugLabelLayouter = false;
       job.ProcessLabels(labelInstances, contourLabelInstances);
     }
 
+    template<class Painter>
+    void DrawTextLabels(const Projection& projection,
+                        const MapParameter& parameter,
+                        Painter *p)
+    {
+
+    }
+
     /**
      *
      * @tparam Painter
@@ -692,9 +702,11 @@ constexpr bool debugLabelLayouter = false;
                      el->labelData, el->label->label);
       }
 
-      for (const ContourLabelType &label:ContourLabels()){
-        p->DrawGlyphs(projection, parameter,
-                      label.style, label.glyphs);
+      for (const ContourLabelType& label : ContourLabels()){
+        p->DrawGlyphs(projection,
+                      parameter,
+                      label.style,
+                      label.glyphs);
       }
     }
 
@@ -788,17 +800,16 @@ constexpr bool debugLabelLayouter = false;
                               const LabelPath &labelPath)
     {
       // TODO: cache label for string and font parameters
-      LabelPtr label = textLayouter->Layout(
-          projection,
-          parameter,
-          labelData.text,
-          labelData.height,
-          /* object width */ 0.0,
-          /*enable wrapping*/ false,
-          /*contour label*/ true);
+      LabelPtr label=textLayouter->Layout(projection,
+                                          parameter,
+                                          labelData.text,
+                                          labelData.height,
+                                          /* object width */ 0.0,
+                                          /*enable wrapping*/ false,
+                                          /*contour label*/ true);
 
       // text should be rendered with 0x0 coordinate as left baseline
-      // we want to move label little bit bottom, near to line center
+      // we want to move label a bit to the bottom, near to line center
       double                           textBaselineOffset = label->height * 0.25;
 
       std::vector<Glyph<NativeGlyph>>  glyphs = label->ToGlyphs();
@@ -815,7 +826,6 @@ constexpr bool debugLabelLayouter = false;
       while (currentCount<=position.labelCount){
         double nextOffset=offset+label->width+position.labelSpace;
 
-        offset+=label->width/2;
         currentCount++;
 
         // skip string rendering when path is too much squiggly at this offset
@@ -826,11 +836,14 @@ constexpr bool debugLabelLayouter = false;
         }
 
         ContourLabelType cLabel;
+
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
 
         if constexpr (debugLabelLayouter) {
           cLabel.text = labelData.text;
+          cLabel.offset = offset;
+          cLabel.start = labelPath.PointAtLength(0);
         }
 
         // do the magic to make sure that we don't render label upside-down
