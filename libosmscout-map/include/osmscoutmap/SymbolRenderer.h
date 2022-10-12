@@ -35,6 +35,14 @@ class OSMSCOUT_MAP_API SymbolRenderer
 public:
   virtual ~SymbolRenderer() = default;
 
+  /**
+   * @param projection used projection for rendering
+   * @param symbol
+   * @param mapCenter screen coordinates where to render symbol center
+   * @param afterRenderTransformer
+   * @param afterEndTransformer
+   * @param scaleFactor scale (on top of projection)
+   */
   virtual void Render(const Projection &projection,
                       const Symbol &symbol,
                       const Vertex2D &mapCenter,
@@ -42,6 +50,12 @@ public:
                       std::function<void()> afterEndTransformer,
                       double scaleFactor=1.0);
 
+  /**
+   * @param projection used projection for rendering
+   * @param symbol
+   * @param mapCenter screen coordinates where to render symbol center
+   * @param scaleFactor scale (on top of projection)
+   */
   virtual void Render(const Projection &projection,
                       const Symbol &symbol,
                       const Vertex2D &mapCenter,
