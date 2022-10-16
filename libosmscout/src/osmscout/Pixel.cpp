@@ -44,4 +44,10 @@ namespace osmscout {
                     a.GetY()+b.GetY());
   }
 
+  Vertex2D operator*(const Vertex2D &a, double scale)
+  {
+    return Vertex2D(a.GetX() * scale,
+                    a.GetY() * scale);
+  }
+
 }

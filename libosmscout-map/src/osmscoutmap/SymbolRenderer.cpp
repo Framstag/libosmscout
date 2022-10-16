@@ -31,16 +31,17 @@ void SymbolRenderer::Render(const Projection& projection,
                             double scaleFactor)
 {
   ScreenBox boundingBox = symbol.GetBoundingBox(projection);
-  Vertex2D boxCenter = boundingBox.GetCenter();
-  Vertex2D center = mapCenter-boxCenter;
-  double groundMeterInPixel=projection.GetMeterInPixel();
-  double screenMmInPixel=projection.ConvertWidthToPixel(1);
+  Vertex2D boxCenter = boundingBox.GetCenter() * scaleFactor;
+  Vertex2D center = mapCenter - boxCenter;
 
+  double screenMmInPixel = projection.ConvertWidthToPixel(scaleFactor);
+  double primitivesScaling;
   if (symbol.GetProjectionMode()==Symbol::ProjectionMode::MAP) {
-    scaleFactor*=screenMmInPixel;
+    primitivesScaling=screenMmInPixel;
   }
   else {
-    scaleFactor*=groundMeterInPixel;
+    double groundMeterInPixel = projection.GetMeterInPixel() * scaleFactor;
+    primitivesScaling=groundMeterInPixel;
   }
 
   for (const auto& primitive : symbol.GetPrimitives()) {
@@ -60,8 +61,8 @@ void SymbolRenderer::Render(const Projection& projection,
       std::vector<Vertex2D> polygonPixels;
       polygonPixels.reserve(polygon->GetCoords().size());
       for (auto const &pixel: polygon->GetCoords()) {
-        polygonPixels.emplace_back(center.GetX()+pixel.GetX()*scaleFactor,
-                                   center.GetY()+pixel.GetY()*scaleFactor);
+        polygonPixels.emplace_back(center.GetX()+pixel.GetX()*primitivesScaling,
+                                   center.GetY()+pixel.GetY()*primitivesScaling);
       }
       DrawPolygon(polygonPixels);
     }
@@ -74,10 +75,10 @@ void SymbolRenderer::Render(const Projection& projection,
       SetFill(fillStyle);
       SetBorder(borderStyle, screenMmInPixel);
 
-      DrawRect(center.GetX()+rectangle->GetTopLeft().GetX()*scaleFactor,
-               center.GetY()+rectangle->GetTopLeft().GetY()*scaleFactor,
-               rectangle->GetWidth() * scaleFactor,
-               rectangle->GetHeight() * scaleFactor);
+      DrawRect(center.GetX()+rectangle->GetTopLeft().GetX()*primitivesScaling,
+               center.GetY()+rectangle->GetTopLeft().GetY()*primitivesScaling,
+               rectangle->GetWidth() * primitivesScaling,
+               rectangle->GetHeight() * primitivesScaling);
     }
     else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
       circle != nullptr) {
@@ -88,9 +89,9 @@ void SymbolRenderer::Render(const Projection& projection,
       SetFill(fillStyle);
       SetBorder(borderStyle, screenMmInPixel);
 
-      DrawCircle(center.GetX()+circle->GetCenter().GetX()*scaleFactor,
-                 center.GetY()+circle->GetCenter().GetY()*scaleFactor,
-                 circle->GetRadius() * scaleFactor);
+      DrawCircle(center.GetX()+circle->GetCenter().GetX()*primitivesScaling,
+                 center.GetY()+circle->GetCenter().GetY()*primitivesScaling,
+                 circle->GetRadius() * primitivesScaling);
     }
 
     afterRenderTransformer();
