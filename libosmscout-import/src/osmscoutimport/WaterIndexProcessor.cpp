@@ -2274,6 +2274,8 @@ constexpr bool debugTiling = false;
     size_t                                     wayCoastCount=0;
     size_t                                     areaCoastCount=0;
 
+    mergedCoastlines.reserve(coastlines.size());
+
     std::list<WaterIndexProcessor::CoastRef>::iterator c=coastlines.begin();
     while (c!=coastlines.end()) {
       WaterIndexProcessor::CoastRef coast=*c;
