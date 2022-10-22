@@ -2274,6 +2274,8 @@ constexpr bool debugTiling = false;
     size_t                                     wayCoastCount=0;
     size_t                                     areaCoastCount=0;
 
+    mergedCoastlines.reserve(coastlines.size());
+
     std::list<WaterIndexProcessor::CoastRef>::iterator c=coastlines.begin();
     while (c!=coastlines.end()) {
       WaterIndexProcessor::CoastRef coast=*c;
@@ -2353,7 +2355,10 @@ constexpr bool debugTiling = false;
 
     progress.Info(std::to_string(wayCoastCount)+" way coastline(s), "+std::to_string(areaCoastCount)+" area coastline(s)");
 
+    coastlines.clear();
     std::move(mergedCoastlines.begin(), mergedCoastlines.end(), std::back_inserter(coastlines));
+    // coastlines cannot be empty after merging
+    assert(!std::any_of(coastlines.begin(), coastlines.end(), [](const auto &coastline){ return coastline->coast.empty(); }));
   }
 
   void WaterIndexProcessor::SynthesizeCoastlines2(Progress& progress,
