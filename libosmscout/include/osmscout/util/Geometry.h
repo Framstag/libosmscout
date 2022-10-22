@@ -1243,6 +1243,7 @@ namespace osmscout {
   {
     if (path.empty() || from>=to){
       boundingBox.Invalidate();
+      return;
     }
 
     double minLon=path[from%path.size()].GetLon();
