@@ -77,7 +77,8 @@ public:
         WebsiteRole = Qt::UserRole+9,
         PhoneRole = Qt::UserRole+10,
         AddressLocationRole = Qt::UserRole+11,
-        AddressNumberRole = Qt::UserRole+12
+        AddressNumberRole = Qt::UserRole+12,
+        IndexedAdminRegionRole = Qt::UserRole+13
     };
     Q_ENUM(Roles)
 

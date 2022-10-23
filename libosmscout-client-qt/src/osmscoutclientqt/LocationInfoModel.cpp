@@ -118,6 +118,7 @@ QHash<int, QByteArray> LocationInfoModel::roleNames() const
     roles[PhoneRole] = "phone";
     roles[AddressLocationRole] = "addressLocation";
     roles[AddressNumberRole] = "addressNumber";
+    roles[IndexedAdminRegionRole] = "indexedAdminRegion";
 
     return roles;
 }
@@ -244,6 +245,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[PhoneRole] = phone;
   obj[AddressLocationRole] = addressLocation;
   obj[AddressNumberRole] = addressNumber;
+  obj[IndexedAdminRegionRole] = LookupModule::IndexedAdminRegionNames(regions, settings->GetShowAltLanguage());
 
   model << obj;
 
@@ -339,6 +341,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[PhoneRole] = "";
   obj[AddressLocationRole] = "";
   obj[AddressNumberRole] = "";
+  obj[IndexedAdminRegionRole] = QStringList();
 
   model << obj;
 

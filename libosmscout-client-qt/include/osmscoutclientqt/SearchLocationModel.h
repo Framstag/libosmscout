@@ -166,7 +166,8 @@ public:
     LonRole = Qt::UserRole +4,
     DistanceRole = Qt::UserRole +5,
     BearingRole = Qt::UserRole +6,
-    LocationObjectRole = Qt::UserRole +7
+    LocationObjectRole = Qt::UserRole +7,
+    IndexedAdminRegionRole = Qt::UserRole+8
   };
 
 public:

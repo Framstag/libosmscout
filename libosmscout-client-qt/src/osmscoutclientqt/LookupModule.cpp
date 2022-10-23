@@ -495,4 +495,20 @@ QStringList LookupModule::AdminRegionNames(const QList<AdminRegionInfoRef> &regi
   }
   return result;
 }
+
+QStringList LookupModule::IndexedAdminRegionNames(const QList<AdminRegionInfoRef> &regionList, bool useAltNames)
+{
+  QStringList result;
+  result.reserve(12);
+  for (int i=0; i<=11; i++) {
+    result << "";
+  }
+  for (const auto &region:regionList) {
+    if (region->adminLevel >= 0 && region->adminLevel < result.size()) {
+      result[region->adminLevel] = (useAltNames && !region->altName().empty()) ? region->qStringAltName() : region->qStringName();
+    }
+  }
+  return result;
+}
+
 }

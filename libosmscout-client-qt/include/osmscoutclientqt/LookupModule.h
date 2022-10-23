@@ -144,6 +144,18 @@ public:
    */
   static QStringList AdminRegionNames(const QList<AdminRegionInfoRef> &regionList, bool useAltNames);
 
+  /** Helper method that returns names of admin region in indexed array.
+   * Array length is 12. When some level is not present, empty string is used.
+   * Level 2 are counties. Levels > 2 are country specific.
+   * See https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative for meaning
+   * of individual levels.
+   *
+   * @param regionList
+   * @param useAltNames
+   * @return list of admin region names, indexed by admin region level
+   */
+  static QStringList IndexedAdminRegionNames(const QList<AdminRegionInfoRef> &regionList, bool useAltNames);
+
 private:
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output

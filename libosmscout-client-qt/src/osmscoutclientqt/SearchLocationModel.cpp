@@ -370,6 +370,8 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
   case LocationObjectRole:
     // QML will take ownership
     return QVariant::fromValue(new LocationEntry(*location));
+  case IndexedAdminRegionRole:
+      return LookupModule::IndexedAdminRegionNames(location->getAdminRegionList(), settings->GetShowAltLanguage());;
   default:
     break;
   }
@@ -398,6 +400,7 @@ QHash<int, QByteArray> LocationListModel::roleNames() const
   roles[DistanceRole]="distance";
   roles[BearingRole]="bearing";
   roles[LocationObjectRole]="locationObject";
+  roles[IndexedAdminRegionRole]="indexedAdminRegion";
 
   return roles;
 }
