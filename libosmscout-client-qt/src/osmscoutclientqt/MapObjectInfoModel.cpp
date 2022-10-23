@@ -31,7 +31,8 @@ ready(false), setup(false), view(), lookupModule(nullptr)
 {
 
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
-  this->mapDpi=OSMScoutQt::GetInstance().GetSettings()->GetMapDPI();
+  settings=OSMScoutQt::GetInstance().GetSettings();
+  this->mapDpi=settings->GetMapDPI();
 
   connect(lookupModule, &LookupModule::initialisationFinished,
           this, &MapObjectInfoModel::dbInitialized,
@@ -178,7 +179,7 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
     return QVariant::fromValue(QString::fromStdString(obj.reverseLookupRef->postalArea->name));
   }
   if (role==RegionRole){
-    return QVariant::fromValue(obj.adminRegionList);
+    return QVariant::fromValue(LookupModule::AdminRegionNames(obj.adminRegionList, settings->GetShowAltLanguage()));
   }
   if (role==LatRole){
     return QVariant::fromValue(obj.center.GetLat());

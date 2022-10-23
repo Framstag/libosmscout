@@ -115,6 +115,7 @@ private:
   QStringList types;
 
   POILookupModule *poiModule{nullptr};
+  SettingsRef settings;
 
 public:
   NearPOIModel();

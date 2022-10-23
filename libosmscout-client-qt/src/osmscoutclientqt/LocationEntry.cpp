@@ -28,7 +28,7 @@ namespace osmscout {
 LocationEntry::LocationEntry(Type type,
                              const QString& label,
                              const QString& objectType,
-                             const QStringList& adminRegionList,
+                             const QList<AdminRegionInfoRef>& adminRegionList,
                              const QString database,
                              const osmscout::GeoCoord coord,
                              const osmscout::GeoBox bbox,
@@ -166,7 +166,7 @@ QString LocationEntry::getObjectType() const
     return objectType;
 }
 
-QStringList LocationEntry::getAdminRegionList() const
+QList<AdminRegionInfoRef> LocationEntry::getAdminRegionList() const
 {
     return adminRegionList;
 }

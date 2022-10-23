@@ -30,18 +30,6 @@
 
 namespace osmscout {
 
-class OSMSCOUT_CLIENT_QT_API AdminRegionInfo {
-public:
-  QString database;
-  osmscout::AdminRegionRef adminRegion;
-  QString name;
-  QString altName;
-  QString type;
-  int adminLevel;
-};
-
-typedef std::shared_ptr<AdminRegionInfo> AdminRegionInfoRef;
-
 /**
  * \ingroup QtAPI
  */
@@ -79,7 +67,7 @@ public:
     QString website;
     QString addressNumber;
     LocationDescriptionService::ReverseLookupRef reverseLookupRef;
-    QStringList adminRegionList;
+    QList<AdminRegionInfoRef> adminRegionList;
     uint64_t id;
     osmscout::GeoCoord center;
     std::vector<osmscout::Point> points;
@@ -105,7 +93,7 @@ signals:
   void locationDescription(const osmscout::GeoCoord location,
                            const QString database,
                            const osmscout::LocationDescription description,
-                           const QStringList regions);
+                           const QList<AdminRegionInfoRef> regions);
   void locationDescriptionFinished(const osmscout::GeoCoord location);
 
   void locationAdminRegions(const osmscout::GeoCoord location,
@@ -146,6 +134,16 @@ public:
   LookupModule(QThread *thread,DBThreadRef dbThread);
   virtual ~LookupModule();
 
+  /** Helper method that returns list of unique admin region names.
+   * When region list contains two (following) administrative regions
+   * with the same name (for example Prague "district", Prague "city"),
+   * it will return such name just once.
+   *
+   * @param regionList
+   * @return list of admin region names
+   */
+  static QStringList AdminRegionNames(const QList<AdminRegionInfoRef> &regionList, bool useAltNames);
+
 private:
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output
@@ -156,7 +154,7 @@ private:
                      const osmscout::TypeInfoRef &objectType,
                      const osmscout::FeatureValueBuffer &features,
                      const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                     LocationServiceRef &locationService,
+                     const DBInstanceRef &db,
                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
   {
     ObjectInfo info;
@@ -184,7 +182,7 @@ private:
     }
     const auto &it=reverseLookupMap.find(ref);
     if (it!=reverseLookupMap.end()){
-      info.adminRegionList=BuildAdminRegionList(locationService, it->second.adminRegion, regionMap);
+      info.adminRegionList=BuildAdminRegionList(db, it->second.adminRegion, regionMap);
       info.reverseLookupRef=std::make_shared<LocationDescriptionService::ReverseLookupResult>(it->second);
     }
     info.center=center;
@@ -200,41 +198,38 @@ private:
                                        const osmscout::GeoCoord &center,
                                        const T &o,
                                        const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                                       LocationServiceRef &locationService,
+                                       const DBInstanceRef &db,
                                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap)
   {
-    addObjectInfo(objectList,type,ref,points,center,o->GetType(),o->GetFeatureValueBuffer(),reverseLookupMap,locationService,regionMap);
+    addObjectInfo(objectList,type,ref,points,center,o->GetType(),o->GetFeatureValueBuffer(),reverseLookupMap,db,regionMap);
   }
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output
                      const NodeRef &node,
                      const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                     LocationServiceRef &locationService,
+                     const DBInstanceRef &db,
                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output
                      const WayRef &way,
                      const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                     LocationServiceRef &locationService,
+                     const DBInstanceRef &db,
                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
 
   void addObjectInfo(QList<ObjectInfo> &objectList, // output
                      const AreaRef &area,
                      const std::map<ObjectFileRef,LocationDescriptionService::ReverseLookupResult> &reverseLookupMap,
-                     LocationServiceRef &locationService,
+                     const DBInstanceRef &db,
                      std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
 
-  AdminRegionInfoRef buildAdminRegionInfo(DBInstanceRef &db,const osmscout::AdminRegionRef &region);
+  static AdminRegionInfoRef buildAdminRegionInfo(const DBInstanceRef &db,const osmscout::AdminRegionRef &region);
 
-  QList<AdminRegionInfoRef> BuildAdminRegionInfoList(AdminRegionInfoRef &bottom,
-                                                     std::map<osmscout::FileOffset,AdminRegionInfoRef> &regionInfoMap);
+  static QList<AdminRegionInfoRef> BuildAdminRegionInfoList(AdminRegionInfoRef &bottom,
+                                                            std::map<osmscout::FileOffset,AdminRegionInfoRef> &regionInfoMap);
 
-  static QStringList BuildAdminRegionList(const osmscout::LocationServiceRef& locationService,
-                                          const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
-
-  static QStringList BuildAdminRegionList(const osmscout::AdminRegionRef& adminRegion,
-                                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap);
+  static QList<AdminRegionInfoRef> BuildAdminRegionList(const DBInstanceRef &db,
+                                                        const osmscout::AdminRegionRef& adminRegion,
+                                                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &regionMap);
 
   void filterObjectInView(const osmscout::MapData &data,
                           QList<ObjectInfo> &objectList);

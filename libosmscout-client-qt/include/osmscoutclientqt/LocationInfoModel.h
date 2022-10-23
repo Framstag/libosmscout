@@ -57,7 +57,7 @@ public slots:
     void onLocationDescription(const osmscout::GeoCoord location, 
                                const QString database, 
                                const osmscout::LocationDescription description,
-                               const QStringList regions);
+                               const QList<AdminRegionInfoRef> regions);
     void onLocationDescriptionFinished(const osmscout::GeoCoord);
 
     void onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>);
@@ -112,7 +112,7 @@ public:
 private: 
    void addToModel(const QString database,
                    const osmscout::LocationAtPlaceDescriptionRef description,
-                   const QStringList regions);
+                   const QList<AdminRegionInfoRef> regions);
  
 private:
     bool ready;
@@ -122,7 +122,7 @@ private:
     QList<ObjectKey> objectSet; // set of objects already inserted to model
     QList<QMap<int, QVariant>> model;
     LookupModule* lookupModule;
-    
+    SettingsRef settings;
 };
 
 }

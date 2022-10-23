@@ -148,6 +148,7 @@ private:
   bool searching;
   SearchModule* searchModule;
   LookupModule* lookupModule;
+  SettingsRef settings;
   osmscout::GeoCoord searchCenter;
   int resultLimit;
   osmscout::BreakerRef breaker;

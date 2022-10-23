@@ -118,6 +118,7 @@ private:
   QList<osmscout::MapData> mapData;
   double mapDpi;
   LookupModule* lookupModule;
+  SettingsRef settings;
 };
 
 }
