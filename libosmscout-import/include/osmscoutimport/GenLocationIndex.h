@@ -49,18 +49,18 @@ namespace osmscout {
   private:
     struct RegionMetrics CLASS_FINAL
     {
-      uint32_t minRegionChars;
-      uint32_t maxRegionChars;
-      uint32_t minRegionWords;
-      uint32_t maxRegionWords;
-      uint32_t maxPOIWords;
-      uint32_t minLocationChars;
-      uint32_t maxLocationChars;
-      uint32_t minLocationWords;
-      uint32_t maxLocationWords;
-      uint32_t maxAddressWords;
+      uint32_t minRegionChars=std::numeric_limits<uint32_t>::max();
+      uint32_t maxRegionChars=0;
+      uint32_t minRegionWords=std::numeric_limits<uint32_t>::max();
+      uint32_t maxRegionWords=0;
+      uint32_t maxPOIWords=0;
+      uint32_t minLocationChars=std::numeric_limits<uint32_t>::max();
+      uint32_t maxLocationChars=0;
+      uint32_t minLocationWords=std::numeric_limits<uint32_t>::max();
+      uint32_t maxLocationWords=0;
+      uint32_t maxAddressWords=0;
 
-      RegionMetrics();
+      RegionMetrics() = default;
     };
 
     /**
@@ -129,7 +129,7 @@ namespace osmscout {
 
     class Region;
 
-    typedef std::shared_ptr<Region> RegionRef;
+    using RegionRef = std::shared_ptr<Region>;
 
     struct PostalArea CLASS_FINAL
     {
@@ -156,7 +156,7 @@ namespace osmscout {
     class Region CLASS_FINAL
     {
     public:
-      typedef std::unordered_map<std::string,PostalArea> PostalAreaMap;
+      using PostalAreaMap = std::unordered_map<std::string, PostalArea>;
 
     private:
       std::vector<GeoBox>                boundingBoxes;      //!< bounding box of each area building up the region (see areas)
@@ -190,12 +190,12 @@ namespace osmscout {
 
       bool Contains(Region& child) const;                 //! Checks whether child is within this
 
-      inline GeoBox GetBoundingBox() const
+      GeoBox GetBoundingBox() const
       {
         return boundingBox;
       }
 
-      inline const std::vector<GeoBox> GetAreaBoundingBoxes() const
+      std::vector<GeoBox> GetAreaBoundingBoxes() const
       {
         return boundingBoxes;
       }
@@ -231,7 +231,7 @@ namespace osmscout {
 
   private:
     void Write(FileWriter& writer,
-               const ObjectFileRef& object);
+               const ObjectFileRef& object) const;
 
     void AnalyseStringForIgnoreTokens(const std::string& string,
                                       std::unordered_map<std::string,size_t>& ignoreTokens,
@@ -279,7 +279,7 @@ namespace osmscout {
                              const LocationIndexGenerator::RegionMetrics& metrics,
                              const std::list<std::string>& regionIgnoreTokens,
                              const std::list<std::string>& poiIgnoreTokens,
-                             const std::list<std::string>& locationIgnoreTokens);
+                             const std::list<std::string>& locationIgnoreTokens) const;
 
     bool AddRegion(Region& parent,
                    const RegionRef& region,
@@ -289,29 +289,29 @@ namespace osmscout {
                           Progress& progress,
                           const TypeConfigRef& typeConfig,
                           const TypeInfoSet& boundaryTypes,
-                          std::vector<std::list<RegionRef>>& boundaryAreas);
+                          std::vector<std::list<RegionRef>>& boundaryAreas) const;
 
     void SortInBoundaries(Progress& progress,
                           Region& rootRegion,
-                          std::list<RegionRef>& boundaryAreas);
+                          const std::list<RegionRef>& boundaryAreas);
 
     bool GetRegionAreas(const TypeConfig& typeConfig,
                         const ImportParameter& parameter,
                         Progress& progress,
-                        std::list<RegionRef>& regionAreas);
+                        std::list<RegionRef>& regionAreas) const;
 
     bool SortInRegionAreas(Progress& progress,
                            Region& rootRegion,
                            std::list<RegionRef>& regionAreas);
 
-    void SortInRegion(RegionRef& area,
+    void SortInRegion(const RegionRef& area,
                       std::vector<std::list<RegionRef> >& regionTree,
                       unsigned long level);
 
-    unsigned long GetRegionTreeDepth(const Region& rootRegion);
+    unsigned long GetRegionTreeDepth(const Region& rootRegion) const;
 
     void IndexRegions(const std::vector<std::list<RegionRef> >& regionTree,
-                      RegionIndex& regionIndex);
+                      RegionIndex& regionIndex) const;
 
     void AddAliasToRegion(Region& region,
                           const RegionAlias& location,
@@ -424,9 +424,9 @@ namespace osmscout {
      * @return a valid iterator to the location else locations.end()
      */
     std::map<std::string,RegionLocation>::iterator FindLocation(Progress& progress,
-                                                                Region& region,
+                                                                const Region& region,
                                                                 PostalArea& postalArea,
-                                                                const std::string &locationName);
+                                                                const std::string &locationName) const;
 
     void AddAddressNodeToRegion(Progress& progress,
                                 Region& region,
@@ -439,7 +439,8 @@ namespace osmscout {
     void AddPOINodeToRegion(Region& region,
                             const FileOffset& fileOffset,
                             const std::string& name,
-                            bool& added);
+                            bool& added) const
+                            ;
 
     bool IndexAddressNodes(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
@@ -452,10 +453,10 @@ namespace osmscout {
     void WriteIgnoreTokens(FileWriter& writer,
                            const std::list<std::string>& regionIgnoreTokens,
                            const std::list<std::string>& poiIgnoreTokens,
-                           const std::list<std::string>& locationIgnoreTokens);
+                           const std::list<std::string>& locationIgnoreTokens) const;
 
     void WriteRegionMetrics(FileWriter& writer,
-                            const RegionMetrics& metrics);
+                            const RegionMetrics& metrics) const;
 
     void WriteRegionIndexEntry(FileWriter& writer,
                                const Region& parentRegion,
@@ -471,13 +472,13 @@ namespace osmscout {
                          Region& root);
 
     void WritePostalArea(FileWriter& writer,
-                         PostalArea& postalArea);
+                         PostalArea& postalArea) const;
 
     void WriteAddressDataEntry(FileWriter& writer,
                                Region& region);
 
     void WriteAddressData(FileWriter& writer,
-                          Region& root);
+                          const Region& root);
 
   public:
     void GetDescription(const ImportParameter& parameter,
