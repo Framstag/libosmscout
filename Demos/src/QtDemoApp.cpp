@@ -114,9 +114,9 @@ bool QtDemoApp::Arguments::Parse(int argc, char* argv[], int &exitCode)
 QtDemoApp::QtDemoApp(QString appName, int &argc, char* argv[]):
     app(argc, argv)
 {
-  app.setOrganizationName("libosmscout");
-  app.setOrganizationDomain("libosmscout.sf.net");
-  app.setApplicationName(appName);
+  QGuiApplication::setOrganizationName("libosmscout");
+  QGuiApplication::setOrganizationDomain("libosmscout.sf.net");
+  QGuiApplication::setApplicationName(appName);
 
   // setup c++ locale
   try {
@@ -151,7 +151,7 @@ int QtDemoApp::Run(const Arguments &args, const QUrl &qmlFileUrl)
   }
   if (translator.load(locale.name(), translationDir)) {
     qDebug() << "Install translator for locale " << locale << "/" << locale.name();
-    app.installTranslator(&translator);
+    QGuiApplication::installTranslator(&translator);
   }else{
     qWarning() << "Can't load translator for locale" << locale << "/" << locale.name() <<
                "(" << translationDir << ")";
@@ -182,7 +182,7 @@ int QtDemoApp::Run(const Arguments &args, const QUrl &qmlFileUrl)
     QQmlApplicationEngine window;
     SetupQmlContext(window.rootContext(), args);
     window.load(qmlFileUrl);
-    result = app.exec();
+    result = QGuiApplication::exec();
   }
 
   osmscout::OSMScoutQt::FreeInstance();

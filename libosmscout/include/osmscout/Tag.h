@@ -80,7 +80,7 @@ namespace osmscout {
   public:
     explicit TagNotCondition(const TagConditionRef& condition);
 
-    inline bool Evaluate(const TagMap& tagMap) const override
+    bool Evaluate(const TagMap& tagMap) const override
     {
       return !condition->Evaluate(tagMap);
     }
@@ -132,7 +132,7 @@ namespace osmscout {
   public:
     explicit TagExistsCondition(TagId tag);
 
-    inline bool Evaluate(const TagMap& tagMap) const override
+    bool Evaluate(const TagMap& tagMap) const override
     {
       return tagMap.find(tag)!=tagMap.end();
     }
@@ -212,7 +212,7 @@ namespace osmscout {
     TagInfo(TagId id,
             const std::string& name);
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
@@ -220,7 +220,7 @@ namespace osmscout {
     /**
      * Returns the unique id of this tag
      */
-    inline TagId GetId() const
+    TagId GetId() const
     {
       return id;
     }

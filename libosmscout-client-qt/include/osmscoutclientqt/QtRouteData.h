@@ -67,7 +67,7 @@ public:
   QtRouteData& operator=(const QtRouteData&);
   QtRouteData& operator=(const QtRouteData&&) = delete;
 
-  inline operator bool() const {
+  explicit operator bool() const {
     return (bool)data;
   };
 

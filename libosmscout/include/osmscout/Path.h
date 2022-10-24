@@ -48,17 +48,17 @@ namespace osmscout {
          bool traversable);
     Path(const Path& other);
 
-    inline ObjectFileRef GetObject() const
+    ObjectFileRef GetObject() const
     {
       return object;
     }
 
-    inline size_t GetTargetNodeIndex() const
+    size_t GetTargetNodeIndex() const
     {
       return targetNodeIndex;
     }
 
-    inline bool IsTraversable() const
+    bool IsTraversable() const
     {
       return traversable;
     }

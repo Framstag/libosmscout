@@ -63,7 +63,7 @@ private:
     GeoCoord coord;
     Timestamp time;
 
-    inline operator bool() const
+    explicit operator bool() const
     {
       return time.time_since_epoch()!=Timestamp::duration::zero();
     }

@@ -69,41 +69,41 @@ public:
 
   ~AvailableVoice() override = default;
 
-  inline VoiceProvider getProvider() const
+  VoiceProvider getProvider() const
   {
     return provider;
   }
 
-  inline QString getLang() const
+  QString getLang() const
   {
     return lang;
   }
-  inline QString getGender() const
+  QString getGender() const
   {
     return gender;
   }
-  inline QString getName() const
+  QString getName() const
   {
     return name;
   }
-  inline QString getLicense() const
+  QString getLicense() const
   {
     return license;
   }
-  inline QString getDirectory() const
+  QString getDirectory() const
   {
     return directory;
   }
-  inline QString getAuthor() const
+  QString getAuthor() const
   {
     return author;
   }
-  inline QString getDescription() const
+  QString getDescription() const
   {
     return description;
   }
 
-  inline bool isValid() const
+  bool isValid() const
   {
     return valid;
   }
@@ -132,37 +132,37 @@ public:
     return dir;
   }
 
-  inline QString getLang() const
+  QString getLang() const
   {
     return lang;
   }
 
-  inline QString getGender() const
+  QString getGender() const
   {
     return gender;
   }
 
-  inline QString getName() const
+  QString getName() const
   {
     return name;
   }
 
-  inline QString getLicense() const
+  QString getLicense() const
   {
     return license;
   }
 
-  inline QString getAuthor() const
+  QString getAuthor() const
   {
     return author;
   }
 
-  inline QString getDescription() const
+  QString getDescription() const
   {
     return description;
   }
 
-  inline bool isValid() const
+  bool isValid() const
   {
     return valid;
   }

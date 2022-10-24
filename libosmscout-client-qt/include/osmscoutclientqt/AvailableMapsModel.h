@@ -261,4 +261,4 @@ private:
 
 Q_DECLARE_METATYPE(osmscout::AvailableMapsModelMap)
 
-#endif	/* OSMSCOUT_CLIENT_QT_AVAILABLEMAPMODEL_H */
+#endif /* OSMSCOUT_CLIENT_QT_AVAILABLEMAPMODEL_H */

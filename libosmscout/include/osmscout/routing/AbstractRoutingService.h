@@ -63,37 +63,37 @@ constexpr bool debugRouting = false;
   public:
     RoutingResult();
 
-    inline void SetOverallDistance(const Distance &overallDistance)
+    void SetOverallDistance(const Distance &overallDistance)
     {
       this->overallDistance=overallDistance;
     }
 
-    inline void SetCurrentMaxDistance(const Distance &currentMaxDistance)
+    void SetCurrentMaxDistance(const Distance &currentMaxDistance)
     {
       this->currentMaxDistance=currentMaxDistance;
     }
 
-    inline Distance GetOverallDistance() const
+    Distance GetOverallDistance() const
     {
       return overallDistance;
     }
 
-    inline Distance GetCurrentMaxDistance() const
+    Distance GetCurrentMaxDistance() const
     {
       return currentMaxDistance;
     }
 
-    inline RouteData& GetRoute()
+    RouteData& GetRoute()
     {
       return route;
     }
 
-    inline const RouteData& GetRoute() const
+    const RouteData& GetRoute() const
     {
       return route;
     }
 
-    inline bool Success() const
+    bool Success() const
     {
       return !route.IsEmpty();
     }
@@ -118,12 +118,12 @@ constexpr bool debugRouting = false;
     RoutePointsResult();
     explicit RoutePointsResult(const RoutePointsRef& points);
 
-    inline bool Success() const
+    bool Success() const
     {
       return success;
     }
 
-    inline RoutePointsRef GetPoints() const
+    RoutePointsRef GetPoints() const
     {
       return points;
     }
@@ -139,12 +139,12 @@ constexpr bool debugRouting = false;
     RouteDescriptionResult();
     explicit RouteDescriptionResult(const RouteDescriptionRef& description);
 
-    inline bool Success() const
+    bool Success() const
     {
       return success;
     }
 
-    inline RouteDescriptionRef GetDescription() const
+    RouteDescriptionRef GetDescription() const
     {
       return description;
     }
@@ -160,12 +160,12 @@ constexpr bool debugRouting = false;
     RouteWayResult();
     explicit RouteWayResult(const WayRef& way);
 
-    inline bool Success() const
+    bool Success() const
     {
       return success;
     }
 
-    inline WayRef GetWay() const
+    WayRef GetWay() const
     {
       return way;
     }

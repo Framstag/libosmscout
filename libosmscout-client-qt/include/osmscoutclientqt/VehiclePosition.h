@@ -46,20 +46,26 @@ class OSMSCOUT_CLIENT_QT_API VehiclePosition: public QObject
   Q_PROPERTY(double   bearing   READ getBearingRadians  CONSTANT)
 
 public:
-  inline explicit VehiclePosition(QObject *parent = nullptr) :
+  explicit VehiclePosition(QObject *parent = nullptr) :
     QObject(parent)
   {}
 
-  inline VehiclePosition(const Vehicle &vehicle,
-                         const PositionAgent::PositionState &state,
-                         const GeoCoord &coord,
-                         const std::optional<Bearing> &bearing,
-                         const std::optional<GeoCoord> &nextStepCoord,
-                         QObject *parent = nullptr):
-      QObject(parent), vehicle(vehicle), state(state), coord(coord), bearing(bearing), nextStepCoord(nextStepCoord)
+  VehiclePosition(const Vehicle& vehicle,
+                  const PositionAgent::PositionState& state,
+                  const GeoCoord& coord,
+                  const std::optional<Bearing>& bearing,
+                  const std::optional<GeoCoord>& nextStepCoord,
+                  QObject* parent=nullptr)
+    :
+    QObject(parent),
+    vehicle(vehicle),
+    state(state),
+    coord(coord),
+    bearing(bearing),
+    nextStepCoord(nextStepCoord)
   {}
 
-  inline VehiclePosition & operator=(const VehiclePosition &o)
+  VehiclePosition & operator=(const VehiclePosition &o)
   {
     vehicle=o.vehicle;
     state=o.state;
@@ -69,37 +75,37 @@ public:
     return *this;
   }
 
-  inline double getLat() const
+  double getLat() const
   {
     return coord.GetLat();
   }
 
-  inline double getLon() const
+  double getLon() const
   {
     return coord.GetLon();
   }
 
-  inline GeoCoord getCoord() const
+  GeoCoord getCoord() const
   {
     return coord;
   }
 
-  inline std::optional<Bearing> getBearing() const
+  std::optional<Bearing> getBearing() const
   {
     return bearing;
   }
 
-  inline double getBearingRadians() const
+  double getBearingRadians() const
   {
     return bearing ? bearing->AsRadians() : 0;
   }
 
-  inline std::optional<GeoCoord> getNextStepCoord() const
+  std::optional<GeoCoord> getNextStepCoord() const
   {
     return nextStepCoord;
   }
 
-  inline PositionAgent::PositionState getState() const
+  PositionAgent::PositionState getState() const
   {
     return state;
   }

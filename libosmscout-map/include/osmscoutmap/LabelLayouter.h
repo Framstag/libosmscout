@@ -605,9 +605,9 @@ constexpr bool debugLabelLayouter = false;
     }
 
     template<class Painter>
-    void DrawTextLabels(const Projection& projection,
-                        const MapParameter& parameter,
-                        Painter *p)
+    void DrawTextLabels(const Projection& /*projection*/,
+                        const MapParameter& /*parameter*/,
+                        Painter */*p*/) const
     {
 
     }

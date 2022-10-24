@@ -49,7 +49,7 @@ namespace osmscout {
     size_t               columns;
     std::vector<int32_t> heights;
 
-    inline int32_t GetHeight(size_t x, size_t y) const
+    int32_t GetHeight(size_t x, size_t y) const
     {
       return heights[y*columns+x];
     }

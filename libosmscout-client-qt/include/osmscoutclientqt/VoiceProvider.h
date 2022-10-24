@@ -48,39 +48,41 @@ private:
 public:
   VoiceProvider() = default;
 
-  inline VoiceProvider(const VoiceProvider &o):
+  VoiceProvider(const VoiceProvider &o):
     QObject(o.parent()),
     valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
 
-  inline VoiceProvider(const QString &name, const QString &uri, const QString &listUri):
+  VoiceProvider(const QString &name, const QString &uri, const QString &listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
 
   ~VoiceProvider() override = default;
 
-  inline void operator=(const VoiceProvider &o)
+  VoiceProvider& operator=(const VoiceProvider &o)
   {
     valid = o.valid;
     uri = o.uri;
     listUri = o.listUri;
     name = o.name;
+
+    return *this;
   }
 
-  inline QString getName() const
+  QString getName() const
   {
     return name;
   }
 
-  inline QString getUri() const
+  QString getUri() const
   {
     return uri;
   }
 
-  inline QUrl getListUri(QString locale="en") const
+  QUrl getListUri(QString locale="en") const
   {
     return listUri.arg(locale);
   }
 
-  inline bool isValid() const
+  bool isValid() const
   {
     return valid;
   }

@@ -270,38 +270,38 @@ namespace osmscout {
           const LocationRef& location,
           const AddressRef& address);
 
-    inline ObjectFileRef GetObject() const
+    ObjectFileRef GetObject() const
     {
       return object;
     }
 
-    inline FeatureValueBufferRef GetObjectFeatures() const
+    FeatureValueBufferRef GetObjectFeatures() const
     {
       return objectFeatures;
     }
 
-    inline AdminRegionRef GetAdminRegion() const
+    AdminRegionRef GetAdminRegion() const
     {
       return adminRegion;
     }
 
-    inline PostalAreaRef GetPostalArea() const
+    PostalAreaRef GetPostalArea() const
     {
       return postalArea;
     }
 
-    inline POIRef GetPOI() const
+    POIRef GetPOI() const
     {
       return poi;
     }
 
-    inline LocationRef GetLocation() const
+    LocationRef GetLocation() const
     {
       return location;
     }
 
 
-    inline AddressRef GetAddress() const
+    AddressRef GetAddress() const
     {
       return address;
     }

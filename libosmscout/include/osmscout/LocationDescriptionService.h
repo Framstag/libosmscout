@@ -63,12 +63,12 @@ namespace osmscout {
     double        size;     //!< The size o the place (size of the geographic bounding box)
 
   public:
-    inline LocationDescriptionCandicate(const ObjectFileRef &ref,
-                                        const std::string& name,
-                                        const Distance &distance,
-                                        const Bearing &bearing,
-                                        const bool atPlace,
-                                        const double size)
+    LocationDescriptionCandicate(const ObjectFileRef& ref,
+                                 const std::string& name,
+                                 const Distance& distance,
+                                 const Bearing& bearing,
+                                 const bool atPlace,
+                                 const double size)
     : ref(ref),
       name(name),
       distance(distance),
@@ -79,32 +79,32 @@ namespace osmscout {
       // no code
     }
 
-    inline ObjectFileRef GetRef() const
+    ObjectFileRef GetRef() const
     {
       return ref;
     }
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
 
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
 
-    inline Bearing GetBearing() const
+    Bearing GetBearing() const
     {
       return bearing;
     }
 
-    inline bool IsAtPlace() const
+    bool IsAtPlace() const
     {
       return atPlace;
     }
 
-    inline double GetSize() const
+    double GetSize() const
     {
       return size;
     }
@@ -132,7 +132,7 @@ namespace osmscout {
     /**
      * Return the place this information is refering to
      */
-    inline Place GetPlace() const
+    Place GetPlace() const
     {
       return place;
     }
@@ -140,7 +140,7 @@ namespace osmscout {
     /**
      * 'true' if the location is at the place itself (in spite of 'close to...')
      */
-    inline bool IsAtPlace() const
+    bool IsAtPlace() const
     {
       return atPlace;
     }
@@ -148,7 +148,7 @@ namespace osmscout {
     /**
      * Return the distance to the location
      */
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
@@ -156,7 +156,7 @@ namespace osmscout {
     /**
      * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
-    inline Bearing GetBearing() const
+    Bearing GetBearing() const
     {
       return bearing;
     }
@@ -185,7 +185,7 @@ namespace osmscout {
     /**
      * Return the place this information is refering to
      */
-    inline Place GetWay() const
+    Place GetWay() const
     {
       return way;
     }
@@ -193,7 +193,7 @@ namespace osmscout {
     /**
      * Return the distance to the location
      */
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
@@ -228,7 +228,7 @@ namespace osmscout {
     /**
      * Return the place this information is refering to
      */
-    inline std::list<Place> GetWays() const
+    std::list<Place> GetWays() const
     {
       return ways;
     }
@@ -236,7 +236,7 @@ namespace osmscout {
     /**
      * 'true' if the location is at the place itself (in spite of 'close to...')
      */
-    inline bool IsAtPlace() const
+    bool IsAtPlace() const
     {
       return atPlace;
     }
@@ -244,7 +244,7 @@ namespace osmscout {
     /**
      * Return the distance to the location
      */
-    inline Distance GetDistance() const
+    Distance GetDistance() const
     {
       return distance;
     }
@@ -252,12 +252,12 @@ namespace osmscout {
     /**
      * Return the bearing you have to go to from the place for 'distance' to reach the location
      */
-    inline Bearing GetBearing() const
+    Bearing GetBearing() const
     {
       return bearing;
     }
 
-    inline GeoCoord GetCrossing() const
+    GeoCoord GetCrossing() const
     {
       return crossing;
     }

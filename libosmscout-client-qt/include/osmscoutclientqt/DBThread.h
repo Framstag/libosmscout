@@ -132,7 +132,7 @@ public slots:
    */
   void FlushCaches(qint64 idleMs);
 
-protected:
+private:
   QThread                            *backgroundThread;
   MapManagerRef                      mapManager;
   QString                            basemapLookupDirectory;
@@ -215,7 +215,7 @@ public:
 
   double GetPhysicalDpi() const;
 
-  inline QString GetStylesheetFilename() const
+  QString GetStylesheetFilename() const
   {
     return stylesheetFilename;
   }
