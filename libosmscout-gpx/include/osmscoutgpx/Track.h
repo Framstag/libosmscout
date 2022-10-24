@@ -30,8 +30,7 @@
 #include <vector>
 #include <optional>
 
-namespace osmscout {
-namespace gpx {
+namespace osmscout::gpx {
 
 class OSMSCOUT_GPX_API Track {
 public:
@@ -52,7 +51,6 @@ public:
 
   void FilterPoints(std::function<void(std::vector<TrackPoint> &)> filter);
 };
-}
 }
 
 #endif //OSMSCOUT_GPX_TRACK_H

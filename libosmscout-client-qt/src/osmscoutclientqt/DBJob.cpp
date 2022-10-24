@@ -24,8 +24,8 @@ namespace osmscout {
 
 DBJob::DBJob():
   QObject(),
-  locker(nullptr),
-  thread(QThread::currentThread())
+  thread(QThread::currentThread()),
+  locker(nullptr)
 {
 }
 

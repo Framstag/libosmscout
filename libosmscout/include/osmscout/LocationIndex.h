@@ -200,22 +200,22 @@ namespace osmscout {
     bool IsRegionIgnoreToken(const std::string& token) const;
     bool IsLocationIgnoreToken(const std::string& token) const;
 
-    inline uint32_t GetRegionMaxWords() const
+    uint32_t GetRegionMaxWords() const
     {
       return maxRegionWords;
     }
 
-    inline uint32_t GetPOIMaxWords() const
+    uint32_t GetPOIMaxWords() const
     {
       return maxPOIWords;
     }
 
-    inline uint32_t GetLocationMaxWords() const
+    uint32_t GetLocationMaxWords() const
     {
       return maxLocationWords;
     }
 
-    inline uint32_t GetAddressMaxWords() const
+    uint32_t GetAddressMaxWords() const
     {
       return maxAddressWords;
     }

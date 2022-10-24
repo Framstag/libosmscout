@@ -195,222 +195,222 @@ namespace osmscout {
     void SetBreaker(const BreakerRef& breaker);
 
 
-    inline std::string GetFontName() const
+    std::string GetFontName() const
     {
       return fontName;
     }
 
-    inline double GetFontSize() const
+    double GetFontSize() const
     {
       return fontSize;
     }
 
-    inline const std::list<std::string>& GetIconPaths() const
+    const std::list<std::string>& GetIconPaths() const
     {
       return iconPaths;
     }
 
-    inline const std::list<std::string>& GetPatternPaths() const
+    const std::list<std::string>& GetPatternPaths() const
     {
       return patternPaths;
     }
 
-    inline double GetLineMinWidthPixel() const
+    double GetLineMinWidthPixel() const
     {
       return lineMinWidthPixel;
     }
 
-    inline double GetAreaMinDimensionMM() const
+    double GetAreaMinDimensionMM() const
     {
       return areaMinDimensionMM;
     }
 
-    inline double GetSidecarMaxDistanceMM() const
+    double GetSidecarMaxDistanceMM() const
     {
       return sidecarMaxDistanceMM;
     }
 
-    inline double GetSidecarDistance() const
+    double GetSidecarDistance() const
     {
       return sidecarDistance;
     }
 
-    inline double GetSidecarMinDistanceMM() const
+    double GetSidecarMinDistanceMM() const
     {
       return sidecarMinDistanceMM;
     }
 
-    inline TransPolygon::OptimizeMethod GetOptimizeWayNodes() const
+    TransPolygon::OptimizeMethod GetOptimizeWayNodes() const
     {
       return optimizeWayNodes;
     }
 
-    inline TransPolygon::OptimizeMethod GetOptimizeAreaNodes() const
+    TransPolygon::OptimizeMethod GetOptimizeAreaNodes() const
     {
       return optimizeAreaNodes;
     }
 
-    inline double GetOptimizeErrorToleranceMm() const
+    double GetOptimizeErrorToleranceMm() const
     {
       return optimizeErrorToleranceMm;
     }
 
-    inline bool GetDrawFadings() const
+    bool GetDrawFadings() const
     {
       return drawFadings;
     }
 
-    inline bool GetDrawWaysWithFixedWidth() const
+    bool GetDrawWaysWithFixedWidth() const
     {
       return drawWaysWithFixedWidth;
     }
 
-    inline size_t GetLabelLineMinCharCount() const
+    size_t GetLabelLineMinCharCount() const
     {
       return labelLineMinCharCount;
     }
 
-    inline size_t GetLabelLineMaxCharCount() const
+    size_t GetLabelLineMaxCharCount() const
     {
       return labelLineMaxCharCount;
     }
 
-    inline bool GetLabelLineFitToArea() const
+    bool GetLabelLineFitToArea() const
     {
       return labelLineFitToArea;
     }
 
-    inline double GetLabelLineFitToWidth() const
+    double GetLabelLineFitToWidth() const
     {
       return labelLineFitToWidth;
     }
 
-    inline double GetLabelPadding() const
+    double GetLabelPadding() const
     {
       return labelPadding;
     }
 
-    inline double GetPlateLabelPadding() const
+    double GetPlateLabelPadding() const
     {
       return plateLabelPadding;
     }
 
-    inline double GetOverlayLabelPadding() const
+    double GetOverlayLabelPadding() const
     {
       return overlayLabelPadding;
     }
 
-    inline IconMode GetIconMode() const
+    IconMode GetIconMode() const
     {
       return iconMode;
     }
 
-    inline double GetIconSize() const
+    double GetIconSize() const
     {
       return iconSize;
     }
 
-    inline double GetIconPixelSize() const
+    double GetIconPixelSize() const
     {
       return iconPixelSize;
     }
 
-    inline double GetIconPadding() const
+    double GetIconPadding() const
     {
       return iconPadding;
     }
 
-    inline PatternMode GetPatternMode() const
+    PatternMode GetPatternMode() const
     {
       return patternMode;
     }
 
-    inline double GetPatternSize() const
+    double GetPatternSize() const
     {
       return patternSize;
     }
 
-    inline double GetContourLabelPadding() const
+    double GetContourLabelPadding() const
     {
       return contourLabelPadding;
     }
 
-    inline std::string GetRouteLabelSeparator() const
+    std::string GetRouteLabelSeparator() const
     {
       return routeLabelSeparator;
     }
 
-    inline double GetLabelLayouterOverlap() const
+    double GetLabelLayouterOverlap() const
     {
       return labelLayouterOverlap;
     }
 
-    inline double GetContourLabelOffset() const
+    double GetContourLabelOffset() const
     {
       return contourLabelOffset;
     }
 
-    inline double GetContourLabelSpace() const
+    double GetContourLabelSpace() const
     {
       return contourLabelSpace;
     }
 
-    inline bool GetRenderBackground() const
+    bool GetRenderBackground() const
     {
       return renderBackground;
     }
 
-    inline bool GetRenderSeaLand() const
+    bool GetRenderSeaLand() const
     {
       return renderSeaLand;
     }
 
-    inline bool GetRenderUnknowns() const
+    bool GetRenderUnknowns() const
     {
       return renderUnknowns;
     }
 
-    inline bool GetRenderContourLines() const
+    bool GetRenderContourLines() const
     {
       return renderContourLines;
     }
 
-    inline bool GetRenderHillShading() const
+    bool GetRenderHillShading() const
     {
       return renderHillShading;
     }
 
-    inline bool IsDebugPerformance() const
+    bool IsDebugPerformance() const
     {
       return debugPerformance;
     }
 
-    inline bool IsDebugData() const
+    bool IsDebugData() const
     {
       return debugData;
     }
 
-    inline size_t GetWarningObjectCountLimit() const
+    size_t GetWarningObjectCountLimit() const
     {
       return warnObjectCountLimit;
     }
 
-    inline size_t GetWarningCoordCountLimit() const
+    size_t GetWarningCoordCountLimit() const
     {
       return warnCoordCountLimit;
     }
 
-    inline bool GetShowAltLanguage() const
+    bool GetShowAltLanguage() const
     {
       return showAltLanguage;
     }
 
-    inline Locale GetLocale() const
+    Locale GetLocale() const
     {
       return locale;
     }
 
-    inline Locale& GetLocaleRef()
+    Locale& GetLocaleRef()
     {
       return locale;
     }

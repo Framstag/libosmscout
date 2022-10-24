@@ -30,8 +30,7 @@
 #include <vector>
 #include <optional>
 
-namespace osmscout {
-namespace gpx {
+namespace osmscout::gpx {
 
 class OSMSCOUT_GPX_API GpxFile {
 public:
@@ -43,6 +42,5 @@ public:
   std::vector<Route>    routes;
   std::vector<Waypoint> waypoints;
 };
-}
 }
 #endif //OSMSCOUT_GPX_GPXFILE_H

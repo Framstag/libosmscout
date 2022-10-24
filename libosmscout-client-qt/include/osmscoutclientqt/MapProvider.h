@@ -48,16 +48,16 @@ private:
 public:
   MapProvider() = default;
 
-  inline MapProvider(const MapProvider &o):
+  MapProvider(const MapProvider &o):
     QObject(o.parent()),
     valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
 
-  inline MapProvider(QString name, QString uri, QString listUri):
+  MapProvider(QString name, QString uri, QString listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
 
   ~MapProvider() override = default;
 
-  inline MapProvider& operator=(const MapProvider &o)
+  MapProvider& operator=(const MapProvider &o)
   {
     valid = o.valid;
     uri = o.uri;
@@ -67,22 +67,22 @@ public:
     return *this;
   }
 
-  inline QString getName() const
+  QString getName() const
   {
     return name;
   }
 
-  inline QString getUri() const
+  QString getUri() const
   {
     return uri;
   }
 
-  inline QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
+  QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
   {
     return listUri.arg(fromVersion).arg(toVersion).arg(locale);
   }
 
-  inline bool isValid() const
+  bool isValid() const
   {
     return valid;
   }

@@ -81,7 +81,7 @@ private slots:
   void onTimeout();
 
 public:
-  inline TapRecognizer():
+  TapRecognizer():
           state(INACTIVE),
           holdIntervalMs(1000),
           hold2IntervalMs(500),
@@ -96,7 +96,7 @@ public:
 
   void touch(const QTouchEvent &event);
 
-  inline void setPhysicalDpi(double physicalDpi)
+  void setPhysicalDpi(double physicalDpi)
   {
     moveTolerance = physicalDpi / 10.0; // ~ 2.5 mm
   }
@@ -142,7 +142,7 @@ public:
    * @param factor - momentum movement length (vector returned from collect method) will be equal to recorded length * factor
    * @param vectorLengthTreshold - movement (between two points) have to be longer than treshold (in pixels) for change move vector
    */
-  inline MoveAccumulator(int memory = 100, double factor = 4, double vectorLengthTreshold = 5):
+  MoveAccumulator(int memory = 100, double factor = 4, double vectorLengthTreshold = 5):
     memory(memory), factor(factor), vectorLengthTreshold(vectorLengthTreshold)
   {
   }
@@ -171,39 +171,56 @@ class OSMSCOUT_CLIENT_QT_API MapView: public QObject
 public:
   explicit inline MapView(QObject *parent=nullptr): QObject(parent) {}
 
-  inline MapView(QObject *parent,
-                 const osmscout::GeoCoord &center,
-                 const Bearing &angle,
-                 const osmscout::Magnification &magnification,
-                 double mapDpi):
-    QObject(parent), center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
+  MapView(QObject* parent,
+          const osmscout::GeoCoord& center,
+          const Bearing& angle,
+          const osmscout::Magnification& magnification,
+          double mapDpi)
+    :
+    QObject(parent),
+    center(center),
+    angle(angle),
+    magnification(magnification),
+    mapDpi(mapDpi)
+  {}
 
-  inline MapView(const osmscout::GeoCoord &center,
-                 const Bearing &angle,
-                 const osmscout::Magnification &magnification,
-                 double mapDpi):
-    center(center), angle(angle), magnification(magnification), mapDpi(mapDpi) {}
+  MapView(const osmscout::GeoCoord& center,
+          const Bearing& angle,
+          const osmscout::Magnification& magnification,
+          double mapDpi)
+    :
+    center(center),
+    angle(angle),
+    magnification(magnification),
+    mapDpi(mapDpi)
+  {}
 
   /**
    * This copy constructor don't transfer ownership
    * in Qt hierarchy - it may cause troubles.
    * @param mv
    */
-  inline MapView(const MapView &mv):
-    QObject(), center(mv.center), angle(mv.angle), magnification(mv.magnification), mapDpi(mv.mapDpi) {}
+  MapView(const MapView& mv)
+    :
+    QObject(),
+    center(mv.center),
+    angle(mv.angle),
+    magnification(mv.magnification),
+    mapDpi(mv.mapDpi)
+  {}
 
   ~MapView() override = default;
 
-  inline double GetLat() const{ return center.GetLat(); }
-  inline double GetLon() const{ return center.GetLon(); }
-  inline double GetAngle() const{ return angle.AsRadians(); }
-  inline double GetMag() const{ return magnification.GetMagnification(); }
-  inline double GetMagLevel() const{ return magnification.GetLevel(); }
-  inline double GetMapDpi() const{ return mapDpi; }
+  double GetLat() const{ return center.GetLat(); }
+  double GetLon() const{ return center.GetLon(); }
+  double GetAngle() const{ return angle.AsRadians(); }
+  double GetMag() const{ return magnification.GetMagnification(); }
+  double GetMagLevel() const{ return magnification.GetLevel(); }
+  double GetMapDpi() const{ return mapDpi; }
 
-  inline bool IsValid() const{ return mapDpi > 0; }
+  bool IsValid() const{ return mapDpi > 0; }
 
-  inline MapView& operator=(const MapView &mv)
+  MapView& operator=(const MapView &mv)
   {
     center = mv.center;
     angle = mv.angle;
@@ -450,7 +467,7 @@ private:
 class OSMSCOUT_CLIENT_QT_API LockHandler : public JumpHandler {
     Q_OBJECT
 public:
-    inline LockHandler(const MapView &view, const QSizeF &widgetSize):
+    LockHandler(const MapView &view, const QSizeF &widgetSize):
       JumpHandler(view), window(widgetSize)
     {};
 
@@ -490,4 +507,4 @@ private:
 Q_DECLARE_METATYPE(osmscout::AccumulatorEvent)
 Q_DECLARE_METATYPE(osmscout::MapView)
 
-#endif	/* OSMSCOUT_CLIENT_QT_INPUTHANDLER_H */
+#endif /* OSMSCOUT_CLIENT_QT_INPUTHANDLER_H */

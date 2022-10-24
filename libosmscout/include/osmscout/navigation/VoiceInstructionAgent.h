@@ -157,7 +157,7 @@ public:
     MessageStruct &operator=(const MessageStruct&) = default;
     MessageStruct &operator=(MessageStruct&&) = default;
 
-    operator bool() const
+    explicit operator bool() const
     {
       return type != MessageType::NoMessage;
     }
@@ -184,7 +184,7 @@ private:
   Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.disntace usually)
 
 public:
-  inline VoiceInstructionAgent(DistanceUnitSystem units):
+  explicit VoiceInstructionAgent(DistanceUnitSystem units):
     units{units}
   {};
 

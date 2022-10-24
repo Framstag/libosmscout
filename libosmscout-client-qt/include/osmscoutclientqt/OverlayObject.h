@@ -72,7 +72,7 @@ signals:
   void bboxChanged();
 
 public:
-  OverlayObject(QObject *parent=Q_NULLPTR);
+  explicit OverlayObject(QObject *parent=Q_NULLPTR);
 
   explicit OverlayObject(const std::vector<osmscout::Point> &nodes,
                          QString typeName="_route",
@@ -99,47 +99,47 @@ public:
     }
   }
 
-  inline QString getTypeName() const
+  QString getTypeName() const
   {
     QMutexLocker locker(&lock);
     return typeName;
   }
 
-  inline void setTypeName(const QString &name){
+  void setTypeName(const QString &name){
     QMutexLocker locker(&lock);
     typeName=name;
   }
 
-  inline size_t getSize(){
+  size_t getSize(){
     QMutexLocker locker(&lock);
     return nodes.size();
   }
 
-  inline qint8 getLayer() const
+  qint8 getLayer() const
   {
     QMutexLocker locker(&lock);
     return layer;
   }
 
-  inline void setLayer(qint8 l)
+  void setLayer(qint8 l)
   {
     QMutexLocker locker(&lock);
     layer = l;
   }
 
-  inline QString getName() const
+  QString getName() const
   {
     QMutexLocker locker(&lock);
     return name;
   }
 
-  inline void setName(const QString &n)
+  void setName(const QString &n)
   {
     QMutexLocker locker(&lock);
     name = n;
   }
 
-  inline QString getColor() const
+  QString getColor() const
   {
     QMutexLocker locker(&lock);
     return color;
@@ -170,7 +170,7 @@ class OSMSCOUT_CLIENT_QT_API OverlayArea : public OverlayObject
 Q_OBJECT
 
 public:
-  OverlayArea(QObject *parent=Q_NULLPTR);
+  explicit OverlayArea(QObject *parent=Q_NULLPTR);
 
   explicit OverlayArea(const std::vector<osmscout::Point> &nodes,
                        QString typeName="_route",
@@ -191,7 +191,7 @@ class OSMSCOUT_CLIENT_QT_API OverlayWay : public OverlayObject
 Q_OBJECT
 
 public:
-  OverlayWay(QObject *parent=Q_NULLPTR);
+  explicit OverlayWay(QObject *parent=Q_NULLPTR);
 
   explicit OverlayWay(const std::vector<osmscout::Point> &nodes,
                       QString typeName="_route",
@@ -212,7 +212,7 @@ class OSMSCOUT_CLIENT_QT_API OverlayNode : public OverlayObject
 Q_OBJECT
 
 public:
-  OverlayNode(QObject *parent=Q_NULLPTR);
+  explicit OverlayNode(QObject *parent=Q_NULLPTR);
 
   explicit OverlayNode(const std::vector<osmscout::Point> &nodes,
                        QString typeName="_route",

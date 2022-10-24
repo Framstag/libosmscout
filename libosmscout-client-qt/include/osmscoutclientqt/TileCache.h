@@ -96,7 +96,7 @@ signals:
   void tileRequested(uint32_t zoomLevel, uint32_t x, uint32_t y);
 
 public:
-  TileCache(size_t cacheSize);
+  explicit TileCache(size_t cacheSize);
   ~TileCache() override;
 
   /**

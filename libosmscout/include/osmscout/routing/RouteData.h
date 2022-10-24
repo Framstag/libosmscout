@@ -54,37 +54,37 @@ namespace osmscout {
 
       void SetObjects(const std::vector<ObjectFileRef>& objects);
 
-      inline Id GetCurrentNodeId() const
+      Id GetCurrentNodeId() const
       {
         return currentNodeId;
       }
 
-      inline DBFileOffset GetDBFileOffset() const
+      DBFileOffset GetDBFileOffset() const
       {
         return DBFileOffset(GetDatabaseId(),GetPathObject().GetFileOffset());
       }
 
-      inline DatabaseId GetDatabaseId() const
+      DatabaseId GetDatabaseId() const
       {
         return database;
       }
 
-      inline size_t GetCurrentNodeIndex() const
+      size_t GetCurrentNodeIndex() const
       {
         return currentNodeIndex;
       }
 
-      inline ObjectFileRef GetPathObject() const
+      ObjectFileRef GetPathObject() const
       {
         return pathObject;
       }
 
-      inline size_t GetTargetNodeIndex() const
+      size_t GetTargetNodeIndex() const
       {
         return targetNodeIndex;
       }
 
-      inline const std::vector<ObjectFileRef>& GetObjects() const
+      const std::vector<ObjectFileRef>& GetObjects() const
       {
         return objects;
       }
@@ -96,7 +96,7 @@ namespace osmscout {
   public:
     void Clear();
 
-    inline bool IsEmpty() const
+    bool IsEmpty() const
     {
       return entries.empty();
     }
@@ -107,22 +107,22 @@ namespace osmscout {
                   const ObjectFileRef& pathObject,
                   size_t targetNodeIndex);
 
-    inline std::list<RouteEntry>& Entries()
+    std::list<RouteEntry>& Entries()
     {
       return entries;
     }
 
-    inline const std::list<RouteEntry>& Entries() const
+    const std::list<RouteEntry>& Entries() const
     {
       return entries;
     }
 
-    inline void Append(RouteData routePart)
+    void Append(RouteData routePart)
     {
       entries.splice(entries.end(),routePart.Entries());
     }
 
-    inline void PopEntry()
+    void PopEntry()
     {
       entries.pop_back();
     }

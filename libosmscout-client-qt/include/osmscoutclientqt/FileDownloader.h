@@ -97,7 +97,7 @@ public:
                           QObject *parent = nullptr);
   ~FileDownloader() override;
 
-  operator bool() const { return isOk; }
+  explicit operator bool() const { return isOk; }
   QString getFileName() const { return QFileInfo(path).fileName(); }
   QString getFilePath() const { return path; }
   uint64_t getBytesDownloaded() const;
@@ -183,32 +183,32 @@ public:
 
   virtual uint64_t expectedSize() const = 0;
 
-  inline bool isDone() const
+  bool isDone() const
   {
     return done;
   }
 
-  inline bool isSuccessful() const
+  bool isSuccessful() const
   {
     return successful;
   }
 
-  inline bool isDownloading() const
+  bool isDownloading() const
   {
     return started && !done;
   }
 
-  inline QString getError() const
+  QString getError() const
   {
     return error;
   }
 
-  inline bool isReplaceExisting() const
+  bool isReplaceExisting() const
   {
     return replaceExisting;
   }
 
-  inline QDir getDestinationDirectory() const
+  QDir getDestinationDirectory() const
   {
     return target;
   }

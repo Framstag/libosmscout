@@ -43,19 +43,19 @@ class OSMSCOUT_CLIENT_QT_API OnlineTileProvider: public QObject
 public:
   OnlineTileProvider() = default;
 
-  inline OnlineTileProvider(const OnlineTileProvider &o):
+  OnlineTileProvider(const OnlineTileProvider &o):
     QObject(o.parent()),
     valid(o.valid), id(o.id), name(o.name), servers(o.servers),
           maximumZoomLevel(o.maximumZoomLevel), copyright(o.copyright){};
 
-  inline OnlineTileProvider(const QString &id, const QString &name, const QStringList &servers, int maximumZoomLevel,
+  OnlineTileProvider(const QString &id, const QString &name, const QStringList &servers, int maximumZoomLevel,
           QString copyright):
     valid(true), id(id), name(name), servers(servers), maximumZoomLevel(maximumZoomLevel),
     copyright(copyright){};
 
   ~OnlineTileProvider() override = default;
 
-  inline OnlineTileProvider& operator=(const OnlineTileProvider &o)
+  OnlineTileProvider& operator=(const OnlineTileProvider &o)
   {
     valid = o.valid;
     id = o.id;
@@ -67,23 +67,23 @@ public:
     return *this;
   }
 
-  inline QString getId() const {
+  QString getId() const {
     return id;
   }
 
-  inline int getMaximumZoomLevel() const {
+  int getMaximumZoomLevel() const {
     return maximumZoomLevel;
   }
 
-  inline QString getName() const {
+  QString getName() const {
     return name;
   }
 
-  inline QStringList getServers() const {
+  QStringList getServers() const {
     return servers;
   }
 
-  inline bool isValid() const {
+  bool isValid() const {
     return valid;
   }
 
@@ -105,4 +105,4 @@ private:
 
 }
 
-#endif	/* OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDER_H */
+#endif /* OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDER_H */

@@ -25,8 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace osmscout {
-namespace gpx {
+namespace osmscout::gpx {
 
 class OSMSCOUT_GPX_API Extensions {
 
@@ -49,7 +48,6 @@ public:
   std::vector<Element> elements;
 
 };
-}
 }
 
 #endif //OSMSCOUT_GPX_EXTENSIONS_H

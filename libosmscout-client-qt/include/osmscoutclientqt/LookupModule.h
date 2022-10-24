@@ -144,7 +144,7 @@ public slots:
 
 public:
   LookupModule(QThread *thread,DBThreadRef dbThread);
-  virtual ~LookupModule();
+  ~LookupModule();
 
 private:
 

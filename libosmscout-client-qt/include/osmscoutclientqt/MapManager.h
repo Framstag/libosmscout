@@ -63,17 +63,17 @@ public:
 
   void start();
 
-  inline QString getMapName() const
+  QString getMapName() const
   {
     return map.getName();
   }
 
-  inline QStringList getMapPath() const
+  QStringList getMapPath() const
   {
     return map.getPath();
   }
 
-  inline uint64_t expectedSize() const override
+  uint64_t expectedSize() const override
   {
     return map.getSize();
   }
@@ -159,17 +159,17 @@ public:
    * Time of map import
    * @return
    */
-  inline QDateTime getCreation() const
+  QDateTime getCreation() const
   {
     return creation;
   }
 
-  inline int getVersion() const
+  int getVersion() const
   {
     return version;
   }
 
-  inline bool operator<(const MapDirectory &o) const
+  bool operator<(const MapDirectory &o) const
   {
     if (getName() == o.getName()){
       return getDir().absolutePath() < o.getDir().absolutePath();
@@ -227,16 +227,16 @@ public:
   void downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting = true);
   void downloadNext();
 
-  inline QList<MapDownloadJob*> getDownloadJobs() const {
+  QList<MapDownloadJob*> getDownloadJobs() const {
     return downloadJobs;
   }
 
-  inline QStringList getLookupDirectories() const
+  QStringList getLookupDirectories() const
   {
     return databaseLookupDirs;
   }
 
-  inline QList<MapDirectory> getDatabaseDirectories() const
+  QList<MapDirectory> getDatabaseDirectories() const
   {
     return databaseDirectories;
   }
@@ -249,4 +249,4 @@ using MapManagerRef = std::shared_ptr<MapManager>;
 
 }
 
-#endif	/* OSMSCOUT_CLIENT_QT_MAPMANAGER_H */
+#endif /* OSMSCOUT_CLIENT_QT_MAPMANAGER_H */

@@ -52,17 +52,17 @@ namespace osmscout {
     bool Load(const TypeConfig& typeConfig,
               const std::string& filename);
 
-    inline bool IsLoaded() const
+    bool IsLoaded() const
     {
       return isLoaded;
     }
 
-    inline std::string GetFilename() const
+    std::string GetFilename() const
     {
       return filename;
     }
 
-    inline const std::vector<ObjectVariantData>& GetData() const
+    const std::vector<ObjectVariantData>& GetData() const
     {
       return data;
     }

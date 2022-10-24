@@ -79,12 +79,12 @@ namespace osmscout {
   public:
     Route() = default;
 
-    inline FileOffset GetFileOffset() const
+    FileOffset GetFileOffset() const
     {
       return fileOffset;
     }
 
-    inline FileOffset GetNextFileOffset() const
+    FileOffset GetNextFileOffset() const
     {
       return nextFileOffset;
     }
@@ -108,58 +108,58 @@ namespace osmscout {
       std::lock_guard<std::mutex> lock(cacheMutex);
       return resolvedMembers;
     }
-    
-    // inline ObjectFileRef GetObjectFileRef() const
+
+    // ObjectFileRef GetObjectFileRef() const
     // {
     //   return {fileOffset,refRoute};
     // }
 
-    inline GeoBox GetBoundingBox() const
+    GeoBox GetBoundingBox() const
     {
       return bbox;
     }
 
-    inline TypeInfoRef GetType() const
+    TypeInfoRef GetType() const
     {
       return featureValueBuffer.GetType();
     }
 
-    inline size_t GetFeatureCount() const
+    size_t GetFeatureCount() const
     {
       return featureValueBuffer.GetType()->GetFeatureCount();
     }
 
-    inline bool HasFeature(size_t idx) const
+    bool HasFeature(size_t idx) const
     {
       return featureValueBuffer.HasFeature(idx);
     }
 
-    inline const FeatureInstance& GetFeature(size_t idx) const
+    const FeatureInstance& GetFeature(size_t idx) const
     {
       return featureValueBuffer.GetType()->GetFeature(idx);
     }
 
-    inline FeatureValue* GetFeatureValue(size_t idx) const
+    FeatureValue* GetFeatureValue(size_t idx) const
     {
       return featureValueBuffer.GetValue(idx);
     }
 
-    inline void UnsetFeature(size_t idx)
+    void UnsetFeature(size_t idx)
     {
       featureValueBuffer.FreeValue(idx);
     }
 
-    inline const FeatureValueBuffer& GetFeatureValueBuffer() const
+    const FeatureValueBuffer& GetFeatureValueBuffer() const
     {
       return featureValueBuffer;
     }
 
-    inline void SetType(const TypeInfoRef& type)
+    void SetType(const TypeInfoRef& type)
     {
       featureValueBuffer.SetType(type);
     }
 
-    inline void SetFeatures(const FeatureValueBuffer& buffer)
+    void SetFeatures(const FeatureValueBuffer& buffer)
     {
       featureValueBuffer.Set(buffer);
     }
