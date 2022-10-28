@@ -57,7 +57,7 @@ public slots:
     void onLocationDescription(const osmscout::GeoCoord location, 
                                const QString database, 
                                const osmscout::LocationDescription description,
-                               const QStringList regions);
+                               const QList<AdminRegionInfoRef> regions);
     void onLocationDescriptionFinished(const osmscout::GeoCoord);
 
     void onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>);
@@ -77,7 +77,8 @@ public:
         WebsiteRole = Qt::UserRole+9,
         PhoneRole = Qt::UserRole+10,
         AddressLocationRole = Qt::UserRole+11,
-        AddressNumberRole = Qt::UserRole+12
+        AddressNumberRole = Qt::UserRole+12,
+        IndexedAdminRegionRole = Qt::UserRole+13
     };
     Q_ENUM(Roles)
 
@@ -112,7 +113,7 @@ public:
 private: 
    void addToModel(const QString database,
                    const osmscout::LocationAtPlaceDescriptionRef description,
-                   const QStringList regions);
+                   const QList<AdminRegionInfoRef> regions);
  
 private:
     bool ready;
@@ -122,7 +123,7 @@ private:
     QList<ObjectKey> objectSet; // set of objects already inserted to model
     QList<QMap<int, QVariant>> model;
     LookupModule* lookupModule;
-    
+    SettingsRef settings;
 };
 
 }

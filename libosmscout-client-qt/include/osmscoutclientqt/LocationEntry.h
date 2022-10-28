@@ -30,6 +30,7 @@
 #include <osmscout/LocationService.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclientqt/AdminRegionInfo.h>
 
 namespace osmscout {
 
@@ -59,7 +60,7 @@ private:
   Type                           type;
   QString                        label;
   QString                        objectType;
-  QStringList                    adminRegionList;
+  QList<AdminRegionInfoRef>      adminRegionList;
   QString                        database;
   QList<osmscout::ObjectFileRef> references;
   osmscout::GeoCoord             coord;
@@ -69,7 +70,7 @@ public:
   LocationEntry(Type type,
                 const QString& label,
                 const QString& objectType,
-                const QStringList& adminRegionList,
+                const QList<AdminRegionInfoRef>& adminRegionList,
                 const QString database,
                 const osmscout::GeoCoord coord,
                 const osmscout::GeoBox bbox,
@@ -103,7 +104,7 @@ public:
   QString getTypeString() const;
   QString getObjectType() const;
   QString getLabel() const;
-  QStringList getAdminRegionList() const;
+  QList<AdminRegionInfoRef> getAdminRegionList() const;
   QString getDatabase() const;
   osmscout::GeoCoord getCoord() const;
   osmscout::GeoBox getBBox() const;

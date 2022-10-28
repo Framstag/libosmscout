@@ -280,7 +280,7 @@ bool SearchRunnable::BuildLocationEntry(const osmscout::ObjectFileRef& object,
                                         QList<LocationEntry> &locations
                                         )
 {
-    QStringList adminRegionList;
+    QList<AdminRegionInfoRef> adminRegionList;
     QString objectType;
     osmscout::GeoCoord coordinates;
     osmscout::GeoBox bbox;
@@ -320,11 +320,7 @@ bool SearchRunnable::BuildLocationEntry(const osmscout::LocationSearchResult::En
                                         QList<LocationEntry> &locations
                                         )
 {
-    if (entry.adminRegion){
-      db->GetLocationService()->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
-    }
-
-    QStringList adminRegionList=LookupModule::BuildAdminRegionList(entry.adminRegion, adminRegionMap);
+    QList<AdminRegionInfoRef> adminRegionList=LookupModule::BuildAdminRegionList(db, entry.adminRegion, adminRegionMap);
     QString objectType;
     osmscout::GeoCoord coordinates;
     osmscout::GeoBox bbox;

@@ -36,6 +36,7 @@ LocationListModel::LocationListModel(QObject* parent)
 {
   searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
+  settings=OSMScoutQt::GetInstance().GetSettings();
 
   connect(this, &LocationListModel::SearchRequested,
           searchModule, &SearchModule::SearchForLocations,
@@ -254,7 +255,7 @@ void LocationListModel::onLocationAdminRegionFinished(const osmscout::GeoCoord l
       !pattern.isEmpty() &&
       defaultRegion &&
       lastRequestDefaultRegion!=defaultRegion){
-    osmscout::log.Debug() << "Search again with new default region: " << defaultRegion->name.toStdString();
+    osmscout::log.Debug() << "Search again with new default region: " << defaultRegion->name();
     setPattern(pattern);
   }
 }
@@ -311,11 +312,11 @@ void LocationListModel::setPattern(const QString& pattern)
   }
   if (searching){
     // we are still waiting for previous request, postpone current
-    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern << "(default region:" << (defaultRegion?defaultRegion->name:"NULL") << ")";
+    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern << "(default region:" << (defaultRegion?defaultRegion->qStringName():"NULL") << ")";
     return;
   }
   
-  qDebug() << "Clear (" << locations.size() << ") search" << pattern << "(default region:" << (defaultRegion?defaultRegion->name:"NULL") << ")";
+  qDebug() << "Clear (" << locations.size() << ") search" << pattern << "(default region:" << (defaultRegion?defaultRegion->qStringName():"NULL") << ")";
   searching = true;
   lastRequestPattern = pattern;
   lastRequestDefaultRegion=defaultRegion;
@@ -347,7 +348,7 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
     else
       return location->getObjectType();
   case RegionRole:
-    return location->getAdminRegionList();
+    return LookupModule::AdminRegionNames(location->getAdminRegionList(), settings->GetShowAltLanguage());
   case LatRole:
     return QVariant::fromValue(location->getCoord().GetLat());
   case LonRole:
@@ -369,6 +370,8 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
   case LocationObjectRole:
     // QML will take ownership
     return QVariant::fromValue(new LocationEntry(*location));
+  case IndexedAdminRegionRole:
+      return LookupModule::IndexedAdminRegionNames(location->getAdminRegionList(), settings->GetShowAltLanguage());;
   default:
     break;
   }
@@ -397,6 +400,7 @@ QHash<int, QByteArray> LocationListModel::roleNames() const
   roles[DistanceRole]="distance";
   roles[BearingRole]="bearing";
   roles[LocationObjectRole]="locationObject";
+  roles[IndexedAdminRegionRole]="indexedAdminRegion";
 
   return roles;
 }

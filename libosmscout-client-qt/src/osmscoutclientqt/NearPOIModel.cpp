@@ -25,6 +25,7 @@ namespace osmscout {
 NearPOIModel::NearPOIModel()
 {
   poiModule=OSMScoutQt::GetInstance().MakePOILookupModule();
+  settings=OSMScoutQt::GetInstance().GetSettings();
 
   connect(this, &NearPOIModel::lookupPOIRequest,
           poiModule, &POILookupModule::lookupPOIRequest,
@@ -74,7 +75,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
       else
         return location->getObjectType();
     case RegionRole:
-      return location->getAdminRegionList();
+      return LookupModule::AdminRegionNames(location->getAdminRegionList(), settings->GetShowAltLanguage());
     case LatRole:
       return QVariant::fromValue(location->getCoord().GetLat());
     case LonRole:

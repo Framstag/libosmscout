@@ -31,6 +31,7 @@ LocationInfoModel::LocationInfoModel():
   ready(false), setup(false)
 {
     lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
+    settings=OSMScoutQt::GetInstance().GetSettings();
 
     connect(lookupModule, &LookupModule::initialisationFinished,
             this, &LocationInfoModel::dbInitialized,
@@ -117,6 +118,7 @@ QHash<int, QByteArray> LocationInfoModel::roleNames() const
     roles[PhoneRole] = "phone";
     roles[AddressLocationRole] = "addressLocation";
     roles[AddressNumberRole] = "addressNumber";
+    roles[IndexedAdminRegionRole] = "indexedAdminRegion";
 
     return roles;
 }
@@ -158,7 +160,7 @@ bool operator==(const ObjectKey &k1, const ObjectKey &k2){
 
 void LocationInfoModel::addToModel(const QString database,
                                    const osmscout::LocationAtPlaceDescriptionRef description,
-                                   const QStringList regions)
+                                   const QList<AdminRegionInfoRef> regions)
 {
   ObjectKey key = {database, description->GetPlace().GetObject()};
   if (objectSet.contains(key)){
@@ -231,7 +233,7 @@ void LocationInfoModel::addToModel(const QString database,
   }
 
   obj[LabelRole] = QString::fromStdString(place.GetDisplayString());
-  obj[RegionRole] = regions;
+  obj[RegionRole] = LookupModule::AdminRegionNames(regions, settings->GetShowAltLanguage());
   obj[AddressRole] = address;
   obj[InPlaceRole] = inPlace;
   obj[DistanceRole] = distance.AsMeter();
@@ -243,6 +245,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[PhoneRole] = phone;
   obj[AddressLocationRole] = addressLocation;
   obj[AddressNumberRole] = addressNumber;
+  obj[IndexedAdminRegionRole] = LookupModule::IndexedAdminRegionNames(regions, settings->GetShowAltLanguage());
 
   model << obj;
 
@@ -253,7 +256,7 @@ void LocationInfoModel::addToModel(const QString database,
 void LocationInfoModel::onLocationDescription(const osmscout::GeoCoord location,
                                               const QString database,
                                               const osmscout::LocationDescription description,
-                                              const QStringList regions)
+                                              const QList<AdminRegionInfoRef> regions)
 {
     if (location != this->location){
         return; // not our request
@@ -316,18 +319,18 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
 
   const AdminRegionInfoRef bottom=regions.first();
   QStringList regionNames;
-  QString lastName=bottom->name;
+  std::string lastName=bottom->name();
   for (const auto &region:regions){
     // remove duplicate names
-    if (region->name!=lastName) {
-      regionNames << region->name;
+    if (region->name()!=lastName) {
+      regionNames << region->qStringName();
     }
-    lastName=region->name;
+    lastName=region->name();
   }
 
-  obj[LabelRole] = bottom->name;
+  obj[LabelRole] = bottom->qStringName();
   obj[RegionRole] = regionNames;
-  obj[AddressRole] = bottom->name;
+  obj[AddressRole] = bottom->qStringName();
   obj[InPlaceRole] = true;
   obj[DistanceRole] = 0;
   obj[BearingRole] = "";
@@ -338,6 +341,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[PhoneRole] = "";
   obj[AddressLocationRole] = "";
   obj[AddressNumberRole] = "";
+  obj[IndexedAdminRegionRole] = QStringList();
 
   model << obj;
 

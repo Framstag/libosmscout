@@ -44,8 +44,6 @@ LocationEntry buildLocationEntry(T obj,
                                  osmscout::GeoCoord coordinates,
                                  osmscout::GeoBox bbox)
 {
-  QStringList adminRegionList;
-
   QString title;
   QString objectType = QString::fromUtf8(obj->GetType()->GetName().c_str());
   const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
@@ -62,7 +60,7 @@ LocationEntry buildLocationEntry(T obj,
     title=QString::fromStdString(ref->GetLabel(osmscout::Locale(), 0));
   }
 
-  LocationEntry location(LocationEntry::typeObject, title, objectType, adminRegionList,
+  LocationEntry location(LocationEntry::typeObject, title, objectType, QList<AdminRegionInfoRef>(),
                          dbPath, coordinates, bbox);
   location.addReference(obj->GetObjectFileRef());
   return LocationEntry(location); // explicit copy. some older compilers (GCC 7.5.0) fails when tries to use deleted move constructor
