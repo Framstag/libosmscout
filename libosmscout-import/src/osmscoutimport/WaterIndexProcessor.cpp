@@ -2518,13 +2518,13 @@ constexpr bool debugTiling = false;
           continue;
         }
 
-if constexpr (debugCoastline) {
-  std::cout.precision(5);
-  std::cout << "    Cut coastline from " <<
-            int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
-            int2.point.GetLat() << " " << int2.point.GetLon() <<
-            std::endl;
-}
+        if constexpr (debugCoastline) {
+          std::cout.precision(5);
+          std::cout << "    Cut coastline from " <<
+                    int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+                    int2.point.GetLat() << " " << int2.point.GetLon() <<
+                    std::endl;
+        }
 
         CoastRef part=std::make_shared<Coast>();
 
