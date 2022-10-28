@@ -133,7 +133,6 @@ namespace osmscout {
     {
       OSMId              id;
       bool               isArea;
-      double             sortCriteria;
       Id                 frontNodeId; //!< Id of the first coast node (coords.front().GetId())
       Id                 backNodeId;  //!< Id of the last coast node (coords.back().GetId())
       std::vector<Point> coast;

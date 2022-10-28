@@ -2467,7 +2467,6 @@ constexpr bool debugTiling = false;
 
           part->right=c->right;
           part->id=c->id;
-          part->sortCriteria=c->sortCriteria;
           part->isArea=false;
 
           synthesized.push_back(part);
@@ -2539,7 +2538,6 @@ if constexpr (debugCoastline) {
         part->left=coastline->left;
         part->right=coastline->right;
         part->id=coastline->id;
-        part->sortCriteria=coastline->sortCriteria;
         part->isArea=false;
 
         synthesized.push_back(part);
