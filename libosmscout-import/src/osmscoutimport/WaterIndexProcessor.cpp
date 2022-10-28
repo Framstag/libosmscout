@@ -2307,7 +2307,9 @@ constexpr bool debugTiling = false;
 
         if (other!=coastStartMap.end() &&
             blacklist.find(other->second->id)==blacklist.end() &&
-            coast->id!=other->second->id) {
+            coast->id!=other->second->id &&
+            coast->right==other->second->right &&
+            coast->left==other->second->left) {
           for (size_t i=1; i<other->second->coast.size(); i++) {
             coast->coast.push_back(other->second->coast[i]);
           }

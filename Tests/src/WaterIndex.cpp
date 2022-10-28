@@ -112,3 +112,23 @@ TEST_CASE("Merge coastlines to area")
   REQUIRE(coastlines.front()->coast.size()==3);
   REQUIRE(coastlines.front()->isArea);
 }
+
+TEST_CASE("Merge with different states")
+{
+  WaterIndexProcessor processor;
+  SilentProgress progress;
+  std::list<WaterIndexProcessor::CoastRef> coastlines;
+
+  std::vector<Point> coords;
+  coords.emplace_back(0, GeoCoord(0,0));
+  coords.emplace_back(0, GeoCoord(1,1));
+  coastlines.push_back(MkCoastline(0, std::move(coords), WaterIndexProcessor::CoastState::water, WaterIndexProcessor::CoastState::land));
+
+  coords.clear();
+  coords.emplace_back(0, GeoCoord(1,1));
+  coords.emplace_back(0, GeoCoord(1,2));
+  coastlines.push_back(MkCoastline(1, std::move(coords), WaterIndexProcessor::CoastState::water, WaterIndexProcessor::CoastState::unknown));
+
+  processor.MergeCoastlines(progress, coastlines);
+  REQUIRE(coastlines.size()==2);
+}
