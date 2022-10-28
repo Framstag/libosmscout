@@ -317,6 +317,13 @@ TransPolygon = executable('TransPolygon',
              link_with: [osmscout],
              install: false)
 
+WaterIndex = executable('WaterIndex',
+             'src/WaterIndex.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout, osmscoutimport],
+             install: false)
+
 WorkQueue = executable('WorkQueue',
              'src/WorkQueue.cpp',
              include_directories: [osmscoutIncDir],
@@ -397,6 +404,7 @@ test('Check scan conversion code', ScanConversion)
 test('Check string utils', StringUtils)
 test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)
+test('Check water index import code', WaterIndex)
 test('Check implementation of work queue', WorkQueue)
 test('Check WString<=>String conversion code', WStringStringConversion)
 test('Check LabelPath code', LabelPathTest)
