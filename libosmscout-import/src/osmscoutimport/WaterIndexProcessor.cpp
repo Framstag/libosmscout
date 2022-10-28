@@ -2333,7 +2333,9 @@ constexpr bool debugTiling = false;
 
       if (coastline->frontNodeId==coastline->backNodeId) {
         coastline->isArea=true;
-        coastline->coast.pop_back();
+        if (!coastline->coast.empty()) {
+          coastline->coast.pop_back();
+        }
 
         areaCoastCount++;
       }
