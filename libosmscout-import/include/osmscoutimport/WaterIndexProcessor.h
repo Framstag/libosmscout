@@ -127,15 +127,15 @@ namespace osmscout {
      * There may be two kind of "coastlines":
      *  - classic coastlines: define border between land and water (see)
      *  - data polygon: define area where database (and classic coastlines) are defined.
-     *     It usually have right/left state unknown/udefined
+     *     It usually have right/left state unknown/undefined
      */
     struct OSMSCOUT_IMPORT_API Coast
     {
       OSMId              id;
       bool               isArea;
       double             sortCriteria;
-      Id                 frontNodeId;
-      Id                 backNodeId;
+      Id                 frontNodeId; //!< Id of the first coast node (coords.front().GetId())
+      Id                 backNodeId;  //!< Id of the last coast node (coords.back().GetId())
       std::vector<Point> coast;
       CoastState         left;
       CoastState         right;
