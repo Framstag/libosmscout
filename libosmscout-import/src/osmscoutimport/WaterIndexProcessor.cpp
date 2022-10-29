@@ -2219,7 +2219,7 @@ constexpr bool debugTiling = false;
 
   void WaterIndexProcessor::SynthesizeCoastlines(Progress& progress,
                                                  std::list<CoastRef>& coastlines,
-                                                 std::list<CoastRef>& boundingPolygons)
+                                                 const std::list<CoastRef>& boundingPolygons)
   {
     progress.SetAction("Synthetize coastlines");
 

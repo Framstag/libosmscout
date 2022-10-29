@@ -685,7 +685,7 @@ public:
      */
     void SynthesizeCoastlines(Progress& progress,
                               std::list<CoastRef>& coastlines,
-                              std::list<CoastRef>& boundingPolygons);
+                              const std::list<CoastRef>& boundingPolygons);
 
     /**
      * Collects, calculates and generates a number of data about a coastline.
