@@ -78,12 +78,12 @@ namespace osmscout {
   extern void WriteGpx(const std::vector<Point> &path, const std::string& name);
 
   /**
-   * Generator that calculates land, water and coast tiles based on passed costline data.
+   * Generator that calculates land, water and coast tiles based on passed coastline data.
    * For more details how index is stored look to `WaterIndex` and description of tiles (cells)
    * look to `GroundTile` struct.
    *
-   * For OSM data is usual that land is always left of the coast (in line direction)
-   * and water is always right. But this generator don't require it, just Coast rigth/left
+   * For OSM data is land is always on the left of the coast (in line direction)
+   * and water is always on the right. But this generator don't require it, just Coast right/left
    * state have to be defined correctly.
    *
    * See GenWaterIndex for usage. It is expected that methods are
