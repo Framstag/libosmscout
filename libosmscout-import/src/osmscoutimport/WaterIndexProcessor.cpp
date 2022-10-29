@@ -2254,7 +2254,7 @@ constexpr bool debugTiling = false;
     }
 
     clock.Stop();
-    progress.Info(std::to_string(boundingPolygons.size())+" bouding polygon(s), and "+
+    progress.Info(std::to_string(boundingPolygons.size())+" bounding polygon(s), and "+
                   std::to_string(allCoastlines.size())+" coastline(s) synthesized into "+
                   std::to_string(synthesized.size())+" coastlines(s), took "+
                   clock.ResultString() +" s"

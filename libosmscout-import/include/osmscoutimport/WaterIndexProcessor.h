@@ -700,7 +700,7 @@ public:
                                 Data& data);
 
     /**
-     * Markes a cell as "coast", if one of the coastlines intersects with it.
+     * Marks a cell as "coast", if one of the coastlines intersects with it.
      */
     void MarkCoastlineCells(Progress& progress,
                             StateMap& stateMap,
