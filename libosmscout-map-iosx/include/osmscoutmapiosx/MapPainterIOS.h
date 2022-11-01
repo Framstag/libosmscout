@@ -156,6 +156,9 @@ namespace osmscout {
         friend IOSLabelLayouter;
 
     private:
+        const float                 ProposedWidthExpandRatio = 1.6;
+        const float                 ProposedWidthMinWidth = 50.0;
+        
         CGContextRef                cg;
         CGFloat                     contentScale;
 

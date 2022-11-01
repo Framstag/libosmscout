@@ -368,18 +368,21 @@ namespace osmscout {
         CGRect rect = CGRectZero;
 
         double proposedWidth = -1;
-        if (enableWrapping && objectWidth > 50.0) {
-            proposedWidth = GetProposedLabelWidth(parameter,
+        if (enableWrapping && objectWidth > ProposedWidthMinWidth) {
+            proposedWidth = ProposedWidthExpandRatio * GetProposedLabelWidth(parameter,
                                                   GetAverageCharWidth(projection, parameter, fontSize),
                                                   objectWidth,
                                                   text.length());
 
-            log.Debug() << "proposedWidth=" << proposedWidth;
+            log.Debug() << "proposedWidth=" << proposedWidth << " for '" << text << "'";
         }
 
-        Font *font = GetFont(projection, parameter, fontSize);
+        
         NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
+        // replace hyphen by unicode NON-BREAKING HYPHEN  
         str = [str stringByReplacingOccurrencesOfString:@"-" withString:@"\u2011"];
+        
+        Font *font = GetFont(projection, parameter, fontSize);
         NSMutableDictionary<NSAttributedStringKey, id> *attr = [NSMutableDictionary dictionaryWithDictionary: @{}];
         if(font){
             attr[NSFontAttributeName] = font;
@@ -389,34 +392,38 @@ namespace osmscout {
         CFAttributedStringRef cfString = (__bridge CFAttributedStringRef)attrStr;
 
         CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(cfString);
-        CGPathRef path;
-        if (proposedWidth > 0){
-            path = CGPathCreateWithRect(CGRectMake(0, 0, proposedWidth, std::numeric_limits<double>::max()), NULL);
-        } else {
-            path = CGPathCreateWithRect(CGRectMake(0, 0, std::numeric_limits<double>::max(), std::numeric_limits<double>::max()), NULL);
-        }
-        CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
-        CGPathRelease(path);
-        CFArrayRef lines =  CTFrameGetLines(frame);
-        for (int lineNumber = 0; lineNumber< CFArrayGetCount(lines); lineNumber++){
-            CTLineRef line = (CTLineRef)CFArrayGetValueAtIndex(lines, lineNumber);
-            result->label.line.push_back(line);
-            CFArrayRef runArray = CTLineGetGlyphRuns(line);
-            if(CFArrayGetCount(runArray) > 0){
-                CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
-                result->label.run.push_back(run);
-                rect = CGRectUnion(rect, CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)));
+        if (framesetter) {
+            CGPathRef path;
+            if (proposedWidth > 0){
+                path = CGPathCreateWithRect(CGRectMake(0, 0, proposedWidth, std::numeric_limits<double>::max()), NULL);
+            } else {
+                path = CGPathCreateWithRect(CGRectMake(0, 0, std::numeric_limits<double>::max(), std::numeric_limits<double>::max()), NULL);
             }
+            CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+            CGPathRelease(path);
+            CFArrayRef lines =  CTFrameGetLines(frame);
+            for (int lineNumber = 0; lineNumber< CFArrayGetCount(lines); lineNumber++){
+                CTLineRef line = (CTLineRef)CFArrayGetValueAtIndex(lines, lineNumber);
+                result->label.line.push_back(line);
+                CFArrayRef runArray = CTLineGetGlyphRuns(line);
+                if(CFArrayGetCount(runArray) > 0){
+                    CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
+                    result->label.run.push_back(run);
+                    rect = CGRectUnion(rect, CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)));
+                }
+            }
+            result->label.lineWidth = rect.size.width;
+            result->label.lineHeight = GetFontHeight(projection, parameter, fontSize);
+            
+            log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << rect.size.height;
+            
+            result->text = text;
+            result->fontSize = fontSize;
+            result->width = rect.size.width;
+            result->height = rect.size.height;
+        } else {
+            log.Warn() << "CTFramesetterCreateFrame returned NULL";
         }
-        result->label.lineWidth = rect.size.width;
-        result->label.lineHeight = GetFontHeight(projection, parameter, fontSize);
-
-        log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << rect.size.height;
-
-        result->text = text;
-        result->fontSize = fontSize;
-        result->width = rect.size.width;
-        result->height = rect.size.height;
 
         return result;
     }
