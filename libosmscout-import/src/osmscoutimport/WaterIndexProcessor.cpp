@@ -2219,7 +2219,7 @@ constexpr bool debugTiling = false;
 
   void WaterIndexProcessor::SynthesizeCoastlines(Progress& progress,
                                                  std::list<CoastRef>& coastlines,
-                                                 std::list<CoastRef>& boundingPolygons)
+                                                 const std::list<CoastRef>& boundingPolygons)
   {
     progress.SetAction("Synthetize coastlines");
 
@@ -2254,7 +2254,7 @@ constexpr bool debugTiling = false;
     }
 
     clock.Stop();
-    progress.Info(std::to_string(boundingPolygons.size())+" bouding polygon(s), and "+
+    progress.Info(std::to_string(boundingPolygons.size())+" bounding polygon(s), and "+
                   std::to_string(allCoastlines.size())+" coastline(s) synthesized into "+
                   std::to_string(synthesized.size())+" coastlines(s), took "+
                   clock.ResultString() +" s"
@@ -2307,7 +2307,9 @@ constexpr bool debugTiling = false;
 
         if (other!=coastStartMap.end() &&
             blacklist.find(other->second->id)==blacklist.end() &&
-            coast->id!=other->second->id) {
+            coast->id!=other->second->id &&
+            coast->right==other->second->right &&
+            coast->left==other->second->left) {
           for (size_t i=1; i<other->second->coast.size(); i++) {
             coast->coast.push_back(other->second->coast[i]);
           }
@@ -2333,7 +2335,9 @@ constexpr bool debugTiling = false;
 
       if (coastline->frontNodeId==coastline->backNodeId) {
         coastline->isArea=true;
-        coastline->coast.pop_back();
+        if (!coastline->coast.empty()) {
+          coastline->coast.pop_back();
+        }
 
         areaCoastCount++;
       }
@@ -2467,7 +2471,6 @@ constexpr bool debugTiling = false;
 
           part->right=c->right;
           part->id=c->id;
-          part->sortCriteria=c->sortCriteria;
           part->isArea=false;
 
           synthesized.push_back(part);
@@ -2519,13 +2522,13 @@ constexpr bool debugTiling = false;
           continue;
         }
 
-if constexpr (debugCoastline) {
-  std::cout.precision(5);
-  std::cout << "    Cut coastline from " <<
-            int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
-            int2.point.GetLat() << " " << int2.point.GetLon() <<
-            std::endl;
-}
+        if constexpr (debugCoastline) {
+          std::cout.precision(5);
+          std::cout << "    Cut coastline from " <<
+                    int1.point.GetLat() << " " << int1.point.GetLon() << " to " <<
+                    int2.point.GetLat() << " " << int2.point.GetLon() <<
+                    std::endl;
+        }
 
         CoastRef part=std::make_shared<Coast>();
 
@@ -2539,7 +2542,6 @@ if constexpr (debugCoastline) {
         part->left=coastline->left;
         part->right=coastline->right;
         part->id=coastline->id;
-        part->sortCriteria=coastline->sortCriteria;
         part->isArea=false;
 
         synthesized.push_back(part);

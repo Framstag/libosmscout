@@ -62,6 +62,13 @@ endif()
 #---- Geometry
 osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 
+#---- WaterIndex
+if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
+	osmscout_test_project(NAME WaterIndex SOURCES src/WaterIndex.cpp TARGET OSMScout::Import)
+else()
+	message("Skip WaterIndex test, libosmscout-import is missing.")
+endif()
+
 #---- WorkQueue
 osmscout_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 

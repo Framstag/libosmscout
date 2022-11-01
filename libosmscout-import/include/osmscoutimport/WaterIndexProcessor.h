@@ -78,12 +78,12 @@ namespace osmscout {
   extern void WriteGpx(const std::vector<Point> &path, const std::string& name);
 
   /**
-   * Generator that calculates land, water and coast tiles based on passed costline data.
+   * Generator that calculates land, water and coast tiles based on passed coastline data.
    * For more details how index is stored look to `WaterIndex` and description of tiles (cells)
    * look to `GroundTile` struct.
    *
-   * For OSM data is usual that land is always left of the coast (in line direction)
-   * and water is always right. But this generator don't require it, just Coast rigth/left
+   * For OSM data is land is always on the left of the coast (in line direction)
+   * and water is always on the right. But this generator don't require it, just Coast right/left
    * state have to be defined correctly.
    *
    * See GenWaterIndex for usage. It is expected that methods are
@@ -127,15 +127,14 @@ namespace osmscout {
      * There may be two kind of "coastlines":
      *  - classic coastlines: define border between land and water (see)
      *  - data polygon: define area where database (and classic coastlines) are defined.
-     *     It usually have right/left state unknown/udefined
+     *     It usually have right/left state unknown/undefined
      */
     struct OSMSCOUT_IMPORT_API Coast
     {
       OSMId              id;
       bool               isArea;
-      double             sortCriteria;
-      Id                 frontNodeId;
-      Id                 backNodeId;
+      Id                 frontNodeId; //!< Id of the first coast node (coords.front().GetId())
+      Id                 backNodeId;  //!< Id of the last coast node (coords.back().GetId())
       std::vector<Point> coast;
       CoastState         left;
       CoastState         right;
@@ -686,7 +685,7 @@ public:
      */
     void SynthesizeCoastlines(Progress& progress,
                               std::list<CoastRef>& coastlines,
-                              std::list<CoastRef>& boundingPolygons);
+                              const std::list<CoastRef>& boundingPolygons);
 
     /**
      * Collects, calculates and generates a number of data about a coastline.
@@ -701,7 +700,7 @@ public:
                                 Data& data);
 
     /**
-     * Markes a cell as "coast", if one of the coastlines intersects with it.
+     * Marks a cell as "coast", if one of the coastlines intersects with it.
      */
     void MarkCoastlineCells(Progress& progress,
                             StateMap& stateMap,
