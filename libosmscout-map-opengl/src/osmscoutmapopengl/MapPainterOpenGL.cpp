@@ -255,8 +255,7 @@ namespace osmscout {
             continue;
           }
 
-          osmscout::GeoBox ringBoundingBox;
-          ring.GetBoundingBox(ringBoundingBox);
+          osmscout::GeoBox ringBoundingBox=ring.GetBoundingBox();
 
           size_t j = i + 1;
           int hasClippings = 0;

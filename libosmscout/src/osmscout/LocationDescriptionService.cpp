@@ -492,8 +492,7 @@ namespace osmscout {
           }
         }
         else {
-          GeoBox ringBBox;
-          ring.GetBoundingBox(ringBBox);
+          GeoBox ringBBox=ring.GetBoundingBox();
           if (!IsAreaAtLeastPartlyInArea(searchEntry.coords,
                                          ring.nodes,
                                          searchEntry.bbox,
@@ -755,7 +754,7 @@ namespace osmscout {
             AdminRegionReverseLookupVisitor::SearchEntry searchEntry;
 
             searchEntry.object=object;
-            ring.GetBoundingBox(searchEntry.bbox);
+            searchEntry.bbox=ring.GetBoundingBox();
 
             searchEntry.coords.resize(ring.nodes.size());
 

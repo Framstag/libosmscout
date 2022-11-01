@@ -197,7 +197,6 @@ namespace osmscout {
 
       bool GetCenter(GeoCoord& center) const;
 
-      void GetBoundingBox(GeoBox& boundingBox) const;
       GeoBox GetBoundingBox() const;
 
       void SetType(const TypeInfoRef& type)

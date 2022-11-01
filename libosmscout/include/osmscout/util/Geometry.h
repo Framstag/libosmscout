@@ -94,46 +94,10 @@ namespace osmscout {
 
   /**
    * \ingroup Geometry
-   * Calculate the bounding box of the (non empty) vector of geo coords
-   *
-   * @param nodes
-   *    The geo coordinates
-   * @param minLon
-   * @param maxLon
-   * @param minLat
-   * @param maxLat
-   */
-  template<typename N>
-  void GetBoundingBox(const std::vector<N>& nodes,
-                      double& minLon,
-                      double& maxLon,
-                      double& minLat,
-                      double& maxLat)
-  {
-    assert(!nodes.empty());
-
-    minLon=nodes[0].GetLon();
-    maxLon=nodes[0].GetLon();
-    minLat=nodes[0].GetLat();
-    maxLat=nodes[0].GetLat();
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-      minLat=std::min(minLat,nodes[i].GetLat());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
-    }
-  }
-
-  /**
-   * \ingroup Geometry
    * Calculate the bounding box of the (non empty) range of geo coords
    *
    * @param [first, last) range of geo coords
-   * @param minLon
-   * @param maxLon
-   * @param minLat
-   * @param maxLat
+   * @param resulting bounding box
    */
   template< class InputIt >
   void GetBoundingBox(const InputIt first,
@@ -164,31 +128,83 @@ namespace osmscout {
    *
    * @param nodes
    *    The geo coordinates
-   * @param minLon
-   * @param maxLon
-   * @param minLat
-   * @param maxLat
+   * @returns
+   *    bounding box
    */
+  template<typename N>
+  GeoBox GetBoundingBox(const std::vector<N>& nodes)
+  {
+    assert(!nodes.empty());
+
+    GeoBox boundingBox;
+
+    for (const auto& node : nodes) {
+      boundingBox.Include(node);
+    }
+
+    return boundingBox;
+  }
+
+  /**
+ * \ingroup Geometry
+ * Calculate the bounding box of the (non empty) vector of geo coords
+ *
+ * @param nodes
+ *    The geo coordinates
+ * @returns
+ *    bounding box
+ */
+  inline GeoBox GetBoundingBox(const std::vector<Point>& nodes)
+  {
+    assert(!nodes.empty());
+
+    GeoBox boundingBox;
+
+    for (const auto& node : nodes) {
+      boundingBox.Include(node.GetCoord());
+    }
+
+    return boundingBox;
+  }
+
+  /**
+ * \ingroup Geometry
+ * Calculate the bounding box of the (non empty) vector of geo coords
+ *
+ * @param nodes
+ *    The geo coordinates
+ * @param
+   *  bounding box to fill
+ */
   template<typename N>
   void GetBoundingBox(const std::vector<N>& nodes,
                       GeoBox& boundingBox)
   {
     assert(!nodes.empty());
 
-    double minLon=nodes[0].GetLon();
-    double maxLon=minLon;
-    double minLat=nodes[0].GetLat();
-    double maxLat=minLat;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-      minLat=std::min(minLat,nodes[i].GetLat());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
+    boundingBox.Invalidate();
+    for (const auto& node : nodes) {
+      boundingBox.Include(node);
     }
+  }
 
-    boundingBox.Set(GeoCoord(minLat,minLon),
-                    GeoCoord(maxLat,maxLon));
+  /**
+ * \ingroup Geometry
+ * Calculate the bounding box of the (non empty) vector of geo coords
+ *
+ * @param nodes
+ *    The geo coordinates
+ * @param bounding box to fill
+ */
+  inline void GetBoundingBox(const std::vector<Point>& nodes,
+                             GeoBox& boundingBox)
+  {
+    assert(!nodes.empty());
+
+    boundingBox.Invalidate();
+    for (const auto& node : nodes) {
+      boundingBox.Include(node.GetCoord());
+    }
   }
 
   /**

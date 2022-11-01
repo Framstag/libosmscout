@@ -161,12 +161,8 @@ namespace osmscout {
       if (bbox.IsValid() || nodes.empty()) {
         return bbox;
       }
-      GeoBox boundingBox;
 
-      osmscout::GetBoundingBox(nodes,
-                               boundingBox);
-
-      return boundingBox;
+      return osmscout::GetBoundingBox(nodes);
     }
 
     /**

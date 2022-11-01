@@ -93,30 +93,6 @@ namespace osmscout {
     return true;
   }
 
-  void Area::Ring::GetBoundingBox(GeoBox& boundingBox) const
-  {
-    assert(!nodes.empty());
-    if (bbox.IsValid()) {
-      boundingBox = bbox;
-      return;
-    }
-
-    double minLon=nodes[0].GetLon();
-    double maxLon=minLon;
-    double minLat=nodes[0].GetLat();
-    double maxLat=minLat;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-      minLat=std::min(minLat,nodes[i].GetLat());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
-    }
-
-    boundingBox.Set(GeoCoord(minLat,minLon),
-                    GeoCoord(maxLat,maxLon));
-  }
-
   GeoBox Area::Ring::GetBoundingBox() const
   {
     assert(!nodes.empty());
@@ -124,20 +100,7 @@ namespace osmscout {
       return bbox;
     }
 
-    double minLon=nodes[0].GetLon();
-    double maxLon=minLon;
-    double minLat=nodes[0].GetLat();
-    double maxLat=minLat;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      minLon=std::min(minLon,nodes[i].GetLon());
-      maxLon=std::max(maxLon,nodes[i].GetLon());
-      minLat=std::min(minLat,nodes[i].GetLat());
-      maxLat=std::max(maxLat,nodes[i].GetLat());
-    }
-
-    return GeoBox(GeoCoord(minLat,minLon),
-                  GeoCoord(maxLat,maxLon));
+    return osmscout::GetBoundingBox(nodes);
   }
 
   bool Area::GetCenter(GeoCoord& center) const
@@ -194,16 +157,7 @@ namespace osmscout {
 
     for (const auto& ring : rings) {
       if (ring.IsTopOuter()) {
-        if (!boundingBox.IsValid()) {
-          ring.GetBoundingBox(boundingBox);
-        }
-        else {
-          GeoBox ringBoundingBox;
-
-          ring.GetBoundingBox(ringBoundingBox);
-
-          boundingBox.Include(ringBoundingBox);
-        }
+        boundingBox.Include(ring.GetBoundingBox());
       }
     }
 
