@@ -268,7 +268,7 @@ namespace osmscout {
   }
 
   void SortNodeDataGenerator::GetDescription(const ImportParameter& /*parameter*/,
-                                         ImportModuleDescription& description) const
+                                             ImportModuleDescription& description) const
   {
     description.SetName("SortNodeDataGenerator");
     description.SetDescription("Sort nodes to improve lookup");

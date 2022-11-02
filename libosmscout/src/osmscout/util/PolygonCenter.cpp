@@ -202,8 +202,7 @@ GeoCoord PolygonCenter(const std::vector<Point>& ring, double precision)
 {
   Polygon polygon;
   polygon.push_back(&ring);
-  GeoBox bbox;
-  GetBoundingBox(ring, bbox);
+  GeoBox bbox=osmscout::GetBoundingBox(ring);
   return PolygonCenter(polygon, bbox, precision);
 }
 }
