@@ -36,6 +36,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Number.h>
+#include <osmscout/util/String.h>
 
 #include <osmscoutimport/GenTextIndex.h>
 
@@ -255,28 +256,20 @@ namespace osmscout
           }
 
           if(nameValue!=nullptr) {
-            std::string keyString;
-
-            if(BuildKeyStr(nameValue->GetName(),
-                           offsetSizeBytes,
-                           node.GetFileOffset(),
-                           refNode,
-                           keyString)) {
-              keyset->push_back(keyString.c_str(),
-                                keyString.length());
-            }
+            AddKeyStr(nameValue->GetName(),
+                      offsetSizeBytes,
+                      node.GetFileOffset(),
+                      refNode,
+                      keyset,
+                      parameter.GetTextIndexVariant());
           }
           if(nameAltValue!=nullptr) {
-            std::string keyString;
-
-            if(BuildKeyStr(nameAltValue->GetNameAlt(),
-                           offsetSizeBytes,
-                           node.GetFileOffset(),
-                           refNode,
-                           keyString)) {
-              keyset->push_back(keyString.c_str(),
-                                keyString.length());
-            }
+            AddKeyStr(nameAltValue->GetNameAlt(),
+                      offsetSizeBytes,
+                      node.GetFileOffset(),
+                      refNode,
+                      keyset,
+                      parameter.GetTextIndexVariant());
           }
         }
       }
@@ -357,42 +350,30 @@ namespace osmscout
         }
 
         if(nameValue!=nullptr) {
-          std::string keyString;
-
-          if(BuildKeyStr(nameValue->GetName(),
-                         offsetSizeBytes,
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString)) {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+          AddKeyStr(nameValue->GetName(),
+                    offsetSizeBytes,
+                    way.GetFileOffset(),
+                    refWay,
+                    keyset,
+                    parameter.GetTextIndexVariant());
         }
 
         if(nameAltValue!=nullptr) {
-          std::string keyString;
-
-          if(BuildKeyStr(nameAltValue->GetNameAlt(),
-                         offsetSizeBytes,
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString)) {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+          AddKeyStr(nameAltValue->GetNameAlt(),
+                    offsetSizeBytes,
+                    way.GetFileOffset(),
+                    refWay,
+                    keyset,
+                    parameter.GetTextIndexVariant());
         }
 
         if(refValue!=nullptr) {
-          std::string keyString;
-
-          if(BuildKeyStr(refValue->GetRef(),
-                         offsetSizeBytes,
-                         way.GetFileOffset(),
-                         refWay,
-                         keyString)) {
-            keyset->push_back(keyString.c_str(),
-                              keyString.length());
-          }
+          AddKeyStr(refValue->GetRef(),
+                    offsetSizeBytes,
+                    way.GetFileOffset(),
+                    refWay,
+                    keyset,
+                    parameter.GetTextIndexVariant());
         }
       }
 
@@ -466,28 +447,20 @@ namespace osmscout
           }
 
           if (nameValue!=nullptr) {
-            std::string keyString;
-
-            if(BuildKeyStr(nameValue->GetName(),
-                           offsetSizeBytes,
-                           area.GetFileOffset(),
-                           refArea,
-                           keyString)) {
-              keyset->push_back(keyString.c_str(),
-                                keyString.length());
-            }
+            AddKeyStr(nameValue->GetName(),
+                      offsetSizeBytes,
+                      area.GetFileOffset(),
+                      refArea,
+                      keyset,
+                      parameter.GetTextIndexVariant());
           }
           if (nameAltValue!=nullptr) {
-            std::string keyString;
-
-            if(BuildKeyStr(nameAltValue->GetNameAlt(),
-                           offsetSizeBytes,
-                           area.GetFileOffset(),
-                           refArea,
-                           keyString)) {
-              keyset->push_back(keyString.c_str(),
-                                keyString.length());
-            }
+            AddKeyStr(nameAltValue->GetNameAlt(),
+                      offsetSizeBytes,
+                      area.GetFileOffset(),
+                      refArea,
+                      keyset,
+                      parameter.GetTextIndexVariant());
           }
         }
       }
@@ -563,4 +536,45 @@ namespace osmscout
 
     return true;
   }
+
+  bool TextIndexGenerator::AddKeyStr(const std::string& text,
+                                     uint8_t offsetSizeBytes,
+                                     FileOffset offset,
+                                     const RefType& reftype,
+                                     marisa::Keyset *keyset,
+                                     ImportParameter::TextIndexVariant variant) const
+  {
+    std::string keyString;
+
+    if (variant==ImportParameter::TextIndexVariant::transliterate) {
+      if (BuildKeyStr(UTF8Transliterate(UTF8NormForLookup(text)),
+                      offsetSizeBytes,
+                      offset,
+                      reftype,
+                      keyString)) {
+        keyset->push_back(keyString.c_str(),
+                          keyString.length());
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    if (variant==ImportParameter::TextIndexVariant::original) {
+      if (BuildKeyStr(UTF8NormForLookup(text),
+                      offsetSizeBytes,
+                      offset,
+                      refNode,
+                      keyString)) {
+        keyset->push_back(keyString.c_str(),
+                          keyString.length());
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+  }
+
+
 }
