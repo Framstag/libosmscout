@@ -466,7 +466,7 @@ namespace osmscout {
     }
 
     /**
-     * Returns the on-screen length of the path fro the first to the llast element
+     * Returns the on-screen length of the path from the first to the last element
      * @return length of path
      */
     double GetLength() const
