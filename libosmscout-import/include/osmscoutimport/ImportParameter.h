@@ -104,6 +104,7 @@ public:
   {
     original      = 0, // store original names
     transliterate = 1, // store transliterated form of names
+    both          = 2, // store original and transliterated form of names
   };
 
 private:

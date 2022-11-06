@@ -62,73 +62,82 @@ static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
 
 std::string TextIndexVariantStr(osmscout::ImportParameter::TextIndexVariant variant)
 {
-  return (variant==osmscout::ImportParameter::TextIndexVariant::transliterate ?
-          "transliterate" : "original");
+  switch (variant) {
+    case osmscout::ImportParameter::TextIndexVariant::original:
+      return "original";
+    case osmscout::ImportParameter::TextIndexVariant::transliterate:
+      return "transliterate";
+    case osmscout::ImportParameter::TextIndexVariant::both:
+      return "both";
+  }
+  assert(false);
+  return "unknown";
 }
 
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [*.osm|*.pbf]..." << std::endl;
-  std::cout << " -h|--help                                  show this help and exit" << std::endl;
-  std::cout << " --data-version                             print output data version and exit" << std::endl;
-  std::cout << " -d                                         show debug output during import" << std::endl;
-  std::cout << " -s <number>                                set starting processing step" << std::endl;
-  std::cout << " -e <number>                                set final processing step" << std::endl;
-  std::cout << " --typefile <*.ost>                         path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
-  std::cout << " --destinationDirectory <path>              destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+  std::cout << " -h|--help                            show this help and exit" << std::endl;
+  std::cout << " --data-version                       print output data version and exit" << std::endl;
+  std::cout << " -d                                   show debug output during import" << std::endl;
+  std::cout << " -s <number>                          set starting processing step" << std::endl;
+  std::cout << " -e <number>                          set final processing step" << std::endl;
+  std::cout << " --typefile <*.ost>                   path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
+  std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
   std::cout << std::endl;
-  std::cout << " --bounding-polygon <*.poly>                optional polygon file containing the bounding polygon of the import area" << std::endl;
-  std::cout << std::endl;
-
-  std::cout << " --router <router description>              definition of a router (default: car,bicycle,foot:router)" << std::endl;
+  std::cout << " --bounding-polygon <*.poly>          optional polygon file containing the bounding polygon of the import area" << std::endl;
   std::cout << std::endl;
 
-  std::cout << " --strictAreas true|false                   assure that areas are simple (default: " << osmscout::BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
-
-  std::cout << " --processingQueueSize <number>             size of of the processing worker queues (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
+  std::cout << " --router <router description>        definition of a router (default: car,bicycle,foot:router)" << std::endl;
   std::cout << std::endl;
 
-  std::cout << " --numericIndexPageSize <number>            size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
+  std::cout << " --strictAreas true|false             assure that areas are simple (default: " << osmscout::BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
 
-  std::cout << " --rawCoordBlockSize <number>               number of raw coords resolved in block (default: " << parameter.GetRawCoordBlockSize() << ")" << std::endl;
-
-  std::cout << " --rawNodeDataMemoryMaped true|false        memory maped raw node data file access (default: " << osmscout::BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
-
-  std::cout << " --rawWayIndexMemoryMaped true|false        memory maped raw way index file access (default: " << osmscout::BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawWayDataMemoryMaped true|false         memory maped raw way data file access (default: " << osmscout::BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawWayIndexCacheSize <number>            raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
-  std::cout << " --rawWayBlockSize <number>                 number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
-
-  std::cout << " --noSort                                   do not sort objects" << std::endl;
-  std::cout << " --sortBlockSize <number>                   size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
-
-  std::cout << " --coordDataMemoryMaped true|false          memory mapped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --coordIndexCacheSize <number>             coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
-  std::cout << " --coordBlockSize <number>                  number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
-
-  std::cout << " --relMaxWays <number>                      maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
-  std::cout << " --relMaxCoords <number>                    maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
-
-  std::cout << " --areaDataMemoryMaped true|false           memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --areaDataCacheSize <number>               area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
-
-  std::cout << " --wayDataMemoryMaped true|false            memory maped way data file access (default: " << osmscout::BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --wayDataCacheSize <number>                way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
-
-  std::cout << " --routeNodeBlockSize <number>              number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
+  std::cout << " --processingQueueSize <number>       size of of the processing worker queues (default: " << parameter.GetProcessingQueueSize() << ")" << std::endl;
   std::cout << std::endl;
-  std::cout << " --langOrder <#|lang1[,#|lang2]..>          language order when parsing lang[:language] and place_name[:language] tags" << std::endl
-            << "                                            # is the default language (no :language) (default: #)" << std::endl;
-  std::cout << " --altLangOrder <#|lang1[,#|lang2]..>       same as --langOrder for a second alternate language (default: none)" << std::endl;
+
+  std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
+
+  std::cout << " --rawCoordBlockSize <number>         number of raw coords resolved in block (default: " << parameter.GetRawCoordBlockSize() << ")" << std::endl;
+
+  std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << osmscout::BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
+
+  std::cout << " --rawWayIndexMemoryMaped true|false  memory maped raw way index file access (default: " << osmscout::BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayDataMemoryMaped true|false   memory maped raw way data file access (default: " << osmscout::BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
+  std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
+
+  std::cout << " --noSort                             do not sort objects" << std::endl;
+  std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
+
+  std::cout << " --coordDataMemoryMaped true|false    memory mapped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
+  std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
+
+  std::cout << " --relMaxWays <number>                maximum of ways for a relation to get resolved (default: " << parameter.GetRelMaxWays() << ")" << std::endl;
+  std::cout << " --relMaxCoords <number>              maximum of coords for a relation to get resolved (default: " << parameter.GetRelMaxCoords() << ")" << std::endl;
+
+  std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << osmscout::BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
+
+  std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << osmscout::BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
+
+  std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
   std::cout << std::endl;
-  std::cout << " --maxAdminLevel <number>                   maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
+  std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
+            << "                                      efault language (no :language) (default: #)" << std::endl;
+  std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << std::endl;
-  std::cout << " --eco true|false                           do delete temporary fiels ASAP" << std::endl;
-  std::cout << " --delete-temporary-files true|false        deletes all temporary files after execution of the importer" << std::endl;
-  std::cout << " --delete-debugging-files true|false        deletes all debugging files after execution of the importer" << std::endl;
-  std::cout << " --delete-analysis-files true|false         deletes all analysis files after execution of the importer" << std::endl;
-  std::cout << " --delete-report-files true|false           deletes all report files after execution of the importer" << std::endl;
-  std::cout << " --textIndexVariant transliterate|original  store transliterated or original strings to string index (default: " + TextIndexVariantStr(parameter.GetTextIndexVariant()) + ")" << std::endl;
+  std::cout << " --maxAdminLevel <number>             maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --eco true|false                     do delete temporary fiels ASAP" << std::endl;
+  std::cout << " --delete-temporary-files true|false  deletes all temporary files after execution of the importer" << std::endl;
+  std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
+  std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
+  std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
+  std::cout << " --textIndexVariant transliterate|original|both" << std::endl;
+  std::cout << "                                      store transliterated, original or both strings to string index (default: " + TextIndexVariantStr(parameter.GetTextIndexVariant()) + ")" << std::endl;
 }
 
 osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
@@ -256,6 +265,9 @@ std::optional<osmscout::ImportParameter::TextIndexVariant> ParseTextIndexVariant
   }
   if (argument == "original") {
     return std::make_optional(osmscout::ImportParameter::TextIndexVariant::original);
+  }
+  if (argument == "both") {
+    return std::make_optional(osmscout::ImportParameter::TextIndexVariant::both);
   }
 
   std::cerr << "Uknown '" << argv[parameterIndex] << "' parameter '" << argument << "'" << std::endl;

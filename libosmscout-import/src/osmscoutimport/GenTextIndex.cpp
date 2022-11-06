@@ -544,9 +544,8 @@ namespace osmscout
                                      marisa::Keyset *keyset,
                                      ImportParameter::TextIndexVariant variant) const
   {
-    std::string keyString;
-
-    if (variant==ImportParameter::TextIndexVariant::transliterate) {
+    if (variant==ImportParameter::TextIndexVariant::transliterate || variant==ImportParameter::TextIndexVariant::both) {
+      std::string keyString;
       if (BuildKeyStr(UTF8Transliterate(UTF8NormForLookup(text)),
                       offsetSizeBytes,
                       offset,
@@ -554,13 +553,13 @@ namespace osmscout
                       keyString)) {
         keyset->push_back(keyString.c_str(),
                           keyString.length());
-        return true;
       } else {
         return false;
       }
     }
 
-    if (variant==ImportParameter::TextIndexVariant::original) {
+    if (variant==ImportParameter::TextIndexVariant::original || variant==ImportParameter::TextIndexVariant::both) {
+      std::string keyString;
       if (BuildKeyStr(UTF8NormForLookup(text),
                       offsetSizeBytes,
                       offset,
@@ -568,12 +567,12 @@ namespace osmscout
                       keyString)) {
         keyset->push_back(keyString.c_str(),
                           keyString.length());
-        return true;
       } else {
         return false;
       }
     }
 
+    return true;
   }
 
 
