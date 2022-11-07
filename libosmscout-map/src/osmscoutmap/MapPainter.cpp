@@ -1033,12 +1033,17 @@ constexpr bool debugGroundTiles = false;
 
         double symbolWidth=symbolBoundingBox.GetWidth()*symbolScale;
         double length=data.coordRange.GetLength();
-        size_t countSymbols=(length-symbolSpace)/(symbolWidth+symbolSpace);
+        if (length < (symbolWidth+symbolSpace)) {
+          continue; // too short way even for single symbol and required space
+        }
+        assert((symbolWidth+symbolSpace)>0);
+        size_t countSymbols=std::max(size_t(1), size_t((length - symbolSpace) / (symbolWidth + symbolSpace)));
         size_t labelCountExp=log2(countSymbols);
 
         countSymbols=pow(2, labelCountExp);
 
         double space = (length-countSymbols*symbolWidth) / (countSymbols+1);
+        assert(space>0);
 
         ContourSymbolData symbolData;
 

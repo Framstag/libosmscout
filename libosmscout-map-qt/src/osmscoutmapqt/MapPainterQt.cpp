@@ -576,6 +576,8 @@ namespace osmscout {
     double symbolWidth=symbol.GetWidth(projection);
     double space=data.symbolSpace;
     double offset=data.symbolOffset;
+    assert(space>0);
+    assert(offset>0);
 
     bool             isClosed=false;
     Vertex2D         origin;
