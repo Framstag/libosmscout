@@ -109,11 +109,17 @@ namespace osmscout
                                bool searchLocations,
                                bool searchRegions,
                                bool searchOther,
+                               bool transliterate,
                                ResultsMap& results) const
   {
     results.clear();
 
-    if (query.empty()) {
+    std::string lookupStr=UTF8NormForLookup(query);
+    if (transliterate) {
+      lookupStr=UTF8Transliterate(lookupStr);
+    }
+
+    if (lookupStr.empty()) {
       return true;
     }
 
@@ -129,8 +135,8 @@ namespace osmscout
         marisa::Agent agent;
 
         try {
-          agent.set_query(query.c_str(),
-                          query.length());
+          agent.set_query(lookupStr.c_str(),
+                          lookupStr.length());
           while (tries[i].trie->predictive_search(agent)) {
             std::string   result(agent.key().ptr(),
                                  agent.key().length());
