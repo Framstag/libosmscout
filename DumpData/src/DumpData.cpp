@@ -805,7 +805,12 @@ static void DumpArea(const osmscout::AreaRef& area,
       DumpIndent(ident);
       std::cout << "boundingBox: " << boundingBox.GetDisplayText() << std::endl;
       DumpIndent(ident);
-      std::cout << "center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+      std::cout << "center of bounding box: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
+
+      if (area->rings[r].center) {
+        DumpIndent(ident);
+        std::cout << "visual center: " << area->rings[r].center.value().GetDisplayText() << std::endl;
+      }
     }
 
     DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
