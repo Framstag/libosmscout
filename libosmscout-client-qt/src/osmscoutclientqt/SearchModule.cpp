@@ -166,6 +166,7 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
     textSearch.Search(searchPattern.toStdString(),
                       /*searchPOIs*/ true, /*searchLocations*/ true,
                       /*searchRegions*/ true, /*searchOther*/ true,
+                      /*transliterate*/ true,
                       resultsTxt);
 
     for(const auto &e: resultsTxt) {

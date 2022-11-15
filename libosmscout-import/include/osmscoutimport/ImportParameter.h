@@ -100,6 +100,13 @@ public:
     automatic = 2, // disable land detection when data polygon is known
   };
 
+  enum class TextIndexVariant
+  {
+    original      = 0, // store original names
+    transliterate = 1, // store transliterated form of names
+    both          = 2, // store original and transliterated form of names
+  };
+
 private:
   std::list<std::string>       mapfiles;                 //<! Name of the files containing map data (either *.osm or *.osm.pbf)
   std::string                  typefile;                 //<! Name and path ff type definition file (map.ost.xml)
@@ -179,14 +186,16 @@ private:
   //<! place_name[:lang] tags
   std::vector<std::string>     altLangOrder;             //<! the same as langOrder but for a alt (second) lang
 
-  size_t                       maxAdminLevel;            //<! Maximum admin level that gets evalutated
+  size_t                       maxAdminLevel;            //<! Maximum admin level that gets evaluated
 
   OSMId                        firstFreeOSMId;           //<! first id available for synthetic objects (parsed polygon files)
   size_t                       fillWaterArea;            //<! count of tiles around coastlines flooded by water
 
   PreprocessorFactoryRef       preprocessorFactory;      //<! Optional preprocessor factory to inject custom preprocessors
 
-  public:
+  TextIndexVariant             textIndexVariant;
+
+public:
   ImportParameter();
   virtual ~ImportParameter();
 
@@ -366,6 +375,9 @@ private:
                                                 PreprocessorCallback& callback) const;
 
   void SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel);
+
+  void SetTextIndexVariant(TextIndexVariant textIndexVariant);
+  TextIndexVariant GetTextIndexVariant() const;
 
   static size_t GetDefaultStartStep();
   static size_t GetDefaultEndStep();

@@ -25,6 +25,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <optional>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
@@ -57,6 +58,20 @@ static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
   }
 
   return result;
+}
+
+std::string TextIndexVariantStr(osmscout::ImportParameter::TextIndexVariant variant)
+{
+  switch (variant) {
+    case osmscout::ImportParameter::TextIndexVariant::original:
+      return "original";
+    case osmscout::ImportParameter::TextIndexVariant::transliterate:
+      return "transliterate";
+    case osmscout::ImportParameter::TextIndexVariant::both:
+      return "both";
+  }
+  assert(false);
+  return "unknown";
 }
 
 void DumpHelp(osmscout::ImportParameter& parameter)
@@ -95,7 +110,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --noSort                             do not sort objects" << std::endl;
   std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
 
-  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordDataMemoryMaped true|false    memory mapped coord data file access (default: " << osmscout::BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --coordIndexCacheSize <number>       coord index cache size (default: " << parameter.GetCoordIndexCacheSize() << ")" << std::endl;
   std::cout << " --coordBlockSize <number>            number of coords resolved in block (default: " << parameter.GetCoordBlockSize() << ")" << std::endl;
 
@@ -111,7 +126,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
   std::cout << std::endl;
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
-            << "                                      # is the default language (no :language) (default: #)" << std::endl;
+            << "                                      efault language (no :language) (default: #)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << std::endl;
   std::cout << " --maxAdminLevel <number>             maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
@@ -121,6 +136,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --delete-debugging-files true|false  deletes all debugging files after execution of the importer" << std::endl;
   std::cout << " --delete-analysis-files true|false   deletes all analysis files after execution of the importer" << std::endl;
   std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
+  std::cout << " --textIndexVariant transliterate|original|both" << std::endl;
+  std::cout << "                                      store transliterated, original or both strings to string index (default: " + TextIndexVariantStr(parameter.GetTextIndexVariant()) + ")" << std::endl;
 }
 
 osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
@@ -228,6 +245,35 @@ std::vector<std::string> ParseLangOrderArgument(int argc,
     return langVec;
 }
 
+std::optional<osmscout::ImportParameter::TextIndexVariant> ParseTextIndexVariant(int argc,
+                                                                                 char* argv[],
+                                                                                 int& currentIndex)
+{
+  int parameterIndex=currentIndex;
+  int argumentIndex=currentIndex+1;
+
+  currentIndex+=2;
+
+  if (argumentIndex>=argc) {
+    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return std::nullopt;
+  }
+
+  std::string argument(argv[argumentIndex]);
+  if (argument == "transliterate") {
+    return std::make_optional(osmscout::ImportParameter::TextIndexVariant::transliterate);
+  }
+  if (argument == "original") {
+    return std::make_optional(osmscout::ImportParameter::TextIndexVariant::original);
+  }
+  if (argument == "both") {
+    return std::make_optional(osmscout::ImportParameter::TextIndexVariant::both);
+  }
+
+  std::cerr << "Uknown '" << argv[parameterIndex] << "' parameter '" << argument << "'" << std::endl;
+  return std::nullopt;
+}
+
 static void InitializeLocale(osmscout::Progress& progress)
 {
   try {
@@ -329,6 +375,9 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
   progress.Info(std::string("Eco: ")+
                 (parameter.IsEco() ? "true" : "false"));
+
+  progress.Info(std::string("TextIndexVariant: ") +
+                TextIndexVariantStr(parameter.GetTextIndexVariant()));
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -866,6 +915,19 @@ int main(int argc, char* argv[])
                                        argv,
                                        i,
                                        deleteReport)) {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--textIndexVariant")==0) {
+      std::optional<osmscout::ImportParameter::TextIndexVariant> textIndexVariant;
+
+      textIndexVariant = ParseTextIndexVariant(argc,
+                                               argv,
+                                               i);
+      if (textIndexVariant) {
+        parameter.SetTextIndexVariant(*textIndexVariant);
+      }
+      else {
         parameterError=true;
       }
     }

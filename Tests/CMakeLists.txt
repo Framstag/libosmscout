@@ -50,6 +50,34 @@ else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
 
+#---- TextLookupTest
+if(MARISA_FOUND)
+	osmscout_demo_project(NAME TextLookupTest SOURCES src/TextLookupTest.cpp TARGET OSMScout::OSMScout OSMScout::OSMScout)
+
+	add_test(NAME TextLookupTest-vysoka
+		COMMAND TextLookupTest
+		--expected-results 5
+		"${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
+		"vysoka"
+		)
+
+	add_test(NAME TextLookupTest-Vysoká
+		COMMAND TextLookupTest
+		--expected-results 5
+		"${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
+		"Vysoká"
+		)
+
+	add_test(NAME TextLookupTest-bosyne
+		COMMAND TextLookupTest
+		--expected-results 1
+		"${CMAKE_CURRENT_SOURCE_DIR}/data/testregion"
+		"bosyne"
+		)
+else()
+	message("Skip TextLookupTest test, Marisa library is missing.")
+endif()
+
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
 	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)

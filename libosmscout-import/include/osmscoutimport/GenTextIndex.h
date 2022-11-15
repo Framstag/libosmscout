@@ -66,6 +66,13 @@ namespace osmscout
                      const RefType& reftype,
                      std::string& keyString) const;
 
+    bool AddKeyStr(const std::string& text,
+                   uint8_t offsetSizeBytes,
+                   FileOffset offset,
+                   const RefType& reftype,
+                   marisa::Keyset *keyset,
+                   ImportParameter::TextIndexVariant variant) const;
+
     // keysets used to store text data and generate tries
     marisa::Keyset  keysetPoi;
     marisa::Keyset  keysetLocation;

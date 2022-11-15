@@ -65,6 +65,7 @@ namespace osmscout
                 bool searchLocations,
                 bool searchRegions,
                 bool searchOther,
+                bool transliterate,
                 ResultsMap& results) const;
 
   private:

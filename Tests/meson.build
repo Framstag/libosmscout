@@ -359,6 +359,15 @@ CoordBufferTest = executable('CoordBufferTest',
            link_with: [osmscoutmap, osmscout],
            install: false)
 
+if marisaDep.found()
+    TextLookupTest = executable('TextLookupTest',
+               'src/TextLookupTest.cpp',
+               include_directories: [osmscoutIncDir],
+               dependencies: [mathDep],
+               link_with: [osmscout],
+               install: false)
+endif
+
 ostandossEnv = environment()
 
 ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
@@ -381,6 +390,23 @@ test('Check threaded database', ThreadedDatabase, args : [
         '--iterations', '1000',
         meson.current_source_dir() + '/data/testregion',
         meson.current_source_dir() + '/../stylesheets/standard.oss'])
+
+if marisaDep.found()
+    test('Check text lookup - vysoka', TextLookupTest, args : [
+            '--expected-results', '5',
+            meson.current_source_dir() + '/data/testregion',
+            'vysoka'])
+
+    test('Check text lookup - Vysoká', TextLookupTest, args : [
+            '--expected-results', '5',
+            meson.current_source_dir() + '/data/testregion',
+            'Vysoká'])
+
+    test('Check text lookup - bosyne', TextLookupTest, args : [
+            '--expected-results', '1',
+            meson.current_source_dir() + '/data/testregion',
+            'bosyne'])
+endif
 
 test('Check SunriseSunset utility', SunriseSunset)
 test('Check encoding of numbers', EncodeNumber)

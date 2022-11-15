@@ -103,7 +103,8 @@ ImportParameter::ImportParameter()
       langOrder({"#"}),
       maxAdminLevel(10),
       firstFreeOSMId(((OSMId)1) << ((sizeof(OSMId)*8)-2)),
-      fillWaterArea(20)
+      fillWaterArea(20),
+      textIndexVariant(TextIndexVariant::transliterate)
 {
   // no code
 }
@@ -588,6 +589,16 @@ void ImportParameter::SetAreaNodeBitmapLimit(uint16_t areaNodeBitmapLimit)
 void ImportParameter::SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel)
 {
   this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
+}
+
+void ImportParameter::SetTextIndexVariant(TextIndexVariant textIndexVariant)
+{
+  this->textIndexVariant=textIndexVariant;
+}
+
+ImportParameter::TextIndexVariant ImportParameter::GetTextIndexVariant() const
+{
+  return textIndexVariant;
 }
 
 void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)

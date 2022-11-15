@@ -154,7 +154,7 @@ int main (int argc, char *argv[])
     // search using the text input as the query
     osmscout::TextSearchIndex::ResultsMap results;
 
-    textSearch.Search(osmscout::LocaleStringToUTF8String(searchInput),true,true,true,true,results);
+    textSearch.Search(osmscout::LocaleStringToUTF8String(searchInput),true,true,true,true,true,results);
 
     if(results.empty()) {
       std::cout << "No results found." << std::endl;
