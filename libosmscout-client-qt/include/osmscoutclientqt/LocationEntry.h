@@ -44,6 +44,7 @@ class OSMSCOUT_CLIENT_QT_API LocationEntry : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(QString label      READ getLabel      CONSTANT)
+  Q_PROPERTY(QString altName    READ getAltName    CONSTANT)
   Q_PROPERTY(QString type       READ getTypeString CONSTANT)
   Q_PROPERTY(QString objectType READ getObjectType CONSTANT)
   Q_PROPERTY(double  lat        READ getLat        CONSTANT)
@@ -59,6 +60,7 @@ public:
 private:
   Type                           type;
   QString                        label;
+  QString                        altName; // name in alternative language
   QString                        objectType;
   QList<AdminRegionInfoRef>      adminRegionList;
   QString                        database;
@@ -69,6 +71,7 @@ private:
 public:
   LocationEntry(Type type,
                 const QString& label,
+                const QString& altName,
                 const QString& objectType,
                 const QList<AdminRegionInfoRef>& adminRegionList,
                 const QString database,
@@ -104,6 +107,7 @@ public:
   QString getTypeString() const;
   QString getObjectType() const;
   QString getLabel() const;
+  QString getAltName() const;
   QList<AdminRegionInfoRef> getAdminRegionList() const;
   QString getDatabase() const;
   osmscout::GeoCoord getCoord() const;

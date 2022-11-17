@@ -111,6 +111,7 @@ LocationEntry* OverlayObject::getBBoxAsLocation() const
   return new LocationEntry(LocationEntry::Type::typeNone,
                            "bbox",
                            "bbox",
+                           "",
                            QList<AdminRegionInfoRef>(),
                            "",
                            bbox.GetCenter(),

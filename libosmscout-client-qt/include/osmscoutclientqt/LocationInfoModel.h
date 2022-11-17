@@ -78,7 +78,8 @@ public:
         PhoneRole = Qt::UserRole+10,
         AddressLocationRole = Qt::UserRole+11,
         AddressNumberRole = Qt::UserRole+12,
-        IndexedAdminRegionRole = Qt::UserRole+13
+        IndexedAdminRegionRole = Qt::UserRole+13,
+        AltLangName = Qt::UserRole+14
     };
     Q_ENUM(Roles)
 

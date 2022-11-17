@@ -37,6 +37,7 @@ class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
   Q_OBJECT
 
   friend class SearchRunnable;
+  friend class SearchLocationsRunnable;
 
 public:
 
