@@ -167,7 +167,8 @@ public:
     DistanceRole = Qt::UserRole +5,
     BearingRole = Qt::UserRole +6,
     LocationObjectRole = Qt::UserRole +7,
-    IndexedAdminRegionRole = Qt::UserRole+8
+    IndexedAdminRegionRole = Qt::UserRole +8,
+    AltLangName = Qt::UserRole +9
   };
 
 public:

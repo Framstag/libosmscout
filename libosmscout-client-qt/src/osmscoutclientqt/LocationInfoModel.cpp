@@ -119,6 +119,7 @@ QHash<int, QByteArray> LocationInfoModel::roleNames() const
     roles[AddressLocationRole] = "addressLocation";
     roles[AddressNumberRole] = "addressNumber";
     roles[IndexedAdminRegionRole] = "indexedAdminRegion";
+    roles[AltLangName]="altLangName";
 
     return roles;
 }
@@ -201,6 +202,7 @@ void LocationInfoModel::addToModel(const QString database,
   QString postalCode;
   QString website;
   QString phone;
+  QString altName;
   if (place.GetObjectFeatures()){
     for (const auto& featureInstance :place.GetObjectFeatures()->GetType()->GetFeatures()){
       if (place.GetObjectFeatures()->HasFeature(featureInstance.GetIndex())){
@@ -208,19 +210,19 @@ void LocationInfoModel::addToModel(const QString database,
         if (feature->HasValue()){
           osmscout::FeatureValue *value=place.GetObjectFeatures()->GetValue(featureInstance.GetIndex());
 
-          const osmscout::PostalCodeFeatureValue *postalCodeValue = dynamic_cast<const osmscout::PostalCodeFeatureValue*>(value);
-          if (postalCodeValue!=nullptr){
+
+          if (const osmscout::PostalCodeFeatureValue *postalCodeValue = dynamic_cast<const osmscout::PostalCodeFeatureValue*>(value);
+              postalCodeValue!=nullptr){
             postalCode = QString::fromStdString(postalCodeValue->GetPostalCode());
-          }
-
-          const osmscout::WebsiteFeatureValue *websiteValue = dynamic_cast<const osmscout::WebsiteFeatureValue*>(value);
-          if (websiteValue!=nullptr){
+          } else if (const osmscout::WebsiteFeatureValue *websiteValue = dynamic_cast<const osmscout::WebsiteFeatureValue*>(value);
+                     websiteValue!=nullptr){
             website = QString::fromStdString(websiteValue->GetWebsite());
-          }
-
-          const osmscout::PhoneFeatureValue *phoneValue = dynamic_cast<const osmscout::PhoneFeatureValue*>(value);
-          if (phoneValue!=nullptr){
+          } else if (const osmscout::PhoneFeatureValue *phoneValue = dynamic_cast<const osmscout::PhoneFeatureValue*>(value);
+                     phoneValue!=nullptr){
             phone = QString::fromStdString(phoneValue->GetPhone());
+          } else if (const osmscout::NameAltFeatureValue *altNameValue = dynamic_cast<const osmscout::NameAltFeatureValue*>(value);
+                     altNameValue != nullptr){
+            altName = QString::fromStdString(altNameValue->GetNameAlt());
           }
         }
       }
@@ -246,6 +248,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[AddressLocationRole] = addressLocation;
   obj[AddressNumberRole] = addressNumber;
   obj[IndexedAdminRegionRole] = LookupModule::IndexedAdminRegionNames(regions, settings->GetShowAltLanguage());
+  obj[AltLangName] = altName;
 
   model << obj;
 

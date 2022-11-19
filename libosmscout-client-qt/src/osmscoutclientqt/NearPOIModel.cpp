@@ -96,6 +96,8 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     case LocationObjectRole:
       // QML will take ownership
       return QVariant::fromValue(new LocationEntry(*location));
+    case AltLangName:
+      return location->getAltName();
     default:
       break;
   }
@@ -124,6 +126,7 @@ QHash<int, QByteArray> NearPOIModel::roleNames() const
   roles[DistanceRole]="distance";
   roles[BearingRole]="bearing";
   roles[LocationObjectRole]="locationObject";
+  roles[AltLangName]="altLangName";
 
   return roles;
 }

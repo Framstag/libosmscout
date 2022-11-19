@@ -372,6 +372,8 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
     return QVariant::fromValue(new LocationEntry(*location));
   case IndexedAdminRegionRole:
       return LookupModule::IndexedAdminRegionNames(location->getAdminRegionList(), settings->GetShowAltLanguage());;
+  case AltLangName:
+    return location->getAltName();
   default:
     break;
   }
@@ -401,6 +403,7 @@ QHash<int, QByteArray> LocationListModel::roleNames() const
   roles[BearingRole]="bearing";
   roles[LocationObjectRole]="locationObject";
   roles[IndexedAdminRegionRole]="indexedAdminRegion";
+  roles[AltLangName]="altLangName";
 
   return roles;
 }

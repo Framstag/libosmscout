@@ -27,6 +27,7 @@ namespace osmscout {
 
 LocationEntry::LocationEntry(Type type,
                              const QString& label,
+                             const QString& altName,
                              const QString& objectType,
                              const QList<AdminRegionInfoRef>& adminRegionList,
                              const QString database,
@@ -36,6 +37,7 @@ LocationEntry::LocationEntry(Type type,
     : QObject(parent),
       type(type),
       label(label),
+      altName(altName),
       objectType(objectType),
       adminRegionList(adminRegionList),
       database(database),
@@ -46,8 +48,8 @@ LocationEntry::LocationEntry(Type type,
 }
 
 LocationEntry::LocationEntry(const QString& label,
-                   const osmscout::GeoCoord& coord,
-                   QObject* parent)
+                             const osmscout::GeoCoord& coord,
+                             QObject* parent)
     : QObject(parent),
       type(typeCoordinate),
       label(label),
@@ -67,6 +69,7 @@ LocationEntry::LocationEntry(const LocationEntry& other)
  : QObject(other.parent()), // make copy of Qt ownership
    type(other.type),
    label(other.label),
+   altName(other.altName),
    objectType(other.objectType),
    adminRegionList(other.adminRegionList),
    database(other.database),
@@ -82,6 +85,7 @@ LocationEntry& LocationEntry::operator=(const LocationEntry& other)
     // Qt ownership is unchanged
     type=other.type;
     label=other.label;
+    altName=other.altName;
     objectType=other.objectType;
     adminRegionList=other.adminRegionList;
     database=other.database;
@@ -95,6 +99,7 @@ LocationEntry::LocationEntry(LocationEntry&& other)
  : QObject(other.parent()), // make copy of Qt ownership
    type(std::move(other.type)),
    label(std::move(other.label)),
+   altName(std::move(other.altName)),
    objectType(std::move(other.objectType)),
    adminRegionList(std::move(other.adminRegionList)),
    database(std::move(other.database)),
@@ -109,6 +114,7 @@ LocationEntry& LocationEntry::operator=(LocationEntry&& other) {
     setParent(other.parent()); // make copy of Qt ownership
     type=std::move(other.type);
     label=std::move(other.label);
+    altName=std::move(other.altName);
     objectType=std::move(other.objectType);
     adminRegionList=std::move(other.adminRegionList);
     database=std::move(other.database);
@@ -179,6 +185,11 @@ QString LocationEntry::getDatabase() const
 QString LocationEntry::getLabel() const
 {
     return label;
+}
+
+QString LocationEntry::getAltName() const
+{
+  return altName;
 }
 
 osmscout::GeoCoord LocationEntry::getCoord() const

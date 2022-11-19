@@ -43,6 +43,8 @@ class OSMSCOUT_CLIENT_QT_API SearchRunnable : public QRunnable {
 protected:
   SearchModule *searchModule;
   DBInstanceRef db;
+  std::shared_ptr<NameFeatureValueReader> nameReader; // when non-null, object name is used as a title
+  std::shared_ptr<NameAltFeatureValueReader> altNameReader; // when non-null, alternative name is set to location
   QString searchPattern;
   int limit;
   osmscout::BreakerRef breaker;
@@ -59,28 +61,24 @@ public:
   std::future<bool> getFuture();
 
 protected:
-  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                          const QString &title,
-                          DBInstanceRef &db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations);
-
-  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
-                          DBInstanceRef &db,
-                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
-                          QList<LocationEntry> &locations);
-
-  bool GetObjectDetails(DBInstanceRef &db,
-                        const osmscout::ObjectFileRef& object,
+  bool GetObjectDetails(const osmscout::ObjectFileRef& object,
                         QString &typeName,
+                        QString &name,
+                        QString &altName,
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
 
-  bool GetObjectDetails(DBInstanceRef &db,
-                        const std::vector<osmscout::ObjectFileRef>& objects,
+  bool GetObjectDetails(const std::vector<osmscout::ObjectFileRef>& objects,
                         QString &typeName,
+                        QString &name,
+                        QString &altName,
                         osmscout::GeoCoord& coordinates,
                         osmscout::GeoBox& bbox);
+
+    void GetObjectNames(const FeatureValueBuffer &features,
+                        QString &typeName,
+                        QString &name,
+                        QString &altName);
 };
 
 /**
@@ -108,6 +106,10 @@ private:
                        int limit,
                        osmscout::BreakerRef &breaker,
                        std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
+
+  bool BuildLocationEntry(const osmscout::LocationSearchResult::Entry &entry,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations);
 };
 
 /**
@@ -129,6 +131,18 @@ private:
                       const QString &searchPattern,
                       int limit,
                       std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap);
+
+  /**
+   * @param object
+   * @param title location title
+   * @param adminRegionMap cached map of administrative regions
+   * @param locations list where new location is added
+   * @return true on success
+   */
+  bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
+                          const QString &title,
+                          std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
+                          QList<LocationEntry> &locations);
 };
 
 /**
