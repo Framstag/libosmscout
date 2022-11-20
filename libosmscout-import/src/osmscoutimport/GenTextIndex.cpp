@@ -563,7 +563,7 @@ namespace osmscout
       if (BuildKeyStr(UTF8NormForLookup(text),
                       offsetSizeBytes,
                       offset,
-                      refNode,
+                      reftype,
                       keyString)) {
         keyset->push_back(keyString.c_str(),
                           keyString.length());
