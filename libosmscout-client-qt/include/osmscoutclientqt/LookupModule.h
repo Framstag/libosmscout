@@ -64,6 +64,7 @@ public:
     QString type; // node / way / area
     QString objectType;
     QString name;
+    QString altLangName;
     QString phone;
     QString website;
     QString addressNumber;
@@ -177,24 +178,27 @@ private:
     info.objectType=QString::fromStdString(objectType->GetName());
     info.id=ref.GetFileOffset();
 
-    const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
-    if (name!=nullptr){
+    if (const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>(); name!=nullptr){
       info.name=QString::fromStdString(name->GetLabel(Locale(), 0));
     }
-    const osmscout::PhoneFeatureValue *phone=features.findValue<osmscout::PhoneFeatureValue>();
-    if (phone!=nullptr){
+
+    if (const osmscout::NameAltFeatureValue *nameAlt=features.findValue<osmscout::NameAltFeatureValue>(); nameAlt!=nullptr){
+      info.altLangName=QString::fromStdString(nameAlt->GetLabel(Locale(), 0));
+    }
+
+    if (const osmscout::PhoneFeatureValue *phone=features.findValue<osmscout::PhoneFeatureValue>(); phone!=nullptr){
       info.phone=QString::fromStdString(phone->GetPhone());
     }
-    const osmscout::WebsiteFeatureValue *website=features.findValue<osmscout::WebsiteFeatureValue>();
-    if (website!=nullptr){
+
+    if (const osmscout::WebsiteFeatureValue *website=features.findValue<osmscout::WebsiteFeatureValue>(); website!=nullptr){
       info.website=QString::fromStdString(website->GetWebsite());
     }
-    const osmscout::AddressFeatureValue *address=features.findValue<osmscout::AddressFeatureValue>();
-    if (address!=nullptr){
+
+    if (const osmscout::AddressFeatureValue *address=features.findValue<osmscout::AddressFeatureValue>(); address!=nullptr){
       info.addressNumber=QString::fromStdString(address->GetAddress());
     }
-    const auto &it=reverseLookupMap.find(ref);
-    if (it!=reverseLookupMap.end()){
+
+    if (const auto &it=reverseLookupMap.find(ref); it!=reverseLookupMap.end()){
       info.adminRegionList=BuildAdminRegionList(db, it->second.adminRegion, regionMap);
       info.reverseLookupRef=std::make_shared<LocationDescriptionService::ReverseLookupResult>(it->second);
     }

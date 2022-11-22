@@ -96,6 +96,7 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
   roles[RegionRole]          = "region";
   roles[LatRole]             = "lat";
   roles[LonRole]             = "lon";
+  roles[AltLangName]         = "altLangName";
 
   return roles;
 }
@@ -151,6 +152,12 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
     if (obj.name.isEmpty())
       return QVariant();
     return QVariant::fromValue(obj.name);
+  }
+  if (role==AltLangName) {
+    if (obj.altLangName.isEmpty()) {
+      return QVariant();
+    }
+    return QVariant::fromValue(obj.altLangName);
   }
 
   if (role==ObjectRole){

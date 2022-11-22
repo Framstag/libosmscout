@@ -60,7 +60,8 @@ public:
       PostalCodeRole      = Qt::UserRole+9,
       RegionRole          = Qt::UserRole+10,
       LatRole             = Qt::UserRole+11,
-      LonRole             = Qt::UserRole+12
+      LonRole             = Qt::UserRole+12,
+      AltLangName         = Qt::UserRole+13
   };
   Q_ENUM(Roles)
 
