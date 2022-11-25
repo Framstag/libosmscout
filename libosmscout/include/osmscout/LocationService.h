@@ -266,7 +266,7 @@ namespace osmscout {
    * the visitor pattern is used.
    *
    * Currently the following functionalities are supported:
-   * - Visit all region (recursivly)
+   * - Visit all region (recursively)
    * - Visit all locations of a region and (optionally) all locations of all
    *   sub regions.
    * - Visit all addresses of a location (non recursive)
