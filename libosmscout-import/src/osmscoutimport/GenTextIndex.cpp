@@ -544,9 +544,15 @@ namespace osmscout
                                      marisa::Keyset *keyset,
                                      ImportParameter::TextIndexVariant variant) const
   {
+    std::string textNorm = UTF8NormForLookup(text);
     if (variant==ImportParameter::TextIndexVariant::transliterate || variant==ImportParameter::TextIndexVariant::both) {
+      std::string textTrans = UTF8Transliterate(textNorm);
+      if (variant==ImportParameter::TextIndexVariant::both && textTrans==textNorm) {
+        // there is no reason to store the same string twice
+        variant = ImportParameter::TextIndexVariant::transliterate;
+      }
       std::string keyString;
-      if (BuildKeyStr(UTF8Transliterate(UTF8NormForLookup(text)),
+      if (BuildKeyStr(textTrans,
                       offsetSizeBytes,
                       offset,
                       reftype,
@@ -560,10 +566,10 @@ namespace osmscout
 
     if (variant==ImportParameter::TextIndexVariant::original || variant==ImportParameter::TextIndexVariant::both) {
       std::string keyString;
-      if (BuildKeyStr(UTF8NormForLookup(text),
+      if (BuildKeyStr(textNorm,
                       offsetSizeBytes,
                       offset,
-                      refNode,
+                      reftype,
                       keyString)) {
         keyset->push_back(keyString.c_str(),
                           keyString.length());

@@ -175,7 +175,7 @@ namespace osmscout
                                           std::string& text,
                                           ObjectFileRef& ref) const
   {
-    // Get the index that marks the end of the
+    // Get the index that marks the end of
     // the text and where the FileOffset begins
 
     // Each result has only one offset that occupies
