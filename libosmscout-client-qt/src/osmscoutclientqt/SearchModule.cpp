@@ -33,6 +33,8 @@ SearchRunnable::SearchRunnable(SearchModule *searchModule,
                                osmscout::BreakerRef &breaker):
     searchModule(searchModule),
     db(db),
+    nameReader(*(db->GetDatabase()->GetTypeConfig())),
+    altNameReader(*(db->GetDatabase()->GetTypeConfig())),
     searchPattern(searchPattern),
     limit(limit),
     breaker(breaker)
@@ -53,7 +55,6 @@ SearchLocationsRunnable::SearchLocationsRunnable(SearchModule *searchModule,
     SearchRunnable(searchModule, db, searchPattern, limit, breaker),
     defaultRegionInfo(defaultRegionInfo)
 {
-  altNameReader=std::make_shared<NameAltFeatureValueReader>(*(db->GetDatabase()->GetTypeConfig()));
 }
 
 void SearchLocationsRunnable::run()
@@ -78,8 +79,6 @@ FreeTextSearchRunnable::FreeTextSearchRunnable(SearchModule *searchModule,
                                                osmscout::BreakerRef &breaker):
     SearchRunnable(searchModule, db, searchPattern, limit, breaker)
 {
-  nameReader=std::make_shared<NameFeatureValueReader>(*(db->GetDatabase()->GetTypeConfig()));
-  altNameReader=std::make_shared<NameAltFeatureValueReader>(*(db->GetDatabase()->GetTypeConfig()));
 }
 
 void FreeTextSearchRunnable::run()
@@ -178,7 +177,7 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
       if (locations.size()>=limit) {
         break;
       }
-      QString title=QString::fromStdString(e.first);
+
       const std::vector<osmscout::ObjectFileRef> &refs=e.second;
 
       for (const auto &fref:refs){
@@ -191,7 +190,7 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
         }
 
         objectSet << fref;
-        BuildLocationEntry(fref, title, adminRegionMap, locations);
+        BuildLocationEntry(fref, e.first, adminRegionMap, locations);
       }
     }
 
@@ -280,7 +279,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
 }
 
 bool FreeTextSearchRunnable::BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                                                const QString &title,
+                                                const std::string &searchKey,
                                                 std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &/*adminRegionMap*/,
                                                 QList<LocationEntry> &locations)
 {
@@ -291,11 +290,11 @@ bool FreeTextSearchRunnable::BuildLocationEntry(const osmscout::ObjectFileRef& o
     osmscout::GeoCoord coordinates;
     osmscout::GeoBox bbox;
 
-    if (!GetObjectDetails(object, objectType, name, altName, coordinates, bbox)){
+    if (!GetObjectDetails(object, searchKey, objectType, name, altName, coordinates, bbox)){
       return false;
     }
     if (name.isEmpty()) {
-      name = title;
+      name = QString::fromStdString(searchKey);
     }
     osmscout::log.Debug() << "obj:    " << name.toStdString() << " (" << objectType.toStdString() << ")";
 
@@ -338,15 +337,15 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
         entry.location &&
         entry.address) {
 
-      QString loc=QString::fromUtf8(entry.location->name.c_str());
-      QString address=QString::fromUtf8(entry.address->name.c_str());
+      QString loc=QString::fromStdString(entry.location->name);
+      QString address=QString::fromStdString(entry.address->name);
 
       QString label;
       label+=loc;
       label+=" ";
       label+=address;
 
-      if (!GetObjectDetails(entry.address->object, objectType, name, altName, coordinates, bbox)){
+      if (!GetObjectDetails(entry.address->object, entry.location->name, objectType, name, altName, coordinates, bbox)){
         return false;
       }
 
@@ -360,8 +359,8 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
     else if (entry.adminRegion &&
              entry.location) {
 
-      QString loc=QString::fromUtf8(entry.location->name.c_str());
-      if (!GetObjectDetails(entry.location->objects, objectType, name, altName, coordinates, bbox)){
+      QString loc=QString::fromStdString(entry.location->name);
+      if (!GetObjectDetails(entry.location->objects, entry.location->name, objectType, name, altName, coordinates, bbox)){
         return false;
       }
 
@@ -378,8 +377,8 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
     else if (entry.adminRegion &&
              entry.poi) {
 
-      QString poi=QString::fromUtf8(entry.poi->name.c_str());
-      if (!GetObjectDetails(entry.poi->object, objectType, name, altName, coordinates, bbox)){
+      QString poi=QString::fromStdString(entry.poi->name);
+      if (!GetObjectDetails(entry.poi->object, entry.poi->name, objectType, name, altName, coordinates, bbox)){
         return false;
       }
       osmscout::log.Debug() << "poi:      " << poi.toStdString();
@@ -390,17 +389,16 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
       locations.append(location);
     }
     else if (entry.adminRegion) {
-      QString objectType;
-      if (!GetObjectDetails(entry.adminRegion->object, objectType, name, altName, coordinates, bbox)){
+      if (!GetObjectDetails(entry.adminRegion->object, entry.adminRegion->name, objectType, name, altName, coordinates, bbox)){
         return false;
       }
-      QString name=QString::fromUtf8(entry.adminRegion->name.c_str());
+      QString regionName=QString::fromStdString(entry.adminRegion->name);
 
       //=QString::fromUtf8(entry.adminRegion->name.c_str());
-      LocationEntry location(LocationEntry::typeObject, name, altName, objectType, adminRegionList,
+      LocationEntry location(LocationEntry::typeObject, regionName, altName, objectType, adminRegionList,
                              db->path, coordinates, bbox);
 
-      osmscout::log.Debug() << "region: " << name.toStdString();
+      osmscout::log.Debug() << "region: " << regionName.toStdString();
 
       location.addReference(entry.adminRegion->object);
       locations.append(location);
@@ -409,6 +407,7 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
 }
 
 bool SearchRunnable::GetObjectDetails(const osmscout::ObjectFileRef& object,
+                                      const std::string &searchKey,
                                       QString &typeName,
                                       QString &name,
                                       QString &altName,
@@ -418,6 +417,7 @@ bool SearchRunnable::GetObjectDetails(const osmscout::ObjectFileRef& object,
   std::vector<osmscout::ObjectFileRef> objects;
   objects.push_back(object);
   return GetObjectDetails(objects,
+                          searchKey,
                           typeName,
                           name,
                           altName,
@@ -426,6 +426,7 @@ bool SearchRunnable::GetObjectDetails(const osmscout::ObjectFileRef& object,
 }
 
 bool SearchRunnable::GetObjectDetails(const std::vector<osmscout::ObjectFileRef>& objects,
+                                      const std::string &searchKey,
                                       QString &typeName,
                                       QString &name,
                                       QString &altName,
@@ -451,7 +452,31 @@ bool SearchRunnable::GetObjectDetails(const std::vector<osmscout::ObjectFileRef>
       if (!database->GetAreaByOffset(object.GetFileOffset(), area)) {
         return false;
       }
-      GetObjectNames(area->rings.front().GetFeatureValueBuffer(), typeName, name, altName);
+
+      // Search indexes contains just object offset. But in case of the area,
+      // matching may be just some ring. Area may represent lake with its own name for example,
+      // but on this lake may be islet (inner Area ring) with different name...
+      // So, we will try to find corresponding ring to get correct name, type and alternative name.
+      std::string normalizedSearchKey = UTF8Transliterate(UTF8NormForLookup(searchKey));
+      for (const auto &ring: area->rings) {
+
+        const FeatureValueBuffer &features = ring.GetFeatureValueBuffer();
+        const NameFeatureValue* nameVal = nameReader.GetValue(features);
+        const NameAltFeatureValue* altNameVal = altNameReader.GetValue(features);
+        if ((nameVal && normalizedSearchKey == UTF8Transliterate(UTF8NormForLookup(nameVal->GetName()))) ||
+            (altNameVal && normalizedSearchKey == UTF8Transliterate(UTF8NormForLookup(altNameVal->GetNameAlt())))) {
+          if (typeName.isEmpty()) {
+            typeName = QString::fromStdString(features.GetType()->GetName());
+          }
+          if (nameVal) {
+            name = QString::fromStdString(nameVal->GetName());
+          }
+          if (altNameVal) {
+            altName = QString::fromStdString(altNameVal->GetNameAlt());
+          }
+          break;
+        }
+      }
       bbox.Include(area->GetBoundingBox());
     } else if (object.GetType() == osmscout::RefType::refWay) {
       osmscout::WayRef way;
@@ -461,6 +486,8 @@ bool SearchRunnable::GetObjectDetails(const std::vector<osmscout::ObjectFileRef>
       GetObjectNames(way->GetFeatureValueBuffer(), typeName, name, altName);
       bbox.Include(way->GetBoundingBox());
     }
+    log.Debug() << "GetObjectDetails for " << object.GetName() << " searchKey " << searchKey
+                << ": " << name.toStdString() << " / " << altName.toStdString() << " (" << typeName.toStdString() << ")";
   }
   coordinates=bbox.GetCenter();
   return true;
@@ -475,17 +502,13 @@ void SearchRunnable::GetObjectNames(
   if (typeName.isEmpty()) {
     typeName = QString::fromStdString(features.GetType()->GetName());
   }
-  if (nameReader) {
-    if (auto val = nameReader->GetValue(features);
+  if (auto val = nameReader.GetValue(features);
       val) {
-      name = QString::fromStdString(val->GetName());
-    }
+    name = QString::fromStdString(val->GetName());
   }
-  if (altNameReader) {
-    if (auto val = altNameReader->GetValue(features);
+  if (auto val = altNameReader.GetValue(features);
       val) {
-      altName = QString::fromStdString(val->GetNameAlt());
-    }
+    altName = QString::fromStdString(val->GetNameAlt());
   }
 }
 }

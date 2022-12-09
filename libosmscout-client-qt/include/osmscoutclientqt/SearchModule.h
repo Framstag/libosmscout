@@ -43,8 +43,8 @@ class OSMSCOUT_CLIENT_QT_API SearchRunnable : public QRunnable {
 protected:
   SearchModule *searchModule;
   DBInstanceRef db;
-  std::shared_ptr<NameFeatureValueReader> nameReader; // when non-null, object name is used as a title
-  std::shared_ptr<NameAltFeatureValueReader> altNameReader; // when non-null, alternative name is set to location
+  NameFeatureValueReader nameReader;
+  NameAltFeatureValueReader altNameReader;
   QString searchPattern;
   int limit;
   osmscout::BreakerRef breaker;
@@ -62,6 +62,7 @@ public:
 
 protected:
   bool GetObjectDetails(const osmscout::ObjectFileRef& object,
+                        const std::string &searchKey,
                         QString &typeName,
                         QString &name,
                         QString &altName,
@@ -69,6 +70,7 @@ protected:
                         osmscout::GeoBox& bbox);
 
   bool GetObjectDetails(const std::vector<osmscout::ObjectFileRef>& objects,
+                        const std::string &searchKey,
                         QString &typeName,
                         QString &name,
                         QString &altName,
@@ -134,13 +136,13 @@ private:
 
   /**
    * @param object
-   * @param title location title
+   * @param searchKey index key matching search query
    * @param adminRegionMap cached map of administrative regions
    * @param locations list where new location is added
    * @return true on success
    */
   bool BuildLocationEntry(const osmscout::ObjectFileRef& object,
-                          const QString &title,
+                          const std::string &searchKey,
                           std::map<osmscout::FileOffset,osmscout::AdminRegionRef> &adminRegionMap,
                           QList<LocationEntry> &locations);
 };
