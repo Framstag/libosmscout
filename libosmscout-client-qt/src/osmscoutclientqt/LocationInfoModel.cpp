@@ -321,15 +321,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   std::sort(regions.begin(),regions.end(),adminRegionComparator);
 
   const AdminRegionInfoRef bottom=regions.first();
-  QStringList regionNames;
-  std::string lastName=bottom->name();
-  for (const auto &region:regions){
-    // remove duplicate names
-    if (region->name()!=lastName) {
-      regionNames << region->qStringName();
-    }
-    lastName=region->name();
-  }
+  QStringList regionNames=LookupModule::AdminRegionNames(regions, settings->GetShowAltLanguage());
 
   obj[LabelRole] = bottom->qStringName();
   obj[RegionRole] = regionNames;
@@ -345,6 +337,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[AddressLocationRole] = "";
   obj[AddressNumberRole] = "";
   obj[IndexedAdminRegionRole] = QStringList();
+  obj[AltLangName] = bottom->qStringAltName();
 
   model << obj;
 

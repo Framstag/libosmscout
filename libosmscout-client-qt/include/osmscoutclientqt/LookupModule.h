@@ -42,7 +42,7 @@ class OSMSCOUT_CLIENT_QT_API LookupModule:public QObject{
 public:
 
   /**
-   * Common sence of administrative region levels.
+   * Common sense of administrative region levels.
    *
    * Note that levels may have different meaning in various countries...
    * https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative
