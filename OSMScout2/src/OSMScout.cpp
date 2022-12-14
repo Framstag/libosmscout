@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     // translations are installed to <PREFIX>/share/libosmscout/OSMScout2/translations
     // Qt lookup app data (on Linux) in directories "~/.local/share/<APPNAME>", "/usr/local/share/<APPNAME>", "/usr/share/<APPNAME>"
     // when APPNAME is combination of <organisation>/<app name>
-    translationDir = QStandardPaths::locate(QStandardPaths::DataLocation, "translations",
+    translationDir = QStandardPaths::locate(QStandardPaths::AppLocalDataLocation, "translations",
                                             QStandardPaths::LocateDirectory);
   }else{
     translationDir = args.translationDir;

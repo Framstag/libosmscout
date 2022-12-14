@@ -21,7 +21,6 @@
 #include <iomanip>
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
 #include <QtGui>
@@ -106,7 +105,11 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::La
 
       painter->drawText(point.GetX(), point.GetY(), QString(string[i]));
 
+#if QT_VERSION < 0x051100
       offset+=metrics.width(string[i]);
+#else
+      offset+=metrics.horizontalAdvance(string[i]);
+#endif
     }
 
     offset+=3*fontHeight;

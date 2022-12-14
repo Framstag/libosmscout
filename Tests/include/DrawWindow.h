@@ -21,10 +21,10 @@
 #define TEST_DRAWWINDOW_H
 
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QElapsedTimer>
 #include <QPixmap>
 #include <QScreen>
-#include <QElapsedTimer>
+#include <QWidget>
 
 #include <osmscout/Database.h>
 #include <osmscoutmap/MapService.h>

@@ -164,7 +164,7 @@ void FileIO::setTarget(QQuickItem *target)
 int FileIO::lineOffset(int l)
 {
     int s = 0;
-    for(int i=0; i<std::min(l, lineOffsets.count()); i++){
+    for(qsizetype i=0; i<std::min(qsizetype(l), qsizetype(lineOffsets.count())); i++){
         s += lineOffsets[i];
     }
     return s;

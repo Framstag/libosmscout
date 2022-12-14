@@ -25,7 +25,6 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
 #include <QtGui>
