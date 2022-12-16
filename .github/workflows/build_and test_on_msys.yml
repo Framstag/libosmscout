@@ -59,12 +59,12 @@ jobs:
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
       - name: Configure build project
-        run: meson setup --buildtype debugoptimized --unity on debug
+        run: meson setup --debug --buildtype debugoptimized --unity on debug
         env:
           CXX: ccache g++
           CC: ccache gcc
       - name: Build project
-        run: meson compile -C debug
+        run: meson compile --verbose -C debug
       - name: Run tests
         run: meson test -C debug --print-errorlogs
         env:
