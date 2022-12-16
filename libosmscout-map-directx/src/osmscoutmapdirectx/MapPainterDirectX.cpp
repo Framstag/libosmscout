@@ -275,6 +275,7 @@ namespace osmscout
           return pStrokeStyle;
         }
       }
+      delete[] dashes;
     }
     if (m_dashLessStrokeStyle == nullptr)
     {
@@ -784,7 +785,7 @@ namespace osmscout
                                             GetStrokeStyle(polygon->GetBorderStyle()->GetDash()));
           }
           pPathGeometry->Release();
-          delete coords;
+          delete[] coords;
         }
       }
       else if (RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
