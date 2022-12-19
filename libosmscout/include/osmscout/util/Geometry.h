@@ -48,14 +48,14 @@ namespace osmscout {
   /**
    * \defgroup Geometry Geometric helper
    *
-   * Collection of classes and methods releated to low level geometric
+   * Collection of classes and methods related to low level geometric
    * stuff.
    */
 
 
   /**
    * \ingroup Geometry
-   * @param deg angl ein degrees
+   * @param deg angle in degrees
    * @return angle in radians
    */
   inline double DegToRad(double deg)

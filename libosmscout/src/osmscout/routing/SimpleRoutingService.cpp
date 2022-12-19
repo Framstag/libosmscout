@@ -454,29 +454,54 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Returns the closest routeable object (area or way) relative
-   * to the given coordinate.
-   *
-   * The result should be use as imput for the router to define
-   * routing start or end point.
-   *
-   * @note The returned node may in fact not be routable, it is just
-   * the closest node to the given position on a routable way or area.
-   *
-   * @note The actual object may not be within the given radius
-   * due to internal search index resolution.
-   *
-   * @param coord
-   *    coordinate of the search center
-   * @param profile
-   *    Routing profile to use. It defines Vehicle to use
-   * @param radius
-   *    The maximum radius to search in from the search center
-   * @return
-   *    A reference to a node on a way or area that is routable (if returned
-   *    route position is valid)
-   */
+  RoutePositionResult SimpleRoutingService::GetRoutableNode(const ObjectFileRef& objRef,
+                                                            const RoutingProfile& profile) const
+  {
+    TypeConfigRef typeConfig=database->GetTypeConfig();
+    RoutePositionResult position;
+
+    if (!typeConfig) {
+      log.Error() << "TypeConfig is invalid!";
+      return position;
+    }
+
+    if (objRef.IsWay()) {
+      WayDataFileRef wayDataFile=database->GetWayDataFile();
+      if (!wayDataFile) {
+        log.Error() << "Way data file is invalid!";
+        return position;
+      }
+      WayRef way;
+      if (!wayDataFile->GetByOffset(objRef.GetFileOffset(), way)) {
+        log.Error() << "Cannot read " << objRef.GetName();
+        return position;
+      }
+      if (!profile.CanUse(*way)) {
+        return position;
+      }
+      if (!HasNodeWithId(way->nodes)) {
+        return position;
+      }
+      // way distance center
+      Distance wayLength;
+      for (size_t i=0; i<way->nodes.size()-1; i++){
+        wayLength+=GetSphericalDistance(way->nodes[i].GetCoord(), way->nodes[i+1].GetCoord());
+      }
+      size_t wayCenter=0;
+      for (Distance d; wayCenter < way->nodes.size() - 1; wayCenter++){
+        d+=GetSphericalDistance(way->nodes[wayCenter].GetCoord(), way->nodes[wayCenter+1].GetCoord());
+        if (d>wayLength/2) {
+          break;
+        }
+      }
+
+      position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(), wayCenter,/*database*/0), Distance::Zero());
+    }
+    // TODO: support areas in router
+
+    return position;
+  }
+
   RoutePositionResult SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                                    const RoutingProfile& profile,
                                                                    const Distance &radius) const
