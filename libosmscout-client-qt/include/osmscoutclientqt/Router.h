@@ -99,10 +99,11 @@ public slots:
   void Initialize();
 
   /**
-   * Start Route computation. Router emits routeComputed or routeFailed later.
+   * Start Route computation. Router emits multiple routingProgress followed by
+   * routeComputed or routeFailed with requestId identifier.
    *
    * User of this function should use Qt::QueuedConnection for invoking
-   * this slot, search may generate IO load and may tooks long time.
+   * this slot, search may generate IO load and may took long time.
    *
    * Route computation can be long depending on the complexity of the route
    * (the further away the endpoints, the more difficult the routing).
@@ -132,10 +133,29 @@ signals:
 
 private:
 
+  /**
+   * Lookup routable node by Qt LocationEntry
+   *
+   * @param routingService
+   * @param location
+   * @return possible routable node. When no routable node node is found, nullopt is returned.
+   */
+  std::optional<RoutePosition> LocationToRoutePosition(osmscout::MultiDBRoutingServiceRef &routingService,
+                                                       const LocationEntryRef &location);
+
+  /**
+   * Synchronous method for routing. Emits multiple routingProgress followed by one of:
+   * routeComputed, routeCanceled or routeFailed.
+   *
+   * @param routingService
+   * @param start
+   * @param target
+   * @param requestId
+   * @param breaker
+   */
   void ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
                            const LocationEntryRef &start,
                            const LocationEntryRef &target,
-                           osmscout::Vehicle vehicle,
                            int requestId,
                            const osmscout::BreakerRef &breaker);
 

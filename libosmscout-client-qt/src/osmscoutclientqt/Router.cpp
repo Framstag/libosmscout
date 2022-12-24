@@ -151,34 +151,57 @@ std::string vehicleStr(osmscout::Vehicle vehicle){
   }
 }
 
+std::optional<RoutePosition> Router::LocationToRoutePosition(osmscout::MultiDBRoutingServiceRef &routingService,
+                                                             const LocationEntryRef &location)
+{
+  RoutePositionResult routePositionResult;
+  if (auto dbId=routingService->GetDatabaseId(location->getDatabase().toStdString()); dbId) {
+    std::vector<ObjectFileRef> refs;
+    for (const auto &ref:location->getReferences()){
+      refs.emplace_back(ref);
+    }
+    routePositionResult=routingService->GetRoutableNode(*dbId, refs);
+    if (!routePositionResult.IsValid()) {
+      log.Debug() << location->getLabel().toStdString() << " doesn't have routable node";
+    }
+  }
+
+  if (!routePositionResult.IsValid()) {
+    routePositionResult = routingService->GetClosestRoutableNode(location->getCoord(),
+                                                                 /*radius*/ Kilometers(1));
+  }
+  if (!routePositionResult.IsValid()) {
+    return std::nullopt;
+  }
+
+  return routePositionResult.GetRoutePosition();
+}
+
 void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingService,
                                  const LocationEntryRef &start,
                                  const LocationEntryRef &target,
-                                 osmscout::Vehicle /*vehicle*/,
                                  int requestId,
                                  const osmscout::BreakerRef &breaker)
 {
-  auto startResult=routingService->GetClosestRoutableNode(
-                                start->getCoord(),
-                                /*radius*/ Kilometers(1));
-  if (!startResult.IsValid()){
+  std::optional<RoutePosition> startNodeOpt=LocationToRoutePosition(routingService, start);
+  if (!startNodeOpt) {
     osmscout::log.Warn() << "Can't found route node near start coord " << start->getCoord().GetDisplayText();
-    emit routeFailed(QString("Can't found route node near start coord %1").arg(QString::fromStdString(start->getCoord().GetDisplayText())),
+    emit routeFailed(QString("Can't found route node near start coord %1").arg(
+                       QString::fromStdString(start->getCoord().GetDisplayText())),
                      requestId);
     return;
   }
-  osmscout::RoutePosition startNode=startResult.GetRoutePosition();
+  RoutePosition startNode=*startNodeOpt;
 
-  auto targetResult=routingService->GetClosestRoutableNode(
-                                target->getCoord(),
-                                /*radius*/ Kilometers(1));
-  if (!targetResult.IsValid()){
-    osmscout::log.Warn() << "Can't found route node near target coord " << target->getCoord().GetDisplayText();
-    emit routeFailed(QString("Can't found route node near target coord %1").arg(QString::fromStdString(target->getCoord().GetDisplayText())),
+  std::optional<RoutePosition> targetNodeOpt=LocationToRoutePosition(routingService, target);
+  if (!targetNodeOpt) {
+    osmscout::log.Warn() << "Can't found route node near target coord " << start->getCoord().GetDisplayText();
+    emit routeFailed(QString("Can't found route node near target coord %1").arg(
+                       QString::fromStdString(start->getCoord().GetDisplayText())),
                      requestId);
     return;
   }
-  osmscout::RoutePosition targetNode=targetResult.GetRoutePosition();
+  RoutePosition targetNode=*targetNodeOpt;
 
   osmscout::RouteData routeData;
   if (!CalculateRoute(routingService,
@@ -234,8 +257,8 @@ void Router::onRouteRequest(LocationEntryRef start,
                             int requestId,
                             osmscout::BreakerRef breaker)
 {
-  osmscout::log.Debug() << "Routing from '" << start->getLabel().toLocal8Bit().data() <<
-    "' to '" << target->getLabel().toLocal8Bit().data() << "'" <<
+  osmscout::log.Debug() << "Routing from '" << start->getLabel().toStdString() <<
+    "' to '" << target->getLabel().toStdString() << "'" <<
     " by '" << vehicleStr(profile->getVehicle()) << "'";
 
   dbThread->RunSynchronousJob(
@@ -246,7 +269,7 @@ void Router::onRouteRequest(LocationEntryRef start,
         emit routeFailed("Can't open routing service",requestId);
         return;
       }
-      ProcessRouteRequest(routingService,start,target,profile->getVehicle(),requestId,breaker);
+      ProcessRouteRequest(routingService,start,target,requestId,breaker);
       routingService->Close();
     }
   );

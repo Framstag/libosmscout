@@ -111,6 +111,25 @@ namespace osmscout {
     isOpen=false;
   }
 
+  RoutePositionResult MultiDBRoutingService::GetRoutableNode(const DatabaseId &dbId, const std::vector<ObjectFileRef> &refs)
+  {
+    auto handleIt = std::find_if(handles.begin(), handles.end(),
+                                 [dbId](const DatabaseHandle& handle) -> bool { return handle.dbId == dbId; });
+    if (handleIt == handles.end()) {
+      return RoutePositionResult();
+    }
+    for (auto const &ref: refs) {
+      RoutePositionResult res = handleIt->router->GetRoutableNode(ref, *handleIt->profile);
+      if (res.IsValid()) {
+        return RoutePositionResult(RoutePosition(res.GetRoutePosition().GetObjectFileRef(),
+                                                 res.GetRoutePosition().GetNodeIndex(),
+                                                 /*database*/ dbId),
+                                   res.GetDistance());
+      }
+    }
+    return RoutePositionResult();
+  }
+
   RoutePositionResult MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                                     const Distance &radius) const
   {
@@ -502,6 +521,16 @@ namespace osmscout {
       mapping[handle.dbId]=handle.database->GetPath();
     }
     return mapping;
+  }
+
+  std::optional<DatabaseId> MultiDBRoutingService::GetDatabaseId(const std::string& databasePath) const
+  {
+    for (const auto &handle:handles){
+      if (databasePath==handle.database->GetPath()) {
+        return handle.dbId;
+      }
+    }
+    return std::nullopt;
   }
 
   // FIXME: I don't understand why these methods should be here...

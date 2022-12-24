@@ -126,6 +126,17 @@ namespace osmscout {
 
     void Close();
 
+    /**
+     * Return first usable routable node from given object references.
+     *
+     * @param dbId
+     *      ID of database where objects exists.
+     * @param refs
+     *      References to possible routable objects
+     * @return routable node on object (way)
+     */
+    RoutePositionResult GetRoutableNode(const DatabaseId &dbId, const std::vector<ObjectFileRef> &refs);
+
     RoutePositionResult GetClosestRoutableNode(const GeoCoord &coord,
                                                const Distance &radius=Kilometers(1)) const;
 
@@ -147,6 +158,8 @@ namespace osmscout {
                                      const std::list<RoutePostprocessor::PostprocessorRef> &postprocessors);
 
     std::map<DatabaseId, std::string> GetDatabaseMapping() const override;
+
+    std::optional<DatabaseId> GetDatabaseId(const std::string& databasePath) const;
   };
 
   //! \ingroup Service
