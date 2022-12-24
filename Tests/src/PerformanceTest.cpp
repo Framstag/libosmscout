@@ -32,7 +32,6 @@
 #endif
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
 #include <osmscoutmapqt/MapPainterQt.h>

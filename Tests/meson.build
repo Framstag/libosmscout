@@ -478,6 +478,7 @@ if buildClientQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 override_options : ['unity=off'], # solves multiple definition of Q_DECLARE_METATYPE(osmscout::TileRef)
                  install: false)
   endif
 endif

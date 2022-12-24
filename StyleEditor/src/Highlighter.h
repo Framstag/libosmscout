@@ -24,6 +24,7 @@
 
 #include <QHash>
 #include <QTextCharFormat>
+#include <QRegExp>
 
 #include <QtQuick/QQuickItem>
 

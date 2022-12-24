@@ -119,6 +119,7 @@ jobs:
         run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
                qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
                libgl-dev"

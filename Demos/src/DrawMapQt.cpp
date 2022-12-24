@@ -22,7 +22,6 @@
 #include <iostream>
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QPixmap>
 #include <QScreen>
 #include <QGuiApplication>
