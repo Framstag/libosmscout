@@ -12,7 +12,7 @@ jobs:
     environment: SOURCEFORGE
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Update package list
         run:  sudo apt-get update
       - name: Install additional tools
