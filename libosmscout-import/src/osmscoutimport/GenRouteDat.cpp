@@ -188,7 +188,7 @@ namespace osmscout {
       }
 
       if (!accessRestrictedValue->CanAccessBicycle()) {
-        flags|=RouteNode::restrictedForFoot;
+        flags|=RouteNode::restrictedForBicycle;
       }
 
       if (!accessRestrictedValue->CanAccessCar()) {
