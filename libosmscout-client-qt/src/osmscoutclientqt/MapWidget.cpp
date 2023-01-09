@@ -164,7 +164,7 @@ void MapWidget::setupInputHandler(InputHandler *newGesture)
             this, &MapWidget::changeView);
 
     if (locked != inputHandler->isLockedToPosition()){
-        emit lockToPossitionChanged();
+        emit lockToPositionChanged();
     }
     //qDebug() << "Input handler changed (" << (newGesture->animationInProgress()? "animation": "stationary") << ")";
 }

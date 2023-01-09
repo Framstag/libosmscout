@@ -68,7 +68,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool     databaseLoaded READ isDatabaseLoaded NOTIFY databaseLoaded)
   Q_PROPERTY(bool     finished READ IsFinished  NOTIFY finishedChanged)
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
-  Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPossitionChanged)
+  Q_PROPERTY(bool     lockToPosition READ isLockedToPosition WRITE setLockToPosition NOTIFY lockToPositionChanged)
   Q_PROPERTY(bool     followVehicle READ isFollowVehicle WRITE setFollowVehicle NOTIFY followVehicleChanged)
   Q_PROPERTY(bool     vehicleAutoRotateMap READ isVehicleAutoRotateMap WRITE setVehicleAutoRotateMap NOTIFY vehicleAutoRotateMapChanged)
   Q_PROPERTY(QString  stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
@@ -162,7 +162,7 @@ private:
 
 signals:
   void viewChanged();
-  void lockToPossitionChanged();
+  void lockToPositionChanged();
   void followVehicleChanged();
   void vehicleAutoRotateMapChanged();
   void finishedChanged(bool finished);
