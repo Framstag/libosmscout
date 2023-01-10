@@ -60,11 +60,12 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_OBJECT
   Q_PROPERTY(QObject  *view    READ GetView     WRITE SetMapView  NOTIFY viewChanged)
   Q_PROPERTY(QObject  *vehiclePosition READ GetVehiclePosition WRITE SetVehiclePosition)
-  Q_PROPERTY(double   lat      READ GetLat      NOTIFY viewChanged)
-  Q_PROPERTY(double   lon      READ GetLon      NOTIFY viewChanged)
-  Q_PROPERTY(int      zoomLevel READ GetMagLevel NOTIFY viewChanged)
-  Q_PROPERTY(QString  zoomLevelName READ GetZoomLevelName NOTIFY viewChanged)
-  Q_PROPERTY(double   pixelSize READ GetPixelSize NOTIFY viewChanged)
+  Q_PROPERTY(double   lat      READ GetLat      NOTIFY latChanged)
+  Q_PROPERTY(double   lon      READ GetLon      NOTIFY lonChanged)
+  Q_PROPERTY(double   angle    READ GetAngle    NOTIFY angleChanged)
+  Q_PROPERTY(int      zoomLevel READ GetMagLevel NOTIFY magLevelChanged)
+  Q_PROPERTY(QString  zoomLevelName READ GetZoomLevelName NOTIFY magLevelChanged)
+  Q_PROPERTY(double   pixelSize READ GetPixelSize NOTIFY pixelSizeChanged)
   Q_PROPERTY(bool     databaseLoaded READ isDatabaseLoaded NOTIFY databaseLoaded)
   Q_PROPERTY(bool     finished READ IsFinished  NOTIFY finishedChanged)
   Q_PROPERTY(bool     showCurrentPosition READ getShowCurrentPosition WRITE setShowCurrentPosition)
@@ -162,6 +163,11 @@ private:
 
 signals:
   void viewChanged();
+  void latChanged();
+  void lonChanged();
+  void angleChanged();
+  void magLevelChanged();
+  void pixelSizeChanged();
   void lockToPositionChanged();
   void followVehicleChanged();
   void vehicleAutoRotateMapChanged();
@@ -386,6 +392,11 @@ public:
   inline double GetLon() const
   {
       return view->center.GetLon();
+  }
+
+  inline double GetAngle() const
+  {
+      return view->angle.AsRadians();
   }
 
   inline osmscout::GeoCoord GetCenter() const
