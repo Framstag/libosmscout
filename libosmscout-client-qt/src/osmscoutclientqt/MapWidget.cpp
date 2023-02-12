@@ -164,7 +164,7 @@ void MapWidget::setupInputHandler(InputHandler *newGesture)
             this, &MapWidget::changeView);
 
     if (locked != inputHandler->isLockedToPosition()){
-        emit lockToPossitionChanged();
+        emit lockToPositionChanged();
     }
     //qDebug() << "Input handler changed (" << (newGesture->animationInProgress()? "animation": "stationary") << ")";
 }
@@ -178,11 +178,35 @@ void MapWidget::changeView(const MapView &updated)
 {
     //qDebug() << "viewChanged: " << QString::fromStdString(updated.center.GetDisplayText()) << "   level: " << updated.magnification.GetLevel();
     //qDebug() << "viewChanged (" << (inputHandler->animationInProgress()? "animation": "stationary") << ")";
+    assert(view);
     bool changed = *view != updated;
-    view->operator =( updated );
+    bool latChangedFlag = floor(view->GetLat()*10000) != floor(updated.GetLat()*10000);
+    bool lonChangedFlag = floor(view->GetLon()*10000) != floor(updated.GetLon()*10000);
+    bool angleChangedFlag = floor(view->angle.AsRadians()*10000) != floor(updated.angle.AsRadians()*10000);
+    bool magLevelChangedFlag = view->magnification.GetLevel() != updated.magnification.GetLevel();
+
+    double oldPixelSize = floor(GetPixelSize()*1000);
+    *view = updated;
+    bool pixelSizeChangedFlag = oldPixelSize != floor(GetPixelSize()*1000);
+
     // make sure that we render map with antialiasing. TODO: do it better
     if (changed || (!inputHandler->animationInProgress())){
         redraw();
+    }
+    if (latChangedFlag) {
+        emit latChanged();
+    }
+    if (lonChangedFlag) {
+        emit lonChanged();
+    }
+    if (angleChangedFlag) {
+        emit angleChanged();
+    }
+    if (magLevelChangedFlag) {
+        emit magLevelChanged();
+    }
+    if (pixelSizeChangedFlag) {
+        emit pixelSizeChanged();
     }
     if (changed){
         emit viewChanged();
@@ -790,7 +814,6 @@ void MapWidget::onMapDPIChange(double dpi)
 
     // discard current input handler
     setupInputHandler(new InputHandler(*view));
-    emit viewChanged();
 }
 
 void MapWidget::onResize()
