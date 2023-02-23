@@ -133,39 +133,39 @@ namespace osmscout {
       throw IOException(filename,"Cannot seek to start of file");
     }
 #elif defined(HAVE__FSEEKI64) && defined(HAVE__FTELLI64)
-    __int64 size;
+    __int64 fileSize;
 
     if (_fseeki64(file,0L,SEEK_END)!=0) {
       throw IOException(filename,"Cannot seek to end of file");
     }
 
-    size=_ftelli64(file);
+    fileSize=_ftelli64(file);
 
-    if (size==-1) {
+    if (fileSize==-1) {
       throw IOException(filename,"Cannot get size of file");
     }
 
-    this->size=(FileOffset)size;
+    this->size=(FileOffset)fileSize;
 
     if (_fseeki64(file,0L,SEEK_SET)!=0) {
       throw IOException(filename,"Cannot seek to start of file");
     }
 #else
-    long size;
+    long fileSize;
 
     if (fseek(file,0L,SEEK_END)!=0) {
       log.Error() << "Cannot seek to end of file '" << filename << "' (" << strerror(errno) << ")";
       throw IOException(filename,"Cannot seek to end of file");
     }
 
-    size=ftell(file);
+    fileSize=ftell(file);
 
-    if (size==-1) {
+    if (fileSize==-1) {
       log.Error() << "Cannot get size of file '" << filename << "' (" << strerror(errno) << ")";
       throw IOException(filename,"Cannot get size of file");
     }
 
-    this->size=(FileOffset)size;
+    this->size=(FileOffset)fileSize;
 
     if (fseek(file,0L,SEEK_SET)!=0) {
       log.Error() << "Cannot seek to start of file '" << filename << "' (" << strerror(errno) << ")";
