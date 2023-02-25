@@ -60,4 +60,10 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/InstalledVoicesModel.h',
           ]
 
-install_headers(osmscoutclientqtHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscoutclientqtHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscoutclientqtHeader)
+endif
+

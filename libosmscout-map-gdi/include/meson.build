@@ -6,4 +6,10 @@ osmscoutmapgdiHeader = [
             'osmscoutmapgdi/MapPainterGDIWindow.h'
           ]
 
-install_headers(osmscoutmapgdiHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscoutmapgdiHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscoutmapgdiHeader)
+endif
+

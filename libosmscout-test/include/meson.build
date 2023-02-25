@@ -8,4 +8,10 @@ osmscouttestHeader = [
             'osmscout-test/PreprocessOLT.h'
           ]
 
-install_headers(osmscouttestHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscouttestHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscouttestHeader)
+endif
+

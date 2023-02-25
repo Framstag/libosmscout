@@ -63,4 +63,10 @@ if marisaDep.found()
   osmscoutimportHeader += ['osmscoutimport/GenTextIndex.h']
 endif
 
-install_headers(osmscoutimportHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscoutimportHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscoutimportHeader)
+endif
+
