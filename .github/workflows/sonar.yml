@@ -13,7 +13,7 @@ on:
 jobs:
   sonar_gcc_meson:
     name: sonar, gcc and meson
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     environment: SONAR
     steps:
       - name: Checkout
@@ -40,9 +40,9 @@ jobs:
                libmarisa-dev"
       - name: Prepare Sonar scanner
         run: |
-            wget -nv https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.1.2450-linux.zip
-            unzip -q sonar-scanner-cli-4.6.1.2450-linux.zip
-            echo "${PWD}/sonar-scanner-4.6.1.2450-linux/bin/" >> $GITHUB_PATH
+            wget -nv https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.27547-linux.zip
+            unzip -q sonar-scanner-cli-4.7.0.27547-linux.zip
+            echo "${PWD}/sonar-scanner-4.7.0.27547-linux/bin/" >> $GITHUB_PATH
             wget -nv https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
             unzip -q build-wrapper-linux-x86.zip
             echo "${PWD}/build-wrapper-linux-x86" >> $GITHUB_PATH
