@@ -29,15 +29,15 @@ jobs:
       - name: Install test coverage
         run:  sudo apt-get -y install gcovr lcov
       - name: Install libosmscout dependencies
-        run:  "sudo apt-get install -y
-               libxml2-dev
-               libprotobuf-dev protobuf-compiler
-               libagg-dev
-               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
-               qt5-default qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
-               qttools5-dev qtmultimedia5-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev
-               libmarisa-dev"
+        run: "sudo apt-get install -y
+              libxml2-dev
+              libprotobuf-dev protobuf-compiler
+              libagg-dev
+              libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+              qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
+              qttools5-dev qtmultimedia5-dev
+              libglm-dev libglew-dev freeglut3 freeglut3-dev
+              libmarisa-dev"
       - name: Prepare Sonar scanner
         run: |
             wget -nv https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.27547-linux.zip
