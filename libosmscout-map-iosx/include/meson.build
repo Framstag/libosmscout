@@ -4,4 +4,10 @@ osmscoutmapiosxHeader = [
             'osmscoutmapiosx/MapPainterIOS.h'
           ]
 
-install_headers(osmscoutmapiosxHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscoutmapiosxHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscoutmapiosxHeader)
+endif
+

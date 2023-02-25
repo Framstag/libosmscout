@@ -21,4 +21,10 @@ osmscoutmapHeader = [
             'osmscoutmap/SymbolRenderer.h'
           ]
 
-install_headers(osmscoutmapHeader)
+if meson.version().version_compare('>=0.63.0')
+    install_headers(osmscoutmapHeader,
+                    preserve_path: true)
+else
+    install_headers(osmscoutmapHeader)
+endif
+
