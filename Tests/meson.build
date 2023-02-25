@@ -1,80 +1,93 @@
 testIncDir = include_directories('include')
 
+testInstallDir = 'share/osmscout/tests'
+
 AccessParse =  executable('AccessParse',
              'src/AccessParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 AsyncProcessing =  executable('AsyncProcessing',
              'src/AsyncProcessing.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 Bearing = executable('Bearing',
              'src/Bearing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 BitsAndBytesNeeded = executable('BitsAndBytesNeeded',
              'src/BitsAndBytesNeeded.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 ByteTest = executable('ByteTest',
              'src/ByteTest.cpp',
              include_directories: [testIncDir],
              dependencies: [mathDep],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 CachePerformance = executable('CachePerformance',
              'src/CachePerformance.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 CalculateResolution = executable('CalculateResolution',
              'src/CalculateResolution.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 ColorParse = executable('ColorParse',
              'src/ColorParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 CoordinateEncoding = executable('CoordinateEncoding',
              'src/CoordinateEncoding.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 if buildMapQt
   if get_option('qtVersion') == 5
@@ -86,7 +99,8 @@ if buildMapQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   elif get_option('qtVersion') == 6
     drawtextMocs = qt6.preprocess(moc_headers : ['include/DrawWindow.h'])
 
@@ -96,7 +110,8 @@ if buildMapQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   endif
 endif
 
@@ -105,49 +120,56 @@ EncodeNumber = executable('EncodeNumber',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 FeatureLabelTest = executable('FeatureLabelTest',
              'src/FeatureLabelTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 File = executable('File',
              'src/File.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 FileScannerWriter = executable('FileScannerWriter',
              'src/FileScannerWriter.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 GeoBox = executable('GeoBox',
              'src/GeoBox.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 GeoCoordParse = executable('GeoCoordParse',
              'src/GeoCoordParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 Geometry = executable('Geometry',
              'src/Geometry.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 if buildImport
     LocationServiceTest = executable('LocationServiceTest',
@@ -160,7 +182,8 @@ if buildImport
                  include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep],
                  link_with: [osmscouttest, osmscoutimport, osmscout],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
 endif
 
 MapRotate = executable('MapRotate',
@@ -168,28 +191,32 @@ MapRotate = executable('MapRotate',
              include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 MultiDBRouting = executable('MultiDBRouting',
              'src/MultiDBRouting.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 NumberSet = executable('NumberSet',
              'src/NumberSet.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 NumberSetPerformance = executable('NumberSetPerformance',
              'src/NumberSetPerformance.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 
 OSTAndOSSCheck = executable('OSTAndOSSCheck',
@@ -197,7 +224,8 @@ OSTAndOSSCheck = executable('OSTAndOSSCheck',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
@@ -260,104 +288,119 @@ ReaderScannerPerformance = executable('ReaderScannerPerformance',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 ScanConversion = executable('ScanConversion',
              'src/ScanConversion.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 StdByteTest = executable('StdByteTest',
              'src/StdByteTest.cpp',
              include_directories: [testIncDir],
              dependencies: [mathDep],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 StringUtils = executable('StringUtils',
              'src/StringUtils.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 ThreadedDatabase = executable('ThreadedDatabase',
              'src/ThreadedDatabase.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 SunriseSunset = executable('SunriseSunset',
              'src/SunriseSunsetTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 PolygonCenter = executable('PolygonCenter',
              'src/PolygonCenter.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 TilingTest = executable('TilingTest',
              'src/TilingTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 TransPolygon = executable('TransPolygon',
              'src/TransPolygon.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 WaterIndex = executable('WaterIndex',
              'src/WaterIndex.cpp',
              include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout, osmscoutimport],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 WorkQueue = executable('WorkQueue',
              'src/WorkQueue.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 WStringStringConversion = executable('WStringStringConversion',
              'src/WStringStringConversion.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
-             install: false)
+             install: true,
+             install_dir: testInstallDir)
 
 LabelPathTest = executable('LabelPathTest',
            'src/LabelPathTest.cpp',
            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
            dependencies: [mathDep],
            link_with: [osmscoutmap, osmscout],
-           install: false)
+           install: true,
+           install_dir: testInstallDir)
 
 Base64Test = executable('Base64Test',
            'src/Base64.cpp',
            include_directories: [testIncDir, osmscoutIncDir],
            dependencies: [mathDep],
            link_with: [osmscout],
-           install: false)
+           install: true,
+           install_dir: testInstallDir)
 
 CoordBufferTest = executable('CoordBufferTest',
            'src/CoordBufferTest.cpp',
            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
            dependencies: [mathDep],
            link_with: [osmscoutmap, osmscout],
-           install: false)
+           install: true,
+           install_dir: testInstallDir)
 
 if marisaDep.found()
     TextLookupTest = executable('TextLookupTest',
@@ -365,7 +408,8 @@ if marisaDep.found()
                include_directories: [osmscoutIncDir],
                dependencies: [mathDep],
                link_with: [osmscout],
-               install: false)
+               install: true,
+               install_dir: testInstallDir)
 endif
 
 ostandossEnv = environment()
@@ -468,7 +512,8 @@ if buildClientQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   elif get_option('qtVersion') == 6
     threadingMocs = qt6.preprocess(moc_headers : ['include/ClientQtThreading.h'])
 
@@ -479,7 +524,8 @@ if buildClientQt
                  dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
                  override_options : ['unity=off'], # solves multiple definition of Q_DECLARE_METATYPE(osmscout::TileRef)
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   endif
 endif
 
@@ -493,7 +539,8 @@ if buildClientQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   elif get_option('qtVersion') == 5
     testMocs = qt6.preprocess(moc_headers : ['include/DownloaderTest.h'])
 
@@ -503,7 +550,8 @@ if buildClientQt
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-                 install: false)
+                 install: true,
+                 install_dir: testInstallDir)
   endif
 endif
 
