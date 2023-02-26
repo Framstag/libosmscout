@@ -65,8 +65,10 @@ namespace osmscout {
     virtual void SetLabelValue(int attribute, const LabelProviderRef& value);
   };
 
-  // Probem under Mac OS X
-  #undef TYPE_BOOL
+#if defined(TYPE_BOOL)
+     // Probem under Mac OS X
+    #undef TYPE_BOOL
+#endif
 
   /**
    * \ingroup Stylesheet
@@ -114,17 +116,17 @@ namespace osmscout {
   public:
     virtual ~StyleAttributeDescriptor() = default;
 
-    inline std::string GetName() const
+    std::string GetName() const
     {
       return name;
     }
 
-    inline StyleAttributeType GetType() const
+    StyleAttributeType GetType() const
     {
       return type;
     }
 
-    inline int GetAttribute() const
+    int GetAttribute() const
     {
       return attribute;
     }

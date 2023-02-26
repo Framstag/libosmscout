@@ -57,10 +57,10 @@ namespace osmscout {
 
     std::string ResultString() const;
 
-    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& stopClock);
   };
 
-  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& stopClock);
 
   /**
    * Copy of the StopClock implementation but using a high_resolution timer
@@ -85,10 +85,10 @@ namespace osmscout {
 
     std::string ResultString() const;
 
-    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock);
+    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& stopClock);
   };
 
-  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock);
+  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClockNano& stopClock);
 
 }
 

@@ -84,10 +84,10 @@ namespace osmscout {
   private:
     unsigned long areaAreaIndexCacheSize=5000;
 
-    unsigned long nodeDataCacheSize=5000;
-    unsigned long wayDataCacheSize=40000;
-    unsigned long areaDataCacheSize=5000;
-    unsigned long routeDataCacheSize=1500;
+    unsigned long nodeDataCacheSize=5'000;
+    unsigned long wayDataCacheSize=40'000;
+    unsigned long areaDataCacheSize=5'000;
+    unsigned long routeDataCacheSize=1'500;
 
     bool routerDataMMap=true;
     bool nodesDataMMap=true;
@@ -276,7 +276,7 @@ namespace osmscout {
   public:
     friend Database;
 
-    inline std::list<AreaRegionSearchResultEntry> GetAreaResults() const
+    std::list<AreaRegionSearchResultEntry> GetAreaResults() const
     {
       return areaResults;
     }
@@ -356,12 +356,12 @@ namespace osmscout {
         return false;
       }
 
-      StopClock time;
+      StopClock runningTime;
 
       bool result=dataFile->GetByOffset(offsets.begin(), offsets.end(), offsets.size(), objects);
 
-      if (time.GetMilliseconds()>100) {
-        log.Warn() << "Retrieving " << objects.size() << " " << typeName << " by offset took " << time.ResultString();
+      if (runningTime.GetMilliseconds()>100) {
+        log.Warn() << "Retrieving " << objects.size() << " " << typeName << " by offset took " << runningTime.ResultString();
       }
 
       return result;

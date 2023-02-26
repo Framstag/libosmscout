@@ -27,11 +27,6 @@
 
 namespace osmscout {
 
-  RoutingProfile::~RoutingProfile()
-  {
-    // no code
-  }
-
   AbstractRoutingProfile::AbstractRoutingProfile(const TypeConfigRef& typeConfig)
    : typeConfig(typeConfig),
      accessReader(*typeConfig),

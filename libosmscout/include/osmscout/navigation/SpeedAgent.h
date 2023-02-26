@@ -52,7 +52,7 @@ private:
     Distance distance;
     Timestamp::duration duration{Timestamp::duration::zero()};
 
-    inline TrackSegment(const Distance &distance, const Timestamp::duration &duration):
+    TrackSegment(const Distance &distance, const Timestamp::duration &duration):
       distance(distance), duration(duration)
     {}
   };
