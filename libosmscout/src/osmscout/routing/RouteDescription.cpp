@@ -562,9 +562,9 @@ namespace osmscout {
   }
 
 
-  void RouteDescription::Node::SetTime(const Timestamp::duration &time)
+  void RouteDescription::Node::SetTime(const Timestamp::duration &duration)
   {
-    this->time=time;
+    this->time=duration;
   }
 
   void RouteDescription::Node::AddDescription(const char* name,

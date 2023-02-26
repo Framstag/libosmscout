@@ -84,7 +84,7 @@ namespace osmscout {
     void SetupValues()
     {
       double speedVal=0;
-      for (size_t i=0; i<5; i++){
+      for (size_t i=0; i<5; ++i){
         if (std::isnan(speed[i])){
           speed[i]=speedVal;
         } else {
@@ -117,7 +117,7 @@ namespace osmscout {
   class OSMSCOUT_API RoutingProfile
   {
   public:
-    virtual ~RoutingProfile();
+    virtual ~RoutingProfile() = default;
 
     virtual Vehicle GetVehicle() const = 0;
     virtual Distance GetCostLimitDistance() const = 0;
@@ -286,13 +286,13 @@ namespace osmscout {
     bool CanUseBackward(const Way& way) const override;
 
     Duration GetTime(const Area& area,
-                            const Distance &distance) const override
+                     const Distance& distance) const override
     {
       return GetTime2(area,distance);
     }
 
     Duration GetTime(const Way& way,
-                            const Distance &distance) const override
+                     const Distance& distance) const override
     {
       return GetTime2(way,distance);
     }
@@ -488,15 +488,15 @@ namespace osmscout {
     double GetCosts(const Area& area,
                            const Distance &distance) const override
     {
-      auto time=GetTime2(area,distance);
-      return std::chrono::duration_cast<HourDuration>(time).count();
+      auto duration=GetTime2(area,distance);
+      return std::chrono::duration_cast<HourDuration>(duration).count();
     }
 
     double GetCosts(const Way& way,
                            const Distance &distance) const override
     {
-      auto time=GetTime2(way,distance);
-      return std::chrono::duration_cast<HourDuration>(time).count();
+      auto duration=GetTime2(way,distance);
+      return std::chrono::duration_cast<HourDuration>(duration).count();
     }
 
     double GetCosts(const Distance &distance) const override

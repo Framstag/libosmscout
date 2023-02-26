@@ -769,7 +769,7 @@ namespace osmscout {
       DescriptionRef GetDescription(const char* name) const;
 
       void SetDistance(Distance distance);
-      void SetTime(const Timestamp::duration &time);
+      void SetTime(const Timestamp::duration &duration);
       void SetLocation(const GeoCoord &coord);
 
       void AddDescription(const char* name,

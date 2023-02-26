@@ -49,9 +49,9 @@ namespace osmscout {
     return stop-start;
   }
 
-  std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
+  std::ostream& operator<<(std::ostream& stream, const StopClock& stopClock)
   {
-    double   deltaMilli=clock.GetMilliseconds();
+    double   deltaMilli=stopClock.GetMilliseconds();
     uint64_t seconds=(uint64_t)deltaMilli/1000;
     uint64_t milliseconds=(uint64_t)deltaMilli-seconds*1000;
 
@@ -111,9 +111,9 @@ namespace osmscout {
     return std::chrono::duration_cast<NanoDouble>(stop-start).count();
   }
 
-  std::ostream& operator<<(std::ostream& stream, const StopClockNano& clock)
+  std::ostream& operator<<(std::ostream& stream, const StopClockNano& stopClock)
   {
-    double deltaNano=clock.GetNanoseconds();
+    double deltaNano=stopClock.GetNanoseconds();
 
     stream <<  deltaNano;
 
