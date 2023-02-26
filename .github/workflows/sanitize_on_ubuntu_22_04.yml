@@ -19,7 +19,7 @@ jobs:
         run:  sudo apt-get update
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
-      - name: Install clang compiler, meson and ninja
+      - name: Install clang compiler, cmake and ninja
         run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y

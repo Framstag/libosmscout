@@ -26,7 +26,7 @@ jobs:
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, meson and ninja
         run:  sudo apt-get -y install gcc-11 g++-11 libtbb-dev ccache libtool pkg-config
-      - name: Install meson, ninja and gcovr
+      - name: Install meson, ninja, lcov and gcovr via pip
         run:  pip install meson ninja lcov gcovr
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
