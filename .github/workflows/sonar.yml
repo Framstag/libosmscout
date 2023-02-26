@@ -47,7 +47,7 @@ jobs:
             unzip -q build-wrapper-linux-x86.zip
             echo "${PWD}/build-wrapper-linux-x86" >> $GITHUB_PATH
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --unity on -Db_coverage=true debug
+        run:  meson setup --buildtype debugoptimized -Db_coverage=true debug
         env:
           CXX: g++-12
           CC: gcc-12
