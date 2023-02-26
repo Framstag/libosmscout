@@ -25,7 +25,7 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, meson and ninja
-        run:  sudo apt-get -y install gcc-10 g++-10 libtbb-dev ccache libtool pkg-config meson ninja-build
+        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config meson ninja-build
       - name: Install test coverage
         run:  sudo apt-get -y install gcovr lcov
       - name: Install libosmscout dependencies
@@ -49,8 +49,8 @@ jobs:
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized --unity on -Db_coverage=true debug
         env:
-          CXX: g++-10
-          CC: gcc-10
+          CXX: g++-12
+          CC: gcc-12
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
       - name: Create gcov files
