@@ -365,7 +365,7 @@ namespace osmscout {
     if (currentPos>=text.length()) {
       coord.Set(latitude, longitude);
 
-      return true;
+      return coord.IsValid();
     }
 
     return false;

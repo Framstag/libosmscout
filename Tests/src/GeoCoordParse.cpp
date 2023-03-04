@@ -103,4 +103,10 @@ TEST_CASE()
 
     // booking.com format
     REQUIRE(CheckParseSuccess("N 050° 5.14767, E 14° 24.62653", osmscout::GeoCoord(50.0857944, 14.4104422)));
+
+    // values outside lat/lon range
+    REQUIRE(CheckParseFail("99 7"));
+    REQUIRE(CheckParseFail("-99 7"));
+    REQUIRE(CheckParseFail("40 190"));
+    REQUIRE(CheckParseFail("40 -190"));
 }
