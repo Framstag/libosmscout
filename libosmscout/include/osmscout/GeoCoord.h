@@ -205,6 +205,7 @@ namespace osmscout {
      * coordinate may have one of these formats:
      *  DDD[.DDDDD]
      *  DD°[D[.DDD]'[D[.DDD]"]]
+     *  DD°[D[.DDD]
      *
      * The means:
      * * You first define the latitude, then the longitude value
