@@ -77,6 +77,11 @@ namespace osmscout {
   public:
     using GeoCoordBuffer = std::array<std::byte,7>;
 
+    static constexpr int MinLatitude = -90;
+    static constexpr int MaxLatitude = 90;
+    static constexpr int MinLongitude = -180;
+    static constexpr int MaxLongitude = 180;
+
   public:
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
@@ -199,7 +204,8 @@ namespace osmscout {
      */
     bool IsValid() const
     {
-      return lat >= -90 && lat <= 90 && lon >= -180 && lon <= +180;
+      return lat >= MinLatitude && lat <= MaxLatitude &&
+             lon >= MinLongitude && lon <= MaxLongitude;
     }
 
     /**

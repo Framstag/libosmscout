@@ -265,10 +265,10 @@ namespace osmscout {
 
       idx-=waterIndexMinMag;
 
-      cx1=(uint32_t)floor((boundingBox.GetMinLon()+180.0)/levels[idx].cellWidth);
-      cx2=(uint32_t)floor((boundingBox.GetMaxLon()+180.0)/levels[idx].cellWidth);
-      cy1=(uint32_t)floor((boundingBox.GetMinLat()+90.0)/levels[idx].cellHeight);
-      cy2=(uint32_t)floor((boundingBox.GetMaxLat()+90.0)/levels[idx].cellHeight);
+      cx1=(uint32_t)floor((boundingBox.GetMinLon()+double(GeoCoord::MaxLongitude))/levels[idx].cellWidth);
+      cx2=(uint32_t)floor((boundingBox.GetMaxLon()+double(GeoCoord::MaxLongitude))/levels[idx].cellWidth);
+      cy1=(uint32_t)floor((boundingBox.GetMinLat()+double(GeoCoord::MaxLatitude))/levels[idx].cellHeight);
+      cy2=(uint32_t)floor((boundingBox.GetMaxLat()+double(GeoCoord::MaxLatitude))/levels[idx].cellHeight);
 
       const Level &level=levels[idx];
 
