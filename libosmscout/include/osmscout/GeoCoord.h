@@ -77,6 +77,11 @@ namespace osmscout {
   public:
     using GeoCoordBuffer = std::array<std::byte,7>;
 
+    static constexpr int MinLatitude = -90;
+    static constexpr int MaxLatitude = 90;
+    static constexpr int MinLongitude = -180;
+    static constexpr int MaxLongitude = 180;
+
   public:
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
@@ -195,6 +200,15 @@ namespace osmscout {
     }
 
     /**
+     * Return true if latitude is in range <-90,+90> and longitude in range <-180,+180>
+     */
+    bool IsValid() const
+    {
+      return lat >= MinLatitude && lat <= MaxLatitude &&
+             lon >= MinLongitude && lon <= MaxLongitude;
+    }
+
+    /**
      * Parse a textual representation of a geo coordinate from a string
      * to an GeoCoord instance.
      *
@@ -205,6 +219,7 @@ namespace osmscout {
      * coordinate may have one of these formats:
      *  DDD[.DDDDD]
      *  DD°[D[.DDD]'[D[.DDD]"]]
+     *  DD°[D[.DDD]
      *
      * The means:
      * * You first define the latitude, then the longitude value

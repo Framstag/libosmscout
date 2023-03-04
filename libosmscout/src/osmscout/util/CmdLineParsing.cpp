@@ -313,11 +313,11 @@ namespace osmscout {
       return CmdLineParseResult("Lon value of argument '"+GetArgumentName()+"' is not in valid format");
     }
 
-    if (lat<-90.0 || lat>90.0) {
+    if (lat<double(GeoCoord::MinLatitude) || lat>double(GeoCoord::MaxLatitude)) {
       return CmdLineParseResult("Lat value of argument '"+GetArgumentName()+"' is not in valid range [-90.0,90.0]");
     }
 
-    if (lon<-180.0 || lon>180.0) {
+    if (lon<double(GeoCoord::MinLongitude) || lon>double(GeoCoord::MaxLongitude)) {
       return CmdLineParseResult("Lon value of argument '"+GetArgumentName()+"' is not in valid range [-180.0,180.0]");
     }
 

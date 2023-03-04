@@ -163,8 +163,11 @@ namespace osmscout {
         currentPos += 2;
       }
 
-      // try pattern:
+      currentPos=EatWhitespace(text, currentPos);
+
+      // try patterns:
       // DD°[D[.DDD]'[D[.DDD]"]]
+      // DD°[D[.DDD]
       // parse minutes
       if (currentPos<text.length() &&
           text[currentPos]>='0' &&
@@ -173,9 +176,9 @@ namespace osmscout {
         if (!ScanNumber(text,currentPos,minutes,2)){
           return false;
         }
+        value+=(minutes/60.0);
         if (currentPos<text.length() &&
             text[currentPos]=='\''){
-          value+=(minutes/60.0);
           currentPos+=1;
 
           // parse seconds
@@ -194,9 +197,6 @@ namespace osmscout {
               return false;
             }
           }
-
-        }else{
-          return false;
         }
       }
     }
@@ -217,8 +217,7 @@ namespace osmscout {
     bool   lonPos=true;
     bool   lonDirectionGiven=false;
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
       return false;
@@ -249,22 +248,22 @@ namespace osmscout {
       currentPos++;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
       return false;
     }
 
-    if (!ScanCoordinate(text,
-                        currentPos,
-                        latitude,
-                        2)) {
+    if (!ScanCoordinate(text, currentPos, latitude, 3)) {
       return false;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
+    // optional ','
+    if (currentPos<text.length() && text[currentPos]==',') {
+      currentPos++;
+    }
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
       return false;
@@ -289,8 +288,7 @@ namespace osmscout {
       currentPos++;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
       return false;
@@ -325,22 +323,17 @@ namespace osmscout {
       currentPos++;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
       return false;
     }
 
-    if (!ScanCoordinate(text,
-                        currentPos,
-                        longitude,
-                        3)) {
+    if (!ScanCoordinate(text, currentPos, longitude, 3)) {
       return false;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos<text.length()) {
       if (text[currentPos]=='E') {
@@ -367,14 +360,12 @@ namespace osmscout {
       longitude=-longitude;
     }
 
-    currentPos=EatWhitespace(text,
-                             currentPos);
+    currentPos=EatWhitespace(text, currentPos);
 
     if (currentPos>=text.length()) {
-      coord.Set(latitude,
-                longitude);
+      coord.Set(latitude, longitude);
 
-      return true;
+      return coord.IsValid();
     }
 
     return false;
