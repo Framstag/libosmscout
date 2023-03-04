@@ -20,11 +20,12 @@
 #include <osmscout/LocationService.h>
 
 #include <algorithm>
+#include <functional>
+#include <iostream>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
 #include <osmscout/TypeFeatures.h>
-#include <iostream>
 
 namespace osmscout {
 
@@ -711,14 +712,21 @@ namespace osmscout {
       }
     };
 
-  public:
-    std::list<TokenSearch> patterns;
-    std::list<Result>      matches;
-    std::list<Result>      partialMatches;
+  private:
+    std::vector<TokenSearch> patterns;
+    BreakerRef breaker;
+    std::function<void(const Result&)> matchCallback;
+    std::function<void(const Result&)> partialMatchCallback;
 
   public:
     AdminRegionSearchVisitor(const StringMatcherFactoryRef& matcherFactory,
-                             const std::list<TokenStringRef>& patterns)
+                             const std::list<TokenStringRef>& patterns,
+                             BreakerRef breaker,
+                             const std::function<void(const Result&)>& matchCallback,
+                             const std::function<void(const Result&)>& partialMatchCallback):
+       breaker(breaker),
+       matchCallback(matchCallback),
+       partialMatchCallback(partialMatchCallback)
     {
       for (const auto& pattern : patterns) {
         this->patterns.emplace_back(pattern,
@@ -735,16 +743,15 @@ namespace osmscout {
 
           if (matchResult==StringMatcher::match) {
             osmscout::log.Debug() << "Match of pattern " << pattern.tokenString->text << " against region " << type << " '" << name << "'";
-            matches.emplace_back(pattern.tokenString,
+            matchCallback(Result(pattern.tokenString,
                                  std::make_shared<AdminRegion>(region),
-                                 name);
-
+                                 name));
           }
           else if (matchResult==StringMatcher::partialMatch) {
             osmscout::log.Debug() << "Partial match of pattern " << pattern.tokenString->text << " against region " << type << " '" << name << "'";
-            partialMatches.emplace_back(pattern.tokenString,
+            partialMatchCallback(Result(pattern.tokenString,
                                         std::make_shared<AdminRegion>(region),
-                                        name);
+                                        name));
           }
           return matchResult;
         };
@@ -773,6 +780,10 @@ namespace osmscout {
         }
       }
 
+      if (breaker && breaker->IsAborted()){
+        osmscout::log.Debug() << "Search aborted";
+        return stop;
+      }
       return visitChildren;
     }
   };
@@ -1941,24 +1952,7 @@ namespace osmscout {
 
     CleanupSearchPatterns(regionSearchPatterns);
 
-    // Search for region name
-
-    AdminRegionSearchVisitor adminRegionVisitor(parameter.stringMatcherFactory,
-                                                regionSearchPatterns);
-
-    StopClock adminRegionVisitTime;
-
-    locationIndex->VisitAdminRegions(adminRegionVisitor);
-
-    adminRegionVisitTime.Stop();
-
-    osmscout::log.Debug() << "Admin Region visit: " << adminRegionVisitTime.ResultString();
-    if (searchParameter.IsAborted()){
-      osmscout::log.Debug() << "Search aborted";
-      return true;
-    }
-
-    for (const auto& regionMatch : adminRegionVisitor.matches) {
+    auto RegionMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
       osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'";
       std::list<std::string> locationTokens=BuildStringListFromSubToken(regionMatch.tokenString,
                                                                         tokens);
@@ -1982,7 +1976,7 @@ namespace osmscout {
                                      breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
-            return true;
+            return;
           }
         }
 
@@ -1996,7 +1990,7 @@ namespace osmscout {
                                 breaker);
           if (searchParameter.IsAborted()){
             osmscout::log.Debug() << "Search aborted";
-            return true;
+            return;
           }
         }
 
@@ -2009,10 +2003,10 @@ namespace osmscout {
                           result);
         }
       }
-    }
+    };
 
-    if (!parameter.adminRegionOnlyMatch) {
-      for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
+    auto RegionPartialMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
+      if (!parameter.adminRegionOnlyMatch) {
         osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' (" << regionMatch.adminRegion->object.GetName() << ") for pattern '" << regionMatch.tokenString->text << "'";
         std::list<std::string> locationTokens=BuildStringListFromSubToken(regionMatch.tokenString,
                                                                           tokens);
@@ -2036,7 +2030,7 @@ namespace osmscout {
                                        breaker);
             if (searchParameter.IsAborted()){
               osmscout::log.Debug() << "Search aborted";
-              return true;
+              return;
             }
           }
 
@@ -2050,7 +2044,7 @@ namespace osmscout {
                                   breaker);
             if (searchParameter.IsAborted()){
               osmscout::log.Debug() << "Search aborted";
-              return true;
+              return;
             }
           }
 
@@ -2064,6 +2058,26 @@ namespace osmscout {
           }
         }
       }
+    };
+
+    // Search for region name
+
+    AdminRegionSearchVisitor adminRegionVisitor(parameter.stringMatcherFactory,
+                                                regionSearchPatterns,
+                                                breaker,
+                                                RegionMatch,
+                                                RegionPartialMatch);
+
+    StopClock adminRegionVisitTime;
+
+    locationIndex->VisitAdminRegions(adminRegionVisitor);
+
+    adminRegionVisitTime.Stop();
+
+    osmscout::log.Debug() << "Admin Region visit: " << adminRegionVisitTime.ResultString();
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
     }
 
     return true;
@@ -2104,24 +2118,7 @@ namespace osmscout {
       return true;
     }
 
-    // Build Region search patterns
-
-    std::list<TokenStringRef> regionSearchPatterns;
-
-    regionSearchPatterns.push_back(std::make_shared<TokenString>(searchParameter.GetAdminRegionSearchString()));
-
-    // Search for region name
-
-    AdminRegionSearchVisitor adminRegionVisitor(searchParameter.GetStringMatcherFactory(),
-                                                regionSearchPatterns);
-
-    locationIndex->VisitAdminRegions(adminRegionVisitor);
-    if (searchParameter.IsAborted()){
-      osmscout::log.Debug() << "Search aborted";
-      return true;
-    }
-
-    for (const auto& regionMatch : adminRegionVisitor.matches) {
+    auto RegionMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
       osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPostalAreaSearchString().empty() &&
@@ -2155,9 +2152,9 @@ namespace osmscout {
                           result);
         }
       }
-    }
+    };
 
-    for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
+    auto RegionPartialMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
       osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPostalAreaSearchString().empty() &&
@@ -2191,6 +2188,27 @@ namespace osmscout {
                           result);
         }
       }
+    };
+
+
+    // Build Region search patterns
+
+    std::list<TokenStringRef> regionSearchPatterns;
+
+    regionSearchPatterns.push_back(std::make_shared<TokenString>(searchParameter.GetAdminRegionSearchString()));
+
+    // Search for region name
+
+    AdminRegionSearchVisitor adminRegionVisitor(searchParameter.GetStringMatcherFactory(),
+                                                regionSearchPatterns,
+                                                breaker,
+                                                RegionMatch,
+                                                RegionPartialMatch);
+
+    locationIndex->VisitAdminRegions(adminRegionVisitor);
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
     }
 
     result.results.sort();
@@ -2233,24 +2251,7 @@ namespace osmscout {
       return true;
     }
 
-    // Build Region search patterns
-
-    std::list<TokenStringRef> regionSearchPatterns;
-
-    regionSearchPatterns.push_back(std::make_shared<TokenString>(searchParameter.GetAdminRegionSearchString()));
-
-    // Search for region name
-
-    AdminRegionSearchVisitor adminRegionVisitor(searchParameter.GetStringMatcherFactory(),
-                                                regionSearchPatterns);
-
-    locationIndex->VisitAdminRegions(adminRegionVisitor);
-    if (searchParameter.IsAborted()){
-      osmscout::log.Debug() << "Search aborted";
-      return true;
-    }
-
-    for (const auto& regionMatch : adminRegionVisitor.matches) {
+    auto RegionMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
       osmscout::log.Debug() << "Found region match '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPOISearchString().empty()) {
@@ -2280,9 +2281,9 @@ namespace osmscout {
                           result);
         }
       }
-    }
+    };
 
-    for (const auto& regionMatch : adminRegionVisitor.partialMatches) {
+    auto RegionPartialMatch = [&](const AdminRegionSearchVisitor::Result& regionMatch){
       osmscout::log.Debug() << "Found region candidate '" << regionMatch.adminRegion->name << "' for pattern '" << regionMatch.tokenString->text << "'";
 
       if (searchParameter.GetPOISearchString().empty()) {
@@ -2312,6 +2313,26 @@ namespace osmscout {
                           result);
         }
       }
+    };
+
+    // Build Region search patterns
+
+    std::list<TokenStringRef> regionSearchPatterns;
+
+    regionSearchPatterns.push_back(std::make_shared<TokenString>(searchParameter.GetAdminRegionSearchString()));
+
+    // Search for region name
+
+    AdminRegionSearchVisitor adminRegionVisitor(searchParameter.GetStringMatcherFactory(),
+                                                regionSearchPatterns,
+                                                searchParameter.GetBreaker(),
+                                                RegionMatch,
+                                                RegionPartialMatch);
+
+    locationIndex->VisitAdminRegions(adminRegionVisitor);
+    if (searchParameter.IsAborted()){
+      osmscout::log.Debug() << "Search aborted";
+      return true;
     }
 
     result.results.sort();
