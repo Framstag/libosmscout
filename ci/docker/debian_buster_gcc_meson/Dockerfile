@@ -25,8 +25,10 @@ ENV QT_QPA_PLATFORM offscreen
 
 RUN apt-get update && apt-get install -y \
           g++ \
-          meson \
+          python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install meson ninja
 
 RUN mkdir /work
 
