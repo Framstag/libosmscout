@@ -19,7 +19,7 @@ project:
   stereotype: NONE
   versionPattern: CHRONVER
   snapshot:
-    pattern: '*.latest'
+    pattern: '*-latest'
     label: latest
     fullChangelog: true
 
