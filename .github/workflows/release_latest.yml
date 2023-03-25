@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths_ignore:
+      - .github/workflows/**
   workflow_dispatch:
 
 env:

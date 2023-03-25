@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - master
+    paths_ignore:
+      - .github/workflows/**
 
 jobs:
   build_clang_meson:
