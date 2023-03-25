@@ -1,0 +1,81 @@
+name: Release Latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRO: 'zulu'
+
+jobs:
+  create_latest_release:
+    name: Create latest release
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install gcc compiler and Co
+        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config
+
+      - name: Install meson and ninja via pip
+        run:  "pip install meson ninja"
+
+      - name: Set version
+        run:  |
+          VERSION=${{ github.event.inputs.version }}
+          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}/g" meson.build
+
+      - name: Initialize meson project
+        run:  meson setup dist --wrap-mode nofallback
+        env:
+          CXX: g++-12
+          CC: gcc-12
+
+      - name: Create distribution archive
+        run:  meson dist -C dist --formats "xztar,zip" --no-tests --allow-dirty
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+
+      - name: JReleaser full-release
+        uses: jreleaser/release-action@v2
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ steps.version.outputs.VERSION }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version changes
+        run:  |
+          VERSION=${{ github.event.inputs.version }}
+          git config --global user.email "framstag@users.noreply.github.com"
+          git config --global user.name "Tim Teulings"
+          git commit -a -m "Releasing version $VERSION"
+          git push origin main
+
+      - name: Tagging version with latest, commit and push
+        run:  |
+          VERSION=latest
+          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}/g" meson.build
+          git config --global user.email "framstag@users.noreply.github.com"
+          git config --global user.name "Tim Teulings"
+          git commit -a -m "Setting version to next snapshot version"
+          git push origin main
+
+      - name: JReleaser upload output
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: jreleaser-release
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
