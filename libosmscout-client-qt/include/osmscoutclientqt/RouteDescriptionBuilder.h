@@ -59,15 +59,15 @@ public:
     GeoCoord coord;
     Distance distance;
     Distance distancePrevious;
-    Duration time;
-    Duration timePrevious;
+    Duration timestamp;
+    Duration timestampPrevious;
 
   public:
     Callback(QList<RouteStep> &routeSteps,
              const Distance &stopAfter = Distance::Lowest(),
              bool skipInformative=false);
 
-    ~Callback() override;
+    ~Callback() override = default;
 
     void OnStart(const RouteDescription::StartDescriptionRef& startDescription,
                  const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
@@ -112,9 +112,7 @@ public:
     RouteStep MkStep(const QString &name);
   };
 public:
-  RouteDescriptionBuilder();
-
-  ~RouteDescriptionBuilder() override;
+  ~RouteDescriptionBuilder() override = default;
 
   void GenerateRouteSteps(const osmscout::RouteDescription &routeDescription,
                           QList<RouteStep> &routeSteps) const;

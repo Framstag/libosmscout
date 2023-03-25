@@ -85,8 +85,8 @@ public:
   Distance distance;        //!< Estimate distance from route start
   Distance distanceDelta;   //!< Estimate distance from previous route step
   Distance distanceTo;      //!< Estimate distance to this step (used with navigation)
-  Duration time;            //!< Estimate time from route start
-  Duration timeDelta;       //!< Estimate time from previous route step
+  Duration timestamp;       //!< Estimate time from route start
+  Duration timestampDelta;  //!< Estimate time from previous route step
   QString description;      //!< Formatted (html) verbose description (translated already)
   QString shortDescription; //!< Plain short description (translated already)
   QStringList streetNames;  //!< Street names leading to this step
@@ -111,8 +111,8 @@ public:
             const GeoCoord &coord,
             const Distance &distance,
             const Distance &distanceDelta,
-            const Duration &time,
-            const Duration &timeDelta,
+            const Duration &timestamp,
+            const Duration &timestampDelta,
             const QStringList &streetNames);
 
   RouteStep(const RouteStep& other);
@@ -161,12 +161,12 @@ public:
 
   double getTime() const
   {
-    return DurationAsSeconds(time);
+    return DurationAsSeconds(timestamp);
   }
 
   double getTimeDelta() const
   {
-    return DurationAsSeconds(timeDelta);
+    return DurationAsSeconds(timestampDelta);
   }
 
   QString getDescription() const

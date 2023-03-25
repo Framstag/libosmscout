@@ -175,9 +175,9 @@ public:
 
     FileOffset position=0;
     while ((res=std::fread(chars,1,sizeof(chars),file))>0) {
-      if (xmlParseChunk(ctxt,chars,
+      if (::xmlParseChunk(ctxt,chars,
                         static_cast<int>(res),0)!=0) {
-        xmlParserError(ctxt,"xmlParseChunk");
+        ::xmlParserError(ctxt,"xmlParseChunk");
         return false;
       }
       if (errorCnt>0){
@@ -195,8 +195,8 @@ public:
       }
     }
 
-    if (xmlParseChunk(ctxt,chars,0,1)!=0) {
-      xmlParserError(ctxt,"xmlParseChunk");
+    if (::xmlParseChunk(ctxt,chars,0,1)!=0) {
+      ::xmlParserError(ctxt,"xmlParseChunk");
       return false;
     }
 
@@ -247,7 +247,7 @@ public:
 
   void Error(const std::string& msg)
   {
-    errorCnt++;
+    ++errorCnt;
     if (callback){
       callback->Error(msg);
     }
@@ -370,7 +370,7 @@ GpxParserContext* GpxParserContext::StartElement(NameSpace,
                                                  const std::string &name,
                                                  [[maybe_unused]] const std::map<AttrKey, std::string> &atts)
 {
-  xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
+  ::xmlParserWarning(ctxt,"Unexpected element %s start on context %s\n", name.c_str(), ContextName());
   parser.Warning("Unexpected element");
   return nullptr;
 }
@@ -426,7 +426,7 @@ public:
         if (StringToNumber(value, ele)){
           point.elevation=std::make_optional<double>(ele);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
         }
       });
@@ -438,7 +438,7 @@ public:
         if (StringToNumber(value, course)){
           point.course=std::make_optional<double>(course);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Magvar value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Magvar value\n");
           parser.Warning("Can't parse Magvar value");
         }
       });
@@ -450,7 +450,7 @@ public:
         if (StringToNumber(value, hdop)){
           point.hdop=std::make_optional<double>(hdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse HDop value\n");
+          ::xmlParserWarning(ctxt,"Can't parse HDop value\n");
           parser.Warning("Can't parse HDop value");
         }
       });
@@ -462,7 +462,7 @@ public:
         if (StringToNumber(value, vdop)){
           point.vdop=std::make_optional<double>(vdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse VDop value\n");
+          ::xmlParserWarning(ctxt,"Can't parse VDop value\n");
           parser.Warning("Can't parse VDop value");
         }
       });
@@ -474,7 +474,7 @@ public:
         if (StringToNumber(value, pdop)){
           point.pdop=std::make_optional<double>(pdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse PDop value\n");
+          ::xmlParserWarning(ctxt,"Can't parse PDop value\n");
           parser.Warning("Can't parse PDop value");
         }
       });
@@ -482,11 +482,11 @@ public:
 
     if (ns == NameSpace::Gpx && name == "time") {
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
-        Timestamp time;
-        if (ParseISO8601TimeString(value, time)){
-          point.time=std::make_optional<Timestamp>(time);
+        Timestamp timestamp;
+        if (ParseISO8601TimeString(value,timestamp)){
+          point.timestamp=std::make_optional<Timestamp>(timestamp);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Time value\n");
           parser.Warning("Can't parse Time value");
         }
       });
@@ -578,7 +578,7 @@ public:
         if (StringToNumber(value, ele)){
           waypoint.elevation=std::make_optional<double>(ele);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
         }
       });
@@ -590,7 +590,7 @@ public:
         if (StringToNumber(value, hdop)){
           waypoint.hdop=std::make_optional<double>(hdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse HDop value\n");
+          ::xmlParserWarning(ctxt,"Can't parse HDop value\n");
           parser.Warning("Can't parse HDop value");
         }
       });
@@ -602,7 +602,7 @@ public:
         if (StringToNumber(value, vdop)){
           waypoint.vdop=std::make_optional<double>(vdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Ele value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Ele value\n");
           parser.Warning("Can't parse Ele value");
         }
       });
@@ -614,7 +614,7 @@ public:
         if (StringToNumber(value, pdop)){
           waypoint.pdop=std::make_optional<double>(pdop);
         }else{
-          xmlParserWarning(ctxt,"Can't parse PDop value\n");
+          ::xmlParserWarning(ctxt,"Can't parse PDop value\n");
           parser.Warning("Can't parse PDop value");
         }
       });
@@ -624,9 +624,9 @@ public:
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
-          waypoint.time=std::make_optional<Timestamp>(time);
+          waypoint.timestamp=std::make_optional<Timestamp>(time);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Time value\n");
           parser.Warning("Can't parse Time value");
         }
       });
@@ -672,9 +672,9 @@ public:
       return new SimpleValueContext("TimeContext", ctxt, parser, [&](const std::string &value){
         Timestamp time;
         if (ParseISO8601TimeString(value, time)){
-          output.time=std::make_optional<Timestamp>(time);
+          output.timestamp=std::make_optional<Timestamp>(time);
         }else{
-          xmlParserWarning(ctxt,"Can't parse Time value\n");
+          ::xmlParserWarning(ctxt,"Can't parse Time value\n");
           parser.Warning("Can't parse Time value");
         }
       });
@@ -715,7 +715,7 @@ public:
         return new TrkptContext(ctxt, segment, parser, lat, lon);
       }
 
-      xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
+      ::xmlParserError(ctxt,"Can't parse trkpt lan/lon\n");
       parser.Error("Can't parse trkpt lan/lon");
       return nullptr;
     }
@@ -755,7 +755,7 @@ public:
         return new RteptContext(ctxt, route, parser, lat, lon);
       }
 
-      xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
+      ::xmlParserError(ctxt, "Can't parse trkpt lan/lon\n");
       parser.Error("Can't parse trkpt lan/lon");
       return nullptr;
     }
@@ -777,9 +777,7 @@ public:
   TrkExtensionContext(xmlParserCtxtPtr ctxt, Track &track, GpxParser &parser) :
       GpxParserContext(ctxt, parser), track(track) {}
 
-  ~TrkExtensionContext() override
-  {
-  }
+  ~TrkExtensionContext() override = default;
 
   const char *ContextName() const override
   {
@@ -889,7 +887,7 @@ public:
         return new WaypointContext(ctxt, output, parser, lat, lon);
       }
 
-      xmlParserError(ctxt,"Can't parse wpt lan/lon\n");
+      ::xmlParserError(ctxt,"Can't parse wpt lan/lon\n");
       parser.Error("Can't parse wpt lan/lon");
       return nullptr;
     }

@@ -39,7 +39,7 @@ public:
 
   osmscout::GeoCoord coord;
   std::optional<double> elevation; // meters above sea
-  std::optional<Timestamp> time;
+  std::optional<Timestamp> timestamp;
   std::optional<double> course; // alias magvar - degrees, 0.0 <= value < 360.0
 
   /**

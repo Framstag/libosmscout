@@ -21,7 +21,6 @@
 
 #include <QDebug>
 #include <QPoint>
-#include <QVector>
 #include <QTime>
 #include <QElapsedTimer>
 
@@ -144,10 +143,10 @@ void TapRecognizer::touch(const QTouchEvent &event)
 MoveAccumulator& MoveAccumulator::operator+=(const QPointF p)
 {
     AccumulatorEvent ev = {p, QElapsedTimer()};
-    ev.time.start();
+    ev.timer.start();
     events.push_back(ev);
     // flush old events
-    while ((!events.isEmpty()) && events.first().time.elapsed() > memory){
+    while ((!events.isEmpty()) && events.first().timer.elapsed() > memory){
         events.pop_front();
     }
     return *this;
@@ -158,7 +157,7 @@ QVector2D MoveAccumulator::collect()
     QVector2D vector;
     double distance = 0;
     // flush old events
-    while ((!events.isEmpty()) && events.first().time.elapsed() > memory){
+    while ((!events.isEmpty()) && events.first().timer.elapsed() > memory){
         events.pop_front();
     }
     if (!events.isEmpty()){
