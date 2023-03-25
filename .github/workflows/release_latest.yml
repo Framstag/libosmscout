@@ -34,7 +34,7 @@ jobs:
 
       - name: Set version locally to 'latest'
         run:  |
-          sed -i "s/^ *version: *'[0-9.]*', *$/        version: '$(date +%Y.%m.%d).1-latest',/g" meson.build
+          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '$(date +%Y.%m.%d).1-latest',/g" meson.build
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback

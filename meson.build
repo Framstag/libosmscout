@@ -1,6 +1,6 @@
 project('libosmscout',
         'cpp',
-        version: '2023.latest',
+        version: '2023.03.25.1-latest',
         meson_version: '>=0.63.0',
         default_options: ['cpp_std=c++17', 'buildtype=debugoptimized', 'warning_level=3'],
         license: ['LGPL'])
