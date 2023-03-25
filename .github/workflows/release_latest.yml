@@ -29,7 +29,7 @@ jobs:
 
       - name: Set version locally to 'latest'
         run:  |
-          sed -i "s/^ *version: *'[0-9.]*', *$/        version: 'latest',/g" meson.build
+          sed -i "s/^ *version: *'[0-9.]*', *$/        version: '$(date +%Y)-latest',/g" meson.build
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback
@@ -45,13 +45,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRO }}
-
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
 
       - name: JReleaser full-release
         uses: jreleaser/release-action@v2
