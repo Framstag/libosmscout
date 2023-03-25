@@ -30,16 +30,16 @@ RouteStep::RouteStep(const QString &type,
                      const GeoCoord &coord,
                      const Distance &distance,
                      const Distance &distanceDelta,
-                     const Duration &time,
-                     const Duration &timeDelta,
+                     const Duration &timestamp,
+                     const Duration &timestampDelta,
                      const QStringList &streetNames):
     type(type),
     coord(coord),
     distance(distance),
     distanceDelta(distanceDelta),
     distanceTo(Distance::Zero()),
-    time(time),
-    timeDelta(timeDelta),
+    timestamp(timestamp),
+    timestampDelta(timestampDelta),
     streetNames(streetNames)
 {
 
@@ -52,8 +52,8 @@ RouteStep::RouteStep(const RouteStep& other)
       distance(other.distance),
       distanceDelta(other.distanceDelta),
       distanceTo(other.distanceTo),
-      time(other.time),
-      timeDelta(other.timeDelta),
+      timestamp(other.timestamp),
+      timestampDelta(other.timestampDelta),
       description(other.description),
       shortDescription(other.shortDescription),
       streetNames(other.streetNames),
@@ -138,8 +138,8 @@ RouteStep& RouteStep::operator=(const RouteStep& other)
     distance=other.distance;
     distanceDelta=other.distanceDelta;
     distanceTo=other.distanceTo;
-    time=other.time;
-    timeDelta=other.timeDelta;
+    timestamp=other.timestamp;
+    timestampDelta=other.timestampDelta;
     description=other.description;
     shortDescription=other.shortDescription;
     streetNames=other.streetNames;

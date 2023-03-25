@@ -266,8 +266,8 @@ bool GpxWritter::WriteWaypoint(const Waypoint &waypoint)
       return false;
     }
   }
-  if (waypoint.time){
-    if (!WriteTextElement("time", *waypoint.time)){
+  if (waypoint.timestamp){
+    if (!WriteTextElement("time", *waypoint.timestamp)){
       return false;
     }
   }
@@ -324,8 +324,8 @@ bool GpxWritter::WriteTrackPoint(const char *elemName, const TrackPoint &point)
       return false;
     }
   }
-  if (point.time){
-    if (!WriteTextElement("time", *point.time)){
+  if (point.timestamp){
+    if (!WriteTextElement("time", *point.timestamp)){
       return false;
     }
   }
@@ -473,7 +473,7 @@ bool GpxWritter::WriteRoutes(const std::vector<Route> &routes)
 
 bool GpxWritter::WriteMetadata(const GpxFile file)
 {
-  if (!file.name && !file.desc && !file.time){
+  if (!file.name && !file.desc && !file.timestamp){
     return true;
   }
 
@@ -491,8 +491,8 @@ bool GpxWritter::WriteMetadata(const GpxFile file)
       return false;
     }
   }
-  if (file.time){
-    if (!WriteTextElement("time", *file.time)){
+  if (file.timestamp){
+    if (!WriteTextElement("time", *file.timestamp)){
       return false;
     }
   }

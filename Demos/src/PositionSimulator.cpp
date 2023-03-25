@@ -99,8 +99,8 @@ bool PositionSimulator::setSegment(size_t i)
   segmentStart=points[0];
   segmentEnd=points[points.size()-1];
 
-  if (segmentStart.time){
-    simulationTime=*segmentStart.time;
+  if (segmentStart.timestamp){
+    simulationTime=*segmentStart.timestamp;
   }else{
     simulationTime=Now();
   }
@@ -147,14 +147,14 @@ void PositionSimulator::tick()
   while (true){
     if (currentPoint<points.size()) {
       auto &point=points[currentPoint];
-      if (point.time && *point.time > simulationTime){
+      if (point.timestamp && *point.timestamp > simulationTime){
         return;
       }
-      osmscout::log.Debug() << "Simulator point: " << osmscout::TimestampToISO8601TimeString(point.time.value_or(simulationTime)) << " @ " << point.coord.GetDisplayText();
+      osmscout::log.Debug() << "Simulator point: " << osmscout::TimestampToISO8601TimeString(point.timestamp.value_or(simulationTime)) << " @ " << point.coord.GetDisplayText();
       currentPosition=point.coord;
       emit positionChanged(currentPosition.GetLat(), currentPosition.GetLon(), point.hdop.has_value(), point.hdop.value_or(0));
       currentPoint++;
-      if (!point.time){
+      if (!point.timestamp){
         return;
       }
     }else{

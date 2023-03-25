@@ -36,7 +36,7 @@ class OSMSCOUT_GPX_API GpxFile {
 public:
   std::optional<std::string> name;
   std::optional<std::string> desc;
-  std::optional<Timestamp> time;
+  std::optional<Timestamp> timestamp;
 
   std::vector<Track>    tracks;
   std::vector<Route>    routes;

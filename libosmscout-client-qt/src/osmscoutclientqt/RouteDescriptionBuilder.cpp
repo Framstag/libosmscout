@@ -40,10 +40,6 @@ RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<Route
 {
 }
 
-RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::~Callback()
-{
-}
-
 static QString TurnCommandType(const RouteDescription::DirectionDescriptionRef& directionDescription)
 {
   if (!directionDescription) {
@@ -613,7 +609,7 @@ void RouteDescriptionBuilder::Callback::BeforeNode(const RouteDescription::Node&
 {
   distance=node.GetDistance();
   coord=node.GetLocation();
-  time=node.GetTime();
+  timestamp=node.GetTime();
 }
 
 RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
@@ -622,13 +618,13 @@ RouteStep RouteDescriptionBuilder::Callback::MkStep(const QString &name)
                  coord,
                  distance,
                  distance-distancePrevious,
-                 time,
-                 time-timePrevious,
+                 timestamp,
+                 timestamp-timestampPrevious,
                  streetNames);
 
   streetNames.clear();
   distancePrevious = distance;
-  timePrevious = time;
+  timestampPrevious = timestamp;
   return step;
 }
 
@@ -638,12 +634,6 @@ bool RouteDescriptionBuilder::Callback::Continue() const
          routeSteps.empty() ||
          routeSteps.constLast().distance <= stopAfter;
 }
-
-RouteDescriptionBuilder::RouteDescriptionBuilder()
-{}
-
-RouteDescriptionBuilder::~RouteDescriptionBuilder()
-{}
 
 void RouteDescriptionBuilder::GenerateRouteSteps(const RouteDescription &routeDescription,
                                                  QList<RouteStep> &routeSteps) const

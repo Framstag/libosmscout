@@ -115,7 +115,7 @@ signals:
 struct AccumulatorEvent
 {
   QPointF pos;
-  QElapsedTimer time;
+  QElapsedTimer timer;
 };
 
 /**
