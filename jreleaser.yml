@@ -21,7 +21,7 @@ project:
   snapshot:
     pattern: .*-latest
     label: latest
-    fullChangelog: false
+    fullChangelog: true
 
 release:
   github:
