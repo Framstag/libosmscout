@@ -29,15 +29,12 @@ jobs:
 
       - name: "Define version based on current year"
         run: |
-          echo "VERSION=$(date +%Y.%m.%d)-latest" >> $GITHUB_OUTPUT
+          echo "VERSION=$(date +%Y.%m.%d).1-latest" >> $GITHUB_OUTPUT
         id: version
-
-      - name: "Output calculated version"
-        run: echo "${VERSION}"
 
       - name: Set version locally to 'latest'
         run:  |
-          sed -i "s/^ *version: *'[0-9.]*', *$/        version: '$(date +%Y.%m.%d)-latest',/g" meson.build
+          sed -i "s/^ *version: *'[0-9.]*', *$/        version: '$(date +%Y.%m.%d).1-latest',/g" meson.build
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback
