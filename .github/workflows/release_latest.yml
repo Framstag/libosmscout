@@ -6,6 +6,10 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRO: 'zulu'
+
 jobs:
   create_latest_release:
     name: Create latest release
