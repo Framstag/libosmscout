@@ -1,4 +1,4 @@
-name: Release Latest
+name: Release
 
 on:
   workflow_dispatch:
@@ -12,14 +12,14 @@ env:
   JAVA_DISTRO: 'zulu'
 
 jobs:
-  create_latest_release:
+  create_release:
     name: Create latest release
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: main
+          ref: master
           fetch-depth: 0
 
       - name: Install gcc compiler and Co
@@ -60,7 +60,7 @@ jobs:
           git config --global user.email "framstag@users.noreply.github.com"
           git config --global user.name "Tim Teulings"
           git commit -a -m "Releasing version $VERSION"
-          git push origin main
+          git push origin master
 
       - name: Tagging version with latest, commit and push
         run:  |
@@ -69,7 +69,7 @@ jobs:
           git config --global user.email "framstag@users.noreply.github.com"
           git config --global user.name "Tim Teulings"
           git commit -a -m "Setting version to next snapshot version"
-          git push origin main
+          git push origin master
 
       - name: JReleaser upload output
         uses: actions/upload-artifact@v3
