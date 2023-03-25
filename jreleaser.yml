@@ -36,6 +36,7 @@ release:
 
 distributions:
   source:
+    type: BINARY
     artifacts:
       - path: dist/meson-dist/libosmscout-{{projectVersion}}.tar.xz
       - path: dist/meson-dist/libosmscout-{{projectVersion}}.zip
