@@ -2,7 +2,7 @@ cppArgs = []
 
 if get_option('default_library')=='shared'
   cppArgs += ['-DOSMScoutMapGDI_EXPORTS']
-  
+
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']
   endif
@@ -19,6 +19,7 @@ osmscoutmapgdi = library('osmscout_map_gdi',
                          cpp_args: cppArgs,
                          dependencies: [mathDep, threadDep, gdiplusDep],
                          link_with: [osmscoutmap, osmscout],
+                         version: libraryVersion,
                          install: true)
-        
-# TODO: Generate PKG_CONFIG file        
+
+# TODO: Generate PKG_CONFIG file

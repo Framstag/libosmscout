@@ -19,6 +19,7 @@ osmscoutmapdirectx = library('osmscout_map_directx',
                              cpp_args: cppArgs,
                              dependencies: [mathDep, threadDep, d2d1Dep, dwriteDep, winCodecsDep],
                              link_with: [osmscoutmap, osmscout],
+                             version: libraryVersion,
                              install: true)
 
 # TODO: Generate PKG_CONFIG file

@@ -26,6 +26,7 @@ osmscoutimport = library('osmscout_import',
                          cpp_args: cppArgs,
                          dependencies: [mathDep, threadDep, tbbDep, openmpDep, wsock32Dep, xml2Dep, marisaDep, protobufDep, zlibDep],
                          link_with: [osmscout],
+                         version: libraryVersion,
                          install: true)
 
 # TODO: Generate PKG_CONFIG file

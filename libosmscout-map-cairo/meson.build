@@ -20,6 +20,7 @@ osmscoutmapcairo = library('osmscout_map_cairo',
                            cpp_args: cppArgs,
                            dependencies: [mathDep, threadDep, cairoDep, pangoDep, pangocairoDep, pngDep, gobjectDep],
                            link_with: [osmscoutmap, osmscout],
+                           version: libraryVersion,
                            install: true)
 
 # TODO: Generate PKG_CONFIG file

@@ -1,9 +1,11 @@
 project('libosmscout',
         'cpp',
+        version: '1.1.1',
         meson_version: '>=0.63.0',
         default_options: ['cpp_std=c++17', 'buildtype=debugoptimized', 'warning_level=3'],
-        license: ['LGPL'],
-        version: '1.1.1')
+        license: ['LGPL'])
+
+libraryVersion='1.1.1'
 
 if build_machine.system()=='darwin'
   add_languages(['objcpp'])
@@ -225,8 +227,6 @@ openGLDep = dependency('gl', required: false)
 glmDep = dependency('glm', required: false, fallback: ['glm', 'glm_dep'])
 glewDep = dependency('glew', required: false, fallback: ['glew', 'glew_dep'])
 
-# Workaround for dependency, else error under Ubuntu 14.04
-
 if build_machine.system()=='darwin' or build_machine.system()=='linux'
   glfwDep=dependency('glfw3', required: false)
 else
@@ -324,12 +324,15 @@ elif get_option('qtVersion') == 6
   buildStyleEditor=buildMapQt and buildClientQt and qt6SvgDep.found()
 endif
 
+message('Meson version:           @0@'.format(meson.version()))
+message('Project version:         @0@'.format(meson.project_version()))
+message('Library version:         @0@'.format(libraryVersion))
+message('Project license:         @0@'.format(meson.project_license()))
 message('Build OS:                @0@'.format(build_machine.system()))
 message('Host OS:                 @0@'.format(host_machine.system()))
 message('Target OS:               @0@'.format(target_machine.system()))
 message('compiler id:             @0@'.format(compiler.get_id()))
-# meson >= 0.49.0
-#message('compiler arg. syntax:    @0@'.format(compiler.get_argument_syntax()))
+message('compiler arg. syntax:    @0@'.format(compiler.get_argument_syntax()))
 message('openmp support:          @0@'.format(openmpDep.found()))
 message('C++17 execution support: @0@'.format(stdExecutionAvailable))
 message('libosmscout:             @0@'.format(true))
@@ -379,7 +382,6 @@ if buildMapGDI
 endif
 
 if buildMapIOSX
-# Does not yet work, because we are not able to active std11 support, fixed in meson trunk
   subdir('libosmscout-map-iosx')
 endif
 

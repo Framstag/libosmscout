@@ -31,6 +31,7 @@ if get_option('qtVersion') == 5
                              cpp_args: cppArgs,
                              dependencies: [mathDep, threadDep, qt5GuiDep, qt5QmlDep, qt5QuickDep, qt5WidgetsDep, qt5NetworkDep, qt5SvgDep, qt5MultimediaDep],
                              link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                             version: libraryVersion,
                              install: true)
 elif get_option('qtVersion') == 6
   mocFiles = qt6.preprocess(moc_headers : mocHeaders,
@@ -43,6 +44,7 @@ elif get_option('qtVersion') == 6
                              cpp_args: cppArgs,
                              dependencies: [mathDep, threadDep, qt6GuiDep, qt6QmlDep, qt6QuickDep, qt6WidgetsDep, qt6NetworkDep, qt6SvgDep, qt6MultimediaDep],
                              link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                             version: libraryVersion,
                              install: true)
 endif
 

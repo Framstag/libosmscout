@@ -19,6 +19,7 @@ osmscoutgpx = library('osmscout_gpx',
                       cpp_args: cppArgs,
                       dependencies: [mathDep, threadDep, xml2Dep, iconvDep, zlibDep],
                       link_with: [osmscout],
+                      version: libraryVersion,
                       install: true)
 
 # TODO: Generate PKG_CONFIG file
