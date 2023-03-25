@@ -12,7 +12,7 @@ on:
     branches:
       - master
     paths_ignore:
-      - .github/workflows/**
+      - '.github/workflows/**'
 
 jobs:
   build:
