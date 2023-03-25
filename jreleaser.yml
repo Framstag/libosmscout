@@ -19,7 +19,7 @@ project:
   stereotype: NONE
   versionPattern: CHRONVER
   snapshot:
-    pattern: latest
+    pattern: '*.latest'
     label: latest
     fullChangelog: true
 
@@ -37,5 +37,5 @@ release:
 distributions:
   source:
     artifacts:
-      - path: dist/meson-dist/libosmscout-{{distributionName}}-{{projectVersion}}.tar.xz
-      - path: dist/meson-dist/libosmscout-{{distributionName}}-{{projectVersion}}.zip
+      - path: dist/meson-dist/libosmscout-{{projectVersion}}.tar.xz
+      - path: dist/meson-dist/libosmscout-{{projectVersion}}.zip

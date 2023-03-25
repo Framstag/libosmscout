@@ -27,6 +27,14 @@ jobs:
       - name: Install meson and ninja via pip
         run:  "pip install meson ninja"
 
+      - name: "Define version based on current year"
+        run: |
+          echo "VERSION=$(date +'%Y')-latest" >> $GITHUB_OUTPUT
+        id: version
+
+      - name: "Output calculated version"
+        run: echo "${VERSION}"
+
       - name: Set version locally to 'latest'
         run:  |
           sed -i "s/^ *version: *'[0-9.]*', *$/        version: '$(date +%Y)-latest',/g" meson.build
@@ -49,11 +57,12 @@ jobs:
       - name: JReleaser full-release
         uses: jreleaser/release-action@v2
         env:
-          JRELEASER_PROJECT_VERSION: latest
+          JRELEASER_PROJECT_VERSION: ${{ steps.version.outputs.VERSION }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: JReleaser upload output
         uses: actions/upload-artifact@v3
+        if: ${{ always() }}
         with:
           name: jreleaser-release
           path: |
