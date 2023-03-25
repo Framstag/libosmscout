@@ -52,7 +52,7 @@ jobs:
       - name: JReleaser full-release
         uses: jreleaser/release-action@v2
         env:
-          JRELEASER_PROJECT_VERSION: ${{ latest }}
+          JRELEASER_PROJECT_VERSION: latest
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: JReleaser upload output
