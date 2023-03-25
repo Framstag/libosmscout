@@ -31,7 +31,7 @@ jobs:
       - name: Set version
         run:  |
           VERSION=${{ github.event.inputs.version }}
-          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}'/g" meson.build
+          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}',/g" meson.build
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback
@@ -65,7 +65,7 @@ jobs:
       - name: Tagging version with latest, commit and push
         run:  |
           VERSION=latest
-          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}'/g" meson.build
+          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}',/g" meson.build
           git config --global user.email "framstag@users.noreply.github.com"
           git config --global user.name "Tim Teulings"
           git commit -a -m "Setting version to next snapshot version"
