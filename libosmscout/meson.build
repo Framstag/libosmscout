@@ -29,6 +29,7 @@ osmscout = library('osmscout',
                    cpp_args: cppArgs,
                    dependencies: [mathDep, threadDep, openmpDep, iconvDep, marisaDep],
                    link_args: link_args,
+                   version: libraryVersion,
                    install: true)
 
 # TODO: Generate PKG_CONFIG file

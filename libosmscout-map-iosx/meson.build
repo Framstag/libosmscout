@@ -13,6 +13,7 @@ osmscoutmapiosx = library('osmscout_map_iosx',
                                           cocoaDep,
                                           appKitDep],
                            link_with: [osmscoutmap, osmscout],
+                           version: libraryVersion,
                            install: true)
 
 # TODO: Generate PKG_CONFIG file

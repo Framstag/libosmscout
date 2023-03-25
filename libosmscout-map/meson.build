@@ -19,6 +19,7 @@ osmscoutmap = library('osmscout_map',
                       cpp_args: cppArgs,
                       dependencies: [mathDep, threadDep],
                       link_with: [osmscout],
+                      version: libraryVersion,
                       install: true)
 
 # TODO: Generate PKG_CONFIG file

@@ -20,6 +20,7 @@ if get_option('qtVersion') == 5
                           cpp_args: cppArgs,
                           dependencies: [mathDep, threadDep, qt5GuiDep, qt5SvgDep],
                           link_with: [osmscout, osmscoutmap],
+                          version: libraryVersion,
                           install: true)
 elif get_option('qtVersion') == 6
   osmscoutmapqt = library('osmscout_map_qt',
@@ -28,6 +29,7 @@ elif get_option('qtVersion') == 6
                           cpp_args: cppArgs,
                           dependencies: [mathDep, threadDep, qt6GuiDep, qt6SvgDep],
                           link_with: [osmscout, osmscoutmap],
+                          version: libraryVersion,
                           install: true)
 endif
 

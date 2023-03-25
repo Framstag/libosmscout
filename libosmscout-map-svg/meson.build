@@ -2,7 +2,7 @@ cppArgs = []
 
 if get_option('default_library')=='shared'
   cppArgs += ['-DOSMScoutMapSVG_EXPORTS']
-  
+
   if haveVisibility
     cppArgs += ['-fvisibility=hidden']
   endif
@@ -19,6 +19,7 @@ osmscoutmapsvg = library('osmscout_map_svg',
                          cpp_args: cppArgs,
                          dependencies: [mathDep, threadDep, pangoft2Dep],
                          link_with: [osmscoutmap, osmscout],
+                         version: libraryVersion,
                          install: true)
-        
-# TODO: Generate PKG_CONFIG file        
+
+# TODO: Generate PKG_CONFIG file

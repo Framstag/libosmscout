@@ -19,6 +19,7 @@ osmscoutmapopengl = library('osmscout_map_opengl',
                             cpp_args: cppArgs,
                             dependencies: [mathDep, threadDep, openGLDep, glmDep, glewDep, pngDep, ftDep],
                             link_with: [osmscout, osmscoutmap],
+                            version: libraryVersion,
                             install: true)
 
 # TODO: Generate PKG_CONFIG file
