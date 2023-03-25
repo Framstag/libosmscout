@@ -10,7 +10,7 @@ jobs:
   create_latest_release:
     name: Create latest release
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
