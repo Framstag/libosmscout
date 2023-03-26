@@ -953,6 +953,9 @@ constexpr bool debugGroundTiles = false;
     if (symbolStyles.empty()) {
       return false;
     }
+    if (data.mainSlotWidth==0) {
+      return false;
+    }
 
     const LanesFeatureValue *lanesValue=nullptr;
     std::vector<OffsetRel>  laneTurns; // cached turns
