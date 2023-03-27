@@ -1,7 +1,7 @@
 ---
-date: "2017-02-27T10:12:00+02:00"
+date: "2019-03-27T08:28:00+01:00"
 title: "Documentation"
-description: "Documentration for libosmscout"
+description: "Documentation for libosmscout"
 weight: 3
 
 menu:

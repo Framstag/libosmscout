@@ -1,7 +1,7 @@
 ---
-date: "2016-05-29T19:40:58+02:00"
+date: "2023-03-27T07:55:58+01:00"
 title: "Building"
-description: "How to build libosmscout youself"
+description: "How to build libosmscout yourself"
 weight: 3
 
 menu:
@@ -35,24 +35,30 @@ pango (optional)
 Qt5 (optional)
 : for the Qt5 backend.
 
+Qt6 (optional)
+: for the Qt6 backend. The meson build currently supports building
+  against Qt6, however due to changes in Qt6 the software builds
+  but some features are disabled.
+
 freeglut (optional),
 glu (optional)
 : for the OpenGL demo
 
-Currently the library does compile without any external dependencies, however
+Currently, the library does compile without any external dependencies, however
 since you need to be able to import OSM data to make any use of the library
 you should at least have libxml2 or protobuf available.
 
 ## Supported Build systems, operating systems and compiler
 
-Libosmscout supports cmake and finally meson. It did support autotools, but this
-support was recently dropped.
+Libosmscout supports [cmake](https://cmake.org/) and [meson](https://mesonbuild.com/) for
+building the software.
 
-We plan to support cmake because of its wide-spread use and tools support and
+We support cmake because of its wide-spread use and tools support and
 meson for its elegance.
-
-We also do support 32bit and also 64bit builds on all platforms, though 32bit builds
-are not actively tested and thus deprecated.
+   
+We did support 32bit builds, but there is no CI build to prove this
+anymore. Also, the software, especially the import, very quickly needs
+mor ethan 4GB memory. We support 64bit builds on all platforms.
 
 Support matrix:
 
@@ -118,7 +124,7 @@ Support matrix:
 
 <tr>
 <td style="text-align: left">Windows</td>
-<td style="text-align: left">Visual Studio 2015</td>
+<td style="text-align: left">Visual Studio 2019</td>
 <td style="text-align: left">CMake</td>
 <td style="text-align: left">vcpkg</td>
 <td style="text-align: left"></td>
@@ -126,22 +132,7 @@ Support matrix:
 
 <tr>
 <td style="text-align: left">Windows</td>
-<td style="text-align: left">Visual Studio 2015</td>
-<td style="text-align: left">Meson</td>
-<td style="text-align: left"></td>
-</tr>
-
-<tr>
-<td style="text-align: left">Windows</td>
-<td style="text-align: left">Visual Studio 2017</td>
-<td style="text-align: left">CMake</td>
-<td style="text-align: left">vcpkg</td>
-<td style="text-align: left"></td>
-</tr>
-
-<tr>
-<td style="text-align: left">Windows</td>
-<td style="text-align: left">Visual Studio 2017</td>
+<td style="text-align: left">Visual Studio 2019</td>
 <td style="text-align: left">Meson</td>
 <td style="text-align: left"></td>
 </tr>
@@ -165,21 +156,25 @@ Support matrix:
 </tbody>
 </table>
 
+## Look at the CI and Docker Builds
+
+For preparing the build environment and for starting builds we
+suggest to take a look at the GitHub Action builds or for the
+docker-based builds as these are current. The documentation here
+may be old and (in some details) not accurate anymore.
 
 ## Preparations
 
-Note, that if your distribution supports Qt4 and Qt5 make
-sure that you install the Qt5 packages. If you have installed Qt4 and Qt5
-packages in parallel you might have to install additional packages that offer
-you ways to default to Qt5 or select Qt5 dynamically (e.g. qt5-default for
-debian).
+Note, that if your distribution supports Qt5 and Qt6, the builds
+will look for QT5. YOu have to explicitly configure the meson
+build to look for Qt6.
 
 ### Setup under Linux
 
 The concrete packages you have to install depends on the distribution you use.
 Libosmscout provides a number of Docker images under `ci/docker`. take the look at
 the corresponding docker file for your distribution and the used `install.sh`and
-`build.sh`scripts to se, how you can setup a valid environment.
+`build.sh`scripts to se, how you can set up a valid environment.
 
 ### Setup for VisualStudio
 
@@ -192,7 +187,7 @@ to import the `CMakeLists.txt` into VisualStudio.
 You can use [vcpkg](https://github.com/Microsoft/vcpkg)
 to install required dependencies and build against.
 
-Currently the following vcpkg dependencies can be used (depending on the libraries you want
+Currently, the following vcpkg dependencies can be used (depending on the libraries you want
 to build):
 
 * zlib
@@ -219,7 +214,7 @@ of your vcpkg may differ):
 ```bash
 $ mkdir vcbuild
 $ cd vcbuild
-$ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
+$ cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=../../vcpkg\scripts\buildsystems\vcpkg.cmake ..
 $ cmake --build .
 ```
 
@@ -275,7 +270,7 @@ For custom installation directories for Qt you have to pass a hint to cmake:
 $ cmake . -DCMAKE_PREFIX_PATH=[QT5_Installation_prefix]
 ```
 
-Note also that native XCode projects doe not have dependency autodetection.
+Note also that native XCode projects does not have dependency autodetection.
 As such the dependencies of the libosmsocout libraries and the XCode projects
 may differ and have to be adapted. In concrete, the XCode projects assume that
 marisa support was build in to the libomscout library, but as this is an
@@ -303,14 +298,14 @@ $ cmake ..
 $ make
 ```
 
-This should recursively analyse dependencies for all project sub directories and
+This should recursively analyse dependencies for all project subdirectories and
 afterwards build them.
 
 Real life example for building using VisualStudio:
 ```bash
 $ mkdir build
 $ cd build
-$ cmake .. -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.10586.0
+$ cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_SYSTEM_VERSION=10.0.10586.0
   -DCMAKE_INSTALL_PREFIX=D:\Mine\OpenSource\osmlib
 $ cmake --build . --config Release --target install
 ```
@@ -324,17 +319,17 @@ $ cmake -G "Xcode" ..
 
 You can then import the Xcode project created in the build directory.
 
-If you are using a non standard Qt installation directory (likely under Windows),
+If you are using a nonstandard Qt installation directory (likely under Windows),
 you might add some additional hints to the cmake call. Relevant are the
 variables `QTDIR` and `CMAKE_PREFIX_PATH`.
 
 Example (with also some other libosmscout specific options):
 
 ```bash
-$ cmake -G "Visual Studio 14 2015" -DCMAKE_SYSTEM_VERSION=10.0.##### .. 
+$ cmake -G "Visual Studio 16 2019" -DCMAKE_SYSTEM_VERSION=10.0.##### .. 
 -DCMAKE_INSTALL_PREFIX=.\output -DOSMSCOUT_BUILD_IMPORT=OFF 
 -DOSMSCOUT_BUILD_DOC_API=OFF -DOSMSCOUT_BUILD_TESTS=OFF
--DQTDIR=D:/Tools/Qt/5.9.2/msvc2015
+-DQTDIR=D:/Tools/Qt/5.9.2/msvc2019
 -DCMAKE_PREFIX_PATH=D:/Tools/Qt/5.9.2/msvc2015/lib/cmake
 ```
 
@@ -352,7 +347,7 @@ For VisualStudio based builds:
 
 ```bash
 $ mkdir debug
-$ meson debug --backend vs2015
+$ meson debug --backend vs2019
 $ cd debug
 $ msbuild.exe libosmscout.sln /t:build /p:Configuration=debugoptimized /p:Platform="x64"
 ```
@@ -366,9 +361,9 @@ you must  make sure, that the libosmscout libraries are found by the loader.
 For this `LD_LIBRARY_PATH` has to be extended. See the `setupAutoconf.sh`
 script in the top level directory for how to do it.
 
-Note that current Mac OS X versions doe not support additional
+Note that current Mac OS X versions does not support additional
 library search paths via environment variables anymore. Location of the
-library hass to be set during compile. cmake and autoconf (and libtool) based
+library has to be set during compile. cmake and autoconf (and libtool) based
 do this correctly, the qmake build for OSMScout2 and Styleconfig currently
 does not.
 
