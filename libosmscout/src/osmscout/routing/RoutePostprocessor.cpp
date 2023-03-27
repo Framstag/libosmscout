@@ -639,7 +639,8 @@ namespace osmscout {
 
   std::vector<RoutePostprocessor::InstructionPostprocessor::NodeExit>
       RoutePostprocessor::InstructionPostprocessor::CollectNodeExits(const RoutePostprocessor& postprocessor,
-                                                                     RouteDescription::Node& node)
+                                                                     RouteDescription::Node& node,
+                                                                     bool includeInputs)
   {
     std::vector<NodeExit> exits;
     if (!node.GetPathObject().IsWay()) {
@@ -653,11 +654,17 @@ namespace osmscout {
         WayRef way=postprocessor.GetWay(DBFileOffset(node.GetDatabaseId(), obj.GetFileOffset()));
         for (size_t ni=0; ni<way->nodes.size(); ++ni) {
           if (way->nodes[ni].IsIdentical(nodePoint)) {
-            if (ni>0 && postprocessor.CanUseBackward(node.GetDatabaseId(), nodePoint.GetId(), obj)) {
-              exits.push_back({obj, ni-1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni-1].GetCoord())});
+            if (ni>0) {
+              bool canBeUsedAsExit = postprocessor.CanUseBackward(node.GetDatabaseId(), nodePoint.GetId(), obj);
+              if (includeInputs || canBeUsedAsExit) {
+                exits.push_back({obj, ni-1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni-1].GetCoord()), canBeUsedAsExit});
+              }
             }
-            if (ni+1<way->nodes.size() && postprocessor.CanUseForward(node.GetDatabaseId(), nodePoint.GetId(), obj)) {
-              exits.push_back({obj, ni+1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni+1].GetCoord())});
+            if (ni+1<way->nodes.size()) {
+              bool canBeUsedAsExit = postprocessor.CanUseForward(node.GetDatabaseId(), nodePoint.GetId(), obj);
+              if (includeInputs || canBeUsedAsExit) {
+                exits.push_back({obj, ni + 1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni + 1].GetCoord()), canBeUsedAsExit});
+              }
             }
             break;
           }
@@ -694,8 +701,8 @@ namespace osmscout {
     RouteDescription::RoundaboutEnterDescriptionRef desc=std::make_shared<RouteDescription::RoundaboutEnterDescription>(roundaboutClockwise);
     node.AddDescription(RouteDescription::ROUNDABOUT_ENTER_DESC,desc);
 
-    // collect roundabout exits
-    std::vector<NodeExit> exits=CollectNodeExits(postprocessor, node);
+    // collect roundabout exits (and even inputs, to be able find entering path when it is oneway)
+    std::vector<NodeExit> exits=CollectNodeExits(postprocessor, node, true);
     // sort exists by its bearing
     std::sort(exits.begin(), exits.end(), [&](const NodeExit &a, const NodeExit &b) {
       if (roundaboutClockwise) {
@@ -709,13 +716,16 @@ namespace osmscout {
     for (size_t i=0;; ++i) {
       NodeExit &exit=exits[i%exits.size()];
       if (entered) {
-        roundaboutCrossingCounter++;
-        if (exit.ref==node.GetPathObject() && exit.node==node.GetTargetNodeIndex()) {
-          break;
+        if (exit.canBeUsedAsExit) {
+          roundaboutCrossingCounter++;
+          if (exit.ref == node.GetPathObject() && exit.node == node.GetTargetNodeIndex()) {
+            break;
+          }
         }
       } else if (exit.ref==incomingPath && exit.node==incomingNode) {
         entered=true;
       }
+      assert(i<exits.size()*2);
     }
 
     RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutLeave(node);
