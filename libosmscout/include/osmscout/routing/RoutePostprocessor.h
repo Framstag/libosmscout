@@ -239,6 +239,7 @@ namespace osmscout {
         ObjectFileRef ref;
         size_t node;
         Bearing bearing;
+        bool canBeUsedAsExit;
       };
 
     private:
@@ -276,7 +277,8 @@ namespace osmscout {
                                  const std::list<RouteDescription::Node>::const_iterator& end);
       // just ways are supported as exits
       std::vector<NodeExit> CollectNodeExits(const RoutePostprocessor& postprocessor,
-                                             RouteDescription::Node& node);
+                                             RouteDescription::Node& node,
+                                             bool includeInputs=false);
 
     public:
       bool Process(const RoutePostprocessor& postprocessor,
