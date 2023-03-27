@@ -638,9 +638,9 @@ namespace osmscout {
   }
 
   std::vector<RoutePostprocessor::InstructionPostprocessor::NodeExit>
-      RoutePostprocessor::InstructionPostprocessor::CollectNodeExits(const RoutePostprocessor& postprocessor,
-                                                                     RouteDescription::Node& node,
-                                                                     bool includeInputs)
+      RoutePostprocessor::InstructionPostprocessor::CollectNodeWays(const RoutePostprocessor& postprocessor,
+                                                                    RouteDescription::Node& node,
+                                                                    bool exitsOnly)
   {
     std::vector<NodeExit> exits;
     if (!node.GetPathObject().IsWay()) {
@@ -656,13 +656,13 @@ namespace osmscout {
           if (way->nodes[ni].IsIdentical(nodePoint)) {
             if (ni>0) {
               bool canBeUsedAsExit = postprocessor.CanUseBackward(node.GetDatabaseId(), nodePoint.GetId(), obj);
-              if (includeInputs || canBeUsedAsExit) {
+              if (!exitsOnly || canBeUsedAsExit) {
                 exits.push_back({obj, ni-1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni-1].GetCoord()), canBeUsedAsExit});
               }
             }
             if (ni+1<way->nodes.size()) {
               bool canBeUsedAsExit = postprocessor.CanUseForward(node.GetDatabaseId(), nodePoint.GetId(), obj);
-              if (includeInputs || canBeUsedAsExit) {
+              if (!exitsOnly || canBeUsedAsExit) {
                 exits.push_back({obj, ni + 1, GetSphericalBearingInitial(nodePoint.GetCoord(), way->nodes[ni + 1].GetCoord()), canBeUsedAsExit});
               }
             }
@@ -702,7 +702,7 @@ namespace osmscout {
     node.AddDescription(RouteDescription::ROUNDABOUT_ENTER_DESC,desc);
 
     // collect roundabout exits (and even inputs, to be able find entering path when it is oneway)
-    std::vector<NodeExit> exits=CollectNodeExits(postprocessor, node, true);
+    std::vector<NodeExit> exits=CollectNodeWays(postprocessor, node, false);
     // sort exists by its bearing
     std::sort(exits.begin(), exits.end(), [&](const NodeExit &a, const NodeExit &b) {
       if (roundaboutClockwise) {

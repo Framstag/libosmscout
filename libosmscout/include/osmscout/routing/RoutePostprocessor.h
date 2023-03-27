@@ -275,10 +275,16 @@ namespace osmscout {
       bool HandleDirectionChange(const RoutePostprocessor& postprocessor,
                                  const std::list<RouteDescription::Node>::iterator& node,
                                  const std::list<RouteDescription::Node>::const_iterator& end);
+      std::vector<NodeExit> CollectNodeWays(const RoutePostprocessor& postprocessor,
+                                            RouteDescription::Node& node,
+                                            bool exitsOnly);
+
       // just ways are supported as exits
-      std::vector<NodeExit> CollectNodeExits(const RoutePostprocessor& postprocessor,
-                                             RouteDescription::Node& node,
-                                             bool includeInputs=false);
+      inline std::vector<NodeExit> CollectNodeExits(const RoutePostprocessor& postprocessor,
+                                                    RouteDescription::Node& node)
+      {
+        return CollectNodeWays(postprocessor, node, true);
+      }
 
     public:
       bool Process(const RoutePostprocessor& postprocessor,
