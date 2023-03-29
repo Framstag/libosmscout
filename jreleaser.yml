@@ -4,8 +4,6 @@ project:
   longDescription: Libosmscout is a C++ library for offline map rendering, routing and location lookup based on OpenStreetMap data
   links:
     homepage: https://libosmscout.sourceforge.net/
-    bugTracker: https://github.com/Framstag/libosmscout/issues
-    vcsBrowser: https://github.com/Framstag/libosmscout
     contact: https://libosmscout.sourceforge.net/documentation/contact/
   authors:
     - Tim Teulings
@@ -25,14 +23,17 @@ project:
 
 release:
   github:
+    owner: Framstag
     overwrite: true
-    discussionCategoryName: 'Announcements'
+    issues:
+      enabled: true
     changelog:
-      formatted: 'ALWAYS'
-      format: '- {{commitShortHash}} {{commitTitle}}'
-      preset: 'conventional-commits'
+      formatted: ALWAYS
+      preset: conventional-commits
       contributors:
         format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+      extraProperties:
+        categorizeScopes: true
 
 distributions:
   source:
