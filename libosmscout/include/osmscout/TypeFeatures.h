@@ -1319,23 +1319,23 @@ namespace osmscout {
   class OSMSCOUT_API EleFeatureValue : public FeatureValue
   {
   private:
-    uint32_t ele=0;
+    int16_t ele=0;
 
   public:
     EleFeatureValue() = default;
 
-    explicit EleFeatureValue(uint32_t ele)
+    explicit EleFeatureValue(int16_t ele)
     : ele(ele)
     {
       // no code
     }
 
-    void SetEle(uint32_t ele)
+    void SetEle(int16_t ele)
     {
       this->ele=ele;
     }
 
-    uint32_t GetEle() const
+    int16_t GetEle() const
     {
       return ele;
     }
