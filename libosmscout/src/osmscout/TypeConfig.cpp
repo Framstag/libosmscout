@@ -703,6 +703,9 @@ namespace osmscout {
     RegisterFeature(std::make_shared<FromToFeature>());
     RegisterFeature(std::make_shared<ColorFeature>());
 
+    featureOpeningHours=std::make_shared<OpeningHoursFeature>();
+    RegisterFeature(featureOpeningHours);
+
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
     typeInfoIgnore=std::make_shared<TypeInfo>("");
@@ -882,7 +885,7 @@ namespace osmscout {
     }
 
     // Something that has a name and is a POI automatically gets the
-    // postal code, location, address, website and phone features, too.
+    // postal code, location, address, website, phone and opening hours features, too.
     if (typeInfo->HasFeature(NameFeature::NAME) &&
         typeInfo->GetIndexAsPOI()) {
       if (!typeInfo->HasFeature(PostalCodeFeature::NAME)) {
@@ -899,6 +902,9 @@ namespace osmscout {
       }
       if (!typeInfo->HasFeature(PhoneFeature::NAME)) {
         typeInfo->AddFeature(featurePhone);
+      }
+      if (!typeInfo->HasFeature(OpeningHoursFeature::NAME)) {
+        typeInfo->AddFeature(featureOpeningHours);
       }
     }
 

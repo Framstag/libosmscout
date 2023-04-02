@@ -2319,6 +2319,76 @@ namespace osmscout {
                const TagMap& tags,
                FeatureValueBuffer& buffer) const override;
   };
+
+  class OSMSCOUT_API OpeningHoursFeatureValue : public FeatureValue
+  {
+  private:
+    std::string value;
+
+  public:
+    OpeningHoursFeatureValue() = default;
+    OpeningHoursFeatureValue(const OpeningHoursFeatureValue& featureValue) = default;
+
+    explicit OpeningHoursFeatureValue(const std::string& value)
+      : value(value)
+    {
+      // no code
+    }
+
+    std::string GetValue() const
+    {
+      return value;
+    }
+
+    void SetValue(const std::string& value)
+    {
+      this->value=value;
+    }
+
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return value;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    OpeningHoursFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API OpeningHoursFeature : public Feature
+  {
+  private:
+    TagId tagOpeningHours;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "opening hours" label */
+    static const char* const LABEL;
+
+    /** Index of the 'opening hours' label */
+    static const size_t      LABEL_INDEX;
+
+  public:
+    OpeningHoursFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueAlignment() const override;
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
 }
 
 #endif
