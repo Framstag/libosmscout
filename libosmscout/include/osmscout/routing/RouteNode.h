@@ -100,7 +100,6 @@ namespace osmscout {
       Id         id;          //!< id of the targeting route node
       uint8_t    objectIndex; //!< The index of the way to use from this route node to the target route node
       uint8_t    flags;       //!< Certain flags
-      //uint8_t    bearing;   //!< Encoded initial and final bearing of this path
 
       bool IsRestricted(Vehicle vehicle) const
       {

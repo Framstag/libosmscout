@@ -248,9 +248,8 @@ constexpr bool debugRouting = false;
     virtual bool GetAreasByOffset(const std::set<DBFileOffset> &areaOffsets,
                                   std::unordered_map<DBFileOffset,AreaRef> &areaMap) = 0;
 
-    void ResolveRNodeChainToList(DBId finalRouteNode,
+    void ResolveRNodeChainToList(const RNode &finalRouteNode,
                                  const ClosedSet& closedSet,
-                                 const ClosedSet& closedRestrictedSet,
                                  std::list<VNode>& nodes);
 
     virtual bool ResolveRouteDataJunctions(RouteData& route) = 0;
@@ -341,8 +340,7 @@ constexpr bool debugRouting = false;
                                       RouteNodeRef &currentRouteNode,
                                       OpenList &openList,
                                       OpenMap &openMap,
-                                      const ClosedSet &closedSet,
-                                      const ClosedSet &closedRestrictedSet);
+                                      const ClosedSet &closedSet);
 
     virtual bool WalkPaths(const RoutingState& state,
                            RNodeRef &current,
@@ -350,7 +348,6 @@ constexpr bool debugRouting = false;
                            OpenList &openList,
                            OpenMap &openMap,
                            ClosedSet &closedSet,
-                           ClosedSet &closedRestrictedSet,
                            RoutingResult &result,
                            const RoutingParameter& parameter,
                            const GeoCoord &targetCoord,
