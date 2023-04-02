@@ -28,6 +28,7 @@
 #include <osmscout/TypeFeature.h>
 
 #include <osmscout/util/Color.h>
+#include <osmscout/util/LaneTurn.h>
 
 namespace osmscout {
 
@@ -1883,8 +1884,8 @@ namespace osmscout {
   private:
 
     uint8_t     lanes=0;              //!< First two bits reserved, 3 bit for number of lanes in each direction
-    std::string turnForward;
-    std::string turnBackward;
+    std::vector<LaneTurn> turnForward;
+    std::vector<LaneTurn> turnBackward;
     std::string destinationForward;
     std::string destinationBackward;
 
@@ -1921,19 +1922,19 @@ namespace osmscout {
 
     uint8_t GetLanes() const;
 
-    void SetTurnLanes(const std::string& turnForward,
-                      const std::string& turnBawckard)
+    void SetTurnLanes(const std::vector<LaneTurn>& turnForward,
+                      const std::vector<LaneTurn>& turnBackward)
     {
       this->turnForward=turnForward;
-      this->turnBackward=turnBawckard;
+      this->turnBackward=turnBackward;
     }
 
-    std::string GetTurnForward() const
+    std::vector<LaneTurn> GetTurnForward() const
     {
       return turnForward;
     }
 
-    std::string GetTurnBackward() const
+    std::vector<LaneTurn> GetTurnBackward() const
     {
       return turnBackward;
     }
@@ -1949,10 +1950,10 @@ namespace osmscout {
     }
 
     void SetDestinationLanes(const std::string& destinationForward,
-                             const std::string& destinationBawckard)
+                             const std::string& destinationBackward)
     {
       this->destinationForward=destinationForward;
-      this->destinationBackward=destinationBawckard;
+      this->destinationBackward=destinationBackward;
     }
 
     std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
