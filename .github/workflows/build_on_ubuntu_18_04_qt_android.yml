@@ -11,7 +11,7 @@ on:
   push:
     branches:
       - master
-    paths_ignore:
+    paths-ignore:
       - '.github/workflows/**'
 
 jobs:
