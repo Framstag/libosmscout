@@ -90,41 +90,20 @@ namespace osmscout {
   }
 
   template <class RoutingState>
-  void AbstractRoutingService<RoutingState>::ResolveRNodeChainToList(DBId finalRouteNode,
+  void AbstractRoutingService<RoutingState>::ResolveRNodeChainToList(const RNode &finalRouteNode,
                                                                      const ClosedSet& closedSet,
-                                                                     const ClosedSet& closedRestrictedSet,
                                                                      std::list<VNode>& nodes)
   {
-    bool restricted=false;
-    auto current=closedSet.find(VNode(finalRouteNode));
-
-    if (current==closedSet.end()){
-      current=closedRestrictedSet.find(VNode(finalRouteNode));
-      assert(current!=closedSet.end());
-      restricted=true;
-    }
+    auto current=closedSet.find(VNode(finalRouteNode.id, finalRouteNode.restricted));
+    assert(current!=closedSet.end());
 
     while (current->previousNode.IsValid()) {
       if constexpr (debugRouting) {
         std::cout << "Chain item " << current->currentNode << " -> " << current->previousNode << std::endl;
       }
       ClosedSet::const_iterator prev;
-      if (!restricted){
-        prev=closedSet.find(VNode(current->previousNode));
-        if (prev==closedSet.end()){
-          prev=closedRestrictedSet.find(VNode(current->previousNode));
-          assert(prev!=closedRestrictedSet.end());
-          restricted=true;
-        }
-      }else{
-        prev=closedRestrictedSet.find(VNode(current->previousNode));
-        if (prev==closedRestrictedSet.end()){
-          prev=closedSet.find(VNode(current->previousNode));
-          assert(prev!=closedSet.end());
-          restricted=false;
-        }
-      }
-
+      prev=closedSet.find(VNode(current->previousNode, current->previousRestricted));
+      assert(prev!=closedSet.end());
 
       nodes.push_back(*current);
 
@@ -383,6 +362,9 @@ namespace osmscout {
                   forwardRNode)) {
       return false;
     }
+    if (forwardRNode) {
+      forwardRNode->leaveRestricted=true;
+    }
 
     if (backwardRouteNode &&
         !GetRNode(state,
@@ -394,6 +376,9 @@ namespace osmscout {
                   targetCoord,
                   backwardRNode)) {
       return false;
+    }
+    if (backwardRNode) {
+      backwardRNode->leaveRestricted=true;
     }
 
     return true;
@@ -564,18 +549,14 @@ namespace osmscout {
                                                                   RouteNodeRef &currentRouteNode,
                                                                   OpenList &openList,
                                                                   OpenMap &openMap,
-                                                                  const ClosedSet &closedSet,
-                                                                  const ClosedSet &closedRestrictedSet)
+                                                                  const ClosedSet &closedSet)
   {
     // add twin nodes to nextNode from other databases to open list
     std::vector<DBId> twins=GetNodeTwins(state,
                                          current->id.database,
                                          currentRouteNode->GetId());
     for (const auto& twin : twins) {
-      if ((current->access &&
-           closedSet.find(VNode(twin))!=closedSet.end()) ||
-          (!current->access &&
-            closedRestrictedSet.find(VNode(twin))!=closedRestrictedSet.end())){
+      if (closedSet.find(VNode(twin, current->restricted))!=closedSet.end()) {
         if constexpr (debugRouting) {
           std::cout << "Twin node " << twin << " is closed already, ignore it" << std::endl;
         }
@@ -590,12 +571,13 @@ namespace osmscout {
           // this is cheaper path to twin
 
           rn->prev=current->id;
+          rn->prevRestricted=current->restricted;
           //rn->object=node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
 
           rn->currentCost=current->currentCost;
           rn->estimateCost=current->estimateCost;
           rn->overallCost=current->overallCost;
-          rn->access=current->access;
+          rn->restricted=current->restricted;
 
           openList.erase(twinIt->second);
 
@@ -616,12 +598,13 @@ namespace osmscout {
                                             node,
                                             //node->objects.begin()->object, /*TODO: how to find correct way from other DB?*/
                                             ObjectFileRef(), // TODO: have to be valid Object here?
-                                            /*prev*/current->id);
+                                            /*prev*/current->id,
+                                            current->restricted);
 
         rn->currentCost=current->currentCost;
         rn->estimateCost=current->estimateCost;
         rn->overallCost=current->overallCost;
-        rn->access=current->access;
+        rn->restricted=current->restricted;
 
         std::pair<OpenListRef,bool> insertResult=openList.insert(rn);
         openMap[rn->id]=insertResult.first;
@@ -641,7 +624,6 @@ namespace osmscout {
                                                        OpenList &openList,
                                                        OpenMap &openMap,
                                                        ClosedSet &closedSet,
-                                                       ClosedSet &closedRestrictedSet,
                                                        RoutingResult &result,
                                                        const RoutingParameter& parameter,
                                                        const GeoCoord &targetCoord,
@@ -686,8 +668,9 @@ namespace osmscout {
         continue;
       }
 
-      if (!current->access &&
-          !path.IsRestricted(vehicle)) {
+      if (current->restricted &&
+          !path.IsRestricted(vehicle) &&
+          !current->leaveRestricted) {
         if constexpr (debugRouting) {
           std::cout << "  Skipping route";
           std::cout << " to " << path.id;
@@ -717,10 +700,7 @@ namespace osmscout {
         continue;
       }
 
-      if ((current->access &&
-           closedSet.find(VNode(DBId(dbId,path.id)))!=closedSet.end()) ||
-          (!current->access &&
-           closedRestrictedSet.find(VNode(DBId(dbId,path.id)))!=closedRestrictedSet.end())) {
+      if (closedSet.find(VNode(DBId(dbId,path.id), path.IsRestricted(vehicle)))!=closedSet.end()) {
         if constexpr (debugRouting) {
           std::cout << "  Skipping route";
           std::cout << " to " << dbId << " / " << path.id;
@@ -831,12 +811,18 @@ namespace osmscout {
         RNodeRef node=*openEntry->second;
 
         node->prev=current->id;
+        node->prevRestricted=current->restricted;
         node->object=currentRouteNode->objects[path.objectIndex].object;
 
         node->currentCost=currentCost;
         node->estimateCost=estimateCost;
         node->overallCost=overallCost;
-        node->access=!currentRouteNode->paths[i].IsRestricted(vehicle);
+        node->restricted=currentRouteNode->paths[i].IsRestricted(vehicle);
+        if (node->restricted &&
+            current->leaveRestricted) {
+          // allow to leave restricted area
+          node->leaveRestricted=true;
+        }
 
         if constexpr (debugRouting) {
           std::cout << "  Updating route " << current->id << " via " << node->object.GetTypeName() << " "
@@ -853,12 +839,18 @@ namespace osmscout {
         RNodeRef node=std::make_shared<RNode>(DBId(dbId,path.id),
                                               nextNode,
                                               currentRouteNode->objects[path.objectIndex].object,
-                                              current->id);
+                                              current->id,
+                                              current->restricted);
 
         node->currentCost=currentCost;
         node->estimateCost=estimateCost;
         node->overallCost=overallCost;
-        node->access=!path.IsRestricted(vehicle);
+        node->restricted=path.IsRestricted(vehicle);
+        if (node->restricted &&
+            current->leaveRestricted) {
+          // allow to leave restricted area
+          node->leaveRestricted=true;
+        }
 
         if constexpr (debugRouting) {
           std::cout << "  Inserting route to " << path.id;
@@ -917,12 +909,7 @@ namespace osmscout {
     // Map routing nodes by id
     OpenMap                  openMap;
 
-    // Restricted way (access=destination) is a way that may be used just
-    // in case when target is on this way. Some routing nodes may be accessed
-    // from two different ways - one without any access restriction (closedSet)
-    // and second with restriction (closedRestrictedSet)
     ClosedSet                closedSet;
-    ClosedSet                closedRestrictedSet;
 
     size_t                   nodesLoadedCount=0;
     size_t                   nodesIgnoredCount=0;
@@ -931,7 +918,6 @@ namespace osmscout {
 
     openMap.reserve(10000);
     closedSet.reserve(300000);
-    closedRestrictedSet.reserve(10000);
 
     if (!GetTargetNodes(state,
                         target,
@@ -1041,7 +1027,6 @@ namespace osmscout {
                      openList,
                      openMap,
                      closedSet,
-                     closedRestrictedSet,
                      result,
                      parameter,
                      targetCoord,
@@ -1065,8 +1050,7 @@ namespace osmscout {
                                 currentRouteNode,
                                 openList,
                                 openMap,
-                                closedSet,
-                                closedRestrictedSet)) {
+                                closedSet)) {
         log.Error() << "Failed to walk to other databases from " << dbId << " / " << currentRouteNode->GetFileOffset();
         return result;
       }
@@ -1078,21 +1062,16 @@ namespace osmscout {
       if constexpr (debugRouting) {
         std::cout << "Closing " << current->id << " (previous " << current->prev << ")" << std::endl;
       }
-      if (current->access) {
-        closedSet.insert(VNode(current->id,
-                               current->object,
-                               current->prev));
-      }
-      else {
-        closedRestrictedSet.insert(VNode(current->id,
-                                         current->object,
-                                         current->prev));
-      }
+      closedSet.insert(VNode(current->id,
+                             current->restricted,
+                             current->object,
+                             current->prev,
+                             current->prevRestricted));
 
       current->node=nullptr;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
-      maxClosedSet=std::max(maxClosedSet,closedSet.size()+closedRestrictedSet.size());
+      maxClosedSet=std::max(maxClosedSet,closedSet.size());
 
       if constexpr (debugRouting) {
         if (openList.empty()) {
@@ -1132,10 +1111,12 @@ namespace osmscout {
 
     // If we have keep the last node open because of access violations, add it
     // after routing is done
-    if (closedSet.find(VNode(current->id))==closedSet.end()) {
+    if (closedSet.find(VNode(current->id, current->restricted))==closedSet.end()) {
       closedSet.insert(VNode(current->id,
+                             current->restricted,
                              current->object,
-                             current->prev));
+                             current->prev,
+                             current->prevRestricted));
     }
     RNodeRef  targetFinalNode;
 
@@ -1222,9 +1203,8 @@ namespace osmscout {
       return result;
     }
 
-    ResolveRNodeChainToList(targetFinalNode->id,
+    ResolveRNodeChainToList(*targetFinalNode,
                             closedSet,
-                            closedRestrictedSet,
                             nodes);
 
     if constexpr (debugRouting) {
