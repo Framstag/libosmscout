@@ -148,17 +148,14 @@ public:
   {
   }
 
-  virtual ~RoutingServiceAnimation()
-  {
-  }
+  ~RoutingServiceAnimation() override = default;
 
-  virtual bool WalkToOtherDatabases(const osmscout::RoutingProfile& /*state*/,
-                                    osmscout::RoutingService::RNodeRef &current,
-                                    osmscout::RouteNodeRef &/*currentRouteNode*/,
-                                    osmscout::RoutingService::OpenList &openList,
-                                    osmscout::RoutingService::OpenMap &/*openMap*/,
-                                    const osmscout::RoutingService::ClosedSet &closedSet,
-                                    const ClosedSet &closedRestrictedSet)
+  bool WalkToOtherDatabases(const osmscout::RoutingProfile& /*state*/,
+                            osmscout::RoutingService::RNodeRef &current,
+                            osmscout::RouteNodeRef &/*currentRouteNode*/,
+                            osmscout::RoutingService::OpenList &openList,
+                            osmscout::RoutingService::OpenMap &/*openMap*/,
+                            const osmscout::RoutingService::ClosedSet &closedSet) override
   {
     if (stepCounter<startStep || (endStep>0 && (int64_t)stepCounter>endStep)){
       stepCounter++;
@@ -193,9 +190,6 @@ public:
     pen.setWidth(5);
 
     // draw ways in closedSet
-    painter.setBrush(QBrush(red));
-    pen.setColor(red);
-
     for (const auto &closedNode:closedSet){
       if (!closedNode.currentNode.IsValid() ||
           !closedNode.previousNode.IsValid()){
@@ -206,24 +200,12 @@ public:
         return false;
       }
 
-      projection.GeoToPixel(n1->GetCoord(),x1,y1);
-      projection.GeoToPixel(n2->GetCoord(),x2,y2);
-      painter.setPen(pen);
-      painter.drawLine(x1,y1,x2,y2);
-    }
-
-    // closed, restricted
-    painter.setBrush(QBrush(grey));
-    pen.setColor(grey);
-
-    for (const auto &closedNode:closedRestrictedSet){
-      if (!closedNode.currentNode.IsValid() ||
-          !closedNode.previousNode.IsValid()){
-        continue;
-      }
-      if (!GetRouteNode(closedNode.currentNode,n1) ||
-          !GetRouteNode(closedNode.previousNode,n2)){
-        return false;
+      if (closedNode.currentRestricted){
+        painter.setBrush(QBrush(grey));
+        pen.setColor(grey);
+      } else {
+        painter.setBrush(QBrush(red));
+        pen.setColor(red);
       }
 
       projection.GeoToPixel(n1->GetCoord(),x1,y1);

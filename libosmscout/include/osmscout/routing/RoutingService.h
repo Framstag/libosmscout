@@ -219,16 +219,22 @@ namespace osmscout {
      */
     struct RNode
     {
-      DBId          id;              //!< The file offset of the current route node
-      RouteNodeRef  node;            //!< The current route node
-      DBId          prev;            //!< The file offset of the previous route node
-      ObjectFileRef object;          //!< The object (way/area) visited from the current route node
+      DBId          id;                   //!< The file offset of the current route node
+      RouteNodeRef  node;                 //!< The current route node
+      DBId          prev;                 //!< The file offset of the previous route node
+      bool          prevRestricted=false; //!< previous node is restricted
+      ObjectFileRef object;               //!< The object (way/area) visited from the current route node
 
-      double        currentCost=0;   //!< The cost of the current up to the current node
-      double        estimateCost=0;  //!< The estimated cost from here to the target
-      double        overallCost=0;   //!< The overall costs (currentCost+estimateCost)
+      double        currentCost=0;        //!< The cost of the current up to the current node
+      double        estimateCost=0;       //!< The estimated cost from here to the target
+      double        overallCost=0;        //!< The overall costs (currentCost+estimateCost)
 
-      bool          access=true;     //!< Flags to signal, if we had access ("access restrictions") to this node
+      bool          restricted=true;      //!< Flag to signal, if access to this node is restricted ("access restrictions")
+
+      /** Flag signaling that we may leave restricted area, because it was start of route.
+       * Flag is disabled when we leave to non-restricted way.
+       */
+      bool          leaveRestricted=false;
 
       RNode() = default;
 
@@ -245,10 +251,12 @@ namespace osmscout {
       RNode(const DBId& id,
             const RouteNodeRef& node,
             const ObjectFileRef& object,
-            const DBId& prev)
+            const DBId& prev,
+            bool prevRestricted)
       : id(id),
         node(node),
         prev(prev),
+        prevRestricted(prevRestricted),
         object(object)
       {
         // no code
@@ -270,7 +278,7 @@ namespace osmscout {
     struct RNodeCostCompare
     {
       bool operator()(const RNodeRef& a,
-                             const RNodeRef& b) const
+                      const RNodeRef& b) const
       {
         if (a->overallCost==b->overallCost) {
          return a->id<b->id;
@@ -290,12 +298,21 @@ namespace osmscout {
      *
      * From the VNode list from the last routing node back to the start
      * the route is recalculated by following the previousNode chain.
+     *
+     * Some routing nodes may be accessed from two different ways
+     *  - one without any access restriction (!currentRestricted)
+     *    and second with restriction (currentRestricted)
+     *
+     * Restricted way (access=destination) is a way that may be used just
+     * in case when start or target is on this way (area of ways).
      */
     struct VNode
     {
-      DBId          currentNode;   //!< FileOffset of this route node
-      DBId          previousNode;  //!< FileOffset of the previous route node
-      ObjectFileRef object;        //!< The object (way/area) visited from the current route node
+      DBId          currentNode;              //!< FileOffset of this route node
+      bool          currentRestricted=false;  //!< Current node is accessed from restricted way
+      DBId          previousNode;             //!< FileOffset of the previous route node
+      bool          previousRestricted=false; //!< Previous node was accessed from restricted way
+      ObjectFileRef object;                   //!< The object (way/area) visited from the current route node
 
       /**
        * Equality operator
@@ -307,7 +324,7 @@ namespace osmscout {
        */
       bool operator==(const VNode& other) const
       {
-        return currentNode==other.currentNode;
+        return currentNode==other.currentNode && currentRestricted==other.currentRestricted;
       }
 
       /**
@@ -317,8 +334,8 @@ namespace osmscout {
        * @param currentNode
        *    Offset of the node to search for
        */
-      explicit VNode(const DBId& currentNode)
-        : currentNode(currentNode)
+      explicit VNode(const DBId& currentNode, bool currentRestricted)
+        : currentNode(currentNode), currentRestricted(currentRestricted)
       {
         // no code
       }
@@ -334,10 +351,14 @@ namespace osmscout {
        *    FileOffset of the previous route node visited
        */
       VNode(const DBId& currentNode,
+            bool currentRestricted,
             const ObjectFileRef& object,
-            const DBId& previousNode)
+            const DBId& previousNode,
+            bool previousRestricted)
       : currentNode(currentNode),
+        currentRestricted(currentRestricted),
         previousNode(previousNode),
+        previousRestricted(previousRestricted),
         object(object)
       {
         // no code
@@ -353,7 +374,8 @@ namespace osmscout {
       size_t operator()(const VNode& node) const
       {
         return std::hash<Id>()(node.currentNode.id) ^
-               std::hash<DatabaseId>()(node.currentNode.database);
+               std::hash<DatabaseId>()(node.currentNode.database) ^
+               std::hash<bool>()(node.currentRestricted);
       }
     };
 
