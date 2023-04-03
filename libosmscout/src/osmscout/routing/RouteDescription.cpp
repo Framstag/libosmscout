@@ -478,7 +478,7 @@ namespace osmscout {
 
   RouteDescription::LaneDescription::LaneDescription(bool oneway,
                                                      uint8_t laneCount,
-                                                     const std::vector<std::string> &laneTurns)
+                                                     const std::vector<LaneTurn> &laneTurns)
                                                      : oneway(oneway), laneCount(laneCount), laneTurns(laneTurns)
   {}
 
@@ -492,13 +492,9 @@ namespace osmscout {
     if (!laneTurns.empty()){
       ss << " :";
     }
-    for_each(laneTurns.begin(), laneTurns.end(), [&ss] (const std::string& s) {
+    for_each(laneTurns.begin(), laneTurns.end(), [&ss] (const LaneTurn& turn) {
       ss << " ";
-      if (s.empty()){
-        ss << "<unspecified>";
-      } else {
-        ss << s;
-      }
+      ss << LaneTurnString(turn);
     });
 
     return ss.str();

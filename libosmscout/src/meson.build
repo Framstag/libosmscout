@@ -14,6 +14,7 @@ osmscoutSrc = [
             'src/osmscout/util/FileScanner.cpp',
             'src/osmscout/util/FileWriter.cpp',
             'src/osmscout/util/HTMLWriter.cpp',
+            'src/osmscout/util/LaneTurn.cpp',
             'src/osmscout/util/Locale.cpp',
             'src/osmscout/util/GeoBox.cpp',
             'src/osmscout/util/Geometry.cpp',

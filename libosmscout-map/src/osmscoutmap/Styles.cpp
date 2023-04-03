@@ -38,50 +38,50 @@ namespace osmscout {
            rel==OffsetRel::laneBackwardRight;
   }
 
-  OffsetRel ParseForwardTurnStringToOffset(const std::string& turn)
+  OffsetRel ParseForwardTurnStringToOffset(LaneTurn turn)
   {
-    if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
+    if (turn==LaneTurn::Left || turn==LaneTurn::MergeToLeft || turn==LaneTurn::SlightLeft || turn==LaneTurn::SharpLeft) {
       return OffsetRel::laneForwardLeft;
     }
 
-    if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+    if (turn==LaneTurn::Through_Left || turn==LaneTurn::Through_SlightLeft || turn==LaneTurn::Through_SharpLeft) {
       return OffsetRel::laneForwardThroughLeft;
     }
 
-    if (turn=="through") {
+    if (turn==LaneTurn::Through) {
       return OffsetRel::laneForwardThrough;
     }
 
-    if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+    if (turn==LaneTurn::Through_Right || turn==LaneTurn::Through_SlightRight || turn==LaneTurn::Through_SharpRight) {
       return OffsetRel::laneForwardThroughRight;
     }
 
-    if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+    if (turn==LaneTurn::Right || turn==LaneTurn::MergeToRight || turn==LaneTurn::SlightRight || turn==LaneTurn::SharpRight) {
       return OffsetRel::laneForwardRight;
     }
 
     return OffsetRel::base;
   }
 
-  OffsetRel ParseBackwardTurnStringToOffset(const std::string& turn)
+  OffsetRel ParseBackwardTurnStringToOffset(LaneTurn turn)
   {
-    if (turn=="left" || turn=="merge_to_left" || turn=="slight_left" || turn=="sharp_left") {
+    if (turn==LaneTurn::Left || turn==LaneTurn::MergeToLeft || turn==LaneTurn::SlightLeft || turn==LaneTurn::SharpLeft) {
       return OffsetRel::laneBackwardLeft;
     }
 
-    if (turn=="through;left" || turn=="through;slight_left" || turn=="through;sharp_left") {
+    if (turn==LaneTurn::Through_Left || turn==LaneTurn::Through_SlightLeft || turn==LaneTurn::Through_SharpLeft) {
       return OffsetRel::laneBackwardThroughLeft;
     }
 
-    if (turn=="through") {
+    if (turn==LaneTurn::Through) {
       return OffsetRel::laneBackwardThrough;
     }
 
-    if (turn=="through;right" || turn=="through;slight_right" || turn=="through;sharp_right") {
+    if (turn==LaneTurn::Through_Right || turn==LaneTurn::Through_SlightRight || turn==LaneTurn::Through_SharpRight) {
       return OffsetRel::laneBackwardThroughRight;
     }
 
-    if (turn=="right" || turn=="merge_to_right" || turn=="slight_right" || turn=="sharp_right") {
+    if (turn==LaneTurn::Right || turn==LaneTurn::MergeToRight || turn==LaneTurn::SlightRight || turn==LaneTurn::SharpRight) {
       return OffsetRel::laneBackwardRight;
     }
 

@@ -32,6 +32,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/util/LaneTurn.h>
 #include <osmscout/util/Time.h>
 
 namespace osmscout {
@@ -593,19 +594,14 @@ namespace osmscout {
        * turns in lanes from left one (drivers view)
        * vector size may be less than laneCount, even empty
        *
-       * usual variants:
-       *    left, slight_left, merge_to_left,
-       *    through;left, through;slight_left, through;sharp_left,
-       *    through,
-       *    through;right, through;slight_right, through;sharp_right,
-       *    right, slight_right, merge_to_right
+       * @see LanesFeatureValue::LaneTurn
        */
-      std::vector<std::string> laneTurns;
+      std::vector<LaneTurn> laneTurns;
 
     public:
       LaneDescription(bool oneway,
                       uint8_t laneCount,
-                      const std::vector<std::string> &laneTurns);
+                      const std::vector<LaneTurn> &laneTurns);
 
       std::string GetDebugString() const override;
 
@@ -619,7 +615,7 @@ namespace osmscout {
         return laneCount;
       }
 
-      const std::vector<std::string>& GetLaneTurns() const
+      const std::vector<LaneTurn>& GetLaneTurns() const
       {
         return laneTurns;
       }

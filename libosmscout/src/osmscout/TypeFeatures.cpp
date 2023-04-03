@@ -2753,9 +2753,21 @@ namespace osmscout {
   {
     lanes=scanner.ReadUInt8();
 
+    auto StrToTurns = [](const std::string &str) {
+      std::vector<LaneTurn> res;
+      for (char ch: str) {
+        if (ch > char(LaneTurn::Unknown)) {
+          res.push_back(LaneTurn::Unknown);
+        } else {
+          res.push_back(LaneTurn(ch));
+        }
+      }
+      return res;
+    };
+
     if ((lanes & 0x01u)!=0) {
-      turnForward=scanner.ReadString();
-      turnBackward=scanner.ReadString();
+      turnForward=StrToTurns(scanner.ReadString());
+      turnBackward=StrToTurns(scanner.ReadString());
       destinationForward=scanner.ReadString();
       destinationBackward=scanner.ReadString();
     }
@@ -2775,9 +2787,18 @@ namespace osmscout {
 
     writer.Write(lanes);
 
+    auto TurnsToStr = [](const std::vector<LaneTurn> &turns) {
+      std::string res;
+      res.reserve(turns.size());
+      for (LaneTurn t: turns) {
+        res.push_back(char(t));
+      }
+      return res;
+    };
+
     if ((lanes & 0x01u)!=0) {
-      writer.Write(turnForward);
-      writer.Write(turnBackward);
+      writer.Write(TurnsToStr(turnForward));
+      writer.Write(TurnsToStr(turnBackward));
       writer.Write(destinationForward);
       writer.Write(destinationBackward);
     }
@@ -3008,8 +3029,52 @@ namespace osmscout {
       value->SetLanes(lanesForward,lanesBackward);
     }
 
+    auto ParseLaneTurns = [&](const std::string &turnStr) {
+      auto turns=SplitString(turnStr, "|");
+      std::vector<LaneTurn> result;
+      for (const std::string &turn: turns) {
+        if (turn=="none" || turn=="") {
+          result.push_back(LaneTurn::None);
+        } else if (turn=="left") {
+          result.push_back(LaneTurn::Left);
+        } else if (turn=="merge_to_left") {
+          result.push_back(LaneTurn::MergeToLeft);
+        } else if (turn=="slight_left") {
+          result.push_back(LaneTurn::SlightLeft);
+        } else if (turn=="sharp_left") {
+          result.push_back(LaneTurn::SharpLeft);
+        } else if (turn=="through;left" || turn=="left;through") {
+          result.push_back(LaneTurn::Through_Left);
+        } else if (turn=="through;slight_left" || turn=="slight_left;through") {
+          result.push_back(LaneTurn::Through_SlightLeft);
+        } else if (turn=="through;sharp_left" || turn=="sharp_left;through") {
+          result.push_back(LaneTurn::Through_SharpLeft);
+        } else if (turn=="through") {
+          result.push_back(LaneTurn::Through);
+        } else if (turn=="through;right" || turn=="right;through") {
+          result.push_back(LaneTurn::Through_Right);
+        } else if (turn=="through;slight_right" || turn=="slight_right;through") {
+          result.push_back(LaneTurn::Through_SlightRight);
+        } else if (turn=="through;sharp_right" || turn=="sharp_right;through") {
+          result.push_back(LaneTurn::Through_SharpRight);
+        } else if (turn=="right") {
+          result.push_back(LaneTurn::Right);
+        } else if (turn=="merge_to_right") {
+          result.push_back(LaneTurn::MergeToRight);
+        } else if (turn=="slight_right") {
+          result.push_back(LaneTurn::SlightRight);
+        } else if (turn=="sharp_right") {
+          result.push_back(LaneTurn::SharpRight);
+        } else {
+          errorReporter.ReportTag(object,tags,std::string("Lane turn '")+turn+"' is unknown!");
+          result.push_back(LaneTurn::Unknown);
+        }
+      }
+      return result;
+    };
+
     if (additionalInfos) {
-      value->SetTurnLanes(turnForward,turnBackward);
+      value->SetTurnLanes(ParseLaneTurns(turnForward),ParseLaneTurns(turnBackward));
       value->SetDestinationLanes(destinationForward,destinationBackward);
     }
   }
