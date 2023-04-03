@@ -336,7 +336,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   }
 
   std::unique_ptr<MapPainterQt> painter;
-  if (databases.empty()) {
+  if (databases.empty() && emptyStyleConfig) {
     osmscout::MapDataRef data = std::make_shared<osmscout::MapData>();
     if (renderBasemap) {
       addBasemapData(data);
