@@ -2067,7 +2067,7 @@ namespace osmscout {
 
   void EleFeatureValue::Read(FileScanner& scanner)
   {
-    ele=scanner.ReadUInt32Number();
+    ele=scanner.ReadInt16Number();
   }
 
   void EleFeatureValue::Write(FileWriter& writer)
@@ -2218,13 +2218,13 @@ namespace osmscout {
     if (!StringToNumber(eleString,e)) {
       errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' is no double!");
     }
-    else if (e<0 || e>std::numeric_limits<uint32_t>::max()) {
+    else if (e<std::numeric_limits<int16_t>::min() || e>std::numeric_limits<int16_t>::max()) {
       errorReporter.ReportTag(object,tags,std::string("Ele tag value '")+ele->second+"' value is too small or too big!");
     }
     else {
       auto* value=static_cast<EleFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-      value->SetEle((uint32_t)floor(e+0.5));
+      value->SetEle(int16_t(floor(e+0.5)));
     }
   }
 
