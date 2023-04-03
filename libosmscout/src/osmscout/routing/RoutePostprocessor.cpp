@@ -1627,9 +1627,9 @@ namespace osmscout {
           int allowedLaneFrom = -1;
           int allowedLaneTo = -1; // inclusive
 
-          auto LookupLanesTurns = [&](const std::set<std::string_view> &possibilities){
+          auto LookupLanesTurns = [&](const std::set<LaneTurn> &possibilities){
             for (size_t i = 0; i < prevLanes->GetLaneTurns().size(); i++){
-              std::string_view turn = prevLanes->GetLaneTurns()[i];
+              LaneTurn turn = prevLanes->GetLaneTurns()[i];
               if (possibilities.find(turn) != possibilities.end()){
                 // it is possible to use this turn
                 if (allowedLaneFrom < 0) {
@@ -1646,17 +1646,29 @@ namespace osmscout {
             }
           };
 
-          static const std::set<std::string_view> leftPossibilities{
-            "left"sv, "slight_left"sv, "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv};
+          static const std::set<LaneTurn> leftPossibilities{
+            LaneTurn::Left,
+            LaneTurn::SlightLeft,
+            LaneTurn::Through_Left,
+            LaneTurn::Through_SlightLeft,
+            LaneTurn::Through_SharpLeft};
 
-          static const std::set<std::string_view> straightPossibilities{
-            "through;left"sv, "through;slight_left"sv, "through;sharp_left"sv,
-            "through"sv,
-            ""sv, // no-sign implicitly as through
-            "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+          static const std::set<LaneTurn> straightPossibilities{
+            LaneTurn::Through_Left,
+            LaneTurn::Through_SlightRight,
+            LaneTurn::Through_SharpLeft,
+            LaneTurn::Through,
+            LaneTurn::None, // no-sign implicitly as through
+            LaneTurn::Through_Right,
+            LaneTurn::Through_SlightRight,
+            LaneTurn::Through_SharpRight};
 
-          static const std::set<std::string_view> rightPossibilities{
-              "right"sv, "slight_right"sv, "through;right"sv, "through;slight_right"sv, "through;sharp_right"sv};
+          static const std::set<LaneTurn> rightPossibilities{
+            LaneTurn::Right,
+            LaneTurn::SlightRight,
+            LaneTurn::Through_Right,
+            LaneTurn::Through_SlightRight,
+            LaneTurn::Through_SharpRight};
 
           // after some direction change, we will evaluate allowed lanes in backBuffer
           if (!prevLanes->GetLaneTurns().empty()){
@@ -2130,14 +2142,14 @@ namespace osmscout {
       bool oneway=accessValue!=nullptr && accessValue->IsOneway();
 
       uint8_t laneCount;
-      std::vector<std::string> laneTurns;
+      std::vector<LaneTurn> laneTurns;
       LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
       if (lanesValue!=nullptr) {
         laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
-        std::string turns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();;
-        std::list<std::string> turnList=SplitString(turns, "|", laneCount);
-        laneTurns.reserve(turnList.size());
-        laneTurns.insert(laneTurns.begin(), turnList.begin(), turnList.end());
+        laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
+        while (laneTurns.size() < laneCount) {
+          laneTurns.push_back(LaneTurn::None);
+        }
       } else {
         // default lane count by object type
         if (oneway) {

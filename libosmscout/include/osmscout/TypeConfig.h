@@ -1100,6 +1100,7 @@ namespace osmscout {
     FeatureRef                                  featureEmbankment;
     FeatureRef                                  featureRoundabout;
     FeatureRef                                  featureLanes;
+    FeatureRef                                  featureOpeningHours;
 
   public:
     // Internal use (only available during preprocessing)
