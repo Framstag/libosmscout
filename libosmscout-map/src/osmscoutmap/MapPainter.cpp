@@ -1479,11 +1479,11 @@ constexpr bool debugGroundTiles = false;
 
     // backward
 
-    auto turns=SplitString(lanesValue.GetTurnBackward(), "|");
+    auto turns=lanesValue.GetTurnBackward();
     int lanes=lanesValue.GetBackwardLanes();
     int lane=0;
 
-    for (const std::string &turn: turns) {
+    for (const LaneTurn &turn: turns) {
       if (lane>=lanes){
         break;
       }
@@ -1497,11 +1497,11 @@ constexpr bool debugGroundTiles = false;
 
     // forward
 
-    turns=SplitString(lanesValue.GetTurnForward(), "|");
+    turns=lanesValue.GetTurnForward();
     lanes=lanesValue.GetForwardLanes();
     lane=0;
 
-    for (const std::string &turn: turns) {
+    for (const LaneTurn &turn: turns) {
       if (lane>=lanes){
         break;
       }

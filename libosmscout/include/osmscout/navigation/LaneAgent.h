@@ -39,7 +39,7 @@ public:
     bool suggested{false};
     int suggestedFrom{0};
     int suggestedTo{0};
-    std::vector<std::string> turns;
+    std::vector<LaneTurn> turns;
 
     Lane() = default;
 

@@ -526,12 +526,22 @@ static void DumpLanesFeatureValue(const osmscout::LanesFeatureValue& lanesValue,
 
   if (!lanesValue.GetTurnForward().empty()) {
     DumpIndent(indent+2);
-    std::cout << "TurnForward: " << lanesValue.GetTurnForward() << std::endl;
+    std::cout << "TurnForward: ";
+    for (auto turn: lanesValue.GetTurnForward()) {
+      std::cout << LaneTurnString(turn);
+      std::cout << " ";
+    }
+    std::cout << std::endl;
   }
 
   if (!lanesValue.GetTurnBackward().empty()) {
     DumpIndent(indent+2);
-    std::cout << "TurnBackward: " << lanesValue.GetTurnBackward() << std::endl;
+    std::cout << "TurnBackward: ";
+    for (auto turn: lanesValue.GetTurnForward()) {
+      std::cout << LaneTurnString(turn);
+      std::cout << " ";
+    }
+    std::cout << std::endl;
   }
 
   if (!lanesValue.GetDestinationForward().empty()) {

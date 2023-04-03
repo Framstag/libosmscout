@@ -1040,7 +1040,7 @@ namespace osmscout {
   // Forward declaration
   class TypeConfig;
 
-  static const uint32_t FILE_FORMAT_VERSION=24;
+  static const uint32_t FILE_FORMAT_VERSION=25;
 
   /**
    * \ingroup type
@@ -1100,6 +1100,7 @@ namespace osmscout {
     FeatureRef                                  featureEmbankment;
     FeatureRef                                  featureRoundabout;
     FeatureRef                                  featureLanes;
+    FeatureRef                                  featureOpeningHours;
 
   public:
     // Internal use (only available during preprocessing)

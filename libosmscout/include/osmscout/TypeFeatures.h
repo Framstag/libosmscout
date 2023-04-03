@@ -28,6 +28,7 @@
 #include <osmscout/TypeFeature.h>
 
 #include <osmscout/util/Color.h>
+#include <osmscout/util/LaneTurn.h>
 
 namespace osmscout {
 
@@ -1319,23 +1320,23 @@ namespace osmscout {
   class OSMSCOUT_API EleFeatureValue : public FeatureValue
   {
   private:
-    uint32_t ele=0;
+    int16_t ele=0;
 
   public:
     EleFeatureValue() = default;
 
-    explicit EleFeatureValue(uint32_t ele)
+    explicit EleFeatureValue(int16_t ele)
     : ele(ele)
     {
       // no code
     }
 
-    void SetEle(uint32_t ele)
+    void SetEle(int16_t ele)
     {
       this->ele=ele;
     }
 
-    uint32_t GetEle() const
+    int16_t GetEle() const
     {
       return ele;
     }
@@ -1883,8 +1884,8 @@ namespace osmscout {
   private:
 
     uint8_t     lanes=0;              //!< First two bits reserved, 3 bit for number of lanes in each direction
-    std::string turnForward;
-    std::string turnBackward;
+    std::vector<LaneTurn> turnForward;
+    std::vector<LaneTurn> turnBackward;
     std::string destinationForward;
     std::string destinationBackward;
 
@@ -1921,19 +1922,19 @@ namespace osmscout {
 
     uint8_t GetLanes() const;
 
-    void SetTurnLanes(const std::string& turnForward,
-                      const std::string& turnBawckard)
+    void SetTurnLanes(const std::vector<LaneTurn>& turnForward,
+                      const std::vector<LaneTurn>& turnBackward)
     {
       this->turnForward=turnForward;
-      this->turnBackward=turnBawckard;
+      this->turnBackward=turnBackward;
     }
 
-    std::string GetTurnForward() const
+    std::vector<LaneTurn> GetTurnForward() const
     {
       return turnForward;
     }
 
-    std::string GetTurnBackward() const
+    std::vector<LaneTurn> GetTurnBackward() const
     {
       return turnBackward;
     }
@@ -1949,10 +1950,10 @@ namespace osmscout {
     }
 
     void SetDestinationLanes(const std::string& destinationForward,
-                             const std::string& destinationBawckard)
+                             const std::string& destinationBackward)
     {
       this->destinationForward=destinationForward;
-      this->destinationBackward=destinationBawckard;
+      this->destinationBackward=destinationBackward;
     }
 
     std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
@@ -2304,6 +2305,76 @@ namespace osmscout {
 
   public:
     ColorFeature();
+    void Initialize(TagRegistry& tagRegistry) override;
+
+    std::string GetName() const override;
+
+    size_t GetValueAlignment() const override;
+    size_t GetValueSize() const override;
+    FeatureValue* AllocateValue(void* buffer) override;
+
+    void Parse(TagErrorReporter& reporter,
+               const TagRegistry& tagRegistry,
+               const FeatureInstance& feature,
+               const ObjectOSMRef& object,
+               const TagMap& tags,
+               FeatureValueBuffer& buffer) const override;
+  };
+
+  class OSMSCOUT_API OpeningHoursFeatureValue : public FeatureValue
+  {
+  private:
+    std::string value;
+
+  public:
+    OpeningHoursFeatureValue() = default;
+    OpeningHoursFeatureValue(const OpeningHoursFeatureValue& featureValue) = default;
+
+    explicit OpeningHoursFeatureValue(const std::string& value)
+      : value(value)
+    {
+      // no code
+    }
+
+    std::string GetValue() const
+    {
+      return value;
+    }
+
+    void SetValue(const std::string& value)
+    {
+      this->value=value;
+    }
+
+    std::string GetLabel(const Locale &/*locale*/, size_t /*labelIndex*/) const override
+    {
+      return value;
+    }
+
+    void Read(FileScanner& scanner) override;
+    void Write(FileWriter& writer) override;
+
+    OpeningHoursFeatureValue& operator=(const FeatureValue& other) override;
+    bool operator==(const FeatureValue& other) const override;
+  };
+
+  class OSMSCOUT_API OpeningHoursFeature : public Feature
+  {
+  private:
+    TagId tagOpeningHours;
+
+  public:
+    /** Name of this feature */
+    static const char* const NAME;
+
+    /** Name of the "opening hours" label */
+    static const char* const LABEL;
+
+    /** Index of the 'opening hours' label */
+    static const size_t      LABEL_INDEX;
+
+  public:
+    OpeningHoursFeature();
     void Initialize(TagRegistry& tagRegistry) override;
 
     std::string GetName() const override;

@@ -28,6 +28,7 @@
 
 #include <osmscout/Pixel.h>
 #include <osmscout/util/Color.h>
+#include <osmscout/util/LaneTurn.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/ScreenBox.h>
 
@@ -61,8 +62,8 @@ namespace osmscout {
 
   extern bool IsLaneOffset(OffsetRel rel);
 
-  extern OffsetRel ParseForwardTurnStringToOffset(const std::string& turn);
-  extern OffsetRel ParseBackwardTurnStringToOffset(const std::string& turn);
+  extern OffsetRel ParseForwardTurnStringToOffset(LaneTurn turn);
+  extern OffsetRel ParseBackwardTurnStringToOffset(LaneTurn turn);
 
   /**
    * \ingroup Stylesheet

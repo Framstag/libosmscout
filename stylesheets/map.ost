@@ -51,6 +51,7 @@ OST
       * Address
       * Website
       * Phone
+      * OpeningHours
     ADDRESS:
       Objects should be indexed as address
       It automatically get the following features assigned:

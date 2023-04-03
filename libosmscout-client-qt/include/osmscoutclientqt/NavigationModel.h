@@ -215,7 +215,7 @@ public:
   {
     QStringList result;
     for (const auto &turn : lane.turns){
-      result << QString::fromStdString(turn);
+      result << QString::fromStdString(LaneTurnString(turn));
     }
     return result;
   }
