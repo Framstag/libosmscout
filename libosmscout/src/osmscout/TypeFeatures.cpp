@@ -2051,11 +2051,11 @@ namespace osmscout {
   }
 
   void ClockwiseDirectionFeature::Parse(TagErrorReporter& /*errorReporter*/,
-                                const TagRegistry& /*tagRegistry*/,
-                                const FeatureInstance& feature,
-                                const ObjectOSMRef& /*object*/,
-                                const TagMap& tags,
-                                FeatureValueBuffer& buffer) const
+                                        const TagRegistry& /*tagRegistry*/,
+                                        const FeatureInstance& feature,
+                                        const ObjectOSMRef& /*object*/,
+                                        const TagMap& tags,
+                                        FeatureValueBuffer& buffer) const
   {
     auto junction=tags.find(tagDirection);
 
@@ -3357,4 +3357,88 @@ namespace osmscout {
       value->SetColor(color);
     }
   }
+
+  void OpeningHoursFeatureValue::Read(FileScanner& scanner)
+  {
+    value=scanner.ReadString();
+  }
+
+  void OpeningHoursFeatureValue::Write(FileWriter& writer)
+  {
+    writer.Write(value);
+  }
+
+  OpeningHoursFeatureValue& OpeningHoursFeatureValue::operator=(const FeatureValue& other)
+  {
+    if (this!=&other) {
+      const auto& otherValue=static_cast<const OpeningHoursFeatureValue&>(other);
+
+      value=otherValue.value;
+    }
+
+    return *this;
+  }
+
+  bool OpeningHoursFeatureValue::operator==(const FeatureValue& other) const
+  {
+    const auto& otherValue=static_cast<const OpeningHoursFeatureValue&>(other);
+
+    return value==otherValue.value;
+  }
+
+  const char* const OpeningHoursFeature::NAME = "OpeningHours";
+  const char* const OpeningHoursFeature::LABEL = "opening hours";
+  const size_t      OpeningHoursFeature::LABEL_INDEX = 0;
+
+  OpeningHoursFeature::OpeningHoursFeature()
+  {
+    RegisterLabel(LABEL_INDEX,LABEL);
+  }
+
+  void OpeningHoursFeature::Initialize(TagRegistry& tagRegistry)
+  {
+    tagOpeningHours=tagRegistry.RegisterTag("opening_hours");
+  }
+
+  std::string OpeningHoursFeature::GetName() const
+  {
+    return NAME;
+  }
+
+  size_t OpeningHoursFeature::GetValueAlignment() const
+  {
+    return alignof(OpeningHoursFeatureValue);
+  }
+
+  size_t OpeningHoursFeature::GetValueSize() const
+  {
+    return sizeof(OpeningHoursFeatureValue);
+  }
+
+  FeatureValue* OpeningHoursFeature::AllocateValue(void* buffer)
+  {
+    return new (buffer) OpeningHoursFeatureValue();
+  }
+
+  void OpeningHoursFeature::Parse(TagErrorReporter& /*errorReporter*/,
+                                  const TagRegistry& /*tagRegistry*/,
+                                  const FeatureInstance& feature,
+                                  const ObjectOSMRef& /*object*/,
+                                  const TagMap& tags,
+                                  FeatureValueBuffer& buffer) const
+  {
+    using namespace std::string_literals;
+
+    std::string colorString;
+    if (auto v=tags.find(tagOpeningHours);
+        v!=tags.end() && !v->second.empty()) {
+
+      size_t idx = feature.GetIndex();
+      FeatureValue* fv = buffer.AllocateValue(idx);
+      auto* value = static_cast<OpeningHoursFeatureValue*>(fv);
+
+      value->SetValue(v->second);
+    }
+  }
+
 }
