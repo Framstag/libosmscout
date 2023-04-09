@@ -657,7 +657,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, 0, data.symbolScale);
+                    DrawSymbol(projection, parameter, symbol, Vertex2D::ZERO, data.symbolScale);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, data.symbolSpace, origin);
                 }
