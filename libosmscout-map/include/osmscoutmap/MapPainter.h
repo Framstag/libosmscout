@@ -97,24 +97,6 @@ namespace osmscout {
     using StepMethod = void (MapPainter::*)(const Projection &, const MapParameter &, const MapData &);
 
   public:
-
-    /**
-     * Structure used for internal statistic collection
-     */
-    struct OSMSCOUT_MAP_API DataStatistic
-    {
-      TypeInfoRef type;        //!< Type
-      size_t      objectCount=0; //!< Sum of nodeCount, wayCount, areaCont
-      size_t      nodeCount=0;   //!< Number of Node objects
-      size_t      wayCount=0;    //!< Number of Way objects
-      size_t      areaCount=0;   //!< Number of Area objects
-      size_t      coordCount=0;  //!< Number of coordinates
-      size_t      labelCount=0;  //!< Number of labels
-      size_t      iconCount=0;   //!< Number of icons
-
-      DataStatistic() = default;
-    };
-
     /**
      * Data structure for holding temporary data about ways
      */
@@ -682,67 +664,6 @@ namespace osmscout {
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);
-  };
-
-  /**
-   * \ingroup Renderer
-   *
-   * Batch renderer helps to render map based on multiple databases
-   * - map data and corresponding MapPainter
-   */
-  template <class PainterType>
-  class MapPainterBatch {
-  protected:
-    std::vector<MapDataRef> data;
-    std::vector<PainterType> painters;
-
-  protected:
-
-    /**
-     * Render bach of multiple databases, step by step (\see RenderSteps).
-     * All painters should have initialised its (backend specific) state.
-     *
-     * @param projection
-     * @param parameter
-     * @return false on error, true otherwise
-     */
-    bool BatchPaintInternal(const Projection& projection,
-                            const MapParameter& parameter)
-    {
-      bool success=true;
-      for (auto step=static_cast<size_t>(osmscout::RenderSteps::FirstStep);
-           step<=static_cast<size_t>(osmscout::RenderSteps::LastStep);
-           ++step){
-
-        for (size_t i=0;i<data.size(); ++i){
-          const MapData &d=*(data[i]);
-          auto renderStep=static_cast<RenderSteps>(step);
-          if (!painters[i]->Draw(projection,
-                                 parameter,
-                                 d,
-                                 renderStep,
-                                 renderStep)) {
-            success=false;
-          }
-        }
-      }
-      return success;
-    }
-
-  public:
-    explicit MapPainterBatch(size_t expectedCount)
-    {
-      data.reserve(expectedCount);
-      painters.reserve(expectedCount);
-    }
-
-    virtual ~MapPainterBatch() = default;
-
-    void AddData(const MapDataRef &d, PainterType &painter)
-    {
-      data.push_back(d);
-      painters.push_back(painter);
-    }
   };
 
   /**

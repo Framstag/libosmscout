@@ -1081,12 +1081,12 @@ namespace osmscout {
     return result;
   }
 
-  MapPainterBatchQt::MapPainterBatchQt(size_t expectedCount):
-    MapPainterBatch(expectedCount) {}
+  BatchMapPainterQt::BatchMapPainterQt(size_t expectedCount):
+    BatchMapPainter(expectedCount) {}
 
-  MapPainterBatchQt::~MapPainterBatchQt(){}
+  BatchMapPainterQt::~BatchMapPainterQt(){}
 
-  bool MapPainterBatchQt::paint(const Projection& projection,
+  bool BatchMapPainterQt::paint(const Projection& projection,
                                 const MapParameter& parameter,
                                 QPainter* qPainter)
   {

@@ -28,6 +28,7 @@
 
 #include <osmscoutmapqt/MapQtImportExport.h>
 
+#include <osmscoutmap/BatchMapPainter.h>
 #include <osmscoutmap/MapPainter.h>
 
 #include <QtGui/QTextLayout>
@@ -38,14 +39,14 @@ namespace osmscout {
   using QtLabel = Label<QGlyphRun, QTextLayout>;
   using QtLabelInstance = LabelInstance<QGlyphRun, QTextLayout>;
 
-  class MapPainterBatchQt;
+  class BatchMapPainterQt;
 
   /**
     Implementation of MapPainter for Qt
    */
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
-    friend class MapPainterBatchQt;
+    friend class BatchMapPainterQt;
 
     using QtLabelLayouter = LabelLayouter<QGlyphRun, QTextLayout, MapPainterQt>;
     friend QtLabelLayouter;
@@ -248,12 +249,12 @@ namespace osmscout {
    * are used from multiple threads, they should be always
    * added in same order to avoid deadlocks.
    */
-  class OSMSCOUT_MAP_QT_API MapPainterBatchQt:
-      public MapPainterBatch<MapPainterQt*> {
+  class OSMSCOUT_MAP_QT_API BatchMapPainterQt:
+      public BatchMapPainter<MapPainterQt*> {
   public:
-    explicit MapPainterBatchQt(size_t expectedCount);
+    explicit BatchMapPainterQt(size_t expectedCount);
 
-    ~MapPainterBatchQt() override;
+    ~BatchMapPainterQt() override;
 
     bool paint(const Projection& projection,
                const MapParameter& parameter,

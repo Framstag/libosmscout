@@ -126,6 +126,73 @@ namespace osmscout {
     return true;
   }
 
+  bool Projection::BoundingBoxToPixel(const GeoBox& boundingBox,
+                                      ScreenBox& screenBox) const
+  {
+    assert(boundingBox.IsValid());
+
+    Vertex2D pixel;
+
+    if (!GeoToPixel(boundingBox.GetMinCoord(),
+                    pixel)) {
+      return false;
+    }
+
+    double xMin=pixel.GetX();
+    double xMax=pixel.GetX();
+    double yMin=pixel.GetY();
+    double yMax=pixel.GetY();
+
+    if (!GeoToPixel(boundingBox.GetMaxCoord(),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
+                             boundingBox.GetMaxLon()),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
+                             boundingBox.GetMinLon()),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    screenBox=ScreenBox(Vertex2D(xMin,yMin),
+                        Vertex2D(xMax,yMax));
+
+    return true;
+  }
+
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
                                const Magnification& magnification,

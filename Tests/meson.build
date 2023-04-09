@@ -299,6 +299,14 @@ ScanConversion = executable('ScanConversion',
              install: true,
              install_dir: testInstallDir)
 
+ScreenBox = executable('ScreenBox',
+             'src/ScreenBox.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
 StdByteTest = executable('StdByteTest',
              'src/StdByteTest.cpp',
              include_directories: [testIncDir],
@@ -457,7 +465,7 @@ test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)
 test('Check File utilities', File)
 test('Check File access implementation', FileScannerWriter)
-test('Check parsing of geo box intersection', GeoBox)
+test('Check handling of geo box intersection', GeoBox)
 test('Check parsing of geo coordinates', GeoCoordParse)
 test('Check impl. of geometric functions', Geometry)
 test('Check coordinate buffer conversions', CoordBufferTest)
@@ -471,6 +479,7 @@ endif
 test('Check correctness of NumberSet class', NumberSet)
 test('Check PolygonCenter utility', PolygonCenter)
 test('Check scan conversion code', ScanConversion)
+test('Check ScreenBox functionality', ScreenBox)
 test('Check string utils', StringUtils)
 test('Check tiling calculation code', TilingTest)
 test('Check polygon transformation code', TransPolygon)

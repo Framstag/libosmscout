@@ -286,7 +286,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   }
 
   // prepare data for batch
-  osmscout::MapPainterBatchQt batch(databases.size());
+  osmscout::BatchMapPainterQt batch(databases.size());
   size_t i=0;
   for (const auto &db: databases) {
     bool first = (i == 0);

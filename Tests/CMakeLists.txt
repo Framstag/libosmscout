@@ -284,6 +284,9 @@ else()
 	message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")
 endif()
 
+#---- ScreenBox
+osmscout_test_project(NAME ScreenBox SOURCES src/ScreenBox.cpp)
+
 #---- SunriseSunsetTest
 osmscout_test_project(NAME SunriseSunsetTest SOURCES src/SunriseSunsetTest.cpp)
 

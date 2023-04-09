@@ -28,6 +28,7 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Magnification.h>
+#include <osmscout/util/ScreenBox.h>
 #include <osmscout/util/Tiling.h>
 
 #include <osmscout/system/SSEMathPublic.h>
@@ -223,6 +224,20 @@ namespace osmscout {
     }
 
     /**
+     * Return a ScreenBox instance for the screen. The ScreenBox
+     * has the value [(0.0,0.0)(width,height)]
+     *
+     * @return ScreenBox instance
+     */
+    [[nodiscard]] ScreenBox GetScreenBox() const
+    {
+      return {Vertex2D(0.0,
+                       0.0),
+              Vertex2D(GetHeight(),
+                       GetHeight())};
+    }
+
+    /**
      * Return the magnification as part of the projection.
      */
     [[nodiscard]] Magnification GetMagnification() const
@@ -348,9 +363,20 @@ namespace osmscout {
      * Return true on success,
      * false if given coordinate is not valid for this projection.
      */
+    [[deprecated]] bool BoundingBoxToPixel(const GeoBox& boundingBox,
+                                           double& xMin,
+                                           double& yMin,
+                                           double& xMax,
+                                           double& yMax) const;
+
+    /**
+     * Converts a valid GeoBox to its on screen pixel coordinates
+     *
+     * Return true on success,
+     * false if given coordinate is not valid for this projection.
+     */
     bool BoundingBoxToPixel(const GeoBox& boundingBox,
-                            double& xMin, double& yMin,
-                            double& xMax, double& yMax) const;
+                            ScreenBox& screenBox) const;
 
   protected:
     virtual void GeoToPixel(const BatchTransformer& transformData) const = 0;

@@ -22,7 +22,6 @@
 #include <cstdint>
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 
 #include <osmscout/system/Math.h>
@@ -229,57 +228,37 @@ constexpr bool debugGroundTiles = false;
       return false;
     }
 
-    double xMin;
-    double xMax;
-    double yMin;
-    double yMax;
+    ScreenBox areaScreenBox;
 
     if (!projection.BoundingBoxToPixel(boundingBox,
-                                       xMin,yMin,
-                                       xMax,yMax)) {
+                                       areaScreenBox)) {
       return false;
     }
 
-    xMin=xMin-pixelOffset;
-    xMax=xMax+pixelOffset;
-    yMin=yMin-pixelOffset;
-    yMax=yMax+pixelOffset;
+    areaScreenBox=areaScreenBox.Resize(pixelOffset);
 
-    if (xMax-xMin<=areaMinDimension &&
-        yMax-yMin<=areaMinDimension) {
+    if (areaScreenBox.GetWidth()<=areaMinDimension &&
+        areaScreenBox.GetHeight()<=areaMinDimension) {
       return false;
     }
 
-    return !(xMin>=projection.GetWidth() ||
-             yMin>=projection.GetHeight() ||
-             xMax<0 ||
-             yMax<0);
+    return areaScreenBox.Intersects(projection.GetScreenBox());
   }
 
   bool MapPainter::IsVisibleWay(const Projection& projection,
                                 const GeoBox& boundingBox,
                                 double pixelOffset) const
   {
-    double xMin;
-    double xMax;
-    double yMin;
-    double yMax;
+    ScreenBox wayScreenBox;
 
     if (!projection.BoundingBoxToPixel(boundingBox,
-                                       xMin,yMin,
-                                       xMax,yMax)) {
+                                       wayScreenBox)) {
       return false;
     }
 
-    xMin=xMin-pixelOffset;
-    xMax=xMax+pixelOffset;
-    yMin=yMin-pixelOffset;
-    yMax=yMax+pixelOffset;
+    wayScreenBox=wayScreenBox.Resize(pixelOffset);
 
-    return !(xMin>=projection.GetWidth() ||
-             yMin>=projection.GetHeight() ||
-             xMax<0 ||
-             yMax<0);
+    return wayScreenBox.Intersects(projection.GetScreenBox());
   }
 
   double MapPainter::GetProjectedWidth(const Projection& projection,
@@ -321,14 +300,28 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
-                                         const PathShieldStyleRef& shieldStyle,
+                                         const PathShieldStyleRef& style,
                                          const std::string_view& text,
                                          const std::vector<Point>& nodes)
   {
-    LabelStyleRef      labelStyle=shieldStyle->GetShieldStyle();
+    LabelStyleRef      labelStyle=style->GetShieldStyle();
     std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
                                                 shieldGridSizeHoriz,
                                                 shieldGridSizeVert);
+
+    if (gridPoints.empty()) {
+      return;
+    }
+
+    LabelData labelBox;
+
+    labelBox.priority=labelStyle->GetPriority();
+    labelBox.alpha=1.0;
+    labelBox.fontSize=labelStyle->GetSize();
+    labelBox.style=labelStyle;
+    labelBox.text=text;
+
+    std::vector<LabelData> labelData= {labelBox};
 
     for (const auto& gridPoint : gridPoints) {
       Vertex2D pixel;
@@ -336,18 +329,9 @@ constexpr bool debugGroundTiles = false;
       projection.GeoToPixel(gridPoint,
                             pixel);
 
-      LabelData labelBox;
-
-      labelBox.priority=labelStyle->GetPriority();
-      labelBox.alpha=1.0;
-      labelBox.fontSize=labelStyle->GetSize();
-      labelBox.style=labelStyle;
-      labelBox.text=text;
-
-      std::vector<LabelData> vect = {labelBox};
       RegisterRegularLabel(projection,
                            parameter,
-                           vect,
+                           labelData,
                            pixel,
                            /*proposedWidth*/ -1);
     }
@@ -366,10 +350,8 @@ constexpr bool debugGroundTiles = false;
    * @param textStyles
    *    A list of text styles to use (the object could have more than
    *    label styles attached)
-   * @param x
-   *    X position to place the label at (currently always the center of the area or the coordinate of the node)
-   * @param y
-   *    Y position to place the label at (currently always the center of the area or the coordinate of the node)
+   * @param screenPos
+   *    position to place the label at (currently always the center of the area or the coordinate of the node)
    * @param objectWidth
    *    The (rough) width of the object
    * @param objectHeight
@@ -440,7 +422,7 @@ constexpr bool debugGroundTiles = false;
       else if (textStyle->GetAutoSize()) {
         double height=std::abs(objectHeight*0.1);
 
-        if (height==0 || height<standardFontSize) {
+        if (height==0.0 || height<standardFontSize) {
           continue;
         }
 
@@ -552,22 +534,19 @@ constexpr bool debugGroundTiles = false;
       return;
     }
 
-    Vertex2D screenPos;
-    Vertex2D minPixel;
-    Vertex2D maxPixel;
+    ScreenBox areaScreenBox;
 
-    projection.GeoToPixel(areaData.boundingBox.GetMinCoord(),
-                          minPixel);
-    projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
-                          maxPixel);
+    projection.BoundingBoxToPixel(areaData.boundingBox,
+                                  areaScreenBox);
+
+    Vertex2D areaCenter;
 
     if (areaData.center.has_value()){
       projection.GeoToPixel(areaData.center.value(),
-                            screenPos);
+                            areaCenter);
     }
     else {
-      screenPos=Vertex2D((minPixel.GetX()+maxPixel.GetX())/2,
-                         (minPixel.GetY()+maxPixel.GetY())/2);
+      areaCenter=areaScreenBox.GetCenter();
     }
 
     LayoutPointLabels(projection,
@@ -575,9 +554,9 @@ constexpr bool debugGroundTiles = false;
                       *areaData.buffer,
                       iconStyle,
                       textStyles,
-                      screenPos,
-                      std::max(minPixel.GetX(), maxPixel.GetX()) - std::min(minPixel.GetX(), maxPixel.GetX()),
-                      std::max(minPixel.GetY(), maxPixel.GetY()) - std::min(minPixel.GetY(), maxPixel.GetY()));
+                      areaCenter,
+                      areaScreenBox.GetWidth(),
+                      areaScreenBox.GetHeight());
   }
 
   bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
