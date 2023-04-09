@@ -33,6 +33,8 @@
 #include <osmscout/util/Tiling.h>
 #include <osmscout/util/Geometry.h>
 
+#include <osmscoutmap/MapPainterStatistics.h>
+
 namespace osmscout {
 
 #ifdef OSMSCOUT_DEBUG_GROUNDTILES
@@ -219,215 +221,6 @@ constexpr bool debugGroundTiles = false;
     log.Debug() << "MapPainter::~MapPainter()";
   }
 
-  static void CalculateStatistics(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const StyleConfig& styleConfig,
-                                  const NodeRef& node,
-                                  MapPainter::DataStatistic& statistic)
-  {
-    ++statistic.nodeCount;
-    ++statistic.coordCount;
-
-    if (parameter.IsDebugData()) {
-      IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
-                                                          projection);
-
-      if (iconStyle) {
-        ++statistic.iconCount;
-      }
-
-      statistic.labelCount+=styleConfig.GetNodeTextStyleCount(node->GetFeatureValueBuffer(),
-                                                              projection);
-
-    }
-  }
-
-  static void CalculateStatistics(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const StyleConfig& styleConfig,
-                                  const WayRef& way,
-                                  MapPainter::DataStatistic& statistic)
-  {
-    ++statistic.wayCount;
-    statistic.coordCount+=way->nodes.size();
-
-    if (parameter.IsDebugData()) {
-      PathShieldStyleRef shieldStyle=styleConfig.GetWayPathShieldStyle(way->GetFeatureValueBuffer(),
-                                                                       projection);
-      PathTextStyleRef   pathTextStyle=styleConfig.GetWayPathTextStyle(way->GetFeatureValueBuffer(),
-                                                                       projection);
-
-      if (shieldStyle) {
-        ++statistic.labelCount;
-      }
-
-      if (pathTextStyle) {
-        ++statistic.labelCount;
-      }
-    }
-  }
-
-  static void CalculateStatistics(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const StyleConfig& styleConfig,
-                                  const AreaRef& area,
-                                  MapPainter::DataStatistic& statistic)
-  {
-    ++statistic.areaCount;
-
-    for (const auto& ring : area->rings) {
-      statistic.coordCount+=ring.nodes.size();
-
-      if (parameter.IsDebugData() && ring.IsMaster()) {
-        IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),
-                                                            ring.GetFeatureValueBuffer(),
-                                                            projection);
-
-        if (iconStyle) {
-          ++statistic.iconCount;
-        }
-
-        statistic.labelCount+=styleConfig.GetAreaTextStyleCount(area->GetType(),
-                                                                ring.GetFeatureValueBuffer(),
-                                                                projection);
-      }
-    }
-  }
-
-  static void DumpStatisticWarnings(const MapParameter& parameter,
-                                    const std::unordered_map<TypeInfoRef,MapPainter::DataStatistic>& statistics)
-  {
-    for (const auto& [type, statistic] : statistics) {
-      if (type) {
-        if (parameter.GetWarningObjectCountLimit()>0 &&
-            statistic.objectCount>parameter.GetWarningObjectCountLimit()) {
-          log.Warn() << "Type : " << type->GetName()
-            << " has " << statistic.objectCount
-            << " objects (performance limit: " << parameter.GetWarningObjectCountLimit() << ")";
-        }
-
-        if (parameter.GetWarningCoordCountLimit()>0 &&
-            statistic.coordCount>parameter.GetWarningCoordCountLimit()) {
-          log.Warn() << "Type : " << type->GetName()
-            << " has " << statistic.coordCount
-            << " coords (performance limit: " << parameter.GetWarningCoordCountLimit() << ")";
-        }
-      }
-    }
-  }
-
-  static std::list<MapPainter::DataStatistic> MapToSortedList(const std::unordered_map<TypeInfoRef,MapPainter::DataStatistic>& statistics)
-  {
-    std::list<MapPainter::DataStatistic> statisticList;
-
-    for (const auto& [type, statistic] : statistics) {
-      statisticList.push_back(statistic);
-    }
-
-    statisticList.sort([](const MapPainter::DataStatistic& a,
-                                const MapPainter::DataStatistic& b)->bool {return a.objectCount>b.objectCount;});
-
-    return statisticList;
-  }
-
-  static void DumpDataStatistics(const std::list<MapPainter::DataStatistic>& statistics)
-  {
-    log.Info() << "Type|ObjectCount|NodeCount|WayCount|AreaCount|Nodes|Labels|Icons";
-    for (const auto& entry : statistics) {
-      log.Info() << entry.type->GetName() << " "
-                 << entry.objectCount << " "
-                 << entry.nodeCount << " " << entry.wayCount << " " << entry.areaCount << " "
-                 << entry.coordCount << " "
-                 << entry.labelCount << " "
-                 << entry.iconCount;
-    }
-  }
-
-  void MapPainter::DumpDataStatistics(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& data) const
-  {
-    std::unordered_map<TypeInfoRef,DataStatistic> statistics;
-    TypeInfoSet                                   types;
-
-    // Now analyse the actual data
-
-    for (const auto& node : data.nodes) {
-      DataStatistic& entry=statistics[node->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          node,
-                          entry);
-    }
-
-    for (const auto& node : data.poiNodes) {
-      DataStatistic& entry=statistics[node->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          node,
-                          entry);
-    }
-
-    for (const auto& way : data.ways) {
-      DataStatistic& entry=statistics[way->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          way,
-                          entry);
-    }
-
-    for (const auto& way : data.poiWays) {
-      DataStatistic& entry=statistics[way->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          way,
-                          entry);
-    }
-
-    for (const auto& area : data.areas) {
-      DataStatistic& entry=statistics[area->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          area,
-                          entry);
-    }
-
-    for (const auto& area : data.poiAreas) {
-      DataStatistic& entry=statistics[area->GetType()];
-
-      CalculateStatistics(projection,
-                          parameter,
-                          *styleConfig,
-                          area,
-                          entry);
-    }
-
-    for (auto& [type, statistic] : statistics) {
-      statistic.objectCount=statistic.nodeCount+statistic.wayCount+statistic.areaCount;
-    }
-
-    DumpStatisticWarnings(parameter,
-                          statistics);
-
-    if (parameter.IsDebugData()) {
-      for (auto& [type, statistic] : statistics) {
-        statistic.type=type;
-      }
-
-      ::osmscout::DumpDataStatistics(MapToSortedList(statistics));
-    }
-  }
-
   bool MapPainter::IsVisibleArea(const Projection& projection,
                                  const GeoBox& boundingBox,
                                  double pixelOffset) const
@@ -532,7 +325,7 @@ constexpr bool debugGroundTiles = false;
                                          const std::string_view& text,
                                          const std::vector<Point>& nodes)
   {
-    LabelStyleRef style=shieldStyle->GetShieldStyle();
+    LabelStyleRef      labelStyle=shieldStyle->GetShieldStyle();
     std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
                                                 shieldGridSizeHoriz,
                                                 shieldGridSizeVert);
@@ -545,10 +338,10 @@ constexpr bool debugGroundTiles = false;
 
       LabelData labelBox;
 
-      labelBox.priority=style->GetPriority();
+      labelBox.priority=labelStyle->GetPriority();
       labelBox.alpha=1.0;
-      labelBox.fontSize=style->GetSize();
-      labelBox.style=style;
+      labelBox.fontSize=labelStyle->GetSize();
+      labelBox.style=labelStyle;
       labelBox.text=text;
 
       std::vector<LabelData> vect = {labelBox};
@@ -641,7 +434,7 @@ constexpr bool debugGroundTiles = false;
           parameter.GetDrawFadings()) {
         double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
 
-        data.fontSize=textStyle->GetSize()*pow(1.5,factor);
+        data.fontSize=textStyle->GetSize()*::pow(1.5,factor);
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
@@ -2185,19 +1978,12 @@ constexpr bool debugGroundTiles = false;
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    if (parameter.IsDebugPerformance()) {
-      log.Info()
-        << "Data: " << data.nodes.size() << "+" << data.poiNodes.size()
-        << " " << data.ways.size() << " " << data.areas.size();
-    }
+    MapPainterStatistics statistics;
 
-    if (parameter.GetWarningCoordCountLimit()>0 ||
-        parameter.GetWarningObjectCountLimit()>0 ||
-        parameter.IsDebugData()) {
-      DumpDataStatistics(projection,
-                         parameter,
-                         data);
-    }
+    statistics.DumpMapPainterStatistics(*styleConfig,
+                                        projection,
+                                        parameter,
+                                        data);
   }
 
   void MapPainter::AfterPreprocessing(const Projection& projection,
@@ -3178,10 +2964,10 @@ constexpr bool debugGroundTiles = false;
     double factor=1.0/1201;
 
     bool even=true;
-    for (int x=minX; x<int(maxLon); x++) {
-      for (int y=minY; y<int(maxLat); y++) {
-        for (int subX=0; subX<1201; subX++) {
-          for (int subY=0; subY<1201; subY++) {
+    for (int x=minX; x<int(maxLon); ++x) {
+      for (int y=minY; y<int(maxLat); ++y) {
+        for (int subX=0; subX<1201; ++subX) {
+          for (int subY=0; subY<1201; ++subY) {
             even=!even;
 
             AreaData tileData;

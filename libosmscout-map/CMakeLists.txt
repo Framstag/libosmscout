@@ -4,6 +4,7 @@ set(HEADER_FILES
 	include/osmscoutmap/oss/Scanner.h
 	include/osmscoutmap/LabelLayouter.h
 	include/osmscoutmap/MapPainter.h
+	include/osmscoutmap/MapPainterStatistics.h
 	include/osmscoutmap/MapParameter.h
 	include/osmscoutmap/MapData.h
 	include/osmscoutmap/MapService.h
@@ -25,6 +26,7 @@ set(SOURCE_FILES
 	src/osmscoutmap/oss/Scanner.cpp
 	src/osmscoutmap/LabelLayouter.cpp
 	src/osmscoutmap/MapPainter.cpp
+	src/osmscoutmap/MapPainterStatistics.cpp
 	src/osmscoutmap/MapParameter.cpp
 	src/osmscoutmap/MapData.cpp
 	src/osmscoutmap/MapService.cpp

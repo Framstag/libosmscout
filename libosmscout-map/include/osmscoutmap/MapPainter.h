@@ -288,15 +288,6 @@ namespace osmscout {
 
   private:
     /**
-     Debugging
-     */
-    //@{
-    void DumpDataStatistics(const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data) const;
-    //@}
-
-    /**
       Private draw algorithm implementation routines.
      */
     //@{
