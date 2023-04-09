@@ -173,8 +173,7 @@ static void cursor_position_callback(GLFWwindow */*window*/, double xpos, double
     loadData = 1;
     lastEvent = std::chrono::steady_clock::now();
 
-    osmscout::GeoBox boundingBox;
-    renderer->GetProjection().GetDimensions(boundingBox);
+    osmscout::GeoBox boundingBox(renderer->GetProjection().GetDimensions());
     osmscout::log.Info() << "BoundingBox: [" << boundingBox.GetMinLon() << " " << boundingBox.GetMinLat() << " "
                          << boundingBox.GetMaxLon() << " " << boundingBox.GetMaxLat() << "]";
     osmscout::log.Info() << "Center: [" << renderer->GetCenter().GetLon() << " " << renderer->GetCenter().GetLat() << "]";

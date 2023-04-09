@@ -10,10 +10,10 @@ TEST_CASE("Check bounding box of generated parallel way")
   CoordBuffer      buffer;
   CoordBufferRange range;
 
-  buffer.PushCoord(0,0);
-  buffer.PushCoord(10,0);
-  buffer.PushCoord(5,1);
-  buffer.PushCoord(0,0);
+  buffer.PushCoord(osmscout::Vertex2D(0.0,0.0));
+  buffer.PushCoord(osmscout::Vertex2D(10.0,0.0));
+  buffer.PushCoord(osmscout::Vertex2D(5.0,1.0));
+  buffer.PushCoord(osmscout::Vertex2D(0.0,0.0));
 
   range=buffer.GenerateParallelWay(CoordBufferRange(buffer,0,3), /*offset*/-1);
   REQUIRE(range.GetEnd() - range.GetStart() >= 3);

@@ -523,8 +523,7 @@ namespace osmscout {
     }
 
     hnd.direction=(hnd.transStart < hnd.transEnd) ? 1 : -1;
-    origin.Set(coordRange.Get(hnd.transStart).GetX(),
-               coordRange.Get(hnd.transStart).GetY());
+    origin=coordRange.Get(hnd.transStart);
   }
 
   bool MapPainterQt::FollowPath(FollowPathHandle &hnd,
@@ -553,8 +552,8 @@ namespace osmscout {
       double fracToGo=l/len;
 
       if (fracToGo<=1.0) {
-        origin.Set(x + deltaX*fracToGo,
-                   y + deltaY*fracToGo);
+        origin=Vertex2D(x + deltaX*fracToGo,
+                        y + deltaY*fracToGo);
         return true;
       }
 
@@ -882,7 +881,10 @@ namespace osmscout {
                                           const PathLabelData &label,
                                           const LabelPath &labelPath)
   {
-    GetLayouter().RegisterContourLabel(projection, parameter, label, labelPath);
+    GetLayouter().RegisterContourLabel(projection,
+                                       parameter,
+                                       label,
+                                       labelPath);
   }
 
   void MapPainterQt::DrawLabels(const Projection& projection,
@@ -1074,7 +1076,7 @@ namespace osmscout {
 
         QtGlyph glyph;
         glyph.glyph=std::move(orphanGlyph);
-        glyph.position.Set(pos.x(), pos.y());
+        glyph.position=Vertex2D(pos.x(), pos.y());
         result.push_back(std::move(glyph));
       }
     }

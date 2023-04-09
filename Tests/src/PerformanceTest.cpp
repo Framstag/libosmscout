@@ -835,7 +835,6 @@ int main(int argc, char* argv[])
       osmscout::MapData       data;
       osmscout::OSMTileIdBox  tileBox(osmscout::OSMTileId(tile.GetX()-1,tile.GetY()-1),
                                       osmscout::OSMTileId(tile.GetX()+1,tile.GetY()+1));
-      osmscout::GeoBox        boundingBox;
 
       if ((current % delta)==0) {
         std::cout << current*100/tileCount << "% " << current;
@@ -854,7 +853,8 @@ int main(int argc, char* argv[])
                      args.TileWidth(),
                      args.TileHeight());
 
-      projection.GetDimensions(boundingBox);
+      osmscout::GeoBox boundingBox(projection.GetDimensions());
+
       projection.SetLinearInterpolationUsage(level.Get() >= 10);
 
       for (size_t i=0; i<args.loadRepeat; i++) {

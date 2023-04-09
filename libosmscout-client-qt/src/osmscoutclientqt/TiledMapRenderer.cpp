@@ -464,8 +464,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     // overlay ways
     std::vector<OverlayObjectRef> overlayObjects;
-    osmscout::GeoBox renderBox;
-    projection.GetDimensions(renderBox);
+    osmscout::GeoBox renderBox(projection.GetDimensions());
     getOverlayObjects(overlayObjects, renderBox);
 
     //DrawMap(p, tileVisualCenter, loadZ, canvas.width(), canvas.height());

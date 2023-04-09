@@ -228,7 +228,7 @@ void DrawWindow::paintEvent(QPaintEvent* /* event */)
     for (int x=startOffset;(x+startOffset)<width();x++){
       //int y=std::cos(((double)(x+sinStart)/(double)width()) *3*M_PI) * (height()/2-44) + height()/2;
       int y=std::sin(((double)(x+sinStart+moveOffset)/(double)width()) *2*M_PI) * (height()/2-44) + height()/2;
-      p.AddPoint(x,y);
+      p.AddPoint(osmscout::Vertex2D(x,y));
     }
     sinStart+=30;
 

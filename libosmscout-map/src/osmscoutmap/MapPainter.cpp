@@ -352,10 +352,8 @@ constexpr bool debugGroundTiles = false;
    *    label styles attached)
    * @param screenPos
    *    position to place the label at (currently always the center of the area or the coordinate of the node)
-   * @param objectWidth
-   *    The (rough) width of the object
-   * @param objectHeight
-   *    The (rough) height of the object
+   * @param objectBox
+   *    The (rough) size of the object
    */
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
@@ -363,8 +361,7 @@ constexpr bool debugGroundTiles = false;
                                      const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
                                      const Vertex2D& screenPos,
-                                     double objectWidth,
-                                     double objectHeight)
+                                     const ScreenBox& objectBox)
   {
     std::vector<LabelData> labelLayoutData;
 
@@ -409,6 +406,7 @@ constexpr bool debugGroundTiles = false;
       }
 
       LabelData data;
+
       data.type=LabelData::Type::Text;
       data.priority=textStyle->GetPriority();
 
@@ -420,7 +418,7 @@ constexpr bool debugGroundTiles = false;
         data.alpha=std::min(textStyle->GetAlpha()/factor, 1.0);
       }
       else if (textStyle->GetAutoSize()) {
-        double height=std::abs(objectHeight*0.1);
+        double height=std::abs(objectBox.GetHeight()*0.1);
 
         if (height==0.0 || height<standardFontSize) {
           continue;
@@ -465,7 +463,7 @@ constexpr bool debugGroundTiles = false;
                          parameter,
                          labelLayoutData,
                          screenPos,
-                         objectWidth);
+                         objectBox.GetWidth());
   }
 
   double MapPainter::GetProposedLabelWidth(const MapParameter& parameter,
@@ -555,8 +553,7 @@ constexpr bool debugGroundTiles = false;
                       iconStyle,
                       textStyles,
                       areaCenter,
-                      areaScreenBox.GetWidth(),
-                      areaScreenBox.GetHeight());
+                      areaScreenBox);
   }
 
   bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
@@ -600,8 +597,7 @@ constexpr bool debugGroundTiles = false;
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
       labelPath.AddPoint(
-          range.Get(j).GetX(),
-          range.Get(j).GetY());
+          range.Get(j));
     }
 
     PathLabelData labelData;
@@ -686,7 +682,8 @@ constexpr bool debugGroundTiles = false;
                       node->GetFeatureValueBuffer(),
                       iconStyle,
                       textStyles,
-                      screenPos);
+                      screenPos,
+                      ScreenBox::EMPTY);
   }
 
   void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
@@ -722,15 +719,16 @@ constexpr bool debugGroundTiles = false;
                                      const MapParameter& parameter,
                                      const MapPainter::WayPathData& data)
   {
-    std::vector<PathSymbolStyleRef> symbolStyles;
     styleConfig.GetWayPathSymbolStyle(*data.buffer,
                                       projection,
                                       symbolStyles);
 
     if (symbolStyles.empty()) {
+      // no symbols to draw
       return false;
     }
     if (data.mainSlotWidth==0) {
+      // line to decorate has no width
       return false;
     }
 
@@ -933,9 +931,7 @@ constexpr bool debugGroundTiles = false;
     LabelPath labelPath;
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
-      labelPath.AddPoint(
-          range.Get(j).GetX(),
-          range.Get(j).GetY());
+      labelPath.AddPoint(range.Get(j));
     }
 
     RegisterContourLabel(projection,
@@ -951,10 +947,7 @@ constexpr bool debugGroundTiles = false;
                                    const Magnification& magnification,
                                    const LineStyleRef& osmTileLine)
   {
-    GeoBox boundingBox;
-
-    projection.GetDimensions(boundingBox);
-
+    GeoBox                  boundingBox(projection.GetDimensions());
     osmscout::OSMTileId     tileA(OSMTileId::GetOSMTile(magnification,
                                                         boundingBox.GetMinCoord()));
     osmscout::OSMTileId     tileB(OSMTileId::GetOSMTile(magnification,
@@ -975,9 +968,8 @@ constexpr bool debugGroundTiles = false;
 
     // Horizontal lines
 
+    coords.resize(endTileX-startTileX+1);
     for (uint32_t y=startTileY; y<=endTileY; ++y) {
-      coords.resize(endTileX-startTileX+1);
-
       for (uint32_t x=startTileX; x<=endTileX; ++x) {
         coords[x-startTileX]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
@@ -1007,9 +999,8 @@ constexpr bool debugGroundTiles = false;
 
     // Vertical lines
 
+    coords.resize(endTileY-startTileY+1);
     for (uint32_t x=startTileX; x<=endTileX; ++x) {
-      coords.resize(endTileY-startTileY+1);
-
       for (uint32_t y=startTileY; y<=endTileY; ++y) {
         coords[y-startTileY]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
@@ -1248,16 +1239,16 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
-  std::vector<OffsetRel> MapPainter::ParseLaneTurns(const LanesFeatureValue &lanesValue) const
+  std::vector<OffsetRel> MapPainter::ParseLaneTurns(const LanesFeatureValue &feature) const
   {
     std::vector<OffsetRel> laneTurns;
 
-    laneTurns.reserve(lanesValue.GetLanes());
+    laneTurns.reserve(feature.GetLanes());
 
     // backward
 
-    auto turns=lanesValue.GetTurnBackward();
-    int lanes=lanesValue.GetBackwardLanes();
+    auto turns=feature.GetTurnBackward();
+    int lanes=feature.GetBackwardLanes();
     int lane=0;
 
     for (const LaneTurn &turn: turns) {
@@ -1274,8 +1265,8 @@ constexpr bool debugGroundTiles = false;
 
     // forward
 
-    turns=lanesValue.GetTurnForward();
-    lanes=lanesValue.GetForwardLanes();
+    turns=feature.GetTurnForward();
+    lanes=feature.GetForwardLanes();
     lane=0;
 
     for (const LaneTurn &turn: turns) {
@@ -1864,8 +1855,8 @@ constexpr bool debugGroundTiles = false;
               else{
                 currentStart=coordBuffer.buffer[transEnd];
               }
-              RouteSegmentData segmentConnection{coordBuffer.PushCoord(lastEnd.GetX(),lastEnd.GetY()),
-                                                 coordBuffer.PushCoord(currentStart.GetX(),currentStart.GetY()),
+              RouteSegmentData segmentConnection{coordBuffer.PushCoord(lastEnd),
+                                                 coordBuffer.PushCoord(currentStart),
                                                  Route::MemberDirection::forward};
               routeTmp.transSegments.push_back(segmentConnection);
 
@@ -1928,11 +1919,8 @@ constexpr bool debugGroundTiles = false;
   }
 
   /**
-   * Base method that must get called to initial the renderer for a render action.
-   * The derived method of the concrete renderer implementation can have
-   *
-   * @return
-   *    false if there was either an error or of the rendering was already interrupted, else true
+   * Base method that must get called to initialize the renderer for a render action.
+   * The derived method of the concrete renderer implementation can add further initialisation.
    */
   void MapPainter::InitializeRender(const Projection& projection,
                                     const MapParameter& parameter,
@@ -1989,9 +1977,7 @@ constexpr bool debugGroundTiles = false;
                   data);
 
     if (parameter.IsDebugPerformance()) {
-      GeoBox boundingBox;
-
-      projection.GetDimensions(boundingBox);
+      GeoBox boundingBox(projection.GetDimensions());
 
       log.Info()
         << "Draw: " << boundingBox.GetDisplayText() << " "
@@ -2011,14 +1997,18 @@ constexpr bool debugGroundTiles = false;
                  *landFill);
     }
 
-    DrawGroundTiles(projection, parameter, data.baseMapTiles);
+    DrawGroundTiles(projection,
+                    parameter,
+                    data.baseMapTiles);
   }
 
   void MapPainter::DrawGroundTiles(const Projection& projection,
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    DrawGroundTiles(projection, parameter, data.groundTiles);
+    DrawGroundTiles(projection,
+                    parameter,
+                    data.groundTiles);
   }
 
   static void DumpGroundTile(const GroundTile& tile)
@@ -2179,7 +2169,7 @@ constexpr bool debugGroundTiles = false;
             y=transBuffer.points[i].y;
           }
 
-          size_t idx=coordBuffer.PushCoord(x,y);
+          size_t idx=coordBuffer.PushCoord(Vertex2D(x,y));
 
           if (i==transBuffer.GetStart()) {
             start=idx;

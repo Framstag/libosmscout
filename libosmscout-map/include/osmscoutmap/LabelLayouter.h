@@ -916,7 +916,8 @@ constexpr bool debugLabelLayouter = false;
             maxY = std::max(maxY, y[i]);
           }
           // setup glyph top-left position and dimension after rotation
-          glyphCopy.trPosition.Set(minX+glyphCopy.position.GetX(), minY+glyphCopy.position.GetY());
+          glyphCopy.trPosition=Vertex2D(minX+glyphCopy.position.GetX(),
+                                        minY+glyphCopy.position.GetY());
           glyphCopy.trWidth  = maxX - minX;
           glyphCopy.trHeight = maxY - minY;
 

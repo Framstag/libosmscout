@@ -358,7 +358,16 @@ namespace osmscout {
      * @return position (index) of the new coordinate coordinate in the buffer
      * @note x and y have to be valid, NaN is not allowed
      */
-    size_t PushCoord(double x, double y);
+    [[deprecated]] size_t PushCoord(double x, double y);
+
+    /**
+     * Push coordinate to the buffer.
+     *
+     * @param coord
+     * @return position (index) of the new coordinate coordinate in the buffer
+     * @note x and y have to be valid, NaN is not allowed
+     */
+    size_t PushCoord(const Vertex2D& coord);
 
     /**
      * Generate parallel way to way stored in this buffer on range orgStart, orgEnd (inclusive)
