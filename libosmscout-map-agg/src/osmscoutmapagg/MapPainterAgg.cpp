@@ -456,7 +456,7 @@ namespace osmscout {
   }
 
   void MapPainterAgg::DrawIcon(const IconStyle* /*style*/,
-                               double /*centerX*/, double /*centerY*/,
+                               const Vertex2D& /*centerPos*/,
                                double /*width*/, double /*height*/)
   {
     // Not implemented
@@ -465,7 +465,7 @@ namespace osmscout {
   void MapPainterAgg::DrawSymbol(const Projection& projection,
                                  const MapParameter& parameter,
                                  const Symbol& symbol,
-                                 double x, double y,
+                                 const Vertex2D& screenPos,
                                  double /*scaleFactor*/)
   {
     ScreenBox boundingBox=symbol.GetBoundingBox(projection);
@@ -485,12 +485,12 @@ namespace osmscout {
              pixel!=polygon->GetCoords().end();
              ++pixel) {
           if (pixel==polygon->GetCoords().begin()) {
-            path.move_to(x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                         y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
+            path.move_to(screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                         screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
           }
           else {
-            path.line_to(x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                         y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
+            path.line_to(screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                         screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
           }
         }
 
@@ -510,8 +510,8 @@ namespace osmscout {
         FillStyleRef      fillStyle=rectangle->GetFillStyle();
         BorderStyleRef    borderStyle=rectangle->GetBorderStyle();
         agg::path_storage path;
-        double            xPos=x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX();
-        double            yPos=y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY();
+        double            xPos=screenPos.GetX()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX();
+        double            yPos=screenPos.GetY()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY();
         double            width=projection.ConvertWidthToPixel(rectangle->GetWidth());
         double            height=projection.ConvertWidthToPixel(rectangle->GetHeight());
 
@@ -538,8 +538,8 @@ namespace osmscout {
         agg::path_storage path;
         double            radius=projection.ConvertWidthToPixel(circle->GetRadius());
 
-        agg::ellipse ellipse(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
-                             y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
+        agg::ellipse ellipse(screenPos.GetX()+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
+                             screenPos.GetY()+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
                              radius,
                              radius);
 

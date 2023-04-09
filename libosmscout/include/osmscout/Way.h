@@ -110,6 +110,10 @@ namespace osmscout {
       return featureValueBuffer;
     }
 
+    bool IsValid() const {
+      return nodes.size()>=2;
+    }
+
     bool IsCircular() const
     {
       return nodes[0].GetId()!=0 &&

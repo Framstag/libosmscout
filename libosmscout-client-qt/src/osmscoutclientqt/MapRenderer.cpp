@@ -328,7 +328,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
     auto *painter = db->GetPainter();
     if (painter != nullptr) {
-      batch.addData(data, painter);
+      batch.AddData(data, painter);
     } else {
       osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();
       success = false;
@@ -344,7 +344,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig());
     painter=std::make_unique<osmscout::MapPainterQt>(emptyStyleConfig);
     MapPainterQt *p = painter.get();
-    batch.addData(data, p);
+    batch.AddData(data, p);
   }
 
   // draw databases

@@ -634,7 +634,7 @@ namespace osmscout {
           DrawSymbol(projection,
                      parameter,
                      symbol,
-                     0,0,
+                     Vertex2D::ZERO,
                      data.symbolScale);
           loop=FollowPath(followPathHnd,
                           data.coordRange,
@@ -647,7 +647,7 @@ namespace osmscout {
   }
 
   void MapPainterQt::DrawIcon(const IconStyle* style,
-                              double x, double y,
+                              const Vertex2D& centerPos,
                               double width, double height)
   {
     const auto &it=images.find(style->GetIconName());
@@ -655,7 +655,8 @@ namespace osmscout {
     assert(it!=images.end());
     assert(!it->second.isNull());
 
-    painter->drawImage(QRectF(x-width/2, y-height/2, width, height),
+    painter->drawImage(QRectF(centerPos.GetX()-width/2, centerPos.GetY()-height/2,
+                              width, height),
                        it->second,
                        QRectF(0, 0, it->second.width(), it->second.height()));
   }
@@ -663,13 +664,13 @@ namespace osmscout {
   void MapPainterQt::DrawSymbol(const Projection& projection,
                                 const MapParameter& /*parameter*/,
                                 const Symbol& symbol,
-                                double x, double y,
+                                const Vertex2D& screenPos,
                                 double scaleFactor)
   {
     SymbolRendererQt renderer(painter);
     renderer.Render(projection,
                     symbol,
-                    Vertex2D(x, y),
+                    screenPos,
                     scaleFactor);
   }
 

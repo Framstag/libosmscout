@@ -23,6 +23,7 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <osmscout/GeoCoord.h>
+#include <osmscout/Pixel.h>
 #include <osmscout/Point.h>
 
 #include <osmscout/util/GeoBox.h>
@@ -89,12 +90,12 @@ namespace osmscout {
       {
       }
 
+      BatchTransformer(const BatchTransformer& other) = delete;
+
       ~BatchTransformer()
       {
         Flush();
       }
-
-      BatchTransformer(const BatchTransformer& other) = delete;
 
       void GeoToPixel(const GeoCoord& coord,
                       double& x,
@@ -114,12 +115,18 @@ namespace osmscout {
           }
         }
         else {
+          Vertex2D pixel;
           projection.GeoToPixel(coord,
-                                x,y);
+                                pixel);
+          x=pixel.GetX();
+          y=pixel.GetY();
         }
 #else
+        Vertex2D pixel;
         projection.GeoToPixel(coord,
-                              x,y);
+                              pixel);
+        x=pixel.GetX();
+        y=pixel.GetY();
 #endif
       }
 
@@ -141,12 +148,18 @@ namespace osmscout {
           }
         }
         else {
+          Vertex2D pixel;
           projection.GeoToPixel(coord.GetCoord(),
                                 x,y);
+          x=pixel.GetX();
+          y=pixel.GetY();
         }
 #else
+        Vertex2D pixel;
         projection.GeoToPixel(coord.GetCoord(),
-                              x,y);
+                              pixel);
+        x=pixel.GetX();
+        y=pixel.GetY();
 #endif
       }
 
@@ -179,7 +192,7 @@ namespace osmscout {
      */
     virtual bool IsValidFor(const GeoCoord& coord) const = 0;
 
-    GeoCoord GetCenter() const
+    [[nodiscard]] GeoCoord GetCenter() const
     {
       return GeoCoord(lat,lon);
     }
@@ -188,7 +201,7 @@ namespace osmscout {
      * Returns the angle in radians ([0..2*PI[) of the display in relation to the north. A degree of 0 means
      * north is to the top, a degree of PI, renders with the south to the top of the display).
      */
-    double GetAngle() const
+    [[nodiscard]] double GetAngle() const
     {
       return angle;
     }
@@ -196,7 +209,7 @@ namespace osmscout {
     /**
      * Returns the width of the screen
      */
-    size_t GetWidth() const
+    [[nodiscard]] size_t GetWidth() const
     {
       return width;
     }
@@ -204,7 +217,7 @@ namespace osmscout {
     /**
      * Returns the height of the screen
      */
-    size_t GetHeight() const
+    [[nodiscard]] size_t GetHeight() const
     {
       return height;
     }
@@ -212,7 +225,7 @@ namespace osmscout {
     /**
      * Return the magnification as part of the projection.
      */
-    Magnification GetMagnification() const
+    [[nodiscard]] Magnification GetMagnification() const
     {
       return magnification;
     }
@@ -220,7 +233,7 @@ namespace osmscout {
     /**
      * Return the DPI as part of the projection.
      */
-    double GetDPI() const
+    [[nodiscard]] double GetDPI() const
     {
       return dpi;
     }
@@ -228,7 +241,7 @@ namespace osmscout {
     /**
      * Returns true, if the given geo coordinate is in the bounding box
      */
-    bool GeoIsIn(double lon, double lat) const
+    [[nodiscard]] bool GeoIsIn(double lon, double lat) const
     {
       return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
     }
@@ -236,8 +249,8 @@ namespace osmscout {
     /**
      * Returns true, if the given bounding box is completely within the projection bounding box
      */
-    bool GeoIsIn(double lonMin, double latMin,
-                 double lonMax, double latMax) const
+    [[nodiscard]] bool GeoIsIn(double lonMin, double latMin,
+                               double lonMax, double latMax) const
     {
       return !(lonMin>this->lonMax ||
                lonMax<this->lonMin ||
@@ -245,7 +258,7 @@ namespace osmscout {
                latMax<this->latMin);
     }
 
-    GeoBox GetDimensions() const
+    [[nodiscard]] GeoBox GetDimensions() const
     {
       return GeoBox(GeoCoord(latMin,lonMin),
                     GeoCoord(latMax,lonMax));
@@ -263,7 +276,7 @@ namespace osmscout {
     /**
      * Returns the size of a pixel in meter
      */
-    double GetPixelSize() const
+    [[nodiscard]] double GetPixelSize() const
     {
       return pixelSize;
     }
@@ -271,7 +284,7 @@ namespace osmscout {
     /**
      * Returns the number of on screen pixel for one meter on the ground
      */
-    double GetMeterInPixel() const
+    [[nodiscard]] double GetMeterInPixel() const
     {
       return meterInPixel;
     }
@@ -279,7 +292,7 @@ namespace osmscout {
     /**
      * Returns the number of on screen millimeters for one meter on the ground
      */
-    double GetMeterInMM() const
+    [[nodiscard]] double GetMeterInMM() const
     {
       return meterInMM;
     }
@@ -292,7 +305,7 @@ namespace osmscout {
      * @return
      *    Width in screen pixel
      */
-    double ConvertWidthToPixel(double width) const
+    [[nodiscard]] double ConvertWidthToPixel(double width) const
     {
       return width*dpi/25.4;
     }
@@ -305,7 +318,7 @@ namespace osmscout {
      * @return
      *    Width in mm
      */
-    double ConvertPixelToWidth(double pixel) const
+    [[nodiscard]] double ConvertPixelToWidth(double pixel) const
     {
       return pixel*25.4/dpi;
     }
@@ -327,7 +340,7 @@ namespace osmscout {
      * false if given coordinate is not valid for this projection.
      */
     virtual bool GeoToPixel(const GeoCoord& coord,
-                            double& x, double& y) const = 0;
+                            Vertex2D& pixel) const = 0;
 
     /**
      * Converts a valid GeoBox to its on screen pixel coordinates
@@ -357,7 +370,7 @@ namespace osmscout {
    */
   class OSMSCOUT_API MercatorProjection : public Projection
   {
-  protected:
+  protected: // Because the OpenGLProjection inherits from this projection
     bool   valid=false;    //!< projection is valid
 
     double latOffset=0.0;  //!< Absolute and untransformed screen position of lat coordinate
@@ -369,7 +382,8 @@ namespace osmscout {
     double scale=1.0;
     double scaleGradtorad ; //!< Precalculated scale*Gradtorad
 
-    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection
+                           //!< center scaled by gradtorad * scale
     bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
   public:
@@ -456,7 +470,7 @@ namespace osmscout {
                     GeoCoord& coord) const override;
 
     bool GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const override;
+                    Vertex2D& pixel) const override;
 
     bool Move(double horizPixel,
               double vertPixel);
@@ -481,7 +495,7 @@ namespace osmscout {
       return Move(pixel,0);
     }
 
-    bool IsLinearInterpolationEnabled() const
+    [[nodiscard]] bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }
@@ -508,7 +522,7 @@ namespace osmscout {
    */
   class OSMSCOUT_API TileProjection : public Projection
   {
-  protected:
+  private:
     bool   valid=false;          //!< projection is valid
 
     double lonOffset=0.0;
@@ -516,7 +530,8 @@ namespace osmscout {
     double scale=1.0;
     double scaleGradtorad; //!< Precalculated scale*Gradtorad
 
-    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection center scaled by gradtorad * scale
+    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection
+                           //!< center scaled by gradtorad * scale
     bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -580,9 +595,9 @@ namespace osmscout {
                     GeoCoord& coord) const override;
 
     bool GeoToPixel(const GeoCoord& coord,
-                    double& x, double& y) const override;
+                    Vertex2D& pixel) const override;
 
-    bool IsLinearInterpolationEnabled() const
+    [[nodiscard]] bool IsLinearInterpolationEnabled() const
     {
       return useLinearInterpolation;
     }

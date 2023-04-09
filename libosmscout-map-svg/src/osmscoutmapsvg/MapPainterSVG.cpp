@@ -777,7 +777,7 @@ namespace osmscout {
   void MapPainterSVG::DrawSymbol(const Projection& projection,
                                  const MapParameter& /*parameter*/,
                                  const Symbol& symbol,
-                                 double x, double y,
+                                 const Vertex2D& screenPos,
                                  double /*scaleFactor*/)
   {
     ScreenBox boundingBox=symbol.GetBoundingBox(projection);
@@ -792,8 +792,8 @@ namespace osmscout {
       const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
 
       if (polygon != nullptr) {
-        FillStyleRef   fillStyle=polygon->GetFillStyle();
-        BorderStyleRef borderStyle=polygon->GetBorderStyle();
+        const FillStyleRef   fillStyle=polygon->GetFillStyle();
+        const BorderStyleRef borderStyle=polygon->GetBorderStyle();
 
         stream << "    <polyline";
         SetupFillAndStroke(fillStyle, borderStyle);
@@ -808,19 +808,19 @@ namespace osmscout {
             stream << " ";
           }
 
-          stream << (x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX())
-                 << "," << (y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
+          stream << (screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX())
+                 << "," << (screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
         }
 
         stream << "\" />" << std::endl;
 
       } else if (rectangle != nullptr) {
-        FillStyleRef   fillStyle=rectangle->GetFillStyle();
-        BorderStyleRef borderStyle=rectangle->GetBorderStyle();
+        const FillStyleRef   fillStyle=rectangle->GetFillStyle();
+        const BorderStyleRef borderStyle=rectangle->GetBorderStyle();
 
         stream << "    <rect";
-        stream << " x=\"" << ((x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX())) << "\"";
-        stream << " y=\"" << ((y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY())) << "\"";
+        stream << " x=\"" << ((screenPos.GetX()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX())) << "\"";
+        stream << " y=\"" << ((screenPos.GetY()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY())) << "\"";
         stream << " width=\"" << (projection.ConvertWidthToPixel(rectangle->GetWidth())) << "\"";
         stream << " height=\"" << (projection.ConvertWidthToPixel(rectangle->GetHeight())) << "\"";
 
@@ -828,12 +828,12 @@ namespace osmscout {
         stream << " />" << std::endl;
 
       } else if (circle != nullptr) {
-        FillStyleRef   fillStyle=circle->GetFillStyle();
-        BorderStyleRef borderStyle=circle->GetBorderStyle();
+        const FillStyleRef   fillStyle=circle->GetFillStyle();
+        const BorderStyleRef borderStyle=circle->GetBorderStyle();
 
         stream << "    <circle";
-        stream << " cx=\"" << (x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX()) << "\"";
-        stream << " cy=\"" << (y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY()) << "\"";
+        stream << " cx=\"" << (screenPos.GetX()+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX()) << "\"";
+        stream << " cy=\"" << (screenPos.GetY()+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY()) << "\"";
         stream << " r=\"" << (projection.ConvertWidthToPixel(circle->GetRadius())) << "\"";
 
         SetupFillAndStroke(fillStyle, borderStyle);
@@ -843,10 +843,10 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawIcon(const IconStyle* style,
-                               double x, double y,
+                               const Vertex2D& centerPos,
                                double width, double height)
   {
-    stream << "    <use x=\"" << (x - width/2) << "\" y=\"" << (y - height/2) << "\" " <<
+    stream << "    <use x=\"" << (centerPos.GetX() - width/2) << "\" y=\"" << (centerPos.GetY() - height/2) << "\" " <<
       "width=\"" << width << "\" height=\"" << height << "\" " <<
       "xlink:href=\"#icon_" << style->GetIconId() << "\" />\n";
   }

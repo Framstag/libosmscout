@@ -90,15 +90,15 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   }
 
   uint32_t osmTileRes = OSMTile::worldRes(projection.GetMagnification().GetLevel());
-  double x1;
-  double y1;
-  projection.GeoToPixel(osmscout::GeoCoord(osmMaxLat, osmMinLon), x1, y1);
-  double x2;
-  double y2;
-  projection.GeoToPixel(osmscout::GeoCoord(osmMinLat, osmMaxLon), x2, y2);
+  Vertex2D pos1;
+  Vertex2D pos2;
+  projection.GeoToPixel(osmscout::GeoCoord(osmMaxLat, osmMinLon),
+                        pos1);
+  projection.GeoToPixel(osmscout::GeoCoord(osmMinLat, osmMaxLon),
+                        pos2);
 
-  double renderTileWidth = (x2 - x1) / osmTileRes; // pixels
-  double renderTileHeight = (y2 - y1) / osmTileRes; // pixels
+  double renderTileWidth = (pos2.GetX() - pos1.GetX()) / osmTileRes; // pixels
+  double renderTileHeight = (pos2.GetY() - pos1.GetY()) / osmTileRes; // pixels
 
   uint32_t osmTileFromX = std::max(0.0, (double)osmTileRes * ((boundingBox.GetMinLon() + (double)180.0) / (double)360.0));
   double maxLatRad = boundingBox.GetMaxLat() * GRAD_TO_RAD;
@@ -113,8 +113,6 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
   }
 
   // render available tiles
-  double x;
-  double y;
 
   painter.save();
   if (request.angle!=Bearing()) {
@@ -143,22 +141,27 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
 
       uint32_t xtile = (osmTileFromX + tx);
       double xtileDeg = (double)xtile / (double)osmTileRes * 360.0 - 180.0;
+      osmscout::Vertex2D pos;
 
-      projection.GeoToPixel(osmscout::GeoCoord(ytileLatDeg, xtileDeg), x, y);
+      projection.GeoToPixel(osmscout::GeoCoord(ytileLatDeg, xtileDeg),
+                            pos);
 
       bool lookupTileFound = false;
       for (TileCache *cache:layerCaches){
         lookupTileFound |= lookupAndDrawTile(*cache, painter,
-                                             x, y, renderTileWidth, renderTileHeight,
-                                             zoomLevel, xtile, ytile, /* up limit */ 6, /* down limit */ 3,
+                                             pos.GetX(), pos.GetY(),
+                                             renderTileWidth, renderTileHeight,
+                                             zoomLevel,
+                                             xtile, ytile,
+                                             /* up limit */ 6, /* down limit */ 3,
                                              overlap
         );
       }
 
       if (!lookupTileFound){
         // no tile found, draw its outline
-        painter.drawLine(x,y, x + renderTileWidth, y);
-        painter.drawLine(x,y, x, y + renderTileHeight);
+        painter.drawLine(pos.GetX(),pos.GetY(), pos.GetX() + renderTileWidth, pos.GetY());
+        painter.drawLine(pos.GetX(),pos.GetY(), pos.GetX(), pos.GetY() + renderTileHeight);
       }
     }
   }

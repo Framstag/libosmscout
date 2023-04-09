@@ -49,7 +49,7 @@ constexpr bool debugGroundTiles = false;
 
     std::set<GeoCoord> intersections;
 
-    for (size_t i=0; i<nodes.size()-1; i++) {
+    for (size_t i=0; i<nodes.size()-1; ++i) {
       size_t cellXStart=(size_t)((nodes[i].GetLon()+180.0)/gridSizeHoriz);
       size_t cellYStart=(size_t)((nodes[i].GetLat()+90.0)/gridSizeVert);
 
@@ -60,7 +60,7 @@ constexpr bool debugGroundTiles = false;
         double lower=std::min(cellYStart,cellYEnd)*gridSizeVert-90.0;
         double upper=(std::max(cellYStart,cellYEnd)+1)*gridSizeVert-90.0;
 
-        for (size_t xIndex=cellXStart+1; xIndex<=cellXEnd; xIndex++) {
+        for (size_t xIndex=cellXStart+1; xIndex<=cellXEnd; ++xIndex) {
           GeoCoord intersection;
 
           double xCoord=xIndex*gridSizeHoriz-180.0;
@@ -79,7 +79,7 @@ constexpr bool debugGroundTiles = false;
         double lower=std::min(cellXStart,cellXEnd)*gridSizeHoriz-180.0;
         double upper=(std::max(cellXStart,cellXEnd)+1)*gridSizeHoriz-180.0;
 
-        for (size_t yIndex=cellYStart+1; yIndex<=cellYEnd; yIndex++) {
+        for (size_t yIndex=cellYStart+1; yIndex<=cellYEnd; ++yIndex) {
           GeoCoord intersection;
 
           double yCoord=yIndex*gridSizeVert-90.0;
@@ -101,7 +101,7 @@ constexpr bool debugGroundTiles = false;
   /**
    * Return if a > b, a should be drawn before b
    */
-  static bool AreaSorter(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
+  [[nodiscard]] static bool AreaSorter(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
   {
     if (a.fillStyle && b.fillStyle) {
       if (a.fillStyle->GetFillColor().IsSolid() && !b.fillStyle->GetFillColor().IsSolid()) {
@@ -146,8 +146,8 @@ constexpr bool debugGroundTiles = false;
   /**
    * Sort labels for the same object by position
    */
-  static inline bool LabelLayoutDataSorter(const LabelData& a,
-                                           const LabelData& b)
+  [[nodiscard]] static inline bool LabelLayoutDataSorter(const LabelData& a,
+                                                         const LabelData& b)
   {
     return a.position<b.position;
   }
@@ -177,7 +177,7 @@ constexpr bool debugGroundTiles = false;
     seaFill=std::make_shared<FillStyle>();
     seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0/255));
 
-    TextStyleRef textStyle=std::make_shared<TextStyle>();
+    auto textStyle=std::make_shared<TextStyle>();
 
     textStyle->SetStyle(TextStyle::normal);
     textStyle->SetPriority(0);
@@ -225,15 +225,15 @@ constexpr bool debugGroundTiles = false;
                                   const NodeRef& node,
                                   MapPainter::DataStatistic& statistic)
   {
-    statistic.nodeCount++;
-    statistic.coordCount++;
+    ++statistic.nodeCount;
+    ++statistic.coordCount;
 
     if (parameter.IsDebugData()) {
       IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                                           projection);
 
       if (iconStyle) {
-        statistic.iconCount++;
+        ++statistic.iconCount;
       }
 
       statistic.labelCount+=styleConfig.GetNodeTextStyleCount(node->GetFeatureValueBuffer(),
@@ -248,7 +248,7 @@ constexpr bool debugGroundTiles = false;
                                   const WayRef& way,
                                   MapPainter::DataStatistic& statistic)
   {
-    statistic.wayCount++;
+    ++statistic.wayCount;
     statistic.coordCount+=way->nodes.size();
 
     if (parameter.IsDebugData()) {
@@ -258,11 +258,11 @@ constexpr bool debugGroundTiles = false;
                                                                        projection);
 
       if (shieldStyle) {
-        statistic.labelCount++;
+        ++statistic.labelCount;
       }
 
       if (pathTextStyle) {
-        statistic.labelCount++;
+        ++statistic.labelCount;
       }
     }
   }
@@ -273,7 +273,7 @@ constexpr bool debugGroundTiles = false;
                                   const AreaRef& area,
                                   MapPainter::DataStatistic& statistic)
   {
-    statistic.areaCount++;
+    ++statistic.areaCount;
 
     for (const auto& ring : area->rings) {
       statistic.coordCount+=ring.nodes.size();
@@ -284,7 +284,7 @@ constexpr bool debugGroundTiles = false;
                                                             projection);
 
         if (iconStyle) {
-          statistic.iconCount++;
+          ++statistic.iconCount;
         }
 
         statistic.labelCount+=styleConfig.GetAreaTextStyleCount(area->GetType(),
@@ -301,12 +301,16 @@ constexpr bool debugGroundTiles = false;
       if (type) {
         if (parameter.GetWarningObjectCountLimit()>0 &&
             statistic.objectCount>parameter.GetWarningObjectCountLimit()) {
-          log.Warn() << "Type : " << type->GetName() << " has " << statistic.objectCount << " objects (performance limit: " << parameter.GetWarningObjectCountLimit() << ")";
+          log.Warn() << "Type : " << type->GetName()
+            << " has " << statistic.objectCount
+            << " objects (performance limit: " << parameter.GetWarningObjectCountLimit() << ")";
         }
 
         if (parameter.GetWarningCoordCountLimit()>0 &&
             statistic.coordCount>parameter.GetWarningCoordCountLimit()) {
-          log.Warn() << "Type : " << type->GetName() << " has " << statistic.coordCount << " coords (performance limit: " << parameter.GetWarningCoordCountLimit() << ")";
+          log.Warn() << "Type : " << type->GetName()
+            << " has " << statistic.coordCount
+            << " coords (performance limit: " << parameter.GetWarningCoordCountLimit() << ")";
         }
       }
     }
@@ -525,7 +529,7 @@ constexpr bool debugGroundTiles = false;
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const PathShieldStyleRef& shieldStyle,
-                                         const std::string& text,
+                                         const std::string_view& text,
                                          const std::vector<Point>& nodes)
   {
     LabelStyleRef style=shieldStyle->GetShieldStyle();
@@ -534,10 +538,10 @@ constexpr bool debugGroundTiles = false;
                                                 shieldGridSizeVert);
 
     for (const auto& gridPoint : gridPoints) {
-      double x;
-      double y;
+      Vertex2D pixel;
 
-      projection.GeoToPixel(gridPoint,x,y);
+      projection.GeoToPixel(gridPoint,
+                            pixel);
 
       LabelData labelBox;
 
@@ -551,7 +555,7 @@ constexpr bool debugGroundTiles = false;
       RegisterRegularLabel(projection,
                            parameter,
                            vect,
-                           Vertex2D(x,y),
+                           pixel,
                            /*proposedWidth*/ -1);
     }
   }
@@ -583,8 +587,7 @@ constexpr bool debugGroundTiles = false;
                                      const FeatureValueBuffer& buffer,
                                      const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
-                                     double x,
-                                     double y,
+                                     const Vertex2D& screenPos,
                                      double objectWidth,
                                      double objectHeight)
   {
@@ -683,7 +686,11 @@ constexpr bool debugGroundTiles = false;
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
-    RegisterRegularLabel(projection, parameter, labelLayoutData, Vertex2D(x,y), objectWidth);
+    RegisterRegularLabel(projection,
+                         parameter,
+                         labelLayoutData,
+                         screenPos,
+                         objectWidth);
   }
 
   double MapPainter::GetProposedLabelWidth(const MapParameter& parameter,
@@ -752,25 +759,22 @@ constexpr bool debugGroundTiles = false;
       return;
     }
 
-    double x1;
-    double x2;
-    double y1;
-    double y2;
+    Vertex2D screenPos;
+    Vertex2D minPixel;
+    Vertex2D maxPixel;
 
     projection.GeoToPixel(areaData.boundingBox.GetMinCoord(),
-                          x1,y1);
-
+                          minPixel);
     projection.GeoToPixel(areaData.boundingBox.GetMaxCoord(),
-                          x2,y2);
+                          maxPixel);
 
-    double labelX;
-    double labelY;
     if (areaData.center.has_value()){
       projection.GeoToPixel(areaData.center.value(),
-                            labelX, labelY);
-    } else {
-      labelX = (x1+x2)/2;
-      labelY = (y1+y2)/2;
+                            screenPos);
+    }
+    else {
+      screenPos=Vertex2D((minPixel.GetX()+maxPixel.GetX())/2,
+                         (minPixel.GetY()+maxPixel.GetY())/2);
     }
 
     LayoutPointLabels(projection,
@@ -778,10 +782,9 @@ constexpr bool debugGroundTiles = false;
                       *areaData.buffer,
                       iconStyle,
                       textStyles,
-                      labelX,
-                      labelY,
-                      std::max(x1, x2) - std::min(x1, x2),
-                      std::max(y1, y2) - std::min(y1, y2));
+                      screenPos,
+                      std::max(minPixel.GetX(), maxPixel.GetX()) - std::min(minPixel.GetX(), maxPixel.GetX()),
+                      std::max(minPixel.GetY(), maxPixel.GetY()) - std::min(minPixel.GetY(), maxPixel.GetY()));
   }
 
   bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
@@ -823,7 +826,7 @@ constexpr bool debugGroundTiles = false;
     // TODO: use coordBuffer for label path
     LabelPath labelPath;
 
-    for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
+    for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
       labelPath.AddPoint(
           range.Get(j).GetX(),
           range.Get(j).GetY());
@@ -836,7 +839,10 @@ constexpr bool debugGroundTiles = false;
     labelData.contourLabelOffset=contourLabelOffset;
     labelData.contourLabelSpace=contourLabelSpace;
 
-    RegisterContourLabel(projection, parameter, labelData, labelPath);
+    RegisterContourLabel(projection,
+                         parameter,
+                         labelData,
+                         labelPath);
 
     return true;
   }
@@ -898,18 +904,17 @@ constexpr bool debugGroundTiles = false;
                                  projection,
                                  textStyles);
 
-    double x;
-    double y;
+    Vertex2D screenPos;
 
     projection.GeoToPixel(node->GetCoords(),
-                          x,y);
+                          screenPos);
 
     LayoutPointLabels(projection,
                       parameter,
                       node->GetFeatureValueBuffer(),
                       iconStyle,
                       textStyles,
-                      x,y);
+                      screenPos);
   }
 
   void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
@@ -1043,7 +1048,7 @@ constexpr bool debugGroundTiles = false;
         size_t countSymbols=std::max(size_t(1), size_t((length - symbolSpace) / (symbolWidth + symbolSpace)));
         size_t labelCountExp=log2(countSymbols);
 
-        countSymbols=pow(2, labelCountExp);
+        countSymbols=::pow(2, labelCountExp);
 
         double space = (length-countSymbols*symbolWidth) / (countSymbols+1);
         assert(space>0);
@@ -1122,7 +1127,7 @@ constexpr bool debugGroundTiles = false;
                                        const MapParameter& parameter,
                                        const WayPathData& data,
                                        const PathTextStyleRef &pathTextStyle,
-                                       const std::string &textLabel)
+                                       const std::string_view &textLabel)
   {
     assert(pathTextStyle);
 
@@ -1155,7 +1160,7 @@ constexpr bool debugGroundTiles = false;
     // TODO: use coordBuffer for label path
     LabelPath labelPath;
 
-    for (size_t j=range.GetStart(); j<=range.GetEnd(); j++) {
+    for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
       labelPath.AddPoint(
           range.Get(j).GetX(),
           range.Get(j).GetY());
@@ -1188,20 +1193,20 @@ constexpr bool debugGroundTiles = false;
     uint32_t                endTileY=std::max(tileA.GetY(),tileB.GetY());
 
     if (startTileX>0) {
-      startTileX--;
+      --startTileX;
     }
     if (startTileY>0) {
-      startTileY--;
+      --startTileY;
     }
 
     std::vector<GeoCoord> coords;
 
     // Horizontal lines
 
-    for (uint32_t y=startTileY; y<=endTileY; y++) {
+    for (uint32_t y=startTileY; y<=endTileY; ++y) {
       coords.resize(endTileX-startTileX+1);
 
-      for (uint32_t x=startTileX; x<=endTileX; x++) {
+      for (uint32_t x=startTileX; x<=endTileX; ++x) {
         coords[x-startTileX]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
@@ -1230,10 +1235,10 @@ constexpr bool debugGroundTiles = false;
 
     // Vertical lines
 
-    for (uint32_t x=startTileX; x<=endTileX; x++) {
+    for (uint32_t x=startTileX; x<=endTileX; ++x) {
       coords.resize(endTileY-startTileY+1);
 
-      for (uint32_t y=startTileY; y<=endTileY; y++) {
+      for (uint32_t y=startTileY; y<=endTileY; ++y) {
         coords[y-startTileY]=OSMTileId(x,y).GetTopLeftCoord(magnification);
       }
 
@@ -1312,7 +1317,7 @@ constexpr bool debugGroundTiles = false;
         borderStyles.front()->GetDisplayOffset()==0.0 &&
         borderStyles.front()->GetOffset()==0.0) {
       borderStyle=borderStyles[borderStyleIndex];
-      borderStyleIndex++;
+      ++borderStyleIndex;
     }
 
     AreaData a;
@@ -1351,7 +1356,7 @@ constexpr bool debugGroundTiles = false;
 
     for (size_t idx=borderStyleIndex;
          idx<borderStyles.size();
-         idx++) {
+         ++idx) {
       borderStyle=borderStyles[idx];
 
       double offset=0.0;
@@ -1489,9 +1494,9 @@ constexpr bool debugGroundTiles = false;
       }
 
       laneTurns.push_back(ParseBackwardTurnStringToOffset(turn));
-      lane++;
+      ++lane;
     }
-    for (;lane<lanes;lane++){
+    for (;lane<lanes;++lane){
       laneTurns.push_back(OffsetRel::base);
     }
 
@@ -1507,9 +1512,9 @@ constexpr bool debugGroundTiles = false;
       }
 
       laneTurns.push_back(ParseForwardTurnStringToOffset(turn));
-      lane++;
+      ++lane;
     }
-    for (;lane<lanes;lane++){
+    for (;lane<lanes;++lane){
       laneTurns.push_back(OffsetRel::base);
     }
 
@@ -1685,7 +1690,9 @@ constexpr bool debugGroundTiles = false;
     }
 
     if (pathData.mainSlotWidth==0.0) {
-      log.Warn() << "Line style for way " << way.GetFileOffset() << " of type " << way.GetType()->GetName() << " results in empty mainSlotWidth";
+      log.Warn() << "Line style for way " << way.GetFileOffset()
+                 << " of type " << way.GetType()->GetName()
+                 << " results in empty mainSlotWidth";
     }
 
     for (const auto& lineStyle : lineStyles) {
@@ -1772,7 +1779,7 @@ constexpr bool debugGroundTiles = false;
         double lanesSpace=pathData.mainSlotWidth/lanes;
         double laneOffset=-pathData.mainSlotWidth/2.0+lanesSpace;
 
-        for (size_t lane=1; lane<lanes; lane++) {
+        for (size_t lane=1; lane<lanes; ++lane) {
           data.coordRange=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                            laneOffset);
           wayData.push_back(data);
@@ -1817,7 +1824,7 @@ constexpr bool debugGroundTiles = false;
     routeLabelData.clear();
 
     for (const auto& way : data.ways) {
-      if (way->nodes.size() >= 2) {
+      if (way->IsValid()) {
         CalculateWayPaths(*styleConfig,
                           projection,
                           parameter,
@@ -1826,7 +1833,7 @@ constexpr bool debugGroundTiles = false;
     }
 
     for (const auto& way : data.poiWays) {
-      if (way->nodes.size() >= 2) {
+      if (way->IsValid()) {
         CalculateWayPaths(*styleConfig,
                           projection,
                           parameter,
@@ -1844,25 +1851,21 @@ constexpr bool debugGroundTiles = false;
     }
 
     for (const auto& way : data.ways) {
-      if (way->nodes.size() < 2) {
-        continue; // algorithms require at least two points
+      if (way->IsValid()) {
+        CalculateWayShieldLabels(*styleConfig,
+                                 projection,
+                                 parameter,
+                                 *way);
       }
-
-      CalculateWayShieldLabels(*styleConfig,
-                               projection,
-                               parameter,
-                               *way);
     }
 
     for (const auto& way : data.poiWays) {
-      if (way->nodes.size()<2) {
-        continue; // algorithms require at least two points
+      if (way->IsValid()) {
+        CalculateWayShieldLabels(*styleConfig,
+                                 projection,
+                                 parameter,
+                                 *way);
       }
-
-      CalculateWayShieldLabels(*styleConfig,
-                               projection,
-                               parameter,
-                               *way);
     }
   }
 
@@ -1907,7 +1910,7 @@ constexpr bool debugGroundTiles = false;
                                                     projection.ConvertWidthToPixel(parameter.GetSidecarMinDistanceMM())));
 
     std::map<FileOffset,WayRoutes> wayDataMap;
-    for (WayPathDataIt it=wayPathData.begin(); it != wayPathData.end(); ++it){
+    for (auto it=wayPathData.begin(); it != wayPathData.end(); ++it){
       auto &wayRoute=wayDataMap[it->ref];
       wayRoute.wayData=it;
       wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+sidecarOffset;
@@ -2184,7 +2187,8 @@ constexpr bool debugGroundTiles = false;
   {
     if (parameter.IsDebugPerformance()) {
       log.Info()
-        << "Data: " << data.nodes.size() << "+" << data.poiNodes.size() << " " << data.ways.size() << " " << data.areas.size();
+        << "Data: " << data.nodes.size() << "+" << data.poiNodes.size()
+        << " " << data.ways.size() << " " << data.areas.size();
     }
 
     if (parameter.GetWarningCoordCountLimit()>0 ||
@@ -2256,16 +2260,16 @@ constexpr bool debugGroundTiles = false;
   {
     switch (tile.type) {
       case GroundTile::land:
-        std::cout << "Drawing land tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        log.Info() << "Drawing land tile: " << tile.xRel << "," << tile.yRel;
         break;
       case GroundTile::water:
-        std::cout << "Drawing water tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        log.Info() << "Drawing water tile: " << tile.xRel << "," << tile.yRel;
         break;
       case GroundTile::coast:
-        std::cout << "Drawing coast tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        log.Info() << "Drawing coast tile: " << tile.xRel << "," << tile.yRel;
         break;
       case GroundTile::unknown:
-        std::cout << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel << std::endl;
+        log.Info() << "Drawing unknown tile: " << tile.xRel << "," << tile.yRel;
         break;
     }
   }
@@ -2333,25 +2337,25 @@ constexpr bool debugGroundTiles = false;
         continue;
       }
 
-      GeoCoord minCoord(tile.yAbs*tile.cellHeight - 90.0 - pixelAsDegree/2,
-                        tile.xAbs*tile.cellWidth - 180.0 - pixelAsDegree/2);
-      GeoCoord maxCoord(minCoord.GetLat() + tile.cellHeight + pixelAsDegree,
-                        minCoord.GetLon() + tile.cellWidth + pixelAsDegree);
+      const GeoCoord minCoord(tile.yAbs*tile.cellHeight - 90.0 - pixelAsDegree/2,
+                              tile.xAbs*tile.cellWidth - 180.0 - pixelAsDegree/2);
+      const GeoCoord maxCoord(minCoord.GetLat() + tile.cellHeight + pixelAsDegree,
+                              minCoord.GetLon() + tile.cellWidth + pixelAsDegree);
 
       groundTileData.boundingBox.Set(minCoord,maxCoord);
 
       // skip tiles that are completely outside projection
       if (!projection.GetDimensions().Intersects(groundTileData.boundingBox)){
         if constexpr (debugGroundTiles) {
-          std::cout << "Tile outside projection: " << tile.xRel << "," << tile.yRel
-                    << " " << groundTileData.boundingBox.GetDisplayText() << std::endl;
+          log.Info() << "Tile outside projection: " << tile.xRel << "," << tile.yRel
+                     << " " << groundTileData.boundingBox.GetDisplayText();
         }
         continue;
       }
 
       if (tile.coords.empty()) {
         if constexpr (debugGroundTiles) {
-          std::cout << " >= fill" << std::endl;
+          log.Info() << " >= fill";
         }
         CoordBufferRange range=TransformBoundingBox(groundTileData.boundingBox,
                                                     transBuffer,
@@ -2365,7 +2369,7 @@ constexpr bool debugGroundTiles = false;
       }
       else {
         if constexpr (debugGroundTiles) {
-          std::cout << " >= sub" << std::endl;
+          log.Info() << " >= sub";
         }
         coords.resize(tile.coords.size());
 
@@ -2373,8 +2377,10 @@ constexpr bool debugGroundTiles = false;
           double lat;
           double lon;
 
-          lat=groundTileData.boundingBox.GetMinCoord().GetLat() + double(tile.coords[i].y) / double(GroundTile::Coord::CELL_MAX) * (tile.cellHeight+pixelAsDegree);
-          lon=groundTileData.boundingBox.GetMinCoord().GetLon() + double(tile.coords[i].x) / double(GroundTile::Coord::CELL_MAX) * (tile.cellWidth+pixelAsDegree);
+          lat=groundTileData.boundingBox.GetMinCoord().GetLat() +
+            double(tile.coords[i].y) / double(GroundTile::Coord::CELL_MAX) * (tile.cellHeight+pixelAsDegree);
+          lon=groundTileData.boundingBox.GetMinCoord().GetLon() +
+            double(tile.coords[i].x) / double(GroundTile::Coord::CELL_MAX) * (tile.cellWidth+pixelAsDegree);
 
           coords[i]=GeoCoord(lat,lon);
         }
@@ -2389,20 +2395,20 @@ constexpr bool debugGroundTiles = false;
           double x,y;
 
           if (tile.coords[i].x==0) {
-            x=floor(transBuffer.points[i].x);
+            x=::floor(transBuffer.points[i].x);
           }
           else if (tile.coords[i].x==GroundTile::Coord::CELL_MAX) {
-            x=ceil(transBuffer.points[i].x);
+            x=::ceil(transBuffer.points[i].x);
           }
           else {
             x=transBuffer.points[i].x;
           }
 
           if (tile.coords[i].y==0) {
-            y=ceil(transBuffer.points[i].y);
+            y=::ceil(transBuffer.points[i].y);
           }
           else if (tile.coords[i].y==GroundTile::Coord::CELL_MAX) {
-            y=floor(transBuffer.points[i].y);
+            y=::floor(transBuffer.points[i].y);
           }
           else {
             y=transBuffer.points[i].y;
@@ -2425,7 +2431,7 @@ constexpr bool debugGroundTiles = false;
           while (lineStart<tile.coords.size()) {
             while (lineStart<tile.coords.size() &&
                    !tile.coords[lineStart].coast) {
-              lineStart++;
+              ++lineStart;
             }
 
             if (lineStart>=tile.coords.size()) {
@@ -2436,7 +2442,7 @@ constexpr bool debugGroundTiles = false;
 
             while (lineEnd<tile.coords.size() &&
                    tile.coords[lineEnd].coast) {
-              lineEnd++;
+              ++lineEnd;
             }
 
             if (lineStart!=lineEnd) {
@@ -2480,11 +2486,10 @@ constexpr bool debugGroundTiles = false;
         double lon = (x * tile.cellWidth + tile.cellWidth / 2) - 180.0;
         double lat = (y * tile.cellHeight + tile.cellHeight / 2) - 90.0;
 
-        double px;
-        double py;
+        Vertex2D pixel;
 
         projection.GeoToPixel(GeoCoord(lat, lon),
-                              px, py);
+                              pixel);
 
         if (drawnLabels.find(GeoCoord(x, y)) != drawnLabels.end()) {
           continue;
@@ -2493,7 +2498,7 @@ constexpr bool debugGroundTiles = false;
         LabelData labelBox;
 
         labelBox.priority = 0;
-        labelBox.alpha = debugLabel->GetAlpha();;
+        labelBox.alpha = debugLabel->GetAlpha();
         labelBox.fontSize = debugLabel->GetSize();
         labelBox.style = debugLabel;
         labelBox.text = label;
@@ -2503,7 +2508,7 @@ constexpr bool debugGroundTiles = false;
         RegisterRegularLabel(projection,
                              parameter,
                              vect,
-                             Vertex2D(px, py),
+                             pixel,
                              /*proposedWidth*/ -1);
 
         drawnLabels.insert(GeoCoord(x, y));
@@ -2597,7 +2602,7 @@ constexpr bool debugGroundTiles = false;
                             projection,
                             parameter,
                             way)) {
-        drawnCount++;
+        ++drawnCount;
       }
     }
 
@@ -2627,7 +2632,7 @@ constexpr bool debugGroundTiles = false;
                               projection,
                               parameter,
                               way)) {
-        drawnCount++;
+        ++drawnCount;
       }
     }
 
@@ -2657,7 +2662,7 @@ constexpr bool debugGroundTiles = false;
                        parameter,
                        area);
 
-      drawnCount++;
+      ++drawnCount;
     }
 
     timer.Stop();
@@ -2684,7 +2689,7 @@ constexpr bool debugGroundTiles = false;
                               projection,
                               parameter,
                               area)) {
-        drawnCount++;
+        ++drawnCount;
       }
     }
 
@@ -2712,7 +2717,7 @@ constexpr bool debugGroundTiles = false;
                                projection,
                                parameter,
                                area)) {
-        drawnCount++;
+        ++drawnCount;
       }
     }
 
@@ -2768,7 +2773,7 @@ constexpr bool debugGroundTiles = false;
                                 *(routeLabel.wayData),
                                 labelEntry.first,
                                 labels.str())) {
-          drawnCount++;
+          ++drawnCount;
         }
       }
     }
@@ -2781,23 +2786,23 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
-  double RoundDown(double value) {
+  static double RoundDown(double value) {
     if (value>=0.0) {
-      return floor(value);
+      return ::floor(value);
     }
 
-    return ceil(value);
+    return ::ceil(value);
   }
 
-  double RoundUp(double value) {
+  static double RoundUp(double value) {
     if (value>=0.0) {
-      return ceil(value);
+      return ::ceil(value);
     }
 
-    return floor(value);
+    return ::floor(value);
   }
 
-  bool CrossesElevationLine(int32_t ele, int32_t height1, int32_t height2)
+  [[nodiscard]] static bool CrossesElevationLine(int32_t ele, int32_t height1, int32_t height2)
   {
     return (height1>=ele && height2 <ele) || (height1<ele && height2>=ele);
   }
@@ -2837,7 +2842,8 @@ constexpr bool debugGroundTiles = false;
         log.Warn() << "Contour lines activated but no line style for type 'srtm_tile' found";
       }
 
-      log.Info() << "Processing height map " << data.srtmTile->boundingBox.GetDisplayText() << " " << data.srtmTile->columns << "x" << data.srtmTile->rows;
+      log.Info() << "Processing height map " << data.srtmTile->boundingBox.GetDisplayText()
+                 << " " << data.srtmTile->columns << "x" << data.srtmTile->rows;
 
       int32_t minHeight=std::numeric_limits<int32_t>::max();
       int32_t maxHeight=std::numeric_limits<int32_t>::min();
@@ -2858,7 +2864,8 @@ constexpr bool debugGroundTiles = false;
       int32_t maxElevation=((maxHeight+elevationSteps)/elevationSteps)*elevationSteps;
       GeoBox  boundingBox=projection.GetDimensions();
 
-      log.Info() << "Elevation range: " << minHeight << " => " << maxHeight << " | " << minElevation << " => " << maxElevation;
+      log.Info() << "Elevation range: " << minHeight << " => " << maxHeight
+                 << " | " << minElevation << " => " << maxElevation;
 
       for (int32_t ele=minElevation; ele<=maxElevation; ele+=elevationSteps) {
         log.Info() << "### Ele " << ele;
@@ -2866,9 +2873,9 @@ constexpr bool debugGroundTiles = false;
           for (size_t x=0; x<data.srtmTile->columns; x++) {
             int32_t height=data.srtmTile->GetHeight(x,y);
             GeoBox box=GeoBox(GeoCoord(data.srtmTile->boundingBox.GetMinLat()+(1-double(y)/data.srtmTile->rows),
-                                          data.srtmTile->boundingBox.GetMinLon()+double(x)/data.srtmTile->columns),
+                                       data.srtmTile->boundingBox.GetMinLon()+double(x)/data.srtmTile->columns),
                               GeoCoord(data.srtmTile->boundingBox.GetMinLat()+(1-double(y+1)/data.srtmTile->rows),
-                                              data.srtmTile->boundingBox.GetMinLon()+double(x+1)/data.srtmTile->columns));
+                                       data.srtmTile->boundingBox.GetMinLon()+double(x+1)/data.srtmTile->columns));
 
             if (!boundingBox.Intersects(box)) {
               continue;
@@ -2878,7 +2885,9 @@ constexpr bool debugGroundTiles = false;
               // left
               int32_t otherHeight=data.srtmTile->GetHeight(x-1,y);
               if (CrossesElevationLine(ele,height,otherHeight)) {
-                log.Info() << "Left " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+                log.Info() << "Left " << x << "," << y
+                           << " " << box.GetDisplayText()
+                           << " " << std::abs(otherHeight-height);
 
                 FeatureValueBuffer     buffer;
                 WayData                wd;
@@ -2914,7 +2923,9 @@ constexpr bool debugGroundTiles = false;
               // right
               int32_t otherHeight=data.srtmTile->GetHeight(x+1,y);
               if (CrossesElevationLine(ele,height,otherHeight)) {
-                log.Info() << "Right " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+                log.Info() << "Right " << x << "," << y
+                           << " " << box.GetDisplayText()
+                           << " " << std::abs(otherHeight-height);
 
                 FeatureValueBuffer     buffer;
                 WayData                wd;
@@ -2950,7 +2961,9 @@ constexpr bool debugGroundTiles = false;
               // top
               int32_t otherHeight=data.srtmTile->GetHeight(x,y-1);
               if (CrossesElevationLine(ele,height,otherHeight)) {
-                log.Info() << "Top " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+                log.Info() << "Top " << x << "," << y
+                           << " " << box.GetDisplayText()
+                           << " " << std::abs(otherHeight-height);
 
                 FeatureValueBuffer     buffer;
                 WayData                wd;
@@ -2987,7 +3000,9 @@ constexpr bool debugGroundTiles = false;
               // bottom
               int32_t otherHeight=data.srtmTile->GetHeight(x,y+1);
               if (CrossesElevationLine(ele,height,otherHeight)) {
-                log.Info() << "Bottom " << x << "," << y << " " << box.GetDisplayText() << " " << std::abs(otherHeight-height);
+                log.Info() << "Bottom " << x << "," << y << " "
+                  << box.GetDisplayText()
+                  << " " << std::abs(otherHeight-height);
 
                 FeatureValueBuffer     buffer;
                 WayData                wd;
@@ -3184,16 +3199,17 @@ constexpr bool debugGroundTiles = false;
 
             if (!textStyles.empty() && data.srtmTile) {
               GeoCoord center=tileData.boundingBox.GetCenter();
-              double   xPos,yPos;
+              Vertex2D screenPos;
 
-              projection.GeoToPixel(center,xPos,yPos);
+              projection.GeoToPixel(center,
+                                    screenPos);
 
               double  latitude =center.GetLat();
               double  longitude=center.GetLon();
-              double  fracLat  =latitude>=0.0 ? 1-latitude+floor(latitude) : ceil(latitude)-latitude;
-              double  fracLon  =longitude>=0.0 ? longitude-floor(longitude) : 1-ceil(longitude)+longitude;
-              int     col      =int(floor(fracLon*data.srtmTile->columns));
-              int     row      =int(floor(fracLat*data.srtmTile->rows));
+              double  fracLat  =latitude>=0.0 ? 1-latitude+::floor(latitude) : ::ceil(latitude)-latitude;
+              double  fracLon  =longitude>=0.0 ? longitude-::floor(longitude) : 1-::ceil(longitude)+longitude;
+              int     col      =int(::floor(fracLon*data.srtmTile->columns));
+              int     row      =int(::floor(fracLat*data.srtmTile->rows));
               int32_t height   =data.srtmTile->GetHeight(col,
                                                          row);
 
@@ -3207,7 +3223,11 @@ constexpr bool debugGroundTiles = false;
 
               std::vector<LabelData> vect;
               vect.push_back(labelBox);
-              RegisterRegularLabel(projection, parameter, vect, Vertex2D(xPos,yPos), /*proposedWidth*/ -1);
+              RegisterRegularLabel(projection,
+                                   parameter,
+                                   vect,
+                                   screenPos,
+                                   /*proposedWidth*/ -1);
             }
 
             // chess pattern

@@ -713,7 +713,7 @@ namespace osmscout
   }
 
   void MapPainterDirectX::DrawIcon(const IconStyle* style,
-                                   double x, double y,
+                                   const Vertex2D& centerPos,
                                    double width, double height)
   {
     size_t idx = style->GetIconId() - 1;
@@ -722,14 +722,16 @@ namespace osmscout
 
     FLOAT dx = (FLOAT)width / 2.0f;
     FLOAT dy = (FLOAT)height / 2.0f;
-    m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], RECTF(x - dx, y - dy, x + dx, y + dy));
+    m_pRenderTarget->DrawBitmap(m_Bitmaps[idx], RECTF(centerPos.GetX() - dx,
+                                                      centerPos.GetY() - dy,
+                                                      centerPos.GetX() + dx,
+                                                      centerPos.GetY() + dy));
   }
 
   void MapPainterDirectX::DrawSymbol(const Projection& projection,
                                      const MapParameter& /*parameter*/,
                                      const Symbol& symbol,
-                                     double x,
-                                     double y,
+                                     const Vertex2D& screenPos,
                                      double /*scaleFactor*/)
   {
     ScreenBox boundingBox=symbol.GetBoundingBox(projection);
@@ -791,10 +793,10 @@ namespace osmscout
       else if (RectanglePrimitive* rectangle = dynamic_cast<RectanglePrimitive*>(primitive);
                rectangle != nullptr)
       {
-        D2D1_RECT_F rect = RECTF(x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX(),
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY(),
-                                 x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX() + projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                                 y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY() + projection.ConvertWidthToPixel(rectangle->GetHeight()));
+        D2D1_RECT_F rect = RECTF(screenPos.GetX() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX(),
+                                 screenPos.GetY() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY(),
+                                 screenPos.GetX() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX() + projection.ConvertWidthToPixel(rectangle->GetWidth()),
+                                 screenPos.GetY() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY() + projection.ConvertWidthToPixel(rectangle->GetHeight()));
         m_pRenderTarget->FillRectangle(rect, GetColorBrush(fillStyle->GetFillColor()));
         if (hasBorder) m_pRenderTarget->DrawRectangle(rect, GetColorBrush(borderStyle->GetColor()), borderWidth, GetStrokeStyle(borderStyle->GetDash()));
       }

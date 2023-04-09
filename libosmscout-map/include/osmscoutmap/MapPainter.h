@@ -55,8 +55,10 @@ namespace osmscout {
   enum RenderSteps : size_t
   {
     FirstStep             =  0,
-    Initialize            =  0, //!< Setup internal state of renderer for executing next steps with current projection and parameters
-    DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer parameter
+    Initialize            =  0, //!< Setup internal state of renderer for executing next steps with current projection
+                                //!< and parameters
+    DumpStatistics        =  1, //!< Prints details for debugging, if debug flag (performance, data) is set in renderer
+                                //!< parameter
     CalculatePaths        =  2, //!< Calculate the paths to draw based on the given ways
     CalculateWayShields   =  3, //!< Calculate the label shields on the ways
     ProcessAreas          =  4, //!< Process (complex) areas for rendering
@@ -116,8 +118,9 @@ namespace osmscout {
     /**
      * Data structure for holding temporary data about ways
      */
-    struct OSMSCOUT_MAP_API WayData
+    class OSMSCOUT_MAP_API WayData
     {
+    public:
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       int8_t                   layer;           //!< Layer this way is in
       LineStyleRef             lineStyle;       //!< Line style
@@ -125,8 +128,10 @@ namespace osmscout {
       size_t                   wayPriority;     //!< Priority of way (from style sheet)
       CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
       double                   lineWidth;       //!< Line width
-      bool                     startIsClosed;   //!< The end of the way is closed, it does not lead to another way or area
-      bool                     endIsClosed;     //!< The end of the way is closed, it does not lead to another way or area
+      bool                     startIsClosed;   //!< The end of the way is closed, it does not lead to another
+                                                //!< way or area
+      bool                     endIsClosed;     //!< The end of the way is closed, it does not lead to another
+                                                //!< way or area
 
       /**
        * We then draw lines in order of layer (Smaller layers first)
@@ -179,7 +184,8 @@ namespace osmscout {
     {
       ObjectFileRef               ref;
       TypeInfoRef                 type;
-      const FeatureValueBuffer    *buffer;         //!< Features of the line segment, can be NULL in case of border only areas
+      const FeatureValueBuffer    *buffer;         //!< Features of the line segment, can be NULL in case of border
+                                                   //!< only areas
       FillStyleRef                fillStyle;       //!< Fill style
       BorderStyleRef              borderStyle;     //!< Border style
       GeoBox                      boundingBox;     //!< Bounding box of the area
@@ -213,7 +219,8 @@ namespace osmscout {
      Internal coordinate transformation data structures
    */
     //@{
-    TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo coordinates to display coordinates
+    TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo
+                                                    //!< coordinates to display coordinates
     CoordBuffer                  coordBuffer;       //!< Coordinate buffer
     //@}
 
@@ -348,7 +355,7 @@ namespace osmscout {
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const PathShieldStyleRef& style,
-                               const std::string& text,
+                               const std::string_view& text,
                                const std::vector<Point>& nodes);
 
     void LayoutPointLabels(const Projection& projection,
@@ -356,7 +363,7 @@ namespace osmscout {
                            const FeatureValueBuffer& buffer,
                            const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
-                           double x, double y,
+                           const Vertex2D& screenPos,
                            double objectWidth=0,
                            double objectHeight=0);
 
@@ -379,7 +386,7 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const WayPathData& data,
                              const PathTextStyleRef &pathTextStyle,
-                             const std::string &textLabel);
+                             const std::string_view &textLabel);
 
     bool DrawAreaBorderLabel(const StyleConfig& styleConfig,
                              const Projection& projection,
@@ -611,7 +618,7 @@ namespace osmscout {
       Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
      */
     virtual void DrawIcon(const IconStyle* style,
-                          double centerX, double centerY,
+                          const Vertex2D& centerPos,
                           double width, double height) = 0;
 
     /**
@@ -620,7 +627,7 @@ namespace osmscout {
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,
                             const Symbol& symbol,
-                            double x, double y,
+                            const Vertex2D& screenPos,
                             double scaleFactor=1.0) = 0;
 
     /**
@@ -669,7 +676,7 @@ namespace osmscout {
 
     //@}
 
-    std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue&) const;
+    std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue& feature) const;
 
   public:
     explicit MapPainter(const StyleConfigRef& styleConfig);
@@ -708,21 +715,22 @@ namespace osmscout {
      * @param parameter
      * @return false on error, true otherwise
      */
-    bool batchPaintInternal(const Projection& projection,
+    bool BatchPaintInternal(const Projection& projection,
                             const MapParameter& parameter)
     {
       bool success=true;
-      for (size_t step=osmscout::RenderSteps::FirstStep;
-           step<=osmscout::RenderSteps::LastStep;
-           step++){
+      for (auto step=static_cast<size_t>(osmscout::RenderSteps::FirstStep);
+           step<=static_cast<size_t>(osmscout::RenderSteps::LastStep);
+           ++step){
 
-        for (size_t i=0;i<data.size(); i++){
+        for (size_t i=0;i<data.size(); ++i){
           const MapData &d=*(data[i]);
+          auto renderStep=static_cast<RenderSteps>(step);
           if (!painters[i]->Draw(projection,
                                  parameter,
                                  d,
-                                 (RenderSteps) step,
-                                 (RenderSteps) step)) {
+                                 renderStep,
+                                 renderStep)) {
             success=false;
           }
         }
@@ -739,7 +747,7 @@ namespace osmscout {
 
     virtual ~MapPainterBatch() = default;
 
-    void addData(const MapDataRef &d, PainterType &painter)
+    void AddData(const MapDataRef &d, PainterType &painter)
     {
       data.push_back(d);
       painters.push_back(painter);

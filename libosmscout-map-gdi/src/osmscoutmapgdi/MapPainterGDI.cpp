@@ -639,7 +639,7 @@ namespace osmscout {
   void MapPainterGDI::DrawSymbol(const Projection &projection,
                                  const MapParameter & /*parameter*/,
                                  const Symbol &symbol,
-                                 double x, double y,
+                                 const Vertex2D& screenPos,
                                  double /*scaleFactor*/) {
     Gdiplus::Pen *pPen;
 
@@ -660,8 +660,8 @@ namespace osmscout {
         pRender->pointBuffer.ResetAndReserve(polygon->GetCoords().size());
 
         for (const auto &pixel: polygon->GetCoords()) {
-          pRender->pointBuffer.AddPoint(x + projection.ConvertWidthToPixel(pixel.GetX()) - center.GetX(),
-                                        y + projection.ConvertWidthToPixel(pixel.GetY()) - center.GetY());
+          pRender->pointBuffer.AddPoint(screenPos.GetX() + projection.ConvertWidthToPixel(pixel.GetX()) - center.GetX(),
+                                        screenPos.GetY() + projection.ConvertWidthToPixel(pixel.GetY()) - center.GetY());
         }
 
         if (polygon->GetFillStyle()) {
@@ -680,8 +680,8 @@ namespace osmscout {
       } else if (rectangle != nullptr) {
         pPen = (rectangle->GetBorderStyle()) ? pRender->GetPen(rectangle->GetBorderStyle()) : nullptr;
         Gdiplus::RectF rect(
-          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX()),
-          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY()),
+          (Gdiplus::REAL) (screenPos.GetX() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX()) - center.GetX()),
+          (Gdiplus::REAL) (screenPos.GetY() + projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY()) - center.GetY()),
           (Gdiplus::REAL) (projection.ConvertWidthToPixel(rectangle->GetWidth())),
           (Gdiplus::REAL) (projection.ConvertWidthToPixel(rectangle->GetHeight()))
         );
@@ -698,9 +698,9 @@ namespace osmscout {
       } else if (circle != nullptr) {
         pPen = (circle->GetBorderStyle()) ? pRender->GetPen(circle->GetBorderStyle()) : nullptr;
         Gdiplus::RectF rect(
-          (Gdiplus::REAL) (x + projection.ConvertWidthToPixel(circle->GetCenter().GetX()) - center.GetX() -
+          (Gdiplus::REAL) (screenPos.GetX() + projection.ConvertWidthToPixel(circle->GetCenter().GetX()) - center.GetX() -
                            2 * projection.ConvertWidthToPixel(circle->GetRadius())),
-          (Gdiplus::REAL) (y + projection.ConvertWidthToPixel(circle->GetCenter().GetY()) - center.GetY() -
+          (Gdiplus::REAL) (screenPos.GetY() + projection.ConvertWidthToPixel(circle->GetCenter().GetY()) - center.GetY() -
                            2 * projection.ConvertWidthToPixel(circle->GetRadius())),
           (Gdiplus::REAL) (2 * projection.ConvertWidthToPixel(circle->GetRadius())),
           (Gdiplus::REAL) (2 * projection.ConvertWidthToPixel(circle->GetRadius()))
@@ -720,13 +720,16 @@ namespace osmscout {
   }
 
   void MapPainterGDI::DrawIcon(const IconStyle *style,
-                               double x, double y,
+                               const Vertex2D& centerPos,
                                double width, double height) {
     RENDEROBJECT(pRender);
     Gdiplus::Image *pImage = pRender->GetIcon(style->GetIconId());
 
     if (pImage != nullptr) {
-      pRender->m_pGraphics->DrawImage(pImage, (INT) (x - width / 2.0), (INT) (y - height / 2.0), (INT) width,
+      pRender->m_pGraphics->DrawImage(pImage,
+                                      (INT) (centerPos.GetX() - width / 2.0),
+                                      (INT) (centerPos.GetY() - height / 2.0),
+                                      (INT) width,
                                       (INT) height);
     }
   }

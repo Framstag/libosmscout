@@ -224,15 +224,12 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
   std::map<osmscout::FileOffset,osmscout::AdminRegionRef> regionMap;
   DBInstanceRef db;
 
-  double x;
-  double y;
-  double x2;
-  double y2;
-
   //std::cout << "nodes: " << d.nodes.size() << std::endl;
   for (auto const &n:mapData.nodes){
-    projection.GeoToPixel(n->GetCoords(),x,y);
-    if (filterRectangle.contains(x,y)){
+    osmscout::Vertex2D screenPos;
+    projection.GeoToPixel(n->GetCoords(),
+                          screenPos);
+    if (filterRectangle.contains(screenPos.GetX(),screenPos.GetY())){
       addObjectInfo(objectList, n, reverseLookupMap, db, regionMap);
     }
   }
@@ -241,9 +238,14 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
   for (auto const &w:mapData.ways){
     // TODO: better detection
     osmscout::GeoBox bbox=w->GetBoundingBox();
-    projection.GeoToPixel(bbox.GetMinCoord(),x,y);
-    projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
-    if (filterRectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
+    osmscout::Vertex2D minScreenPos;
+    osmscout::Vertex2D maxScreenPos;
+    projection.GeoToPixel(bbox.GetMinCoord(),
+                          minScreenPos);
+    projection.GeoToPixel(bbox.GetMaxCoord(),
+                          maxScreenPos);
+    if (filterRectangle.intersects(QRectF(QPointF(minScreenPos.GetX(),minScreenPos.GetY()),
+                                          QPointF(maxScreenPos.GetX(),maxScreenPos.GetY())))){
       addObjectInfo(objectList, w, reverseLookupMap, db, regionMap);
     }
   }
@@ -252,9 +254,14 @@ void LookupModule::filterObjectInView(const osmscout::MapData &mapData,
   for (auto const &a:mapData.areas){
     // TODO: better detection
     osmscout::GeoBox bbox=a->GetBoundingBox();
-    projection.GeoToPixel(bbox.GetMinCoord(),x,y);
-    projection.GeoToPixel(bbox.GetMaxCoord(),x2,y2);
-    if (filterRectangle.intersects(QRectF(QPointF(x,y),QPointF(x2,y2)))){
+    osmscout::Vertex2D minScreenPos;
+    osmscout::Vertex2D maxScreenPos;
+    projection.GeoToPixel(bbox.GetMinCoord(),
+                          minScreenPos);
+    projection.GeoToPixel(bbox.GetMaxCoord(),
+                          maxScreenPos);
+    if (filterRectangle.intersects(QRectF(QPointF(minScreenPos.GetX(),minScreenPos.GetY()),
+                                          QPointF(maxScreenPos.GetY(),maxScreenPos.GetY())))){
       addObjectInfo(objectList, a, reverseLookupMap, db, regionMap);
     }
   }

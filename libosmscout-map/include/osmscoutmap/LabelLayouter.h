@@ -667,14 +667,14 @@ constexpr bool debugLabelLayouter = false;
             p->DrawSymbol(projection,
                           parameter,
                           *(el.labelData.iconStyle->GetSymbol()),
-                          el.x + el.labelData.iconWidth/2,
-                          el.y + el.labelData.iconHeight/2,
+                          Vertex2D(el.x + el.labelData.iconWidth/2,
+                                   el.y + el.labelData.iconHeight/2),
                           1.0);
 
           } else if (el.labelData.type==LabelData::Icon){
             p->DrawIcon(el.labelData.iconStyle.get(),
-                        el.x + el.labelData.iconWidth/2,
-                        el.y + el.labelData.iconHeight/2,
+                        Vertex2D(el.x + el.labelData.iconWidth/2,
+                                 el.y + el.labelData.iconHeight/2),
                         el.labelData.iconWidth,
                         el.labelData.iconHeight);
 
