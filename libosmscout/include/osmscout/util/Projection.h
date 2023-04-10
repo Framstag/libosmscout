@@ -151,7 +151,7 @@ namespace osmscout {
         else {
           Vertex2D pixel;
           projection.GeoToPixel(coord.GetCoord(),
-                                x,y);
+                                pixel);
           x=pixel.GetX();
           y=pixel.GetY();
         }
