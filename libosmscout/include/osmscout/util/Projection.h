@@ -151,7 +151,7 @@ namespace osmscout {
         else {
           Vertex2D pixel;
           projection.GeoToPixel(coord.GetCoord(),
-                                x,y);
+                                pixel);
           x=pixel.GetX();
           y=pixel.GetY();
         }
@@ -169,10 +169,13 @@ namespace osmscout {
 #ifdef OSMSCOUT_HAVE_SSE2
         if (count!=0) {
           count=0;
+          Vertex2D pixel;
           projection.GeoToPixel(GeoCoord(lat[0],
                                          lon[0]),
-                                *xPointer[0],
-                                *yPointer[0]);
+                                pixel);
+
+          *xPointer[0]=pixel.GetX();
+          *yPointer[0]=pixel.GetY();
         }
 #endif
       }
