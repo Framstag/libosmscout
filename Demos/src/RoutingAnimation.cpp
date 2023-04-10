@@ -107,10 +107,11 @@ void drawDot(QPainter &painter,
              const osmscout::MercatorProjection &projection,
              const osmscout::GeoCoord &coord){
 
-  double x,y;
-  projection.GeoToPixel(coord,x,y);
+  osmscout::Vertex2D pos;
+  projection.GeoToPixel(coord,
+                        pos);
   painter.setPen(Qt::NoPen);
-  painter.drawEllipse(x,y,10,10);
+  painter.drawEllipse(pos.GetX(),pos.GetY(),10,10);
 }
 
 class RoutingServiceAnimation: public osmscout::SimpleRoutingService{
@@ -167,8 +168,6 @@ public:
     }
     stepCounter++;
 
-    double x1,y1;
-    double x2,y2;
     osmscout::RouteNodeRef n1;
     osmscout::RouteNodeRef n2;
 
@@ -208,10 +207,16 @@ public:
         pen.setColor(red);
       }
 
-      projection.GeoToPixel(n1->GetCoord(),x1,y1);
-      projection.GeoToPixel(n2->GetCoord(),x2,y2);
+      osmscout::Vertex2D pos1;
+      osmscout::Vertex2D pos2;
+
+      projection.GeoToPixel(n1->GetCoord(),
+                            pos1);
+      projection.GeoToPixel(n2->GetCoord(),
+                            pos2);
       painter.setPen(pen);
-      painter.drawLine(x1,y1,x2,y2);
+      painter.drawLine(pos1.GetX(),pos1.GetY(),
+                       pos2.GetX(),pos2.GetY());
     }
 
     // draw nodes in open list
@@ -224,10 +229,16 @@ public:
         if (!GetRouteNode(open->prev,n1)){
           return false;
         }
-        projection.GeoToPixel(n1->GetCoord(),x1,y1);
-        projection.GeoToPixel(open->node->GetCoord(),x2,y2);
+        osmscout::Vertex2D pos1;
+        osmscout::Vertex2D pos2;
+
+        projection.GeoToPixel(n1->GetCoord(),
+                              pos1);
+        projection.GeoToPixel(open->node->GetCoord(),
+                              pos2);
         painter.setPen(pen);
-        painter.drawLine(x1,y1,x2,y2);
+        painter.drawLine(pos1.GetX(),pos1.GetY(),
+                         pos2.GetX(),pos2.GetY());
       }
     }
 
@@ -239,10 +250,17 @@ public:
       if (!GetRouteNode(current->prev,n1)){
         return false;
       }
-      projection.GeoToPixel(n1->GetCoord(),x1,y1);
-      projection.GeoToPixel(current->node->GetCoord(),x2,y2);
+
+      osmscout::Vertex2D pos1;
+      osmscout::Vertex2D pos2;
+
+      projection.GeoToPixel(n1->GetCoord(),
+                            pos1);
+      projection.GeoToPixel(current->node->GetCoord(),
+                            pos2);
       painter.setPen(pen);
-      painter.drawLine(x1,y1,x2,y2);
+      painter.drawLine(pos1.GetX(),pos1.GetY(),
+                       pos2.GetX(),pos2.GetY());
     }
 
     painter.end();

@@ -174,11 +174,11 @@ namespace osmscout {
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,
-                    double x, double y,
+                    const Vertex2D& screenPos,
                     double scaleFactor) override;
 
     void DrawIcon(const IconStyle* style,
-                  double centerX, double centerY,
+                  const Vertex2D& centerPos,
                   double width, double height) override;
 
     void DrawPath(const Projection& projection,

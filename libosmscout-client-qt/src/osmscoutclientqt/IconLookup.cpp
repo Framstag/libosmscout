@@ -71,22 +71,29 @@ void IconLookup::lookupIcons(const QString &databasePath,
                      const TypeInfoRef& type,
                      const FeatureValueBuffer& featureBuffer) {
     if (iconStyle && iconStyle->IsVisible() && !iconStyle->IsOverlay()) {
-      double x, y;
-      projection.GeoToPixel(coord, x, y);
+      osmscout::Vertex2D screenPos;
+      projection.GeoToPixel(coord,
+                            screenPos);
       QRectF iconRect;
 
       if (!iconStyle->GetIconName().empty()) {
-        iconRect=QRectF(x - iconSize/2, y-iconSize/2, iconSize, iconSize);
+        iconRect=QRectF(screenPos.GetX() - iconSize/2,
+                        screenPos.GetY()-iconSize/2,
+                        iconSize,
+                        iconSize);
       } else {
         auto symbol=iconStyle->GetSymbol();
         assert(symbol);
         double w=symbol->GetWidth(projection);
         double h=symbol->GetHeight(projection);
-        iconRect=QRectF(x - w/2, y-h/2, w, h);
+        iconRect=QRectF(screenPos.GetX() - w/2,
+                        screenPos.GetY()-h/2,
+                        w,
+                        h);
       }
       if (iconRect.intersects(tapRectangle)) {
         double distanceSquare=iconRect.contains(lookupCoord) ? 0 :
-          std::pow(lookupCoord.x()-x,2)+std::pow(lookupCoord.y()-y,2);
+          std::pow(lookupCoord.x()-screenPos.GetX(),2)+std::pow(lookupCoord.y()-screenPos.GetY(),2);
 
         QString name;
         QString altName;
@@ -119,7 +126,8 @@ void IconLookup::lookupIcons(const QString &databasePath,
           website=QString::fromStdString(websiteValue->GetWebsite());
         }
 
-        findIcons.push_back(MapIcon{QPoint(x,y), iconRect, coord, distanceSquare, iconStyle,
+        findIcons.push_back(MapIcon{QPoint(screenPos.GetX(),screenPos.GetY()),
+                                    iconRect, coord, distanceSquare, iconStyle,
                                     databasePath, objectRef, poiId, QString::fromStdString(type->GetName()),
                                     name, altName, ref, operatorName, phone, website, QImage()});
       }

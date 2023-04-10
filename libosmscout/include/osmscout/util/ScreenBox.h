@@ -52,33 +52,38 @@ namespace osmscout {
     ScreenBox(const ScreenBox& other) = default;
 
     /**
-     * Assign the value of other
-     */
-    ScreenBox& operator=(const ScreenBox& other) = default;
-
-    /**
      * Initialize the GeoBox based on the given coordinates. The two Coordinates
      * together span a rectangular (in coordinates, not on the sphere) area.
      */
     ScreenBox(const Vertex2D& coordA,
               const Vertex2D& coordB);
 
-    double GetMinX() const
+    /**
+     * Assign the value of other
+     */
+    ScreenBox& operator=(const ScreenBox& other) = default;
+
+    /**
+     * Compare two values
+     */
+    bool operator==(const ScreenBox& other) const;
+
+    [[nodiscard]] double GetMinX() const
     {
       return minCoord.GetX();
     }
 
-    double GetMinY() const
+    [[nodiscard]] double GetMinY() const
     {
       return minCoord.GetY();
     }
 
-    double GetMaxX() const
+    [[nodiscard]] double GetMaxX() const
     {
       return maxCoord.GetX();
     }
 
-    double GetMaxY() const
+    [[nodiscard]] double GetMaxY() const
     {
       return maxCoord.GetY();
     }
@@ -86,7 +91,7 @@ namespace osmscout {
     /**
      * Returns the width of the bounding box (maxLon-minLon).
      */
-    double GetWidth() const
+    [[nodiscard]] double GetWidth() const
     {
       return maxCoord.GetX()-minCoord.GetX();
     }
@@ -94,7 +99,7 @@ namespace osmscout {
     /**
      * Returns the height of the bounding box (maxLat-minLat).
      */
-    double GetHeight() const
+    [[nodiscard]] double GetHeight() const
     {
       return maxCoord.GetY()-minCoord.GetY();
     }
@@ -103,13 +108,29 @@ namespace osmscout {
      * Returns the center coordinates of the box
      * @return the center coordinates
      */
-    Vertex2D GetCenter() const
+    [[nodiscard]] Vertex2D GetCenter() const
     {
       return {(minCoord.GetX()+maxCoord.GetX())/2,
               (minCoord.GetY()+maxCoord.GetY())/2};
     }
 
-    ScreenBox Merge(const ScreenBox& other) const;
+    [[nodiscard]] bool Intersects(const ScreenBox& other) const;
+    [[nodiscard]] bool Intersects(const ScreenBox& other,
+                                  bool openInterval) const;
+
+    /**
+     * Resize the rectangle in all dimension using the given amount.
+     * If pixel is >=0 the resulting area will be bigger, else smaller.
+     *
+     * It is checked that pixel>=width/2 and pixel >=height/2
+     *
+     * The size delta will be 2*pixel in width and in height!
+     *
+     * @param offset the amount to change the coordinates.
+     * @return the resulting ScreenBox
+     */
+    [[nodiscard]] ScreenBox Resize(double offset) const;
+    [[nodiscard]] ScreenBox Merge(const ScreenBox& other) const;
   };
 }
 

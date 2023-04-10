@@ -164,17 +164,17 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
                          finalImgProjection.GetWidth(),
                          finalImgProjection.GetHeight());
 
-  double targetCenterX;
-  double targetCenterY;
+  osmscout::Vertex2D targetCenter;
 
   osmscout::GeoCoord srcImageCenterCoord;
   finalImgProjection.PixelToGeo(finalImgProjection.GetWidth()/2,
                                 finalImgProjection.GetHeight()/2,
                                 srcImageCenterCoord);
 
-  requestProjection.GeoToPixel(srcImageCenterCoord,targetCenterX,targetCenterY);
-  double targetTopLeftX=targetCenterX - finalImgProjection.GetWidth()*scale*0.5;
-  double targetTopLeftY=targetCenterY - finalImgProjection.GetHeight()*scale*0.5;
+  requestProjection.GeoToPixel(srcImageCenterCoord,
+                               targetCenter);
+  double targetTopLeftX=targetCenter.GetX() - finalImgProjection.GetWidth()*scale*0.5;
+  double targetTopLeftY=targetCenter.GetY() - finalImgProjection.GetHeight()*scale*0.5;
 
   QRectF targetRectangle(targetTopLeftX,
                          targetTopLeftY,
@@ -281,14 +281,14 @@ double PlaneMapRenderer::computeScale(const osmscout::MercatorProjection &previo
   currentProjection.PixelToGeo(currentProjection.GetWidth(),currentProjection.GetHeight(),
                                bottomRight);
 
-  double x1;
-  double y1;
-  previousProjection.GeoToPixel(topLeft,x1,y1);
-  double x2;
-  double y2;
-  previousProjection.GeoToPixel(bottomRight,x2,y2);
+  osmscout::Vertex2D pos1;
+  osmscout::Vertex2D pos2;
+  previousProjection.GeoToPixel(topLeft,
+                                pos1);
+  previousProjection.GeoToPixel(bottomRight,
+                                pos2);
 
-  double previousDiagonal=sqrt(pow(x2-x1,2) + pow(y2-y1,2));
+  double previousDiagonal=sqrt(pow(pos2.GetX()-pos1.GetX(),2) + pow(pos2.GetY()-pos1.GetY(),2));
   return currentDiagonal / previousDiagonal;
 }
 

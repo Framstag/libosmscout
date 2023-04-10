@@ -61,8 +61,9 @@ void IconAnimation::deactivateAll()
 void IconAnimation::paint(QPainter *painter, const MercatorProjection &projection)
 {
   for (Animation &animation: icons) {
-    double x,y;
-    projection.GeoToPixel(animation.icon.coord, x, y);
+    osmscout::Vertex2D screenPos;
+    projection.GeoToPixel(animation.icon.coord,
+                          screenPos);
     double w = animation.size;
     double h = animation.icon.image.height() * (w / animation.icon.image.width());
 
@@ -70,9 +71,9 @@ void IconAnimation::paint(QPainter *painter, const MercatorProjection &projectio
     double r = std::sqrt(std::pow(w, 2) + std::pow(h, 2)) / 2;
     painter->setPen(Qt::NoPen);
     painter->setBrush(QBrush(QColor::fromRgbF(0, 0, 0, 0.1)));
-    painter->drawEllipse(QPointF(x, y) ,r ,r);
+    painter->drawEllipse(QPointF(screenPos.GetX(), screenPos.GetY()) ,r ,r);
 
-    painter->drawImage(QRectF(x-w/2, y-h/2, w, h), animation.icon.image);
+    painter->drawImage(QRectF(screenPos.GetX()-w/2, screenPos.GetY()-h/2, w, h), animation.icon.image);
   }
 }
 

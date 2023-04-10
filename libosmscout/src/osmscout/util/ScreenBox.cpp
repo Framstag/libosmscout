@@ -31,6 +31,45 @@ namespace osmscout {
     // no code
   }
 
+  bool ScreenBox::operator==(const ScreenBox& other) const
+  {
+    return minCoord==other.minCoord &&
+           maxCoord == other.maxCoord;
+  }
+
+  bool ScreenBox::Intersects(const ScreenBox& other) const
+  {
+    return Intersects(other,true);
+  }
+
+  bool ScreenBox::Intersects(const ScreenBox& other,
+                             bool openInterval) const
+  {
+    if (openInterval) {
+      return !(other.GetMaxX()<minCoord.GetX() ||
+               other.GetMinX()>=maxCoord.GetX() ||
+               other.GetMaxY()<minCoord.GetY() ||
+               other.GetMinY()>=maxCoord.GetY());
+    }
+
+    return !(other.GetMaxX()<minCoord.GetX() ||
+             other.GetMinX()>maxCoord.GetX() ||
+             other.GetMaxY()<minCoord.GetY() ||
+             other.GetMinY()>maxCoord.GetY());
+  }
+
+  ScreenBox ScreenBox::Resize(double offset) const
+  {
+    // If the offset is negative its absolute value must not be > than width or height
+    assert(offset>-GetWidth());
+    assert(offset>-GetHeight());
+
+    return {Vertex2D(minCoord.GetX()-offset,
+                     minCoord.GetY()-offset),
+            Vertex2D(maxCoord.GetX()+offset,
+                     maxCoord.GetY()+offset)};
+  }
+
   ScreenBox ScreenBox::Merge(const ScreenBox& other) const
   {
     return {Vertex2D(std::min(minCoord.GetX(),other.minCoord.GetX()),

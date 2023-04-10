@@ -377,11 +377,11 @@ namespace osmscout {
             log.Debug() << "proposedWidth=" << proposedWidth << " for '" << text << "'";
         }
 
-        
+
         NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-        // replace hyphen by unicode NON-BREAKING HYPHEN  
+        // replace hyphen by unicode NON-BREAKING HYPHEN
         str = [str stringByReplacingOccurrencesOfString:@"-" withString:@"\u2011"];
-        
+
         Font *font = GetFont(projection, parameter, fontSize);
         NSMutableDictionary<NSAttributedStringKey, id> *attr = [NSMutableDictionary dictionaryWithDictionary: @{}];
         if(font){
@@ -414,9 +414,9 @@ namespace osmscout {
             }
             result->label.lineWidth = rect.size.width;
             result->label.lineHeight = GetFontHeight(projection, parameter, fontSize);
-            
+
             log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << rect.size.height;
-            
+
             result->text = text;
             result->fontSize = fontSize;
             result->width = rect.size.width;
@@ -657,7 +657,7 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, 0, 0, data.symbolScale);
+                    DrawSymbol(projection, parameter, symbol, Vertex2D::ZERO, data.symbolScale);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, data.symbolSpace, origin);
                 }
@@ -672,7 +672,7 @@ namespace osmscout {
      *          double width, double height)
      */
     void MapPainterIOS::DrawIcon(const IconStyle* style,
-                                 double x, double y,
+                                 const Vertex2D& centerPos,
                                  double /*width*/, double /*height*/){
         size_t idx=style->GetIconId()-1;
 
@@ -681,7 +681,9 @@ namespace osmscout {
 
         CGFloat w = CGImageGetWidth(images[idx]);
         CGFloat h = CGImageGetHeight(images[idx]);
-        CGRect rect = CGRectMake(x-w/2, -h/2-y, w, h);
+        CGRect rect = CGRectMake(centerPos.GetX()-w/2,
+                                 -h/2-centerPos.GetY(),
+                                 w, h);
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
         CGContextDrawImage(cg, rect, images[idx]);
@@ -697,7 +699,7 @@ namespace osmscout {
     void MapPainterIOS::DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
                     const Symbol& symbol,
-                    double x, double y,
+                    const Vertex2D& screenPos,
                     double scaleFactor){
         ScreenBox boundingBox=symbol.GetBoundingBox(projection);
         Vertex2D center=boundingBox.GetCenter();
@@ -733,11 +735,13 @@ namespace osmscout {
                      pixel!=polygon->GetCoords().end();
                      ++pixel) {
                     if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                                             y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
+                        CGContextMoveToPoint(cg,
+                                             screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                                             screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
                     } else {
-                        CGContextAddLineToPoint(cg,x+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                                                y+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
+                        CGContextAddLineToPoint(cg,
+                                                screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
+                                                screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
                     }
                 }
 
@@ -759,8 +763,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
-                                         y+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
+                CGRect rect = CGRectMake(screenPos.GetX()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
+                                         screenPos.GetY()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
                                          projection.ConvertWidthToPixel(rectangle->GetWidth()),
                                          projection.ConvertWidthToPixel(rectangle->GetHeight()));
                 CGContextAddRect(cg,rect);
@@ -782,8 +786,8 @@ namespace osmscout {
                 } else {
                     CGContextSetRGBStrokeColor(cg,0,0,0,0);
                 }
-                CGRect rect = CGRectMake(x+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
-                                         y+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
+                CGRect rect = CGRectMake(screenPos.GetX()+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
+                                         screenPos.GetY()+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
                                          projection.ConvertWidthToPixel(circle->GetRadius()),
                                          projection.ConvertWidthToPixel(circle->GetRadius()));
                 CGContextAddEllipseInRect(cg, rect);

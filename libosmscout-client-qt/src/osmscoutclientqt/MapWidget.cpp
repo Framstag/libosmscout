@@ -309,9 +309,9 @@ void MapWidget::paint(QPainter *painter)
     // render vehicle
     if (vehicle.position && !vehicle.getIcon().isNull()){
       QImage vehicleIcon=vehicle.getIcon();
-      double x;
-      double y;
-      projection.GeoToPixel(vehicle.position->getCoord(), x, y);
+      osmscout::Vertex2D screenPos;
+      projection.GeoToPixel(vehicle.position->getCoord(),
+                            screenPos);
 
       Bearing iconAngle;
       if (vehicle.position->getBearing()) {
@@ -321,26 +321,32 @@ void MapWidget::paint(QPainter *painter)
       }
 
       painter->save();
-      painter->translate(x,y);
+      painter->translate(screenPos.GetX(),
+                         screenPos.GetY());
       painter->rotate(iconAngle.AsDegrees());
       // draw vehicleIcon center on coordinate 0x0
-      painter->drawImage(QPointF(vehicleIcon.width()/-2, vehicleIcon.height()/-2), vehicleIcon);
+      painter->drawImage(QPointF(vehicleIcon.width()/-2,
+                                 vehicleIcon.height()/-2),
+                         vehicleIcon);
       painter->restore();
     }
 
     // render current position spot
     if (showCurrentPosition && currentPosition.valid){
-        double x;
-        double y;
-        projection.GeoToPixel(currentPosition.coord, x, y);
-        if (boundingBox.contains(x, y)){
+        osmscout::Vertex2D screenPos;
+        projection.GeoToPixel(currentPosition.coord,
+                              screenPos);
+        if (boundingBox.contains(screenPos.GetX(), screenPos.GetY())){
 
             if (currentPosition.horizontalAccuracyValid){
                 double diameter = currentPosition.horizontalAccuracy * projection.GetMeterInPixel();
                 if (diameter > 25.0 && diameter < std::max(request.width, request.height)){
                     painter->setBrush(QBrush(QColor::fromRgbF(1.0, 1.0, 1.0, 0.4)));
                     painter->setPen(QColor::fromRgbF(1.0, 1.0, 1.0, 0.7));
-                    painter->drawEllipse(x - (diameter /2.0), y - (diameter /2.0), diameter, diameter);
+                    painter->drawEllipse(screenPos.GetX() - (diameter /2.0),
+                                         screenPos.GetY() - (diameter /2.0),
+                                         diameter,
+                                         diameter);
                 }
             }
 
@@ -353,14 +359,15 @@ void MapWidget::paint(QPainter *painter)
             }
             painter->setPen(QColor::fromRgbF(0.0, 0.5, 0.0, 0.9));
             double dimension = projection.ConvertWidthToPixel(2.8);
-            painter->drawEllipse(x - dimension/2, y - dimension/2, dimension, dimension);
+            painter->drawEllipse(screenPos.GetX() - dimension/2,
+                                 screenPos.GetY() - dimension/2,
+                                 dimension,
+                                 dimension);
         }
     }
 
     // render marks
     if (!marks.isEmpty()){
-        double x;
-        double y;
         painter->setBrush(QBrush());
         QPen pen;
         pen.setColor(QColor::fromRgbF(0.8, 0.0, 0.0, 0.9));
@@ -368,10 +375,14 @@ void MapWidget::paint(QPainter *painter)
         painter->setPen(pen);
 
         for (auto &entry: marks){
-            projection.GeoToPixel(osmscout::GeoCoord(entry.GetLat(), entry.GetLon()), x, y);
-            if (boundingBox.contains(x, y)){
+            osmscout::Vertex2D screenPos;
+            projection.GeoToPixel(osmscout::GeoCoord(entry.GetLat(), entry.GetLon()),
+                                  screenPos);
+            if (boundingBox.contains(screenPos.GetX(), screenPos.GetY())){
                 double dimension = projection.ConvertWidthToPixel(6);
-                painter->drawEllipse(x - dimension/2, y - dimension/2, dimension, dimension);
+                painter->drawEllipse(screenPos.GetX() - dimension/2,
+                                     screenPos.GetY() - dimension/2,
+                                     dimension, dimension);
             }
         }
     }
@@ -410,10 +421,10 @@ bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
 
 QPointF MapWidget::screenPosition(double lat, double lon)
 {
-    double x;
-    double y;
-    getProjection().GeoToPixel(osmscout::GeoCoord(lat, lon), x, y);
-    return QPointF(x, y);
+    osmscout::Vertex2D screenPos;
+    getProjection().GeoToPixel(osmscout::GeoCoord(lat, lon),
+                               screenPos);
+    return QPointF(screenPos.GetX(), screenPos.GetY());
 }
 
 void MapWidget::zoom(double zoomFactor)

@@ -401,23 +401,19 @@ namespace osmscout {
 
   bool osmscout::MapPainterOpenGL::IsVisibleArea(const Projection &projection, const GeoBox &boundingBox,
                                                  double pixelOffset) {
-    double x1;
-    double x2;
-    double y1;
-    double y2;
+    Vertex2D minPixel;
+    Vertex2D maxPixel;
 
     projection.GeoToPixel(boundingBox.GetMinCoord(),
-                          x1,
-                          y1);
+                          minPixel);
 
     projection.GeoToPixel(boundingBox.GetMaxCoord(),
-                          x2,
-                          y2);
+                          maxPixel);
 
-    double xMin = std::min(x1, x2) - pixelOffset;
-    double xMax = std::max(x1, x2) + pixelOffset;
-    double yMin = std::min(y1, y2) - pixelOffset;
-    double yMax = std::max(y1, y2) + pixelOffset;
+    double xMin = std::min(minPixel.GetX(), maxPixel.GetX()) - pixelOffset;
+    double xMax = std::max(minPixel.GetX(), maxPixel.GetX()) + pixelOffset;
+    double yMin = std::min(minPixel.GetY(), maxPixel.GetY()) - pixelOffset;
+    double yMax = std::max(minPixel.GetY(), maxPixel.GetY()) + pixelOffset;
 
     osmscout::GeoBox gb;
     projection.GetDimensions(gb);

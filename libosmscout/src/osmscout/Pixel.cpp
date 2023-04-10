@@ -32,6 +32,8 @@ namespace osmscout {
     return stream.str();
   }
 
+  const Vertex2D Vertex2D::ZERO(0.0,0.0);
+
   Vertex2D operator-(const Vertex2D &a, const Vertex2D &b)
   {
     return Vertex2D(a.GetX()-b.GetX(),

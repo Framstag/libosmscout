@@ -40,7 +40,7 @@ namespace osmscout {
    */
 
   //< Radius of the earth in meter
-  static const double earthRadiusMeter=6378137.0;
+  static const double earthRadiusMeter=6'378'137.0;
   //< Extent of the earth in meter
   static const double earthExtentMeter=2*M_PI*earthRadiusMeter;
   //< Width of a tile at the equator for zoom level 0 in meter (equal to extent of the earth at the equator
@@ -67,66 +67,128 @@ namespace osmscout {
   {
     assert(boundingBox.IsValid());
 
-    double x;
-    double y;
+    Vertex2D pixel;
 
     if (!GeoToPixel(boundingBox.GetMinCoord(),
-                    x,
-                    y)) {
+                    pixel)) {
       return false;
     }
 
-    xMin=x;
-    xMax=x;
-    yMin=y;
-    yMax=y;
+    xMin=pixel.GetX();
+    xMax=pixel.GetX();
+    yMin=pixel.GetY();
+    yMax=pixel.GetY();
 
     if (!GeoToPixel(boundingBox.GetMaxCoord(),
-                    x,
-                    y)) {
+                    pixel)) {
       return false;
     }
 
     xMin=std::min(xMin,
-                  x);
+                  pixel.GetX());
     xMax=std::max(xMax,
-                  x);
+                  pixel.GetX());
     yMin=std::min(yMin,
-                  y);
+                  pixel.GetY());
     yMax=std::max(yMax,
-                  y);
+                  pixel.GetY());
 
     if (!GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
                              boundingBox.GetMaxLon()),
-                    x,
-                    y)) {
+                    pixel)) {
       return false;
     }
 
     xMin=std::min(xMin,
-                  x);
+                  pixel.GetX());
     xMax=std::max(xMax,
-                  x);
+                  pixel.GetX());
     yMin=std::min(yMin,
-                  y);
+                  pixel.GetY());
     yMax=std::max(yMax,
-                  y);
+                  pixel.GetY());
 
     if (!GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
                              boundingBox.GetMinLon()),
-                    x,
-                    y)) {
+                    pixel)) {
       return false;
     }
 
     xMin=std::min(xMin,
-                  x);
+                  pixel.GetX());
     xMax=std::max(xMax,
-                  x);
+                  pixel.GetX());
     yMin=std::min(yMin,
-                  y);
+                  pixel.GetY());
     yMax=std::max(yMax,
-                  y);
+                  pixel.GetY());
+
+    return true;
+  }
+
+  bool Projection::BoundingBoxToPixel(const GeoBox& boundingBox,
+                                      ScreenBox& screenBox) const
+  {
+    assert(boundingBox.IsValid());
+
+    Vertex2D pixel;
+
+    if (!GeoToPixel(boundingBox.GetMinCoord(),
+                    pixel)) {
+      return false;
+    }
+
+    double xMin=pixel.GetX();
+    double xMax=pixel.GetX();
+    double yMin=pixel.GetY();
+    double yMax=pixel.GetY();
+
+    if (!GeoToPixel(boundingBox.GetMaxCoord(),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
+                             boundingBox.GetMaxLon()),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    if (!GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
+                             boundingBox.GetMinLon()),
+                    pixel)) {
+      return false;
+    }
+
+    xMin=std::min(xMin,
+                  pixel.GetX());
+    xMax=std::max(xMax,
+                  pixel.GetX());
+    yMin=std::min(yMin,
+                  pixel.GetY());
+    yMax=std::max(yMax,
+                  pixel.GetY());
+
+    screenBox=ScreenBox(Vertex2D(xMin,yMin),
+                        Vertex2D(xMax,yMax));
 
     return true;
   }
@@ -163,8 +225,8 @@ namespace osmscout {
     this->height=height;
 
     if (angle!=0.0) {
-      angleSin=sin(angle);
-      angleCos=cos(angle);
+      angleSin=::sin(angle);
+      angleCos=::cos(angle);
       angleNegSin=-angleSin;
       angleNegCos=angleCos;
     }
@@ -188,7 +250,7 @@ namespace osmscout {
     double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
 
     // Width of the visible area in meter
-    double groundWidthVisibleMeter=groundWidthEquatorMeter*cos(lat*gradtorad);
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*::cos(lat*gradtorad);
 
     // Resulting projection scale factor
     scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
@@ -204,9 +266,7 @@ namespace osmscout {
     meterInMM=meterInPixel*25.4/dpi;
 
     // Absolute Y mercator coordinate for latitude
-    latOffset=atanh(sin(coord.GetLat()*gradtorad));
-
-    //std::cout << "Pixel size " << pixelSize << " meterInPixel " << meterInPixel << " meterInMM " << meterInMM << std::endl;
+    latOffset=::atanh(::sin(coord.GetLat()*gradtorad));
 
     GeoCoord topLeft;
 
@@ -236,17 +296,8 @@ namespace osmscout {
                                     std::max(bottomLeft.GetLon(),bottomRight.GetLon())));
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / ::sin( (2 * this->lat * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
-
-    /*
-    std::cout << "Center: " << GeoCoord(lat,lon).GetDisplayText() << std::endl;
-    std::cout << "Magnification: " << magnification.GetMagnification() << "/" << magnification.GetLevel() << std::endl;
-    std::cout << "Screen dimension: " << width << "x" << height << " " << dpi << " DPI " << std::endl;
-
-    std::cout << "Box: " << GeoBox(GeoCoord(latMin,lonMin),GeoCoord(latMax,lonMax)).GetDisplayText() << ", " << groundWidthVisibleMeter << " " << std::endl;
-
-    std::cout << "Scale: 1 : " << scale << std::endl;*/
 
     return true;
   }
@@ -269,19 +320,20 @@ namespace osmscout {
     }
 
     // Transform to absolute geo coordinate
-    coord.Set(atan(sinh(y/scale+latOffset))/gradtorad,
+    coord.Set(::atan(::sinh(y/scale+latOffset))/gradtorad,
               this->lon+x/scaleGradtorad);
 
     return IsValidFor(coord);
   }
 
   bool MercatorProjection::GeoToPixel(const GeoCoord& coord,
-                                      double& x, double& y) const
+                                      Vertex2D& pixel) const
   {
     assert(valid);
 
     // Screen coordinate relative to center of image
-    x=(coord.GetLon()-this->lon)*scaleGradtorad;
+    double x=(coord.GetLon()-this->lon)*scaleGradtorad;
+    double y;
 
     if (useLinearInterpolation) {
       y=(coord.GetLat()-this->lat)*scaledLatDeriv;
@@ -291,7 +343,7 @@ namespace osmscout {
       // For values outside this range is better to result projection border
       // than some invalid coordinate, like INFINITY
       double lat = std::min(std::max(coord.GetLat(), MinLat), MaxLat);
-      y=(atanh(sin(lat*gradtorad))-latOffset)*scale;
+      y=(::atanh(::sin(lat*gradtorad))-latOffset)*scale;
     }
 
     if (angle!=0.0) {
@@ -306,6 +358,8 @@ namespace osmscout {
     y=height/2.0-y;
     x+=width/2.0;
 
+    pixel=Vertex2D(x,y);
+
     return IsValidFor(coord);
   }
 
@@ -317,16 +371,15 @@ namespace osmscout {
   bool MercatorProjection::Move(double horizPixel,
                                 double vertPixel)
   {
-    double x;
-    double y;
+    Vertex2D pixel;
 
     GeoToPixel(GeoCoord(lat,lon),
-               x,y);
+               pixel);
 
     GeoCoord coord;
 
-    if (!PixelToGeo(x+horizPixel,
-                    y-vertPixel,
+    if (!PixelToGeo(pixel.GetX()+horizPixel,
+                    pixel.GetY()-vertPixel,
                     coord)) {
       return false;
     }
@@ -385,14 +438,14 @@ namespace osmscout {
     scaleGradtorad = scale * gradtorad;
 
     lonOffset=lonMin*scaleGradtorad;
-    latOffset=scale*atanh(sin(latMin*gradtorad));
+    latOffset=scale*::atanh(::sin(latMin*gradtorad));
 
     pixelSize=earthExtentMeter/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / ::sin( (2 * this->lat * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -441,7 +494,7 @@ namespace osmscout {
   bool TileProjection::PixelToGeo(double x, double y,
                                   GeoCoord& coord) const
   {
-    coord.Set(atan(sinh((height-y+latOffset)/scale))/gradtorad,
+    coord.Set(::atan(::sinh((height-y+latOffset)/scale))/gradtorad,
               (x+lonOffset)/(scale*gradtorad));
 
     return IsValidFor(coord);
@@ -450,10 +503,11 @@ namespace osmscout {
   #ifdef OSMSCOUT_HAVE_SSE2
 
     bool TileProjection::GeoToPixel(const GeoCoord& coord,
-                                    double& x, double& y) const
+                                    Vertex2D& pixel) const
     {
-      x=coord.GetLon()*scaleGradtorad-lonOffset;
-      y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
+      double x=coord.GetLon()*scaleGradtorad-lonOffset;
+      double y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
+      pixel=Vertex2D(x,y);
       return IsValidFor(coord);
     }
 
@@ -462,7 +516,10 @@ namespace osmscout {
     {
       v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
       __m128d test = ARRAY2V2DF(transformData.lat);
-      v2df y = _mm_sub_pd(sse2Height, _mm_sub_pd(_mm_mul_pd(sse2Scale, atanh_sin_pd( _mm_mul_pd( test,  ARRAY2V2DF(sseGradtorad)))), sse2LatOffset));
+      v2df y = _mm_sub_pd(sse2Height,
+                          _mm_sub_pd(_mm_mul_pd(sse2Scale,
+                                                atanh_sin_pd( _mm_mul_pd( test,  ARRAY2V2DF(sseGradtorad)))),
+                                     sse2LatOffset));
 
       //store results:
       _mm_storel_pd (transformData.xPointer[0], x);
@@ -472,22 +529,25 @@ namespace osmscout {
     }
 
   #else
+  bool TileProjection::GeoToPixel(const GeoCoord& coord,
+                                  Vertex2D& pixel) const
+  {
+    double x=coord.GetLon()*scaleGradtorad-lonOffset;
+    double y;
 
-    bool TileProjection::GeoToPixel(const GeoCoord& coord,
-                                    double& x, double& y) const
-    {
-      x=coord.GetLon()*scaleGradtorad-lonOffset;
-
-      if (useLinearInterpolation) {
-        y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
-      }
-      else {
-        y=height-(scale*atanh(sin(coord.GetLat()*gradtorad))-latOffset);
-      }
-      return IsValidFor(coord);
+    if (useLinearInterpolation) {
+      y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
+    }
+    else {
+      y=height-(scale*::atanh(::sin(coord.GetLat()*gradtorad))-latOffset);
     }
 
-    void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
+    pixel=Vertex2D(x,y);
+
+    return IsValidFor(coord);
+  }
+
+  void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
     {
       assert(false); //should not be called
     }

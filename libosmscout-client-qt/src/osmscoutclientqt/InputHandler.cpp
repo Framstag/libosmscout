@@ -759,11 +759,11 @@ bool LockHandler::currentPosition(bool locationValid, osmscout::GeoCoord current
             return false;
         }
 
-        double x;
-        double y;
-        projection.GeoToPixel(currentPosition, x, y);
-        double distanceFromCenter = sqrt(pow(std::abs(projection.GetWidth()/2 - x), 2) +
-                                         pow(std::abs(projection.GetHeight()/2 - y), 2));
+        Vertex2D screenPos;
+        projection.GeoToPixel(currentPosition,
+                              screenPos);
+        double distanceFromCenter = sqrt(pow(std::abs(projection.GetWidth()/2 - screenPos.GetX()), 2) +
+                                         pow(std::abs(projection.GetHeight()/2 - screenPos.GetY()), 2));
 
         double moveTolerance = std::min(window.width(), window.height()) / 4;
         if (distanceFromCenter > moveTolerance){

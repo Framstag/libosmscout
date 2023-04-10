@@ -104,6 +104,8 @@ namespace osmscout {
     std::array<double,2> coords;
 
   public:
+    static const Vertex2D ZERO;
+
     /**
      * The default constructor creates an uninitialized instance (for performance reasons).
      */

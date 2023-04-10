@@ -1120,19 +1120,19 @@ namespace osmscout {
   void MapPainterCairo::DrawSymbol(const Projection& projection,
                                    const MapParameter& /*parameter*/,
                                    const Symbol& symbol,
-                                   double x, double y,
+                                   const Vertex2D& screenPos,
                                    double scaleFactor)
   {
     SymbolRendererCairo renderer(draw);
 
     renderer.Render(projection,
                     symbol,
-                    Vertex2D(x, y),
+                    screenPos,
                     scaleFactor);
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
-                                 double centerX, double centerY,
+                                 const Vertex2D& centerPos,
                                  double width, double height)
   {
     size_t idx=style->GetIconId()-1;
@@ -1152,8 +1152,8 @@ namespace osmscout {
 
     cairo_set_source_surface(draw,
                              icon,
-                             (centerX-width/2) / scaleW,
-                             (centerY-height/2) / scaleH);
+                             (centerPos.GetX()-width/2) / scaleW,
+                             (centerPos.GetY()-height/2) / scaleH);
 
     cairo_paint(draw);
     cairo_set_matrix(draw, &matrix);

@@ -1,28 +1,27 @@
----
-Checks:          '-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,cppcoreguidelines,misc-*,modernize-*,performance-*,readability-*,clang-diagnostic-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability-redundant-access-specifiers,-readability-uppercase-literal-suffix,-readability-magic-numbers,-readability-isolate-declaration,-modernize-use-auto,-misc-non-private-member-variables-in-classes,-cert-dcl21-cpp,-modernize-pass-by-value,-readability-convert-member-functions-to-static,-readability-identifier-length,-bugprone-too-small-loop-variable'
+Checks:          '-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,readability-*,clang-diagnostic-*,-modernize-use-nodiscard,-modernize-use-trailing-return-type,-readability-redundant-access-specifiers,-readability-uppercase-literal-suffix,-readability-magic-numbers,-readability-isolate-declaration,-modernize-use-auto,-misc-non-private-member-variables-in-classes,-cert-dcl21-cpp,-modernize-pass-by-value,-readability-convert-member-functions-to-static,-readability-identifier-length,-bugprone-too-small-loop-variable,-misc-const-correctness,-readability-static-definition-in-anonymous-namespace'
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*/libosmscout.*/.*'
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
 CheckOptions:
-  - key:             cert-dcl16-c.NewSuffixes
-    value:           'L;LL;LU;LLU'
-  - key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
-    value:           '0'
-  - key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
-    value:           '1'
-  - key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
-    value:           '1'
-  - key:             modernize-loop-convert.MaxCopySize
-    value:           '16'
-  - key:             modernize-loop-convert.MinConfidence
-    value:           reasonable
-  - key:             modernize-loop-convert.NamingStyle
-    value:           CamelCase
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-...
+- key:             cert-dcl16-c.NewSuffixes
+  value:           'L;LL;LU;LLU'
+- key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
+  value:           '0'
+- key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
+  value:           '1'
+- key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+  value:           '1'
+- key:             modernize-loop-convert.MaxCopySize
+  value:           '16'
+- key:             modernize-loop-convert.MinConfidence
+  value:           reasonable
+- key:             modernize-loop-convert.NamingStyle
+  value:           CamelCase
+- key:             modernize-pass-by-value.IncludeStyle
+  value:           llvm
+- key:             modernize-replace-auto-ptr.IncludeStyle
+  value:           llvm
+- key:             modernize-use-nullptr.NullMacros
+  value:           'NULL'
+
