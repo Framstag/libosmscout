@@ -20,15 +20,15 @@ jobs:
       - name: Copy vcpkg.json
         run:  copy vcpkg_medium.json vcpkg.json
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1.3
+        uses: microsoft/setup-msbuild@v1.3.1
         # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
       - name: Restore from cache and install vcpkg
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
-        uses: lukka/run-vcpkg@v10.7 # https://github.com/lukka/run-vcpkg/releases/tag/v10.7
+        uses: lukka/run-vcpkg@v11.1 # https://github.com/lukka/run-vcpkg/releases/tag/v10.7
         with:
-          runVcpkgInstall: false
+          runVcpkgInstall: false                                                lukka/run-vcpkg
           vcpkgJsonGlob: '**/vcpkg.json'
-          vcpkgGitCommitId: a7b6122f6b6504d16d96117336a0562693579933 # https://github.com/microsoft/vcpkg/releases/tag/2023.02.24
+          vcpkgGitCommitId: 93e173a0d724c193e5546d48efb3e4ef47c1e1f2 # current, before: https://github.com/microsoft/vcpkg/releases/tag/2023.02.24
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
