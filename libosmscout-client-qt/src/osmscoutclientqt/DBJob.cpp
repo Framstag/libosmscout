@@ -97,8 +97,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                     const std::list<DBInstanceRef> &databases,
                     QReadLocker *locker)
 {
-  osmscout::GeoBox lookupBox;
-  lookupProjection.GetDimensions(lookupBox);
+  osmscout::GeoBox lookupBox(lookupProjection.GetDimensions());
   std::list<DBInstanceRef> relevantDatabases;
   for (const auto &db:databases){
     if (!db->IsOpen() || (!db->GetStyleConfig())) {

@@ -359,7 +359,6 @@ int main(int argc, char* argv[])
       for (uint32_t x=xTileStart; x<=xTileEnd; x++) {
         agg::pixfmt_rgb24   pf(rbuf);
         osmscout::StopClock timer;
-        osmscout::GeoBox    boundingBox;
         osmscout::MapData   data;
 
         projection.Set(osmscout::OSMTileId(x,y),
@@ -368,7 +367,7 @@ int main(int argc, char* argv[])
                        tileWidth,
                        tileHeight);
 
-        projection.GetDimensions(boundingBox);
+        osmscout::GeoBox boundingBox(projection.GetDimensions());
 
         std::cout << "Drawing tile " << level << "." << y << "." << x << " " << boundingBox.GetDisplayText() << std::endl;
 

@@ -69,9 +69,7 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                  width,
                  height);
 
-  osmscout::GeoBox boundingBox;
-
-  projection.GetDimensions(boundingBox);
+  osmscout::GeoBox boundingBox(projection.GetDimensions());
 
   QColor grey2 = QColor::fromRgbF(0.8,0.8,0.8);
 

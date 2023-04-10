@@ -267,7 +267,31 @@ namespace osmscout {
       buffer=newBuffer;
     }
 
-    buffer[usedPoints].Set(x,y);
+    buffer[usedPoints]=Vertex2D(x,y);
+
+    return usedPoints++;
+  }
+
+  size_t CoordBuffer::PushCoord(const Vertex2D& coord)
+  {
+    assert(!std::isnan(coord.GetX()));
+    assert(!std::isnan(coord.GetY()));
+
+    if (usedPoints>=bufferSize) {
+      bufferSize=bufferSize*2;
+
+      Vertex2D *newBuffer=new Vertex2D[bufferSize];
+
+      std::memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
+
+      log.Warn() << "*** Buffer reallocation: " << bufferSize;
+
+      delete [] buffer;
+
+      buffer=newBuffer;
+    }
+
+    buffer[usedPoints]=coord;
 
     return usedPoints++;
   }
@@ -292,8 +316,8 @@ namespace osmscout {
     oax=offset*oax;
     oay=offset*oay;
 
-    start=PushCoord(buffer[org.GetStart()].GetX()+oax,
-                    buffer[org.GetStart()].GetY()+oay);
+    start=PushCoord(Vertex2D(buffer[org.GetStart()].GetX()+oax,
+                             buffer[org.GetStart()].GetY()+oay));
 
     for (size_t i=org.GetStart()+1; i<org.GetEnd(); i++) {
       Normalize(buffer[i-1].GetY()-buffer[i].GetY(),
@@ -324,19 +348,19 @@ namespace osmscout {
         double addX = det1/det2*(buffer[i].GetX()-buffer[i-1].GetX());
         double addY = det1/det2*(buffer[i].GetY()-buffer[i-1].GetY());
         if (std::abs(addX) < 2*std::abs(offset) && std::abs(addY) < 2*std::abs(offset)) {
-          PushCoord(buffer[i].GetX() + oax + addX,
-                    buffer[i].GetY() + oay + addY);
+          PushCoord(Vertex2D(buffer[i].GetX() + oax + addX,
+                             buffer[i].GetY() + oay + addY));
         }else{
           // cut the edge of too sharp angles
-          PushCoord(buffer[i].GetX() + oax,
-                    buffer[i].GetY() + oay);
-          PushCoord(buffer[i].GetX() + obx,
-                    buffer[i].GetY() + oby);
+          PushCoord(Vertex2D(buffer[i].GetX() + oax,
+                             buffer[i].GetY() + oay));
+          PushCoord(Vertex2D(buffer[i].GetX() + obx,
+                             buffer[i].GetY() + oby));
         }
       }
       else {
-        PushCoord(buffer[i].GetX()+oax,
-                  buffer[i].GetY()+oay);
+        PushCoord(Vertex2D(buffer[i].GetX()+oax,
+                           buffer[i].GetY()+oay));
       }
     }
 
@@ -347,8 +371,8 @@ namespace osmscout {
     oax=offset*oax;
     oay=offset*oay;
 
-    end=PushCoord(buffer[org.GetEnd()].GetX()+oax,
-                  buffer[org.GetEnd()].GetY()+oay);
+    end=PushCoord(Vertex2D(buffer[org.GetEnd()].GetX()+oax,
+                           buffer[org.GetEnd()].GetY()+oay));
 
     return CoordBufferRange(*this,start,end);
   }
@@ -706,8 +730,8 @@ namespace osmscout {
 
     for (size_t i=transBuffer.GetStart(); i<=transBuffer.GetEnd(); i++) {
       if (transBuffer.points[i].draw) {
-        end=coordBuffer.PushCoord(transBuffer.points[i].x,
-                                  transBuffer.points[i].y);
+        end=coordBuffer.PushCoord(Vertex2D(transBuffer.points[i].x,
+                                           transBuffer.points[i].y));
 
         if (isStart) {
           start=end;

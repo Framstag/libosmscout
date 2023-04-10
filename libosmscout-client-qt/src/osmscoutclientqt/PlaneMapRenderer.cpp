@@ -379,8 +379,7 @@ void PlaneMapRenderer::DrawMap()
 
     // overlay objects
     std::vector<OverlayObjectRef> overlayObjects;
-    osmscout::GeoBox renderBox;
-    projection.GetDimensions(renderBox);
+    osmscout::GeoBox renderBox(projection.GetDimensions());
     getOverlayObjects(overlayObjects, renderBox);
 
     bool success;

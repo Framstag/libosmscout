@@ -34,20 +34,21 @@ namespace osmscout {
   {
   }
 
-  void LabelPath::AddPoint(double x,double y)
+  void LabelPath::AddPoint(const Vertex2D& point)
   {
     if (segments.empty()){
-      end.Set(x,y);
+      end=point;
       Segment s={end,0,0,0};
       segments.push_back(s);
     }else{
-      end.Set(x,y);
+      end=point;
       Segment last=segments.back();
-      double endDistance = last.start.DistanceTo(Vertex2D(x,y)); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
+      double endDistance = last.start.DistanceTo(point); //  QVector2D(last.start).distanceToPoint(QVector2D(x,y));
       if (endDistance>minSegmentLength){
         length+=endDistance;
         last.length=endDistance;
-        last.angle=std::atan2(last.start.GetY()-y,x-last.start.GetX());
+        last.angle=std::atan2(last.start.GetY()-point.GetY(),
+                              point.GetX()-last.start.GetX());
         segments[segments.size()-1]=last;
 
         // fill offsetIndex

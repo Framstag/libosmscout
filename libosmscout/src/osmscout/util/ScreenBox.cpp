@@ -21,6 +21,11 @@
 
 namespace osmscout {
 
+  const ScreenBox ScreenBox::EMPTY(Vertex2D(0.0,
+                                            0.0),
+                                   Vertex2D(0.0,
+                                            0.0));
+
   ScreenBox::ScreenBox(const Vertex2D& coordA,
                        const Vertex2D& coordB)
   : minCoord(std::min(coordA.GetX(),coordB.GetX()),

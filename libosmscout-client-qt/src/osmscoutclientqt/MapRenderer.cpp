@@ -363,8 +363,7 @@ bool DBRenderJob::addBasemapData(MapDataRef data) const
   if (!waterIndex) {
     return false;
   }
-  osmscout::GeoBox boundingBox;
-  renderProjection.GetDimensions(boundingBox);
+  osmscout::GeoBox boundingBox(renderProjection.GetDimensions());
   return waterIndex->GetRegions(boundingBox,
                                 renderProjection.GetMagnification(),
                                 data->baseMapTiles);
