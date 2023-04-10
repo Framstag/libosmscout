@@ -228,6 +228,7 @@ namespace osmscout {
 
     std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
     std::vector<LineStyleRef>    lineStyles;         //!< Temporary storage for StyleConfig return value
+    std::vector<PathSymbolStyleRef> symbolStyles;    //!< Temporary storage for StyleConfig return value
 
     /**                           L
      Precalculations
@@ -337,8 +338,7 @@ namespace osmscout {
                            const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            const Vertex2D& screenPos,
-                           double objectWidth=0,
-                           double objectHeight=0);
+                           const ScreenBox& objectBox);
 
     bool DrawWayDecoration(const StyleConfig& styleConfig,
                            const Projection& projection,

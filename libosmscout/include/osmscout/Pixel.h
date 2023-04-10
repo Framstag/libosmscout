@@ -124,18 +124,18 @@ namespace osmscout {
     Vertex2D& operator=(const Vertex2D& other) = default;
     Vertex2D& operator=(Vertex2D&& other) = default;
 
-    void SetX(double x)
+    [[deprecated]] void SetX(double x)
     {
       coords[0]=x;
     }
 
-    void SetY(double y)
+    [[deprecated]] void SetY(double y)
     {
       coords[1]=y;
     }
 
-    void Set(double x,
-             double y)
+    [[deprecated]] void Set(double x,
+                            double y)
     {
       coords[0]=x;
       coords[1]=y;

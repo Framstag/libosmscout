@@ -285,7 +285,7 @@ namespace osmscout {
     /**
      * Returns the bounding box of the area covered
      */
-    void GetDimensions(GeoBox& boundingBox) const
+    [[deprecated]] void GetDimensions(GeoBox& boundingBox) const
     {
       boundingBox.Set(GeoCoord(latMin,lonMin),
                       GeoCoord(latMax,lonMax));

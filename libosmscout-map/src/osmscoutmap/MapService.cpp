@@ -814,9 +814,7 @@ namespace osmscout {
 
     StopClock cacheRetrievalTime;
 
-    GeoBox boundingBox;
-
-    projection.GetDimensions(boundingBox);
+    GeoBox boundingBox(projection.GetDimensions());
 
     cache.GetTilesForBoundingBox(projection.GetMagnification(),
                                  boundingBox,
@@ -1367,9 +1365,7 @@ namespace osmscout {
   bool MapService::GetGroundTiles(const Projection& projection,
                                   std::list<GroundTile>& tiles) const
   {
-    GeoBox boundingBox;
-
-    projection.GetDimensions(boundingBox);
+    GeoBox boundingBox(projection.GetDimensions());
 
     return GetGroundTiles(boundingBox,
                           projection.GetMagnification(),

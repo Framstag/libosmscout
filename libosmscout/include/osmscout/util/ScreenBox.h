@@ -41,6 +41,7 @@ namespace osmscout {
     Vertex2D maxCoord=Vertex2D(0.0,0.0);
 
   public:
+    static const ScreenBox EMPTY;
     /**
      * The default constructor creates an invalid instance.
      */

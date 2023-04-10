@@ -236,8 +236,8 @@ namespace osmscout {
 
       result.back().glyph.character = WStringToUTF8String(label.substr(ch,1));
 
-      result.back().position.SetX(horizontalOffset);
-      result.back().position.SetY(0);
+      result.back().position=Vertex2D(horizontalOffset,
+                                      0.0);
 
       horizontalOffset += (double)(height * MapPainterSVG::AverageCharacterWidth);
     }
@@ -731,7 +731,10 @@ namespace osmscout {
                                            const PathLabelData &label,
                                            const LabelPath &labelPath)
   {
-    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    labelLayouter.RegisterContourLabel(projection,
+                                       parameter,
+                                       label,
+                                       labelPath);
   }
 
   void MapPainterSVG::IconData(const Projection& projection,

@@ -21,9 +21,10 @@
 */
 
 #include <osmscoutmap/MapImportExport.h>
-#include <osmscout/Pixel.h>
 
 #include <vector>
+
+#include <osmscout/Pixel.h>
 
 namespace osmscout {
   struct Segment
@@ -52,7 +53,7 @@ namespace osmscout {
   public:
     explicit LabelPath(double minSegmentLength=5);
     virtual ~LabelPath();
-    void AddPoint(double x,double y);
+    void AddPoint(const Vertex2D& point);
     double GetLength() const {
       return length+endDistance;
     }

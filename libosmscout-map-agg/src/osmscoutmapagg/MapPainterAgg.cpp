@@ -353,7 +353,7 @@ namespace osmscout {
     for (const auto &nativeGlyph : label.glyphs) {
       MapPainterAgg::AggGlyph glyph{};
       glyph.glyph=nativeGlyph;
-      glyph.position.Set(nativeGlyph.x, nativeGlyph.y);
+      glyph.position=Vertex2D(nativeGlyph.x, nativeGlyph.y);
       result.emplace_back(glyph);
     }
     return result;
@@ -422,7 +422,10 @@ namespace osmscout {
                                            const PathLabelData &label,
                                            const LabelPath &labelPath)
   {
-    labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    labelLayouter.RegisterContourLabel(projection,
+                                       parameter,
+                                       label,
+                                       labelPath);
   }
 
   void MapPainterAgg::DrawLabels(const Projection& projection,

@@ -362,8 +362,7 @@ public:
       return true;
     }
 
-    osmscout::GeoBox boundingBox;
-    projection.GetDimensions(boundingBox);
+    osmscout::GeoBox boundingBox(projection.GetDimensions());
     if (!waterIndex->GetRegions(boundingBox,
                                 projection.GetMagnification(),
                                 tiles)) {
