@@ -26,6 +26,11 @@ Please subscribe to the [mailing list](https://sourceforge.net/p/libosmscout/mai
 and ask your questions. English is the preferred language but other languages might be supported,
 too.
 
+You can also get support in the matrix room `#libosmscout.matrix.org`. While
+it is a interactive chat room, an answer still may take some
+time, though.
+
+
 # Installation
 
 You can find detailed instruction how to get libraries and applications
