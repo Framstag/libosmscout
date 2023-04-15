@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <algorithm>
 
@@ -27,8 +27,6 @@
 #ifdef OSMSCOUT_HAVE_SSE2
 #include <osmscout/system/SSEMath.h>
 #endif
-
-#include <osmscout/util/Tiling.h>
 
 namespace osmscout {
 
@@ -58,73 +56,6 @@ namespace osmscout {
 #endif
 
   static const double gradtorad=2*M_PI/360;
-
-  bool Projection::BoundingBoxToPixel(const GeoBox& boundingBox,
-                                      ScreenBox& screenBox) const
-  {
-    assert(boundingBox.IsValid());
-
-    Vertex2D pixel;
-
-    if (!GeoToPixel(boundingBox.GetMinCoord(),
-                    pixel)) {
-      return false;
-    }
-
-    double xMin=pixel.GetX();
-    double xMax=pixel.GetX();
-    double yMin=pixel.GetY();
-    double yMax=pixel.GetY();
-
-    if (!GeoToPixel(boundingBox.GetMaxCoord(),
-                    pixel)) {
-      return false;
-    }
-
-    xMin=std::min(xMin,
-                  pixel.GetX());
-    xMax=std::max(xMax,
-                  pixel.GetX());
-    yMin=std::min(yMin,
-                  pixel.GetY());
-    yMax=std::max(yMax,
-                  pixel.GetY());
-
-    if (!GeoToPixel(GeoCoord(boundingBox.GetMinLat(),
-                             boundingBox.GetMaxLon()),
-                    pixel)) {
-      return false;
-    }
-
-    xMin=std::min(xMin,
-                  pixel.GetX());
-    xMax=std::max(xMax,
-                  pixel.GetX());
-    yMin=std::min(yMin,
-                  pixel.GetY());
-    yMax=std::max(yMax,
-                  pixel.GetY());
-
-    if (!GeoToPixel(GeoCoord(boundingBox.GetMaxLat(),
-                             boundingBox.GetMinLon()),
-                    pixel)) {
-      return false;
-    }
-
-    xMin=std::min(xMin,
-                  pixel.GetX());
-    xMax=std::max(xMax,
-                  pixel.GetX());
-    yMin=std::min(yMin,
-                  pixel.GetY());
-    yMax=std::max(yMax,
-                  pixel.GetY());
-
-    screenBox=ScreenBox(Vertex2D(xMin,yMin),
-                        Vertex2D(xMax,yMax));
-
-    return true;
-  }
 
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
@@ -332,158 +263,4 @@ namespace osmscout {
                width,
                height);
   }
-
-  bool TileProjection::SetInternal(double lonMin,double latMin,
-                                   double lonMax,double latMax,
-                                   const Magnification& magnification,
-                                   double dpi,
-                                   size_t width,size_t height)
-  {
-    if (valid &&
-        this->latMin==latMin &&
-        this->latMax==latMax &&
-        this->lonMin==lonMin &&
-        this->lonMax==lonMax &&
-        this->magnification==magnification &&
-        this->dpi==dpi &&
-        this->width==width &&
-        this->height==height) {
-      return true;
-    }
-
-    valid=true;
-
-    // Make a copy of the context information
-    this->magnification=magnification;
-    this->dpi=dpi;
-    this->width=width;
-    this->height=height;
-
-    this->latMin=latMin;
-    this->latMax=latMax;
-    this->lonMin=lonMin;
-    this->lonMax=lonMax;
-
-    lat=(latMin+latMax)/2;
-    lon=(lonMin+lonMax)/2;
-
-    scale=width/(gradtorad*(lonMax-lonMin));
-    scaleGradtorad = scale * gradtorad;
-
-    lonOffset=lonMin*scaleGradtorad;
-    latOffset=scale*::atanh(::sin(latMin*gradtorad));
-
-    pixelSize=earthExtentMeter/magnification.GetMagnification()/width;
-    meterInPixel=1/pixelSize;
-    meterInMM=meterInPixel*25.4/pixelSize;
-
-    // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / ::sin( (2 * this->lat * gradtorad + M_PI) /  2);
-    scaledLatDeriv = latDeriv * gradtorad * scale;
-
-#ifdef OSMSCOUT_HAVE_SSE2
-    sse2LonOffset      = _mm_set1_pd(lonOffset);
-    sse2LatOffset      = _mm_set1_pd(latOffset);
-    sse2Scale          = _mm_set1_pd(scale);
-    sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
-    sse2Height         = _mm_set1_pd(double(height));
-#endif
-
-    return true;
-}
-
-  bool TileProjection::Set(const OSMTileId& tile,
-                           const Magnification& magnification,
-                           double dpi,
-                           size_t width, size_t height)
-  {
-    GeoBox boundingBox(tile.GetBoundingBox(magnification));
-
-    return SetInternal(boundingBox.GetMinLon(),
-                       boundingBox.GetMinLat(),
-                       boundingBox.GetMaxLon(),
-                       boundingBox.GetMaxLat(),
-                       magnification,
-                       dpi,
-                       width,height);
-  }
-
-  bool TileProjection::Set(const OSMTileIdBox& tileBox,
-                           const Magnification& magnification,
-                           double dpi,
-                           size_t width,size_t height)
-  {
-    GeoBox boundingBox(tileBox.GetBoundingBox(magnification));
-
-    return SetInternal(boundingBox.GetMinLon(),
-                       boundingBox.GetMinLat(),
-                       boundingBox.GetMaxLon(),
-                       boundingBox.GetMaxLat(),
-                       magnification,
-                       dpi,
-                       width,height);
-  }
-
-  bool TileProjection::PixelToGeo(double x, double y,
-                                  GeoCoord& coord) const
-  {
-    coord.Set(::atan(::sinh((height-y+latOffset)/scale))/gradtorad,
-              (x+lonOffset)/(scale*gradtorad));
-
-    return IsValidFor(coord);
-  }
-
-  #ifdef OSMSCOUT_HAVE_SSE2
-
-    bool TileProjection::GeoToPixel(const GeoCoord& coord,
-                                    Vertex2D& pixel) const
-    {
-      double x=coord.GetLon()*scaleGradtorad-lonOffset;
-      double y=height-(scale*atanh_sin_pd(coord.GetLat()*gradtorad)-latOffset);
-      pixel=Vertex2D(x,y);
-      return IsValidFor(coord);
-    }
-
-    //this basically transforms 2 coordinates in 1 call
-    void TileProjection::GeoToPixel(const BatchTransformer& transformData) const
-    {
-      v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
-      __m128d test = ARRAY2V2DF(transformData.lat);
-      v2df y = _mm_sub_pd(sse2Height,
-                          _mm_sub_pd(_mm_mul_pd(sse2Scale,
-                                                atanh_sin_pd( _mm_mul_pd( test,  ARRAY2V2DF(sseGradtorad)))),
-                                     sse2LatOffset));
-
-      //store results:
-      _mm_storel_pd (transformData.xPointer[0], x);
-      _mm_storeh_pd (transformData.xPointer[1], x);
-      _mm_storel_pd (transformData.yPointer[0], y);
-      _mm_storeh_pd (transformData.yPointer[1], y);
-    }
-
-  #else
-  bool TileProjection::GeoToPixel(const GeoCoord& coord,
-                                  Vertex2D& pixel) const
-  {
-    double x=coord.GetLon()*scaleGradtorad-lonOffset;
-    double y;
-
-    if (useLinearInterpolation) {
-      y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
-    }
-    else {
-      y=height-(scale*::atanh(::sin(coord.GetLat()*gradtorad))-latOffset);
-    }
-
-    pixel=Vertex2D(x,y);
-
-    return IsValidFor(coord);
-  }
-
-  void TileProjection::GeoToPixel(const BatchTransformer& /*transformData*/) const
-    {
-      assert(false); //should not be called
-    }
-
-  #endif
 }

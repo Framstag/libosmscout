@@ -27,9 +27,11 @@
 #include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/Pixel.h>
+
+#include <osmscout/projection/Projection.h>
+
 #include <osmscout/util/Color.h>
 #include <osmscout/util/LaneTurn.h>
-#include <osmscout/util/Projection.h>
 #include <osmscout/util/ScreenBox.h>
 
 #include <osmscoutmap/StyleDescription.h>

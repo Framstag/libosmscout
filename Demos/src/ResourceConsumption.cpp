@@ -22,12 +22,13 @@
 
 
 #include <osmscout/Database.h>
-#include <osmscoutmap/MapService.h>
 
-#include <osmscoutmap/MapPainter.h>
+#include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
+
+#include <osmscoutmap/MapService.h>
+#include <osmscoutmap/MapPainter.h>
 
 /*
   Example for the germany.osm, show germany overview, then zooms into Bonn city

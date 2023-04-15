@@ -32,10 +32,11 @@
 
 #include <osmscout/GroundTile.h>
 
+#include <osmscout/projection/Projection.h>
+
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Progress.h>
-#include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>
 
 #include <osmscout/system/Compiler.h>

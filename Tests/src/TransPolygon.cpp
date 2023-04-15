@@ -22,6 +22,8 @@
 
 #include <TestWay.h>
 
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Transformation.h>
 

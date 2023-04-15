@@ -54,9 +54,45 @@ set(HEADER_FILES_ROOT
     include/osmscout/WayDataFile.h
     include/osmscout/CoreFeatures.h)
 
+set(HEADER_FILES_NAVIGATION
+        include/osmscout/navigation/Agents.h
+        include/osmscout/navigation/ArrivalEstimateAgent.h
+        include/osmscout/navigation/DataAgent.h
+        include/osmscout/navigation/PositionAgent.h
+        include/osmscout/navigation/RouteStateAgent.h
+        include/osmscout/navigation/Engine.h
+        include/osmscout/navigation/Navigation.h
+        include/osmscout/navigation/BearingAgent.h
+        include/osmscout/navigation/RouteInstructionAgent.h
+        include/osmscout/navigation/SpeedAgent.h
+        include/osmscout/navigation/VoiceInstructionAgent.h
+        include/osmscout/navigation/LaneAgent.h)
+
 set(HEADER_FILES_OST
     include/osmscout/ost/Parser.h
     include/osmscout/ost/Scanner.h)
+
+set(HEADER_FILES_PROJECTION
+        include/osmscout/projection/MercatorProjection.h
+        include/osmscout/projection/Projection.h
+        include/osmscout/projection/TileProjection.h)
+
+set(HEADER_FILES_ROUTING
+        include/osmscout/routing/RouteData.h
+        include/osmscout/routing/RouteDescription.h
+        include/osmscout/routing/RouteNode.h
+        include/osmscout/routing/RouteNodeDataFile.h
+        include/osmscout/routing/RoutePostprocessor.h
+        include/osmscout/routing/RoutingDB.h
+        include/osmscout/routing/RoutingProfile.h
+        include/osmscout/routing/RoutingService.h
+        include/osmscout/routing/AbstractRoutingService.h
+        include/osmscout/routing/SimpleRoutingService.h
+        include/osmscout/routing/MultiDBRoutingService.h
+        include/osmscout/routing/DBFileOffset.h
+        include/osmscout/routing/TurnRestriction.h
+        include/osmscout/routing/MultiDBRoutingState.h
+        include/osmscout/routing/RouteDescriptionPostprocessor.h)
 
 set(HEADER_FILES_SYSTEM
     include/osmscout/system/Assert.h
@@ -94,7 +130,6 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/PolygonCenter.h
     include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
-    include/osmscout/util/Projection.h
     include/osmscout/util/ScreenBox.h
     include/osmscout/util/ScopeGuard.h
     include/osmscout/util/StopClock.h
@@ -112,40 +147,12 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/utf8helper_charmap.h
   )
 
-set(HEADER_FILES_ROUTING
-    include/osmscout/routing/RouteData.h
-    include/osmscout/routing/RouteDescription.h
-    include/osmscout/routing/RouteNode.h
-    include/osmscout/routing/RouteNodeDataFile.h
-    include/osmscout/routing/RoutePostprocessor.h
-    include/osmscout/routing/RoutingDB.h
-    include/osmscout/routing/RoutingProfile.h
-    include/osmscout/routing/RoutingService.h
-    include/osmscout/routing/AbstractRoutingService.h
-    include/osmscout/routing/SimpleRoutingService.h
-    include/osmscout/routing/MultiDBRoutingService.h
-    include/osmscout/routing/DBFileOffset.h
-    include/osmscout/routing/TurnRestriction.h
-    include/osmscout/routing/MultiDBRoutingState.h
-    include/osmscout/routing/RouteDescriptionPostprocessor.h)
-
-set(HEADER_FILES_NAVIGATION
-    include/osmscout/navigation/Agents.h
-    include/osmscout/navigation/ArrivalEstimateAgent.h
-    include/osmscout/navigation/DataAgent.h
-    include/osmscout/navigation/PositionAgent.h
-    include/osmscout/navigation/RouteStateAgent.h
-    include/osmscout/navigation/Engine.h
-    include/osmscout/navigation/Navigation.h
-    include/osmscout/navigation/BearingAgent.h
-    include/osmscout/navigation/RouteInstructionAgent.h
-    include/osmscout/navigation/SpeedAgent.h
-    include/osmscout/navigation/VoiceInstructionAgent.h
-    include/osmscout/navigation/LaneAgent.h)
-
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
     src/osmscout/ost/Scanner.cpp
+    src/osmscout/projection/MercatorProjection.cpp
+    src/osmscout/projection/Projection.cpp
+    src/osmscout/projection/TileProjection.cpp
     src/osmscout/system/SSEMath.cpp
     src/osmscout/util/Bearing.cpp
     src/osmscout/util/Breaker.cpp
@@ -170,7 +177,6 @@ set(SOURCE_FILES
     src/osmscout/util/Parsing.cpp
     src/osmscout/util/PolygonCenter.cpp
     src/osmscout/util/Progress.cpp
-    src/osmscout/util/Projection.cpp
     src/osmscout/util/ScreenBox.cpp
     src/osmscout/util/StopClock.cpp
     src/osmscout/util/String.cpp
@@ -270,6 +276,7 @@ endif()
 set(HEADER_FILES
     ${HEADER_FILES_ROOT}
     ${HEADER_FILES_OST}
+    ${HEADER_FILES_PROJECTION}
     ${HEADER_FILES_SYSTEM}
     ${HEADER_FILES_UTIL}
     ${HEADER_FILES_ROUTING}

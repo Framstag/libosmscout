@@ -22,7 +22,7 @@
 
 #include <osmscoutmapopengl/MapOpenGLImportExport.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <cassert>
 

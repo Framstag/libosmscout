@@ -2,6 +2,9 @@
 osmscoutSrc = [
             'src/osmscout/ost/Parser.cpp',
             'src/osmscout/ost/Scanner.cpp',
+            'src/osmscout/projection/MercatorProjection.cpp',
+            'src/osmscout/projection/Projection.cpp',
+            'src/osmscout/projection/TileProjection.cpp',
             'src/osmscout/system/SSEMath.cpp',
             'src/osmscout/util/Breaker.cpp',
             'src/osmscout/util/Bearing.cpp',
@@ -27,7 +30,6 @@ osmscoutSrc = [
             'src/osmscout/util/Parsing.cpp',
             'src/osmscout/util/PolygonCenter.cpp',
             'src/osmscout/util/Progress.cpp',
-            'src/osmscout/util/Projection.cpp',
             'src/osmscout/util/ScreenBox.cpp',
             'src/osmscout/util/StopClock.cpp',
             'src/osmscout/util/String.cpp',

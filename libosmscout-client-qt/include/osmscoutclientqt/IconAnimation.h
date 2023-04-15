@@ -22,7 +22,8 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/Projection.h>
+
 #include <osmscoutclientqt/IconLookup.h>
 
 #include <QObject>

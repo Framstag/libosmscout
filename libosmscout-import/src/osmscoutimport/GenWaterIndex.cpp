@@ -29,7 +29,7 @@
 #include <osmscout/WaterIndex.h>
 #include <osmscout/WayDataFile.h>
 
-#include <osmscout/system/Math.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>

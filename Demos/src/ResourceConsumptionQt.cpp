@@ -24,11 +24,15 @@
 #include <QApplication>
 
 #include <osmscout/Database.h>
+
+#include <osmscout/projection/MercatorProjection.h>
+
+#include <osmscout/util/StopClock.h>
+
 #include <osmscoutmap/MapService.h>
 
 #include <osmscoutmapqt/MapPainterQt.h>
 
-#include <osmscout/util/StopClock.h>
 
 /*
   Example for the germany.osm, show germany overview, then zooms into Bonn city

@@ -23,7 +23,8 @@
 #include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/util/Projection.h>
+
+#include <osmscout/projection/Projection.h>
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapData.h>

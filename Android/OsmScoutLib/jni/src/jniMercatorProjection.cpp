@@ -21,7 +21,7 @@
 #include <string.h>
 #include <android/log.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/Projection.h>
 
 #include <jniObjectArray.h>
 
@@ -109,15 +109,15 @@ jobject Java_osm_scout_MercatorProjection_jniPixelToGeo(JNIEnv *env,
   }
 
   double lon, lat;
-  
+
   if (!nativeProjection->PixelToGeo(x, y, lon, lat))
     return NULL;
 
   jclass javaClass = env->FindClass("osm/scout/GeoPos");
   jmethodID methodId = env->GetMethodID(javaClass,"<init>","(DD)V");
   jobject geoPos=env->NewObject(javaClass, methodId, lon, lat);
-  
-  return geoPos;	
+
+  return geoPos;
 }
 
 jobject Java_osm_scout_MercatorProjection_jniGeoToPixel(JNIEnv *env,
@@ -133,15 +133,15 @@ jobject Java_osm_scout_MercatorProjection_jniGeoToPixel(JNIEnv *env,
   }
 
   double x, y;
-  
+
   if (!nativeProjection->GeoToPixel(lon, lat, x, y))
     return NULL;
-    
+
   jclass javaClass = env->FindClass("android/graphics/PointF");
   jmethodID methodId = env->GetMethodID(javaClass,"<init>","(FF)V");
   jobject point=env->NewObject(javaClass, methodId, (float)x, (float)y);
-  
-  return point;	
+
+  return point;
 }
 
 #ifdef __cplusplus

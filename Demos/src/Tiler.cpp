@@ -23,6 +23,8 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/projection/TileProjection.h>
+
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Tiling.h>
 #include <osmscout/util/CmdLineParsing.h>
