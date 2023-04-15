@@ -236,7 +236,7 @@ namespace osmscout {
     {
       return {Vertex2D(0.0,
                        0.0),
-              Vertex2D(GetHeight(),
+              Vertex2D(GetWidth(),
                        GetHeight())};
     }
 
