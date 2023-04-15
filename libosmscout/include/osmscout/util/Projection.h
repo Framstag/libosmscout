@@ -253,26 +253,6 @@ namespace osmscout {
       return dpi;
     }
 
-    /**
-     * Returns true, if the given geo coordinate is in the bounding box
-     */
-    [[nodiscard]] bool GeoIsIn(double lon, double lat) const
-    {
-      return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
-    }
-
-    /**
-     * Returns true, if the given bounding box is completely within the projection bounding box
-     */
-    [[nodiscard]] bool GeoIsIn(double lonMin, double latMin,
-                               double lonMax, double latMax) const
-    {
-      return !(lonMin>this->lonMax ||
-               lonMax<this->lonMin ||
-               latMin>this->latMax ||
-               latMax<this->latMin);
-    }
-
     [[nodiscard]] GeoBox GetDimensions() const
     {
       return {GeoCoord(latMin,lonMin),
