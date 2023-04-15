@@ -75,19 +75,16 @@ namespace osmscout {
       // implementors. I don't know a nice way to handle this
       const Projection&  projection;
 #ifdef OSMSCOUT_HAVE_SSE2
-      int                count;
+      int                count=0;
       ALIGN16_BEG double lon[2] ALIGN16_END;
       ALIGN16_BEG double lat[2] ALIGN16_END;
-      double*            xPointer[2];
-      double*            yPointer[2];
+      double*            xPointer[2]=NULL;
+      double*            yPointer[2]=null;
 #endif
 
     public:
       explicit BatchTransformer(const Projection& projection)
         : projection(projection)
-#ifdef OSMSCOUT_HAVE_SSE2
-          ,count(0)
-#endif
       {
       }
 
@@ -198,7 +195,7 @@ namespace osmscout {
 
     [[nodiscard]] GeoCoord GetCenter() const
     {
-      return GeoCoord(lat,lon);
+      return {lat,lon};
     }
 
     /**
@@ -278,17 +275,8 @@ namespace osmscout {
 
     [[nodiscard]] GeoBox GetDimensions() const
     {
-      return GeoBox(GeoCoord(latMin,lonMin),
-                    GeoCoord(latMax,lonMax));
-    }
-
-    /**
-     * Returns the bounding box of the area covered
-     */
-    [[deprecated]] void GetDimensions(GeoBox& boundingBox) const
-    {
-      boundingBox.Set(GeoCoord(latMin,lonMin),
-                      GeoCoord(latMax,lonMax));
+      return {GeoCoord(latMin,lonMin),
+              GeoCoord(latMax,lonMax)};
     }
 
     /**
@@ -366,18 +354,6 @@ namespace osmscout {
      * Return true on success,
      * false if given coordinate is not valid for this projection.
      */
-    [[deprecated]] bool BoundingBoxToPixel(const GeoBox& boundingBox,
-                                           double& xMin,
-                                           double& yMin,
-                                           double& xMax,
-                                           double& yMax) const;
-
-    /**
-     * Converts a valid GeoBox to its on screen pixel coordinates
-     *
-     * Return true on success,
-     * false if given coordinate is not valid for this projection.
-     */
     bool BoundingBoxToPixel(const GeoBox& boundingBox,
                             ScreenBox& screenBox) const;
 
@@ -403,15 +379,15 @@ namespace osmscout {
     bool   valid=false;    //!< projection is valid
 
     double latOffset=0.0;  //!< Absolute and untransformed screen position of lat coordinate
-    double angleSin;
-    double angleCos;
-    double angleNegSin;
-    double angleNegCos;
+    double angleSin=0.0;
+    double angleCos=0.0;
+    double angleNegSin=0.0;
+    double angleNegCos=0.0;
 
     double scale=1.0;
-    double scaleGradtorad ; //!< Precalculated scale*Gradtorad
+    double scaleGradtorad=0.0 ; //!< Precalculated scale*Gradtorad
 
-    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection
+    double scaledLatDeriv=0.0; //!< precalculated derivation of "latToYPixel" function in projection
                            //!< center scaled by gradtorad * scale
     bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
@@ -557,9 +533,9 @@ namespace osmscout {
     double lonOffset=0.0;
     double latOffset=0.0;
     double scale=1.0;
-    double scaleGradtorad; //!< Precalculated scale*Gradtorad
+    double scaleGradtorad=0.0; //!< Precalculated scale*Gradtorad
 
-    double scaledLatDeriv; //!< precalculated derivation of "latToYPixel" function in projection
+    double scaledLatDeriv=0.0; //!< precalculated derivation of "latToYPixel" function in projection
                            //!< center scaled by gradtorad * scale
     bool   useLinearInterpolation=false; //!< switch to enable linear interpolation of latitude to pixel computation
 
@@ -607,7 +583,11 @@ namespace osmscout {
                     const Magnification& magnification,
                     size_t width, size_t height)
     {
-      return Set(tile,magnification,GetDPI(),width,height);
+      return Set(tile,
+                 magnification,
+                 GetDPI(),
+                 width,
+                 height);
     }
 
     bool Set(const OSMTileId& tile,

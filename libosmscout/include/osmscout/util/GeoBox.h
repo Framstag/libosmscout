@@ -62,6 +62,16 @@ namespace osmscout {
     GeoBox(const GeoCoord& coordA,
            const GeoCoord& coordB);
 
+    bool operator==(const GeoBox& other) const {
+      return GetMinCoord()==other.GetMinCoord() &&
+      GetMaxCoord()== other.GetMaxCoord();
+    }
+
+    bool operator!=(const GeoBox& other) const {
+      return GetMinCoord()!=other.GetMinCoord() ||
+             GetMaxCoord()!= other.GetMaxCoord();
+    }
+
     /**
      * Invalidate the bounding Box
      */

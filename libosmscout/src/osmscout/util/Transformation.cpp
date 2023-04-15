@@ -248,30 +248,6 @@ namespace osmscout {
     usedPoints=0;
   }
 
-  size_t CoordBuffer::PushCoord(double x, double y)
-  {
-    assert(!std::isnan(x));
-    assert(!std::isnan(y));
-
-    if (usedPoints>=bufferSize) {
-      bufferSize=bufferSize*2;
-
-      Vertex2D *newBuffer=new Vertex2D[bufferSize];
-
-      std::memcpy(newBuffer,buffer,sizeof(Vertex2D)*usedPoints);
-
-      log.Warn() << "*** Buffer reallocation: " << bufferSize;
-
-      delete [] buffer;
-
-      buffer=newBuffer;
-    }
-
-    buffer[usedPoints]=Vertex2D(x,y);
-
-    return usedPoints++;
-  }
-
   size_t CoordBuffer::PushCoord(const Vertex2D& coord)
   {
     assert(!std::isnan(coord.GetX()));

@@ -198,8 +198,8 @@ namespace osmscout {
 
         result.back().glyph.font = font;
 
-        result.back().position.SetX(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset);
-        result.back().position.SetY((double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
+        result.back().position=Vertex2D(((double)glyphInfo.geometry.x_offset/(double)PANGO_SCALE) + horizontalOffset,
+                                        (double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
 
         glyphInfo.geometry.x_offset = 0;
         glyphInfo.geometry.y_offset = 0;

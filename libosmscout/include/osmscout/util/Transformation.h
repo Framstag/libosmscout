@@ -353,16 +353,6 @@ namespace osmscout {
     /**
      * Push coordinate to the buffer.
      *
-     * @param x
-     * @param y
-     * @return position (index) of the new coordinate coordinate in the buffer
-     * @note x and y have to be valid, NaN is not allowed
-     */
-    [[deprecated]] size_t PushCoord(double x, double y);
-
-    /**
-     * Push coordinate to the buffer.
-     *
      * @param coord
      * @return position (index) of the new coordinate coordinate in the buffer
      * @note x and y have to be valid, NaN is not allowed
