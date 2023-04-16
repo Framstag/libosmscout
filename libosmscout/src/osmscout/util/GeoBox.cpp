@@ -106,6 +106,17 @@ namespace osmscout {
     return {cornerMin, cornerMax};
   }
 
+  GeoBox GeoBox::CropTo(const GeoBox& other) const
+  {
+    GeoCoord cornerMin( GetMinLat()<other.GetMinLat() ? other.GetMinLat() : GetMinLat(),
+                        GetMinLon()<other.GetMinLon() ? other.GetMinLon() : GetMinLon());
+
+    GeoCoord cornerMax( GetMaxLat()>other.GetMaxLat() ? other.GetMaxLat() : GetMaxLat(),
+                        GetMaxLon()>other.GetMaxLon() ? other.GetMaxLon() : GetMaxLon());
+
+    return {cornerMin, cornerMax};
+  }
+
   GeoCoord GeoBox::GetCenter() const
   {
     return {(minCoord.GetLat()+maxCoord.GetLat())/2,
@@ -147,5 +158,4 @@ namespace osmscout {
 
     return boundingBox;
   }
-
 }

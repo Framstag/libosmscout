@@ -27,6 +27,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/File.h>
 

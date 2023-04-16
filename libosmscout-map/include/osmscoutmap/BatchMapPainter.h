@@ -24,7 +24,7 @@
 
 #include <osmscoutmap/MapImportExport.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/Projection.h>
 
 #include <osmscoutmap/MapData.h>
 #include <osmscoutmap/MapPainter.h>

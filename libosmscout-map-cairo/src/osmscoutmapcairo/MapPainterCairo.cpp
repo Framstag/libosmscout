@@ -875,8 +875,7 @@ namespace osmscout {
       result.back().glyph.width = textExtents.width;
       result.back().glyph.height = label.fontExtents.height;
 
-      result.back().position.SetX(horizontalOffset);
-      result.back().position.SetY(0);
+      result.back().position=Vertex2D(horizontalOffset,0);
 
       horizontalOffset += result.back().glyph.width;
     }

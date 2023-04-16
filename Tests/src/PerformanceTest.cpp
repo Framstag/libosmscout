@@ -25,6 +25,9 @@
 #include "config.h"
 
 #include <osmscout/Database.h>
+
+#include <osmscout/projection/TileProjection.h>
+
 #include <osmscoutmap/MapService.h>
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)

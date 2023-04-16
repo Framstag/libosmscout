@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(libosmscout VERSION 1.1.1 LANGUAGES C CXX)
+set(OSMSCOUT_LIBRARY_VERSION 1.1.1)
 
 # If we are called from conan, include and activate it cmake additions
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -25,7 +26,6 @@ if(NOT CMAKE_DEBUG_POSTFIX)
 endif()
 set(OSMSCOUT_BASE_DIR_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 set(OSMSCOUT_BASE_DIR_BUILD ${CMAKE_CURRENT_BINARY_DIR})
-set(OSMSCOUT_LIBRARY_VERSION ${PROJECT_VERSION})
 include_directories(${OSMSCOUT_BASE_DIR_BUILD}/include)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if(IOS)

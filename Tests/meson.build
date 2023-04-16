@@ -194,6 +194,14 @@ MapRotate = executable('MapRotate',
              install: true,
              install_dir: testInstallDir)
 
+MercatorProjection = executable('MercatorProjection',
+             'src/MercatorProjection.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
 MultiDBRouting = executable('MultiDBRouting',
              'src/MultiDBRouting.cpp',
              include_directories: [osmscoutIncDir],
@@ -425,7 +433,7 @@ ostandossEnv = environment()
 ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
 
 test('Check parsing of access rights', AccessParse)
-test('Check parsing of time string', TimeParse)
+test('Check Base64 code', Base64Test)
 test('Check calculation of bearing', Bearing)
 test('Check encoding of numbers', BitsAndBytesNeeded)
 test('Check std_byte behaviour', ByteTest)
@@ -433,10 +441,34 @@ test('Check cache functionality with CachePerformance', CachePerformance, args :
 test('Check position accuracy with coordinate bits', CalculateResolution)
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
-test('Check number set performance', NumberSetPerformance, timeout: 180)
-test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check coordinate buffer conversions', CoordBufferTest)
 test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check encoding of numbers', EncodeNumber)
+test('Check label formatting', FeatureLabelTest)
+test('Check File utilities', File)
+test('Check File access implementation', FileScannerWriter)
+test('Check handling of geo box intersection', GeoBox)
+test('Check parsing of geo coordinates', GeoCoordParse)
+test('Check impl. of geometric functions', Geometry)
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+  warning('Test "Check rotation of maps" does not run under MSYS because of missing locale support')
+else
+  test('Check rotation of maps', MapRotate)
+endif
+test('Check MercatorProjection', MercatorProjection)
 test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
+test('Check correctness of NumberSet class', NumberSet)
+test('Check number set performance', NumberSetPerformance, timeout: 180)
+test('Check PolygonCenter utility', PolygonCenter)
+test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check scan conversion code', ScanConversion)
+test('Check ScreenBox functionality', ScreenBox)
+test('Check string utils', StringUtils)
+test('Check tiling calculation code', TilingTest)
+test('Check polygon transformation code', TransPolygon)
+test('Check water index import code', WaterIndex)
+test('Check implementation of work queue', WorkQueue)
+test('Check WString<=>String conversion code', WStringStringConversion)
 test('Check threaded database', ThreadedDatabase, args : [
         '--threads', '100',
         '--iterations', '1000',
@@ -461,33 +493,10 @@ if marisaDep.found()
 endif
 
 test('Check SunriseSunset utility', SunriseSunset)
-test('Check encoding of numbers', EncodeNumber)
-test('Check label formatting', FeatureLabelTest)
-test('Check File utilities', File)
-test('Check File access implementation', FileScannerWriter)
-test('Check handling of geo box intersection', GeoBox)
-test('Check parsing of geo coordinates', GeoCoordParse)
-test('Check impl. of geometric functions', Geometry)
-test('Check coordinate buffer conversions', CoordBufferTest)
+test('Check parsing of time string', TimeParse)
 
-if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
-  warning('Test "Check rotation of maps" does not run under MSYS because of missing locale support')
-else
-  test('Check rotation of maps', MapRotate)
-endif
 
-test('Check correctness of NumberSet class', NumberSet)
-test('Check PolygonCenter utility', PolygonCenter)
-test('Check scan conversion code', ScanConversion)
-test('Check ScreenBox functionality', ScreenBox)
-test('Check string utils', StringUtils)
-test('Check tiling calculation code', TilingTest)
-test('Check polygon transformation code', TransPolygon)
-test('Check water index import code', WaterIndex)
-test('Check implementation of work queue', WorkQueue)
-test('Check WString<=>String conversion code', WStringStringConversion)
 test('Check LabelPath code', LabelPathTest)
-test('Check Base64 code', Base64Test)
 
 if buildImport
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)

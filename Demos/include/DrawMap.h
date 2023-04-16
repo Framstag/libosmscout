@@ -21,11 +21,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <osmscout/Database.h>
+#include <osmscout/BasemapDatabase.h>
+
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscout/util/CmdLineParsing.h>
 
-#include <osmscout/Database.h>
 #include <osmscoutmap/MapService.h>
-#include <osmscout/BasemapDatabase.h>
 
 #include <iostream>
 

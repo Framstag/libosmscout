@@ -27,7 +27,7 @@
 #include <osmscoutclientqt/InputHandler.h>
 #include <osmscoutclientqt/OSMTile.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <osmscout/system/Math.h>
 

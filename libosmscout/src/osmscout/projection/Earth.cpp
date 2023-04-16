@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_SYSTEM_MATH_H
-#define OSMSCOUT_SYSTEM_MATH_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2023  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,10 +17,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cmath>
+#include <osmscout/projection/Earth.h>
+
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
-  static const double gradtorad=2*M_PI/360.0;
-}
 
-#endif
+  /*
+   * For the calculations here see:
+   * http://en.wikipedia.org/wiki/Mercator_projection
+   * http://en.wikipedia.org/wiki/Web_Mercator
+   * http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+   */
+
+  //< Radius of the earth in meter
+  const double Earth::radiusMeter=6'378'137.0;
+  //< Extent of the earth in meter
+  const double Earth::extentMeter=2*M_PI*Earth::radiusMeter;
+}

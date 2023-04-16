@@ -313,7 +313,7 @@ namespace osmscout {
                 glyph.glyph.line = label.line[i];
                 glyph.glyph.run = run;
                 glyph.glyph.index = index;
-                glyph.position.Set(glyphPositions[index].x, glyphPositions[index].y);
+                glyph.position=Vertex2D(glyphPositions[index].x, glyphPositions[index].y);
                 result.push_back(std::move(glyph));
             }
             i++;
@@ -586,7 +586,7 @@ namespace osmscout {
             hnd.transEnd = transStart;
         }
         hnd.direction = (hnd.transStart < hnd.transEnd) ? 1 : -1;
-        origin.Set(coordBuffer.buffer[hnd.transStart].GetX(), coordBuffer.buffer[hnd.transStart].GetY());
+        origin=Vertex2D(coordBuffer.buffer[hnd.transStart].GetX(), coordBuffer.buffer[hnd.transStart].GetY());
     }
 
     bool MapPainterIOS::followPath(FollowPathHandle &hnd, double l, Vertex2D &origin) {
@@ -609,7 +609,7 @@ namespace osmscout {
 
             fracToGo = l/len;
             if(fracToGo <= 1.0) {
-                origin.Set(x + deltaX*fracToGo,y + deltaY*fracToGo);
+                origin=Vertex2D(x + deltaX*fracToGo,y + deltaY*fracToGo);
                 return true;
             }
 

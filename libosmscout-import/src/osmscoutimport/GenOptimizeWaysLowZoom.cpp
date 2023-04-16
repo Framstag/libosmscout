@@ -31,11 +31,12 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/Projection.h>
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/Transformation.h>
 

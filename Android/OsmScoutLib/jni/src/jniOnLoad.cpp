@@ -22,7 +22,7 @@
 #include <android/log.h>
 
 #include <osmscout/Database.h>
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/Projection.h>
 #include <osmscout/StyleConfig.h>
 
 #include <jniMapPainterCanvas.h>
@@ -51,7 +51,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
   gObjectTypeSetsArray=new JniObjectArray<ObjectTypeSets>();
   gStyleConfigArray=new JniObjectArray<StyleConfig>();
   gTypeConfigArray=new JniObjectArray<TypeConfig>();
-  
+
   return JNI_VERSION_1_6;
 }
 

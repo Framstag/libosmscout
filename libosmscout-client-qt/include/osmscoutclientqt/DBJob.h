@@ -27,9 +27,12 @@
 #include <QReadWriteLock>
 
 #include <osmscout/BasemapDatabase.h>
-#include <osmscoutclientqt/DBInstance.h>
+
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscoutmap/DataTileCache.h>
 
+#include <osmscoutclientqt/DBInstance.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 namespace osmscout {

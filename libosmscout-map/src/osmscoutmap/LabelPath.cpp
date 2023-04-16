@@ -67,10 +67,10 @@ namespace osmscout {
     if (segments.empty()){
       return Vertex2D();
     }
-    Segment relevantSetment= SegmentBefore(offset);
-    Vertex2D p=relevantSetment.start;
-    double mul = (offset-relevantSetment.offset);
-    Vertex2D add(std::cos(relevantSetment.angle) * mul, -std::sin(relevantSetment.angle) * mul);
+    Segment  relevantSegment= SegmentBefore(offset);
+    Vertex2D p              =relevantSegment.start;
+    double   mul            = (offset-relevantSegment.offset);
+    Vertex2D add(std::cos(relevantSegment.angle)*mul,-std::sin(relevantSegment.angle)*mul);
 
     return Vertex2D(p.GetX() + add.GetX(), p.GetY() + add.GetY());
   }

@@ -28,18 +28,19 @@
 #include <list>
 
 #include <osmscout/Database.h>
-#include <osmscoutmap/MapService.h>
 
-#include <osmscout/util/Projection.h>
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/CmdLineParsing.h>
-
-#include <osmscoutmapqt/MapPainterQt.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/RoutingService.h>
 
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/CmdLineParsing.h>
+
+#include <osmscoutmap/MapService.h>
+
+#include <osmscoutmapqt/MapPainterQt.h>
 
 //#define ROUTE_DEBUG
 //#define NODE_DEBUG

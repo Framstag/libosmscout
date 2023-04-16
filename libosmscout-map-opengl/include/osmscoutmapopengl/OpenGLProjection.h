@@ -22,7 +22,7 @@
 
 #include <osmscoutmapopengl/MapOpenGLImportExport.h>
 
-#include <osmscout/util/Projection.h>
+#include <osmscout/projection/MercatorProjection.h>
 
 #include <cassert>
 
@@ -50,15 +50,15 @@ namespace osmscout {
       assert(width>0);
       assert(height>0);
 
-      auto SetGLf = [shaderProgram](const char *uniformName, GLfloat f) {
-        glUniform1f(glGetUniformLocation(shaderProgram, uniformName), f);
+      auto SetGLf = [shaderProgram](const std::string_view& uniformName, GLfloat f) {
+        glUniform1f(glGetUniformLocation(shaderProgram, uniformName.data()), f);
       };
-      auto SetGLui = [shaderProgram](const char *uniformName, GLuint i) {
-        glUniform1ui(glGetUniformLocation(shaderProgram, uniformName), i);
+      auto SetGLui = [shaderProgram](const std::string_view& uniformName, GLuint i) {
+        glUniform1ui(glGetUniformLocation(shaderProgram, uniformName.data()), i);
       };
 
-      SetGLf("centerLat", lat);
-      SetGLf("centerLon", lon);
+      SetGLf("centerLat", center.GetLat());
+      SetGLf("centerLon", center.GetLon());
       SetGLf("scaleGradtorad", scaleGradtorad);
       SetGLui("useLinearInterpolation", useLinearInterpolation ? 1 : 0);
       SetGLf("scaledLatDeriv", scaledLatDeriv);

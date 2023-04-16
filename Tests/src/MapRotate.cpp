@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscoutmap/MapPainterNoOp.h>
 
 #include <TestMain.h>

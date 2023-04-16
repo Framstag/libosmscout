@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstddef>
 #include <string>
 
 #include <osmscout/CoreImportExport.h>
@@ -40,8 +41,10 @@ namespace osmscout {
    * Note: Numeric values of variants are used for database serialization,
    * do not change them without increasing database format version.
    * Just append new variants to the end.
+   *
+   * Note: There is no need to export Enums
    */
-  enum class OSMSCOUT_API LaneTurn: char {
+  enum class LaneTurn: std::uint8_t {
     Null = 0,
     None = 1,
     Left = 2,

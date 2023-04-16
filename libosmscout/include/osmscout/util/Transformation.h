@@ -24,9 +24,10 @@
 
 #include <osmscout/CoreImportExport.h>
 
+#include <osmscout/projection/Projection.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
-#include <osmscout/util/Projection.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -349,16 +350,6 @@ namespace osmscout {
     CoordBuffer& operator=(const CoordBuffer& other) = delete;
 
     void Reset();
-
-    /**
-     * Push coordinate to the buffer.
-     *
-     * @param x
-     * @param y
-     * @return position (index) of the new coordinate coordinate in the buffer
-     * @note x and y have to be valid, NaN is not allowed
-     */
-    [[deprecated]] size_t PushCoord(double x, double y);
 
     /**
      * Push coordinate to the buffer.
