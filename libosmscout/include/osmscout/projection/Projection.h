@@ -45,8 +45,7 @@ namespace osmscout {
   class OSMSCOUT_API Projection
   {
   protected:
-    double        lon=0.0;          //!< Longitude coordinate of the center of the image
-    double        lat=0.0;          //!< Latitude coordinate of the center of the image
+    GeoCoord      center;           //!< Coordinate of the center of the displayed area
     double        angle=0.0;        //!< Display rotation angle in radians, canvas clockwise
     Magnification magnification;    //!< Current magnification
     double        dpi=0.0;          //!< Screen DPI
@@ -194,7 +193,7 @@ namespace osmscout {
 
     [[nodiscard]] GeoCoord GetCenter() const
     {
-      return {lat,lon};
+      return center;
     }
 
     /**

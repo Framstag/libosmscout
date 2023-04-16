@@ -58,8 +58,7 @@ namespace osmscout {
                                size_t width, size_t height)
   {
     if (valid &&
-        this->lon==coord.GetLon() &&
-        this->lat==coord.GetLat() &&
+        this->center==coord &&
         this->angle==angle &&
         this->magnification==magnification &&
         this->dpi==dpi &&
@@ -74,8 +73,7 @@ namespace osmscout {
     valid=true;
 
     // Make a copy of the context information
-    this->lon=coord.GetLon();
-    this->lat=coord.GetLat();
+    this->center=coord;
     this->angle=angle;
     this->magnification=magnification;
     this->dpi=dpi;
@@ -108,7 +106,7 @@ namespace osmscout {
     double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
 
     // Width of the visible area in meter
-    double groundWidthVisibleMeter=groundWidthEquatorMeter*std::cos(lat*gradtorad);
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*std::cos(center.GetLat()*gradtorad);
 
     // Resulting projection scale factor
     scale=width/(2*M_PI*groundWidthEquatorMeter/Earth::extentMeter);
@@ -154,7 +152,7 @@ namespace osmscout {
                                     std::max(bottomLeft.GetLon(),bottomRight.GetLon())));
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / std::sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / std::sin( (2 * this->center.GetLat() * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
     return true;
@@ -179,7 +177,7 @@ namespace osmscout {
 
     // Transform to absolute geo coordinate
     coord.Set(std::atan(std::sinh(y/scale+latOffset))/gradtorad,
-              this->lon+x/scaleGradtorad);
+              this->center.GetLon()+x/scaleGradtorad);
 
     return IsValidFor(coord);
   }
@@ -190,11 +188,11 @@ namespace osmscout {
     assert(valid);
 
     // Screen coordinate relative to center of image
-    double x=(coord.GetLon()-this->lon)*scaleGradtorad;
+    double x=(coord.GetLon()-this->center.GetLon())*scaleGradtorad;
     double y;
 
     if (useLinearInterpolation) {
-      y=(coord.GetLat()-this->lat)*scaledLatDeriv;
+      y=(coord.GetLat()-this->center.GetLat())*scaledLatDeriv;
     }
     else {
       // Mercator is defined just for latitude +-85.0511
@@ -231,7 +229,7 @@ namespace osmscout {
   {
     Vertex2D pixel;
 
-    GeoToPixel(GeoCoord(lat,lon),
+    GeoToPixel(center,
                pixel);
 
     GeoCoord coord;

@@ -67,8 +67,8 @@ namespace osmscout {
     this->lonMin=lonMin;
     this->lonMax=lonMax;
 
-    lat=(latMin+latMax)/2;
-    lon=(lonMin+lonMax)/2;
+    this->center=GeoCoord((latMin+latMax)/2,
+                          (lonMin+lonMax)/2);
 
     scale=width/(gradtorad*(lonMax-lonMin));
     scaleGradtorad = scale * gradtorad;
@@ -81,7 +81,7 @@ namespace osmscout {
     meterInMM=meterInPixel*25.4/pixelSize;
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / std::sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / std::sin( (2 * this->center.GetLat() * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -172,7 +172,7 @@ namespace osmscout {
     double y;
 
     if (useLinearInterpolation) {
-      y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
+      y=(height/2.0)-((coord.GetLat()-this->center.GetLat())*scaledLatDeriv);
     }
     else {
       y=height-(scale*std::atanh(std::sin(coord.GetLat()*gradtorad))-latOffset);
