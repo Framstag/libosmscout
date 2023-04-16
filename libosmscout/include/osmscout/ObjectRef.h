@@ -52,13 +52,34 @@ namespace osmscout {
   public:
     ObjectOSMRef() = default;
     ObjectOSMRef(const ObjectOSMRef& ref) = default;
+    ObjectOSMRef(ObjectOSMRef&& ref) = default;
 
     ObjectOSMRef(OSMId id,
-                        OSMRefType type)
+                 OSMRefType type)
     : id(id),
       type(type)
     {
       // no code
+    }
+
+    ~ObjectOSMRef() = default;
+
+    ObjectOSMRef& operator=(const ObjectOSMRef& other) = default;
+    ObjectOSMRef& operator=(ObjectOSMRef&& other) = default;
+
+    bool operator<(const ObjectOSMRef& reference) const
+    {
+      return std::tie(type, id) < std::tie(reference.type, reference.id);
+    }
+
+    bool operator==(const ObjectOSMRef& reference) const
+    {
+      return type==reference.type && id==reference.id;
+    }
+
+    bool operator!=(const ObjectOSMRef& reference) const
+    {
+      return type!=reference.type || id!=reference.id;
     }
 
     void Set(const OSMId& id,
@@ -110,20 +131,6 @@ namespace osmscout {
     {
       return type==osmRefRelation;
     }
-    bool operator<(const ObjectOSMRef& reference) const
-    {
-      return std::tie(type, id) < std::tie(reference.type, reference.id);
-    }
-
-    bool operator==(const ObjectOSMRef& reference) const
-    {
-      return type==reference.type && id==reference.id;
-    }
-
-    bool operator!=(const ObjectOSMRef& reference) const
-    {
-      return type!=reference.type || id!=reference.id;
-    }
 
     const char* GetTypeName() const;
   };
@@ -149,17 +156,38 @@ namespace osmscout {
   public:
     ObjectFileRef() = default;
     ObjectFileRef(const ObjectFileRef& ref) = default;
+    ObjectFileRef(ObjectFileRef&& ref) = default;
 
     ObjectFileRef(FileOffset offset,
-                         RefType type)
+                  RefType type)
     : offset(offset),
       type(type)
     {
       // no code
     }
 
+    ~ObjectFileRef() = default;
+
+    ObjectFileRef& operator=(const ObjectFileRef& other) = default;
+    ObjectFileRef& operator=(ObjectFileRef&& other) = default;
+
+    bool operator<(const ObjectFileRef& reference) const
+    {
+      return std::tie(type, offset) < std::tie(reference.type, reference.offset);
+    }
+
+    bool operator==(const ObjectFileRef& reference) const
+    {
+      return type==reference.type && offset==reference.offset;
+    }
+
+    bool operator!=(const ObjectFileRef& reference) const
+    {
+      return type!=reference.type || offset!=reference.offset;
+    }
+
     void Set(const FileOffset& offset,
-                    const RefType& type)
+             const RefType& type)
     {
       this->offset=offset;
       this->type=type;
@@ -206,21 +234,6 @@ namespace osmscout {
     bool IsArea() const
     {
       return type==refArea;
-    }
-
-    bool operator<(const ObjectFileRef& reference) const
-    {
-      return std::tie(type, offset) < std::tie(reference.type, reference.offset);
-    }
-
-    bool operator==(const ObjectFileRef& reference) const
-    {
-      return type==reference.type && offset==reference.offset;
-    }
-
-    bool operator!=(const ObjectFileRef& reference) const
-    {
-      return type!=reference.type || offset!=reference.offset;
     }
 
     const char* GetTypeName() const;
