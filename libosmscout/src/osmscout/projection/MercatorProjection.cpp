@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <osmscout/projection/Earth.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -37,12 +39,6 @@ namespace osmscout {
    * http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
    */
 
-  //< Radius of the earth in meter
-  static const double earthRadiusMeter=6'378'137.0;
-  //< Extent of the earth in meter
-  static const double earthExtentMeter=2*M_PI*earthRadiusMeter;
-  //< Width of a tile at the equator for zoom level 0 in meter (equal to extent of the earth at the equator
-  static const double tileWidthZoom0Aquator=earthExtentMeter;
   //< DPI of a classical OSM tile
   static const double tileDPI=96.0;
 
@@ -54,8 +50,6 @@ namespace osmscout {
 #ifdef OSMSCOUT_HAVE_SSE2
   static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
 #endif
-
-  static const double gradtorad=2*M_PI/360;
 
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
@@ -89,8 +83,8 @@ namespace osmscout {
     this->height=height;
 
     if (angle!=0.0) {
-      angleSin=::sin(angle);
-      angleCos=::cos(angle);
+      angleSin=std::sin(angle);
+      angleCos=std::cos(angle);
       angleNegSin=-angleSin;
       angleNegCos=angleCos;
     }
@@ -102,7 +96,7 @@ namespace osmscout {
     }
 
     // Width in meter of a tile of the given magnification at the equator
-    double equatorTileWidth=tileWidthZoom0Aquator/magnification.GetMagnification();
+    double equatorTileWidth=Earth::extentMeter/magnification.GetMagnification();
 
     // Resolution (meter/pixel) of a pixel in a classical 256 pixel tile for the given zoom level at the equator
     double equatorTileResolution=equatorTileWidth/256.0;
@@ -114,10 +108,10 @@ namespace osmscout {
     double groundWidthEquatorMeter=width*equatorCorrectedEquatorTileResolution;
 
     // Width of the visible area in meter
-    double groundWidthVisibleMeter=groundWidthEquatorMeter*::cos(lat*gradtorad);
+    double groundWidthVisibleMeter=groundWidthEquatorMeter*std::cos(lat*gradtorad);
 
     // Resulting projection scale factor
-    scale=width/(2*M_PI*groundWidthEquatorMeter/earthExtentMeter);
+    scale=width/(2*M_PI*groundWidthEquatorMeter/Earth::extentMeter);
     scaleGradtorad=scale*gradtorad;
 
     // Size of one pixel in meter
@@ -130,7 +124,7 @@ namespace osmscout {
     meterInMM=meterInPixel*25.4/dpi;
 
     // Absolute Y mercator coordinate for latitude
-    latOffset=::atanh(::sin(coord.GetLat()*gradtorad));
+    latOffset=std::atanh(std::sin(coord.GetLat()*gradtorad));
 
     GeoCoord topLeft;
 
@@ -160,7 +154,7 @@ namespace osmscout {
                                     std::max(bottomLeft.GetLon(),bottomRight.GetLon())));
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / ::sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / std::sin( (2 * this->lat * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
     return true;
@@ -184,7 +178,7 @@ namespace osmscout {
     }
 
     // Transform to absolute geo coordinate
-    coord.Set(::atan(::sinh(y/scale+latOffset))/gradtorad,
+    coord.Set(std::atan(std::sinh(y/scale+latOffset))/gradtorad,
               this->lon+x/scaleGradtorad);
 
     return IsValidFor(coord);
@@ -207,7 +201,7 @@ namespace osmscout {
       // For values outside this range is better to result projection border
       // than some invalid coordinate, like INFINITY
       double lat = std::min(std::max(coord.GetLat(), MinLat), MaxLat);
-      y=(::atanh(::sin(lat*gradtorad))-latOffset)*scale;
+      y=(std::atanh(std::sin(lat*gradtorad))-latOffset)*scale;
     }
 
     if (angle!=0.0) {

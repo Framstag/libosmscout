@@ -19,6 +19,8 @@
 
 #include <osmscout/projection/TileProjection.h>
 
+#include <osmscout/projection/Earth.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -33,20 +35,6 @@ namespace osmscout {
 #ifdef OSMSCOUT_HAVE_SSE2
   static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
 #endif
-
-  /*
- * For the calculations here see:
- * http://en.wikipedia.org/wiki/Mercator_projection
- * http://en.wikipedia.org/wiki/Web_Mercator
- * http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
- */
-
-  //< Radius of the earth in meter
-  static const double earthRadiusMeter=6'378'137.0;
-  //< Extent of the earth in meter
-  static const double earthExtentMeter=2*M_PI*earthRadiusMeter;
-
-  static const double gradtorad=2*M_PI/360;
 
   bool TileProjection::SetInternal(double lonMin,double latMin,
                                    double lonMax,double latMax,
@@ -86,14 +74,14 @@ namespace osmscout {
     scaleGradtorad = scale * gradtorad;
 
     lonOffset=lonMin*scaleGradtorad;
-    latOffset=scale*::atanh(::sin(latMin*gradtorad));
+    latOffset=scale*std::atanh(std::sin(latMin*gradtorad));
 
-    pixelSize=earthExtentMeter/magnification.GetMagnification()/width;
+    pixelSize=Earth::extentMeter/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
     meterInMM=meterInPixel*25.4/pixelSize;
 
     // derivation of "latToYPixel" function in projection center
-    double latDeriv = 1.0 / ::sin( (2 * this->lat * gradtorad + M_PI) /  2);
+    double latDeriv = 1.0 / std::sin( (2 * this->lat * gradtorad + M_PI) /  2);
     scaledLatDeriv = latDeriv * gradtorad * scale;
 
 #ifdef OSMSCOUT_HAVE_SSE2
@@ -142,7 +130,7 @@ namespace osmscout {
   bool TileProjection::PixelToGeo(double x, double y,
                                   GeoCoord& coord) const
   {
-    coord.Set(::atan(::sinh((height-y+latOffset)/scale))/gradtorad,
+    coord.Set(std::atan(std::sinh((height-y+latOffset)/scale))/gradtorad,
               (x+lonOffset)/(scale*gradtorad));
 
     return IsValidFor(coord);
@@ -187,7 +175,7 @@ namespace osmscout {
       y=(height/2.0)-((coord.GetLat()-this->lat)*scaledLatDeriv);
     }
     else {
-      y=height-(scale*::atanh(::sin(coord.GetLat()*gradtorad))-latOffset);
+      y=height-(scale*std::atanh(std::sin(coord.GetLat()*gradtorad))-latOffset);
     }
 
     pixel=Vertex2D(x,y);

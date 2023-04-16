@@ -2,6 +2,7 @@
 osmscoutSrc = [
             'src/osmscout/ost/Parser.cpp',
             'src/osmscout/ost/Scanner.cpp',
+            'src/osmscout/projection/Earth.cpp',
             'src/osmscout/projection/MercatorProjection.cpp',
             'src/osmscout/projection/Projection.cpp',
             'src/osmscout/projection/TileProjection.cpp',

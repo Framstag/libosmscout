@@ -69,10 +69,11 @@ set(HEADER_FILES_NAVIGATION
         include/osmscout/navigation/LaneAgent.h)
 
 set(HEADER_FILES_OST
-    include/osmscout/ost/Parser.h
-    include/osmscout/ost/Scanner.h)
+        include/osmscout/ost/Parser.h
+        include/osmscout/ost/Scanner.h)
 
 set(HEADER_FILES_PROJECTION
+        include/osmscout/projection/Earth.h
         include/osmscout/projection/MercatorProjection.h
         include/osmscout/projection/Projection.h
         include/osmscout/projection/TileProjection.h)
@@ -150,6 +151,7 @@ set(HEADER_FILES_UTIL
 set(SOURCE_FILES
     src/osmscout/ost/Parser.cpp
     src/osmscout/ost/Scanner.cpp
+    src/osmscout/projection/Earth.cpp
     src/osmscout/projection/MercatorProjection.cpp
     src/osmscout/projection/Projection.cpp
     src/osmscout/projection/TileProjection.cpp

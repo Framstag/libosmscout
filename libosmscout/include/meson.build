@@ -4,6 +4,7 @@ osmscoutHeader = [
             'osmscout/CoreImportExport.h',
             'osmscout/ost/Parser.h',
             'osmscout/ost/Scanner.h',
+            'osmscout/projection/Earth.h',
             'osmscout/projection/MercatorProjection.h',
             'osmscout/projection/Projection.h',
             'osmscout/projection/TileProjection.h',

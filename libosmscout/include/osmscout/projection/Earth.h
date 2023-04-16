@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_SYSTEM_MATH_H
-#define OSMSCOUT_SYSTEM_MATH_H
+#ifndef OSMSCOUT_PROJECTION_EARTH_H
+#define OSMSCOUT_PROJECTION_EARTH_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2011  Tim Teulings
+  Copyright (C) 2023  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,25 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cmath>
+#include <osmscout/CoreImportExport.h>
 
 namespace osmscout {
-  static const double gradtorad=2*M_PI/360.0;
+
+  /**
+   * Some general information regarding the earth
+   *
+   * To make the stack support other planets, too, one would have
+   * to define a interface base class, from which Earth inherits and
+   * implements the interface.
+   */
+  class OSMSCOUT_API Earth
+  {
+  public:
+    static const double radiusMeter;
+    //< Radius of the earth in meter
+    static const double extentMeter;
+    //< Extent of the earth in meter
+  };
 }
 
 #endif
