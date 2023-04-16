@@ -28,6 +28,8 @@
 
 #include <windows.h>
 
+#include <osmscout/projection/MercatorProjection.h>
+
 #include <osmscoutmapgdi/MapPainterGDIWindow.h>
 
 namespace osmscout {
