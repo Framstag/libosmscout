@@ -77,8 +77,8 @@ namespace osmscout {
       int                count=0;
       ALIGN16_BEG double lon[2] ALIGN16_END;
       ALIGN16_BEG double lat[2] ALIGN16_END;
-      double*            xPointer[2]=nullptr;
-      double*            yPointer[2]=nullptr;
+      double*            xPointer[2]={nullptr,nullptr};
+      double*            yPointer[2]={nullptr,nullptr};
 #endif
 
     public:
