@@ -58,8 +58,7 @@ namespace osmscout {
 #endif
 
   protected:
-    virtual bool SetInternal(double lonMin,double latMin,
-                             double lonMax,double latMax,
+    virtual bool SetInternal(const GeoBox& boundingBox,
                              const Magnification& magnification,
                              double dpi,
                              size_t width,size_t height);
@@ -89,8 +88,8 @@ namespace osmscout {
     }
 
     bool Set(const OSMTileId& tile,
-                    const Magnification& magnification,
-                    size_t width, size_t height)
+             const Magnification& magnification,
+             size_t width, size_t height)
     {
       return Set(tile,
                  magnification,

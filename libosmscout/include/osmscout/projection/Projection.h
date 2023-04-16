@@ -52,10 +52,7 @@ namespace osmscout {
     size_t        width=0;          //!< Width of image
     size_t        height=0;         //!< Height of image
 
-    double        lonMin=0.0;       //!< Longitude of the upper left corner of the image
-    double        latMin=0.0;       //!< Latitude of the upper left corner of the image
-    double        lonMax=0.0;       //!< Longitude of the lower right corner of the image
-    double        latMax=0.0;       //!< Latitude of the lower right corner of the image
+    GeoBox        boundingBox;      //!< Bounding box of the current projection on the ground
 
     double        pixelSize=0.0;    //!< Size of a pixel in meter
     double        meterInPixel=0.0; //!< Number of on screen pixel for one meter on the ground
@@ -253,8 +250,7 @@ namespace osmscout {
 
     [[nodiscard]] GeoBox GetDimensions() const
     {
-      return {GeoCoord(latMin,lonMin),
-              GeoCoord(latMax,lonMax)};
+      return boundingBox;
     }
 
     /**

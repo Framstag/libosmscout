@@ -109,8 +109,9 @@ namespace osmscout {
      * @return
      *    True, if there is intersection, else false.
      */
-    template<typename P> bool Includes(const P& coord,
-                             bool openInterval=true) const
+    template<typename P>
+    bool Includes(const P& coord,
+                  bool openInterval=true) const
     {
       if (!valid){
         return false;
@@ -141,7 +142,7 @@ namespace osmscout {
      *
      */
     bool Intersects(const GeoBox& other,
-                           bool openInterval=true) const
+                    bool openInterval=true) const
     {
       if (!valid || !other.valid) {
         return false;
@@ -166,6 +167,12 @@ namespace osmscout {
      * @param other
      */
     GeoBox Intersection(const GeoBox& other) const;
+
+    /**
+     * Create new GeoBox to is cropped to the bounds of the passed geo box
+     * @param other
+     */
+    GeoBox CropTo(const GeoBox& other) const;
 
     /**
      * Returns true, if the GeoBox instance is valid. This means there were

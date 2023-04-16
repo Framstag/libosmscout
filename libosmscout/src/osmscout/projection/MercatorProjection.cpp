@@ -141,15 +141,10 @@ namespace osmscout {
     PixelToGeo((double)width,(double)height,bottomRight);
 
     // evaluate bounding box, crop bounding box to valid Mercator area
-    latMin=std::max(MinLat,std::min(std::min(topLeft.GetLat(),topRight.GetLat()),
-                                    std::min(bottomLeft.GetLat(),bottomRight.GetLat())));
-    latMax=std::min(MaxLat,std::max(std::max(topLeft.GetLat(),topRight.GetLat()),
-                                    std::max(bottomLeft.GetLat(),bottomRight.GetLat())));
 
-    lonMin=std::max(MinLon,std::min(std::min(topLeft.GetLon(),topRight.GetLon()),
-                                    std::min(bottomLeft.GetLon(),bottomRight.GetLon())));
-    lonMax=std::min(MaxLon,std::max(std::max(topLeft.GetLon(),topRight.GetLon()),
-                                    std::max(bottomLeft.GetLon(),bottomRight.GetLon())));
+    boundingBox=GeoBox(topLeft,bottomRight);
+    boundingBox.CropTo(GeoBox(GeoCoord(MinLat,MinLon),
+                              GeoCoord(MaxLat,MaxLon)));
 
     // derivation of "latToYPixel" function in projection center
     double latDeriv = 1.0 / std::sin( (2 * this->center.GetLat() * gradtorad + M_PI) /  2);

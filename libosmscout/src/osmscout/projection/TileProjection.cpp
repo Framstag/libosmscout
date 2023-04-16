@@ -36,17 +36,13 @@ namespace osmscout {
   static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
 #endif
 
-  bool TileProjection::SetInternal(double lonMin,double latMin,
-                                   double lonMax,double latMax,
+  bool TileProjection::SetInternal(const GeoBox& boundingBox,
                                    const Magnification& magnification,
                                    double dpi,
                                    size_t width,size_t height)
   {
     if (valid &&
-        this->latMin==latMin &&
-        this->latMax==latMax &&
-        this->lonMin==lonMin &&
-        this->lonMax==lonMax &&
+        this->boundingBox==boundingBox &&
         this->magnification==magnification &&
         this->dpi==dpi &&
         this->width==width &&
@@ -62,19 +58,14 @@ namespace osmscout {
     this->width=width;
     this->height=height;
 
-    this->latMin=latMin;
-    this->latMax=latMax;
-    this->lonMin=lonMin;
-    this->lonMax=lonMax;
+    this->boundingBox=boundingBox;
+    this->center=this->boundingBox.GetCenter();
 
-    this->center=GeoCoord((latMin+latMax)/2,
-                          (lonMin+lonMax)/2);
-
-    scale=width/(gradtorad*(lonMax-lonMin));
+    scale=width/(gradtorad*(boundingBox.GetMaxLon()-boundingBox.GetMinLon()));
     scaleGradtorad = scale * gradtorad;
 
-    lonOffset=lonMin*scaleGradtorad;
-    latOffset=scale*std::atanh(std::sin(latMin*gradtorad));
+    lonOffset=boundingBox.GetMinLon()*scaleGradtorad;
+    latOffset=scale*std::atanh(std::sin(boundingBox.GetMinLat()*gradtorad));
 
     pixelSize=Earth::extentMeter/magnification.GetMagnification()/width;
     meterInPixel=1/pixelSize;
@@ -102,10 +93,7 @@ namespace osmscout {
   {
     GeoBox boundingBox(tile.GetBoundingBox(magnification));
 
-    return SetInternal(boundingBox.GetMinLon(),
-                       boundingBox.GetMinLat(),
-                       boundingBox.GetMaxLon(),
-                       boundingBox.GetMaxLat(),
+    return SetInternal(boundingBox,
                        magnification,
                        dpi,
                        width,height);
@@ -118,10 +106,7 @@ namespace osmscout {
   {
     GeoBox boundingBox(tileBox.GetBoundingBox(magnification));
 
-    return SetInternal(boundingBox.GetMinLon(),
-                       boundingBox.GetMinLat(),
-                       boundingBox.GetMaxLon(),
-                       boundingBox.GetMaxLat(),
+    return SetInternal(boundingBox,
                        magnification,
                        dpi,
                        width,height);
