@@ -63,7 +63,7 @@ namespace osmscout {
     /**
      * This class is used to hide internal complexity concerned with batching GeoToPixel calls
      */
-    class BatchTransformer
+    class BatchTransformer CLASS_FINAL
     {
     public:
       // this should be private, but that would exclude future projection
