@@ -232,8 +232,8 @@ namespace osmscout {
     {
       return {Vertex2D(0.0,
                        0.0),
-              Vertex2D(GetWidth(),
-                       GetHeight())};
+              Vertex2D(static_cast<double>(GetWidth()),
+                       static_cast<double>(GetHeight()))};
     }
 
     /**
