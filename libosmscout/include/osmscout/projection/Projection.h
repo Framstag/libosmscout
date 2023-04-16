@@ -84,11 +84,15 @@ namespace osmscout {
       }
 
       BatchTransformer(const BatchTransformer& other) = delete;
+      BatchTransformer(BatchTransformer&& other) = delete;
 
       ~BatchTransformer()
       {
         Flush();
       }
+
+      BatchTransformer& operator=(const BatchTransformer& other) = delete;
+      BatchTransformer& operator=(BatchTransformer&& other) = delete;
 
       void GeoToPixel(const GeoCoord& coord,
                       double& x,
