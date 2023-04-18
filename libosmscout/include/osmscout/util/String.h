@@ -540,6 +540,11 @@ namespace osmscout {
   extern OSMSCOUT_API std::string TimestampToISO8601TimeString(const Timestamp &timestamp);
 
   extern OSMSCOUT_API std::string DurationString(const Duration &duration);
+
+  /**
+   * Trim trimmedChar from begin and end of str.
+   */
+  extern OSMSCOUT_API std::string Trim(const std::string &str, char trimmedChar=' ');
 }
 
 #endif
