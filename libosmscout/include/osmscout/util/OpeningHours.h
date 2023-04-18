@@ -73,7 +73,7 @@ namespace osmscout {
     std::vector<Rule> rules;
 
   public:
-    OpeningHours(std::vector<Rule> rules);
+    explicit OpeningHours(std::vector<Rule> rules);
     OpeningHours(const OpeningHours&) = default;
     OpeningHours(OpeningHours&&) = default;
 

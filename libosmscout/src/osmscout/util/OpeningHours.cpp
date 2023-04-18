@@ -69,35 +69,40 @@ std::optional<OpeningHours::WeekDay> ParseDay(const std::string &dayStr, bool ho
 // examples:
 // Mo-Su
 // Mo,Tu
+// Sa-Su,PH
 std::optional<std::vector<OpeningHours::WeekDay>> ParseDayDescription(const std::string &dayDescription)
 {
   std::vector<OpeningHours::WeekDay> result;
-  if (dayDescription.find('-') != std::string::npos) {
-    // dayDescription is day interval (Mo-Su)
-    auto days = SplitString(dayDescription, "-", 2);
-    if (days.size() != 2) {
-      log.Warn() << "Cannot parse day description: " << dayDescription;
-      return std::nullopt;
-    }
-    auto from=ParseDay(days.front(), false);
-    auto to=ParseDay(days.back(), false);
-    if (!from || !to) {
-      return std::nullopt;
-    }
-    for (int day=int(from.value()); day<=int(to.value()); day++) {
-      result.push_back(OpeningHours::WeekDay(day));
-    }
-  } else {
-    // dayDescription is day set (Mo,Tu)
-    auto days=SplitString(dayDescription, ",");
-    for (auto const &dayStr:days) {
-      auto day=ParseDay(dayStr, true);
+
+  // dayDescription is day set (Mo,Tu or Sa-Su,PH)
+  auto days=SplitString(dayDescription, ",");
+  for (auto const &dayStr:days) {
+
+    if (dayStr.find('-') != std::string::npos) {
+      // dayDescription is day interval (Mo-Su)
+      auto daysIntervalParts = SplitString(dayStr, "-", 2);
+      if (daysIntervalParts.size() != 2) {
+        log.Warn() << "Cannot parse day description: " << dayDescription;
+        return std::nullopt;
+      }
+      auto from=ParseDay(daysIntervalParts.front(), false);
+      auto to=ParseDay(daysIntervalParts.back(), false);
+      if (!from || !to) {
+        return std::nullopt;
+      }
+      for (int day=int(from.value()); day<=int(to.value()); day++) {
+        result.push_back(OpeningHours::WeekDay(day));
+      }
+    } else {
+      // single day
+      auto day = ParseDay(dayStr, true);
       if (!day) {
         return std::nullopt;
       }
       result.push_back(*day);
     }
   }
+
   return result;
 }
 
