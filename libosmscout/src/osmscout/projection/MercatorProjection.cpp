@@ -47,10 +47,6 @@ namespace osmscout {
   const double MercatorProjection::MaxLon = +180.0;
   const double MercatorProjection::MinLon = -180.0;
 
-#ifdef OSMSCOUT_HAVE_SSE2
-  static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
-#endif
-
   bool MercatorProjection::Set(const GeoCoord& coord,
                                double angle,
                                const Magnification& magnification,
