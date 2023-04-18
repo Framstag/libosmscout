@@ -908,4 +908,17 @@ namespace osmscout {
 
     return stream.str();
   }
+
+  std::string Trim(const std::string &str, char trimmedChar)
+  {
+    auto begin=str.begin();
+    auto end=str.end();
+    while (begin != end && *(end - 1) == trimmedChar) {
+      --end;
+    }
+    while (begin != end && *begin == trimmedChar) {
+      ++begin;
+    }
+    return std::string(begin, end);
+  }
 }

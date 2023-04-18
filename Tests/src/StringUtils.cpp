@@ -281,3 +281,11 @@ TEST_CASE("Local aware number to string")
   REQUIRE(osmscout::NumberToString(1002030, locale) == "1 002 030");
   REQUIRE(osmscout::NumberToString(-1002030, locale) == "-1 002 030");
 }
+
+TEST_CASE("Trim string")
+{
+  REQUIRE(osmscout::Trim("").empty());
+  REQUIRE(osmscout::Trim("a b c")=="a b c");
+  REQUIRE(osmscout::Trim("  abc  ")=="abc");
+  REQUIRE(osmscout::Trim("--  abc  --", '-')=="  abc  ");
+}
