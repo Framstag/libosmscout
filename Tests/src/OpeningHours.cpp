@@ -70,3 +70,12 @@ TEST_CASE("Public holidays as weekend")
   REQUIRE(oh != std::nullopt);
   REQUIRE(oh->GetRules().size() == 8);
 }
+
+TEST_CASE("Closed at public holidays")
+{
+  auto oh = osmscout::OpeningHours::Parse("Mo-Fr 08:00-18:00; PH off");
+  REQUIRE(oh != std::nullopt);
+  REQUIRE(oh->GetRules().size() == 6);
+  REQUIRE(oh->GetRules()[5].day==osmscout::OpeningHours::WeekDay::PublicHoliday);
+  REQUIRE(oh->GetRules()[5].intervals.empty());
+}
