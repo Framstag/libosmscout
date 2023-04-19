@@ -226,6 +226,13 @@ NumberSetPerformance = executable('NumberSetPerformance',
              install: true,
              install_dir: testInstallDir)
 
+OpeningHours = executable('OpeningHours',
+             'src/OpeningHours.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
 
 OSTAndOSSCheck = executable('OSTAndOSSCheck',
              'src/OSTAndOSSCheck.cpp',
@@ -442,6 +449,7 @@ test('Check position accuracy with coordinate bits', CalculateResolution)
 test('Check parsing of command line args', CmdLineParsing)
 test('Check parsing of colors', ColorParse)
 test('Check coordinate buffer conversions', CoordBufferTest)
+test('Check parsing of opening hours', OpeningHours)
 test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
 test('Check encoding of numbers', EncodeNumber)
 test('Check label formatting', FeatureLabelTest)

@@ -37,6 +37,9 @@ set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 #---- NumberSetPerformance
 osmscout_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
 
+#---- OpeningHours
+osmscout_test_project(NAME OpeningHours SOURCES src/OpeningHours.cpp)
+
 #---- ReaderScannerPerformance
 osmscout_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 

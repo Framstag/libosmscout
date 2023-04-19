@@ -37,6 +37,7 @@ osmscoutHeader = [
             'osmscout/util/Number.h',
             'osmscout/util/NumberSet.h',
             'osmscout/util/ObjectPool.h',
+            'osmscout/util/OpeningHours.h',
             'osmscout/util/Parsing.h',
             'osmscout/util/PolygonCenter.h',
             'osmscout/util/ProcessingQueue.h',

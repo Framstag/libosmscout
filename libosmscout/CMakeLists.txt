@@ -127,6 +127,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Number.h
     include/osmscout/util/NumberSet.h
     include/osmscout/util/ObjectPool.h
+    include/osmscout/util/OpeningHours.h
     include/osmscout/util/Parsing.h
     include/osmscout/util/PolygonCenter.h
     include/osmscout/util/ProcessingQueue.h
@@ -176,6 +177,7 @@ set(SOURCE_FILES
     src/osmscout/util/NodeUseMap.cpp
     src/osmscout/util/Number.cpp
     src/osmscout/util/NumberSet.cpp
+    src/osmscout/util/OpeningHours.cpp
     src/osmscout/util/Parsing.cpp
     src/osmscout/util/PolygonCenter.cpp
     src/osmscout/util/Progress.cpp

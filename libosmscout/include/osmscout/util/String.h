@@ -316,7 +316,7 @@ namespace osmscout {
    *
    * \note when stringList is empty, result is empty list
    * \note separator must not be empty
-   * \note when string ends with separator, last (empty) element is omited
+   * \note when string ends with separator, last (empty) element is omitted
    * \note when maxSize is negative, list will contains all elements
    */
   extern OSMSCOUT_API std::list<std::string> SplitString(const std::string& stringList,
@@ -332,7 +332,7 @@ namespace osmscout {
    * Returns the first entry in the list
    *
    * \note stringList must not be empty
-   * \note at least one devider must be given
+   * \note at least one divider must be given
    */
   extern OSMSCOUT_API std::string GetFirstInStringList(const std::string& stringList,
                                                        const std::string& divider);
