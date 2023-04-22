@@ -101,6 +101,7 @@ void IconLookup::lookupIcons(const QString &databasePath,
         QString operatorName;
         QString phone;
         QString website;
+        QString openingHours;
         if (const osmscout::NameFeatureValue *nameValue=featureBuffer.findValue<osmscout::NameFeatureValue>();
             nameValue!=nullptr){
           name=QString::fromStdString(nameValue->GetLabel(Locale(), 0));
@@ -125,11 +126,15 @@ void IconLookup::lookupIcons(const QString &databasePath,
             websiteValue!=nullptr){
           website=QString::fromStdString(websiteValue->GetWebsite());
         }
+        if (const osmscout::OpeningHoursFeatureValue *openingHoursValue=featureBuffer.findValue<osmscout::OpeningHoursFeatureValue>();
+            openingHoursValue!=nullptr){
+          openingHours=QString::fromStdString(openingHoursValue->GetValue());
+        }
 
         findIcons.push_back(MapIcon{QPoint(screenPos.GetX(),screenPos.GetY()),
                                     iconRect, coord, distanceSquare, iconStyle,
                                     databasePath, objectRef, poiId, QString::fromStdString(type->GetName()),
-                                    name, altName, ref, operatorName, phone, website, QImage()});
+                                    name, altName, ref, operatorName, phone, website, openingHours, QImage()});
       }
     }
   };

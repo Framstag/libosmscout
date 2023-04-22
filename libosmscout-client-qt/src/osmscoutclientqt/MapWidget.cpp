@@ -777,7 +777,8 @@ void MapWidget::onIconFound(QPoint /*lookupCoord*/, MapIcon icon)
 
   emit iconTapped(icon.screenCoord, icon.coord.GetLat(), icon.coord.GetLon(), icon.databasePath,
                   QString(icon.objectRef.GetTypeName()), icon.objectRef.GetFileOffset(), icon.poiId,
-                  icon.type, icon.name, icon.altName, icon.ref, icon.operatorName, icon.phone, icon.website);
+                  icon.type, icon.name, icon.altName, icon.ref, icon.operatorName, icon.phone, icon.website,
+                  icon.openingHours);
 }
 
 void MapWidget::onDoubleTap(const QPoint p)
