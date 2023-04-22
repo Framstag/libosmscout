@@ -103,7 +103,7 @@ public:
     };
     
     Q_INVOKABLE double distance(double lat1, double lon1, 
-                                 double lat2, double lon2);
+                                double lat2, double lon2);
     Q_INVOKABLE QString bearing(double lat1, double lon1, 
                                 double lat2, double lon2);
     
