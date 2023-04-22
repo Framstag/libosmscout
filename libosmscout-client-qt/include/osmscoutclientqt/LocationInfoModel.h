@@ -79,7 +79,8 @@ public:
         AddressLocationRole = Qt::UserRole+11,
         AddressNumberRole = Qt::UserRole+12,
         IndexedAdminRegionRole = Qt::UserRole+13,
-        AltLangName = Qt::UserRole+14
+        AltLangName = Qt::UserRole+14,
+        OpeningHours = Qt::UserRole+15
     };
     Q_ENUM(Roles)
 
