@@ -87,7 +87,13 @@ namespace osmscout {
       return rules;
     }
 
-    static std::optional<OpeningHours> Parse(const std::string &str);
+    /** Parse OSM opening hours string
+     *
+     * @param str
+     * @param explicitClosedDays explicitly add empty rule for week days when is closed
+     * @return
+     */
+    static std::optional<OpeningHours> Parse(const std::string &str, bool explicitClosedDays=false);
   };
 
 }

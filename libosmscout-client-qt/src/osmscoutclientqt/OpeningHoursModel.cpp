@@ -93,7 +93,7 @@ void OpeningHoursModel::setOpeningHours(const QString &openingHours)
   rawOpeningHours = openingHours;
   beginResetModel();
   model.clear();
-  auto result=OpeningHours::Parse(openingHours.toStdString());
+  auto result=OpeningHours::Parse(openingHours.toStdString(), true);
   if (result) {
     bool sundayFirst=locale.firstDayOfWeek()==Qt::Sunday;
     auto dayNum=[sundayFirst](const OpeningHours::WeekDay day) -> int {

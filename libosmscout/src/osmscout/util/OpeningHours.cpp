@@ -167,7 +167,7 @@ std::optional<std::vector<OpeningHours::TimeInterval>> ParseTimeDescription(cons
 }
 }
 
-std::optional<OpeningHours> OpeningHours::Parse(const std::string &str)
+std::optional<OpeningHours> OpeningHours::Parse(const std::string &str, bool explicitClosedDays)
 {
   constexpr int LastDayValue = int(WeekDay::SchoolHoliday);
 
@@ -208,6 +208,8 @@ std::optional<OpeningHours> OpeningHours::Parse(const std::string &str)
   for (int day=0; day<=LastDayValue; day++) {
     if (rules[day].has_value()) {
       rulesVec.push_back(Rule{WeekDay(day),rules[day].value()});
+    } else if (explicitClosedDays && day<=int(WeekDay::Sunday)) {
+      rulesVec.push_back(Rule{WeekDay(day),std::vector<OpeningHours::TimeInterval>()});
     }
   }
 
