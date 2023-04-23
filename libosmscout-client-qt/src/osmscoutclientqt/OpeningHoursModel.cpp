@@ -58,12 +58,12 @@ QString OpeningHoursModel::dayName(OpeningHours::WeekDay weekDay) const
 QString OpeningHoursModel::shortDayName(OpeningHours::WeekDay weekDay) const
 {
   if (weekDay==OpeningHours::WeekDay::PublicHoliday) {
-    //: short variant
-    return OpeningHoursModel::tr("Public holiday");
+    //: short variant of "Public holiday"
+    return OpeningHoursModel::tr("PH");
   }
   if (weekDay==OpeningHours::WeekDay::SchoolHoliday) {
-    //: short variant
-    return OpeningHoursModel::tr("School holiday");
+    //: short variant of "School holiday"
+    return OpeningHoursModel::tr("SH");
   }
   // return calendar.standaloneWeekDayName(locale, int(weekDay)+1, QLocale::FormatType::ShortFormat);
   return locale.standaloneDayName(int(weekDay)+1, QLocale::FormatType::ShortFormat);
