@@ -2,8 +2,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-		include/osmscoutclientqt/AdminRegionInfo.h
-		include/osmscoutclientqt/ClientQtImportExport.h
+    include/osmscoutclientqt/AdminRegionInfo.h
+    include/osmscoutclientqt/ClientQtImportExport.h
     include/osmscoutclientqt/DBThread.h
     include/osmscoutclientqt/DBInstance.h
     include/osmscoutclientqt/ElevationChartWidget.h
@@ -17,6 +17,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/MapWidget.h
     include/osmscoutclientqt/OnlineTileProvider.h
     include/osmscoutclientqt/OnlineTileProviderModel.h
+    include/osmscoutclientqt/OpeningHoursModel.h
     include/osmscoutclientqt/OsmTileDownloader.h
     include/osmscoutclientqt/OSMTile.h
     include/osmscoutclientqt/RoutingModel.h
@@ -76,6 +77,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/MapWidget.cpp
     src/osmscoutclientqt/OnlineTileProvider.cpp
     src/osmscoutclientqt/OnlineTileProviderModel.cpp
+    src/osmscoutclientqt/OpeningHoursModel.cpp
     src/osmscoutclientqt/OSMTile.cpp
     src/osmscoutclientqt/OsmTileDownloader.cpp
     src/osmscoutclientqt/RoutingModel.cpp

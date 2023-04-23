@@ -15,6 +15,7 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/InputHandler.cpp',
             'src/osmscoutclientqt/OnlineTileProvider.cpp',
             'src/osmscoutclientqt/OnlineTileProviderModel.cpp',
+            'src/osmscoutclientqt/OpeningHoursModel.cpp',
             'src/osmscoutclientqt/SearchLocationModel.cpp',
             'src/osmscoutclientqt/Settings.cpp',
             'src/osmscoutclientqt/MapWidget.cpp',
