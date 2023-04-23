@@ -51,6 +51,7 @@ public:
     DayRole = Qt::UserRole,
     ShortDayRole = Qt::UserRole+1,
     TimeIntervalsRole = Qt::UserRole+2,
+    IsTodayRole = Qt::UserRole+3,
   };
   Q_ENUM(Roles)
 

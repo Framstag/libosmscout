@@ -118,6 +118,7 @@ QVariant OpeningHoursModel::data(const QModelIndex &index, int role) const
   if(index.row() < 0 || index.row() >= int(model.size())) {
     return QVariant();
   }
+  int dayOfTheWeek;
   auto const &rule = model[index.row()];
   switch (role) {
     case DayRole:
@@ -126,6 +127,9 @@ QVariant OpeningHoursModel::data(const QModelIndex &index, int role) const
       return shortDayName(rule.day);
     case TimeIntervalsRole:
       return intervalStrings(rule.intervals);
+    case IsTodayRole:
+      dayOfTheWeek=QDate::currentDate().dayOfWeek()-1;
+      return dayOfTheWeek>=0 && dayOfTheWeek<=int(OpeningHours::WeekDay::Sunday) && dayOfTheWeek==int(rule.day);
     default:
       return QVariant();
   }
@@ -138,6 +142,7 @@ QHash<int, QByteArray> OpeningHoursModel::roleNames() const
   roles[DayRole]="day";
   roles[ShortDayRole]="shortDay";
   roles[TimeIntervalsRole]="timeIntervals";
+  roles[IsTodayRole]="isToday";
 
   return roles;
 }
