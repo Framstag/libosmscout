@@ -120,6 +120,7 @@ QHash<int, QByteArray> LocationInfoModel::roleNames() const
     roles[AddressNumberRole] = "addressNumber";
     roles[IndexedAdminRegionRole] = "indexedAdminRegion";
     roles[AltLangName]="altLangName";
+    roles[OpeningHours]="openingHours";
 
     return roles;
 }
@@ -203,6 +204,7 @@ void LocationInfoModel::addToModel(const QString database,
   QString website;
   QString phone;
   QString altName;
+  QString openingHours;
   if (place.GetObjectFeatures()){
     for (const auto& featureInstance :place.GetObjectFeatures()->GetType()->GetFeatures()){
       if (place.GetObjectFeatures()->HasFeature(featureInstance.GetIndex())){
@@ -223,6 +225,9 @@ void LocationInfoModel::addToModel(const QString database,
           } else if (const osmscout::NameAltFeatureValue *altNameValue = dynamic_cast<const osmscout::NameAltFeatureValue*>(value);
                      altNameValue != nullptr){
             altName = QString::fromStdString(altNameValue->GetNameAlt());
+          } else if (const osmscout::OpeningHoursFeatureValue *openingHoursValue = dynamic_cast<const osmscout::OpeningHoursFeatureValue*>(value);
+                     openingHoursValue != nullptr) {
+            openingHours = QString::fromStdString(openingHoursValue->GetValue());
           }
         }
       }
@@ -249,6 +254,7 @@ void LocationInfoModel::addToModel(const QString database,
   obj[AddressNumberRole] = addressNumber;
   obj[IndexedAdminRegionRole] = LookupModule::IndexedAdminRegionNames(regions, settings->GetShowAltLanguage());
   obj[AltLangName] = altName;
+  obj[OpeningHours] = openingHours;
 
   model << obj;
 
@@ -338,6 +344,7 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   obj[AddressNumberRole] = "";
   obj[IndexedAdminRegionRole] = QStringList();
   obj[AltLangName] = bottom->qStringAltName();
+  obj[OpeningHours] = "";
 
   model << obj;
 

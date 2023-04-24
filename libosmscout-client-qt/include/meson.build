@@ -19,6 +19,7 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/InputHandler.h',
             'osmscoutclientqt/OnlineTileProvider.h',
             'osmscoutclientqt/OnlineTileProviderModel.h',
+            'osmscoutclientqt/OpeningHoursModel.h',
             'osmscoutclientqt/SearchLocationModel.h',
             'osmscoutclientqt/Settings.h',
             'osmscoutclientqt/MapWidget.h',
