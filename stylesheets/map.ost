@@ -429,11 +429,11 @@ TYPES
       {Bridge, Tunnel}
 
   //
-  // Other public transport (not railway)
+  // Other public transport (not railway or ferry_terminal)
   //
 
   TYPE highway_bus_stop
-    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND ("public_transport" IN ["platform", "stop_position"])))
+    = NODE ("highway"=="bus_stop" OR (!("bus" IN ["no", "false", "0"]) AND !("amenity"=="ferry_terminal") AND ("public_transport" IN ["platform", "stop_position"])))
       {Name, NameAlt}
 
   TYPE public_transport_platform
