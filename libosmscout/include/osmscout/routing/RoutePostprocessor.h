@@ -28,7 +28,14 @@
 #include <osmscout/CoreFeatures.h>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/feature/BridgeFeature.h>
+#include <osmscout/feature/ClockwiseDirectionFeature.h>
+#include <osmscout/feature/DestinationFeature.h>
+#include <osmscout/feature/LanesFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/RefFeature.h>
+#include <osmscout/feature/RoundaboutFeature.h>
 
 #include <osmscout/util/Time.h>
 

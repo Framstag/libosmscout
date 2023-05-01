@@ -20,13 +20,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <iostream>
+
 #include <QObject>
 #include <QThread>
-#include <osmscoutclientqt/DBThread.h>
+
 #include <osmscout/LocationDescriptionService.h>
 
+#include <osmscout/feature/PhoneFeature.h>
+#include <osmscout/feature/WebsiteFeature.h>
+
+#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
-#include <iostream>
+
 
 namespace osmscout {
 

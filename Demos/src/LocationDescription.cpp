@@ -24,7 +24,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/LocationDescriptionService.h>
-#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/feature/AdminLevelFeature.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 

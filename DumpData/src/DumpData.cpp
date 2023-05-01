@@ -19,20 +19,32 @@
 
 #include <cstring>
 #include <iostream>
+#include <list>
+#include <map>
+#include <string>
+#include <vector>
 
 #include <osmscout/Database.h>
 #include <osmscout/DebugDatabase.h>
 
 #include <osmscout/routing/RouteNode.h>
-#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/feature/AccessRestrictedFeature.h>
+#include <osmscout/feature/AddressFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/IsInFeature.h>
+#include <osmscout/feature/LanesFeature.h>
+#include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/LocationFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+#include <osmscout/feature/RefFeature.h>
+#include <osmscout/feature/SidewayFeature.h>
+#include <osmscout/feature/WidthFeature.h>
 
 #include <osmscout/routing/RouteNodeDataFile.h>
 #include <osmscout/routing/RoutingService.h>
-
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
 
 /*
  * Example:

@@ -22,7 +22,8 @@
 #define osmscout_ost_PARSER_H
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/feature/NameFeature.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
@@ -167,4 +168,3 @@ std::string Destring(const char* str)
 
 
 #endif // !defined(COCO_PARSER_H__)
-

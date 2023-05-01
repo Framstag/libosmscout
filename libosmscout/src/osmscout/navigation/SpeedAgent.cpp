@@ -18,8 +18,10 @@
  */
 
 #include <osmscout/navigation/SpeedAgent.h>
+
+#include <osmscout/feature/MaxSpeedFeature.h>
+
 #include <osmscout/navigation/PositionAgent.h>
-#include <osmscout/FeatureReader.h>
 
 namespace osmscout {
 

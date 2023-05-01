@@ -19,10 +19,15 @@
 
 #include <osmscoutimport/SortNodeDat.h>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/NodeDataFile.h>
+
+#include <osmscout/feature/AddressFeature.h>
+#include <osmscout/feature/LocationFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/PostalCodeFeature.h>
+
 #include <osmscoutimport/GenNodeDat.h>
 
 namespace osmscout {

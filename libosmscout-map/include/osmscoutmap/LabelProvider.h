@@ -25,7 +25,6 @@
 #include <osmscoutmap/MapImportExport.h>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
 
 #include <osmscoutmap/MapParameter.h>
 

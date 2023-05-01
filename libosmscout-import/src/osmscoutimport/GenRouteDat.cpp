@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <future>
-#include <iterator>
 
 #include <osmscout/ObjectRef.h>
 
@@ -29,20 +28,13 @@
 
 #include <osmscout/routing/RoutingService.h>
 
-#include <osmscoutimport/GenRouteDat.h>
-
-#include <algorithm>
-#include <future>
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/StopClock.h>
 
 #include <osmscoutimport/Preprocess.h>
 #include <osmscoutimport/GenWayWayDat.h>
-
-#include <iostream>
 
 namespace osmscout {
 

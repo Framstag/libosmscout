@@ -22,12 +22,18 @@
 #include <list>
 #include <map>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
 #include <osmscout/PTRouteDataFile.h>
+
+#include <osmscout/feature/ColorFeature.h>
+#include <osmscout/feature/FromToFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NetworkFeature.h>
+#include <osmscout/feature/OperatorFeature.h>
+#include <osmscout/feature/RefFeature.h>
 
 #include <osmscoutimport/Preprocess.h>
 

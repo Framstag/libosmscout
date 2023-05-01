@@ -21,12 +21,15 @@
 
 #include <algorithm>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/TypeInfoSet.h>
+
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/RefFeature.h>
 
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
+
 #include <osmscoutimport/Preprocess.h>
 #include <osmscoutimport/GenRawNodeIndex.h>
 #include <osmscoutimport/GenRawWayIndex.h>

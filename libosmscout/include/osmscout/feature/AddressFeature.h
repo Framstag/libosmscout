@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_FEATURE_ADDRESSFEATURE_H
-#define OSMSCOUT_FEATURE_ADDRESSFEATURE_H
+#ifndef OSMSCOUT_FEATURE_ADDRESS_FEATURE_H
+#define OSMSCOUT_FEATURE_ADDRESS_FEATURE_H
 
 /*
   This source is part of the libosmscout library
@@ -19,9 +19,6 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
-
-#include <cstdint>
-#include <limits>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeature.h>

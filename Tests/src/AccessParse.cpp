@@ -4,8 +4,7 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/TypeFeatures.h>
-#include <osmscout/FeatureReader.h>
+#include <osmscout/feature/AccessFeature.h>
 
 #include <osmscout/util/TagErrorReporter.h>
 

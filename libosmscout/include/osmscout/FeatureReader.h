@@ -24,7 +24,6 @@
 #include <vector>
 
 #include <osmscout/TypeFeature.h>
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/TypeConfig.h>
 
 namespace osmscout {
@@ -106,13 +105,6 @@ namespace osmscout {
 
     return false;
   }
-
-  using AccessRestrictedFeatureReader   = FeatureReader<AccessRestrictedFeature>;
-  using BridgeFeatureReader             = FeatureReader<BridgeFeature>;
-  using TunnelFeatureReader             = FeatureReader<TunnelFeature>;
-  using EmbankmentFeatureReader         = FeatureReader<EmbankmentFeature>;
-  using RoundaboutFeatureReader         = FeatureReader<RoundaboutFeature>;
-  using ClockwiseDirectionFeatureReader = FeatureReader<ClockwiseDirectionFeature>;
 
   /**
    * Variant of FeatureReader that is not type set and thus can easier get used
@@ -257,30 +249,6 @@ namespace osmscout {
     return defaultValue;
   }
 
-  using NameFeatureValueReader             = FeatureValueReader<NameFeature, NameFeatureValue>;
-  using NameAltFeatureValueReader          = FeatureValueReader<NameAltFeature, NameAltFeatureValue>;
-  using NameShortFeatureValueReader        = FeatureValueReader<NameShortFeature, NameShortFeatureValue>;
-  using RefFeatureValueReader              = FeatureValueReader<RefFeature, RefFeatureValue>;
-  using LocationFeatureValueReader         = FeatureValueReader<LocationFeature, LocationFeatureValue>;
-  using AddressFeatureValueReader          = FeatureValueReader<AddressFeature, AddressFeatureValue>;
-  using AccessFeatureValueReader           = FeatureValueReader<AccessFeature, AccessFeatureValue>;
-  using AccessRestrictedFeatureValueReader = FeatureValueReader<AccessRestrictedFeature, AccessRestrictedFeatureValue>;
-  using LayerFeatureValueReader            = FeatureValueReader<LayerFeature, LayerFeatureValue>;
-  using WidthFeatureValueReader            = FeatureValueReader<WidthFeature, WidthFeatureValue>;
-  using MaxSpeedFeatureValueReader         = FeatureValueReader<MaxSpeedFeature, MaxSpeedFeatureValue>;
-  using GradeFeatureValueReader            = FeatureValueReader<GradeFeature, GradeFeatureValue>;
-  using AdminLevelFeatureValueReader       = FeatureValueReader<AdminLevelFeature, AdminLevelFeatureValue>;
-  using PostalCodeFeatureValueReader       = FeatureValueReader<PostalCodeFeature, PostalCodeFeatureValue>;
-  using IsInFeatureValueReader             = FeatureValueReader<IsInFeature, IsInFeatureValue>;
-  using DestinationFeatureValueReader      = FeatureValueReader<DestinationFeature, DestinationFeatureValue>;
-  using ConstructionYearFeatureValueReader = FeatureValueReader<ConstructionYearFeature, ConstructionYearFeatureValue>;
-  using LanesFeatureValueReader            = FeatureValueReader<LanesFeature, LanesFeatureValue>;
-  using EleFeatureValueReader              = FeatureValueReader<EleFeature, EleFeatureValue>;
-  using OperatorFeatureValueReader         = FeatureValueReader<OperatorFeature, OperatorFeatureValue>;
-  using NetworkFeatureValueReader          = FeatureValueReader<NetworkFeature, NetworkFeatureValue>;
-  using FromToFeatureValueReader           = FeatureValueReader<FromToFeature, FromToFeatureValue>;
-  using ColorFeatureValueReader            = FeatureValueReader<ColorFeature, ColorFeatureValue>;
-
   template <class F, class V>
   class FeatureLabelReader
   {
@@ -336,9 +304,6 @@ namespace osmscout {
 
     return "";
   }
-
-  using NameFeatureLabelReader = FeatureLabelReader<NameFeature, NameFeatureValue>;
-  using RefFeatureLabelReader  = FeatureLabelReader<RefFeature, RefFeatureValue>;
 
   /**
    * \defgroup type Object type related data structures and services

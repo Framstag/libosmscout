@@ -22,7 +22,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/WaterIndex.h>
 
 #include <osmscout/system/Assert.h>

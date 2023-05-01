@@ -23,7 +23,6 @@
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/TextSearchIndex.h>
@@ -31,6 +30,10 @@
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
 #include <osmscout/AreaDataFile.h>
+
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+#include <osmscout/feature/RefFeature.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>

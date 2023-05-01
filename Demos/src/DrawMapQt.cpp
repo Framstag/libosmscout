@@ -29,6 +29,8 @@
 #include <osmscout/Database.h>
 #include <osmscoutmap/MapService.h>
 
+#include <osmscout/feature/ConstructionYearFeature.h>
+
 #include <osmscoutmapqt/MapPainterQt.h>
 
 /*

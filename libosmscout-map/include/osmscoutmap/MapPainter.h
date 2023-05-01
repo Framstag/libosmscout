@@ -28,7 +28,14 @@
 
 #include <osmscout/ObjectRef.h>
 
-#include <osmscout/TypeFeatures.h>
+#include <osmscout/feature/AddressFeature.h>
+#include <osmscout/feature/ColorFeature.h>
+#include <osmscout/feature/LanesFeature.h>
+#include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+#include <osmscout/feature/RefFeature.h>
+#include <osmscout/feature/WidthFeature.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>

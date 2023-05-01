@@ -25,7 +25,6 @@
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
-#include <osmscout/TypeFeatures.h>
 
 namespace osmscout {
 

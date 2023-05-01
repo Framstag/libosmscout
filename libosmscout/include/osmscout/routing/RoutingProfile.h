@@ -27,17 +27,20 @@
 
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/Way.h>
 #include <osmscout/Area.h>
 
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/MaxSpeedFeature.h>
+
+#include <osmscout/routing/RouteNode.h>
+
 #include <osmscout/util/Time.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Logger.h>
-
-#include <osmscout/routing/RouteNode.h>
 
 namespace osmscout {
 

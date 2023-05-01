@@ -25,6 +25,8 @@
 #include <osmscout/Database.h>
 #include <osmscout/PTRouteDataFile.h>
 
+#include <osmscout/feature/NameFeature.h>
+
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/FileScanner.h>
 

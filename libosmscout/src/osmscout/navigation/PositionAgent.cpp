@@ -18,6 +18,9 @@
  */
 
 #include <osmscout/navigation/PositionAgent.h>
+
+#include <osmscout/feature/TunnelFeature.h>
+
 #include <osmscout/navigation/DataAgent.h>
 
 #include <chrono>

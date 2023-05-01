@@ -21,11 +21,16 @@
 
 #include <algorithm>
 
+#include <osmscout/FeatureReader.h>
+
+#include <osmscout/feature/AddressFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/RefFeature.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
-#include <osmscout/TypeFeatures.h>
-#include <osmscout/FeatureReader.h>
 
 #include <osmscout/system/Math.h>
 

@@ -21,7 +21,7 @@
 
 #include <osmscout/Pixel.h>
 
-#include <osmscout/TypeFeatures.h>
+#include <osmscout/feature/RefFeature.h>
 
 #include <osmscout/Way.h>
 

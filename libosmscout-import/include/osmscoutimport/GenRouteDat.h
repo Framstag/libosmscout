@@ -27,12 +27,8 @@
 
 #include <osmscout/NumericIndex.h>
 
-#include <osmscout/routing/RouteNode.h>
-#include <osmscout/routing/TurnRestriction.h>
-
 #include <osmscout/OSMScoutTypes.h>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/Area.h>
@@ -40,12 +36,20 @@
 
 #include <osmscout/ObjectRef.h>
 
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/feature/AccessRestrictedFeature.h>
+#include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/MaxSpeedFeature.h>
+
+#include <osmscout/routing/RouteNode.h>
+#include <osmscout/routing/TurnRestriction.h>
+
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/NodeUseMap.h>
 
-#include <osmscoutimport/Import.h>
-
 #include <osmscout/system/Compiler.h>
+
+#include <osmscoutimport/Import.h>
 
 namespace osmscout {
 

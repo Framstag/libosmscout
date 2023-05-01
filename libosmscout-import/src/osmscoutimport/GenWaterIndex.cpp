@@ -24,10 +24,13 @@
 #include <osmscout/DataFile.h>
 #include <osmscout/BoundingBoxDataFile.h>
 #include <osmscout/CoordDataFile.h>
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 #include <osmscout/WaterIndex.h>
 #include <osmscout/WayDataFile.h>
+
+#include <osmscout/feature/BridgeFeature.h>
+#include <osmscout/feature/EmbankmentFeature.h>
+#include <osmscout/feature/TunnelFeature.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 

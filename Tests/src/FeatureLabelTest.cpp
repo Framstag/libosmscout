@@ -1,5 +1,5 @@
 
-#include <osmscout/TypeFeatures.h>
+#include <osmscout/feature/EleFeature.h>
 
 #include <TestMain.h>
 
