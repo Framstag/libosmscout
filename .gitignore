@@ -26,10 +26,18 @@
 /debug/
 /release/
 
+# JReleaser 
+/out
+
+# Maven
+/libosmscout-kotlin/target/
+
 # Generation of db for tests
-Tests/*.dat
-Tests/*.idx
-Tests/*.tmp
-Tests/*.idmap
-Tests/*.txt
-Tests/*.html
+/Tests/*.dat
+/Tests/*.idx
+/Tests/*.tmp
+/Tests/*.idmap
+/Tests/*.txt
+/Tests/*.html
+/Tests/Testing/Temporary/*
+/Tests/data/testregion/stats.dot
