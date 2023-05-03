@@ -19,11 +19,16 @@
  */
 
 #include <osmscoutclientqt/OverlayObject.h>
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
-#include <osmscout/TypeFeatures.h>
 
 #include <iostream>
+
+#include <osmscout/feature/ColorFeature.h>
+#include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/NameFeature.h>
+
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
+
 
 namespace osmscout {
 

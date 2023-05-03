@@ -21,7 +21,39 @@
 
 #include <algorithm>
 
-#include <osmscout/TypeFeatures.h>
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/feature/AccessRestrictedFeature.h>
+#include <osmscout/feature/AddressFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BridgeFeature.h>
+#include <osmscout/feature/BuildingFeature.h>
+#include <osmscout/feature/ClockwiseDirectionFeature.h>
+#include <osmscout/feature/ColorFeature.h>
+#include <osmscout/feature/ConstructionYearFeature.h>
+#include <osmscout/feature/DestinationFeature.h>
+#include <osmscout/feature/EleFeature.h>
+#include <osmscout/feature/EmbankmentFeature.h>
+#include <osmscout/feature/FromToFeature.h>
+#include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/IsInFeature.h>
+#include <osmscout/feature/LanesFeature.h>
+#include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/LocationFeature.h>
+#include <osmscout/feature/MaxSpeedFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+#include <osmscout/feature/NameShortFeature.h>
+#include <osmscout/feature/NetworkFeature.h>
+#include <osmscout/feature/OpeningHoursFeature.h>
+#include <osmscout/feature/OperatorFeature.h>
+#include <osmscout/feature/PhoneFeature.h>
+#include <osmscout/feature/PostalCodeFeature.h>
+#include <osmscout/feature/RefFeature.h>
+#include <osmscout/feature/RoundaboutFeature.h>
+#include <osmscout/feature/SidewayFeature.h>
+#include <osmscout/feature/TunnelFeature.h>
+#include <osmscout/feature/WebsiteFeature.h>
+#include <osmscout/feature/WidthFeature.h>
 
 #include <osmscout/system/Assert.h>
 

@@ -22,7 +22,7 @@
 
 #include <osmscoutmap/MapImportExport.h>
 
-#include <osmscout/TypeFeatures.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscoutmap/Styles.h>
 

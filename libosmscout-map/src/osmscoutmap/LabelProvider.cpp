@@ -19,6 +19,9 @@
 
 #include <osmscoutmap/LabelProvider.h>
 
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+
 #include <osmscout/system/Assert.h>
 
 namespace osmscout {

@@ -23,7 +23,8 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/Way.h>
 #include <osmscout/CoreImportExport.h>
-#include <osmscout/FeatureReader.h>
+
+#include <osmscout/feature/EleFeature.h>
 
 #include <osmscout/util/TileId.h>
 

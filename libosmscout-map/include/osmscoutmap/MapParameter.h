@@ -21,6 +21,7 @@
 */
 
 #include <list>
+#include <locale>
 #include <string>
 
 #include <osmscoutmap/MapImportExport.h>

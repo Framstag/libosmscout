@@ -32,13 +32,14 @@
 
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/TypeInfoSet.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/feature/AccessFeature.h>
 
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Transformation.h>

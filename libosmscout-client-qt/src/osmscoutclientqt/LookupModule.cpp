@@ -18,8 +18,13 @@
  */
 
 #include <osmscoutclientqt/LookupModule.h>
-#include <osmscoutclientqt/OSMScoutQt.h>
+
+
 #include <iostream>
+
+#include <osmscout/feature/AdminLevelFeature.h>
+
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 namespace osmscout {
 

@@ -28,7 +28,6 @@
 
 #include <osmscout/Pixel.h>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/LocationIndex.h>
@@ -36,6 +35,13 @@
 #include <osmscout/AreaDataFile.h>
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
+
+#include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/IsInFeature.h>
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/NameAltFeature.h>
+#include <osmscout/feature/PostalCodeFeature.h>
+#include <osmscout/feature/RefFeature.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>

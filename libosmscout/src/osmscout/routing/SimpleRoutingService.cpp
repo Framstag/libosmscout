@@ -23,14 +23,15 @@
 
 #include <osmscout/system/Assert.h>
 
-#include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/StopClock.h>
+#include <osmscout/feature/NameFeature.h>
 
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutingProfile.h>
 
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
+#include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING
 

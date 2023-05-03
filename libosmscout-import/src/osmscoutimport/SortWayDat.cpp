@@ -19,10 +19,12 @@
 
 #include <osmscoutimport/SortWayDat.h>
 
-#include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/WayDataFile.h>
+
+#include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/PostalCodeFeature.h>
 
 #include <osmscout/util/Geometry.h>
 

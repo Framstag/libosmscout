@@ -19,11 +19,15 @@
  */
 
 #include <osmscoutclientqt/LocationInfoModel.h>
+
+#include <algorithm>
+
+#include <osmscout/feature/OpeningHoursFeature.h>
+#include <osmscout/feature/PostalCodeFeature.h>
+
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QtCore/qabstractitemmodel.h>
-
-#include <algorithm>
 
 namespace osmscout {
 

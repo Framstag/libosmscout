@@ -1,5 +1,6 @@
 #include <osmscout/TypeConfig.h>
-#include <osmscout/TypeFeatures.h>
+
+#include <osmscout/feature/NameFeature.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>

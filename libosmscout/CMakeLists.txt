@@ -45,7 +45,6 @@ set(HEADER_FILES_ROOT
     include/osmscout/Tag.h
     include/osmscout/TypeConfig.h
     include/osmscout/TypeFeature.h
-    include/osmscout/TypeFeatures.h
     include/osmscout/TypeInfoSet.h
     include/osmscout/FeatureReader.h
     include/osmscout/OSMScoutTypes.h
@@ -53,6 +52,42 @@ set(HEADER_FILES_ROOT
     include/osmscout/Way.h
     include/osmscout/WayDataFile.h
     include/osmscout/CoreFeatures.h)
+
+set(HEADER_FILES_FEATURE
+        include/osmscout/feature/AccessFeature.h
+        include/osmscout/feature/AccessRestrictedFeature.h
+        include/osmscout/feature/AddressFeature.h
+        include/osmscout/feature/AdminLevelFeature.h
+        include/osmscout/feature/BridgeFeature.h
+        include/osmscout/feature/BuildingFeature.h
+        include/osmscout/feature/ClockwiseDirectionFeature.h
+        include/osmscout/feature/ColorFeature.h
+        include/osmscout/feature/ConstructionYearFeature.h
+        include/osmscout/feature/DestinationFeature.h
+        include/osmscout/feature/EleFeature.h
+        include/osmscout/feature/EmbankmentFeature.h
+        include/osmscout/feature/FromToFeature.h
+        include/osmscout/feature/GradeFeature.h
+        include/osmscout/feature/IsInFeature.h
+        include/osmscout/feature/LanesFeature.h
+        include/osmscout/feature/LayerFeature.h
+        include/osmscout/feature/LocationFeature.h
+        include/osmscout/feature/MaxSpeedFeature.h
+        include/osmscout/feature/NameFeature.h
+        include/osmscout/feature/NameAltFeature.h
+        include/osmscout/feature/NameShortFeature.h
+        include/osmscout/feature/NetworkFeature.h
+        include/osmscout/feature/OpeningHoursFeature.h
+        include/osmscout/feature/OperatorFeature.h
+        include/osmscout/feature/PhoneFeature.h
+        include/osmscout/feature/PostalCodeFeature.h
+        include/osmscout/feature/RefFeature.h
+        include/osmscout/feature/RoundaboutFeature.h
+        include/osmscout/feature/SidewayFeature.h
+        include/osmscout/feature/TunnelFeature.h
+        include/osmscout/feature/WebsiteFeature.h
+        include/osmscout/feature/WidthFeature.h
+        )
 
 set(HEADER_FILES_NAVIGATION
         include/osmscout/navigation/Agents.h
@@ -150,12 +185,70 @@ set(HEADER_FILES_UTIL
   )
 
 set(SOURCE_FILES
+    src/osmscout/feature/AccessFeature.cpp
+    src/osmscout/feature/AccessRestrictedFeature.cpp
+    src/osmscout/feature/AddressFeature.cpp
+    src/osmscout/feature/AdminLevelFeature.cpp
+    src/osmscout/feature/BridgeFeature.cpp
+    src/osmscout/feature/BuildingFeature.cpp
+    src/osmscout/feature/ClockwiseDirectionFeature.cpp
+    src/osmscout/feature/ColorFeature.cpp
+    src/osmscout/feature/ConstructionYearFeature.cpp
+    src/osmscout/feature/DestinationFeature.cpp
+    src/osmscout/feature/EleFeature.cpp
+    src/osmscout/feature/EmbankmentFeature.cpp
+    src/osmscout/feature/FromToFeature.cpp
+    src/osmscout/feature/GradeFeature.cpp
+    src/osmscout/feature/IsInFeature.cpp
+    src/osmscout/feature/LanesFeature.cpp
+    src/osmscout/feature/LayerFeature.cpp
+    src/osmscout/feature/LocationFeature.cpp
+    src/osmscout/feature/MaxSpeedFeature.cpp
+    src/osmscout/feature/NameFeature.cpp
+    src/osmscout/feature/NameAltFeature.cpp
+    src/osmscout/feature/NameShortFeature.cpp
+    src/osmscout/feature/NetworkFeature.cpp
+    src/osmscout/feature/OpeningHoursFeature.cpp
+    src/osmscout/feature/OperatorFeature.cpp
+    src/osmscout/feature/PhoneFeature.cpp
+    src/osmscout/feature/PostalCodeFeature.cpp
+    src/osmscout/feature/RefFeature.cpp
+    src/osmscout/feature/RoundaboutFeature.cpp
+    src/osmscout/feature/SidewayFeature.cpp
+    src/osmscout/feature/TunnelFeature.cpp
+    src/osmscout/feature/WebsiteFeature.cpp
+    src/osmscout/feature/WidthFeature.cpp
+    src/osmscout/navigation/Agents.cpp
+    src/osmscout/navigation/ArrivalEstimateAgent.cpp
+    src/osmscout/navigation/BearingAgent.cpp
+    src/osmscout/navigation/DataAgent.cpp
+    src/osmscout/navigation/PositionAgent.cpp
+    src/osmscout/navigation/RouteStateAgent.cpp
+    src/osmscout/navigation/RouteInstructionAgent.cpp
+    src/osmscout/navigation/SpeedAgent.cpp
+    src/osmscout/navigation/Engine.cpp
+    src/osmscout/navigation/VoiceInstructionAgent.cpp
+    src/osmscout/navigation/LaneAgent.cpp
     src/osmscout/ost/Parser.cpp
     src/osmscout/ost/Scanner.cpp
     src/osmscout/projection/Earth.cpp
     src/osmscout/projection/MercatorProjection.cpp
     src/osmscout/projection/Projection.cpp
     src/osmscout/projection/TileProjection.cpp
+    src/osmscout/routing/RouteData.cpp
+    src/osmscout/routing/RouteDescription.cpp
+    src/osmscout/routing/RouteNode.cpp
+    src/osmscout/routing/RouteNodeDataFile.cpp
+    src/osmscout/routing/RoutePostprocessor.cpp
+    src/osmscout/routing/RoutingDB.cpp
+    src/osmscout/routing/RoutingProfile.cpp
+    src/osmscout/routing/RoutingService.cpp
+    src/osmscout/routing/AbstractRoutingService.cpp
+    src/osmscout/routing/SimpleRoutingService.cpp
+    src/osmscout/routing/MultiDBRoutingService.cpp
+    src/osmscout/routing/TurnRestriction.cpp
+    src/osmscout/routing/MultiDBRoutingState.cpp
+    src/osmscout/routing/RouteDescriptionPostprocessor.cpp
     src/osmscout/system/SSEMath.cpp
     src/osmscout/util/Bearing.cpp
     src/osmscout/util/Breaker.cpp
@@ -194,31 +287,6 @@ set(SOURCE_FILES
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/SunriseSunset.cpp
     src/osmscout/util/TagErrorReporter.cpp
-    src/osmscout/routing/RouteData.cpp
-    src/osmscout/routing/RouteDescription.cpp
-    src/osmscout/routing/RouteNode.cpp
-    src/osmscout/routing/RouteNodeDataFile.cpp
-    src/osmscout/routing/RoutePostprocessor.cpp
-    src/osmscout/routing/RoutingDB.cpp
-    src/osmscout/routing/RoutingProfile.cpp
-    src/osmscout/routing/RoutingService.cpp
-    src/osmscout/routing/AbstractRoutingService.cpp
-    src/osmscout/routing/SimpleRoutingService.cpp
-    src/osmscout/routing/MultiDBRoutingService.cpp
-    src/osmscout/routing/TurnRestriction.cpp
-    src/osmscout/routing/MultiDBRoutingState.cpp
-    src/osmscout/routing/RouteDescriptionPostprocessor.cpp
-    src/osmscout/navigation/Agents.cpp
-    src/osmscout/navigation/ArrivalEstimateAgent.cpp
-    src/osmscout/navigation/BearingAgent.cpp
-    src/osmscout/navigation/DataAgent.cpp
-    src/osmscout/navigation/PositionAgent.cpp
-    src/osmscout/navigation/RouteStateAgent.cpp
-    src/osmscout/navigation/RouteInstructionAgent.cpp
-    src/osmscout/navigation/SpeedAgent.cpp
-    src/osmscout/navigation/Engine.cpp
-    src/osmscout/navigation/VoiceInstructionAgent.cpp
-    src/osmscout/navigation/LaneAgent.cpp
     src/osmscout/Area.cpp
     src/osmscout/AreaDataFile.cpp
     src/osmscout/AreaAreaIndex.cpp
@@ -259,7 +327,6 @@ set(SOURCE_FILES
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeature.cpp
-    src/osmscout/TypeFeatures.cpp
     src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
@@ -279,12 +346,13 @@ endif()
 
 set(HEADER_FILES
     ${HEADER_FILES_ROOT}
+    ${HEADER_FILES_FEATURE}
+    ${HEADER_FILES_NAVIGATION}
     ${HEADER_FILES_OST}
     ${HEADER_FILES_PROJECTION}
-    ${HEADER_FILES_SYSTEM}
-    ${HEADER_FILES_UTIL}
     ${HEADER_FILES_ROUTING}
-    ${HEADER_FILES_NAVIGATION})
+    ${HEADER_FILES_SYSTEM}
+    ${HEADER_FILES_UTIL})
 
 osmscout_library_project(
     NAME OSMScout
@@ -339,4 +407,3 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 
      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 endif()
-

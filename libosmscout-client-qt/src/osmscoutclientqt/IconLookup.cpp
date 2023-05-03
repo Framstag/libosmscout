@@ -17,12 +17,20 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscoutmapqt/SymbolRendererQt.h>
 #include <osmscoutclientqt/IconLookup.h>
+
+#include <cmath>
 
 #include <QSvgRenderer>
 
-#include <cmath>
+#include <osmscout/feature/OpeningHoursFeature.h>
+#include <osmscout/feature/OperatorFeature.h>
+#include <osmscout/feature/PhoneFeature.h>
+#include <osmscout/feature/WebsiteFeature.h>
+
+#include <osmscoutmapqt/SymbolRendererQt.h>
+
+
 
 namespace osmscout {
 

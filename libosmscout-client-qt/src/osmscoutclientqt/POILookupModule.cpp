@@ -18,6 +18,9 @@
  */
 
 #include <osmscoutclientqt/POILookupModule.h>
+
+#include <osmscout/feature/OperatorFeature.h>
+
 #include <osmscout/POIService.h>
 
 namespace osmscout {

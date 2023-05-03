@@ -428,9 +428,9 @@ if buildTests
     subdir('Tests')
 endif
 
-if buildBinding
+#if buildBinding
 #  subdir('libosmscout-binding')
-endif
+#endif
 
 
 run_target('cppcheck', command : ['scripts/cppcheck.sh',

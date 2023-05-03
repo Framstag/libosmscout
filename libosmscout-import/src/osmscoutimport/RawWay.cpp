@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <limits>
 
-#include <osmscout/TypeFeatures.h>
-
-#include <osmscout/system/Math.h>
+#include <osmscout/feature/AccessFeature.h>
 
 namespace osmscout {
 
