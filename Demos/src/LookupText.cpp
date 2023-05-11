@@ -76,14 +76,14 @@ int main (int argc, char *argv[])
                       true);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
-    args.maxPrintedOffsets=value;
-  }),
+                        args.maxPrintedOffsets=value;
+                      }),
                       "max-offsets",
                       "Maximum of printed offsets for each result (default "s + std::to_string(args.maxPrintedOffsets) + ")"s,
                       false);
 
   argParser.AddOption(osmscout::CmdLineUIntOption([&args](unsigned int value) {
-                        args.maxPrintedOffsets=value;
+                        args.maxUniqueResults=value;
                       }),
                       "max-results",
                       "Maximum of printed unique results (default "s + std::to_string(args.maxUniqueResults) + ")"s,
