@@ -69,7 +69,12 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   /**
    * Limit of results for each database.
    */
-  Q_PROPERTY(int      resultLimit READ GetResultLimit WRITE SetResultLimit)
+  Q_PROPERTY(int      resultLimit   READ GetResultLimit   WRITE SetResultLimit)
+
+  /**
+   * Limit of model rows
+   */
+  Q_PROPERTY(int      displayLimit  READ GetDisplayLimit  WRITE SetDisplayLimit)
 
   /**
    * Searched pattern
@@ -141,21 +146,27 @@ public slots:
   void onLocationAdminRegions(const osmscout::GeoCoord,QList<AdminRegionInfoRef>);
   void onLocationAdminRegionFinished(const osmscout::GeoCoord);
 
+private slots:
+  void postponeAdd();
+
 private:
   QString pattern;
   QString lastRequestPattern;
   QList<LocationEntryRef> locations;
-  bool searching;
+  QList<LocationEntryRef> postponedEntries;
+  bool searching=false;
   SearchModule* searchModule;
   LookupModule* lookupModule;
   SettingsRef settings;
   osmscout::GeoCoord searchCenter;
-  int resultLimit;
+  int resultLimit=2000;
+  int displayLimit=100;
   osmscout::BreakerRef breaker;
   AdminRegionInfoRef defaultRegion;
   AdminRegionInfoRef lastRequestDefaultRegion;
   QJSValue compareFn;
   QJSValue equalsFn;
+  QTimer postponeTimer;
 
 public:
   enum Roles {
@@ -207,7 +218,7 @@ public:
   Q_INVOKABLE QObject* get(int row) const;
 
   inline bool isSearching() const {
-    return searching;
+    return searching || !postponedEntries.empty();
   }
 
   inline double GetLat() const {
@@ -240,12 +251,23 @@ public:
     resultLimit=limit;
   }
 
+  inline int GetDisplayLimit() const {
+    return displayLimit;
+  }
+
+  inline void SetDisplayLimit(int limit) {
+    displayLimit=limit;
+  }
+
   inline QString getPattern() const {
     return pattern;
   }
 
 private:
   void lookupRegion();
+
+  void addBatch(QList<LocationEntryRef> foundLocations);
+
 
 };
 

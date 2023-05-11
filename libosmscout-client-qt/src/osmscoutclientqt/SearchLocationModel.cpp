@@ -32,7 +32,7 @@ namespace osmscout {
 #define INVALID_COORD -1000.0
 
 LocationListModel::LocationListModel(QObject* parent)
-: QAbstractListModel(parent), searching(false), searchCenter(INVALID_COORD,INVALID_COORD), resultLimit(50)
+: QAbstractListModel(parent), searchCenter(INVALID_COORD,INVALID_COORD)
 {
   searchModule=OSMScoutQt::GetInstance().MakeSearchModule();
   lookupModule=OSMScoutQt::GetInstance().MakeLookupModule();
@@ -61,6 +61,10 @@ LocationListModel::LocationListModel(QObject* parent)
   connect(lookupModule, &LookupModule::locationAdminRegionFinished,
           this, &LocationListModel::onLocationAdminRegionFinished,
           Qt::QueuedConnection);
+
+  connect(&postponeTimer, &QTimer::timeout,
+          this, &LocationListModel::postponeAdd,
+          Qt::QueuedConnection);
 }
 
 LocationListModel::~LocationListModel()
@@ -82,28 +86,54 @@ LocationListModel::~LocationListModel()
 }
 
 void LocationListModel::onSearchResult(const QString searchPattern, 
-                                       const QList<LocationEntry> foundLocationsConst)
-{
+                                       const QList<LocationEntry> foundLocationsConst) {
   if (this->pattern.isEmpty()) {
     return; //No search requested
   }
-  if (!searchPattern.contains(this->pattern, Qt::CaseInsensitive)){
+  if (!searchPattern.contains(this->pattern, Qt::CaseInsensitive)) {
     return; // result is not for us
   }
 
+  /**
+   * Adding huge batch of entries to model (more that 100) may take longer than ~16 ms
+   * and UI may become choppy. So, we enqueue all found entries to postponedEntries
+   * and start postponeTimer that adds entries by small chunks. Whole operation is splitted
+   * to multiple animation frames.
+   */
+  for (const LocationEntry &e: foundLocationsConst) {
+    postponedEntries.push_back(std::make_shared<LocationEntry>(e));
+  }
+
+  postponeTimer.setInterval(1);
+  postponeTimer.start();
+}
+
+void LocationListModel::postponeAdd() {
+  constexpr int batchSize = 50;
+
+  if (postponedEntries.size() <= batchSize) {
+    addBatch(postponedEntries);
+    postponedEntries.clear();
+    postponeTimer.stop();
+    emit SearchingChanged(isSearching());
+  } else {
+    QList<LocationEntryRef> batch;
+    batch.reserve(batchSize);
+    std::copy(postponedEntries.begin(), postponedEntries.begin() + batchSize, std::back_inserter(batch));
+    addBatch(batch);
+    postponedEntries.erase(postponedEntries.begin(), postponedEntries.begin() + batchSize);
+  }
+}
+
+void LocationListModel::addBatch(QList<LocationEntryRef> foundLocations) {
   QElapsedTimer timer;
   timer.start();
 
-  int equalityCall=0;
-  int comparisonsCall=0;
-
-  QList<LocationEntryRef> foundLocations;
-  for (const LocationEntry& e : foundLocationsConst) {
-    foundLocations.push_back(std::make_shared<LocationEntry>(e));
-  }
+  int equalityCall = 0;
+  int comparisonsCall = 0;
 
   QQmlEngine *engine = qmlEngine(this);
-  if (equalsFn.isCallable()){
+  if (equalsFn.isCallable()) {
     // try to merge locations that are equals
     auto Equal = [&](const LocationEntryRef& a, const LocationEntryRef& b) -> bool {
       assert(a != nullptr && b != nullptr);
@@ -226,9 +256,14 @@ void LocationListModel::onSearchResult(const QString searchPattern,
     }
   }
 
+  if (locations.size()>displayLimit) {
+    emit beginRemoveRows(QModelIndex(), displayLimit, locations.size() -1);
+    locations.erase(locations.begin()+displayLimit, locations.end());
+    emit endRemoveRows();
+  }
+
   emit countChanged(locations.size());
-  qDebug() << "new" << foundLocationsConst.size()
-           << "added" << foundLocations.size()
+  qDebug() << "added" << foundLocations.size()
            << "(in" << timer.elapsed() << "ms,"
            << "equal" << equalityCall << "x, compare" << comparisonsCall << "x),"
            << "model size" << locations.size();
@@ -273,7 +308,7 @@ void LocationListModel::onSearchFinished(const QString searchPattern, bool /*err
     emit SearchRequested(pattern,resultLimit,searchCenter,defaultRegion,breaker);
   }else{
     searching = false;
-    emit SearchingChanged(false);
+    emit SearchingChanged(isSearching());
   }
 }
 
@@ -290,6 +325,8 @@ void LocationListModel::setPattern(const QString& pattern)
   locations.clear();
   endRemoveRows();
   emit countChanged(locations.size());
+  postponedEntries.clear();
+  postponeTimer.stop();
 
   std::string stdPattern=pattern.toUtf8().constData();
 
@@ -320,7 +357,7 @@ void LocationListModel::setPattern(const QString& pattern)
   searching = true;
   lastRequestPattern = pattern;
   lastRequestDefaultRegion=defaultRegion;
-  emit SearchingChanged(true);
+  emit SearchingChanged(isSearching());
   breaker=std::make_shared<osmscout::ThreadedBreaker>();
   emit SearchRequested(pattern,resultLimit,searchCenter,defaultRegion,breaker);
 }
