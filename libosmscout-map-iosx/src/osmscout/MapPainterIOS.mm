@@ -18,6 +18,7 @@
 */
 
 #import <osmscoutmapiosx/MapPainterIOS.h>
+#import <osmscoutmapiosx/SymbolRendererIOS.h>
 
 #include <cassert>
 #include <limits>
@@ -623,10 +624,11 @@ namespace osmscout {
     }
 
     void MapPainterIOS::DrawContourSymbol(const Projection& projection,
-                                          const MapParameter& parameter,
+                                          const MapParameter& /* parameter */,
                                           const Symbol& symbol,
                                           const ContourSymbolData& data){
-
+        CGContextRef drawCG = cg;
+        SymbolRendererIOS renderer(cg);
         ScreenBox boundingBox=symbol.GetBoundingBox(projection);
         double width=boundingBox.GetWidth();
         double height=boundingBox.GetHeight();
@@ -640,6 +642,7 @@ namespace osmscout {
         if(!isClosed && !followPath(followPathHnd, data.symbolOffset, origin)){
             return;
         }
+        
         bool loop = true;
         while (loop){
             x1 = origin.GetX();
@@ -657,7 +660,14 @@ namespace osmscout {
                     CGContextTranslateCTM(cg, x2, y2);
                     CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
                     CGContextConcatCTM(cg, ct);
-                    DrawSymbol(projection, parameter, symbol, Vertex2D::ZERO, data.symbolScale);
+                    renderer.Render(projection,
+                                    symbol,
+                                    Vertex2D(0.0, 0.0),
+                                    []() {
+                                    },
+                                    []() {
+                                    },
+                                    data.symbolScale);
                     CGContextRestoreGState(cg);
                     loop = followPath(followPathHnd, data.symbolSpace, origin);
                 }
@@ -673,7 +683,7 @@ namespace osmscout {
      */
     void MapPainterIOS::DrawIcon(const IconStyle* style,
                                  const Vertex2D& centerPos,
-                                 double /*width*/, double /*height*/){
+                                 double /*width*/, double /*height*/) {
         size_t idx=style->GetIconId()-1;
 
         assert(idx<images.size());
@@ -690,6 +700,7 @@ namespace osmscout {
         CGContextRestoreGState(cg);
     }
 
+
     /*
      * DrawSymbol(const Projection& projection,
      *            const MapParameter& parameter,
@@ -697,104 +708,17 @@ namespace osmscout {
      *            double x, double y, double scaleFactor)
      */
     void MapPainterIOS::DrawSymbol(const Projection& projection,
-                    const MapParameter& parameter,
+                    const MapParameter& /* parameter */,
                     const Symbol& symbol,
                     const Vertex2D& screenPos,
-                    double scaleFactor){
-        ScreenBox boundingBox=symbol.GetBoundingBox(projection);
-        Vertex2D center=boundingBox.GetCenter();
+                    double scaleFactor) {
+        
+        SymbolRendererIOS renderer(cg);
 
-        CGContextSaveGState(cg);
-        if (scaleFactor != 0.0) {
-            CGContextConcatCTM(cg, CGAffineTransformMakeScale(scaleFactor, scaleFactor));
-        }
-        for (const auto& primitive : symbol.GetPrimitives()) {
-            const DrawPrimitive *primitivePtr=primitive.get();
-
-            if (const auto *polygon = dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-                polygon != nullptr) {
-
-                FillStyleRef fillStyle=polygon->GetFillStyle();
-                BorderStyleRef borderStyle=polygon->GetBorderStyle();
-
-                if (fillStyle) {
-                    SetFill(projection, parameter, *fillStyle);
-                } else {
-                    CGContextSetRGBFillColor(cg,0,0,0,0);
-                }
-
-                if (borderStyle) {
-                    SetBorder(projection, parameter, *borderStyle);
-                } else {
-                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
-                }
-
-                CGContextBeginPath(cg);
-
-                for (std::list<Vertex2D>::const_iterator pixel=polygon->GetCoords().begin();
-                     pixel!=polygon->GetCoords().end();
-                     ++pixel) {
-                    if (pixel==polygon->GetCoords().begin()) {
-                        CGContextMoveToPoint(cg,
-                                             screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                                             screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
-                    } else {
-                        CGContextAddLineToPoint(cg,
-                                                screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX(),
-                                                screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
-                    }
-                }
-
-                CGContextDrawPath(cg, kCGPathFillStroke);
-            }
-            else if (const auto *rectangle = dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-                     rectangle != nullptr) {
-
-                FillStyleRef fillStyle=rectangle->GetFillStyle();
-                BorderStyleRef borderStyle=rectangle->GetBorderStyle();
-                if (fillStyle) {
-                    SetFill(projection, parameter, *fillStyle);
-                } else {
-                    CGContextSetRGBFillColor(cg,0,0,0,0);
-                }
-
-                if (borderStyle) {
-                    SetBorder(projection, parameter, *borderStyle);
-                } else {
-                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
-                }
-                CGRect rect = CGRectMake(screenPos.GetX()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX(),
-                                         screenPos.GetY()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY(),
-                                         projection.ConvertWidthToPixel(rectangle->GetWidth()),
-                                         projection.ConvertWidthToPixel(rectangle->GetHeight()));
-                CGContextAddRect(cg,rect);
-                CGContextDrawPath(cg, kCGPathFillStroke);
-            }
-            else if (const auto *circle = dynamic_cast<const CirclePrimitive*>(primitivePtr);
-                     circle != nullptr) {
-
-                FillStyleRef fillStyle=circle->GetFillStyle();
-                BorderStyleRef borderStyle=circle->GetBorderStyle();
-                if (fillStyle) {
-                    SetFill(projection, parameter, *fillStyle);
-                } else {
-                    CGContextSetRGBFillColor(cg,0,0,0,0);
-                }
-
-                if (borderStyle) {
-                    SetBorder(projection, parameter, *borderStyle);
-                } else {
-                    CGContextSetRGBStrokeColor(cg,0,0,0,0);
-                }
-                CGRect rect = CGRectMake(screenPos.GetX()+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX(),
-                                         screenPos.GetY()+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY(),
-                                         projection.ConvertWidthToPixel(circle->GetRadius()),
-                                         projection.ConvertWidthToPixel(circle->GetRadius()));
-                CGContextAddEllipseInRect(cg, rect);
-                CGContextDrawPath(cg, kCGPathFillStroke);
-            }
-        }
-        CGContextRestoreGState(cg);
+        renderer.Render(projection,
+                        symbol,
+                        screenPos,
+                        scaleFactor);
     }
 
     /*
@@ -886,33 +810,6 @@ namespace osmscout {
             CGContextSetRGBFillColor(cg,0,0,0,0);
         }
     }
-
-    /*
-     * SetPen(const LineStyle& style,
-     *        double lineWidth)
-     */
-    void MapPainterIOS::SetPen(const LineStyle& style,
-                              double lineWidth) {
-        CGContextSetRGBStrokeColor(cg,style.GetLineColor().GetR(),
-                                      style.GetLineColor().GetG(),
-                                      style.GetLineColor().GetB(),
-                                      style.GetLineColor().GetA());
-        CGContextSetLineWidth(cg,lineWidth);
-
-        if (style.GetDash().empty()) {
-            CGContextSetLineDash(cg, 0.0, NULL, 0);
-            CGContextSetLineCap(cg, kCGLineCapRound);
-        } else {
-            CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*style.GetDash().size());
-            for (size_t i=0; i<style.GetDash().size(); i++) {
-                dashes[i] = style.GetDash()[i]*lineWidth;
-            }
-            CGContextSetLineDash(cg, 0.0, dashes, style.GetDash().size());
-            free(dashes); dashes = NULL;
-            CGContextSetLineCap(cg, kCGLineCapButt);
-        }
-    }
-
 
     /*
      * DrawArea(const Projection& projection,

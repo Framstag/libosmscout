@@ -1,9 +1,11 @@
 set(HEADER_FILES
     include/osmscoutmapiosx/MapPainterIOS.h
+    include/osmscoutmapiosx/SymbolRendererIOS.h 
 )
 
 set(SOURCE_FILES
     src/osmscout/MapPainterIOS.mm
+    src/osmscout/SymbolRendererIOS.mm
 )
 
 osmscout_library_project(
