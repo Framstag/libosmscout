@@ -396,6 +396,8 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/routing)
     set_source_files_properties(${HEADER_FILES_NAVIGATION}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/navigation)
+    set_source_files_properties(${HEADER_FILES_PROJECTION}
+        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/projection)
 
     set_target_properties(OSMScout PROPERTIES
         FRAMEWORK TRUE
