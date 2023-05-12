@@ -79,3 +79,10 @@ TEST_CASE("Closed at public holidays")
   REQUIRE(oh->GetRules()[5].day==osmscout::OpeningHours::WeekDay::PublicHoliday);
   REQUIRE(oh->GetRules()[5].intervals.empty());
 }
+
+TEST_CASE("Wrong rule separator")
+{
+  // this value use comma instead of semicolon
+  auto oh = osmscout::OpeningHours::Parse("Mo-Th 11:00-24:00, Sa 11:30-24:00, Su 11:30-22:00, Fr 11:00-01:00");
+  REQUIRE(oh == std::nullopt);
+}
