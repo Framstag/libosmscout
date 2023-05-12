@@ -61,7 +61,8 @@ public:
       RegionRole          = Qt::UserRole+10,
       LatRole             = Qt::UserRole+11,
       LonRole             = Qt::UserRole+12,
-      AltLangName         = Qt::UserRole+13
+      AltLangName         = Qt::UserRole+13,
+      OpeningHours        = Qt::UserRole+14
   };
   Q_ENUM(Roles)
 
