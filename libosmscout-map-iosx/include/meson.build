@@ -1,7 +1,8 @@
 osmscoutmapiosxIncDir = include_directories('.')
 
 osmscoutmapiosxHeader = [
-            'osmscoutmapiosx/MapPainterIOS.h'
+            'osmscoutmapiosx/MapPainterIOS.h',
+            'osmscoutmapiosx/SymbolRendererIOS.h'
           ]
 
 if meson.version().version_compare('>=0.63.0')
