@@ -13,7 +13,7 @@ on:
 jobs:
   build_meson:
     name: meson
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
 
   build_cmake:
     name: cmake
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
       - name: Checkout
         uses: actions/checkout@v3

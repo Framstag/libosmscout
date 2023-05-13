@@ -72,7 +72,7 @@ namespace osmscout {
     ProcessAreas          =  4, //!< Process (complex) areas for rendering
     ProcessRoutes         =  5, //!< Process routes for rendering
     AfterPreprocessing    =  6, //!< Additional postprocessing
-    Prerender             =  7, //!< Implementation specific preparison
+    Prerender             =  7, //!< Implementation specific preparation
     DrawBaseMapTiles      =  8, //!< Draw unknown/sea/land tiles and tiles with "coastlines" from base map
     DrawGroundTiles       =  9, //!< Same as previous, but from main database
     DrawOSMTileGrids      = 10, //!< If special style exists, renders grid corresponding to OSM tiles

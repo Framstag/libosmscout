@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_MAP_BATCHAPPAINTER_H
-#define OSMSCOUT_MAP_BATCHMAPPAINTER_H
+#ifndef OSMSCOUT_MAP_BATCH_MAP_PAINTER_H
+#define OSMSCOUT_MAP_BATCH_MAP_PAINTER_H
 
 /*
   This source is part of the libosmscout-map library
