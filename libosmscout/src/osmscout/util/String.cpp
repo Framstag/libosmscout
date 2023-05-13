@@ -425,6 +425,20 @@ namespace osmscout {
     return result;
   }
 
+  std::optional<std::pair<std::string,std::string>> SplitStringToPair(const std::string& str,
+                                                                      const std::string& separator)
+  {
+    assert(!separator.empty());
+
+    std::string::size_type pos = str.find(separator);
+
+    if (pos == std::string::npos) {
+      return std::nullopt;
+    }
+    return std::make_pair(str.substr(0, pos),
+                          str.substr(pos + separator.length()));
+  }
+
   std::string GetFirstInStringList(const std::string& stringList,
                                    const std::string& divider)
   {

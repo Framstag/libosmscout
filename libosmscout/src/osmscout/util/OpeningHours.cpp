@@ -80,7 +80,7 @@ std::optional<std::vector<OpeningHours::WeekDay>> ParseDayDescription(const std:
 
     if (dayStr.find('-') != std::string::npos) {
       // dayDescription is day interval (Mo-Su)
-      auto daysIntervalParts = SplitString(dayStr, "-", 2);
+      auto daysIntervalParts = SplitString(dayStr, "-");
       if (daysIntervalParts.size() != 2) {
         log.Warn() << "Cannot parse day description: " << dayDescription;
         return std::nullopt;
@@ -109,7 +109,7 @@ std::optional<std::vector<OpeningHours::WeekDay>> ParseDayDescription(const std:
 // example: 08:00
 std::optional<OpeningHours::DayTime> ParseTime(const std::string &timeStr)
 {
-  auto timesStr=SplitString(timeStr, ":", 2);
+  auto timesStr=SplitString(timeStr, ":");
   if (timesStr.size()!=2) {
     log.Warn() << "Cannot parse time: " << timeStr;
     return std::nullopt;
@@ -133,7 +133,7 @@ std::optional<OpeningHours::DayTime> ParseTime(const std::string &timeStr)
 // example: 08:00-12:00
 std::optional<OpeningHours::TimeInterval> ParseTimeRange(const std::string &rangeStr)
 {
-  auto timesStr=SplitString(rangeStr, "-", 2);
+  auto timesStr=SplitString(rangeStr, "-");
   if (timesStr.size()!=2) {
     log.Warn() << "Cannot parse time interval: " << rangeStr;
     return std::nullopt;
@@ -149,7 +149,11 @@ std::optional<OpeningHours::TimeInterval> ParseTimeRange(const std::string &rang
   return OpeningHours::TimeInterval{*from, *to};
 }
 
-// example: 08:00-12:00,13:00-17:30
+// examples:
+// 08:00-12:00
+// 08:00-12:00,13:00-17:30
+// 08:00-12:00, 13:00-17:30
+// off
 std::optional<std::vector<OpeningHours::TimeInterval>> ParseTimeDescription(const std::string &timeDescription) {
   std::vector<OpeningHours::TimeInterval> result;
   if (timeDescription=="off") {
@@ -157,7 +161,7 @@ std::optional<std::vector<OpeningHours::TimeInterval>> ParseTimeDescription(cons
   }
   auto rangesStr=SplitString(timeDescription, ",");
   for (const auto &rangeStr:rangesStr) {
-    auto range=ParseTimeRange(rangeStr);
+    auto range=ParseTimeRange(Trim(rangeStr));
     if (!range) {
       return std::nullopt;
     }
@@ -185,16 +189,16 @@ std::optional<OpeningHours> OpeningHours::Parse(const std::string &str, bool exp
   auto rulesStr = SplitString(str, ";");
   for (std::string &ruleStr:rulesStr){
     ruleStr=Trim(ruleStr);
-    auto ruleSplit=SplitString(ruleStr, " ", 2);
-    if (ruleSplit.size()!=2) {
+    auto ruleSplit=SplitStringToPair(ruleStr, " ");
+    if (!ruleSplit.has_value()) {
       log.Warn() << "Cannot parse opening hours rule: " << ruleStr;
       return std::nullopt;
     }
-    auto days=ParseDayDescription(ruleSplit.front());
+    auto days=ParseDayDescription(std::get<0>(ruleSplit.value()));
     if (!days) {
       return std::nullopt;
     }
-    auto timeIntervals=ParseTimeDescription(ruleSplit.back());
+    auto timeIntervals=ParseTimeDescription(std::get<1>(ruleSplit.value()));
     if (!timeIntervals) {
       return std::nullopt;
     }

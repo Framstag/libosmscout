@@ -41,6 +41,36 @@ TEST_CASE("Split string by multi-character separator")
   REQUIRE(*(it++) == "gravel");
 }
 
+TEST_CASE("Split empty string to pair")
+{
+  auto elements = osmscout::SplitStringToPair("", ";");
+  REQUIRE_FALSE(elements.has_value());
+}
+
+TEST_CASE("Split string with multiple separators to pair")
+{
+  auto elements = osmscout::SplitStringToPair("a;b;c;", ";");
+  REQUIRE(elements.has_value());
+  REQUIRE(std::get<0>(elements.value())=="a");
+  REQUIRE(std::get<1>(elements.value())=="b;c;");
+}
+
+TEST_CASE("Split string with separator on the end")
+{
+  auto elements = osmscout::SplitStringToPair("a;", ";");
+  REQUIRE(elements.has_value());
+  REQUIRE(std::get<0>(elements.value())=="a");
+  REQUIRE(std::get<1>(elements.value()).empty());
+}
+
+TEST_CASE("Split string just with separator")
+{
+  auto elements = osmscout::SplitStringToPair(";", ";");
+  REQUIRE(elements.has_value());
+  REQUIRE(std::get<0>(elements.value()).empty());
+  REQUIRE(std::get<1>(elements.value()).empty());
+}
+
 TEST_CASE("Transliterate diacritics")
 {
   try {
