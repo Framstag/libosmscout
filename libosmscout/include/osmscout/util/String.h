@@ -25,6 +25,8 @@
 #include <memory>
 #include <string>
 #include <chrono>
+#include <optional>
+#include <utility>
 
 #include <osmscout/CoreFeatures.h>
 
@@ -323,6 +325,17 @@ namespace osmscout {
                                                          const std::string& separator,
                                                          int maxSize=-1);
 
+  /**
+   * Split string by separator to two parts. Unlike SplitString with maxSize=2,
+   * second element contains the rest of the string after first separator.
+   * When no separator found, nullopt is returned.
+   *
+   * \note when str is empty nullopt is returned
+   * \note separator must not be empty
+   * \note when string ends with separator, and there is just one, second element is empty
+   */
+  extern OSMSCOUT_API std::optional<std::pair<std::string,std::string>> SplitStringToPair(const std::string& str,
+                                                                                          const std::string& separator);
 
   /**
    * \ingroup Util
