@@ -29,6 +29,7 @@
 
 #include <osmscout/feature/PhoneFeature.h>
 #include <osmscout/feature/WebsiteFeature.h>
+#include <osmscout/feature/OpeningHoursFeature.h>
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
@@ -73,6 +74,7 @@ public:
     QString altLangName;
     QString phone;
     QString website;
+    QString openingHours;
     QString addressNumber;
     LocationDescriptionService::ReverseLookupRef reverseLookupRef;
     QList<AdminRegionInfoRef> adminRegionList;
@@ -198,6 +200,10 @@ private:
 
     if (const osmscout::WebsiteFeatureValue *website=features.findValue<osmscout::WebsiteFeatureValue>(); website!=nullptr){
       info.website=QString::fromStdString(website->GetWebsite());
+    }
+
+    if (const osmscout::OpeningHoursFeatureValue *openingHours=features.findValue<osmscout::OpeningHoursFeatureValue>(); openingHours!=nullptr){
+      info.openingHours=QString::fromStdString(openingHours->GetValue());
     }
 
     if (const osmscout::AddressFeatureValue *address=features.findValue<osmscout::AddressFeatureValue>(); address!=nullptr){

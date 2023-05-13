@@ -97,6 +97,7 @@ QHash<int, QByteArray> MapObjectInfoModel::roleNames() const
   roles[LatRole]             = "lat";
   roles[LonRole]             = "lon";
   roles[AltLangName]         = "altLangName";
+  roles[OpeningHours]        = "openingHours";
 
   return roles;
 }
@@ -193,6 +194,9 @@ QVariant MapObjectInfoModel::data(const QModelIndex &index, int role) const
   }
   if (role==LonRole){
     return QVariant::fromValue(obj.center.GetLon());
+  }
+  if (role==OpeningHours){
+    return QVariant::fromValue(obj.openingHours);
   }
 
   //qDebug() << "Undefined role" << role << "("<<LabelRole<<"..."<<NameRole<<")";
