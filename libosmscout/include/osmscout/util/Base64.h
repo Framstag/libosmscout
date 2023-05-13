@@ -7,6 +7,7 @@
  * licensed under terms of MIT license
  */
 
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -18,7 +19,6 @@ namespace osmscout {
 
   static inline std::string Base64Encode(const std::vector<char> &in)
   {
-
     std::string out;
 
     uint32_t val = 0;
@@ -45,7 +45,6 @@ namespace osmscout {
 
   static inline std::vector<char> Base64Decode(const std::string &in)
   {
-
     std::vector<char> out;
 
     std::vector<int> T(256, -1);

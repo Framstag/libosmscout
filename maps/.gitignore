@@ -7,6 +7,7 @@
 /*.zip
 /*.poly
 /*.shp
+/*/*.hgt
 
 # Libosmscout Databases
 /*/*.txt
@@ -15,6 +16,7 @@
 /*/*.idmap
 /*/*.tmp
 /*/*.html
+/*/*.dot
 
 # Shapefiles
 /*/*.cpg
