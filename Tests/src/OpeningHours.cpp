@@ -46,6 +46,32 @@ TEST_CASE("Parse simple opening hours")
   REQUIRE(oh->GetRules()[0].intervals[1].to.minute==30);
 }
 
+TEST_CASE("Parse simple opening hours with space")
+{
+  // space between time intervals should not be there, but be tolerant
+  auto oh=osmscout::OpeningHours::Parse("Mo-Fr 08:00-12:00, 13:00-17:30");
+  REQUIRE(oh != std::nullopt);
+
+  REQUIRE(oh->GetRules().size()==5);
+  REQUIRE(oh->GetRules()[0].day==osmscout::OpeningHours::WeekDay::Monday);
+  REQUIRE(oh->GetRules()[1].day==osmscout::OpeningHours::WeekDay::Tuesday);
+  REQUIRE(oh->GetRules()[2].day==osmscout::OpeningHours::WeekDay::Wednesday);
+  REQUIRE(oh->GetRules()[3].day==osmscout::OpeningHours::WeekDay::Thursday);
+  REQUIRE(oh->GetRules()[4].day==osmscout::OpeningHours::WeekDay::Friday);
+
+  REQUIRE(oh->GetRules()[0].intervals.size()==2);
+
+  REQUIRE(oh->GetRules()[0].intervals[0].from.hour==8);
+  REQUIRE(oh->GetRules()[0].intervals[0].from.minute==0);
+  REQUIRE(oh->GetRules()[0].intervals[0].to.hour==12);
+  REQUIRE(oh->GetRules()[0].intervals[0].to.minute==0);
+
+  REQUIRE(oh->GetRules()[0].intervals[1].from.hour==13);
+  REQUIRE(oh->GetRules()[0].intervals[1].from.minute==0);
+  REQUIRE(oh->GetRules()[0].intervals[1].to.hour==17);
+  REQUIRE(oh->GetRules()[0].intervals[1].to.minute==30);
+}
+
 TEST_CASE("Parse multiple rules")
 {
   auto oh=osmscout::OpeningHours::Parse("Mo-Fr 08:00-18:00; Sa 08:00-12:00");
