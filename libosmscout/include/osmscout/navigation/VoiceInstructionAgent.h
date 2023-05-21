@@ -175,6 +175,7 @@ public:
 
 private:
   DistanceUnitSystem units{DistanceUnitSystem::Metrics};
+  Vehicle vehicle{vehicleCar};
 
   // state used for triggering GpsFound / GpsLost messages
   bool prevGpsSignal{true};

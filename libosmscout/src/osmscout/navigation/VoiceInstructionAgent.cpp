@@ -270,7 +270,9 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
     return samples;
   }
 
-  if (distanceInUnits > 50){
+  if (bool skipDistanceInformation = (distanceInUnits < 80 && vehicle == vehicleCar);
+      !skipDistanceInformation){
+
     samples.push_back(VoiceSample::After);
     if (distanceInUnits > 800){
       samples.push_back(VoiceSample::Distance800);
@@ -299,7 +301,7 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
   toSamples(samples, message.type);
   if (then){
     auto thenDistance = then.distance - message.distance;
-    if (thenDistance <= Meters(200)) { // ignore then messsage otherwise
+    if (thenDistance <= Meters(200)) { // ignore then message otherwise
       samples.push_back(VoiceSample::Then);
       toSamples(samples, then.type);
     }
@@ -316,6 +318,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
     // reset state
     lastMessage.type=MessageType::NoMessage;
     lastMessagePosition=Distance::Zero();
+    vehicle=routeUpdateMessage->vehicle;
     return result;
   }
 
