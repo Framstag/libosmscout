@@ -266,3 +266,19 @@ TEST_CASE("GetDimensions()")
 
   REQUIRE(projection.GetDimensions().GetDisplayText()==expectedBox.GetDisplayText());
 }
+
+TEST_CASE("GetDimensions() with rotation")
+{
+  osmscout::MercatorProjection projection;
+  osmscout::GeoBox expectedBox(osmscout::GeoCoord(51.49061,7.42522),
+                               osmscout::GeoCoord(51.53420,7.50528));
+
+  projection.Set(defaultCenter,
+                 0.524, // 30°
+                 osmscout::Magnification(osmscout::Magnification::magClose),
+                 defaultDpi,
+                 defaultWidth,
+                 defaultHeight);
+
+  REQUIRE(projection.GetDimensions().GetDisplayText()==expectedBox.GetDisplayText());
+}
