@@ -101,14 +101,14 @@ public:
   explicit RoutingListModel(QObject* parent = nullptr);
   RoutingListModel(const RoutingListModel&) = delete;
   RoutingListModel(RoutingListModel&&) = delete;
-  virtual ~RoutingListModel();
+  ~RoutingListModel() override;
 
   RoutingListModel& operator=(const RoutingListModel&) = delete;
   RoutingListModel& operator=(RoutingListModel&&) = delete;
 
-  QVariant data(const QModelIndex &index, int role) const;
+  QVariant data(const QModelIndex &index, int role) const override;
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
   /**
    * Route length in meters
@@ -122,9 +122,9 @@ public:
    */
   double getRouteDuration() const;
 
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-  QHash<int, QByteArray> roleNames() const;
+  QHash<int, QByteArray> roleNames() const override;
 
   Q_INVOKABLE QObject* get(int row) const;
 

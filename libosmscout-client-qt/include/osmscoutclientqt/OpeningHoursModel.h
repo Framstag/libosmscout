@@ -65,7 +65,7 @@ public:
   OpeningHoursModel& operator=(const OpeningHoursModel&) = delete;
   OpeningHoursModel& operator=(OpeningHoursModel&&) = delete;
 
-  Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
+  Q_INVOKABLE int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
   {
     return model.size();
   };

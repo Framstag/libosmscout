@@ -54,7 +54,7 @@ public slots:
 public:
   InstalledVoicesModel();
 
-  virtual ~InstalledVoicesModel();
+  ~InstalledVoicesModel() override;
 
   enum Roles {
     NameRole = Qt::UserRole, // name
@@ -68,10 +68,10 @@ public:
   };
   Q_ENUM(Roles)
 
-  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
-  virtual QHash<int, QByteArray> roleNames() const;
-  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const override;
+  QHash<int, QByteArray> roleNames() const override;
+  Q_INVOKABLE Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   Q_INVOKABLE void select(const QModelIndex &index);
   Q_INVOKABLE void playSample(const QModelIndex &index, const QStringList &sample);

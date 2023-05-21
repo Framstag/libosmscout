@@ -61,14 +61,14 @@ public:
   StyleFlagsModel();
   ~StyleFlagsModel() override;
 
-  Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
+  Q_INVOKABLE int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
   {
       return mapFlags.size();
   };
 
-  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const override;
-  virtual QHash<int, QByteArray> roleNames() const override;
-  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const override;
+  QHash<int, QByteArray> roleNames() const override;
+  Q_INVOKABLE Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   Q_INVOKABLE void setFlag(const QString &key, bool value);
 };
