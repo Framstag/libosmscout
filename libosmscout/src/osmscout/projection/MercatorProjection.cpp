@@ -124,14 +124,6 @@ namespace osmscout {
 
     PixelToGeo(0.0,0.0,topLeft);
 
-    GeoCoord topRight;
-
-    PixelToGeo((double)width,0.0,topRight);
-
-    GeoCoord bottomLeft;
-
-    PixelToGeo(0.0,(double)height,bottomLeft);
-
     GeoCoord bottomRight;
 
     PixelToGeo((double)width,(double)height,bottomRight);
@@ -139,6 +131,20 @@ namespace osmscout {
     // evaluate bounding box, crop bounding box to valid Mercator area
 
     boundingBox=GeoBox(topLeft,bottomRight);
+
+    if (angle!=0.0) {
+      // be aware that top-left, bottom-right bounding box may not include top-right and bottom-left coordinates when projection is rotated
+      GeoCoord topRight;
+
+      PixelToGeo((double)width,0.0,topRight);
+
+      GeoCoord bottomLeft;
+
+      PixelToGeo(0.0,(double)height,bottomLeft);
+
+      boundingBox.Include(GeoBox(topRight, bottomLeft));
+    }
+
     boundingBox.CropTo(GeoBox(GeoCoord(MinLat,MinLon),
                               GeoCoord(MaxLat,MaxLon)));
 
