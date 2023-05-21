@@ -41,6 +41,8 @@ struct Arguments {
 #endif
   double     dpi=96.0;
 
+  osmscout::Bearing angle;
+
   bool renderContourLines=false;
   bool renderHillShading=false;
 
@@ -108,6 +110,12 @@ public:
               }),
               "dpi",
               "Rendering DPI (" + std::to_string(args.dpi) + ")",
+              false);
+    AddOption(osmscout::CmdLineDoubleOption([this](const double& value) {
+                args.angle=osmscout::Bearing::Degrees(value);
+              }),
+              "angle",
+              "Rendering angle (in degrees)",
               false);
     AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
                 args.fontName = value;
@@ -315,6 +323,7 @@ public:
     drawParameter.SetLabelLineFitToArea(true);
 
     projection.Set(args.center,
+                   args.angle.AsRadians(),
                    args.zoom,
                    args.dpi,
                    args.width,
