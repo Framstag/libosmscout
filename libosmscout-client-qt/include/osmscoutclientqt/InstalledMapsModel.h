@@ -58,10 +58,10 @@ public:
   };
   Q_ENUM(Roles)
 
-  Q_INVOKABLE virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  Q_INVOKABLE virtual QVariant data(const QModelIndex &index, int role) const;
-  virtual QHash<int, QByteArray> roleNames() const;
-  Q_INVOKABLE virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const override;
+  QHash<int, QByteArray> roleNames() const override;
+  Q_INVOKABLE Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   /**
    * Delete installed map represented this model on given row
@@ -69,7 +69,7 @@ public:
    * @return true on success
    */
   Q_INVOKABLE bool deleteMap(int row);
-  Q_INVOKABLE virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+  Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
   /**
    * Generation time of map with given path. Null if don't exists

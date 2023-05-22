@@ -126,7 +126,7 @@ public:
 public:
   NavigationModel();
 
-  virtual ~NavigationModel();
+  ~NavigationModel() override;
 
   bool isPositionOnRoute();
 
@@ -135,13 +135,13 @@ public:
 
   QObject *getNextRoutStep();
 
-  QVariant data(const QModelIndex &index, int role) const;
+  QVariant data(const QModelIndex &index, int role) const override;
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-  QHash<int, QByteArray> roleNames() const;
+  QHash<int, QByteArray> roleNames() const override;
 
   inline OverlayWay* getRouteWay() const
   {
