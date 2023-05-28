@@ -118,8 +118,8 @@ class OSMSCOUT_API VoiceInstructionAgent CLASS_FINAL : public NavigationAgent
 {
 public:
 
-  enum class MessageType {
-    NoMessage,
+  enum class MessageType: int {
+    NoMessage = 0,
 
     LeaveRbExit1,
     LeaveRbExit2,
@@ -138,7 +138,9 @@ public:
 
     LeaveMotorway,
     LeaveMotorwayRight,
-    LeaveMotorwayLeft
+    LeaveMotorwayLeft,
+
+    Silent
   };
 
   struct MessageStruct {
@@ -175,6 +177,7 @@ public:
 
 private:
   DistanceUnitSystem units{DistanceUnitSystem::Metrics};
+  Vehicle vehicle{vehicleCar};
 
   // state used for triggering GpsFound / GpsLost messages
   bool prevGpsSignal{true};
@@ -194,7 +197,8 @@ public:
 
 private:
   void toSamples(std::vector<VoiceInstructionMessage::VoiceSample> &samples,
-                 const MessageType &messageType);
+                 const MessageType &messageType,
+                 bool shortRoundaboutMessage);
 
   std::vector<VoiceInstructionMessage::VoiceSample> toSamples(const Distance &distanceFromStart,
                                                               const MessageStruct &message,

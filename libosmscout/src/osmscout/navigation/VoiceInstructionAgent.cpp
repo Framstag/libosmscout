@@ -32,6 +32,7 @@ private:
   Distance distanceFromStart;
   Distance stopAfter;
   Distance distance;
+  std::optional<Distance> roundaboutEnter; //<! distance of roundabout enter before nextMessage
 
 public:
   VoiceInstructionAgent::MessageStruct nextMessage;
@@ -90,12 +91,28 @@ public:
     OnMotorwayLeave(directionDescription);
   }
 
+  void OnRoundaboutEnter([[maybe_unused]] const RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDescription,
+                         [[maybe_unused]] const RouteDescription::CrossingWaysDescriptionRef &crossingWaysDescription) override
+  {
+    if (!roundaboutEnter) {
+      roundaboutEnter = distance;
+    }
+  }
+
   void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
                          [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(roundaboutLeaveDescription);
-
     using MessageType = VoiceInstructionAgent::MessageType;
+
+    if (!roundaboutEnter) {
+      if (!nextMessage) {
+        // we are on the roundabout right now, be silent until we leave it
+        nextMessage = VoiceInstructionAgent::MessageStruct{MessageType::Silent, distance};
+      }
+      return;
+    }
+
     MessageType type = MessageType::NoMessage;
     switch (roundaboutLeaveDescription->GetExitCount()){
       case 1:
@@ -120,11 +137,13 @@ public:
         // it is not correct, but what else we may say?
         type = MessageType::LeaveRbExit6;
     }
+    // say the message before entering the roundabout
     if (!nextMessage){
-      nextMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+      nextMessage = VoiceInstructionAgent::MessageStruct{type, *roundaboutEnter};
     } else if (!thenMessage){
-      thenMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+      thenMessage = VoiceInstructionAgent::MessageStruct{type, *roundaboutEnter};
     }
+    roundaboutEnter = std::nullopt;
   }
 
   void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& /*targetDescription*/) override
@@ -188,33 +207,32 @@ public:
   }
 };
 
-void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::VoiceSample> &samples, const MessageType &type)
+void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::VoiceSample> &samples, const MessageType &type, bool shortRoundaboutMessage)
 {
   using VoiceSample = VoiceInstructionMessage::VoiceSample;
+
+  if (!shortRoundaboutMessage && type>=MessageType::LeaveRbExit1 && type<=MessageType::LeaveRbExit6) {
+    samples.push_back(VoiceSample::RbCross);
+  }
+
   switch (type) {
 
     case MessageType::LeaveRbExit1:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit1);
       break;
     case MessageType::LeaveRbExit2:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit2);
       break;
     case MessageType::LeaveRbExit3:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit3);
       break;
     case MessageType::LeaveRbExit4:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit4);
       break;
     case MessageType::LeaveRbExit5:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit5);
       break;
     case MessageType::LeaveRbExit6:
-      samples.push_back(VoiceSample::RbCross);
       samples.push_back(VoiceSample::RbExit6);
       break;
 
@@ -262,6 +280,11 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
   std::vector<VoiceInstructionMessage::VoiceSample> samples;
 
   assert(message);
+
+  if (message.type == MessageType::Silent) {
+    return samples;
+  }
+
   // distance from our position to next message
   Distance nextMessageDistance = (message.distance - distanceFromStart);
   double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
@@ -270,7 +293,13 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
     return samples;
   }
 
-  if (distanceInUnits > 50){
+  // We are close to roundabout, we will use short roundabout message in such case.
+  bool shortRoundaboutMessage = message.type >= MessageType::LeaveRbExit1 && message.type <= MessageType::LeaveRbExit6 &&
+    distanceInUnits < 120;
+
+  if (bool skipDistanceInformation = (distanceInUnits < 80 && vehicle == vehicleCar);
+      !skipDistanceInformation){
+
     samples.push_back(VoiceSample::After);
     if (distanceInUnits > 800){
       samples.push_back(VoiceSample::Distance800);
@@ -296,12 +325,12 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
     samples.push_back(units == DistanceUnitSystem::Metrics ? VoiceSample::Meters : VoiceSample::Yards);
   }
 
-  toSamples(samples, message.type);
+  toSamples(samples, message.type, shortRoundaboutMessage);
   if (then){
     auto thenDistance = then.distance - message.distance;
-    if (thenDistance <= Meters(200)) { // ignore then messsage otherwise
+    if (thenDistance <= Meters(200)) { // ignore then message otherwise
       samples.push_back(VoiceSample::Then);
-      toSamples(samples, then.type);
+      toSamples(samples, then.type, true);
     }
   }
   return samples;
@@ -316,6 +345,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
     // reset state
     lastMessage.type=MessageType::NoMessage;
     lastMessagePosition=Distance::Zero();
+    vehicle=routeUpdateMessage->vehicle;
     return result;
   }
 
