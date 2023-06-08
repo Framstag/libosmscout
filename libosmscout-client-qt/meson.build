@@ -30,7 +30,7 @@ if get_option('qtVersion') == 5
                              include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                              cpp_args: cppArgs,
                              dependencies: [mathDep, threadDep, qt5GuiDep, qt5QmlDep, qt5QuickDep, qt5WidgetsDep, qt5NetworkDep, qt5SvgDep, qt5MultimediaDep],
-                             link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                             link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclient],
                              version: libraryVersion,
                              install: true)
 elif get_option('qtVersion') == 6
@@ -43,7 +43,7 @@ elif get_option('qtVersion') == 6
                              include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                              cpp_args: cppArgs,
                              dependencies: [mathDep, threadDep, qt6GuiDep, qt6QmlDep, qt6QuickDep, qt6WidgetsDep, qt6NetworkDep, qt6SvgDep, qt6MultimediaDep],
-                             link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                             link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclient],
                              version: libraryVersion,
                              install: true)
 endif
