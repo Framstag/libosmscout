@@ -397,6 +397,8 @@ if buildMapSVG
     subdir('libosmscout-map-svg')
 endif
 
+subdir('libosmscout-client')
+
 if buildClientQt
   subdir('libosmscout-client-qt')
 endif

@@ -130,7 +130,7 @@ osmscout_library_project(
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutclientqt
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia
+	TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia OSMScout::Client
 )
 
 if(MARISA_FOUND)
