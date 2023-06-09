@@ -17,22 +17,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QObject>
-#include <QtGlobal>
-#include <QMetaType>
-#include <QQmlEngine>
+#include <osmscout/util/Distance.h>
+
+#include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/DBThread.h>
-#include <osmscoutmap/DataTileCache.h>
 #include <osmscoutclientqt/MapWidget.h>
 #include <osmscoutclientqt/ElevationChartWidget.h>
 #include <osmscoutclientqt/PlaneMapRenderer.h>
 #include <osmscoutclientqt/TiledMapRenderer.h>
 #include <osmscoutclientqt/OverlayObject.h>
-#include <osmscout/util/Distance.h>
-
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/LocationInfoModel.h>
 #include <osmscoutclientqt/MapDownloadsModel.h>
@@ -52,6 +48,12 @@
 #include <osmscoutclientqt/QmlRoutingProfile.h>
 #include <osmscoutclientqt/SunriseSunset.h>
 #include <osmscoutclientqt/OpeningHoursModel.h>
+
+#include <QObject>
+#include <QtGlobal>
+#include <QMetaType>
+#include <QQmlEngine>
+#include <QStandardPaths>
 
 #include <optional>
 

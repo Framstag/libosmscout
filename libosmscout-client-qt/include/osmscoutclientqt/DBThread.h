@@ -21,7 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QtGui>
 #include <QThread>
 #include <QMetaType>
 #include <QMutex>
@@ -29,7 +28,6 @@
 #include <QTimer>
 #include <QReadWriteLock>
 
-#include <osmscoutclientqt/LocationEntry.h>
 #include <osmscout/BasemapDatabase.h>
 #include <osmscout/Database.h>
 #include <osmscout/LocationService.h>

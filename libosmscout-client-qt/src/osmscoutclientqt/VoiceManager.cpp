@@ -23,6 +23,8 @@
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/AvailableVoicesModel.h>
 
+#include <QDirIterator>
+
 namespace osmscout {
 
 VoiceDownloadJob::VoiceDownloadJob(QNetworkAccessManager *webCtrl,

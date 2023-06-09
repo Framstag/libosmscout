@@ -22,13 +22,16 @@
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/private/Config.h>
-#include "osmscoutclientqt/MapManager.h"
+#include <osmscoutclientqt/MapManager.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/TextSearchIndex.h>
 #endif
 
 #include <osmscout/util/Logger.h>
+
+#include <QGuiApplication>
+#include <QScreen>
 
 namespace osmscout {
 

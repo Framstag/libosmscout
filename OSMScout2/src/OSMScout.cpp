@@ -25,6 +25,8 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QQmlContext>
+#include <QTranslator>
+#include <QStandardPaths>
 
 // OSM Scout library singleton
 #include <osmscoutclientqt/OSMScoutQt.h>
