@@ -23,6 +23,8 @@
 
 #include <osmscout/system/Math.h>
 
+#include <QtMath>
+
 namespace osmscout {
 
 // uncomment or define by compiler parameter to render various debug marks

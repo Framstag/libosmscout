@@ -22,6 +22,9 @@
 #include <osmscoutclientqt/LookupModule.h>
 
 #include <osmscout/util/Logger.h>
+
+#include <QThreadPool>
+
 #include <iostream>
 
 namespace osmscout {

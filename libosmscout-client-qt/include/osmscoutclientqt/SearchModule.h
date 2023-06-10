@@ -20,8 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QObject>
-#include <QThread>
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/LookupModule.h>
 
@@ -30,6 +28,10 @@
 #endif
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
+
+#include <QObject>
+#include <QThread>
+#include <QRunnable>
 
 namespace osmscout {
 

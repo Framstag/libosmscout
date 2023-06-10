@@ -21,6 +21,8 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscout/util/String.h>
 
+#include <QPainterPath>
+
 namespace osmscout {
 
 ElevationChartWidget::ElevationChartWidget(QQuickItem* parent):

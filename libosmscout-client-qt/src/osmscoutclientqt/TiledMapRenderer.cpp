@@ -26,6 +26,9 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/util/Logger.h>
 
+#include <QGuiApplication>
+#include <QScreen>
+
 namespace osmscout {
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    SettingsRef settings,

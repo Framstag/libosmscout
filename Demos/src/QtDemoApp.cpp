@@ -23,9 +23,11 @@
 
 #include <QGuiApplication>
 #include <QApplication>
+#include <QQmlApplicationEngine>
+#include <QStandardPaths>
+#include <QTranslator>
 
 #include <iostream>
-#include <QQmlApplicationEngine>
 
 void QtDemoApp::Arguments::AddOptions(osmscout::CmdLineParser &argParser)
 {

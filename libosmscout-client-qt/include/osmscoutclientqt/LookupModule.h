@@ -33,7 +33,7 @@
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
-
+#include <osmscoutclientqt/LocationEntry.h>
 
 namespace osmscout {
 
