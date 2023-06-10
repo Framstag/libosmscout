@@ -28,88 +28,46 @@
 #include <thread>
 
 #include <osmscout/CoreImportExport.h>
+#include <osmscout/util/ProcessingQueue.h>
 
 namespace osmscout {
 
   template<typename R>
-  class WorkQueue
+  class WorkQueue: public ProcessingQueue<std::packaged_task<R ()>>
   {
   private:
     using Task = std::packaged_task<R ()>;
 
-  private:
-    std::mutex              mutex;
-    std::condition_variable pushCondition;
-    std::condition_variable popCondition;
-    std::deque<Task>        tasks;
-    size_t                  queueLimit=std::numeric_limits<size_t>::max();
-    bool                    running=true;
-
   public:
-    WorkQueue();
+    WorkQueue() = default;
 
     explicit WorkQueue(size_t queueLimit);
-    ~WorkQueue();
+    ~WorkQueue() override = default;
 
-    void PushTask(Task& task);
+    //void PushTask(Task& task);
     bool PopTask(Task& task);
-
-    void Stop();
   };
 
-  template<class R>
-  WorkQueue<R>::WorkQueue() = default;
 
   template<class R>
   WorkQueue<R>::WorkQueue(size_t queueLimit)
-    : queueLimit(queueLimit)
+    : ProcessingQueue<Task>(queueLimit)
   {
     // no code
   }
 
   template<class R>
-  WorkQueue<R>::~WorkQueue() = default;
-
-  template<class R>
-  void WorkQueue<R>::PushTask(Task& task)
-  {
-    std::unique_lock lock(mutex);
-
-    pushCondition.wait(lock,[this]{return tasks.size()<=queueLimit;});
-
-    tasks.push_back(std::move(task));
-
-    popCondition.notify_one();
-  }
-
-  template<class R>
   bool WorkQueue<R>::PopTask(Task& task)
   {
-    std::unique_lock lock(mutex);
+    auto taskOpt = ProcessingQueue<Task>::PopTask();
 
-    popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
-
-    if (tasks.empty() &&
-        !running) {
+    if (!taskOpt) {
       return false;
     }
 
-    task=std::move(tasks.front());
-    tasks.pop_front();
-
-    pushCondition.notify_one();
+    task=std::move(taskOpt.value());
 
     return true;
-  }
-
-  template<class R>
-  void WorkQueue<R>::Stop()
-  {
-    std::scoped_lock<std::mutex> lock(mutex);
-
-    running=false;
-
-    popCondition.notify_all();
   }
 }
 
