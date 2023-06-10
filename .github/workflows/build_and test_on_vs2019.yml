@@ -28,7 +28,7 @@ jobs:
         with:
           runVcpkgInstall: false                                                lukka/run-vcpkg
           vcpkgJsonGlob: '**/vcpkg.json'
-          vcpkgGitCommitId: 93e173a0d724c193e5546d48efb3e4ef47c1e1f2 # current, before: https://github.com/microsoft/vcpkg/releases/tag/2023.02.24
+          vcpkgGitCommitId: 501db0f17ef6df184fcdbfbe0f87cde2313b6ab1 # https://github.com/microsoft/vcpkg/releases/tag/2023.04.15
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
