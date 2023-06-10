@@ -154,6 +154,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Bearing.h
     include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
+    include/osmscout/util/CancelableFuture.h
     include/osmscout/util/Color.h
     include/osmscout/util/CmdLineParsing.h
     include/osmscout/util/Distance.h

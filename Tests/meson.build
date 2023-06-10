@@ -79,6 +79,16 @@ CalculateResolution = executable('CalculateResolution',
 
 test('Check position accuracy with coordinate bits', CalculateResolution)
 
+CancelableFuture = executable('CancelableFuture',
+             'src/CancelableFuture.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check cancelable future', CancelableFuture)
+
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

@@ -19,6 +19,9 @@ osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COM
 #---- CalculateResolution
 osmscout_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
 
+#---- CancelableFuture
+osmscout_test_project(NAME CancelableFuture SOURCES src/CancelableFuture.cpp)
+
 #---- CmdLineParsing
 osmscout_test_project(NAME CmdLineParsing SOURCES src/CmdLineParsing.cpp)
 

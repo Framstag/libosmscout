@@ -80,6 +80,7 @@ osmscoutHeader = [
             'osmscout/util/Bearing.h',
             'osmscout/util/Breaker.h',
             'osmscout/util/Cache.h',
+            'osmscout/util/CancelableFuture.h',
             'osmscout/util/CmdLineParsing.h',
             'osmscout/util/Color.h',
             'osmscout/util/Distance.h',
