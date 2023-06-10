@@ -26,7 +26,7 @@ jobs:
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
         uses: lukka/run-vcpkg@v11.1
         with:
-          runVcpkgInstall: true
+          runVcpkgInstall: false
           vcpkgJsonGlob: '**/vcpkg.json'
           vcpkgGitCommitId: 501db0f17ef6df184fcdbfbe0f87cde2313b6ab1 # https://github.com/microsoft/vcpkg/releases/tag/2023.04.15
       - name: Create build directory
