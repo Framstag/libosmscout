@@ -92,7 +92,6 @@ endif
 
 # C++20 Execution support
 
-
 tbbDep = dependency('', required: false)
 
 stdExecutionAvailable = compiler.has_header('execution')
@@ -316,6 +315,8 @@ else
   buildBinding=false
 endif
 
+buildClient=true
+
 if get_option('qtVersion') == 5
   buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
   buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
@@ -323,40 +324,6 @@ elif get_option('qtVersion') == 6
   buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt6SvgDep.found()
   buildStyleEditor=buildMapQt and buildClientQt and qt6SvgDep.found()
 endif
-
-message('Meson version:           @0@'.format(meson.version()))
-message('Project version:         @0@'.format(meson.project_version()))
-message('Library version:         @0@'.format(libraryVersion))
-message('Project license:         @0@'.format(meson.project_license()))
-message('Build OS:                @0@'.format(build_machine.system()))
-message('Host OS:                 @0@'.format(host_machine.system()))
-message('Target OS:               @0@'.format(target_machine.system()))
-message('compiler id:             @0@'.format(compiler.get_id()))
-message('compiler arg. syntax:    @0@'.format(compiler.get_argument_syntax()))
-message('openmp support:          @0@'.format(openmpDep.found()))
-message('C++17 execution support: @0@'.format(stdExecutionAvailable))
-message('libosmscout:             @0@'.format(true))
-message('libosmscout-gpx:         @0@'.format(buildGpx))
-message('libosmscout-import:      @0@'.format(buildImport))
-message('libosmscout-test:        @0@'.format(buildImport))
-message('libosmscout-map:         @0@'.format(true))
-message('libosmscout-map-agg:     @0@'.format(buildMapAgg))
-message('libosmscout-map-cairo:   @0@'.format(buildMapCairo))
-message('libosmscout-map-directx: @0@'.format(buildMapDirectX))
-message('libosmscout-map-gdi:     @0@'.format(buildMapGDI))
-message('libosmscout-map-iosx:    @0@'.format(buildMapIOSX))
-message('libosmscout-map-opengl:  @0@'.format(buildMapOpenGL))
-message('libosmscout-map-qt:      @0@'.format(buildMapQt))
-message('libosmscout-map-svg:     @0@'.format(buildMapSVG))
-message('libosmscout-client-qt:   @0@'.format(buildClientQt))
-message('BasemapImport:           @0@'.format(buildImport))
-message('Import:                  @0@'.format(buildImport))
-message('Demos:                   @0@'.format(true))
-message('DumpData:                @0@'.format(true))
-message('OSMScout2:               @0@'.format(buildOSMScout2))
-message('StyleEditor:             @0@'.format(buildStyleEditor))
-message('libosmscout-binding:     @0@'.format(buildBinding))
-message('Tests:                   @0@'.format(buildTests))
 
 subdir('libosmscout')
 subdir('libosmscout-map')
@@ -438,3 +405,61 @@ endif
 run_target('cppcheck', command : ['scripts/cppcheck.sh',
   meson.current_build_dir(),
   join_paths(meson.current_build_dir(),'compile_commands.json')])
+
+summary({
+  'Build OS': build_machine.system(),
+  'Build CPU': build_machine.cpu(),
+  'Host OS': host_machine.system(),
+  'Host CPU': build_machine.cpu(),
+  'Target OS': target_machine.system(),
+  'Target CPU': build_machine.cpu(),
+  }, section: 'OS')
+
+summary({
+  'Compiler id': compiler.get_id(),
+  'Compiler arg. syntax': compiler.get_argument_syntax(),
+  'OpenMP support': openmpDep.found(),
+  'C++17 execution support': stdExecutionAvailable,
+  }, section: 'Compiler')
+
+summary({
+  'Meson backend': meson.backend(),
+  'Is unity': meson.is_unity(),
+  }, section: 'Build')
+
+summary({
+  'Meson version': meson.version(),
+  'Project version': meson.project_version(),
+  'Library version': libraryVersion,
+  'Project license': meson.project_license(),
+  }, section: 'Project')
+
+summary({
+  'libosmscout': true,
+  'libosmscout-test': buildImport,
+  'libosmscout-import': buildImport,
+  'libosmscout-map': true,
+  'libosmscout-map-agg': buildMapAgg,
+  'libosmscout-map-cairo': buildMapCairo,
+  'libosmscout-map-directx': buildMapDirectX,
+  'libosmscout-map-gdi': buildMapGDI,
+  'libosmscout-map-iosx': buildMapIOSX,
+  'libosmscout-map-opengl': buildMapOpenGL,
+  'libosmscout-map-qt': buildMapQt,
+  'libosmscout-map-svg': buildMapSVG,
+  'libosmscout-gpx': buildGpx,
+  'libosmscout-client': buildClient,
+  'libosmscout-client-qt': buildClientQt,
+  'libosmscout-binding': buildBinding
+}, section: 'Libraries')
+
+summary({
+  'BasemapImport': buildImport,
+  'Import': buildImport,
+  'Demos': true,
+  'DumpData': true,
+  'OSMScout2': buildOSMScout2,
+  'StyleEditor': buildStyleEditor,
+  'Tests': buildTests
+}, section: 'Apps')
+
