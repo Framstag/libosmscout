@@ -69,7 +69,7 @@ namespace osmscout {
     ProcessingQueue(const ProcessingQueue&) = delete;
     ProcessingQueue &operator=(const ProcessingQueue&) = delete;
 
-    ~ProcessingQueue() = default;
+    virtual ~ProcessingQueue() = default;
 
     void PushTask(const T& task);
     void PushTask(T&& task);

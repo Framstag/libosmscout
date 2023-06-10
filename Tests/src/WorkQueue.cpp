@@ -69,7 +69,7 @@ public:
 
     std::future<int> future=task.get_future();
 
-    queue.PushTask(task);
+    queue.PushTask(std::move(task));
 
     return future;
   }
