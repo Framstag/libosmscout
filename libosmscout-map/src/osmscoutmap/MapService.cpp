@@ -680,7 +680,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    nodeWorkerQueue.PushTask(task);
+    nodeWorkerQueue.PushTask(std::move(task));
 
     return future;
   }
@@ -702,7 +702,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    areaLowZoomWorkerQueue.PushTask(task);
+    areaLowZoomWorkerQueue.PushTask(std::move(task));
 
     return future;
   }
@@ -724,7 +724,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    areaWorkerQueue.PushTask(task);
+    areaWorkerQueue.PushTask(std::move(task));
 
     return future;
   }
@@ -746,7 +746,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    wayLowZoomWorkerQueue.PushTask(task);
+    wayLowZoomWorkerQueue.PushTask(std::move(task));
 
     return future;
   }
@@ -766,7 +766,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    wayWorkerQueue.PushTask(task);
+    wayWorkerQueue.PushTask(std::move(task));
 
     return future;
   }
@@ -786,7 +786,7 @@ namespace osmscout {
 
     std::future<bool> future=task.get_future();
 
-    routeWorkerQueue.PushTask(task);
+    routeWorkerQueue.PushTask(std::move(task));
 
     return future;
   }

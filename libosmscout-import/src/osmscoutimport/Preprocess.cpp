@@ -817,7 +817,7 @@ namespace osmscout {
     std::shared_future<ProcessedDataRef>   processingResult(blockTask.get_future());
 
 
-    blockWorkerQueue.PushTask(blockTask);
+    blockWorkerQueue.PushTask(std::move(blockTask));
 
     //
     // Pass the (future of the) result of the processing back to the asynchronous writer
@@ -826,7 +826,7 @@ namespace osmscout {
     std::packaged_task<void()> writeTask(std::bind(&Preprocess::Callback::WriteTask,this,
                                                    processingResult));
 
-    writeWorkerQueue.PushTask(writeTask);
+    writeWorkerQueue.PushTask(std::move(writeTask));
   }
 
 
