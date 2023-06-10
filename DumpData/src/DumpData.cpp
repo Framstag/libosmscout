@@ -24,8 +24,8 @@
 #include <string>
 #include <vector>
 
-#include <osmscout/Database.h>
-#include <osmscout/DebugDatabase.h>
+#include <osmscout/db/Database.h>
+#include <osmscout/db/DebugDatabase.h>
 
 #include <osmscout/routing/RouteNode.h>
 
@@ -899,17 +899,17 @@ int main(int argc, char* argv[])
       1000);
 
   if (!database.Open(map)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
   }
 
   if (!debugDatabase.Open(map)) {
-    std::cerr << "Cannot open debug database" << std::endl;
+    std::cerr << "Cannot open debug db" << std::endl;
   }
 
   if (!routeNodeDataFile.Open(database.GetTypeConfig(),
                               map,
                               true)) {
-    std::cerr << "Cannot open routing database" << std::endl;
+    std::cerr << "Cannot open routing db" << std::endl;
   }
 
   // OSM ids

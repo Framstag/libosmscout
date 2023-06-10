@@ -24,7 +24,7 @@
 #include <osmscoutclientqt/LookupModule.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-#include <osmscout/TextSearchIndex.h>
+#include <osmscout/db/TextSearchIndex.h>
 #endif
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
@@ -179,7 +179,7 @@ public slots:
    * duplicates, because search may use various databases and indexes.
    *
    * @param searchPattern
-   * @param limit - suggested limit for count of retrieved entries from one database
+   * @param limit - suggested limit for count of retrieved entries from one db
    */
   void SearchForLocations(const QString searchPattern,
                           int limit,

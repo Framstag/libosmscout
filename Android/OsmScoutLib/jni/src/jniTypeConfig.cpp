@@ -21,7 +21,7 @@
 #include <string.h>
 #include <android/log.h>
 
-#include <osmscout/Database.h>
+#include "osmscout/database/Database.h"
 #include <osmscout/StyleConfig.h>
 #include <osmscout/StyleConfigLoader.h>
 
@@ -49,7 +49,7 @@ void Java_osm_scout_TypeConfig_jniDestructor(JNIEnv *env, jobject object,
   }
 
   // Do not delete native TypeConfig. Ii internally belongs to the matching
-  // database
+  // db
   //delete nativeTypeConfig;
 }
 

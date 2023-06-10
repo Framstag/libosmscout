@@ -38,8 +38,9 @@
 
 // Datafiles
 #include <osmscout/DataFile.h>
-#include <osmscout/Database.h>
-#include <osmscout/ObjectVariantDataFile.h>
+
+#include <osmscout/db/Database.h>
+#include <osmscout/db/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -259,7 +260,7 @@ namespace osmscout {
 
   /**
    * \defgroup Routing Routing based data structures and services
-   * Classes and methods for handling routing aspects of object in the libosmscout database
+   * Classes and methods for handling routing aspects of object in the libosmscout db
    */
 }
 

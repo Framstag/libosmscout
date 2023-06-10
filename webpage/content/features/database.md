@@ -1,7 +1,7 @@
 ---
 date: "2016-05-29T19:50:12+02:00"
 title: "Database"
-description: "Detailed list of database features"
+description: "Detailed list of db features"
 weight: 5
 
 menu:

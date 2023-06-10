@@ -21,7 +21,7 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/WayDataFile.h>
+#include <osmscout/db/WayDataFile.h>
 
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/PostalCodeFeature.h>

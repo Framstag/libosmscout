@@ -3,7 +3,7 @@
     "ignorePaths": [],
     "dictionaryDefinitions": [],
     "dictionaries": ["en-gb"],
-    "words": ["Teulings", "framstag", "osmscout"],
+    "words": ["Teulings", "framstag", "libosmscout", "osmscout"],
     "ignoreWords": [],
     "import": []
 }

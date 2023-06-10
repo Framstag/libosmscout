@@ -20,15 +20,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TypeConfig.h>
-#include <osmscout/Way.h>
+#include <vector>
+
 #include <osmscout/CoreImportExport.h>
+
+#include <osmscout/Way.h>
+
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/feature/EleFeature.h>
 
+#include <osmscout/util/Logger.h>
 #include <osmscout/util/TileId.h>
-
-#include <vector>
 
 namespace osmscout {
 

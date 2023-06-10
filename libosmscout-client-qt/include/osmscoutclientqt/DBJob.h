@@ -26,9 +26,9 @@
 #include <QThread>
 #include <QReadWriteLock>
 
-#include <osmscout/BasemapDatabase.h>
-
 #include <osmscout/projection/MercatorProjection.h>
+
+#include <osmscout/db/BasemapDatabase.h>
 
 #include <osmscoutmap/DataTileCache.h>
 
@@ -44,12 +44,12 @@ class OSMSCOUT_CLIENT_QT_API DBJob : public QObject{
   Q_OBJECT
 
 protected:
-  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap database
+  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap db
   std::list<DBInstanceRef>     databases;       //!< borrowed databases
   QThread                      *thread;         //!< job thread
 
 private:
-  QReadLocker                  *locker;         //!< database locker
+  QReadLocker                  *locker;         //!< db locker
 
 public:
   DBJob();
@@ -109,7 +109,7 @@ public:
    * @param tiles
    * @param data
    * @return true on success
-   *         false when given database was not added to this job, or job was closed
+   *         false when given db was not added to this job, or job was closed
    */
   bool AddTileDataToMapData(QString dbPath,
                             const QList<osmscout::TileRef> &tiles,

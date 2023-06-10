@@ -26,7 +26,8 @@
 #include <QScreen>
 #include <QWidget>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscoutmap/MapService.h>
 
 #include <osmscoutmap/LabelPath.h>

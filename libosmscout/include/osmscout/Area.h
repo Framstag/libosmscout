@@ -323,7 +323,7 @@ namespace osmscout {
 
     /**
      * Write the area with all data required in the
-     * standard database.
+     * standard db.
      */
     void Write(const TypeConfig& typeConfig,
                FileWriter& writer) const;

@@ -106,7 +106,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
     osmscout::GeoBox dbBox=db->GetDBGeoBox();
     if (!dbBox.Intersects(lookupBox)){
-      qDebug() << "Skip database" << db->path;
+      qDebug() << "Skip db" << db->path;
       continue;
     }
     relevantDatabases.push_back(db);
@@ -180,7 +180,7 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
   loadedTileMap[tile->GetKey()]=tileIt.value();
   loadingTileMap.remove(tile->GetKey());
 
-  if (loadingTileMap.isEmpty()){ // this database is finished
+  if (loadingTileMap.isEmpty()){ // this db is finished
     loadingTiles.remove(dbPath);
     emit databaseLoaded(dbPath,loadedTileMap.values());
     if (loadingTiles.isEmpty()){ // all databases are finished

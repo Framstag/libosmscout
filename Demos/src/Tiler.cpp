@@ -18,10 +18,9 @@
 */
 
 #include <iostream>
-#include <iomanip>
 #include <limits>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/projection/TileProjection.h>
 
@@ -266,7 +265,7 @@ int main(int argc, char* argv[])
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }

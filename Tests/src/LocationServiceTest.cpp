@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
   database=std::make_shared<osmscout::Database>(dbParameter);
 
   if (!database->Open(testsTmpDir)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
     return 77;
   }
 

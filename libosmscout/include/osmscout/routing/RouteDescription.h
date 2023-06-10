@@ -663,7 +663,7 @@ namespace osmscout {
     class OSMSCOUT_API Node
     {
     private:
-      DatabaseId                                     database; //!< database id of objects and pathObject
+      DatabaseId                                     database; //!< db id of objects and pathObject
       size_t                                         currentNodeIndex; //!< current node index of pathObject
       std::vector<ObjectFileRef>                     objects; //!< list of objects intersecting this node. Is empty when node belongs to pathObject only
       ObjectFileRef                                  pathObject; //!< object used for traveling from this node. Is invalid for last node

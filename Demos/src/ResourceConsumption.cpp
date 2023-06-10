@@ -21,7 +21,7 @@
 #include <iomanip>
 
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     auto mapService=std::make_shared<osmscout::MapService>(database);
 
     if (!database->Open(map.c_str())) {
-      std::cerr << "Cannot open database" << std::endl;
+      std::cerr << "Cannot open db" << std::endl;
 
       return 1;
     }
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
       database->DumpStatistics();
     }
 
-    std::cout << "# Press return to close database" << std::endl;
+    std::cout << "# Press return to close db" << std::endl;
 
     std::cin.get();
 

@@ -26,7 +26,7 @@ src/DrawMapGDI ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51241 
 
 #include <iostream>
 
-#include <osmscout/Database.h>
+#include "osmscout/database/Database.h"
 
 #include <osmscoutmap/MapService.h>
 

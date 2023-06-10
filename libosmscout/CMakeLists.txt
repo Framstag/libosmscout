@@ -2,56 +2,58 @@
 #set(MARISA_FOUND 1)
 
 set(HEADER_FILES_ROOT
-    include/osmscout/CoreImportExport.h
-    include/osmscout/Area.h
-    include/osmscout/AreaAreaIndex.h
-    include/osmscout/AreaDataFile.h
-    include/osmscout/AreaIndex.h
-    include/osmscout/AreaNodeIndex.h
-    include/osmscout/AreaRouteIndex.h
-    include/osmscout/AreaWayIndex.h
-    include/osmscout/CoordDataFile.h
-    include/osmscout/CoverageIndex.h
-    include/osmscout/BoundingBoxDataFile.h
-    include/osmscout/TypeDistributionDataFile.h
-    include/osmscout/Database.h
-    include/osmscout/DataFile.h
-    include/osmscout/ElevationService.h
-    include/osmscout/BasemapDatabase.h
-    include/osmscout/DebugDatabase.h
-    include/osmscout/GeoCoord.h
-    include/osmscout/GroundTile.h
-    include/osmscout/Intersection.h
-    include/osmscout/Location.h
-    include/osmscout/LocationIndex.h
-    include/osmscout/LocationService.h
-    include/osmscout/LocationDescriptionService.h
-    include/osmscout/Node.h
-    include/osmscout/NodeDataFile.h
-    include/osmscout/NumericIndex.h
-    include/osmscout/ObjectRef.h
-    include/osmscout/OptimizeAreasLowZoom.h
-    include/osmscout/OptimizeWaysLowZoom.h
-    include/osmscout/Path.h
-    include/osmscout/Pixel.h
-    include/osmscout/Point.h
-    include/osmscout/POIService.h
-    include/osmscout/PTRouteDataFile.h
-    include/osmscout/PublicTransport.h
-    include/osmscout/ObjectVariantDataFile.h
-    include/osmscout/Route.h
-    include/osmscout/RouteDataFile.h
-    include/osmscout/SRTM.h
-    include/osmscout/Tag.h
-    include/osmscout/TypeConfig.h
-    include/osmscout/TypeFeature.h
-    include/osmscout/TypeInfoSet.h
-    include/osmscout/FeatureReader.h
-    include/osmscout/OSMScoutTypes.h
-    include/osmscout/WaterIndex.h
-    include/osmscout/Way.h
-    include/osmscout/WayDataFile.h
-    include/osmscout/CoreFeatures.h)
+        include/osmscout/CoreImportExport.h
+        include/osmscout/Area.h
+        include/osmscout/DataFile.h
+        include/osmscout/ElevationService.h
+        include/osmscout/GeoCoord.h
+        include/osmscout/GroundTile.h
+        include/osmscout/Intersection.h
+        include/osmscout/Location.h
+        include/osmscout/LocationService.h
+        include/osmscout/LocationDescriptionService.h
+        include/osmscout/Node.h
+        include/osmscout/NumericIndex.h
+        include/osmscout/ObjectRef.h
+        include/osmscout/Path.h
+        include/osmscout/Pixel.h
+        include/osmscout/Point.h
+        include/osmscout/POIService.h
+        include/osmscout/PublicTransport.h
+        include/osmscout/Route.h
+        include/osmscout/SRTM.h
+        include/osmscout/Tag.h
+        include/osmscout/TypeConfig.h
+        include/osmscout/TypeFeature.h
+        include/osmscout/TypeInfoSet.h
+        include/osmscout/FeatureReader.h
+        include/osmscout/OSMScoutTypes.h
+        include/osmscout/Way.h
+        include/osmscout/CoreFeatures.h)
+
+set(HEADER_FILES_DB
+        include/osmscout/db/AreaAreaIndex.h
+        include/osmscout/db/AreaDataFile.h
+        include/osmscout/db/AreaIndex.h
+        include/osmscout/db/AreaNodeIndex.h
+        include/osmscout/db/AreaRouteIndex.h
+        include/osmscout/db/AreaWayIndex.h
+        include/osmscout/db/CoordDataFile.h
+        include/osmscout/db/CoverageIndex.h
+        include/osmscout/db/BoundingBoxDataFile.h
+        include/osmscout/db/TypeDistributionDataFile.h
+        include/osmscout/db/Database.h
+        include/osmscout/db/BasemapDatabase.h
+        include/osmscout/db/DebugDatabase.h
+        include/osmscout/db/LocationIndex.h
+        include/osmscout/db/NodeDataFile.h
+        include/osmscout/db/OptimizeAreasLowZoom.h
+        include/osmscout/db/OptimizeWaysLowZoom.h
+        include/osmscout/db/PTRouteDataFile.h
+        include/osmscout/db/ObjectVariantDataFile.h
+        include/osmscout/db/WaterIndex.h
+        include/osmscout/db/WayDataFile.h)
+
 
 set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessFeature.h
@@ -115,6 +117,7 @@ set(HEADER_FILES_PROJECTION
 
 set(HEADER_FILES_ROUTING
         include/osmscout/routing/RouteData.h
+        include/osmscout/routing/RouteDataFile.h
         include/osmscout/routing/RouteDescription.h
         include/osmscout/routing/RouteNode.h
         include/osmscout/routing/RouteNodeDataFile.h
@@ -288,41 +291,41 @@ set(SOURCE_FILES
     src/osmscout/util/SunriseSunset.cpp
     src/osmscout/util/TagErrorReporter.cpp
     src/osmscout/Area.cpp
-    src/osmscout/AreaDataFile.cpp
-    src/osmscout/AreaAreaIndex.cpp
-    src/osmscout/AreaIndex.cpp
-    src/osmscout/AreaNodeIndex.cpp
-    src/osmscout/AreaRouteIndex.cpp
-    src/osmscout/AreaWayIndex.cpp
-    src/osmscout/CoordDataFile.cpp
-    src/osmscout/CoverageIndex.cpp
-    src/osmscout/BoundingBoxDataFile.cpp
-    src/osmscout/TypeDistributionDataFile.cpp
-    src/osmscout/Database.cpp
-    src/osmscout/DebugDatabase.cpp
-    src/osmscout/BasemapDatabase.cpp
+        src/osmscout/db/AreaDataFile.cpp
+        src/osmscout/db/AreaAreaIndex.cpp
+        src/osmscout/db/AreaIndex.cpp
+        src/osmscout/db/AreaNodeIndex.cpp
+        src/osmscout/db/AreaRouteIndex.cpp
+        src/osmscout/db/AreaWayIndex.cpp
+        src/osmscout/db/CoordDataFile.cpp
+        src/osmscout/db/CoverageIndex.cpp
+        src/osmscout/db/BoundingBoxDataFile.cpp
+        src/osmscout/db/TypeDistributionDataFile.cpp
+        src/osmscout/db/Database.cpp
+        src/osmscout/db/DebugDatabase.cpp
+        src/osmscout/db/BasemapDatabase.cpp
     src/osmscout/GeoCoord.cpp
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp
     src/osmscout/Location.cpp
-    src/osmscout/LocationIndex.cpp
+        src/osmscout/db/LocationIndex.cpp
     src/osmscout/LocationService.cpp
     src/osmscout/LocationDescriptionService.cpp
     src/osmscout/Node.cpp
-    src/osmscout/NodeDataFile.cpp
+        src/osmscout/db/NodeDataFile.cpp
     src/osmscout/NumericIndex.cpp
     src/osmscout/ObjectRef.cpp
-    src/osmscout/OptimizeAreasLowZoom.cpp
-    src/osmscout/OptimizeWaysLowZoom.cpp
+        src/osmscout/db/OptimizeAreasLowZoom.cpp
+        src/osmscout/db/OptimizeWaysLowZoom.cpp
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
     src/osmscout/Point.cpp
     src/osmscout/POIService.cpp
-    src/osmscout/PTRouteDataFile.cpp
+        src/osmscout/db/PTRouteDataFile.cpp
     src/osmscout/PublicTransport.cpp
-    src/osmscout/ObjectVariantDataFile.cpp
+        src/osmscout/db/ObjectVariantDataFile.cpp
     src/osmscout/Route.cpp
-    src/osmscout/RouteDataFile.cpp
+        src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
@@ -330,16 +333,16 @@ set(SOURCE_FILES
     src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
-    src/osmscout/WaterIndex.cpp
+        src/osmscout/db/WaterIndex.cpp
     src/osmscout/Way.cpp
-    src/osmscout/WayDataFile.cpp
+        src/osmscout/db/WayDataFile.cpp
     src/osmscout/util/CmdLineParsing.cpp)
 
 set(EXCLUDE_HEADER)
 
 if(MARISA_FOUND)
-    list(APPEND HEADER_FILES_ROOT include/osmscout/TextSearchIndex.h)
-    list(APPEND SOURCE_FILES src/osmscout/TextSearchIndex.cpp)
+    list(APPEND HEADER_FILES_ROOT include/osmscout/db/TextSearchIndex.h)
+    list(APPEND SOURCE_FILES src/osmscout/db/TextSearchIndex.cpp)
 else()
     list(APPEND EXCLUDE_HEADER TextSearchIndex.h)
 endif()
@@ -347,6 +350,7 @@ endif()
 set(HEADER_FILES
     ${HEADER_FILES_ROOT}
     ${HEADER_FILES_FEATURE}
+    ${HEADER_FILES_DB}
     ${HEADER_FILES_NAVIGATION}
     ${HEADER_FILES_OST}
     ${HEADER_FILES_PROJECTION}
@@ -386,6 +390,10 @@ endif()
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_ROOT}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_FEATURE}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_DB}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_OST}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
     set_source_files_properties(${HEADER_FILES_SYSTEM}

@@ -1,7 +1,7 @@
 ---
 date: "2016-05-29T19:50:42+02:00"
 title: "Database files"
-description: "Description of the indivudal database files and their function"
+description: "Description of the indivudal db files and their function"
 weight: 8
 
 menu:

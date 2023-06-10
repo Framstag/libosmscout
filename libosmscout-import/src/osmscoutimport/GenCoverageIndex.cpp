@@ -19,11 +19,11 @@
 
 #include <osmscoutimport/GenCoverageIndex.h>
 
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/db/AreaDataFile.h>
+#include <osmscout/db/NodeDataFile.h>
+#include <osmscout/db/WayDataFile.h>
 
-#include <osmscout/CoverageIndex.h>
+#include <osmscout/db/CoverageIndex.h>
 
 #include <osmscout/util/TileId.h>
 

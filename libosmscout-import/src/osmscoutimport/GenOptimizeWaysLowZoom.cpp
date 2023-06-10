@@ -25,11 +25,10 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/WayDataFile.h>
-#include <osmscout/OptimizeWaysLowZoom.h>
+#include <osmscout/db/WayDataFile.h>
+#include <osmscout/db/OptimizeWaysLowZoom.h>
 
 #include <osmscout/system/Assert.h>
-#include <osmscout/system/Math.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 

@@ -22,8 +22,8 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/OptimizeAreasLowZoom.h>
+#include <osmscout/db/AreaDataFile.h>
+#include <osmscout/db/OptimizeAreasLowZoom.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>

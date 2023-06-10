@@ -21,7 +21,7 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/NodeDataFile.h>
+#include <osmscout/db/NodeDataFile.h>
 
 #include <osmscout/feature/AddressFeature.h>
 #include <osmscout/feature/LocationFeature.h>

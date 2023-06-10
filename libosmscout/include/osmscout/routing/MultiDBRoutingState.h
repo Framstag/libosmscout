@@ -22,9 +22,10 @@
 */
 
 #include <osmscout/DataFile.h>
-#include <osmscout/ObjectVariantDataFile.h>
-#include <osmscout/Database.h>
 #include <osmscout/Intersection.h>
+
+#include <osmscout/db/ObjectVariantDataFile.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RoutingProfile.h>
