@@ -21,9 +21,9 @@
 
 #include <osmscout/Node.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscoutimport/RawNode.h>
 #include <osmscoutimport/Preprocess.h>

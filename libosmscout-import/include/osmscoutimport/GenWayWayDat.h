@@ -31,7 +31,7 @@
 
 #include <osmscout/TypeInfoSet.h>
 
-#include <osmscout/NumericIndex.h>
+#include <osmscout/io/NumericIndex.h>
 
 #include <osmscout/routing/TurnRestriction.h>
 

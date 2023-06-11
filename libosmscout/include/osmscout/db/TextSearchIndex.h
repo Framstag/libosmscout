@@ -22,9 +22,9 @@
 
 #include <unordered_map>
 
-#include "osmscout/ObjectRef.h"
+#include <osmscout/ObjectRef.h>
 
-#include "osmscout/util/FileScanner.h"
+#include <osmscout/io/FileScanner.h>
 
 #include <marisa.h>
 

@@ -29,8 +29,9 @@
 #include <osmscout/location/Location.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/io/FileScanner.h>
+
 #include <osmscout/util/ObjectPool.h>
-#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 

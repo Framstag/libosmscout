@@ -19,7 +19,8 @@
 
 #include <osmscoutimport/ImportProgress.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/File.h>
+
+#include <osmscout/io/File.h>
 
 #include <algorithm>
 #include <iomanip>

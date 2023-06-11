@@ -26,10 +26,11 @@
 
 #include <osmscoutimport/Import.h>
 
-#include <osmscout/DataFile.h>
 #include <osmscout/ObjectRef.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/DataFile.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/system/Math.h>
 
 namespace osmscout {

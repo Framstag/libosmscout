@@ -22,7 +22,7 @@
 #include <osmscout-test/olt/Scanner.h>
 #include <osmscout-test/olt/Parser.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 
 namespace osmscout {
   namespace test {

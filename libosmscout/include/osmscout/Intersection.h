@@ -28,7 +28,7 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/FileScanner.h>
 
 #include <osmscout/system/Compiler.h>
 

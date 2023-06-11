@@ -35,10 +35,11 @@
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
-#include <osmscoutimport/Preprocess.h>
+#include <osmscout/io/File.h>
 
 #include <osmscout/util/Color.h>
-#include <osmscout/util/File.h>
+
+#include <osmscoutimport/Preprocess.h>
 
 namespace osmscout {
 

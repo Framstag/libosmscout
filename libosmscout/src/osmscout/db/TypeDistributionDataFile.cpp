@@ -19,9 +19,10 @@
 
 #include <osmscout/db/TypeDistributionDataFile.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
+
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
 
 namespace osmscout {
 

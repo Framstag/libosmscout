@@ -28,7 +28,8 @@
 #include <optional>
 
 #include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/File.h>
+
+#include <osmscout/io/File.h>
 
 #include <osmscoutimport/Import.h>
 

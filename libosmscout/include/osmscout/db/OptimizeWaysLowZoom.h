@@ -26,12 +26,13 @@
 #include <set>
 #include <string>
 
-#include "osmscout/TypeInfoSet.h"
+#include <osmscout/TypeInfoSet.h>
 
-#include "osmscout/Way.h"
+#include <osmscout/Way.h>
 
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/Magnification.h"
+#include <osmscout/io/FileScanner.h>
+
+#include <osmscout/util/Magnification.h>
 
 namespace osmscout {
 

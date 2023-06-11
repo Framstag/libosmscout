@@ -2,7 +2,7 @@
 #include <iostream>
 #include <utility>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 
 #include <TestMain.h>
 

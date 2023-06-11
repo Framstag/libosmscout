@@ -22,8 +22,9 @@
 
 #include <memory>
 
-#include "osmscout/Area.h"
-#include "osmscout/DataFile.h"
+#include <osmscout/Area.h>
+
+#include <osmscout/io/DataFile.h>
 
 namespace osmscout {
   /**

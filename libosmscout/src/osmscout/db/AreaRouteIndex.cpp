@@ -19,8 +19,6 @@
 
 #include <osmscout/db/AreaRouteIndex.h>
 
-#include "osmscout/util/File.h"
-
 namespace osmscout {
 
   const char* const AreaRouteIndex::AREA_ROUTE_IDX="arearoute.idx";

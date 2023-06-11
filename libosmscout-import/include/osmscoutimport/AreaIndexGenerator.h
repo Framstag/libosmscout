@@ -27,12 +27,15 @@
 
 #include <osmscout/Pixel.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/TypeInfoSet.h>
+
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/File.h>
+
 #include <osmscout/system/Compiler.h>
-#include <osmscout/TypeInfoSet.h>
 
 namespace osmscout {
 

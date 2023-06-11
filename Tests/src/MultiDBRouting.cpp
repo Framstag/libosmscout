@@ -28,7 +28,8 @@
 #include <osmscout/routing/MultiDBRoutingService.h>
 
 #include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/FileScanner.h>
+
+#include <osmscout/io/FileScanner.h>
 
 struct Arguments
 {

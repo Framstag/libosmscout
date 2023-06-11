@@ -21,11 +21,9 @@
 // The Config.h, than our class and then std io.
 #include <osmscout/private/Config.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <algorithm>
-
-#include <cstring>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>

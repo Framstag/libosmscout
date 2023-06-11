@@ -28,8 +28,8 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Geometry.h>

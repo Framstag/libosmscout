@@ -25,8 +25,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/NumericIndex.h>
-
 #include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/FeatureReader.h>
@@ -44,7 +42,9 @@
 #include <osmscout/routing/RouteNode.h>
 #include <osmscout/routing/TurnRestriction.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/NumericIndex.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/NodeUseMap.h>
 
 #include <osmscout/system/Compiler.h>

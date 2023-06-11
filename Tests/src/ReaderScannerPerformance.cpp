@@ -21,8 +21,9 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+
 #include <osmscout/util/StopClock.h>
 
 /**

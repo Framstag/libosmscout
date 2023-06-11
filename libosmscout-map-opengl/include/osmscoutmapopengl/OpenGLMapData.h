@@ -25,7 +25,8 @@
 
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapPainter.h>
-#include <osmscout/util/File.h>
+
+#include <osmscout/io/File.h>
 
 #include <iostream>
 #include <fstream>
