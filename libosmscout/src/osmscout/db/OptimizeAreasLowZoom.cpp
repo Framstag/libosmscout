@@ -24,13 +24,12 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
-#include <osmscout/projection/Projection.h>
+#include <osmscout/io/File.h>
 
-#include "osmscout/util/File.h"
-#include "osmscout/util/Geometry.h"
-#include "osmscout/util/Logger.h"
-#include "osmscout/util/StopClock.h"
-#include "osmscout/util/String.h"
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/Logger.h>
+#include <osmscout/util/StopClock.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout
 {

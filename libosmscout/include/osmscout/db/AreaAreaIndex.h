@@ -25,13 +25,13 @@
 #include <mutex>
 #include <vector>
 
-#include "osmscout/DataFile.h"
+#include <osmscout/TypeInfoSet.h>
 
-#include "osmscout/TypeInfoSet.h"
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/DataFile.h>
 
-#include "osmscout/util/Cache.h"
-#include "osmscout/util/Geometry.h"
-#include "osmscout/util/FileScanner.h"
+#include <osmscout/util/Cache.h>
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 

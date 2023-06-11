@@ -32,8 +32,8 @@
 #include <osmscout/db/AreaAreaIndex.h>
 #include <osmscout/db/AreaDataFile.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 

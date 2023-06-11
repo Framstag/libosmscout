@@ -25,13 +25,15 @@
 #include <unordered_set>
 #include <vector>
 
-#include "AreaIndex.h"
-#include "osmscout/TypeConfig.h"
-#include "osmscout/TypeInfoSet.h"
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/TileId.h"
-#include "osmscout/system/Compiler.h"
+#include <osmscout/db/AreaIndex.h>
+
+#include <osmscout/io/FileScanner.h>
+
+#include <osmscout/util/TileId.h>
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 

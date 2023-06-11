@@ -21,12 +21,11 @@
 
 #include <algorithm>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/StopClock.h>
-
-#include "osmscout/system/Math.h"
 
 namespace osmscout {
 

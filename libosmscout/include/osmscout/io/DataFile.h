@@ -26,11 +26,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/NumericIndex.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/NumericIndex.h>
+
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Logger.h>
 
 //#include <map>

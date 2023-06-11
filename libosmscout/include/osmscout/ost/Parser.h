@@ -25,7 +25,7 @@
 
 #include <osmscout/feature/NameFeature.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/ost/Scanner.h>

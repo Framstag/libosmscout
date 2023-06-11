@@ -19,8 +19,8 @@
 
 #include <osmscoutimport/MergeAreaData.h>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscoutimport/GenRelAreaDat.h>
 #include <osmscoutimport/GenWayAreaDat.h>

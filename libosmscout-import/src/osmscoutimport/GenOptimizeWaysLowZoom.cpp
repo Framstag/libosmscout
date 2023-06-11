@@ -32,7 +32,8 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Number.h>

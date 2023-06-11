@@ -19,7 +19,7 @@
 
 #include <osmscout/private/Config.h>
 
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/FileScanner.h>
 
 #include <cerrno>
 #include <cstdio>

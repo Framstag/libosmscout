@@ -37,10 +37,10 @@
 #include <osmscout/routing/RouteNode.h>
 
 // Datafiles
-#include <osmscout/DataFile.h>
+#include <osmscout/io/DataFile.h>
 
-#include "osmscout/db/Database.h"
-#include "osmscout/db/ObjectVariantDataFile.h"
+#include <osmscout/db/Database.h>
+#include <osmscout/db/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>

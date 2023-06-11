@@ -4,13 +4,11 @@
 set(HEADER_FILES_ROOT
         include/osmscout/CoreImportExport.h
         include/osmscout/Area.h
-        include/osmscout/DataFile.h
         include/osmscout/ElevationService.h
         include/osmscout/GeoCoord.h
         include/osmscout/GroundTile.h
         include/osmscout/Intersection.h
         include/osmscout/Node.h
-        include/osmscout/NumericIndex.h
         include/osmscout/ObjectRef.h
         include/osmscout/Path.h
         include/osmscout/Pixel.h
@@ -63,6 +61,13 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/WebsiteFeature.h
         include/osmscout/feature/WidthFeature.h
         )
+
+set(HEADER_FILES_IO
+        include/osmscout/io/DataFile.h
+        include/osmscout/io/File.h
+        include/osmscout/io/FileScanner.h
+        include/osmscout/io/FileWriter.h
+        include/osmscout/io/NumericIndex.h)
 
 set(HEADER_FILES_DB
         include/osmscout/db/AreaAreaIndex.h
@@ -152,9 +157,6 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/CmdLineParsing.h
     include/osmscout/util/Distance.h
     include/osmscout/util/Exception.h
-    include/osmscout/util/File.h
-    include/osmscout/util/FileScanner.h
-    include/osmscout/util/FileWriter.h
     include/osmscout/util/HTMLWriter.h
     include/osmscout/util/LaneTurn.h
     include/osmscout/util/Locale.h
@@ -262,9 +264,9 @@ set(SOURCE_FILES
     src/osmscout/util/Color.cpp
     src/osmscout/util/Distance.cpp
     src/osmscout/util/Exception.cpp
-    src/osmscout/util/File.cpp
-    src/osmscout/util/FileScanner.cpp
-    src/osmscout/util/FileWriter.cpp
+        src/osmscout/io/File.cpp
+        src/osmscout/io/FileScanner.cpp
+        src/osmscout/io/FileWriter.cpp
     src/osmscout/util/HTMLWriter.cpp
     src/osmscout/util/LaneTurn.cpp
     src/osmscout/util/Locale.cpp
@@ -322,7 +324,7 @@ set(SOURCE_FILES
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp
     src/osmscout/Node.cpp
-    src/osmscout/NumericIndex.cpp
+        src/osmscout/io/NumericIndex.cpp
     src/osmscout/ObjectRef.cpp
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
@@ -352,6 +354,7 @@ endif()
 set(HEADER_FILES
     ${HEADER_FILES_ROOT}
     ${HEADER_FILES_FEATURE}
+    ${HEADER_FILES_IO}
     ${HEADER_FILES_DB}
     ${HEADER_FILES_LOCATION}
     ${HEADER_FILES_NAVIGATION}
@@ -392,25 +395,27 @@ endif()
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_ROOT}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_FEATURE}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_IO}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_DB}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_LOCATION}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_OST}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
     set_source_files_properties(${HEADER_FILES_SYSTEM}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/system)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/system)
     set_source_files_properties(${HEADER_FILES_UTIL}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/util)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/util)
     set_source_files_properties(${HEADER_FILES_ROUTING}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/routing)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/routing)
     set_source_files_properties(${HEADER_FILES_NAVIGATION}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/navigation)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/navigation)
     set_source_files_properties(${HEADER_FILES_PROJECTION}
-        PROPERTIES MACOSX_PACKAGE_LOCATION Headers/projection)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/projection)
 
     set_target_properties(OSMScout PROPERTIES
         FRAMEWORK TRUE

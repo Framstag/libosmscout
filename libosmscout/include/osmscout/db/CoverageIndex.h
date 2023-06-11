@@ -24,9 +24,9 @@
 #include <mutex>
 #include <vector>
 
-#include "osmscout/Pixel.h"
+#include <osmscout/Pixel.h>
 
-#include "osmscout/util/FileScanner.h"
+#include <osmscout/io/FileScanner.h>
 
 namespace osmscout {
 

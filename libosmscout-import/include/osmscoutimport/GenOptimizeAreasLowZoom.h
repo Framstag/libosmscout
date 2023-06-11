@@ -31,8 +31,8 @@
 
 #include <osmscout/Area.h>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscout/system/Compiler.h>
 

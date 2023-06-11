@@ -24,11 +24,12 @@
 #include <unordered_set>
 #include <vector>
 
-#include "osmscout/TypeConfig.h"
-#include "osmscout/TypeInfoSet.h"
+#include <osmscout/TypeConfig.h>
+#include <osmscout/TypeInfoSet.h>
 
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/TileId.h"
+#include <osmscout/io/FileScanner.h>
+
+#include <osmscout/util/TileId.h>
 
 namespace osmscout {
 

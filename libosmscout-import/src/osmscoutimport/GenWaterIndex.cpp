@@ -21,7 +21,6 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/DataFile.h>
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/db/BoundingBoxDataFile.h>
@@ -35,8 +34,10 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/DataFile.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+
 #include <osmscout/util/Geometry.h>
 
 #include <osmscoutimport/Preprocess.h>

@@ -26,8 +26,10 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/String.h>
-#include <osmscout/util/File.h>
 #include <osmscout/util/Base64.h>
 
 namespace osmscout {

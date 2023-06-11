@@ -18,7 +18,7 @@
 */
 
 #include <osmscoutmapopengl/ShaderUtils.h>
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 #include <osmscout/util/Logger.h>
 
 #include <string>

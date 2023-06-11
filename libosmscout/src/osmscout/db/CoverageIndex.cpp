@@ -19,9 +19,7 @@
 
 #include <osmscout/db/CoverageIndex.h>
 
-#include <algorithm>
-
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 

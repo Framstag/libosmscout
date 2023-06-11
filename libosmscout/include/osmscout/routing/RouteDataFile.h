@@ -22,8 +22,9 @@
 
 #include <memory>
 
-#include "osmscout/DataFile.h"
-#include "osmscout/Route.h"
+#include <osmscout/Route.h>
+
+#include <osmscout/io/DataFile.h>
 
 namespace osmscout {
   /**

@@ -21,7 +21,8 @@
 
 #include <osmscout/system/Assert.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/Logger.h>
 
 namespace osmscout {

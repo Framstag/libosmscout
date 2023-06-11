@@ -30,8 +30,9 @@
 #include <osmscout/system/Compiler.h>
 
 #include <osmscout/util/Color.h>
-#include <osmscout/util/FileWriter.h>
-#include <osmscout/util/FileScanner.h>
+
+#include <osmscout/io/FileWriter.h>
+#include <osmscout/io/FileScanner.h>
 
 namespace osmscout {
 

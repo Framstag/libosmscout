@@ -27,7 +27,7 @@
 #include <osmscout/db/BoundingBoxDataFile.h>
 #include <osmscout/db/TypeDistributionDataFile.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 
 #include <osmscoutimport/RawCoastline.h>
 #include <osmscoutimport/RawCoord.h>

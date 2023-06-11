@@ -21,9 +21,10 @@
 
 #include <numeric>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/ProcessingQueue.h>
 #include <osmscout/util/Worker.h>
 

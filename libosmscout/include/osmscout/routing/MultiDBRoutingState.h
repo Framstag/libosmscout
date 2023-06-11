@@ -21,8 +21,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/DataFile.h>
 #include <osmscout/Intersection.h>
+
+#include <osmscout/io/DataFile.h>
 
 #include <osmscout/db/ObjectVariantDataFile.h>
 #include <osmscout/db/Database.h>

@@ -18,12 +18,12 @@
 */
 
 #include <cstdio>
-#include <cstdlib>
 
 #include <filesystem>
 
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/Exception.h>
-#include <osmscout/util/File.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Logger.h>
 

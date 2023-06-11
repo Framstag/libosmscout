@@ -20,10 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/DataFile.h"
-#include "osmscout/Point.h"
+#include <osmscout/io/DataFile.h>
+#include <osmscout/Point.h>
 
-#include "osmscout/util/Cache.h"
+#include <osmscout/util/Cache.h>
 
 namespace osmscout {
 

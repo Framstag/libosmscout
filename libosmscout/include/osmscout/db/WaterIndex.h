@@ -26,11 +26,12 @@
 #include <string>
 #include <vector>
 
-#include "osmscout/GroundTile.h"
-#include "osmscout/OSMScoutTypes.h"
+#include <osmscout/GroundTile.h>
+#include <osmscout/OSMScoutTypes.h>
 
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/Magnification.h"
+#include <osmscout/util/Magnification.h>
+
+#include <osmscout/io/FileScanner.h>
 
 namespace osmscout {
 

@@ -27,7 +27,6 @@
 
 #include <libxml/parser.h>
 
-#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 #include <osmscoutimport/RawRelation.h>

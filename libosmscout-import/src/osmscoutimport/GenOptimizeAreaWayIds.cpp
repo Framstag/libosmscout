@@ -29,11 +29,12 @@
 #include <numeric>
 #include <unordered_set>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/DataFile.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/PolygonCenter.h>
 
-#include <osmscout/DataFile.h>
 #include <osmscoutimport/GenMergeAreas.h>
 #include <osmscoutimport/GenWayWayDat.h>
 

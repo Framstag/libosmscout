@@ -19,17 +19,14 @@
 
 #include <osmscout/db/DebugDatabase.h>
 
-#include <algorithm>
+#include <osmscout/system/Assert.h>
 
-#include "osmscout/system/Assert.h"
-#include "osmscout/system/Math.h"
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
 
-#include "osmscout/util/File.h"
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/Logger.h"
-#include "osmscout/util/StopClock.h"
+#include <osmscout/util/Logger.h>
 
-#include "osmscout/ObjectRef.h"
+#include <osmscout/ObjectRef.h>
 
 namespace osmscout {
 

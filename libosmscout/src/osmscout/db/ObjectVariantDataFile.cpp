@@ -19,8 +19,9 @@
 
 #include <osmscout/db/ObjectVariantDataFile.h>
 
-#include "osmscout/util/FileScanner.h"
-#include "osmscout/util/Logger.h"
+#include <osmscout/util/Logger.h>
+
+#include <osmscout/io/FileScanner.h>
 
 namespace osmscout {
 

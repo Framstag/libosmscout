@@ -1,8 +1,9 @@
 #include <osmscout/db/TextSearchIndex.h>
 
-#include <osmscout/util/File.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/String.h>
+
+#include <osmscout/io/File.h>
 
 namespace osmscout
 {

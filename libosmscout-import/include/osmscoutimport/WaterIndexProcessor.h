@@ -34,10 +34,11 @@
 
 #include <osmscout/projection/Projection.h>
 
-#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Transformation.h>
+
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscout/system/Compiler.h>
 

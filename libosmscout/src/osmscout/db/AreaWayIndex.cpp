@@ -19,8 +19,6 @@
 
 #include <osmscout/db/AreaWayIndex.h>
 
-#include "osmscout/util/File.h"
-
 namespace osmscout {
 
   const char* const AreaWayIndex::AREA_WAY_IDX="areaway.idx";
