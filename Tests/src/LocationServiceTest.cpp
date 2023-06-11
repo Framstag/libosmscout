@@ -5,7 +5,7 @@
 
 #include <osmscout-test/PreprocessOLT.h>
 
-#include <osmscout/LocationService.h>
+#include <osmscout/location/LocationService.h>
 
 #include <TestRunner.h>
 

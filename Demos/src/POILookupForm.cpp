@@ -21,7 +21,7 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/LocationService.h>
+#include <osmscout/location/LocationService.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 

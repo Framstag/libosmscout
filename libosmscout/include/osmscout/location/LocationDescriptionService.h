@@ -23,10 +23,11 @@
 #include <list>
 #include <memory>
 
-#include <osmscout/Location.h>
 #include <osmscout/TypeInfoSet.h>
 
-#include "osmscout/db/Database.h"
+#include <osmscout/db/Database.h>
+
+#include <osmscout/location/Location.h>
 
 #include <osmscout/util/StringMatcher.h>
 

@@ -26,8 +26,10 @@
 #include <QJSValue>
 
 #include <osmscout/GeoCoord.h>
+
+#include <osmscout/location/LocationService.h>
+
 #include <osmscoutclientqt/LocationEntry.h>
-#include <osmscout/LocationService.h>
 #include <osmscoutclientqt/SearchModule.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>

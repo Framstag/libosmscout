@@ -31,9 +31,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <stdio.h>
 #include <sstream>
 #include <algorithm>
-#include "osmscout/database/Database.h"
-#include <osmscout/LocationService.h>
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/database/Database.h>
+#include <osmscout/location/LocationService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 #include <osmscout/POIService.h>
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>

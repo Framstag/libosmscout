@@ -28,12 +28,13 @@
 #include <QTimer>
 #include <QReadWriteLock>
 
-#include <osmscout/LocationService.h>
-#include <osmscoutmap/MapService.h>
-#include <osmscoutmapqt/MapPainterQt.h>
-
 #include <osmscout/db/BasemapDatabase.h>
 #include <osmscout/db/Database.h>
+
+#include <osmscout/location/LocationService.h>
+
+#include <osmscoutmap/MapService.h>
+#include <osmscoutmapqt/MapPainterQt.h>
 
 #include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/TileCache.h>

@@ -9,9 +9,6 @@ set(HEADER_FILES_ROOT
         include/osmscout/GeoCoord.h
         include/osmscout/GroundTile.h
         include/osmscout/Intersection.h
-        include/osmscout/Location.h
-        include/osmscout/LocationService.h
-        include/osmscout/LocationDescriptionService.h
         include/osmscout/Node.h
         include/osmscout/NumericIndex.h
         include/osmscout/ObjectRef.h
@@ -30,30 +27,6 @@ set(HEADER_FILES_ROOT
         include/osmscout/OSMScoutTypes.h
         include/osmscout/Way.h
         include/osmscout/CoreFeatures.h)
-
-set(HEADER_FILES_DB
-        include/osmscout/db/AreaAreaIndex.h
-        include/osmscout/db/AreaDataFile.h
-        include/osmscout/db/AreaIndex.h
-        include/osmscout/db/AreaNodeIndex.h
-        include/osmscout/db/AreaRouteIndex.h
-        include/osmscout/db/AreaWayIndex.h
-        include/osmscout/db/CoordDataFile.h
-        include/osmscout/db/CoverageIndex.h
-        include/osmscout/db/BoundingBoxDataFile.h
-        include/osmscout/db/TypeDistributionDataFile.h
-        include/osmscout/db/Database.h
-        include/osmscout/db/BasemapDatabase.h
-        include/osmscout/db/DebugDatabase.h
-        include/osmscout/db/LocationIndex.h
-        include/osmscout/db/NodeDataFile.h
-        include/osmscout/db/OptimizeAreasLowZoom.h
-        include/osmscout/db/OptimizeWaysLowZoom.h
-        include/osmscout/db/PTRouteDataFile.h
-        include/osmscout/db/ObjectVariantDataFile.h
-        include/osmscout/db/WaterIndex.h
-        include/osmscout/db/WayDataFile.h)
-
 
 set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessFeature.h
@@ -90,6 +63,35 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/WebsiteFeature.h
         include/osmscout/feature/WidthFeature.h
         )
+
+set(HEADER_FILES_DB
+        include/osmscout/db/AreaAreaIndex.h
+        include/osmscout/db/AreaDataFile.h
+        include/osmscout/db/AreaIndex.h
+        include/osmscout/db/AreaNodeIndex.h
+        include/osmscout/db/AreaRouteIndex.h
+        include/osmscout/db/AreaWayIndex.h
+        include/osmscout/db/CoordDataFile.h
+        include/osmscout/db/CoverageIndex.h
+        include/osmscout/db/BoundingBoxDataFile.h
+        include/osmscout/db/TypeDistributionDataFile.h
+        include/osmscout/db/Database.h
+        include/osmscout/db/BasemapDatabase.h
+        include/osmscout/db/DebugDatabase.h
+        include/osmscout/db/LocationIndex.h
+        include/osmscout/db/NodeDataFile.h
+        include/osmscout/db/OptimizeAreasLowZoom.h
+        include/osmscout/db/OptimizeWaysLowZoom.h
+        include/osmscout/db/PTRouteDataFile.h
+        include/osmscout/db/ObjectVariantDataFile.h
+        include/osmscout/db/WaterIndex.h
+        include/osmscout/db/WayDataFile.h)
+
+set(HEADER_FILES_LOCATION
+        include/osmscout/location/Location.h
+        include/osmscout/location/LocationService.h
+        include/osmscout/location/LocationDescriptionService.h)
+
 
 set(HEADER_FILES_NAVIGATION
         include/osmscout/navigation/Agents.h
@@ -252,6 +254,7 @@ set(SOURCE_FILES
     src/osmscout/routing/TurnRestriction.cpp
     src/osmscout/routing/MultiDBRoutingState.cpp
     src/osmscout/routing/RouteDescriptionPostprocessor.cpp
+    src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/system/SSEMath.cpp
     src/osmscout/util/Bearing.cpp
     src/osmscout/util/Breaker.cpp
@@ -290,42 +293,43 @@ set(SOURCE_FILES
     src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/SunriseSunset.cpp
     src/osmscout/util/TagErrorReporter.cpp
+    src/osmscout/db/AreaDataFile.cpp
+    src/osmscout/db/AreaAreaIndex.cpp
+    src/osmscout/db/AreaIndex.cpp
+    src/osmscout/db/AreaNodeIndex.cpp
+    src/osmscout/db/AreaRouteIndex.cpp
+    src/osmscout/db/AreaWayIndex.cpp
+    src/osmscout/db/CoordDataFile.cpp
+    src/osmscout/db/CoverageIndex.cpp
+    src/osmscout/db/BoundingBoxDataFile.cpp
+    src/osmscout/db/TypeDistributionDataFile.cpp
+    src/osmscout/db/Database.cpp
+    src/osmscout/db/DebugDatabase.cpp
+    src/osmscout/db/BasemapDatabase.cpp
+    src/osmscout/db/LocationIndex.cpp
+    src/osmscout/db/NodeDataFile.cpp
+    src/osmscout/db/OptimizeAreasLowZoom.cpp
+    src/osmscout/db/OptimizeWaysLowZoom.cpp
+    src/osmscout/db/PTRouteDataFile.cpp
+    src/osmscout/db/ObjectVariantDataFile.cpp
+    src/osmscout/db/WaterIndex.cpp
+    src/osmscout/db/WayDataFile.cpp
+    src/osmscout/location/Location.cpp
+    src/osmscout/location/LocationService.cpp
+    src/osmscout/location/LocationDescriptionService.cpp
     src/osmscout/Area.cpp
-        src/osmscout/db/AreaDataFile.cpp
-        src/osmscout/db/AreaAreaIndex.cpp
-        src/osmscout/db/AreaIndex.cpp
-        src/osmscout/db/AreaNodeIndex.cpp
-        src/osmscout/db/AreaRouteIndex.cpp
-        src/osmscout/db/AreaWayIndex.cpp
-        src/osmscout/db/CoordDataFile.cpp
-        src/osmscout/db/CoverageIndex.cpp
-        src/osmscout/db/BoundingBoxDataFile.cpp
-        src/osmscout/db/TypeDistributionDataFile.cpp
-        src/osmscout/db/Database.cpp
-        src/osmscout/db/DebugDatabase.cpp
-        src/osmscout/db/BasemapDatabase.cpp
     src/osmscout/GeoCoord.cpp
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp
-    src/osmscout/Location.cpp
-        src/osmscout/db/LocationIndex.cpp
-    src/osmscout/LocationService.cpp
-    src/osmscout/LocationDescriptionService.cpp
     src/osmscout/Node.cpp
-        src/osmscout/db/NodeDataFile.cpp
     src/osmscout/NumericIndex.cpp
     src/osmscout/ObjectRef.cpp
-        src/osmscout/db/OptimizeAreasLowZoom.cpp
-        src/osmscout/db/OptimizeWaysLowZoom.cpp
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
     src/osmscout/Point.cpp
     src/osmscout/POIService.cpp
-        src/osmscout/db/PTRouteDataFile.cpp
     src/osmscout/PublicTransport.cpp
-        src/osmscout/db/ObjectVariantDataFile.cpp
     src/osmscout/Route.cpp
-        src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
@@ -333,9 +337,7 @@ set(SOURCE_FILES
     src/osmscout/TypeInfoSet.cpp
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
-        src/osmscout/db/WaterIndex.cpp
     src/osmscout/Way.cpp
-        src/osmscout/db/WayDataFile.cpp
     src/osmscout/util/CmdLineParsing.cpp)
 
 set(EXCLUDE_HEADER)
@@ -351,6 +353,7 @@ set(HEADER_FILES
     ${HEADER_FILES_ROOT}
     ${HEADER_FILES_FEATURE}
     ${HEADER_FILES_DB}
+    ${HEADER_FILES_LOCATION}
     ${HEADER_FILES_NAVIGATION}
     ${HEADER_FILES_OST}
     ${HEADER_FILES_PROJECTION}
@@ -393,6 +396,8 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_FEATURE}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_DB}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_LOCATION}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_OST}
         PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)

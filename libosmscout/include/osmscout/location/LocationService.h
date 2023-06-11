@@ -23,9 +23,9 @@
 #include <list>
 #include <memory>
 
-#include <osmscout/Location.h>
-
 #include <osmscout/db/Database.h>
+
+#include <osmscout/location/Location.h>
 
 #include <osmscout/util/StringMatcher.h>
 #include <osmscout/util/Breaker.h>

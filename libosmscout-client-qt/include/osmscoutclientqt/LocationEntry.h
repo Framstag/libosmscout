@@ -25,9 +25,10 @@
 #include <QStringList>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/Location.h>
-#include <osmscout/LocationDescriptionService.h>
-#include <osmscout/LocationService.h>
+
+#include <osmscout/location/Location.h>
+#include <osmscout/location/LocationDescriptionService.h>
+#include <osmscout/location/LocationService.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/AdminRegionInfo.h>
