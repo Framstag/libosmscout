@@ -24,7 +24,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
 
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 
 #include <algorithm>
 #include <cassert>

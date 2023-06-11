@@ -1,6 +1,6 @@
 #include <TestSub.h>
 
-#include <osmscout/LocationService.h>
+#include <osmscout/location/LocationService.h>
 
 extern osmscout::LocationServiceRef locationService;
 

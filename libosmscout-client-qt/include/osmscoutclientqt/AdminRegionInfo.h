@@ -26,7 +26,7 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscout/Location.h>
+#include <osmscout/location/Location.h>
 
 namespace osmscout {
 

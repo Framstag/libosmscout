@@ -17,11 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Location.h>
+#include <osmscout/location/Location.h>
 
 #include <sstream>
 
-#include <osmscout/util/String.h>
+#include "osmscout/util/String.h"
 
 namespace osmscout {
 

@@ -20,8 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/LocationService.h>
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 
 #include <osmscout/db/Database.h>
 

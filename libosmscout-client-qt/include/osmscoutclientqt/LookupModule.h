@@ -25,7 +25,7 @@
 #include <QObject>
 #include <QThread>
 
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 
 #include <osmscout/feature/PhoneFeature.h>
 #include <osmscout/feature/WebsiteFeature.h>

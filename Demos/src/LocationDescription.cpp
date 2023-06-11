@@ -21,8 +21,8 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/LocationService.h>
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 
 #include <osmscout/feature/AdminLevelFeature.h>
 

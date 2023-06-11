@@ -23,7 +23,7 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 
 int main(int argc, char* argv[])
 {

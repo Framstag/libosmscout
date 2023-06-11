@@ -26,11 +26,11 @@
 #include <set>
 #include <unordered_set>
 
-#include "osmscout/Location.h"
-#include "osmscout/TypeConfig.h"
+#include <osmscout/location/Location.h>
+#include <osmscout/TypeConfig.h>
 
-#include "osmscout/util/ObjectPool.h"
-#include "osmscout/util/FileScanner.h"
+#include <osmscout/util/ObjectPool.h>
+#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 
