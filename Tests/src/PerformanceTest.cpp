@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <limits>
 #include <tuple>
 

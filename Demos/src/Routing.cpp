@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
+#include <sstream>
 #include <fstream>
 
 #include <osmscout/db/Database.h>

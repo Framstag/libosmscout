@@ -19,8 +19,7 @@
 
 #include <osmscout/util/Logger.h>
 
-#include <iostream>
-#include <string_view>
+#include <osmscout/util/LoggerImpl.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -95,100 +94,6 @@ namespace osmscout {
   Logger::Line Logger::Error()
   {
     return Log(ERROR);
-  }
-
-  StreamLogger::StreamDestination::StreamDestination(std::ostream& stream)
-  : stream(stream)
-  {
-    // no code
-  }
-
-  void StreamLogger::StreamDestination::Print(const std::string& value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(const std::string_view& value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(const char* value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(bool value)
-  {
-    stream << (value ? "true" : "false");
-  }
-
-  void StreamLogger::StreamDestination::Print(short value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(unsigned short value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(int value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(unsigned int value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(long value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(unsigned long value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(long long value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::Print(unsigned long long value)
-  {
-    stream << value;
-  }
-
-  void StreamLogger::StreamDestination::PrintLn()
-  {
-    stream << std::endl;
-  }
-
-  StreamLogger::StreamLogger(std::ostream& infoStream,
-                             std::ostream& errorStream)
-  : infoDestination(infoStream),
-    errorDestination(errorStream)
-  {
-    // no code
-  }
-
-  Logger::Line StreamLogger::Log(Level level)
-  {
-    if (level==DEBUG || level==INFO) {
-      return Line(infoDestination);
-    }
-
-    return Line(errorDestination);
-  }
-
-  ConsoleLogger::ConsoleLogger()
-  : StreamLogger(std::cout,std::cerr)
-  {
-    // no code
   }
 
   Log::Log()

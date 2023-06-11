@@ -38,6 +38,7 @@ src/DrawMapDirectX ../maps/nordrhein-westfalen ../stylesheets/standard.oss 51.51
 #include <dwrite.h>
 
 #include <iostream>
+#include <sstream>
 
 #include <osmscoutmap/MapService.h>
 
