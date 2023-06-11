@@ -82,6 +82,7 @@ osmscoutSrc = [
             'src/osmscout/util/GeoBox.cpp',
             'src/osmscout/util/Geometry.cpp',
             'src/osmscout/util/Logger.cpp',
+            'src/osmscout/util/LoggerImpl.cpp',
             'src/osmscout/util/Magnification.cpp',
             'src/osmscout/util/MemoryMonitor.cpp',
             'src/osmscout/util/NodeUseMap.cpp',

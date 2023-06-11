@@ -161,6 +161,7 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/GeoBox.h
     include/osmscout/util/Geometry.h
     include/osmscout/util/Logger.h
+    include/osmscout/util/LoggerImpl.h
     include/osmscout/util/Magnification.h
     include/osmscout/util/MemoryMonitor.h
     include/osmscout/util/NodeUseMap.h
@@ -271,6 +272,7 @@ set(SOURCE_FILES
     src/osmscout/util/GeoBox.cpp
     src/osmscout/util/Geometry.cpp
     src/osmscout/util/Logger.cpp
+    src/osmscout/util/LoggerImpl.cpp
     src/osmscout/util/Magnification.cpp
     src/osmscout/util/MemoryMonitor.cpp
     src/osmscout/util/NodeUseMap.cpp

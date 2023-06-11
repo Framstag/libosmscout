@@ -20,15 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <string_view>
+
 #include <osmscout/CoreFeatures.h>
 
 #include <osmscout/CoreImportExport.h>
 
-#include <ostream>
-#include <sstream>
-
-#include <osmscout/util/StopClock.h>
 #include <osmscout/util/Distance.h>
+#include <osmscout/util/StopClock.h>
 
 // Since we have a DEBUG enumeration member
 #ifdef DEBUG
@@ -343,65 +342,6 @@ namespace osmscout {
     {
       return Line(destination);
     }
-  };
-
-  /**
-   * \ingroup Logging
-   *  The StreamLogger allows to direct logging output to a standard library std::ostream.
-   *  IT allows to assign one stream for DEBUG and INFO logging and a different stream
-   *  for WARN and ERROR log output.
-   */
-  class OSMSCOUT_API StreamLogger : public Logger
-  {
-  private:
-    /**
-     * \ingroup Logging
-     * Special Destination implementation that delegates printing to the assigned
-     * std::ostream.
-     */
-    class OSMSCOUT_API StreamDestination : public Destination
-    {
-    private:
-      std::ostream& stream;
-
-    public:
-      explicit StreamDestination(std::ostream& stream);
-
-      void Print(const std::string& value) override;
-      void Print(const std::string_view& value) override;
-      void Print(const char* value) override;
-      void Print(bool value) override;
-      void Print(short value) override;
-      void Print(unsigned short value) override;
-      void Print(int value) override;
-      void Print(unsigned int value) override;
-      void Print(long value) override;
-      void Print(unsigned long value) override;
-      void Print(long long value) override;
-      void Print(unsigned long long value) override;
-      void PrintLn() override;
-    };
-
-  private:
-    StreamDestination infoDestination;
-    StreamDestination errorDestination;
-
-  public:
-    StreamLogger(std::ostream& infoStream,
-                 std::ostream& errorStream);
-
-    Line Log(Level level) override;
-  };
-
-  /**
-   * \ingroup Logging
-   * The console logger extends the StreamLogger by assigning std::cout for normal
-   * loging output and std::cerr for error output.
-   */
-  class OSMSCOUT_API ConsoleLogger : public StreamLogger
-  {
-  public:
-    ConsoleLogger();
   };
 
   /**

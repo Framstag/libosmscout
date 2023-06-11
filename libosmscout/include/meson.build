@@ -92,6 +92,7 @@ osmscoutHeader = [
             'osmscout/util/GeoBox.h',
             'osmscout/util/Geometry.h',
             'osmscout/util/Logger.h',
+            'osmscout/util/LoggerImpl.h',
             'osmscout/util/Magnification.h',
             'osmscout/util/MemoryMonitor.h',
             'osmscout/util/NodeUseMap.h',

@@ -19,10 +19,9 @@
 
 #include <osmscoutmap/MapPainter.h>
 
-#include <cstdint>
-
 #include <algorithm>
 #include <limits>
+#include <sstream>
 
 #include <osmscout/system/Math.h>
 

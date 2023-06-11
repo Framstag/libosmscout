@@ -19,9 +19,11 @@
 
 #include <osmscout/util/HTMLWriter.h>
 
+#include <locale>
+#include <sstream>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/util/Logger.h>
-#include <locale>
 
 namespace osmscout {
 
