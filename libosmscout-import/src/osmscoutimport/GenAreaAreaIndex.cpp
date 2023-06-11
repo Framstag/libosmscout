@@ -24,13 +24,13 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/AreaAreaIndex.h>
-#include <osmscout/AreaDataFile.h>
-
 #include <osmscout/feature/AddressFeature.h>
 #include <osmscout/feature/LocationFeature.h>
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/PostalCodeFeature.h>
+
+#include <osmscout/db/AreaAreaIndex.h>
+#include <osmscout/db/AreaDataFile.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>

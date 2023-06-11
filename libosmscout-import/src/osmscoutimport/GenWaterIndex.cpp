@@ -22,11 +22,12 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/DataFile.h>
-#include <osmscout/BoundingBoxDataFile.h>
-#include <osmscout/CoordDataFile.h>
 #include <osmscout/FeatureReader.h>
-#include <osmscout/WaterIndex.h>
-#include <osmscout/WayDataFile.h>
+
+#include <osmscout/db/BoundingBoxDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
+#include <osmscout/db/WaterIndex.h>
+#include <osmscout/db/WayDataFile.h>
 
 #include <osmscout/feature/BridgeFeature.h>
 #include <osmscout/feature/EmbankmentFeature.h>

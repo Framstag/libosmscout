@@ -22,9 +22,9 @@
 #include <limits>
 #include <vector>
 
-#include <osmscout/AreaDataFile.h>
 #include <osmscout/TypeConfig.h>
-#include <osmscout/WayDataFile.h>
+
+#include <osmscout/db/WayDataFile.h>
 
 #include <osmscout/util/StopClock.h>
 

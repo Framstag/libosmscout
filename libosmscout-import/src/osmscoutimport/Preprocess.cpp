@@ -24,8 +24,8 @@
 
 #include <osmscout/system/Math.h>
 
-#include <osmscout/BoundingBoxDataFile.h>
-#include <osmscout/TypeDistributionDataFile.h>
+#include <osmscout/db/BoundingBoxDataFile.h>
+#include <osmscout/db/TypeDistributionDataFile.h>
 
 #include <osmscout/util/File.h>
 

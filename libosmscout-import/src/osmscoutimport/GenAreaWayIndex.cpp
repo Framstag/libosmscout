@@ -20,8 +20,9 @@
 #include <osmscoutimport/GenAreaWayIndex.h>
 
 #include <osmscout/Way.h>
-#include <osmscout/AreaWayIndex.h>
-#include <osmscout/WayDataFile.h>
+
+#include <osmscout/db/AreaWayIndex.h>
+#include <osmscout/db/WayDataFile.h>
 
 namespace osmscout {
 

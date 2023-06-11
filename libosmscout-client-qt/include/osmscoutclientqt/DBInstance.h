@@ -20,9 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/Database.h>
 #include <osmscout/LocationService.h>
 #include <osmscout/LocationDescriptionService.h>
+
+#include <osmscout/db/Database.h>
+
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmapqt/MapPainterQt.h>
 
@@ -89,7 +91,7 @@ private:
 /**
  * \ingroup QtAPI
  *
- * Instance of one osmscout database and database specific objects.
+ * Instance of one osmscout db and db specific objects.
  *
  * It is thread safe
  */
@@ -103,9 +105,9 @@ public:
 private:
   mutable QMutex                          mutex;
   QMap<QThread*,osmscout::MapPainterQt*>  painterHolder; ///< thread-local cache of map painters, guarded by mutex
-  QElapsedTimer                           lastUsage; ///< last time when database was used, guarded by mutex
+  QElapsedTimer                           lastUsage; ///< last time when db was used, guarded by mutex
 
-  osmscout::GeoBox                        dbBox; ///< cached database GeoBox, may be accessed without lock and lastUsage update
+  osmscout::GeoBox                        dbBox; ///< cached db GeoBox, may be accessed without lock and lastUsage update
   osmscout::DatabaseRef                   database;
 
   osmscout::LocationServiceRef            locationService;
@@ -132,7 +134,7 @@ public:
     styleConfig(styleConfig)
   {
     if (!database->GetBoundingBox(dbBox)){
-      osmscout::log.Error() << "Failed to get database GeoBox: " << path.toStdString();
+      osmscout::log.Error() << "Failed to get db GeoBox: " << path.toStdString();
     }
     lastUsage.start();
   };
@@ -148,7 +150,7 @@ public:
   }
 
   /**
-   * return true if database is open
+   * return true if db is open
    * lastUsage is not udpated
    */
   bool IsOpen() const
@@ -190,7 +192,7 @@ public:
   }
 
   /**
-   * Returns the number of milliseconds since last database usage
+   * Returns the number of milliseconds since last db usage
    */
   qint64 LastUsageMs() const
   {

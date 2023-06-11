@@ -523,7 +523,7 @@ namespace osmscout {
    * LocationService constructor
    *
    * @param database
-   *    Valid reference to a database instance
+   *    Valid reference to a db instance
    */
   LocationService::LocationService(const DatabaseRef& database)
   : database(database)

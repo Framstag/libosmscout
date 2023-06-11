@@ -10,10 +10,10 @@
 #define OSMScout_h
 
 #if __cplusplus
-#include <osmscout/Database.h>
+#include "osmscout/database/Database.h"
 #include <osmscout/Way.h>
 #include <osmscout/Tag.h>
-#include <osmscout/WayDataFile.h>
+#include "osmscout/database/WayDataFile.h"
 #include <osmscout/util/Geometry.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscoutmap/StyleConfig.h>

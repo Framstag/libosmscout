@@ -17,15 +17,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
 #include <osmscoutgpx/Import.h>
+
+#include <osmscout/ElevationService.h>
 
 #include <osmscout/util/CmdLineParsing.h>
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/Distance.h>
-#include <osmscout/ElevationService.h>
 
 #include <iostream>
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscoutgpx/Export.h>
 
 struct Arguments
@@ -113,7 +116,7 @@ int main(int argc, char* argv[])
                             args.database=value;
                           }),
                           "DATABASE",
-                          "OSMScout database directory");
+                          "OSMScout db directory");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.gpxInput=value;
@@ -178,7 +181,7 @@ int main(int argc, char* argv[])
   auto                        database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(args.database)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
     return 1;
   }
 

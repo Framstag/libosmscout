@@ -72,7 +72,7 @@ Q_OBJECT
   Q_PROPERTY(int      resultLimit READ GetResultLimit WRITE SetResultLimit)
 
   /**
-   * Limit of results for each database.
+   * Limit of results for each db.
    */
   Q_PROPERTY(QStringList types READ GetTypes WRITE SetTypes)
 

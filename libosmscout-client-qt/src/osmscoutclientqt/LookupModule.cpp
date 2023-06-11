@@ -173,7 +173,7 @@ void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookup
 
           qDebug() << "Lookup objects for location entry" << entry.getLabel() << ":"
                    << areaOffsets.size() << wayOffsets.size() << nodeOffsets.size()
-                   << "(areas, ways, nodes) in database" << entry.getDatabase();
+                   << "(areas, ways, nodes) in db" << entry.getDatabase();
 
           MapData mapData;
 

@@ -33,7 +33,7 @@ namespace osmscout{
    * \ingroup Routing
    *
    * Helper structure to implement a reference to a routing node in a given
-   * database (identified by a unique index).
+   * db (identified by a unique index).
    */
   struct DBId
   {
@@ -87,7 +87,7 @@ namespace osmscout{
    * \ingroup Routing
    *
    * Helper structure to implement a reference to a routing node in a given
-   * database (identified by a unique index).
+   * db (identified by a unique index).
    */
   struct DBFileOffset
   {

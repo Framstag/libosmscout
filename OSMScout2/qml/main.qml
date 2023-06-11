@@ -129,7 +129,7 @@ Window {
                     map.view = appSettings.mapView;
                     console.log("restore last position: " + appSettings.mapView.lat + " " + appSettings.mapView.lon);
                   }else{
-                    console.log("position " + appSettings.mapView.lat + " " + appSettings.mapView.lon + " is outside database, recenter");
+                    console.log("position " + appSettings.mapView.lat + " " + appSettings.mapView.lon + " is outside db, recenter");
                     map.recenter();
                   }
                 }else{

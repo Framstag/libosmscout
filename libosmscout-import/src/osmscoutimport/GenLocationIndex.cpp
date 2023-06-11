@@ -30,11 +30,11 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/LocationIndex.h>
+#include <osmscout/db/LocationIndex.h>
 
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/db/AreaDataFile.h>
+#include <osmscout/db/NodeDataFile.h>
+#include <osmscout/db/WayDataFile.h>
 
 #include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/IsInFeature.h>

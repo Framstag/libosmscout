@@ -1,7 +1,7 @@
 ---
 date: "2016-05-29T19:40:58+02:00"
 title:  "Importing an *.osm or *.pbf file"
-description: "How to import a *.osm or *.pbf file to create a database"
+description: "How to import a *.osm or *.pbf file to create a db"
 weight: 1
 
 menu:

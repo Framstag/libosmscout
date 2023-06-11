@@ -24,7 +24,7 @@
 
 #include "config.h"
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/projection/TileProjection.h>
 
@@ -776,7 +776,7 @@ int main(int argc, char* argv[])
   osmscout::MapServiceRef     mapService=std::make_shared<osmscout::MapService>(database);
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
     return 1;
   }
 
@@ -907,10 +907,10 @@ int main(int argc, char* argv[])
           tiles.clear(); // following flush method removes only tiles with use_count() == 1
           mapService->FlushTileCache();
 
-          // simplest way howto flush database caches is close it and open again
+          // simplest way howto flush db caches is close it and open again
           database->Close();
           if (!database->Open(args.databaseDirectory)) {
-            std::cerr << "Cannot open database" << std::endl;
+            std::cerr << "Cannot open db" << std::endl;
             return 1;
           }
         }

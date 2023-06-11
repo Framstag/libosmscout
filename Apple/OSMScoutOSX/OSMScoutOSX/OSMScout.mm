@@ -26,7 +26,7 @@ namespace osmscout {
 
     bool OSMScoutCpp::initDraw(double initDpi) {
         if (!database->IsOpen() && !database->Open(map.c_str())) {
-            std::cerr << "Cannot open database" << std::endl;
+            std::cerr << "Cannot open db" << std::endl;
             
             return false;
         }

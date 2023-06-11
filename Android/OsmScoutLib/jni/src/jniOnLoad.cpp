@@ -21,7 +21,7 @@
 #include <string.h>
 #include <android/log.h>
 
-#include <osmscout/Database.h>
+#include "osmscout/database/Database.h"
 #include <osmscout/projection/Projection.h>
 #include <osmscout/StyleConfig.h>
 

@@ -74,7 +74,7 @@ namespace osmscout {
     AfterPreprocessing    =  6, //!< Additional postprocessing
     Prerender             =  7, //!< Implementation specific preparation
     DrawBaseMapTiles      =  8, //!< Draw unknown/sea/land tiles and tiles with "coastlines" from base map
-    DrawGroundTiles       =  9, //!< Same as previous, but from main database
+    DrawGroundTiles       =  9, //!< Same as previous, but from main db
     DrawOSMTileGrids      = 10, //!< If special style exists, renders grid corresponding to OSM tiles
     DrawAreas             = 11,
     DrawWays              = 12,

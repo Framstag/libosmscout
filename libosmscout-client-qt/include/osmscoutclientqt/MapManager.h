@@ -39,7 +39,7 @@
 namespace osmscout {
 
 /**
- * Utility class for downloading map database described by AvailableMapsModelMap
+ * Utility class for downloading map db described by AvailableMapsModelMap
  * over http.
  * \ingroup QtAPI
  */
@@ -56,7 +56,7 @@ public:
 
   /**
    * Cancel downloading,
-   * when database is not downloaded successfully, remove it from disk
+   * when db is not downloaded successfully, remove it from disk
    * (even already downloaded files).
    */
   ~MapDownloadJob() override;
@@ -80,7 +80,7 @@ public:
 };
 
 /**
- * Holder for map database metadata
+ * Holder for map db metadata
  *
  * \ingroup QtAPI
  */
@@ -107,19 +107,19 @@ public:
   static QStringList metadataFiles();
 
   /**
-   * byte size of all database files on disk
+   * byte size of all db files on disk
    * @return
    */
   qint64 byteSize() const;
 
   /**
-   * Delete complete database
+   * Delete complete db
    */
   bool deleteDatabase();
 
   /**
-   * Check if directory contains all required files for osmscout database
-   * @return true if all requirements met and directory may be used as database
+   * Check if directory contains all required files for osmscout db
+   * @return true if all requirements met and directory may be used as db
    */
   bool isValid() const
   {
@@ -188,7 +188,7 @@ private:
 };
 
 /**
- * Manager of map databases. It provide database lookup
+ * Manager of map databases. It provide db lookup
  * (in databaseDirectories) and simple scheduler for downloading maps.
  * \ingroup QtAPI
  */
@@ -222,7 +222,7 @@ public:
    *
    * @param map
    * @param dir
-   * @param replaceExisting - when true, manager will delete existing database with same path (MapDirectory::getPath)
+   * @param replaceExisting - when true, manager will delete existing db with same path (MapDirectory::getPath)
    */
   void downloadMap(AvailableMapsModelMap map, QDir dir, bool replaceExisting = true);
   void downloadNext();

@@ -22,7 +22,7 @@
 #include <android/log.h>
 
 #include <osmscout/AdminRegion.h>
-#include <osmscout/Database.h>
+#include "osmscout/database/Database.h"
 #include <osmscout/Node.h>
 #include <osmscoutmap/MapPainter.h>
 

@@ -27,7 +27,7 @@
 #include <limits>
 #include <map>
 
-#include <osmscout/CoordDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
 
 #include <osmscout/util/ProcessingQueue.h>
 #include <osmscout/util/Worker.h>

@@ -1569,7 +1569,7 @@ namespace osmscout {
 
       if (n->currentNode.database!=nn->currentNode.database &&
           node->GetId()==nextNode->GetId()){
-        // there is no way between database transition nodes
+        // there is no way between db transition nodes
         continue;
       }
 

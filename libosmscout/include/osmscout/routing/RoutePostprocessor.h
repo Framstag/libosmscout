@@ -40,7 +40,7 @@
 #include <osmscout/util/Time.h>
 
 // Database
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 // Routing
 #include <osmscout/routing/RouteData.h>

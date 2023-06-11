@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/POIService.h>
 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
                             args.databaseDirectory=value;
                           }),
                           "DATABASE",
-                          "Directory of the database to use");
+                          "Directory of the db to use");
 
   argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
                             args.topLeft=value;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
                                           args.bottomRight);
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
                               areas);
   }
   catch (const std::exception& e) {
-    std::cerr << "Cannot load data from database: " << e.what() << std::endl;
+    std::cerr << "Cannot load data from db: " << e.what() << std::endl;
 
     return 1;
   }

@@ -24,7 +24,7 @@
 
 #include <osmscout/ObjectRef.h>
 
-#include <osmscout/CoordDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
 
 #include <osmscout/routing/RoutingService.h>
 

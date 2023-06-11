@@ -1046,7 +1046,7 @@ namespace osmscout {
    * \ingroup type
    *
    * The TypeConfig class holds information about object types
-   * defined by a database instance.
+   * defined by a db instance.
    */
   class OSMSCOUT_API TypeConfig CLASS_FINAL
   {
