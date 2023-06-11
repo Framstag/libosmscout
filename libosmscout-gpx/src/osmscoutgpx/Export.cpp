@@ -26,6 +26,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace osmscout;
 using namespace osmscout::gpx;
