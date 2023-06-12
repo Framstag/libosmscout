@@ -32,8 +32,8 @@
 #ifndef POLY2TRI_H
 #define POLY2TRI_H
 
-#include "common/shapes.h"
-#include "sweep/cdt.h"
+#include <poly2tri/common/shapes.h>
+#include <poly2tri/sweep/cdt.h>
 
 #endif
 

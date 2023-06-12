@@ -1,4 +1,4 @@
-#include "../RegionList.h"
+#include <osmscout-test/RegionList.h>
 
 #include <osmscout/util/String.h>
 

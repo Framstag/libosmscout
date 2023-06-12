@@ -21,7 +21,7 @@
 
 #include <sstream>
 
-#include "osmscout/util/String.h"
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

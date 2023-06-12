@@ -17,9 +17,8 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Highlighter.h"
+#include <Highlighter.h>
 #include <QtGui>
-#include <QQuickWindow>
 
 Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)

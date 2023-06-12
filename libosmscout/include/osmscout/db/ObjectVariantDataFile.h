@@ -20,10 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/CoreImportExport.h"
+#include <osmscout/CoreImportExport.h>
 
-#include "osmscout/routing/RouteNode.h"
-#include "osmscout/TypeConfig.h"
+#include <osmscout/TypeConfig.h>
+
+#include <osmscout/routing/RouteNode.h>
 
 namespace osmscout {
 

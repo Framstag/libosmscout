@@ -19,7 +19,7 @@
 
 #include <osmscoutimport/GenAreaRouteIndex.h>
 
-#include "osmscout/routing/RouteDataFile.h"
+#include <osmscout/routing/RouteDataFile.h>
 #include <osmscout/db/AreaRouteIndex.h>
 
 namespace osmscout {

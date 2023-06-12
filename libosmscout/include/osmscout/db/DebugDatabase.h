@@ -24,10 +24,10 @@
 #include <map>
 #include <set>
 
-#include "osmscout/ObjectRef.h"
+#include <osmscout/ObjectRef.h>
 
 // Type and style sheet configuration
-#include "osmscout/TypeConfig.h"
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/db/CoordDataFile.h>
 

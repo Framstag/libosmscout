@@ -23,7 +23,7 @@
 #include <osmscout/navigation/Engine.h>
 #include <osmscout/navigation/Agents.h>
 #include <osmscout/navigation/DataAgent.h>
-#include "PositionAgent.h"
+#include <osmscout/navigation/PositionAgent.h>
 
 namespace osmscout {
 

@@ -21,7 +21,7 @@
 #if !defined(osmscout_olt_PARSER_H)
 #define osmscout_olt_PARSER_H
 
-#include "../RegionList.h"
+#include <osmscout-test/RegionList.h>
 
 #include <osmscout/util/String.h>
 
