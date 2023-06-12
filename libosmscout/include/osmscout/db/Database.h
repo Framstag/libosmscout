@@ -29,15 +29,15 @@
 #include <string_view>
 
 // Type and style sheet configuration
-#include "osmscout/OSMScoutTypes.h"
-#include "osmscout/TypeConfig.h"
+#include <osmscout/OSMScoutTypes.h>
+#include <osmscout/TypeConfig.h>
 
 // Datafiles
 #include <osmscout/db/AreaDataFile.h>
 #include <osmscout/db/BoundingBoxDataFile.h>
 #include <osmscout/db/NodeDataFile.h>
 #include <osmscout/db/WayDataFile.h>
-#include "osmscout/routing/RouteDataFile.h"
+#include <osmscout/routing/RouteDataFile.h>
 
 #include <osmscout/db/OptimizeAreasLowZoom.h>
 #include <osmscout/db/OptimizeWaysLowZoom.h>
@@ -55,13 +55,13 @@
 #include <osmscout/db/WaterIndex.h>
 
 // SRTM index
-#include "osmscout/SRTM.h"
+#include <osmscout/SRTM.h>
 
-#include "osmscout/routing/RouteDescription.h"
+#include <osmscout/routing/RouteDescription.h>
 
-#include "osmscout/util/GeoBox.h"
+#include <osmscout/util/GeoBox.h>
 
-#include "osmscout/system/Compiler.h"
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 

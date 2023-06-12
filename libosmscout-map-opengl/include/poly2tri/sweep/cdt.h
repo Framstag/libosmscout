@@ -32,9 +32,9 @@
 #ifndef CDT_H
 #define CDT_H
 
-#include "advancing_front.h"
-#include "sweep_context.h"
-#include "sweep.h"
+#include <poly2tri/sweep/advancing_front.h>
+#include <poly2tri/sweep/sweep_context.h>
+#include <poly2tri/sweep/sweep.h>
 
 /**
  * 

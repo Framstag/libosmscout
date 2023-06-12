@@ -29,10 +29,10 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 // Main Window
-#include "MainWindow.h"
+#include <MainWindow.h>
 
 // Custom QML objects
-#include "FileIO.h"
+#include <FileIO.h>
 
 using namespace osmscout;
 

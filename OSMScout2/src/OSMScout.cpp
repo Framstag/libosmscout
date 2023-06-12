@@ -32,9 +32,9 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 // Application theming
-#include "Theme.h"
+#include <Theme.h>
 
-#include "AppSettings.h"
+#include <AppSettings.h>
 
 #include <osmscout/util/Logger.h>
 #include <osmscout/util/CmdLineParsing.h>

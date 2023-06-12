@@ -24,7 +24,7 @@
 
 #include <osmscout/GeoCoord.h>
 
-#include "GPXImportExport.h"
+#include <osmscoutgpx/GPXImportExport.h>
 
 #include <string>
 #include <optional>

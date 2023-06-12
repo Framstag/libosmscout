@@ -32,7 +32,7 @@
 #ifndef ADVANCED_FRONT_H
 #define ADVANCED_FRONT_H
 
-#include "../common/shapes.h"
+#include <poly2tri/common/shapes.h>
 
 namespace p2t {
 

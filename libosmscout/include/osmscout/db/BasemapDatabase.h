@@ -21,13 +21,13 @@
 */
 
 // Type and style sheet configuration
-#include "osmscout/OSMScoutTypes.h"
-#include "osmscout/TypeConfig.h"
+#include <osmscout/OSMScoutTypes.h>
+#include <osmscout/TypeConfig.h>
 
 // Water index
-#include "WaterIndex.h"
+#include <osmscout/db/WaterIndex.h>
 
-#include "osmscout/system/Compiler.h"
+#include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 

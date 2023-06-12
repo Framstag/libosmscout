@@ -25,8 +25,8 @@
 #include <QQuickItem>
 #include <QVector>
 
-#include "Highlighter.h"
-#include "StyleAnalyser.h"
+#include <Highlighter.h>
+#include <StyleAnalyser.h>
 
 #define TMP_SUFFIX ".tmp"
 

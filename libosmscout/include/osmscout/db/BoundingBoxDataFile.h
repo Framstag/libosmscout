@@ -20,11 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include "osmscout/CoreImportExport.h"
+#include <osmscout/CoreImportExport.h>
 
 #include <memory>
 
-#include "osmscout/util/GeoBox.h"
+#include <osmscout/util/GeoBox.h>
 
 namespace osmscout {
 

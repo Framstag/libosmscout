@@ -22,7 +22,7 @@
 #include <limits>
 #include <tuple>
 
-#include "config.h"
+#include <config.h>
 
 #include <osmscout/db/Database.h>
 

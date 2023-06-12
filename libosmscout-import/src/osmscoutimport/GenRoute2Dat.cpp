@@ -23,7 +23,7 @@
 #include <osmscoutimport/Preprocess.h>
 
 #include <osmscout/db/WayDataFile.h>
-#include "osmscout/routing/RouteDataFile.h"
+#include <osmscout/routing/RouteDataFile.h>
 
 namespace osmscout {
 

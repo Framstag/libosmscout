@@ -93,6 +93,10 @@ endif()
 #---- Geometry
 osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
 
+#---- HeaderCheck
+osmscout_test_project(NAME HeaderCheck SOURCES src/HeaderCheck.cpp)
+set_tests_properties(HeaderCheck PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
+
 #---- WaterIndex
 if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME WaterIndex SOURCES src/WaterIndex.cpp TARGET OSMScout::Import)
