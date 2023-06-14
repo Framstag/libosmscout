@@ -112,15 +112,12 @@ namespace osmscout {
     public:
       Promise() = default;
 
-      virtual ~Promise()
-      {
-        state->Cancel();
-      };
+      virtual ~Promise() = default;
 
-      Promise(const Promise&) = delete;
+      Promise(const Promise&) = default;
       Promise(Promise&&) = default;
 
-      Promise& operator=(const Promise&) = delete;
+      Promise& operator=(const Promise&) = default;
       Promise& operator=(Promise&&) = default;
 
       CancelableFuture<T> Future() const {
