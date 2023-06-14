@@ -150,6 +150,7 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Thread.h)
 
 set(HEADER_FILES_UTIL
+    include/osmscout/util/AsyncWorker.h
     include/osmscout/util/Base64.h
     include/osmscout/util/Bearing.h
     include/osmscout/util/Breaker.h
@@ -262,15 +263,16 @@ set(SOURCE_FILES
     src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/system/SSEMath.cpp
     src/osmscout/system/Thread.cpp
+    src/osmscout/util/AsyncWorker.cpp
     src/osmscout/util/Bearing.cpp
     src/osmscout/util/Breaker.cpp
     src/osmscout/util/Cache.cpp
     src/osmscout/util/Color.cpp
     src/osmscout/util/Distance.cpp
     src/osmscout/util/Exception.cpp
-        src/osmscout/io/File.cpp
-        src/osmscout/io/FileScanner.cpp
-        src/osmscout/io/FileWriter.cpp
+    src/osmscout/io/File.cpp
+    src/osmscout/io/FileScanner.cpp
+    src/osmscout/io/FileWriter.cpp
     src/osmscout/util/HTMLWriter.cpp
     src/osmscout/util/LaneTurn.cpp
     src/osmscout/util/Locale.cpp

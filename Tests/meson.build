@@ -20,6 +20,16 @@ AsyncProcessing =  executable('AsyncProcessing',
              install: true,
              install_dir: testInstallDir)
 
+AsyncWorker =  executable('AsyncWorker',
+             'src/AsyncWorker.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check asynchronous worker', AsyncWorker)
+
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

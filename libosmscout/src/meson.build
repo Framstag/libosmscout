@@ -67,6 +67,7 @@ osmscoutSrc = [
             'src/osmscout/routing/MultiDBRoutingState.cpp',
             'src/osmscout/system/SSEMath.cpp',
             'src/osmscout/system/Thread.cpp',
+            'src/osmscout/util/AsyncWorker.cpp',
             'src/osmscout/util/Breaker.cpp',
             'src/osmscout/util/Bearing.cpp',
             'src/osmscout/util/Cache.cpp',

@@ -76,6 +76,7 @@ osmscoutHeader = [
             'osmscout/system/SSEMathPublic.h',
             'osmscout/system/SystemTypes.h',
             'osmscout/system/Thread.h',
+            'osmscout/util/AsyncWorker.h',
             'osmscout/util/Base64.h',
             'osmscout/util/Bearing.h',
             'osmscout/util/Breaker.h',
