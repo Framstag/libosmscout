@@ -44,7 +44,6 @@ namespace osmscout {
     explicit WorkQueue(size_t queueLimit);
     ~WorkQueue() override = default;
 
-    //void PushTask(Task& task);
     bool PopTask(Task& task);
   };
 
