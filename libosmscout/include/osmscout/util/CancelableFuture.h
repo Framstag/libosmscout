@@ -20,6 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscout/util/Breaker.h>
+#include <osmscout/util/Logger.h>
+
 #include <future>
 #include <functional>
 #include <optional>
@@ -61,6 +64,47 @@ namespace osmscout {
       }
     };
 
+    class Promise;
+
+    class FutureBreaker: public Breaker
+    {
+    private:
+      std::shared_ptr<State> state=std::make_shared<State>();
+
+    private:
+      friend class Promise;
+
+      FutureBreaker(const std::shared_ptr<State> &state): state(state)
+      {
+        // no code
+      };
+
+    public:
+      virtual ~FutureBreaker() = default;
+
+      FutureBreaker(const FutureBreaker&) = default;
+      FutureBreaker(FutureBreaker&&) = default;
+
+      FutureBreaker& operator=(const FutureBreaker&) = default;
+      FutureBreaker& operator=(FutureBreaker&&) = default;
+
+      void Break() override
+      {
+        state->Cancel();
+      }
+
+      bool IsAborted() const override
+      {
+        std::unique_lock lock(state->mutex);
+        return state->canceled;
+      }
+
+      void Reset() override
+      {
+        log.Warn() << "Future breaker doesn't support reset.";
+      }
+    };
+
     class Promise
     {
     private:
@@ -88,7 +132,7 @@ namespace osmscout {
         state->Cancel();
       }
 
-      bool IsCanceled()
+      bool IsCanceled() const
       {
         std::unique_lock lock(state->mutex);
         return state->canceled;
@@ -104,6 +148,11 @@ namespace osmscout {
         for (const auto &callback: state->callbacks) {
           callback(value);
         }
+      }
+
+      FutureBreaker Breaker() const
+      {
+        return FutureBreaker(state);
       }
     };
 
