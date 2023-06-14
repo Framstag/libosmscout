@@ -178,6 +178,21 @@ namespace osmscout {
       std::unique_lock lock(state->mutex);
       return state->canceled;
     }
+
+    std::future<T> StdFuture()
+    {
+      auto promisePtr=std::make_shared<std::promise<T>>();
+
+      OnComplete([promisePtr](const T &value) {
+        promisePtr->set_value(value);
+      });
+
+      OnCancel([promisePtr]() {
+        promisePtr->set_exception(std::make_exception_ptr(std::runtime_error("Canceled")));
+      });
+
+      return promisePtr->get_future();
+    }
   };
 
 }

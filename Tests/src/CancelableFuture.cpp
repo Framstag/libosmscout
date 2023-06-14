@@ -17,6 +17,7 @@ TEST_CASE("Call callback immediately") {
   REQUIRE(value == 0);
   promise.SetValue(42);
   REQUIRE(future.Value() == std::make_optional<int>(42));
+  REQUIRE(future.StdFuture().get() == 42);
   REQUIRE(value == 42);
 
   int value2=0;
