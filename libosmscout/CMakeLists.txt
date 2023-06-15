@@ -399,13 +399,13 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_ROOT}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
     set_source_files_properties(${HEADER_FILES_FEATURE}
-            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/feature)
     set_source_files_properties(${HEADER_FILES_IO}
-            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/io)
     set_source_files_properties(${HEADER_FILES_DB}
-            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/db)
     set_source_files_properties(${HEADER_FILES_LOCATION}
-            PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/location)
     set_source_files_properties(${HEADER_FILES_OST}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
     set_source_files_properties(${HEADER_FILES_SYSTEM}
