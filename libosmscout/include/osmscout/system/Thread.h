@@ -23,16 +23,24 @@
 #include <osmscout/CoreImportExport.h>
 
 #include <string>
+#include <thread>
 
 namespace osmscout {
 
-  /**
-   * Try to set thread name for easier debuggability.
+  /** Try to set current thread name.
+   *
    * @param name
    * @return true if supported and successful, else otherwise
    */
   extern OSMSCOUT_API bool SetThreadName(const std::string &name);
 
+  /** Try to set thread name
+   *
+   * @param thread
+   * @param name
+   * @return true if supported and successful, else otherwise
+   */
+  extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name);
 }
 
 #endif //LIBOSMSCOUT_THREAD_H
