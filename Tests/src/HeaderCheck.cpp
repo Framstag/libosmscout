@@ -299,7 +299,7 @@ TEST_CASE("Check format of includes")
 
     std::regex includeExpression("#include *[\"][a-zA-Z0-9/.]+[\"]");
 
-    size_t violationCount;
+    size_t violationCount=0;
 
     for (const auto& file : allFiles) {
         auto includes= GetIncludes(file);
