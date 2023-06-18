@@ -18,7 +18,7 @@
 */
 
 #include <osmscoutimport/Import.h>
-#include <osmscout/private/Config.h>
+#include <osmscoutimport/private/Config.h>
 
 #include <algorithm>
 

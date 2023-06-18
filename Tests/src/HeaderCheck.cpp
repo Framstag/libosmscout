@@ -113,7 +113,6 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutgpx => osmscout.io",
     "osmscoutgpx => osmscout", // Fix this
 
-    "osmscoutimport => osmscout.private", // Fix this
     "osmscoutimport => osmscout.system",
     "osmscoutimport => osmscout.util",
     "osmscoutimport => osmscout.projection",
@@ -122,19 +121,20 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutimport => osmscout.feature",
     "osmscoutimport => osmscout.routing",
     "osmscoutimport => osmscout", // Fix it
+    "osmscoutimport => osmscoutimport.private",
     "osmscoutimport => osmscoutimport.pbf",
 
     "osmscoutmap.oss => osmscout.system",
     "osmscoutmap.oss => osmscout.util",
     "osmscoutmap.oss => osmscout.io",
-    "osmscoutmap.oss => osmscout", // Fix this
-    "osmscoutmap.oss => osmscoutmap", // Fix this
+    "osmscoutmap.oss => osmscout", // Fix this -> Helper and TypeService
+    "osmscoutmap.oss => osmscoutmap", // Fix this -> use of StyleConfig
     "osmscoutmap => osmscout.system",
     "osmscoutmap => osmscout.util",
     "osmscoutmap => osmscout.projection",
     "osmscoutmap => osmscout.feature",
-    "osmscoutmap => osmscout.io", // Fix this?
-    "osmscoutmap => osmscout.db", // Fix this?
+    "osmscoutmap => osmscout.io",
+    "osmscoutmap => osmscout.db", // Fix this? -> MapService makes heavy use of Database
     "osmscoutmap => osmscoutmap.oss",
     "osmscoutmap => osmscout",
 
@@ -158,17 +158,17 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmapopengl => osmscout.system",
     "osmscoutmapopengl => osmscout.util",
     "osmscoutmapopengl => osmscout.projection",
-    "osmscoutmapopengl => osmscout.io", // Fix it?
+    "osmscoutmapopengl => osmscout.io",
     "osmscoutmapopengl => osmscoutmap",
 
     "osmscoutmapqt => osmscout.system",
     "osmscoutmapqt => osmscout.util",
-    "osmscoutmapqt => osmscout.io", // Fix it?
+    "osmscoutmapqt => osmscout.io",
     "osmscoutmapqt => osmscoutmap",
 
     "osmscoutmapsvg => osmscout.system",
     "osmscoutmapsvg => osmscout.util",
-    "osmscoutmapsvg => osmscout.io", // Fix it?
+    "osmscoutmapsvg => osmscout.io",
     "osmscoutmapsvg => osmscoutmap",
 
     "osmscout-test.olt => osmscout.util",

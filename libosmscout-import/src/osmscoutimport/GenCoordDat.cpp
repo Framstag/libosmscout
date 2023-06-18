@@ -19,7 +19,7 @@
 
 #include <osmscoutimport/GenCoordDat.h>
 
-#include <osmscout/private/Config.h>
+#include <osmscoutimport/private/Config.h>
 
 #if defined(HAVE_STD_EXECUTION)
   #include <execution>
