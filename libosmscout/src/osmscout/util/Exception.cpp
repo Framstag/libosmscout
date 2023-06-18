@@ -19,8 +19,10 @@
 
 #include <osmscout/util/Exception.h>
 
+#if !defined(_MSC_VER)
 #include <errno.h>
-#include <string.h>
+#endif
+#include <cstring>
 
 namespace osmscout {
 
@@ -29,10 +31,10 @@ namespace osmscout {
     return "No error";
   }
 
-  UninitializedException::UninitializedException(const std::string& object)
-  : object(object)
+  UninitializedException::UninitializedException(const std::string& objectName)
+  : objectName(objectName)
   {
-    description="Object '"+object+"' is not initialized";
+    description="Object '"+objectName+"' is not initialized";
   }
 
   const char* UninitializedException::what() const OSMSCOUT_NOEXCEPT
@@ -40,9 +42,9 @@ namespace osmscout {
     return description.c_str();
   }
 
-  std::string UninitializedException::GetObject() const
+  std::string UninitializedException::GetObjectName() const
   {
-    return object;
+    return objectName;
   }
 
   std::string UninitializedException::GetDescription() const
