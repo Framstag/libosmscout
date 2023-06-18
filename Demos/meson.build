@@ -354,7 +354,7 @@ if buildMapDirectX
                               include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapdirectxIncDir, demoIncDir],
                               dependencies: [mathDep, openmpDep, d2d1Dep, dwriteDep, winCodecsDep],
                               link_with: [osmscout, osmscoutmap, osmscoutmapdirectx],
-                              gui_app: true,
+                              win_subsystem: 'windows',
                               install: true,
                               install_dir: demoInstallDir)
 endif
@@ -365,7 +365,7 @@ if buildMapGDI
                             include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapgdiIncDir, demoIncDir],
                             dependencies: [mathDep, openmpDep, gdiplusDep],
                             link_with: [osmscout, osmscoutmap, osmscoutmapgdi],
-                            gui_app: true,
+                            win_subsystem: 'windows',
                             install: true,
                             install_dir: demoInstallDir)
 endif
