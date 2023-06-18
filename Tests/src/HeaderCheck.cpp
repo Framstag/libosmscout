@@ -333,8 +333,8 @@ TEST_CASE("Check include dependencies")
     size_t                violationCount=0;
 
     for (const auto& file : allFiles) {
-        auto filePackage= FilenameToPackage(file);
-        auto includes= GetIncludes(file);
+        auto filePackage= FilenameToPackage(file.generic_string());
+        auto includes= GetIncludes(file.generic_string());
 
         for (const auto& incudeStatement : includes)  {
             std::smatch result;
