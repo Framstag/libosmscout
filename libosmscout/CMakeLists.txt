@@ -146,7 +146,8 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-    include/osmscout/system/SystemTypes.h)
+    include/osmscout/system/SystemTypes.h
+    include/osmscout/system/Thread.h)
 
 set(HEADER_FILES_UTIL
     include/osmscout/util/Base64.h
@@ -259,6 +260,7 @@ set(SOURCE_FILES
     src/osmscout/routing/RouteDescriptionPostprocessor.cpp
     src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/system/SSEMath.cpp
+    src/osmscout/system/Thread.cpp
     src/osmscout/util/Bearing.cpp
     src/osmscout/util/Breaker.cpp
     src/osmscout/util/Cache.cpp
@@ -326,7 +328,7 @@ set(SOURCE_FILES
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp
     src/osmscout/Node.cpp
-        src/osmscout/io/NumericIndex.cpp
+    src/osmscout/io/NumericIndex.cpp
     src/osmscout/ObjectRef.cpp
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp

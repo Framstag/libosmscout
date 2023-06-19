@@ -24,6 +24,7 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
+#include <osmscout/system/Thread.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Logger.h>
@@ -613,6 +614,8 @@ namespace osmscout {
 
   void MapService::NodeWorkerLoop()
   {
+    SetThreadName("NodeLoader");
+
     std::packaged_task<bool()> task;
 
     while (nodeWorkerQueue.PopTask(task)) {
@@ -622,6 +625,8 @@ namespace osmscout {
 
   void MapService::WayWorkerLoop()
   {
+    SetThreadName("WayLoader");
+
     std::packaged_task<bool()> task;
 
     while (wayWorkerQueue.PopTask(task)) {
@@ -631,6 +636,8 @@ namespace osmscout {
 
   void MapService::WayLowZoomWorkerLoop()
   {
+    SetThreadName("WayLowZoomLoader");
+
     std::packaged_task<bool()> task;
 
     while (wayLowZoomWorkerQueue.PopTask(task)) {
@@ -640,6 +647,8 @@ namespace osmscout {
 
   void MapService::AreaWorkerLoop()
   {
+    SetThreadName("AreaLoader");
+
     std::packaged_task<bool()> task;
 
     while (areaWorkerQueue.PopTask(task)) {
@@ -649,6 +658,8 @@ namespace osmscout {
 
   void MapService::AreaLowZoomWorkerLoop()
   {
+    SetThreadName("AreaLowZoomLoader");
+
     std::packaged_task<bool()> task;
 
     while (areaLowZoomWorkerQueue.PopTask(task)) {
@@ -658,6 +669,8 @@ namespace osmscout {
 
   void MapService::RouteWorkerLoop()
   {
+    SetThreadName("RouteLoader");
+
     std::packaged_task<bool()> task;
 
     while (routeWorkerQueue.PopTask(task)) {
