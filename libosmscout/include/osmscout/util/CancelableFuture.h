@@ -21,7 +21,7 @@
  */
 
 #include <osmscout/util/Breaker.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <future>
 #include <functional>

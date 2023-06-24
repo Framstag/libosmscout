@@ -39,13 +39,15 @@ bool SetThreadName([[maybe_unused]] const std::string &name)
 #endif
 }
 
-extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name)
-{
 #ifdef OSMSCOUT_PTHREAD_NAME
-  return pthread_setname_np(thread.native_handle(), name.c_str()) == 0;
-#else
-  return false;
-#endif
+bool SetThreadName(std::thread &thread, const std::string &name)
+{
+    return pthread_setname_np(thread.native_handle(), name.c_str()) == 0;
 }
-
+#else
+bool SetThreadName(std::thread &/*thread*/, const std::string &/*name*/)
+{
+    return false;
+}
+#endif
 }

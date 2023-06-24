@@ -32,7 +32,7 @@
 #include <osmscout/io/NumericIndex.h>
 
 #include <osmscout/util/Cache.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 //#include <map>
 namespace osmscout {

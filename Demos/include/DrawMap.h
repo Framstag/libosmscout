@@ -26,7 +26,7 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
 

@@ -19,7 +19,7 @@
 
 #include <osmscout/Tag.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>

@@ -20,9 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <sstream>
 

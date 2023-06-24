@@ -20,18 +20,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/CoreFeatures.h>
-
 #include <limits>
 #include <list>
 #include <unordered_map>
 #include <vector>
 
+#include <osmscout/lib/CoreFeatures.h>
+
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/OSMScoutTypes.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 

@@ -28,7 +28,7 @@
 #include <osmscout/db/TextSearchIndex.h>
 #endif
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <QGuiApplication>
 #include <QScreen>

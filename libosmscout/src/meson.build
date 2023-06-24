@@ -1,5 +1,8 @@
 
 osmscoutSrc = [
+            'src/osmscout/log/Logger.cpp',
+            'src/osmscout/log/LoggerImpl.cpp',
+            'src/osmscout/cli/CmdLineParsing.cpp',
             'src/osmscout/feature/AccessFeature.cpp',
             'src/osmscout/feature/AccessRestrictedFeature.cpp',
             'src/osmscout/feature/AddressFeature.cpp',
@@ -71,7 +74,6 @@ osmscoutSrc = [
             'src/osmscout/util/Breaker.cpp',
             'src/osmscout/util/Bearing.cpp',
             'src/osmscout/util/Cache.cpp',
-            'src/osmscout/util/CmdLineParsing.cpp',
             'src/osmscout/util/Color.cpp',
             'src/osmscout/util/Distance.cpp',
             'src/osmscout/util/Exception.cpp',
@@ -80,8 +82,6 @@ osmscoutSrc = [
             'src/osmscout/util/Locale.cpp',
             'src/osmscout/util/GeoBox.cpp',
             'src/osmscout/util/Geometry.cpp',
-            'src/osmscout/util/Logger.cpp',
-            'src/osmscout/util/LoggerImpl.cpp',
             'src/osmscout/util/Magnification.cpp',
             'src/osmscout/util/MemoryMonitor.cpp',
             'src/osmscout/util/NodeUseMap.cpp',

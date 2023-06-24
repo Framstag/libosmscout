@@ -21,12 +21,13 @@
 */
 
 #include <functional>
+#include <list>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/GeoCoord.h>
 
@@ -215,7 +216,7 @@ namespace osmscout {
 
       if (StringToNumber(valueString,value)) {
         setter(value);
-        return CmdLineParseResult();
+        return {};
       }
 
       return CmdLineParseResult("Value for number argument '"+GetArgumentName()+"' is not a valid number '"+valueString+"'");

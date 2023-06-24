@@ -21,7 +21,7 @@
   SOFTWARE.
  */
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
 #include <osmscout/Area.h>

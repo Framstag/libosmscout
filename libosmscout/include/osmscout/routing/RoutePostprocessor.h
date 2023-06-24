@@ -25,7 +25,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/TypeConfig.h>
 

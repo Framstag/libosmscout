@@ -27,7 +27,7 @@
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscout/io/FileScanner.h>
 

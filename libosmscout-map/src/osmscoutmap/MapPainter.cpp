@@ -25,7 +25,7 @@
 
 #include <osmscout/system/Math.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Tiling.h>

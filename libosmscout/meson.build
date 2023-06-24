@@ -13,7 +13,7 @@ endif
 # TODO: Generate Config.h
 
 subdir('include')
-subdir('include/osmscout')
+subdir('include/osmscout/lib')
 subdir('include/osmscout/private')
 subdir('src')
 

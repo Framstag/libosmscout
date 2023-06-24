@@ -1,7 +1,10 @@
 osmscoutIncDir = include_directories('.')
 
 osmscoutHeader = [
-            'osmscout/CoreImportExport.h',
+            'osmscout/lib/CoreImportExport.h',
+            'osmscout/log/Logger.h',
+            'osmscout/log/LoggerImpl.h',
+            'osmscout/cli/CmdLineParsing.h',
             'osmscout/feature/AccessFeature.h',
             'osmscout/feature/AccessRestrictedFeature.h',
             'osmscout/feature/AddressFeature.h',
@@ -82,7 +85,6 @@ osmscoutHeader = [
             'osmscout/util/Breaker.h',
             'osmscout/util/Cache.h',
             'osmscout/util/CancelableFuture.h',
-            'osmscout/util/CmdLineParsing.h',
             'osmscout/util/Color.h',
             'osmscout/util/Distance.h',
             'osmscout/util/Exception.h',
@@ -91,8 +93,6 @@ osmscoutHeader = [
             'osmscout/util/Locale.h',
             'osmscout/util/GeoBox.h',
             'osmscout/util/Geometry.h',
-            'osmscout/util/Logger.h',
-            'osmscout/util/LoggerImpl.h',
             'osmscout/util/Magnification.h',
             'osmscout/util/MemoryMonitor.h',
             'osmscout/util/NodeUseMap.h',

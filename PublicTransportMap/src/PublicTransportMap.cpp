@@ -27,7 +27,7 @@
 
 #include <osmscout/feature/NameFeature.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscout/io/FileScanner.h>
 

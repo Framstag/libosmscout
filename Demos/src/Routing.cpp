@@ -33,7 +33,7 @@
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Time.h>
 

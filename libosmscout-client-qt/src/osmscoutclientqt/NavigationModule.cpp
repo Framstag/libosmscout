@@ -19,7 +19,7 @@
 
 #include <osmscoutclientqt/NavigationModule.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 

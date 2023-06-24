@@ -24,7 +24,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/system/Compiler.h>
 #include <osmscoutclientqt/DBThread.h>
 

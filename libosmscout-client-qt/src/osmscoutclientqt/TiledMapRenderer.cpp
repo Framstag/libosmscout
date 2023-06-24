@@ -24,7 +24,7 @@
 #include <osmscoutclientqt/TiledRenderingHelper.h>
 
 #include <osmscout/system/Math.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <QGuiApplication>
 #include <QScreen>

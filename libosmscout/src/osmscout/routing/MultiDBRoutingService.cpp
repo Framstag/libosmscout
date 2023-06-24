@@ -31,7 +31,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING

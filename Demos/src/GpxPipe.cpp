@@ -20,8 +20,8 @@
 #include <osmscoutgpx/Import.h>
 #include <osmscoutgpx/Export.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/Distance.h>
 
 #include <iostream>

@@ -22,9 +22,8 @@
 
 #include <string_view>
 
-#include <osmscout/CoreFeatures.h>
-
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/util/Distance.h>
 #include <osmscout/util/StopClock.h>
