@@ -20,6 +20,16 @@ AsyncProcessing =  executable('AsyncProcessing',
              install: true,
              install_dir: testInstallDir)
 
+AsyncWorker =  executable('AsyncWorker',
+             'src/AsyncWorker.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check asynchronous worker', AsyncWorker)
+
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -78,6 +88,16 @@ CalculateResolution = executable('CalculateResolution',
              install_dir: testInstallDir)
 
 test('Check position accuracy with coordinate bits', CalculateResolution)
+
+CancelableFuture = executable('CancelableFuture',
+             'src/CancelableFuture.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check cancelable future', CancelableFuture)
 
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
