@@ -23,7 +23,7 @@
 #include <osmscout/db/TextSearchIndex.h>
 #include <osmscout/db/Database.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

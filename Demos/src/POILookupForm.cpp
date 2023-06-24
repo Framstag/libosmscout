@@ -23,7 +23,7 @@
 
 #include <osmscout/location/LocationService.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

@@ -23,7 +23,7 @@
 #include <memory>
 #include <tuple>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/Pixel.h>
 

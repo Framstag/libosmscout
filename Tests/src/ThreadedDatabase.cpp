@@ -24,7 +24,7 @@
 #include <osmscout/db/Database.h>
 
 #include <osmscoutmap/StyleConfig.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 // TODO: configurable
 static const size_t AREAINDEXACCESS_THREAD_COUNT=10;

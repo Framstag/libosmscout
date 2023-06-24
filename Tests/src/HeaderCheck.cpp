@@ -31,6 +31,8 @@ static const std::list<fs::path> projects{
  *
  * osmscout.private
  * osmscout.system
+ * osmscout.log
+ * osmscout.cli
  * osmscout.util
  * osmscout.projection
  * osmscout.io
@@ -44,26 +46,42 @@ static const std::list<fs::path> projects{
  */
 
 static const std::set<std::string> allowedDependencies{
+    "osmscout => osmscout.lib",
     "osmscout => osmscout.system",
+    "osmscout => osmscout.log",
     "osmscout => osmscout.util",
     "osmscout => osmscout.io",
     "osmscout => osmscout.db",
     "osmscout => osmscout.feature",
     "osmscout => osmscout.ost",
+    "osmscout.system => osmscout.lib",
     "osmscout.system => osmscout.private",
-    "osmscout.system => osmscout", // Fix this
+    "osmscout.log => osmscout.lib",
+    "osmscout.log => osmscout.system",
+    "osmscout.log => osmscout.util", // Fix this -> Move database to package
+    "osmscout.cli => osmscout.system",
+    "osmscout.cli => osmscout.lib",
+    "osmscout.cli => osmscout.util", // Fix this -> Move String.h into package
+    "osmscout.cli => osmscout", // Fix this -> Move GeoCoord into package
+    "osmscout.util => osmscout.lib",
     "osmscout.util => osmscout.private",
     "osmscout.util => osmscout.system",
+    "osmscout.util => osmscout.log", // Fix this? Which parts of util should use a logger?
     "osmscout.util => osmscout.projection", // Fix this
     "osmscout.util => osmscout", // Fix this
+    "osmscout.projection => osmscout.lib",
     "osmscout.projection => osmscout.system",
     "osmscout.projection => osmscout.util",
     "osmscout.projection => osmscout", // Fix this
+    "osmscout.io => osmscout.lib",
     "osmscout.io => osmscout.private",
     "osmscout.io => osmscout.system",
+    "osmscout.io => osmscout.log",
     "osmscout.io => osmscout.util",
     "osmscout.io => osmscout", // Fix this
+    "osmscout.db => osmscout.lib",
     "osmscout.db => osmscout.system",
+    "osmscout.db => osmscout.log",
     "osmscout.db => osmscout.util",
     "osmscout.db => osmscout.io",
     "osmscout.db => osmscout.location", // Fix this
@@ -77,11 +95,14 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.ost => osmscout.feature",
     "osmscout.ost => osmscout", // Fix this
     "osmscout.location => osmscout.system",
+    "osmscout.location => osmscout.log",
     "osmscout.location => osmscout.util",
     "osmscout.location => osmscout.db",
     "osmscout.location => osmscout.feature",
     "osmscout.location => osmscout", // Fix this
+    "osmscout.routing => osmscout.lib",
     "osmscout.routing => osmscout.system",
+    "osmscout.routing => osmscout.log",
     "osmscout.routing => osmscout.util",
     "osmscout.routing => osmscout.io",
     "osmscout.routing => osmscout.db",
@@ -89,6 +110,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.routing => osmscout.location",
     "osmscout.routing => osmscout", // Fix this
     "osmscout.navigation => osmscout.system",
+    "osmscout.navigation => osmscout.log",
     "osmscout.navigation => osmscout.util",
     "osmscout.navigation => osmscout.feature",
     "osmscout.navigation => osmscout.location",
@@ -96,6 +118,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.navigation => osmscout", // Fix this
 
     "osmscoutclientqt => osmscout.system",
+    "osmscoutclientqt => osmscout.log",
     "osmscoutclientqt => osmscout.util",
     "osmscoutclientqt => osmscout.projection",
     "osmscoutclientqt => osmscout.db",
@@ -109,6 +132,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutclientqt => osmscoutclientqt.private",
 
     "osmscoutgpx => osmscout.system",
+    "osmscoutgpx => osmscout.log",
     "osmscoutgpx => osmscout.util",
     "osmscoutgpx => osmscout.io",
     "osmscoutgpx => osmscout", // Fix this
@@ -125,11 +149,13 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutimport => osmscoutimport.pbf",
 
     "osmscoutmap.oss => osmscout.system",
+    "osmscoutmap.oss => osmscout.log",
     "osmscoutmap.oss => osmscout.util",
     "osmscoutmap.oss => osmscout.io",
     "osmscoutmap.oss => osmscout", // Fix this -> Helper and TypeService
     "osmscoutmap.oss => osmscoutmap", // Fix this -> use of StyleConfig
     "osmscoutmap => osmscout.system",
+    "osmscoutmap => osmscout.log",
     "osmscoutmap => osmscout.util",
     "osmscoutmap => osmscout.projection",
     "osmscoutmap => osmscout.feature",
@@ -143,6 +169,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmapagg => osmscoutmap",
 
     "osmscoutmapcairo => osmscout.system",
+    "osmscoutmapcairo => osmscout.log",
     "osmscoutmapcairo => osmscout.util",
     "osmscoutmapcairo => osmscoutmap",
 
@@ -156,12 +183,14 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmapgdi => osmscoutmap",
 
     "osmscoutmapopengl => osmscout.system",
+    "osmscoutmapopengl => osmscout.log",
     "osmscoutmapopengl => osmscout.util",
     "osmscoutmapopengl => osmscout.projection",
     "osmscoutmapopengl => osmscout.io",
     "osmscoutmapopengl => osmscoutmap",
 
     "osmscoutmapqt => osmscout.system",
+    "osmscoutmapqt => osmscout.log",
     "osmscoutmapqt => osmscout.util",
     "osmscoutmapqt => osmscout.io",
     "osmscoutmapqt => osmscoutmap",

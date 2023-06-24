@@ -27,7 +27,7 @@
 #include <limits>
 #include <thread>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 #include <osmscout/util/ProcessingQueue.h>
 
 namespace osmscout {

@@ -40,7 +40,7 @@
 
 #include <osmscout/util/Time.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 

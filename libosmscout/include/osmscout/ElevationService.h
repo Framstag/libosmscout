@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/Way.h>
 
@@ -30,7 +30,7 @@
 
 #include <osmscout/feature/EleFeature.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/TileId.h>
 
 namespace osmscout {

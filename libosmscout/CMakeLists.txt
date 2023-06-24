@@ -2,7 +2,6 @@
 #set(MARISA_FOUND 1)
 
 set(HEADER_FILES_ROOT
-        include/osmscout/CoreImportExport.h
         include/osmscout/Area.h
         include/osmscout/ElevationService.h
         include/osmscout/GeoCoord.h
@@ -23,8 +22,19 @@ set(HEADER_FILES_ROOT
         include/osmscout/TypeInfoSet.h
         include/osmscout/FeatureReader.h
         include/osmscout/OSMScoutTypes.h
-        include/osmscout/Way.h
-        include/osmscout/CoreFeatures.h)
+        include/osmscout/Way.h)
+
+set(HEADER_FILES_LIB
+        include/osmscout/lib/CoreFeatures.h
+        include/osmscout/lib/CoreImportExport.h)
+
+set(HEADER_FILES_LOG
+        include/osmscout/log/Logger.h
+        include/osmscout/log/LoggerImpl.h
+)
+
+set(HEADER_FILES_CLI
+        include/osmscout/cli/CmdLineParsing.h)
 
 set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessFeature.h
@@ -157,7 +167,6 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Cache.h
     include/osmscout/util/CancelableFuture.h
     include/osmscout/util/Color.h
-    include/osmscout/util/CmdLineParsing.h
     include/osmscout/util/Distance.h
     include/osmscout/util/Exception.h
     include/osmscout/util/HTMLWriter.h
@@ -165,8 +174,6 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Locale.h
     include/osmscout/util/GeoBox.h
     include/osmscout/util/Geometry.h
-    include/osmscout/util/Logger.h
-    include/osmscout/util/LoggerImpl.h
     include/osmscout/util/Magnification.h
     include/osmscout/util/MemoryMonitor.h
     include/osmscout/util/NodeUseMap.h
@@ -196,6 +203,12 @@ set(HEADER_FILES_UTIL
   )
 
 set(SOURCE_FILES
+    src/osmscout/log/Logger.cpp
+    src/osmscout/log/LoggerImpl.cpp
+    src/osmscout/io/File.cpp
+    src/osmscout/io/FileScanner.cpp
+    src/osmscout/io/FileWriter.cpp
+    src/osmscout/io/NumericIndex.cpp
     src/osmscout/feature/AccessFeature.cpp
     src/osmscout/feature/AccessRestrictedFeature.cpp
     src/osmscout/feature/AddressFeature.cpp
@@ -270,16 +283,11 @@ set(SOURCE_FILES
     src/osmscout/util/Color.cpp
     src/osmscout/util/Distance.cpp
     src/osmscout/util/Exception.cpp
-    src/osmscout/io/File.cpp
-    src/osmscout/io/FileScanner.cpp
-    src/osmscout/io/FileWriter.cpp
     src/osmscout/util/HTMLWriter.cpp
     src/osmscout/util/LaneTurn.cpp
     src/osmscout/util/Locale.cpp
     src/osmscout/util/GeoBox.cpp
     src/osmscout/util/Geometry.cpp
-    src/osmscout/util/Logger.cpp
-    src/osmscout/util/LoggerImpl.cpp
     src/osmscout/util/Magnification.cpp
     src/osmscout/util/MemoryMonitor.cpp
     src/osmscout/util/NodeUseMap.cpp
@@ -331,7 +339,6 @@ set(SOURCE_FILES
     src/osmscout/GroundTile.cpp
     src/osmscout/Intersection.cpp
     src/osmscout/Node.cpp
-    src/osmscout/io/NumericIndex.cpp
     src/osmscout/ObjectRef.cpp
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
@@ -347,7 +354,7 @@ set(SOURCE_FILES
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
     src/osmscout/Way.cpp
-    src/osmscout/util/CmdLineParsing.cpp)
+        src/osmscout/cli/CmdLineParsing.cpp)
 
 set(EXCLUDE_HEADER)
 
@@ -360,6 +367,9 @@ endif()
 
 set(HEADER_FILES
     ${HEADER_FILES_ROOT}
+    ${HEADER_FILES_LIB}
+    ${HEADER_FILES_LOG}
+    ${HEADER_FILES_CLI}
     ${HEADER_FILES_FEATURE}
     ${HEADER_FILES_IO}
     ${HEADER_FILES_DB}
@@ -377,7 +387,7 @@ osmscout_library_project(
     OUTPUT_NAME "osmscout"
     SOURCE ${SOURCE_FILES}
     HEADER ${HEADER_FILES}
-    TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/CoreFeatures.h.cmake
+    TEMPLATE  ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/lib/CoreFeatures.h.cmake
     EXCLUDE ${EXCLUDE_HEADER}
 )
 
@@ -403,6 +413,12 @@ endif()
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
     set_source_files_properties(${HEADER_FILES_ROOT}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers)
+    set_source_files_properties(${HEADER_FILES_LIB}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/lib)
+    set_source_files_properties(${HEADER_FILES_LOG}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/log)
+    set_source_files_properties(${HEADER_FILES_CLI}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/cli)
     set_source_files_properties(${HEADER_FILES_FEATURE}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/feature)
     set_source_files_properties(${HEADER_FILES_IO}

@@ -25,7 +25,7 @@
 
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Number.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 

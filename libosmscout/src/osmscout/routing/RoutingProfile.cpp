@@ -21,7 +21,7 @@
 
 #include <limits>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscout/system/Assert.h>
 

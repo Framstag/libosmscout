@@ -32,7 +32,7 @@
 
 #include <osmscout/SRTM.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscout/system/Math.h>
 

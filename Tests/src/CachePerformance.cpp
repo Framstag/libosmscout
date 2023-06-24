@@ -23,7 +23,7 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 /**
   Check performance of

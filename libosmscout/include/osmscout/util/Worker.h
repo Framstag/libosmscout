@@ -25,7 +25,7 @@
 
 #include <osmscout/util/ProcessingQueue.h>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 namespace osmscout {
 

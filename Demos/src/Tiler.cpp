@@ -26,7 +26,7 @@
 
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Tiling.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
 
