@@ -23,9 +23,9 @@
 #include <memory>
 #include <vector>
 
-#include <osmscout/Database.h>
-
 #include <osmscout/TypeInfoSet.h>
+
+#include <osmscout/db/Database.h>
 
 #include <osmscout/util/GeoBox.h>
 

@@ -19,7 +19,7 @@
 
 #include <osmscout/util/OpeningHours.h>
 #include <osmscout/util/String.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <array>
 

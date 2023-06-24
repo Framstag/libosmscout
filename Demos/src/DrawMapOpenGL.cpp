@@ -21,15 +21,11 @@
 
 #include <fstream>
 #include <iostream>
-#include <cstdlib>
 #include <sstream>
 #include <iomanip>
 
-#include <osmscout/Database.h>
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/Logger.h>
-
-#include <osmscoutmap/MapService.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 

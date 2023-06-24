@@ -26,11 +26,10 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include "TestImportExport.h"
-
-#include "RegionList.h"
-
 #include <osmscout/util/Geometry.h>
+
+#include <osmscout-test/TestImportExport.h>
+#include <osmscout-test/RegionList.h>
 
 namespace osmscout {
   namespace test {

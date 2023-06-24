@@ -23,9 +23,11 @@
 
 #include <QGuiApplication>
 #include <QApplication>
+#include <QQmlApplicationEngine>
+#include <QStandardPaths>
+#include <QTranslator>
 
 #include <iostream>
-#include <QQmlApplicationEngine>
 
 void QtDemoApp::Arguments::AddOptions(osmscout::CmdLineParser &argParser)
 {
@@ -62,8 +64,8 @@ void QtDemoApp::Arguments::AddOptions(osmscout::CmdLineParser &argParser)
   argParser.AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
                         mapLookupDirectories.append(QString::fromStdString(value));
                       }),
-                      "database",
-                      "Map database directory",
+                      "db",
+                      "Map db directory",
                       false);
 
   argParser.AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {

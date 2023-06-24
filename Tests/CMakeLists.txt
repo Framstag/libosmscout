@@ -4,6 +4,9 @@ osmscout_test_project(NAME AccessParse SOURCES src/AccessParse.cpp)
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessing SOURCES src/AsyncProcessing.cpp)
 
+#---- AsyncWorker
+osmscout_test_project(NAME AsyncWorker SOURCES src/AsyncWorker.cpp)
+
 #---- Bearing
 osmscout_test_project(NAME Bearing SOURCES src/Bearing.cpp)
 
@@ -18,6 +21,9 @@ osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COM
 
 #---- CalculateResolution
 osmscout_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
+
+#---- CancelableFuture
+osmscout_test_project(NAME CancelableFuture SOURCES src/CancelableFuture.cpp)
 
 #---- CmdLineParsing
 osmscout_test_project(NAME CmdLineParsing SOURCES src/CmdLineParsing.cpp)
@@ -92,6 +98,10 @@ endif()
 
 #---- Geometry
 osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
+
+#---- HeaderCheck
+osmscout_test_project(NAME HeaderCheck SOURCES src/HeaderCheck.cpp)
+set_tests_properties(HeaderCheck PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
 
 #---- WaterIndex
 if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)

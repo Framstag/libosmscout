@@ -24,7 +24,8 @@
 #include <osmscoutgpx/Utils.h>
 #include <osmscoutgpx/GPXImportExport.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/Exception.h>
 #include <osmscout/util/Breaker.h>
 

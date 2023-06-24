@@ -22,6 +22,8 @@
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <QDirIterator>
+
 namespace osmscout {
 
 MapStyleModel::MapStyleModel():

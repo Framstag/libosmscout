@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <iostream>
 
-#include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 

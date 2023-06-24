@@ -17,11 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <osmscout/CoverageIndex.h>
-
-#include <osmscout/util/CmdLineParsing.h>
-
 #include <iostream>
+
+#include <osmscout/db/CoverageIndex.h>
+
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

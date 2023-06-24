@@ -27,11 +27,11 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/CoordDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
 
 #include <osmscout/TypeInfoSet.h>
 
-#include <osmscout/NumericIndex.h>
+#include <osmscout/io/NumericIndex.h>
 
 #include <osmscout/routing/TurnRestriction.h>
 

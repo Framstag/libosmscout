@@ -21,8 +21,7 @@
 
 #include <algorithm>
 
-#include <osmscout/DataFile.h>
-#include <osmscout/TypeDistributionDataFile.h>
+#include <osmscout/db/TypeDistributionDataFile.h>
 
 #include <osmscout/system/Assert.h>
 

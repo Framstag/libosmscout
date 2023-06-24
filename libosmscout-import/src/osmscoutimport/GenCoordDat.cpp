@@ -19,7 +19,7 @@
 
 #include <osmscoutimport/GenCoordDat.h>
 
-#include <osmscout/private/Config.h>
+#include <osmscoutimport/private/Config.h>
 
 #if defined(HAVE_STD_EXECUTION)
   #include <execution>
@@ -27,7 +27,7 @@
 #include <limits>
 #include <map>
 
-#include <osmscout/CoordDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
 
 #include <osmscout/util/ProcessingQueue.h>
 #include <osmscout/util/Worker.h>

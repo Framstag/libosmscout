@@ -21,7 +21,10 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/LookupModule.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
+
+#include <QThreadPool>
+
 #include <iostream>
 
 namespace osmscout {
@@ -163,8 +166,8 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
     QList<osmscout::ObjectFileRef> objectSet;
     osmscout::TextSearchIndex textSearch;
     if(!textSearch.Load(db->path.toStdString())){
-      osmscout::log.Warn() << "Failed to load text index files, search only for locations with database " << db->path.toStdString();
-      return true; // silently continue, text indexes are optional in database
+      osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path.toStdString();
+      return true; // silently continue, text indexes are optional in db
     }
     osmscout::TextSearchIndex::ResultsMap resultsTxt;
     textSearch.Search(searchPattern.toStdString(),

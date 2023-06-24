@@ -19,7 +19,7 @@
 
 #include <osmscoutclientqt/DBInstance.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <QRegExp>
 
@@ -173,7 +173,7 @@ void DBInstance::close()
   qDeleteAll(painterHolder);
   painterHolder.clear();
 
-  // release map service, its threads may still use database
+  // release map service, its threads may still use db
   // threads are stopped and joined in MapService destructor
   if (mapService && mapService.use_count() > 1){
     // if DBInstance is not exclusive owner, threads may hit closed data file and trigger assert!

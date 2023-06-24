@@ -23,15 +23,17 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
+#include <sstream>
 #include <fstream>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Time.h>
 
@@ -743,7 +745,7 @@ int main(int argc, char* argv[])
                             args.databaseDirectory=value;
                           }),
                           "DATABASE",
-                          "Directory of the first database to use");
+                          "Directory of the first db to use");
 
   argParser.AddPositional(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
                             args.start=value;
@@ -779,7 +781,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }
@@ -798,7 +800,7 @@ int main(int argc, char* argv[])
                                                                                             args.router);
 
   if (!router->Open()) {
-    std::cerr << "Cannot open routing database" << std::endl;
+    std::cerr << "Cannot open routing db" << std::endl;
 
     return 1;
   }

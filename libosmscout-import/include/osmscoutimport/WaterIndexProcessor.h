@@ -34,10 +34,11 @@
 
 #include <osmscout/projection/Projection.h>
 
-#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Progress.h>
 #include <osmscout/util/Transformation.h>
+
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscout/system/Compiler.h>
 
@@ -127,7 +128,7 @@ namespace osmscout {
      *
      * There may be two kind of "coastlines":
      *  - classic coastlines: define border between land and water (see)
-     *  - data polygon: define area where database (and classic coastlines) are defined.
+     *  - data polygon: define area where db (and classic coastlines) are defined.
      *     It usually have right/left state unknown/undefined
      */
     struct OSMSCOUT_IMPORT_API Coast

@@ -23,15 +23,18 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscoutclientqt/RouteDescriptionBuilder.h>
-#include <osmscoutmap/DataTileCache.h>
-#include <osmscoutclientqt/DBThread.h>
-#include <osmscoutclientqt/Settings.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
+
+#include <osmscoutmap/DataTileCache.h>
+
+#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclientqt/RouteDescriptionBuilder.h>
 #include <osmscoutclientqt/QmlRoutingProfile.h>
+#include <osmscoutclientqt/LocationEntry.h>
 
 #include <memory>
 

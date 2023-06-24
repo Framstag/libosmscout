@@ -1,7 +1,7 @@
 ---
 date: "2017-06-04T15:40:00+02:00"
 title:  "Basemap Importing"
-description: "How to create a basemap database"
+description: "How to create a basemap db"
 weight: 2
 
 menu:

@@ -23,7 +23,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/String.h>
 
-#include "GPXImportExport.h"
+#include <osmscoutgpx/GPXImportExport.h>
 
 #include <chrono>
 #include <optional>

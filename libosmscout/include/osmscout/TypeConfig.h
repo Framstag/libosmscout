@@ -28,17 +28,18 @@
 #include <vector>
 #include <array>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/OSMScoutTypes.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeFeature.h>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/TagErrorReporter.h>
 #include <osmscout/util/Number.h>
+
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -1046,7 +1047,7 @@ namespace osmscout {
    * \ingroup type
    *
    * The TypeConfig class holds information about object types
-   * defined by a database instance.
+   * defined by a db instance.
    */
   class OSMSCOUT_API TypeConfig CLASS_FINAL
   {

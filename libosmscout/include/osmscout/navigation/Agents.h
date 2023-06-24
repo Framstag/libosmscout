@@ -22,7 +22,7 @@
 
 #include <osmscout/navigation/Engine.h>
 
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 #include <osmscout/routing/AbstractRoutingService.h>
 
 namespace osmscout {

@@ -25,13 +25,13 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Locale.h>
-
 #include <osmscout/util/TagErrorReporter.h>
+
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
 
 #include <osmscout/system/Assert.h>
 

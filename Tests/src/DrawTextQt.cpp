@@ -18,16 +18,11 @@
 */
 
 #include <iostream>
-#include <iomanip>
 
 #include <QApplication>
 #include <QPixmap>
 #include <QScreen>
 #include <QtGui>
-#include <QDebug>
-
-#include <osmscout/Database.h>
-#include <osmscoutmap/MapService.h>
 
 #include <osmscoutmap/LabelPath.h>
 

@@ -24,8 +24,10 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscoutmap/StyleConfig.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/io/File.h>
+
+#include <osmscout/cli/CmdLineParsing.h>
+
 #include <iomanip>
 
 using namespace std;

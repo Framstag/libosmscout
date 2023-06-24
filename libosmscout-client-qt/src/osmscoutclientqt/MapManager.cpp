@@ -24,7 +24,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/system/Compiler.h>
 #include <osmscoutclientqt/DBThread.h>
 
@@ -44,8 +44,8 @@ MapDownloadJob::MapDownloadJob(QNetworkAccessManager *webCtrl,
 MapDownloadJob::~MapDownloadJob()
 {
   if (started && !successful){
-    // delete partial database
-    clearJobs(); // need to remove temporary files before deleting database directory
+    // delete partial db
+    clearJobs(); // need to remove temporary files before deleting db directory
     MapDirectory dir(target);
     dir.deleteDatabase();
   }
@@ -113,11 +113,11 @@ MapDirectory::MapDirectory(QDir dir):
     dir(dir)
 {
   QStringList fileNames = mandatoryFiles();
-  // coverage.idx is optional, introduced after database version 16
+  // coverage.idx is optional, introduced after db version 16
   // text*.dat files are optional, these files are missing
-  // when database is build without Marisa support
+  // when db is build without Marisa support
 
-  osmscout::log.Debug() << "Checking database files in directory " << dir.absolutePath().toStdString();
+  osmscout::log.Debug() << "Checking db files in directory " << dir.absolutePath().toStdString();
   valid=true;
   for (const auto &fileName: fileNames) {
     bool exists=dir.exists(fileName);
@@ -127,7 +127,7 @@ MapDirectory::MapDirectory(QDir dir):
     valid &= exists;
   }
   if (!valid){
-    osmscout::log.Warn() << "Can't use database " << dir.absolutePath().toStdString() << ", some mandatory files are missing.";
+    osmscout::log.Warn() << "Can't use db " << dir.absolutePath().toStdString() << ", some mandatory files are missing.";
   }
 
   // metadata
@@ -226,9 +226,9 @@ bool MapDirectory::deleteDatabase()
   parent.cdUp();
   result&=parent.rmdir(dir.dirName());
   if (result){
-    qDebug() << "Removed database" << dir.path();
+    qDebug() << "Removed db" << dir.path();
   }else{
-    qWarning() << "Failed to remove database directory completely" << dir.path();
+    qWarning() << "Failed to remove db directory completely" << dir.path();
   }
   return result;
 }
@@ -257,7 +257,7 @@ void MapManager::lookupDatabases()
       if (fInfo.isFile() && fInfo.fileName() == osmscout::TypeConfig::FILE_TYPES_DAT){
         MapDirectory mapDir(fInfo.dir());
         if (mapDir.isValid()) {
-          osmscout::log.Info() << "found database " << mapDir.getName().toStdString() << ": " << fInfo.dir().absolutePath().toStdString();
+          osmscout::log.Info() << "found db " << mapDir.getName().toStdString() << ": " << fInfo.dir().absolutePath().toStdString();
           if (!uniqPaths.contains(fInfo.canonicalFilePath())) {
             databaseDirectories << mapDir;
             databaseFsDirectories << mapDir.getDir();
@@ -315,13 +315,13 @@ void MapManager::onJobFinished()
       finished << job;
 
       if (job->isReplaceExisting() && job->isSuccessful()){
-        // if there is upgrade requested, delete old database with same (logical) path
+        // if there is upgrade requested, delete old db with same (logical) path
         for (auto &mapDir:databaseDirectories) {
           if (mapDir.hasMetadata() &&
               mapDir.getPath() == job->getMapPath() &&
               mapDir.getDir().canonicalPath() != job->getDestinationDirectory().canonicalPath()) {
 
-            osmscout::log.Debug() << "deleting map database " << mapDir.getName().toStdString() << " after upgrade: "
+            osmscout::log.Debug() << "deleting map db " << mapDir.getName().toStdString() << " after upgrade: "
                                   << mapDir.getDir().canonicalPath().toStdString();
             mapDir.deleteDatabase();
           }

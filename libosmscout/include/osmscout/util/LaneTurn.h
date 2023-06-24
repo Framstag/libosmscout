@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 namespace osmscout {
 
@@ -38,8 +38,8 @@ namespace osmscout {
    *
    * Common lane turn variants.
    *
-   * Note: Numeric values of variants are used for database serialization,
-   * do not change them without increasing database format version.
+   * Note: Numeric values of variants are used for db serialization,
+   * do not change them without increasing db format version.
    * Just append new variants to the end.
    *
    * Note: There is no need to export Enums

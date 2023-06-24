@@ -21,8 +21,9 @@
 #include <cstring>
 #include <iostream>
 
-#include <osmscout/Database.h>
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/db/Database.h>
+
+#include <osmscout/location/LocationDescriptionService.h>
 
 int main(int argc, char* argv[])
 {
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(map)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }

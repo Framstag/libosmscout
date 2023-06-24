@@ -18,21 +18,19 @@
 */
 
 #include <cstring>
-#include <cstdio>
 
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/File.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
-#include <osmscoutimport/Import.h>
+#include <osmscout/io/File.h>
+
 #include <osmscoutimport/ShapeFileScanner.h>
 
 #include <osmscoutimport/WaterIndexProcessor.h>

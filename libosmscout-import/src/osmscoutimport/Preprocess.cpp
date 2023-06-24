@@ -24,17 +24,17 @@
 
 #include <osmscout/system/Math.h>
 
-#include <osmscout/BoundingBoxDataFile.h>
-#include <osmscout/TypeDistributionDataFile.h>
+#include <osmscout/db/BoundingBoxDataFile.h>
+#include <osmscout/db/TypeDistributionDataFile.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 
 #include <osmscoutimport/RawCoastline.h>
 #include <osmscoutimport/RawCoord.h>
 #include <osmscoutimport/RawNode.h>
 #include <osmscoutimport/RawWay.h>
 
-#include <osmscout/private/Config.h>
+#include <osmscoutimport/private/Config.h>
 
 #if defined(HAVE_LIB_XML) || defined(OSMSCOUT_IMPORT_HAVE_XML_SUPPORT)
   #include <osmscoutimport/PreprocessOSM.h>
@@ -817,7 +817,7 @@ namespace osmscout {
     std::shared_future<ProcessedDataRef>   processingResult(blockTask.get_future());
 
 
-    blockWorkerQueue.PushTask(blockTask);
+    blockWorkerQueue.PushTask(std::move(blockTask));
 
     //
     // Pass the (future of the) result of the processing back to the asynchronous writer
@@ -826,7 +826,7 @@ namespace osmscout {
     std::packaged_task<void()> writeTask(std::bind(&Preprocess::Callback::WriteTask,this,
                                                    processingResult));
 
-    writeWorkerQueue.PushTask(writeTask);
+    writeWorkerQueue.PushTask(std::move(writeTask));
   }
 
 

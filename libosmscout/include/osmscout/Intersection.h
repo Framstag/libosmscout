@@ -23,12 +23,12 @@
 #include <memory>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/FileScanner.h>
 
 #include <osmscout/system/Compiler.h>
 

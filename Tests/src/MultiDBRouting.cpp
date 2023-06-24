@@ -22,12 +22,14 @@
 #include <thread>
 #include <vector>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/MultiDBRoutingService.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/cli/CmdLineParsing.h>
+
+#include <osmscout/io/FileScanner.h>
 
 struct Arguments
 {
@@ -119,10 +121,10 @@ int main(int argc, char* argv[])
   routerParameter.SetDebugPerformance(true);
 
   for (const auto& databaseDirectory:args.databaseDirectories) {
-    std::cout << "Opening database " << databaseDirectory << std::endl;
+    std::cout << "Opening db " << databaseDirectory << std::endl;
     osmscout::DatabaseRef database=std::make_shared<osmscout::Database>(dbParameter);;
     if (!database->Open(databaseDirectory)) {
-      std::cerr << "Cannot open database " << databaseDirectory << std::endl;
+      std::cerr << "Cannot open db " << databaseDirectory << std::endl;
 
       return 1;
     }

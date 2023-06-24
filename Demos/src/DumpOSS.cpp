@@ -23,7 +23,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscoutmap/StyleConfig.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

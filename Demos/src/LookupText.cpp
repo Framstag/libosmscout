@@ -20,10 +20,10 @@
 #include <algorithm>
 #include <iostream>
 
-#include <osmscout/TextSearchIndex.h>
-#include <osmscout/Database.h>
+#include <osmscout/db/TextSearchIndex.h>
+#include <osmscout/db/Database.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {
@@ -93,7 +93,7 @@ int main (int argc, char *argv[])
                             args.databaseDirectory=value;
                           }),
                           "DATABASE",
-                          "Directory of the database to use");
+                          "Directory of the db to use");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -164,7 +164,7 @@ int main (int argc, char *argv[])
     osmscout::DatabaseParameter databaseParameter;
     osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
     if (!database->Open(args.databaseDirectory)) {
-      std::cerr << "Cannot open database" << std::endl;
+      std::cerr << "Cannot open db" << std::endl;
       return 1;
     }
 

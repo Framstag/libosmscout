@@ -19,7 +19,7 @@
 
 #include <osmscoutclientqt/NavigationModule.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 
@@ -169,7 +169,7 @@ bool NavigationModule::loadRoutableObjects(const GeoBox &box,
       auto database=db->GetDatabase();
       auto dbIdIt=databaseMapping.find(database->GetPath());
       if (dbIdIt==databaseMapping.end()){
-        continue; // this database was not used for routing
+        continue; // this db was not used for routing
       }
       DatabaseId databaseId=dbIdIt->second;
 

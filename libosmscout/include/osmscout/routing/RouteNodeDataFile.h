@@ -23,10 +23,11 @@
 #include <map>
 #include <vector>
 
-#include <osmscout/DataFile.h>
 #include <osmscout/Pixel.h>
 
 #include <osmscout/util/TileId.h>
+
+#include <osmscout/io/DataFile.h>
 
 #include <osmscout/routing/RouteNode.h>
 

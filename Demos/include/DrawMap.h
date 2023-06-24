@@ -21,12 +21,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <osmscout/Database.h>
-#include <osmscout/BasemapDatabase.h>
+#include <osmscout/db/Database.h>
+#include <osmscout/db/BasemapDatabase.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
 
@@ -288,7 +288,7 @@ public:
     database=std::make_shared<osmscout::Database>(databaseParameter);
 
     if (!database->Open(args.map)) {
-      std::cerr << "Cannot open database" << std::endl;
+      std::cerr << "Cannot open db" << std::endl;
       return false;
     }
 

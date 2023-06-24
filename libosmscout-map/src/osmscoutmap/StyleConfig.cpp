@@ -19,15 +19,14 @@
 
 #include <osmscoutmap/StyleConfig.h>
 
-#include <cstring>
 #include <set>
-#include <sstream>
 #include <algorithm>
 
 #include <osmscout/system/Assert.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
+
+#include <osmscout/io/File.h>
 
 #include <osmscoutmap/oss/Parser.h>
 #include <osmscoutmap/oss/Scanner.h>

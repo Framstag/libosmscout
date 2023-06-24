@@ -22,7 +22,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscoutmap/MapService.h>
 

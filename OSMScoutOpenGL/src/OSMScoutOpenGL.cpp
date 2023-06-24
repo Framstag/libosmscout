@@ -22,10 +22,10 @@
 #include <future>
 #include <chrono>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmap/MapService.h>
 
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
                             args.databaseDirectory = value;
                           }),
                           "DATABASE",
-                          "Directory of the database to use");
+                          "Directory of the db to use");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string &value) {
                             args.styleFile = value;
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
   mapService = osmscout::MapServiceRef(new osmscout::MapService(database));
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
     return 1;
   }
 

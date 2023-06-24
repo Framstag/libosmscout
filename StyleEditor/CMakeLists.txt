@@ -39,6 +39,8 @@ set(RESOURCE_FILES
 
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
+target_include_directories(StyleEditor PRIVATE "src")
+
 target_link_libraries(StyleEditor
 	OSMScout::OSMScout
 	OSMScout::Map
@@ -64,7 +66,11 @@ if (QT_QML_DEBUG)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG")
 endif()
 
-set_target_properties(StyleEditor PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
+set_target_properties(StyleEditor
+		PROPERTIES
+		VERSION ${OSMSCOUT_LIBRARY_VERSION}
+		SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+		FOLDER "Tools")
 
 if(WIN32)
 	create_win32_tool_resource(StyleEditor)

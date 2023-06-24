@@ -26,8 +26,10 @@
 #include <QJSValue>
 
 #include <osmscout/GeoCoord.h>
+
+#include <osmscout/location/LocationService.h>
+
 #include <osmscoutclientqt/LocationEntry.h>
-#include <osmscout/LocationService.h>
 #include <osmscoutclientqt/SearchModule.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
@@ -67,7 +69,7 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
   Q_PROPERTY(double   lon         READ GetLon      WRITE SetLon)
 
   /**
-   * Limit of results for each database.
+   * Limit of results for each db.
    */
   Q_PROPERTY(int      resultLimit   READ GetResultLimit   WRITE SetResultLimit)
 
@@ -105,7 +107,7 @@ class OSMSCOUT_CLIENT_QT_API LocationListModel : public QAbstractListModel
    * JavaScript function used for check location equality.
    * It is possible that model will returns one physical location multiple
    * times, for example one from location index and second from fulltext
-   * search, or two database segments for one real street...
+   * search, or two db segments for one real street...
    *
    * Such results may be merged in model.
    * Function will receive two locations (only locations with same label

@@ -21,8 +21,9 @@
 
 #include <osmscoutimport/GenRoute2Dat.h>
 #include <osmscoutimport/Preprocess.h>
-#include <osmscout/WayDataFile.h>
-#include <osmscout/RouteDataFile.h>
+
+#include <osmscout/db/WayDataFile.h>
+#include <osmscout/routing/RouteDataFile.h>
 
 namespace osmscout {
 

@@ -19,7 +19,7 @@
 
 #include <PositionSimulator.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutgpx/Import.h>
 

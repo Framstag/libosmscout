@@ -24,9 +24,9 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/WayDataFile.h>
-#include <osmscout/PTRouteDataFile.h>
+#include <osmscout/db/NodeDataFile.h>
+#include <osmscout/db/WayDataFile.h>
+#include <osmscout/db/PTRouteDataFile.h>
 
 #include <osmscout/feature/ColorFeature.h>
 #include <osmscout/feature/FromToFeature.h>
@@ -35,10 +35,11 @@
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
-#include <osmscoutimport/Preprocess.h>
+#include <osmscout/io/File.h>
 
 #include <osmscout/util/Color.h>
-#include <osmscout/util/File.h>
+
+#include <osmscoutimport/Preprocess.h>
 
 namespace osmscout {
 

@@ -39,7 +39,8 @@
 #include <cmath>
 #include <cstring>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscout/routing/SimpleRoutingService.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/util/Time.h>
@@ -519,7 +520,7 @@ int main(int argc, char *argv[]){
     osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
     if (!database->Open(mapDirectory)) {
-        std::cerr << "Cannot open database" << std::endl;
+        std::cerr << "Cannot open db" << std::endl;
 
         return 1;
     }
@@ -532,7 +533,7 @@ int main(int argc, char *argv[]){
                                                                                               routerFilenamebase);
 
     if (!router->Open()) {
-        std::cerr << "Cannot open routing database" << std::endl;
+        std::cerr << "Cannot open routing db" << std::endl;
 
         return 1;
     }

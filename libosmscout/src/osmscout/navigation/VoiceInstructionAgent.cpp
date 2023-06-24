@@ -21,7 +21,7 @@
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/system/Compiler.h>
 
 namespace osmscout {

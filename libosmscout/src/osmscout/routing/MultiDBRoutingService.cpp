@@ -31,7 +31,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING
@@ -123,7 +123,7 @@ namespace osmscout {
       if (res.IsValid()) {
         return RoutePositionResult(RoutePosition(res.GetRoutePosition().GetObjectFileRef(),
                                                  res.GetRoutePosition().GetNodeIndex(),
-                                                 /*database*/ dbId),
+                                                 /*db*/ dbId),
                                    res.GetDistance());
       }
     }
@@ -142,7 +142,7 @@ namespace osmscout {
       if (position.IsValid() && position.GetDistance() < closestPosition.GetDistance()) {
         closestPosition=RoutePositionResult(RoutePosition(position.GetRoutePosition().GetObjectFileRef(),
                                                           position.GetRoutePosition().GetNodeIndex(),
-                                                          /*database*/ handle.dbId),
+                                                          /*db*/ handle.dbId),
                                             position.GetDistance());
       }
     }
@@ -397,15 +397,15 @@ namespace osmscout {
     // start and target databases are different, try to find common route nodes
     if (start.GetDatabaseId()>=handles.size() ||
         !handles[start.GetDatabaseId()].database) {
-      log.Error() << "Can't find start database " << start.GetDatabaseId();
+      log.Error() << "Can't find start db " << start.GetDatabaseId();
       return result;
     }
 
-    // DatabaseRef database1=handles[start.GetDatabaseId()].database;
+    // DatabaseRef database1=handles[start.GetDatabaseId()].db;
 
     if (target.GetDatabaseId()>=handles.size() ||
         !handles[target.GetDatabaseId()].database) {
-      log.Error() << "Can't find target database " << target.GetDatabaseId();
+      log.Error() << "Can't find target db " << target.GetDatabaseId();
       return result;
     }
 

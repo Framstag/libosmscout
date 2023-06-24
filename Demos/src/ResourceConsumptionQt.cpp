@@ -23,7 +23,7 @@
 #include <QPixmap>
 #include <QApplication>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   osmscout::MapServiceRef mapService(new osmscout::MapService(database));
 
   if (!database->Open(map)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }

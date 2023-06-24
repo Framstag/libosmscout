@@ -91,7 +91,7 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
 
   auto database=db->GetDatabase();
   if (!database){
-    osmscout::log.Error() << "No database available";
+    osmscout::log.Error() << "No db available";
     return result;
   }
   osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();

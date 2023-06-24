@@ -41,7 +41,7 @@ namespace osmscout {
     Point() = default;
 
     Point(uint8_t serial,
-                 const GeoCoord& coords)
+          const GeoCoord& coords)
      : serial(serial),
        coord(coords)
      {
@@ -49,7 +49,7 @@ namespace osmscout {
      }
 
     void Set(uint8_t serial,
-                    const GeoCoord& coords)
+             const GeoCoord& coords)
     {
       this->serial=serial;
       this->coord=coords;

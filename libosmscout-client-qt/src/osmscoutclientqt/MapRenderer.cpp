@@ -317,7 +317,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     if (skip) {
-      osmscout::log.Debug() << "Skip database " << db->path.toStdString();
+      osmscout::log.Debug() << "Skip db " << db->path.toStdString();
       continue;
     }
 
@@ -330,7 +330,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     if (painter != nullptr) {
       batch.AddData(data, painter);
     } else {
-      osmscout::log.Warn() << "Painter is not available for database: " << db->path.toStdString();
+      osmscout::log.Warn() << "Painter is not available for db: " << db->path.toStdString();
       success = false;
     }
   }

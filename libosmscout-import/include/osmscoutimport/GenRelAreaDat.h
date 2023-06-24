@@ -28,8 +28,7 @@
 
 #include <osmscout/Area.h>
 
-#include <osmscout/DataFile.h>
-#include <osmscout/CoordDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
 
 #include <osmscout/util/Geometry.h>
 

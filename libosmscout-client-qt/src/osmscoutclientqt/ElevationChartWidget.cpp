@@ -18,8 +18,15 @@
  */
 
 #include <osmscoutclientqt/ElevationChartWidget.h>
-#include <osmscoutclientqt/OSMScoutQt.h>
+
+#include <QPainterPath>
+
+#include <limits>
+#include <sstream>
+
 #include <osmscout/util/String.h>
+
+#include <osmscoutclientqt/OSMScoutQt.h>
 
 namespace osmscout {
 

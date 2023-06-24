@@ -17,14 +17,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <vector>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscoutmap/StyleConfig.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 // TODO: configurable
 static const size_t AREAINDEXACCESS_THREAD_COUNT=10;
@@ -492,7 +492,7 @@ int main(int argc, char* argv[])
   argParser.AddPositional(osmscout::CmdLineStringOption([&](const std::string& value) {
                             databasePath=value;
                           }),
-                          "database directory",
+                          "db directory",
                           "Database directory");
 
   argParser.AddPositional(osmscout::CmdLineStringOption([&](const std::string& value) {
@@ -518,10 +518,10 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter parameter;
   osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(parameter);
 
-  std::cout << "Opening database..." << std::endl;
+  std::cout << "Opening db..." << std::endl;
 
   if (!database->Open(databasePath)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }
@@ -565,7 +565,7 @@ int main(int argc, char* argv[])
     std::cout << "Test result: ERROR" << std::endl;
   }
 
-  std::cout << "Closing database..." << std::endl;
+  std::cout << "Closing db..." << std::endl;
   database->Close();
   database=nullptr;
   std::cout << "Done." << std::endl;

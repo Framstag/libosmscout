@@ -34,8 +34,9 @@
 
 #include <osmscoutmapgdi/MapPainterGDI.h>
 
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/String.h>
-#include <osmscout/util/File.h>
 
 namespace osmscout {
 

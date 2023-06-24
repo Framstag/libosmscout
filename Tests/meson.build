@@ -10,6 +10,8 @@ AccessParse =  executable('AccessParse',
              install: true,
              install_dir: testInstallDir)
 
+test('Check parsing of access rights', AccessParse)
+
 AsyncProcessing =  executable('AsyncProcessing',
              'src/AsyncProcessing.cpp',
              include_directories: [osmscoutIncDir],
@@ -17,6 +19,16 @@ AsyncProcessing =  executable('AsyncProcessing',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+AsyncWorker =  executable('AsyncWorker',
+             'src/AsyncWorker.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check asynchronous worker', AsyncWorker)
 
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
@@ -26,6 +38,8 @@ TimeParse =  executable('TimeParse',
              install: true,
              install_dir: testInstallDir)
 
+test('Check parsing of time string', TimeParse)
+
 Bearing = executable('Bearing',
              'src/Bearing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -33,6 +47,8 @@ Bearing = executable('Bearing',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check calculation of bearing', Bearing)
 
 BitsAndBytesNeeded = executable('BitsAndBytesNeeded',
              'src/BitsAndBytesNeeded.cpp',
@@ -42,12 +58,16 @@ BitsAndBytesNeeded = executable('BitsAndBytesNeeded',
              install: true,
              install_dir: testInstallDir)
 
+test('Check encoding of numbers', BitsAndBytesNeeded)
+
 ByteTest = executable('ByteTest',
              'src/ByteTest.cpp',
              include_directories: [testIncDir],
              dependencies: [mathDep],
              install: true,
              install_dir: testInstallDir)
+
+test('Check std_byte behaviour', ByteTest)
 
 CachePerformance = executable('CachePerformance',
              'src/CachePerformance.cpp',
@@ -57,6 +77,8 @@ CachePerformance = executable('CachePerformance',
              install: true,
              install_dir: testInstallDir)
 
+test('Check cache functionality with CachePerformance', CachePerformance, args : ['--size', '1000'])
+
 CalculateResolution = executable('CalculateResolution',
              'src/CalculateResolution.cpp',
              include_directories: [osmscoutIncDir],
@@ -64,6 +86,18 @@ CalculateResolution = executable('CalculateResolution',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check position accuracy with coordinate bits', CalculateResolution)
+
+CancelableFuture = executable('CancelableFuture',
+             'src/CancelableFuture.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check cancelable future', CancelableFuture)
 
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
@@ -73,6 +107,8 @@ CmdLineParsing = executable('CmdLineParsing',
              install: true,
              install_dir: testInstallDir)
 
+test('Check parsing of command line args', CmdLineParsing)
+
 ColorParse = executable('ColorParse',
              'src/ColorParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -81,6 +117,8 @@ ColorParse = executable('ColorParse',
              install: true,
              install_dir: testInstallDir)
 
+test('Check parsing of colors', ColorParse)
+
 CoordinateEncoding = executable('CoordinateEncoding',
              'src/CoordinateEncoding.cpp',
              include_directories: [osmscoutIncDir],
@@ -88,6 +126,8 @@ CoordinateEncoding = executable('CoordinateEncoding',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
 
 if buildMapQt
   if get_option('qtVersion') == 5
@@ -123,6 +163,8 @@ EncodeNumber = executable('EncodeNumber',
              install: true,
              install_dir: testInstallDir)
 
+test('Check encoding of numbers', EncodeNumber)
+
 FeatureLabelTest = executable('FeatureLabelTest',
              'src/FeatureLabelTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -130,6 +172,8 @@ FeatureLabelTest = executable('FeatureLabelTest',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check label formatting', FeatureLabelTest)
 
 File = executable('File',
              'src/File.cpp',
@@ -139,6 +183,8 @@ File = executable('File',
              install: true,
              install_dir: testInstallDir)
 
+test('Check File utilities', File)
+
 FileScannerWriter = executable('FileScannerWriter',
              'src/FileScannerWriter.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -146,6 +192,8 @@ FileScannerWriter = executable('FileScannerWriter',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check File access implementation', FileScannerWriter)
 
 GeoBox = executable('GeoBox',
              'src/GeoBox.cpp',
@@ -155,6 +203,8 @@ GeoBox = executable('GeoBox',
              install: true,
              install_dir: testInstallDir)
 
+test('Check handling of geo box intersection', GeoBox)
+
 GeoCoordParse = executable('GeoCoordParse',
              'src/GeoCoordParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -163,6 +213,8 @@ GeoCoordParse = executable('GeoCoordParse',
              install: true,
              install_dir: testInstallDir)
 
+test('Check parsing of geo coordinates', GeoCoordParse)
+
 Geometry = executable('Geometry',
              'src/Geometry.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -170,6 +222,21 @@ Geometry = executable('Geometry',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check impl. of geometric functions', Geometry)
+
+headerCheckEnv = environment()
+headerCheckEnv.set('SOURCE_ROOT', meson.project_source_root())
+
+HeaderCheck = executable('HeaderCheck',
+             'src/HeaderCheck.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check use of \'<\'...\'>\' for includes', HeaderCheck, env: headerCheckEnv)
 
 if buildImport
     LocationServiceTest = executable('LocationServiceTest',
@@ -194,6 +261,12 @@ MapRotate = executable('MapRotate',
              install: true,
              install_dir: testInstallDir)
 
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+  warning('Test "Check rotation of maps" does not run under MSYS because of missing locale support')
+else
+  test('Check rotation of maps', MapRotate)
+endif
+
 MercatorProjection = executable('MercatorProjection',
              'src/MercatorProjection.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -201,6 +274,8 @@ MercatorProjection = executable('MercatorProjection',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check MercatorProjection', MercatorProjection)
 
 MultiDBRouting = executable('MultiDBRouting',
              'src/MultiDBRouting.cpp',
@@ -210,6 +285,8 @@ MultiDBRouting = executable('MultiDBRouting',
              install: true,
              install_dir: testInstallDir)
 
+test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
+
 NumberSet = executable('NumberSet',
              'src/NumberSet.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -217,6 +294,8 @@ NumberSet = executable('NumberSet',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check correctness of NumberSet class', NumberSet)
 
 NumberSetPerformance = executable('NumberSetPerformance',
              'src/NumberSetPerformance.cpp',
@@ -226,6 +305,8 @@ NumberSetPerformance = executable('NumberSetPerformance',
              install: true,
              install_dir: testInstallDir)
 
+test('Check number set performance', NumberSetPerformance, timeout: 180)
+
 OpeningHours = executable('OpeningHours',
              'src/OpeningHours.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -233,6 +314,8 @@ OpeningHours = executable('OpeningHours',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check parsing of opening hours', OpeningHours)
 
 OSTAndOSSCheck = executable('OSTAndOSSCheck',
              'src/OSTAndOSSCheck.cpp',
@@ -306,6 +389,8 @@ ReaderScannerPerformance = executable('ReaderScannerPerformance',
              install: true,
              install_dir: testInstallDir)
 
+test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
+
 ScanConversion = executable('ScanConversion',
              'src/ScanConversion.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -314,6 +399,8 @@ ScanConversion = executable('ScanConversion',
              install: true,
              install_dir: testInstallDir)
 
+test('Check scan conversion code', ScanConversion)
+
 ScreenBox = executable('ScreenBox',
              'src/ScreenBox.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -321,6 +408,8 @@ ScreenBox = executable('ScreenBox',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check ScreenBox functionality', ScreenBox)
 
 StdByteTest = executable('StdByteTest',
              'src/StdByteTest.cpp',
@@ -337,6 +426,8 @@ StringUtils = executable('StringUtils',
              install: true,
              install_dir: testInstallDir)
 
+test('Check string utils', StringUtils)
+
 ThreadedDatabase = executable('ThreadedDatabase',
              'src/ThreadedDatabase.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
@@ -344,6 +435,12 @@ ThreadedDatabase = executable('ThreadedDatabase',
              link_with: [osmscoutmap, osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check threaded database', ThreadedDatabase, args : [
+        '--threads', '100',
+        '--iterations', '1000',
+        meson.current_source_dir() + '/data/testregion',
+        meson.current_source_dir() + '/../stylesheets/standard.oss'])
 
 SunriseSunset = executable('SunriseSunset',
              'src/SunriseSunsetTest.cpp',
@@ -353,6 +450,8 @@ SunriseSunset = executable('SunriseSunset',
              install: true,
              install_dir: testInstallDir)
 
+test('Check SunriseSunset utility', SunriseSunset)
+
 PolygonCenter = executable('PolygonCenter',
              'src/PolygonCenter.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -360,6 +459,8 @@ PolygonCenter = executable('PolygonCenter',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check PolygonCenter utility', PolygonCenter)
 
 TilingTest = executable('TilingTest',
              'src/TilingTest.cpp',
@@ -369,6 +470,8 @@ TilingTest = executable('TilingTest',
              install: true,
              install_dir: testInstallDir)
 
+test('Check tiling calculation code', TilingTest)
+
 TransPolygon = executable('TransPolygon',
              'src/TransPolygon.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -376,6 +479,8 @@ TransPolygon = executable('TransPolygon',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check polygon transformation code', TransPolygon)
 
 WaterIndex = executable('WaterIndex',
              'src/WaterIndex.cpp',
@@ -385,6 +490,8 @@ WaterIndex = executable('WaterIndex',
              install: true,
              install_dir: testInstallDir)
 
+test('Check water index import code', WaterIndex)
+
 WorkQueue = executable('WorkQueue',
              'src/WorkQueue.cpp',
              include_directories: [osmscoutIncDir],
@@ -392,6 +499,8 @@ WorkQueue = executable('WorkQueue',
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check implementation of work queue', WorkQueue)
 
 WStringStringConversion = executable('WStringStringConversion',
              'src/WStringStringConversion.cpp',
@@ -401,6 +510,8 @@ WStringStringConversion = executable('WStringStringConversion',
              install: true,
              install_dir: testInstallDir)
 
+test('Check WString<=>String conversion code', WStringStringConversion)
+
 LabelPathTest = executable('LabelPathTest',
            'src/LabelPathTest.cpp',
            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
@@ -408,6 +519,8 @@ LabelPathTest = executable('LabelPathTest',
            link_with: [osmscoutmap, osmscout],
            install: true,
            install_dir: testInstallDir)
+
+test('Check LabelPath code', LabelPathTest)
 
 Base64Test = executable('Base64Test',
            'src/Base64.cpp',
@@ -417,6 +530,8 @@ Base64Test = executable('Base64Test',
            install: true,
            install_dir: testInstallDir)
 
+test('Check Base64 code', Base64Test)
+
 CoordBufferTest = executable('CoordBufferTest',
            'src/CoordBufferTest.cpp',
            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
@@ -424,6 +539,8 @@ CoordBufferTest = executable('CoordBufferTest',
            link_with: [osmscoutmap, osmscout],
            install: true,
            install_dir: testInstallDir)
+
+test('Check coordinate buffer conversions', CoordBufferTest)
 
 if marisaDep.found()
     TextLookupTest = executable('TextLookupTest',
@@ -433,80 +550,26 @@ if marisaDep.found()
                link_with: [osmscout],
                install: true,
                install_dir: testInstallDir)
+
+   test('Check text lookup - vysoka', TextLookupTest, args : [
+           '--expected-results', '5',
+           meson.current_source_dir() + '/data/testregion',
+           'vysoka'])
+
+   test('Check text lookup - Vysoká', TextLookupTest, args : [
+           '--expected-results', '5',
+           meson.current_source_dir() + '/data/testregion',
+           'Vysoká'])
+
+   test('Check text lookup - bosyne', TextLookupTest, args : [
+           '--expected-results', '1',
+           meson.current_source_dir() + '/data/testregion',
+           'bosyne'])
 endif
-
-ostandossEnv = environment()
-
-ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
-
-test('Check parsing of access rights', AccessParse)
-test('Check Base64 code', Base64Test)
-test('Check calculation of bearing', Bearing)
-test('Check encoding of numbers', BitsAndBytesNeeded)
-test('Check std_byte behaviour', ByteTest)
-test('Check cache functionality with CachePerformance', CachePerformance, args : ['--size', '1000'])
-test('Check position accuracy with coordinate bits', CalculateResolution)
-test('Check parsing of command line args', CmdLineParsing)
-test('Check parsing of colors', ColorParse)
-test('Check coordinate buffer conversions', CoordBufferTest)
-test('Check parsing of opening hours', OpeningHours)
-test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
-test('Check encoding of numbers', EncodeNumber)
-test('Check label formatting', FeatureLabelTest)
-test('Check File utilities', File)
-test('Check File access implementation', FileScannerWriter)
-test('Check handling of geo box intersection', GeoBox)
-test('Check parsing of geo coordinates', GeoCoordParse)
-test('Check impl. of geometric functions', Geometry)
-if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
-  warning('Test "Check rotation of maps" does not run under MSYS because of missing locale support')
-else
-  test('Check rotation of maps', MapRotate)
-endif
-test('Check MercatorProjection', MercatorProjection)
-test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
-test('Check correctness of NumberSet class', NumberSet)
-test('Check number set performance', NumberSetPerformance, timeout: 180)
-test('Check PolygonCenter utility', PolygonCenter)
-test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
-test('Check scan conversion code', ScanConversion)
-test('Check ScreenBox functionality', ScreenBox)
-test('Check string utils', StringUtils)
-test('Check tiling calculation code', TilingTest)
-test('Check polygon transformation code', TransPolygon)
-test('Check water index import code', WaterIndex)
-test('Check implementation of work queue', WorkQueue)
-test('Check WString<=>String conversion code', WStringStringConversion)
-test('Check threaded database', ThreadedDatabase, args : [
-        '--threads', '100',
-        '--iterations', '1000',
-        meson.current_source_dir() + '/data/testregion',
-        meson.current_source_dir() + '/../stylesheets/standard.oss'])
-
-if marisaDep.found()
-    test('Check text lookup - vysoka', TextLookupTest, args : [
-            '--expected-results', '5',
-            meson.current_source_dir() + '/data/testregion',
-            'vysoka'])
-
-    test('Check text lookup - Vysoká', TextLookupTest, args : [
-            '--expected-results', '5',
-            meson.current_source_dir() + '/data/testregion',
-            'Vysoká'])
-
-    test('Check text lookup - bosyne', TextLookupTest, args : [
-            '--expected-results', '1',
-            meson.current_source_dir() + '/data/testregion',
-            'bosyne'])
-endif
-
-test('Check SunriseSunset utility', SunriseSunset)
-test('Check parsing of time string', TimeParse)
-
-
-test('Check LabelPath code', LabelPathTest)
 
 if buildImport
+    ostandossEnv = environment()
+    ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)
 endif
 

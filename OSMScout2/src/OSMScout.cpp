@@ -25,17 +25,19 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QQmlContext>
+#include <QTranslator>
+#include <QStandardPaths>
 
 // OSM Scout library singleton
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 // Application theming
-#include "Theme.h"
+#include <Theme.h>
 
-#include "AppSettings.h"
+#include <AppSettings.h>
 
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 using namespace osmscout;
 

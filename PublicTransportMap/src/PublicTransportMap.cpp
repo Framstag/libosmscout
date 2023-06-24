@@ -22,13 +22,14 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/Database.h>
-#include <osmscout/PTRouteDataFile.h>
+#include <osmscout/db/Database.h>
+#include <osmscout/db/PTRouteDataFile.h>
 
 #include <osmscout/feature/NameFeature.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/cli/CmdLineParsing.h>
+
+#include <osmscout/io/FileScanner.h>
 
 /*
  * Example:
@@ -467,7 +468,7 @@ int main(int argc,
   osmscout::Database               database(databaseParameter);
 
   if (!database.Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
   }
 
   auto routeType=database.GetTypeConfig()->GetTypeInfo(args.typeFilter);

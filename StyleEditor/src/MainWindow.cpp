@@ -17,12 +17,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "MainWindow.h"
+#include <MainWindow.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <QGuiApplication>
-#include "SettingsDialog.h"
+#include <SettingsDialog.h>
 
 using namespace osmscout;
 

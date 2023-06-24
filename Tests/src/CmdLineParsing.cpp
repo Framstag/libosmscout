@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <TestMain.h>
 

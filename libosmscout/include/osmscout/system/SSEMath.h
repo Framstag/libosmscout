@@ -20,12 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/system/Math.h>
-
 #include <osmscout/system/SSEMathPublic.h>
-
 #include <osmscout/system/SystemTypes.h>
 
 #include <osmscout/private/Config.h>

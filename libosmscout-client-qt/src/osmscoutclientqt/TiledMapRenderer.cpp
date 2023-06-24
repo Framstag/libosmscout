@@ -24,7 +24,10 @@
 #include <osmscoutclientqt/TiledRenderingHelper.h>
 
 #include <osmscout/system/Math.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
+
+#include <QGuiApplication>
+#include <QScreen>
 
 namespace osmscout {
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
@@ -262,7 +265,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     }
 
     DatabaseCoverage state = databaseCoverageOfTile(zoomLevel, xtile, ytile);
-    // render offline map when area is fully covered by database or online tiles are disabled -> render basemap
+    // render offline map when area is fully covered by db or online tiles are disabled -> render basemap
     bool render = (state != DatabaseCoverage::Outside) || (!onlineTilesEnabled);
     if (render) {
         // tile rendering have sub-linear complexity with area size

@@ -29,7 +29,8 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/TileId.h>
 

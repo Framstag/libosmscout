@@ -26,7 +26,8 @@
 #include <QScreen>
 #include <QGuiApplication>
 
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
+
 #include <osmscoutmap/MapService.h>
 
 #include <osmscout/feature/ConstructionYearFeature.h>
@@ -156,12 +157,12 @@ int main(int argc, char* argv[])
 
   if (buildingType!=nullptr) {
     /*
-    osmscout::FillStyleProcessorRef constructionProcessor=std::make_shared<ConstructionProcessor>(*database->GetTypeConfig());
+    osmscout::FillStyleProcessorRef constructionProcessor=std::make_shared<ConstructionProcessor>(*db->GetTypeConfig());
     drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
                                              constructionProcessor);*/
 
     /*
-    osmscout::FillStyleProcessorRef addressProcessor=std::make_shared<AddressProcessor>(*database->GetTypeConfig());
+    osmscout::FillStyleProcessorRef addressProcessor=std::make_shared<AddressProcessor>(*db->GetTypeConfig());
     drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
                                           addressProcessor);*/
   }

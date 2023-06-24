@@ -23,7 +23,7 @@
 #include <exception>
 #include <string>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 #include <system_error>
 
 #if defined(_MSC_VER)
@@ -57,15 +57,15 @@ namespace osmscout {
   class OSMSCOUT_API UninitializedException : public OSMScoutException
   {
   private:
-    std::string object;
+    std::string objectName;
     std::string description;
 
   public:
-    explicit UninitializedException(const std::string& object);
+    explicit UninitializedException(const std::string& objectName);
 
     const char* what() const OSMSCOUT_NOEXCEPT override;
 
-    std::string GetObject() const;
+    std::string GetObjectName() const;
     std::string GetDescription() const override;
   };
 

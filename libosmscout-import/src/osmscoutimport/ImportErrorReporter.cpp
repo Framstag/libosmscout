@@ -21,9 +21,9 @@
 
 #include <sstream>
 
-#include <osmscout/DebugDatabase.h>
+#include <osmscout/db/DebugDatabase.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
 
 namespace osmscout {
 

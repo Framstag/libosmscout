@@ -10,15 +10,15 @@
 #define OSMScout_h
 
 #if __cplusplus
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 #include <osmscout/Way.h>
 #include <osmscout/Tag.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/db/WayDataFile.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscoutmap/StyleConfig.h>
 #include <osmscoutmap/MapService.h>
-#include <osmscout/LocationService.h>
+#include <osmscout/location/LocationService.h>
 
 namespace osmscout {
     class MyBreaker : public Breaker {

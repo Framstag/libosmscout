@@ -22,15 +22,15 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/AreaDataFile.h>
-#include <osmscout/OptimizeAreasLowZoom.h>
+#include <osmscout/db/AreaDataFile.h>
+#include <osmscout/db/OptimizeAreasLowZoom.h>
 
 #include <osmscout/system/Assert.h>
-#include <osmscout/system/Math.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/File.h>
+#include <osmscout/io/File.h>
+
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>

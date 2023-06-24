@@ -25,19 +25,20 @@
 
 #include <osmscout/FeatureReader.h>
 
-#include <osmscout/TextSearchIndex.h>
+#include <osmscout/db/TextSearchIndex.h>
 
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/WayDataFile.h>
-#include <osmscout/AreaDataFile.h>
+#include <osmscout/db/NodeDataFile.h>
+#include <osmscout/db/WayDataFile.h>
+#include <osmscout/db/AreaDataFile.h>
 
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/NameAltFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+#include <osmscout/io/FileWriter.h>
+
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 

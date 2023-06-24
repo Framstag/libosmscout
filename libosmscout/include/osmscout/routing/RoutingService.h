@@ -28,7 +28,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/Point.h>
 
@@ -37,9 +37,10 @@
 #include <osmscout/routing/RouteNode.h>
 
 // Datafiles
-#include <osmscout/DataFile.h>
-#include <osmscout/Database.h>
-#include <osmscout/ObjectVariantDataFile.h>
+#include <osmscout/io/DataFile.h>
+
+#include <osmscout/db/Database.h>
+#include <osmscout/db/ObjectVariantDataFile.h>
 
 // Routing
 #include <osmscout/Intersection.h>
@@ -126,7 +127,7 @@ namespace osmscout {
   /**
    * \ingroup Routing
    *
-   * Database instance initialization parameter to influence the behavior of the database
+   * Database instance initialization parameter to influence the behavior of the db
    * instance.
    *
    * The following groups attributes are currently available:

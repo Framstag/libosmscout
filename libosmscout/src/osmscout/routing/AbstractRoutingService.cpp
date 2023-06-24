@@ -29,7 +29,7 @@
 #include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 #include <iomanip>
@@ -1569,7 +1569,7 @@ namespace osmscout {
 
       if (n->currentNode.database!=nn->currentNode.database &&
           node->GetId()==nextNode->GetId()){
-        // there is no way between database transition nodes
+        // there is no way between db transition nodes
         continue;
       }
 

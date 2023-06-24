@@ -25,7 +25,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/TypeConfig.h>
 
@@ -40,7 +40,7 @@
 #include <osmscout/util/Time.h>
 
 // Database
-#include <osmscout/Database.h>
+#include <osmscout/db/Database.h>
 
 // Routing
 #include <osmscout/routing/RouteData.h>

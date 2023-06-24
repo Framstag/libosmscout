@@ -17,14 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <cctype>
 #include <iostream>
-#include <iomanip>
 
-#include <osmscout/Database.h>
-#include <osmscout/LocationService.h>
+#include <osmscout/db/Database.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/location/LocationService.h>
+
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {
@@ -335,7 +334,7 @@ int main(int argc, char* argv[])
                             args.databaseDirectory=value;
                           }),
                           "DATABASE",
-                          "Directory of the database to use");
+                          "Directory of the db to use");
 
   osmscout::CmdLineParseResult result=argParser.Parse();
 
@@ -367,7 +366,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open db" << std::endl;
 
     return 1;
   }

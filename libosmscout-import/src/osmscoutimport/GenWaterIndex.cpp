@@ -21,12 +21,12 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/DataFile.h>
-#include <osmscout/BoundingBoxDataFile.h>
-#include <osmscout/CoordDataFile.h>
 #include <osmscout/FeatureReader.h>
-#include <osmscout/WaterIndex.h>
-#include <osmscout/WayDataFile.h>
+
+#include <osmscout/db/BoundingBoxDataFile.h>
+#include <osmscout/db/CoordDataFile.h>
+#include <osmscout/db/WaterIndex.h>
+#include <osmscout/db/WayDataFile.h>
 
 #include <osmscout/feature/BridgeFeature.h>
 #include <osmscout/feature/EmbankmentFeature.h>
@@ -34,8 +34,10 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/io/DataFile.h>
+#include <osmscout/io/File.h>
+#include <osmscout/io/FileScanner.h>
+
 #include <osmscout/util/Geometry.h>
 
 #include <osmscoutimport/Preprocess.h>

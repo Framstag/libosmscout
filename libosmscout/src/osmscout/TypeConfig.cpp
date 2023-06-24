@@ -60,11 +60,12 @@
 #include <osmscout/ost/Parser.h>
 #include <osmscout/ost/Scanner.h>
 
-#include <osmscout/util/File.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/Number.h>
 
-namespace osmscout {
+#include <osmscout/io/File.h>
+
+  namespace osmscout {
 
   const char* TypeConfig::FILE_TYPES_DAT="types.dat";
 

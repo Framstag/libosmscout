@@ -21,7 +21,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QtGui>
 #include <QThread>
 #include <QMetaType>
 #include <QMutex>
@@ -29,10 +28,11 @@
 #include <QTimer>
 #include <QReadWriteLock>
 
-#include <osmscoutclientqt/LocationEntry.h>
-#include <osmscout/BasemapDatabase.h>
-#include <osmscout/Database.h>
-#include <osmscout/LocationService.h>
+#include <osmscout/db/BasemapDatabase.h>
+#include <osmscout/db/Database.h>
+
+#include <osmscout/location/LocationService.h>
+
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmapqt/MapPainterQt.h>
 
@@ -89,14 +89,14 @@ enum DatabaseCoverage{
 /**
  * \ingroup QtAPI
  *
- * Central object that manage database instances (\ref DBInstance),
+ * Central object that manage db instances (\ref DBInstance),
  * its map styles (there is one global map style now)
  * and provides simple thread-safe, asynchronous api for accessing it.
  *
  * DBThread is de facto singleton, that is created and accessible by OSMScoutQt.
  *
  * List of databases is protected by read-write lock. There may be multiple
- * readers at one time. DBThread warrants that none database will be closed
+ * readers at one time. DBThread warrants that none db will be closed
  * or modified (except thread-safe caches) when read lock is hold.
  * Databases may be accessed via \see RunJob or \see RunSynchronousJob methods.
  */
@@ -128,7 +128,7 @@ public slots:
   void onDatabaseListChanged(QList<QDir> databaseDirectories);
 
   /**
-   * Flush all caches for database that was not used in recent idleMs
+   * Flush all caches for db that was not used in recent idleMs
    */
   void FlushCaches(qint64 idleMs);
 

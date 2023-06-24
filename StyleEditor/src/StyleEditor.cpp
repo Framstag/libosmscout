@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 // Qt includes
 #include <QGuiApplication>
@@ -29,10 +29,10 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 // Main Window
-#include "MainWindow.h"
+#include <MainWindow.h>
 
 // Custom QML objects
-#include "FileIO.h"
+#include <FileIO.h>
 
 using namespace osmscout;
 

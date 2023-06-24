@@ -27,11 +27,12 @@
 
 #include <osmscoutmap/MapImportExport.h>
 
-#include <osmscout/Database.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscoutmap/MapPainter.h>
 #include <osmscoutmap/StyleConfig.h>
+
+#include <osmscout/db/Database.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/GeoBox.h>
@@ -117,7 +118,7 @@ namespace osmscout {
   private:
     mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
 
-    DatabaseRef                  database;             //!< The reference to the database
+    DatabaseRef                  database;             //!< The reference to the db
     mutable DataTileCache        cache;                //!< Data cache
 
     mutable WorkQueue<bool>      nodeWorkerQueue;

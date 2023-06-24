@@ -28,7 +28,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
+
 #include <osmscout/TypeConfig.h>
 #include <osmscout/Point.h>
 #include <osmscout/Pixel.h>
@@ -225,9 +226,9 @@ constexpr bool debugRouting = false;
                                std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) = 0;
 
     /**
-     * Return the route node for the given database offset
+     * Return the route node for the given db offset
      * @param offset
-     *    Offset in given database
+     *    Offset in given db
      * @param node
      *    Node instance to write the result back
      * @return
@@ -370,7 +371,7 @@ constexpr bool debugRouting = false;
     RouteWayResult TransformRouteDataToWay(const RouteData& data);
 
     /**
-     * Get current mapping of DatabaseId to database path than be used
+     * Get current mapping of DatabaseId to db path than be used
      * later for lookup objects in description
      *
      * @return

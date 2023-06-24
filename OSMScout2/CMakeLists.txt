@@ -69,6 +69,8 @@ set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
 add_executable(OSMScout2 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 
+target_include_directories(OSMScout2 PRIVATE "src")
+
 target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
 target_link_libraries(OSMScout2
@@ -100,7 +102,11 @@ if (QT_QML_DEBUG)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG")
 endif()
 
-set_target_properties(OSMScout2 PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
+set_target_properties(OSMScout2
+		PROPERTIES
+		VERSION ${OSMSCOUT_LIBRARY_VERSION}
+		SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+		FOLDER "Tools")
 
 if(WIN32)
 	create_win32_tool_resource(OSMScout2)
@@ -116,7 +122,10 @@ if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
     )
 endif()
 
-install(TARGETS OSMScout2 RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+install(TARGETS OSMScout2
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib)
 
 # install QM files to correct location - QStandardPaths::AppDataLocation / "translations"
 if(APPLE)

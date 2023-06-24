@@ -27,8 +27,10 @@
 #include <vector>
 #include <optional>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/File.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/util/String.h>
+
+#include <osmscout/io/File.h>
 
 #include <osmscoutimport/Import.h>
 

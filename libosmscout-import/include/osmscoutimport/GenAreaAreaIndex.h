@@ -26,7 +26,7 @@
 #include <osmscout/Area.h>
 #include <osmscout/Pixel.h>
 
-#include <osmscout/util/FileWriter.h>
+#include <osmscout/io/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
 #include <osmscoutimport/Import.h>

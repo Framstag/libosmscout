@@ -95,7 +95,7 @@ public:
 
   enum class AssumeLandStrategy
   {
-    disable   = 0, // disable land detection by database objects
+    disable   = 0, // disable land detection by db objects
     enable    = 1, // enable land detection
     automatic = 2, // disable land detection when data polygon is known
   };

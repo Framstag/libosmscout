@@ -22,7 +22,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/system/Math.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/Router.h>

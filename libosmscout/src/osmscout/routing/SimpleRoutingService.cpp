@@ -30,7 +30,7 @@
 #include <osmscout/routing/RoutingProfile.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/StopClock.h>
 
 //#define DEBUG_ROUTING
@@ -42,7 +42,7 @@ namespace osmscout {
    * Create a new instance of the routing service.
    *
    * @param database
-   *    A valid reference to a database instance
+   *    A valid reference to a db instance
    * @param parameter
    *    An instance to the parameter object holding further paramterization
    */
@@ -82,7 +82,7 @@ namespace osmscout {
   }
 
   bool SimpleRoutingService::CanUse(const RoutingProfile& profile,
-                                    const DatabaseId /*database*/,
+                                    const DatabaseId /*db*/,
                                     const RouteNode& routeNode,
                                     size_t pathIndex)
   {
@@ -90,21 +90,21 @@ namespace osmscout {
   }
 
   bool SimpleRoutingService::CanUseForward(const RoutingProfile& profile,
-                                           const DatabaseId& /*database*/,
+                                           const DatabaseId& /*db*/,
                                            const WayRef& way)
   {
     return profile.CanUseForward(*way);
   }
 
   bool SimpleRoutingService::CanUseBackward(const RoutingProfile& profile,
-                                            const DatabaseId& /*database*/,
+                                            const DatabaseId& /*db*/,
                                             const WayRef& way)
   {
     return profile.CanUseBackward(*way);
   }
 
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
-                                        const DatabaseId /*database*/,
+                                        const DatabaseId /*db*/,
                                         const RouteNode& routeNode,
                                         size_t inPathIndex,
                                         size_t outPathIndex)
@@ -113,7 +113,7 @@ namespace osmscout {
   }
 
   double SimpleRoutingService::GetCosts(const RoutingProfile& profile,
-                                        const DatabaseId /*database*/,
+                                        const DatabaseId /*db*/,
                                         const WayRef &way,
                                         const Distance &wayLength)
   {
@@ -121,21 +121,21 @@ namespace osmscout {
   }
 
   double SimpleRoutingService::GetEstimateCosts(const RoutingProfile& profile,
-                                                const DatabaseId /*database*/,
+                                                const DatabaseId /*db*/,
                                                 const Distance &targetDistance)
   {
     return profile.GetCosts(targetDistance);
   }
 
   double SimpleRoutingService::GetCostLimit(const RoutingProfile& profile,
-                                            const DatabaseId /*database*/,
+                                            const DatabaseId /*db*/,
                                             const Distance &targetDistance)
   {
     return profile.GetCosts(profile.GetCostLimitDistance()) + profile.GetCosts(targetDistance)*profile.GetCostLimitFactor();
   }
 
   std::string SimpleRoutingService::GetCostString(const RoutingProfile& profile,
-                                                  DatabaseId /*database*/,
+                                                  DatabaseId /*db*/,
                                                   double cost) const
   {
     return profile.GetCostString(cost);
@@ -309,7 +309,7 @@ namespace osmscout {
   }
 
   std::vector<DBId> SimpleRoutingService::GetNodeTwins(const RoutingProfile& /*state*/,
-                                                       const DatabaseId /*database*/,
+                                                       const DatabaseId /*db*/,
                                                        const Id /*id*/)
   {
     std::vector<DBId> result;
@@ -360,10 +360,10 @@ namespace osmscout {
   }
 
   /**
-   * Returns the type configuration of the underlying database instance
+   * Returns the type configuration of the underlying db instance
    *
    * @return
-   *    A valid type configuration or null if the database is not valid
+   *    A valid type configuration or null if the db is not valid
    */
   TypeConfigRef SimpleRoutingService::GetTypeConfig() const
   {
@@ -417,10 +417,10 @@ namespace osmscout {
 
       partialResult=CalculateRoute(profile,
                                    RoutePosition(fromObject,
-                                                 fromNodeIndex,/*database*/
+                                                 fromNodeIndex,/*db*/
                                                  0),
                                    RoutePosition(toObject,
-                                                 toNodeIndex,/*database*/
+                                                 toNodeIndex,/*db*/
                                                  0),
                                    parameter);
       if (!partialResult.Success()) {
@@ -496,7 +496,7 @@ namespace osmscout {
         }
       }
 
-      position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(), wayCenter,/*database*/0), Distance::Zero());
+      position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(), wayCenter,/*db*/0), Distance::Zero());
     }
     // TODO: support areas in router
 
@@ -600,7 +600,7 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
 
-          position=RoutePositionResult(RoutePosition(area->GetObjectFileRef(),i,/*database*/0),
+          position=RoutePositionResult(RoutePosition(area->GetObjectFileRef(),i,/*db*/0),
                                        GetEllipsoidalDistance(coord, area->rings[0].nodes[i].GetCoord()));
         }
       }
@@ -623,10 +623,10 @@ namespace osmscout {
         if (distance<minDistance) {
           minDistance=distance;
           if(r<0.5){
-            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i,/*database*/0),
+            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i,/*db*/0),
                                          GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
           } else {
-            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i+1,/*database*/0),
+            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i+1,/*db*/0),
                                          GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
           }
         }

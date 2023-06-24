@@ -44,14 +44,14 @@ private:
   // Rendered tile is combined from both sources.
   //
   // Online cache may contain NULL images (QImage::isNull() is true) for areas
-  // covered by offline database and offline cache can contain NULL images
-  // for areas not covered by database.
+  // covered by offline db and offline cache can contain NULL images
+  // for areas not covered by db.
   //
   // When offlineTileCache is invalidated, cache keeps unchanged,
   // just its epoch is increased. When there is retrieved pixmap with
   // old epoch from cache, it is used, but rendering request is triggered.
   //
-  // Offline tiles should be in ARGB format on database area interface.
+  // Offline tiles should be in ARGB format on db area interface.
   mutable QMutex                tileCacheMutex;
   TileCache                     onlineTileCache;
   TileCache                     offlineTileCache;

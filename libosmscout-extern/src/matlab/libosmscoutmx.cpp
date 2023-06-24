@@ -31,9 +31,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <stdio.h>
 #include <sstream>
 #include <algorithm>
-#include <osmscout/Database.h>
-#include <osmscout/LocationService.h>
-#include <osmscout/LocationDescriptionService.h>
+#include <osmscout/database/Database.h>
+#include <osmscout/location/LocationService.h>
+#include <osmscout/location/LocationDescriptionService.h>
 #include <osmscout/POIService.h>
 #include <osmscout/TypeFeatures.h>
 #include <osmscout/FeatureReader.h>
@@ -143,7 +143,7 @@ data::STRUCTURE LocationDescription(std::string map_directory, osmscout::GeoCoor
 	osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
 	if (!database->Open(map_directory.c_str()))
 	{
-		mexErrMsgTxt("Cannot open map database");
+		mexErrMsgTxt("Cannot open map db");
 	}
 	osmscout::LocationServiceRef locationService(std::make_shared<osmscout::LocationService>(database));
 	osmscout::LocationDescriptionServiceRef locationDescriptionService(std::make_shared<osmscout::LocationDescriptionService>(database));
@@ -224,7 +224,7 @@ void LookupPOI(std::string map_directory, osmscout::GeoBox boundingBox, std::lis
 	osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
 	if (!database->Open(map_directory.c_str()))
 	{
-		mexErrMsgTxt("Cannot open map database");
+		mexErrMsgTxt("Cannot open map db");
 	}
 	osmscout::POIServiceRef poiService = std::make_shared<osmscout::POIService>(database);
 	osmscout::TypeConfigRef typeConfig(database->GetTypeConfig());
@@ -257,7 +257,7 @@ void LookupPOI(std::string map_directory, osmscout::GeoBox boundingBox, std::lis
 		poiService->GetPOIsInArea(boundingBox, nodeTypes, nodes, wayTypes, ways, areaTypes, areas);
 	}
 	catch (const std::exception&) {
-		mexErrMsgTxt("Cannot load data from database");
+		mexErrMsgTxt("Cannot load data from db");
 	}
 	std::vector<ds> node_data;
 	std::vector<ds> way_data;

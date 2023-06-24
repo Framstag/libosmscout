@@ -21,7 +21,7 @@
 
 #include <osmscoutmapcairo/SymbolRendererCairo.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
   SymbolRendererCairo::SymbolRendererCairo(cairo_t* draw)

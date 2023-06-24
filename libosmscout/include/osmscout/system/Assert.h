@@ -21,7 +21,7 @@
 */
 
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <cassert>
 

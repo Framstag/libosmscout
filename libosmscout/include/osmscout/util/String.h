@@ -28,13 +28,14 @@
 #include <optional>
 #include <utility>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/system/Assert.h>
+
 #include <osmscout/util/Time.h>
 #include <osmscout/util/Locale.h>
 
-#include <osmscout/CoreImportExport.h>
 #include <osmscout/OSMScoutTypes.h>
 
 namespace osmscout {

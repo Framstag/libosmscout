@@ -22,13 +22,16 @@
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/private/Config.h>
-#include "osmscoutclientqt/MapManager.h"
+#include <osmscoutclientqt/MapManager.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-#include <osmscout/TextSearchIndex.h>
+#include <osmscout/db/TextSearchIndex.h>
 #endif
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
+
+#include <QGuiApplication>
+#include <QScreen>
 
 namespace osmscout {
 
@@ -141,7 +144,7 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
     if (boundingBox.Includes(bbox.GetMinCoord()) &&
         boundingBox.Includes(bbox.GetMaxCoord())) {
 
-      // test if some database has full coverage for this box
+      // test if some db has full coverage for this box
       bool fullCoverage=false;
       for (const auto &db:databases){
         std::list<osmscout::GroundTile> groundTiles;
@@ -274,7 +277,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       qDebug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
     }
     else {
-      qWarning() << "Cannot open basemap database '" << basemapLookupDirectory << "'!";
+      qWarning() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
     }
   }
 
@@ -294,7 +297,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       }
     }
     else {
-      qWarning() << "Cannot open database '" << databaseDirectory.absolutePath() << "'!";
+      qWarning() << "Cannot open db '" << databaseDirectory.absolutePath() << "'!";
       continue;
     }
 
