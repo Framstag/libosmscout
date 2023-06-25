@@ -22,9 +22,9 @@
 
 #include <osmscout/lib/CoreImportExport.h>
 
-#include <osmscout/util/Breaker.h>
-#include <osmscout/util/CancelableFuture.h>
-#include <osmscout/util/WorkQueue.h>
+#include <osmscout/async/Breaker.h>
+#include <osmscout/async/CancelableFuture.h>
+#include <osmscout/async/WorkQueue.h>
 
 #include <thread>
 

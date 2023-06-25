@@ -28,7 +28,7 @@
 
 #include <osmscoutmap/StyleProcessor.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {

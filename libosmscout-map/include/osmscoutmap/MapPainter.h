@@ -49,7 +49,7 @@
 
 #include <osmscout/projection/Projection.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Transformation.h>
 

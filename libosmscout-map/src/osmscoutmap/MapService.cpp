@@ -24,7 +24,7 @@
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
-#include <osmscout/system/Thread.h>
+#include <osmscout/async/Thread.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/log/Logger.h>

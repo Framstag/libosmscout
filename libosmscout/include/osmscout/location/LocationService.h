@@ -28,7 +28,7 @@
 #include <osmscout/location/Location.h>
 
 #include <osmscout/util/StringMatcher.h>
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 
 namespace osmscout {
 

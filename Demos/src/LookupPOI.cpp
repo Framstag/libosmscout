@@ -21,7 +21,7 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/POIService.h>
+#include <osmscout/poi/POIService.h>
 
 #include <osmscout/FeatureReader.h>
 

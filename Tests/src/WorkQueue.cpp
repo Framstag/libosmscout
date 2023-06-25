@@ -22,7 +22,7 @@
 #include <thread>
 #include <vector>
 
-#include <osmscout/util/WorkQueue.h>
+#include <osmscout/async/WorkQueue.h>
 
 class Worker
 {

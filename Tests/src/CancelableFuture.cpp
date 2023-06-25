@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <osmscout/util/CancelableFuture.h>
+#include <osmscout/async/CancelableFuture.h>
 
 #include <TestMain.h>
 

@@ -25,8 +25,8 @@
 #include <osmscout/io/FileScanner.h>
 #include <osmscout/io/FileWriter.h>
 
-#include <osmscout/util/ProcessingQueue.h>
-#include <osmscout/util/Worker.h>
+#include <osmscout/async/ProcessingQueue.h>
+#include <osmscout/async/Worker.h>
 
 #include <osmscoutimport/MergeAreaData.h>
 

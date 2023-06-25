@@ -51,7 +51,7 @@
 #include <osmscout/routing/RoutingService.h>
 #include <osmscout/routing/AbstractRoutingService.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 #include <osmscout/system/Compiler.h>

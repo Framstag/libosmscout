@@ -1,5 +1,5 @@
 
-#include <osmscout/util/AsyncWorker.h>
+#include <osmscout/async/AsyncWorker.h>
 
 #include <TestMain.h>
 
