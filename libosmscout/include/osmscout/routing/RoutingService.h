@@ -50,7 +50,7 @@
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 #include <osmscout/system/Compiler.h>

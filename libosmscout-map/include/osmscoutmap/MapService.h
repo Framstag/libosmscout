@@ -34,10 +34,10 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/StopClock.h>
-#include <osmscout/util/WorkQueue.h>
+#include <osmscout/async/WorkQueue.h>
 
 #include <osmscoutmap/DataTileCache.h>
 

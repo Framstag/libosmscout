@@ -28,7 +28,7 @@
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmapqt/MapPainterQt.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

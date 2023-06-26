@@ -30,7 +30,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <osmscout/SRTM.h>
+#include <osmscout/elevation/SRTM.h>
 
 #include <osmscout/log/Logger.h>
 

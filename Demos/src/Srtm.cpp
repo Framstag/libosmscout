@@ -36,7 +36,7 @@
 #include <iostream>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/SRTM.h>
+#include <osmscout/elevation/SRTM.h>
 
 int main(int argc,
          char* argv[])

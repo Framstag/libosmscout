@@ -31,6 +31,7 @@ static const std::list<fs::path> projects{
  *
  * osmscout.private
  * osmscout.system
+ * osmscout.async
  * osmscout.log
  * osmscout.cli
  * osmscout.util
@@ -39,7 +40,9 @@ static const std::list<fs::path> projects{
  * osmscout.db
  * osmscout.feature
  * osmscout.ost
+ * osmscout.elevation
  * osmscout.location
+ * osmscout.poi
  * osmscout.routing
  * osmscout.navigation
  *
@@ -51,11 +54,13 @@ static const std::set<std::string> allowedDependencies{
     "osmscout => osmscout.log",
     "osmscout => osmscout.util",
     "osmscout => osmscout.io",
-    "osmscout => osmscout.db",
     "osmscout => osmscout.feature",
     "osmscout => osmscout.ost",
     "osmscout.system => osmscout.lib",
     "osmscout.system => osmscout.private",
+    "osmscout.async => osmscout.lib",
+    "osmscout.async => osmscout.private",
+    "osmscout.async => osmscout.log",
     "osmscout.log => osmscout.lib",
     "osmscout.log => osmscout.system",
     "osmscout.log => osmscout.util", // Fix this -> Move database to package
@@ -84,6 +89,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.db => osmscout.log",
     "osmscout.db => osmscout.util",
     "osmscout.db => osmscout.io",
+    "osmscout.db => osmscout.elevation", // Fix this
     "osmscout.db => osmscout.location", // Fix this
     "osmscout.db => osmscout.routing", // Fix this
     "osmscout.db => osmscout", // Fix this
@@ -94,14 +100,26 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.ost => osmscout.io", // Fix this?
     "osmscout.ost => osmscout.feature",
     "osmscout.ost => osmscout", // Fix this
+    "osmscout.elevation => osmscout.lib",
+    "osmscout.elevation => osmscout.system",
+    "osmscout.elevation => osmscout.log",
+    "osmscout.elevation => osmscout.util",
+    "osmscout.elevation => osmscout.feature",
+    "osmscout.elevation => osmscout", // Fix this
     "osmscout.location => osmscout.system",
+    "osmscout.location => osmscout.async",
     "osmscout.location => osmscout.log",
     "osmscout.location => osmscout.util",
     "osmscout.location => osmscout.db",
     "osmscout.location => osmscout.feature",
     "osmscout.location => osmscout", // Fix this
+    "osmscout.poi => osmscout", // Fix this
+    "osmscout.poi => osmscout.log",
+    "osmscout.poi => osmscout.db",
+    "osmscout.poi => osmscout.util",
     "osmscout.routing => osmscout.lib",
     "osmscout.routing => osmscout.system",
+    "osmscout.routing => osmscout.async",
     "osmscout.routing => osmscout.log",
     "osmscout.routing => osmscout.util",
     "osmscout.routing => osmscout.io",
@@ -118,12 +136,15 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.navigation => osmscout", // Fix this
 
     "osmscoutclientqt => osmscout.system",
+    "osmscoutclientqt => osmscout.async",
     "osmscoutclientqt => osmscout.log",
     "osmscoutclientqt => osmscout.util",
     "osmscoutclientqt => osmscout.projection",
     "osmscoutclientqt => osmscout.db",
     "osmscoutclientqt => osmscout.feature",
+    "osmscoutclientqt => osmscout.elevation",
     "osmscoutclientqt => osmscout.location",
+    "osmscoutclientqt => osmscout.poi",
     "osmscoutclientqt => osmscout.routing",
     "osmscoutclientqt => osmscout.navigation",
     "osmscoutclientqt => osmscout",
@@ -132,12 +153,14 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutclientqt => osmscoutclientqt.private",
 
     "osmscoutgpx => osmscout.system",
+    "osmscoutgpx => osmscout.async",
     "osmscoutgpx => osmscout.log",
     "osmscoutgpx => osmscout.util",
     "osmscoutgpx => osmscout.io",
     "osmscoutgpx => osmscout", // Fix this
 
     "osmscoutimport => osmscout.system",
+    "osmscoutimport => osmscout.async",
     "osmscoutimport => osmscout.util",
     "osmscoutimport => osmscout.projection",
     "osmscoutimport => osmscout.io",
@@ -155,12 +178,14 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmap.oss => osmscout", // Fix this -> Helper and TypeService
     "osmscoutmap.oss => osmscoutmap", // Fix this -> use of StyleConfig
     "osmscoutmap => osmscout.system",
+    "osmscoutmap => osmscout.async",
     "osmscoutmap => osmscout.log",
     "osmscoutmap => osmscout.util",
     "osmscoutmap => osmscout.projection",
     "osmscoutmap => osmscout.feature",
     "osmscoutmap => osmscout.io",
     "osmscoutmap => osmscout.db", // Fix this? -> MapService makes heavy use of Database
+    "osmscoutmap => osmscout.elevation", // Fix this?
     "osmscoutmap => osmscoutmap.oss",
     "osmscoutmap => osmscout",
 

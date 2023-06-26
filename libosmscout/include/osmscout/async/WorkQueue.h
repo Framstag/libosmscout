@@ -28,7 +28,7 @@
 #include <thread>
 
 #include <osmscout/lib/CoreImportExport.h>
-#include <osmscout/util/ProcessingQueue.h>
+#include <osmscout/async/ProcessingQueue.h>
 
 namespace osmscout {
 

@@ -21,7 +21,7 @@
 
 #include <osmscout/feature/OperatorFeature.h>
 
-#include <osmscout/POIService.h>
+#include <osmscout/poi/POIService.h>
 
 namespace osmscout {
 

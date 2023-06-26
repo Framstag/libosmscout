@@ -27,7 +27,7 @@
 #include <osmscout/io/File.h>
 
 #include <osmscout/util/Exception.h>
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 
 #include <cstdio>
 #include <string>

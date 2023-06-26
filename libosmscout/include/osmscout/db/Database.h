@@ -55,7 +55,7 @@
 #include <osmscout/db/WaterIndex.h>
 
 // SRTM index
-#include <osmscout/SRTM.h>
+#include <osmscout/elevation/SRTM.h>
 
 #include <osmscout/routing/RouteDescription.h>
 

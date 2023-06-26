@@ -21,7 +21,7 @@
  */
 
 #include <osmscout/location/Location.h>
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/routing/RouteDescription.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>

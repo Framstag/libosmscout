@@ -3,7 +3,6 @@
 
 set(HEADER_FILES_ROOT
         include/osmscout/Area.h
-        include/osmscout/ElevationService.h
         include/osmscout/GeoCoord.h
         include/osmscout/GroundTile.h
         include/osmscout/Intersection.h
@@ -12,10 +11,9 @@ set(HEADER_FILES_ROOT
         include/osmscout/Path.h
         include/osmscout/Pixel.h
         include/osmscout/Point.h
-        include/osmscout/POIService.h
         include/osmscout/PublicTransport.h
         include/osmscout/Route.h
-        include/osmscout/SRTM.h
+        include/osmscout/elevation/SRTM.h
         include/osmscout/Tag.h
         include/osmscout/TypeConfig.h
         include/osmscout/TypeFeature.h
@@ -30,11 +28,19 @@ set(HEADER_FILES_LIB
 
 set(HEADER_FILES_LOG
         include/osmscout/log/Logger.h
-        include/osmscout/log/LoggerImpl.h
-)
+        include/osmscout/log/LoggerImpl.h)
 
 set(HEADER_FILES_CLI
         include/osmscout/cli/CmdLineParsing.h)
+
+set(HEADER_FILES_ASYNC
+        include/osmscout/async/AsyncWorker.h
+        include/osmscout/async/Breaker.h
+        include/osmscout/async/CancelableFuture.h
+        include/osmscout/async/ProcessingQueue.h
+        include/osmscout/async/Thread.h
+        include/osmscout/async/Worker.h
+        include/osmscout/async/WorkQueue.h)
 
 set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessFeature.h
@@ -69,8 +75,7 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/SidewayFeature.h
         include/osmscout/feature/TunnelFeature.h
         include/osmscout/feature/WebsiteFeature.h
-        include/osmscout/feature/WidthFeature.h
-        )
+        include/osmscout/feature/WidthFeature.h)
 
 set(HEADER_FILES_IO
         include/osmscout/io/DataFile.h
@@ -132,6 +137,13 @@ set(HEADER_FILES_PROJECTION
         include/osmscout/projection/Projection.h
         include/osmscout/projection/TileProjection.h)
 
+set(HEADER_FILES_POI
+        include/osmscout/poi/POIService.h)
+
+set(HEADER_FILES_ELEVATION
+        include/osmscout/elevation/ElevationService.h
+        src/osmscout/elevation/SRTM.cpp)
+
 set(HEADER_FILES_ROUTING
         include/osmscout/routing/RouteData.h
         include/osmscout/routing/RouteDataFile.h
@@ -156,16 +168,12 @@ set(HEADER_FILES_SYSTEM
     include/osmscout/system/Math.h
     include/osmscout/system/SSEMath.h
     include/osmscout/system/SSEMathPublic.h
-    include/osmscout/system/SystemTypes.h
-    include/osmscout/system/Thread.h)
+    include/osmscout/system/SystemTypes.h)
 
 set(HEADER_FILES_UTIL
-    include/osmscout/util/AsyncWorker.h
     include/osmscout/util/Base64.h
     include/osmscout/util/Bearing.h
-    include/osmscout/util/Breaker.h
     include/osmscout/util/Cache.h
-    include/osmscout/util/CancelableFuture.h
     include/osmscout/util/Color.h
     include/osmscout/util/Distance.h
     include/osmscout/util/Exception.h
@@ -183,7 +191,6 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/OpeningHours.h
     include/osmscout/util/Parsing.h
     include/osmscout/util/PolygonCenter.h
-    include/osmscout/util/ProcessingQueue.h
     include/osmscout/util/Progress.h
     include/osmscout/util/ScreenBox.h
     include/osmscout/util/ScopeGuard.h
@@ -196,11 +203,8 @@ set(HEADER_FILES_UTIL
     include/osmscout/util/Time.h
     include/osmscout/util/TileId.h
     include/osmscout/util/Transformation.h
-    include/osmscout/util/Worker.h
-    include/osmscout/util/WorkQueue.h
     include/osmscout/util/utf8helper.h
-    include/osmscout/util/utf8helper_charmap.h
-  )
+    include/osmscout/util/utf8helper_charmap.h)
 
 set(SOURCE_FILES
     src/osmscout/log/Logger.cpp
@@ -209,6 +213,11 @@ set(SOURCE_FILES
     src/osmscout/io/FileScanner.cpp
     src/osmscout/io/FileWriter.cpp
     src/osmscout/io/NumericIndex.cpp
+    src/osmscout/async/AsyncWorker.cpp
+    src/osmscout/async/Breaker.cpp
+    src/osmscout/async/Thread.cpp
+    src/osmscout/async/Worker.cpp
+    src/osmscout/async/WorkQueue.cpp
     src/osmscout/feature/AccessFeature.cpp
     src/osmscout/feature/AccessRestrictedFeature.cpp
     src/osmscout/feature/AddressFeature.cpp
@@ -275,10 +284,7 @@ set(SOURCE_FILES
     src/osmscout/routing/RouteDescriptionPostprocessor.cpp
     src/osmscout/routing/RouteDataFile.cpp
     src/osmscout/system/SSEMath.cpp
-    src/osmscout/system/Thread.cpp
-    src/osmscout/util/AsyncWorker.cpp
     src/osmscout/util/Bearing.cpp
-    src/osmscout/util/Breaker.cpp
     src/osmscout/util/Cache.cpp
     src/osmscout/util/Color.cpp
     src/osmscout/util/Distance.cpp
@@ -304,10 +310,8 @@ set(SOURCE_FILES
     src/osmscout/util/Tiling.cpp
     src/osmscout/util/TileId.cpp
     src/osmscout/util/Transformation.cpp
-    src/osmscout/util/Worker.cpp
     src/osmscout/util/utf8helper.cpp
     src/osmscout/util/utf8helper_charmap.cpp
-    src/osmscout/util/WorkQueue.cpp
     src/osmscout/util/SunriseSunset.cpp
     src/osmscout/util/TagErrorReporter.cpp
     src/osmscout/db/AreaDataFile.cpp
@@ -334,6 +338,7 @@ set(SOURCE_FILES
     src/osmscout/location/Location.cpp
     src/osmscout/location/LocationService.cpp
     src/osmscout/location/LocationDescriptionService.cpp
+    src/osmscout/poi/POIService.cpp
     src/osmscout/Area.cpp
     src/osmscout/GeoCoord.cpp
     src/osmscout/GroundTile.cpp
@@ -343,10 +348,8 @@ set(SOURCE_FILES
     src/osmscout/Path.cpp
     src/osmscout/Pixel.cpp
     src/osmscout/Point.cpp
-    src/osmscout/POIService.cpp
     src/osmscout/PublicTransport.cpp
     src/osmscout/Route.cpp
-    src/osmscout/SRTM.cpp
     src/osmscout/Tag.cpp
     src/osmscout/TypeConfig.cpp
     src/osmscout/TypeFeature.cpp
@@ -370,10 +373,13 @@ set(HEADER_FILES
     ${HEADER_FILES_LIB}
     ${HEADER_FILES_LOG}
     ${HEADER_FILES_CLI}
+    ${HEADER_FILES_ASYNC}
     ${HEADER_FILES_FEATURE}
     ${HEADER_FILES_IO}
     ${HEADER_FILES_DB}
+    ${HEADER_FILES_ELEVATION}
     ${HEADER_FILES_LOCATION}
+    ${HEADER_FILES_POI}
     ${HEADER_FILES_NAVIGATION}
     ${HEADER_FILES_OST}
     ${HEADER_FILES_PROJECTION}
@@ -419,14 +425,20 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/log)
     set_source_files_properties(${HEADER_FILES_CLI}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/cli)
+    set_source_files_properties(${HEADER_FILES_ASYNC}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/async)
     set_source_files_properties(${HEADER_FILES_FEATURE}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/feature)
     set_source_files_properties(${HEADER_FILES_IO}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/io)
     set_source_files_properties(${HEADER_FILES_DB}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/db)
+    set_source_files_properties(${HEADER_FILES_ELEVATION}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/elevation)
     set_source_files_properties(${HEADER_FILES_LOCATION}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/location)
+    set_source_files_properties(${HEADER_FILES_POI}
+            PROPERTIES MACOSX_PACKAGE_LOCATION Headers/poi)
     set_source_files_properties(${HEADER_FILES_OST}
             PROPERTIES MACOSX_PACKAGE_LOCATION Headers/ost)
     set_source_files_properties(${HEADER_FILES_SYSTEM}

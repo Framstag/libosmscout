@@ -23,7 +23,7 @@
 #include <thread>
 #include <optional>
 
-#include <osmscout/util/ProcessingQueue.h>
+#include <osmscout/async/ProcessingQueue.h>
 
 #include <osmscout/lib/CoreImportExport.h>
 

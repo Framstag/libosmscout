@@ -20,7 +20,7 @@
 
 #include <osmscoutgpx/Import.h>
 
-#include <osmscout/ElevationService.h>
+#include <osmscout/elevation/ElevationService.h>
 
 #include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/log/Logger.h>
