@@ -4,10 +4,10 @@
 # OSMSCOUT_BUILD_TOOL_OSMSCOUT2: OSMSCOUT_BUILD_CLIENT_QT, Qt(Core, Gui, Widgets, Qml, Quick)
 # OSMSCOUT_BUILD_TOOL_STYLEEDITOR: OSMSCOUT_BUILD_CLIENT_QT, Qt(Core, Gui, Widgets, Qml, Quick)
 
-option(OSMSCOUT_BUILD_MAP_QT "Enable build of Qt map drawing backend" OFF)
-option(OSMSCOUT_BUILD_CLIENT_QT "Find newest Qt in respect to QT_VERSION_MAJOR and QT_VERSION_MINOR" OFF)
-option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMSCout2 demo" OFF)
-option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of StyleEditor application" OFF)
+option(OSMSCOUT_BUILD_MAP_QT "Enable build of Qt map drawing backend" ON)
+option(OSMSCOUT_BUILD_CLIENT_QT "Find newest Qt in respect to QT_VERSION_MAJOR and QT_VERSION_MINOR" ON)
+option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMSCout2 demo" ON)
+option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of StyleEditor application" ON)
 
 # Find newest Qt in respect to QT_VERSION_MAJOR and QT_VERSION_MINOR
 set(QT_VERSION_MAJOR "" CACHE STRING "")
