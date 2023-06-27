@@ -1,8 +1,11 @@
-if(${QT_VERSION_MINOR} STREQUAL "")
+if(NOT ${QT_VERSION_MINOR} OR ${QT_VERSION_MINOR} STREQUAL "")
     find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 else()
     find_package(Qt5 ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} REQUIRED COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 endif()
+
+set(HAVE_LIB_QT5_GUI ${Qt5Gui_FOUND})
+set(HAVE_LIB_QT5_WIDGETS ${Qt5Widgets_FOUND})
 
 if(OSMSCOUT_BUILD_MAP_QT)
     if(NOT ${OSMSCOUT_BUILD_MAP})
