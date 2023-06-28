@@ -86,23 +86,23 @@ if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
         message(STATUS "OSMScout2 requires lib gpx")
     endif()
 
-    if(NOT Qt6Core_FOUND)
+    if(NOT ${Qt6Core_FOUND})
         message(STATUS "OSMScout2 requires Qt6Core")
     endif()
 
-    if(NOT Qt6Gui_FOUND)
+    if(NOT ${Qt6Gui_FOUND})
         message(STATUS "OSMScout2 requires Qt6Gui")
     endif()
 
-    if(NOT Qt6Widgets_FOUND)
+    if(NOT ${Qt6Widgets_FOUND})
         message(STATUS "OSMScout2 requires Qt6Widgets")
     endif()
 
-    if(NOT Qt6Qml_FOUND)
+    if(NOT ${Qt6Qml_FOUND})
         message(STATUS "OSMScout2 requires Qt6Qml")
     endif()
 
-    if(NOT Qt6Quick_FOUND)
+    if(NOT ${Qt6Quick_FOUND})
         message(STATUS "OSMScout2 requires Qt6Quick")
     endif()
 
@@ -117,23 +117,23 @@ if(OSMSCOUT_BUILD_TOOL_STYLEEDITOR)
         message(STATUS "StyleEditor requires OSMSCOUT_BUILD_CLIENT_QT")
     endif()
 
-    if(NOT Qt6Core_FOUND)
+    if(NOT ${Qt6Core_FOUND})
         message(STATUS "StyleEditor requires Qt6Core")
     endif()
 
-    if(NOT Qt6Gui_FOUND)
+    if(NOT ${Qt6Gui_FOUND})
         message(STATUS "StyleEditor requires Qt6Gui")
     endif()
 
-    if(NOT Qt6Widgets_FOUND)
+    if(NOT ${Qt6Widgets_FOUND})
         message(STATUS "StyleEditor requires Qt6Widgets")
     endif()
 
-    if(NOT Qt6Qml_FOUND)
+    if(NOT ${Qt6Qml_FOUND})
         message(STATUS "StyleEditor requires Qt6Qml")
     endif()
 
-    if(NOT Qt6Quick_FOUND)
+    if(NOT ${Qt6Quick_FOUND})
         message(STATUS "StyleEditor requires Qt6Quick")
     endif()
 
