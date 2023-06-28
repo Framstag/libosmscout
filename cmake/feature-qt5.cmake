@@ -1,7 +1,12 @@
-if(NOT ${QT_VERSION_MINOR} OR ${QT_VERSION_MINOR} STREQUAL "")
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
+option(OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED "" OFF)
+option(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED "" OFF)
+option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT5_ENABLED "" OFF)
+option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED "" OFF)
+
+if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
+    find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 else()
-    find_package(Qt5 ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} REQUIRED COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
+    find_package(Qt5 ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION} COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 endif()
 
 set(HAVE_LIB_QT5_GUI ${Qt5Gui_FOUND})
@@ -9,39 +14,43 @@ set(HAVE_LIB_QT5_WIDGETS ${Qt5Widgets_FOUND})
 
 if(OSMSCOUT_BUILD_MAP_QT)
     if(NOT ${OSMSCOUT_BUILD_MAP})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT requires OSMSCOUT_BUILD_MAP")
+        message(VERBOSE "OSMSCOUT_BUILD_MAP_QT requires OSMSCOUT_BUILD_MAP")
     endif()
 
     if(NOT Qt5Gui_FOUND)
-        message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT requires Qt5Gui")
+        message(VERBOSE "OSMSCOUT_BUILD_MAP_QT requires Qt5Gui")
     endif()
 
     if(NOT Qt5Svg_FOUND)
-        message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT requires Qt5Svg")
+        message(VERBOSE "OSMSCOUT_BUILD_MAP_QT requires Qt5Svg")
     endif()
+
+    set(OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED ON CACHE BOOL "" FORCE)
 endif()
 
 if(OSMSCOUT_BUILD_CLIENT_QT)
     if(NOT ${OSMSCOUT_BUILD_MAP_QT})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Core")
+        message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Core")
     endif()
 
     if(NOT ${Qt5Core_FOUND})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Core")
+        message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Core")
     endif()
 
     if(NOT ${Qt5Gui_FOUND})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Gui")
+        message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Gui")
     endif()
 
     if(NOT ${Qt5Quick_FOUND})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Quick")
+        message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Quick")
     endif()
 
     if(NOT ${Qt5Multimedia_FOUND})
-        message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Multimedia")
+        message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt5Multimedia")
     endif()
 
+    set(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED ON CACHE BOOL "" FORCE)
+    
     option(QT_QML_DEBUG "Build with QML debugger support" OFF)
     mark_as_advanced(QT_QML_DEBUG)
 endif()
@@ -70,61 +79,65 @@ endif()
 # OSMScout2
 if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
     if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
-        message(FATAL_ERROR "OSMScout2 requires OSMSCOUT_BUILD_CLIENT_QT")
+        message(STATUS "OSMScout2 requires OSMSCOUT_BUILD_CLIENT_QT")
     endif()
 
     if(NOT ${OSMSCOUT_BUILD_GPX})
-        message(FATAL_ERROR "OSMScout2 requires lib gpx")
+        message(STATUS "OSMScout2 requires lib gpx")
     endif()
 
     if(NOT Qt5Core_FOUND)
-        message(FATAL "OSMScout2 requires Qt5Core")
+        message(STATUS "OSMScout2 requires Qt5Core")
     endif()
 
     if(NOT Qt5Gui_FOUND)
-        message(FATAL_ERROR "OSMScout2 requires Qt5Gui")
+        message(STATUS "OSMScout2 requires Qt5Gui")
     endif()
 
     if(NOT Qt5Widgets_FOUND)
-        message(FATAL_ERROR "OSMScout2 requires Qt5Widgets")
+        message(STATUS "OSMScout2 requires Qt5Widgets")
     endif()
 
     if(NOT Qt5Qml_FOUND)
-        message(FATAL_ERROR "OSMScout2 requires Qt5Qml")
+        message(STATUS "OSMScout2 requires Qt5Qml")
     endif()
 
     if(NOT Qt5Quick_FOUND)
-        message(FATAL_ERROR "OSMScout2 requires Qt5Quick")
+        message(STATUS "OSMScout2 requires Qt5Quick")
     endif()
 
     add_subdirectory(OSMScout2)
+
+    set(OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT5_ENABLED ON CACHE BOOL "" FORCE)
 endif()
 
 # StyleEditor
 if(OSMSCOUT_BUILD_TOOL_STYLEEDITOR)
     if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
-        message(FATAL_ERROR "StyleEditor requires OSMSCOUT_BUILD_CLIENT_QT")
+        message(STATUS "StyleEditor requires OSMSCOUT_BUILD_CLIENT_QT")
     endif()
 
     if(NOT Qt5Core_FOUND)
-        message(FATAL_ERROR "StyleEditor requires Qt5Core")
+        message(STATUS "StyleEditor requires Qt5Core")
     endif()
 
     if(NOT Qt5Gui_FOUND)
-        message(FATAL_ERROR "StyleEditor requires Qt5Gui")
+        message(STATUS "StyleEditor requires Qt5Gui")
     endif()
 
     if(NOT Qt5Widgets_FOUND)
-        message(FATAL_ERROR "StyleEditor requires Qt5Widgets")
+        message(STATUS "StyleEditor requires Qt5Widgets")
     endif()
 
     if(NOT Qt5Qml_FOUND)
-        message(FATAL_ERROR "StyleEditor requires Qt5Qml")
+        message(STATUS "StyleEditor requires Qt5Qml")
     endif()
 
     if(NOT Qt5Quick_FOUND)
-        message(FATAL_ERROR "StyleEditor requires Qt5Quick")
+        message(STATUS "StyleEditor requires Qt5Quick")
     endif()
 
     add_subdirectory(StyleEditor)
+
+    set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED ON CACHE BOOL "" FORCE)
 endif()
