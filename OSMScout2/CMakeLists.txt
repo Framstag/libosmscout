@@ -60,7 +60,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 	#
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
-	qt6_create_translation(
+	qt_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
 		TRANSLATION_TS_FILES}
