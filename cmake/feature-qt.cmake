@@ -16,13 +16,13 @@ option(OSMSCOUT_BUILD_CLIENT_QT "Enable build of Qt client" ON)
 option(OSMSCOUT_BUILD_TOOL_OSMSCOUT2 "Enable build of OSMSCout2 demo" ON)
 option(OSMSCOUT_BUILD_TOOL_STYLEEDITOR "Enable build of StyleEditor application" ON)
 
-# ENABLE_QT_WITH_BUILT_IN_RULES OFF: find the newest qt in respect to QT_MAJOR_VERSION and QT_MINOR_VERSION
-# ENABLE_QT_WITH_BUILT_IN_RULES OFF: find qt in rules in priority as below:
+# ENABLE_QT_BY_BUILT_IN_RULES OFF: find the newest qt in respect to QT_MAJOR_VERSION and QT_MINOR_VERSION
+# ENABLE_QT_BY_BUILT_IN_RULES ON: find qt by built-in rules in priority as below:
 # 1. explicit (OSMSCOUT_BUILD_MAP_QT, OSMSCOUT_BUILD_CLIENT_QT, QT_MAJOR_VERSION, QT_MINOR_VERSION)
 # 2. Qt5
 # 3. Qt6
 # *. OSMSCOUT_BUILD_TOOL_OSMSCOUT2 and OSMSCOUT_BUILD_TOOL_STYLEEDITOR are enabled if possible
-option(ENABLE_QT_WITH_BUILT_IN_RULES "Enable Qt with built in rules" ON)
+option(ENABLE_QT_BY_BUILT_IN_RULES "Enable Qt with built in rules" ON)
 
 # Find newest Qt in respect to QT_MAJOR_VERSION and QT_MINOR_VERSION
 set(QT_MAJOR_VERSION "" CACHE STRING "")
