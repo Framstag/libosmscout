@@ -180,9 +180,9 @@ qt5ClientDep=dependency('qt5', modules: [ 'Core', 'Gui', 'Widgets', 'Svg', 'Qml'
 haveQt5ClientDep=haveQt5MapDep and qt5ClientDep.found() and qt5ClientDep.version().version_compare('>=5.6') and get_option('enableClientQt')
 
 qt6 = import('qt6', required: false)
-qt6MapDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Widgets'], required: false)
+qt6MapDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Svg', 'Widgets'], required: false)
 haveQt6MapDep=qt6MapDep.found() and qt6MapDep.version().version_compare('>=6.0') and get_option('enableMapQt')
-qt6ClientDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Widgets', 'Qml', 'Quick', 'Network', 'Location', 'Multimedia'], required: false)
+qt6ClientDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Svg', 'Widgets', 'Qml', 'Quick', 'Network', 'Multimedia'], required: false)
 haveQt6ClientDep=haveQt6MapDep and qt6ClientDep.found() and qt6ClientDep.version().version_compare('>=6.0') and get_option('enableClientQt')
 
 buildMapQt=false
