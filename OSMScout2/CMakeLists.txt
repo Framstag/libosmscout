@@ -50,6 +50,44 @@ set(TRANSLATION_SOURCE_FILES
 	../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp
 	)
 
+if(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "6")
+	# See http://doc.qt.io/qt-6/cmake-manual.html
+	#
+	# qt5_create_translation macro process translations in two steps:
+	#
+	#  - collect available phrases inside TRANSLATION_SOURCE_FILES
+	#    with lupdate tool and put them into *.ts files if some is missing there.
+	#
+	#  - create binary translation files (*.qm) from translated phrases available
+	#    in *.ts files with lrelease tool
+	qt6_create_translation(
+		TRANSLATION_QM_FILES
+		${TRANSLATION_SOURCE_FILES}
+		TRANSLATION_TS_FILES}
+		)
+
+	qt6_add_resources(RESOURCE_FILES res.qrc)
+elseif(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "5")
+	# See http://doc.qt.io/qt-5/cmake-manual.html
+	#
+	# qt5_create_translation macro process translations in two steps:
+	#
+	#  - collect available phrases inside TRANSLATION_SOURCE_FILES
+	#    with lupdate tool and put them into *.ts files if some is missing there.
+	#
+	#  - create binary translation files (*.qm) from translated phrases available
+	#    in *.ts files with lrelease tool
+	qt5_create_translation(
+		TRANSLATION_QM_FILES
+		TRANSLATION_SOURCE_FILES}
+		TRANSLATION_TS_FILES}
+		)
+
+	qt5_add_resources(RESOURCE_FILES res.qrc)
+else
+	message(FATAL_ERROR "Invalid Qt majro version: " ${QT_MAJOR_VERSION})
+endif()
+
 # See http://doc.qt.io/qt-5/cmake-manual.html
 #
 # qt5_create_translation macro process translations in two steps:
