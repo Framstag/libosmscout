@@ -50,7 +50,7 @@ set(TRANSLATION_SOURCE_FILES
 	../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp
 	)
 
-if(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "6")
+if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 	# See http://doc.qt.io/qt-6/cmake-manual.html
 	#
 	# qt5_create_translation macro process translations in two steps:
@@ -67,7 +67,7 @@ if(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "6")
 		)
 
 	qt6_add_resources(RESOURCE_FILES res.qrc)
-elseif(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "5")
+elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 	# See http://doc.qt.io/qt-5/cmake-manual.html
 	#
 	# qt5_create_translation macro process translations in two steps:
@@ -85,7 +85,7 @@ elseif(${QT_MAJOR_VERSION} AND ${QT_MAJOR_VERSION} STREQUAL "5")
 
 	qt5_add_resources(RESOURCE_FILES res.qrc)
 else()
-	message(FATAL_ERROR "Invalid Qt major version: " ${QT_MAJOR_VERSION})
+	message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT for Qt5 or Qt6 disabled")
 endif()
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
