@@ -66,7 +66,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 		TRANSLATION_TS_FILES}
 		)
 
-	qt6_add_resources(RESOURCE_FILES res.qrc)
+	qt_add_resources(RESOURCE_FILES res.qrc)
 elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 	# See http://doc.qt.io/qt-5/cmake-manual.html
 	#
