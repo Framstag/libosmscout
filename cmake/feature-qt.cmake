@@ -33,7 +33,7 @@ if (NOT OSMSCOUT_BUILD_MAP_QT AND NOT OSMSCOUT_BUILD_CLIENT_QT)
 endif()
 
 if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
-    if(${ENABLE_QT_WITH_BUILT_IN_RULES})
+    if(${ENABLE_QT_BY_BUILT_IN_RULES})
         # Qt5    
         include(feature-qt5)
 
