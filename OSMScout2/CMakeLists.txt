@@ -64,7 +64,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 	qt_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
-		TRANSLATION_TS_FILES}
+		${TRANSLATION_TS_FILES}
 		)
 
 	qt_add_resources(RESOURCE_FILES res.qrc)
@@ -80,8 +80,8 @@ elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 	#    in *.ts files with lrelease tool
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
-		TRANSLATION_SOURCE_FILES}
-		TRANSLATION_TS_FILES}
+		${TRANSLATION_SOURCE_FILES}
+		${TRANSLATION_TS_FILES}
 		)
 
 	qt5_add_resources(RESOURCE_FILES res.qrc)
