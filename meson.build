@@ -170,54 +170,43 @@ gdiplusDep = compiler.find_library('gdiplus', required: false)
 
 # Qt
 
-if get_option('qtVersion') == 5
-  qt5 = import('qt5')
-  qt5GuiDep = dependency('qt5', modules: [ 'Core', 'Gui'], required: false)
-  qt5QmlDep = dependency('qt5', modules: 'Qml', required: false)
-  qt5QuickDep = dependency('qt5', modules: 'Quick', required: false)
-  qt5WidgetsDep = dependency('qt5', modules: 'Widgets', required: false)
-  qt5SvgDep = dependency('qt5', modules: 'Svg', required: false)
-  qt5NetworkDep = dependency('qt5', modules: 'Network', required: false)
-  qt5LocationDep = dependency('qt5', modules: 'Location', required: false)
-  qt5MultimediaDep = dependency('qt5', modules: 'Multimedia', required: false)
+qtMapDep=dependency('', required: false)
+qtClientDep=dependency('', required: false)
 
-  message('Qt5 version : @0@ (required >= 5.6)'.format(qt5GuiDep.version()))
+qt5=import('qt5', required: false)
+qt5MapDep=dependency('qt5', modules: [ 'Core', 'Gui', 'Widgets', 'Svg'], required: false)
+haveQt5MapDep=qt5MapDep.found() and qt5MapDep.version().version_compare('>=5.6') and get_option('enableMapQt')
+qt5ClientDep=dependency('qt5', modules: [ 'Core', 'Gui', 'Widgets', 'Svg', 'Qml', 'Quick', 'Network', 'Location', 'Multimedia'], required: false)
+haveQt5ClientDep=haveQt5MapDep and qt5ClientDep.found() and qt5ClientDep.version().version_compare('>=5.6') and get_option('enableClientQt')
 
-  if qt5GuiDep.found() and qt5GuiDep.version().version_compare('>=5.6') and qt5WidgetsDep.found() and get_option('enableMapQt')
+qt6 = import('qt6', required: false)
+qt6MapDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Svg', 'Widgets'], required: false)
+haveQt6MapDep=qt6MapDep.found() and qt6MapDep.version().version_compare('>=6.0') and get_option('enableMapQt')
+qt6ClientDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui', 'Svg', 'Widgets', 'Qml', 'Quick', 'Network', 'Multimedia'], required: false)
+haveQt6ClientDep=haveQt6MapDep and qt6ClientDep.found() and qt6ClientDep.version().version_compare('>=6.0') and get_option('enableClientQt')
+
+buildMapQt=false
+buildClientQt=false
+
+if get_option('qtVersion') == 5 and haveQt5MapDep
+    message('Qt5 version : @0@ (required >= 5.6)'.format(qt5MapDep.version()))
     buildMapQt=true
-  else
-    buildMapQt=false
-  endif
+    qtMapDep=qt5MapDep
+    qt=qt5
 
-  if buildMapQt and qt5MultimediaDep.found() and qt5QmlDep.found() and qt5QuickDep.found() and qt5NetworkDep.found() and get_option('enableClientQt')
-    buildClientQt=true
-  else
-    buildClientQt=false
-  endif
-
-elif get_option('qtVersion') == 6
-  qt6 = import('qt6')
-  qt6GuiDep = dependency('qt6', modules: [ 'Core', 'Core5Compat', 'Gui'], required: false)
-  qt6QmlDep = dependency('qt6', modules: 'Qml', required: false)
-  qt6QuickDep = dependency('qt6', modules: 'Quick', required: false)
-  qt6WidgetsDep = dependency('qt6', modules: 'Widgets', required: false)
-  qt6SvgDep = dependency('qt6', modules: 'Svg', required: false)
-  qt6NetworkDep = dependency('qt6', modules: 'Network', required: false)
-  qt6LocationDep = dependency('qt6', modules: 'Location', required: false)
-  qt6MultimediaDep = dependency('qt6', modules: 'Multimedia', required: false)
-
-  message('Qt6 version : @0@ (required >= 6.0)'.format(qt6GuiDep.version()))
-
-  if qt6GuiDep.found() and qt6GuiDep.version().version_compare('>=6.0') and qt6WidgetsDep.found() and get_option('enableMapQt')
+    if haveQt5ClientDep
+      qtClientDep=qt5ClientDep
+      buildClientQt=true
+    endif
+elif haveQt6MapDep
+    message('Qt6 version : @0@ (required >= 6.0)'.format(qt6MapDep.version()))
     buildMapQt=true
-  else
-    buildMapQt=false
-  endif
+    qtMapDep=qt6MapDep
+    qt=qt6
 
-  if buildMapQt and qt6MultimediaDep.found() and qt6QmlDep.found() and qt6QuickDep.found() and qt6NetworkDep.found() and get_option('enableClientQt')
-    buildClientQt=true
-  else
-    buildClientQt=false
+    if haveQt6ClientDep
+      qtClientDep=qt6ClientDep
+      buildClientQt=true
   endif
 endif
 
@@ -317,13 +306,8 @@ endif
 
 buildClient=true
 
-if get_option('qtVersion') == 5
-  buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt5SvgDep.found()
-  buildStyleEditor=buildMapQt and buildClientQt and qt5SvgDep.found()
-elif get_option('qtVersion') == 6
-  buildOSMScout2=buildGpx and buildMapQt and buildClientQt and qt6SvgDep.found()
-  buildStyleEditor=buildMapQt and buildClientQt and qt6SvgDep.found()
-endif
+buildOSMScout2=buildGpx and buildMapQt and buildClientQt
+buildStyleEditor=buildMapQt and buildClientQt
 
 subdir('libosmscout')
 subdir('libosmscout-map')
@@ -433,6 +417,11 @@ summary({
   'Library version': libraryVersion,
   'Project license': meson.project_license(),
   }, section: 'Project')
+
+summary({
+  'Qt map dependency': qtMapDep.version(),
+  'Qt client dependency': qtClientDep.version(),
+  }, section: 'Qt dependencies')
 
 summary({
   'libosmscout': true,

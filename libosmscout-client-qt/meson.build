@@ -20,8 +20,7 @@ foreach hdr : osmscoutclientqtHeader
   mocHeaders += headerTemplate.format('include/',hdr)
 endforeach
 
-if get_option('qtVersion') == 5
-  mocFiles = qt5.preprocess(moc_headers : mocHeaders,
+  mocFiles = qt.preprocess(moc_headers : mocHeaders,
                             include_directories: include_directories('include'))
 
   osmscoutclientqt = library('osmscout_client_qt',
@@ -29,23 +28,9 @@ if get_option('qtVersion') == 5
                              osmscoutclientqtSrc,
                              include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                              cpp_args: cppArgs,
-                             dependencies: [mathDep, threadDep, qt5GuiDep, qt5QmlDep, qt5QuickDep, qt5WidgetsDep, qt5NetworkDep, qt5SvgDep, qt5MultimediaDep],
+                             dependencies: [mathDep, threadDep, qtClientDep],
                              link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclient],
                              version: libraryVersion,
                              install: true)
-elif get_option('qtVersion') == 6
-  mocFiles = qt6.preprocess(moc_headers : mocHeaders,
-                            include_directories: include_directories('include'))
-
-  osmscoutclientqt = library('osmscout_client_qt',
-                             mocFiles,
-                             osmscoutclientqtSrc,
-                             include_directories: [osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
-                             cpp_args: cppArgs,
-                             dependencies: [mathDep, threadDep, qt6GuiDep, qt6QmlDep, qt6QuickDep, qt6WidgetsDep, qt6NetworkDep, qt6SvgDep, qt6MultimediaDep],
-                             link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclient],
-                             version: libraryVersion,
-                             install: true)
-endif
 
 # TODO: Generate PKG_CONFIG file

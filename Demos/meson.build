@@ -94,53 +94,29 @@ ResourceConsumption = executable('ResourceConsumption',
                                  install_dir: demoInstallDir)
 
 if buildMapQt
-  if get_option('qtVersion') == 5
     ResourceConsumptionQt = executable('ResourceConsumptionQt',
-                                       'src/ResourceConsumptionQt.cpp',
-                                       cpp_args: ['-fPIC'],
-                                       include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                       dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
-                                       link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                                       install: true,
-                                       install_dir: demoInstallDir)
-  elif get_option('qtVersion') == 6
-    ResourceConsumptionQt = executable('ResourceConsumptionQt',
-                                       'src/ResourceConsumptionQt.cpp',
-                                       cpp_args: ['-fPIC'],
-                                       include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                       dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
-                                       link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                                       install: true,
-                                       install_dir: demoInstallDir)
-  endif
+                                    'src/ResourceConsumptionQt.cpp',
+                                     cpp_args: ['-fPIC'],
+                                     include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
+                                     dependencies: [mathDep, openmpDep, qtMapDep],
+                                     link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+                                     install: true,
+                                     install_dir: demoInstallDir)
 endif
 
 if buildMapQt
-  if get_option('qtVersion') == 5
     RoutingAnimation = executable('RoutingAnimation',
                                   'src/RoutingAnimation.cpp',
                                   cpp_args: ['-fPIC'],
                                   include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                  dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
+                                  dependencies: [mathDep, openmpDep, qtMapDep],
                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt],
                                   install: true,
                                   install_dir: demoInstallDir)
-  elif get_option('qtVersion') == 6
-    RoutingAnimation = executable('RoutingAnimation',
-                                  'src/RoutingAnimation.cpp',
-                                  cpp_args: ['-fPIC'],
-                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir],
-                                  dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
-                                  link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                                  install: true,
-                                  install_dir: demoInstallDir)
-  endif
-
 endif
 
 if buildClientQt
-  if get_option('qtVersion') == 5
-    demoMocs = qt5.preprocess('qt-demo',
+    demoMocs = qt.preprocess('qt-demo',
                               moc_headers : ['include/QtDemoApp.h'],
                               qresources: ['demo.qrc', '../OSMScout2/res.qrc'])
 
@@ -150,74 +126,35 @@ if buildClientQt
                                   demoMocs,
                                   cpp_args: ['-fPIC'],
                                   include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir],
-                                  dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
+                                  dependencies: [mathDep, openmpDep, qtClientDep],
                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
                                   override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
                                   install: true,
                                   install_dir: demoInstallDir)
-  elif get_option('qtVersion') == 6
-    demoMocs = qt6.preprocess('qt-demo',
-                              moc_headers : ['include/QtDemoApp.h'],
-                              qresources: ['demo.qrc', '../OSMScout2/res.qrc'])
-
-    ElevationProfileChart = executable('ElevationProfileChart',
-                                  ['src/ElevationProfileChart.cpp',
-                                   'src/QtDemoApp.cpp'],
-                                  demoMocs,
-                                  cpp_args: ['-fPIC'],
-                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir],
-                                  dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6SvgDep, qt6NetworkDep, qt6LocationDep, qt6MultimediaDep],
-                                  link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
-                                  override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
-                                  install: true,
-                                  install_dir: demoInstallDir)
-  endif
 
   if buildGpx
-    if get_option('qtVersion') == 5
-      navDemoMocs = qt5.preprocess(moc_headers : [
+    navDemoMocs = qt.preprocess(moc_headers : [
                                     'include/PositionSimulator.h',
                                     '../OSMScout2/src/Theme.h'
                                    ])
 
-      NavigationSimulation = executable('NavigationSimulation',
-                                    ['src/NavigationSimulation.cpp',
-                                     'src/QtDemoApp.cpp',
-                                     'src/PositionSimulator.cpp',
-                                     '../OSMScout2/src/Theme.cpp'],
-                                    [demoMocs, navDemoMocs],
-                                    cpp_args: ['-fPIC'],
-                                    include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, osmscoutgpxIncDir, demoIncDir, include_directories('../OSMScout2/src')],
-                                    dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
-                                    link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt, osmscoutgpx],
-                                    override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
-                                    install: true,
-                                    install_dir: demoInstallDir)
-    elif get_option('qtVersion') == 6
-      navDemoMocs = qt6.preprocess(moc_headers : [
-                                    'include/PositionSimulator.h',
-                                    '../OSMScout2/src/Theme.h'
-                                   ])
-
-      NavigationSimulation = executable('NavigationSimulation',
-                                    ['src/NavigationSimulation.cpp',
-                                     'src/QtDemoApp.cpp',
-                                     'src/PositionSimulator.cpp',
-                                     '../OSMScout2/src/Theme.cpp'],
-                                    [demoMocs, navDemoMocs],
-                                    cpp_args: ['-fPIC'],
-                                    include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, osmscoutgpxIncDir, demoIncDir, include_directories('../OSMScout2/src')],
-                                    dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6SvgDep, qt6NetworkDep, qt6LocationDep, qt6MultimediaDep],
-                                    link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt, osmscoutgpx],
-                                    override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
-                                    install: true,
-                                    install_dir: demoInstallDir)
-    endif
+    NavigationSimulation = executable('NavigationSimulation',
+                                ['src/NavigationSimulation.cpp',
+                                 'src/QtDemoApp.cpp',
+                                 'src/PositionSimulator.cpp',
+                                 '../OSMScout2/src/Theme.cpp'],
+                                [demoMocs, navDemoMocs],
+                                cpp_args: ['-fPIC'],
+                                include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, osmscoutgpxIncDir, demoIncDir, include_directories('../OSMScout2/src')],
+                                dependencies: [mathDep, openmpDep, qtClientDep],
+                                link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt, osmscoutgpx],
+                                override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
+                                install: true,
+                                install_dir: demoInstallDir)
   endif
 
 
-  if get_option('qtVersion') == 5
-    routingParamsDemoMocs = qt5.preprocess(moc_headers : [
+    routingParamsDemoMocs = qt.preprocess(moc_headers : [
                                   '../OSMScout2/src/Theme.h'
                                  ])
 
@@ -228,29 +165,11 @@ if buildClientQt
                                   [demoMocs, routingParamsDemoMocs],
                                   cpp_args: ['-fPIC'],
                                   include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir, include_directories('../OSMScout2/src')],
-                                  dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5SvgDep, qt5NetworkDep, qt5LocationDep, qt5MultimediaDep],
+                                  dependencies: [mathDep, openmpDep, qtClientDep],
                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
                                   override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
                                   install: true,
                                   install_dir: demoInstallDir)
-  elif get_option('qtVersion') == 6
-    routingParamsDemoMocs = qt6.preprocess(moc_headers : [
-                                  '../OSMScout2/src/Theme.h'
-                                 ])
-
-    RoutingParameters = executable('RoutingParameters',
-                                  ['src/RoutingParameters.cpp',
-                                   'src/QtDemoApp.cpp',
-                                   '../OSMScout2/src/Theme.cpp'],
-                                  [demoMocs, routingParamsDemoMocs],
-                                  cpp_args: ['-fPIC'],
-                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir, include_directories('../OSMScout2/src')],
-                                  dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6SvgDep, qt6NetworkDep, qt6LocationDep, qt6MultimediaDep],
-                                  link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
-                                  override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
-                                  install: true,
-                                  install_dir: demoInstallDir)
-  endif
 endif
 
 Routing = executable('Routing',
@@ -316,25 +235,14 @@ if buildMapCairo
 endif
 
 if buildMapQt
-  if get_option('qtVersion') == 5
     DrawMapQt = executable('DrawMapQt',
                            'src/DrawMapQt.cpp',
                            cpp_args: ['-fPIC'],
                            include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, demoIncDir],
-                           dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
+                           dependencies: [mathDep, openmpDep, qtMapDep],
                            link_with: [osmscout, osmscoutmap, osmscoutmapqt],
                            install: true,
                            install_dir: demoInstallDir)
-  elif get_option('qtVersion') == 6
-    DrawMapQt = executable('DrawMapQt',
-                           'src/DrawMapQt.cpp',
-                           cpp_args: ['-fPIC'],
-                           include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, demoIncDir],
-                           dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
-                           link_with: [osmscout, osmscoutmap, osmscoutmapqt],
-                           install: true,
-                           install_dir: demoInstallDir)
-  endif
 endif
 
 if buildMapOpenGL and glfwDep.found() and ftDep.found() and glewDep.found()

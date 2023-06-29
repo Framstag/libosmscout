@@ -20,9 +20,12 @@
 #ifndef LIBOSMSCOUT_CLIENTQTTHREADING_H
 #define LIBOSMSCOUT_CLIENTQTTHREADING_H
 
+#include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/StyleModule.h>
 
 #include <QObject>
+#include <QList>
+#include <QMap>
 #include <QStringList>
 #include <QTimer>
 
@@ -43,7 +46,7 @@ public:
                 const osmscout::GeoCoord &renderingCenter,
                 const size_t &magLevel);
 
-  ~ThreadingTest();
+  ~ThreadingTest() override;
 
   inline bool isFailed() const
   {
