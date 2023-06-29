@@ -89,7 +89,7 @@ _PS_CONST(2  , 2.0);
 _PS_CONST(0_5  , 0.5);
 _PS_CONST(2OPI , 2.0/M_PI);
 _PS_CONST(PIO2 , M_PI/2.0);
-_PS_CONST(LOG_C_2, log(2.0));
+_PS_CONST(LOG_C_2, ::log(2.0));
 
 _PS_CONST_TYPE(sign_mask, uint64_t, 0x8000000000000000);
 _PS_CONST_TYPE(x01_double_mask, uint64_t, 0x0000000100000001);
@@ -103,7 +103,7 @@ _PS_CONST(0_66  , 0.66);
 _PS_CONST(0_87  , 0.87);
 _PS_CONST(1_74  , 1.74);
 _PS_CONST(1_32  , 1.32);
-_PS_CONST(log_inv_1_74  , log(1/1.74));
-_PS_CONST(log_inv_1_32  , log(1/1.32));
+_PS_CONST(log_inv_1_74  , ::log(1/1.74));
+_PS_CONST(log_inv_1_32  , ::log(1/1.32));
 }
 #endif
