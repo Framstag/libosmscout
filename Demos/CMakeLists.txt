@@ -125,7 +125,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 	elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 		qt5_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
 	else()
-		message(FATAL_ERROR "Unsupported Qt major version: " ${QT_MAJOR_VERSION})
+		message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT for Qt5 or Qt6 disabled")
 	endif()	
 
 	set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
