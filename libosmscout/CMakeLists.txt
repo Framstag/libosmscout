@@ -38,6 +38,7 @@ set(HEADER_FILES_ASYNC
         include/osmscout/async/Breaker.h
         include/osmscout/async/CancelableFuture.h
         include/osmscout/async/ProcessingQueue.h
+        include/osmscout/async/Signal.h
         include/osmscout/async/Thread.h
         include/osmscout/async/Worker.h
         include/osmscout/async/WorkQueue.h)

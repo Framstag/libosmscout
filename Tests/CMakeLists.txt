@@ -149,6 +149,9 @@ osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
+#---- Signal
+osmscout_test_project(NAME Signal SOURCES src/Signal.cpp)
+
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 
