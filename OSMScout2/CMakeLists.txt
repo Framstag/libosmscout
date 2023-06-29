@@ -96,24 +96,46 @@ target_include_directories(OSMScout2 PRIVATE "src")
 
 target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
-target_link_libraries(OSMScout2
-	OSMScout::OSMScout
-	OSMScout::Map
-	OSMScout::MapQt
-	OSMScout::ClientQt
-	Qt5::Core
-	Qt5::Gui
-	Qt5::Widgets
-	Qt5::Qml
-	Qt5::Quick
-)
+if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
+	target_link_libraries(OSMScout2
+		OSMScout::OSMScout
+		OSMScout::Map
+		OSMScout::MapQt
+		OSMScout::ClientQt
+		Qt5::Core
+		Qt5::Gui
+		Qt5::Widgets
+		Qt5::Qml
+		Qt5::Quick
+	)
 
-if (Qt5Svg_FOUND)
-	target_link_libraries(OSMScout2 Qt5::Svg)
-endif()
+	if (Qt5Svg_FOUND)
+		target_link_libraries(OSMScout2 Qt5::Svg)
+	endif()
 
-if (Qt5Positioning_FOUND)
-	target_link_libraries(OSMScout2 Qt5::Positioning)
+	if (Qt5Positioning_FOUND)
+		target_link_libraries(OSMScout2 Qt5::Positioning)
+	endif()
+elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+	target_link_libraries(OSMScout2
+		OSMScout::OSMScout
+		OSMScout::Map
+		OSMScout::MapQt
+		OSMScout::ClientQt
+		Qt6::Core
+		Qt6::Gui
+		Qt6::Widgets
+		Qt6::Qml
+		Qt6::Quick
+	)
+
+	if (Qt6Svg_FOUND)
+		target_link_libraries(OSMScout2 Qt6::Svg)
+	endif()
+
+	if (Qt6Positioning_FOUND)
+		target_link_libraries(OSMScout2 Qt6::Positioning)
+	endif()
 endif()
 
 if(MARISA_FOUND)
@@ -137,12 +159,22 @@ endif()
 if(MSVC)
 	  visual_studio_qt_helper("OSMScout2")
 endif()
-if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
-	add_custom_command(TARGET OSMScout2
-        POST_BUILD
-        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
-    )
+if(OSMSCOUT_INSTALL_QT_DLL)
+	if(TARGET Qt5::windeployqt)
+		add_custom_command(
+			TARGET OSMScout2
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
+		)
+	elseif(TARGET Qt6::windeployqt)
+		add_custom_command(
+			TARGET OSMScout2
+			POST_BUILD
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt6_install_prefix}/bin
+			COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
+		)
+	endif()
 endif()
 
 install(TARGETS OSMScout2
