@@ -174,8 +174,6 @@ endif()
 set(OSMSCOUT_BUILD_MAP ON CACHE INTERNAL "" FORCE)
 add_subdirectory(libosmscout-map)
 
-include(feature-qt)
-
 if(LIBAGG_FOUND AND LIBAGGFT2_LIBRARIES AND FREETYPE_FOUND AND OSMSCOUT_BUILD_MAP)
   set(OSMSCOUT_BUILD_MAP_AGG_CACHE ON)
 else()
@@ -428,6 +426,8 @@ if(OSMSCOUT_BUILD_TESTS)
   add_subdirectory(libosmscout-test)
   add_subdirectory(Tests)
 endif()
+
+include(feature-qt)
 
 # display build configuration
 message(STATUS "libosmscout ${PROJECT_VERSION} build configuration:")
