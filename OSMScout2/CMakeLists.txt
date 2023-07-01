@@ -103,26 +103,6 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 		OSMScout::Map
 		OSMScout::MapQt
 		OSMScout::ClientQt
-		Qt5::Core
-		Qt5::Gui
-		Qt5::Widgets
-		Qt5::Qml
-		Qt5::Quick
-	)
-
-	if (Qt5Svg_FOUND)
-		target_link_libraries(OSMScout2 Qt5::Svg)
-	endif()
-
-	if (Qt5Positioning_FOUND)
-		target_link_libraries(OSMScout2 Qt5::Positioning)
-	endif()
-elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
-	target_link_libraries(OSMScout2
-		OSMScout::OSMScout
-		OSMScout::Map
-		OSMScout::MapQt
-		OSMScout::ClientQt
 		Qt6::Core
 		Qt6::Gui
 		Qt6::Widgets
@@ -136,6 +116,26 @@ elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 
 	if (Qt6Positioning_FOUND)
 		target_link_libraries(OSMScout2 Qt6::Positioning)
+	endif()
+elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+	target_link_libraries(OSMScout2
+		OSMScout::OSMScout
+		OSMScout::Map
+		OSMScout::MapQt
+		OSMScout::ClientQt
+		Qt5::Core
+		Qt5::Gui
+		Qt5::Widgets
+		Qt5::Qml
+		Qt5::Quick
+	)
+
+	if (Qt5Svg_FOUND)
+		target_link_libraries(OSMScout2 Qt5::Svg)
+	endif()
+
+	if (Qt5Positioning_FOUND)
+		target_link_libraries(OSMScout2 Qt5::Positioning)
 	endif()
 endif()
 
