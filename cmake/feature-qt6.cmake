@@ -25,6 +25,8 @@ if(${OSMSCOUT_BUILD_MAP_QT})
         message(VERBOSE "OSMSCOUT_BUILD_MAP_QT requires Qt6Svg")
     endif()
 
+    add_subdirectory(libosmscout-map-qt)
+
     set(OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED ON)
 endif()
 
@@ -48,6 +50,8 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
     if(NOT ${Qt6Multimedia_FOUND})
         message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt6Multimedia")
     endif()
+
+    add_subdirectory(libosmscout-client-qt)
 
     set(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED ON)
     
