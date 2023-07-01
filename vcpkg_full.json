@@ -13,26 +13,8 @@
     "freeglut",
     "glm",
     "glew",
-    "glfw3"
-  ],
-  "features": {
-    "qt5": {
-      "description": "Enable Qt5 for map and/or client of libosmscout",
-      "dependencies": [
-        {
-          "name": "qt5",
-          "default-features": false
-        }
-      ]
-    },
-    "qt6": {
-      "description": "Enable Qt6 for map and/or client of libosmscout",
-      "dependencies": [
-        {
-          "name": "qt6",
-          "default-features": false
-        }
-      ]
-    }
-  }
+    "glfw3",
+    "qt5",
+    "qt"
+  ]
 }
