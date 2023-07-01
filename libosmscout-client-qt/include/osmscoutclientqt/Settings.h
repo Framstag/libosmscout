@@ -46,7 +46,7 @@ namespace osmscout {
  * Settings provides central point mutable configuration of OSMScout library.
  * It uses Qt's QSettings for persistency. It may be accessed from DBThread instance.
  *
- * List of online tile providers should be initialized at applicaiton start.
+ * List of online tile providers should be initialized at application start.
  * ```
  *   Settings::GetInstance()->loadOnlineTileProviders(
  *     ":/resources/online-tile-providers.json");
