@@ -22,11 +22,9 @@
  */
 
 #include <QThread>
-#include <QMetaType>
-#include <QMutex>
-#include <QTime>
-#include <QTimer>
+#include <QObject>
 #include <QReadWriteLock>
+#include <QDir>
 
 #include <osmscout/db/BasemapDatabase.h>
 #include <osmscout/db/Database.h>
@@ -34,12 +32,9 @@
 #include <osmscout/location/LocationService.h>
 
 #include <osmscoutmap/MapService.h>
-#include <osmscoutmapqt/MapPainterQt.h>
 
 #include <osmscoutclient/Settings.h>
 
-#include <osmscoutclientqt/TileCache.h>
-#include <osmscoutclientqt/OsmTileDownloader.h>
 #include <osmscoutclientqt/MapManager.h>
 #include <osmscoutclientqt/DBInstance.h>
 #include <osmscoutclientqt/DBJob.h>
