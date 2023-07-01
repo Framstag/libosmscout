@@ -324,6 +324,8 @@ if(OSMSCOUT_BUILD_CLIENT)
   add_subdirectory(libosmscout-client)
 endif()
 
+include(feature-qt)
+
 option(OSMSCOUT_BUILD_DEMOS "Enable build of demo applications" TRUE)
 if(OSMSCOUT_BUILD_DEMOS)
   add_subdirectory(Demos)
@@ -418,8 +420,6 @@ else()
 endif()
 option(OSMSCOUT_BUILD_EXTERN_MATLAB "Enable generation of MATLAB mex function" ${OSMSCOUT_BUILD_EXTERN_MATLAB_CACHE})
 add_subdirectory(libosmscout-extern)
-
-include(feature-qt)
 
 # Tests
 option(OSMSCOUT_BUILD_TESTS "Enable build of test applications" ON)
