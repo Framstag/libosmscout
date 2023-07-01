@@ -32,20 +32,30 @@ namespace osmscout {
   template<typename... Args>
   class Slot;
 
+  /** Signal and Slot is tool for connecting source of events and its consumers.
+   * It is similar to Qt's signal, but it lacks some advanced functionality,
+   * like asynchronous connection. Slot callback is called in thread context of the signal.
+   * Locking or asynchronicity have to be solved differently.
+   *
+   * Signal and Slot are thread safe. Their live cycle may be independent.
+   *
+   * @tparam Args
+   */
   template<typename... Args>
   class Signal
   {
   private:
     struct Connection
     {
-      std::mutex mutex;
+      // Note: when just signal or slot is locked, always lock connection when accessing it
+      mutable std::mutex mutex;
       Slot<Args...>* slot = nullptr;
       Signal<Args...>* signal = nullptr;
     };
 
   private:
     // Note: when signal and slot mutexes are locked at the same time, always lock signal's one first
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::vector<std::shared_ptr<Connection>> connections;
 
   public:
@@ -60,12 +70,25 @@ namespace osmscout {
 
     virtual ~Signal();
 
-    void Emit(const Args&... args);
+    /** Emit signal.
+     * All connected slots are called.
+     * @param args
+     */
+    void Emit(const Args&... args) const;
 
+    /** Connect Signal to given Slot
+     * @param slot
+     */
     void Connect(Slot<Args...> &slot);
 
+    /** Disconnect from specific slot.
+     * When there is no connection with given slot, Method is no-op.
+     * @param slot
+     */
     void Disconnect(Slot<Args...> &slot);
 
+    /** Disconnect from all slots
+     */
     void Disconnect();
   };
 
@@ -74,13 +97,16 @@ namespace osmscout {
   {
   private:
     // Note: when signal and slot mutexes are locked at the same time, always lock signal's one first
-    std::mutex mutex;
+    mutable std::mutex mutex;
     const std::function<void(const Args&...)> callback;
     std::vector<std::shared_ptr<typename Signal<Args...>::Connection>> connections;
 
   public:
     friend class Signal<Args...>;
 
+    /** Construct slot with callback function.
+     * @param callback
+     */
     explicit Slot(const std::function<void(const Args&...)> &callback);
 
     Slot(const Slot&) = delete;
@@ -91,9 +117,15 @@ namespace osmscout {
 
     virtual ~Slot();
 
+    /** Disconnect from all signals
+     */
     void Disconnect();
 
   private:
+    /** Call the callback. Lock of specific connection have to be hold,
+     * to be sure that Slot is not destructed before returning from the call.
+     * @param args
+     */
     void Call(const Args&... args) const;
   };
 
@@ -109,7 +141,7 @@ namespace osmscout {
   }
 
   template<typename... Args>
-  void Signal<Args...>::Emit(const Args&... args)
+  void Signal<Args...>::Emit(const Args&... args) const
   {
     std::unique_lock lock(mutex);
     for (const auto &con: connections) {
