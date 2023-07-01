@@ -91,6 +91,8 @@ if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
             if(NOT ${OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT6_ENABLED})
                 message(WARNING "OSMSCOUT_BUILD_TOOL_STYLEEDITOR(Qt6) failed to be enabled")
             endif()
+
+            return()
         endif()
 
         if (NOT ${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
@@ -101,7 +103,7 @@ if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
             message(NOTICE "OSMSCOUT_BUILD_CLIENT_QT(Qt6) failed to be enabled")
         endif()
 
-        # Qt5    
+        # Qt5
         include(feature-qt5)
 
         if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED} AND ${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
@@ -112,8 +114,6 @@ if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
             if(NOT ${OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED})
                 message(WARNING "OSMSCOUT_BUILD_TOOL_STYLEEDITOR failed to be enabled")
             endif()
-
-            return()
         endif()
 
         if (NOT ${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
@@ -124,11 +124,7 @@ if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
             message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT(Qt5) failed to be enabled")
         endif()
     endif()
-
-    return()
-endif()
-
-if(${QT_MAJOR_VERSION} STREQUAL "6")
+elseif(${QT_MAJOR_VERSION} STREQUAL "6")
     include(feature-qt6)
 
     if(NOT ${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
@@ -165,3 +161,5 @@ elseif(${QT_MAJOR_VERSION} STREQUAL "5")
         message(WARNING "OSMSCOUT_BUILD_TOOL_STYLEEDITOR(Qt5) failed to be enabled")
     endif()
 endif()
+
+
