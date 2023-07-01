@@ -84,7 +84,13 @@ endif()
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
 	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
-	qt5_wrap_cpp(src_files include/DrawWindow.h)
+	if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
+		qt_wrap_cpp(src_files include/DrawWindow.h)
+	elseif(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
+		qt5_wrap_cpp(src_files include/DrawWindow.h)
+	else()
+		message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT for Qt5 and Qt6 not enabled")
+	endif()
 	osmscout_test_project(NAME DrawTextQt SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt Qt5::Widgets SKIPTEST)
 else()
 	message("Skip DrawTextQt test, libosmscout-map-qt is missing.")
@@ -195,18 +201,38 @@ if(${OSMSCOUT_BUILD_MAP})
 		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} cairo)
 	endif()
 	if(${OSMSCOUT_BUILD_MAP_QT})
-		target_link_libraries(PerformanceTest OSMScout::MapQt Qt5::Widgets)
+		if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
+			target_link_libraries(PerformanceTest OSMScout::MapQt Qt6::Widgets)
+		elseif(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
+			target_link_libraries(PerformanceTest OSMScout::MapQt Qt5::Widgets)
+		else()
+			message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT for Qt5 and Qt6 not enabled")
+		endif()
+		
 		set(HAVE_LIB_OSMSCOUTMAPQT 1)
+
 		if(MSVC)
 			visual_studio_qt_helper("PerformanceTest")
 		endif()
-		if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
-			add_custom_command(TARGET PerformanceTest
-				POST_BUILD
-				COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-				COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:PerformanceTest>/$<TARGET_FILE_NAME:PerformanceTest>"
-				)
+		
+		if(OSMSCOUT_INSTALL_QT_DLL)
+			if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED} AND TARGET Qt6::windeployqt)
+				add_custom_command(TARGET PerformanceTest
+					POST_BUILD
+					COMMAND set PATH=%PATH%$<SEMICOLON>${qt6_install_prefix}/bin
+					COMMAND Qt6::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:PerformanceTest>/$<TARGET_FILE_NAME:PerformanceTest>"
+					)
+			elseif(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED} AND TARGET Qt5::windeployqt)
+				add_custom_command(TARGET PerformanceTest
+					POST_BUILD
+					COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+					COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:PerformanceTest>/$<TARGET_FILE_NAME:PerformanceTest>"
+					)			
+			else()
+				message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT for Qt5 and Qt6 not enabled")
+			endif()			
 		endif()
+
 		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} Qt)
 	endif()
 	if(${OSMSCOUT_BUILD_MAP_AGG})
@@ -276,7 +302,14 @@ osmscout_test_project(NAME CoordBufferTest SOURCES src/CoordBufferTest.cpp)
 #---- ClientQtThreading
 if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
 	set(src_files src/ClientQtThreading.cpp)
-	qt5_wrap_cpp(src_files include/ClientQtThreading.h)
+	if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
+		qt_wrap_cpp(src_files include/ClientQtThreading.h)
+	elseif(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
+		qt5_wrap_cpp(src_files include/ClientQtThreading.h)
+	else()
+		message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT for Qt5 and Qt6 not enabled")
+	endif()
+	
 	osmscout_test_project(NAME ClientQtThreading SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
 else()
 	message("Skip ClientQtThreading test, libosmscout-client-qt is missing.")
@@ -285,7 +318,14 @@ endif()
 #---- QtFileDownloader
 if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
 	set(src_files src/QtFileDownloader.cpp)
-	qt5_wrap_cpp(src_files include/DownloaderTest.h)
+	if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
+		qt_wrap_cpp(src_files include/DownloaderTest.h)
+	elseif(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
+		qt5_wrap_cpp(src_files include/DownloaderTest.h)
+	else()
+		message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT for Qt5 and Qt6 not enabled")
+	endif()
+	
 	osmscout_test_project(NAME QtFileDownloader SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets SKIPTEST)
 else()
 	message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")

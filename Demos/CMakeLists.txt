@@ -121,7 +121,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 	set(CMAKE_AUTORCC ON)
 
 	if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
-		qt6_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
+		qt_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
 	elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 		qt5_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
 	else()
