@@ -25,6 +25,7 @@
 #include <functional>
 #include <mutex>
 #include <set>
+#include <memory>
 
 namespace osmscout {
 
@@ -35,8 +36,17 @@ namespace osmscout {
   class Signal
   {
   private:
+    struct Connection
+    {
+      std::mutex mutex;
+      Slot<Args...>* slot = nullptr;
+      Signal<Args...>* signal = nullptr;
+    };
+
+  private:
+    // Note: when signal and slot mutexes are locked at the same time, always lock signal's one first
     std::mutex mutex;
-    std::set<Slot<Args...>*> connections;
+    std::vector<std::shared_ptr<Connection>> connections;
 
   public:
     friend class Slot<Args...>;
@@ -48,20 +58,25 @@ namespace osmscout {
     Signal& operator=(const Signal&) = delete;
     Signal& operator=(Signal&&) = delete;
 
-    virtual ~Signal() = default;
+    virtual ~Signal();
 
     void Emit(const Args&... args);
 
     void Connect(Slot<Args...> &slot);
+
+    void Disconnect(Slot<Args...> &slot);
+
+    void Disconnect();
   };
 
   template<typename... Args>
   class Slot
   {
   private:
+    // Note: when signal and slot mutexes are locked at the same time, always lock signal's one first
     std::mutex mutex;
     const std::function<void(const Args&...)> callback;
-    std::set<Signal<Args...>*> connections;
+    std::vector<std::shared_ptr<typename Signal<Args...>::Connection>> connections;
 
   public:
     friend class Signal<Args...>;
@@ -74,11 +89,12 @@ namespace osmscout {
     Slot& operator=(const Slot&) = delete;
     Slot& operator=(Slot&&) = delete;
 
-    virtual ~Slot() = default;
+    virtual ~Slot();
+
+    void Disconnect();
 
   private:
     void Call(const Args&... args) const;
-    void Connect(Signal<Args...> *signal);
   };
 
   template<typename... Args>
@@ -93,18 +109,14 @@ namespace osmscout {
   }
 
   template<typename... Args>
-  void Slot<Args...>::Connect(Signal<Args...> *signal)
-  {
-    std::unique_lock lock(mutex);
-    connections.insert(signal);
-  }
-
-  template<typename... Args>
   void Signal<Args...>::Emit(const Args&... args)
   {
     std::unique_lock lock(mutex);
-    for (const auto &slot: connections) {
-      slot->Call(args...);
+    for (const auto &con: connections) {
+      std::unique_lock lockCon(con->mutex);
+      if (auto slot = con->slot; slot != nullptr) {
+        slot->Call(args...);
+      }
     }
   }
 
@@ -112,8 +124,63 @@ namespace osmscout {
   void Signal<Args...>::Connect(Slot<Args...> &slot)
   {
     std::unique_lock lock(mutex);
-    connections.insert(&slot);
-    slot.Connect(this);
+    std::unique_lock slotLock(slot.mutex);
+
+    auto con=std::make_shared<Connection>();
+    con->slot = &slot;
+    con->signal = this;
+    connections.push_back(con);
+    slot.connections.push_back(con);
+  }
+
+  template<typename... Args>
+  void Signal<Args...>::Disconnect(Slot<Args...> &slot)
+  {
+    std::unique_lock lock(mutex);
+    std::unique_lock slotLock(slot.mutex);
+
+    if (auto it = connections.find([&slot](auto const &con) -> bool { return con && con->slot == &slot; });
+      it != connections.end()) {
+      connections.erase(it);
+    }
+    if (auto it = slot.connections.find([this](auto const &con) -> bool { return con && con->signal == this; });
+      it != slot.connections.end()) {
+      slot.connections.erase(it);
+    }
+  }
+
+  template<typename... Args>
+  void Signal<Args...>::Disconnect()
+  {
+    std::unique_lock lock(mutex);
+    for (auto &con: connections) {
+      std::unique_lock lockCon(con->mutex);
+      con->signal = nullptr;
+      con->slot = nullptr;
+    }
+    connections.clear();
+  }
+
+  template<typename... Args>
+  void Slot<Args...>::Disconnect()
+  {
+    std::unique_lock lock(mutex);
+    for (auto &con: connections) {
+      std::unique_lock lockCon(con->mutex);
+      con->signal = nullptr;
+      con->slot = nullptr;
+    }
+    connections.clear();
+  }
+
+  template<typename... Args>
+  Signal<Args...>::~Signal() {
+    Disconnect();
+  }
+
+  template<typename... Args>
+  Slot<Args...>::~Slot() {
+    Disconnect();
   }
 
 } // namespace
