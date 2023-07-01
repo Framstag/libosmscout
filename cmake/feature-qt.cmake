@@ -81,9 +81,51 @@ if(NOT ${QT_MAJOR_VERSION} OR ${QT_MAJOR_VERSION} STREQUAL "")
 
         return()
     else()
-        set(QT_MAJOR_VERSION "6" CACHE STRING "" FORCE)
-        set(QT_MINOR_VERSION "" CACHE STRING "" FORCE)
+        # Qt6
+        include(feature-qt6)
+        if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED} AND ${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
+            if(NOT ${OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT6_ENABLED})
+                message(WARNING "OSMSCOUT_BUILD_TOOL_OSMSCOUT2(Qt6) failed to be enabled")
+            endif()
+            
+            if(NOT ${OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT6_ENABLED})
+                message(WARNING "OSMSCOUT_BUILD_TOOL_STYLEEDITOR(Qt6) failed to be enabled")
+            endif()
+        endif()
+
+        if (NOT ${OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED})
+            message(NOTICE "OSMSCOUT_BUILD_MAP_QT(Qt6) failed to be enabled")
+        endif()
+
+        if (NOT ${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
+            message(NOTICE "OSMSCOUT_BUILD_CLIENT_QT(Qt6) failed to be enabled")
+        endif()
+
+        # Qt5    
+        include(feature-qt5)
+
+        if(${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED} AND ${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+            if(NOT ${OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT5_ENABLED})
+                message(WARNING "OSMSCOUT_BUILD_TOOL_OSMSCOUT2 failed to be enabled")
+            endif()
+
+            if(NOT ${OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED})
+                message(WARNING "OSMSCOUT_BUILD_TOOL_STYLEEDITOR failed to be enabled")
+            endif()
+
+            return()
+        endif()
+
+        if (NOT ${OSMSCOUT_BUILD_MAP_QT_FOR_QT5_ENABLED})
+            message(FATAL_ERROR "OSMSCOUT_BUILD_MAP_QT(Qt5) failed to be enabled")
+        endif()
+
+        if (NOT ${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+            message(FATAL_ERROR "OSMSCOUT_BUILD_CLIENT_QT(Qt5) failed to be enabled")
+        endif()
     endif()
+
+    return()
 endif()
 
 if(${QT_MAJOR_VERSION} STREQUAL "6")
