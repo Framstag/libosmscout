@@ -70,3 +70,26 @@ TEST_CASE("slot disconnection on destructor") {
   REQUIRE(map.size()==1);
   REQUIRE(map["A"]==1);
 }
+
+TEST_CASE("shorter signal live cycle") {
+  std::map<std::string, double> map;
+  osmscout::Slot<std::string, double> target([&map](const std::string &str, const double &d) mutable {
+    map[str] = d;
+  });
+
+  {
+    osmscout::Signal<std::string, double> source;
+    source.Connect(target);
+    source.Emit("A", 1);
+  }
+
+  {
+    osmscout::Signal<std::string, double> source;
+    source.Connect(target);
+    source.Emit("B", 2);
+  }
+
+  REQUIRE(map.size()==2);
+  REQUIRE(map["A"]==1);
+  REQUIRE(map["B"]==2);
+}
