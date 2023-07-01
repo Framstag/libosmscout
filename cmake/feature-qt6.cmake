@@ -12,7 +12,7 @@ endif()
 set(HAVE_LIB_QT6_GUI ${Qt6Gui_FOUND})
 set(HAVE_LIB_QT6_WIDGETS ${Qt6Widgets_FOUND})
 
-if(OSMSCOUT_BUILD_MAP_QT)
+if(${OSMSCOUT_BUILD_MAP_QT})
     if(NOT ${OSMSCOUT_BUILD_MAP})
         message(VERBOSE "OSMSCOUT_BUILD_MAP_QT requires OSMSCOUT_BUILD_MAP")
     endif()
@@ -28,7 +28,7 @@ if(OSMSCOUT_BUILD_MAP_QT)
     set(OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED ON)
 endif()
 
-if(OSMSCOUT_BUILD_CLIENT_QT)
+if(${OSMSCOUT_BUILD_CLIENT_QT})
     if(NOT ${OSMSCOUT_BUILD_MAP_QT})
         message(VERBOSE "OSMSCOUT_BUILD_CLIENT_QT requires Qt6Core")
     endif()
@@ -77,7 +77,7 @@ endif()
 ################################################################
 
 # OSMScout2
-if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
+if(${OSMSCOUT_BUILD_TOOL_OSMSCOUT2})
     if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
         message(STATUS "OSMScout2 requires OSMSCOUT_BUILD_CLIENT_QT")
     endif()
@@ -112,7 +112,7 @@ if(OSMSCOUT_BUILD_TOOL_OSMSCOUT2)
 endif()
 
 # StyleEditor
-if(OSMSCOUT_BUILD_TOOL_STYLEEDITOR)
+if(${OSMSCOUT_BUILD_TOOL_STYLEEDITOR})
     if(NOT ${OSMSCOUT_BUILD_CLIENT_QT})
         message(STATUS "StyleEditor requires OSMSCOUT_BUILD_CLIENT_QT")
     endif()
