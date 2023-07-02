@@ -401,6 +401,15 @@ StdByteTest = executable('StdByteTest',
              install: true,
              install_dir: testInstallDir)
 
+Signal = executable('Signal',
+             'src/Signal.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check signal', Signal)
+
 StringUtils = executable('StringUtils',
              'src/StringUtils.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
