@@ -83,7 +83,7 @@ endif()
 
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
-	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
+	set(src_files src/DrawTextQt.cpp)
 	qt_wrap_cpp(src_files include/DrawWindow.h)
 	osmscout_test_project(NAME DrawTextQt SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt Qt5::Widgets SKIPTEST)
 else()
