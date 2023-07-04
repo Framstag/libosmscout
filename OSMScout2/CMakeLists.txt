@@ -82,7 +82,8 @@ elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 	#    in *.ts files with lrelease tool
 	if(NOT ${Qt5LinguistTools_FOUND})
 		find_package(Qt5LinguistTools REQUIRED)
-	endif
+	endif()
+	
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
