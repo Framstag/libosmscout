@@ -80,8 +80,9 @@ elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
 	#
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
-	find_package(Qt5LinguistTools)
-	# find_package(Qt5 REQUIRED COMPONENTS LinguistTools)
+	if(NOT ${Qt5LinguistTools_FOUND})
+		find_package(Qt5LinguistTools REQUIRED)
+	endif
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
