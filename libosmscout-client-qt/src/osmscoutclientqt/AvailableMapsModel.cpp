@@ -65,7 +65,7 @@ AvailableMapsModel::AvailableMapsModel()
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   mapProviders = settings->GetMapProviders();
 
-  diskCache.setCacheDirectory(settings->GetHttpCacheDir());
+  diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 

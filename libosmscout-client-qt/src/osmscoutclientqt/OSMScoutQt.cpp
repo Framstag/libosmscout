@@ -82,7 +82,7 @@ bool OSMScoutQtBuilder::Init()
     return false;
   }
 
-  SettingsRef settings=std::make_shared<Settings>(settingsStorage);
+  SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage));
 
   // load online tile providers
   if (!onlineTileProviders.isEmpty()){
@@ -97,14 +97,14 @@ bool OSMScoutQtBuilder::Init()
 
   // setup style sheet
   if (styleSheetFileConfigured){
-    settings->SetStyleSheetFile(styleSheetFile);
+    settings->SetStyleSheetFile(styleSheetFile.toStdString());
   }
   if (styleSheetDirectoryConfigured){
-    settings->SetStyleSheetDirectory(styleSheetDirectory);
+    settings->SetStyleSheetDirectory(styleSheetDirectory.toStdString());
   }
 
   // setup voice
-  settings->SetVoiceLookupDirectory(voiceLookupDirectory);
+  settings->SetVoiceLookupDirectory(voiceLookupDirectory.toStdString());
 
   MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
 

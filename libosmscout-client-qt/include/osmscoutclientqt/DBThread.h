@@ -116,6 +116,8 @@ signals:
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
 
+  void mapDpiSignal(double);
+
 public slots:
   void ToggleDaylight();
   void onMapDPIChange(double dpi);
@@ -161,6 +163,12 @@ private:
   QList<StyleError>                  styleErrors;
 
   std::vector<std::string>           customPoiTypes;
+
+  Slot<double> mapDpiSlot{
+    [this](const double &d) {
+      mapDpiSignal(d);
+    }
+  };
 
 protected:
 

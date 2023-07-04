@@ -275,6 +275,13 @@ public slots:
 
   void onIconFound(QPoint lookupCoord, MapIcon icon);
 
+private:
+  Slot<double> mapDpiSlot{
+    [this](const double &d) {
+      this->onMapDPIChange(d);
+    }
+  };
+
 private slots:
 
   virtual void onTap(const QPoint p);

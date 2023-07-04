@@ -110,6 +110,51 @@ signals:
   void Redraw();
   void TriggerDrawMap();
 
+  void mapDpiChangeSignal(double);
+  void renderSeaSignal(bool);
+  void fontNameSignal(QString);
+  void fontSizeSignal(double);
+  void showAltLanguageSignal(bool);
+  void unitsSignal(QString);
+
+private:
+  // slots
+  Slot<double> mapDpiChangeSlot{
+    [this](const double &d){
+      mapDpiChangeSignal(d);
+    }
+  };
+
+  Slot<bool> renderSeaSlot{
+    [this](const bool &b){
+      renderSeaSignal(b);
+    }
+  };
+
+  Slot<std::string> fontNameSlot{
+    [this](const std::string &str){
+      fontNameSignal(QString::fromStdString(str));
+    }
+  };
+
+  Slot<double> fontSizeSlot{
+    [this](const double &d){
+      fontSizeSignal(d);
+    }
+  };
+
+  Slot<bool> showAltLanguageSlot{
+    [this](const bool &b){
+      showAltLanguageSignal(b);
+    }
+  };
+
+  Slot<std::string> unitsSlot{
+    [this](const std::string &str){
+      unitsSignal(QString::fromStdString(str));
+    }
+  };
+
 public slots:
   virtual void Initialize() = 0;
 

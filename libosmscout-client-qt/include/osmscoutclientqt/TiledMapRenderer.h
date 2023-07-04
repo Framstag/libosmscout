@@ -75,6 +75,23 @@ private:
 
   QColor                        unknownColor;
 
+  Slot<OnlineTileProvider> onlineTileProviderSlot{
+    [this](const OnlineTileProvider &provider) { onlineTileProviderSignal(provider); }
+  };
+
+  Slot<bool> onlineTileEnabledSlot{
+    [this](const bool &b) { onlineTilesEnabledSignal(b); }
+  };
+
+  Slot<bool> offlineMapChangedSlot{
+    [this](const bool &b) { offlineMapChangedSignal(b); }
+  };
+
+signals:
+  void onlineTileProviderSignal(OnlineTileProvider provider);
+  void onlineTilesEnabledSignal(bool);
+  void offlineMapChangedSignal(bool);
+
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
@@ -87,7 +104,7 @@ public slots:
   void onDatabaseLoaded(osmscout::GeoBox boundingBox);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
 
-  void onlineTileProviderChanged();
+  void onlineTileProviderChanged(const OnlineTileProvider &);
   void onlineTilesEnabledChanged(bool);
 
   void onOfflineMapChanged(bool);

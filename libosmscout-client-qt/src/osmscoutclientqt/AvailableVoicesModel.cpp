@@ -31,7 +31,7 @@ AvailableVoicesModel::AvailableVoicesModel()
   assert(settings);
   voiceProviders = settings->GetVoiceProviders();
 
-  diskCache.setCacheDirectory(settings->GetHttpCacheDir());
+  diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 

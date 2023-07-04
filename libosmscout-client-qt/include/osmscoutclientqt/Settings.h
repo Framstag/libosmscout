@@ -25,12 +25,13 @@
 #include <QSettings>
 #include <QStringList>
 
+#include <osmscout/async/Signal.h>
 #include <osmscout/routing/RoutingProfile.h>
+
 #include <osmscoutclientqt/InputHandler.h>
 #include <osmscoutclientqt/OnlineTileProvider.h>
 #include <osmscoutclientqt/MapProvider.h>
 #include <osmscoutclientqt/VoiceProvider.h>
-
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 // this variable should be defined by build system
@@ -40,6 +41,51 @@
 
 namespace osmscout {
 
+struct OSMSCOUT_CLIENT_QT_API SettingsStorage
+{
+public:
+  virtual void SetValue(const std::string &key, double d) = 0;
+  virtual void SetValue(const std::string &key, uint32_t i) = 0;
+  virtual void SetValue(const std::string &key, const std::string &str) = 0;
+  virtual void SetValue(const std::string &key, bool b) = 0;
+  virtual void SetValue(const std::string &key, std::vector<char> bytes) = 0;
+  virtual double GetDouble(const std::string &key, double defaultValue = 0) = 0;
+  virtual uint32_t GetUInt(const std::string &key, uint32_t defaultValue = 0) = 0;
+  virtual std::string GetString(const std::string &key, const std::string &defaultValue = "") = 0;
+  virtual bool GetBool(const std::string &key, bool defaultValue = 0) = 0;
+  virtual std::vector<char> GetBytes(const std::string &key) = 0;
+
+  /** Get all configuration keys with given prefix.
+   * @param prefix
+   * @return keys (containing prefix)
+   */
+  virtual std::vector<std::string> Keys(const std::string &prefix) = 0;
+};
+
+using SettingsStoragePtr = std::shared_ptr<SettingsStorage>;
+
+class OSMSCOUT_CLIENT_QT_API QtSettingsStorage: public QObject, public SettingsStorage
+{
+private:
+  QSettings *storage;
+public:
+  explicit QtSettingsStorage(QSettings *providedStorage=nullptr);
+  virtual ~QtSettingsStorage() = default;
+
+  void SetValue(const std::string &key, double d) override;
+  void SetValue(const std::string &key, uint32_t i) override;
+  void SetValue(const std::string &key, const std::string &str) override;
+  void SetValue(const std::string &key, bool b) override;
+  void SetValue(const std::string &key, std::vector<char> bytes) override;
+  double GetDouble(const std::string &key, double defaultValue = 0) override;
+  uint32_t GetUInt(const std::string &key, uint32_t defaultValue = 0) override;
+  std::string GetString(const std::string &key, const std::string &defaultValue = "") override;
+  bool GetBool(const std::string &key, bool defaultValue = 0) override;
+  std::vector<char> GetBytes(const std::string &key) override;
+
+  std::vector<std::string> Keys(const std::string &prefix) override;
+};
+
 /**
  * \ingroup QtAPI
  *
@@ -48,48 +94,16 @@ namespace osmscout {
  *
  * List of online tile providers should be initialized at application start.
  * ```
- *   Settings::GetInstance()->loadOnlineTileProviders(
+ *   OSMScoutQt::GetInstance().GetSettings()->loadOnlineTileProviders(
  *     ":/resources/online-tile-providers.json");
  * ```
  *
  * Before program exit, resources should be released by calling Settings::FreeInstance.
  */
-class OSMSCOUT_CLIENT_QT_API Settings: public QObject
+class OSMSCOUT_CLIENT_QT_API Settings
 {
-  Q_OBJECT
-  Q_PROPERTY(double   mapDPI      READ GetMapDPI              WRITE SetMapDPI       NOTIFY MapDPIChange)
-  Q_PROPERTY(bool     onlineTiles READ GetOnlineTilesEnabled WRITE SetOnlineTilesEnabled NOTIFY OnlineTilesEnabledChanged)
-  Q_PROPERTY(QString  onlineTileProviderId READ GetOnlineTileProviderId WRITE SetOnlineTileProviderId NOTIFY OnlineTileProviderIdChanged)
-  Q_PROPERTY(bool     offlineMap  READ GetOfflineMap          WRITE SetOfflineMap   NOTIFY OfflineMapChanged)
-  Q_PROPERTY(bool     renderSea   READ GetRenderSea           WRITE SetRenderSea    NOTIFY RenderSeaChanged)
-  Q_PROPERTY(QString  styleSheetDirectory READ GetStyleSheetDirectory WRITE SetStyleSheetDirectory NOTIFY StyleSheetDirectoryChanged)
-  Q_PROPERTY(QString  styleSheetFile      READ GetStyleSheetFile      WRITE SetStyleSheetFile      NOTIFY StyleSheetFileChanged)
-  Q_PROPERTY(QString  fontName    READ GetFontName            WRITE SetFontName     NOTIFY FontNameChanged)
-  Q_PROPERTY(double   fontSize    READ GetFontSize            WRITE SetFontSize     NOTIFY FontSizeChanged)
-  Q_PROPERTY(bool     showAltLanguage READ GetShowAltLanguage WRITE SetShowAltLanguage NOTIFY ShowAltLanguageChanged)
-  /// metrics or imperial
-  Q_PROPERTY(QString  units       READ GetUnits               WRITE SetUnits        NOTIFY UnitsChanged)
-  Q_PROPERTY(QString  voiceLookupDirectory READ GetVoiceLookupDirectory WRITE SetVoiceLookupDirectory NOTIFY VoiceLookupDirectoryChanged)
-  Q_PROPERTY(QString  voiceDir    READ GetVoiceDir            WRITE SetVoiceDir     NOTIFY VoiceDirChanged)
-
-signals:
-  void MapDPIChange(double dpi);
-  void OnlineTilesEnabledChanged(bool);
-  void OnlineTileProviderIdChanged(const QString id);
-  void OnlineTileProviderChanged(const OnlineTileProvider &provider);
-  void OfflineMapChanged(bool);
-  void RenderSeaChanged(bool);
-  void StyleSheetDirectoryChanged(const QString dir);
-  void StyleSheetFileChanged(const QString file);
-  void VoiceLookupDirectoryChanged(const QString dir);
-  void VoiceDirChanged(const QString voice);
-  void FontNameChanged(const QString fontName);
-  void FontSizeChanged(double fontSize);
-  void ShowAltLanguageChanged(bool showAltLanguage);
-  void UnitsChanged(const QString units);
-
 private:
-  QSettings *storage;
+  SettingsStoragePtr storage;
   double    physicalDpi;
   QMap<QString, OnlineTileProvider> onlineProviderMap;
   QList<OnlineTileProvider> onlineProviders;
@@ -97,8 +111,24 @@ private:
   QList<VoiceProvider> voiceProviders;
 
 public:
-  explicit Settings(QSettings *providedStorage=nullptr);
-  ~Settings() override = default;
+  Signal<double> mapDPIChange;
+  Signal<bool> onlineTilesEnabledChanged;
+  Signal<std::string> onlineTileProviderIdChanged;
+  Signal<OnlineTileProvider> onlineTileProviderChanged;
+  Signal<bool> offlineMapChanged;
+  Signal<bool> renderSeaChanged;
+  Signal<std::string> styleSheetDirectoryChanged;
+  Signal<std::string> styleSheetFileChanged;
+  Signal<std::string> voiceLookupDirectoryChanged;
+  Signal<std::string> voiceDirChanged;
+  Signal<std::string> fontNameChanged;
+  Signal<double> fontSizeChanged;
+  Signal<bool> showAltLanguageChanged;
+  Signal<std::string> unitsChanged;
+
+public:
+  explicit Settings(SettingsStoragePtr storage);
+  virtual ~Settings() = default;
 
   double GetPhysicalDPI() const;
 
@@ -117,8 +147,8 @@ public:
   const QList<MapProvider> GetMapProviders() const;
   const QList<VoiceProvider> GetVoiceProviders() const;
 
-  const QString GetOnlineTileProviderId() const;
-  void SetOnlineTileProviderId(QString id);
+  const std::string GetOnlineTileProviderId() const;
+  void SetOnlineTileProviderId(const std::string &id);
 
   bool loadOnlineTileProviders(const QStringList &paths);
   bool loadMapProviders(const QStringList &paths);
@@ -130,26 +160,26 @@ public:
   bool GetRenderSea() const;
   void SetRenderSea(bool);
 
-  const QString GetStyleSheetDirectory() const;
-  void SetStyleSheetDirectory(const QString dir);
+  const std::string GetStyleSheetDirectory() const;
+  void SetStyleSheetDirectory(const std::string &dir);
 
-  const QString GetVoiceLookupDirectory() const;
-  void SetVoiceLookupDirectory(const QString &voiceLookupDirectory);
+  const std::string GetVoiceLookupDirectory() const;
+  void SetVoiceLookupDirectory(const std::string &voiceLookupDirectory);
 
-  const QString GetVoiceDir() const;
-  void SetVoiceDir(const QString &voice);
+  const std::string GetVoiceDir() const;
+  void SetVoiceDir(const std::string &voice);
 
-  const QString GetStyleSheetFile() const;
-  const QString GetStyleSheetAbsoluteFile() const;
-  void SetStyleSheetFile(const QString file);
+  const std::string GetStyleSheetFile() const;
+  const std::string GetStyleSheetAbsoluteFile() const;
+  void SetStyleSheetFile(const std::string &file);
 
-  const std::unordered_map<std::string,bool> GetStyleSheetFlags(const QString styleSheetFile);
+  const std::unordered_map<std::string,bool> GetStyleSheetFlags(const std::string &styleSheetFile);
   const std::unordered_map<std::string,bool> GetStyleSheetFlags();
-  void SetStyleSheetFlags(const QString styleSheetFile, std::unordered_map<std::string,bool> flags);
+  void SetStyleSheetFlags(const std::string &styleSheetFile, std::unordered_map<std::string,bool> flags);
   void SetStyleSheetFlags(std::unordered_map<std::string,bool> flags);
 
-  QString GetFontName() const;
-  void SetFontName(const QString fontName);
+  std::string GetFontName() const;
+  void SetFontName(const std::string &fontName);
 
   double GetFontSize() const;
   void SetFontSize(double fontSize);
@@ -157,13 +187,13 @@ public:
   bool GetShowAltLanguage() const;
   void SetShowAltLanguage(bool showAltLanguage);
 
-  const QString GetHttpCacheDir() const;
+  const std::string GetHttpCacheDir() const;
 
   const QByteArray GetCookieData() const;
   void SetCookieData(QByteArray data);
 
-  QString GetUnits() const;
-  void SetUnits(const QString units);
+  std::string GetUnits() const;
+  void SetUnits(const std::string &units);
 };
 
 /**
@@ -207,6 +237,47 @@ class OSMSCOUT_CLIENT_QT_API QmlSettings: public QObject{
 
 private:
   SettingsRef settings;
+
+  // slots
+  Slot<double> mapDPISlot{
+    [this](const double &d){ this->MapDPIChange(d); }
+  };
+
+  Slot<bool> onlineTilesEnabledSlot{
+    [this](const bool &b){this->OnlineTilesEnabledChanged(b);}
+  };
+
+  Slot<std::string> onlineTileProviderIdSlot{
+    [this](const std::string &str){ this->OnlineTileProviderIdChanged(QString::fromStdString(str));}
+  };
+
+  Slot<bool> offlineMapSlot{
+    [this](const bool &b){ this->OfflineMapChanged(b);}
+  };
+
+  Slot<std::string> styleSheetFileSlot{
+    [this](const std::string &str){ this->StyleSheetFileChanged(QString::fromStdString(str));}
+  };
+
+  Slot<bool> renderSeaSlot{
+    [this](const bool &b){ this->RenderSeaChanged(b);}
+  };
+
+  Slot<std::string> fontNameSlot{
+    [this](const std::string &str){ this->FontNameChanged(QString::fromStdString(str));}
+  };
+
+  Slot<double> fontSizeSlot{
+    [this](const double &d){ this->FontSizeChanged(d);}
+  };
+
+  Slot<bool> showAltLanguageSlot{
+    [this](const bool &b){ this->ShowAltLanguageChanged(b);}
+  };
+
+  Slot<std::string> unitsSlot{
+    [this](const std::string &str){ this->UnitsChanged(QString::fromStdString(str));}
+  };
 
 signals:
   void MapDPIChange(double dpi);

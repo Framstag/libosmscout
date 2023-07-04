@@ -94,7 +94,7 @@ VoiceManager::VoiceManager()
 void VoiceManager::reload()
 {
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
-  lookupDir = settings->GetVoiceLookupDirectory();
+  lookupDir = QString::fromStdString(settings->GetVoiceLookupDirectory());
   osmscout::log.Info() << "Lookup voices at " << lookupDir.toStdString();
   installedVoices.clear();
   QSet<QString> uniqPaths;
@@ -117,7 +117,7 @@ void VoiceManager::reload()
   emit reloaded();
 
   // check if configured voice still exists
-  QString voiceDir = settings->GetVoiceDir();
+  QString voiceDir = QString::fromStdString(settings->GetVoiceDir());
   if (!voiceDir.isEmpty()){
     bool found=false;
     for (const auto &v:installedVoices){

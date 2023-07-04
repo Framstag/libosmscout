@@ -53,13 +53,17 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   onlineTilesEnabled = settings->GetOnlineTilesEnabled();
   offlineTilesEnabled = settings->GetOfflineMap();
 
-  connect(settings.get(), &Settings::OnlineTileProviderIdChanged,
+  settings->onlineTileProviderChanged.Connect(onlineTileProviderSlot);
+  settings->onlineTilesEnabledChanged.Connect(onlineTileEnabledSlot);
+  settings->offlineMapChanged.Connect(offlineMapChangedSlot);
+
+  connect(this, &TiledMapRenderer::onlineTileProviderSignal,
           this, &TiledMapRenderer::onlineTileProviderChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::OnlineTilesEnabledChanged,
+  connect(this, &TiledMapRenderer::onlineTilesEnabledSignal,
           this, &TiledMapRenderer::onlineTilesEnabledChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::OfflineMapChanged,
+  connect(this, &TiledMapRenderer::offlineMapChangedSignal,
           this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
@@ -96,7 +100,7 @@ void TiledMapRenderer::Initialize()
     // create tile downloader in correct thread
     tileDownloader = new OsmTileDownloader(tileCacheDirectory,settings->GetOnlineTileProvider());
 
-    connect(settings.get(), &Settings::OnlineTileProviderChanged,
+    connect(this, &TiledMapRenderer::onlineTileProviderSignal,
             tileDownloader, &OsmTileDownloader::onlineTileProviderChanged,
             Qt::QueuedConnection);
 
@@ -357,7 +361,7 @@ void TiledMapRenderer::tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32
     }
 }
 
-void TiledMapRenderer::onlineTileProviderChanged()
+void TiledMapRenderer::onlineTileProviderChanged(const OnlineTileProvider&)
 {
     {
         QMutexLocker locker(&tileCacheMutex);

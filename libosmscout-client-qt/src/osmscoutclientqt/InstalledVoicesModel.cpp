@@ -31,14 +31,12 @@ InstalledVoicesModel::InstalledVoicesModel()
   assert(voiceManager);
   assert(settings);
 
+  settings->voiceDirChanged.Connect(voiceDirSlot);
+
   connect(voiceManager.get(), &VoiceManager::reloaded,
       this, &InstalledVoicesModel::update);
-  connect(settings.get(), &Settings::VoiceDirChanged,
-          this, &InstalledVoicesModel::onVoiceChanged);
-  connect(settings.get(), &Settings::VoiceDirChanged,
-          this, &InstalledVoicesModel::voiceChanged);
 
-  voiceDir = settings->GetVoiceDir();
+  voiceDir = QString::fromStdString(settings->GetVoiceDir());
   update();
 }
 
@@ -124,7 +122,7 @@ void InstalledVoicesModel::select(const QModelIndex &index)
     // when voice is invalid, directory may be still valid (default-constructed QDir pointing to $PWD)
     settings->SetVoiceDir("");
   } else {
-    settings->SetVoiceDir(voice.getDir().absolutePath());
+    settings->SetVoiceDir(voice.getDir().absolutePath().toStdString());
   }
 }
 

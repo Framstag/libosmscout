@@ -44,6 +44,11 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API InstalledVoicesModel : public QAbstractListModel {
   Q_OBJECT
 
+private:
+  Slot<std::string> voiceDirSlot{
+    [this](const std::string &dir){ onVoiceChanged(QString::fromStdString(dir)); }
+  };
+
 signals:
   void voiceChanged(const QString);
 

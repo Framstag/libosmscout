@@ -34,9 +34,8 @@ NavigationModule::NavigationModule(QThread *thread,
   timer.moveToThread(thread); // constructor is called from different thread!
   connect(&timer, &QTimer::timeout, this, &NavigationModule::onTimeout);
 
-  connect(settings.get(), &Settings::VoiceLookupDirectoryChanged, this, &NavigationModule::onVoiceChanged);
-  connect(settings.get(), &Settings::VoiceDirChanged, this, &NavigationModule::onVoiceChanged);
-  onVoiceChanged(settings->GetVoiceDir());
+  settings->voiceDirChanged.Connect(voiceDirSlot);
+  onVoiceChanged(QString::fromStdString(settings->GetVoiceDir()));
 }
 
 NavigationModule::~NavigationModule()

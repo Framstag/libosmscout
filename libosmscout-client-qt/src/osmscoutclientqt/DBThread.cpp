@@ -59,7 +59,7 @@ DBThread::DBThread(QThread *backgroundThread,
   mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
-  stylesheetFilename=settings->GetStyleSheetAbsoluteFile();
+  stylesheetFilename=QString::fromStdString(settings->GetStyleSheetAbsoluteFile());
   stylesheetFlags=settings->GetStyleSheetFlags();
   osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
 
@@ -67,7 +67,8 @@ DBThread::DBThread(QThread *backgroundThread,
   registerCustomPoiTypes(emptyTypeConfig);
   emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
 
-  connect(settings.get(), &Settings::MapDPIChange,
+  settings->mapDPIChange.Connect(mapDpiSlot);
+  connect(this, &DBThread::mapDpiSignal,
           this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
 
@@ -80,6 +81,8 @@ DBThread::~DBThread()
 {
   QWriteLocker locker(&lock);
   osmscout::log.Debug() << "DBThread::~DBThread()";
+
+  mapDpiSlot.Disconnect();
 
   if (basemapDatabase) {
     basemapDatabase->Close();

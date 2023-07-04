@@ -65,6 +65,11 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
 
+private:
+  Slot<std::string> voiceDirSlot{
+    [this](const std::string &str) { onVoiceChanged(QString::fromStdString(str)); }
+  };
+
 signals:
   void update(std::list<RouteStep> instructions);
 
