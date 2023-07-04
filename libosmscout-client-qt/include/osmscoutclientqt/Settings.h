@@ -69,6 +69,10 @@ class OSMSCOUT_CLIENT_QT_API QtSettingsStorage: public QObject, public SettingsS
 private:
   QSettings *storage;
 public:
+  /**
+   * @param providedStorage custom provider when not null. Storage takes ownership.
+   *    When it is null, default Qt settings is used.
+   */
   explicit QtSettingsStorage(QSettings *providedStorage=nullptr);
   virtual ~QtSettingsStorage() = default;
 

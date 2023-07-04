@@ -37,6 +37,8 @@ QtSettingsStorage::QtSettingsStorage(QSettings *providedStorage):
 {
   if (storage==nullptr){
     storage=new QSettings(this);
+  } else {
+    providedStorage->setParent(this);
   }
 }
 

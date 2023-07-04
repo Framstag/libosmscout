@@ -83,6 +83,7 @@ bool OSMScoutQtBuilder::Init()
   }
 
   SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage));
+  settingsStorage = nullptr;
 
   // load online tile providers
   if (!onlineTileProviders.isEmpty()){
