@@ -22,4 +22,5 @@ osmscoutmapgdi = library('osmscout_map_gdi',
                          version: libraryVersion,
                          install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutmapgdi)

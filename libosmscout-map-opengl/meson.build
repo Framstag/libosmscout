@@ -22,4 +22,5 @@ osmscoutmapopengl = library('osmscout_map_opengl',
                             version: libraryVersion,
                             install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutmapopengl)

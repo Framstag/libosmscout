@@ -22,4 +22,5 @@ osmscoutmapsvg = library('osmscout_map_svg',
                          version: libraryVersion,
                          install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutmapsvg)
