@@ -16,4 +16,5 @@ osmscoutmapiosx = library('osmscout_map_iosx',
                            version: libraryVersion,
                            install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutmapiosx)

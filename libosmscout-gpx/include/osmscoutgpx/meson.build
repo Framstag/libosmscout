@@ -3,5 +3,6 @@ gpxFeaturesCfg.set('OSMSCOUT_GPX_HAVE_LIB_XML',xml2Dep.found(), description: '*.
 gpxFeaturesCfg.set('OSMSCOUT_GPX_MESON_BUILD',true, description: 'we are building using meson')
 
 configure_file(output: 'GPXFeatures.h',
+               install_dir: 'include/osmscoutgpx',
                configuration: gpxFeaturesCfg)
 

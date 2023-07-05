@@ -23,4 +23,5 @@ osmscoutmapcairo = library('osmscout_map_cairo',
                            version: libraryVersion,
                            install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutmapcairo)

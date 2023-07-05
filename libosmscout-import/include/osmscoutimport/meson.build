@@ -7,5 +7,6 @@ importFeaturesCfg.set('OSMSCOUT_DEBUG_COASTLINE',false, description: 'Extra debu
 importFeaturesCfg.set('OSMSCOUT_DEBUG_TILING',false, description: 'Extra debugging of water index tiling')
 
 configure_file(output: 'ImportFeatures.h',
+               install_dir: 'include/osmscoutimport',
                configuration: importFeaturesCfg)
 

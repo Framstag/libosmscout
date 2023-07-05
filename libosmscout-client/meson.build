@@ -33,4 +33,5 @@ osmscoutclient = library('osmscout_client',
                          version: libraryVersion,
                          install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutclient)

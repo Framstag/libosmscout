@@ -5,5 +5,6 @@ coreFeaturesCfg.set('OSMSCOUT_HAVE_LIB_MARISA',marisaDep.found(), description: '
 coreFeaturesCfg.set('OSMSCOUT_DEBUG_ROUTING',false, description: 'Extra debugging of routing')
 
 configure_file(output: 'CoreFeatures.h',
+               install_dir: 'include/osmscout/lib',
                configuration: coreFeaturesCfg)
 
