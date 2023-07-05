@@ -23,7 +23,7 @@
 #include <exception>
 #include <string>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 #include <system_error>
 
 #if defined(_MSC_VER)

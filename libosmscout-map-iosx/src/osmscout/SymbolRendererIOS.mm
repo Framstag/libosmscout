@@ -20,7 +20,7 @@
 
 #include <osmscoutmapiosx/SymbolRendererIOS.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
   SymbolRendererIOS::SymbolRendererIOS(CGContextRef cg)

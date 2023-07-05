@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>

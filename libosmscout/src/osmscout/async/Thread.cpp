@@ -1,6 +1,3 @@
-#ifndef LIBOSMSCOUT_THREAD_H
-#define LIBOSMSCOUT_THREAD_H
-
 /*
  This source is part of the libosmscout library
  Copyright (C) 2023 Lukas Karas
@@ -20,27 +17,37 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/private/Config.h>
+#include <osmscout/async/Thread.h>
 
-#include <string>
-#include <thread>
+#ifdef OSMSCOUT_PTHREAD_NAME
+#include <type_traits>
+
+#include <pthread.h>
+
+static_assert(std::is_same<std::thread::native_handle_type, pthread_t>::value, "std::thread::native_handle_type have to be pthread_t");
+#endif
 
 namespace osmscout {
 
-  /** Try to set current thread name.
-   *
-   * @param name
-   * @return true if supported and successful, else otherwise
-   */
-  extern OSMSCOUT_API bool SetThreadName(const std::string &name);
-
-  /** Try to set thread name
-   *
-   * @param thread
-   * @param name
-   * @return true if supported and successful, else otherwise
-   */
-  extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name);
+bool SetThreadName([[maybe_unused]] const std::string &name)
+{
+#ifdef OSMSCOUT_PTHREAD_NAME
+  return pthread_setname_np(pthread_self(), name.c_str()) == 0;
+#else
+  return false;
+#endif
 }
 
-#endif //LIBOSMSCOUT_THREAD_H
+#ifdef OSMSCOUT_PTHREAD_NAME
+bool SetThreadName(std::thread &thread, const std::string &name)
+{
+    return pthread_setname_np(thread.native_handle(), name.c_str()) == 0;
+}
+#else
+bool SetThreadName(std::thread &/*thread*/, const std::string &/*name*/)
+{
+    return false;
+}
+#endif
+}

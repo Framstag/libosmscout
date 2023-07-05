@@ -26,7 +26,7 @@
 
 #include <osmscout/feature/AdminLevelFeature.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

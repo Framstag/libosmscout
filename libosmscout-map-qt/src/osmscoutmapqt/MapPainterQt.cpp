@@ -34,7 +34,7 @@
 #include <osmscout/io/File.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmapqt/SymbolRendererQt.h>
 

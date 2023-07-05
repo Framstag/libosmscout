@@ -27,7 +27,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/util/Parsing.h>
 

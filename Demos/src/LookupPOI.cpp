@@ -21,13 +21,13 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/POIService.h>
+#include <osmscout/poi/POIService.h>
 
 #include <osmscout/FeatureReader.h>
 
 #include <osmscout/feature/NameFeature.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/GeoBox.h>
 
 struct Arguments

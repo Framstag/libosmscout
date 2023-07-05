@@ -29,4 +29,5 @@ osmscoutimport = library('osmscout_import',
                          version: libraryVersion,
                          install: true)
 
-# TODO: Generate PKG_CONFIG file
+pkg = import('pkgconfig')
+pkg.generate(osmscoutimport)

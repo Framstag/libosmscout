@@ -17,9 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
-#include <osmscout/util/LoggerImpl.h>
+#include <osmscout/log/LoggerImpl.h>
 
 #include <osmscout/system/Assert.h>
 

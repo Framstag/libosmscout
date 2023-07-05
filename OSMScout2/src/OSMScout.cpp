@@ -36,8 +36,8 @@
 
 #include <AppSettings.h>
 
-#include <osmscout/util/Logger.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 using namespace osmscout;
 

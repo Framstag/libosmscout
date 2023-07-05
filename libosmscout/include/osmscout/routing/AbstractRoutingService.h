@@ -28,7 +28,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
+
 #include <osmscout/TypeConfig.h>
 #include <osmscout/Point.h>
 #include <osmscout/Pixel.h>

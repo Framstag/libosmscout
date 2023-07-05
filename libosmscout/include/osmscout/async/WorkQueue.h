@@ -27,8 +27,8 @@
 #include <limits>
 #include <thread>
 
-#include <osmscout/CoreImportExport.h>
-#include <osmscout/util/ProcessingQueue.h>
+#include <osmscout/lib/CoreImportExport.h>
+#include <osmscout/async/ProcessingQueue.h>
 
 namespace osmscout {
 
@@ -44,7 +44,6 @@ namespace osmscout {
     explicit WorkQueue(size_t queueLimit);
     ~WorkQueue() override = default;
 
-    //void PushTask(Task& task);
     bool PopTask(Task& task);
   };
 

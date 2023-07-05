@@ -23,9 +23,8 @@
 #include <ctime>
 #include <string>
 
-#include <osmscout/CoreFeatures.h>
-
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/system/Compiler.h>
 

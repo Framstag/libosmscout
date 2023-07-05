@@ -26,7 +26,7 @@
 
 #include <osmscout/io/File.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <iomanip>
 

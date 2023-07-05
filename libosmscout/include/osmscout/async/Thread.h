@@ -1,6 +1,9 @@
+#ifndef LIBOSMSCOUT_THREAD_H
+#define LIBOSMSCOUT_THREAD_H
+
 /*
-  This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+ This source is part of the libosmscout library
+ Copyright (C) 2023 Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -15,25 +18,29 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-*/
+ */
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/lib/CoreImportExport.h>
+
+#include <string>
+#include <thread>
 
 namespace osmscout {
 
-  void ThreadedBreaker::Break()
-  {
-    aborted=true;
-  }
+  /** Try to set current thread name.
+   *
+   * @param name
+   * @return true if supported and successful, else otherwise
+   */
+  extern OSMSCOUT_API bool SetThreadName(const std::string &name);
 
-  bool ThreadedBreaker::IsAborted() const
-  {
-    return aborted;
-  }
-
-  void ThreadedBreaker::Reset()
-  {
-    aborted=false;
-  }
+  /** Try to set thread name
+   *
+   * @param thread
+   * @param name
+   * @return true if supported and successful, else otherwise
+   */
+  extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name);
 }
 
+#endif //LIBOSMSCOUT_THREAD_H

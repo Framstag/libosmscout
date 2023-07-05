@@ -31,7 +31,7 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/GroundTile.h>
-#include <osmscout/SRTM.h>
+#include <osmscout/elevation/SRTM.h>
 
 #include <osmscout/system/Compiler.h>
 

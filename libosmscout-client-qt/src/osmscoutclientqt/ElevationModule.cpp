@@ -18,7 +18,7 @@
  */
 
 #include <osmscoutclientqt/ElevationModule.h>
-#include <osmscout/ElevationService.h>
+#include <osmscout/elevation/ElevationService.h>
 
 namespace osmscout {
 

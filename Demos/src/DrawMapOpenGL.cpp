@@ -24,8 +24,8 @@
 #include <sstream>
 #include <iomanip>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 

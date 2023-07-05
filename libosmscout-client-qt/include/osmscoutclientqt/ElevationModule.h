@@ -22,7 +22,7 @@
 
 #include <osmscoutclientqt/OverlayObject.h>
 #include <osmscoutclientqt/DBThread.h>
-#include <osmscout/ElevationService.h>
+#include <osmscout/elevation/ElevationService.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

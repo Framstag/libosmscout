@@ -27,7 +27,7 @@
 #include <mutex>
 #include <optional>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 namespace osmscout {
 

@@ -24,8 +24,8 @@
 
 #include <osmscout/db/Database.h>
 
-#include <osmscout/util/CmdLineParsing.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmap/MapService.h>
 

@@ -23,7 +23,7 @@
 #include <sstream>
 
 #include <osmscout/system/Assert.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 namespace osmscout {
 

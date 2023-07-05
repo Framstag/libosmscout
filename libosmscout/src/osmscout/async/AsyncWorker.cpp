@@ -17,35 +17,48 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/private/Config.h>
-#include <osmscout/system/Thread.h>
-
-#ifdef OSMSCOUT_PTHREAD_NAME
-#include <type_traits>
-
-#include <pthread.h>
-
-static_assert(std::is_same<std::thread::native_handle_type, pthread_t>::value, "std::thread::native_handle_type have to be pthread_t");
-#endif
+#include <osmscout/async/AsyncWorker.h>
 
 namespace osmscout {
 
-bool SetThreadName([[maybe_unused]] const std::string &name)
+AsyncWorker::AsyncWorker(const std::string&):
+  thread(&AsyncWorker::Loop,this)
 {
-#ifdef OSMSCOUT_PTHREAD_NAME
-  return pthread_setname_np(pthread_self(), name.c_str()) == 0;
-#else
-  return false;
-#endif
+
 }
 
-extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name)
+AsyncWorker::~AsyncWorker()
 {
-#ifdef OSMSCOUT_PTHREAD_NAME
-  return pthread_setname_np(thread.native_handle(), name.c_str()) == 0;
-#else
-  return false;
-#endif
+  queue.Stop();
+  if (thread.joinable() && thread.get_id() != std::this_thread::get_id()) {
+    thread.join();
+  } else {
+    thread.detach();
+  }
 }
 
+void AsyncWorker::Loop()
+{
+  while (true) {
+    auto taskOpt = queue.PopTask();
+    if (!taskOpt) {
+      break;
+    }
+
+    taskOpt.value()();
+  }
+
+  if (deleteOnExit) {
+    delete this;
+  }
+}
+
+void AsyncWorker::DeleteLater()
+{
+  Async<bool>([this](Breaker &) -> bool {
+    queue.Stop();
+    deleteOnExit=true;
+    return true;
+  });
+}
 }

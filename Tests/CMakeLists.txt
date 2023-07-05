@@ -4,6 +4,9 @@ osmscout_test_project(NAME AccessParse SOURCES src/AccessParse.cpp)
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessing SOURCES src/AsyncProcessing.cpp)
 
+#---- AsyncWorker
+osmscout_test_project(NAME AsyncWorker SOURCES src/AsyncWorker.cpp)
+
 #---- Bearing
 osmscout_test_project(NAME Bearing SOURCES src/Bearing.cpp)
 
@@ -18,6 +21,9 @@ osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COM
 
 #---- CalculateResolution
 osmscout_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
+
+#---- CancelableFuture
+osmscout_test_project(NAME CancelableFuture SOURCES src/CancelableFuture.cpp)
 
 #---- CmdLineParsing
 osmscout_test_project(NAME CmdLineParsing SOURCES src/CmdLineParsing.cpp)
@@ -149,6 +155,9 @@ osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
+
+#---- Signal
+osmscout_test_project(NAME Signal SOURCES src/Signal.cpp)
 
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)

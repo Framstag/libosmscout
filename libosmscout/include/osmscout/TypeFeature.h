@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/util/Locale.h>
 #include <osmscout/util/TagErrorReporter.h>

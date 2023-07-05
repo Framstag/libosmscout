@@ -48,7 +48,7 @@
 #include <osmscout/navigation/ArrivalEstimateAgent.h>
 #include <osmscout/navigation/SpeedAgent.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 struct Arguments
 {

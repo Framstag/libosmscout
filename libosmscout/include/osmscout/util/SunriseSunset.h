@@ -25,7 +25,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 #include <osmscout/GeoCoord.h>
 #include <osmscout/system/Compiler.h>
 #include <osmscout/system/Math.h>

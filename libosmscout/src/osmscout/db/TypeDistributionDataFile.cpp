@@ -19,7 +19,7 @@
 
 #include <osmscout/db/TypeDistributionDataFile.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscout/io/File.h>
 #include <osmscout/io/FileScanner.h>

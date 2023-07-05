@@ -28,7 +28,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/Point.h>
 
@@ -50,7 +50,7 @@
 #include <osmscout/routing/RoutingProfile.h>
 #include <osmscout/routing/DBFileOffset.h>
 
-#include <osmscout/util/Breaker.h>
+#include <osmscout/async/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 #include <osmscout/system/Compiler.h>

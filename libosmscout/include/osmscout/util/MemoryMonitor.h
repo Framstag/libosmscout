@@ -24,19 +24,19 @@
 #include <mutex>
 #include <thread>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/system/Compiler.h>
 
 namespace osmscout {
 
   /**
-   * Starts a background threads that checks every 200ms the current memory usage of the current
+   * Starts a background thread that checks every 200ms the current memory usage of the current
    * process and accumulates it to return the maximum memory usage since start or reset.
    *
    * Thread is started on construction and join again on destruction (with up to 200ms wait time).
    *
-   * Implementation is OS specific, if GetValue() retutns 0.0 for each value there is likely no
+   * Implementation is OS specific, if GetValue() returns 0.0 for each value there is likely no
    * implementation for your OS.
    */
   class OSMSCOUT_API MemoryMonitor CLASS_FINAL
@@ -55,6 +55,10 @@ namespace osmscout {
 
   public:
     MemoryMonitor();
+    MemoryMonitor(const MemoryMonitor& other) = delete;
+    MemoryMonitor(MemoryMonitor&& other) = delete;
+    MemoryMonitor& operator=(const MemoryMonitor& other) = delete;
+    MemoryMonitor& operator=(MemoryMonitor&& other) = delete;
     ~MemoryMonitor();
 
     void GetMaxValue(double& vmUsage,

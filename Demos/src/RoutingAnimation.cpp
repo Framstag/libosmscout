@@ -34,7 +34,7 @@
 #include <osmscout/db/Database.h>
 
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
 

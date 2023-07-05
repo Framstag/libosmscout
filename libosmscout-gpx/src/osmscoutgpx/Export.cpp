@@ -18,7 +18,7 @@
 */
 
 #include <osmscoutgpx/Export.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/String.h>
 
 #include <libxml/xmlwriter.h>

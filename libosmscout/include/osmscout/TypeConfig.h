@@ -28,7 +28,7 @@
 #include <vector>
 #include <array>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/OSMScoutTypes.h>

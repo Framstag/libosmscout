@@ -20,6 +20,16 @@ AsyncProcessing =  executable('AsyncProcessing',
              install: true,
              install_dir: testInstallDir)
 
+AsyncWorker =  executable('AsyncWorker',
+             'src/AsyncWorker.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check asynchronous worker', AsyncWorker)
+
 TimeParse =  executable('TimeParse',
              'src/TimeParse.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -79,6 +89,16 @@ CalculateResolution = executable('CalculateResolution',
 
 test('Check position accuracy with coordinate bits', CalculateResolution)
 
+CancelableFuture = executable('CancelableFuture',
+             'src/CancelableFuture.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check cancelable future', CancelableFuture)
+
 CmdLineParsing = executable('CmdLineParsing',
              'src/CmdLineParsing.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -110,29 +130,16 @@ CoordinateEncoding = executable('CoordinateEncoding',
 test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
 
 if buildMapQt
-  if get_option('qtVersion') == 5
-    drawtextMocs = qt5.preprocess(moc_headers : ['include/DrawWindow.h'])
+    drawtextMocs = qt.preprocess(moc_headers : ['include/DrawWindow.h'])
 
     DrawTextQt = executable('DrawTextQt',
                  'src/DrawTextQt.cpp',
                  drawtextMocs,
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
-                 dependencies: [mathDep, openmpDep, qt5GuiDep, qt5WidgetsDep],
+                 dependencies: [mathDep, openmpDep, qtMapDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout],
                  install: true,
                  install_dir: testInstallDir)
-  elif get_option('qtVersion') == 6
-    drawtextMocs = qt6.preprocess(moc_headers : ['include/DrawWindow.h'])
-
-    DrawTextQt = executable('DrawTextQt',
-                 'src/DrawTextQt.cpp',
-                 drawtextMocs,
-                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
-                 dependencies: [mathDep, openmpDep, qt6GuiDep, qt6WidgetsDep],
-                 link_with: [osmscoutmapqt, osmscoutmap, osmscout],
-                 install: true,
-                 install_dir: testInstallDir)
-  endif
 endif
 
 EncodeNumber = executable('EncodeNumber',
@@ -318,11 +325,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
 
   if buildMapQt
     includes += osmscoutmapqtIncDir
-    if get_option('qtVersion') == 5
-      deps += [qt5WidgetsDep, qt5GuiDep]
-    elif get_option('qtVersion') == 6
-      deps += [qt6WidgetsDep, qt6GuiDep]
-    endif
+    deps += [qtMapDep]
     links += osmscoutmapqt
   endif
 
@@ -397,6 +400,15 @@ StdByteTest = executable('StdByteTest',
              dependencies: [mathDep],
              install: true,
              install_dir: testInstallDir)
+
+Signal = executable('Signal',
+             'src/Signal.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check signal', Signal)
 
 StringUtils = executable('StringUtils',
              'src/StringUtils.cpp',
@@ -572,55 +584,28 @@ foreach stylesheet : stylesheets
 endforeach
 
 if buildClientQt
-  if get_option('qtVersion') == 5
-    threadingMocs = qt5.preprocess(moc_headers : ['include/ClientQtThreading.h'])
+    threadingMocs = qt.preprocess(moc_headers : ['include/ClientQtThreading.h'])
 
     ClientQtThreading = executable('ClientQtThreading',
                  'src/ClientQtThreading.cpp',
                  threadingMocs,
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-                 dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
+                 dependencies: [mathDep, threadDep, openmpDep, qtClientDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
                  install: true,
                  install_dir: testInstallDir)
-  elif get_option('qtVersion') == 6
-    threadingMocs = qt6.preprocess(moc_headers : ['include/ClientQtThreading.h'])
-
-    ClientQtThreading = executable('ClientQtThreading',
-                 'src/ClientQtThreading.cpp',
-                 threadingMocs,
-                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-                 dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
-                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-                 override_options : ['unity=off'], # solves multiple definition of Q_DECLARE_METATYPE(osmscout::TileRef)
-                 install: true,
-                 install_dir: testInstallDir)
-  endif
 endif
 
 if buildClientQt
-  if get_option('qtVersion') == 5
-    testMocs = qt5.preprocess(moc_headers : ['include/DownloaderTest.h'])
+    testMocs = qt.preprocess(moc_headers : ['include/DownloaderTest.h'])
 
     QtFileDownloader = executable('QtFileDownloader',
                  'src/QtFileDownloader.cpp',
                  testMocs,
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-                 dependencies: [mathDep, threadDep, openmpDep, qt5GuiDep, qt5WidgetsDep, qt5QmlDep, qt5QuickDep, qt5NetworkDep, qt5MultimediaDep],
+                 dependencies: [mathDep, threadDep, openmpDep, qtClientDep],
                  link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
                  install: true,
                  install_dir: testInstallDir)
-  elif get_option('qtVersion') == 5
-    testMocs = qt6.preprocess(moc_headers : ['include/DownloaderTest.h'])
-
-    QtFileDownloader = executable('QtFileDownloader',
-                 'src/QtFileDownloader.cpp',
-                 testMocs,
-                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
-                 dependencies: [mathDep, threadDep, openmpDep, qt6GuiDep, qt6WidgetsDep, qt6QmlDep, qt6QuickDep, qt6NetworkDep, qt6MultimediaDep],
-                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
-                 install: true,
-                 install_dir: testInstallDir)
-  endif
 endif
 

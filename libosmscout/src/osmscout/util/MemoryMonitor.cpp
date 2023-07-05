@@ -18,7 +18,7 @@
 */
 
 #include <osmscout/util/MemoryMonitor.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 // For MemoryMonitor
 #ifdef __linux__

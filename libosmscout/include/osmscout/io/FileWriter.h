@@ -24,9 +24,8 @@
 #include <string>
 #include <vector>
 
-#include <osmscout/CoreImportExport.h>
-
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/lib/CoreImportExport.h>
+#include <osmscout/lib/CoreFeatures.h>
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/ObjectRef.h>

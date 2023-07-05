@@ -19,7 +19,7 @@
 
 #include <osmscoutmapopengl/ShaderUtils.h>
 #include <osmscout/io/File.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <string>
 #include <fstream>

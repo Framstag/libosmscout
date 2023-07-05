@@ -23,7 +23,7 @@
 #include <thread>
 #include <vector>
 
-#include <osmscout/util/ProcessingQueue.h>
+#include <osmscout/async/ProcessingQueue.h>
 #include <osmscout/util/StopClock.h>
 
 using namespace std::chrono_literals;

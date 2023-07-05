@@ -29,7 +29,7 @@
 #include <vector>
 #include <tuple>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>

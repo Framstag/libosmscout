@@ -60,7 +60,7 @@
 #include <osmscout/ost/Parser.h>
 #include <osmscout/ost/Scanner.h>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/Number.h>
 
 #include <osmscout/io/File.h>

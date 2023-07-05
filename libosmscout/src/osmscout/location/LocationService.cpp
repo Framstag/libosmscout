@@ -23,7 +23,7 @@
 #include <functional>
 #include <iostream>
 
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {

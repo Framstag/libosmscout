@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 namespace osmscout {
 

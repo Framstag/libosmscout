@@ -29,7 +29,7 @@
 
 #include <osmscout/io/FileWriter.h>
 
-#include <osmscout/util/WorkQueue.h>
+#include <osmscout/async/WorkQueue.h>
 
 #include <osmscoutimport/Import.h>
 #include <osmscoutimport/Preprocessor.h>

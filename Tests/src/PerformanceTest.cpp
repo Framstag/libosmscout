@@ -66,7 +66,7 @@
 
 #include <osmscout/system/Math.h>
 
-#include <osmscout/util/CmdLineParsing.h>
+#include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/Tiling.h>
 

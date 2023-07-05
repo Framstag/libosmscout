@@ -25,7 +25,7 @@
 
 #include <osmscout/system/Compiler.h>
 
-#include <osmscout/CoreImportExport.h>
+#include <osmscout/lib/CoreImportExport.h>
 
 namespace osmscout {
 
@@ -41,6 +41,7 @@ namespace osmscout {
 
   public:
     StopClock();
+    ~StopClock() = default;
 
     StopClock(const StopClock&) = delete; // We do not want you to make copies of a stop clock
     StopClock(StopClock&&) = default; // moves are fine
@@ -72,12 +73,15 @@ namespace osmscout {
     std::chrono::high_resolution_clock::time_point start;
     std::chrono::high_resolution_clock::time_point stop;
 
-  private:
-    // We do not want you to make copies of a stop clock
-    StopClockNano(const StopClockNano& other);
-
   public:
     StopClockNano();
+    ~StopClockNano() = default;
+
+    StopClockNano(const StopClockNano& other) = delete;
+    StopClockNano(StopClockNano &&) = default; // moves are fine
+
+    StopClockNano& operator=(const StopClockNano&) = delete;
+    StopClockNano& operator=(StopClockNano&&) = default;
 
     void Stop();
 

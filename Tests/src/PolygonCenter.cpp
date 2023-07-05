@@ -22,7 +22,7 @@
  * Some test cases copied from https://github.com/mapbox/polylabel/tree/master/test
  */
 #include <osmscout/util/PolygonCenter.h>
-#include <osmscout/util/Logger.h>
+#include <osmscout/log/Logger.h>
 
 #include <TestMain.h>
 
