@@ -52,7 +52,7 @@ set(TRANSLATION_SOURCE_FILES
 	../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp
 	)
 
-if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
+if(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED)
 	# See http://doc.qt.io/qt-6/cmake-manual.html
 	#
 	# qt5_create_translation macro process translations in two steps:
@@ -70,7 +70,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 		)
 
 	qt_add_resources(RESOURCE_FILES res.qrc)
-elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	# See http://doc.qt.io/qt-5/cmake-manual.html
 	#
 	# qt5_create_translation macro process translations in two steps:
@@ -103,7 +103,7 @@ target_include_directories(OSMScout2 PRIVATE "src")
 
 target_sources(OSMScout2 PRIVATE ${TRANSLATION_TS_FILES} ${TRANSLATION_QM_FILES})
 
-if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
+if(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED)
 	target_link_libraries(OSMScout2
 		OSMScout::OSMScout
 		OSMScout::Map
@@ -123,7 +123,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED})
 	if (Qt6Positioning_FOUND)
 		target_link_libraries(OSMScout2 Qt6::Positioning)
 	endif()
-elseif(${OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED})
+elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	target_link_libraries(OSMScout2
 		OSMScout::OSMScout
 		OSMScout::Map
