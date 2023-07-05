@@ -29,7 +29,10 @@ AvailableVoicesModel::AvailableVoicesModel()
 {
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   assert(settings);
-  voiceProviders = settings->GetVoiceProviders();
+  auto providers = settings->GetVoiceProviders();
+  for (const auto &provider: providers) {
+    voiceProviders << provider;
+  }
 
   diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
   webCtrl.setCache(&diskCache);

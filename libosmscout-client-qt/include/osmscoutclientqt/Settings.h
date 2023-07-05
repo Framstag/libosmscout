@@ -110,9 +110,9 @@ private:
   SettingsStoragePtr storage;
   double    physicalDpi;
   QMap<QString, OnlineTileProvider> onlineProviderMap;
-  QList<OnlineTileProvider> onlineProviders;
-  QList<MapProvider> mapProviders;
-  QList<VoiceProvider> voiceProviders;
+  std::vector<OnlineTileProvider> onlineProviders;
+  std::vector<MapProvider> mapProviders;
+  std::vector<VoiceProvider> voiceProviders;
 
 public:
   Signal<double> mapDPIChange;
@@ -145,11 +145,11 @@ public:
   bool GetOnlineTilesEnabled() const;
   void SetOnlineTilesEnabled(bool b);
 
-  const QList<OnlineTileProvider> GetOnlineProviders() const;
+  const std::vector<OnlineTileProvider> GetOnlineProviders() const;
   const OnlineTileProvider GetOnlineTileProvider() const;
 
-  const QList<MapProvider> GetMapProviders() const;
-  const QList<VoiceProvider> GetVoiceProviders() const;
+  const std::vector<MapProvider> GetMapProviders() const;
+  const std::vector<VoiceProvider> GetVoiceProviders() const;
 
   const std::string GetOnlineTileProviderId() const;
   void SetOnlineTileProviderId(const std::string &id);

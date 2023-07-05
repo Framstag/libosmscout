@@ -169,17 +169,17 @@ void Settings::SetOnlineTilesEnabled(bool b)
   }
 }
 
-const QList<OnlineTileProvider> Settings::GetOnlineProviders() const
+const std::vector<OnlineTileProvider> Settings::GetOnlineProviders() const
 {
   return onlineProviders;
 }
 
-const QList<MapProvider> Settings::GetMapProviders() const
+const std::vector<MapProvider> Settings::GetMapProviders() const
 {
   return mapProviders;
 }
 
-const QList<VoiceProvider> Settings::GetVoiceProviders() const
+const std::vector<VoiceProvider> Settings::GetVoiceProviders() const
 {
   return voiceProviders;
 }
@@ -195,7 +195,7 @@ const OnlineTileProvider Settings::GetOnlineTileProvider() const
 const std::string Settings::GetOnlineTileProviderId() const
 {
     QString def = "?";
-    if (!onlineProviders.isEmpty()){
+    if (!onlineProviders.empty()){
         def = onlineProviders.begin()->getId();
     }
     return storage->GetString("OSMScoutLib/Rendering/OnlineTileProvider", def.toStdString());
@@ -230,7 +230,7 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
         } else {
           if (!onlineProviderMap.contains(provider.getId())) {
             onlineProviderMap[provider.getId()] = provider;
-            onlineProviders << provider;
+            onlineProviders.push_back(provider);
           }
         }
       }
@@ -239,7 +239,7 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
     // check if current provider is valid...
     if (!onlineProviderMap.contains(QString::fromStdString(GetOnlineTileProviderId()))){
         // ...if not, setup first
-        if (!onlineProviders.isEmpty()){
+        if (!onlineProviders.empty()){
             SetOnlineTileProviderId(onlineProviders.begin()->getId().toStdString());
         }
     }
@@ -251,7 +251,7 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
 namespace { // anonymous namespace
 
 template <typename Provider>
-bool loadResourceProviders(const QString &path, QList<Provider> &providers)
+bool loadResourceProviders(const QString &path, std::vector<Provider> &providers)
 {
   QFile loadFile(path);
   if (!loadFile.open(QIODevice::ReadOnly)) {
@@ -266,7 +266,7 @@ bool loadResourceProviders(const QString &path, QList<Provider> &providers)
     if (!provider.isValid()){
       qWarning() << "Can't parse online provider from json value" << obj;
     }else{
-      providers.append(provider);
+      providers.push_back(provider);
     }
   }
   return true;

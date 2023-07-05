@@ -85,7 +85,10 @@ public:
   inline OnlineTileProviderModel()
   {
     auto settings=OSMScoutQt::GetInstance().GetSettings();
-    onlineProviders=settings->GetOnlineProviders();
+    auto providers=settings->GetOnlineProviders();
+    for (const auto &provider: providers) {
+      onlineProviders << provider;
+    }
   };
   
   virtual inline ~OnlineTileProviderModel(){};

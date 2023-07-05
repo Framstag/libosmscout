@@ -63,7 +63,10 @@ int AvailableMapsModelMap::getVersion() const
 AvailableMapsModel::AvailableMapsModel()
 {
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
-  mapProviders = settings->GetMapProviders();
+  auto providers = settings->GetMapProviders();
+  for (const auto &provider: providers) {
+    mapProviders << provider;
+  }
 
   diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
   webCtrl.setCache(&diskCache);
