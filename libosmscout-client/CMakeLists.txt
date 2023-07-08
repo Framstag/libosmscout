@@ -1,4 +1,6 @@
 set(HEADER_FILES
+    include/osmscoutclient/json/json.hpp
+    include/osmscoutclient/json/json_fwd.hpp
     include/osmscoutclient/ClientImportExport.h
 )
 
