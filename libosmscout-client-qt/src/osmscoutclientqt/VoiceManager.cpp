@@ -24,6 +24,9 @@
 #include <osmscoutclientqt/AvailableVoicesModel.h>
 
 #include <QDirIterator>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 namespace osmscout {
 

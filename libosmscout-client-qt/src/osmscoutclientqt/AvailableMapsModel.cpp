@@ -25,6 +25,9 @@
 
 #include <QString>
 #include <QtAlgorithms>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <algorithm>
 

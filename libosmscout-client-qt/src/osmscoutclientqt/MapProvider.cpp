@@ -19,21 +19,25 @@
 
 #include <osmscoutclientqt/MapProvider.h>
 
+#include <osmscoutclient/json/json.hpp>
+
 namespace osmscout {
 
-MapProvider MapProvider::fromJson(QJsonValue val)
+MapProvider MapProvider::fromJson(const nlohmann::json &obj)
 {
-  if (!val.isObject())
+  if (!obj.is_object()) {
     return MapProvider();
+  }
 
-  QJsonObject obj = val.toObject();
   auto name = obj["name"];
   auto uri = obj["uri"];
   auto listUri = obj["listUri"];
 
-  if (!(name.isString() && uri.isString() && listUri.isString())){
+  if (!(name.is_string() && uri.is_string() && listUri.is_string())){
     return MapProvider();
   }
-  return MapProvider(name.toString(), uri.toString(), listUri.toString());
+  return MapProvider(QString::fromStdString(name.get<std::string>()),
+                     QString::fromStdString(uri.get<std::string>()),
+                     QString::fromStdString(listUri.get<std::string>()));
 }
 }

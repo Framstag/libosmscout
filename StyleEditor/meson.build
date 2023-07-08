@@ -23,7 +23,7 @@ OSMScout2 = executable('StyleEditor',
                      styleeditorSrc,
                      styleeditorMocs,
                      cpp_args: ['-fPIC'],
-                     include_directories: [styleeditorIncDir, osmscoutclientqtIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                     include_directories: [styleeditorIncDir, osmscoutclientqtIncDir, osmscoutclientIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                      dependencies: [mathDep, openmpDep, qtClientDep],
                      link_with: [osmscoutclientqt, osmscoutmapqt, osmscoutmap, osmscout],
                      install: true)

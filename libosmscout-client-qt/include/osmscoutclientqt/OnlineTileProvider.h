@@ -23,9 +23,7 @@
 #include <QObject>
 #include <QDebug>
 
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
+#include <osmscoutclient/json/json_fwd.hpp>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
@@ -92,7 +90,7 @@ public:
     return copyright;
   }
 
-  static OnlineTileProvider fromJson(QJsonValue obj);
+  static OnlineTileProvider fromJson(const nlohmann::json &obj);
 
 private:
   bool valid{false};

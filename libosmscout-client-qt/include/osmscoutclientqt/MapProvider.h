@@ -24,11 +24,9 @@
 #include <QString>
 #include <QUrl>
 
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-
 #include <osmscoutclientqt/ClientQtImportExport.h>
+
+#include <osmscoutclient/json/json_fwd.hpp>
 
 namespace osmscout {
 
@@ -87,7 +85,7 @@ public:
     return valid;
   }
 
-  static MapProvider fromJson(QJsonValue obj);
+  static MapProvider fromJson(const nlohmann::json &obj);
 };
 
 }

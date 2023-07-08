@@ -20,6 +20,8 @@
 #include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <osmscoutclient/json/json.hpp>
+
 #include <QScreen>
 #include <QGuiApplication>
 #include <QStandardPaths>
@@ -214,25 +216,37 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
     // load online tile providers
     bool result = true;
     for (const auto &path : paths) {
-      QFile loadFile(path);
-      if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
+      std::vector<char> content;
+      if (!ReadFile(path.toStdString(), content)) {
+        qWarning() << "Couldn't open" << path << "file.";
         result = false;
         continue;
       }
-      qDebug() << "Loading online tile providers from " << loadFile.fileName();
+      qDebug() << "Loading online tile providers from " << path;
 
-      QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
-      for (auto obj: doc.array()) {
-        OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
-        if (!provider.isValid()) {
-          qWarning() << "Can't parse online provider from json value" << obj;
-        } else {
-          if (!onlineProviderMap.contains(provider.getId())) {
-            onlineProviderMap[provider.getId()] = provider;
-            onlineProviders.push_back(provider);
+      using json = nlohmann::json;
+      try {
+        auto doc = json::parse(content);
+        if (!doc.is_array()) {
+          qWarning() << "Json is not array " << QString::fromStdString(doc.dump());
+          result = false;
+          continue;
+        }
+        for (auto obj: doc) {
+          OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
+          if (!provider.isValid()) {
+            qWarning() << "Can't parse online provider from json value" << QString::fromStdString(obj.dump());
+            result = false;
+          } else {
+            if (!onlineProviderMap.contains(provider.getId())) {
+              onlineProviderMap[provider.getId()] = provider;
+              onlineProviders.push_back(provider);
+            }
           }
         }
+      } catch (const json::exception &e) {
+        qWarning() << "Failed to parse json from" << path << ":" << e.what();
+        result = false;
       }
     }
 
@@ -253,21 +267,31 @@ namespace { // anonymous namespace
 template <typename Provider>
 bool loadResourceProviders(const QString &path, std::vector<Provider> &providers)
 {
-  QFile loadFile(path);
-  if (!loadFile.open(QIODevice::ReadOnly)) {
-    qWarning() << "Couldn't open" << loadFile.fileName() << "file.";
+  std::vector<char> content;
+  if (!ReadFile(path.toStdString(), content)) {
+    qWarning() << "Couldn't open" << path << "file.";
     return false;
   }
-  qDebug() << "Loading providers from " << loadFile.fileName();
+  qDebug() << "Loading providers from " << path;
 
-  QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
-  for (auto obj: doc.array()){
-    Provider provider = Provider::fromJson(obj);
-    if (!provider.isValid()){
-      qWarning() << "Can't parse online provider from json value" << obj;
-    }else{
-      providers.push_back(provider);
+  using json = nlohmann::json;
+  try {
+    auto doc = json::parse(content);
+    if (!doc.is_array()) {
+      qWarning() << "Json is not array " << QString::fromStdString(doc.dump());
+    } else {
+      for (auto obj: doc) {
+        Provider provider = Provider::fromJson(obj);
+        if (!provider.isValid()) {
+          qWarning() << "Can't parse online provider from json value" << QString::fromStdString(obj.dump());
+        } else {
+          providers.push_back(provider);
+        }
+      }
     }
+  } catch (const json::exception &e) {
+    qWarning() << "Failed to parse json from" << path << ":" << e.what();
+    return false;
   }
   return true;
 }

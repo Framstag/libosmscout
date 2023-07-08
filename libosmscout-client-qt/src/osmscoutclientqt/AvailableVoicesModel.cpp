@@ -21,6 +21,10 @@
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include <algorithm>
 
 namespace osmscout {
