@@ -319,3 +319,10 @@ TEST_CASE("Trim string")
   REQUIRE(osmscout::Trim("  abc  ")=="abc");
   REQUIRE(osmscout::Trim("--  abc  --", '-')=="  abc  ");
 }
+
+TEST_CASE("String replace")
+{
+  REQUIRE(osmscout::ReplaceString("", "a", "b").empty());
+  REQUIRE(osmscout::ReplaceString("abc", "", "b")=="abc");
+  REQUIRE(osmscout::ReplaceString("abcabc", "a", "A")=="AbcAbc");
+}
