@@ -81,16 +81,18 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
 
-	if(NOT Qt5LinguistTools_FOUND)
-		if(APPLE)
-			find_package(
-				Qt5LinguistTools REQUIRED
-			    PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools"
-			)
-			message(WARNING "find_package search paths for Qt5 LinguistTools is version dependent")
-		endif()
+	if(NOT APPLE)
+		find_package(Qt5 REQUIRED
+				     COMPONENTS Core LinguistTools)					 
+	else()
+		# find_package(Qt5 REQUIRED
+		# 			COMPONENTS LinguistTools
+		# 			PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools")
+		find_package(Qt5 REQUIRED
+					COMPONENTS Core LinguistTools
+					PATHS "/usr/local/Cellar/qt@5")
 	endif()
-	
+
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
