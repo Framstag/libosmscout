@@ -24,6 +24,7 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/QtSettingsStorage.h>
+#include <osmscoutclientqt/QmlSettings.h>
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/MapWidget.h>
 #include <osmscoutclientqt/ElevationChartWidget.h>
