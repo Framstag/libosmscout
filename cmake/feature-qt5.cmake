@@ -4,18 +4,33 @@ set(OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT5_ENABLED OFF)
 set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED OFF)
 
 if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
-    find_package(Qt5
-                 REQUIRE
-                 QUIET
-                 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
-                 PATHS "/usr/local/Cellar/qt@5/5.15.10/")
+    if(APPLE)
+        find_package(Qt5
+                     REQUIRE
+                     QUIET
+                     COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
+                     PATHS "/usr/local/Cellar/qt@5/5.15.10/")
+    else()
+        find_package(Qt5
+                     REQUIRE
+                     QUIET
+                     COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
+    endif()
 else()
-    find_package(Qt5
-                 ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
-                 REQUIRE
-                 QUIET
-                 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
-                 PATHS "/usr/local/Cellar/qt@5/5.15.10/")
+    if(APPLE)
+        find_package(Qt5
+                     ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
+                     REQUIRE
+                     QUIET
+                     COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
+                     PATHS "/usr/local/Cellar/qt@5/5.15.10/")
+    else()
+        find_package(Qt5
+                     ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
+                     REQUIRE
+                     QUIET
+                     COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
+    endif()
 endif()
 
 message(STATUS "Qt5Core_FOUND: ", ${Qt5Core_FOUND})
