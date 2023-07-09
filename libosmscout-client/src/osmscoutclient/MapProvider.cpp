@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/MapProvider.h>
+#include <osmscoutclient/MapProvider.h>
 
 #include <osmscoutclient/json/json.hpp>
 
@@ -36,8 +36,8 @@ MapProvider MapProvider::fromJson(const nlohmann::json &obj)
   if (!(name.is_string() && uri.is_string() && listUri.is_string())){
     return MapProvider();
   }
-  return MapProvider(QString::fromStdString(name.get<std::string>()),
-                     QString::fromStdString(uri.get<std::string>()),
-                     QString::fromStdString(listUri.get<std::string>()));
+  return MapProvider(name.get<std::string>(),
+                     uri.get<std::string>(),
+                     listUri.get<std::string>());
 }
 }

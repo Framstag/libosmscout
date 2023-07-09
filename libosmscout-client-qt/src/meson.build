@@ -25,7 +25,6 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/OsmTileDownloader.cpp',
             'src/osmscoutclientqt/OSMTile.cpp',
             'src/osmscoutclientqt/TileCache.cpp',
-            'src/osmscoutclientqt/MapProvider.cpp',
             'src/osmscoutclientqt/AvailableMapsModel.cpp',
             'src/osmscoutclientqt/FileDownloader.cpp',
             'src/osmscoutclientqt/IconAnimation.cpp',

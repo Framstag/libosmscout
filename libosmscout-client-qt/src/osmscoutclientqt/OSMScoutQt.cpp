@@ -87,15 +87,23 @@ bool OSMScoutQtBuilder::Init()
   SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage));
   settingsStorage = nullptr;
 
+  auto StrVector = [](const QStringList &list) -> std::vector<std::string> {
+    std::vector<std::string> result;
+    for (const auto &str: list) {
+      result.push_back(str.toStdString());
+    }
+    return result;
+  };
+
   // load online tile providers
   if (!onlineTileProviders.isEmpty()){
-    settings->loadOnlineTileProviders(onlineTileProviders);
+    settings->loadOnlineTileProviders(StrVector(onlineTileProviders));
   }
   if (!mapProviders.isEmpty()){
-    settings->loadMapProviders(mapProviders);
+    settings->loadMapProviders(StrVector(mapProviders));
   }
   if (!voiceProviders.isEmpty()){
-    settings->loadVoiceProviders(voiceProviders);
+    settings->loadVoiceProviders(StrVector(voiceProviders));
   }
 
   // setup style sheet
@@ -176,6 +184,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<std::map<int,OverlayObjectRef>>("std::map<int,OverlayObjectRef>");
   qRegisterMetaType<MapIcon>("MapIcon");
   qRegisterMetaType<VoiceProvider>("VoiceProvider");
+  qRegisterMetaType<MapProvider>("MapProvider");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");

@@ -1,8 +1,8 @@
-#ifndef OSMSCOUT_CLIENT_QT_MAPPROVIDER_H
-#define OSMSCOUT_CLIENT_QT_MAPPROVIDER_H
+#ifndef OSMSCOUT_CLIENT_MAPPROVIDER_H
+#define OSMSCOUT_CLIENT_MAPPROVIDER_H
 
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2016 Lukas Karas
 
   This library is free software; you can redistribute it and/or
@@ -20,64 +20,57 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QObject>
-#include <QString>
-#include <QUrl>
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <osmscoutclient/json/json_fwd.hpp>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
-class OSMSCOUT_CLIENT_QT_API MapProvider: public QObject
+struct OSMSCOUT_CLIENT_API MapProvider
 {
-  Q_OBJECT
 
 private:
   bool valid=false;
-  QString uri;
-  QString listUri;
-  QString name;
+  std::string uri;
+  std::string listUri;
+  std::string name;
 
 public:
   MapProvider() = default;
+  MapProvider(const MapProvider &) = default;
+  MapProvider(MapProvider &&) = default;
 
-  MapProvider(const MapProvider &o):
-    QObject(o.parent()),
-    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
-
-  MapProvider(QString name, QString uri, QString listUri):
+  MapProvider(const std::string &name, const std::string &uri, const std::string &listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
 
-  ~MapProvider() override = default;
+  virtual ~MapProvider() = default;
 
-  MapProvider& operator=(const MapProvider &o)
-  {
-    valid = o.valid;
-    uri = o.uri;
-    listUri = o.listUri;
-    name = o.name;
+  MapProvider& operator=(const MapProvider &) = default;
+  MapProvider& operator=(MapProvider &&) = default;
 
-    return *this;
-  }
-
-  QString getName() const
+  std::string getName() const
   {
     return name;
   }
 
-  QString getUri() const
+  std::string getUri() const
   {
     return uri;
   }
 
-  QUrl getListUri(int fromVersion, int toVersion, QString locale="en") const
+  std::string getListUri(int fromVersion, int toVersion, std::string locale="en") const
   {
-    return listUri.arg(fromVersion).arg(toVersion).arg(locale);
+    std::string res = listUri;
+    res=ReplaceString(res, "%1", std::to_string(fromVersion));
+    res=ReplaceString(res, "%2", std::to_string(toVersion));
+    res=ReplaceString(res, "%3", locale);
+    return res;
   }
 
   bool isValid() const
@@ -90,6 +83,4 @@ public:
 
 }
 
-Q_DECLARE_METATYPE(osmscout::MapProvider)
-
-#endif // OSMSCOUT_CLIENT_QT_MAPPROVIDER_H
+#endif // OSMSCOUT_CLIENT_MAPPROVIDER_H

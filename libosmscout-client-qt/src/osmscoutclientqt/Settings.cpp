@@ -130,31 +130,31 @@ void Settings::SetOnlineTileProviderId(const std::string &id){
     }
 }
 
-bool Settings::loadOnlineTileProviders(const QStringList &paths)
+bool Settings::loadOnlineTileProviders(const std::vector<std::string> &paths)
 {
     // load online tile providers
     bool result = true;
     for (const auto &path : paths) {
       std::vector<char> content;
-      if (!ReadFile(path.toStdString(), content)) {
-        qWarning() << "Couldn't open" << path << "file.";
+      if (!ReadFile(path, content)) {
+        log.Warn() << "Couldn't open" << path << "file.";
         result = false;
         continue;
       }
-      qDebug() << "Loading online tile providers from " << path;
+      log.Debug() << "Loading online tile providers from " << path;
 
       using json = nlohmann::json;
       try {
         auto doc = json::parse(content);
         if (!doc.is_array()) {
-          qWarning() << "Json is not array " << QString::fromStdString(doc.dump());
+          log.Warn() << "Json is not array " << doc.dump();
           result = false;
           continue;
         }
         for (auto obj: doc) {
           OnlineTileProvider provider = OnlineTileProvider::fromJson(obj);
           if (!provider.isValid()) {
-            qWarning() << "Can't parse online provider from json value" << QString::fromStdString(obj.dump());
+            log.Warn() << "Can't parse online provider from json value" << obj.dump();
             result = false;
           } else {
             if (onlineProviderMap.find(provider.getId())==onlineProviderMap.end()) {
@@ -164,7 +164,7 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
           }
         }
       } catch (const json::exception &e) {
-        qWarning() << "Failed to parse json from" << path << ":" << e.what();
+        log.Warn() << "Failed to parse json from" << path << ":" << e.what();
         result = false;
       }
     }
@@ -184,39 +184,39 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
 namespace { // anonymous namespace
 
 template <typename Provider>
-bool loadResourceProviders(const QString &path, std::vector<Provider> &providers)
+bool loadResourceProviders(const std::string &path, std::vector<Provider> &providers)
 {
   std::vector<char> content;
-  if (!ReadFile(path.toStdString(), content)) {
-    qWarning() << "Couldn't open" << path << "file.";
+  if (!ReadFile(path, content)) {
+    log.Warn() << "Couldn't open " << path << " file.";
     return false;
   }
-  qDebug() << "Loading providers from " << path;
+  log.Debug() << "Loading providers from " << path;
 
   using json = nlohmann::json;
   try {
     auto doc = json::parse(content);
     if (!doc.is_array()) {
-      qWarning() << "Json is not array " << QString::fromStdString(doc.dump());
+      log.Warn() << "Json is not array " << doc.dump();
     } else {
       for (auto obj: doc) {
         Provider provider = Provider::fromJson(obj);
         if (!provider.isValid()) {
-          qWarning() << "Can't parse online provider from json value" << QString::fromStdString(obj.dump());
+          log.Warn() << "Can't parse online provider from json value " << obj.dump();
         } else {
           providers.push_back(provider);
         }
       }
     }
   } catch (const json::exception &e) {
-    qWarning() << "Failed to parse json from" << path << ":" << e.what();
+    log.Warn() << "Failed to parse json from " << path << ": " << e.what();
     return false;
   }
   return true;
 }
 }
 
-bool Settings::loadMapProviders(const QStringList &paths)
+bool Settings::loadMapProviders(const std::vector<std::string> &paths)
 {
   bool result = true;
   for (const auto &path:paths) {
@@ -225,7 +225,7 @@ bool Settings::loadMapProviders(const QStringList &paths)
   return !mapProviders.empty() && result;
 }
 
-bool Settings::loadVoiceProviders(const QStringList &paths)
+bool Settings::loadVoiceProviders(const std::vector<std::string> &paths)
 {
   bool result = true;
   for (const auto &path:paths) {

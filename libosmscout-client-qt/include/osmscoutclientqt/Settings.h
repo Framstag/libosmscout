@@ -26,10 +26,10 @@
 #include <osmscout/async/Signal.h>
 #include <osmscout/routing/RoutingProfile.h>
 
+#include <osmscoutclient/MapProvider.h>
 #include <osmscoutclient/OnlineTileProvider.h>
 #include <osmscoutclient/VoiceProvider.h>
 
-#include <osmscoutclientqt/MapProvider.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 // this variable should be defined by build system
@@ -126,9 +126,9 @@ public:
   const std::string GetOnlineTileProviderId() const;
   void SetOnlineTileProviderId(const std::string &id);
 
-  bool loadOnlineTileProviders(const QStringList &paths);
-  bool loadMapProviders(const QStringList &paths);
-  bool loadVoiceProviders(const QStringList &paths);
+  bool loadOnlineTileProviders(const std::vector<std::string> &paths);
+  bool loadMapProviders(const std::vector<std::string> &paths);
+  bool loadVoiceProviders(const std::vector<std::string> &paths);
 
   bool GetOfflineMap() const;
   void SetOfflineMap(bool);

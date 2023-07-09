@@ -25,7 +25,8 @@
 #include <QNetworkDiskCache>
 #include <QNetworkReply>
 
-#include <osmscoutclientqt/MapProvider.h>
+#include <osmscoutclient/MapProvider.h>
+
 #include <osmscoutclientqt/Settings.h>
 
 namespace osmscout {

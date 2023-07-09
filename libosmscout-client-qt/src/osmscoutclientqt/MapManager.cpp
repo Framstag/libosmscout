@@ -107,7 +107,7 @@ void MapDownloadJob::start()
 
   QStringList fileNames = MapDirectory::optionalFiles() + MapDirectory::mandatoryFiles();
 
-  DownloadJob::start(map.getProvider().getUri()+"/"+map.getServerDirectory(), fileNames);
+  DownloadJob::start(QString::fromStdString(map.getProvider().getUri())+"/"+map.getServerDirectory(), fileNames);
 }
 
 MapDirectory::MapDirectory(QDir dir):
