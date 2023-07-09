@@ -84,7 +84,7 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	if(NOT Qt5LinguistTools_FOUND)
 		if(APPLE)
 			find_package(
-				Qt5 REQUIRED COMPONENTS LinguistTools
+				Qt5LinguistTools REQUIRED
 			    PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools"
 			)
 			message(WARNING "find_package search paths for Qt5 LinguistTools is version dependent")
