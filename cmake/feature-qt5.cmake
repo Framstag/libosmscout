@@ -4,7 +4,7 @@ set(OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT5_ENABLED OFF)
 set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED OFF)
 
 if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
+    find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 else()
     find_package(Qt5 REQUIRED ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION} COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 endif()

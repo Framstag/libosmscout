@@ -62,7 +62,7 @@ if(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED)
 	#
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
-	find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+	find_package(Qt6 COMPONENTS LinguistTools)
 	qt_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
@@ -82,10 +82,10 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	#    in *.ts files with lrelease tool
 
 	if(NOT APPLE)
-		find_package(Qt5 REQUIRED
+		find_package(Qt5
 				     COMPONENTS Core LinguistTools)
 	else()
-		find_package(Qt5 REQUIRED
+		find_package(Qt5
 					 COMPONENTS Core LinguistTools)
 		# find_package(Qt5 REQUIRED
 		# 			 COMPONENTS LinguistTools
