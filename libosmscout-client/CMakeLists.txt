@@ -2,10 +2,11 @@ set(HEADER_FILES
     include/osmscoutclient/json/json.hpp
     include/osmscoutclient/json/json_fwd.hpp
     include/osmscoutclient/ClientImportExport.h
+    include/osmscoutclient/VoiceProvider.h
 )
 
 set(SOURCE_FILES
-	src/osmscoutclient/Empty.cpp
+	src/osmscoutclient/VoiceProvider.cpp
 )
 
 set(EXCLUDE_HEADER)

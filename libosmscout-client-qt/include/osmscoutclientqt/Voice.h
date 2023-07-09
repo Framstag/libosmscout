@@ -20,7 +20,8 @@
 */
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
-#include <osmscoutclientqt/VoiceProvider.h>
+
+#include <osmscoutclient/VoiceProvider.h>
 
 #include <QObject>
 #include <QDir>

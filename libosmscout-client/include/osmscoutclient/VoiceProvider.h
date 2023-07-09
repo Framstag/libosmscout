@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_CLIENT_QT_VOICEPROVIDER_H
-#define OSMSCOUT_CLIENT_QT_VOICEPROVIDER_H
+#ifndef OSMSCOUT_CLIENT_VOICEPROVIDER_H
+#define OSMSCOUT_CLIENT_VOICEPROVIDER_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -20,64 +20,53 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QObject>
-#include <QString>
-#include <QUrl>
+#include <string>
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <osmscoutclient/json/json_fwd.hpp>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
-class OSMSCOUT_CLIENT_QT_API VoiceProvider: public QObject
+struct OSMSCOUT_CLIENT_API VoiceProvider
 {
-  Q_OBJECT
-
 private:
   bool valid=false;
-  QString uri;
-  QString listUri;
-  QString name;
+  std::string uri;
+  std::string listUri;
+  std::string name;
 
 public:
   VoiceProvider() = default;
+  VoiceProvider(const VoiceProvider &) = default;
+  VoiceProvider(VoiceProvider &&) = default;
 
-  VoiceProvider(const VoiceProvider &o):
-    QObject(o.parent()),
-    valid(o.valid), uri(o.uri), listUri(o.listUri), name(o.name){};
-
-  VoiceProvider(const QString &name, const QString &uri, const QString &listUri):
+  VoiceProvider(const std::string &name, const std::string &uri, const std::string &listUri):
     valid(true), uri(uri), listUri(listUri), name(name) {}
 
-  ~VoiceProvider() override = default;
+  virtual ~VoiceProvider() = default;
 
-  VoiceProvider& operator=(const VoiceProvider &o)
-  {
-    valid = o.valid;
-    uri = o.uri;
-    listUri = o.listUri;
-    name = o.name;
+  VoiceProvider& operator=(const VoiceProvider&) = default;
+  VoiceProvider& operator=(VoiceProvider&&) = default;
 
-    return *this;
-  }
-
-  QString getName() const
+  std::string getName() const
   {
     return name;
   }
 
-  QString getUri() const
+  std::string getUri() const
   {
     return uri;
   }
 
-  QUrl getListUri(QString locale="en") const
+  std::string getListUri(const std::string &locale="en") const
   {
-    return listUri.arg(locale);
+    return ReplaceString(listUri, "%1", locale);
   }
 
   bool isValid() const
@@ -90,6 +79,4 @@ public:
 
 }
 
-Q_DECLARE_METATYPE(osmscout::VoiceProvider)
-
-#endif // OSMSCOUT_CLIENT_QT_VOICEPROVIDER_H
+#endif // OSMSCOUT_CLIENT_VOICEPROVIDER_H

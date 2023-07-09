@@ -81,7 +81,8 @@ void VoiceDownloadJob::start()
     return;
   }
 
-  DownloadJob::start(voice.getProvider().getUri()+"/"+voice.getDirectory(), Voice::files());
+  DownloadJob::start(QString::fromStdString(voice.getProvider().getUri()) + "/" + voice.getDirectory(),
+                     Voice::files());
 }
 
 VoiceManager::VoiceManager()

@@ -76,7 +76,7 @@ void AvailableVoicesModel::reload()
 
   QLocale locale;
   for (auto &provider: voiceProviders){
-    QUrl url = provider.getListUri(locale.name());
+    QUrl url = QUrl(QString::fromStdString(provider.getListUri(locale.name().toStdString())));
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());

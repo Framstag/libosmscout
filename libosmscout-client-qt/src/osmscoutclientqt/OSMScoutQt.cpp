@@ -173,6 +173,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<ElevationModule::ElevationPoints>("ElevationModule::ElevationPoints");
   qRegisterMetaType<std::map<int,OverlayObjectRef>>("std::map<int,OverlayObjectRef>");
   qRegisterMetaType<MapIcon>("MapIcon");
+  qRegisterMetaType<VoiceProvider>("VoiceProvider");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");

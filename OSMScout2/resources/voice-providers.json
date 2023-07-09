@@ -1,7 +1,7 @@
 [
   {
     "uri": "https://osmscout.karry.cz/voices",
-    "listUri": "https://osmscout.karry.cz/voices/list.json?locale=%3",
+    "listUri": "https://osmscout.karry.cz/voices/list.json?locale=%1",
     "name": "karry.cz"
   }
 ]

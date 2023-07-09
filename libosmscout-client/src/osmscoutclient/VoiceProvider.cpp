@@ -17,8 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/VoiceProvider.h>
-
+#include <osmscoutclient/VoiceProvider.h>
 #include <osmscoutclient/json/json.hpp>
 
 namespace osmscout {
@@ -36,8 +35,8 @@ VoiceProvider VoiceProvider::fromJson(const nlohmann::json &obj)
   if (!(name.is_string() && uri.is_string() && listUri.is_string())){
     return VoiceProvider();
   }
-  return VoiceProvider(QString::fromStdString(name.get<std::string>()),
-                       QString::fromStdString(uri.get<std::string>()),
-                       QString::fromStdString(listUri.get<std::string>()));
+  return VoiceProvider(name.get<std::string>(),
+                       uri.get<std::string>(),
+                       listUri.get<std::string>());
 }
 }

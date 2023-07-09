@@ -1,3 +1,3 @@
 osmscoutclientSrc = [
-             'src/osmscoutclient/Empty.cpp'
+             'src/osmscoutclient/VoiceProvider.cpp'
           ]

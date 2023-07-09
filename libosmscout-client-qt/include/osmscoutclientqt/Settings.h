@@ -28,10 +28,11 @@
 #include <osmscout/async/Signal.h>
 #include <osmscout/routing/RoutingProfile.h>
 
+#include <osmscoutclient/VoiceProvider.h>
+
 #include <osmscoutclientqt/InputHandler.h>
 #include <osmscoutclientqt/OnlineTileProvider.h>
 #include <osmscoutclientqt/MapProvider.h>
-#include <osmscoutclientqt/VoiceProvider.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 // this variable should be defined by build system

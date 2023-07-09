@@ -3,7 +3,8 @@ osmscoutclientIncDir = include_directories('.')
 osmscoutclientHeader = [
             'osmscoutclient/json/json.hpp',
             'osmscoutclient/json/json_fwd.hpp',
-            'osmscoutclient/ClientImportExport.h'
+            'osmscoutclient/ClientImportExport.h',
+            'osmscoutclient/VoiceProvider.h'
           ]
 
 if meson.version().version_compare('>=0.63.0')
