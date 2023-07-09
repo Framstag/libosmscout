@@ -62,7 +62,8 @@ if(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED)
 	#
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
-	find_package(Qt6 COMPONENTS LinguistTools)
+	find_package(Qt6 REQUIRED
+	             COMPONENTS LinguistTools)
 	qt_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
@@ -82,17 +83,12 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	#    in *.ts files with lrelease tool
 
 	if(NOT APPLE)
-		find_package(Qt5
+		find_package(Qt5 REQUIRED
 				     COMPONENTS Core LinguistTools)
 	else()
-		find_package(Qt5
-					 COMPONENTS Core LinguistTools)
-		# find_package(Qt5 REQUIRED
-		# 			 COMPONENTS LinguistTools
-		# 			 PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools")
-		# find_package(Qt5 REQUIRED
-		# 			 COMPONENTS Core LinguistTools
-		# 			 PATHS "/usr/local/Cellar/qt@5")
+		find_package(Qt5 REQUIRED
+					 COMPONENTS Core LinguistTools
+					 PATHS "/usr/local/Cellar/qt@5/5.15.10/")
 	endif()
 
 	message(STATUS "OSMScout2 Qt5LinguistTools_FOUND: ", ${Qt5LinguistTools_FOUND})
