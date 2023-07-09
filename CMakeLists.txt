@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 project(libosmscout VERSION 1.1.1 LANGUAGES C CXX)
 set(OSMSCOUT_LIBRARY_VERSION 1.1.1)
 
+if(NOT APPLE)
+  return()
+endif()
+
 # If we are called from conan, include and activate it cmake additions
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   message("Loading conan definitions...")
