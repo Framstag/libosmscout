@@ -87,14 +87,14 @@ private:
             }
         }
 
-        settings->SetCookieData(data);
+        settings->SetCookieData(std::vector<char>(data.data(), data.data() + data.size()));
     }
 
     void load()
     {
         QMutexLocker lock(&mutex);
-        const QByteArray data = settings->GetCookieData();
-        setAllCookies(QNetworkCookie::parseCookies(data));
+        const auto data = settings->GetCookieData();
+        setAllCookies(QNetworkCookie::parseCookies(QByteArray(data.data(), data.size())));
     }
 
     mutable QMutex mutex;

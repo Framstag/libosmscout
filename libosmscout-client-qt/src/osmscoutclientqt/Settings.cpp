@@ -461,15 +461,14 @@ const std::string Settings::GetHttpCacheDir() const
   return (cacheLocation + QDir::separator() + "OSMScoutHttpCache").toStdString();
 }
 
-const QByteArray Settings::GetCookieData() const
+const std::vector<char> Settings::GetCookieData() const
 {
-  auto bv = storage->GetBytes("OSMScoutLib/General/Cookies");
-  return QByteArray(bv.data(), bv.size());
+  return storage->GetBytes("OSMScoutLib/General/Cookies");
 }
 
-void Settings::SetCookieData(const QByteArray data)
+void Settings::SetCookieData(const std::vector<char> &data)
 {
-  storage->SetValue("OSMScoutLib/General/Cookies", std::vector<char>(data.data(), data.data() + data.size()));
+  storage->SetValue("OSMScoutLib/General/Cookies", data);
 }
 
 std::string Settings::GetUnits() const

@@ -194,8 +194,8 @@ public:
 
   const std::string GetHttpCacheDir() const;
 
-  const QByteArray GetCookieData() const;
-  void SetCookieData(QByteArray data);
+  const std::vector<char> GetCookieData() const;
+  void SetCookieData(const std::vector<char> &data);
 
   std::string GetUnits() const;
   void SetUnits(const std::string &units);
