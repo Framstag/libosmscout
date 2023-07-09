@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/OnlineTileProvider.h>
+#include <osmscoutclient/OnlineTileProvider.h>
 
 #include <osmscoutclient/json/json.hpp>
 
@@ -39,21 +39,21 @@ OnlineTileProvider OnlineTileProvider::fromJson(const nlohmann::json &val)
           maximumZoomLevel.is_number() && copyright.is_string())){
     return OnlineTileProvider();      
   }
-  
-  QStringList serverList;
+
+  std::vector<std::string> serverList;
   for (auto serverVal: servers){
       if (serverVal.is_string()){
-          serverList.append(QString::fromStdString(serverVal.get<std::string>()));
+          serverList.push_back(serverVal.get<std::string>());
       }
   }
   if (serverList.empty()){
     return OnlineTileProvider();
   }
   
-  return OnlineTileProvider(QString::fromStdString(id.get<std::string>()),
-                            QString::fromStdString(name.get<std::string>()),
+  return OnlineTileProvider(id.get<std::string>(),
+                            name.get<std::string>(),
                             serverList,
                             maximumZoomLevel.get<int>(),
-                            QString::fromStdString(copyright.get<std::string>()));
+                            copyright.get<std::string>());
 }
 }

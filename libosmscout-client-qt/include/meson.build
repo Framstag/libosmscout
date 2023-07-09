@@ -17,7 +17,6 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/NavigationModel.h',
             'osmscoutclientqt/VehiclePosition.h',
             'osmscoutclientqt/InputHandler.h',
-            'osmscoutclientqt/OnlineTileProvider.h',
             'osmscoutclientqt/OnlineTileProviderModel.h',
             'osmscoutclientqt/OpeningHoursModel.h',
             'osmscoutclientqt/SearchLocationModel.h',

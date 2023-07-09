@@ -2,7 +2,7 @@
 #define OSMSCOUT_CLIENT_VOICEPROVIDER_H
 
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2020 Lukas Karas
 
   This library is free software; you can redistribute it and/or

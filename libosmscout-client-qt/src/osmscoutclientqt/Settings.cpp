@@ -188,19 +188,20 @@ const std::vector<VoiceProvider> Settings::GetVoiceProviders() const
 
 const OnlineTileProvider Settings::GetOnlineTileProvider() const
 {
-    if (onlineProviderMap.contains(QString::fromStdString(GetOnlineTileProviderId()))){
-        return onlineProviderMap[QString::fromStdString(GetOnlineTileProviderId())];
+    if (auto it=onlineProviderMap.find(GetOnlineTileProviderId());
+        it!=onlineProviderMap.end()){
+        return it->second;
     }
     return OnlineTileProvider();
 }
 
 const std::string Settings::GetOnlineTileProviderId() const
 {
-    QString def = "?";
+    std::string def = "?";
     if (!onlineProviders.empty()){
         def = onlineProviders.begin()->getId();
     }
-    return storage->GetString("OSMScoutLib/Rendering/OnlineTileProvider", def.toStdString());
+    return storage->GetString("OSMScoutLib/Rendering/OnlineTileProvider", def);
 }
 
 void Settings::SetOnlineTileProviderId(const std::string &id){
@@ -238,7 +239,7 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
             qWarning() << "Can't parse online provider from json value" << QString::fromStdString(obj.dump());
             result = false;
           } else {
-            if (!onlineProviderMap.contains(provider.getId())) {
+            if (onlineProviderMap.find(provider.getId())==onlineProviderMap.end()) {
               onlineProviderMap[provider.getId()] = provider;
               onlineProviders.push_back(provider);
             }
@@ -251,10 +252,10 @@ bool Settings::loadOnlineTileProviders(const QStringList &paths)
     }
 
     // check if current provider is valid...
-    if (!onlineProviderMap.contains(QString::fromStdString(GetOnlineTileProviderId()))){
+    if (onlineProviderMap.find(GetOnlineTileProviderId())==onlineProviderMap.end()){
         // ...if not, setup first
         if (!onlineProviders.empty()){
-            SetOnlineTileProviderId(onlineProviders.begin()->getId().toStdString());
+            SetOnlineTileProviderId(onlineProviders.begin()->getId());
         }
     }
 
@@ -550,7 +551,7 @@ QString QmlSettings::onlineProviderCopyright()
 {
     OnlineTileProvider provider = settings->GetOnlineTileProvider();
     if (provider.isValid()){
-        return provider.getCopyright();
+        return QString::fromStdString(provider.getCopyright());
     }
     return "";
 }

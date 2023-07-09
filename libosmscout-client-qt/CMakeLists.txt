@@ -15,7 +15,6 @@ set(HEADER_FILES
     include/osmscoutclientqt/LocationEntry.h
     include/osmscoutclientqt/LocationInfoModel.h
     include/osmscoutclientqt/MapWidget.h
-    include/osmscoutclientqt/OnlineTileProvider.h
     include/osmscoutclientqt/OnlineTileProviderModel.h
     include/osmscoutclientqt/OpeningHoursModel.h
     include/osmscoutclientqt/OsmTileDownloader.h
@@ -74,7 +73,6 @@ set(SOURCE_FILES
     src/osmscoutclientqt/LocationEntry.cpp
     src/osmscoutclientqt/LocationInfoModel.cpp
     src/osmscoutclientqt/MapWidget.cpp
-    src/osmscoutclientqt/OnlineTileProvider.cpp
     src/osmscoutclientqt/OnlineTileProviderModel.cpp
     src/osmscoutclientqt/OpeningHoursModel.cpp
     src/osmscoutclientqt/OSMTile.cpp

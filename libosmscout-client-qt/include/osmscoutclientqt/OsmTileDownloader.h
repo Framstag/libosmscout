@@ -28,8 +28,9 @@
 #include <QImage>
 #include <QNetworkDiskCache>
 
+#include <osmscoutclient/OnlineTileProvider.h>
+
 #include <osmscoutclientqt/TileCache.h>
-#include <osmscoutclientqt/OnlineTileProvider.h>
 #include <osmscoutclientqt/Settings.h>
 
 namespace osmscout {

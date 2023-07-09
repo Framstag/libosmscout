@@ -22,7 +22,8 @@
 
 #include <QAbstractListModel>
 
-#include <osmscoutclientqt/OnlineTileProvider.h>
+#include <osmscoutclient/OnlineTileProvider.h>
+
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 

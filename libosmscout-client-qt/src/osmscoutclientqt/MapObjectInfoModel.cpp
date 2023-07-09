@@ -22,6 +22,8 @@
 
 #include <osmscoutclientqt/MapObjectInfoModel.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
+#include <osmscoutclientqt/InputHandler.h>
+
 #include <iostream>
 
 namespace osmscout {

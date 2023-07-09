@@ -13,7 +13,6 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/NavigationModel.cpp',
             'src/osmscoutclientqt/VehiclePosition.cpp',
             'src/osmscoutclientqt/InputHandler.cpp',
-            'src/osmscoutclientqt/OnlineTileProvider.cpp',
             'src/osmscoutclientqt/OnlineTileProviderModel.cpp',
             'src/osmscoutclientqt/OpeningHoursModel.cpp',
             'src/osmscoutclientqt/SearchLocationModel.cpp',
