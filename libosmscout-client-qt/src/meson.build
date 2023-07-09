@@ -9,6 +9,7 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/RouteStep.cpp',
             'src/osmscoutclientqt/QmlRoutingProfile.cpp',
             'src/osmscoutclientqt/QtRouteData.cpp',
+            'src/osmscoutclientqt/QtSettingsStorage.cpp',
             'src/osmscoutclientqt/NavigationModule.cpp',
             'src/osmscoutclientqt/NavigationModel.cpp',
             'src/osmscoutclientqt/VehiclePosition.cpp',

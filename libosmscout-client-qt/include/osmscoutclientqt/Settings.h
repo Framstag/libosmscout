@@ -65,32 +65,6 @@ public:
 
 using SettingsStoragePtr = std::shared_ptr<SettingsStorage>;
 
-class OSMSCOUT_CLIENT_QT_API QtSettingsStorage: public QObject, public SettingsStorage
-{
-private:
-  QSettings *storage;
-public:
-  /**
-   * @param providedStorage custom provider when not null. Storage takes ownership.
-   *    When it is null, default Qt settings is used.
-   */
-  explicit QtSettingsStorage(QSettings *providedStorage=nullptr);
-  virtual ~QtSettingsStorage() = default;
-
-  void SetValue(const std::string &key, double d) override;
-  void SetValue(const std::string &key, uint32_t i) override;
-  void SetValue(const std::string &key, const std::string &str) override;
-  void SetValue(const std::string &key, bool b) override;
-  void SetValue(const std::string &key, std::vector<char> bytes) override;
-  double GetDouble(const std::string &key, double defaultValue = 0) override;
-  uint32_t GetUInt(const std::string &key, uint32_t defaultValue = 0) override;
-  std::string GetString(const std::string &key, const std::string &defaultValue = "") override;
-  bool GetBool(const std::string &key, bool defaultValue = 0) override;
-  std::vector<char> GetBytes(const std::string &key) override;
-
-  std::vector<std::string> Keys(const std::string &prefix) override;
-};
-
 /**
  * \ingroup QtAPI
  *

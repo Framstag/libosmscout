@@ -51,6 +51,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/VehiclePosition.h
     include/osmscoutclientqt/QmlRoutingProfile.h
     include/osmscoutclientqt/QtRouteData.h
+    include/osmscoutclientqt/QtSettingsStorage.h
     include/osmscoutclientqt/RouteStep.h
     include/osmscoutclientqt/NearPOIModel.h
     include/osmscoutclientqt/POILookupModule.h
@@ -109,6 +110,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/RouteStep.cpp
     src/osmscoutclientqt/QmlRoutingProfile.cpp
     src/osmscoutclientqt/QtRouteData.cpp
+    src/osmscoutclientqt/QtSettingsStorage.cpp
     src/osmscoutclientqt/NearPOIModel.cpp
     src/osmscoutclientqt/POILookupModule.cpp
     src/osmscoutclientqt/InstalledMapsModel.cpp
