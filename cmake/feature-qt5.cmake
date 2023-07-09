@@ -7,13 +7,13 @@ if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
     find_package(Qt5
                  QUIET
                  COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
-                 PATHS "/usr/local/Cellar/qt@5/")
+                 PATHS "/usr/local/Cellar/qt@5/5.15.10/")
 else()
     find_package(Qt5
                  ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
                  QUIET
                  COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
-                 PATHS "/usr/local/Cellar/qt@5/")
+                 PATHS "/usr/local/Cellar/qt@5/5.15.10/")
 endif()
 
 message(STATUS "Qt5Core_FOUND: ", ${Qt5Core_FOUND})
