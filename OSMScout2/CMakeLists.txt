@@ -85,12 +85,12 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 		find_package(Qt5 REQUIRED
 				     COMPONENTS Core LinguistTools)					 
 	else()
-		# find_package(Qt5 REQUIRED
-		# 			COMPONENTS LinguistTools
-		# 			PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools")
 		find_package(Qt5 REQUIRED
-					COMPONENTS Core LinguistTools
-					PATHS "/usr/local/Cellar/qt@5")
+					 COMPONENTS LinguistTools
+					 PATHS "/usr/local/Cellar/qt@5/5.15.10/lib/cmake/Qt5LinguistTools")
+		# find_package(Qt5 REQUIRED
+		# 			 COMPONENTS Core LinguistTools
+		# 			 PATHS "/usr/local/Cellar/qt@5")
 	endif()
 
 	qt5_create_translation(
