@@ -95,6 +95,8 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 		# 			 PATHS "/usr/local/Cellar/qt@5")
 	endif()
 
+	message(STATUS "OSMScout2 Qt5LinguistTools_FOUND: ", ${Qt5LinguistTools_FOUND})
+
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
