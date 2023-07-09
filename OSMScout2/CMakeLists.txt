@@ -80,15 +80,21 @@ elseif(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT5_ENABLED)
 	#
 	#  - create binary translation files (*.qm) from translated phrases available
 	#    in *.ts files with lrelease tool
-	if(APPLE OR NOT ${Qt5LinguistTools_FOUND})
-		find_package(Qt5LinguistTools REQUIRED)
+	if(APPLE)
+		if(Qt5LinguistTools_FOUND)
+			message(STATUS ================== Qt5LinguistTools_FOUND on apple is true)
+		else()
+			message(STATUS ================== Qt5LinguistTools_FOUND on apple is false)
+			find_package(Qt5LinguistTools REQUIRED)
+		endif()
+		
 	endif()
 	
 	qt5_create_translation(
 		TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
 		${TRANSLATION_TS_FILES}
-		)
+	)
 
 	qt5_add_resources(RESOURCE_FILES res.qrc)
 else()
