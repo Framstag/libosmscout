@@ -9,6 +9,16 @@ else()
     find_package(Qt5 ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION} COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 endif()
 
+message(STATUS "Qt5Core_FOUND: ", ${Qt5Core_FOUND})
+message(STATUS "Qt5Gui_FOUND: ", ${Qt5Gui_FOUND})
+message(STATUS "Qt5Widgets_FOUND: ", ${Qt5Widgets_FOUND})
+message(STATUS "Qt5Qml_FOUND: ", ${Qt5Qml_FOUND})
+message(STATUS "Qt5Quick_FOUND: ", ${Qt5Quick_FOUND})
+message(STATUS "Qt5Svg_FOUND: ", ${Qt5Svg_FOUND})
+message(STATUS "Qt5Positioning_FOUND: ", ${Qt5Positioning_FOUND})
+message(STATUS "Qt5Multimedia_FOUND: ", ${Qt5Multimedia_FOUND})
+message(STATUS "Qt5LinguistTools_FOUND: ", ${Qt5LinguistTools_FOUND})
+
 set(HAVE_LIB_QT5_GUI ${Qt5Gui_FOUND})
 set(HAVE_LIB_QT5_WIDGETS ${Qt5Widgets_FOUND})
 

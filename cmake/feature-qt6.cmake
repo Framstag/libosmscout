@@ -1,4 +1,4 @@
-set(OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED OFF)
+set(OSMSCOUT_BUILD_MAP_QT_FOR_QT6_ENABLED OFF)6
 set(OSMSCOUT_BUILD_CLIENT_QT_FOR_QT6_ENABLED OFF)
 set(OSMSCOUT_BUILD_TOOL_OSMSCOUT2_FOR_QT6_ENABLED OFF)
 set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT6_ENABLED OFF)
@@ -8,6 +8,16 @@ if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
 else()
     find_package(Qt6 ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION} COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
 endif()
+
+message(STATUS "Qt6Core_FOUND: ", ${Qt6Core_FOUND})
+message(STATUS "Qt6Gui_FOUND: ", ${Qt6Gui_FOUND})
+message(STATUS "Qt6Widgets_FOUND: ", ${Qt6Widgets_FOUND})
+message(STATUS "Qt6Qml_FOUND: ", ${Qt6Qml_FOUND})
+message(STATUS "Qt6Quick_FOUND: ", ${Qt6Quick_FOUND})
+message(STATUS "Qt6Svg_FOUND: ", ${Qt6Svg_FOUND})
+message(STATUS "Qt6Positioning_FOUND: ", ${Qt6Positioning_FOUND})
+message(STATUS "Qt6Multimedia_FOUND: ", ${Qt6Multimedia_FOUND})
+message(STATUS "Qt6LinguistTools_FOUND: ", ${Qt6LinguistTools_FOUND})
 
 set(HAVE_LIB_QT6_GUI ${Qt6Gui_FOUND})
 set(HAVE_LIB_QT6_WIDGETS ${Qt6Widgets_FOUND})
