@@ -22,7 +22,6 @@ set(HEADER_FILES
     include/osmscoutclientqt/RoutingModel.h
     include/osmscoutclientqt/Router.h
     include/osmscoutclientqt/SearchLocationModel.h
-    include/osmscoutclientqt/Settings.h
     include/osmscoutclientqt/TileCache.h
     include/osmscoutclientqt/AvailableMapsModel.h
     include/osmscoutclientqt/PersistentCookieJar.h
@@ -81,7 +80,6 @@ set(SOURCE_FILES
     src/osmscoutclientqt/RoutingModel.cpp
     src/osmscoutclientqt/Router.cpp
     src/osmscoutclientqt/SearchLocationModel.cpp
-    src/osmscoutclientqt/Settings.cpp
     src/osmscoutclientqt/TileCache.cpp
     src/osmscoutclientqt/AvailableMapsModel.cpp
     src/osmscoutclientqt/MapManager.cpp

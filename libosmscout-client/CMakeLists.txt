@@ -4,12 +4,14 @@ set(HEADER_FILES
     include/osmscoutclient/MapProvider.h
     include/osmscoutclient/ClientImportExport.h
     include/osmscoutclient/OnlineTileProvider.h
+    include/osmscoutclient/Settings.h
     include/osmscoutclient/VoiceProvider.h
 )
 
 set(SOURCE_FILES
 	src/osmscoutclient/MapProvider.cpp
   src/osmscoutclient/OnlineTileProvider.cpp
+	src/osmscoutclient/Settings.cpp
 	src/osmscoutclient/VoiceProvider.cpp
 )
 

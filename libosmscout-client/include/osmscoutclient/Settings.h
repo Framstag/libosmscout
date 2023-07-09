@@ -1,8 +1,8 @@
-#ifndef OSMSCOUT_CLIENT_QT_SETTINGS_H
-#define OSMSCOUT_CLIENT_QT_SETTINGS_H
+#ifndef OSMSCOUT_CLIENT_SETTINGS_H
+#define OSMSCOUT_CLIENT_SETTINGS_H
 
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2013  Tim Teulings
 
   This library is free software; you can redistribute it and/or
@@ -20,17 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <memory>
-#include <map>
-
 #include <osmscout/async/Signal.h>
 #include <osmscout/routing/RoutingProfile.h>
 
+#include <osmscoutclient/ClientImportExport.h>
 #include <osmscoutclient/MapProvider.h>
 #include <osmscoutclient/OnlineTileProvider.h>
 #include <osmscoutclient/VoiceProvider.h>
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <memory>
+#include <map>
 
 // this variable should be defined by build system
 #ifndef LIBOSMSCOUT_VERSION_STRING
@@ -39,7 +38,12 @@
 
 namespace osmscout {
 
-struct OSMSCOUT_CLIENT_QT_API SettingsStorage
+/**
+ * \ingroup ClientAPI
+ *
+ * Abstract settings storage.
+ */
+struct OSMSCOUT_CLIENT_API SettingsStorage
 {
 public:
   virtual void SetValue(const std::string &key, double d) = 0;
@@ -63,7 +67,7 @@ public:
 using SettingsStoragePtr = std::shared_ptr<SettingsStorage>;
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  *
  * Settings provides central point mutable configuration of OSMScout library.
  * It uses Qt's QSettings for persistency. It may be accessed from DBThread instance.
@@ -76,11 +80,12 @@ using SettingsStoragePtr = std::shared_ptr<SettingsStorage>;
  *
  * Before program exit, resources should be released by calling Settings::FreeInstance.
  */
-class OSMSCOUT_CLIENT_QT_API Settings
+class OSMSCOUT_CLIENT_API Settings
 {
 private:
   SettingsStoragePtr storage;
-  double    physicalDpi;
+  double physicalDpi;
+  std::string defaultUnits;
   std::map<std::string, OnlineTileProvider> onlineProviderMap;
   std::vector<OnlineTileProvider> onlineProviders;
   std::vector<MapProvider> mapProviders;
@@ -103,7 +108,13 @@ public:
   Signal<std::string> unitsChanged;
 
 public:
-  explicit Settings(SettingsStoragePtr storage);
+  /**
+   *
+   * @param storage
+   * @param physicalDpi
+   * @param defaultUnits - metrics or imperial
+   */
+  Settings(SettingsStoragePtr storage, double physicalDpi, const std::string &defaultUnits);
   virtual ~Settings() = default;
 
   double GetPhysicalDPI() const;
@@ -162,8 +173,6 @@ public:
 
   bool GetShowAltLanguage() const;
   void SetShowAltLanguage(bool showAltLanguage);
-
-  const std::string GetHttpCacheDir() const;
 
   const std::vector<char> GetCookieData() const;
   void SetCookieData(const std::vector<char> &data);

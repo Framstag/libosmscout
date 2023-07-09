@@ -6,6 +6,7 @@ osmscoutclientHeader = [
             'osmscoutclient/ClientImportExport.h',
             'osmscoutclient/MapProvider.h',
             'osmscoutclient/OnlineTileProvider.h',
+            'osmscoutclient/Settings.h',
             'osmscoutclient/VoiceProvider.h'
           ]
 

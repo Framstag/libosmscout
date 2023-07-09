@@ -136,6 +136,9 @@ static const std::set<std::string> allowedDependencies{
     "osmscout.navigation => osmscout", // Fix this
 
     "osmscoutclient => osmscoutclient.json",
+    "osmscoutclient => osmscout.async",
+    "osmscoutclient => osmscout.io",
+    "osmscoutclient => osmscout.routing",
     "osmscoutclient => osmscout.util",
 
     "osmscoutclientqt => osmscout.system",

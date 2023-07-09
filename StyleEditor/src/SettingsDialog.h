@@ -28,7 +28,7 @@
 #include <QStandardItemModel>
 #include <QTableView>*/
 
-#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclient/Settings.h>
 
 class SettingsDialog : public QQuickView
 {

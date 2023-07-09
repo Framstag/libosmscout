@@ -18,10 +18,11 @@
 */
 
 #include <osmscoutclientqt/VoiceManager.h>
-#include <osmscoutclientqt/Settings.h>
+
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
-#include <osmscoutclientqt/AvailableVoicesModel.h>
 
 #include <QDirIterator>
 #include <QJsonDocument>

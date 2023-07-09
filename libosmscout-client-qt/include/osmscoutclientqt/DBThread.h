@@ -36,7 +36,8 @@
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmapqt/MapPainterQt.h>
 
-#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/TileCache.h>
 #include <osmscoutclientqt/OsmTileDownloader.h>
 #include <osmscoutclientqt/MapManager.h>

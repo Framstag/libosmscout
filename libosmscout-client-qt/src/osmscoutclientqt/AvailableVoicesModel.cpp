@@ -24,6 +24,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QStandardPaths>
 
 #include <algorithm>
 
@@ -38,7 +39,7 @@ AvailableVoicesModel::AvailableVoicesModel()
     voiceProviders << provider;
   }
 
-  diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
+  diskCache.setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "OSMScoutHttpCache");
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 

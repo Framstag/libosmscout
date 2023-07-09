@@ -21,6 +21,6 @@ OSMScout2 = executable('OSMScout2',
                      cpp_args: ['-fPIC'],
                      include_directories: [osmscout2IncDir, osmscoutgpxIncDir, osmscoutclientqtIncDir, osmscoutclientIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                      dependencies: [mathDep, openmpDep, qtClientDep],
-                     link_with: [osmscoutgpx, osmscoutclientqt, osmscoutmapqt, osmscoutmap, osmscout],
+                     link_with: [osmscoutgpx, osmscoutclientqt, osmscoutclient, osmscoutmapqt, osmscoutmap, osmscout],
                      install: true)
 

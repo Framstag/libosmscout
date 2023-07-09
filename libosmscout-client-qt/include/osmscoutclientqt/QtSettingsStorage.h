@@ -22,7 +22,7 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclient/Settings.h>
 
 #include <QObject>
 #include <QSettings>

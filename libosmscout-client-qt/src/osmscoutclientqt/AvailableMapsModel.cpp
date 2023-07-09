@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/util/String.h>
+
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/DBThread.h>
@@ -28,6 +29,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QStandardPaths>
 
 #include <algorithm>
 
@@ -71,7 +73,7 @@ AvailableMapsModel::AvailableMapsModel()
     mapProviders << provider;
   }
 
-  diskCache.setCacheDirectory(QString::fromStdString(settings->GetHttpCacheDir()));
+  diskCache.setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "OSMScoutHttpCache");
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 

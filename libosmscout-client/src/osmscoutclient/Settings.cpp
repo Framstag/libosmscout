@@ -1,5 +1,5 @@
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2013  Tim Teulings
 
   This library is free software; you can redistribute it and/or
@@ -17,37 +17,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/Settings.h>
-#include <osmscoutclientqt/OSMScoutQt.h>
+#include <osmscoutclient/Settings.h>
 
+#include <osmscout/io/File.h>
 #include <osmscoutclient/json/json.hpp>
-
-#include <QScreen>
-#include <QGuiApplication>
-#include <QStandardPaths>
-#include <QDir>
-#include <QObject>
-#include <QDebug>
-#include <QFileInfo>
-#include <QJsonDocument>
-#include <QLocale>
 
 namespace osmscout {
 
-Settings::Settings(SettingsStoragePtr storage):
-  storage(storage)
+Settings::Settings(SettingsStoragePtr storage, double physicalDpi, const std::string &defaultUnits):
+  storage(storage), physicalDpi(physicalDpi), defaultUnits(defaultUnits)
 {
-    /* Warning: Sailfish OS before version 2.0.1 reports incorrect DPI (100)
-     *
-     * Some DPI values:
-     *
-     * ~ 330 - Jolla tablet native
-     *   242.236 - Jolla phone native
-     *   130 - PC (24" FullHD)
-     *   100 - Qt default (reported by SailfishOS < 2.0.1)
-     */
-    QScreen *srn=QGuiApplication::screens().at(0);
-    physicalDpi = (double)srn->physicalDotsPerInch();
+  // no code
 }
 
 double Settings::GetPhysicalDPI() const
@@ -300,8 +280,7 @@ const std::string Settings::GetStyleSheetFile() const
 }
 const std::string Settings::GetStyleSheetAbsoluteFile() const
 {
-  return QFileInfo(QString::fromStdString(GetStyleSheetDirectory()), QString::fromStdString(GetStyleSheetFile()))
-    .absoluteFilePath().toStdString();
+  return GetStyleSheetDirectory() + "/" + GetStyleSheetFile();
 }
 void Settings::SetStyleSheetFile(const std::string &file)
 {
@@ -373,12 +352,6 @@ void Settings::SetShowAltLanguage(bool showAltLanguage)
   }
 }
 
-const std::string Settings::GetHttpCacheDir() const
-{
-  QString cacheLocation = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-  return (cacheLocation + QDir::separator() + "OSMScoutHttpCache").toStdString();
-}
-
 const std::vector<char> Settings::GetCookieData() const
 {
   return storage->GetBytes("OSMScoutLib/General/Cookies");
@@ -391,18 +364,7 @@ void Settings::SetCookieData(const std::vector<char> &data)
 
 std::string Settings::GetUnits() const
 {
-  QLocale locale;
-  QString defaultUnits;
-  switch (locale.measurementSystem()){
-    case QLocale::ImperialUSSystem:
-    case QLocale::ImperialUKSystem:
-      defaultUnits="imperial";
-      break;
-    case QLocale::MetricSystem:
-    default:
-      defaultUnits="metrics";
-  }
-  return storage->GetString("OSMScoutLib/General/Units", defaultUnits.toStdString());
+  return storage->GetString("OSMScoutLib/General/Units", defaultUnits);
 }
 
 void Settings::SetUnits(const std::string &units)

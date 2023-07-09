@@ -26,8 +26,9 @@
 #include <QNetworkReply>
 
 #include <osmscoutclient/MapProvider.h>
+#include <osmscoutclient/Settings.h>
 
-#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclientqt/ClientQtImportExport.h>
 
 namespace osmscout {
 

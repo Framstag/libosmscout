@@ -23,8 +23,8 @@
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <osmscoutclient/MapProvider.h>
+#include <osmscoutclient/Settings.h>
 
-#include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/FileDownloader.h>
 

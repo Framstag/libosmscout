@@ -21,8 +21,9 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/OSMScoutQt.h>
-#include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/QtSettingsStorage.h>
 #include <osmscoutclientqt/QmlSettings.h>
 #include <osmscoutclientqt/DBThread.h>
@@ -56,6 +57,8 @@
 #include <QMetaType>
 #include <QQmlEngine>
 #include <QStandardPaths>
+#include <QGuiApplication>
+#include <QScreen>
 
 #include <optional>
 
@@ -84,7 +87,31 @@ bool OSMScoutQtBuilder::Init()
     return false;
   }
 
-  SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage));
+  /* Warning: Sailfish OS before version 2.0.1 reports incorrect DPI (100)
+   *
+   * Some DPI values:
+   *
+   * ~ 330 - Jolla tablet native
+   *   242.236 - Jolla phone native
+   *   130 - PC (24" FullHD)
+   *   100 - Qt default (reported by SailfishOS < 2.0.1)
+   */
+  QScreen *srn=QGuiApplication::screens().at(0);
+  double physicalDpi = (double)srn->physicalDotsPerInch();
+
+  QLocale locale;
+  QString defaultUnits;
+  switch (locale.measurementSystem()){
+    case QLocale::ImperialUSSystem:
+    case QLocale::ImperialUKSystem:
+      defaultUnits="imperial";
+      break;
+    case QLocale::MetricSystem:
+    default:
+      defaultUnits="metrics";
+  }
+
+  SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage), physicalDpi, defaultUnits.toStdString());
   settingsStorage = nullptr;
 
   auto StrVector = [](const QStringList &list) -> std::vector<std::string> {

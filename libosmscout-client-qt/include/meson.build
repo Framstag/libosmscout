@@ -22,7 +22,6 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/OnlineTileProviderModel.h',
             'osmscoutclientqt/OpeningHoursModel.h',
             'osmscoutclientqt/SearchLocationModel.h',
-            'osmscoutclientqt/Settings.h',
             'osmscoutclientqt/MapWidget.h',
             'osmscoutclientqt/LocationEntry.h',
             'osmscoutclientqt/LocationInfoModel.h',
