@@ -6,13 +6,13 @@ set(OSMSCOUT_BUILD_TOOL_STYLEEDITOR_FOR_QT5_ENABLED OFF)
 if(NOT ${QT_MINOR_VERSION} OR ${QT_MINOR_VERSION} STREQUAL "")
     if(APPLE)
         find_package(Qt5
-                     REQUIRE
+                     REQUIRED
                      QUIET
                      COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
                      PATHS "/usr/local/Cellar/qt@5/5.15.10/")
     else()
         find_package(Qt5
-                     REQUIRE
+                     REQUIRED
                      QUIET
                      COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
     endif()
@@ -20,14 +20,14 @@ else()
     if(APPLE)
         find_package(Qt5
                      ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
-                     REQUIRE
+                     REQUIRED
                      QUIET
                      COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools
                      PATHS "/usr/local/Cellar/qt@5/5.15.10/")
     else()
         find_package(Qt5
                      ${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}
-                     REQUIRE
+                     REQUIRED
                      QUIET
                      COMPONENTS Core Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
     endif()
