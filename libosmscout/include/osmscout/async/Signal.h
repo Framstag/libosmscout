@@ -26,6 +26,7 @@
 #include <mutex>
 #include <set>
 #include <memory>
+#include <vector>
 
 namespace osmscout {
 

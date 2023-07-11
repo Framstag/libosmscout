@@ -19,6 +19,15 @@
 
 #include <osmscout/async/ThreadFinalizer.h>
 
+namespace { // anonymous namespace
+  thread_local struct osmscout::ThreadFinalizer threadFinalizer{};
+}
+
 namespace osmscout {
-  thread_local ThreadFinalizer threadFinalizer{};
+
+  struct ThreadFinalizer& ThreadFinalizer()
+  {
+    return threadFinalizer;
+  }
+
 }

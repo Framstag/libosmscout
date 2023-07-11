@@ -19,7 +19,7 @@ TEST_CASE("Thread finalizer") {
 
   std::thread t1([&threadEndSlot](){
     std::cout << "ThreadFn " << std::this_thread::get_id() << std::endl;
-    osmscout::threadFinalizer.threadExit.Connect(threadEndSlot);
+    osmscout::ThreadFinalizer().threadExit.Connect(threadEndSlot);
   });
 
   t1.join();

@@ -50,7 +50,7 @@ namespace osmscout {
    * some threads may be still running on program exit. For example detached
    * thread, global scheduler threads, when std::exit is called...
    */
-  extern thread_local OSMSCOUT_API ThreadFinalizer threadFinalizer;
+  extern OSMSCOUT_API ThreadFinalizer& ThreadFinalizer();
 }
 
 #endif //LIBOSMSCOUT_THREADFINALIZER_H
