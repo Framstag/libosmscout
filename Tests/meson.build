@@ -434,6 +434,17 @@ test('Check threaded database', ThreadedDatabase, args : [
         meson.current_source_dir() + '/data/testregion',
         meson.current_source_dir() + '/../stylesheets/standard.oss'])
 
+
+ThreadFinalizer = executable('ThreadFinalizer',
+             'src/ThreadFinalizer.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, threadDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check thread finalizer', ThreadFinalizer)
+
 SunriseSunset = executable('SunriseSunset',
              'src/SunriseSunsetTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

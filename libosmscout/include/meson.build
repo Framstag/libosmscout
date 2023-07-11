@@ -11,6 +11,7 @@ osmscoutHeader = [
             'osmscout/async/ProcessingQueue.h',
             'osmscout/async/Signal.h',
             'osmscout/async/Thread.h',
+            'osmscout/async/ThreadFinalizer.h',
             'osmscout/async/Worker.h',
             'osmscout/async/WorkQueue.h',
             'osmscout/feature/AccessFeature.h',

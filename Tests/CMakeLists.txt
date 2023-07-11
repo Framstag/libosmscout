@@ -59,6 +59,9 @@ else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
 
+#---- ThreadFinalizer
+osmscout_test_project(NAME ThreadFinalizer SOURCES src/ThreadFinalizer.cpp)
+
 #---- TextLookupTest
 if(MARISA_FOUND)
 	osmscout_demo_project(NAME TextLookupTest SOURCES src/TextLookupTest.cpp TARGET OSMScout::OSMScout OSMScout::OSMScout)

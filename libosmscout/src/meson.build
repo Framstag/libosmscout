@@ -6,6 +6,7 @@ osmscoutSrc = [
             'src/osmscout/async/AsyncWorker.cpp',
             'src/osmscout/async/Breaker.cpp',
             'src/osmscout/async/Thread.cpp',
+            'src/osmscout/async/ThreadFinalizer.cpp',
             'src/osmscout/async/Worker.cpp',
             'src/osmscout/async/WorkQueue.cpp',
             'src/osmscout/feature/AccessFeature.cpp',

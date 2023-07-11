@@ -40,6 +40,7 @@ set(HEADER_FILES_ASYNC
         include/osmscout/async/ProcessingQueue.h
         include/osmscout/async/Signal.h
         include/osmscout/async/Thread.h
+        include/osmscout/async/ThreadFinalizer.h
         include/osmscout/async/Worker.h
         include/osmscout/async/WorkQueue.h)
 
@@ -217,6 +218,7 @@ set(SOURCE_FILES
     src/osmscout/async/AsyncWorker.cpp
     src/osmscout/async/Breaker.cpp
     src/osmscout/async/Thread.cpp
+    src/osmscout/async/ThreadFinalizer.cpp
     src/osmscout/async/Worker.cpp
     src/osmscout/async/WorkQueue.cpp
     src/osmscout/feature/AccessFeature.cpp
