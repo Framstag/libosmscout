@@ -327,6 +327,20 @@ namespace osmscout {
                                                          int maxSize=-1);
 
   /**
+   * \ingroup Util
+   * Replace all occurrences of search in input string by some other string.
+   * When search is empty, unchanged input string is returned.
+   *
+   * @param in - input string
+   * @param search
+   * @param replacement
+   * @return
+   */
+  extern OSMSCOUT_API std::string ReplaceString(const std::string &in,
+                                                const std::string &search,
+                                                const std::string &replacement);
+
+  /**
    * Split string by separator to two parts. Unlike SplitString with maxSize=2,
    * second element contains the rest of the string after first separator.
    * When no separator found, nullopt is returned.

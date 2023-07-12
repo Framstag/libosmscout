@@ -425,6 +425,25 @@ namespace osmscout {
     return result;
   }
 
+  std::string ReplaceString(const std::string &in,
+                            const std::string &search,
+                            const std::string &replacement)
+  {
+    if (search.empty()) {
+      return in;
+    }
+    auto arr=SplitString(in, search);
+    std::ostringstream buff;
+    for (auto it=arr.begin(); it!=arr.end();) {
+      buff << *it;
+      ++it;
+      if (it!=arr.end()) {
+        buff << replacement;
+      }
+    }
+    return buff.str();
+  }
+
   std::optional<std::pair<std::string,std::string>> SplitStringToPair(const std::string& str,
                                                                       const std::string& separator)
   {
