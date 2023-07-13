@@ -22,6 +22,8 @@
 
 #include <osmscout/lib/CoreImportExport.h>
 
+#include <osmscout/async/Signal.h>
+
 #include <string>
 #include <thread>
 
@@ -41,6 +43,13 @@ namespace osmscout {
    * @return true if supported and successful, else otherwise
    */
   extern OSMSCOUT_API bool SetThreadName(std::thread &thread, const std::string &name);
+
+  /** Signal that is emitted on thread exit.
+   * It is not guaranteed that signal will be emitted for all threads,
+   * some threads may be still running on program exit. For example detached
+   * thread, global scheduler threads, when std::exit is called...
+   */
+  extern OSMSCOUT_API Signal<std::thread::id>& ThreadExitSignal();
 }
 
 #endif //LIBOSMSCOUT_THREAD_H

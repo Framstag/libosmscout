@@ -50,4 +50,30 @@ bool SetThreadName(std::thread &/*thread*/, const std::string &/*name*/)
     return false;
 }
 #endif
+
+namespace {
+  struct ThreadFinalizer
+  {
+    Signal<std::thread::id> threadExit;
+
+    ThreadFinalizer() = default;
+    ThreadFinalizer(const ThreadFinalizer &) = delete;
+    ThreadFinalizer(ThreadFinalizer &&) = delete;
+
+    virtual ~ThreadFinalizer()
+    {
+      threadExit.Emit(std::this_thread::get_id());
+    }
+
+    ThreadFinalizer &operator=(const ThreadFinalizer &) = delete;
+    ThreadFinalizer &operator=(ThreadFinalizer &&) = delete;
+  };
+
+  thread_local struct osmscout::ThreadFinalizer threadFinalizer{};
+}
+
+Signal<std::thread::id>& ThreadExitSignal()
+{
+  return threadFinalizer.threadExit;
+}
 }
