@@ -23,8 +23,12 @@
 #ifndef UNICODE
 #define UNICODE
 #endif
+#if !defined(NOMINMAX)
 #define NOMINMAX // msvc issue with std::max/min
+#endif
+#if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
+#endif
 
 #include <windows.h>
 

@@ -87,6 +87,9 @@ else()
 	message("Skip TextLookupTest test, Marisa library is missing.")
 endif()
 
+#---- Thread
+osmscout_test_project(NAME Thread SOURCES src/Thread.cpp)
+
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
 	set(src_files src/DrawTextQt.cpp include/DrawWindow.h)
