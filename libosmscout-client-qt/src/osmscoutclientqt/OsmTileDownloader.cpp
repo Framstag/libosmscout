@@ -23,9 +23,9 @@
 #include <QRandomGenerator>
 #endif
 
+#include <osmscoutclient/OnlineTileProvider.h>
+
 #include <osmscoutclientqt/OsmTileDownloader.h>
-#include <osmscoutclientqt/OnlineTileProvider.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 namespace osmscout {
@@ -72,12 +72,12 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
     return;
   }
 
-  QStringList servers = tileProvider.getServers();
+  auto servers = tileProvider.getServers();
   if (servers.empty()){
     emit failed(zoomLevel, x, y, false);
     return;
   }
-  QString server = servers.at(serverNumber % servers.size());
+  QString server = QString::fromStdString(servers[serverNumber % servers.size()]);
 
   QUrl tileUrl(server.arg(zoomLevel).arg(x).arg(y));
   qDebug() << "Download tile" << tileUrl << "(current thread:" << QThread::currentThread() << ")";

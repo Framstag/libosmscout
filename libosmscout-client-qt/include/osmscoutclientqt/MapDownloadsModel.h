@@ -20,17 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscoutclientqt/ClientQtImportExport.h>
+
+#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/DBThread.h>
+
 #include <QObject>
 #include <QStringList>
 #include <QList>
 #include <QDir>
 #include <QTimer>
-
-#include <osmscoutclientqt/ClientQtImportExport.h>
-
-#include <osmscoutclientqt/MapProvider.h>
-#include <osmscoutclientqt/MapManager.h>
-#include <osmscoutclientqt/DBThread.h>
 
 namespace osmscout {
 

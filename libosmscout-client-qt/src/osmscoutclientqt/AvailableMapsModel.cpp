@@ -18,6 +18,7 @@
 */
 
 #include <osmscout/util/String.h>
+
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/DBThread.h>
@@ -25,6 +26,10 @@
 
 #include <QString>
 #include <QtAlgorithms>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QStandardPaths>
 
 #include <algorithm>
 
@@ -63,9 +68,12 @@ int AvailableMapsModelMap::getVersion() const
 AvailableMapsModel::AvailableMapsModel()
 {
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
-  mapProviders = settings->GetMapProviders();
+  auto providers = settings->GetMapProviders();
+  for (const auto &provider: providers) {
+    mapProviders << provider;
+  }
 
-  diskCache.setCacheDirectory(settings->GetHttpCacheDir());
+  diskCache.setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "OSMScoutHttpCache");
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 
@@ -78,10 +86,10 @@ void AvailableMapsModel::reload()
 
   QLocale locale;
   for (const auto &provider: mapProviders){
-    QUrl url = provider.getListUri(osmscout::TypeConfig::MIN_FORMAT_VERSION,
-                                   osmscout::TypeConfig::MAX_FORMAT_VERSION,
-                                   locale.name());
-    QNetworkRequest request(url);
+    std::string url = provider.getListUri(osmscout::TypeConfig::MIN_FORMAT_VERSION,
+                                          osmscout::TypeConfig::MAX_FORMAT_VERSION,
+                                          locale.name().toStdString());
+    QNetworkRequest request(QUrl(QString::fromStdString(url)));
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());
 
@@ -307,7 +315,7 @@ QVariant AvailableMapsModel::data(const QModelIndex &index, int role) const
     case SizeRole:
       return map==nullptr ? "": QVariant(map->getSizeHuman());
     case ProviderUriRole:
-      return map==nullptr ? QVariant(): map->getProvider().getName();
+      return map==nullptr ? QVariant(): QString::fromStdString(map->getProvider().getName());
     case DescriptionRole:
       return item->getDescription();
     case MapRole:

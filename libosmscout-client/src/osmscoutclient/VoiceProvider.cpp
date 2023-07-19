@@ -1,6 +1,6 @@
 /*
   This source is part of the libosmscout-map library
-  Copyright (C) 2016  Lukáš Karas
+  Copyright (C) 2020  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,23 +17,26 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/MapProvider.h>
+#include <osmscoutclient/VoiceProvider.h>
+#include <osmscoutclient/json/json.hpp>
 
 namespace osmscout {
 
-MapProvider MapProvider::fromJson(QJsonValue val)
+VoiceProvider VoiceProvider::fromJson(const nlohmann::json &obj)
 {
-  if (!val.isObject())
-    return MapProvider();
+  if (!obj.is_object()) {
+    return VoiceProvider();
+  }
 
-  QJsonObject obj = val.toObject();
   auto name = obj["name"];
   auto uri = obj["uri"];
   auto listUri = obj["listUri"];
 
-  if (!(name.isString() && uri.isString() && listUri.isString())){
-    return MapProvider();
+  if (!(name.is_string() && uri.is_string() && listUri.is_string())){
+    return VoiceProvider();
   }
-  return MapProvider(name.toString(), uri.toString(), listUri.toString());
+  return VoiceProvider(name.get<std::string>(),
+                       uri.get<std::string>(),
+                       listUri.get<std::string>());
 }
 }

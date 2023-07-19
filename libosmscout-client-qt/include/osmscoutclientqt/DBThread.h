@@ -36,7 +36,8 @@
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmapqt/MapPainterQt.h>
 
-#include <osmscoutclientqt/Settings.h>
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/TileCache.h>
 #include <osmscoutclientqt/OsmTileDownloader.h>
 #include <osmscoutclientqt/MapManager.h>
@@ -116,6 +117,8 @@ signals:
   void databaseLoadFinished(osmscout::GeoBox boundingBox);
   void styleErrorsChanged();
 
+  void mapDpiSignal(double);
+
 public slots:
   void ToggleDaylight();
   void onMapDPIChange(double dpi);
@@ -161,6 +164,12 @@ private:
   QList<StyleError>                  styleErrors;
 
   std::vector<std::string>           customPoiTypes;
+
+  Slot<double> mapDpiSlot{
+    [this](const double &d) {
+      mapDpiSignal(d);
+    }
+  };
 
 protected:
 

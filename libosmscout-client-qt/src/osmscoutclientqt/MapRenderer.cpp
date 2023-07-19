@@ -35,29 +35,37 @@ MapRenderer::MapRenderer(QThread *thread,
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
   renderSea=settings->GetRenderSea();
-  fontName=settings->GetFontName();
+  fontName=QString::fromStdString(settings->GetFontName());
   fontSize=settings->GetFontSize();
   showAltLanguage=settings->GetShowAltLanguage();
-  units=settings->GetUnits();
+  units=QString::fromStdString(settings->GetUnits());
 
-  connect(settings.get(), &Settings::MapDPIChange,
+  settings->mapDPIChange.Connect(mapDpiChangeSlot);
+  settings->renderSeaChanged.Connect(renderSeaSlot);
+  settings->fontNameChanged.Connect(fontNameSlot);
+  settings->fontSizeChanged.Connect(fontSizeSlot);
+  settings->showAltLanguageChanged.Connect(showAltLanguageSlot);
+  settings->unitsChanged.Connect(unitsSlot);
+
+  connect(this, &MapRenderer::mapDpiChangeSignal,
           this, &MapRenderer::onMapDPIChange,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::RenderSeaChanged,
+  connect(this, &MapRenderer::renderSeaSignal,
           this, &MapRenderer::onRenderSeaChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::FontNameChanged,
+  connect(this, &MapRenderer::fontNameSignal,
           this, &MapRenderer::onFontNameChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::FontSizeChanged,
+  connect(this, &MapRenderer::fontSizeSignal,
           this, &MapRenderer::onFontSizeChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::ShowAltLanguageChanged,
+  connect(this, &MapRenderer::showAltLanguageSignal,
           this, &MapRenderer::onShowAltLanguageChanged,
           Qt::QueuedConnection);
-  connect(settings.get(), &Settings::UnitsChanged,
+  connect(this, &MapRenderer::unitsSignal,
           this, &MapRenderer::onUnitsChanged,
           Qt::QueuedConnection);
+
   connect(thread, &QThread::started,
           this, &MapRenderer::Initialize);
   connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,

@@ -125,7 +125,7 @@ if buildClientQt
                                    'src/QtDemoApp.cpp'],
                                   demoMocs,
                                   cpp_args: ['-fPIC'],
-                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir],
+                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir, demoIncDir],
                                   dependencies: [mathDep, openmpDep, qtClientDep],
                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
                                   override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
@@ -145,7 +145,7 @@ if buildClientQt
                                  '../OSMScout2/src/Theme.cpp'],
                                 [demoMocs, navDemoMocs],
                                 cpp_args: ['-fPIC'],
-                                include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, osmscoutgpxIncDir, demoIncDir, include_directories('../OSMScout2/src')],
+                                include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir, osmscoutgpxIncDir, demoIncDir, include_directories('../OSMScout2/src')],
                                 dependencies: [mathDep, openmpDep, qtClientDep],
                                 link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt, osmscoutgpx],
                                 override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
@@ -164,7 +164,7 @@ if buildClientQt
                                    '../OSMScout2/src/Theme.cpp'],
                                   [demoMocs, routingParamsDemoMocs],
                                   cpp_args: ['-fPIC'],
-                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientqtIncDir, demoIncDir, include_directories('../OSMScout2/src')],
+                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir, demoIncDir, include_directories('../OSMScout2/src')],
                                   dependencies: [mathDep, openmpDep, qtClientDep],
                                   link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
                                   override_options : ['unity=off'], # generated code for qt resources use static variables with the same name

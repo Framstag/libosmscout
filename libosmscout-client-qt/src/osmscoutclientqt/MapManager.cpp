@@ -19,14 +19,15 @@
 
 #include <QDirIterator>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include <osmscoutclientqt/MapManager.h>
-#include <osmscout/TypeConfig.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 
+#include <osmscout/TypeConfig.h>
 #include <osmscout/log/Logger.h>
-#include <osmscout/system/Compiler.h>
-#include <osmscoutclientqt/DBThread.h>
 
 namespace osmscout {
 
@@ -106,7 +107,7 @@ void MapDownloadJob::start()
 
   QStringList fileNames = MapDirectory::optionalFiles() + MapDirectory::mandatoryFiles();
 
-  DownloadJob::start(map.getProvider().getUri()+"/"+map.getServerDirectory(), fileNames);
+  DownloadJob::start(QString::fromStdString(map.getProvider().getUri())+"/"+map.getServerDirectory(), fileNames);
 }
 
 MapDirectory::MapDirectory(QDir dir):

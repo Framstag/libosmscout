@@ -27,9 +27,9 @@ QVariant OnlineTileProviderModel::data(const QModelIndex &index, int role) const
   switch (role) {
     case Qt::DisplayRole:
     case NameRole:
-        return provider.getName();
+        return QString::fromStdString(provider.getName());
     case IdRole:
-        return provider.getId();
+        return QString::fromStdString(provider.getId());
     default:
         break;
   }
@@ -62,12 +62,12 @@ int OnlineTileProviderModel::count() const
 
 QString OnlineTileProviderModel::getId(int row) const
 {
-    return onlineProviders.at(row).getId();
+    return QString::fromStdString(onlineProviders.at(row).getId());
 }
 
 QString OnlineTileProviderModel::getName(int row) const
 {
-    return onlineProviders.at(row).getName();    
+    return QString::fromStdString(onlineProviders.at(row).getName());
 }
 
 }

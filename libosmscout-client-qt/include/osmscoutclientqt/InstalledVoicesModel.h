@@ -19,9 +19,11 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
+
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/VoiceManager.h>
 #include <osmscoutclientqt/Voice.h>
-#include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <QAbstractListModel>
@@ -43,6 +45,11 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API InstalledVoicesModel : public QAbstractListModel {
   Q_OBJECT
+
+private:
+  Slot<std::string> voiceDirSlot{
+    [this](const std::string &dir){ onVoiceChanged(QString::fromStdString(dir)); }
+  };
 
 signals:
   void voiceChanged(const QString);

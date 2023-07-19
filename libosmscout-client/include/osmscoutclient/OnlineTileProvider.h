@@ -2,7 +2,7 @@
 #define	OSMSCOUT_CLIENT_QT_ONLINETILEPROVIDER_H
 
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2016 Lukas Karas
 
   This library is free software; you can redistribute it and/or
@@ -20,54 +20,42 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QObject>
-#include <QDebug>
+#include <osmscoutclient/ClientImportExport.h>
 
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
+#include <osmscoutclient/json/json_fwd.hpp>
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <string>
+#include <vector>
 
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  *
  * Online tile provider object. See OnlineTileProviderModel and Settings.
  */
-class OSMSCOUT_CLIENT_QT_API OnlineTileProvider: public QObject
+struct OSMSCOUT_CLIENT_API OnlineTileProvider
 {
-  Q_OBJECT
-
 public:
   OnlineTileProvider() = default;
 
-  OnlineTileProvider(const OnlineTileProvider &o):
-    QObject(o.parent()),
-    valid(o.valid), id(o.id), name(o.name), servers(o.servers),
-          maximumZoomLevel(o.maximumZoomLevel), copyright(o.copyright){};
+  OnlineTileProvider(const OnlineTileProvider &) = default;
+  OnlineTileProvider(OnlineTileProvider &&) = default;
 
-  OnlineTileProvider(const QString &id, const QString &name, const QStringList &servers, int maximumZoomLevel,
-          QString copyright):
+  OnlineTileProvider(const std::string &id,
+                     const std::string &name,
+                     const std::vector<std::string> &servers,
+                     int maximumZoomLevel,
+                     const std::string &copyright):
     valid(true), id(id), name(name), servers(servers), maximumZoomLevel(maximumZoomLevel),
     copyright(copyright){};
 
-  ~OnlineTileProvider() override = default;
+  virtual ~OnlineTileProvider() = default;
 
-  OnlineTileProvider& operator=(const OnlineTileProvider &o)
-  {
-    valid = o.valid;
-    id = o.id;
-    name = o.name;
-    servers = o.servers;
-    maximumZoomLevel = o.maximumZoomLevel;
-    copyright = o.copyright;
+  OnlineTileProvider& operator=(const OnlineTileProvider &) = default;
+  OnlineTileProvider& operator=(OnlineTileProvider &&) = default;
 
-    return *this;
-  }
-
-  QString getId() const {
+  std::string getId() const {
     return id;
   }
 
@@ -75,11 +63,11 @@ public:
     return maximumZoomLevel;
   }
 
-  QString getName() const {
+  std::string getName() const {
     return name;
   }
 
-  QStringList getServers() const {
+  std::vector<std::string> getServers() const {
     return servers;
   }
 
@@ -87,20 +75,20 @@ public:
     return valid;
   }
 
-  QString getCopyright() const
+  std::string getCopyright() const
   {
     return copyright;
   }
 
-  static OnlineTileProvider fromJson(QJsonValue obj);
+  static OnlineTileProvider fromJson(const nlohmann::json &obj);
 
 private:
   bool valid{false};
-  QString id;
-  QString name;
-  QStringList servers;
+  std::string id;
+  std::string name;
+  std::vector<std::string> servers;
   int maximumZoomLevel{-1};
-  QString copyright;
+  std::string copyright;
 };
 
 }

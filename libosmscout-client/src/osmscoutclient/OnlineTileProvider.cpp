@@ -17,38 +17,43 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscoutclientqt/OnlineTileProvider.h>
+#include <osmscoutclient/OnlineTileProvider.h>
+
+#include <osmscoutclient/json/json.hpp>
 
 namespace osmscout {
 
-OnlineTileProvider OnlineTileProvider::fromJson(QJsonValue val)
+OnlineTileProvider OnlineTileProvider::fromJson(const nlohmann::json &val)
 {
-  if (!val.isObject())
+  if (!val.is_object()) {
     return OnlineTileProvider();
+  }
+
+  auto id = val["id"];
+  auto name = val["name"];
+  auto servers = val["servers"];
+  auto maximumZoomLevel = val["maximumZoomLevel"];
+  auto copyright = val["copyright"];
   
-  QJsonObject obj = val.toObject();
-  auto id = obj["id"];
-  auto name = obj["name"];
-  auto servers = obj["servers"];
-  auto maximumZoomLevel = obj["maximumZoomLevel"];
-  auto copyright = obj["copyright"];
-  
-  if (!(id.isString() && name.isString() && servers.isArray() && 
-          maximumZoomLevel.isDouble() && copyright.isString())){
+  if (!(id.is_string() && name.is_string() && servers.is_array() &&
+          maximumZoomLevel.is_number() && copyright.is_string())){
     return OnlineTileProvider();      
   }
-  
-  QStringList serverList;
-  for (auto serverVal: servers.toArray()){
-      if (serverVal.isString()){
-          serverList.append(serverVal.toString());
+
+  std::vector<std::string> serverList;
+  for (auto serverVal: servers){
+      if (serverVal.is_string()){
+          serverList.push_back(serverVal.get<std::string>());
       }
   }
   if (serverList.empty()){
     return OnlineTileProvider();
   }
   
-  return OnlineTileProvider(id.toString(), name.toString(), serverList, 
-          maximumZoomLevel.toDouble(), copyright.toString());
+  return OnlineTileProvider(id.get<std::string>(),
+                            name.get<std::string>(),
+                            serverList,
+                            maximumZoomLevel.get<int>(),
+                            copyright.get<std::string>());
 }
 }

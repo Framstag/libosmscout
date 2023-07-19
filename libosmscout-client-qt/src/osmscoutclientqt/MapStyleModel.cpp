@@ -41,7 +41,7 @@ MapStyleModel::MapStyleModel():
 
   SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
 
-  QDirIterator dirIt(settings->GetStyleSheetDirectory(), QDir::Files, QDirIterator::FollowSymlinks);
+  QDirIterator dirIt(QString::fromStdString(settings->GetStyleSheetDirectory()), QDir::Files, QDirIterator::FollowSymlinks);
   while (dirIt.hasNext()) {
     dirIt.next();
     QFileInfo fInfo(dirIt.filePath());
@@ -69,9 +69,9 @@ void MapStyleModel::setStyle(const QString &styleFile)
 {
   SettingsRef settings=OSMScoutQt::GetInstance().GetSettings();
 
-  settings->SetStyleSheetFile(styleFile);
+  settings->SetStyleSheetFile(styleFile.toStdString());
 
-  emit loadStyleRequested(settings->GetStyleSheetAbsoluteFile(),
+  emit loadStyleRequested(QString::fromStdString(settings->GetStyleSheetAbsoluteFile()),
                           settings->GetStyleSheetFlags());
 }
 

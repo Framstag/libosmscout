@@ -20,8 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/DBThread.h>
-#include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/Router.h>
 
 #include <osmscout/navigation/Navigation.h>
@@ -64,6 +65,11 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API NavigationModule: public QObject {
   Q_OBJECT
+
+private:
+  Slot<std::string> voiceDirSlot{
+    [this](const std::string &str) { onVoiceChanged(QString::fromStdString(str)); }
+  };
 
 signals:
   void update(std::list<RouteStep> instructions);

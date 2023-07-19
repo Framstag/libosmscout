@@ -78,6 +78,10 @@ public:
 
   virtual ~OSMScoutQtBuilder();
 
+  /** Set custom settings storage. OSMScout library takes ownership.
+   * @param providedStorage
+   * @return
+   */
   inline OSMScoutQtBuilder& WithSettingsStorage(QSettings *providedStorage)
   {
     this->settingsStorage=providedStorage;
@@ -324,8 +328,5 @@ public:
 };
 
 }
-
-Q_DECLARE_METATYPE(osmscout::TileRef)
-Q_DECLARE_METATYPE(osmscout::BreakerRef)
 
 #endif /* OSMSCOUT_CLIENT_QT_OSMSCOUTQT_H */

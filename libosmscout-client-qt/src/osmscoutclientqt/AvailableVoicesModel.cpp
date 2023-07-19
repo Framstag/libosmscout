@@ -21,6 +21,11 @@
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QStandardPaths>
+
 #include <algorithm>
 
 namespace osmscout {
@@ -29,9 +34,12 @@ AvailableVoicesModel::AvailableVoicesModel()
 {
   SettingsRef settings = OSMScoutQt::GetInstance().GetSettings();
   assert(settings);
-  voiceProviders = settings->GetVoiceProviders();
+  auto providers = settings->GetVoiceProviders();
+  for (const auto &provider: providers) {
+    voiceProviders << provider;
+  }
 
-  diskCache.setCacheDirectory(settings->GetHttpCacheDir());
+  diskCache.setCacheDirectory(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "OSMScoutHttpCache");
   webCtrl.setCache(&diskCache);
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
 
@@ -69,7 +77,7 @@ void AvailableVoicesModel::reload()
 
   QLocale locale;
   for (auto &provider: voiceProviders){
-    QUrl url = provider.getListUri(locale.name());
+    QUrl url = QUrl(QString::fromStdString(provider.getListUri(locale.name().toStdString())));
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::UserAgentHeader, OSMScoutQt::GetInstance().GetUserAgent());

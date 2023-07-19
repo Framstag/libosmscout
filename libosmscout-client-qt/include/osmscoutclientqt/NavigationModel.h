@@ -22,6 +22,7 @@
 
 #include <osmscoutclientqt/NavigationModule.h>
 #include <osmscoutclientqt/OverlayObject.h>
+#include <osmscoutclientqt/VehiclePosition.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

@@ -21,6 +21,10 @@
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 namespace osmscout {
 
 AvailableVoice::AvailableVoice(const VoiceProvider &provider,

@@ -17,8 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscoutclient/Settings.h>
+
 #include <osmscoutclientqt/FileDownloader.h>
-#include <osmscoutclientqt/Settings.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QUrl>

@@ -26,6 +26,7 @@
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <QImage>
+#include <QJsonObject>
 
 namespace osmscout {
 

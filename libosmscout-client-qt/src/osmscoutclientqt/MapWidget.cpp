@@ -47,8 +47,7 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
 
-    connect(settings.get(), &Settings::MapDPIChange,
-            this, &MapWidget::onMapDPIChange);
+    settings->mapDPIChange.Connect(mapDpiSlot);
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 

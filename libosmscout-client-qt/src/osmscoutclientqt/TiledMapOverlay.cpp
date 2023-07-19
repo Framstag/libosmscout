@@ -22,6 +22,10 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/TiledRenderingHelper.h>
 
+#include <osmscoutclient/json/json.hpp>
+
+#include <QJsonDocument>
+
 namespace osmscout {
 
 TileLoaderThread::TileLoaderThread(QThread *thread):
@@ -198,7 +202,19 @@ QJsonValue TiledMapOverlay::getProvider()
 
 void TiledMapOverlay::setProvider(QJsonValue jv)
 {
-  OnlineTileProvider provider=OnlineTileProvider::fromJson(jv);
+  if (!jv.isObject()) {
+    qWarning() << "Failed to parse providers json:" << jv;
+    return;
+  }
+
+  OnlineTileProvider provider;
+  try{
+    auto jsonStr = QJsonDocument(jv.toObject()).toJson().toStdString();
+    provider = OnlineTileProvider::fromJson(nlohmann::json::parse(jsonStr));
+  } catch (const nlohmann::json::exception &e) {
+    qWarning() << "Failed to parse providers json:" << e.what();
+    return;
+  }
   if (!provider.isValid()){
     qWarning() << "Invalid provider:" << jv;
     return;

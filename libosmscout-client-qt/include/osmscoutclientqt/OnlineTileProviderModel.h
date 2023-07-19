@@ -22,7 +22,8 @@
 
 #include <QAbstractListModel>
 
-#include <osmscoutclientqt/OnlineTileProvider.h>
+#include <osmscoutclient/OnlineTileProvider.h>
+
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
@@ -85,7 +86,10 @@ public:
   inline OnlineTileProviderModel()
   {
     auto settings=OSMScoutQt::GetInstance().GetSettings();
-    onlineProviders=settings->GetOnlineProviders();
+    auto providers=settings->GetOnlineProviders();
+    for (const auto &provider: providers) {
+      onlineProviders << provider;
+    }
   };
   
   virtual inline ~OnlineTileProviderModel(){};

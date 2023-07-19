@@ -15,7 +15,6 @@ set(HEADER_FILES
     include/osmscoutclientqt/LocationEntry.h
     include/osmscoutclientqt/LocationInfoModel.h
     include/osmscoutclientqt/MapWidget.h
-    include/osmscoutclientqt/OnlineTileProvider.h
     include/osmscoutclientqt/OnlineTileProviderModel.h
     include/osmscoutclientqt/OpeningHoursModel.h
     include/osmscoutclientqt/OsmTileDownloader.h
@@ -23,9 +22,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/RoutingModel.h
     include/osmscoutclientqt/Router.h
     include/osmscoutclientqt/SearchLocationModel.h
-    include/osmscoutclientqt/Settings.h
     include/osmscoutclientqt/TileCache.h
-    include/osmscoutclientqt/MapProvider.h
     include/osmscoutclientqt/AvailableMapsModel.h
     include/osmscoutclientqt/PersistentCookieJar.h
     include/osmscoutclientqt/MapManager.h
@@ -51,7 +48,9 @@ set(HEADER_FILES
     include/osmscoutclientqt/NavigationModel.h
     include/osmscoutclientqt/VehiclePosition.h
     include/osmscoutclientqt/QmlRoutingProfile.h
+    include/osmscoutclientqt/QmlSettings.h
     include/osmscoutclientqt/QtRouteData.h
+    include/osmscoutclientqt/QtSettingsStorage.h
     include/osmscoutclientqt/RouteStep.h
     include/osmscoutclientqt/NearPOIModel.h
     include/osmscoutclientqt/POILookupModule.h
@@ -59,7 +58,6 @@ set(HEADER_FILES
     include/osmscoutclientqt/Voice.h
     include/osmscoutclientqt/VoiceManager.h
     include/osmscoutclientqt/AvailableVoicesModel.h
-    include/osmscoutclientqt/VoiceProvider.h
     include/osmscoutclientqt/InstalledVoicesModel.h
 )
 
@@ -75,7 +73,6 @@ set(SOURCE_FILES
     src/osmscoutclientqt/LocationEntry.cpp
     src/osmscoutclientqt/LocationInfoModel.cpp
     src/osmscoutclientqt/MapWidget.cpp
-    src/osmscoutclientqt/OnlineTileProvider.cpp
     src/osmscoutclientqt/OnlineTileProviderModel.cpp
     src/osmscoutclientqt/OpeningHoursModel.cpp
     src/osmscoutclientqt/OSMTile.cpp
@@ -83,9 +80,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/RoutingModel.cpp
     src/osmscoutclientqt/Router.cpp
     src/osmscoutclientqt/SearchLocationModel.cpp
-    src/osmscoutclientqt/Settings.cpp
     src/osmscoutclientqt/TileCache.cpp
-    src/osmscoutclientqt/MapProvider.cpp
     src/osmscoutclientqt/AvailableMapsModel.cpp
     src/osmscoutclientqt/MapManager.cpp
     src/osmscoutclientqt/MapDownloadsModel.cpp
@@ -111,14 +106,15 @@ set(SOURCE_FILES
     src/osmscoutclientqt/VehiclePosition.cpp
     src/osmscoutclientqt/RouteStep.cpp
     src/osmscoutclientqt/QmlRoutingProfile.cpp
+    src/osmscoutclientqt/QmlSettings.cpp
     src/osmscoutclientqt/QtRouteData.cpp
+    src/osmscoutclientqt/QtSettingsStorage.cpp
     src/osmscoutclientqt/NearPOIModel.cpp
     src/osmscoutclientqt/POILookupModule.cpp
     src/osmscoutclientqt/InstalledMapsModel.cpp
     src/osmscoutclientqt/Voice.cpp
     src/osmscoutclientqt/VoiceManager.cpp
     src/osmscoutclientqt/AvailableVoicesModel.cpp
-    src/osmscoutclientqt/VoiceProvider.cpp
     src/osmscoutclientqt/InstalledVoicesModel.cpp
 )
 
