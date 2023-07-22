@@ -499,6 +499,9 @@ int main(int argc, char* argv[])
 
   std::cout << "Database:                " << args.databaseDirectory << std::endl;
   std::cout << "Search pattern:          " << searchParameter.GetSearchString() << std::endl;
+  if (args.transliterate) {
+    std::cout << "Transliterated pattern:  " << osmscout::UTF8Transliterate(osmscout::UTF8StringToUpper(searchParameter.GetSearchString())) << std::endl;
+  }
   std::cout << "Search for location:     " << (searchParameter.GetSearchForLocation() ? "true" : "false") << std::endl;
   std::cout << "Search for POI:          " << (searchParameter.GetSearchForPOI() ? "true" : "false") << std::endl;
   std::cout << "Admin region only match: " << (searchParameter.GetAdminRegionOnlyMatch() ? "true" : "false") << std::endl;
