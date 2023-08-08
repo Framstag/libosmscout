@@ -13,7 +13,6 @@ set(HEADER_FILES_ROOT
         include/osmscout/Point.h
         include/osmscout/PublicTransport.h
         include/osmscout/Route.h
-        include/osmscout/elevation/SRTM.h
         include/osmscout/Tag.h
         include/osmscout/TypeConfig.h
         include/osmscout/TypeFeature.h
@@ -143,7 +142,7 @@ set(HEADER_FILES_POI
 
 set(HEADER_FILES_ELEVATION
         include/osmscout/elevation/ElevationService.h
-        src/osmscout/elevation/SRTM.cpp)
+        include/osmscout/elevation/SRTM.h)
 
 set(HEADER_FILES_ROUTING
         include/osmscout/routing/RouteData.h
@@ -340,6 +339,7 @@ set(SOURCE_FILES
     src/osmscout/location/LocationService.cpp
     src/osmscout/location/LocationDescriptionService.cpp
     src/osmscout/poi/POIService.cpp
+    src/osmscout/elevation/SRTM.cpp
     src/osmscout/Area.cpp
     src/osmscout/GeoCoord.cpp
     src/osmscout/GroundTile.cpp
@@ -358,7 +358,7 @@ set(SOURCE_FILES
     src/osmscout/FeatureReader.cpp
     src/osmscout/OSMScoutTypes.cpp
     src/osmscout/Way.cpp
-        src/osmscout/cli/CmdLineParsing.cpp)
+    src/osmscout/cli/CmdLineParsing.cpp)
 
 set(EXCLUDE_HEADER)
 

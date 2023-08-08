@@ -197,7 +197,7 @@ namespace osmscout {
 
       int32_t h1=GetHeight(col,row);
 
-      log.Info() << "Height at " << coord.GetDisplayText() << " " << fracLat << "x" << fracLon << " with tile coords " << col << "," << row << " = " << h1;
+      log.Debug() << "Height at " << coord.GetDisplayText() << " " << fracLat << "x" << fracLon << " with tile coords " << col << "," << row << " = " << h1;
 
 #ifndef SRTM_BILINEAR_INTERPOLATION
       return (int32_t) floor(h1);
@@ -210,7 +210,7 @@ namespace osmscout {
       // bilinear interpolation
       double fLat = fracLat - fracLat*row/SRTM::rows;
       double fLon = fracLon - fracLon*pixelSize/SRTM::columns;
-      log.Info() << "fLat=" << fLat << " fLon=" << fLon;
+      log.Debug() << "fLat=" << fLat << " fLon=" << fLon;
 
       double h = h1*(1-fLat)*(1-fLon) + h2*fLat*(1-fLon) + h3*(1-fLat)*fLon + h4*fLat*fLon;
       return (int32_t)floor(h+0.5);
