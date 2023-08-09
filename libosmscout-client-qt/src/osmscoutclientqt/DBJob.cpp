@@ -68,7 +68,7 @@ DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      bool closeOnFinish):
   DBJob(),
   closeOnFinish(closeOnFinish),
-  breaker(std::make_shared<QBreaker>()),
+  breaker(std::make_shared<ThreadedBreaker>()),
   lookupProjection(lookupProjection)
 {
   //qDebug() << "create: " << this << " in " << QThread::currentThread();
