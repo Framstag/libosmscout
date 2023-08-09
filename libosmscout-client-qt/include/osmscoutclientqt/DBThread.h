@@ -137,7 +137,6 @@ private:
   SettingsRef                        settings;
 
   double                             mapDpi;
-  double                             physicalDpi;
 
   mutable QReadWriteLock             lock;
 

@@ -30,9 +30,6 @@
 
 #include <osmscout/log/Logger.h>
 
-#include <QGuiApplication>
-#include <QScreen>
-
 namespace osmscout {
 
 DBThread::DBThread(QThread *backgroundThread,
@@ -46,15 +43,12 @@ DBThread::DBThread(QThread *backgroundThread,
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
-    physicalDpi(-1),
     lock(QReadWriteLock::Recursive),
     iconDirectory(iconDirectory),
     daylight(true),
     customPoiTypes(customPoiTypes)
 {
-  QScreen *srn=QGuiApplication::screens().at(0);
-
-  physicalDpi = (double)srn->physicalDotsPerInch();
+  double physicalDpi = settings->GetPhysicalDPI();
   osmscout::log.Debug() << "Reported screen DPI: " << physicalDpi;
   mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
@@ -115,7 +109,7 @@ double DBThread::GetMapDpi() const
 
 double DBThread::GetPhysicalDpi() const
 {
-    return physicalDpi;
+    return settings->GetPhysicalDPI();
 }
 
 const DatabaseLoadedResponse DBThread::loadedResponse() const {
