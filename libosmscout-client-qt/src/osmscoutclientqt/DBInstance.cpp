@@ -25,33 +25,6 @@
 
 namespace osmscout {
 
-QBreaker::QBreaker()
-  : osmscout::Breaker(),
-    aborted(false)
-{
-}
-
-void QBreaker::Break()
-{
-  QMutexLocker locker(&mutex);
-
-  aborted=true;
-}
-
-bool QBreaker::IsAborted() const
-{
-  QMutexLocker locker(&mutex);
-
-  return aborted;
-}
-
-void QBreaker::Reset()
-{
-  QMutexLocker locker(&mutex);
-
-  aborted=false;
-}
-
 StyleError::StyleError(QString msg){
     QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
     if(rx.exactMatch(msg)){

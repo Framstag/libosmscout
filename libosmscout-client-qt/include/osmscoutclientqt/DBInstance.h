@@ -45,23 +45,6 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API QBreaker : public osmscout::Breaker
-{
-private:
-  mutable QMutex mutex;
-  bool           aborted;
-
-public:
-  QBreaker();
-
-  void Break() override;
-  bool IsAborted() const override;
-  void Reset() override;
-};
-
-/**
- * \ingroup QtAPI
- */
 class OSMSCOUT_CLIENT_QT_API StyleError
 {
     enum StyleErrorType {
