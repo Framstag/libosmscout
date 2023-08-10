@@ -67,6 +67,7 @@ struct Arguments
   std::string            gpx;
   std::string            databaseDirectory;
   osmscout::GeoCoord     start;
+  osmscout::GeoCoord     via = osmscout::GeoCoord(1E10,1E10); // Initialize with invalid coordinates
   osmscout::GeoCoord     target;
   bool                   debug=false;
   bool                   dataDebug=false;
@@ -606,6 +607,15 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     std::cout << "Pass: " << poiAtRouteDescription->GetName()->GetDescription() << std::endl;
   }
 
+  void OnViaAtRoute(const osmscout::RouteDescription::ViaDescriptionRef& viaDescription) override
+  {
+      size_t sectionNumber = viaDescription->GetSectionNumber();
+      if (sectionNumber > 1) {
+        NextLine(lineCount);
+        std::cout << "Etap: " << sectionNumber - 1  << std::endl;
+      }
+  }
+    
   void BeforeNode(const osmscout::RouteDescription::Node& node) override
   {
     lineCount=0;
@@ -741,6 +751,13 @@ int main(int argc, char* argv[])
                       "penalty-max",
                       "Maximum junction penalty, time [s]. Default "s + std::to_string(duration_cast<seconds>(args.maxPenalty).count()));
 
+
+  argParser.AddOption(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
+                        args.via=value;
+                       }),
+                      "via",
+                      "add a via location coordinate");
+    
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -855,11 +872,24 @@ int main(int argc, char* argv[])
   if (target.GetObjectFileRef().GetType()==osmscout::refNode) {
     std::cerr << "Cannot find start node for target location!" << std::endl;
   }
-
-  osmscout::RoutingResult result=router->CalculateRoute(*routingProfile,
-                                                        start,
-                                                        target,
-                                                        parameter);
+    
+  osmscout::RoutingResult result;
+    
+  if (args.via.IsValid()) {
+      std::cout << "Using 'CalculateRouteViaCoords' method" << std::endl;
+      std::vector<osmscout::GeoCoord> via = { args.start, args.via, args.target };
+      result=router->CalculateRouteViaCoords(*routingProfile,
+                                             via,
+                                             osmscout::Kilometers(1),
+                                             parameter);
+                                                                     
+  } else {
+      std::cout << "Using 'CalculateRoute' method" << std::endl;
+      result=router->CalculateRoute(*routingProfile,
+                                    start,
+                                    target,
+                                    parameter);
+  }
 
   if (!result.Success()) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
@@ -962,6 +992,10 @@ int main(int argc, char* argv[])
 
   std::vector<osmscout::RoutingProfileRef> profiles{routingProfile};
   std::vector<osmscout::DatabaseRef>       databases{database};
+
+  // SectionsPostprocessor needs the section lenghts computed in the routing when there are some via points
+  // between start and end
+  postprocessors.push_back(std::make_shared<osmscout::RoutePostprocessor::SectionsPostprocessor>(result.GetSectionLenghts()));
 
   if (!postprocessor.PostprocessRouteDescription(*routeDescriptionResult.GetDescription(),
                                                  profiles,

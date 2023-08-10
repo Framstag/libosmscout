@@ -167,6 +167,14 @@ namespace osmscout {
        *    The POI information
        */
       virtual void OnPOIAtRoute(const RouteDescription::POIAtRouteDescriptionRef& poiAtRouteDescription);
+    
+      /**
+        * Called everytime we have a new section at the route when routing with some via points between start and target
+        *
+        * @param viaDescription
+        *    The via information
+        */
+      virtual void OnViaAtRoute(const RouteDescription::ViaDescriptionRef& viaDescription);
 
       /**
        * Always called before we analyse a node. It may be that other callback methods are called

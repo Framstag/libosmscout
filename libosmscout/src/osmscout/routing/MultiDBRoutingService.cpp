@@ -458,7 +458,8 @@ namespace osmscout {
                                      parameter);
         if (!partialResult.Success()) {
           result.GetRoute().Clear();
-
+          result.ClearSectionLengths();
+            
           return result;
         }
 
@@ -469,6 +470,7 @@ namespace osmscout {
         }
 
         result.GetRoute().Append(partialResult.GetRoute());
+        result.AppendSectionLength(partialResult.GetRoute().Entries().size());
       }
 
       return result;

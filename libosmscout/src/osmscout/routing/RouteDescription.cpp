@@ -65,6 +65,8 @@ namespace osmscout {
   const char* const RouteDescription::LANES_DESC             = "Lanes";
   /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
   const char* const RouteDescription::SUGGESTED_LANES_DESC   = "SuggestedLanes";
+  /** Constant for a description of a via on the rote (first node of a route section) */
+  const char* const RouteDescription::NODE_VIA_DESC          = "NodeVia";
 
   RouteDescription::StartDescription::StartDescription(const std::string& description)
   : description(description)
@@ -523,6 +525,11 @@ namespace osmscout {
     ss << (int)to;
     ss << ">";
     return ss.str();
+  }
+
+  std::string RouteDescription::ViaDescription::GetDebugString() const
+  {
+    return "Section number: "+std::to_string(sectionNumber)+" node count: "+std::to_string(nodeCount);
   }
 
   bool RouteDescription::Node::HasDescription(const char* name) const

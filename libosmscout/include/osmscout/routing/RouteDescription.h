@@ -92,7 +92,9 @@ namespace osmscout {
     static const char* const LANES_DESC;
     /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
     static const char* const SUGGESTED_LANES_DESC;
-
+    /** Constant for a description of the first node of a route section */
+    static const char* const NODE_VIA_DESC;
+      
   public:
     /**
      * \ingroup Routing
@@ -657,6 +659,28 @@ namespace osmscout {
 
     using SuggestedLaneDescriptionRef = std::shared_ptr<SuggestedLaneDescription>;
 
+    /**
+     * \ingroup Routing
+     * Start of the route
+     */
+     class OSMSCOUT_API ViaDescription : public Description
+     {
+     private:
+       int sectionNumber;
+       int nodeCount;
+
+      public:
+        explicit ViaDescription(int sectionNumber, int nodeCount) : sectionNumber(sectionNumber), nodeCount(nodeCount) {};
+
+        std::string GetDebugString() const override;
+
+        int GetSectionNumber() const { return sectionNumber; };
+         
+        int GetNodeCount() const { return nodeCount; };
+      };
+
+      using ViaDescriptionRef = std::shared_ptr<ViaDescription>;
+      
     /**
      * \ingroup Routing
      */
