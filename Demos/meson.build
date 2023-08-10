@@ -170,6 +170,15 @@ if buildClientQt
                                   override_options : ['unity=off'], # generated code for qt resources use static variables with the same name
                                   install: true,
                                   install_dir: demoInstallDir)
+
+    QtWidgetsDemoApp = executable('QtWidgetsDemoApp',
+                                  ['src/QtWidgetsDemoApp.cpp'],
+                                  cpp_args: ['-fPIC'],
+                                  include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapqtIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir],
+                                  dependencies: [qtClientDep],
+                                  link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclientqt],
+                                  install: true,
+                                  install_dir: demoInstallDir)
 endif
 
 Routing = executable('Routing',

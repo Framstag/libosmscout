@@ -210,8 +210,11 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
 			)
 	endif()
+
+	#---- QtWidgetsDemoApp
+	osmscout_demo_project(NAME QtWidgetsDemoApp SOURCES src/QtWidgetsDemoApp.cpp TARGET OSMScout::ClientQt)
 else()
-	message("Skip ElevationProfileChart, NavigationSimulation and RoutingParameters demo, libosmscout-client-qt is missing.")
+	message("Skip ElevationProfileChart, NavigationSimulation and RoutingParameters QtWidgetsDemoApp demo, libosmscout-client-qt is missing.")
 endif()
 
 #---- DrawMapSVG
