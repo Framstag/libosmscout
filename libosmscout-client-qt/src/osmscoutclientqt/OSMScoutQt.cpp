@@ -59,6 +59,7 @@
 #include <QStandardPaths>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QTemporaryFile>
 
 #include <optional>
 
@@ -114,24 +115,37 @@ bool OSMScoutQtBuilder::Init()
   SettingsRef settings=std::make_shared<Settings>(std::make_shared<QtSettingsStorage>(settingsStorage), physicalDpi, defaultUnits.toStdString());
   settingsStorage = nullptr;
 
-  auto StrVector = [](const QStringList &list) -> std::vector<std::string> {
+  // Provider files may be distributed as Qt resources. But Setting cannot read Qt resources,
+  // so we make temporary copy of resource on standard filesystem (native file).
+  std::vector<std::unique_ptr<QTemporaryFile>> resourceCopies;
+
+  auto ProviderFiles = [&resourceCopies](const QStringList &list) -> std::vector<std::string> {
     std::vector<std::string> result;
-    for (const auto &str: list) {
-      result.push_back(str.toStdString());
+    for (const auto &fileName: list) {
+      QFile file(fileName);
+      if (auto tmp=QTemporaryFile::createNativeFile(file); tmp!=nullptr) {
+        resourceCopies.emplace_back(std::unique_ptr<QTemporaryFile>(tmp));
+        result.push_back(tmp->fileName().toStdString());
+      } else {
+        result.push_back(fileName.toStdString());
+      }
     }
     return result;
   };
 
   // load online tile providers
   if (!onlineTileProviders.isEmpty()){
-    settings->loadOnlineTileProviders(StrVector(onlineTileProviders));
+    settings->loadOnlineTileProviders(ProviderFiles(onlineTileProviders));
   }
   if (!mapProviders.isEmpty()){
-    settings->loadMapProviders(StrVector(mapProviders));
+    settings->loadMapProviders(ProviderFiles(mapProviders));
   }
   if (!voiceProviders.isEmpty()){
-    settings->loadVoiceProviders(StrVector(voiceProviders));
+    settings->loadVoiceProviders(ProviderFiles(voiceProviders));
   }
+
+  // delete temporary files
+  resourceCopies.clear();
 
   // setup style sheet
   if (styleSheetFileConfigured){
