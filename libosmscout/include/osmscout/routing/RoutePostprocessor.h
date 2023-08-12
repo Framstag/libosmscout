@@ -377,6 +377,21 @@ namespace osmscout {
     private:
       Distance distanceBefore;
     };
+      
+    /**
+    * \ingroup Routing
+    * Adds section to the route if there is one or more via node
+    */
+    class OSMSCOUT_API SectionsPostprocessor : public Postprocessor
+    {
+    private:
+        std::vector<int> sectionLengths;
+    public:
+        explicit SectionsPostprocessor(const std::vector<int>& sectionLengths) : Postprocessor(), sectionLengths(sectionLengths) {};
+
+    bool Process(const RoutePostprocessor& postprocessor,
+                 RouteDescription& description) override;
+    };
 
     using SuggestedLanesPostprocessorRef = std::shared_ptr<SuggestedLanesPostprocessor>;
 

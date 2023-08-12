@@ -60,6 +60,7 @@ constexpr bool debugRouting = false;
     RouteData route;
     Distance  currentMaxDistance;
     Distance  overallDistance;
+    std::vector<int> sectionLengths;
 
   public:
     RoutingResult();
@@ -97,6 +98,21 @@ constexpr bool debugRouting = false;
     bool Success() const
     {
       return !route.IsEmpty();
+    }
+      
+    const std::vector<int>& GetSectionLenghts() const
+    {
+      return sectionLengths;
+    }
+      
+    void AppendSectionLength(int length)
+    {
+      this->sectionLengths.push_back(length);
+    }
+
+    void ClearSectionLengths()
+    {
+      this->sectionLengths.clear();
     }
   };
 

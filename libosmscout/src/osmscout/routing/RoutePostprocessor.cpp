@@ -2447,4 +2447,40 @@ namespace osmscout {
 
     return true;
   }
+
+  bool RoutePostprocessor::SectionsPostprocessor::Process(const RoutePostprocessor& postprocessor,
+                                                          RouteDescription& description)
+  {
+    int nbSections = this->sectionLengths.size();
+    if (nbSections < 2) {
+      return true;
+    }
+
+    int sectionCount = 0;
+    int nodeCount = 1;
+    RouteDescription::Node *previousNode = nullptr;
+    for (auto &node : description.Nodes()) {
+        if (--nodeCount == 0) {
+            
+            if (previousNode) {
+                RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(sectionCount, sectionLengths[sectionCount - 1]);
+                previousNode->AddDescription(RouteDescription::NODE_VIA_DESC, desc);
+            }
+
+            previousNode = &node;
+            nodeCount = sectionLengths[sectionCount++];
+            
+            if (sectionCount >= nbSections) {
+                break;
+            }
+        }
+    }
+      
+    if (previousNode) {
+        RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(nbSections, sectionLengths[nbSections - 1]);
+        previousNode->AddDescription(RouteDescription::NODE_VIA_DESC, desc);
+    }
+      
+    return true;
+  }
 }

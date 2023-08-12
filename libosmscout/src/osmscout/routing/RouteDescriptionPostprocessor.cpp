@@ -104,6 +104,11 @@ namespace osmscout {
     // no code
   }
 
+  void RouteDescriptionPostprocessor::Callback::OnViaAtRoute(const RouteDescription::ViaDescriptionRef& /*viaDescription*/)
+  {
+    // no code
+  }
+
   void RouteDescriptionPostprocessor::Callback::BeforeNode(const RouteDescription::Node& /*node*/)
   {
     // no code
@@ -163,6 +168,7 @@ namespace osmscout {
       osmscout::RouteDescription::MaxSpeedDescriptionRef         maxSpeedDescription;
       osmscout::RouteDescription::TypeNameDescriptionRef         typeNameDescription;
       osmscout::RouteDescription::POIAtRouteDescriptionRef       poiAtRouteDescription;
+      osmscout::RouteDescription::ViaDescriptionRef              viaDescription;
 
       desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
       if (desc) {
@@ -250,6 +256,11 @@ namespace osmscout {
         poiAtRouteDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::POIAtRouteDescription>(desc);
       }
 
+        desc=node->GetDescription(osmscout::RouteDescription::NODE_VIA_DESC);
+        if (desc) {
+          viaDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::ViaDescription>(desc);
+        }
+        
       callback.BeforeNode(*node);
 
       if (startDescription) {
@@ -260,6 +271,10 @@ namespace osmscout {
 
       if (targetDescription) {
         callback.OnTargetReached(targetDescription);
+      }
+        
+      if (viaDescription) {
+        callback.OnViaAtRoute(viaDescription);
       }
 
       if (roundaboutEnterDescription || roundaboutLeaveDescription) {
