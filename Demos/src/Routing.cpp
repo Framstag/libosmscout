@@ -61,22 +61,22 @@
 
 struct Arguments
 {
-  bool                   help=false;
-  std::string            router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
-  osmscout::Vehicle      vehicle=osmscout::Vehicle::vehicleCar;
-  std::string            gpx;
-  std::string            databaseDirectory;
-  osmscout::GeoCoord     start;
-  osmscout::GeoCoord     via = osmscout::GeoCoord(1E10,1E10); // Initialize with invalid coordinates
-  osmscout::GeoCoord     target;
-  bool                   debug=false;
-  bool                   dataDebug=false;
-  bool                   routeDebug=false;
-  std::string            routeJson;
+  bool                              help=false;
+  std::string                       router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
+  osmscout::Vehicle                 vehicle=osmscout::Vehicle::vehicleCar;
+  std::string                       gpx;
+  std::string                       databaseDirectory;
+  osmscout::GeoCoord                start;
+  std::vector<osmscout::GeoCoord>   via;
+  osmscout::GeoCoord                target;
+  bool                              debug=false;
+  bool                              dataDebug=false;
+  bool                              routeDebug=false;
+  std::string                       routeJson;
 
-  osmscout::Distance     penaltySameType=osmscout::Meters(40);
-  osmscout::Distance     penaltyDifferentType=osmscout::Meters(250);
-  osmscout::HourDuration maxPenalty=std::chrono::seconds(10);
+  osmscout::Distance                penaltySameType=osmscout::Meters(40);
+  osmscout::Distance                penaltyDifferentType=osmscout::Meters(250);
+  osmscout::HourDuration            maxPenalty=std::chrono::seconds(10);
 };
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -753,7 +753,7 @@ int main(int argc, char* argv[])
 
 
   argParser.AddOption(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
-                        args.via=value;
+                        args.via.push_back(value);
                        }),
                       "via",
                       "add a via location coordinate");
@@ -875,20 +875,21 @@ int main(int argc, char* argv[])
     
   osmscout::RoutingResult result;
     
-  if (args.via.IsValid()) {
-      std::cout << "Using 'CalculateRouteViaCoords' method" << std::endl;
-      std::vector<osmscout::GeoCoord> via = { args.start, args.via, args.target };
-      result=router->CalculateRouteViaCoords(*routingProfile,
-                                             via,
-                                             osmscout::Kilometers(1),
-                                             parameter);
-                                                                     
+  if (args.via.size() > 0) {
+    std::cout << "Using 'CalculateRouteViaCoords' method" << std::endl;
+    args.via.insert(args.via.begin(), args.start);
+    args.via.push_back(args.target);
+    result=router->CalculateRouteViaCoords(*routingProfile,
+                                           args.via,
+                                           osmscout::Kilometers(1),
+                                           parameter);
+    
   } else {
-      std::cout << "Using 'CalculateRoute' method" << std::endl;
-      result=router->CalculateRoute(*routingProfile,
-                                    start,
-                                    target,
-                                    parameter);
+    std::cout << "Using 'CalculateRoute' method" << std::endl;
+    result=router->CalculateRoute(*routingProfile,
+                                  start,
+                                  target,
+                                  parameter);
   }
 
   if (!result.Success()) {
