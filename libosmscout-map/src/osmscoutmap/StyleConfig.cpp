@@ -1621,16 +1621,16 @@ namespace osmscout {
     for (const auto& err : parser->errors->errors) {
       switch(err.type) {
         case oss::Errors::Err::Symbol:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Symbol:")+err.text);
+          errors.push_back(StyleError(StyleError::Symbol, err.line, err.column, err.text));
           break;
         case oss::Errors::Err::Error:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Error:")+err.text);
+          errors.push_back(StyleError(StyleError::Error, err.line, err.column, err.text));
           break;
         case oss::Errors::Err::Warning:
-          warnings.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Warning:")+err.text);
+          warnings.push_back(StyleError(StyleError::Warning, err.line, err.column, err.text));
           break;
         case oss::Errors::Err::Exception:
-          errors.push_back(std::to_string(err.line)+","+std::to_string(err.column)+std::string(" Exception:")+err.text);
+          errors.push_back(StyleError(StyleError::Exception, err.line, err.column, err.text));
           break;
         default:
           break;
@@ -1713,12 +1713,12 @@ namespace osmscout {
     return success;
   }
 
-  const std::list<std::string>& StyleConfig::GetErrors() const
+  const std::list<StyleError>& StyleConfig::GetErrors() const
   {
     return errors;
   }
 
-  const std::list<std::string>& StyleConfig::GetWarnings() const
+  const std::list<StyleError>& StyleConfig::GetWarnings() const
   {
     return warnings;
   }

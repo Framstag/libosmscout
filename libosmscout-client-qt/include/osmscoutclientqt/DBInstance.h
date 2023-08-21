@@ -44,35 +44,6 @@ namespace osmscout {
 
 /**
  * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API StyleError
-{
-    enum StyleErrorType {
-        Symbol, Error, Warning, Exception
-    };
-
-public:
-    StyleError(StyleErrorType type, int line, int column, const QString &text) :
-        type(type), line(line), column(column), text(text){}
-    explicit StyleError(QString msg);
-
-    StyleErrorType GetType() const { return type; }
-    QString GetTypeName() const;
-    int GetLine() const{ return line; }
-    int GetColumn() const{ return column; }
-    const QString &GetText() const { return text; }
-    QString GetDescription() const {return GetTypeName()+": "+GetText();}
-
-private:
-    StyleErrorType  type;
-    int             line;
-    int             column;
-    QString         text;
-};
-
-
-/**
- * \ingroup QtAPI
  *
  * Instance of one osmscout db and db specific objects.
  *

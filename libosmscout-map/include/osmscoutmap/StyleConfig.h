@@ -47,6 +47,7 @@
 #include <osmscoutmap/LabelProvider.h>
 #include <osmscoutmap/StyleDescription.h>
 #include <osmscoutmap/Styles.h>
+#include <osmscoutmap/StyleError.h>
 
 namespace osmscout {
 
@@ -634,8 +635,8 @@ namespace osmscout {
   private:
     std::unordered_map<std::string,bool>       flags;
     std::unordered_map<std::string,StyleConstantRef> constants;
-    std::list<std::string>                     errors;
-    std::list<std::string>                     warnings;
+    std::list<StyleError>                      errors;
+    std::list<StyleError>                      warnings;
 
   private:
     void Reset();
@@ -848,8 +849,8 @@ namespace osmscout {
     bool Load(const std::string& styleFile,
               ColorPostprocessor colorPostprocessor=nullptr,
               bool submodule=false);
-    const std::list<std::string>&  GetErrors() const;
-    const std::list<std::string>&  GetWarnings() const;
+    const std::list<StyleError>&  GetErrors() const;
+    const std::list<StyleError>&  GetWarnings() const;
     //@}
   };
 

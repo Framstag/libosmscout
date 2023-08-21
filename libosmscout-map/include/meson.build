@@ -11,6 +11,7 @@ osmscoutmapHeader = [
             'osmscoutmap/MapParameter.h',
             'osmscoutmap/LabelProvider.h',
             'osmscoutmap/LabelPath.h',
+            'osmscoutmap/StyleError.h',
             'osmscoutmap/Styles.h',
             'osmscoutmap/StyleDescription.h',
             'osmscoutmap/StyleConfig.h',

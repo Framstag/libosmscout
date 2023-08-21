@@ -19,49 +19,13 @@
 
 #include <osmscoutclientqt/DBInstance.h>
 
+#include <osmscoutmap/StyleError.h>
+
 #include <osmscout/log/Logger.h>
 
 #include <QRegExp>
 
 namespace osmscout {
-
-StyleError::StyleError(QString msg){
-    QRegExp rx("(\\d+),(\\d+) (Symbol|Error|Warning|Exception):(.*)");
-    if(rx.exactMatch(msg)){
-        line = rx.cap(1).toInt();
-        column = rx.cap(2).toInt();
-        if(rx.cap(3) == "Symbol"){
-            type = Symbol;
-        } else if(rx.cap(3) == "Error"){
-            type = Error;
-        } else if(rx.cap(3) == "Warning"){
-            type = Warning;
-        } else {
-            type = Exception;
-        }
-        text = rx.cap(4);
-    }
-}
-
-QString StyleError::GetTypeName() const
-{
-    switch(type){
-    case Symbol:
-        return QString("symbol");
-        break;
-    case Error:
-        return QString("error");
-        break;
-    case Warning:
-        return QString("warning");
-        break;
-    case Exception:
-        return QString("exception");
-        break;
-    default:
-      return QString("???");
-    }
-}
 
 bool DBInstance::LoadStyle(QString stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
@@ -100,11 +64,10 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     osmscout::log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
   }
   else {
-    std::list<std::string> errorsStrings=newStyleConfig->GetErrors();
+    std::list<StyleError> errorsStrings=newStyleConfig->GetErrors();
 
-    for(const auto& errorString : errorsStrings) {
-      StyleError err(QString::fromStdString(errorString));
-      qWarning() << "Style error:" << err.GetDescription();
+    for(const auto& err : errorsStrings) {
+      qWarning() << "Style error:" << QString::fromStdString(err.GetDescription());
       errors.append(err);
     }
 
