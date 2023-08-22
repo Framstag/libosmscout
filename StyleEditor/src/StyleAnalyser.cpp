@@ -85,16 +85,11 @@ void StyleAnalyser::update(QString content)
 
   QSet<int> errorLines;
   QSet<int> warningLines;
-  int line;
   for (const auto &w: styleConfig->GetWarnings()) {
-    // TODO: expose warning as some structure with line number
-    osmscout::StringToNumberSigned(w, line);
-    warningLines << line;
+    warningLines << w.GetLine();
   }
   for (const auto &w: styleConfig->GetErrors()) {
-    // TODO: expose warning as some structure with line number
-    osmscout::StringToNumberSigned(w, line);
-    errorLines << line;
+    errorLines << w.GetLine();
   }
 
   emit problematicLines(errorLines, warningLines);

@@ -967,7 +967,7 @@ QString MapWidget::firstStylesheetErrorDescription() const
     QList<StyleError> errors=dbThread->GetStyleErrors();
     if (errors.isEmpty())
       return "";
-    return errors.first().GetDescription();
+    return QString::fromStdString(errors.first().GetDescription());
 }
 
 bool MapWidget::toggleDebug()

@@ -13,6 +13,7 @@ set(HEADER_FILES
 	include/osmscoutmap/LabelProvider.h
 	include/osmscoutmap/LabelPath.h
 	include/osmscoutmap/Styles.h
+	include/osmscoutmap/StyleError.h
 	include/osmscoutmap/StyleDescription.h
 	include/osmscoutmap/StyleConfig.h
 	include/osmscoutmap/StyleProcessor.h
