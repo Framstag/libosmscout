@@ -57,6 +57,10 @@ jobs:
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
       - name: Create gcov files
         run:  mkdir gcov && cd gcov && gcov -p ../debug//*/*/*
+      - name: jvm test
+        run:  echo $JAVA_HOME && ${JAVA_HOME}/bin/java --version
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
       - name: SonarCloud Scan
         run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.login=$SONAR_TOKEN
         env:
