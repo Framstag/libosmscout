@@ -21,7 +21,7 @@ osmscout_library_project(
 	INCLUDEDIR osmscoutmapqt
 	INCLUDES ${QT5_INCLUDE_DIR}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapqt/MapQtFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map Qt5::Gui Qt5::Svg
+	TARGET OSMScout::OSMScout OSMScout::Map Qt::Gui Qt::Svg
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)

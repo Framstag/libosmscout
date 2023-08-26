@@ -45,15 +45,15 @@ osmscout_demo_project(NAME Routing SOURCES src/Routing.cpp TARGET OSMScout::OSMS
 
 #---- RoutingAnimation
 if(${OSMSCOUT_BUILD_MAP_QT})
-	osmscout_demo_project(NAME RoutingAnimation SOURCES src/RoutingAnimation.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
+	osmscout_demo_project(NAME RoutingAnimation SOURCES src/RoutingAnimation.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets)
 	if(MSVC)
 		  visual_studio_qt_helper("RoutingAnimation")
 	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 		add_custom_command(TARGET RoutingAnimation
 			POST_BUILD
-			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingAnimation>/$<TARGET_FILE_NAME:RoutingAnimation>"
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+			COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingAnimation>/$<TARGET_FILE_NAME:RoutingAnimation>"
 		)
 	endif()
 endif()
@@ -85,30 +85,30 @@ endif()
 #---- DrawMapQt & ResourceConsumptionQt
 if(${OSMSCOUT_BUILD_MAP_QT})
 	#---- DrawMapQt
-    osmscout_demo_project(NAME DrawMapQt SOURCES src/DrawMapQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
-    target_compile_definitions(DrawMapQt PRIVATE ${Qt5Widgets_DEFINITIONS})
+    osmscout_demo_project(NAME DrawMapQt SOURCES src/DrawMapQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets)
+    target_compile_definitions(DrawMapQt PRIVATE ${QtWidgets_DEFINITIONS})
 	if(MSVC)
 		  visual_studio_qt_helper("DrawMapQt")
 	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 		add_custom_command(TARGET DrawMapQt
 			POST_BUILD
-			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:DrawMapQt>/$<TARGET_FILE_NAME:DrawMapQt>"
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+			COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:DrawMapQt>/$<TARGET_FILE_NAME:DrawMapQt>"
 		)
 	endif()
 
 	#---- ResourceConsumptionQt
-    osmscout_demo_project(NAME ResourceConsumptionQt SOURCES src/ResourceConsumptionQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Widgets)
-    target_compile_definitions(ResourceConsumptionQt PRIVATE ${Qt5Widgets_DEFINITIONS})
+    osmscout_demo_project(NAME ResourceConsumptionQt SOURCES src/ResourceConsumptionQt.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets)
+    target_compile_definitions(ResourceConsumptionQt PRIVATE ${QtWidgets_DEFINITIONS})
 	if(MSVC)
 		  visual_studio_qt_helper("ResourceConsumptionQt")
 	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 		add_custom_command(TARGET ResourceConsumptionQt
 			POST_BUILD
-			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ResourceConsumptionQt>/$<TARGET_FILE_NAME:ResourceConsumptionQt>"
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+			COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ResourceConsumptionQt>/$<TARGET_FILE_NAME:ResourceConsumptionQt>"
 		)
 	endif()
 else()
@@ -120,7 +120,7 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 	set(CMAKE_AUTOMOC ON)
 	set(CMAKE_AUTORCC ON)
 
-	qt5_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
+	qt_add_resources(RESOURCE_FILES ../OSMScout2/res.qrc demo.qrc)
 
 	set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 	set_property(SOURCE qrc_demo.cpp PROPERTY SKIP_AUTOMOC ON)
@@ -135,18 +135,18 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 				# qml files in CMake sources make it visible in QtCreator
 				qml/ElevationProfileChart.qml
 
-			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)
-	target_compile_definitions(ElevationProfileChart PRIVATE ${Qt5Widgets_DEFINITIONS})
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets)
+	target_compile_definitions(ElevationProfileChart PRIVATE ${QtWidgets_DEFINITIONS})
 	set_target_properties(ElevationProfileChart PROPERTIES
 		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
 	if(MSVC)
 		visual_studio_qt_helper("ElevationProfileChart")
 	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 		add_custom_command(TARGET ElevationProfileChart
 				POST_BUILD
-				COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-				COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ElevationProfileChart>/$<TARGET_FILE_NAME:ElevationProfileChart>"
+				COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+				COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:ElevationProfileChart>/$<TARGET_FILE_NAME:ElevationProfileChart>"
 				)
 	endif()
 
@@ -165,18 +165,18 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 			qml/NavigationSimulation.qml
 
 			INCLUDES ../OSMScout2/src/
-			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt OSMScout::GPX Qt5::Widgets)
-		target_compile_definitions(NavigationSimulation PRIVATE ${Qt5Widgets_DEFINITIONS})
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt OSMScout::GPX Qt::Widgets)
+		target_compile_definitions(NavigationSimulation PRIVATE ${QtWidgets_DEFINITIONS})
 		set_target_properties(NavigationSimulation PROPERTIES
 			UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
 		if(MSVC)
 			visual_studio_qt_helper("NavigationSimulation")
 		endif()
-		if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+		if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 			add_custom_command(TARGET NavigationSimulation
 				POST_BUILD
-				COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-				COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:NavigationSimulation>/$<TARGET_FILE_NAME:NavigationSimulation>"
+				COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+				COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:NavigationSimulation>/$<TARGET_FILE_NAME:NavigationSimulation>"
 				)
 		endif()
 	else()
@@ -196,23 +196,23 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 			qml/PlaceInput.qml
 
 		INCLUDES ../OSMScout2/src/
-		TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt5::Widgets)
-	target_compile_definitions(RoutingParameters PRIVATE ${Qt5Widgets_DEFINITIONS})
+		TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets)
+	target_compile_definitions(RoutingParameters PRIVATE ${QtWidgets_DEFINITIONS})
 	set_target_properties(RoutingParameters PROPERTIES
 		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
 	if(MSVC)
 		visual_studio_qt_helper("RoutingParameters")
 	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 		add_custom_command(TARGET RoutingParameters
 			POST_BUILD
-			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-			COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+			COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
 			)
 	endif()
 
 	#---- QtWidgetsDemoApp
-	osmscout_demo_project(NAME QtWidgetsDemoApp SOURCES src/QtWidgetsDemoApp.cpp TARGET OSMScout::ClientQt)
+	osmscout_demo_project(NAME QtWidgetsDemoApp SOURCES src/QtWidgetsDemoApp.cpp TARGET Qt::Widgets OSMScout::ClientQt)
 else()
 	message("Skip ElevationProfileChart, NavigationSimulation and RoutingParameters QtWidgetsDemoApp demo, libosmscout-client-qt is missing.")
 endif()
