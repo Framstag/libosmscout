@@ -140,3 +140,34 @@ jobs:
         run:  ninja -C debug
       - name: Run tests
         run:  meson test -C debug --print-errorlogs
+
+  build_gcc_cmake_qt6:
+    name: gcc and cmake with Qt6
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install software-properties-common
+        run:  sudo apt-get install software-properties-common
+      - name: Install gcc compiler, cmake and ninja
+        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config cmake ninja-build
+      - name: Install libosmscout dependencies
+        run:  "sudo apt-get update && sudo apt-get install -y
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+               qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
+               qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
+               libgl-dev"
+      - name: Configure build project
+        run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
+        env:
+          CXX: g++-12
+          CC: gcc-12
+      - name: Build project
+        run: cmake --build build
+      - name: Install project
+        run: sudo cmake --install build
+      - name: Run tests
+        run: xvfb-run ctest -j 2 --output-on-failure
+        env:
+          QT_QPA_PLATFORM: offscreen
+        working-directory: build

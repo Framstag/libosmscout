@@ -59,7 +59,7 @@ set(TRANSLATION_SOURCE_FILES
 #
 #  - create binary translation files (*.qm) from translated phrases available
 #    in *.ts files with lrelease tool
-qt5_create_translation(TRANSLATION_QM_FILES
+qt_create_translation(TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
 		${TRANSLATION_TS_FILES})
 
