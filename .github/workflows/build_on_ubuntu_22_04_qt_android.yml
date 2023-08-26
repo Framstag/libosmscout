@@ -39,7 +39,6 @@ jobs:
           host: 'linux'
           target: 'android'
           arch: 'android'
-          modules: android
           install-deps: 'true'
           cache: true
           cache-key-prefix: ${{ runner.os }}
