@@ -43,6 +43,7 @@ jobs:
           install-deps: 'true'
           cache: true
           cache-key-prefix: ${{ runner.os }}
+          setup-python: false
       - name: Dump Qt installation data
         run:  echo ${Qt5_DIR}
       - name: List Qt installation
