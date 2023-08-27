@@ -36,21 +36,27 @@ jobs:
           cache: true
           cache-key-prefix: ${{ runner.os }}
           setup-python: false
+      - name: Dump Qt installation data
+        run:  echo ${Qt5_DIR}
+      - name: List Qt installation
+        run:  ls -l ../Qt/5.15.2/ios/
+      - name: List Qt installation
+        run:  ls -l ../Qt/5.15.2/ios/lib/cmake/Qt5
       - name: Configure build project
-        run: "
-          cmake -B build
-          -DCMAKE_SYSTEM_NAME=iOS
-          -DCMAKE_OSX_ARCHITECTURES=arm64
-          -DCMAKE_OSX_DEPLOYMENT_TARGET=13
-          -DOSMSCOUT_BUILD_IMPORT=OFF
-          -DOSMSCOUT_BUILD_GPX=ON
-          -DOSMSCOUT_BUILD_DEMOS=OFF
-          -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
-          -DOSMSCOUT_BUILD_DOC_API=OFF
-          -DOSMSCOUT_BUILD_WEBPAGE=OFF
-          -DOSMSCOUT_BUILD_TESTS=OFF
-          -DQt5_DIR=${Qt5_DIR}/lib/cmake/Qt5
-          -DCMAKE_UNITY_BUILD=ON
-          -Wno-dev"
+        run: "cmake -B build
+                    -DCMAKE_SYSTEM_NAME=iOS
+                    -DCMAKE_OSX_ARCHITECTURES=arm64
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET=13
+                    -DOSMSCOUT_BUILD_IMPORT=OFF
+                    -DOSMSCOUT_BUILD_GPX=ON
+                    -DOSMSCOUT_BUILD_DEMOS=OFF
+                    -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
+                    -DOSMSCOUT_BUILD_DOC_API=OFF
+                    -DOSMSCOUT_BUILD_WEBPAGE=OFF
+                    -DOSMSCOUT_BUILD_TESTS=OFF
+                    -DQt5_DIR=${Qt5_DIR}/lib/cmake/Qt5
+                    -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ON
+                    -DCMAKE_UNITY_BUILD=ON
+                    -Wno-dev"
       - name: Build project
         run: cmake --build build
