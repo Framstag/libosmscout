@@ -88,5 +88,6 @@ endif()
 
 install(TARGETS StyleEditor
         RUNTIME DESTINATION bin
+		BUNDLE DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
