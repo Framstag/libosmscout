@@ -23,5 +23,6 @@ endif()
 
 install(TARGETS BasemapImport
         RUNTIME DESTINATION bin
+        BUNDLE DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

@@ -141,8 +141,7 @@ osmscout_library_project(
 )
 
 if(LIBXML2_FOUND)
-	target_include_directories(OSMScoutImport PRIVATE ${LIBXML2_INCLUDE_DIR})
-	target_link_libraries(OSMScoutImport ${LIBXML2_LIBRARIES})
+	target_link_libraries(OSMScoutImport LibXml2::LibXml2)
 endif()
 
 if (PROTOBUF_FOUND)

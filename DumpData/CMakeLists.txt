@@ -14,5 +14,6 @@ endif()
 
 install(TARGETS DumpData
         RUNTIME DESTINATION bin
+		BUNDLE DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

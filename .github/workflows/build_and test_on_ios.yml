@@ -24,10 +24,8 @@ jobs:
       - name: Activate XCode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 13.4.1
+          xcode-version: latest-stable
       - name: Configure build project
-        run: cmake -B build -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DQt5_DIR=$(brew --prefix qt5)/lib/cmake/Qt5 -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -DCMAKE_UNITY_BUILD=ON -Wno-dev
-        env:
-          PKG_CONFIG_PATH: "/usr/local/opt/qt@5/lib/pkgconfig:/usr/local/opt/libxml2/lib/pkgconfig"
+        run: cmake -B build -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13 -DQt5_DIR=$(brew --prefix qt5)/lib/cmake/Qt5 -DCMAKE_UNITY_BUILD=ON -Wno-dev
       - name: Build project
         run: cmake --build build

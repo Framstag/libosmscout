@@ -105,7 +105,7 @@ check_include_file(sys/time.h HAVE_SYS_TIME_H)
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 check_include_file(unistd.h HAVE_UNISTD_H)
 check_include_file_cxx(codecvt HAVE_CODECVT)
-if(${HAVE_STDINT_H} AND ${HAVE_STDLIB_H} AND ${HAVE_INTTYPES_H} AND ${HAVE_STRING_H} AND ${HAVE_MEMORY_H})
+if(HAVE_STDINT_H AND HAVE_STDLIB_H AND HAVE_INTTYPES_H AND HAVE_STRING_H AND HAVE_MEMORY_H)
   set(STDC_HEADERS ON)
 else()
   set(STDC_HEADERS OFF)
@@ -134,9 +134,9 @@ check_function_exists(posix_fadvise HAVE_POSIX_FADVISE)
 check_function_exists(posix_madvise HAVE_POSIX_MADVISE)
 check_function_exists(mallinfo HAVE_MALLINFO)
 
-# prefer static libraries if shared are disabled 
-if(NOT BUILD_SHARED_LIBS AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC)) 
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES}) 
+# prefer static libraries if shared are disabled
+if(NOT BUILD_SHARED_LIBS AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCC))
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
 # check libraries and tools
@@ -355,7 +355,7 @@ endif()
 
 find_package(Direct2D QUIET)
 
-find_package(Threads REQUIRED)
+find_package(Threads)
 if(THREADS_HAVE_PTHREAD_ARG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${THREADS_PTHREAD_ARG}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${THREADS_PTHREAD_ARG}")
