@@ -56,6 +56,7 @@ jobs:
                     -DOSMSCOUT_BUILD_TESTS=OFF
                     -DQt5_DIR=${Qt5_DIR}/lib/cmake/Qt5
                     -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ON
+                    -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ON
                     -DCMAKE_UNITY_BUILD=ON
                     -Wno-dev"
       - name: Build project
