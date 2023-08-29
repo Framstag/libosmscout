@@ -2448,7 +2448,7 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::SectionsPostprocessor::Process(const RoutePostprocessor& postprocessor,
+  bool RoutePostprocessor::SectionsPostprocessor::Process([[maybe_unused]] const RoutePostprocessor& postprocessor,
                                                           RouteDescription& description)
   {
     int nbSections = this->sectionLengths.size();
