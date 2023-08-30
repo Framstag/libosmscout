@@ -138,6 +138,8 @@ macro(osmscout_library_project)
 			install(FILES $<TARGET_PDB_FILE:${_name}> DESTINATION ${CMAKE_INSTALL_PREFIX}/bin CONFIGURATIONS Debug)
 		endif()
 	endif()
+	configure_file("${CMAKE_SOURCE_DIR}/pkgconfig-template.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" @ONLY)
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" DESTINATION lib/pkgconfig)
 endmacro(osmscout_library_project)
 
 macro(osmscout_demo_project)
