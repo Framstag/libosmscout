@@ -118,16 +118,29 @@ set(SOURCE_FILES
     src/osmscoutclientqt/InstalledVoicesModel.cpp
 )
 
-osmscout_library_project(
-	NAME OSMScoutClientQt
-	ALIAS ClientQt
-	OUTPUT_NAME "osmscout_client_qt"
-	SOURCE ${SOURCE_FILES}
-	HEADER ${HEADER_FILES}
-	INCLUDEDIR osmscoutclientqt
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt5::Core Qt5::Gui Qt5::Quick Qt5::Multimedia OSMScout::Client
-)
+if (QT_VERSION_MAJOR EQUAL 6)
+	osmscout_library_project(
+			NAME OSMScoutClientQt
+			ALIAS ClientQt
+			OUTPUT_NAME "osmscout_client_qt"
+			SOURCE ${SOURCE_FILES}
+			HEADER ${HEADER_FILES}
+			INCLUDEDIR osmscoutclientqt
+			TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt6::Core5Compat Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
+	)
+else ()
+	osmscout_library_project(
+			NAME OSMScoutClientQt
+			ALIAS ClientQt
+			OUTPUT_NAME "osmscout_client_qt"
+			SOURCE ${SOURCE_FILES}
+			HEADER ${HEADER_FILES}
+			INCLUDEDIR osmscoutclientqt
+			TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
+	)
+endif ()
 
 if(MARISA_FOUND)
     target_include_directories(OSMScoutClientQt PUBLIC ${MARISA_INCLUDE_DIRS})

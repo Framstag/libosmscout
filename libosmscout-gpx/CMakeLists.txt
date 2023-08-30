@@ -43,9 +43,7 @@ osmscout_library_project(
 )
 
 if(LIBXML2_FOUND)
-    target_include_directories(OSMScoutGPX PRIVATE ${LIBXML2_INCLUDE_DIR})
-    target_link_libraries(OSMScoutGPX ${LIBXML2_LIBRARIES})
-	target_include_directories(OSMScoutGPX INTERFACE ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(OSMScoutGPX LibXml2::LibXml2)
 endif()
 
 if (ICONV_FOUND)

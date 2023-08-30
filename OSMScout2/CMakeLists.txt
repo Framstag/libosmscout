@@ -59,11 +59,11 @@ set(TRANSLATION_SOURCE_FILES
 #
 #  - create binary translation files (*.qm) from translated phrases available
 #    in *.ts files with lrelease tool
-qt5_create_translation(TRANSLATION_QM_FILES
+qt_create_translation(TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
 		${TRANSLATION_TS_FILES})
 
-qt5_add_resources(RESOURCE_FILES res.qrc)
+qt_add_resources(RESOURCE_FILES res.qrc)
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 
@@ -78,19 +78,19 @@ target_link_libraries(OSMScout2
 	OSMScout::Map
 	OSMScout::MapQt
 	OSMScout::ClientQt
-	Qt5::Core
-	Qt5::Gui
-	Qt5::Widgets
-	Qt5::Qml
-	Qt5::Quick
+	Qt::Core
+	Qt::Gui
+	Qt::Widgets
+	Qt::Qml
+	Qt::Quick
 )
 
-if (Qt5Svg_FOUND)
-	target_link_libraries(OSMScout2 Qt5::Svg)
+if (QtSvg_FOUND)
+	target_link_libraries(OSMScout2 Qt::Svg)
 endif()
 
-if (Qt5Positioning_FOUND)
-	target_link_libraries(OSMScout2 Qt5::Positioning)
+if (QtPositioning_FOUND)
+	target_link_libraries(OSMScout2 Qt::Positioning)
 endif()
 
 if(MARISA_FOUND)
@@ -114,16 +114,17 @@ endif()
 if(MSVC)
 	  visual_studio_qt_helper("OSMScout2")
 endif()
-if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
 	add_custom_command(TARGET OSMScout2
         POST_BUILD
-        COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-        COMMAND Qt5::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
+        COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+        COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:OSMScout2>/$<TARGET_FILE_NAME:OSMScout2>"
     )
 endif()
 
 install(TARGETS OSMScout2
 		RUNTIME DESTINATION bin
+		BUNDLE DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib)
 

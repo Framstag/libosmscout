@@ -32,26 +32,21 @@ jobs:
         run:  ${ANDROID_HOME}/tools/bin/sdkmanager --update
       - name: Install android platform, platform-tools, build-tools and ndk
         run:  ${ANDROID_HOME}/tools/bin/sdkmanager --install "platform-tools" "platforms;android-29" "build-tools;29.0.2" "ndk;23.1.7779620"
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
-          version: '5.12.9'
+          version: '5.15.2'
           host: 'linux'
           target: 'android'
-          arch: 'android_arm64_v8a'
-          modules: android
+          arch: 'android'
           install-deps: 'true'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}
+          setup-python: false
       - name: Dump Qt installation data
         run:  echo ${Qt5_DIR}
       - name: List Qt installation
-        run:  ls -l ../Qt/5.12.9/android_arm64_v8a/
+        run:  ls -l ../Qt/5.15.2/android/
       - name: Configure build project
         run: "cmake -B build
                     -DCMAKE_TOOLCHAIN_FILE=${ANDROID_HOME}/ndk/23.1.7779620/build/cmake/android.toolchain.cmake
