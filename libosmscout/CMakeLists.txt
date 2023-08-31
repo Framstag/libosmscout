@@ -463,3 +463,5 @@ if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 
      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private/Config.h" EXCLUDE)
 endif()
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/lib/CoreFeatures.h DESTINATION include/osmscout/lib)
