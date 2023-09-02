@@ -223,8 +223,8 @@ set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
 
-find_package(HarfBuzz QUIET)
-set(HAVE_LIB_HARFBUZZ ${HARFBUZZ_FOUND})
+find_package(harfbuzz QUIET)
+set(HAVE_LIB_HARFBUZZ $<TARGET_EXISTS:harfbuzz::harfbuzz>)
 
 set(OpenGL_GL_PREFERENCE "GLVND") # Prever non-legacy OpenGL libraries
 find_package(OpenGL QUIET)

@@ -29,10 +29,8 @@ if(PANGOCAIRO_FOUND)
   target_link_libraries(OSMScoutMapCairo ${PANGO_LIBRARIES})
   target_include_directories(OSMScoutMapCairo INTERFACE ${PANGO_INCLUDE_DIRS})
 
-  if(HARFBUZZ_FOUND)
-	  target_include_directories(OSMScoutMapCairo PUBLIC ${HARFBUZZ_INCLUDE_DIRS})
-	  target_link_libraries(OSMScoutMapCairo ${HARFBUZZ_LIBRARIES})
-	  target_include_directories(OSMScoutMapCairo INTERFACE ${HARFBUZZ_INCLUDE_DIRS})
+  if(TARGET harfbuzz::harfbuzz)
+	  target_link_libraries(OSMScoutMapCairo harfbuzz::harfbuzz)
   endif()
 endif()
 
