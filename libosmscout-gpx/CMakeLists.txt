@@ -47,13 +47,11 @@ if(LIBXML2_FOUND)
 endif()
 
 if (ICONV_FOUND)
-	target_include_directories(OSMScoutGPX PRIVATE ${ICONV_INCLUDE_DIRS})
-	target_link_libraries(OSMScoutGPX ${ICONV_LIBRARIES})
+	target_link_libraries(OSMScoutGPX Iconv::Iconv)
 endif()
 
 if (ZLIB_FOUND)
-	target_include_directories(OSMScoutGPX PRIVATE ${ZLIB_INCLUDE_DIRS})
-	target_link_libraries(OSMScoutGPX ${ZLIB_LIBRARIES})
+	target_link_libraries(OSMScoutGPX ZLIB::ZLIB)
 endif()
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)

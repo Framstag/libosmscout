@@ -18,9 +18,9 @@ osmscout_library_project(
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutmapcairo
-	INCLUDES ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
+	INCLUDES ${CAIRO_INCLUDE_DIRS}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapcairo/MapCairoFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES}
+	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} PNG::PNG
 )
 target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})
 
