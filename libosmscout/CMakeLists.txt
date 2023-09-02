@@ -403,7 +403,7 @@ if(MARISA_FOUND)
     target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
-if (ICONV_FOUND)
+if (TARGET Iconv::Iconv)
     target_link_libraries(OSMScout Iconv::Iconv)
 endif()
 

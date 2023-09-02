@@ -19,7 +19,7 @@ set(SOURCE_FILES
     src/osmscoutgpx/Extensions.cpp
 )
 
-if(LIBXML2_FOUND)
+if(TARGET LibXml2::LibXml2)
     list(APPEND HEADER_FILES
         include/osmscoutgpx/Import.h
         include/osmscoutgpx/Export.h
@@ -42,15 +42,15 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout
 )
 
-if(LIBXML2_FOUND)
+if(TARGET LibXml2::LibXml2)
     target_link_libraries(OSMScoutGPX LibXml2::LibXml2)
 endif()
 
-if (ICONV_FOUND)
+if (TARGET Iconv::Iconv)
 	target_link_libraries(OSMScoutGPX Iconv::Iconv)
 endif()
 
-if (ZLIB_FOUND)
+if (TARGET ZLIB::ZLIB)
 	target_link_libraries(OSMScoutGPX ZLIB::ZLIB)
 endif()
 

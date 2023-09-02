@@ -7,8 +7,6 @@ add_executable(OSMScoutOpenGL ${SOURCE_FILES})
 set_target_properties(OSMScoutOpenGL PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
 
 target_include_directories(OSMScoutOpenGL PRIVATE
-	${GLEW_INCLUDE_DIRS}
-	${GLFW_INCLUDE_DIR}
 	Freetype::Freetype
 )
 
@@ -17,7 +15,7 @@ target_link_libraries(OSMScoutOpenGL
 	OSMScout::Map
 	OSMScout::MapOpenGL
 	OpenGL::GL
-	${GLFW_LIBRARIES}
+	glfw
 )
 
 install(TARGETS OSMScoutOpenGL

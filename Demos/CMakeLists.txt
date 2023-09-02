@@ -235,9 +235,8 @@ else()
 endif()
 
 #---- DrawMapOpenGL
-if(${OSMSCOUT_BUILD_MAP_OPENGL} AND ${GLFW_FOUND})
-    osmscout_demo_project(NAME DrawMapOpenGL SOURCES src/DrawMapOpenGL.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapOpenGL ${GLFW_LIBRARIES})
-    target_include_directories(DrawMapOpenGL PRIVATE ${GLFW_INCLUDE_DIR})
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET glfw)
+    osmscout_demo_project(NAME DrawMapOpenGL SOURCES src/DrawMapOpenGL.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapOpenGL glfw)
 else()
 	message("Skip DrawMapOpenGL demo, libosmscout-map-opengl or glfw is missing.")
 endif()

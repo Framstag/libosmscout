@@ -108,14 +108,14 @@ else()
 	list(APPEND EXCLUDE_HEADER GenTextIndex.h)
 endif()
 
-if(LIBXML2_FOUND)
+if(TARGET LibXml2::LibXml2)
     list(APPEND HEADER_FILES include/osmscoutimport/PreprocessOSM.h)
     list(APPEND SOURCE_FILES src/osmscoutimport/PreprocessOSM.cpp)
 else()
 	list(APPEND EXCLUDE_HEADER PreprocessOSM.h)
 endif()
 
-if (PROTOBUF_FOUND)
+if (TARGET protobuf::libprotobuf)
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/fileformat.proto
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/osmformat.proto)
@@ -140,11 +140,11 @@ osmscout_library_project(
 	SKIP_HEADER
 )
 
-if(LIBXML2_FOUND)
+if(TARGET LibXml2::LibXml2)
 	target_link_libraries(OSMScoutImport LibXml2::LibXml2)
 endif()
 
-if (PROTOBUF_FOUND)
+if (TARGET protobuf::libprotobuf)
 	target_include_directories(OSMScoutImport PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(OSMScoutImport protobuf::libprotobuf)
 	if(WIN32)
@@ -153,15 +153,15 @@ if (PROTOBUF_FOUND)
 	target_compile_definitions(OSMScoutImport PRIVATE -DOSMSCOUT_IMPORT_CMAKE_BUILD)
 endif()
 
-if (ICONV_FOUND)
+if (TARGET Iconv::Iconv)
 	target_link_libraries(OSMScoutImport Iconv::Iconv)
 endif()
 
-if (LIBLZMA_FOUND)
+if (TARGET LibLZMA::LibLZMA)
 	target_link_libraries(OSMScoutImport LibLZMA::LibLZMA)
 endif()
 
-if (ZLIB_FOUND)
+if (TARGET ZLIB::ZLIB)
 	target_link_libraries(OSMScoutImport ZLIB::ZLIB)
 endif()
 
@@ -174,7 +174,7 @@ if (HAVE_STD_EXECUTION)
 	target_link_libraries(OSMScoutImport TBB::tbb)
 endif()
 
-if(OpenMP_CXX_FOUND)
+if(TARGET OpenMP::OpenMP_CXX)
 	target_link_libraries(OSMScoutImport OpenMP::OpenMP_CXX)
 endif()
 
