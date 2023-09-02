@@ -30,7 +30,8 @@ jobs:
                     mingw-w64-x86_64-libxml2
                     mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
-                    mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm"
+                    mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm
+                    mingw-w64-x86_64-directx-headers"
       - name: Configure build project
         run: DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST} cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
       - name: Build project
