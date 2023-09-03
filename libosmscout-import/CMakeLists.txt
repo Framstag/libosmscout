@@ -115,8 +115,8 @@ else()
 	list(APPEND EXCLUDE_HEADER PreprocessOSM.h)
 endif()
 
-if (TARGET protobuf::libprotobuf)
-    protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
+if (TARGET protobuf::libprotobuf AND EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
+	protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/fileformat.proto
 		${CMAKE_CURRENT_SOURCE_DIR}/src/protobuf/osmformat.proto)
     list(APPEND HEADER_FILES include/osmscoutimport/PreprocessPBF.h)
@@ -144,7 +144,7 @@ if(TARGET LibXml2::LibXml2)
 	target_link_libraries(OSMScoutImport LibXml2::LibXml2)
 endif()
 
-if (TARGET protobuf::libprotobuf)
+if (TARGET protobuf::libprotobuf AND EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
 	target_include_directories(OSMScoutImport PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(OSMScoutImport protobuf::libprotobuf)
 	if(WIN32)

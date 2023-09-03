@@ -166,7 +166,6 @@ set(OSMSCOUT_GPX_HAVE_LIB_XML $<TARGET_EXISTS:LibXml2>)
 find_package(Protobuf QUIET)
 if (TARGET protobuf::libprotobuf AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")
-  set(PROTOBUF_FOUND FALSE)
 endif()
 set(HAVE_LIB_PROTOBUF $<TARGET_EXISTS:protobuf::libprotobuf>)
 
