@@ -147,8 +147,8 @@ set(HAVE_LIB_MARISA ${MARISA_FOUND})
 set(OSMSCOUT_HAVE_LIB_MARISA ${HAVE_LIB_MARISA})
 set(OSMSCOUT_IMPORT_HAVE_LIB_MARISA ${MARISA_FOUND})
 
-find_package(LibXml2)
-if (LIBXML2_FOUND AND NOT BUILD_SHARED_LIBS)
+find_package(LibXml2 QUIET)
+if (TARGET LibXml2::LibXml2 AND NOT BUILD_SHARED_LIBS)
   # seems that FindLibXml2.cmake don't handle static libraries properly
   # as a workaround we append PC_LIBXML_STATIC_LIBRARIES to LIBXML2_LIBRARIES
   set(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${PC_LIBXML_STATIC_LIBRARIES})
@@ -160,22 +160,35 @@ if (LIBXML2_FOUND AND NOT BUILD_SHARED_LIBS)
     list(APPEND LIBXML2_LIBRARIES "dl")
   endif()
 endif()
-set(HAVE_LIB_XML ${LIBXML2_FOUND})
-set(OSMSCOUT_GPX_HAVE_LIB_XML ${LIBXML2_FOUND})
+set(HAVE_LIB_XML $<TARGET_EXISTS:LibXml2>)
+set(OSMSCOUT_GPX_HAVE_LIB_XML $<TARGET_EXISTS:LibXml2>)
 
-find_package(Protobuf)
-if (${PROTOBUF_FOUND} AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
+find_package(Protobuf QUIET)
+if (TARGET protobuf::libprotobuf AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")
-  set(PROTOBUF_FOUND FALSE)
 endif()
-set(HAVE_LIB_PROTOBUF ${PROTOBUF_FOUND})
+set(HAVE_LIB_PROTOBUF $<TARGET_EXISTS:protobuf::libprotobuf>)
 
-find_package(ZLIB)
-set(HAVE_LIB_ZLIB ${ZLIB_FOUND})
+find_package(ZLIB QUIET)
+set(HAVE_LIB_ZLIB $<TARGET_EXISTS:ZLIB::ZLIB>)
 
-find_package(iconv)
-if(ICONV_FOUND)
+find_package(Iconv QUIET)
+if(TARGET Iconv::Iconv)
   set(HAVE_ICONV TRUE)
+
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR})
+  set(CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARIES})
+  if(MSVC)
+    set(CMAKE_REQUIRED_FLAGS /we4028 /fp:fast /wd4251 /Oi)
+  endif()
+  check_prototype_definition("iconv"
+          "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
+          "-1"
+          "iconv.h"
+          ICONV_SECOND_ARGUMENT_IS_CONST)
+  cmake_pop_check_state()
+
   if(${ICONV_SECOND_ARGUMENT_IS_CONST})
     set(ICONV_CONST "const")
   endif()
@@ -183,7 +196,7 @@ else()
   message(WARNING "No iconv support")
 endif()
 
-find_package(LibLZMA)
+find_package(LibLZMA QUIET)
 
 find_package(PNG QUIET)
 set(HAVE_LIB_PNG ${PNG_FOUND})
@@ -209,8 +222,8 @@ set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
 
-find_package(HarfBuzz QUIET)
-set(HAVE_LIB_HARFBUZZ ${HARFBUZZ_FOUND})
+find_package(harfbuzz QUIET)
+set(HAVE_LIB_HARFBUZZ $<TARGET_EXISTS:harfbuzz::harfbuzz>)
 
 set(OpenGL_GL_PREFERENCE "GLVND") # Prever non-legacy OpenGL libraries
 find_package(OpenGL QUIET)
@@ -218,8 +231,9 @@ set(HAVE_LIB_OPENGL ${OPENGL_FOUND})
 
 find_package(GLEW QUIET)
 
-find_package(GLM QUIET)
-if(NOT GLM_FOUND)
+find_package(glm QUIET)
+if(NOT TARGET glm)
+  message(STATUS "glm NOT found")
   find_package(Git QUIET)
   if(Git_FOUND)
     option(OSMSCOUT_DOWNLOAD_GLM_IF_NOT_FOUND "Load GLM via Git automatically if the library was not found offline" OFF)
@@ -236,7 +250,7 @@ if(NOT GLM_FOUND)
   endif()
 endif()
 
-find_package(GLFW QUIET)
+find_package(glfw3 QUIET)
 
 if (QT_VERSION_PREFERRED AND QT_VERSION_PREFERRED EQUAL 5)
   message(STATUS "Try loading Qt5 (explicitly preferred)...")

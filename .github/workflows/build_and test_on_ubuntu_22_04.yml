@@ -130,7 +130,7 @@ jobs:
                libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
                qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
-               libgl-dev"
+               libglm-dev libgl-dev"
       - name: Configure build project
         run:  PATH=/usr/lib/qt6/bin:/usr/lib/qt6/libexec:$PATH meson setup --buildtype debugoptimized --unity on --wrap-mode=nofallback -D qtVersion=6 debug
         env:
@@ -153,10 +153,9 @@ jobs:
         run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+               libprotobuf-dev protobuf-compiler
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
-               qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
-               libgl-dev"
+               qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev"
       - name: Configure build project
         run: cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
         env:

@@ -403,9 +403,8 @@ if(MARISA_FOUND)
     target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
-if (ICONV_FOUND)
-    target_include_directories(OSMScout PRIVATE ${ICONV_INCLUDE_DIRS})
-    target_link_libraries(OSMScout ${ICONV_LIBRARIES})
+if (TARGET Iconv::Iconv)
+    target_link_libraries(OSMScout Iconv::Iconv)
 endif()
 
 if(CMAKE_THREAD_LIBS_INIT)

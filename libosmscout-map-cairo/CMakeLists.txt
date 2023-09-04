@@ -18,9 +18,9 @@ osmscout_library_project(
 	SOURCE ${SOURCE_FILES}
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutmapcairo
-	INCLUDES ${CAIRO_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
+	INCLUDES ${CAIRO_INCLUDE_DIRS}
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapcairo/MapCairoFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} ${PNG_LIBRARIES}
+	TARGET OSMScout::OSMScout OSMScout::Map ${CAIRO_LIBRARIES} PNG::PNG
 )
 target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})
 
@@ -29,10 +29,8 @@ if(PANGOCAIRO_FOUND)
   target_link_libraries(OSMScoutMapCairo ${PANGO_LIBRARIES})
   target_include_directories(OSMScoutMapCairo INTERFACE ${PANGO_INCLUDE_DIRS})
 
-  if(HARFBUZZ_FOUND)
-	  target_include_directories(OSMScoutMapCairo PUBLIC ${HARFBUZZ_INCLUDE_DIRS})
-	  target_link_libraries(OSMScoutMapCairo ${HARFBUZZ_LIBRARIES})
-	  target_include_directories(OSMScoutMapCairo INTERFACE ${HARFBUZZ_INCLUDE_DIRS})
+  if(TARGET harfbuzz::harfbuzz)
+	  target_link_libraries(OSMScoutMapCairo harfbuzz::harfbuzz)
   endif()
 endif()
 
