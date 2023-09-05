@@ -31,6 +31,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QMutex>
+#include <QPainter>
 
 namespace osmscout {
 

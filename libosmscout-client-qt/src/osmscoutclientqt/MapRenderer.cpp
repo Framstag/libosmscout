@@ -20,6 +20,8 @@
 
 #include <osmscoutclientqt/MapRenderer.h>
 
+#include <osmscoutmapqt/MapPainterQt.h>
+
 namespace osmscout {
 
 MapRenderer::MapRenderer(QThread *thread,
@@ -334,7 +336,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                           data->groundTiles);
     }
 
-    auto *painter = db->GetPainter();
+    auto *painter = db->GetPainter<MapPainterQt>();
     if (painter != nullptr) {
       batch.AddData(data, painter);
     } else {

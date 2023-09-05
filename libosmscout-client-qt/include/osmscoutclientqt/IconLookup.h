@@ -30,6 +30,9 @@
 #include <QObject>
 #include <QSettings>
 #include <QMutex>
+#include <QPoint>
+#include <QRectF>
+#include <QImage>
 
 namespace osmscout {
 

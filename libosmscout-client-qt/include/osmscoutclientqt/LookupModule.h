@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QRectF>
 
 #include <osmscout/location/LocationDescriptionService.h>
 
