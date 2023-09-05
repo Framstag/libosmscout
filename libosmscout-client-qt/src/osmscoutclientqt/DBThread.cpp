@@ -304,7 +304,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       continue;
     }
 
-    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
+    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath().toStdString(),
                                                      database,
                                                      std::make_shared<osmscout::LocationService>(database),
                                                      std::make_shared<osmscout::LocationDescriptionService>(database),
@@ -461,7 +461,7 @@ void DBThread::FlushCaches(qint64 idleMs)
 {
   RunSynchronousJob([idleMs](const std::list<DBInstanceRef> &dbs){
     for (const auto &db:dbs){
-      if (db->LastUsageMs() > idleMs){
+      if (db->LastUsageMs().count() > idleMs){
         auto database=db->GetDatabase();
         osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
         database->DumpStatistics();

@@ -31,7 +31,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
                            QList<StyleError> &errors)
 {
-  QMutexLocker locker(&mutex);
+  std::lock_guard<std::mutex> lock(mutex);
 
   if (!database->IsOpen()) {
     return false;
@@ -61,13 +61,13 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     // Recreate
     styleConfig=newStyleConfig;
 
-    osmscout::log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
+    log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
   }
   else {
     std::list<StyleError> errorsStrings=newStyleConfig->GetErrors();
 
     for(const auto& err : errorsStrings) {
-      qWarning() << "Style error:" << QString::fromStdString(err.GetDescription());
+      log.Warn() << "Style error:" << err.GetDescription();
       errors.append(err);
     }
 
@@ -81,7 +81,7 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
 
 void DBInstance::onThreadFinished()
 {
-  QMutexLocker locker(&mutex);
+  std::lock_guard<std::mutex> lock(mutex);
   if (painterHolder.contains(QThread::currentThread())){
     delete painterHolder[QThread::currentThread()];
     painterHolder.remove(QThread::currentThread());
@@ -90,7 +90,7 @@ void DBInstance::onThreadFinished()
 
 void DBInstance::close()
 {
-  QMutexLocker locker(&mutex);
+  std::lock_guard<std::mutex> lock(mutex);
 
   qDeleteAll(painterHolder);
   painterHolder.clear();
@@ -99,7 +99,7 @@ void DBInstance::close()
   // threads are stopped and joined in MapService destructor
   if (mapService && mapService.use_count() > 1){
     // if DBInstance is not exclusive owner, threads may hit closed data file and trigger assert!
-    log.Warn() << "Map service for " << path.toStdString() << " is used on multiple places";
+    log.Warn() << "Map service for " << path << " is used on multiple places";
   }
   mapService.reset();
 

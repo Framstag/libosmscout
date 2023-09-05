@@ -139,14 +139,14 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
     osmscout::GeoBox   bbox=area->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
-    result << buildLocationEntry(area, db->path, coordinates, bbox);
+    result << buildLocationEntry(area, QString::fromStdString(db->path), coordinates, bbox);
   }
 
   for (osmscout::WayRef &way:ways) {
     osmscout::GeoBox   bbox=way->GetBoundingBox();
     osmscout::GeoCoord coordinates=bbox.GetCenter();
 
-    result << buildLocationEntry(way, db->path, coordinates, bbox);
+    result << buildLocationEntry(way, QString::fromStdString(db->path), coordinates, bbox);
   }
 
   for (osmscout::NodeRef &node:nodes) {
@@ -154,7 +154,7 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
     osmscout::GeoBox bbox;
     bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
 
-    result << buildLocationEntry(node, db->path, coordinates, bbox);
+    result << buildLocationEntry(node, QString::fromStdString(db->path), coordinates, bbox);
   }
 
   return result;

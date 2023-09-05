@@ -305,8 +305,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     ++i;
 
     std::list<osmscout::TileRef> tileList;
-    if (tiles.contains(db->path)) {
-      auto list = tiles[db->path].values();
+    if (tiles.contains(QString::fromStdString(db->path))) {
+      auto list = tiles[QString::fromStdString(db->path)].values();
       tileList = std::list<osmscout::TileRef>(list.begin(), list.end());
       skip = false;
     }
@@ -327,7 +327,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     if (skip) {
-      osmscout::log.Debug() << "Skip db " << db->path.toStdString();
+      osmscout::log.Debug() << "Skip db " << db->path;
       continue;
     }
 
@@ -340,7 +340,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     if (painter != nullptr) {
       batch.AddData(data, painter);
     } else {
-      osmscout::log.Warn() << "Painter is not available for db: " << db->path.toStdString();
+      osmscout::log.Warn() << "Painter is not available for db: " << db->path;
       success = false;
     }
   }

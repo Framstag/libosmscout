@@ -205,10 +205,10 @@ void IconLookup::onDatabaseLoaded(QString dbPath,QList<osmscout::TileRef> tiles)
   loadJob->AddTileDataToMapData(dbPath,tiles,data);
   dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef> &databases){
     for (auto &db: databases) {
-      if (db->path==dbPath){
+      if (db->path==dbPath.toStdString()){
         TypeConfigRef typeConfig=db->GetDatabase()->GetTypeConfig();
         StyleConfigRef styleConfig=db->GetStyleConfig();
-        this->lookupIcons(db->path, data, typeConfig, styleConfig);
+        this->lookupIcons(QString::fromStdString(db->path), data, typeConfig, styleConfig);
       }
     }
   });

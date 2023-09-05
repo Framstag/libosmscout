@@ -33,12 +33,10 @@
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <QObject>
-#include <QMutex>
-#include <QDebug>
 #include <QMap>
 #include <QThread>
-#include <QElapsedTimer>
-#include <QMutexLocker>
+
+#include <chrono>
 
 namespace osmscout {
 
@@ -54,14 +52,14 @@ class OSMSCOUT_CLIENT_QT_API DBInstance : public QObject
   Q_OBJECT
 
 public:
-  const QString                           path;
+  const std::string                       path;
 
 private:
-  mutable QMutex                          mutex;
-  QMap<QThread*,MapPainter*>              painterHolder; ///< thread-local cache of map painters, guarded by mutex
-  QElapsedTimer                           lastUsage; ///< last time when db was used, guarded by mutex
+  mutable std::mutex                      mutex;
+  QMap<QThread*,MapPainter*>              painterHolder;  ///< thread-local cache of map painters, guarded by mutex
+  std::chrono::steady_clock::time_point   lastUsage;      ///< last time when db was used, guarded by mutex
 
-  osmscout::GeoBox                        dbBox; ///< cached db GeoBox, may be accessed without lock and lastUsage update
+  osmscout::GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
   osmscout::DatabaseRef                   database;
 
   osmscout::LocationServiceRef            locationService;
@@ -74,7 +72,7 @@ public slots:
   void onThreadFinished();
 
 public:
-  DBInstance(const QString &path,
+  DBInstance(const std::string &path,
              const osmscout::DatabaseRef& database,
              const osmscout::LocationServiceRef& locationService,
              const osmscout::LocationDescriptionServiceRef& locationDescriptionService,
@@ -88,9 +86,9 @@ public:
     styleConfig(styleConfig)
   {
     if (!database->GetBoundingBox(dbBox)){
-      osmscout::log.Error() << "Failed to get db GeoBox: " << path.toStdString();
+      osmscout::log.Error() << "Failed to get db GeoBox: " << path;
     }
-    lastUsage.start();
+    lastUsage=std::chrono::steady_clock::now();
   };
 
   ~DBInstance() override
@@ -105,7 +103,7 @@ public:
 
   /**
    * return true if db is open
-   * lastUsage is not udpated
+   * lastUsage is not updated
    */
   bool IsOpen() const
   {
@@ -114,29 +112,29 @@ public:
 
   osmscout::DatabaseRef GetDatabase()
   {
-    QMutexLocker locker(&mutex);
-    lastUsage.restart();
+    std::lock_guard<std::mutex> lock(mutex);
+    lastUsage=std::chrono::steady_clock::now();
     return database;
   }
 
   osmscout::MapServiceRef GetMapService()
   {
-    QMutexLocker locker(&mutex);
-    lastUsage.restart();
+    std::lock_guard<std::mutex> lock(mutex);
+    lastUsage=std::chrono::steady_clock::now();
     return mapService;
   }
 
   osmscout::LocationDescriptionServiceRef GetLocationDescriptionService()
   {
-    QMutexLocker locker(&mutex);
-    lastUsage.restart();
+    std::lock_guard<std::mutex> lock(mutex);
+    lastUsage=std::chrono::steady_clock::now();
     return locationDescriptionService;
   }
 
   osmscout::LocationServiceRef GetLocationService()
   {
-    QMutexLocker locker(&mutex);
-    lastUsage.restart();
+    std::lock_guard<std::mutex> lock(mutex);
+    lastUsage=std::chrono::steady_clock::now();
     return locationService;
   }
 
@@ -148,10 +146,10 @@ public:
   /**
    * Returns the number of milliseconds since last db usage
    */
-  qint64 LastUsageMs() const
+  std::chrono::milliseconds LastUsageMs() const
   {
-    QMutexLocker locker(&mutex);
-    return lastUsage.elapsed();
+    std::lock_guard<std::mutex> lock(mutex);
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-lastUsage);
   }
 
   bool LoadStyle(QString stylesheetFilename,
@@ -169,7 +167,7 @@ public:
            typename Requires = std::enable_if_t<std::is_base_of<MapPainter, PainterType>::value>>
   PainterType* GetPainter()
   {
-    QMutexLocker locker(&mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     if (!styleConfig) {
       return nullptr;
     }

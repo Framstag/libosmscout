@@ -68,7 +68,7 @@ void SearchLocationsRunnable::run()
   }
 
   osmscout::AdminRegionRef defaultRegion;
-  if (defaultRegionInfo && defaultRegionInfo->database==db->path){
+  if (defaultRegionInfo && defaultRegionInfo->database==QString::fromStdString(db->path)){
     defaultRegion=defaultRegionInfo->adminRegion;
   }
 
@@ -165,8 +165,8 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
     QList<LocationEntry> locations;
     QList<osmscout::ObjectFileRef> objectSet;
     osmscout::TextSearchIndex textSearch;
-    if(!textSearch.Load(db->path.toStdString())){
-      osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path.toStdString();
+    if(!textSearch.Load(db->path)){
+      osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path;
       return true; // silently continue, text indexes are optional in db
     }
     osmscout::TextSearchIndex::ResultsMap resultsTxt;
@@ -318,7 +318,7 @@ bool FreeTextSearchRunnable::BuildLocationEntry(const osmscout::ObjectFileRef& o
     */
 
     LocationEntry location(LocationEntry::typeObject, name, altName, objectType, adminRegionList,
-                           db->path, coordinates, bbox);
+                           QString::fromStdString(db->path), coordinates, bbox);
     location.addReference(object);
     locations.append(location);
 
@@ -355,7 +355,7 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
       osmscout::log.Debug() << "address:  " << label.toStdString();
 
       LocationEntry location(LocationEntry::typeObject, label, altName, objectType, adminRegionList,
-                             db->path, coordinates, bbox);
+                             QString::fromStdString(db->path), coordinates, bbox);
       location.addReference(entry.address->object);
       locations.append(location);
     }
@@ -370,7 +370,7 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
       osmscout::log.Debug() << "loc:      " << loc.toStdString();
 
       LocationEntry location(LocationEntry::typeObject, loc, altName, objectType, adminRegionList,
-                             db->path, coordinates, bbox);
+                             QString::fromStdString(db->path), coordinates, bbox);
 
       for (auto object : entry.location->objects) {
           location.addReference(object);
@@ -387,7 +387,7 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
       osmscout::log.Debug() << "poi:      " << poi.toStdString();
 
       LocationEntry location(LocationEntry::typeObject, poi, altName, objectType, adminRegionList,
-                             db->path, coordinates, bbox);
+                             QString::fromStdString(db->path), coordinates, bbox);
       location.addReference(entry.poi->object);
       locations.append(location);
     }
@@ -399,7 +399,7 @@ bool SearchLocationsRunnable::BuildLocationEntry(const osmscout::LocationSearchR
 
       //=QString::fromUtf8(entry.adminRegion->name.c_str());
       LocationEntry location(LocationEntry::typeObject, regionName, altName, objectType, adminRegionList,
-                             db->path, coordinates, bbox);
+                             QString::fromStdString(db->path), coordinates, bbox);
 
       osmscout::log.Debug() << "region: " << regionName.toStdString();
 

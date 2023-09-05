@@ -29,6 +29,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QPainter>
+#include <QElapsedTimer>
 
 namespace osmscout {
 
