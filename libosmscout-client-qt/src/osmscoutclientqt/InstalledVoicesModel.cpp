@@ -136,7 +136,7 @@ void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringLis
     return;
   }
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   if (mediaPlayer==nullptr){
     assert(currentPlaylist==nullptr);
     mediaPlayer = new QMediaPlayer(this);

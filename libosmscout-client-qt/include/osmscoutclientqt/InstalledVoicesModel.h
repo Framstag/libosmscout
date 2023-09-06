@@ -29,7 +29,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QMediaPlayer>
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMediaPlaylist>
 #endif
 
@@ -89,7 +89,7 @@ private:
   SettingsRef settings;
 
   // we setup QObject parents, objects are cleaned after Module destruction
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QMediaPlaylist *currentPlaylist{nullptr};
 #endif
   QMediaPlayer *mediaPlayer{nullptr};

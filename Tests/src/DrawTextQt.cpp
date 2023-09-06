@@ -100,7 +100,7 @@ void DrawWindow::drawText1(QPainter *painter, QString string, const osmscout::La
 
       painter->drawText(point.GetX(), point.GetY(), QString(string[i]));
 
-#if QT_VERSION < 0x051100
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
       offset+=metrics.width(string[i]);
 #else
       offset+=metrics.horizontalAdvance(string[i]);

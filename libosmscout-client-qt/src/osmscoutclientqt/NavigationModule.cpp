@@ -56,19 +56,19 @@ void NavigationModule::InitPlayer()
   }
 
   if (mediaPlayer==nullptr){
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     assert(currentPlaylist==nullptr);
 #endif
     mediaPlayer = new QMediaPlayer(this);
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     currentPlaylist = new QMediaPlaylist(mediaPlayer);
 #endif
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(mediaPlayer, &QMediaPlayer::stateChanged, this, &NavigationModule::playerStateChanged);
 #else
     connect(mediaPlayer, &QMediaPlayer::playbackStateChanged, this, &NavigationModule::playerStateChanged);
 #endif
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     mediaPlayer->setPlaylist(currentPlaylist);
 #endif
   }
@@ -138,7 +138,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
         nextMessage = voiceInstructionMessage->message;
         InitPlayer();
         assert(mediaPlayer);
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         playerStateChanged(mediaPlayer->state());
 #else
         playerStateChanged(mediaPlayer->playbackState());
@@ -329,7 +329,7 @@ QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSam
   }
 }
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   void NavigationModule::playerStateChanged(QMediaPlayer::State state)
 #else
   void NavigationModule::playerStateChanged(QMediaPlayer::PlaybackState state)
@@ -339,26 +339,26 @@ QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSam
     qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
   }
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   qDebug() << "Voice player state:" << mediaPlayer->state() << "(" << currentPlaylist->currentIndex() << "/" << currentPlaylist->mediaCount() << ")";
 #endif
   if (!voiceDir.isEmpty() &&
       !nextMessage.empty() &&
       state == QMediaPlayer::StoppedState) {
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     currentPlaylist->clear();
 #endif
 
     for (const auto& sample : nextMessage){
       auto sampleUrl = QUrl::fromLocalFile(voiceDir + QDir::separator() + sampleFile(sample));
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       qDebug() << "Adding to playlist:" << sampleUrl;
       currentPlaylist->addMedia(sampleUrl);
 #endif
     }
     nextMessage.clear();
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     currentPlaylist->setCurrentIndex(0);
 #endif
     mediaPlayer->play();

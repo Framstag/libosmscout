@@ -45,7 +45,7 @@
 #include <QTimer>
 #include <QMediaPlayer>
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   #include <QMediaPlaylist>
 #endif
 
@@ -53,7 +53,7 @@
 
 namespace osmscout {
 
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   using QtMediaPlayerState = QMediaPlayer::State;
 #else
   using QtMediaPlayerState = QMediaPlayer::PlaybackState;
@@ -142,7 +142,7 @@ private:
   QString voiceDir;
   // player and playlist should be created in module thread, not in UI thread (constructor)
   // we setup QObject parents, objects are cleaned after Module destruction
-#if QT_VERSION < 0x060000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QMediaPlaylist *currentPlaylist{nullptr};
 #endif
   QMediaPlayer *mediaPlayer{nullptr};

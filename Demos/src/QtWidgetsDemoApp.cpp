@@ -8,10 +8,22 @@ const auto MIN_ZOOM = 0;
 const auto MAP_DPI = 96;
 
 namespace {
+// used with QWheelEvent
 template <typename EventType>
 auto pos(EventType* event)
 {
-#if QT_VERSION < 0x051400
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    return event->pos();
+#else
+    return event->position().toPoint();
+#endif
+}
+
+// used with QMouseEvent
+template <typename EventType>
+auto pos2(EventType* event)
+{
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     return event->pos();
 #else
     return event->position().toPoint();
@@ -58,15 +70,15 @@ protected:
 
     void mousePressEvent(QMouseEvent* ev) override
     {
-        m_lastMousePos = ::pos(ev);
+        m_lastMousePos = ::pos2(ev);
     }
 
     void mouseMoveEvent(QMouseEvent* ev) override
     {
-        auto x_delta = ::pos(ev).x() - m_lastMousePos.x();
-        auto y_delta = ::pos(ev).y() - m_lastMousePos.y();
+        auto x_delta = ::pos2(ev).x() - m_lastMousePos.x();
+        auto y_delta = ::pos2(ev).y() - m_lastMousePos.y();
         m_currentProjection.Move(-x_delta, y_delta);
-        m_lastMousePos = ::pos(ev);
+        m_lastMousePos = ::pos2(ev);
         update();
     }
 
