@@ -25,6 +25,7 @@
 #include <QList>
 #include <QThread>
 #include <QReadWriteLock>
+#include <QMap>
 
 #include <osmscout/projection/MercatorProjection.h>
 

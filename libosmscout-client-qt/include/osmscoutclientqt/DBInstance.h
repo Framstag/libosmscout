@@ -24,6 +24,8 @@
 #include <osmscout/location/LocationDescriptionService.h>
 
 #include <osmscout/db/Database.h>
+#include <osmscout/async/Thread.h>
+#include <osmscout/async/Signal.h>
 
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmap/MapPainter.h>
@@ -32,11 +34,8 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <QObject>
-#include <QMap>
-#include <QThread>
-
 #include <chrono>
+#include <thread>
 
 namespace osmscout {
 
@@ -47,10 +46,8 @@ namespace osmscout {
  *
  * It is thread safe
  */
-class OSMSCOUT_CLIENT_QT_API DBInstance : public QObject
+class OSMSCOUT_CLIENT_QT_API DBInstance
 {
-  Q_OBJECT
-
 public:
   const std::string                       path;
 
@@ -58,7 +55,7 @@ public:
 
 private:
   mutable std::mutex                      mutex;
-  QMap<QThread*,MapPainterRef>            painterHolder;  ///< thread-local cache of map painters, guarded by mutex
+  std::map<std::thread::id,MapPainterRef> painterHolder;  ///< thread-local cache of map painters, guarded by mutex
   std::chrono::steady_clock::time_point   lastUsage;      ///< last time when db was used, guarded by mutex
 
   osmscout::GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
@@ -70,8 +67,7 @@ private:
 
   osmscout::StyleConfigRef                styleConfig;
 
-public slots:
-  void onThreadFinished();
+  Slot<std::thread::id>                   threadFinishSlot;
 
 public:
   DBInstance(const std::string &path,
@@ -85,7 +81,8 @@ public:
     locationService(locationService),
     locationDescriptionService(locationDescriptionService),
     mapService(mapService),
-    styleConfig(styleConfig)
+    styleConfig(styleConfig),
+    threadFinishSlot(std::bind(&DBInstance::OnThreadFinished, this, std::placeholders::_1))
   {
     if (!database->GetBoundingBox(dbBox)){
       osmscout::log.Error() << "Failed to get db GeoBox: " << path;
@@ -93,9 +90,9 @@ public:
     lastUsage=std::chrono::steady_clock::now();
   };
 
-  ~DBInstance() override
+  virtual ~DBInstance()
   {
-    close();
+    Close();
   };
 
   osmscout::GeoBox GetDBGeoBox() const
@@ -154,9 +151,9 @@ public:
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-lastUsage);
   }
 
-  bool LoadStyle(QString stylesheetFilename,
+  bool LoadStyle(const std::string &stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
-                 QList<StyleError> &errors);
+                 std::list<StyleError> &errors);
 
   /**
    * Get or create thread local MapPainter instance for this map
@@ -174,9 +171,9 @@ public:
       return nullptr;
     }
 
-    if (painterHolder.contains(QThread::currentThread())){
-      MapPainterRef p=painterHolder[QThread::currentThread()];
-      if (std::shared_ptr<PainterType> res=std::dynamic_pointer_cast<PainterType>(p);
+    if (auto it=painterHolder.find(std::this_thread::get_id());
+        it!=painterHolder.end()){
+      if (std::shared_ptr<PainterType> res=std::dynamic_pointer_cast<PainterType>(it->second);
           res!=nullptr) {
         return res;
       } else {
@@ -185,13 +182,17 @@ public:
     }
 
     std::shared_ptr<PainterType> res=std::make_shared<PainterType>(styleConfig);
-    painterHolder[QThread::currentThread()]=res;
-    connect(QThread::currentThread(), &QThread::finished,
-            this, &DBInstance::onThreadFinished);
+    painterHolder[std::this_thread::get_id()]=res;
+
+    ThreadExitSignal().Connect(threadFinishSlot);
+
     return res;
   }
 
-  void close();
+  void Close();
+
+private:
+  void OnThreadFinished(const std::thread::id &id);
 };
 
 using DBInstanceRef = std::shared_ptr<DBInstance>;

@@ -155,7 +155,7 @@ private:
   bool                               daylight;
 
   bool                               renderError;
-  QList<StyleError>                  styleErrors;
+  std::list<StyleError>              styleErrors;
 
   std::vector<std::string>           customPoiTypes;
 
@@ -223,7 +223,7 @@ public:
     return stylesheetFilename;
   }
 
-  const QList<StyleError> &GetStyleErrors() const
+  const std::list<StyleError> &GetStyleErrors() const
   {
       return styleErrors;
   }

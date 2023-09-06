@@ -23,13 +23,11 @@
 
 #include <osmscout/log/Logger.h>
 
-#include <QRegExp>
-
 namespace osmscout {
 
-bool DBInstance::LoadStyle(QString stylesheetFilename,
+bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
-                           QList<StyleError> &errors)
+                           std::list<StyleError> &errors)
 {
   std::lock_guard<std::mutex> lock(mutex);
 
@@ -53,21 +51,20 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     newStyleConfig->AddFlag(flag.first,flag.second);
   }
 
-  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data(),nullptr, false)) {
+  if (newStyleConfig->Load(stylesheetFilename, nullptr, false)) {
     // Tear down
     painterHolder.clear();
 
     // Recreate
     styleConfig=newStyleConfig;
 
-    log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
+    log.Info()<< "Created new style with " << stylesheetFilename;
   }
   else {
-    std::list<StyleError> errorsStrings=newStyleConfig->GetErrors();
+    errors=newStyleConfig->GetErrors();
 
-    for(const auto& err : errorsStrings) {
+    for(const auto& err : errors) {
       log.Warn() << "Style error:" << err.GetDescription();
-      errors.append(err);
     }
 
     styleConfig=nullptr;
@@ -78,15 +75,16 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
   return true;
 }
 
-void DBInstance::onThreadFinished()
+void DBInstance::OnThreadFinished(const std::thread::id &id)
 {
   std::lock_guard<std::mutex> lock(mutex);
-  if (painterHolder.contains(QThread::currentThread())){
-    painterHolder.remove(QThread::currentThread());
+  if (auto it=painterHolder.find(id);
+      it!=painterHolder.end()){
+    painterHolder.erase(it);
   }
 }
 
-void DBInstance::close()
+void DBInstance::Close()
 {
   std::lock_guard<std::mutex> lock(mutex);
 

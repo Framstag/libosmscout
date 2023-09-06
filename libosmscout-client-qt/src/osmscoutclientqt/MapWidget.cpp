@@ -943,31 +943,34 @@ QString MapWidget::GetZoomLevelName() const
 bool MapWidget::stylesheetHasErrors() const
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    return !dbThread->GetStyleErrors().isEmpty();
+    return !dbThread->GetStyleErrors().empty();
 }
 int MapWidget::firstStylesheetErrorLine() const
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    QList<StyleError> errors=dbThread->GetStyleErrors();
-    if (errors.isEmpty())
+    std::list<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.empty()) {
       return -1;
-    return errors.first().GetLine();
+    }
+    return errors.front().GetLine();
 }
 int MapWidget::firstStylesheetErrorColumn() const
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    QList<StyleError> errors=dbThread->GetStyleErrors();
-    if (errors.isEmpty())
+    std::list<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.empty()) {
       return -1;
-    return errors.first().GetColumn();
+    }
+    return errors.front().GetColumn();
 }
 QString MapWidget::firstStylesheetErrorDescription() const
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    QList<StyleError> errors=dbThread->GetStyleErrors();
-    if (errors.isEmpty())
+    std::list<StyleError> errors=dbThread->GetStyleErrors();
+    if (errors.empty()) {
       return "";
-    return QString::fromStdString(errors.first().GetDescription());
+    }
+    return QString::fromStdString(errors.front().GetDescription());
 }
 
 bool MapWidget::toggleDebug()
