@@ -4,6 +4,7 @@ osmscoutclientHeader = [
             'osmscoutclient/json/json.hpp',
             'osmscoutclient/json/json_fwd.hpp',
             'osmscoutclient/ClientImportExport.h',
+            'osmscoutclient/DBInstance.h',
             'osmscoutclient/MapProvider.h',
             'osmscoutclient/OnlineTileProvider.h',
             'osmscoutclient/Settings.h',

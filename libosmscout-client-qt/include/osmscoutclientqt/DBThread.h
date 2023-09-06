@@ -33,11 +33,11 @@
 
 #include <osmscoutmap/MapService.h>
 
+#include <osmscoutclient/DBInstance.h>
 #include <osmscoutclient/Settings.h>
 
-#include <osmscoutclientqt/MapManager.h>
-#include <osmscoutclientqt/DBInstance.h>
 #include <osmscoutclientqt/DBJob.h>
+#include <osmscoutclientqt/MapManager.h>
 
 namespace osmscout {
 

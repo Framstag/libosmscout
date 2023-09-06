@@ -1,9 +1,9 @@
-  #ifndef OSMSCOUT_CLIENT_QT_DBINSTANCE_H
-#define OSMSCOUT_CLIENT_QT_DBINSTANCE_H
+#ifndef OSMSCOUT_CLIENT_DBINSTANCE_H
+#define OSMSCOUT_CLIENT_DBINSTANCE_H
 
 /*
- OSMScout - a Qt backend for libosmscout and libosmscout-map
- Copyright (C) 2017 Lukáš Karas
+  This source is part of the libosmscout library
+  Copyright (C) 2017 Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,12 @@
 #include <osmscout/db/Database.h>
 #include <osmscout/async/Thread.h>
 #include <osmscout/async/Signal.h>
+#include <osmscout/async/Breaker.h>
 
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmap/MapPainter.h>
 
-#include <osmscout/async/Breaker.h>
-
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <chrono>
 #include <thread>
@@ -46,7 +45,7 @@ namespace osmscout {
  *
  * It is thread safe
  */
-class OSMSCOUT_CLIENT_QT_API DBInstance
+class OSMSCOUT_CLIENT_API DBInstance
 {
 public:
   const std::string                       path;
@@ -199,4 +198,4 @@ using DBInstanceRef = std::shared_ptr<DBInstance>;
 
 }
 
-#endif /* OSMSCOUT_CLIENT_QT_DBINSTANCE_H */
+#endif /* OSMSCOUT_CLIENT_DBINSTANCE_H */

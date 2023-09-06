@@ -33,7 +33,8 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
-#include <osmscoutclientqt/DBInstance.h>
+#include <osmscoutclient/DBInstance.h>
+
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 namespace osmscout {

@@ -1,6 +1,7 @@
 set(HEADER_FILES
     include/osmscoutclient/json/json.hpp
     include/osmscoutclient/json/json_fwd.hpp
+    include/osmscoutclient/DBInstance.h
     include/osmscoutclient/MapProvider.h
     include/osmscoutclient/ClientImportExport.h
     include/osmscoutclient/OnlineTileProvider.h
@@ -9,6 +10,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+  src/osmscoutclient/DBInstance.cpp
 	src/osmscoutclient/MapProvider.cpp
   src/osmscoutclient/OnlineTileProvider.cpp
 	src/osmscoutclient/Settings.cpp
@@ -26,7 +28,7 @@ osmscout_library_project(
 	INCLUDEDIR "osmscoutclient"
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclient/ClientFeatures.h.cmake
 	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutclient/ClientFeatures.h
-	TARGET OSMScout::OSMScout
+	TARGET OSMScout::OSMScout OSMScout::Map
 	SKIP_HEADER
 )
 

@@ -25,11 +25,11 @@ endif
 
 osmscoutclient = library('osmscout_client',
                          osmscoutclientSrc,
-                         include_directories: [osmscoutclientIncDir, osmscoutIncDir],
+                         include_directories: [osmscoutclientIncDir, osmscoutIncDir, osmscoutmapIncDir],
                          cpp_args: cppArgs,
                          dependencies: [mathDep, threadDep],
                          link_args: link_args,
-                         link_with: [osmscout],
+                         link_with: [osmscout, osmscoutmap],
                          version: libraryVersion,
                          install: true)
 
