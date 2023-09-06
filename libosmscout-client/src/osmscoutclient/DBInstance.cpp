@@ -29,7 +29,7 @@ bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
                            std::list<StyleError> &errors)
 {
-  std::lock_guard<std::mutex> lock(mutex);
+  std::scoped_lock lock(mutex);
 
   if (!database->IsOpen()) {
     return false;
@@ -77,7 +77,7 @@ bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
 
 void DBInstance::OnThreadFinished(const std::thread::id &id)
 {
-  std::lock_guard<std::mutex> lock(mutex);
+  std::scoped_lock lock(mutex);
   if (auto it=painterHolder.find(id);
       it!=painterHolder.end()){
     painterHolder.erase(it);
@@ -86,7 +86,7 @@ void DBInstance::OnThreadFinished(const std::thread::id &id)
 
 void DBInstance::Close()
 {
-  std::lock_guard<std::mutex> lock(mutex);
+  std::scoped_lock lock(mutex);
 
   painterHolder.clear();
 

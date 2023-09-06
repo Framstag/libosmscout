@@ -89,6 +89,12 @@ public:
     lastUsage=std::chrono::steady_clock::now();
   };
 
+  DBInstance(const DBInstance&) = delete;
+  DBInstance(DBInstance&&) = delete;
+
+  DBInstance& operator=(const DBInstance&) = delete;
+  DBInstance& operator=(DBInstance&&) = delete;
+
   virtual ~DBInstance()
   {
     Close();
@@ -110,28 +116,28 @@ public:
 
   osmscout::DatabaseRef GetDatabase()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     lastUsage=std::chrono::steady_clock::now();
     return database;
   }
 
   osmscout::MapServiceRef GetMapService()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     lastUsage=std::chrono::steady_clock::now();
     return mapService;
   }
 
   osmscout::LocationDescriptionServiceRef GetLocationDescriptionService()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     lastUsage=std::chrono::steady_clock::now();
     return locationDescriptionService;
   }
 
   osmscout::LocationServiceRef GetLocationService()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     lastUsage=std::chrono::steady_clock::now();
     return locationService;
   }
@@ -146,7 +152,7 @@ public:
    */
   std::chrono::milliseconds LastUsageMs() const
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-lastUsage);
   }
 
@@ -162,10 +168,10 @@ public:
    * @return pointer to thread-local painter
    */
   template<typename PainterType,
-           typename Requires = std::enable_if_t<std::is_base_of<MapPainter, PainterType>::value>>
+           typename Requires = std::enable_if_t<std::is_base_of_v<MapPainter, PainterType>>>
   std::shared_ptr<PainterType> GetPainter()
   {
-    std::lock_guard<std::mutex> lock(mutex);
+    std::scoped_lock lock(mutex);
     if (!styleConfig) {
       return nullptr;
     }
