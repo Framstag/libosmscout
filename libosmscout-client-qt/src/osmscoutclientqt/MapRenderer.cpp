@@ -336,9 +336,10 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                           data->groundTiles);
     }
 
-    auto *painter = db->GetPainter<MapPainterQt>();
-    if (painter != nullptr) {
-      batch.AddData(data, painter);
+    std::shared_ptr<MapPainterQt> painter = db->GetPainter<MapPainterQt>();
+    if (painter) {
+      MapPainterQt *p = painter.get();
+      batch.AddData(data, p);
     } else {
       osmscout::log.Warn() << "Painter is not available for db: " << db->path;
       success = false;

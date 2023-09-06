@@ -55,7 +55,6 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
 
   if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data(),nullptr, false)) {
     // Tear down
-    qDeleteAll(painterHolder);
     painterHolder.clear();
 
     // Recreate
@@ -83,7 +82,6 @@ void DBInstance::onThreadFinished()
 {
   std::lock_guard<std::mutex> lock(mutex);
   if (painterHolder.contains(QThread::currentThread())){
-    delete painterHolder[QThread::currentThread()];
     painterHolder.remove(QThread::currentThread());
   }
 }
@@ -92,7 +90,6 @@ void DBInstance::close()
 {
   std::lock_guard<std::mutex> lock(mutex);
 
-  qDeleteAll(painterHolder);
   painterHolder.clear();
 
   // release map service, its threads may still use db

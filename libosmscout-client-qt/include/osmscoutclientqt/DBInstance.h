@@ -54,9 +54,11 @@ class OSMSCOUT_CLIENT_QT_API DBInstance : public QObject
 public:
   const std::string                       path;
 
+  using MapPainterRef=std::shared_ptr<MapPainter>;
+
 private:
   mutable std::mutex                      mutex;
-  QMap<QThread*,MapPainter*>              painterHolder;  ///< thread-local cache of map painters, guarded by mutex
+  QMap<QThread*,MapPainterRef>            painterHolder;  ///< thread-local cache of map painters, guarded by mutex
   std::chrono::steady_clock::time_point   lastUsage;      ///< last time when db was used, guarded by mutex
 
   osmscout::GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
@@ -165,7 +167,7 @@ public:
    */
   template<typename PainterType,
            typename Requires = std::enable_if_t<std::is_base_of<MapPainter, PainterType>::value>>
-  PainterType* GetPainter()
+  std::shared_ptr<PainterType> GetPainter()
   {
     std::lock_guard<std::mutex> lock(mutex);
     if (!styleConfig) {
@@ -173,18 +175,16 @@ public:
     }
 
     if (painterHolder.contains(QThread::currentThread())){
-      MapPainter *p=painterHolder[QThread::currentThread()];
-      if (PainterType* res=dynamic_cast<PainterType*>(p);
+      MapPainterRef p=painterHolder[QThread::currentThread()];
+      if (std::shared_ptr<PainterType> res=std::dynamic_pointer_cast<PainterType>(p);
           res!=nullptr) {
         return res;
       } else {
-        painterHolder.remove(QThread::currentThread());
         log.Warn() << "Thread changed painter type";
-        delete p;
       }
     }
 
-    PainterType* res=new PainterType(styleConfig);
+    std::shared_ptr<PainterType> res=std::make_shared<PainterType>(styleConfig);
     painterHolder[QThread::currentThread()]=res;
     connect(QThread::currentThread(), &QThread::finished,
             this, &DBInstance::onThreadFinished);
