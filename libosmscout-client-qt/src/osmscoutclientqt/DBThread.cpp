@@ -84,7 +84,7 @@ DBThread::~DBThread()
   }
 
   for (auto& db:databases){
-    db->close();
+    db->Close();
   }
   databases.clear();
   backgroundThread->quit(); // deleteLater() is invoked when thread is finished
@@ -187,7 +187,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
   }
 
   for (const auto& db:databases){
-    db->close();
+    db->Close();
   }
   databases.clear();
   osmscout::GeoBox boundingBox;
@@ -304,7 +304,7 @@ void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
       continue;
     }
 
-    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath(),
+    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath().toStdString(),
                                                      database,
                                                      std::make_shared<osmscout::LocationService>(database),
                                                      std::make_shared<osmscout::LocationDescriptionService>(database),
@@ -417,14 +417,14 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
 
   emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
 
-  bool prevErrs = !styleErrors.isEmpty();
+  bool prevErrs = !styleErrors.empty();
   styleErrors.clear();
   for (const auto& db: databases){
     qDebug() << "Loading style " << stylesheetFilename << suffix << "...";
-    db->LoadStyle(stylesheetFilename+suffix, stylesheetFlags, styleErrors);
+    db->LoadStyle((stylesheetFilename+suffix).toStdString(), stylesheetFlags, styleErrors);
     qDebug() << "Loading style done";
   }
-  if (prevErrs || (!styleErrors.isEmpty())){
+  if (prevErrs || (!styleErrors.empty())){
     qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);
     emit styleErrorsChanged();
   }
@@ -461,7 +461,7 @@ void DBThread::FlushCaches(qint64 idleMs)
 {
   RunSynchronousJob([idleMs](const std::list<DBInstanceRef> &dbs){
     for (const auto &db:dbs){
-      if (db->LastUsageMs() > idleMs){
+      if (db->LastUsageMs().count() > idleMs){
         auto database=db->GetDatabase();
         osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
         database->DumpStatistics();

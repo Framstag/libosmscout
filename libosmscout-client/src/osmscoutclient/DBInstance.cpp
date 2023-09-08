@@ -1,6 +1,6 @@
 /*
- OSMScout - a Qt backend for libosmscout and libosmscout-map
- Copyright (C) 2017  Lukáš Karas
+  This source is part of the libosmscout library
+  Copyright (C) 2017  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,21 +17,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscoutclientqt/DBInstance.h>
+#include <osmscoutclient/DBInstance.h>
 
 #include <osmscoutmap/StyleError.h>
 
 #include <osmscout/log/Logger.h>
 
-#include <QRegExp>
-
 namespace osmscout {
 
-bool DBInstance::LoadStyle(QString stylesheetFilename,
+bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
-                           QList<StyleError> &errors)
+                           std::list<StyleError> &errors)
 {
-  QMutexLocker locker(&mutex);
+  std::scoped_lock lock(mutex);
 
   if (!database->IsOpen()) {
     return false;
@@ -53,22 +51,20 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
     newStyleConfig->AddFlag(flag.first,flag.second);
   }
 
-  if (newStyleConfig->Load(stylesheetFilename.toLocal8Bit().data(),nullptr, false)) {
+  if (newStyleConfig->Load(stylesheetFilename, nullptr, false)) {
     // Tear down
-    qDeleteAll(painterHolder);
     painterHolder.clear();
 
     // Recreate
     styleConfig=newStyleConfig;
 
-    osmscout::log.Info()<< "Created new style with " << stylesheetFilename.toStdString();
+    log.Info()<< "Created new style with " << stylesheetFilename;
   }
   else {
-    std::list<StyleError> errorsStrings=newStyleConfig->GetErrors();
+    errors=newStyleConfig->GetErrors();
 
-    for(const auto& err : errorsStrings) {
-      qWarning() << "Style error:" << QString::fromStdString(err.GetDescription());
-      errors.append(err);
+    for(const auto& err : errors) {
+      log.Warn() << "Style error:" << err.GetDescription();
     }
 
     styleConfig=nullptr;
@@ -79,41 +75,26 @@ bool DBInstance::LoadStyle(QString stylesheetFilename,
   return true;
 }
 
-osmscout::MapPainterQt* DBInstance::GetPainter()
+void DBInstance::OnThreadFinished(const std::thread::id &id)
 {
-  QMutexLocker locker(&mutex);
-  if (!styleConfig)
-    return nullptr;
-
-  if (!painterHolder.contains(QThread::currentThread())){
-    painterHolder[QThread::currentThread()]=new osmscout::MapPainterQt(styleConfig);
-    connect(QThread::currentThread(), &QThread::finished,
-            this, &DBInstance::onThreadFinished);
-  }
-  return painterHolder[QThread::currentThread()];
-}
-
-void DBInstance::onThreadFinished()
-{
-  QMutexLocker locker(&mutex);
-  if (painterHolder.contains(QThread::currentThread())){
-    delete painterHolder[QThread::currentThread()];
-    painterHolder.remove(QThread::currentThread());
+  std::scoped_lock lock(mutex);
+  if (auto it=painterHolder.find(id);
+      it!=painterHolder.end()){
+    painterHolder.erase(it);
   }
 }
 
-void DBInstance::close()
+void DBInstance::Close()
 {
-  QMutexLocker locker(&mutex);
+  std::scoped_lock lock(mutex);
 
-  qDeleteAll(painterHolder);
   painterHolder.clear();
 
   // release map service, its threads may still use db
   // threads are stopped and joined in MapService destructor
   if (mapService && mapService.use_count() > 1){
     // if DBInstance is not exclusive owner, threads may hit closed data file and trigger assert!
-    log.Warn() << "Map service for " << path.toStdString() << " is used on multiple places";
+    log.Warn() << "Map service for " << path << " is used on multiple places";
   }
   mapService.reset();
 

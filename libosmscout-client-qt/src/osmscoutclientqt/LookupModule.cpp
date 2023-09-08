@@ -149,7 +149,7 @@ void LookupModule::requestObjects(const LocationEntry &entry, bool reverseLookup
   dbThread->RunSynchronousJob(
     [&](const std::list<DBInstanceRef> &databases){
       for (const auto &db:databases) {
-        if (db->path==entry.getDatabase()){
+        if (QString::fromStdString(db->path)==entry.getDatabase()){
 
           std::set<osmscout::FileOffset>         areaOffsets;
           std::set<osmscout::FileOffset>         wayOffsets;
@@ -309,7 +309,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
           count++;
 
           auto place = description.GetAtAddressDescription()->GetPlace();
-          emit locationDescription(location, db->path, description,
+          emit locationDescription(location, QString::fromStdString(db->path), description,
                                    BuildAdminRegionList(db, place.GetAdminRegion(), regionMap));
         }
 
@@ -322,7 +322,7 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
           count++;
 
           auto place = description.GetAtPOIDescription()->GetPlace();
-          emit locationDescription(location, db->path, description,
+          emit locationDescription(location, QString::fromStdString(db->path), description,
                                    BuildAdminRegionList(db, place.GetAdminRegion(), regionMap));
         }
       }
@@ -343,7 +343,7 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(const DBInstanceRef &db,
     return info;
   }
 
-  info->database=db->path;
+  info->database=QString::fromStdString(db->path);
 
   // read admin region features
   auto database=db->GetDatabase();
@@ -403,7 +403,7 @@ void LookupModule::requestRegionLookup(const osmscout::GeoCoord location) {
         std::list<osmscout::LocationDescriptionService::ReverseLookupResult> result;
 
         if (db->GetLocationDescriptionService()->ReverseLookupRegion(location,result)){
-          std::map<osmscout::FileOffset,AdminRegionInfoRef> adminRegionMap=adminRegionCache[db->path];
+          std::map<osmscout::FileOffset,AdminRegionInfoRef> adminRegionMap=adminRegionCache[QString::fromStdString(db->path)];
           AdminRegionInfoRef bottomAdminRegion; // admin region with highest admin level
 
           for (const auto &entry:result) {
@@ -437,7 +437,7 @@ void LookupModule::requestRegionLookup(const osmscout::GeoCoord location) {
             emit locationAdminRegions(location,
                                       adminRegionList);
           }
-          adminRegionCache[db->path]=adminRegionMap;
+          adminRegionCache[QString::fromStdString(db->path)]=adminRegionMap;
         }
       }
     }

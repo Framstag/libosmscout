@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QWidget>
+#include <QMouseEvent>
 
 #include <osmscoutclientqt/OSMScoutQt.h>
 

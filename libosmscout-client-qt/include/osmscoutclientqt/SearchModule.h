@@ -32,6 +32,7 @@
 #include <QObject>
 #include <QThread>
 #include <QRunnable>
+#include <QElapsedTimer>
 
 namespace osmscout {
 
