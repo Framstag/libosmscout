@@ -237,7 +237,7 @@ bool MapDirectory::deleteDatabase()
 MapManager::MapManager(QStringList databaseLookupDirs, SettingsRef settings):
   databaseLookupDirs(databaseLookupDirs)
 {
-  qDebug() << "MapManager ctor";
+  osmscout::log.Debug() << "MapManager ctor";
   webCtrl.setCookieJar(new PersistentCookieJar(settings));
   // we don't use disk cache here
 }
