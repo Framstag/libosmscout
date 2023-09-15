@@ -95,7 +95,7 @@ void TiledMapRenderer::Initialize()
 {
   {
     QMutexLocker locker(&lock);
-    qDebug() << "Initialize";
+    osmscout::log.Debug() << "Initialize";
 
     // create tile downloader in correct thread
     tileDownloader = new OsmTileDownloader(tileCacheDirectory,settings->GetOnlineTileProvider());
@@ -505,7 +505,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
         QMutexLocker tileCacheLocker(&tileCacheMutex);
 
         if (loadEpoch != offlineTileCache.getEpoch()){
-          qWarning() << "Rendered from outdated data" << loadEpoch << "!=" << offlineTileCache.getEpoch();
+          osmscout::log.Warn() << "Rendered from outdated data" << loadEpoch << "!=" << offlineTileCache.getEpoch();
         }
 
         if (width == 1 && height == 1){
