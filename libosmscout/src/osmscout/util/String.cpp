@@ -432,16 +432,23 @@ namespace osmscout {
     if (search.empty()) {
       return in;
     }
-    auto arr=SplitString(in, search);
-    std::ostringstream buff;
-    for (auto it=arr.begin(); it!=arr.end();) {
-      buff << *it;
-      ++it;
-      if (it!=arr.end()) {
-        buff << replacement;
+
+    std::ostringstream result;
+    std::string remaining=in;
+
+    while (!remaining.empty()) {
+      std::string::size_type pos = remaining.find(search);
+      if (pos == std::string::npos) {
+        result << remaining;
+        break;
+      } else {
+        result << remaining.substr(0, pos);
+        result << replacement;
+        remaining.erase(0, pos + search.length());
       }
     }
-    return buff.str();
+
+    return result.str();
   }
 
   std::optional<std::pair<std::string,std::string>> SplitStringToPair(const std::string& str,
