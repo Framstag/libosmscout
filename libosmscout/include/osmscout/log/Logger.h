@@ -420,7 +420,7 @@ namespace osmscout {
 
   /**
    * \ingroup Logging
-   * The one an donly global instance of the logger that should get used
+   * The one and only global instance of the logger that should get used
    * for all logging output.
    */
   extern OSMSCOUT_API Log log;
