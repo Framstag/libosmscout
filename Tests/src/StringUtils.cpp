@@ -325,4 +325,6 @@ TEST_CASE("String replace")
   REQUIRE(osmscout::ReplaceString("", "a", "b").empty());
   REQUIRE(osmscout::ReplaceString("abc", "", "b")=="abc");
   REQUIRE(osmscout::ReplaceString("abcabc", "a", "A")=="AbcAbc");
+  REQUIRE(osmscout::ReplaceString("abcdef", "ef", "X")=="abcdX");
+  REQUIRE(osmscout::ReplaceString("abcdef", "ab", "X")=="Xcdef");
 }
