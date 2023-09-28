@@ -266,6 +266,13 @@ namespace osmscout {
       return maxTile;
     }
 
+
+    TileId GetCenter() const
+    {
+      return {(minTile.GetX()+maxTile.GetX())/2,
+              (minTile.GetY()+maxTile.GetY())/2};
+    }
+
     uint32_t GetMinX() const
     {
       return minTile.GetX();
