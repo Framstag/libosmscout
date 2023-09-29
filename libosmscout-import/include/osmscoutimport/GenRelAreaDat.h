@@ -157,7 +157,7 @@ namespace osmscout {
         }
       }
 
-      inline std::string GetRelationRoleStr() const
+      static inline std::string GetRelationRoleStr(RelationRole relationRole)
       {
         switch (relationRole){
           case outer:
@@ -167,6 +167,11 @@ namespace osmscout {
           default:
             return "none";
         }
+      }
+
+      inline std::string GetRelationRoleStr() const
+      {
+        return GetRelationRoleStr(relationRole);
       }
 
       inline void SetId(OSMId id)

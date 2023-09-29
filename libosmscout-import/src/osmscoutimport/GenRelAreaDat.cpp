@@ -142,8 +142,7 @@ namespace osmscout {
       if (sub->relationRole!=MultipolygonPart::none){
         MultipolygonPart::RelationRole expectedRole = id % 2 == 0 ? MultipolygonPart::inner : MultipolygonPart::outer;
         if (sub->relationRole != expectedRole) {
-          progress.Error("Ring " + std::to_string(sub->id) + " has invalid role, continue");
-          continue;
+          progress.Warning("Ring " + std::to_string(sub->id) + " has invalid role " + sub->GetRelationRoleStr() + ", expecting " + MultipolygonPart::GetRelationRoleStr(expectedRole));
         }
       }
 
