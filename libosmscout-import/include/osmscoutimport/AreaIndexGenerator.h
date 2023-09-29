@@ -176,9 +176,16 @@ namespace osmscout {
     // "+1" because we add +1 to every offset, to generate offset > 0
     uint8_t dataOffsetBytes=BytesNeededToEncodeNumber(dataSize+1);
 
+
+    GeoBox boundingBox=typeData.tileBox.GetCenter().GetBoundingBox(typeData.indexLevel);
+
     progress.Info("Writing map for "+
-                  typeInfo.GetName()+" , "+
-                  ByteSizeToString(1.0*dataOffsetBytes*typeData.tileBox.GetCount()+dataSize));
+                  typeInfo.GetName()+
+                  " ("+
+                  ByteSizeToString(1.0*dataOffsetBytes*typeData.tileBox.GetCount()+dataSize)+", "+
+                  GetEllipsoidalDistance(boundingBox.GetTopLeft(),boundingBox.GetBottomRight()).AsString()+", "+
+                  std::to_string(typeData.indexEntries/typeData.indexCells)+"/cell"+
+                  ")");
 
     FileOffset bitmapOffset;
 
