@@ -351,18 +351,24 @@ namespace osmscout {
   class OSMSCOUT_API Log
   {
   private:
-    Logger*    logger;
-    NoOpLogger noOpLogger;
-    bool       logDebug=false;
-    bool       logInfo=true;
-    bool       logWarn=true;
-    bool       logError=true;
+    std::shared_ptr<Logger> logger;
+    NoOpLogger              noOpLogger;
+    bool                    logDebug=false;
+    bool                    logInfo=true;
+    bool                    logWarn=true;
+    bool                    logError=true;
 
   public:
     Log();
-    ~Log();
+    Log(const Log &log) = default;
+    Log(Log &&log) = default;
 
-    void SetLogger(Logger* logger);
+    Log& operator=(const Log &log) = default;
+    Log& operator=(Log &&log) = default;
+
+    ~Log() = default;
+
+    void SetLogger(const std::shared_ptr<Logger> &logger);
 
      Log& Debug(bool state)
     {

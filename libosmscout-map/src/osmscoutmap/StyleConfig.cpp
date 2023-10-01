@@ -1603,14 +1603,16 @@ namespace osmscout {
   bool StyleConfig::LoadContent(const std::string& filename,
                                 const std::string& content,
                                 ColorPostprocessor colorPostprocessor,
-                                bool submodule)
+                                bool submodule,
+                                Log &log)
   {
     oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
                                            content.length());
     oss::Parser  *parser=new oss::Parser(scanner,
                                          filename,
                                          *this,
-                                         colorPostprocessor);
+                                         colorPostprocessor,
+                                         log);
     parser->Parse();
 
     bool success=!parser->errors->hasErrors;
@@ -1659,7 +1661,8 @@ namespace osmscout {
    */
   bool StyleConfig::Load(const std::string& styleFile,
                          ColorPostprocessor colorPostprocessor,
-                         bool submodule)
+                         bool submodule,
+                         Log &log)
   {
     StopClock  timer;
     bool       success=false;
@@ -1698,7 +1701,8 @@ namespace osmscout {
       success=LoadContent(styleFile,
                           std::string((const char *)content,fileSize),
                           colorPostprocessor,
-                          submodule);
+                          submodule,
+                          log);
 
       delete [] content;
 

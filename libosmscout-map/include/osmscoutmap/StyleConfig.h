@@ -845,10 +845,12 @@ namespace osmscout {
     bool LoadContent(const std::string& filename,
                      const std::string& content,
                      ColorPostprocessor colorPostprocessor=nullptr,
-                     bool submodule=false);
+                     bool submodule=false,
+                     Log &log=osmscout::log);
     bool Load(const std::string& styleFile,
               ColorPostprocessor colorPostprocessor=nullptr,
-              bool submodule=false);
+              bool submodule=false,
+              Log &log=osmscout::log);
     const std::list<StyleError>&  GetErrors() const;
     const std::list<StyleError>&  GetWarnings() const;
     //@}

@@ -79,7 +79,7 @@ namespace osmscout {
   /**
    * \ingroup Logging
    * The console logger extends the StreamLogger by assigning std::cout for normal
-   * loging output and std::cerr for error output.
+   * logging output and std::cerr for error output.
    */
   class OSMSCOUT_API ConsoleLogger : public StreamLogger
   {

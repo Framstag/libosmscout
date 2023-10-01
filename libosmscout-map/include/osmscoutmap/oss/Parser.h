@@ -32,7 +32,7 @@
 #include <osmscout/io/File.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
-
+#include <osmscout/log/Logger.h>
 
 #include <osmscoutmap/oss/Scanner.h>
 
@@ -68,10 +68,11 @@ public:
 
 public:
   std::list<Err> errors;
-  bool           hasErrors;
+  bool           hasErrors=false;
+  Log            log;
 
 public:
-  Errors();
+  explicit Errors(const Log &log);
   void SynErr(int line, int col, int n);
   void Error(int line, int col, const char *s);
   void Warning(int line, int col, const char *s);
@@ -198,7 +199,7 @@ void AddFeatureToFilter(StyleFilter& filter,
       if (!filter.FiltersByType() ||
           filter.HasType(type)) {
         // Add type only if the filter either has no types or
-        // if the the type is already filtered
+        // if the type is already filtered
         resultTypes.Set(type);
       }
     }
@@ -217,7 +218,8 @@ void AddFeatureToFilter(StyleFilter& filter,
   Parser(Scanner *scanner,
          const std::string& filename,
          StyleConfig& config,
-         osmscout::ColorPostprocessor colorPostprocessor=nullptr);
+         osmscout::ColorPostprocessor colorPostprocessor=nullptr,
+         const Log &log=osmscout::log);
   ~Parser();
 
   void SemErr(const char* msg);
