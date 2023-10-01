@@ -332,8 +332,8 @@ void PlaneMapRenderer::DrawMap()
     drawParameter.SetPatternMode(osmscout::MapParameter::PatternMode::Scalable);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
-    drawParameter.SetDebugData(false);
-    drawParameter.SetDebugPerformance(true);
+    drawParameter.SetDebugData(osmscout::log.IsDebug());
+    drawParameter.SetDebugPerformance(osmscout::log.IsWarn());
     // We want to get notified, if we have more than 1000 objects from a certain type (=> move type rendering to a higher zoom level?)
     drawParameter.SetWarningObjectCountLimit(1000);
     // We want to get notified, if we have more than 20000 coords from a certain type (=> move type rendering to a higher zoom level?)
