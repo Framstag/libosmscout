@@ -436,8 +436,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     drawParameter.SetPatternMode(osmscout::MapParameter::PatternMode::Scalable);
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
-    drawParameter.SetDebugData(false);
-    drawParameter.SetDebugPerformance(true);
+    drawParameter.SetDebugData(osmscout::log.IsDebug());
+    drawParameter.SetDebugPerformance(osmscout::log.IsWarn());
 
     // optimize process can reduce number of nodes before rendering
     // it helps for slow renderer backend, but it cost some cpu
