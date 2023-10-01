@@ -17,7 +17,7 @@ macro(osmscout_library_project)
 	set(_targets)
 	set(_includes
 		include
-		${CMAKE_SOURCE_DIR}/include
+		${PROJECT_SOURCE_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/privateinclude
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -138,7 +138,7 @@ macro(osmscout_library_project)
 			install(FILES $<TARGET_PDB_FILE:${_name}> DESTINATION ${CMAKE_INSTALL_PREFIX}/bin CONFIGURATIONS Debug)
 		endif()
 	endif()
-	configure_file("${CMAKE_SOURCE_DIR}/pkgconfig-template.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" @ONLY)
+	configure_file("${PROJECT_SOURCE_DIR}/pkgconfig-template.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" @ONLY)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" DESTINATION lib/pkgconfig)
 endmacro(osmscout_library_project)
 
@@ -148,7 +148,7 @@ macro(osmscout_demo_project)
 	set(_targets)
 	set(_includes
 		include
-		${CMAKE_SOURCE_DIR}/include
+		${PROJECT_SOURCE_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/privateinclude
 		${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -187,7 +187,7 @@ macro(osmscout_test_project)
 	set(_targets OSMScout::OSMScout)
 	set(_includes
 		include
-		${CMAKE_SOURCE_DIR}/include
+		${PROJECT_SOURCE_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${CMAKE_CURRENT_BINARY_DIR}/privateinclude
 		${CMAKE_CURRENT_SOURCE_DIR}
@@ -253,7 +253,7 @@ macro(osmscout_test_project)
 				endif()
 			endforeach()
 			set_tests_properties(${_name} PROPERTIES ENVIRONMENT "${envpath};$ENV{PATH}")
-			file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}" working_directory)
+			file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}" working_directory)
 			file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${_name}.vcxproj.user "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <Project ToolsVersion=\"15.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
   <PropertyGroup>
