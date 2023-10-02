@@ -2455,7 +2455,8 @@ void Parser::Parse()
 Parser::Parser(Scanner *scanner,
                const std::string& filename,
                StyleConfig& config,
-               osmscout::ColorPostprocessor colorPostprocessor)
+               osmscout::ColorPostprocessor colorPostprocessor,
+               const Log &log)
  : filename(filename),
    config(config)
 {
@@ -2466,7 +2467,7 @@ Parser::Parser(Scanner *scanner,
   minErrDist = 2;
   errDist = minErrDist;
   this->scanner = scanner;
-  errors = new Errors();
+  errors = new Errors(log);
   this->colorPostprocessor=colorPostprocessor;
 }
 
@@ -2505,8 +2506,8 @@ osmscout::Color Parser::PostprocessColor(const osmscout::Color& color) const
   }
 }
 
-Errors::Errors()
- : hasErrors(false)
+Errors::Errors(const Log &log)
+ : log(log)
 {
   // no code
 }

@@ -96,27 +96,14 @@ namespace osmscout {
     return Log(ERROR);
   }
 
-  Log::Log()
-  : logger(new ConsoleLogger())
-  {
-    Debug() << "Initializing Logging";
-  }
+  Log::Log():
+    logger(std::make_shared<ConsoleLogger>())
+  {}
 
-  Log::~Log()
-  {
-    Debug() << "Deinitializing Logging";
-
-    delete logger;
-  }
-
-  void Log::SetLogger(Logger* logger)
+  void Log::SetLogger(const std::shared_ptr<Logger> &logger)
   {
     assert(logger!=nullptr);
-    Logger* oldLogger=this->logger;
-
     this->logger=logger;
-
-    delete oldLogger;
   }
 
   Logger::Line Log::Debug()
@@ -134,7 +121,7 @@ namespace osmscout {
       return logger->Info();
     }
 
-    return noOpLogger.Debug();
+    return noOpLogger.Info();
   }
 
   Logger::Line Log::Warn()
@@ -143,7 +130,7 @@ namespace osmscout {
       return logger->Warn();
     }
 
-    return noOpLogger.Debug();
+    return noOpLogger.Warn();
   }
 
   Logger::Line Log::Error()
@@ -152,7 +139,7 @@ namespace osmscout {
       return logger->Error();
     }
 
-    return noOpLogger.Debug();
+    return noOpLogger.Error();
   }
 }
 

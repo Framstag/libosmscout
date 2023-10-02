@@ -187,7 +187,7 @@ protected:
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
 
-  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig) const;
+  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
 
 public:
   DBThread(QThread *backgroundThread,

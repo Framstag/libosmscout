@@ -59,7 +59,7 @@ DBThread::DBThread(QThread *backgroundThread,
 
   emptyTypeConfig=std::make_shared<TypeConfig>();
   registerCustomPoiTypes(emptyTypeConfig);
-  emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
+  emptyStyleConfig=makeStyleConfig(emptyTypeConfig, true);
 
   settings->mapDPIChange.Connect(mapDpiSlot);
   connect(this, &DBThread::mapDpiSignal,
@@ -339,7 +339,7 @@ void DBThread::registerCustomPoiTypes(osmscout::TypeConfigRef typeConfig) const
   }
 }
 
-StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig) const
+StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings) const
 {
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
@@ -348,7 +348,12 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig) const
     styleConfig->AddFlag(flag.first,flag.second);
   }
 
-  if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data())) {
+  Log log=osmscout::log;
+  if (suppressWarnings) {
+    log.Warn(false);
+  }
+
+  if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data(), nullptr, false, log)) {
     qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
     styleConfig=nullptr;
   }
@@ -415,17 +420,18 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
 
-  emptyStyleConfig=makeStyleConfig(emptyTypeConfig);
+  emptyStyleConfig=makeStyleConfig(emptyTypeConfig, true);
 
   bool prevErrs = !styleErrors.empty();
   styleErrors.clear();
+  std::string file = (stylesheetFilename+suffix).toStdString();
   for (const auto& db: databases){
-    qDebug() << "Loading style " << stylesheetFilename << suffix << "...";
-    db->LoadStyle((stylesheetFilename+suffix).toStdString(), stylesheetFlags, styleErrors);
-    qDebug() << "Loading style done";
+    log.Debug() << "Loading style " << file << "...";
+    db->LoadStyle(file, stylesheetFlags, styleErrors);
+    log.Debug() << "Loading style done";
   }
   if (prevErrs || (!styleErrors.empty())){
-    qWarning()<<"Failed to load stylesheet"<<(stylesheetFilename+suffix);
+    log.Warn() << "Failed to load stylesheet" << file;
     emit styleErrorsChanged();
   }
   emit stylesheetFilenameChanged();
