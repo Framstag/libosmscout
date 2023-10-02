@@ -67,7 +67,7 @@ public:
 
   void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
            const std::list<DBInstanceRef> &allDatabases,
-           QReadLocker *locker) override;
+           std::shared_lock<std::shared_mutex> &&locker) override;
 
   inline bool IsSuccess() const{
     return success;

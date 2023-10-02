@@ -24,8 +24,8 @@
 #include <QHash>
 #include <QList>
 #include <QThread>
-#include <QReadWriteLock>
 #include <QMap>
+#include <shared_mutex>
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -51,14 +51,15 @@ protected:
   QThread                      *thread;         //!< job thread
 
 private:
-  QReadLocker                  *locker;         //!< db locker
+  std::shared_lock<std::shared_mutex> locker;   //!< db locker
 
 public:
   DBJob();
   ~DBJob() override;
 
   virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
-                   const std::list<DBInstanceRef> &databases, QReadLocker *locker);
+                   const std::list<DBInstanceRef> &databases,
+                   std::shared_lock<std::shared_mutex> &&locker);
   virtual void Close();
 };
 
@@ -94,11 +95,13 @@ public:
             unsigned long maximumAreaLevel,
             bool lowZoomOptimization,
             bool closeOnFinish=true);
+
   ~DBLoadJob() override;
 
   void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
-                   const std::list<DBInstanceRef> &databases,
-                   QReadLocker *locker) override;
+           const std::list<DBInstanceRef> &databases,
+           std::shared_lock<std::shared_mutex> &&locker) override;
+
   void Close() override;
 
   bool IsFinished() const;

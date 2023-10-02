@@ -23,7 +23,6 @@
 
 #include <QThread>
 #include <QObject>
-#include <QReadWriteLock>
 #include <QDir>
 
 #include <osmscout/db/BasemapDatabase.h>
@@ -38,6 +37,8 @@
 
 #include <osmscoutclientqt/DBJob.h>
 #include <osmscoutclientqt/MapManager.h>
+
+#include <shared_mutex>
 
 namespace osmscout {
 
@@ -138,7 +139,7 @@ private:
 
   double                             mapDpi;
 
-  mutable QReadWriteLock             lock;
+  mutable std::shared_mutex          lock;
 
   osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
   osmscout::BasemapDatabaseRef       basemapDatabase;
@@ -230,7 +231,7 @@ public:
 
   StyleConfigRef GetEmptyStyleConfig() const
   {
-    QReadLocker locker(&lock);
+    std::shared_lock locker(lock);
     return emptyStyleConfig;
   }
 
