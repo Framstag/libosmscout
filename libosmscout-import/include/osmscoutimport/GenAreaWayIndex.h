@@ -47,7 +47,7 @@ namespace osmscout {
 
   public:
     AreaWayIndexGenerator();
-    virtual ~AreaWayIndexGenerator() = default;
+    ~AreaWayIndexGenerator() override = default;
 
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;

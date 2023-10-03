@@ -85,10 +85,10 @@ ImportParameter::ImportParameter()
       areaNodeTileListCoordLimit(1000),
       areaNodeBitmapMaxMag(20),
       areaNodeBitmapLimit(20),
-      areaWayMinMag(11), // Should not be >= than optimizationMaxMag
-      areaWayIndexMaxLevel(13),
-      areaRouteMinMag(11),
-      areaRouteIndexMaxLevel(13),
+      areaWayIndexMinMag(10), // Should not be >= than areaWayIndexMaxMag
+      areaWayIndexMaxMag(15),
+      areaRouteIndexMinMag(10),
+      areaRouteIndexMaxMag(15),
       waterIndexMinMag(6),
       waterIndexMaxMag(14),
       optimizationMaxWayCount(1000000),
@@ -294,24 +294,24 @@ uint16_t ImportParameter::GetAreaNodeBitmapLimit() const
   return areaNodeBitmapLimit;
 }
 
-MagnificationLevel ImportParameter::GetAreaWayMinMag() const
+MagnificationLevel ImportParameter::GetAreaWayIndexMinMag() const
 {
-  return areaWayMinMag;
+  return areaWayIndexMinMag;
 }
 
-MagnificationLevel ImportParameter::GetAreaWayIndexMaxLevel() const
+MagnificationLevel ImportParameter::GetAreaWayIndexMaxMag() const
 {
-  return areaWayIndexMaxLevel;
+  return areaWayIndexMaxMag;
 }
 
-MagnificationLevel ImportParameter::GetAreaRouteMinMag() const
+MagnificationLevel ImportParameter::GetAreaRouteIndexMinMag() const
 {
-  return areaRouteMinMag;
+  return areaRouteIndexMinMag;
 }
 
-MagnificationLevel ImportParameter::GetAreaRouteIndexMaxLevel() const
+MagnificationLevel ImportParameter::GetAreaRouteIndexMaxMag() const
 {
-  return areaRouteIndexMaxLevel;
+  return areaRouteIndexMaxMag;
 }
 
 size_t ImportParameter::GetAreaAreaIndexMaxMag() const
@@ -586,11 +586,6 @@ void ImportParameter::SetAreaNodeBitmapLimit(uint16_t areaNodeBitmapLimit)
   this->areaNodeBitmapLimit=areaNodeBitmapLimit;
 }
 
-void ImportParameter::SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel)
-{
-  this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
-}
-
 void ImportParameter::SetTextIndexVariant(TextIndexVariant textIndexVariant)
 {
   this->textIndexVariant=textIndexVariant;
@@ -601,24 +596,24 @@ ImportParameter::TextIndexVariant ImportParameter::GetTextIndexVariant() const
   return textIndexVariant;
 }
 
-void ImportParameter::SetAreaWayMinMag(MagnificationLevel areaWayMinMag)
+void ImportParameter::SetAreaWayIndexMinMag(MagnificationLevel areaWayMinMag)
 {
-  this->areaWayMinMag=areaWayMinMag;
+  this->areaWayIndexMinMag=areaWayMinMag;
 }
 
-void ImportParameter::SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel)
+void ImportParameter::SetAreaWayIndexMaxMag( MagnificationLevel areaWayIndexMaxMag)
 {
-  this->areaWayIndexMaxLevel=areaWayIndexMaxLevel;
+  this->areaWayIndexMaxMag=areaWayIndexMaxMag;
 }
 
-void ImportParameter::SetAreaRouteMinMag(MagnificationLevel areaRouteMinMag)
+void ImportParameter::SetAreaRouteIndexMinMag(MagnificationLevel areaRouteIndexMinMag)
 {
-  this->areaRouteMinMag=areaRouteMinMag;
+  this->areaRouteIndexMinMag=areaRouteIndexMinMag;
 }
 
-void ImportParameter::SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxLevel)
+void ImportParameter::SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxMag)
 {
-  this->areaRouteIndexMaxLevel=areaRouteIndexMaxLevel;
+  this->areaRouteIndexMaxMag=areaRouteIndexMaxMag;
 }
 
 void ImportParameter::SetWaterIndexMinMag(uint32_t waterIndexMinMag)
