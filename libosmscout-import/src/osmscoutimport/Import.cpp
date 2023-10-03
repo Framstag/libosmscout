@@ -128,8 +128,13 @@ namespace osmscout {
 
   bool Importer::ValidateParameter(Progress& progress)
   {
-    if (parameter.GetAreaWayMinMag()<=parameter.GetOptimizationMaxMag()) {
-      progress.Error("Area way index minimum magnification is <= than optimization max magnification");
+    if (parameter.GetAreaWayIndexMinMag() > parameter.GetAreaWayIndexMaxMag()) {
+      progress.Error("Area way index minimum magnification is > than area way index max magnification");
+      return false;
+    }
+
+    if (parameter.GetAreaRouteIndexMinMag() > parameter.GetAreaRouteIndexMaxMag()) {
+      progress.Error("Area route index minimum magnification is > than area route index max magnification");
       return false;
     }
 

@@ -61,8 +61,8 @@ namespace osmscout {
                          parameter,
                          progress,
                          typeConfig->GetWayTypes(),
-                         parameter.GetAreaWayMinMag(),
-                         parameter.GetAreaWayIndexMaxLevel(),
+                         parameter.GetAreaWayIndexMinMag(),
+                         parameter.GetAreaWayIndexMaxMag(),
                          parameter.GetWayDataMemoryMaped());
   }
 

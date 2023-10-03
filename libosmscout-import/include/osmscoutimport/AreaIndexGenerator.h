@@ -24,6 +24,7 @@
 
 #include <list>
 #include <map>
+#include <utility>
 
 #include <osmscout/Pixel.h>
 
@@ -66,16 +67,17 @@ namespace osmscout {
       }
     };
 
+  private:
     std::string typeName;
     std::string typeNamePlural;
     std::string dataFile;
     std::string indexFile;
 
   protected:
-    AreaIndexGenerator(const std::string &typeName,
-                       const std::string &typeNamePlural,
-                       const std::string &dataFile,
-                       const std::string &indexFile):
+    AreaIndexGenerator(const std::string& typeName,
+                       const std::string& typeNamePlural,
+                       const std::string& dataFile,
+                       const std::string& indexFile):
        typeName(typeName),
        typeNamePlural(typeNamePlural),
        dataFile(dataFile),
@@ -118,9 +120,8 @@ namespace osmscout {
      * @param typeInfo
      * @param typeData
      * @param typeCellOffsets
-     * @return
      */
-    bool WriteBitmap(Progress& progress,
+    void WriteBitmap(Progress& progress,
                      FileWriter& writer,
                      const TypeInfo& typeInfo,
                      const TypeData& typeData,
@@ -135,12 +136,12 @@ namespace osmscout {
                        Progress& progress,
                        const std::vector<TypeInfoRef> &types,
                        const MagnificationLevel &areaIndexMinMag,
-                       const MagnificationLevel &areaIndexMaxLevel,
+                       const MagnificationLevel &areaIndexMaxMag,
                        bool useMmap);
   };
 
   template <typename Object>
-  bool AreaIndexGenerator<Object>::WriteBitmap(Progress& progress,
+  void AreaIndexGenerator<Object>::WriteBitmap(Progress& progress,
                                                FileWriter& writer,
                                                const TypeInfo& typeInfo,
                                                const TypeData& typeData,
@@ -187,9 +188,7 @@ namespace osmscout {
                   std::to_string(typeData.indexEntries/typeData.indexCells)+"/cell"+
                   ")");
 
-    FileOffset bitmapOffset;
-
-    bitmapOffset=writer.GetPos();
+    FileOffset bitmapOffset=writer.GetPos();
 
     assert(typeData.indexOffset!=0);
 
@@ -208,9 +207,7 @@ namespace osmscout {
                              dataOffsetBytes);
     }
 
-    FileOffset dataStartOffset;
-
-    dataStartOffset=writer.GetPos();
+    FileOffset dataStartOffset=writer.GetPos();
 
     // Now write the list of offsets of objects for every cell with content
     for (const auto& cell : typeCellOffsets) {
@@ -218,11 +215,10 @@ namespace osmscout {
                                   ((cell.first.GetY()-typeData.tileBox.GetMinY())*typeData.tileBox.GetWidth()+
                                    cell.first.GetX()-typeData.tileBox.GetMinX())*(FileOffset)dataOffsetBytes;
       FileOffset previousOffset=0;
-      FileOffset cellOffset;
 
       assert(bitmapCellOffset>=bitmapOffset);
 
-      cellOffset=writer.GetPos();
+      FileOffset cellOffset=writer.GetPos();
 
       writer.SetPos(bitmapCellOffset);
 
@@ -245,8 +241,6 @@ namespace osmscout {
         previousOffset=offset;
       }
     }
-
-    return true;
   }
 
   template <typename Object>
@@ -267,37 +261,59 @@ namespace osmscout {
     }
 
     // Average number of entries per tile cell
-    double average=overallCount*1.0/cellFillCount.size();
+    double average=double(overallCount)/double(cellFillCount.size());
 
     size_t emptyCount=0;
-    size_t toLowCount=0;
-    size_t toHighCount=0;
-    size_t inCount=0;
+    size_t tooLowCount=0;
+    size_t tooHighCount=0;
+    size_t muchTooHighCount=0;
+    size_t okCount=0;
     size_t allCount=0;
 
+    size_t tooLowValue=4*average/10;
+    size_t tooHighValue=64+32;
+    size_t muchTooHighValue=128+64;
+
     for (const auto& cell : cellFillCount) {
+      allCount++;
+
       if (cell.second==0) {
         emptyCount++;
       }
-      else if (cell.second<0.4*average) {
-        toLowCount++;
+      else if (cell.second<tooLowValue) {
+        tooLowCount++;
       }
-      else if (cell.second>128){
-        toHighCount++;
+      else if (cell.second>muchTooHighValue) {
+        muchTooHighCount++;
+      }
+      else if (cell.second>tooHighValue) {
+        tooHighCount++;
       }
       else {
-        inCount++;
+        okCount++;
       }
-
-      allCount++;
     }
 
-    if (toHighCount*1.0/allCount>=0.05) {
+    progress.Info(typeInfo.GetName()+" "+
+                  std::to_string(emptyCount)+" | "+
+                  std::to_string(tooLowCount)+" < "+
+                  std::to_string(okCount)+" < "+
+                  std::to_string(tooHighCount)+" *"+
+                  std::to_string(muchTooHighCount)+"* - "+
+                  std::to_string(allCount));
+
+    if (double(muchTooHighCount) / double(allCount) >= 0.01) {
+      progress.Warning(typeInfo.GetName() + " has more than 1% cells with much too high entry count, will use smaller tile size");
       return false;
     }
 
-    if (toLowCount*1.0/allCount>=0.2) {
-      progress.Warning(typeInfo.GetName()+" has more than 20% cells with <40% of average filling ("+std::to_string(toLowCount)+"/"+std::to_string(allCount)+")");
+    if (double(tooHighCount) / double(allCount) >= 0.05) {
+      progress.Warning(typeInfo.GetName() + " has more than 5% cells with too high entry count, will use smaller tile size");
+      return false;
+    }
+
+    if (double(tooLowCount) / double(allCount) >= 0.2) {
+      progress.Warning(typeInfo.GetName() + " has more than 20% cells with <40% of average filling");
     }
 
     /*
@@ -323,7 +339,7 @@ namespace osmscout {
                                                  Progress& progress,
                                                  const std::vector<TypeInfoRef> &types,
                                                  const MagnificationLevel &areaIndexMinMag,
-                                                 const MagnificationLevel &areaIndexMaxLevel,
+                                                 const MagnificationLevel &areaIndexMaxMag,
                                                  bool useMmap)
   {
     using namespace std::string_literals;
@@ -347,7 +363,7 @@ namespace osmscout {
                                types,
                                typeData,
                                areaIndexMinMag,
-                               areaIndexMaxLevel,
+                               areaIndexMaxMag,
                                useMmap,
                                maxLevel)) {
       return false;
@@ -400,7 +416,7 @@ namespace osmscout {
                    FileScanner::Sequential,
                    useMmap);
 
-      for (MagnificationLevel l=areaIndexMinMag; l<=maxLevel; l++) {
+      for (MagnificationLevel l=areaIndexMinMag; l <= maxLevel; l++) {
         Magnification magnification(l);
         TypeInfoSet   indexTypes(*typeConfig);
 
@@ -428,9 +444,7 @@ namespace osmscout {
         for (uint32_t w=1; w <= objectCount; w++) {
           progress.SetProgress(w, objectCount);
 
-          FileOffset offset;
-
-          offset=scanner.GetPos();
+          FileOffset offset=scanner.GetPos();
 
           obj.Read(*typeConfig,
                    scanner);
@@ -449,13 +463,11 @@ namespace osmscout {
         for (const auto &type : indexTypes) {
           size_t index=type->GetIndex();
 
-          if (!WriteBitmap(progress,
-                           writer,
-                           *typeConfig->GetTypeInfo(index),
-                           typeData[index],
-                           typeCellOffsets[index])) {
-            return false;
-          }
+          WriteBitmap(progress,
+                      writer,
+                      *typeConfig->GetTypeInfo(index),
+                      typeData[index],
+                      typeCellOffsets[index]);
         }
       }
 
@@ -570,7 +582,7 @@ namespace osmscout {
               currentObjectTypes.Remove(type);
             }
             else {
-              progress.Warning(typeConfig.GetTypeInfo(typeIndex)->GetName()+" has too many index cells, that area filled over the limit");
+              progress.Warning(typeConfig.GetTypeInfo(typeIndex)->GetName()+" still does not fit good index criteria");
             }
           }
         }

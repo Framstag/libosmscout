@@ -26,7 +26,7 @@ namespace osmscout {
 
   AreaRouteIndexGenerator::AreaRouteIndexGenerator():
     AreaIndexGenerator<Route>("route",
-                              "rotues",
+                              "routes",
                               RouteDataFile::ROUTE_DAT,
                               AreaRouteIndex::AREA_ROUTE_IDX)
   {}
@@ -58,8 +58,8 @@ namespace osmscout {
                          parameter,
                          progress,
                          typeConfig->GetRouteTypes(),
-                         parameter.GetAreaRouteMinMag(),
-                         parameter.GetAreaRouteIndexMaxLevel(),
+                         parameter.GetAreaRouteIndexMinMag(),
+                         parameter.GetAreaRouteIndexMaxMag(),
                          parameter.GetWayDataMemoryMaped());
   }
 

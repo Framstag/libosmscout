@@ -93,14 +93,14 @@ public:
 
   using RouterRef = std::shared_ptr<Router>;
 
-  enum class AssumeLandStrategy
+  enum class AssumeLandStrategy : std::uint8_t
   {
     disable   = 0, // disable land detection by db objects
     enable    = 1, // enable land detection
     automatic = 2, // disable land detection when data polygon is known
   };
 
-  enum class TextIndexVariant
+  enum class TextIndexVariant : std::uint8_t
   {
     original      = 0, // store original names
     transliterate = 1, // store transliterated form of names
@@ -161,11 +161,11 @@ private:
   MagnificationLevel           areaNodeBitmapMaxMag;      //<! Maximum Magnification level for bitmap index
   uint16_t                     areaNodeBitmapLimit;       //<! All cells must have less entries for a given zoom level
 
-  MagnificationLevel           areaWayMinMag;            //<! Minimum magnification of index for individual type
-  MagnificationLevel           areaWayIndexMaxLevel;     //<! Maximum zoom level for area way index bitmap
+  MagnificationLevel           areaWayIndexMinMag;       //<! Minimum magnification of index for individual type
+  MagnificationLevel           areaWayIndexMaxMag;       //<! Maximum zoom level for area way index bitmap
 
-  MagnificationLevel           areaRouteMinMag;          //<! Minimum magnification of index for individual type
-  MagnificationLevel           areaRouteIndexMaxLevel;   //<! Maximum zoom level for area route index bitmap
+  MagnificationLevel           areaRouteIndexMinMag;     //<! Minimum magnification of index for individual type
+  MagnificationLevel           areaRouteIndexMaxMag;   //<! Maximum zoom level for area route index bitmap
 
   uint32_t                     waterIndexMinMag;         //<! Minimum level of the generated water index
   uint32_t                     waterIndexMaxMag;         //<! Maximum level of the generated water index
@@ -252,11 +252,11 @@ public:
   MagnificationLevel GetAreaNodeBitmapMaxMag() const;
   uint16_t GetAreaNodeBitmapLimit() const;
 
-  MagnificationLevel GetAreaWayMinMag() const;
-  MagnificationLevel GetAreaWayIndexMaxLevel() const;
+  MagnificationLevel GetAreaWayIndexMinMag() const;
+  MagnificationLevel GetAreaWayIndexMaxMag() const;
 
-  MagnificationLevel GetAreaRouteMinMag() const;
-  MagnificationLevel GetAreaRouteIndexMaxLevel() const;
+  MagnificationLevel GetAreaRouteIndexMinMag() const;
+  MagnificationLevel GetAreaRouteIndexMaxMag() const;
 
   size_t GetAreaAreaIndexMaxMag() const;
 
@@ -338,11 +338,11 @@ public:
   void SetAreaNodeBitmapMaxMag(const MagnificationLevel& areaNodeBitmapMaxMag);
   void SetAreaNodeBitmapLimit(uint16_t areaNodeBitmapLimit);
 
-  void SetAreaWayMinMag(MagnificationLevel areaWayMinMag);
-  void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxLevel);
+  void SetAreaWayIndexMinMag(MagnificationLevel areaWayIndexMinMag);
+  void SetAreaWayIndexMaxMag(MagnificationLevel areaWayIndexMaxMag);
 
-  void SetAreaRouteMinMag(MagnificationLevel areaRouteMinMag);
-  void SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxLevel);
+  void SetAreaRouteIndexMinMag(MagnificationLevel areaRouteIndexMinMag);
+  void SetAreaRouteIndexMaxMag(MagnificationLevel areaRouteIndexMaxMag);
 
   void SetWaterIndexMinMag(uint32_t waterIndexMinMag);
   void SetWaterIndexMaxMag(uint32_t waterIndexMaxMag);
@@ -374,7 +374,7 @@ public:
   std::unique_ptr<Preprocessor> GetPreprocessor(const std::string& filename,
                                                 PreprocessorCallback& callback) const;
 
-  void SetAreaWayIndexMaxLevel(const MagnificationLevel& areaWayIndexMaxLevel);
+  void SetAreaWayIndexMaxMag(const MagnificationLevel& areaWayIndexMaxLevel);
 
   void SetTextIndexVariant(TextIndexVariant textIndexVariant);
   TextIndexVariant GetTextIndexVariant() const;
