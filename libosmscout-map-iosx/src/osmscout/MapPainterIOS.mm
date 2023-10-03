@@ -445,7 +445,7 @@ namespace osmscout {
         int lineNumber = 0;
         for (CTRunRef run : layout.run) {
             const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
-            CFIndex glyphCount = CTRunGetGlyphCount(run);
+            const CFIndex glyphCount = CTRunGetGlyphCount(run);
             CGGlyph glyphs[glyphCount];
             CGPoint glyphPositions[glyphCount];
             CGSize glyphAdvances[glyphCount];
@@ -627,11 +627,9 @@ namespace osmscout {
                                           const MapParameter& /* parameter */,
                                           const Symbol& symbol,
                                           const ContourSymbolData& data){
-        CGContextRef drawCG = cg;
         SymbolRendererIOS renderer(cg);
         ScreenBox boundingBox=symbol.GetBoundingBox(projection);
         double width=boundingBox.GetWidth();
-        double height=boundingBox.GetHeight();
         bool isClosed = false;
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         Vertex2D origin;
@@ -642,7 +640,7 @@ namespace osmscout {
         if(!isClosed && !followPath(followPathHnd, data.symbolOffset, origin)){
             return;
         }
-        
+
         bool loop = true;
         while (loop){
             x1 = origin.GetX();
@@ -712,7 +710,7 @@ namespace osmscout {
                     const Symbol& symbol,
                     const Vertex2D& screenPos,
                     double scaleFactor) {
-        
+
         SymbolRendererIOS renderer(cg);
 
         renderer.Render(projection,

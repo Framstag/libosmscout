@@ -146,7 +146,6 @@ namespace osmscout {
                                                const TypeData& typeData,
                                                const CoordOffsetsMap& typeCellOffsets)
   {
-    size_t              indexEntries=0;
     size_t              dataSize=0;
     std::array<char,10> buffer;
 
@@ -156,8 +155,6 @@ namespace osmscout {
     // that much bytes we need to address the last data entry.
 
     for (const auto& cell : typeCellOffsets) {
-      indexEntries+=cell.second.size();
-
       dataSize+=EncodeNumber(cell.second.size(),
                              buffer);
 
