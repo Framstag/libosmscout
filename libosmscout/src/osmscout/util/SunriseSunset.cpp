@@ -50,7 +50,6 @@ namespace {
   const int JULIAN_DATE_2000_01_01 = 2451545;
   const double CONST_0009 = 0.0009;
   const double CONST_360 = 360;
-  const long MILLISECONDS_IN_DAY = 60 * 60 * 24 * 1000;
 
   /**
    * Intermediate variables used in the sunrise equation

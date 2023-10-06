@@ -415,7 +415,6 @@ namespace osmscout {
     double yMin = std::min(minPixel.GetY(), maxPixel.GetY()) - pixelOffset;
     double yMax = std::max(minPixel.GetY(), maxPixel.GetY()) + pixelOffset;
 
-    osmscout::GeoBox gb(projection.GetDimensions());
     double areaMinDimension = projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
 
     if (xMax - xMin <= areaMinDimension &&

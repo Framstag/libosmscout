@@ -857,8 +857,6 @@ int main(int argc, char* argv[])
                      args.TileWidth(),
                      args.TileHeight());
 
-      osmscout::GeoBox boundingBox(projection.GetDimensions());
-
       projection.SetLinearInterpolationUsage(level.Get() >= 10);
 
       for (size_t i=0; i<args.loadRepeat; i++) {

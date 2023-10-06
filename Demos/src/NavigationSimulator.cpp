@@ -162,7 +162,6 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
                              double maxSpeed)
 {
   size_t             tickCount=0;
-  double             totalTime=0.0;
   double             restTime=0.0;
   auto               currentNode=description.Nodes().begin();
   auto               nextNode=currentNode;
@@ -204,7 +203,6 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
     auto timeInHours=distanceInKilometer/maxSpeed;
     auto timeInSeconds=timeInHours*60*60;
 
-    totalTime+=timeInHours;
 
     // Make sure we do not skip edges in the street
     lastPosition=currentNode->GetLocation();
