@@ -374,8 +374,6 @@ public:
   std::unique_ptr<Preprocessor> GetPreprocessor(const std::string& filename,
                                                 PreprocessorCallback& callback) const;
 
-  void SetAreaWayIndexMaxMag(const MagnificationLevel& areaWayIndexMaxLevel);
-
   void SetTextIndexVariant(TextIndexVariant textIndexVariant);
   TextIndexVariant GetTextIndexVariant() const;
 

@@ -125,6 +125,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << osmscout::BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
+  std::cout << " --areaWayIndexMinMag <number>        minimum index level for area way index analysis (default: " << parameter.GetAreaWayIndexMinMag() << ")" << std::endl;
+  std::cout << " --areaWayIndexMaxMag <number>        maximum index level for area way index analysis (default: " << parameter.GetAreaWayIndexMaxMag() << ")" << std::endl;
+
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
   std::cout << std::endl;
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
@@ -349,6 +352,10 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
                 (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("AreaDataCacheSize: ")+
                 std::to_string(parameter.GetAreaDataCacheSize()));
+  progress.Info(std::string("AreaWayIndexMinMag: ")+
+                std::to_string(parameter.GetAreaWayIndexMinMag().Get()));
+  progress.Info(std::string("AreaWayIndexMaxMag: ")+
+                std::to_string(parameter.GetAreaWayIndexMaxMag().Get()));
 
   progress.Info(std::string("WayDataMemoryMaped: ")+
                 (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
@@ -805,6 +812,32 @@ int main(int argc, char* argv[])
                                        i,
                                        areaDataCacheSize)) {
         parameter.SetAreaDataCacheSize(areaDataCacheSize);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--areaWayIndexMinMag")==0) {
+      size_t areaWayIndexMinMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       areaWayIndexMinMag)) {
+        parameter.SetAreaWayIndexMinMag(osmscout::MagnificationLevel(areaWayIndexMinMag));
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--areaWayIndexMaxMag")==0) {
+      size_t areaWayIndexMaxMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       areaWayIndexMaxMag)) {
+        parameter.SetAreaWayIndexMaxMag(osmscout::MagnificationLevel(areaWayIndexMaxMag));
       }
       else {
         parameterError=true;
