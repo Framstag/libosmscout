@@ -65,9 +65,9 @@ namespace osmscout {
 
   ScreenBox ScreenBox::Resize(double offset) const
   {
-    // If the offset is negative its absolute value must not be > than width or height
-    assert(offset>-GetWidth());
-    assert(offset>-GetHeight());
+    // If the offset is negative its absolute value must not be >= than width/2 or height/2
+    assert(offset >= GetWidth()/-2);
+    assert(offset >= GetHeight()/-2);
 
     return {Vertex2D(minCoord.GetX()-offset,
                      minCoord.GetY()-offset),

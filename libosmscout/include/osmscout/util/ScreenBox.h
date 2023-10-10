@@ -123,7 +123,7 @@ namespace osmscout {
      * Resize the rectangle in all dimension using the given amount.
      * If pixel is >=0 the resulting area will be bigger, else smaller.
      *
-     * It is checked that pixel>=width/2 and pixel >=height/2
+     * It is checked that offset>=width/-2 and offset>=height/-2
      *
      * The size delta will be 2*pixel in width and in height!
      *

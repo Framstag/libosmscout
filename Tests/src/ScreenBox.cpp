@@ -101,3 +101,15 @@ TEST_CASE("Resize empty rectangle by zero")
 
   REQUIRE(expectedResizedBox==resizedBox);
 }
+
+TEST_CASE("Resize square to zero")
+{
+  osmscout::ScreenBox box(osmscout::Vertex2D(-1, -1),
+                          osmscout::Vertex2D(1, 1));
+  osmscout::ScreenBox resizedBox=box.Resize(-1);
+
+  osmscout::ScreenBox expectedResizedBox(osmscout::Vertex2D(0, 0),
+                                         osmscout::Vertex2D(0, 0));
+
+  REQUIRE(expectedResizedBox==resizedBox);
+}
