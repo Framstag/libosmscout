@@ -112,4 +112,10 @@ TEST_CASE("Resize square to zero")
                                          osmscout::Vertex2D(0, 0));
 
   REQUIRE(expectedResizedBox==resizedBox);
+  REQUIRE(resizedBox.IsEmpty());
+
+  resizedBox=resizedBox.Resize(-1);
+
+  REQUIRE(expectedResizedBox==resizedBox);
+  REQUIRE(resizedBox.IsEmpty());
 }

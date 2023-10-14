@@ -53,6 +53,11 @@ namespace osmscout {
     ScreenBox(const ScreenBox& other) = default;
 
     /**
+     * Move-Constructor
+     */
+    ScreenBox(ScreenBox&& other) = default;
+
+    /**
      * Initialize the GeoBox based on the given coordinates. The two Coordinates
      * together span a rectangular (in coordinates, not on the sphere) area.
      */
@@ -63,6 +68,11 @@ namespace osmscout {
      * Assign the value of other
      */
     ScreenBox& operator=(const ScreenBox& other) = default;
+
+    /**
+     * Move assignment operator
+     */
+    ScreenBox& operator=(ScreenBox&& other) = default;
 
     /**
      * Compare two values
@@ -106,6 +116,26 @@ namespace osmscout {
     }
 
     /**
+     * Returns the size of the screen box (width*height).
+     *
+     * @return GetWidth()*GetHeight()
+     */
+    [[nodiscard]] double GetSize() const
+    {
+      return GetWidth()*GetHeight();
+    }
+
+    /**
+     * Check if size of the screen box is zero
+     *
+     * @return GetSize()==0.0
+     */
+    [[nodiscard]] bool IsEmpty() const
+    {
+      return GetSize()==0.0;
+    }
+
+    /**
      * Returns the center coordinates of the box
      * @return the center coordinates
      */
@@ -121,11 +151,12 @@ namespace osmscout {
 
     /**
      * Resize the rectangle in all dimension using the given amount.
-     * If pixel is >=0 the resulting area will be bigger, else smaller.
+     * If offset is >=0 the resulting area will be bigger, else smaller.
      *
-     * It is checked that offset>=width/-2 and offset>=height/-2
+     * If the reduction (negative offset) is bigger than width/2 or height/2,
+     * resulted screen box will have zero size (will be empty).
      *
-     * The size delta will be 2*pixel in width and in height!
+     * The size delta will be 2*offset in width and in height!
      *
      * @param offset the amount to change the coordinates.
      * @return the resulting ScreenBox

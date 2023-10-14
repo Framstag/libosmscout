@@ -65,14 +65,24 @@ namespace osmscout {
 
   ScreenBox ScreenBox::Resize(double offset) const
   {
-    // If the offset is negative its absolute value must not be >= than width/2 or height/2
-    assert(offset >= GetWidth()/-2);
-    assert(offset >= GetHeight()/-2);
+    double minX, minY, maxX, maxY;
 
-    return {Vertex2D(minCoord.GetX()-offset,
-                     minCoord.GetY()-offset),
-            Vertex2D(maxCoord.GetX()+offset,
-                     maxCoord.GetY()+offset)};
+    if (offset < GetWidth()/-2) {
+      maxX=minX=(maxCoord.GetX()+minCoord.GetX()) / 2;
+    } else {
+      minX=minCoord.GetX()-offset;
+      maxX=maxCoord.GetX()+offset;
+    }
+
+    if(offset < GetHeight()/-2){
+      maxY=minY=(maxCoord.GetY()+minCoord.GetY()) / 2;
+    } else {
+      minY=minCoord.GetY()-offset;
+      maxY=maxCoord.GetY()+offset;
+    }
+
+    return {Vertex2D(minX,minY),
+            Vertex2D(maxX,maxY)};
   }
 
   ScreenBox ScreenBox::Merge(const ScreenBox& other) const
