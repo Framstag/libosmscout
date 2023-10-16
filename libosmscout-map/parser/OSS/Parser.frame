@@ -37,10 +37,11 @@ public:
 
 public:
   std::list<Err> errors;
-  bool           hasErrors;
+  bool           hasErrors=false;
+  Log            log;
 
 public:
-  Errors();
+  explicit Errors(const Log &log);
   void SynErr(int line, int col, int n);
   void Error(int line, int col, const char *s);
   void Warning(int line, int col, const char *s);
@@ -80,7 +81,8 @@ public:
   Parser(Scanner *scanner,
          const std::string& filename,
          StyleConfig& config,
-         osmscout::ColorPostprocessor colorPostprocessor=nullptr);
+         osmscout::ColorPostprocessor colorPostprocessor=nullptr,
+         const Log &log=osmscout::log);
   ~Parser();
 
   void SemErr(const char* msg);
@@ -237,7 +239,8 @@ void Parser::Parse()
 Parser::Parser(Scanner *scanner,
                const std::string& filename,
                StyleConfig& config,
-               osmscout::ColorPostprocessor colorPostprocessor)
+               osmscout::ColorPostprocessor colorPostprocessor,
+               const Log &log)
  : filename(filename),
    config(config)
 {
@@ -247,7 +250,7 @@ Parser::Parser(Scanner *scanner,
   minErrDist = 2;
   errDist = minErrDist;
   this->scanner = scanner;
-  errors = new Errors();
+  errors = new Errors(log);
   this->colorPostprocessor=colorPostprocessor;
 }
 
@@ -276,8 +279,8 @@ osmscout::Color Parser::PostprocessColor(const osmscout::Color& color) const
   }
 }
 
-Errors::Errors()
- : hasErrors(false)
+Errors::Errors(const Log &log)
+ : log(log)
 {
   // no code
 }
