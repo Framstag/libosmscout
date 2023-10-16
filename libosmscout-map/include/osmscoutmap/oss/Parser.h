@@ -30,9 +30,11 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/io/File.h>
+
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 #include <osmscout/log/Logger.h>
+
 
 #include <osmscoutmap/oss/Scanner.h>
 
