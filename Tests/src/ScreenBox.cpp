@@ -77,3 +77,45 @@ TEST_CASE("Resize >0")
 
   REQUIRE(expectedResizedBox==resizedBox);
 }
+
+TEST_CASE("Resize ==0")
+{
+  osmscout::ScreenBox box(osmscout::Vertex2D(-1, -1),
+                          osmscout::Vertex2D(1, 1));
+  osmscout::ScreenBox resizedBox=box.Resize(0);
+
+  osmscout::ScreenBox expectedResizedBox(osmscout::Vertex2D(-1, -1),
+                                         osmscout::Vertex2D(1, 1));
+
+  REQUIRE(expectedResizedBox==resizedBox);
+}
+
+TEST_CASE("Resize empty rectangle by zero")
+{
+  osmscout::ScreenBox box(osmscout::Vertex2D(-1, -1),
+                          osmscout::Vertex2D(-1, 1));
+  osmscout::ScreenBox resizedBox=box.Resize(0);
+
+  osmscout::ScreenBox expectedResizedBox(osmscout::Vertex2D(-1, -1),
+                                         osmscout::Vertex2D(-1, 1));
+
+  REQUIRE(expectedResizedBox==resizedBox);
+}
+
+TEST_CASE("Resize square to zero")
+{
+  osmscout::ScreenBox box(osmscout::Vertex2D(-1, -1),
+                          osmscout::Vertex2D(1, 1));
+  osmscout::ScreenBox resizedBox=box.Resize(-1);
+
+  osmscout::ScreenBox expectedResizedBox(osmscout::Vertex2D(0, 0),
+                                         osmscout::Vertex2D(0, 0));
+
+  REQUIRE(expectedResizedBox==resizedBox);
+  REQUIRE(resizedBox.IsEmpty());
+
+  resizedBox=resizedBox.Resize(-1);
+
+  REQUIRE(expectedResizedBox==resizedBox);
+  REQUIRE(resizedBox.IsEmpty());
+}
