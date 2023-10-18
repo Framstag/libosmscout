@@ -10,6 +10,7 @@
 
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
+#include <osmscout/log/Logger.h>
 
 COMPILER OSS
 
@@ -95,7 +96,7 @@ void AddFeatureToFilter(StyleFilter& filter,
       if (!filter.FiltersByType() ||
           filter.HasType(type)) {
         // Add type only if the filter either has no types or
-        // if the the type is already filtered
+        // if the type is already filtered
         resultTypes.Set(type);
       }
     }
@@ -180,7 +181,8 @@ PRODUCTIONS
 
              bool success=config.Load(moduleFileName,
                                       colorPostprocessor,
-                                      true);
+                                      true,
+                                      errors->log);
 
              if (!success) {
                std::string e="Cannot load module '"+moduleFileName+"'";
@@ -1407,18 +1409,18 @@ PRODUCTIONS
   ATTRIBUTEVALUE<PartialStyleBase& style, const StyleAttributeDescriptor& descriptor>
               =
                  (.
-                   ValueType              valueType=ValueType::NO_VALUE;
-                   bool                   negate=false;
-                   std::string            ident;
-                   std::string            subIdent;
-                   std::string            stringValue;
-                   std::string            function;
-                   double                 factor=-1;
-                   std::string            unit;
-                   std::string            number;
-                   std::list<std::string> numberList;
-                   Color                  color;
-                   StyleConstantRef       constant;
+                   ValueType                valueType=ValueType::NO_VALUE;
+                   bool                     negate=false;
+                   std::string              ident;
+                   std::string              subIdent;
+                   std::string              stringValue;
+                   std::string              function;
+                   double                   factor=-1;
+                   std::string              unit;
+                   std::string              number;
+                   std::vector<std::string> numberList;
+                   Color                    color;
+                   StyleConstantRef         constant;
                   .)
 
                  (
