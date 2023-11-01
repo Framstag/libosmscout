@@ -19,12 +19,17 @@
 
 #include <osmscout/async/AsyncWorker.h>
 
+#include <osmscout/async/Thread.h>
+
 namespace osmscout {
 
-AsyncWorker::AsyncWorker(const std::string&):
+AsyncWorker::AsyncWorker(const std::string &name):
   thread(&AsyncWorker::Loop,this)
 {
-
+  Async<int>([name](Breaker &) -> int {
+    SetThreadName(name);
+    return 0;
+  });
 }
 
 AsyncWorker::~AsyncWorker()
