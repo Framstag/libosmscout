@@ -99,7 +99,7 @@ public:
     IdRole = Qt::UserRole+1,
   };
 
-  Q_INVOKABLE virtual int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const
+  Q_INVOKABLE virtual int inline rowCount(const QModelIndex &parent = QModelIndex()) const
   {
     return onlineProviders.size();
   };

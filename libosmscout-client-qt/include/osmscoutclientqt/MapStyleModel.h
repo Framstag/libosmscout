@@ -58,7 +58,7 @@ public:
   QString getStyle() const;
   void setStyle(const QString &style);
 
-  Q_INVOKABLE int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
+  Q_INVOKABLE int inline rowCount(const QModelIndex &parent = QModelIndex()) const override
   {
       return stylesheets.size();
   };

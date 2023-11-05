@@ -61,7 +61,7 @@ public:
   StyleFlagsModel();
   ~StyleFlagsModel() override;
 
-  Q_INVOKABLE int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
+  Q_INVOKABLE int inline rowCount(const QModelIndex &parent = QModelIndex()) const override
   {
       return mapFlags.size();
   };
