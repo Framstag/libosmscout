@@ -101,6 +101,7 @@ public:
 
   Q_INVOKABLE virtual int inline rowCount(const QModelIndex &parent = QModelIndex()) const
   {
+    Q_UNUSED(parent);
     return onlineProviders.size();
   };
 
