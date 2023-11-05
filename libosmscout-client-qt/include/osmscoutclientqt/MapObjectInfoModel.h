@@ -92,8 +92,9 @@ public:
   MapObjectInfoModel();
   ~MapObjectInfoModel() override;
 
-  Q_INVOKABLE int inline rowCount(const QModelIndex &/*parent = QModelIndex()*/) const override
+  Q_INVOKABLE int inline rowCount(const QModelIndex &parent = QModelIndex()) const override
   {
+      Q_UNUSED(parent);
       return model.size();
   };
 
