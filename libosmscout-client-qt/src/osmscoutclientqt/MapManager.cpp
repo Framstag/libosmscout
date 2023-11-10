@@ -62,11 +62,16 @@ void MapDownloadJob::start()
         mapDir.getCreation() == map.getCreation()) {
       // directory contains partial download
       // (contains downloader metadata, but not all required files)
-      // TODO: continue partial download
+      if (!mapDir.deleteDatabase()) {
+        qWarning() << "Failed to clean up partial download" << target.canonicalPath()<<"!";
+        onJobFailed("Directory already exists", false);
+        return;
+      }
+    } else {
+      qWarning() << "Directory already exists" << target.canonicalPath()<<"!";
+      onJobFailed("Directory already exists", false);
+      return;
     }
-    qWarning() << "Directory already exists"<<target.canonicalPath()<<"!";
-    onJobFailed("Directory already exists", false);
-    return;
   }
 
   if (!target.mkpath(target.path())) {
@@ -221,6 +226,12 @@ bool MapDirectory::deleteDatabase()
   for (const auto &fileName: fileNames) {
     if(dir.exists(fileName)){
       result&=dir.remove(fileName);
+    } else {
+      // check for partial download
+      QString tempfileName = fileName + FileDownloaderConfig::TemporaryFileSuffix;
+      if (dir.exists(tempfileName)){
+        result&=dir.remove(tempfileName);
+      }
     }
   }
   QDir parent=dir;

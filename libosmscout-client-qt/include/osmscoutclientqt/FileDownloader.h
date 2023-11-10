@@ -46,6 +46,7 @@ static constexpr std::chrono::seconds DownloadReadTimeout{60}; ///< Download rea
 static constexpr std::chrono::seconds BackOffInitial{1}; ///< Initial back-off time
 static constexpr std::chrono::seconds BackOffMax{300}; ///< Maximum back-off time
 static constexpr int MaxDownloadRetries{-1}; ///< Maximal number of download retries before cancelling download
+static constexpr char const *TemporaryFileSuffix{".download"}; ///< suffix of file being downloaded
 }
 
 /// \brief Downloads a file specified by URL

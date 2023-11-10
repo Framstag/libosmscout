@@ -62,7 +62,7 @@ FileDownloader::FileDownloader(QNetworkAccessManager *manager,
     return;
   }
 
-  file.setFileName(path + ".download");
+  file.setFileName(path + FileDownloaderConfig::TemporaryFileSuffix);
   if (!file.open(QIODevice::WriteOnly)) {
     isOk = false;
     qWarning() << "Cannot open file:" << file.fileName();
