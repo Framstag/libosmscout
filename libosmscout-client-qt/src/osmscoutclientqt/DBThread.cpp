@@ -22,7 +22,7 @@
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/private/Config.h>
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/db/TextSearchIndex.h>
@@ -65,9 +65,11 @@ DBThread::DBThread(QThread *backgroundThread,
           this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
 
-  connect(mapManager.get(), &MapManager::databaseListChanged,
+  connect(this, &DBThread::databaseListChanged,
           this, &DBThread::onDatabaseListChanged,
           Qt::QueuedConnection);
+
+  mapManager->databaseListChanged.Connect(databaseListChangedSlot);
 }
 
 DBThread::~DBThread()
@@ -173,7 +175,7 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 void DBThread::Initialize()
 {
   std::shared_lock locker(lock);
-  mapManager->lookupDatabases();
+  mapManager->LookupDatabases();
 }
 
 void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)

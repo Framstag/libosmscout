@@ -24,6 +24,8 @@
 
 #include <osmscoutclient/MapProvider.h>
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/MapDirectory.h>
+#include <osmscoutclient/MapManager.h>
 
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/FileDownloader.h>
@@ -50,7 +52,6 @@ class OSMSCOUT_CLIENT_QT_API MapDownloadJob: public DownloadJob
   AvailableMapsModelMap   map;
 
 public:
-  static const char* FILE_METADATA;
 
   MapDownloadJob(QNetworkAccessManager *webCtrl, AvailableMapsModelMap map, QDir target, bool replaceExisting);
 
@@ -80,142 +81,31 @@ public:
 };
 
 /**
- * Holder for map db metadata
- *
- * \ingroup QtAPI
- */
-class OSMSCOUT_CLIENT_QT_API MapDirectory
-{
-public:
-  MapDirectory() = default;
-  explicit MapDirectory(QDir dir);
-  ~MapDirectory() = default;
-
-  MapDirectory(const MapDirectory &other) = default;
-  MapDirectory &operator=(const MapDirectory &other) = default;
-
-  MapDirectory(MapDirectory &&other) = default;
-  MapDirectory &operator=(MapDirectory &&other) = default;
-
-  QDir getDir() const
-  {
-    return dir;
-  }
-
-  static QStringList mandatoryFiles();
-  static QStringList optionalFiles();
-  static QStringList metadataFiles();
-
-  /**
-   * byte size of all db files on disk
-   * @return
-   */
-  qint64 byteSize() const;
-
-  /**
-   * Delete complete db
-   */
-  bool deleteDatabase();
-
-  /**
-   * Check if directory contains all required files for osmscout db
-   * @return true if all requirements met and directory may be used as db
-   */
-  bool isValid() const
-  {
-    return valid;
-  }
-
-  /**
-   * Check if map directory contains metadata created by downloader
-   * @return true if map directory contains metadata
-   */
-  bool hasMetadata() const
-  {
-    return metadata;
-  }
-
-  /**
-   * Human readable name of the map. It is name of geographical region usually (eg: Germany, Czech Republic...).
-   * Name is localised by server when it is downloading. When locale is changed later, name will remain
-   * in its original locale.
-   * @return map name
-   */
-  QString getName() const
-  {
-    return name;
-  }
-
-  /**
-   * Logical path of the map, eg: europe/gemany; europe/czech-republic
-   * @return
-   */
-  QStringList getPath() const
-  {
-    return path;
-  }
-
-  /**
-   * Time of map import
-   * @return
-   */
-  QDateTime getCreation() const
-  {
-    return creation;
-  }
-
-  int getVersion() const
-  {
-    return version;
-  }
-
-  bool operator<(const MapDirectory &o) const
-  {
-    if (getName() == o.getName()){
-      return getDir().absolutePath() < o.getDir().absolutePath();
-    }
-    return getName() < o.getName();
-  }
-
-private:
-  QDir dir;
-  bool valid{false};
-  bool metadata{false};
-  QString name;
-  QStringList path;
-  QDateTime creation;
-  int version{0};
-};
-
-/**
  * Manager of map databases. It provide db lookup
  * (in databaseDirectories) and simple scheduler for downloading maps.
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API MapManager: public QObject
+class OSMSCOUT_CLIENT_QT_API MapDownloader: public QObject
 {
   Q_OBJECT
 
 private:
-  QStringList databaseLookupDirs;
-  QList<MapDirectory> databaseDirectories;
   QList<MapDownloadJob*> downloadJobs;
   QNetworkAccessManager webCtrl;
+  MapManagerRef mapManager;
 
 public slots:
-  void lookupDatabases();
   void onJobFinished();
   void onJobFailed(QString errorMessage);
 
 signals:
   void mapDownloadFails(QString message);
-  void databaseListChanged(QList<QDir> databaseDirectories);
   void downloadJobsChanged();
 
 public:
-  MapManager(QStringList databaseLookupDirs, SettingsRef settings);
+  MapDownloader(MapManagerRef mapManager, SettingsRef settings);
 
-  ~MapManager() override;
+  ~MapDownloader() override;
 
   /**
    * Start map downloading into local dir.
@@ -230,22 +120,12 @@ public:
   QList<MapDownloadJob*> getDownloadJobs() const {
     return downloadJobs;
   }
-
-  QStringList getLookupDirectories() const
-  {
-    return databaseLookupDirs;
-  }
-
-  QList<MapDirectory> getDatabaseDirectories() const
-  {
-    return databaseDirectories;
-  }
 };
 
 /**
  * \ingroup QtAPI
  */
-using MapManagerRef = std::shared_ptr<MapManager>;
+using MapDownloaderRef = std::shared_ptr<MapDownloader>;
 
 }
 

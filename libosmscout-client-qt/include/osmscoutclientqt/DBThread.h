@@ -36,7 +36,8 @@
 #include <osmscoutclient/Settings.h>
 
 #include <osmscoutclientqt/DBJob.h>
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
+#include <osmscoutclientqt/QtStdConverters.h>
 
 #include <shared_mutex>
 
@@ -115,6 +116,8 @@ signals:
 
   void mapDpiSignal(double);
 
+  void databaseListChanged(QList<QDir> databaseDirectories);
+
 public slots:
   void ToggleDaylight();
   void onMapDPIChange(double dpi);
@@ -163,6 +166,12 @@ private:
   Slot<double> mapDpiSlot{
     [this](const double &d) {
       mapDpiSignal(d);
+    }
+  };
+
+  Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
+    [this](const std::vector<std::filesystem::path> &paths) {
+      emit databaseListChanged(PathVectorToQDirList(paths));
     }
   };
 

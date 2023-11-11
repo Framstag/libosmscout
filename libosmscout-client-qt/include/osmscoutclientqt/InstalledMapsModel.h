@@ -25,7 +25,8 @@
 
 #include <QAbstractListModel>
 
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
+#include <osmscoutclientqt/QtStdConverters.h>
 
 namespace osmscout {
 
@@ -37,7 +38,7 @@ class OSMSCOUT_CLIENT_QT_API InstalledMapsModel : public QAbstractListModel {
 Q_OBJECT
 
 signals:
-  void databaseListChanged();
+  void databaseListChanged(QList<QDir> databaseDirectories);
 
 public slots:
   void onDatabaseListChanged();
@@ -83,6 +84,12 @@ public:
 private:
   QList<MapDirectory> dirs;
   MapManagerRef mapManager;
+
+  Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
+    [this](const std::vector<std::filesystem::path> &paths) {
+      emit databaseListChanged(PathVectorToQDirList(paths));
+    }
+  };
 };
 
 }

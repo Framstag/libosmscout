@@ -39,7 +39,7 @@
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  *
  * Instance of one osmscout db and db specific objects.
  *

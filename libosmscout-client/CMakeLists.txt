@@ -1,20 +1,24 @@
 set(HEADER_FILES
-    include/osmscoutclient/json/json.hpp
-    include/osmscoutclient/json/json_fwd.hpp
-    include/osmscoutclient/DBInstance.h
-    include/osmscoutclient/MapProvider.h
-    include/osmscoutclient/ClientImportExport.h
-    include/osmscoutclient/OnlineTileProvider.h
-    include/osmscoutclient/Settings.h
-    include/osmscoutclient/VoiceProvider.h
+  include/osmscoutclient/json/json.hpp
+  include/osmscoutclient/json/json_fwd.hpp
+  include/osmscoutclient/DBInstance.h
+  include/osmscoutclient/MapDirectory.h
+  include/osmscoutclient/MapManager.h
+  include/osmscoutclient/MapProvider.h
+  include/osmscoutclient/ClientImportExport.h
+  include/osmscoutclient/OnlineTileProvider.h
+  include/osmscoutclient/Settings.h
+  include/osmscoutclient/VoiceProvider.h
 )
 
 set(SOURCE_FILES
   src/osmscoutclient/DBInstance.cpp
-	src/osmscoutclient/MapProvider.cpp
+  src/osmscoutclient/MapDirectory.cpp
+  src/osmscoutclient/MapManager.cpp
+  src/osmscoutclient/MapProvider.cpp
   src/osmscoutclient/OnlineTileProvider.cpp
-	src/osmscoutclient/Settings.cpp
-	src/osmscoutclient/VoiceProvider.cpp
+  src/osmscoutclient/Settings.cpp
+  src/osmscoutclient/VoiceProvider.cpp
 )
 
 set(EXCLUDE_HEADER)

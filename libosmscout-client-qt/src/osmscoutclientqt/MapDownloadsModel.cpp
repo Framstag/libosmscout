@@ -26,22 +26,21 @@ namespace osmscout {
 MapDownloadsModel::MapDownloadsModel(QObject *parent):
   QAbstractListModel(parent){
 
-  mapManager=OSMScoutQt::GetInstance().GetMapManager();
-  connect(mapManager.get(), &MapManager::downloadJobsChanged, this, &MapDownloadsModel::onDownloadJobsChanged);
-  connect(mapManager.get(), &MapManager::mapDownloadFails, this, &MapDownloadsModel::mapDownloadFails);
+  mapDownloader=OSMScoutQt::GetInstance().GetMapDownloader();
+  connect(mapDownloader.get(), &MapDownloader::downloadJobsChanged, this, &MapDownloadsModel::onDownloadJobsChanged);
+  connect(mapDownloader.get(), &MapDownloader::mapDownloadFails, this, &MapDownloadsModel::mapDownloadFails);
   onDownloadJobsChanged();
 }
 
 QString MapDownloadsModel::suggestedDirectory(QObject *obj, QString rootDirectory)
 {
   auto mapManager=OSMScoutQt::GetInstance().GetMapManager();
-  auto directories=mapManager->getLookupDirectories();
-  auto it=directories.begin();
+  auto directories=mapManager->GetLookupDirectories();
   QString path=rootDirectory;
   if (path==""){
     path=".";
-    if (it!=directories.end()){
-      path=*it;
+    if (auto it=directories.begin(); it!=directories.end()){
+      path=QString::fromStdString(it->string());
     }
   }
 
@@ -64,7 +63,7 @@ void MapDownloadsModel::downloadMap(QObject *obj, QString dir)
   qDebug() << "request to download map:" << obj << "to" << dir;
   const AvailableMapsModelMap *map=dynamic_cast<const AvailableMapsModelMap*>(obj);
   if (map!=nullptr){
-    mapManager->downloadMap(*map, QDir(dir));
+    mapDownloader->downloadMap(*map, QDir(dir));
   }else{
     qWarning() << obj << "can't be converted to AvailableMapsModelMap";
   }
@@ -72,7 +71,12 @@ void MapDownloadsModel::downloadMap(QObject *obj, QString dir)
 
 QStringList MapDownloadsModel::getLookupDirectories()
 {
-  return mapManager->getLookupDirectories();
+  QStringList dirPaths;
+  auto dirs=OSMScoutQt::GetInstance().GetMapManager()->GetLookupDirectories();
+  for (const auto &dir: dirs) {
+    dirPaths << QString::fromStdString(dir.string());
+  }
+  return dirPaths;
 }
 
 double MapDownloadsModel::getFreeSpace(QString dir)
@@ -84,7 +88,7 @@ double MapDownloadsModel::getFreeSpace(QString dir)
 void MapDownloadsModel::onDownloadJobsChanged()
 {
   beginResetModel();
-  for (auto *job:mapManager->getDownloadJobs()){
+  for (auto *job:mapDownloader->getDownloadJobs()){
     connect(job, &MapDownloadJob::downloadProgress, this, &MapDownloadsModel::onDownloadProgress);
   }
   endResetModel();
@@ -92,7 +96,7 @@ void MapDownloadsModel::onDownloadJobsChanged()
 
 void MapDownloadsModel::onDownloadProgress()
 {
-  int count=mapManager->getDownloadJobs().size();
+  int count=mapDownloader->getDownloadJobs().size();
   if (count==0)
     return;
   QVector<int> roles;
@@ -104,12 +108,12 @@ void MapDownloadsModel::onDownloadProgress()
 
 int MapDownloadsModel::rowCount(const QModelIndex &/*parent*/) const
 {
-  return mapManager->getDownloadJobs().size();
+  return mapDownloader->getDownloadJobs().size();
 }
 
 QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
 {
-  auto jobs=mapManager->getDownloadJobs();
+  auto jobs=mapDownloader->getDownloadJobs();
   if (index.row() < 0 || index.row()>=jobs.size()){
     return QVariant();
   }
@@ -135,7 +139,7 @@ QVariant MapDownloadsModel::data(const QModelIndex &index, int role) const
 
 void MapDownloadsModel::cancel(int row)
 {
-  auto jobs=mapManager->getDownloadJobs();
+  auto jobs=mapDownloader->getDownloadJobs();
   if (row < 0 || row >= jobs.size()){
     return;
   }

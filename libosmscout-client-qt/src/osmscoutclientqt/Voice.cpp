@@ -51,7 +51,7 @@ bool Voice::deleteVoice()
   valid=false;
 
   QStringList fileNames = files();
-  fileNames << MapDownloadJob::FILE_METADATA;
+  fileNames << MapDirectory::FileMetadata;
 
   bool result=true;
   for (const auto &fileName: fileNames) {
@@ -161,8 +161,8 @@ Voice::Voice(QDir dir):
   }
 
   // metadata
-  if (dir.exists(MapDownloadJob::FILE_METADATA)){
-    QFile jsonFile(dir.filePath(MapDownloadJob::FILE_METADATA));
+  if (dir.exists(MapDirectory::FileMetadata)){
+    QFile jsonFile(dir.filePath(MapDirectory::FileMetadata));
     jsonFile.open(QFile::OpenModeFlag::ReadOnly);
     QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
     QJsonObject metadataObject = doc.object();
