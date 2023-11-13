@@ -29,7 +29,7 @@ QStringList OpeningHoursModel::intervalStrings(const std::vector<OpeningHours::T
   QStringList result;
   if (intervals.empty()) {
     //: example: restaurant is "closed" at Monday
-    result << OpeningHoursModel::tr("closed");
+    result << osmscout::OpeningHoursModel::tr("closed");
   }
   auto timeString=[](const OpeningHours::DayTime &time) -> QString {
     return QString("%1:%2").arg(int(time.hour)).arg(int(time.minute), 2, 10, QLatin1Char('0'));
@@ -45,11 +45,11 @@ QString OpeningHoursModel::dayName(OpeningHours::WeekDay weekDay) const
 {
   if (weekDay==OpeningHours::WeekDay::PublicHoliday) {
     //: long variant
-    return OpeningHoursModel::tr("Public holiday");
+    return osmscout::OpeningHoursModel::tr("Public holiday");
   }
   if (weekDay==OpeningHours::WeekDay::SchoolHoliday) {
     //: long variant
-    return OpeningHoursModel::tr("School holiday");
+    return osmscout::OpeningHoursModel::tr("School holiday");
   }
   return locale.standaloneDayName(int(weekDay)+1, QLocale::FormatType::LongFormat);
   // return calendar.standaloneWeekDayName(locale, int(weekDay)+1, QLocale::FormatType::LongFormat);
@@ -59,11 +59,11 @@ QString OpeningHoursModel::shortDayName(OpeningHours::WeekDay weekDay) const
 {
   if (weekDay==OpeningHours::WeekDay::PublicHoliday) {
     //: short variant of "Public holiday"
-    return OpeningHoursModel::tr("PH");
+    return osmscout::OpeningHoursModel::tr("PH");
   }
   if (weekDay==OpeningHours::WeekDay::SchoolHoliday) {
     //: short variant of "School holiday"
-    return OpeningHoursModel::tr("SH");
+    return osmscout::OpeningHoursModel::tr("SH");
   }
   // return calendar.standaloneWeekDayName(locale, int(weekDay)+1, QLocale::FormatType::ShortFormat);
   return locale.standaloneDayName(int(weekDay)+1, QLocale::FormatType::ShortFormat);
