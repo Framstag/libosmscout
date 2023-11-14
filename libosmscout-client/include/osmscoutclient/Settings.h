@@ -182,7 +182,7 @@ public:
 };
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
 using SettingsRef = std::shared_ptr<Settings>;
 

@@ -22,7 +22,7 @@
 
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/private/Config.h>
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/db/TextSearchIndex.h>
@@ -43,7 +43,6 @@ DBThread::DBThread(QThread *backgroundThread,
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
     mapDpi(-1),
-    lock(QReadWriteLock::Recursive),
     iconDirectory(iconDirectory),
     daylight(true),
     customPoiTypes(customPoiTypes)
@@ -66,14 +65,16 @@ DBThread::DBThread(QThread *backgroundThread,
           this, &DBThread::onMapDPIChange,
           Qt::QueuedConnection);
 
-  connect(mapManager.get(), &MapManager::databaseListChanged,
+  connect(this, &DBThread::databaseListChanged,
           this, &DBThread::onDatabaseListChanged,
           Qt::QueuedConnection);
+
+  mapManager->databaseListChanged.Connect(databaseListChangedSlot);
 }
 
 DBThread::~DBThread()
 {
-  QWriteLocker locker(&lock);
+  std::unique_lock locker(lock);
   osmscout::log.Debug() << "DBThread::~DBThread()";
 
   mapDpiSlot.Disconnect();
@@ -98,7 +99,7 @@ bool DBThread::isInitializedInternal()
 
 bool DBThread::isInitialized()
 {
-  QReadLocker locker(&lock);
+  std::shared_lock locker(lock);
   return isInitializedInternal();
 }
 
@@ -113,7 +114,7 @@ double DBThread::GetPhysicalDpi() const
 }
 
 const DatabaseLoadedResponse DBThread::loadedResponse() const {
-  QReadLocker locker(&lock);
+  std::shared_lock locker(lock);
   DatabaseLoadedResponse response;
   for (const auto& db:databases){
     response.boundingBox.Include(db->GetDBGeoBox());
@@ -124,7 +125,7 @@ const DatabaseLoadedResponse DBThread::loadedResponse() const {
 DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magnification,
                                             const osmscout::GeoBox &bbox)
 {
-  QReadLocker locker(&lock);
+  std::shared_lock locker(lock);
 
   osmscout::GeoBox boundingBox;
   for (const auto &db:databases){
@@ -173,13 +174,13 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 
 void DBThread::Initialize()
 {
-  QReadLocker locker(&lock);
-  mapManager->lookupDatabases();
+  std::shared_lock locker(lock);
+  mapManager->LookupDatabases();
 }
 
 void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
 {
-  QWriteLocker locker(&lock);
+  std::unique_lock locker(lock);
 
   if (basemapDatabase) {
     basemapDatabase->Close();
@@ -363,7 +364,7 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppress
 
 void DBThread::ToggleDaylight()
 {
-  QWriteLocker locker(&lock);
+  std::unique_lock locker(lock);
 
   if (!isInitializedInternal()) {
       return;
@@ -380,7 +381,7 @@ void DBThread::ToggleDaylight()
 void DBThread::onMapDPIChange(double dpi)
 {
   {
-    QWriteLocker locker(&lock);
+    std::unique_lock locker(lock);
     mapDpi = dpi;
   }
 }
@@ -388,7 +389,7 @@ void DBThread::onMapDPIChange(double dpi)
 void DBThread::SetStyleFlag(const QString &key, bool value)
 {
   qDebug() << "SetStyleFlag" << key << "to" << value;
-  QWriteLocker locker(&lock);
+  std::unique_lock locker(lock);
 
   if (!isInitializedInternal()) {
       return;
@@ -409,7 +410,7 @@ void DBThread::LoadStyle(QString stylesheetFilename,
                          std::unordered_map<std::string,bool> stylesheetFlags,
                          const QString &suffix)
 {
-  QWriteLocker locker(&lock);
+  std::unique_lock locker(lock);
   LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
 }
 
@@ -439,7 +440,7 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
 
 const QMap<QString,bool> DBThread::GetStyleFlags() const
 {
-  QReadLocker locker(&lock);
+  std::shared_lock locker(lock);
   QMap<QString,bool> flags;
   // add flag overrides
   for (const auto& flag : stylesheetFlags){
@@ -480,18 +481,18 @@ void DBThread::FlushCaches(qint64 idleMs)
 
 void DBThread::RunJob(DBJob *job)
 {
-  QReadLocker *locker=new QReadLocker(&lock);
+  std::shared_lock locker(lock);
   if (!isInitializedInternal()){
-    delete locker;
+    locker.unlock();
     osmscout::log.Warn() << "ignore request, dbs is not initialized";
     return;
   }
-  job->Run(basemapDatabase,databases,locker);
+  job->Run(basemapDatabase,databases,std::move(locker));
 }
 
 void DBThread::RunSynchronousJob(SynchronousDBJob job)
 {
-  QReadLocker locker(&lock);
+  std::shared_lock locker(lock);
   if (!isInitializedInternal()){
     osmscout::log.Warn() << "ignore request, dbs is not initialized";
     return;

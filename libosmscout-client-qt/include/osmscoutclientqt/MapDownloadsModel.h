@@ -22,7 +22,7 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
 #include <osmscoutclientqt/DBThread.h>
 
 #include <QObject>
@@ -49,7 +49,7 @@ public slots:
   void onDownloadProgress();
 
 private:
-  MapManagerRef mapManager;
+  MapDownloaderRef mapDownloader;
 
 public:
   MapDownloadsModel(QObject *parent=Q_NULLPTR);

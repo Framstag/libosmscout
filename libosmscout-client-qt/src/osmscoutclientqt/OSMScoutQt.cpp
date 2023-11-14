@@ -158,7 +158,11 @@ bool OSMScoutQtBuilder::Init()
   // setup voice
   settings->SetVoiceLookupDirectory(voiceLookupDirectory.toStdString());
 
-  MapManagerRef mapManager=std::make_shared<MapManager>(mapLookupDirectories, settings);
+  std::vector<std::filesystem::path> paths;
+  for (const auto &dir: mapLookupDirectories) {
+    paths.push_back(dir.toStdString());
+  }
+  MapManagerRef mapManager=std::make_shared<MapManager>(paths);
 
   QString userAgent=QString("%1/%2 libosmscout/%3 Qt/%4")
       .arg(appName).arg(appVersion)
@@ -355,8 +359,18 @@ MapManagerRef OSMScoutQt::GetMapManager() const
   return mapManager;
 }
 
+MapDownloaderRef OSMScoutQt::GetMapDownloader()
+{
+  std::unique_lock<std::mutex> locker(mutex);
+  if (!mapDownloader){
+    mapDownloader = std::make_shared<MapDownloader>(mapManager, settings);
+  }
+  return mapDownloader;
+}
+
 VoiceManagerRef OSMScoutQt::GetVoiceManager()
 {
+  std::unique_lock<std::mutex> locker(mutex);
   if (!voiceManager){
     voiceManager = std::make_shared<VoiceManager>();
   }

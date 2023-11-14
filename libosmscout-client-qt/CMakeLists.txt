@@ -24,7 +24,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/TileCache.h
     include/osmscoutclientqt/AvailableMapsModel.h
     include/osmscoutclientqt/PersistentCookieJar.h
-    include/osmscoutclientqt/MapManager.h
+    include/osmscoutclientqt/MapDownloader.h
     include/osmscoutclientqt/MapDownloadsModel.h
     include/osmscoutclientqt/MapObjectInfoModel.h
     include/osmscoutclientqt/MapStyleModel.h
@@ -50,6 +50,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/QmlSettings.h
     include/osmscoutclientqt/QtRouteData.h
     include/osmscoutclientqt/QtSettingsStorage.h
+    include/osmscoutclientqt/QtStdConverters.h
     include/osmscoutclientqt/RouteStep.h
     include/osmscoutclientqt/NearPOIModel.h
     include/osmscoutclientqt/POILookupModule.h
@@ -80,7 +81,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/SearchLocationModel.cpp
     src/osmscoutclientqt/TileCache.cpp
     src/osmscoutclientqt/AvailableMapsModel.cpp
-    src/osmscoutclientqt/MapManager.cpp
+    src/osmscoutclientqt/MapDownloader.cpp
     src/osmscoutclientqt/MapDownloadsModel.cpp
     src/osmscoutclientqt/MapObjectInfoModel.cpp
     src/osmscoutclientqt/MapStyleModel.cpp
@@ -107,6 +108,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/QmlSettings.cpp
     src/osmscoutclientqt/QtRouteData.cpp
     src/osmscoutclientqt/QtSettingsStorage.cpp
+    src/osmscoutclientqt/QtStdConverters.cpp
     src/osmscoutclientqt/NearPOIModel.cpp
     src/osmscoutclientqt/POILookupModule.cpp
     src/osmscoutclientqt/InstalledMapsModel.cpp

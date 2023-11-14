@@ -23,7 +23,6 @@
 
 #include <QThread>
 #include <QObject>
-#include <QReadWriteLock>
 #include <QDir>
 
 #include <osmscout/db/BasemapDatabase.h>
@@ -37,7 +36,10 @@
 #include <osmscoutclient/Settings.h>
 
 #include <osmscoutclientqt/DBJob.h>
-#include <osmscoutclientqt/MapManager.h>
+#include <osmscoutclientqt/MapDownloader.h>
+#include <osmscoutclientqt/QtStdConverters.h>
+
+#include <shared_mutex>
 
 namespace osmscout {
 
@@ -114,6 +116,8 @@ signals:
 
   void mapDpiSignal(double);
 
+  void databaseListChanged(QList<QDir> databaseDirectories);
+
 public slots:
   void ToggleDaylight();
   void onMapDPIChange(double dpi);
@@ -138,7 +142,7 @@ private:
 
   double                             mapDpi;
 
-  mutable QReadWriteLock             lock;
+  mutable std::shared_mutex          lock;
 
   osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
   osmscout::BasemapDatabaseRef       basemapDatabase;
@@ -162,6 +166,12 @@ private:
   Slot<double> mapDpiSlot{
     [this](const double &d) {
       mapDpiSignal(d);
+    }
+  };
+
+  Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
+    [this](const std::vector<std::filesystem::path> &paths) {
+      emit databaseListChanged(PathVectorToQDirList(paths));
     }
   };
 
@@ -230,7 +240,7 @@ public:
 
   StyleConfigRef GetEmptyStyleConfig() const
   {
-    QReadLocker locker(&lock);
+    std::shared_lock locker(lock);
     return emptyStyleConfig;
   }
 

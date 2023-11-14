@@ -24,8 +24,7 @@ namespace osmscout {
 
 DBJob::DBJob():
   QObject(),
-  thread(QThread::currentThread()),
-  locker(nullptr)
+  thread(QThread::currentThread())
 {
 }
 
@@ -39,26 +38,25 @@ DBJob::~DBJob()
 
 void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                 const std::list<DBInstanceRef> &databases,
-                QReadLocker *locker)
+                std::shared_lock<std::shared_mutex> &&locker)
 {
   if (thread!=QThread::currentThread()){
     qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
   this->basemapDatabase=basemapDatabase;
   this->databases=databases;
-  this->locker=locker;
+  this->locker=std::move(locker);
 }
 
 void DBJob::Close()
 {
-  if (locker==nullptr){
+  if (!locker.owns_lock()){
     return;
   }
   if (thread!=QThread::currentThread()){
     qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
   }
-  delete locker;
-  locker=nullptr;
+  locker.unlock();
   databases.clear();
 }
 
@@ -95,7 +93,7 @@ DBLoadJob::~DBLoadJob()
 
 void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                     const std::list<DBInstanceRef> &databases,
-                    QReadLocker *locker)
+                    std::shared_lock<std::shared_mutex> &&locker)
 {
   osmscout::GeoBox lookupBox(lookupProjection.GetDimensions());
   std::list<DBInstanceRef> relevantDatabases;
@@ -112,7 +110,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     relevantDatabases.push_back(db);
   }
 
-  DBJob::Run(basemapDatabase,relevantDatabases,locker);
+  DBJob::Run(basemapDatabase,relevantDatabases,std::move(locker));
   for (auto &db:relevantDatabases){
     std::list<osmscout::TileRef> tiles;
     db->GetMapService()->LookupTiles(lookupProjection,tiles);

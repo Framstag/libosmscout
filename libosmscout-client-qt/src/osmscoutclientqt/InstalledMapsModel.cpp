@@ -19,6 +19,7 @@
 
 #include <osmscoutclientqt/InstalledMapsModel.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
+#include <osmscoutclientqt/QtStdConverters.h>
 
 #include <algorithm>
 
@@ -27,10 +28,10 @@ namespace osmscout {
 InstalledMapsModel::InstalledMapsModel()
 {
   mapManager=OSMScoutQt::GetInstance().GetMapManager();
-  connect(mapManager.get(), &MapManager::databaseListChanged,
+  connect(this, &InstalledMapsModel::databaseListChanged,
           this, &InstalledMapsModel::onDatabaseListChanged);
-  connect(mapManager.get(), &MapManager::databaseListChanged,
-          this, &InstalledMapsModel::databaseListChanged);
+
+  mapManager->databaseListChanged.Connect(databaseListChangedSlot);
   onDatabaseListChanged();
 }
 
@@ -40,7 +41,7 @@ InstalledMapsModel::~InstalledMapsModel()
 
 void InstalledMapsModel::onDatabaseListChanged()
 {
-  QList<MapDirectory> currentDirs=mapManager->getDatabaseDirectories();
+  std::vector<MapDirectory> currentDirs=mapManager->GetDatabaseDirectories();
 
   std::stable_sort(currentDirs.begin(), currentDirs.end());
 
@@ -50,14 +51,14 @@ void InstalledMapsModel::onDatabaseListChanged()
   // process removals
   QMap<QString, MapDirectory> currentDirMap;
   for (const auto& dir: currentDirs){
-    currentDirMap[dir.getDir().absolutePath()] = dir;
+    currentDirMap[QString::fromStdString(dir.GetDirStr())] = dir;
   }
 
   bool deleteDone=false;
   while (!deleteDone){
     deleteDone=true;
     for (int row=0;row<dirs.size(); row++){
-      if (!currentDirMap.contains(dirs.at(row).getDir().absolutePath())){
+      if (!currentDirMap.contains(QString::fromStdString(dirs.at(row).GetDirStr()))){
         beginRemoveRows(QModelIndex(), row, row);
         dirs.removeAt(row);
         endRemoveRows();
@@ -70,16 +71,16 @@ void InstalledMapsModel::onDatabaseListChanged()
   // process adds
   QMap<QString, MapDirectory> oldDirMap;
   for (const auto& dir: dirs){
-    oldDirMap[dir.getDir().absolutePath()] = dir;
+    oldDirMap[QString::fromStdString(dir.GetDirStr())] = dir;
   }
 
-  for (int row = 0; row < currentDirs.size(); row++) {
+  for (size_t row = 0; row < currentDirs.size(); row++) {
     const auto& dir = currentDirs.at(row);
-    if (!oldDirMap.contains(dir.getDir().absolutePath())){
+    if (!oldDirMap.contains(QString::fromStdString(dir.GetDirStr()))){
       beginInsertRows(QModelIndex(), row, row);
       dirs.insert(row, dir);
       endInsertRows();
-      oldDirMap[dir.getDir().absolutePath()] = dir;
+      oldDirMap[QString::fromStdString(dir.GetDirStr())] = dir;
     }
   }
 }
@@ -99,19 +100,19 @@ QVariant InstalledMapsModel::data(const QModelIndex &index, int role) const
   switch (role) {
     case Qt::DisplayRole:
     case NameRole:
-      return dir.hasMetadata() ? dir.getName() : dir.getDir().dirName();
+      return dir.HasMetadata() ? QString::fromStdString(dir.GetName()) : QString::fromStdString(dir.GetDirStr());
     case PathRole:
-      return dir.hasMetadata() ? dir.getPath() : QStringList();
+      return dir.HasMetadata() ? StringVectorToQStringList(dir.GetPath()) : QStringList();
     case DirectoryRole:
-      return dir.getDir().canonicalPath();
+      return QString::fromStdString(dir.GetDirStr());
     case TimeRole:
-      return dir.hasMetadata() ? dir.getCreation() : QVariant();
+      return dir.HasMetadata() ? TimestampToQDateTime(dir.GetCreation()) : QVariant();
     case ByteSizeRole:
-      return dir.byteSize();
+      return qint64(dir.ByteSize());
     case SizeRole:
-      return QString::fromStdString(osmscout::ByteSizeToString(double(dir.byteSize())));
+      return QString::fromStdString(osmscout::ByteSizeToString(double(dir.ByteSize())));
     case VersionRole:
-      return dir.hasMetadata() ? dir.getVersion() : 0;
+      return dir.HasMetadata() ? dir.GetVersion() : 0;
     default:
       break;
   }
@@ -150,12 +151,12 @@ Q_INVOKABLE bool InstalledMapsModel::removeRows(int fromRow, int count, const QM
 
   for (int row = fromRow; row < (fromRow + count); row++){
       auto dir=dirs.at(row);
-      if (!dir.deleteDatabase()){
-        qWarning() << "Failed to remove " << dir.getDir().absolutePath();
+      if (!dir.DeleteDatabase()){
+        qWarning() << "Failed to remove " << QString::fromStdString(dir.GetDirStr());
         break;
       }
   }
-  mapManager->lookupDatabases();
+  mapManager->LookupDatabases();
   return true;
 }
 
@@ -170,8 +171,8 @@ QVariant InstalledMapsModel::timeOfMap(const QStringList& path)
     return QVariant();
   }
   for (const auto &dir:dirs){
-    if (dir.hasMetadata() && dir.getPath()==path){
-      return dir.getCreation();
+    if (dir.HasMetadata() && StringVectorToQStringList(dir.GetPath())==path){
+      return TimestampToQDateTime(dir.GetCreation());
     }
   }
   return QVariant();

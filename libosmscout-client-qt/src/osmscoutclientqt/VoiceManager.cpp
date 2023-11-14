@@ -71,7 +71,7 @@ void VoiceDownloadJob::start()
   metadata["description"] = voice.getDescription();
 
   QJsonDocument doc(metadata);
-  QFile metadataFile(target.filePath(MapDownloadJob::FILE_METADATA));
+  QFile metadataFile(target.filePath(MapDirectory::FileMetadata));
   metadataFile.open(QFile::OpenModeFlag::WriteOnly);
   metadataFile.write(doc.toJson());
   metadataFile.close();

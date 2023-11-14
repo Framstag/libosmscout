@@ -23,6 +23,9 @@
 #include <QSettings>
 
 #include <osmscoutmap/DataTileCache.h>
+
+#include <osmscoutclient/MapManager.h>
+
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/LookupModule.h>
 #include <osmscoutclientqt/MapRenderer.h>
@@ -236,16 +239,19 @@ class OSMSCOUT_CLIENT_QT_API OSMScoutQt : public QObject {
   friend class OSMScoutQtBuilder;
 
 private:
-  SettingsRef     settings;
-  MapManagerRef   mapManager;
-  DBThreadRef     dbThread;
-  QString         iconDirectory;
-  QString         cacheLocation;
-  size_t          onlineTileCacheSize;
-  size_t          offlineTileCacheSize;
-  QString         userAgent;
-  std::atomic_int liveBackgroundThreads;
-  VoiceManagerRef voiceManager; // created lazy
+  SettingsRef      settings;
+  MapManagerRef    mapManager;
+  DBThreadRef      dbThread;
+  QString          iconDirectory;
+  QString          cacheLocation;
+  size_t           onlineTileCacheSize;
+  size_t           offlineTileCacheSize;
+  QString          userAgent;
+  std::atomic_int  liveBackgroundThreads;
+
+  std::mutex       mutex;
+  MapDownloaderRef mapDownloader; // created lazy, guarded by mutex
+  VoiceManagerRef  voiceManager; // created lazy, guarded by mutex
 
 private:
   OSMScoutQt(SettingsRef settings,
@@ -301,6 +307,7 @@ public:
   DBThreadRef GetDBThread() const;
   SettingsRef GetSettings() const;
   MapManagerRef GetMapManager() const;
+  MapDownloaderRef GetMapDownloader();
   VoiceManagerRef GetVoiceManager();
 
   LookupModule* MakeLookupModule();

@@ -13,7 +13,7 @@ SOURCES += \
     src/osmscoutclientqt/LocationEntry.cpp \
     src/osmscoutclientqt/LocationInfoModel.cpp \
     src/osmscoutclientqt/MapDownloadsModel.cpp \
-    src/osmscoutclientqt/MapManager.cpp \
+    src/osmscoutclientqt/MapDownloader.cpp \
     src/osmscoutclientqt/MapProvider.cpp \
     src/osmscoutclientqt/MapWidget.cpp \
     src/osmscoutclientqt/OnlineTileProvider.cpp \
@@ -44,7 +44,7 @@ HEADERS += \
     include/osmscoutclientqt/LocationEntry.h \
     include/osmscoutclientqt/LocationInfoModel.h \
     include/osmscoutclientqt/MapDownloadsModel.h \
-    include/osmscoutclientqt/MapManager.h \
+    include/osmscoutclientqt/MapDownloader.h \
     include/osmscoutclientqt/MapProvider.h \
     include/osmscoutclientqt/MapWidget.h \
     include/osmscoutclientqt/OnlineTileProvider.h \
