@@ -36,7 +36,7 @@ When you have installed the OSMScout sources and the needed dependencies, to com
 cd libosmscout
 mkdir build.ios
 cd build.ios
-cmake -DIOS_DEPLOYMENT_TARGET=13.0 -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=~/Dev/marisa/lib -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  ..
+cmake -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=15.0 -DCMAKE_TOOLCHAIN_FILE=../../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=~/Dev/marisa/lib -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  ..
 make
 ```
 
@@ -44,13 +44,13 @@ make
 The framework directory used by the iOS simulator target is:
 >OSMScoutOSX/OSMScoutiOS/Frameworks_simulator
 
-When you have installed the OSMScout sources and the needed dependencies, to compile the library for iOS simulator you might do something like:
+When you have installed the OSMScout sources and the needed dependencies, to compile the library for iOS simulator for X86 and ARM target you might do something like:
 
 ```
 cd libosmscout
 mkdir build.simulator
 cd build.simulator
-cmake -DIOS_DEPLOYMENT_TARGET=13.0 -DCMAKE_TOOLCHAIN_FILE=../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=~/Dev/marisa/lib -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config -DIOS_PLATFORM=SIMULATOR64 ..
-make
+cmake -G Xcode -DPLATFORM=SIMULATOR64COMBINED  -DDEPLOYMENT_TARGET=15.0 -DCMAKE_TOOLCHAIN_FILE=../../cmake/iOS.cmake -DMARISA_INCLUDE_DIRS=~/Dev/marisa/lib -DPKG_CONFIG_EXECUTABLE=/usr/local/bin/pkg-config  ..
+xcodebuild -project libosmscout.xcodeproj
 ```
 
