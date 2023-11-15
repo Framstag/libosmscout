@@ -43,6 +43,15 @@ CancelableFuture<bool> MapManager::LookupDatabases()
     std::vector<std::filesystem::path> databaseFsDirectories;
 
     for (const auto &lookupDir:databaseLookupDirs){
+      // Symlinks are automatically resolved when using exists() and is_directory().
+      // https://en.cppreference.com/w/cpp/filesystem/exists
+      // https://en.cppreference.com/w/cpp/filesystem/is_directory
+      // https://en.cppreference.com/w/cpp/filesystem/status
+      if (!std::filesystem::exists(lookupDir) || !std::filesystem::is_directory(lookupDir)) {
+        osmscout::log.Warn() << "Lookup dir" << lookupDir.string() << "doesn't exist or isn't a directory";
+        continue;
+      }
+
       for (const auto & fInfo : std::filesystem::recursive_directory_iterator(lookupDir)) {
         auto entryPath = fInfo.path();
         if (fInfo.is_regular_file() && entryPath.has_filename() && entryPath.has_parent_path() && entryPath.filename() == TypeConfig::FILE_TYPES_DAT){
