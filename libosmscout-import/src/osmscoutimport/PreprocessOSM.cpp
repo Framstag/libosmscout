@@ -339,9 +339,17 @@ namespace osmscout {
     return xmlGetPredefinedEntity(name);
   }
 
-  static void StructuredErrorHandler(void* /*data*/, xmlErrorPtr error)
+  // overloaded method for libxml2 >= 2.12.0
+  static void StructuredErrorHandler(void* /*data*/, const xmlError *error)
   {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
+  }
+
+  // overloaded method for libxml2 < 2.12.0
+  [[maybe_unused]]
+  static void StructuredErrorHandler(void* data, xmlErrorPtr error)
+  {
+    StructuredErrorHandler(data, static_cast<const xmlError*>(error));
   }
 
   static void WarningHandler(void* /*data*/, const char* msg,...)

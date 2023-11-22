@@ -335,10 +335,18 @@ public:
     return xmlGetPredefinedEntity(name);
   }
 
-  static void StructuredErrorHandler(void* data, xmlErrorPtr error)
+  // overloaded method for libxml2 >= 2.12.0
+  static void StructuredErrorHandler(void* data, const xmlError *error)
   {
     auto* parser=static_cast<GpxParser*>(data);
     parser->Error("XML error, line " + std::to_string(error->line) + ": " + error->message);
+  }
+
+  // overloaded method for libxml2 < 2.12.0
+  [[maybe_unused]]
+  static void StructuredErrorHandler(void* data, xmlErrorPtr error)
+  {
+    StructuredErrorHandler(data, static_cast<const xmlError*>(error));
   }
 
   static void WarningHandler(void* data, const char* msg,...)
