@@ -23,16 +23,13 @@
 namespace osmscout {
 
 DBJob::DBJob():
-  QObject(),
-  thread(QThread::currentThread())
+  threadId(std::this_thread::get_id())
 {
 }
 
 DBJob::~DBJob()
 {
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Destroy" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
-  }
+  assert(threadId==std::this_thread::get_id());
   Close();
 }
 
@@ -40,9 +37,7 @@ void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                 const std::list<DBInstanceRef> &databases,
                 std::shared_lock<std::shared_mutex> &&locker)
 {
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Run" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
-  }
+  assert(threadId==std::this_thread::get_id());
   this->basemapDatabase=basemapDatabase;
   this->databases=databases;
   this->locker=std::move(locker);
@@ -53,9 +48,7 @@ void DBJob::Close()
   if (!locker.owns_lock()){
     return;
   }
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Closing" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
-  }
+  assert(threadId==std::this_thread::get_id());
   locker.unlock();
   databases.clear();
 }
@@ -159,10 +152,7 @@ void DBLoadJob::onTileStateChanged(QString dbPath,const osmscout::TileRef tile)
   if (!tile->IsComplete()){
     return; // ignore incomplete
   }
-  // qDebug() << "Callback:" << this << "in" << QThread::currentThread();
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Tile callback" << this << "from non Job thread" << thread << " in " << QThread::currentThread();
-  }
+  assert(threadId==std::this_thread::get_id());
   if (!loadingTiles.contains(dbPath)){
     return; // loaded already
   }

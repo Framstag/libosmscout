@@ -38,7 +38,7 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
+class OSMSCOUT_CLIENT_QT_API DBRenderJob : public QObject, public DBJob{
   Q_OBJECT
 private:
   osmscout::MercatorProjection renderProjection;
