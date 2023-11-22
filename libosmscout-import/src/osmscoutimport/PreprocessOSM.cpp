@@ -339,7 +339,11 @@ namespace osmscout {
     return xmlGetPredefinedEntity(name);
   }
 
+#if LIBXML_VERSION >= 21200
+  static void StructuredErrorHandler(void* /*data*/, const xmlError *error)
+#else
   static void StructuredErrorHandler(void* /*data*/, xmlErrorPtr error)
+#endif
   {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
   }

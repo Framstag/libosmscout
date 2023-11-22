@@ -335,7 +335,11 @@ public:
     return xmlGetPredefinedEntity(name);
   }
 
+#if LIBXML_VERSION >= 21200
+  static void StructuredErrorHandler(void* data, const xmlError *error)
+#else
   static void StructuredErrorHandler(void* data, xmlErrorPtr error)
+#endif
   {
     auto* parser=static_cast<GpxParser*>(data);
     parser->Error("XML error, line " + std::to_string(error->line) + ": " + error->message);
