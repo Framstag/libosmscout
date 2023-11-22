@@ -34,12 +34,13 @@
 
 #include <osmscoutclient/DBInstance.h>
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/MapManager.h>
 
 #include <osmscoutclientqt/DBJob.h>
-#include <osmscoutclientqt/MapDownloader.h>
 #include <osmscoutclientqt/QtStdConverters.h>
 
 #include <shared_mutex>
+#include <filesystem>
 
 namespace osmscout {
 

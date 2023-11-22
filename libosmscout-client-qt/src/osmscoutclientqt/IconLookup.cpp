@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <QSvgRenderer>
+#include <QDebug>
 
 #include <osmscout/feature/OpeningHoursFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
@@ -29,8 +30,6 @@
 #include <osmscout/feature/WebsiteFeature.h>
 
 #include <osmscoutmapqt/SymbolRendererQt.h>
-
-
 
 namespace osmscout {
 

@@ -23,6 +23,8 @@
 
 #include <osmscout/poi/POIService.h>
 
+#include <QDebug>
+
 namespace osmscout {
 
 POILookupModule::POILookupModule(QThread *thread,DBThreadRef dbThread):

@@ -22,6 +22,8 @@
 
 #include <osmscoutmapqt/MapPainterQt.h>
 
+#include <QDebug>
+
 namespace osmscout {
 
 MapRenderer::MapRenderer(QThread *thread,

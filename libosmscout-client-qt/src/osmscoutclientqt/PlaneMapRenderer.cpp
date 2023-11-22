@@ -24,6 +24,7 @@
 #include <osmscout/system/Math.h>
 
 #include <QtMath>
+#include <QDebug>
 
 namespace osmscout {
 
