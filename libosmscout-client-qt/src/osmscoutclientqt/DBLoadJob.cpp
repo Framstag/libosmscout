@@ -18,40 +18,9 @@
  */
 
 #include <QDebug>
-#include <osmscoutclientqt/DBJob.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 namespace osmscout {
-
-DBJob::DBJob():
-  threadId(std::this_thread::get_id())
-{
-}
-
-DBJob::~DBJob()
-{
-  assert(threadId==std::this_thread::get_id());
-  Close();
-}
-
-void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
-                const std::list<DBInstanceRef> &databases,
-                std::shared_lock<std::shared_mutex> &&locker)
-{
-  assert(threadId==std::this_thread::get_id());
-  this->basemapDatabase=basemapDatabase;
-  this->databases=databases;
-  this->locker=std::move(locker);
-}
-
-void DBJob::Close()
-{
-  if (!locker.owns_lock()){
-    return;
-  }
-  assert(threadId==std::this_thread::get_id());
-  locker.unlock();
-  databases.clear();
-}
 
 DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      unsigned long maximumAreaLevel,

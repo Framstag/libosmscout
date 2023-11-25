@@ -34,7 +34,7 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/MapStyleModel.cpp',
             'src/osmscoutclientqt/StyleFlagsModel.cpp',
             'src/osmscoutclientqt/OSMScoutQt.cpp',
-            'src/osmscoutclientqt/DBJob.cpp',
+            'src/osmscoutclientqt/DBLoadJob.cpp',
             'src/osmscoutclientqt/LookupModule.cpp',
             'src/osmscoutclientqt/SearchModule.cpp',
             'src/osmscoutclientqt/StyleModule.cpp',

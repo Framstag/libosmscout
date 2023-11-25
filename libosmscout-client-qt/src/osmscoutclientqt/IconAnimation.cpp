@@ -19,7 +19,7 @@
 
 #include <osmscoutclientqt/IconAnimation.h>
 
-#include <osmscoutclientqt/DBJob.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 #include <cmath>
 

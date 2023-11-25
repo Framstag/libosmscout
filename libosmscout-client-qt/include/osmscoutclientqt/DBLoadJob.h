@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_CLIENT_QT_DBOPERATION_H
-#define OSMSCOUT_CLIENT_QT_DBOPERATION_H
+#ifndef OSMSCOUT_CLIENT_QT_DBLOADJOB_H
+#define OSMSCOUT_CLIENT_QT_DBLOADJOB_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -33,6 +33,7 @@
 #include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclient/DBInstance.h>
+#include <osmscoutclient/DBJob.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
@@ -43,30 +44,6 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API DBJob {
-
-protected:
-  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap db
-  std::list<DBInstanceRef>     databases;       //!< borrowed databases
-  std::thread::id              threadId;        //!< job thread
-
-private:
-  std::shared_lock<std::shared_mutex> locker;   //!< db locker
-
-public:
-  DBJob();
-  DBJob(const DBJob&) = delete;
-  DBJob(DBJob&&) = delete;
-  DBJob& operator=(const DBJob&) = delete;
-  DBJob& operator=(DBJob&&) = delete;
-  virtual ~DBJob();
-
-  virtual void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
-                   const std::list<DBInstanceRef> &databases,
-                   std::shared_lock<std::shared_mutex> &&locker);
-  virtual void Close();
-};
-
 class OSMSCOUT_CLIENT_QT_API DBLoadJob : public QObject, public DBJob {
   Q_OBJECT
 
@@ -127,4 +104,4 @@ public:
 
 }
 
-#endif /* OSMSCOUT_CLIENT_QT_DBOPERATION_H */
+#endif /* OSMSCOUT_CLIENT_QT_DBLOADJOB_H */

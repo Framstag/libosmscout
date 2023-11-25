@@ -27,7 +27,7 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/OverlayObject.h>
-#include <osmscoutclientqt/DBJob.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 #include <QObject>
 #include <QSettings>

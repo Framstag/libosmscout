@@ -21,7 +21,7 @@
 #include <osmscoutclientqt/TiledRenderingHelper.h>
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMTile.h>
-#include <osmscoutclientqt/DBJob.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 #include <osmscout/system/Math.h>
 
