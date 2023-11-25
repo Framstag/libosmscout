@@ -36,6 +36,7 @@
 #include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/LocationEntry.h>
+#include <osmscoutclientqt/DBJob.h>
 
 namespace osmscout {
 

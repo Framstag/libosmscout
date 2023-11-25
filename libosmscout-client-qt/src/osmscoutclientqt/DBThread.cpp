@@ -479,7 +479,7 @@ void DBThread::FlushCaches(qint64 idleMs)
   });
 }
 
-void DBThread::RunJob(DBJob *job)
+void DBThread::RunJob(AsynchronousDBJob job)
 {
   std::shared_lock locker(lock);
   if (!isInitializedInternal()){
@@ -487,7 +487,7 @@ void DBThread::RunJob(DBJob *job)
     osmscout::log.Warn() << "ignore request, dbs is not initialized";
     return;
   }
-  job->Run(basemapDatabase,databases,std::move(locker));
+  job(basemapDatabase,databases,std::move(locker));
 }
 
 void DBThread::RunSynchronousJob(SynchronousDBJob job)

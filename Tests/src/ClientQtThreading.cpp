@@ -86,7 +86,7 @@ void ThreadingTest::test()
   connect(loadJob, &DBLoadJob::finished,
           this, &ThreadingTest::onLoadJobFinished);
 
-  dbThread->RunJob(loadJob);
+  dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles)

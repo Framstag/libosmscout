@@ -309,7 +309,7 @@ void IconLookup::onIconRequest(const MapViewStruct &view,
   connect(loadJob, &DBLoadJob::finished,
           this, &IconLookup::onLoadJobFinished);
 
-  dbThread->RunJob(loadJob);
+  dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 

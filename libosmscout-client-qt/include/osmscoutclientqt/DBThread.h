@@ -36,7 +36,6 @@
 #include <osmscoutclient/Settings.h>
 #include <osmscoutclient/MapManager.h>
 
-#include <osmscoutclientqt/DBJob.h>
 #include <osmscoutclientqt/QtStdConverters.h>
 
 #include <shared_mutex>
@@ -97,7 +96,7 @@ enum DatabaseCoverage{
  * List of databases is protected by read-write lock. There may be multiple
  * readers at one time. DBThread warrants that none db will be closed
  * or modified (except thread-safe caches) when read lock is hold.
- * Databases may be accessed via \see RunJob or \see RunSynchronousJob methods.
+ * Databases may be accessed via \see AsynchronousDBJob or \see RunSynchronousJob methods.
  */
 class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 {
@@ -108,6 +107,10 @@ class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
 
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
+
+  using AsynchronousDBJob = std::function<void (const osmscout::BasemapDatabaseRef& basemapDatabase,
+                                                const std::list<DBInstanceRef> &databases,
+                                                std::shared_lock<std::shared_mutex> &&locker)>;
 
 signals:
   void initialisationFinished(const DatabaseLoadedResponse& response);
@@ -249,13 +252,13 @@ public:
 
   /**
    * Submit asynchronous job that will retrieve list
-   * of initialized databases and pointer to \ref QReadLocker.
+   * of initialized databases and r-value reference to \ref std::shared_lock<std::shared_mutex>.
    * Job is responsible for releasing lock when its task
    * is finished.
    *
    * @param job
    */
-  void RunJob(DBJob *job);
+  void RunJob(AsynchronousDBJob job);
 
   /**
    * Submit synchronous job (simple lambda function)
