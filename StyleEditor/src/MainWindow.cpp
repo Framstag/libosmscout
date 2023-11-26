@@ -30,13 +30,5 @@ MainWindow::MainWindow(const DBThreadRef& dbThread)
  : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
    dbThread(dbThread)
 {
-  connect(dbThread.get(),
-          SIGNAL(initialisationFinished(const DatabaseLoadedResponse&)),
-          this,
-          SLOT(InitialisationFinished(const DatabaseLoadedResponse&)));
-}
-
-void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& /*response*/)    // NOLINT
-{
-  osmscout::log.Info() << "InitialisationFinished()";
+  dbThread->databaseLoadFinished.Connect(dbLoadedSlot);
 }

@@ -4,7 +4,7 @@
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2010  Tim Teulings
- Copyright (C) 2016  Lukáš Karas
+ Copyright (C) 2023  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,9 @@
 #include <osmscout/db/Database.h>
 
 #include <osmscout/location/LocationService.h>
+
+#include <osmscout/async/Signal.h>
+#include <osmscout/async/AsyncWorker.h>
 
 #include <osmscoutmap/MapService.h>
 
@@ -91,20 +94,13 @@ enum DatabaseCoverage{
  * its map styles (there is one global map style now)
  * and provides simple thread-safe, asynchronous api for accessing it.
  *
- * DBThread is de facto singleton, that is created and accessible by OSMScoutQt.
- *
  * List of databases is protected by read-write lock. There may be multiple
  * readers at one time. DBThread warrants that none db will be closed
  * or modified (except thread-safe caches) when read lock is hold.
  * Databases may be accessed via \see AsynchronousDBJob or \see RunSynchronousJob methods.
  */
-class OSMSCOUT_CLIENT_QT_API DBThread : public QObject
+class OSMSCOUT_CLIENT_QT_API DBThread: public AsyncWorker
 {
-  friend class OSMScoutQt; // accessing to protected constructor
-
-  Q_OBJECT
-  Q_PROPERTY(QString stylesheetFilename READ GetStylesheetFilename NOTIFY stylesheetFilenameChanged)
-
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
 
@@ -112,36 +108,62 @@ public:
                                                 const std::list<DBInstanceRef> &databases,
                                                 std::shared_lock<std::shared_mutex> &&locker)>;
 
-signals:
-  void initialisationFinished(const DatabaseLoadedResponse& response);
-  void stylesheetFilenameChanged();
-  void databaseLoadFinished(osmscout::GeoBox boundingBox);
-  void styleErrorsChanged();
+  // signals
+  Signal<> stylesheetFilenameChanged;
+  Signal<osmscout::GeoBox> databaseLoadFinished;
+  Signal<> styleErrorsChanged;
 
-  void mapDpiSignal(double);
+  // slots
+  Slot<> toggleDaylight{
+    [this](){
+      ToggleDaylight();
+    }
+  };
 
-  void databaseListChanged(QList<QDir> databaseDirectories);
+  Slot<std::string, bool> setStyleFlag{
+    [this](const std::string &key, bool value) {
+      SetStyleFlag(key, value);
+    }
+  };
 
-public slots:
-  void ToggleDaylight();
-  void onMapDPIChange(double dpi);
-  void SetStyleFlag(const QString &key, bool value);
-  void ReloadStyle(const QString &suffix="");
-  void LoadStyle(QString stylesheetFilename,
-                 std::unordered_map<std::string,bool> stylesheetFlags,
-                 const QString &suffix="");
-  void Initialize();
-  void onDatabaseListChanged(QList<QDir> databaseDirectories);
+  Slot<std::string> reloadStyle{
+    [this](const std::string &suffix) {
+      ReloadStyle(suffix);
+    }
+  };
+
+  Slot<std::string, std::unordered_map<std::string,bool>, std::string> loadStyle {
+    [this](const std::string &stylesheetFilename,
+           std::unordered_map<std::string,bool> stylesheetFlags,
+           const std::string &suffix) {
+      LoadStyle(stylesheetFilename, stylesheetFlags, suffix);
+    }
+  };
+
+  Slot<> initialize{
+    [this](){
+      Initialize();
+    }
+  };
+
+  Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
+    [this](const std::vector<std::filesystem::path> &paths) {
+      OnDatabaseListChanged(paths);
+    }
+  };
 
   /**
    * Flush all caches for db that was not used in recent idleMs
    */
-  void FlushCaches(qint64 idleMs);
+  Slot<std::chrono::milliseconds> flushCaches {
+    [this](const std::chrono::milliseconds &idleMs) {
+      FlushCaches(idleMs);
+    }
+  };
 
 private:
-  QThread                            *backgroundThread;
   MapManagerRef                      mapManager;
-  QString                            basemapLookupDirectory;
+  std::string                        basemapLookupDirectory;
   SettingsRef                        settings;
 
   double                             mapDpi;
@@ -156,8 +178,8 @@ private:
   TypeConfigRef                      emptyTypeConfig; // type config just with special and custom poi types
   StyleConfigRef                     emptyStyleConfig;
 
-  QString                            stylesheetFilename;
-  QString                            iconDirectory;
+  std::string                        stylesheetFilename;
+  std::string                        iconDirectory;
   std::unordered_map<std::string,bool>
                                      stylesheetFlags;
   bool                               daylight;
@@ -167,15 +189,9 @@ private:
 
   std::vector<std::string>           customPoiTypes;
 
-  Slot<double> mapDpiSlot{
-    [this](const double &d) {
-      mapDpiSignal(d);
-    }
-  };
-
-  Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
-    [this](const std::vector<std::filesystem::path> &paths) {
-      emit databaseListChanged(PathVectorToQDirList(paths));
+  Slot<double> mapDpiSlot {
+    [this](const double &dpi) {
+      OnMapDPIChange(dpi);
     }
   };
 
@@ -195,26 +211,28 @@ protected:
    * @param stylesheetFlags
    * @param suffix
    */
-  void LoadStyleInternal(QString stylesheetFilename,
+  void LoadStyleInternal(const std::string &stylesheetFilename,
                          std::unordered_map<std::string,bool> stylesheetFlags,
-                         const QString &suffix="");
+                         const std::string &suffix="");
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
 
   StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
 
 public:
-  DBThread(QThread *backgroundThread,
-           QString basemapLookupDirectory,
-           QString iconDirectory,
+  DBThread(const std::string &basemapLookupDirectory,
+           const std::string &iconDirectory,
            SettingsRef settings,
            MapManagerRef mapManager,
            const std::vector<std::string> &customPoiTypes);
 
   ~DBThread() override;
 
+  void Initialize();
+
   bool isInitialized();
 
+  // TODO: use just GeoBox, rename method
   const DatabaseLoadedResponse loadedResponse() const;
 
   /**
@@ -232,7 +250,7 @@ public:
 
   double GetPhysicalDpi() const;
 
-  QString GetStylesheetFilename() const
+  std::string GetStylesheetFilename() const
   {
     return stylesheetFilename;
   }
@@ -280,6 +298,15 @@ public:
    */
   void RunSynchronousJob(SynchronousDBJob job);
 
+  CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
+  CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);
+  CancelableFuture<bool> OnMapDPIChange(double dpi);
+  CancelableFuture<bool> SetStyleFlag(const std::string &key, bool value);
+  CancelableFuture<bool> LoadStyle(const std::string &stylesheetFilename,
+                                   std::unordered_map<std::string,bool> stylesheetFlags,
+                                   const std::string &suffix="");
+  CancelableFuture<bool> ToggleDaylight();
+  CancelableFuture<bool> ReloadStyle(const std::string &suffix="");
 };
 
 using DBThreadRef = std::shared_ptr<DBThread>;

@@ -78,22 +78,16 @@ private:
 
   QColor                        unknownColor;
 
-  Slot<OnlineTileProvider> onlineTileProviderSlot{
-    [this](const OnlineTileProvider &provider) { onlineTileProviderSignal(provider); }
-  };
-
-  Slot<bool> onlineTileEnabledSlot{
-    [this](const bool &b) { onlineTilesEnabledSignal(b); }
-  };
-
-  Slot<bool> offlineMapChangedSlot{
-    [this](const bool &b) { offlineMapChangedSignal(b); }
-  };
+  Slot<OnlineTileProvider> onlineTileProviderSlot{ std::bind(&TiledMapRenderer::onlineTileProviderSignal, this, std::placeholders::_1) };
+  Slot<bool> onlineTileEnabledSlot{ std::bind(&TiledMapRenderer::onlineTilesEnabledSignal, this, std::placeholders::_1) };
+  Slot<bool> offlineMapChangedSlot{ std::bind(&TiledMapRenderer::offlineMapChangedSignal, this, std::placeholders::_1) };
+  Slot<GeoBox> databaseLoadFinishedSlot{ std::bind(&TiledMapRenderer::databaseLoadFinished, this, std::placeholders::_1) };
 
 signals:
   void onlineTileProviderSignal(OnlineTileProvider provider);
   void onlineTilesEnabledSignal(bool);
   void offlineMapChangedSignal(bool);
+  void databaseLoadFinished(const GeoBox &geoBox);
 
 public slots:
   virtual void Initialize();

@@ -307,27 +307,19 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
     customPoiTypeVector.push_back(typeName.toStdString());
   }
 
-  QThread *thread=makeThread("DBThread");
-  dbThread=std::make_shared<DBThread>(thread,
-                                      basemapLookupDirectory,
-                                      iconDirectory,
+  dbThread=std::make_shared<DBThread>(basemapLookupDirectory.toStdString(),
+                                      iconDirectory.toStdString(),
                                       settings,
                                       mapManager,
                                       customPoiTypeVector);
 
-  connect(thread, &QThread::started,
-          dbThread.get(), &DBThread::Initialize);
+  dbThread->Initialize();
 
-  dbThread->moveToThread(thread);
-
-  thread->start();
-
-  // move itself to DBThread event loop,
-  // we need to receive threadFinished slot
-  // even main loop is shutdown
-
-  // DBThread is responsible for thread shutdown
-  this->moveToThread(thread);
+  // move itself to own event loop,
+  // we need to receive slots
+  // even when main loop is shutdown
+  // QThread *thread=makeThread("OSMScoutQt");
+  // this->moveToThread(thread);
 }
 
 OSMScoutQt::~OSMScoutQt()

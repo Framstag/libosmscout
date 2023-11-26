@@ -27,12 +27,10 @@ StyleModule::StyleModule(QThread *thread,DBThreadRef dbThread):
     thread(thread),
     dbThread(dbThread)
 {
+  dbThread->databaseLoadFinished.Connect(dbLoadedSlot);
+  dbThread->stylesheetFilenameChanged.Connect(stylesheetFilenameChangeSlot);
 
-  connect(dbThread.get(), &DBThread::initialisationFinished,
-          this, &StyleModule::initialisationFinished);
-  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
-          this, &StyleModule::stylesheetFilenameChanged);
-  connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
+  connect(this, &StyleModule::stylesheetFilenameChanged,
           this, &StyleModule::onStyleChanged,
           Qt::QueuedConnection);
 }
@@ -50,7 +48,7 @@ StyleModule::~StyleModule()
 void StyleModule::loadStyle(QString stylesheetFilename,
                             std::unordered_map<std::string,bool> stylesheetFlags)
 {
-  dbThread->LoadStyle(stylesheetFilename,
+  dbThread->LoadStyle(stylesheetFilename.toStdString(),
                       stylesheetFlags);
 }
 
@@ -65,7 +63,7 @@ void StyleModule::onStyleChanged()
 
 void StyleModule::onSetFlagRequest(QString key, bool value)
 {
-  dbThread->SetStyleFlag(key, value);
+  dbThread->SetStyleFlag(key.toStdString(), value);
   emit flagSet(key, value);
 }
 }

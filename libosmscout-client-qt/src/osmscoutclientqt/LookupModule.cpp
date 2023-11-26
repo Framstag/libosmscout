@@ -34,9 +34,7 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   dbThread(dbThread),
   loadJob(nullptr)
 {
-
-  connect(dbThread.get(), &DBThread::initialisationFinished,
-          this, &LookupModule::initialisationFinished);
+  dbThread->databaseLoadFinished.Connect(dbLoadedSlot);
 }
 
 LookupModule::~LookupModule()

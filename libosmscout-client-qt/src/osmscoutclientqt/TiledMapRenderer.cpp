@@ -56,6 +56,7 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   settings->onlineTileProviderChanged.Connect(onlineTileProviderSlot);
   settings->onlineTilesEnabledChanged.Connect(onlineTileEnabledSlot);
   settings->offlineMapChanged.Connect(offlineMapChangedSlot);
+  dbThread->databaseLoadFinished.Connect(databaseLoadFinishedSlot);
 
   connect(this, &TiledMapRenderer::onlineTileProviderSignal,
           this, &TiledMapRenderer::onlineTileProviderChanged,
@@ -67,7 +68,7 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
           this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
-  connect(dbThread.get(), &DBThread::databaseLoadFinished,
+  connect(this, &TiledMapRenderer::databaseLoadFinished,
           this, &TiledMapRenderer::onDatabaseLoaded,
           Qt::QueuedConnection);
   //

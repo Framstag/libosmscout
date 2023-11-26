@@ -95,8 +95,14 @@ private:
   QRectF           filterRectangle;
   std::map<QString,std::map<osmscout::FileOffset,AdminRegionInfoRef>> adminRegionCache;
 
+  Slot<osmscout::GeoBox> dbLoadedSlot{
+    [this](const osmscout::GeoBox &b) {
+      emit initialisationFinished(b);
+    }
+  };
+
 signals:
-  void initialisationFinished(const DatabaseLoadedResponse& response);
+  void initialisationFinished(const osmscout::GeoBox& response);
   void viewObjectsLoaded(const MapViewStruct&,
                          const QList<LookupModule::ObjectInfo> &objects);
 

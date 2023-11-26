@@ -72,7 +72,7 @@ signals:
   void objectsRequested(const LocationEntry &entry, bool reverseLookupAddresses);
 
 public slots:
-  void dbInitialized(const DatabaseLoadedResponse&);
+  void dbInitialized(const osmscout::GeoBox&);
   void setPosition(QObject *mapView,
                    const int width, const int height,
                    const int screenX, const int screenY);

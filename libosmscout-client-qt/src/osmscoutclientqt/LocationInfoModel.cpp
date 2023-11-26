@@ -89,7 +89,7 @@ void LocationInfoModel::setLocation(const double lat, const double lon)
     emit locationDescriptionRequested(location);
 }
 
-void LocationInfoModel::dbInitialized(const DatabaseLoadedResponse&)
+void LocationInfoModel::dbInitialized(const osmscout::GeoBox&)
 {
     if (setup){
         emit locationDescriptionRequested(location);

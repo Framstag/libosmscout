@@ -61,7 +61,7 @@ MapStyleModel::~MapStyleModel()
 
 QString MapStyleModel::getStyle() const
 {
-  QFileInfo fileInfo(OSMScoutQt::GetInstance().GetDBThread()->GetStylesheetFilename());
+  QFileInfo fileInfo(QString::fromStdString(OSMScoutQt::GetInstance().GetDBThread()->GetStylesheetFilename()));
   return fileInfo.fileName();
 }
 

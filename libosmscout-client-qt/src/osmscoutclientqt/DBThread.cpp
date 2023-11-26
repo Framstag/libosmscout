@@ -1,7 +1,7 @@
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2010  Tim Teulings
-  Copyright (C) 2016  Lukáš Karas
+  Copyright (C) 2023  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -32,13 +32,12 @@
 
 namespace osmscout {
 
-DBThread::DBThread(QThread *backgroundThread,
-                   QString basemapLookupDirectory,
-                   QString iconDirectory,
+DBThread::DBThread(const std::string &basemapLookupDirectory,
+                   const std::string &iconDirectory,
                    SettingsRef settings,
                    MapManagerRef mapManager,
                    const std::vector<std::string> &customPoiTypes)
-  : backgroundThread(backgroundThread),
+  : AsyncWorker("DBThread"),
     mapManager(mapManager),
     basemapLookupDirectory(basemapLookupDirectory),
     settings(settings),
@@ -52,23 +51,15 @@ DBThread::DBThread(QThread *backgroundThread,
   mapDpi = settings->GetMapDPI();
   osmscout::log.Debug() << "Map DPI override: " << mapDpi;
 
-  stylesheetFilename=QString::fromStdString(settings->GetStyleSheetAbsoluteFile());
+  stylesheetFilename = settings->GetStyleSheetAbsoluteFile();
   stylesheetFlags=settings->GetStyleSheetFlags();
-  osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename.toStdString();
+  osmscout::log.Debug() << "Using stylesheet: " << stylesheetFilename;
 
   emptyTypeConfig=std::make_shared<TypeConfig>();
   registerCustomPoiTypes(emptyTypeConfig);
   emptyStyleConfig=makeStyleConfig(emptyTypeConfig, true);
 
   settings->mapDPIChange.Connect(mapDpiSlot);
-  connect(this, &DBThread::mapDpiSignal,
-          this, &DBThread::onMapDPIChange,
-          Qt::QueuedConnection);
-
-  connect(this, &DBThread::databaseListChanged,
-          this, &DBThread::onDatabaseListChanged,
-          Qt::QueuedConnection);
-
   mapManager->databaseListChanged.Connect(databaseListChangedSlot);
 }
 
@@ -78,6 +69,7 @@ DBThread::~DBThread()
   osmscout::log.Debug() << "DBThread::~DBThread()";
 
   mapDpiSlot.Disconnect();
+  databaseListChangedSlot.Disconnect();
 
   if (basemapDatabase) {
     basemapDatabase->Close();
@@ -88,7 +80,6 @@ DBThread::~DBThread()
     db->Close();
   }
   databases.clear();
-  backgroundThread->quit(); // deleteLater() is invoked when thread is finished
 }
 
 bool DBThread::isInitializedInternal()
@@ -174,147 +165,157 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 
 void DBThread::Initialize()
 {
-  std::shared_lock locker(lock);
   mapManager->LookupDatabases();
 }
 
-void DBThread::onDatabaseListChanged(QList<QDir> databaseDirectories)
+CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories)
 {
-  std::unique_lock locker(lock);
+  return Async<bool>([this, databaseDirectories](const Breaker &breaker) -> bool {
+    if (breaker.IsAborted()) {
+      return false;
+    }
+    std::unique_lock locker(lock);
 
-  if (basemapDatabase) {
-    basemapDatabase->Close();
-    basemapDatabase=nullptr;
-  }
+    if (basemapDatabase) {
+      basemapDatabase->Close();
+      basemapDatabase=nullptr;
+    }
 
-  for (const auto& db:databases){
-    db->Close();
-  }
-  databases.clear();
-  osmscout::GeoBox boundingBox;
+    for (const auto& db:databases){
+      db->Close();
+    }
+    databases.clear();
+    osmscout::GeoBox boundingBox;
 
 #if defined(HAVE_MMAP)
-  if (sizeof(void*)<=4){
-    // we are on 32 bit system probably, we have to be careful with mmap
-    qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
-    QStringList mmapFiles;
-    mmapFiles << "bounding.dat" << "router2.dat" << "types.dat" << "textregion.dat" << "textpoi.dat"
-              << "textother.dat" << "areasopt.dat" << "areanode.idx" << "textloc.dat" << "water.idx"
-              << "areaway.idx" << "waysopt.dat" << "intersections.idx" << "areaarea.idx" << "arearoute.idx"
-              << "location.idx" << "intersections.dat";
-
-    for (auto &databaseDirectory:databaseDirectories){
-      for (auto &file:mmapFiles){
-        mmapQuota-=QFileInfo(databaseDirectory, file).size();
-      }
-    }
-    if (mmapQuota<0){
-      qWarning() << "Database is too huge to be mapped";
-    }
-
-    qint64 nodesSize=0;
-    for (auto &databaseDirectory:databaseDirectories){
-      nodesSize+=QFileInfo(databaseDirectory, "nodes.dat").size();
-    }
-    if (mmapQuota-nodesSize<0){
-      qWarning() << "Nodes data files can't be mmapped";
-      databaseParameter.SetNodesDataMMap(false);
-    }else{
-      mmapQuota-=nodesSize;
-    }
-
-    qint64 areasSize=0;
-    for (auto &databaseDirectory:databaseDirectories){
-      areasSize+=QFileInfo(databaseDirectory, "areas.dat").size();
-    }
-    if (mmapQuota-areasSize<0){
-      qWarning() << "Areas data files can't be mmapped";
-      databaseParameter.SetAreasDataMMap(false);
-    }else{
-      mmapQuota-=areasSize;
-    }
-
-    qint64 waysSize=0;
-    for (auto &databaseDirectory:databaseDirectories){
-      waysSize+=QFileInfo(databaseDirectory, "ways.dat").size();
-    }
-    if (mmapQuota-waysSize<0){
-      qWarning() << "Ways data files can't be mmapped";
-      databaseParameter.SetWaysDataMMap(false);
-    }else{
-      mmapQuota-=waysSize;
-    }
-
-    qint64 routeSize=0;
-    for (auto &databaseDirectory:databaseDirectories){
-      routeSize+=QFileInfo(databaseDirectory, "route.dat").size();
-    }
-    if (mmapQuota-routeSize<0){
-      qWarning() << "Route data files can't be mmapped";
-      databaseParameter.SetRoutesDataMMap(false);
-    }else{
-      mmapQuota-=routeSize;
-    }
-
-    qint64 routerSize=0;
-    for (auto &databaseDirectory:databaseDirectories){
-      routerSize+=QFileInfo(databaseDirectory, "router.dat").size();
-    }
-    if (mmapQuota-routerSize<0){
-      qWarning() << "Router data files can't be mmapped";
-      databaseParameter.SetRouterDataMMap(false);
-    }
-  }
+    constexpr bool haveMmap = true;
+#else
+    constexpr bool haveMmap = false;
 #endif
 
-  if (!basemapLookupDirectory.isEmpty()) {
-    osmscout::BasemapDatabaseRef database = std::make_shared<osmscout::BasemapDatabase>(basemapDatabaseParameter);
+    if constexpr (haveMmap && sizeof(void*)<=4){
+      // we are on 32 bit system probably, we have to be careful with mmap
+      qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
+      std::vector<std::string> mmapFiles{
+        "bounding.dat", "router2.dat", "types.dat", "textregion.dat", "textpoi.dat",
+        "textother.dat", "areasopt.dat", "areanode.idx", "textloc.dat", "water.idx",
+        "areaway.idx", "waysopt.dat", "intersections.idx", "areaarea.idx", "arearoute.idx",
+        "location.idx", "intersections.dat"
+      };
 
-    if (database->Open(basemapLookupDirectory.toLocal8Bit().data())) {
-      basemapDatabase=database;
-      qDebug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
+      for (auto &databaseDirectory:databaseDirectories){
+        for (auto &file:mmapFiles){
+          mmapQuota -= GetFileSize((databaseDirectory / file).string());
+        }
+      }
+      if (mmapQuota<0){
+        log.Warn() << "Database is too huge to be mapped";
+      }
+
+      qint64 nodesSize=0;
+      for (auto &databaseDirectory:databaseDirectories){
+        nodesSize += GetFileSize((databaseDirectory / "nodes.dat").string());
+      }
+      if (mmapQuota-nodesSize<0){
+        log.Warn() << "Nodes data files can't be mmapped";
+        databaseParameter.SetNodesDataMMap(false);
+      }else{
+        mmapQuota-=nodesSize;
+      }
+
+      qint64 areasSize=0;
+      for (auto &databaseDirectory:databaseDirectories){
+        areasSize += GetFileSize((databaseDirectory / "areas.dat").string());
+      }
+      if (mmapQuota-areasSize<0){
+        log.Warn() << "Areas data files can't be mmapped";
+        databaseParameter.SetAreasDataMMap(false);
+      }else{
+        mmapQuota -= areasSize;
+      }
+
+      qint64 waysSize=0;
+      for (auto &databaseDirectory:databaseDirectories){
+        waysSize += GetFileSize((databaseDirectory / "ways.dat").string());
+      }
+      if (mmapQuota-waysSize<0){
+        log.Warn() << "Ways data files can't be mmapped";
+        databaseParameter.SetWaysDataMMap(false);
+      }else{
+        mmapQuota -= waysSize;
+      }
+
+      qint64 routeSize=0;
+      for (auto &databaseDirectory:databaseDirectories){
+        routeSize += GetFileSize((databaseDirectory /"route.dat").string());
+      }
+      if (mmapQuota-routeSize<0){
+        log.Warn() << "Route data files can't be mmapped";
+        databaseParameter.SetRoutesDataMMap(false);
+      }else{
+        mmapQuota -= routeSize;
+      }
+
+      qint64 routerSize=0;
+      for (auto &databaseDirectory:databaseDirectories){
+        routerSize += GetFileSize((databaseDirectory / "router.dat").string());
+      }
+      if (mmapQuota-routerSize<0){
+        log.Warn() << "Router data files can't be mmapped";
+        databaseParameter.SetRouterDataMMap(false);
+      }
     }
-    else {
-      qWarning() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
-    }
-  }
 
-  for (auto &databaseDirectory:databaseDirectories){
-    osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
-    osmscout::StyleConfigRef styleConfig;
-    if (database->Open(databaseDirectory.absolutePath().toLocal8Bit().data())) {
-      osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+    if (!basemapLookupDirectory.empty()) {
+      osmscout::BasemapDatabaseRef database = std::make_shared<osmscout::BasemapDatabase>(basemapDatabaseParameter);
 
-      if (typeConfig) {
-        registerCustomPoiTypes(typeConfig);
-        styleConfig=makeStyleConfig(typeConfig);
+      if (database->Open(basemapLookupDirectory)) {
+        basemapDatabase=database;
+        log.Debug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
       }
       else {
-        qWarning() << "TypeConfig invalid!";
-        styleConfig=nullptr;
+        log.Warn() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
       }
     }
-    else {
-      qWarning() << "Cannot open db '" << databaseDirectory.absolutePath() << "'!";
-      continue;
+
+    for (auto &databaseDirectory:databaseDirectories){
+      osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
+      osmscout::StyleConfigRef styleConfig;
+      if (database->Open(databaseDirectory.string())) {
+        osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+        if (typeConfig) {
+          registerCustomPoiTypes(typeConfig);
+          styleConfig=makeStyleConfig(typeConfig);
+        }
+        else {
+          log.Warn() << "TypeConfig invalid!";
+          styleConfig=nullptr;
+        }
+      }
+      else {
+        log.Warn() << "Cannot open db '" << databaseDirectory.string() << "'!";
+        continue;
+      }
+
+      if (!database->GetBoundingBox(boundingBox)) {
+        log.Warn() << "Cannot read initial bounding box";
+        database->Close();
+        continue;
+      }
+
+      databases.push_back(std::make_shared<DBInstance>(databaseDirectory.string(),
+                                                       database,
+                                                       std::make_shared<osmscout::LocationService>(database),
+                                                       std::make_shared<osmscout::LocationDescriptionService>(database),
+                                                       std::make_shared<osmscout::MapService>(database),
+                                                       styleConfig));
     }
 
-    if (!database->GetBoundingBox(boundingBox)) {
-      qWarning() << "Cannot read initial bounding box";
-      database->Close();
-      continue;
-    }
+    databaseLoadFinished.Emit(boundingBox);
 
-    databases.push_back(std::make_shared<DBInstance>(databaseDirectory.absolutePath().toStdString(),
-                                                     database,
-                                                     std::make_shared<osmscout::LocationService>(database),
-                                                     std::make_shared<osmscout::LocationDescriptionService>(database),
-                                                     std::make_shared<osmscout::MapService>(database),
-                                                     styleConfig));
-  }
-
-  emit databaseLoadFinished(boundingBox);
-  emit stylesheetFilenameChanged();
+    return true;
+  });
 }
 
 void DBThread::registerCustomPoiTypes(osmscout::TypeConfigRef typeConfig) const
@@ -354,69 +355,84 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppress
     log.Warn(false);
   }
 
-  if (!styleConfig->Load(stylesheetFilename.toLocal8Bit().data(), nullptr, false, log)) {
-    qWarning() << "Cannot load style sheet '" << stylesheetFilename << "'!";
+  if (!styleConfig->Load(stylesheetFilename, nullptr, false, log)) {
+    log.Warn() << "Cannot load style sheet '" << stylesheetFilename << "'!";
     styleConfig=nullptr;
   }
 
   return styleConfig;
 }
 
-void DBThread::ToggleDaylight()
+CancelableFuture<bool> DBThread::ToggleDaylight()
 {
-  std::unique_lock locker(lock);
+  return Async<bool>([this](const Breaker &) -> bool {
+    std::unique_lock locker(lock);
 
-  if (!isInitializedInternal()) {
-      return;
-  }
+    if (!isInitializedInternal()) {
+      return false;
+    }
 
-  qDebug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
-  daylight=!daylight;
-  stylesheetFlags["daylight"] = daylight;
+    log.Debug() << "Toggling daylight from " << daylight << " to " << !daylight << "...";
+    daylight=!daylight;
+    stylesheetFlags["daylight"] = daylight;
 
-  LoadStyleInternal(stylesheetFilename, stylesheetFlags);
-  qDebug() << "Toggling daylight done.";
+    LoadStyleInternal(stylesheetFilename, stylesheetFlags);
+    log.Debug() << "Toggling daylight done.";
+    return true;
+  });
 }
 
-void DBThread::onMapDPIChange(double dpi)
+CancelableFuture<bool> DBThread::OnMapDPIChange(double dpi)
 {
-  {
+  return Async<bool>([this, dpi](const Breaker&) -> bool{
     std::unique_lock locker(lock);
     mapDpi = dpi;
-  }
+    return true;
+  });
 }
 
-void DBThread::SetStyleFlag(const QString &key, bool value)
+CancelableFuture<bool> DBThread::SetStyleFlag(const std::string &key, bool value)
 {
-  qDebug() << "SetStyleFlag" << key << "to" << value;
-  std::unique_lock locker(lock);
+  return Async<bool>([this, key, value](const Breaker&) -> bool{
+    log.Debug() << "SetStyleFlag" << key << "to" << value;
+    std::unique_lock locker(lock);
 
-  if (!isInitializedInternal()) {
-      return;
-  }
+    if (!isInitializedInternal()) {
+      return false;
+    }
 
-  stylesheetFlags[key.toStdString()] = value;
-  LoadStyleInternal(stylesheetFilename, stylesheetFlags);
+    stylesheetFlags[key] = value;
+    LoadStyleInternal(stylesheetFilename, stylesheetFlags);
+
+    return true;
+  });
 }
 
-void DBThread::ReloadStyle(const QString &suffix)
+CancelableFuture<bool> DBThread::ReloadStyle(const std::string &suffix)
 {
-  qDebug() << "Reloading style " << stylesheetFilename << suffix << "...";
-  LoadStyle(stylesheetFilename, stylesheetFlags,suffix);
-  qDebug() << "Reloading style done.";
+  return Async<bool>([this, suffix](const Breaker &) -> bool {
+    log.Debug() << "Reloading style " << stylesheetFilename << suffix << "...";
+    std::unique_lock locker(lock);
+    LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
+    log.Debug() << "Reloading style done.";
+    return true;
+  });
 }
 
-void DBThread::LoadStyle(QString stylesheetFilename,
-                         std::unordered_map<std::string,bool> stylesheetFlags,
-                         const QString &suffix)
+CancelableFuture<bool> DBThread::LoadStyle(const std::string &stylesheetFilename,
+                                           std::unordered_map<std::string,bool> stylesheetFlags,
+                                           const std::string &suffix)
 {
-  std::unique_lock locker(lock);
-  LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
+  return Async<bool>([this, stylesheetFilename, stylesheetFlags, suffix](const Breaker&){
+    std::unique_lock locker(lock);
+    LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
+    return true;
+  });
 }
 
-void DBThread::LoadStyleInternal(QString stylesheetFilename,
+void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
                                  std::unordered_map<std::string,bool> stylesheetFlags,
-                                 const QString &suffix)
+                                 const std::string &suffix)
 {
   this->stylesheetFilename = stylesheetFilename;
   this->stylesheetFlags = stylesheetFlags;
@@ -425,7 +441,7 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
 
   bool prevErrs = !styleErrors.empty();
   styleErrors.clear();
-  std::string file = (stylesheetFilename+suffix).toStdString();
+  std::string file = stylesheetFilename+suffix;
   for (const auto& db: databases){
     log.Debug() << "Loading style " << file << "...";
     db->LoadStyle(file, stylesheetFlags, styleErrors);
@@ -433,9 +449,9 @@ void DBThread::LoadStyleInternal(QString stylesheetFilename,
   }
   if (prevErrs || (!styleErrors.empty())){
     log.Warn() << "Failed to load stylesheet" << file;
-    emit styleErrorsChanged();
+    styleErrorsChanged.Emit();
   }
-  emit stylesheetFilenameChanged();
+  stylesheetFilenameChanged.Emit();
 }
 
 const QMap<QString,bool> DBThread::GetStyleFlags() const
@@ -464,18 +480,30 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
   return flags;
 }
 
-void DBThread::FlushCaches(qint64 idleMs)
+CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &idleMs)
 {
-  RunSynchronousJob([idleMs](const std::list<DBInstanceRef> &dbs){
-    for (const auto &db:dbs){
-      if (db->LastUsageMs().count() > idleMs){
-        auto database=db->GetDatabase();
-        osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
-        database->DumpStatistics();
-        database->FlushCache();
-        db->GetMapService()->FlushTileCache();
-      }
+  return Async<bool>([this, idleMs](const Breaker& breaker) {
+    if (breaker.IsAborted()) {
+      return false;
     }
+    bool result=true;
+    RunSynchronousJob([&](const std::list<DBInstanceRef> &dbs){
+      if (breaker.IsAborted()) {
+        result = false;
+        return;
+      }
+
+      for (const auto &db:dbs){
+        if (db->LastUsageMs() > idleMs){
+          auto database=db->GetDatabase();
+          osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
+          database->DumpStatistics();
+          database->FlushCache();
+          db->GetMapService()->FlushTileCache();
+        }
+      }
+    });
+    return result;
   });
 }
 

@@ -30,11 +30,14 @@ class MainWindow : public QQmlApplicationEngine
 {
   Q_OBJECT
 
-public slots:
-  void InitialisationFinished(const osmscout::DatabaseLoadedResponse& response);
-
 private:
   osmscout::DBThreadRef dbThread;
+
+  osmscout::Slot<osmscout::GeoBox> dbLoadedSlot{
+    [](const osmscout::GeoBox &) {
+      osmscout::log.Info() << "InitialisationFinished()";
+    }
+  };
 
 public:
   explicit MainWindow(const osmscout::DBThreadRef& dbThread);

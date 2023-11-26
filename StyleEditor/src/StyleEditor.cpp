@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     MainWindow window(dbThread);
     result = app.exec();
 
-    QString tmpStylesheet(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
+    QString tmpStylesheet = QString::fromStdString(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
     if(QFile::exists(tmpStylesheet)){
       QFile::remove(tmpStylesheet);
     }

@@ -276,9 +276,23 @@ public slots:
   void onIconFound(QPoint lookupCoord, MapIcon icon);
 
 private:
-  Slot<double> mapDpiSlot{
-    [this](const double &d) {
-      this->onMapDPIChange(d);
+  Slot<double> mapDpiSlot{ std::bind(&MapWidget::onMapDPIChange, this, std::placeholders::_1) };
+
+  Slot<> stylesheetFilenameChangedSlot{
+    [this](){
+      emit stylesheetFilenameChanged();
+    }
+  };
+
+  Slot<> styleErrorsChangedSlot{
+    [this](){
+      emit styleErrorsChanged();
+    }
+  };
+
+  Slot<osmscout::GeoBox> databaseLoadedSlot{
+    [this](const osmscout::GeoBox &geoBox){
+      emit databaseLoaded(geoBox);
     }
   };
 
