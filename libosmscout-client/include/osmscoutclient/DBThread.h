@@ -1,10 +1,10 @@
-#ifndef OSMSCOUT_CLIENT_QT_DBTHREAD_H
-#define OSMSCOUT_CLIENT_QT_DBTHREAD_H
+#ifndef OSMSCOUT_CLIENT_DBTHREAD_H
+#define OSMSCOUT_CLIENT_DBTHREAD_H
 
 /*
- OSMScout - a Qt backend for libosmscout and libosmscout-map
- Copyright (C) 2010  Tim Teulings
- Copyright (C) 2023  Lukáš Karas
+  This source is part of the libosmscout library
+  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2023  Lukáš Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,9 +21,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QThread>
-#include <QObject>
-#include <QDir>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <osmscout/db/BasemapDatabase.h>
 #include <osmscout/db/Database.h>
@@ -39,15 +37,15 @@
 #include <osmscoutclient/Settings.h>
 #include <osmscoutclient/MapManager.h>
 
-#include <osmscoutclientqt/QtStdConverters.h>
-
 #include <shared_mutex>
 #include <filesystem>
+#include <map>
+#include <string>
 
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
 struct MapViewStruct
 {
@@ -70,7 +68,7 @@ inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
 }
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
 struct DatabaseLoadedResponse
 {
@@ -78,7 +76,7 @@ struct DatabaseLoadedResponse
 };
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  * \see DBThread::databaseCoverage
  */
 enum DatabaseCoverage{
@@ -88,7 +86,7 @@ enum DatabaseCoverage{
 };
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  *
  * Central object that manage db instances (\ref DBInstance),
  * its map styles (there is one global map style now)
@@ -99,7 +97,7 @@ enum DatabaseCoverage{
  * or modified (except thread-safe caches) when read lock is hold.
  * Databases may be accessed via \see AsynchronousDBJob or \see RunSynchronousJob methods.
  */
-class OSMSCOUT_CLIENT_QT_API DBThread: public AsyncWorker
+class OSMSCOUT_CLIENT_API DBThread: public AsyncWorker
 {
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
@@ -184,7 +182,6 @@ private:
                                      stylesheetFlags;
   bool                               daylight;
 
-  bool                               renderError;
   std::list<StyleError>              styleErrors;
 
   std::vector<std::string>           customPoiTypes;
@@ -266,7 +263,7 @@ public:
     return emptyStyleConfig;
   }
 
-  const QMap<QString,bool> GetStyleFlags() const;
+  const std::map<std::string,bool> GetStyleFlags() const;
 
   /**
    * Submit asynchronous job that will retrieve list
@@ -312,8 +309,5 @@ public:
 using DBThreadRef = std::shared_ptr<DBThread>;
 
 }
-
-Q_DECLARE_METATYPE(osmscout::MapViewStruct)
-Q_DECLARE_METATYPE(osmscout::DatabaseLoadedResponse)
 
 #endif

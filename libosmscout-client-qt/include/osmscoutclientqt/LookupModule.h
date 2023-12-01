@@ -33,7 +33,8 @@
 #include <osmscout/feature/WebsiteFeature.h>
 #include <osmscout/feature/OpeningHoursFeature.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/LocationEntry.h>
 #include <osmscoutclientqt/DBLoadJob.h>

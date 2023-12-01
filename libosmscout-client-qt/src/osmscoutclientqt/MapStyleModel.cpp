@@ -18,8 +18,9 @@
 */
 
 
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/MapStyleModel.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QDirIterator>

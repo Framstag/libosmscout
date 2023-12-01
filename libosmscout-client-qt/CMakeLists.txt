@@ -4,7 +4,6 @@ set(CMAKE_AUTORCC ON)
 set(HEADER_FILES
     include/osmscoutclientqt/AdminRegionInfo.h
     include/osmscoutclientqt/ClientQtImportExport.h
-    include/osmscoutclientqt/DBThread.h
     include/osmscoutclientqt/ElevationChartWidget.h
     include/osmscoutclientqt/ElevationModule.h
     include/osmscoutclientqt/FileDownloader.h
@@ -62,7 +61,6 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/osmscoutclientqt/DBThread.cpp
     src/osmscoutclientqt/ElevationChartWidget.cpp
     src/osmscoutclientqt/ElevationModule.cpp
     src/osmscoutclientqt/FileDownloader.cpp

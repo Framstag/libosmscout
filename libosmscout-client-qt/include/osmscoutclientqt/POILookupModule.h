@@ -21,7 +21,8 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/LocationEntry.h>
 
 #include <QObject>

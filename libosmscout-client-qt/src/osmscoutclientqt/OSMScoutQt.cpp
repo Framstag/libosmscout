@@ -22,11 +22,11 @@
 #include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/QtSettingsStorage.h>
 #include <osmscoutclientqt/QmlSettings.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/MapWidget.h>
 #include <osmscoutclientqt/ElevationChartWidget.h>
 #include <osmscoutclientqt/PlaneMapRenderer.h>

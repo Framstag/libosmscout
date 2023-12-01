@@ -24,10 +24,11 @@
 #include <osmscout/async/Breaker.h>
 #include <osmscout/routing/RouteDescription.h>
 
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <osmscoutclientqt/SearchLocationModel.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/Router.h>
 #include <osmscoutclientqt/OverlayObject.h>
 #include <osmscoutclientqt/QmlRoutingProfile.h>

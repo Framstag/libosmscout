@@ -1,5 +1,4 @@
 osmscoutclientqtSrc = [
-            'src/osmscoutclientqt/DBThread.cpp',
             'src/osmscoutclientqt/ElevationChartWidget.cpp',
             'src/osmscoutclientqt/ElevationModule.cpp',
             'src/osmscoutclientqt/RoutingModel.cpp',

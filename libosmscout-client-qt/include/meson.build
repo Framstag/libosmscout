@@ -3,7 +3,6 @@ osmscoutclientqtIncDir = include_directories('.')
 osmscoutclientqtHeader = [
             'osmscoutclientqt/AdminRegionInfo.h',
             'osmscoutclientqt/ClientQtImportExport.h',
-            'osmscoutclientqt/DBThread.h',
             'osmscoutclientqt/ElevationChartWidget.h',
             'osmscoutclientqt/ElevationModule.h',
             'osmscoutclientqt/RoutingModel.h',

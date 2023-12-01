@@ -58,7 +58,13 @@ void StyleModule::onStyleFlagsRequested(){
 
 void StyleModule::onStyleChanged()
 {
-  emit styleFlagsChanged(dbThread->GetStyleFlags());
+  QMap<QString, bool> qMap;
+  auto stdMap=dbThread->GetStyleFlags();
+  for (const auto &p: stdMap) {
+    qMap[QString::fromStdString(p.first)] = p.second;
+  }
+
+  emit styleFlagsChanged(qMap);
 }
 
 void StyleModule::onSetFlagRequest(QString key, bool value)

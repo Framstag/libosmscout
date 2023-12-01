@@ -22,7 +22,7 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/OverlayObject.h>

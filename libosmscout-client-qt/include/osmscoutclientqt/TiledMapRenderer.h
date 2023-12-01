@@ -26,7 +26,8 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/MapRenderer.h>
 #include <osmscoutclientqt/TileCache.h>
 #include <osmscoutclientqt/OsmTileDownloader.h>

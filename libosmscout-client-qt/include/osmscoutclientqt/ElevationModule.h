@@ -20,13 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscoutclientqt/OverlayObject.h>
-#include <osmscoutclientqt/DBThread.h>
-#include <osmscout/elevation/ElevationService.h>
-
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
+#include <osmscout/elevation/ElevationService.h>
+
+#include <osmscoutclient/DBThread.h>
+
+#include <osmscoutclientqt/OverlayObject.h>
+
 #include <QThread>
+
 #include <memory>
 
 namespace osmscout {

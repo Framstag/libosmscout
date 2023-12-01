@@ -24,7 +24,7 @@
 #include <QThread>
 #include <QMutex>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

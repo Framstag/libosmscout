@@ -25,9 +25,9 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
 
-#include <osmscoutclientqt/DBThread.h>
-#include <osmscoutclientqt/LookupModule.h>
+#include <osmscoutclient/DBThread.h>
 
+#include <osmscoutclientqt/LookupModule.h>
 #include <osmscoutclientqt/LocationInfoModel.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

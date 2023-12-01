@@ -31,8 +31,8 @@
 #include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/DBThread.h>
 
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/RouteDescriptionBuilder.h>
 #include <osmscoutclientqt/QmlRoutingProfile.h>
 #include <osmscoutclientqt/LocationEntry.h>

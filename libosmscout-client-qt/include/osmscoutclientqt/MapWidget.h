@@ -25,10 +25,10 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/util/GeoBox.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/MapRenderer.h>
 #include <osmscoutclientqt/SearchLocationModel.h>
 #include <osmscoutclientqt/InputHandler.h>

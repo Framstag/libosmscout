@@ -24,6 +24,7 @@
 #include <osmscout/poi/POIService.h>
 
 #include <QDebug>
+#include <QThread>
 
 namespace osmscout {
 

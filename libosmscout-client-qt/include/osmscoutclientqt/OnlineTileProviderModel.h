@@ -20,37 +20,37 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <QAbstractListModel>
-
 #include <osmscoutclient/OnlineTileProvider.h>
+#include <osmscoutclient/DBThread.h>
 
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
+
+#include <QAbstractListModel>
 
 namespace osmscout {
 
 /**
  * \ingroup QtAPI
- * 
+ *
  * Provide Qt model with loaded online tile providers (see Settings::loadOnlineTileProviders).
  * It should be registered by qmlRegisterType method before first usage.
- * 
+ *
  * Usage in QML (Silica UI example):
  * ```
  * import harbour.osmscout.map 1.0
- * 
+ *
  * Settings {
  *   id: settings
  * }
- * 
+ *
  * ComboBox {
  *   id: onlineTileProviderComboBox
  *   property bool initialized: false
- * 
+ *
  *   OnlineTileProviderModel{
  *     id: providerModel
  *   }
- * 
+ *
  *   menu: ContextMenu {
  *     Repeater {
  *       width: parent.width
@@ -60,7 +60,7 @@ namespace osmscout {
  *       }
  *     }
  *   }
- * 
+ *
  *   onCurrentItemChanged: {
  *     if (!initialized){
  *       return;
@@ -81,7 +81,7 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API OnlineTileProviderModel : public QAbstractListModel {
   Q_OBJECT
-  
+
 public:
   inline OnlineTileProviderModel()
   {
@@ -91,9 +91,9 @@ public:
       onlineProviders << provider;
     }
   };
-  
+
   virtual inline ~OnlineTileProviderModel(){};
-  
+
   enum Roles {
     NameRole = Qt::UserRole,
     IdRole = Qt::UserRole+1,
@@ -112,7 +112,7 @@ public:
   Q_INVOKABLE int count() const;
   Q_INVOKABLE QString getId(int row) const;
   Q_INVOKABLE QString getName(int row) const;
-  
+
 private:
     QList<OnlineTileProvider> onlineProviders;
 };

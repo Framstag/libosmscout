@@ -19,9 +19,10 @@
 
 #include <osmscout/util/String.h>
 
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/AvailableMapsModel.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QString>

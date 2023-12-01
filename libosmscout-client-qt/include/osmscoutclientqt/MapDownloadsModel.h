@@ -22,8 +22,9 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/MapDownloader.h>
-#include <osmscoutclientqt/DBThread.h>
 
 #include <QObject>
 #include <QStringList>

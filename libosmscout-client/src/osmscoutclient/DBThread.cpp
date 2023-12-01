@@ -1,5 +1,5 @@
 /*
-  OSMScout - a Qt backend for libosmscout and libosmscout-map
+  This source is part of the libosmscout library
   Copyright (C) 2010  Tim Teulings
   Copyright (C) 2023  Lukáš Karas
 
@@ -20,9 +20,8 @@
 
 #include <osmscoutmap/MapService.h>
 
-#include <osmscoutclientqt/DBThread.h>
-#include <osmscoutclientqt/private/Config.h>
-#include <osmscoutclientqt/MapDownloader.h>
+#include <osmscoutclient/DBThread.h>
+#include <osmscoutclient/private/Config.h>
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/db/TextSearchIndex.h>
@@ -195,7 +194,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
 
     if constexpr (haveMmap && sizeof(void*)<=4){
       // we are on 32 bit system probably, we have to be careful with mmap
-      qint64 mmapQuota=1.5 * (1<<30); // 1.5 GiB
+      int64_t mmapQuota=1.5 * (1<<30); // 1.5 GiB
       std::vector<std::string> mmapFiles{
         "bounding.dat", "router2.dat", "types.dat", "textregion.dat", "textpoi.dat",
         "textother.dat", "areasopt.dat", "areanode.idx", "textloc.dat", "water.idx",
@@ -212,7 +211,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         log.Warn() << "Database is too huge to be mapped";
       }
 
-      qint64 nodesSize=0;
+      int64_t nodesSize=0;
       for (auto &databaseDirectory:databaseDirectories){
         nodesSize += GetFileSize((databaseDirectory / "nodes.dat").string());
       }
@@ -223,7 +222,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         mmapQuota-=nodesSize;
       }
 
-      qint64 areasSize=0;
+      int64_t areasSize=0;
       for (auto &databaseDirectory:databaseDirectories){
         areasSize += GetFileSize((databaseDirectory / "areas.dat").string());
       }
@@ -234,7 +233,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         mmapQuota -= areasSize;
       }
 
-      qint64 waysSize=0;
+      int64_t waysSize=0;
       for (auto &databaseDirectory:databaseDirectories){
         waysSize += GetFileSize((databaseDirectory / "ways.dat").string());
       }
@@ -245,7 +244,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         mmapQuota -= waysSize;
       }
 
-      qint64 routeSize=0;
+      int64_t routeSize=0;
       for (auto &databaseDirectory:databaseDirectories){
         routeSize += GetFileSize((databaseDirectory /"route.dat").string());
       }
@@ -256,7 +255,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         mmapQuota -= routeSize;
       }
 
-      qint64 routerSize=0;
+      int64_t routerSize=0;
       for (auto &databaseDirectory:databaseDirectories){
         routerSize += GetFileSize((databaseDirectory / "router.dat").string());
       }
@@ -454,13 +453,13 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
   stylesheetFilenameChanged.Emit();
 }
 
-const QMap<QString,bool> DBThread::GetStyleFlags() const
+const std::map<std::string,bool> DBThread::GetStyleFlags() const
 {
   std::shared_lock locker(lock);
-  QMap<QString,bool> flags;
+  std::map<std::string,bool> flags;
   // add flag overrides
   for (const auto& flag : stylesheetFlags){
-    flags[QString::fromStdString(flag.first)]=flag.second;
+    flags[flag.first]=flag.second;
   }
 
   // add flags defined by stylesheet
@@ -471,8 +470,8 @@ const QMap<QString,bool> DBThread::GetStyleFlags() const
 
     auto styleFlags = db->GetStyleConfig()->GetFlags(); // iterate temporary container is UB!
     for (const auto& flag : styleFlags){
-      if (!flags.contains(QString::fromStdString(flag.first))){
-        flags[QString::fromStdString(flag.first)]=flag.second;
+      if (flags.find(flag.first)!=flags.end()){
+        flags[flag.first]=flag.second;
       }
     }
   }
