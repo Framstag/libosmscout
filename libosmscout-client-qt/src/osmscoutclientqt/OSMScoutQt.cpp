@@ -191,7 +191,6 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
                                   int versionMinor)
 {
   // register osmscout + standard types for usage in Qt signals/slots
-  qRegisterMetaType<DatabaseLoadedResponse>("DatabaseLoadedResponse");
   qRegisterMetaType<LocationEntryRef>("LocationEntryRef");
   qRegisterMetaType<osmscout::BreakerRef>("osmscout::BreakerRef");
   qRegisterMetaType<osmscout::Distance>("osmscout::Distance");

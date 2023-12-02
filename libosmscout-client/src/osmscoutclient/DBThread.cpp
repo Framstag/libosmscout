@@ -103,11 +103,11 @@ double DBThread::GetPhysicalDpi() const
     return settings->GetPhysicalDPI();
 }
 
-const DatabaseLoadedResponse DBThread::loadedResponse() const {
+const GeoBox DBThread::databaseBoundingBox() const {
   std::shared_lock locker(lock);
-  DatabaseLoadedResponse response;
+  GeoBox response;
   for (const auto& db:databases){
-    response.boundingBox.Include(db->GetDBGeoBox());
+    response.Include(db->GetDBGeoBox());
   }
   return response;
 }

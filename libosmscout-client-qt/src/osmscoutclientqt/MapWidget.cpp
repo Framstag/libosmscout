@@ -387,32 +387,32 @@ void MapWidget::paint(QPainter *painter)
 void MapWidget::recenter()
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  if (!resp.boundingBox.IsValid()){
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  if (!boundingBox.IsValid()){
     return;
   }
-  Distance dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
-                                                        resp.boundingBox.GetMaxCoord());
+  Distance dimension = osmscout::GetEllipsoidalDistance(boundingBox.GetMinCoord(),
+                                                        boundingBox.GetMaxCoord());
 
-  showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
+  showCoordinates(boundingBox.GetCenter(), magnificationByDimension(dimension));
 }
 
 bool MapWidget::isDatabaseLoaded()
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  return resp.boundingBox.IsValid();
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  return boundingBox.IsValid();
 }
 
 bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  if (!resp.boundingBox.IsValid()){
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  if (!boundingBox.IsValid()){
     return false;
   }
   osmscout::GeoCoord coord(lat, lon);
-  return resp.boundingBox.Includes(coord);
+  return boundingBox.Includes(coord);
 }
 
 QPointF MapWidget::screenPosition(double lat, double lon)

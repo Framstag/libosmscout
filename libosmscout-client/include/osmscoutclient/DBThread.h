@@ -69,14 +69,6 @@ inline bool operator!=(const MapViewStruct &r1, const MapViewStruct &r2)
 
 /**
  * \ingroup ClientAPI
- */
-struct DatabaseLoadedResponse
-{
-    osmscout::GeoBox boundingBox;
-};
-
-/**
- * \ingroup ClientAPI
  * \see DBThread::databaseCoverage
  */
 enum class DatabaseCoverage{
@@ -229,8 +221,13 @@ public:
 
   bool isInitialized();
 
-  // TODO: use just GeoBox, rename method
-  const DatabaseLoadedResponse loadedResponse() const;
+  /** Return geographical bounding box contains all loaded databases.
+   *
+   * When there is no database, returned bounding box is invalid.
+   *
+   * @return geo box
+   */
+  const GeoBox databaseBoundingBox() const;
 
   /**
    * Test if some bounding box is covered by databases - fully, partially or not covered.
