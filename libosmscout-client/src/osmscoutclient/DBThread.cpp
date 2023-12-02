@@ -419,7 +419,7 @@ CancelableFuture<bool> DBThread::ReloadStyle(const std::string &suffix)
 }
 
 CancelableFuture<bool> DBThread::LoadStyle(const std::string &stylesheetFilename,
-                                           std::unordered_map<std::string,bool> stylesheetFlags,
+                                           const std::unordered_map<std::string,bool> &stylesheetFlags,
                                            const std::string &suffix)
 {
   return Async<bool>([this, stylesheetFilename, stylesheetFlags, suffix](const Breaker&){
@@ -430,7 +430,7 @@ CancelableFuture<bool> DBThread::LoadStyle(const std::string &stylesheetFilename
 }
 
 void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
-                                 std::unordered_map<std::string,bool> stylesheetFlags,
+                                 const std::unordered_map<std::string,bool> &stylesheetFlags,
                                  const std::string &suffix)
 {
   this->stylesheetFilename = stylesheetFilename;

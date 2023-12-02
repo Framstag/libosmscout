@@ -79,7 +79,7 @@ struct DatabaseLoadedResponse
  * \ingroup ClientAPI
  * \see DBThread::databaseCoverage
  */
-enum DatabaseCoverage{
+enum class DatabaseCoverage{
   Outside = 0,
   Covered = 1,
   Intersects = 2,
@@ -132,7 +132,7 @@ public:
 
   Slot<std::string, std::unordered_map<std::string,bool>, std::string> loadStyle {
     [this](const std::string &stylesheetFilename,
-           std::unordered_map<std::string,bool> stylesheetFlags,
+           const std::unordered_map<std::string,bool> &stylesheetFlags,
            const std::string &suffix) {
       LoadStyle(stylesheetFilename, stylesheetFlags, suffix);
     }
@@ -209,7 +209,7 @@ protected:
    * @param suffix
    */
   void LoadStyleInternal(const std::string &stylesheetFilename,
-                         std::unordered_map<std::string,bool> stylesheetFlags,
+                         const std::unordered_map<std::string,bool> &stylesheetFlags,
                          const std::string &suffix="");
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
@@ -300,7 +300,7 @@ public:
   CancelableFuture<bool> OnMapDPIChange(double dpi);
   CancelableFuture<bool> SetStyleFlag(const std::string &key, bool value);
   CancelableFuture<bool> LoadStyle(const std::string &stylesheetFilename,
-                                   std::unordered_map<std::string,bool> stylesheetFlags,
+                                   const std::unordered_map<std::string,bool> &stylesheetFlags,
                                    const std::string &suffix="");
   CancelableFuture<bool> ToggleDaylight();
   CancelableFuture<bool> ReloadStyle(const std::string &suffix="");
