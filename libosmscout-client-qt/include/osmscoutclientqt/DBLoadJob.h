@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_CLIENT_QT_DBOPERATION_H
-#define OSMSCOUT_CLIENT_QT_DBOPERATION_H
+#ifndef OSMSCOUT_CLIENT_QT_DBLOADJOB_H
+#define OSMSCOUT_CLIENT_QT_DBLOADJOB_H
 
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -25,7 +25,6 @@
 #include <QList>
 #include <QThread>
 #include <QMap>
-#include <shared_mutex>
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -34,36 +33,18 @@
 #include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclient/DBInstance.h>
+#include <osmscoutclient/DBJob.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
+
+#include <shared_mutex>
 
 namespace osmscout {
 
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API DBJob : public QObject{
-  Q_OBJECT
-
-protected:
-  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap db
-  std::list<DBInstanceRef>     databases;       //!< borrowed databases
-  QThread                      *thread;         //!< job thread
-
-private:
-  std::shared_lock<std::shared_mutex> locker;   //!< db locker
-
-public:
-  DBJob();
-  ~DBJob() override;
-
-  virtual void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
-                   const std::list<DBInstanceRef> &databases,
-                   std::shared_lock<std::shared_mutex> &&locker);
-  virtual void Close();
-};
-
-class OSMSCOUT_CLIENT_QT_API DBLoadJob : public DBJob{
+class OSMSCOUT_CLIENT_QT_API DBLoadJob : public QObject, public DBJob {
   Q_OBJECT
 
 private:
@@ -98,7 +79,7 @@ public:
 
   ~DBLoadJob() override;
 
-  void Run(const osmscout::BasemapDatabaseRef& basempaDatabase,
+  void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
            const std::list<DBInstanceRef> &databases,
            std::shared_lock<std::shared_mutex> &&locker) override;
 
@@ -123,4 +104,4 @@ public:
 
 }
 
-#endif /* OSMSCOUT_CLIENT_QT_DBOPERATION_H */
+#endif /* OSMSCOUT_CLIENT_QT_DBLOADJOB_H */

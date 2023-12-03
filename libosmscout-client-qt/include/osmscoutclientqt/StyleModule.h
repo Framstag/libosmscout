@@ -24,7 +24,7 @@
 #include <QThread>
 #include <QMutex>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
@@ -41,8 +41,20 @@ private:
   QThread          *thread;
   DBThreadRef      dbThread;
 
+  Slot<osmscout::GeoBox> dbLoadedSlot{
+    [this](const osmscout::GeoBox &b) {
+      emit initialisationFinished(b);
+    }
+  };
+
+  Slot<> stylesheetFilenameChangeSlot{
+    [this]() {
+      emit stylesheetFilenameChanged();
+    }
+  };
+
 signals:
-  void initialisationFinished(const DatabaseLoadedResponse& response);
+  void initialisationFinished(const osmscout::GeoBox& response);
   void stylesheetFilenameChanged();
   void styleFlagsChanged(QMap<QString,bool>);
   void flagSet(QString key, bool value);

@@ -38,7 +38,6 @@ SOURCES += \
 HEADERS += \
     include/osmscoutclientqt/AvailableMapsModel.h \
     include/osmscoutclientqt/ClientQtFeatures.h \
-    include/osmscoutclientqt/DBThread.h \
     include/osmscoutclientqt/FileDownloader.h \
     include/osmscoutclientqt/InputHandler.h \
     include/osmscoutclientqt/LocationEntry.h \

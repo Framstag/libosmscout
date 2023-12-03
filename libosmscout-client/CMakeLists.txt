@@ -2,6 +2,8 @@ set(HEADER_FILES
   include/osmscoutclient/json/json.hpp
   include/osmscoutclient/json/json_fwd.hpp
   include/osmscoutclient/DBInstance.h
+  include/osmscoutclient/DBJob.h
+  include/osmscoutclient/DBThread.h
   include/osmscoutclient/MapDirectory.h
   include/osmscoutclient/MapManager.h
   include/osmscoutclient/MapProvider.h
@@ -13,6 +15,8 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   src/osmscoutclient/DBInstance.cpp
+  src/osmscoutclient/DBJob.cpp
+  src/osmscoutclient/DBThread.cpp
   src/osmscoutclient/MapDirectory.cpp
   src/osmscoutclient/MapManager.cpp
   src/osmscoutclient/MapProvider.cpp

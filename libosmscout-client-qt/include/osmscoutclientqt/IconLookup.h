@@ -22,10 +22,11 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/OverlayObject.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 #include <QObject>
 #include <QSettings>

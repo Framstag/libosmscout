@@ -65,7 +65,7 @@ MapObjectInfoModel::~MapObjectInfoModel()
   }
 }
 
-void MapObjectInfoModel::dbInitialized(const DatabaseLoadedResponse&)
+void MapObjectInfoModel::dbInitialized(const osmscout::GeoBox&)
 {
   if (setup){
     emit objectsOnViewRequested(view,filterRectangle);

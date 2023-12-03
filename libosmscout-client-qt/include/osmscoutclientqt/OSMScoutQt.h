@@ -25,9 +25,10 @@
 #include <osmscoutmap/DataTileCache.h>
 
 #include <osmscoutclient/MapManager.h>
+#include <osmscoutclient/DBThread.h>
 
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/LookupModule.h>
+#include <osmscoutclientqt/MapDownloader.h>
 #include <osmscoutclientqt/MapRenderer.h>
 #include <osmscoutclientqt/Router.h>
 #include <osmscoutclientqt/SearchModule.h>

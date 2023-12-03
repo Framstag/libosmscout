@@ -20,6 +20,8 @@
 #include <osmscoutclientqt/ElevationModule.h>
 #include <osmscout/elevation/ElevationService.h>
 
+#include <QDebug>
+
 namespace osmscout {
 
 ElevationModule::ElevationModule(QThread *thread,DBThreadRef dbThread):

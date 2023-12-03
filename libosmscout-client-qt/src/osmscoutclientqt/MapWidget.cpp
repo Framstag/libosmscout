@@ -48,17 +48,14 @@ MapWidget::MapWidget(QQuickItem* parent)
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
 
     settings->mapDPIChange.Connect(mapDpiSlot);
+    dbThread->stylesheetFilenameChanged.Connect(stylesheetFilenameChangedSlot);
+    dbThread->styleErrorsChanged.Connect(styleErrorsChangedSlot);
+    dbThread->databaseLoadFinished.Connect(databaseLoadedSlot);
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
     connect(renderer, &MapRenderer::Redraw,
             this, &MapWidget::redraw);
-    connect(dbThread.get(), &DBThread::stylesheetFilenameChanged,
-            this, &MapWidget::stylesheetFilenameChanged);
-    connect(dbThread.get(), &DBThread::styleErrorsChanged,
-            this, &MapWidget::styleErrorsChanged);
-    connect(dbThread.get(), &DBThread::databaseLoadFinished,
-            this, &MapWidget::databaseLoaded);
 
     connect(&tapRecognizer, &TapRecognizer::tap,        this, &MapWidget::onTap);
     connect(&tapRecognizer, &TapRecognizer::doubleTap,  this, &MapWidget::onDoubleTap);
@@ -390,32 +387,32 @@ void MapWidget::paint(QPainter *painter)
 void MapWidget::recenter()
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  if (!resp.boundingBox.IsValid()){
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  if (!boundingBox.IsValid()){
     return;
   }
-  Distance dimension = osmscout::GetEllipsoidalDistance(resp.boundingBox.GetMinCoord(),
-                                                        resp.boundingBox.GetMaxCoord());
+  Distance dimension = osmscout::GetEllipsoidalDistance(boundingBox.GetMinCoord(),
+                                                        boundingBox.GetMaxCoord());
 
-  showCoordinates(resp.boundingBox.GetCenter(), magnificationByDimension(dimension));
+  showCoordinates(boundingBox.GetCenter(), magnificationByDimension(dimension));
 }
 
 bool MapWidget::isDatabaseLoaded()
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  return resp.boundingBox.IsValid();
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  return boundingBox.IsValid();
 }
 
 bool MapWidget::isInDatabaseBoundingBox(double lat, double lon)
 {
   DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
-  DatabaseLoadedResponse resp = dbThread->loadedResponse();
-  if (!resp.boundingBox.IsValid()){
+  GeoBox boundingBox = dbThread->databaseBoundingBox();
+  if (!boundingBox.IsValid()){
     return false;
   }
   osmscout::GeoCoord coord(lat, lon);
-  return resp.boundingBox.Includes(coord);
+  return boundingBox.Includes(coord);
 }
 
 QPointF MapWidget::screenPosition(double lat, double lon)
@@ -817,6 +814,8 @@ void MapWidget::onTapLongTap(const QPoint p)
 
 void MapWidget::onMapDPIChange(double dpi)
 {
+    assert(QThread::currentThread() == this->thread());
+
     MapView v = *view;
     v.mapDpi = dpi;
     changeView(v);
@@ -925,7 +924,7 @@ void MapWidget::setInteractiveIcons(bool b)
 QString MapWidget::GetStylesheetFilename() const
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
-    return dbThread->GetStylesheetFilename();
+    return QString::fromStdString(dbThread->GetStylesheetFilename());
 }
 
 QString MapWidget::GetZoomLevelName() const
@@ -935,7 +934,7 @@ QString MapWidget::GetZoomLevelName() const
 
     if (converter.Convert(osmscout::MagnificationLevel(view->magnification.GetLevel()),
                           name)) {
-      return name.c_str();
+      return QString::fromStdString(name);
     }
 
     return "";

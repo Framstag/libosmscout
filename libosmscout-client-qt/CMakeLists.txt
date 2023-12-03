@@ -4,7 +4,6 @@ set(CMAKE_AUTORCC ON)
 set(HEADER_FILES
     include/osmscoutclientqt/AdminRegionInfo.h
     include/osmscoutclientqt/ClientQtImportExport.h
-    include/osmscoutclientqt/DBThread.h
     include/osmscoutclientqt/ElevationChartWidget.h
     include/osmscoutclientqt/ElevationModule.h
     include/osmscoutclientqt/FileDownloader.h
@@ -30,7 +29,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/MapStyleModel.h
     include/osmscoutclientqt/StyleFlagsModel.h
     include/osmscoutclientqt/OSMScoutQt.h
-    include/osmscoutclientqt/DBJob.h
+    include/osmscoutclientqt/DBLoadJob.h
     include/osmscoutclientqt/LookupModule.h
     include/osmscoutclientqt/SearchModule.h
     include/osmscoutclientqt/StyleModule.h
@@ -62,7 +61,6 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/osmscoutclientqt/DBThread.cpp
     src/osmscoutclientqt/ElevationChartWidget.cpp
     src/osmscoutclientqt/ElevationModule.cpp
     src/osmscoutclientqt/FileDownloader.cpp
@@ -87,7 +85,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/MapStyleModel.cpp
     src/osmscoutclientqt/StyleFlagsModel.cpp
     src/osmscoutclientqt/OSMScoutQt.cpp
-    src/osmscoutclientqt/DBJob.cpp
+    src/osmscoutclientqt/DBLoadJob.cpp
     src/osmscoutclientqt/LookupModule.cpp
     src/osmscoutclientqt/SearchModule.cpp
     src/osmscoutclientqt/StyleModule.cpp

@@ -33,9 +33,11 @@
 #include <osmscout/feature/WebsiteFeature.h>
 #include <osmscout/feature/OpeningHoursFeature.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/LocationEntry.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 namespace osmscout {
 
@@ -94,8 +96,14 @@ private:
   QRectF           filterRectangle;
   std::map<QString,std::map<osmscout::FileOffset,AdminRegionInfoRef>> adminRegionCache;
 
+  Slot<osmscout::GeoBox> dbLoadedSlot{
+    [this](const osmscout::GeoBox &b) {
+      emit initialisationFinished(b);
+    }
+  };
+
 signals:
-  void initialisationFinished(const DatabaseLoadedResponse& response);
+  void initialisationFinished(const osmscout::GeoBox& response);
   void viewObjectsLoaded(const MapViewStruct&,
                          const QList<LookupModule::ObjectInfo> &objects);
 

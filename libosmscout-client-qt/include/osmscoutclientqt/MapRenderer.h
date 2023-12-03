@@ -23,10 +23,11 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/OverlayObject.h>
+#include <osmscoutclientqt/DBLoadJob.h>
 
 #include <QObject>
 #include <QSettings>
@@ -38,7 +39,7 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API DBRenderJob : public DBJob{
+class OSMSCOUT_CLIENT_QT_API DBRenderJob : public QObject, public DBJob{
   Q_OBJECT
 private:
   osmscout::MercatorProjection renderProjection;
@@ -117,6 +118,7 @@ signals:
   void fontSizeSignal(double);
   void showAltLanguageSignal(bool);
   void unitsSignal(QString);
+  void stylesheetFilenameChanged();
 
 private:
   // slots
@@ -155,6 +157,8 @@ private:
       unitsSignal(QString::fromStdString(str));
     }
   };
+
+  Slot<> stylesheetFilenameChangedSlot{ std::bind(&MapRenderer::stylesheetFilenameChanged, this) };
 
 public slots:
   virtual void Initialize() = 0;

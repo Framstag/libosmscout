@@ -19,6 +19,8 @@
 
 #include <osmscoutclientqt/IconAnimation.h>
 
+#include <osmscoutclientqt/DBLoadJob.h>
+
 #include <cmath>
 
 namespace osmscout {

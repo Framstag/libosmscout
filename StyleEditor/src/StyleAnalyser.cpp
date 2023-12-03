@@ -19,7 +19,8 @@
 
 #include <StyleAnalyser.h>
 
-#include <osmscoutclientqt/DBThread.h>
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 using namespace osmscout;

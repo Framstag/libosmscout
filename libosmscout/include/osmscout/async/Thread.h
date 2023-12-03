@@ -26,6 +26,7 @@
 
 #include <string>
 #include <thread>
+#include <optional>
 
 namespace osmscout {
 

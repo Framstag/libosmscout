@@ -24,6 +24,7 @@
 #include <QObject>
 #include <QAbstractListModel>
 #include <QJSValue>
+#include <QTimer>
 
 #include <osmscout/GeoCoord.h>
 

@@ -34,9 +34,7 @@ LookupModule::LookupModule(QThread *thread,DBThreadRef dbThread):
   dbThread(dbThread),
   loadJob(nullptr)
 {
-
-  connect(dbThread.get(), &DBThread::initialisationFinished,
-          this, &LookupModule::initialisationFinished);
+  dbThread->databaseLoadFinished.Connect(dbLoadedSlot);
 }
 
 LookupModule::~LookupModule()
@@ -75,7 +73,7 @@ void LookupModule::requestObjectsOnView(const MapViewStruct &view,
   connect(loadJob, &DBLoadJob::finished,
           this, &LookupModule::onLoadJobFinished);
 
-  dbThread->RunJob(loadJob);
+  dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void LookupModule::addObjectInfo(QList<ObjectInfo> &objectList, // output

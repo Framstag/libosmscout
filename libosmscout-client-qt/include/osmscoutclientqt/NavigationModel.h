@@ -26,6 +26,8 @@
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
+#include <QAbstractListModel>
+#include <QDateTime>
 #include <QObject>
 
 #include <optional>

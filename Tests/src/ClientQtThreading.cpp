@@ -86,7 +86,7 @@ void ThreadingTest::test()
   connect(loadJob, &DBLoadJob::finished,
           this, &ThreadingTest::onLoadJobFinished);
 
-  dbThread->RunJob(loadJob);
+  dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles)
@@ -99,7 +99,7 @@ void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmsco
 
     for (const auto &tileKey:map.keys()){
       const auto &tile=map[tileKey];
-      std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename().toStdString()
+      std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename()
                 << ", " << dbPath.toStdString()
                 << ", " << tileKey.GetDisplayText()
                 << " object count: " << tile->GetAreaData().GetDataSize()
@@ -110,9 +110,9 @@ void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmsco
       objectCount += tile->GetAreaData().GetDataSize() + tile->GetWayData().GetDataSize() + tile->GetNodeData().GetDataSize();
     }
   }
-  std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename().toStdString() << ", sum object count: " << objectCount << std::endl;
-  if (objectCountPerStylesheet.contains(dbThread->GetStylesheetFilename())){
-    size_t lastObjectCount = objectCountPerStylesheet[dbThread->GetStylesheetFilename()];
+  std::cout << "Stylesheet: " << dbThread->GetStylesheetFilename() << ", sum object count: " << objectCount << std::endl;
+  if (objectCountPerStylesheet.contains(QString::fromStdString(dbThread->GetStylesheetFilename()))){
+    size_t lastObjectCount = objectCountPerStylesheet[QString::fromStdString(dbThread->GetStylesheetFilename())];
     if (objectCount < lastObjectCount){
       std::cerr << "Less objects! " << lastObjectCount << " > " << objectCount << std::endl;
       failure = true;
@@ -121,7 +121,7 @@ void ThreadingTest::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmsco
     }
   }
 
-  objectCountPerStylesheet[dbThread->GetStylesheetFilename()] = objectCount;
+  objectCountPerStylesheet[QString::fromStdString(dbThread->GetStylesheetFilename())] = objectCount;
 
   stylesheetCtn++;
   emit loadStyleRequested(stylesheets.at(stylesheetCtn % stylesheets.size()).absoluteFilePath(),

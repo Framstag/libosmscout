@@ -21,8 +21,8 @@
  */
 
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/DBThread.h>
 
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/Router.h>
 
 #include <osmscout/navigation/Navigation.h>
@@ -44,6 +44,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QMediaPlayer>
+#include <QDateTime>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   #include <QMediaPlaylist>

@@ -21,6 +21,10 @@
 
 #include <osmscout/log/Logger.h>
 
+#include <QThread>
+#include <QDateTime>
+#include <QDir>
+
 namespace osmscout {
 
 NavigationModule::NavigationModule(QThread *thread,

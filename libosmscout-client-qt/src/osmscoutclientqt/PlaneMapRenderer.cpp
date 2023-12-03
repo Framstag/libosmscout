@@ -24,6 +24,7 @@
 #include <osmscout/system/Math.h>
 
 #include <QtMath>
+#include <QDebug>
 
 namespace osmscout {
 
@@ -393,7 +394,7 @@ void PlaneMapRenderer::DrawMap()
                       overlayObjects,
                       dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ true);
-      dbThread->RunJob(&job);
+      dbThread->RunJob(std::bind(&DBRenderJob::Run, &job, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
       success=job.IsSuccess();
     }
 
@@ -506,7 +507,7 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request, size_t 
     connect(loadJob, &DBLoadJob::finished,
             this, &PlaneMapRenderer::onLoadJobFinished);
 
-    dbThread->RunJob(loadJob);
+    dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
   emit TriggerInitialRendering();
 }

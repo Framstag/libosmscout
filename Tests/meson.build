@@ -601,7 +601,7 @@ if buildClientQt
                  threadingMocs,
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutclientIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qtClientDep],
-                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclient, osmscoutclientqt],
                  install: true,
                  install_dir: testInstallDir)
 endif
@@ -614,7 +614,7 @@ if buildClientQt
                  testMocs,
                  include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir],
                  dependencies: [mathDep, threadDep, openmpDep, qtClientDep],
-                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclientqt],
+                 link_with: [osmscoutmapqt, osmscoutmap, osmscout, osmscoutclient, osmscoutclientqt],
                  install: true,
                  install_dir: testInstallDir)
 endif

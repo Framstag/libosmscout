@@ -5,6 +5,8 @@ osmscoutclientHeader = [
             'osmscoutclient/json/json_fwd.hpp',
             'osmscoutclient/ClientImportExport.h',
             'osmscoutclient/DBInstance.h',
+            'osmscoutclient/DBJob.h',
+            'osmscoutclient/DBThread.h',
             'osmscoutclient/MapDirectory.h',
             'osmscoutclient/MapManager.h',
             'osmscoutclient/MapProvider.h',

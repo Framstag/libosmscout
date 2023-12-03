@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <QSvgRenderer>
+#include <QDebug>
 
 #include <osmscout/feature/OpeningHoursFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
@@ -29,8 +30,6 @@
 #include <osmscout/feature/WebsiteFeature.h>
 
 #include <osmscoutmapqt/SymbolRendererQt.h>
-
-
 
 namespace osmscout {
 
@@ -310,7 +309,7 @@ void IconLookup::onIconRequest(const MapViewStruct &view,
   connect(loadJob, &DBLoadJob::finished,
           this, &IconLookup::onLoadJobFinished);
 
-  dbThread->RunJob(loadJob);
+  dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 

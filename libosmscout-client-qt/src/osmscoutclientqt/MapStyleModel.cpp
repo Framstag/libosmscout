@@ -18,8 +18,9 @@
 */
 
 
+#include <osmscoutclient/DBThread.h>
+
 #include <osmscoutclientqt/MapStyleModel.h>
-#include <osmscoutclientqt/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QDirIterator>
@@ -61,7 +62,7 @@ MapStyleModel::~MapStyleModel()
 
 QString MapStyleModel::getStyle() const
 {
-  QFileInfo fileInfo(OSMScoutQt::GetInstance().GetDBThread()->GetStylesheetFilename());
+  QFileInfo fileInfo(QString::fromStdString(OSMScoutQt::GetInstance().GetDBThread()->GetStylesheetFilename()));
   return fileInfo.fileName();
 }
 

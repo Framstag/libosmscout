@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QSet>
 
 #include <osmscoutclientqt/StyleModule.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>

@@ -56,6 +56,7 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   settings->onlineTileProviderChanged.Connect(onlineTileProviderSlot);
   settings->onlineTilesEnabledChanged.Connect(onlineTileEnabledSlot);
   settings->offlineMapChanged.Connect(offlineMapChangedSlot);
+  dbThread->databaseLoadFinished.Connect(databaseLoadFinishedSlot);
 
   connect(this, &TiledMapRenderer::onlineTileProviderSignal,
           this, &TiledMapRenderer::onlineTileProviderChanged,
@@ -67,7 +68,7 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
           this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
-  connect(dbThread.get(), &DBThread::databaseLoadFinished,
+  connect(this, &TiledMapRenderer::databaseLoadFinished,
           this, &TiledMapRenderer::onDatabaseLoaded,
           Qt::QueuedConnection);
   //
@@ -318,7 +319,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
                 this, &TiledMapRenderer::onLoadJobFinished);
 
         if (offlineTilesEnabled) {
-          dbThread->RunJob(loadJob);
+          dbThread->RunJob(std::bind(&DBLoadJob::Run, loadJob, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         } else {
           // offline map rendering is disabled but there are some overlay objects intersecting with the tile...
           onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>());
@@ -486,7 +487,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                       /*drawCanvasBackground*/ false,
                       /*renderBasemap*/ !onlineTilesEnabled,
                       offlineTilesEnabled);
-      dbThread->RunJob(&job);
+      dbThread->RunJob(std::bind(&DBRenderJob::Run, &job, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
       success=job.IsSuccess();
     }
 
