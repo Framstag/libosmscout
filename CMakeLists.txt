@@ -682,7 +682,7 @@ message(STATUS "doxygen:                         ${DOXYGEN_FOUND}")
 message(STATUS "documentation:                   ${OSMSCOUT_BUILD_DOC_API}")
 message(STATUS "webpage:                         ${OSMSCOUT_BUILD_WEBPAGE}")
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/stylesheets DESTINATION share/osmscout)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/stylesheets DESTINATION share/osmscout)
 if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
 	install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif()
