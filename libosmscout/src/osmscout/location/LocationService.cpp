@@ -1088,7 +1088,7 @@ namespace osmscout {
    * @param tokenString
    *    Token to remove
    * @param tokens
-   *    List to rmeove token parameter from
+   *    List to remove token parameter from
    * @return
    *    New list
    */
