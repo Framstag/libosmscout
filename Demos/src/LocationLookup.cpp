@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
   }
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database(new osmscout::Database(databaseParameter));
+  osmscout::DatabaseRef       database=std::make_shared<osmscout::Database>(databaseParameter);
 
   if (!database->Open(args.databaseDirectory)) {
     std::cerr << "Cannot open db" << std::endl;
