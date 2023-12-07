@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
                         args.repeat=value;
                       }),
                       "repeat",
-                      "Cout of repeat for performance test");
+                      "Count of repeat for performance test");
 
   argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
                         args.transliterate=value;
