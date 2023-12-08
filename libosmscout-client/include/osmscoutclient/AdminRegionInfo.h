@@ -1,8 +1,8 @@
-#ifndef OSMSCOUT_CLIENT_QT_ADMINREGIONINFO_H
-#define OSMSCOUT_CLIENT_QT_ADMINREGIONINFO_H
+#ifndef OSMSCOUT_CLIENT_ADMINREGIONINFO_H
+#define OSMSCOUT_CLIENT_ADMINREGIONINFO_H
 /*
- OSMScout - a Qt backend for libosmscout and libosmscout-map
- Copyright (C) 2017 Lukas Karas
+  This source is part of the libosmscout library
+  Copyright (C) 2017 Lukas Karas
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -19,47 +19,33 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <QObject>
-#include <QString>
 
 #include <memory>
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <osmscout/location/Location.h>
 
 namespace osmscout {
 
 /**
- * \ingroup QtAPI
+ * \ingroup ClientAPI
  */
-class OSMSCOUT_CLIENT_QT_API AdminRegionInfo
+struct OSMSCOUT_CLIENT_API AdminRegionInfo
 {
-public:
-  QString database;
+  std::string database;
   osmscout::AdminRegionRef adminRegion;
-  QString type; //!< adminRegion->object's type
+  std::string type; //!< adminRegion->object's type
   int adminLevel{-1};
 
-public:
   std::string name() const
   {
     return adminRegion->name;
   }
 
-  QString qStringName() const
-  {
-    return QString::fromStdString(adminRegion->name);
-  }
-
   std::string altName() const
   {
     return adminRegion->altName;
-  }
-
-  QString qStringAltName() const
-  {
-    return QString::fromStdString(adminRegion->altName);
   }
 };
 
@@ -67,4 +53,4 @@ typedef std::shared_ptr<AdminRegionInfo> AdminRegionInfoRef;
 
 }
 
-#endif //OSMSCOUT_CLIENT_QT_ADMINREGIONINFO_H
+#endif //OSMSCOUT_CLIENT_ADMINREGIONINFO_H

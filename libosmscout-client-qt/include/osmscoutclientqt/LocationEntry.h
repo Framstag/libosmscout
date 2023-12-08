@@ -30,8 +30,10 @@
 #include <osmscout/location/LocationDescriptionService.h>
 #include <osmscout/location/LocationService.h>
 
+#include <osmscoutclient/LocationInfo.h>
+#include <osmscoutclient/AdminRegionInfo.h>
+
 #include <osmscoutclientqt/ClientQtImportExport.h>
-#include <osmscoutclientqt/AdminRegionInfo.h>
 
 namespace osmscout {
 
@@ -51,15 +53,8 @@ class OSMSCOUT_CLIENT_QT_API LocationEntry : public QObject
   Q_PROPERTY(double  lat        READ getLat        CONSTANT)
   Q_PROPERTY(double  lon        READ getLon        CONSTANT)
 
-public:
-  enum Type {
-    typeNone,
-    typeObject,
-    typeCoordinate
-  };
-
 private:
-  Type                           type;
+  LocationInfo::Type             type;
   QString                        label;
   QString                        altName; // name in alternative language
   QString                        objectType;
@@ -70,7 +65,7 @@ private:
   osmscout::GeoBox               bbox;
 
 public:
-  LocationEntry(Type type,
+  LocationEntry(LocationInfo::Type type,
                 const QString& label,
                 const QString& altName,
                 const QString& objectType,
@@ -83,6 +78,8 @@ public:
   LocationEntry(const QString& label,
                 const osmscout::GeoCoord& coord,
                 QObject* parent = nullptr);
+
+  explicit LocationEntry(const LocationInfo &info);
 
   explicit LocationEntry(QObject* parent = nullptr);
 
@@ -104,7 +101,7 @@ public:
 
   Q_INVOKABLE double distanceTo(double lat, double lon) const;
 
-  Type getType() const;
+  LocationInfo::Type getType() const;
   QString getTypeString() const;
   QString getObjectType() const;
   QString getLabel() const;

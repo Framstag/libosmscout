@@ -113,7 +113,7 @@ LocationEntry* OverlayObject::getBBoxAsLocation() const
   GeoBox bbox = boundingBox();
 
   // QML will take ownership
-  return new LocationEntry(LocationEntry::Type::typeNone,
+  return new LocationEntry(LocationInfo::Type::typeNone,
                            "bbox",
                            "bbox",
                            "",

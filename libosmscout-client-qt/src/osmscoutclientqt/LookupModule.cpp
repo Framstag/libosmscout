@@ -341,7 +341,7 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(const DBInstanceRef &db,
     return info;
   }
 
-  info->database=QString::fromStdString(db->path);
+  info->database=db->path;
 
   // read admin region features
   auto database=db->GetDatabase();
@@ -359,19 +359,19 @@ AdminRegionInfoRef LookupModule::buildAdminRegionInfo(const DBInstanceRef &db,
     case osmscout::refNode:
       if (database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
         adminLevelValue=adminLevelReader.GetValue(node->GetFeatureValueBuffer());
-        info->type=QString::fromStdString(node->GetType()->GetName());
+        info->type=node->GetType()->GetName();
       }
       break;
     case osmscout::refWay:
       if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
         adminLevelValue=adminLevelReader.GetValue(way->GetFeatureValueBuffer());
-        info->type=QString::fromStdString(way->GetType()->GetName());
+        info->type=way->GetType()->GetName();
       }
       break;
     case osmscout::refArea:
       if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
         adminLevelValue=adminLevelReader.GetValue(area->GetFeatureValueBuffer());
-        info->type=QString::fromStdString(area->GetType()->GetName());
+        info->type=area->GetType()->GetName();
       }
       break;
     case osmscout::refNone:
@@ -497,7 +497,7 @@ QStringList LookupModule::AdminRegionNames(const QList<AdminRegionInfoRef> &regi
   QString previousName;
   QString name;
   for (const auto &region: regionList) {
-    name = (useAltNames && !region->altName().empty()) ? region->qStringAltName() : region->qStringName();
+    name = QString::fromStdString( (useAltNames && !region->altName().empty()) ? region->altName() : region->name());
     if (previousName != name) {
       result << name;
       previousName = name;
@@ -515,7 +515,7 @@ QStringList LookupModule::IndexedAdminRegionNames(const QList<AdminRegionInfoRef
   }
   for (const auto &region:regionList) {
     if (region->adminLevel >= 0 && region->adminLevel < result.size()) {
-      result[region->adminLevel] = (useAltNames && !region->altName().empty()) ? region->qStringAltName() : region->qStringName();
+      result[region->adminLevel] = QString::fromStdString((useAltNames && !region->altName().empty()) ? region->altName() : region->name());
     }
   }
   return result;

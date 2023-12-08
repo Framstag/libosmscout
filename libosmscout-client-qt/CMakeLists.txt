@@ -2,7 +2,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-    include/osmscoutclientqt/AdminRegionInfo.h
     include/osmscoutclientqt/ClientQtImportExport.h
     include/osmscoutclientqt/ElevationChartWidget.h
     include/osmscoutclientqt/ElevationModule.h

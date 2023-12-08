@@ -22,8 +22,7 @@
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <osmscoutclient/DBThread.h>
-
-#include <osmscoutclientqt/LocationEntry.h>
+#include <osmscoutclient/LocationInfo.h>
 
 namespace osmscout {
 
@@ -37,11 +36,12 @@ private:
 
 public:
 
-  using LookupFuture = CancelableFuture<std::vector<LocationEntry>>;
+  using LookupResult = std::vector<LocationInfo>;
+  using LookupFuture = CancelableFuture<LookupResult>;
 
   Signal<int> lookupAborted; //<! requestId was aborted
   Signal<int> lookupFinished; //<! requestId was finished
-  Signal<int, std::vector<LocationEntry>> lookupResult; //<! partial result for requestId
+  Signal<int, LookupResult> lookupResult; //<! partial result for requestId
 
 public:
   explicit POILookupModule(DBThreadRef dbThread);
@@ -63,9 +63,9 @@ public:
                                 const Distance &maxDistance);
 
 private:
-  std::vector<LocationEntry> doPOIlookup(DBInstanceRef db,
-                                         const GeoBox &searchBoundingBox,
-                                         const std::vector<std::string> &types);
+  LookupResult doPOIlookup(DBInstanceRef db,
+                           const GeoBox &searchBoundingBox,
+                           const std::vector<std::string> &types);
 
 };
 

@@ -37,44 +37,49 @@ POILookupModule::~POILookupModule()
 }
 
 template<class T>
-LocationEntry buildLocationEntry(T obj,
-                                 QString dbPath,
-                                 GeoCoord coordinates,
-                                 GeoBox bbox)
+LocationInfo buildLocationEntry(T obj,
+                                const std::string &dbPath,
+                                const GeoCoord &coordinates,
+                                const GeoBox &bbox)
 {
-  QString title;
-  QString altName;
-  QString objectType = QString::fromUtf8(obj->GetType()->GetName().c_str());
+  std::string title;
+  std::string altName;
+  std::string objectType = obj->GetType()->GetName();
   const FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
 
   if (const NameFeatureValue *name=features.findValue<NameFeatureValue>();
       name!=nullptr){
-    title=QString::fromStdString(name->GetLabel(Locale(), 0));
+    title=name->GetLabel(Locale(), 0);
     //std::cout << " \"" << name->GetLabel() << "\"";
   } else if (const OperatorFeatureValue *operatorVal=features.findValue<OperatorFeatureValue>();
              operatorVal!=nullptr) {
-    title=QString::fromStdString(operatorVal->GetLabel(Locale(), 0));
+    title=operatorVal->GetLabel(Locale(), 0);
   } else if (const RefFeatureValue *ref=features.findValue<RefFeatureValue>();
              ref!=nullptr) {
-    title=QString::fromStdString(ref->GetLabel(Locale(), 0));
+    title=ref->GetLabel(Locale(), 0);
   }
 
   if (const NameAltFeatureValue *name=features.findValue<NameAltFeatureValue>();
     name!=nullptr) {
-    altName = QString::fromStdString(name->GetLabel(Locale(), 0));
+    altName = name->GetLabel(Locale(), 0);
   }
 
-  LocationEntry location(LocationEntry::typeObject, title, altName, objectType, QList<AdminRegionInfoRef>(),
-                         dbPath, coordinates, bbox);
-  location.addReference(obj->GetObjectFileRef());
-  return LocationEntry(location); // explicit copy. some older compilers (GCC 7.5.0) fails when tries to use deleted move constructor
+  return LocationInfo{LocationInfo::Type::typeObject,
+                      title,
+                      altName,
+                      objectType,
+                      std::vector<AdminRegionInfoRef>(),
+                      dbPath,
+                      {obj->GetObjectFileRef()},
+                      coordinates,
+                      bbox};
 }
 
-std::vector<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
-                                                        const GeoBox &searchBoundingBox,
-                                                        const std::vector<std::string> &types)
+POILookupModule::LookupResult POILookupModule::doPOIlookup(DBInstanceRef db,
+                                                           const GeoBox &searchBoundingBox,
+                                                           const std::vector<std::string> &types)
 {
-  std::vector<LocationEntry> result;
+  LookupResult result;
 
   TypeInfoSet nodeTypes;
   std::vector<NodeRef> nodes;
@@ -133,14 +138,14 @@ std::vector<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
     GeoBox   bbox=area->GetBoundingBox();
     GeoCoord coordinates=bbox.GetCenter();
 
-    result.push_back(buildLocationEntry(area, QString::fromStdString(db->path), coordinates, bbox));
+    result.push_back(buildLocationEntry(area, db->path, coordinates, bbox));
   }
 
   for (WayRef &way:ways) {
     GeoBox   bbox=way->GetBoundingBox();
     GeoCoord coordinates=bbox.GetCenter();
 
-    result.push_back(buildLocationEntry(way, QString::fromStdString(db->path), coordinates, bbox));
+    result.push_back(buildLocationEntry(way, db->path, coordinates, bbox));
   }
 
   for (NodeRef &node:nodes) {
@@ -148,7 +153,7 @@ std::vector<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
     GeoBox bbox;
     bbox.Include(GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
 
-    result.push_back(buildLocationEntry(node, QString::fromStdString(db->path), coordinates, bbox));
+    result.push_back(buildLocationEntry(node, db->path, coordinates, bbox));
   }
 
   return result;
@@ -159,8 +164,8 @@ POILookupModule::LookupFuture POILookupModule::lookupPOIRequest(int requestId,
                                                                 const std::vector<std::string> &types,
                                                                 const Distance &maxDistance)
 {
-  return Async<std::vector<LocationEntry>>([=](Breaker &breaker) -> std::vector<LocationEntry> {
-    std::vector<LocationEntry> result;
+  return Async<LookupResult>([=](Breaker &breaker) -> LookupResult {
+    LookupResult result;
     GeoBox searchBoundingBox=GeoBox::BoxByCenterAndRadius(searchCenter, maxDistance);
 
     dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef>& databases){

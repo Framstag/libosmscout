@@ -68,7 +68,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     case LabelRole:
       return location->getLabel();
     case TypeRole:
-      if (location->getType()==LocationEntry::typeCoordinate)
+      if (location->getType()==LocationInfo::Type::typeCoordinate)
         return "coordinate";
       else
         return location->getObjectType();

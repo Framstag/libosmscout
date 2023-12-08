@@ -119,11 +119,11 @@ private:
 
   Slot<int> lookupFinishedSlot{ std::bind(&NearPOIModel::lookupFinished, this, std::placeholders::_1) };
 
-  Slot<int, std::vector<LocationEntry>> lookupResultSlot{
-    [this](int requestId, const std::vector<LocationEntry> &locationsVector) {
+  Slot<int, POILookupModule::LookupResult> lookupResultSlot {
+    [this](int requestId, const POILookupModule::LookupResult &locationsVector) {
       QList<LocationEntry> locations;
-      for (const auto &loc: locationsVector) {
-        locations << loc;
+      for (const auto &info: locationsVector) {
+        locations << LocationEntry(info);
       }
       emit lookupResult(requestId, locations);
     }
