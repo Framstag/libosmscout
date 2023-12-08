@@ -20,8 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscoutclient/POILookupModule.h>
+
 #include <osmscoutclientqt/LocationEntry.h>
-#include <osmscoutclientqt/POILookupModule.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 

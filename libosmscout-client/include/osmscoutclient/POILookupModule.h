@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_CLIENT_QT_POILOOKUPSERVICE_H
-#define OSMSCOUT_CLIENT_QT_POILOOKUPSERVICE_H
+#ifndef OSMSCOUT_CLIENT_POILOOKUPSERVICE_H
+#define OSMSCOUT_CLIENT_POILOOKUPSERVICE_H
 /*
  OSMScout - a Qt backend for libosmscout and libosmscout-map
  Copyright (C) 2018 Lukas Karas
@@ -19,7 +19,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscoutclientqt/ClientQtImportExport.h>
+#include <osmscoutclient/ClientImportExport.h>
 
 #include <osmscoutclient/DBThread.h>
 #include <osmscoutclient/LocationInfo.h>
@@ -29,7 +29,7 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API POILookupModule: public AsyncWorker
+class OSMSCOUT_CLIENT_API POILookupModule: public AsyncWorker
 {
 private:
   DBThreadRef      dbThread;
@@ -71,4 +71,4 @@ private:
 
 }
 
-#endif //OSMSCOUT_CLIENT_QT_POILOOKUPSERVICE_H
+#endif //OSMSCOUT_CLIENT_POILOOKUPSERVICE_H

@@ -49,7 +49,6 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/TiledMapOverlay.h',
             'osmscoutclientqt/TiledRenderingHelper.h',
             'osmscoutclientqt/NearPOIModel.h',
-            'osmscoutclientqt/POILookupModule.h',
             'osmscoutclientqt/InstalledMapsModel.h',
             'osmscoutclientqt/Voice.h',
             'osmscoutclientqt/VoiceManager.h',
