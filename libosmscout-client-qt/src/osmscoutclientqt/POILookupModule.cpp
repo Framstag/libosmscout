@@ -23,53 +23,45 @@
 
 #include <osmscout/poi/POIService.h>
 
-#include <QDebug>
-#include <QThread>
-
 namespace osmscout {
 
-POILookupModule::POILookupModule(QThread *thread,DBThreadRef dbThread):
-  thread(thread), dbThread(dbThread)
+POILookupModule::POILookupModule(DBThreadRef dbThread):
+  AsyncWorker("POILookupModule"), dbThread(dbThread)
 {
-
+  // no code
 }
 
 POILookupModule::~POILookupModule()
 {
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Destroy" << this << "from non incorrect thread;" << thread << "!=" << QThread::currentThread();
-  }
-  if (thread!=nullptr){
-    thread->quit();
-  }
+  ThreadAssert();
 }
 
 template<class T>
 LocationEntry buildLocationEntry(T obj,
                                  QString dbPath,
-                                 osmscout::GeoCoord coordinates,
-                                 osmscout::GeoBox bbox)
+                                 GeoCoord coordinates,
+                                 GeoBox bbox)
 {
   QString title;
   QString altName;
   QString objectType = QString::fromUtf8(obj->GetType()->GetName().c_str());
-  const osmscout::FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
+  const FeatureValueBuffer &features=obj->GetFeatureValueBuffer();
 
-  if (const osmscout::NameFeatureValue *name=features.findValue<osmscout::NameFeatureValue>();
+  if (const NameFeatureValue *name=features.findValue<NameFeatureValue>();
       name!=nullptr){
-    title=QString::fromStdString(name->GetLabel(osmscout::Locale(), 0));
+    title=QString::fromStdString(name->GetLabel(Locale(), 0));
     //std::cout << " \"" << name->GetLabel() << "\"";
-  } else if (const osmscout::OperatorFeatureValue *operatorVal=features.findValue<osmscout::OperatorFeatureValue>();
+  } else if (const OperatorFeatureValue *operatorVal=features.findValue<OperatorFeatureValue>();
              operatorVal!=nullptr) {
-    title=QString::fromStdString(operatorVal->GetLabel(osmscout::Locale(), 0));
-  } else if (const osmscout::RefFeatureValue *ref=features.findValue<osmscout::RefFeatureValue>();
+    title=QString::fromStdString(operatorVal->GetLabel(Locale(), 0));
+  } else if (const RefFeatureValue *ref=features.findValue<RefFeatureValue>();
              ref!=nullptr) {
-    title=QString::fromStdString(ref->GetLabel(osmscout::Locale(), 0));
+    title=QString::fromStdString(ref->GetLabel(Locale(), 0));
   }
 
-  if (const osmscout::NameAltFeatureValue *name=features.findValue<osmscout::NameAltFeatureValue>();
+  if (const NameAltFeatureValue *name=features.findValue<NameAltFeatureValue>();
     name!=nullptr) {
-    altName = QString::fromStdString(name->GetLabel(osmscout::Locale(), 0));
+    altName = QString::fromStdString(name->GetLabel(Locale(), 0));
   }
 
   LocationEntry location(LocationEntry::typeObject, title, altName, objectType, QList<AdminRegionInfoRef>(),
@@ -78,36 +70,35 @@ LocationEntry buildLocationEntry(T obj,
   return LocationEntry(location); // explicit copy. some older compilers (GCC 7.5.0) fails when tries to use deleted move constructor
 }
 
-QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
-                                                  osmscout::GeoBox searchBoundingBox,
-                                                  osmscout::BreakerRef /*breaker*/,
-                                                  QStringList types)
+std::vector<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
+                                                        const GeoBox &searchBoundingBox,
+                                                        const std::vector<std::string> &types)
 {
-  QList<LocationEntry> result;
+  std::vector<LocationEntry> result;
 
-  osmscout::TypeInfoSet nodeTypes;
-  std::vector<osmscout::NodeRef> nodes;
-  osmscout::TypeInfoSet wayTypes;
-  std::vector<osmscout::WayRef> ways;
-  osmscout::TypeInfoSet areaTypes;
-  std::vector<osmscout::AreaRef> areas;
+  TypeInfoSet nodeTypes;
+  std::vector<NodeRef> nodes;
+  TypeInfoSet wayTypes;
+  std::vector<WayRef> ways;
+  TypeInfoSet areaTypes;
+  std::vector<AreaRef> areas;
 
   auto database=db->GetDatabase();
   if (!database){
-    osmscout::log.Error() << "No db available";
+    log.Error() << "No db available";
     return result;
   }
-  osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+  TypeConfigRef typeConfig=database->GetTypeConfig();
   if (!typeConfig){
-    osmscout::log.Error() << "No typeConfig available";
+    log.Error() << "No typeConfig available";
     return result;
   }
 
   // prepare type set
-  for (const QString &typeName: types){
-    osmscout::TypeInfoRef typeInfo=typeConfig->GetTypeInfo(typeName.toStdString());
+  for (const auto &typeName: types){
+    TypeInfoRef typeInfo=typeConfig->GetTypeInfo(typeName);
     if (!typeInfo){
-      osmscout::log.Warn() << "There is no type " << typeName.toStdString();
+      log.Warn() << "There is no type " << typeName;
       continue;
     }
     if (typeInfo->CanBeArea()){
@@ -122,7 +113,7 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
   }
 
   // lookup objects
-  osmscout::POIService poiService(database);
+  POIService poiService(database);
   try {
     poiService.GetPOIsInArea(searchBoundingBox,
                              nodeTypes,
@@ -133,56 +124,58 @@ QList<LocationEntry> POILookupModule::doPOIlookup(DBInstanceRef db,
                              areas);
   }
   catch (const std::exception& e) {
-    osmscout::log.Error() << "Failed to load POIs in area: " << e.what();
+    log.Error() << "Failed to load POIs in area: " << e.what();
     return result;
   }
 
   // build location entries
-  for (osmscout::AreaRef &area:areas) {
-    osmscout::GeoBox   bbox=area->GetBoundingBox();
-    osmscout::GeoCoord coordinates=bbox.GetCenter();
+  for (AreaRef &area:areas) {
+    GeoBox   bbox=area->GetBoundingBox();
+    GeoCoord coordinates=bbox.GetCenter();
 
-    result << buildLocationEntry(area, QString::fromStdString(db->path), coordinates, bbox);
+    result.push_back(buildLocationEntry(area, QString::fromStdString(db->path), coordinates, bbox));
   }
 
-  for (osmscout::WayRef &way:ways) {
-    osmscout::GeoBox   bbox=way->GetBoundingBox();
-    osmscout::GeoCoord coordinates=bbox.GetCenter();
+  for (WayRef &way:ways) {
+    GeoBox   bbox=way->GetBoundingBox();
+    GeoCoord coordinates=bbox.GetCenter();
 
-    result << buildLocationEntry(way, QString::fromStdString(db->path), coordinates, bbox);
+    result.push_back(buildLocationEntry(way, QString::fromStdString(db->path), coordinates, bbox));
   }
 
-  for (osmscout::NodeRef &node:nodes) {
-    osmscout::GeoCoord coordinates=node->GetCoords();
-    osmscout::GeoBox bbox;
-    bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
+  for (NodeRef &node:nodes) {
+    GeoCoord coordinates=node->GetCoords();
+    GeoBox bbox;
+    bbox.Include(GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
 
-    result << buildLocationEntry(node, QString::fromStdString(db->path), coordinates, bbox);
+    result.push_back(buildLocationEntry(node, QString::fromStdString(db->path), coordinates, bbox));
   }
 
   return result;
 }
 
-void POILookupModule::lookupPOIRequest(int requestId,
-                                       osmscout::BreakerRef breaker,
-                                       osmscout::GeoCoord searchCenter,
-                                       QStringList types,
-                                       double maxDistance)
+POILookupModule::LookupFuture POILookupModule::lookupPOIRequest(int requestId,
+                                                                const GeoCoord &searchCenter,
+                                                                const std::vector<std::string> &types,
+                                                                const Distance &maxDistance)
 {
-  osmscout::GeoBox searchBoundingBox=osmscout::GeoBox::BoxByCenterAndRadius(searchCenter, Distance::Of<Meter>(maxDistance));
+  return Async<std::vector<LocationEntry>>([=](Breaker &breaker) -> std::vector<LocationEntry> {
+    std::vector<LocationEntry> result;
+    GeoBox searchBoundingBox=GeoBox::BoxByCenterAndRadius(searchCenter, maxDistance);
 
-  dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef>& databases){
-
-    for (auto &db : databases) {
-      if (breaker && breaker->IsAborted()){
-        emit lookupAborted(requestId);
-        break;
+    dbThread->RunSynchronousJob([&](const std::list<DBInstanceRef>& databases){
+      for (auto &db : databases) {
+        if (breaker.IsAborted()){
+          lookupAborted.Emit(requestId);
+          break;
+        }
+        auto partialResult=doPOIlookup(db, searchBoundingBox, types);
+        lookupResult.Emit(requestId,partialResult);
+        std::copy(partialResult.begin(), partialResult.end(), std::back_inserter(result));
       }
-      emit lookupResult(requestId,
-                        doPOIlookup(db, searchBoundingBox, breaker, types));
-    }
-  });
+    });
 
-  emit lookupFinished(requestId);
+    return result;
+  });
 }
 }

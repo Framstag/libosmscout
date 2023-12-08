@@ -415,11 +415,7 @@ StyleModule* OSMScoutQt::MakeStyleModule()
 
 POILookupModule *OSMScoutQt::MakePOILookupModule()
 {
-  QThread *thread=makeThread("POILookupModule");
-  POILookupModule *module=new POILookupModule(thread,dbThread);
-  module->moveToThread(thread);
-  thread->start();
-  return module;
+  return new POILookupModule(dbThread);
 }
 
 ElevationModule *OSMScoutQt::MakeElevationModule()

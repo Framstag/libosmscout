@@ -25,43 +25,47 @@
 
 #include <osmscoutclientqt/LocationEntry.h>
 
-#include <QObject>
-
 namespace osmscout {
 
 /**
  * \ingroup QtAPI
  */
-class OSMSCOUT_CLIENT_QT_API POILookupModule: public QObject
+class OSMSCOUT_CLIENT_QT_API POILookupModule: public AsyncWorker
 {
-  Q_OBJECT
-
-signals:
-  void lookupAborted(int requestId);
-  void lookupFinished(int requestId);
-  void lookupResult(int requestId, QList<LocationEntry> locations);
-
-public slots:
-  void lookupPOIRequest(int requestId,
-                        osmscout::BreakerRef breaker,
-                        osmscout::GeoCoord searchCenter,
-                        QStringList types,
-                        double maxDistance);
-
 private:
-  QThread          *thread;
   DBThreadRef      dbThread;
 
 public:
-  POILookupModule(QThread *thread,DBThreadRef dbThread);
+
+  using LookupFuture = CancelableFuture<std::vector<LocationEntry>>;
+
+  Signal<int> lookupAborted; //<! requestId was aborted
+  Signal<int> lookupFinished; //<! requestId was finished
+  Signal<int, std::vector<LocationEntry>> lookupResult; //<! partial result for requestId
+
+public:
+  explicit POILookupModule(DBThreadRef dbThread);
+
+  POILookupModule(const POILookupModule&) = delete;
+  POILookupModule(POILookupModule&&) = delete;
+  POILookupModule& operator=(const POILookupModule&) = delete;
+  POILookupModule& operator=(POILookupModule&&) = delete;
 
   ~POILookupModule() override;
 
+  /** Lookup POI around some point, to maximum distance by given types.
+   * It returns future with complete result and emits lookupResult signal
+   * with partial results.
+   */
+  LookupFuture lookupPOIRequest(int requestId,
+                                const GeoCoord &searchCenter,
+                                const std::vector<std::string> &types,
+                                const Distance &maxDistance);
+
 private:
-  QList<LocationEntry> doPOIlookup(DBInstanceRef db,
-                                   osmscout::GeoBox searchBoundingBox,
-                                   osmscout::BreakerRef breaker,
-                                   QStringList types);
+  std::vector<LocationEntry> doPOIlookup(DBInstanceRef db,
+                                         const GeoBox &searchBoundingBox,
+                                         const std::vector<std::string> &types);
 
 };
 

@@ -28,6 +28,9 @@
 #include <QObject>
 #include <QAbstractListModel>
 
+#include <functional>
+#include <optional>
+
 namespace osmscout {
 
 #define INVALID_COORD -1000.0
@@ -95,28 +98,36 @@ signals:
 
   void SearchingChanged(bool);
 
-  void lookupPOIRequest(int requestId,
-                        osmscout::BreakerRef breaker,
-                        osmscout::GeoCoord searchCenter,
-                        QStringList types,
-                        double maxDistance);
+  void lookupFinished(int requestId);
+  void lookupResult(int requestId, QList<LocationEntry> locations);
 
 public slots:
   void onLookupFinished(int requestId);
   void onLookupResult(int requestId, QList<LocationEntry> locations);
 
 private:
-  bool searching{false};
   int currentRequest{0};
   QList<LocationEntryRef> locations;
   osmscout::GeoCoord searchCenter{INVALID_COORD,INVALID_COORD};
   int resultLimit{100};
-  osmscout::BreakerRef breaker;
+  std::optional<POILookupModule::LookupFuture> future;
   Distance maxDistance{Distance::Of<Kilometer>(1)};
   QStringList types;
 
   POILookupModule *poiModule{nullptr};
   SettingsRef settings;
+
+  Slot<int> lookupFinishedSlot{ std::bind(&NearPOIModel::lookupFinished, this, std::placeholders::_1) };
+
+  Slot<int, std::vector<LocationEntry>> lookupResultSlot{
+    [this](int requestId, const std::vector<LocationEntry> &locationsVector) {
+      QList<LocationEntry> locations;
+      for (const auto &loc: locationsVector) {
+        locations << loc;
+      }
+      emit lookupResult(requestId, locations);
+    }
+  };
 
 public:
   NearPOIModel();
@@ -134,7 +145,7 @@ public:
 
   inline bool isSearching() const
   {
-    return searching;
+    return future.has_value();
   }
 
   inline double GetLat() const
