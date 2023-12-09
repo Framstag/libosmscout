@@ -1088,7 +1088,7 @@ namespace osmscout {
    * @param tokenString
    *    Token to remove
    * @param tokens
-   *    List to rmeove token parameter from
+   *    List to remove token parameter from
    * @return
    *    New list
    */
@@ -1379,9 +1379,19 @@ namespace osmscout {
       locationIgnoreTokenSet.insert(UTF8StringToUpper(token));
     }
 
+    // Locations are streets in town usually. But for small villages without named streets,
+    // village name (region) is added as virtual location to our location index.
+    // Address points are linked by "addr:place" tag to the place (region).
+    //
+    // So, to be able lookup address points just by phrase "Village 123",
+    // we add region name to location search patterns.
+    // We would force users to use pattern "Village Village 123" otherwise.
+    std::list<std::string> extendedLocationTokens=locationTokens;
+    extendedLocationTokens.push_back(regionMatch.name);
+
     // Build Location search patterns
 
-    std::list<TokenStringRef> locationSearchPatterns=GenerateSearchPatterns(locationTokens,
+    std::list<TokenStringRef> locationSearchPatterns=GenerateSearchPatterns(extendedLocationTokens,
                                                                             locationIgnoreTokenSet,
                                                                             locationIndex->GetLocationMaxWords());
 
