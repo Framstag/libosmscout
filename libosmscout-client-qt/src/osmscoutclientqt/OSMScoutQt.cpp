@@ -211,6 +211,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QtRouteData>("QtRouteData");
   qRegisterMetaType<uint32_t>("uint32_t");
   qRegisterMetaType<uint64_t>("uint64_t");
+  qRegisterMetaType<size_t>("size_t");
   qRegisterMetaType<AdminRegionInfoRef>("AdminRegionInfoRef");
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
