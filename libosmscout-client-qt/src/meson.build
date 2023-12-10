@@ -46,7 +46,6 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/TiledMapOverlay.cpp',
             'src/osmscoutclientqt/TiledRenderingHelper.cpp',
             'src/osmscoutclientqt/NearPOIModel.cpp',
-            'src/osmscoutclientqt/POILookupModule.cpp',
             'src/osmscoutclientqt/InstalledMapsModel.cpp',
             'src/osmscoutclientqt/Voice.cpp',
             'src/osmscoutclientqt/VoiceManager.cpp',

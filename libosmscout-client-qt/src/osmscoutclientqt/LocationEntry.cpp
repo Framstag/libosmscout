@@ -19,13 +19,15 @@
  */
 
 #include <osmscoutclientqt/LocationEntry.h>
+#include <osmscoutclientqt/QtStdConverters.h>
+
 #include <osmscout/util/Geometry.h>
 
 #include <iostream>
 
 namespace osmscout {
 
-LocationEntry::LocationEntry(Type type,
+LocationEntry::LocationEntry(LocationInfo::Type type,
                              const QString& label,
                              const QString& altName,
                              const QString& objectType,
@@ -51,7 +53,7 @@ LocationEntry::LocationEntry(const QString& label,
                              const osmscout::GeoCoord& coord,
                              QObject* parent)
     : QObject(parent),
-      type(typeCoordinate),
+      type(LocationInfo::Type::typeCoordinate),
       label(label),
       coord(coord)
 {
@@ -60,9 +62,25 @@ LocationEntry::LocationEntry(const QString& label,
 
 LocationEntry::LocationEntry(QObject* parent)
     : QObject(parent),
-      type(typeNone)
+      type(LocationInfo::Type::typeNone)
 {
     // no code
+}
+
+LocationEntry::LocationEntry(const LocationInfo &info):
+  LocationEntry(info.type,
+                QString::fromStdString(info.label),
+                QString::fromStdString(info.altName),
+                QString::fromStdString(info.objectType),
+                vectorToQList<>(info.adminRegionList),
+                QString::fromStdString(info.database),
+                info.coord,
+                info.bbox,
+                nullptr)
+{
+  for (const auto &ref: info.references) {
+    addReference(ref);
+  }
 }
 
 LocationEntry::LocationEntry(const LocationEntry& other)
@@ -126,14 +144,14 @@ LocationEntry& LocationEntry::operator=(LocationEntry&& other) {
 
 void LocationEntry::addReference(const osmscout::ObjectFileRef reference)
 {
-    assert(type==typeObject);
+    assert(type==LocationInfo::Type::typeObject);
     references.push_back(reference);
 }
 
 void LocationEntry::mergeWith(const LocationEntry &location)
 {
-  assert(type==typeObject);
-  assert(location.type==typeObject);
+  assert(type==LocationInfo::Type::typeObject);
+  assert(location.type==LocationInfo::Type::typeObject);
 
   bbox.Include(location.bbox);
   for (auto &ref:location.getReferences()) {
@@ -150,7 +168,7 @@ Q_INVOKABLE double LocationEntry::distanceTo(double lat, double lon) const
   return osmscout::GetSphericalDistance(coord, osmscout::GeoCoord(lat, lon)).AsMeter();
 }
 
-LocationEntry::Type LocationEntry::getType() const
+LocationInfo::Type LocationEntry::getType() const
 {
     return type;
 }
@@ -158,9 +176,9 @@ LocationEntry::Type LocationEntry::getType() const
 QString LocationEntry::getTypeString() const
 {
   switch (type){
-    case typeObject:
+    case LocationInfo::Type::typeObject:
       return "object";
-    case typeCoordinate:
+    case LocationInfo::Type::typeCoordinate:
       return "coordinate";
     default:
       return "none";

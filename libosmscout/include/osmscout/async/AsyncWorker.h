@@ -27,6 +27,7 @@
 #include <osmscout/async/WorkQueue.h>
 
 #include <thread>
+#include <cassert>
 
 namespace osmscout {
 
@@ -57,6 +58,16 @@ namespace osmscout {
     void Loop();
 
     void DeleteLater();
+
+    std::thread::id GetThreadId() const
+    {
+      return thread.get_id();
+    }
+
+    void ThreadAssert() const
+    {
+      assert(std::this_thread::get_id()==thread.get_id());
+    }
 
   protected:
     template<typename T>

@@ -333,21 +333,21 @@ void LocationInfoModel::onLocationAdminRegions(const osmscout::GeoCoord location
   const AdminRegionInfoRef bottom=regions.first();
   QStringList regionNames=LookupModule::AdminRegionNames(regions, settings->GetShowAltLanguage());
 
-  obj[LabelRole] = bottom->qStringName();
+  obj[LabelRole] = QString::fromStdString(bottom->name());
   obj[RegionRole] = regionNames;
-  obj[AddressRole] = bottom->qStringName();
+  obj[AddressRole] = QString::fromStdString(bottom->name());
   obj[InPlaceRole] = true;
   obj[DistanceRole] = 0;
   obj[BearingRole] = "";
   obj[PoiRole] = "";
-  obj[TypeRole] = bottom->type;
+  obj[TypeRole] = QString::fromStdString(bottom->type);
   obj[PostalCodeRole] = "";
   obj[WebsiteRole] = "";
   obj[PhoneRole] = "";
   obj[AddressLocationRole] = "";
   obj[AddressNumberRole] = "";
   obj[IndexedAdminRegionRole] = QStringList();
-  obj[AltLangName] = bottom->qStringAltName();
+  obj[AltLangName] = QString::fromStdString(bottom->altName());
   obj[OpeningHours] = "";
 
   model << obj;

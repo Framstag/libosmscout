@@ -140,8 +140,8 @@ void LocationListModel::addBatch(QList<LocationEntryRef> foundLocations) {
       assert(a != nullptr && b != nullptr);
       if (a->getLabel()==b->getLabel() &&
           a->getDatabase()==b->getDatabase() &&
-          a->getType()==LocationEntry::typeObject &&
-          b->getType()==LocationEntry::typeObject){
+          a->getType()==LocationInfo::Type::typeObject &&
+          b->getType()==LocationInfo::Type::typeObject){
 
         QJSValueList args;
         // to transfer ownership to QML, parent have to be null. copy constructor copy ownership
@@ -350,11 +350,11 @@ void LocationListModel::setPattern(const QString& pattern)
   }
   if (searching){
     // we are still waiting for previous request, postpone current
-    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern << "(default region:" << (defaultRegion?defaultRegion->qStringName():"NULL") << ")";
+    qDebug() << "Clear (" << locations.size() << ") postpone search" << pattern << "(default region:" << QString::fromStdString(defaultRegion?defaultRegion->name():"NULL") << ")";
     return;
   }
   
-  qDebug() << "Clear (" << locations.size() << ") search" << pattern << "(default region:" << (defaultRegion?defaultRegion->qStringName():"NULL") << ")";
+  qDebug() << "Clear (" << locations.size() << ") search" << pattern << "(default region:" << QString::fromStdString(defaultRegion?defaultRegion->name():"NULL") << ")";
   searching = true;
   lastRequestPattern = pattern;
   lastRequestDefaultRegion=defaultRegion;
@@ -381,7 +381,7 @@ QVariant LocationListModel::data(const QModelIndex &index, int role) const
   case LabelRole:
     return location->getLabel();
   case TypeRole:
-    if (location->getType()==LocationEntry::typeCoordinate)
+    if (location->getType()==LocationInfo::Type::typeCoordinate)
       return "coordinate";
     else
       return location->getObjectType();

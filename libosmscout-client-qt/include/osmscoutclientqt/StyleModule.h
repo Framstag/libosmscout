@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QThread>
 #include <QMutex>
+#include <QMap>
 
 #include <osmscoutclient/DBThread.h>
 

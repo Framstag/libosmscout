@@ -2,7 +2,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(HEADER_FILES
-    include/osmscoutclientqt/AdminRegionInfo.h
     include/osmscoutclientqt/ClientQtImportExport.h
     include/osmscoutclientqt/ElevationChartWidget.h
     include/osmscoutclientqt/ElevationModule.h
@@ -52,7 +51,6 @@ set(HEADER_FILES
     include/osmscoutclientqt/QtStdConverters.h
     include/osmscoutclientqt/RouteStep.h
     include/osmscoutclientqt/NearPOIModel.h
-    include/osmscoutclientqt/POILookupModule.h
     include/osmscoutclientqt/InstalledMapsModel.h
     include/osmscoutclientqt/Voice.h
     include/osmscoutclientqt/VoiceManager.h
@@ -108,7 +106,6 @@ set(SOURCE_FILES
     src/osmscoutclientqt/QtSettingsStorage.cpp
     src/osmscoutclientqt/QtStdConverters.cpp
     src/osmscoutclientqt/NearPOIModel.cpp
-    src/osmscoutclientqt/POILookupModule.cpp
     src/osmscoutclientqt/InstalledMapsModel.cpp
     src/osmscoutclientqt/Voice.cpp
     src/osmscoutclientqt/VoiceManager.cpp

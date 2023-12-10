@@ -42,6 +42,16 @@ extern OSMSCOUT_CLIENT_QT_API QDateTime TimestampToQDateTime(const osmscout::Tim
 
 extern OSMSCOUT_CLIENT_QT_API QList<QDir> PathVectorToQDirList(const std::vector<std::filesystem::path> &paths);
 
+template <typename T>
+QList<T> vectorToQList(const std::vector<T> &vec)
+{
+  QList<T> result;
+  for (const auto &o: vec) {
+    result << o;
+  }
+  return result;
+}
+
 }
 
 #endif //OSMSCOUT_CLIENT_QT_QTSTDCONVERTERS_H

@@ -20,13 +20,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <osmscoutclient/POILookupModule.h>
+
 #include <osmscoutclientqt/LocationEntry.h>
-#include <osmscoutclientqt/POILookupModule.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
 #include <QObject>
 #include <QAbstractListModel>
+
+#include <functional>
+#include <optional>
 
 namespace osmscout {
 
@@ -95,28 +99,36 @@ signals:
 
   void SearchingChanged(bool);
 
-  void lookupPOIRequest(int requestId,
-                        osmscout::BreakerRef breaker,
-                        osmscout::GeoCoord searchCenter,
-                        QStringList types,
-                        double maxDistance);
+  void lookupFinished(int requestId);
+  void lookupResult(int requestId, QList<LocationEntry> locations);
 
 public slots:
   void onLookupFinished(int requestId);
   void onLookupResult(int requestId, QList<LocationEntry> locations);
 
 private:
-  bool searching{false};
   int currentRequest{0};
   QList<LocationEntryRef> locations;
   osmscout::GeoCoord searchCenter{INVALID_COORD,INVALID_COORD};
   int resultLimit{100};
-  osmscout::BreakerRef breaker;
+  std::optional<POILookupModule::LookupFuture> future;
   Distance maxDistance{Distance::Of<Kilometer>(1)};
   QStringList types;
 
   POILookupModule *poiModule{nullptr};
   SettingsRef settings;
+
+  Slot<int> lookupFinishedSlot{ std::bind(&NearPOIModel::lookupFinished, this, std::placeholders::_1) };
+
+  Slot<int, POILookupModule::LookupResult> lookupResultSlot {
+    [this](int requestId, const POILookupModule::LookupResult &locationsVector) {
+      QList<LocationEntry> locations;
+      for (const auto &info: locationsVector) {
+        locations << LocationEntry(info);
+      }
+      emit lookupResult(requestId, locations);
+    }
+  };
 
 public:
   NearPOIModel();
@@ -134,7 +146,7 @@ public:
 
   inline bool isSearching() const
   {
-    return searching;
+    return future.has_value();
   }
 
   inline double GetLat() const

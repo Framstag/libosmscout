@@ -3,14 +3,17 @@ osmscoutclientIncDir = include_directories('.')
 osmscoutclientHeader = [
             'osmscoutclient/json/json.hpp',
             'osmscoutclient/json/json_fwd.hpp',
+            'osmscoutclient/AdminRegionInfo.h',
             'osmscoutclient/ClientImportExport.h',
             'osmscoutclient/DBInstance.h',
             'osmscoutclient/DBJob.h',
             'osmscoutclient/DBThread.h',
+            'osmscoutclient/LocationInfo.h',
             'osmscoutclient/MapDirectory.h',
             'osmscoutclient/MapManager.h',
             'osmscoutclient/MapProvider.h',
             'osmscoutclient/OnlineTileProvider.h',
+            'osmscoutclient/POILookupModule.h',
             'osmscoutclient/Settings.h',
             'osmscoutclient/VoiceProvider.h'
           ]

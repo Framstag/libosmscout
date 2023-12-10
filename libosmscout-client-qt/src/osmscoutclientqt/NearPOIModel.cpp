@@ -19,6 +19,7 @@
 
 #include <osmscoutclientqt/NearPOIModel.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
+#include <osmscoutclientqt/QtStdConverters.h>
 
 namespace osmscout {
 
@@ -27,31 +28,28 @@ NearPOIModel::NearPOIModel()
   poiModule=OSMScoutQt::GetInstance().MakePOILookupModule();
   settings=OSMScoutQt::GetInstance().GetSettings();
 
-  connect(this, &NearPOIModel::lookupPOIRequest,
-          poiModule, &POILookupModule::lookupPOIRequest,
-          Qt::QueuedConnection);
-
-  connect(poiModule, &POILookupModule::lookupAborted,
+  connect(this, &NearPOIModel::lookupFinished,
           this, &NearPOIModel::onLookupFinished,
           Qt::QueuedConnection);
-  connect(poiModule, &POILookupModule::lookupFinished,
-          this, &NearPOIModel::onLookupFinished,
-          Qt::QueuedConnection);
-  connect(poiModule, &POILookupModule::lookupResult,
+  connect(this, &NearPOIModel::lookupResult,
           this, &NearPOIModel::onLookupResult,
           Qt::QueuedConnection);
+
+  poiModule->lookupResult.Connect(lookupResultSlot);
+  poiModule->lookupAborted.Connect(lookupFinishedSlot);
+  poiModule->lookupAborted.Connect(lookupFinishedSlot);
 }
 
 NearPOIModel::~NearPOIModel()
 {
   locations.clear();
 
-  if (breaker){
-    breaker->Break();
-    breaker.reset();
+  if (future){
+    future->Cancel();
+    future.reset();
   }
   if (poiModule!=nullptr){
-    poiModule->deleteLater();
+    poiModule->DeleteLater();
     poiModule=nullptr;
   }
 }
@@ -70,7 +68,7 @@ QVariant NearPOIModel::data(const QModelIndex &index, int role) const
     case LabelRole:
       return location->getLabel();
     case TypeRole:
-      if (location->getType()==LocationEntry::typeCoordinate)
+      if (location->getType()==LocationInfo::Type::typeCoordinate)
         return "coordinate";
       else
         return location->getObjectType();
@@ -152,8 +150,8 @@ void NearPOIModel::onLookupFinished(int requestId)
   if (requestId!=currentRequest){
     return;
   }
-  searching=false;
-  emit SearchingChanged(searching);
+  future.reset();
+  emit SearchingChanged(future.has_value());
 }
 
 void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocations)
@@ -188,8 +186,9 @@ void NearPOIModel::onLookupResult(int requestId, QList<LocationEntry> newLocatio
 
 void NearPOIModel::lookupPOI()
 {
-  if (breaker){
-    breaker->Break();
+  if (future){
+    future->Cancel();
+    future.reset();
   }
 
   if (!locations.isEmpty()){
@@ -205,14 +204,10 @@ void NearPOIModel::lookupPOI()
       maxDistance.AsMeter()>0 &&
       resultLimit>0){
 
-    breaker=std::make_shared<osmscout::ThreadedBreaker>();
-    searching=true;
     // TODO: use resultLimit
-    emit lookupPOIRequest(++currentRequest, breaker, searchCenter, types, maxDistance.AsMeter());
-  }else{
-    searching=false;
+    future = poiModule->lookupPOIRequest(++currentRequest, searchCenter, QStringListToStringVector(types), maxDistance);
   }
-  emit SearchingChanged(searching);
+  emit SearchingChanged(future.has_value());
 }
 
 }
