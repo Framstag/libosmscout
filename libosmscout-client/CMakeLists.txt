@@ -52,6 +52,11 @@ if(OpenMP_CXX_FOUND)
 	target_link_libraries(OSMScoutClient OpenMP::OpenMP_CXX)
 endif()
 
+if(MARISA_FOUND)
+	target_include_directories(OSMScoutClient PUBLIC ${MARISA_INCLUDE_DIRS})
+	target_link_libraries(OSMScoutClient ${MARISA_LIBRARIES})
+endif()
+
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
 	set_target_properties(OSMScoutClient PROPERTIES
         FRAMEWORK TRUE
