@@ -79,7 +79,7 @@ void OsmTileDownloader::download(uint32_t zoomLevel, uint32_t x, uint32_t y)
   QString server = QString::fromStdString(servers[serverNumber % servers.size()]);
 
   QUrl tileUrl(server.arg(zoomLevel).arg(x).arg(y));
-  osmscout::log.Debug() << "Download tile" << tileUrl.toString().toStdString() << "(current thread:" << QThread::currentThread() << ")";
+  osmscout::log.Debug() << "Download tile " << tileUrl.toString().toStdString();
 
   TileCacheKey key = {zoomLevel, x, y};
 
@@ -102,7 +102,7 @@ void OsmTileDownloader::fileDownloaded(const TileCacheKey &key, QNetworkReply *r
   QUrl url = reply->url();
 
   if (reply->error() != QNetworkReply::NoError){
-    osmscout::log.Warn() << "Downloading" << url.toString().toStdString() << "failed with" << reply->errorString().toStdString();
+    osmscout::log.Warn() << "Downloading " << url.toString().toStdString() << " failed with " << reply->errorString().toStdString();
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
     serverNumber = qrand(); // try another server for future requests
 #else
@@ -114,7 +114,7 @@ void OsmTileDownloader::fileDownloaded(const TileCacheKey &key, QNetworkReply *r
 
     QImage image;
     if (image.loadFromData(downloadedData, Q_NULLPTR)){
-      osmscout::log.Debug()  << "Downloaded tile " << url.toString().toStdString() << " (current thread: " << QThread::currentThread() << ")";
+      osmscout::log.Debug() << "Downloaded tile " << url.toString().toStdString();
 
       emit downloaded(key.zoomLevel, key.xtile, key.ytile, image, downloadedData);
     }else{
