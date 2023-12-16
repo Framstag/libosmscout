@@ -36,7 +36,7 @@ NearPOIModel::NearPOIModel()
           Qt::QueuedConnection);
 
   poiModule->lookupResult.Connect(lookupResultSlot);
-  poiModule->lookupAborted.Connect(lookupFinishedSlot);
+  poiModule->lookupFinished.Connect(lookupFinishedSlot);
   poiModule->lookupAborted.Connect(lookupFinishedSlot);
 }
 

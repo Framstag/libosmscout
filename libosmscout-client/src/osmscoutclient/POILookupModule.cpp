@@ -180,6 +180,7 @@ POILookupModule::LookupFuture POILookupModule::lookupPOIRequest(int requestId,
       }
     });
 
+    lookupFinished.Emit(requestId);
     return result;
   });
 }
