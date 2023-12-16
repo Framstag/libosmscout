@@ -77,7 +77,6 @@ private:
   size_t                        epoch{0};
 
 signals:
-  //void TileStatusChanged(const osmscout::TileRef& tile);
   void TriggerMapRenderingSignal(const MapViewStruct& request, size_t requestEpoch);
   void TriggerInitialRendering();
 
