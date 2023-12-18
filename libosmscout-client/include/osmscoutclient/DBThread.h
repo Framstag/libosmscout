@@ -105,50 +105,34 @@ public:
 
   // slots
   Slot<> toggleDaylight{
-    [this](){
-      ToggleDaylight();
-    }
+    std::bind(&DBThread::ToggleDaylight, this)
   };
 
   Slot<std::string, bool> setStyleFlag{
-    [this](const std::string &key, bool value) {
-      SetStyleFlag(key, value);
-    }
+    std::bind(&DBThread::SetStyleFlag, this, std::placeholders::_1, std::placeholders::_2)
   };
 
   Slot<std::string> reloadStyle{
-    [this](const std::string &suffix) {
-      ReloadStyle(suffix);
-    }
+    std::bind(&DBThread::ReloadStyle, this, std::placeholders::_1)
   };
 
   Slot<std::string, std::unordered_map<std::string,bool>, std::string> loadStyle {
-    [this](const std::string &stylesheetFilename,
-           const std::unordered_map<std::string,bool> &stylesheetFlags,
-           const std::string &suffix) {
-      LoadStyle(stylesheetFilename, stylesheetFlags, suffix);
-    }
+    std::bind(&DBThread::LoadStyle, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
   };
 
   Slot<> initialize{
-    [this](){
-      Initialize();
-    }
+    std::bind(&DBThread::Initialize, this)
   };
 
   Slot<std::vector<std::filesystem::path>> databaseListChangedSlot {
-    [this](const std::vector<std::filesystem::path> &paths) {
-      OnDatabaseListChanged(paths);
-    }
+    std::bind(&DBThread::OnDatabaseListChanged, this, std::placeholders::_1)
   };
 
   /**
    * Flush all caches for db that was not used in recent idleMs
    */
   Slot<std::chrono::milliseconds> flushCaches {
-    [this](const std::chrono::milliseconds &idleMs) {
-      FlushCaches(idleMs);
-    }
+    std::bind(&DBThread::FlushCaches, this, std::placeholders::_1)
   };
 
 private:
