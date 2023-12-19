@@ -119,6 +119,7 @@ signals:
   void showAltLanguageSignal(bool);
   void unitsSignal(QString);
   void stylesheetFilenameChanged();
+  void databaseLoadFinished(const osmscout::GeoBox &geoBox);
 
 private:
   // slots
@@ -159,12 +160,14 @@ private:
   };
 
   Slot<> stylesheetFilenameChangedSlot{ std::bind(&MapRenderer::stylesheetFilenameChanged, this) };
+  Slot<GeoBox> databaseLoadFinishedSlot{ std::bind(&MapRenderer::databaseLoadFinished, this, std::placeholders::_1) };
 
 public slots:
   virtual void Initialize() = 0;
 
   virtual void InvalidateVisualCache() = 0;
   virtual void onStylesheetFilenameChanged();
+  virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox) = 0;
 
   virtual void onMapDPIChange(double dpi);
   virtual void onRenderSeaChanged(bool);

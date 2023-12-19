@@ -82,24 +82,22 @@ private:
   Slot<OnlineTileProvider> onlineTileProviderSlot{ std::bind(&TiledMapRenderer::onlineTileProviderSignal, this, std::placeholders::_1) };
   Slot<bool> onlineTileEnabledSlot{ std::bind(&TiledMapRenderer::onlineTilesEnabledSignal, this, std::placeholders::_1) };
   Slot<bool> offlineMapChangedSlot{ std::bind(&TiledMapRenderer::offlineMapChangedSignal, this, std::placeholders::_1) };
-  Slot<GeoBox> databaseLoadFinishedSlot{ std::bind(&TiledMapRenderer::databaseLoadFinished, this, std::placeholders::_1) };
 
 signals:
   void onlineTileProviderSignal(OnlineTileProvider provider);
   void onlineTilesEnabledSignal(bool);
   void offlineMapChangedSignal(bool);
-  void databaseLoadFinished(const GeoBox &geoBox);
 
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
   virtual void onStylesheetFilenameChanged();
+  virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox);
 
   void onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uint32_t ytile);
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, QByteArray downloadedData);
   void tileDownloadFailed(uint32_t zoomLevel, uint32_t x, uint32_t y, bool zoomLevelOutOfRange);
-  void onDatabaseLoaded(osmscout::GeoBox boundingBox);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
 
   void onlineTileProviderChanged(const OnlineTileProvider &);

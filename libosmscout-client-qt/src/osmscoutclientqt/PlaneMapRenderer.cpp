@@ -85,12 +85,17 @@ PlaneMapRenderer::~PlaneMapRenderer()
     delete loadJob;
 }
 
+void PlaneMapRenderer::onDatabaseLoaded(osmscout::GeoBox boundingBox)
+{
+  InvalidateVisualCache();
+}
+
 void PlaneMapRenderer::InvalidateVisualCache()
 {
   {
     QMutexLocker finishedLocker(&finishedMutex);
     osmscout::log.Debug() << "Invalidate finished image";
-    epoch++;;
+    epoch++;
   }
   emit Redraw();
 }

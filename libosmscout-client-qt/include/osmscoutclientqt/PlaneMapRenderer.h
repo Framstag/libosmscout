@@ -83,6 +83,8 @@ signals:
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
+  virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox);
+
   void DrawMap();
   void HandleTileStatusChanged(QString dbPath,const osmscout::TileRef tile);
   void onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>>);
