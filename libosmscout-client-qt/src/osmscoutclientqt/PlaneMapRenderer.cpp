@@ -85,7 +85,7 @@ PlaneMapRenderer::~PlaneMapRenderer()
     delete loadJob;
 }
 
-void PlaneMapRenderer::onDatabaseLoaded(osmscout::GeoBox boundingBox)
+void PlaneMapRenderer::onDatabaseLoaded([[maybe_unused]] osmscout::GeoBox boundingBox)
 {
   InvalidateVisualCache();
 }
