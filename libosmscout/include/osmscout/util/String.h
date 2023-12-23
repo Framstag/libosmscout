@@ -418,8 +418,8 @@ namespace osmscout {
    *
    * Returned string is locale aware, UTF-8 encoded
    */
-  extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size, const Locale &locale = Locale::ByEnvironment());
-  extern OSMSCOUT_API std::string ByteSizeToString(double size, const Locale &locale = Locale::ByEnvironment());
+  extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size, const Locale &locale = Locale::ByEnvironmentSafe());
+  extern OSMSCOUT_API std::string ByteSizeToString(double size, const Locale &locale = Locale::ByEnvironmentSafe());
 
   /**
    * \ingroup Util

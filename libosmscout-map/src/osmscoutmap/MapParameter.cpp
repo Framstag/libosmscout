@@ -62,7 +62,7 @@ namespace osmscout {
     warnObjectCountLimit(0),
     warnCoordCountLimit(0),
     showAltLanguage(false),
-    locale{Locale::ByEnvironment()}
+    locale{Locale::ByEnvironmentSafe()}
   {
     // no code
   }

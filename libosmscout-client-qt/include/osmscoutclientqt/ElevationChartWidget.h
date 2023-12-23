@@ -186,7 +186,7 @@ protected:
   int textPixelSize=14;
   int textPadding=4;
 
-  Locale locale=Locale::ByEnvironment();
+  Locale locale=Locale::ByEnvironmentSafe();
 };
 
 }
