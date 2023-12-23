@@ -56,7 +56,6 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   settings->onlineTileProviderChanged.Connect(onlineTileProviderSlot);
   settings->onlineTilesEnabledChanged.Connect(onlineTileEnabledSlot);
   settings->offlineMapChanged.Connect(offlineMapChangedSlot);
-  dbThread->databaseLoadFinished.Connect(databaseLoadFinishedSlot);
 
   connect(this, &TiledMapRenderer::onlineTileProviderSignal,
           this, &TiledMapRenderer::onlineTileProviderChanged,
@@ -68,9 +67,6 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
           this, &TiledMapRenderer::onOfflineMapChanged,
           Qt::QueuedConnection);
 
-  connect(this, &TiledMapRenderer::databaseLoadFinished,
-          this, &TiledMapRenderer::onDatabaseLoaded,
-          Qt::QueuedConnection);
   //
   // Make sure that we always decouple caller and receiver even if they are running in the same thread
   // else we might get into a dead lock
@@ -217,7 +213,7 @@ void TiledMapRenderer::onDatabaseLoaded(osmscout::GeoBox boundingBox)
   {
     QMutexLocker locker(&tileCacheMutex);
     onlineTileCache.invalidate(boundingBox);
-    offlineTileCache.invalidate(boundingBox);
+    offlineTileCache.incEpoch();
   }
 
   emit Redraw();

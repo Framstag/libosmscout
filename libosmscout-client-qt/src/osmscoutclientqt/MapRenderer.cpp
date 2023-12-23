@@ -51,6 +51,7 @@ MapRenderer::MapRenderer(QThread *thread,
   settings->showAltLanguageChanged.Connect(showAltLanguageSlot);
   settings->unitsChanged.Connect(unitsSlot);
   dbThread->stylesheetFilenameChanged.Connect(stylesheetFilenameChangedSlot);
+  dbThread->databaseLoadFinished.Connect(databaseLoadFinishedSlot);
 
   connect(this, &MapRenderer::mapDpiChangeSignal,
           this, &MapRenderer::onMapDPIChange,
@@ -75,6 +76,9 @@ MapRenderer::MapRenderer(QThread *thread,
           this, &MapRenderer::Initialize);
   connect(this, &MapRenderer::stylesheetFilenameChanged,
           this, &MapRenderer::onStylesheetFilenameChanged,
+          Qt::QueuedConnection);
+  connect(this, &MapRenderer::databaseLoadFinished,
+          this, &MapRenderer::onDatabaseLoaded,
           Qt::QueuedConnection);
 }
 
