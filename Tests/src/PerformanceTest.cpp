@@ -57,8 +57,8 @@
 #include <gperftools/heap-profiler.h>
 #include <malloc.h> // mallinfo
 #else
-#if defined(HAVE_MALLINFO)
-#include <malloc.h> // mallinfo
+#if defined(HAVE_MALLINFO2)
+#include <malloc.h> // mallinfo2
 #endif
 #endif
 
@@ -886,11 +886,11 @@ int main(int argc, char* argv[])
         }
         struct mallinfo alloc_info = tc_mallinfo();
 #else
-#if defined(HAVE_MALLINFO)
-        struct mallinfo alloc_info = mallinfo();
+#if defined(HAVE_MALLINFO2)
+        struct mallinfo2 alloc_info = mallinfo2();
 #endif
 #endif
-#if defined(HAVE_MALLINFO) || defined(PERF_TEST_GPERFTOOLS_USAGE)
+#if defined(HAVE_MALLINFO2) || defined(PERF_TEST_GPERFTOOLS_USAGE)
         std::cout << "memory usage: " << formatAlloc(alloc_info.uordblks) << std::endl;
         stats.allocMax = std::max(stats.allocMax, (double) alloc_info.uordblks);
         stats.allocSum = stats.allocSum + (double) alloc_info.uordblks;
@@ -973,7 +973,7 @@ int main(int argc, char* argv[])
     std::cout << "Level: " << stats.level << std::endl;
     std::cout << "Tiles: " << stats.tileCount << " (load " << args.loadRepeat << "x, drawn " << args.drawRepeat << "x)" << std::endl;
 
-#if defined(HAVE_MALLINFO) || defined(PERF_TEST_GPERFTOOLS_USAGE)
+#if defined(HAVE_MALLINFO2) || defined(PERF_TEST_GPERFTOOLS_USAGE)
     std::cout << " Used memory: ";
     std::cout << "max: " << formatAlloc(stats.allocMax) << " ";
     std::cout << "avg: " << formatAlloc(stats.allocSum / (stats.tileCount * args.loadRepeat)) << std::endl;
