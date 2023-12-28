@@ -308,8 +308,23 @@ TEST_CASE("Local aware number to string")
 {
   osmscout::Locale locale;
   locale.SetThousandsSeparator(" ");
+  locale.SetDecimalSeparator(".");
   REQUIRE(osmscout::NumberToString(1002030, locale) == "1 002 030");
   REQUIRE(osmscout::NumberToString(-1002030, locale) == "-1 002 030");
+
+  REQUIRE(osmscout::FloatToString(M_PI, locale, 2) == "3.14");
+  REQUIRE(osmscout::FloatToString(-1002030.123456, locale, 6) == "-1 002 030.123 456");
+  REQUIRE(osmscout::FloatToString(-1002030.125, locale, 2) == "-1 002 030.13");
+}
+
+TEST_CASE("Byte size to string")
+{
+  osmscout::Locale locale;
+  locale.SetThousandsSeparator("'");
+  locale.SetDecimalSeparator(",");
+  locale.SetUnitsSeparator(" ");
+  REQUIRE(osmscout::ByteSizeToString(1063256064.0, locale) == "1'014,0 MiB");
+  REQUIRE(osmscout::ByteSizeToString(6406241158.0, locale) == "6,0 GiB");
 }
 
 TEST_CASE("Trim string")

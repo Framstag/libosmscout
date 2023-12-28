@@ -38,6 +38,7 @@ jobs:
         run: cmake --build build
       - name: Run tests
         run:  "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-test
+               LC_ALL=C
                ctest -j 4 --output-on-failure --exclude-regex PerformanceTest"
         working-directory: build
 
@@ -69,6 +70,7 @@ jobs:
       - name: Build project
         run: meson compile -C debug
       - name: Run tests
-        run: meson test -C debug --print-errorlogs
+        run: "LC_ALL=C
+              meson test -C debug --print-errorlogs"
         env:
           LANG: en_US.utf8

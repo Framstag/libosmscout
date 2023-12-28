@@ -48,7 +48,7 @@ CancelableFuture<bool> MapManager::LookupDatabases()
       // https://en.cppreference.com/w/cpp/filesystem/is_directory
       // https://en.cppreference.com/w/cpp/filesystem/status
       if (!std::filesystem::exists(lookupDir) || !std::filesystem::is_directory(lookupDir)) {
-        osmscout::log.Warn() << "Lookup dir" << lookupDir.string() << "doesn't exist or isn't a directory";
+        osmscout::log.Warn() << "Lookup dir " << lookupDir.string() << " doesn't exist or isn't a directory";
         continue;
       }
 

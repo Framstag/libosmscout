@@ -74,9 +74,19 @@ namespace osmscout {
    *
    * @param value
    * @param locale
-   * @return
+   * @return UTF-8 string
    */
   extern OSMSCOUT_API std::string NumberToString(long value, const Locale &locale);
+
+  /**
+   * Returns locale-aware string representation of number
+   *
+   * @param value
+   * @param locale
+   * @param precision
+   * @return UTF-8 string
+   */
+  extern OSMSCOUT_API std::string FloatToString(double value, const Locale &locale, uint32_t precision = 3);
 
   /**
    * \ingroup Util
@@ -403,9 +413,13 @@ namespace osmscout {
   /**
    * \ingroup Util
    *
+   * Prints byte size with short, human readable form by ISO/IEC 80000 standard.
+   * It means that KiB stands for 1024 bytes, MiB for 1024^2, GiB 1024^3...
+   *
+   * Returned string is locale aware, UTF-8 encoded
    */
-  extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size);
-  extern OSMSCOUT_API std::string ByteSizeToString(double size);
+  extern OSMSCOUT_API std::string ByteSizeToString(FileOffset size, const Locale &locale = Locale::ByEnvironmentSafe());
+  extern OSMSCOUT_API std::string ByteSizeToString(double size, const Locale &locale = Locale::ByEnvironmentSafe());
 
   /**
    * \ingroup Util

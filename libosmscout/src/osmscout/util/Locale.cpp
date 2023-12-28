@@ -35,7 +35,7 @@ namespace osmscout {
   }
   }
 
-  Locale Locale::ByEnvironment(std::locale cppLocale)
+  Locale Locale::FromStdLocale(std::locale cppLocale)
   {
     Locale locale;
 
