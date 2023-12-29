@@ -52,7 +52,7 @@ jobs:
       - name: Create gcov files
         run:  mkdir gcov && cd gcov && gcov -p ../debug//*/*/*
       - name: SonarCloud Scan
-        run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.login=$SONAR_TOKEN
+        run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.token=$SONAR_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
