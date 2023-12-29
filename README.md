@@ -75,5 +75,3 @@ Current build status:
 |Windows, Visual Studio 2019|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml)|
 |Android (on Ubuntu 18.04)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml)|
 |Linux (with sanitizers)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml)|
-|Windows|Appveyor|[![Build status](https://ci.appveyor.com/api/projects/status/s38jd7v5cwhwra8t?svg=true)](https://ci.appveyor.com/project/Framstag/libosmscout)|
-|Linux|Wercker|[![wercker status](https://app.wercker.com/status/39a4ba230c28d1d9e4ecae6158b283e8/s/master "wercker status")](https://app.wercker.com/project/byKey/39a4ba230c28d1d9e4ecae6158b283e8)|
