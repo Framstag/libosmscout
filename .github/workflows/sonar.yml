@@ -40,14 +40,8 @@ jobs:
               qttools5-dev qtmultimedia5-dev
               libglm-dev libglew-dev freeglut3 freeglut3-dev
               libmarisa-dev"
-      - name: Prepare Sonar scanner
-        run: |
-            wget -nv https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-            unzip -q sonar-scanner-cli-5.0.1.3006-linux.zip
-            echo "${PWD}/sonar-scanner-5.0.1.3006-linux/bin/" >> $GITHUB_PATH
-            wget -nv https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-            unzip -q build-wrapper-linux-x86.zip
-            echo "${PWD}/build-wrapper-linux-x86" >> $GITHUB_PATH
+      - name: Install sonar-scanner and build-wrapper
+        uses: sonarsource/sonarcloud-github-c-cpp@v2
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized -Db_coverage=true --unity on debug
         env:
@@ -58,7 +52,7 @@ jobs:
       - name: Create gcov files
         run:  mkdir gcov && cd gcov && gcov -p ../debug//*/*/*
       - name: SonarCloud Scan
-        run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.login=$SONAR_TOKEN
+        run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.token=$SONAR_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
