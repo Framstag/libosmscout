@@ -63,45 +63,42 @@ namespace osmscout {
 
   AccessFeatureValue RouteDataGenerator::GetAccess(const FeatureValueBuffer& buffer) const
   {
-    AccessFeatureValue *accessValue=accessReader->GetValue(buffer);
+    const AccessFeatureValue *accessValue=accessReader->GetValue(buffer);
 
     if (accessValue!=nullptr) {
       return *accessValue;
     }
-    else {
-      return AccessFeatureValue (buffer.GetType()->GetDefaultAccess());
-    }
+
+    return AccessFeatureValue (buffer.GetType()->GetDefaultAccess());
   }
 
   uint8_t RouteDataGenerator::GetMaxSpeed(const Way& way) const
   {
-    MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader->GetValue(way.GetFeatureValueBuffer());
+    const MaxSpeedFeatureValue *maxSpeedValue=maxSpeedReader->GetValue(way.GetFeatureValueBuffer());
 
     if (maxSpeedValue!=nullptr) {
       return maxSpeedValue->GetMaxSpeed();
     }
-    else {
-      return 0;
-    }
+
+    return 0;
   }
 
   uint8_t RouteDataGenerator::GetGrade(const Way& way) const
   {
-    GradeFeatureValue *gradeValue=gradeReader->GetValue(way.GetFeatureValueBuffer());
+    const GradeFeatureValue *gradeValue=gradeReader->GetValue(way.GetFeatureValueBuffer());
 
     if (gradeValue!=nullptr) {
       return gradeValue->GetGrade();
     }
-    else {
-      return 1;
-    }
+
+    return 1;
   }
 
   uint8_t RouteDataGenerator::CopyFlags(const Area::Ring& ring) const
   {
-    uint8_t                      flags=0;
-    AccessFeatureValue           access=GetAccess(ring.GetFeatureValueBuffer());
-    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(ring.GetFeatureValueBuffer());
+    uint8_t                            flags=0;
+    AccessFeatureValue                 access=GetAccess(ring.GetFeatureValueBuffer());
+    const AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(ring.GetFeatureValueBuffer());
 
 
     if (accessRestrictedValue!=nullptr) {
@@ -135,9 +132,9 @@ namespace osmscout {
 
   uint8_t RouteDataGenerator::CopyFlagsForward(const Way& way) const
   {
-    uint8_t                      flags=0;
-    AccessFeatureValue           access=GetAccess(way.GetFeatureValueBuffer());
-    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
+    uint8_t                            flags=0;
+    AccessFeatureValue                 access=GetAccess(way.GetFeatureValueBuffer());
+    const AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
 
     if (accessRestrictedValue!=nullptr) {
       if (!accessRestrictedValue->CanAccessFoot()) {
@@ -170,9 +167,9 @@ namespace osmscout {
 
   uint8_t RouteDataGenerator::CopyFlagsBackward(const Way& way) const
   {
-    uint8_t            flags=0;
-    AccessFeatureValue access=GetAccess(way.GetFeatureValueBuffer());
-    AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
+    uint8_t                            flags=0;
+    AccessFeatureValue                 access=GetAccess(way.GetFeatureValueBuffer());
+    const AccessRestrictedFeatureValue *accessRestrictedValue=accessRestrictedReader->GetValue(way.GetFeatureValueBuffer());
 
     if (accessRestrictedValue!=nullptr) {
       if (!accessRestrictedValue->CanAccessFoot()) {
@@ -1725,6 +1722,8 @@ namespace osmscout {
                                   const ImportParameter& parameter,
                                   Progress& progress)
   {
+    using namespace std::string_literals;
+
     // List of restrictions for a way
     ViaTurnRestrictionMap              restrictions;
 
@@ -1837,7 +1836,7 @@ namespace osmscout {
       std::string variantFilename=AppendFileToDir(parameter.GetDestinationDirectory(),
                                                   router.GetVariantFilename());
 
-      progress.SetAction(std::string("Writing route graph '")+dataFilename+"'");
+      progress.SetAction("Writing route graph to '"s+dataFilename+"' and '"s+variantFilename+"'"s);
 
       WriteRouteGraph(parameter,
                       progress,
