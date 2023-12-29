@@ -240,7 +240,7 @@ set(HAVE_LIB_OPENGL ${OPENGL_FOUND})
 find_package(GLEW QUIET)
 
 find_package(glm QUIET)
-if(NOT TARGET glm)
+if(NOT TARGET glm::glm)
   message(STATUS "glm NOT found")
   find_package(Git QUIET)
   if(Git_FOUND)
