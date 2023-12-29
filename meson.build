@@ -365,6 +365,10 @@ subdir('Demos')
 subdir('DumpData')
 subdir('PublicTransportMap')
 
+if buildGpx
+  subdir('WellScoutedRoute')
+endif
+
 if buildOSMScout2
   subdir('OSMScout2')
 endif
