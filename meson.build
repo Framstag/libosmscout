@@ -59,7 +59,6 @@ endif
 # Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
-iconvAvailable = compiler.has_header('iconv.h')
 codecvtAvailable = compiler.has_header('codecvt')
 jniAvailable = compiler.has_header('jni.h')
 
@@ -83,7 +82,6 @@ swigExe = find_program('swig', required: false)
 # Base
 mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
-iconvDep = compiler.find_library('iconv', required: false)
 if compiler.get_id()=='clang' or compiler.get_id()=='msvc'
   openmpDep = dependency('', required: false)
 else

@@ -17,7 +17,7 @@ osmscoutgpx = library('osmscout_gpx',
                       osmscoutgpxSrc,
                       include_directories: [osmscoutgpxIncDir, osmscoutIncDir],
                       cpp_args: cppArgs,
-                      dependencies: [mathDep, threadDep, xml2Dep, iconvDep, zlibDep],
+                      dependencies: [mathDep, threadDep, xml2Dep, zlibDep],
                       link_with: [osmscout],
                       version: libraryVersion,
                       install: true)
