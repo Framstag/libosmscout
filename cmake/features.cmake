@@ -180,30 +180,6 @@ target_exists(protobuf::libprotobuf HAVE_LIB_PROTOBUF)
 find_package(ZLIB QUIET)
 target_exists(ZLIB::ZLIB HAVE_LIB_ZLIB)
 
-find_package(Iconv QUIET)
-if(TARGET Iconv::Iconv)
-  set(HAVE_ICONV TRUE)
-
-  cmake_push_check_state(RESET)
-  set(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR})
-  set(CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARIES})
-  if(MSVC)
-    set(CMAKE_REQUIRED_FLAGS /we4028 /fp:fast /wd4251 /Oi)
-  endif()
-  check_prototype_definition("iconv"
-          "size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)"
-          "-1"
-          "iconv.h"
-          ICONV_SECOND_ARGUMENT_IS_CONST)
-  cmake_pop_check_state()
-
-  if(${ICONV_SECOND_ARGUMENT_IS_CONST})
-    set(ICONV_CONST "const")
-  endif()
-else()
-  message(WARNING "No iconv support")
-endif()
-
 find_package(LibLZMA QUIET)
 
 find_package(PNG QUIET)

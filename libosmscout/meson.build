@@ -27,7 +27,7 @@ osmscout = library('osmscout',
                    osmscoutSrc,
                    include_directories: osmscoutIncDir,
                    cpp_args: cppArgs,
-                   dependencies: [mathDep, threadDep, openmpDep, iconvDep, marisaDep],
+                   dependencies: [mathDep, threadDep, openmpDep, marisaDep],
                    link_args: link_args,
                    version: libraryVersion,
                    install: true)
