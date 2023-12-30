@@ -34,7 +34,7 @@
 
 #include <osmscoutimport/Import.h>
 
-static std::string VehcileMaskToString(osmscout::VehicleMask vehicleMask)
+static std::string VehicleMaskToString(osmscout::VehicleMask vehicleMask)
 {
   std::string result;
 
@@ -308,7 +308,7 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
 
   for (const auto& router : parameter.GetRouter()) {
-    progress.Info(std::string("Router: ")+VehcileMaskToString(router.GetVehicleMask())+ " - '"+router.GetFilenamebase()+"'");
+    progress.Info(std::string("Router: ") + VehicleMaskToString(router.GetVehicleMask()) + " - '" + router.GetFilenamebase() + "'");
   }
 
   progress.Info(std::string("StrictAreas: ")+

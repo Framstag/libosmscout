@@ -140,6 +140,14 @@ if(NOT BUILD_SHARED_LIBS AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLAN
 endif()
 
 # check libraries and tools
+macro(target_exists target var)
+  if(TARGET ${target})
+    set(${var} 1)
+  else()
+    set(${var} 0)
+  endif()
+endmacro()
+
 if(NOT IOS)
   find_package(Marisa)
 endif()
@@ -160,17 +168,17 @@ if (TARGET LibXml2::LibXml2 AND NOT BUILD_SHARED_LIBS)
     list(APPEND LIBXML2_LIBRARIES "dl")
   endif()
 endif()
-set(HAVE_LIB_XML $<TARGET_EXISTS:LibXml2>)
-set(OSMSCOUT_GPX_HAVE_LIB_XML $<TARGET_EXISTS:LibXml2>)
+target_exists(LibXml2::LibXml2 HAVE_LIB_XML)
+target_exists(LibXml2::LibXml2 OSMSCOUT_GPX_HAVE_LIB_XML)
 
 find_package(Protobuf QUIET)
 if (TARGET protobuf::libprotobuf AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")
 endif()
-set(HAVE_LIB_PROTOBUF $<TARGET_EXISTS:protobuf::libprotobuf>)
+target_exists(protobuf::libprotobuf HAVE_LIB_PROTOBUF)
 
 find_package(ZLIB QUIET)
-set(HAVE_LIB_ZLIB $<TARGET_EXISTS:ZLIB::ZLIB>)
+target_exists(ZLIB::ZLIB HAVE_LIB_ZLIB)
 
 find_package(Iconv QUIET)
 if(TARGET Iconv::Iconv)
@@ -223,7 +231,7 @@ set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
 
 find_package(harfbuzz QUIET)
-set(HAVE_LIB_HARFBUZZ $<TARGET_EXISTS:harfbuzz::harfbuzz>)
+target_exists(harfbuzz::harfbuzz HAVE_LIB_HARFBUZZ)
 
 set(OpenGL_GL_PREFERENCE "GLVND") # Prever non-legacy OpenGL libraries
 find_package(OpenGL QUIET)
@@ -232,7 +240,7 @@ set(HAVE_LIB_OPENGL ${OPENGL_FOUND})
 find_package(GLEW QUIET)
 
 find_package(glm QUIET)
-if(NOT TARGET glm)
+if(NOT TARGET glm::glm)
   message(STATUS "glm NOT found")
   find_package(Git QUIET)
   if(Git_FOUND)

@@ -69,7 +69,7 @@ osmscout_library_project(
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutmapopengl
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapopengl/MapOpenGLFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map OpenGL::GL glm GLEW::GLEW PNG::PNG Freetype::Freetype
+	TARGET OSMScout::OSMScout OSMScout::Map OpenGL::GL glm::glm GLEW::GLEW PNG::PNG Freetype::Freetype
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
