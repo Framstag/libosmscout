@@ -12,7 +12,4 @@ import AppKit
 class AppDelegate: NSResponder, NSApplicationDelegate {
     var window : NSWindow? = nil
     
-    func application(_ aNotification : NSNotification) {
-    }
-    
 }
