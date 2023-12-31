@@ -68,7 +68,7 @@ namespace osmscout {
         Magnification mag(zoom);
         projection.Set(OSMTileId((uint32_t)x,(uint32_t)y), mag, dpi, (width+1), (height+1));
         GeoBox boundingBox;
-        projection.GetDimensions(boundingBox);
+        boundingBox = projection.GetDimensions();
         
         std::list<osmscout::TileRef> tiles;
         mapService->LookupTiles(projection,tiles);

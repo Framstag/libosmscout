@@ -19,6 +19,7 @@
 #include <osmscoutmap/StyleConfig.h>
 #include <osmscoutmap/MapService.h>
 #include <osmscout/location/LocationService.h>
+#include <osmscout/projection/TileProjection.h>
 
 namespace osmscout {
     class MyBreaker : public Breaker {
@@ -46,7 +47,7 @@ namespace osmscout {
         bool                isDatabaseOpened;
         StyleConfigRef      styleConfig;
         MapPainterIOS       *mapPainter;
-        TileProjection      projection;
+        TileProjection          projection;
         MapParameter        drawParameter;
         std::shared_ptr<MyBreaker> drawBreaker;
         double              loadedLatMin;

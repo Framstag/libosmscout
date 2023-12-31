@@ -11,12 +11,8 @@
 		E501875823CA77610055F4B2 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E501875723CA77610055F4B2 /* Media.xcassets */; };
 		E501876323CA99800055F4B2 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E501876223CA99800055F4B2 /* libiconv.tbd */; };
 		E50B832C15E0136800C685B3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E50B832A15E0136800C685B3 /* InfoPlist.strings */; };
-		E50B832E15E0136800C685B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B832D15E0136800C685B3 /* main.m */; };
 		E50B833215E0136800C685B3 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = E50B833015E0136800C685B3 /* Credits.rtf */; };
-		E50B833515E0136800C685B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B833415E0136800C685B3 /* AppDelegate.m */; };
 		E50B833815E0136900C685B3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E50B833615E0136900C685B3 /* MainMenu.xib */; };
-		E50B856815E0219200C685B3 /* OSMScoutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856715E0219200C685B3 /* OSMScoutViewController.m */; };
-		E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E50B856A15E021DD00C685B3 /* OSMScoutView.m */; };
 		E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
 		E51A610422C57414007316F9 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610322C573CA007316F9 /* CoreText.framework */; };
 		E51A610F22C57B91007316F9 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A610022C5738D007316F9 /* Cocoa.framework */; };
@@ -24,6 +20,8 @@
 		E51A611122C57BA6007316F9 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E51A60FD22C57337007316F9 /* CoreLocation.framework */; };
 		E51A611222C57BAC007316F9 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E50B832415E0136800C685B3 /* AppKit.framework */; };
 		E51A611322C57BB3007316F9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E50B832615E0136800C685B3 /* Foundation.framework */; };
+		E5437DF92B40298A008E508F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5437DF82B40298A008E508F /* AppDelegate.swift */; };
+		E5437E022B406D35008E508F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5437E012B406D35008E508F /* AppDelegate.swift */; };
 		E5653B591F4EF59D00EF6212 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */; };
 		E5653B5E1F4EF66E00EF6212 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5D1F4EF66E00EF6212 /* UIKit.framework */; };
 		E5653B601F4EF6B700EF6212 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B5F1F4EF6B700EF6212 /* MapKit.framework */; };
@@ -38,14 +36,13 @@
 		E59C37E726C87A8000C38713 /* OSMScoutMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D626C8751500C38713 /* OSMScoutMap.framework */; };
 		E59C37E926C87A8300C38713 /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59C37D526C8751500C38713 /* OSMScoutMapIOSX.framework */; };
 		E59C37EC26C87B8200C38713 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */; };
+		E59D8B182B417C3A00860D2F /* OSMScoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D8B172B417C3A00860D2F /* OSMScoutView.swift */; };
+		E59D8B192B417DD300860D2F /* OSMScoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D8B172B417C3A00860D2F /* OSMScoutView.swift */; };
+		E59D8B1A2B417DD400860D2F /* OSMScoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D8B172B417C3A00860D2F /* OSMScoutView.swift */; };
 		E5F711EF27A5565700890F3C /* map.osmscout in Resources */ = {isa = PBXBuildFile; fileRef = E5F711EE27A5565700890F3C /* map.osmscout */; };
 		E5F711F027A5565700890F3C /* map.osmscout in Resources */ = {isa = PBXBuildFile; fileRef = E5F711EE27A5565700890F3C /* map.osmscout */; };
 		E5F711F227A5C9B600890F3C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BBE160B880500084E83 /* InfoPlist.strings */; };
-		E5F711F527A5CA2E00890F3C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
-		E5F711F627A5CA2E00890F3C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
-		E5F711F727A5CA2E00890F3C /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
 		E5F711F827A5CA2E00890F3C /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
-		E5F711F927A5CA2E00890F3C /* OSMScoutIOSView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */; };
 		E5F711FA27A5CA2E00890F3C /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		E5F711FD27A5CA2E00890F3C /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E501876223CA99800055F4B2 /* libiconv.tbd */; };
 		E5F711FE27A5CA2E00890F3C /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5653B611F4EF79900EF6212 /* CoreLocation.framework */; };
@@ -64,13 +61,9 @@
 		E5F7121C27A5CCB200890F3C /* OSMScoutMapIOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5F7121427A5CB3000890F3C /* OSMScoutMapIOSX.framework */; };
 		F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
 		F5D6036B18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */; };
-		F5DD1BC2160B880500084E83 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC1160B880500084E83 /* main.m */; };
-		F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BC5160B880500084E83 /* AppDelegate.m */; };
-		F5DD1BCF160B880500084E83 /* OSMScoutIOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */; };
 		F5DD1BD2160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */; };
 		F5DD1BD5160B880500084E83 /* OSMScoutIOSViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */; };
 		F5DD1BDA160B88EA00084E83 /* OSMScout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E50B856D15E024D400C685B3 /* OSMScout.mm */; };
-		F5DD1C15160D1DFA00084E83 /* OSMScoutIOSView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -99,15 +92,8 @@
 		E50B832615E0136800C685B3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E50B832915E0136800C685B3 /* OSMScoutOSX-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OSMScoutOSX-Info.plist"; sourceTree = "<group>"; };
 		E50B832B15E0136800C685B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		E50B832D15E0136800C685B3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E50B832F15E0136800C685B3 /* OSMScoutOSX-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OSMScoutOSX-Prefix.pch"; sourceTree = "<group>"; };
 		E50B833115E0136800C685B3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		E50B833315E0136800C685B3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		E50B833415E0136800C685B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		E50B856615E0219200C685B3 /* OSMScoutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMScoutViewController.h; sourceTree = "<group>"; };
-		E50B856715E0219200C685B3 /* OSMScoutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutViewController.m; sourceTree = "<group>"; };
-		E50B856915E021DD00C685B3 /* OSMScoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMScoutView.h; sourceTree = "<group>"; };
-		E50B856A15E021DD00C685B3 /* OSMScoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutView.m; sourceTree = "<group>"; };
 		E50B856D15E024D400C685B3 /* OSMScout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = OSMScout.mm; path = OSMScoutOSX/OSMScout.mm; sourceTree = "<group>"; };
 		E50B856F15E029A800C685B3 /* OSMScout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OSMScout.h; path = OSMScoutOSX/OSMScout.h; sourceTree = "<group>"; };
 		E51A60FD22C57337007316F9 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -115,6 +101,10 @@
 		E51A610022C5738D007316F9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		E51A610122C573A3007316F9 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		E51A610322C573CA007316F9 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = DEVELOPER_DIR; };
+		E5437DF72B40298A008E508F /* OSMScoutiOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OSMScoutiOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		E5437DF82B40298A008E508F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E5437E012B406D35008E508F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E5437E032B406DD7008E508F /* OSMScoutOSX-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OSMScoutOSX-Bridging-Header.h"; sourceTree = "<group>"; };
 		E5653B581F4EF59D00EF6212 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		E5653B5D1F4EF66E00EF6212 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		E5653B5F1F4EF6B700EF6212 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/MapKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -129,6 +119,7 @@
 		E59C37DC26C875DB00C38713 /* OSMScout.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScout.framework; path = OSMScoutOSX/Frameworks/OSMScout.framework; sourceTree = "<group>"; };
 		E59C37DD26C875DB00C38713 /* OSMScoutMap.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSMScoutMap.framework; path = OSMScoutOSX/Frameworks/OSMScoutMap.framework; sourceTree = "<group>"; };
 		E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		E59D8B172B417C3A00860D2F /* OSMScoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSMScoutView.swift; sourceTree = "<group>"; };
 		E5F711EE27A5565700890F3C /* map.osmscout */ = {isa = PBXFileReference; lastKnownFileType = folder; path = map.osmscout; sourceTree = "<group>"; };
 		E5F711F127A57B4B00890F3C /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
 		E5F7120F27A5CA2E00890F3C /* OSMScoutiOS Simulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OSMScoutiOS Simulator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -141,14 +132,7 @@
 		F5DD1BB3160B880400084E83 /* OSMScoutiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSMScoutiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5DD1BBD160B880500084E83 /* OSMScoutiOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OSMScoutiOS-Info.plist"; sourceTree = "<group>"; };
 		F5DD1BBF160B880500084E83 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5DD1BC1160B880500084E83 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F5DD1BC3160B880500084E83 /* OSMScoutiOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OSMScoutiOS-Prefix.pch"; sourceTree = "<group>"; };
-		F5DD1BC4160B880500084E83 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		F5DD1BC5160B880500084E83 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		F5DD1BCD160B880500084E83 /* OSMScoutIOSViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSMScoutIOSViewController.h; sourceTree = "<group>"; };
-		F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSMScoutIOSViewController.m; sourceTree = "<group>"; };
-		F5DD1C13160D1DFA00084E83 /* OSMScoutIOSView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMScoutIOSView.h; sourceTree = "<group>"; };
-		F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMScoutIOSView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,12 +238,7 @@
 		E50B832715E0136800C685B3 /* OSMScoutOSX */ = {
 			isa = PBXGroup;
 			children = (
-				E50B833315E0136800C685B3 /* AppDelegate.h */,
-				E50B833415E0136800C685B3 /* AppDelegate.m */,
-				E50B856915E021DD00C685B3 /* OSMScoutView.h */,
-				E50B856A15E021DD00C685B3 /* OSMScoutView.m */,
-				E50B856615E0219200C685B3 /* OSMScoutViewController.h */,
-				E50B856715E0219200C685B3 /* OSMScoutViewController.m */,
+				E5437E012B406D35008E508F /* AppDelegate.swift */,
 				E50B833615E0136900C685B3 /* MainMenu.xib */,
 				E501875523CA771A0055F4B2 /* Media.xcassets */,
 				E50B832815E0136800C685B3 /* Supporting Files */,
@@ -270,9 +249,9 @@
 		E50B832815E0136800C685B3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				E5437E032B406DD7008E508F /* OSMScoutOSX-Bridging-Header.h */,
 				E50B832915E0136800C685B3 /* OSMScoutOSX-Info.plist */,
 				E50B832A15E0136800C685B3 /* InfoPlist.strings */,
-				E50B832D15E0136800C685B3 /* main.m */,
 				E50B832F15E0136800C685B3 /* OSMScoutOSX-Prefix.pch */,
 				E50B833015E0136800C685B3 /* Credits.rtf */,
 				E501876123CA90660055F4B2 /* OSMScoutOSX.entitlements */,
@@ -316,12 +295,7 @@
 		F5DD1BBB160B880500084E83 /* OSMScoutiOS */ = {
 			isa = PBXGroup;
 			children = (
-				F5DD1BC4160B880500084E83 /* AppDelegate.h */,
-				F5DD1BC5160B880500084E83 /* AppDelegate.m */,
-				F5DD1C13160D1DFA00084E83 /* OSMScoutIOSView.h */,
-				F5DD1C14160D1DFA00084E83 /* OSMScoutIOSView.m */,
-				F5DD1BCD160B880500084E83 /* OSMScoutIOSViewController.h */,
-				F5DD1BCE160B880500084E83 /* OSMScoutIOSViewController.m */,
+				E5437DF82B40298A008E508F /* AppDelegate.swift */,
 				F5DD1BD0160B880500084E83 /* OSMScoutIOSViewController_iPhone.xib */,
 				F5DD1BD3160B880500084E83 /* OSMScoutIOSViewController_iPad.xib */,
 				E501875723CA77610055F4B2 /* Media.xcassets */,
@@ -337,8 +311,8 @@
 				F5DD1BBD160B880500084E83 /* OSMScoutiOS-Info.plist */,
 				E5F7121D27A6F31100890F3C /* OSMScoutiOS Simulator-Info.plist */,
 				F5DD1BBE160B880500084E83 /* InfoPlist.strings */,
-				F5DD1BC1160B880500084E83 /* main.m */,
 				F5DD1BC3160B880500084E83 /* OSMScoutiOS-Prefix.pch */,
+				E5437DF72B40298A008E508F /* OSMScoutiOS-Bridging-Header.h */,
 				E59C37EB26C87B8200C38713 /* Launch Screen.storyboard */,
 			);
 			name = "Supporting Files";
@@ -351,6 +325,7 @@
 				E50B856D15E024D400C685B3 /* OSMScout.mm */,
 				F5D6036818875EE000D8242B /* OSMScoutMKTileOverlay.h */,
 				F5D6036918875EE000D8242B /* OSMScoutMKTileOverlay.m */,
+				E59D8B172B417C3A00860D2F /* OSMScoutView.swift */,
 			);
 			name = Common;
 			sourceTree = "<group>";
@@ -421,6 +396,7 @@
 				TargetAttributes = {
 					E50B831C15E0136800C685B3 = {
 						DevelopmentTeam = TE75LNDCJS;
+						LastSwiftMigration = 1510;
 						ProvisioningStyle = Automatic;
 					};
 					E5F711F327A5CA2E00890F3C = {
@@ -429,6 +405,7 @@
 					};
 					F5DD1BB2160B880400084E83 = {
 						DevelopmentTeam = TE75LNDCJS;
+						LastSwiftMigration = 1510;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -499,10 +476,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E50B832E15E0136800C685B3 /* main.m in Sources */,
-				E50B833515E0136800C685B3 /* AppDelegate.m in Sources */,
-				E50B856815E0219200C685B3 /* OSMScoutViewController.m in Sources */,
-				E50B856B15E021DD00C685B3 /* OSMScoutView.m in Sources */,
+				E59D8B182B417C3A00860D2F /* OSMScoutView.swift in Sources */,
+				E5437E022B406D35008E508F /* AppDelegate.swift in Sources */,
 				E50B856E15E024D400C685B3 /* OSMScout.mm in Sources */,
 				F5D6036A18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */,
 			);
@@ -512,11 +487,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5F711F527A5CA2E00890F3C /* main.m in Sources */,
-				E5F711F627A5CA2E00890F3C /* AppDelegate.m in Sources */,
-				E5F711F727A5CA2E00890F3C /* OSMScoutIOSViewController.m in Sources */,
+				E59D8B1A2B417DD400860D2F /* OSMScoutView.swift in Sources */,
 				E5F711F827A5CA2E00890F3C /* OSMScout.mm in Sources */,
-				E5F711F927A5CA2E00890F3C /* OSMScoutIOSView.m in Sources */,
 				E5F711FA27A5CA2E00890F3C /* OSMScoutMKTileOverlay.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,11 +497,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5DD1BC2160B880500084E83 /* main.m in Sources */,
-				F5DD1BC6160B880500084E83 /* AppDelegate.m in Sources */,
-				F5DD1BCF160B880500084E83 /* OSMScoutIOSViewController.m in Sources */,
 				F5DD1BDA160B88EA00084E83 /* OSMScout.mm in Sources */,
-				F5DD1C15160D1DFA00084E83 /* OSMScoutIOSView.m in Sources */,
+				E59D8B192B417DD300860D2F /* OSMScoutView.swift in Sources */,
+				E5437DF92B40298A008E508F /* AppDelegate.swift in Sources */,
 				F5D6036B18875EE000D8242B /* OSMScoutMKTileOverlay.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -684,6 +654,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = OSMScoutOSX/OSMScoutOSX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -697,11 +668,15 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutOSX/OSMScoutOSX-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutOSX/OSMScoutOSX-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "OSMScoutOSX/OSMScoutOSX-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -710,6 +685,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = OSMScoutOSX/OSMScoutOSX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -723,11 +699,14 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutOSX/OSMScoutOSX-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutOSX/OSMScoutOSX-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "OSMScoutOSX/OSMScoutOSX-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -797,6 +776,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -810,12 +790,16 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "OSMScoutiOS/OSMScoutiOS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -826,6 +810,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -839,13 +824,16 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OSMScoutiOS/OSMScoutiOS-Prefix.pch";
 				INFOPLIST_FILE = "OSMScoutiOS/OSMScoutiOS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PRODUCT_BUNDLE_IDENTIFIER = "libosmscout.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "OSMScoutiOS/OSMScoutiOS-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
