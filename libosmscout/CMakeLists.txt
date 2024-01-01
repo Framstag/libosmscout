@@ -403,10 +403,6 @@ if(MARISA_FOUND)
     target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
-if (TARGET Iconv::Iconv)
-    target_link_libraries(OSMScout Iconv::Iconv)
-endif()
-
 if(CMAKE_THREAD_LIBS_INIT)
     target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()
