@@ -180,7 +180,7 @@ namespace osmscout {
 
     /**
      * Callback triggered on future complete.
-     * When future is calceled, it is never called.
+     * When future is canceled, it is never called.
      * It is called from thread of value producer.
      * When future is completed already, callback is called immediately in thread of caller.
      *
