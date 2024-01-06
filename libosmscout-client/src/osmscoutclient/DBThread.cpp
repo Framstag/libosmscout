@@ -393,7 +393,7 @@ CancelableFuture<bool> DBThread::OnMapDPIChange(double dpi)
 CancelableFuture<bool> DBThread::SetStyleFlag(const std::string &key, bool value)
 {
   return Async<bool>([this, key, value](const Breaker&) -> bool{
-    log.Debug() << "SetStyleFlag" << key << "to" << value;
+    log.Debug() << "SetStyleFlag " << key << " to " << value;
     std::unique_lock locker(lock);
 
     if (!isInitializedInternal()) {

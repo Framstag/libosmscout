@@ -42,6 +42,8 @@ private:
   QThread          *thread;
   DBThreadRef      dbThread;
 
+  std::shared_ptr<bool> alive=std::make_shared<bool>(true);
+
   Slot<osmscout::GeoBox> dbLoadedSlot{
     [this](const osmscout::GeoBox &b) {
       emit initialisationFinished(b);

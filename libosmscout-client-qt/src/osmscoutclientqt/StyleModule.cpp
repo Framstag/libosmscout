@@ -43,6 +43,7 @@ StyleModule::~StyleModule()
   if (thread!=nullptr){
     thread->quit();
   }
+  *alive=false;
 }
 
 void StyleModule::loadStyle(QString stylesheetFilename,
@@ -69,7 +70,14 @@ void StyleModule::onStyleChanged()
 
 void StyleModule::onSetFlagRequest(QString key, bool value)
 {
-  dbThread->SetStyleFlag(key.toStdString(), value);
-  emit flagSet(key, value);
+  qDebug() << "Setting flag" << key << "to" << value;
+  auto thisAlive=alive;
+  dbThread->SetStyleFlag(key.toStdString(), value)
+    .OnComplete([this, key, value, thisAlive](const bool &){
+      if (*thisAlive) { // avoid to call slot with deleted object
+        emit flagSet(key, value);
+      }
+      qDebug() << "Flag" << key << "setup done (" << value << ")";
+    });
 }
 }
