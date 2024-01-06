@@ -81,7 +81,7 @@ public:
 
   void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
            const std::list<DBInstanceRef> &databases,
-           std::shared_lock<std::shared_mutex> &&locker) override;
+           ReadLock &&locker) override;
 
   void Close() override;
 

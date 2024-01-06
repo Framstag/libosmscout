@@ -55,7 +55,7 @@ DBLoadJob::~DBLoadJob()
 
 void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                     const std::list<DBInstanceRef> &databases,
-                    std::shared_lock<std::shared_mutex> &&locker)
+                    ReadLock &&locker)
 {
   osmscout::GeoBox lookupBox(lookupProjection.GetDimensions());
   std::list<DBInstanceRef> relevantDatabases;
