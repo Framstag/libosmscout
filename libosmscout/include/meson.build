@@ -9,6 +9,7 @@ osmscoutHeader = [
             'osmscout/async/Breaker.h',
             'osmscout/async/CancelableFuture.h',
             'osmscout/async/ProcessingQueue.h',
+            'osmscout/async/ReadWriteLock.h',
             'osmscout/async/Signal.h',
             'osmscout/async/Thread.h',
             'osmscout/async/Worker.h',

@@ -30,6 +30,7 @@
 
 #include <osmscout/async/Signal.h>
 #include <osmscout/async/AsyncWorker.h>
+#include <osmscout/async/ReadWriteLock.h>
 
 #include <osmscoutmap/MapService.h>
 
@@ -96,7 +97,7 @@ public:
 
   using AsynchronousDBJob = std::function<void (const osmscout::BasemapDatabaseRef& basemapDatabase,
                                                 const std::list<DBInstanceRef> &databases,
-                                                std::shared_lock<std::shared_mutex> &&locker)>;
+                                                ReadLock &&locker)>;
 
   // signals
   Signal<> stylesheetFilenameChanged;
@@ -142,7 +143,7 @@ private:
 
   double                             mapDpi;
 
-  mutable std::shared_mutex          lock;
+  mutable SharedMutex                lock;
 
   osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
   osmscout::BasemapDatabaseRef       basemapDatabase;

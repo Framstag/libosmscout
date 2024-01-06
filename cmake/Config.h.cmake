@@ -376,6 +376,11 @@
 #cmakedefine OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO 1
 #endif
 
+#ifndef OSMSCOUT_PTHREAD
+/* Threads are pthreads */
+#cmakedefine OSMSCOUT_PTHREAD
+#endif
+
 #ifndef OSMSCOUT_PTHREAD_NAME
 /* Threads are pthreads and non-posix setname is available */
 #cmakedefine OSMSCOUT_PTHREAD_NAME
