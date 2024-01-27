@@ -143,7 +143,7 @@ private:
 
   double                             mapDpi;
 
-  mutable SharedMutex                lock;
+  mutable Latch                      latch;
 
   osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
   osmscout::BasemapDatabaseRef       basemapDatabase;
@@ -236,12 +236,12 @@ public:
 
   const std::list<StyleError> &GetStyleErrors() const
   {
-      return styleErrors;
+    return styleErrors;
   }
 
   StyleConfigRef GetEmptyStyleConfig() const
   {
-    std::shared_lock locker(lock);
+    ReadLock locker(latch);
     return emptyStyleConfig;
   }
 

@@ -64,7 +64,7 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
 
 DBThread::~DBThread()
 {
-  WriteLock locker(lock);
+  WriteLock locker(latch);
   osmscout::log.Debug() << "DBThread::~DBThread()";
 
   mapDpiSlot.Disconnect();
@@ -89,7 +89,7 @@ bool DBThread::isInitializedInternal()
 
 bool DBThread::isInitialized()
 {
-  ReadLock locker(lock);
+  ReadLock locker(latch);
   return isInitializedInternal();
 }
 
@@ -104,7 +104,7 @@ double DBThread::GetPhysicalDpi() const
 }
 
 const GeoBox DBThread::databaseBoundingBox() const {
-  ReadLock locker(lock);
+    ReadLock locker(latch);
   GeoBox response;
   for (const auto& db:databases){
     response.Include(db->GetDBGeoBox());
@@ -115,7 +115,7 @@ const GeoBox DBThread::databaseBoundingBox() const {
 DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magnification,
                                             const osmscout::GeoBox &bbox)
 {
-  ReadLock locker(lock);
+  ReadLock locker(latch);
 
   osmscout::GeoBox boundingBox;
   for (const auto &db:databases){
@@ -173,7 +173,7 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
     if (breaker.IsAborted()) {
       return false;
     }
-    WriteLock locker(lock);
+    WriteLock locker(latch);
 
     if (basemapDatabase) {
       basemapDatabase->Close();
@@ -365,7 +365,7 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppress
 CancelableFuture<bool> DBThread::ToggleDaylight()
 {
   return Async<bool>([this](const Breaker &) -> bool {
-    WriteLock locker(lock);
+    WriteLock locker(latch);
 
     if (!isInitializedInternal()) {
       return false;
@@ -384,7 +384,7 @@ CancelableFuture<bool> DBThread::ToggleDaylight()
 CancelableFuture<bool> DBThread::OnMapDPIChange(double dpi)
 {
   return Async<bool>([this, dpi](const Breaker&) -> bool{
-    WriteLock locker(lock);
+    WriteLock locker(latch);
     mapDpi = dpi;
     return true;
   });
@@ -394,7 +394,7 @@ CancelableFuture<bool> DBThread::SetStyleFlag(const std::string &key, bool value
 {
   return Async<bool>([this, key, value](const Breaker&) -> bool{
     log.Debug() << "SetStyleFlag " << key << " to " << value;
-    WriteLock locker(lock);
+    WriteLock locker(latch);
 
     if (!isInitializedInternal()) {
       return false;
@@ -411,7 +411,7 @@ CancelableFuture<bool> DBThread::ReloadStyle(const std::string &suffix)
 {
   return Async<bool>([this, suffix](const Breaker &) -> bool {
     log.Debug() << "Reloading style " << stylesheetFilename << suffix << "...";
-    WriteLock locker(lock);
+    WriteLock locker(latch);
     LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
     log.Debug() << "Reloading style done.";
     return true;
@@ -423,7 +423,7 @@ CancelableFuture<bool> DBThread::LoadStyle(const std::string &stylesheetFilename
                                            const std::string &suffix)
 {
   return Async<bool>([this, stylesheetFilename, stylesheetFlags, suffix](const Breaker&){
-    WriteLock locker(lock);
+    WriteLock locker(latch);
     LoadStyleInternal(stylesheetFilename, stylesheetFlags, suffix);
     return true;
   });
@@ -455,7 +455,7 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
 
 const std::map<std::string,bool> DBThread::GetStyleFlags() const
 {
-  ReadLock locker(lock);
+  ReadLock locker(latch);
   std::map<std::string,bool> flags;
   // add flag overrides
   for (const auto& flag : stylesheetFlags){
@@ -508,7 +508,7 @@ CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &id
 
 void DBThread::RunJob(AsynchronousDBJob job)
 {
-  ReadLock locker(lock);
+  ReadLock locker(latch);
   if (!isInitializedInternal()){
     locker.unlock();
     osmscout::log.Warn() << "ignore request, dbs is not initialized";
@@ -519,7 +519,7 @@ void DBThread::RunJob(AsynchronousDBJob job)
 
 void DBThread::RunSynchronousJob(SynchronousDBJob job)
 {
-  ReadLock locker(lock);
+  ReadLock locker(latch);
   if (!isInitializedInternal()){
     osmscout::log.Warn() << "ignore request, dbs is not initialized";
     return;
