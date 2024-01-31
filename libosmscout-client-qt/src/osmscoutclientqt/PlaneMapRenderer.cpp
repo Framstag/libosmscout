@@ -474,7 +474,8 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request, size_t 
   {
     QMutexLocker locker(&lock);
     if (loadJob!=nullptr){
-      // TODO: check if job contains same tiles...
+      // TODO: check if job contains the same tiles...
+      loadJob->Close();
       loadJob->deleteLater();
       loadJob=nullptr;
     }
