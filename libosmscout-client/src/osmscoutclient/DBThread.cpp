@@ -470,7 +470,7 @@ const std::map<std::string,bool> DBThread::GetStyleFlags() const
 
     auto styleFlags = db->GetStyleConfig()->GetFlags(); // iterate temporary container is UB!
     for (const auto& flag : styleFlags){
-      if (flags.find(flag.first)!=flags.end()){
+      if (flags.find(flag.first)==flags.end()){
         flags[flag.first]=flag.second;
       }
     }
