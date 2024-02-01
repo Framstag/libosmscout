@@ -718,9 +718,9 @@ namespace osmscout {
     stream << buff.data();
 
     // add milliseconds
-    auto millisFromEpoch = timestamp.time_since_epoch().count();
+    auto millisFromEpoch = duration_cast<milliseconds>(timestamp.time_since_epoch()).count();
     stream << ".";
-    stream << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
+    stream << std::setfill('0') << std::setw(3) << (millisFromEpoch - ((millisFromEpoch / 1000) * 1000));
     stream << "Z";
     return stream.str();
   }
