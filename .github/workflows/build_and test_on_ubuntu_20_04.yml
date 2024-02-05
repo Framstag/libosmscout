@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler and Co
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, cmake and ninja
