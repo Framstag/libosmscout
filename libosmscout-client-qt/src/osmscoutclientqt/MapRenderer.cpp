@@ -254,7 +254,7 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
 
 void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                       const std::list<DBInstanceRef> &allDatabases,
-                      std::shared_lock<std::shared_mutex> &&locker)
+                      ReadLock &&locker)
 {
   std::list<DBInstanceRef> databases; // enabled databases for rendering
   if (renderDatabases) {

@@ -37,6 +37,7 @@ set(HEADER_FILES_ASYNC
         include/osmscout/async/Breaker.h
         include/osmscout/async/CancelableFuture.h
         include/osmscout/async/ProcessingQueue.h
+        include/osmscout/async/ReadWriteLock.h
         include/osmscout/async/Signal.h
         include/osmscout/async/Thread.h
         include/osmscout/async/Worker.h
@@ -215,6 +216,7 @@ set(SOURCE_FILES
     src/osmscout/io/NumericIndex.cpp
     src/osmscout/async/AsyncWorker.cpp
     src/osmscout/async/Breaker.cpp
+    src/osmscout/async/ReadWriteLock.cpp
     src/osmscout/async/Thread.cpp
     src/osmscout/async/Worker.cpp
     src/osmscout/async/WorkQueue.cpp

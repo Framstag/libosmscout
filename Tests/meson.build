@@ -225,6 +225,16 @@ HeaderCheck = executable('HeaderCheck',
 
 test('Check use of \'<\'...\'>\' for includes', HeaderCheck, env: headerCheckEnv)
 
+Latch = executable('Latch',
+             'src/Latch.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, threadDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check latch consistency', Latch)
+
 if buildImport
     LocationServiceTest = executable('LocationServiceTest',
                  [
