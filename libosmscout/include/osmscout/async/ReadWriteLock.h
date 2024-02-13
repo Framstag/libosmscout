@@ -24,7 +24,6 @@
 
 #include <osmscout/private/Config.h>
 
-#include <array>
 #include <atomic>
 #include <thread>
 #include <mutex>
@@ -39,14 +38,11 @@ namespace osmscout {
  * reverts to lock and wait in race condition.
  */
 
-constexpr size_t latch_bucket_count = 64;
-
 class OSMSCOUT_API Latch {
 private:
-  mutable std::atomic_flag s_spin = ATOMIC_FLAG_INIT;
+  mutable std::atomic<bool> s_spin = false;
 
   volatile int x_wait = 0;              /* counts requests in wait for X  */
-  volatile int s_count = 0;             /* counts held S locks            */
   volatile int x_flag = 0;              /* X status: 0, 1, 2, or 3        */
   std::thread::id x_owner;              /* X owner (thread id)            */
 
@@ -56,25 +52,39 @@ private:
   std::condition_variable s_gate;       /* wait for release of S          */
 
   bool px = true;                       /* enable X precedence            */
-  std::array<int,latch_bucket_count> s_buckets{};
+
+  struct TNode {
+    TNode * _prev = nullptr;
+    TNode * _next = nullptr;
+    std::thread::id id;
+    int count = 0;
+  };
+  TNode * s_freed = nullptr;
+  TNode * s_nodes = nullptr;
 
   void spin_lock() {
-    while (s_spin.test_and_set(std::memory_order_acquire)) {
-      std::this_thread::yield();
+    while (s_spin.exchange(true, std::memory_order_acquire)) {
+      do {
+        std::this_thread::yield();
+      } while (s_spin.load(std::memory_order_relaxed));
     }
   }
   void spin_unlock() {
-    s_spin.clear(std::memory_order_release);
+    s_spin.store(false, std::memory_order_release);
   }
 
+  TNode * find_node(const std::thread::id& id);
+  TNode * new_node(const std::thread::id& id);
+  void free_node(TNode * n);
+
 public:
-  Latch() = default;
+  Latch();
   explicit Latch(bool _px) : px(_px) { }
   Latch(const Latch&) = delete;
   Latch(Latch&&) = delete;
   Latch& operator=(const Latch&) = delete;
   Latch& operator=(Latch&&) = delete;
-  ~Latch() = default;
+  ~Latch();
 
   /* Locks the latch for exclusive ownership,
    * blocks if the latch is not available
