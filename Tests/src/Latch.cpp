@@ -487,6 +487,43 @@ TEST_CASE("Multi Recursive Writer Worker") {
   REQUIRE(refCounter == pc);
 }
 
+TEST_CASE("Check Re-Entrant One Reader Writer") {
+  osmscout::StopClock stopClock;
+  volatile int i=0;
+  osmscout::ReadLock rl(latch);
+
+  std::thread t([&i](){
+    osmscout::ReadLock rl0(latch);
+    {
+      osmscout::WriteLock wl(latch);
+      {
+        osmscout::ReadLock rl1(latch);
+        i++;
+      }
+    }
+  });
+
+  // wait until writer lock is requested
+  while (true) {
+    if (!latch.try_lock_shared()) {
+      // writer lock is requested already
+      break;
+    }
+    latch.unlock_shared();
+    std::this_thread::yield();
+  }
+
+  REQUIRE(i == 0);
+  rl.unlock();
+  t.join();
+
+  stopClock.Stop();
+
+  REQUIRE(i == 1);
+  std::cout << "<<< ReentrantOneReaderWriter...done: " << stopClock.ResultString() << std::endl;
+  std::cout << std::endl;
+}
+
 TEST_CASE("Check write precedence") {
   volatile int i=0;
   osmscout::ReadLock rl(latch);
@@ -517,9 +554,9 @@ TEST_CASE("Check write precedence") {
 TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
   int nbreader=4;
   volatile int i=0;
-  std::atomic<int> j=0;
-  std::atomic<int> blocked=0;
-  std::atomic<int> notblocked=0;
+  int blocked=0;
+  std::atomic<int> beg=0;
+  std::atomic<int> end=0;
   std::vector<std::thread*> pools;
   {
     osmscout::ReadLock rl(latch);
@@ -540,40 +577,36 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
     }
 
     for (int nr=0; nr < nbreader; ++nr) {
-      std::thread * tr = new std::thread([&j, &blocked, &notblocked](){
-        if (latch.try_lock_shared()) {
-          notblocked++;
-          latch.unlock_shared();
-        } else {
-          blocked++;
-          osmscout::ReadLock rl(latch);
-          j++;
-        }
+      std::thread * tr = new std::thread([&beg, &end](){
+        beg++;
+        osmscout::ReadLock rl(latch);
+        end++;
       });
       pools.push_back(tr);
     }
 
     // wait for everyone to get set up
     int k=0;
-    while ((notblocked.load() + blocked.load()) < 1 && k++ < 1000) {
+    while (beg.load() != nbreader && k++ < 1000) {
       std::this_thread::yield();
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     REQUIRE(i == 0); // write lock is still waiting
-    REQUIRE((blocked.load() + notblocked.load()) > 0);
+    blocked = beg.load() - end.load();
     rl.unlock();
     t.join();
   }
-  std::cout << "#blocked: " << blocked.load() << "/" << nbreader << std::endl;
-  // hoping that 1 read lock have been blocked because exclusive lock was requested
-  REQUIRE((blocked.load() > 0));
+  std::cout << "#blocked: " << blocked << "/" << nbreader << std::endl;
+  // hoping that all read locks have been blocked because exclusive lock was requested
+  REQUIRE((blocked == nbreader));
   // check BUG: thread was not awakened after broadcast signal
   // wait for all readers, or fail when lost reader
   int k=0;
-  while (j.load() != blocked.load() && k++ < 1000) {
+  while (end.load() != nbreader && k++ < 1000) {
     std::this_thread::yield();
   }
-  // all blocked readers must be finalized
-  REQUIRE(j.load() == blocked.load());
+  // all readers must be finalized
+  REQUIRE(end.load() == nbreader);
   // cleanup
   while (!pools.empty()) {
     pools.back()->join();
