@@ -488,6 +488,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     }
 
     // this slot is called from DBLoadJob, we can't delete it now
+    loadJob->Close();
     loadJob->deleteLater();
     loadJob=nullptr;
 

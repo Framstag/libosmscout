@@ -413,6 +413,7 @@ void PlaneMapRenderer::DrawMap()
 
     if (loadJob->IsFinished()){
       // this slot is may be called from DBLoadJob, we can't delete it now
+      loadJob->Close();
       loadJob->deleteLater();
       loadJob=nullptr;
     }
