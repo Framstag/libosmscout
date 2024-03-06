@@ -22,8 +22,6 @@
 
 #include <osmscout/lib/CoreImportExport.h>
 
-#include <osmscout/private/Config.h>
-
 #include <atomic>
 #include <thread>
 #include <mutex>
