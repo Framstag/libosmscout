@@ -46,7 +46,7 @@ struct Arguments
   osmscout::Vehicle                 vehicle=osmscout::Vehicle::vehicleBicycle;
   std::string                       databaseDirectory;
   osmscout::GeoCoord                start;
-  osmscout::Distance                distance;
+  osmscout::Distance                routeLength;
   bool                              debug=false;
   bool                              dataDebug=false;
   bool                              routeDebug=false;
@@ -78,6 +78,29 @@ struct Route
   osmscout::Distance  length;
 };
 
+struct Step;
+
+using StepRef = std::shared_ptr<Step>;
+
+struct Step
+{
+  Route              route;
+  StepRef            previousStep;
+  StepRef            ptaskreviousStep;
+};
+
+struct StepTask
+{
+  double                     costs;
+  size_t                     stepCount;
+  osmscout::Distance         currentDistance;
+  osmscout::Distance         remainingDistance;
+  StepRef                    previousStep;
+  size_t                     startNodeIndex;
+  std::unordered_set<size_t> nodeRestrictions;
+  osmscout::Distance         requestedLength;
+};
+
 /*
 struct Step
 {
@@ -94,6 +117,45 @@ struct Step
     return this->costs/this->currentDirectDistance.AsMeter()<other.costs/this->currentDirectDistance.AsMeter();
   }
 };*/
+
+static void ExportGpx(std::vector<Node>& graph,
+                      const StepRef& lastStep,
+                      const std::string& prefix,
+                      size_t dumpIndex)
+{
+  osmscout::gpx::GpxFile gpxFile;
+  StepRef                currentStep=lastStep;
+  std::list<StepRef>     path;
+
+  while (currentStep) {
+    path.push_front(currentStep);
+    currentStep=currentStep->previousStep;
+  }
+
+  gpxFile.name="Route";
+
+  osmscout::gpx::Waypoint startPoint(graph[path.front()->route.path.front()].point.GetCoord());
+  startPoint.name="Start";
+  gpxFile.waypoints.push_back(startPoint);
+
+  osmscout::gpx::Track track;
+  track.name="Roundtrip";
+  track.displayColor=osmscout::Color::DARK_RED;
+
+  for (const StepRef step : path) {
+    osmscout::gpx::TrackSegment segment;
+
+    for (auto nodeIndex : step->route.path) {
+      segment.points.emplace_back(graph[nodeIndex].point.GetCoord());
+    }
+
+    track.segments.push_back(segment);
+  }
+
+  gpxFile.tracks.push_back(track);
+
+  osmscout::gpx::ExportGpx(gpxFile,"Route_"+prefix+"_"+std::to_string(dumpIndex)+".gpx");
+}
 
 static void ExportGpx(const std::vector<Node>& graph,
                       const std::vector<size_t>& path,
@@ -282,10 +344,10 @@ static void InitializeCmdLineParser(osmscout::CmdLineParser& argParser,
                           "start coordinate");
 
   argParser.AddPositional(osmscout::CmdLineDoubleOption([&args](double value) {
-                            args.distance=osmscout::Distance::Of<osmscout::Kilometer>(value);
+                            args.routeLength=osmscout::Distance::Of<osmscout::Kilometer>(value);
                           }),
-                          "DISTANCE",
-                          "distance for roundtrip");
+                          "LENGTH",
+                          "length of the round trip");
 }
 
 static bool HandleCmdLine(osmscout::CmdLineParser& argParser,
@@ -308,7 +370,7 @@ static bool HandleCmdLine(osmscout::CmdLineParser& argParser,
 
 static std::vector<osmscout::RouteNode> LoadRouteNodes(osmscout::ConsoleProgress& progress,
                                                        const Arguments& args,
-                                                       const osmscout::Distance& maxDistance)
+                                                       const osmscout::Distance& maxTurnPointDistance)
 {
   osmscout::FileScanner            routeReader;
   std::vector<osmscout::RouteNode> nodeList;
@@ -316,11 +378,9 @@ static std::vector<osmscout::RouteNode> LoadRouteNodes(osmscout::ConsoleProgress
   try {
     routeReader.Open(args.databaseDirectory+"/"+"router.dat",osmscout::FileScanner::Sequential,true);
 
-    [[maybe_unused]]
-    osmscout::FileOffset indexOffset=routeReader.ReadFileOffset();
+    [[maybe_unused]] osmscout::FileOffset indexOffset=routeReader.ReadFileOffset();
     uint32_t nodeCount=routeReader.ReadUInt32();
-    [[maybe_unused]]
-    uint32_t routeNodeTileMag=routeReader.ReadUInt32();
+    [[maybe_unused]] uint32_t routeNodeTileMag=routeReader.ReadUInt32();
 
     progress.Info("Loading "+std::to_string(nodeCount)+" route nodes");
 
@@ -344,7 +404,7 @@ static std::vector<osmscout::RouteNode> LoadRouteNodes(osmscout::ConsoleProgress
 
       osmscout::Distance directDistance=osmscout::GetSphericalDistance(args.start,node.GetCoord());
 
-      if (validPaths>0 && directDistance<=maxDistance) {
+      if (validPaths>0 && directDistance<=maxTurnPointDistance) {
         ++relevantCount;
 
         nodeList.push_back(node);
@@ -445,7 +505,7 @@ static size_t GetStartRouteNodeIndex(osmscout::ConsoleProgress& progress,
   return startNodeIndex;
 }
 
-static void CalculateGraphCosts(osmscout::ConsoleProgress& progress,
+static void CalculateGraphCosts(osmscout::ConsoleProgress& /*progress*/,
                                 std::vector<Node>& graph)
 {
   for (auto& node : graph) {
@@ -455,7 +515,7 @@ static void CalculateGraphCosts(osmscout::ConsoleProgress& progress,
   }
 }
 
-static void BellmanFord(osmscout::ConsoleProgress& progress,
+static void BellmanFord(osmscout::ConsoleProgress& /*progress*/,
                         std::vector<Node>& graph,
                         size_t startNodeIndex,
                         const std::unordered_set<size_t>& restrictedNodeIndexes)
@@ -568,6 +628,67 @@ static Route CalculateRoute(const std::vector<Node>& graph,size_t nodeIndex) {
   return route;
 }
 
+std::vector<StepRef> CalculateStepTask(std::vector<Node>& graph,
+                                       const StepTask& task)
+{
+  std::vector<StepRef> steps;
+  osmscout::ConsoleProgress progress;
+
+  BellmanFord(progress,graph,task.startNodeIndex,task.nodeRestrictions);
+
+  if (!CheckForNegativeCycles(progress,graph,task.nodeRestrictions)) {
+    osmscout::log.Error() << "We have negative cycles";
+    return steps;
+  }
+
+  for (size_t nodeIndex = 0; nodeIndex < graph.size(); ++nodeIndex) {
+    size_t currentNodeIndex=nodeIndex;
+    size_t previousNodeIndex=graph[currentNodeIndex].previousNodeIndex;
+    osmscout::Distance lastStepDistance;
+
+    if (previousNodeIndex==std::numeric_limits<size_t>::max()) {
+      continue;
+    }
+
+    for (const auto &path: graph[previousNodeIndex].paths) {
+      if (path.targetNodeIndex==currentNodeIndex) {
+        lastStepDistance=path.length;
+        break;
+      }
+    }
+
+    osmscout::Distance routeLength;
+
+    while (previousNodeIndex!=std::numeric_limits<size_t>::max() &&
+           previousNodeIndex!=task.startNodeIndex) {
+      for (const auto &path: graph[previousNodeIndex].paths) {
+        if (path.targetNodeIndex == currentNodeIndex) {
+          routeLength += path.length;
+          break;
+        }
+      }
+
+      currentNodeIndex = previousNodeIndex;
+      previousNodeIndex = graph[currentNodeIndex].previousNodeIndex;
+    }
+
+    if (previousNodeIndex!=task.startNodeIndex) {
+      // No route...
+      continue;
+    }
+
+    if ((routeLength-lastStepDistance)<task.requestedLength &&
+        routeLength>task.requestedLength) {
+      StepRef step=std::make_shared<Step>();
+
+      step->route=CalculateRoute(graph,nodeIndex);
+      steps.push_back(step);
+    }
+  }
+
+  return steps;
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::CmdLineParser   argParser("Routing",
@@ -593,18 +714,26 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  size_t dumpCount=1;
-  size_t dumpLimit=50;
+  double routeLengthGraceFactor=1.10;
 
-  osmscout::log.Info() << "We have a route length of " << args.distance.AsString();
+  osmscout::Distance routeLengthWithGrace=(args.routeLength * routeLengthGraceFactor);
+  // The furthest possible point away from the start
+  osmscout::Distance maxTurnPointDistance= routeLengthWithGrace / 2.0;
+  // We assume that we route away from our initial start and later on back to the start
+  // That turn-point should be at least maxDistance away...
+  osmscout::Distance maxDistance=args.routeLength/M_PI*1.1;
+  // The length of our final round trip route must be in the range [args.distance,maxDistance]
+  osmscout::Distance maxLength=args.routeLength*1.10;
+
+  osmscout::log.Info() << "We have a given round trip length of " << args.routeLength.AsString();
+  osmscout::log.Info() << "With a grace factor of << " << routeLengthGraceFactor << " we have a round trip length of " << (args.routeLength * routeLengthGraceFactor).AsString();
+  osmscout::log.Info() << "In the degenerated case the furthest point away thus would be " << maxTurnPointDistance.AsString() << " away";
 
 
   //  Circle extend = 2 * PI * r
   //  r = extends / (2*PI)
-  osmscout::log.Info() << "This could be a circle with radius " << args.distance/(2*M_PI) << " and diameter " << args.distance/M_PI;
+  osmscout::log.Info() << "In the optimal case this also could be a circle with radius " << routeLengthWithGrace/(2*M_PI) << " and diameter " << routeLengthWithGrace/M_PI;
 
-  osmscout::Distance maxDistance=args.distance/M_PI*1.1;
-  osmscout::Distance maxLength=args.distance*1.10;
 
   osmscout::log.Info() << "We tolerate a maximum distance up to " << maxDistance;
   osmscout::log.Info() << "We tolerate a maximum length up to " << maxLength;
@@ -612,9 +741,9 @@ int main(int argc, char* argv[])
   try {
     osmscout::ConsoleProgress progress;
 
-    progress.SetAction("Loading routing graph");
+    progress.SetAction("Loading routing graph up to max turn point distance");
 
-    std::vector<osmscout::RouteNode> nodeList=LoadRouteNodes(progress,args,maxDistance);
+    std::vector<osmscout::RouteNode> nodeList=LoadRouteNodes(progress,args,maxTurnPointDistance);
 
     progress.SetAction("Building node index");
 
@@ -629,7 +758,7 @@ int main(int argc, char* argv[])
     size_t startNodeIndex=GetStartRouteNodeIndex(progress,
                                                  graph,
                                                  args.start);
-    // TODO: Check fro numeric_limits::max()
+    // TODO: Check for numeric_limits::max()
 
     // The following steps implement
     // https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm
@@ -639,114 +768,102 @@ int main(int argc, char* argv[])
     CalculateGraphCosts(progress,
                         graph);
 
-    std::unordered_set<size_t> restrictedNodeIndexes;
+    osmscout::Distance stepDistance=routeLengthWithGrace / 3.0;
 
-    progress.SetAction("Bellman-Ford");
+    osmscout::log.Info() << "In the first step we route for  " << stepDistance.AsString();
 
-    BellmanFord(progress,graph,startNodeIndex,restrictedNodeIndexes);
+    StepTask initialTask;
 
-    if (!CheckForNegativeCycles(progress,graph,restrictedNodeIndexes)) {
-      return 1;
-    }
+    initialTask.stepCount=1;
+    initialTask.costs=0.0;
+    initialTask.currentDistance=osmscout::Distance::Zero();
+    initialTask.remainingDistance=routeLengthWithGrace;
+    initialTask.startNodeIndex=startNodeIndex;
+    initialTask.requestedLength=stepDistance;
 
-    progress.SetAction("Build routes");
+    std::vector<StepTask> taskList;
 
-    std::vector<Route> routes;
+    taskList.push_back(initialTask);
 
-    // TODO: Calculate the actual count to safe memory
-    routes.reserve(graph.size());
+    size_t exportedRouteIndex=1;
 
-    for (size_t nodeIndex = 0; nodeIndex < graph.size(); ++nodeIndex) {
-      if (graph[nodeIndex].previousNodeIndex==std::numeric_limits<size_t>::max()) {
-        continue;
-      }
+    while (!taskList.empty()) {
+      osmscout::log.Info() << "Task List size: " << taskList.size();
 
-      routes.push_back(CalculateRoute(graph,nodeIndex));
-    }
+      StepTask task=taskList.back();
+      taskList.pop_back();
 
-    progress.Info("we have found "+std::to_string(routes.size())+" routes");
+      osmscout::log.Info() << "Calculating task: " << task.stepCount << " " << task.currentDistance << " " << task.remainingDistance << " " << task.costs << " " << task.costs/task.currentDistance.AsMeter();
 
-    progress.SetAction("Find best route");
+      std::vector<StepRef> steps=CalculateStepTask(graph,task);
 
-    std::sort(routes.begin(),routes.end(), [](const Route & a, const Route & b) {
-      return a.costs<b.costs;
-    });
+      progress.Info("we have found "+std::to_string(steps.size())+" routes");
 
-    size_t backStartIndex=0;
-    while (backStartIndex < routes.size() &&
-           routes[backStartIndex].length < maxDistance) {
-      ++backStartIndex;
-    }
+      for (const auto& step : steps) {
+        osmscout::Distance remainingDistance;
 
-    auto awayRoute=routes.begin();
-    while (awayRoute != routes.end() &&
-           awayRoute->length < maxDistance) {
-      ++awayRoute;
-    }
+        step->previousStep=task.previousStep;
 
-    progress.SetAction("Collect routes back");
-
-    // TODO: Calculate number of possible back routes and active progress
-
-    size_t backRouteCount=1;
-    while (awayRoute != routes.end()) {
-      progress.SetProgress(backRouteCount, routes.size() - backStartIndex);
-      ++backRouteCount;
-
-      //DumpPath(graph, awayRoute->path);
-
-      std::unordered_set<size_t> restrictedNodeIndexes;
-
-      for (auto& nodeIndex : awayRoute->path) {
-        if (nodeIndex != startNodeIndex) {
-          restrictedNodeIndexes.insert(nodeIndex);
+        if (step->route.length < task.remainingDistance) {
+          remainingDistance = task.remainingDistance - step->route.length;
+        } else {
+          remainingDistance = osmscout::Distance::Zero();
         }
+
+        // TODO: Throw away routes, that are too far away
+        osmscout::Distance distanceFromStart=osmscout::GetSphericalDistance(graph[startNodeIndex].point.GetCoord(),
+                                                                            graph[step->route.path.back()].point.GetCoord());
+
+        if (distanceFromStart>maxDistance) {
+          osmscout::log.Info() << "- Drop task result (too far): " << task.stepCount << " " << task.currentDistance << " " << task.remainingDistance << " " << task.costs << " " << task.costs/task.currentDistance.AsMeter();
+          continue;
+        }
+
+        if (remainingDistance.AsMeter() == 0.0) {
+          if (step->route.path.back()!=startNodeIndex) {
+            osmscout::log.Info() << "- Drop task result (not back to start): " << task.stepCount << " " << task.currentDistance << " " << task.remainingDistance << " " << task.costs << " " << task.costs/task.currentDistance.AsMeter();
+            continue;
+          }
+
+          osmscout::log.Info() << "+ Use Route: " << exportedRouteIndex << " " << step->route.costs/step->route.length.AsMeter() << " " << step->route.path.front() << "-"<< step->route.path.back() << " " << step->route.length;
+
+          ExportGpx(graph, step, "route-", exportedRouteIndex);
+          exportedRouteIndex++;
+          continue;
+        }
+
+        StepTask newTask;
+
+        newTask.costs=task.costs+step->route.costs;
+        newTask.stepCount = task.stepCount + 1;
+        newTask.currentDistance=task.currentDistance+step->route.length;
+        newTask.remainingDistance = remainingDistance;
+        newTask.startNodeIndex = step->route.path.back();
+        newTask.requestedLength = stepDistance;
+        newTask.previousStep = step;
+
+        StepRef previousStep=step;
+        while (previousStep) {
+          for (const auto &index: step->route.path) {
+            newTask.nodeRestrictions.insert(index);
+          }
+          previousStep=previousStep->previousStep;
+        }
+
+        if (remainingDistance<stepDistance) {
+          newTask.nodeRestrictions.erase(startNodeIndex);
+        }
+
+        taskList.push_back(newTask);
+
+        // Best cost/length factor first
+        std::sort(taskList.begin(),taskList.end(), [](const StepTask& a, const StepTask& b) {
+          return a.costs/a.currentDistance.AsMeter()<b.costs/b.currentDistance.AsMeter();
+        });
       }
-
-      BellmanFord(progress, graph, awayRoute->nodeIndex,restrictedNodeIndexes);
-
-      if (!CheckForNegativeCycles(progress,graph,restrictedNodeIndexes)) {
-        return 1;
-      }
-
-      if (graph[startNodeIndex].previousNodeIndex==std::numeric_limits<size_t>::max()) {
-        ++awayRoute;
-        continue;
-      }
-
-      Route backRoute=CalculateRoute(graph, startNodeIndex);
-
-      if (awayRoute->length+backRoute.length<maxLength) {
-        ++awayRoute;
-        continue;
-      }
-
-      Route roundtripRoute;
-
-      roundtripRoute.costs=awayRoute->costs+backRoute.costs;
-      roundtripRoute.length=awayRoute->length+backRoute.length;
-
-      auto awayStart=awayRoute->path.begin();
-      auto awayEnd=awayRoute->path.end();
-
-      --awayEnd;
-
-      std::copy(awayStart,awayEnd,std::back_inserter(roundtripRoute.path));
-      std::copy(backRoute.path.begin(),backRoute.path.end(),std::back_inserter(roundtripRoute.path));
-
-      progress.Info("Route "+ std::to_string(roundtripRoute.costs) + " " + roundtripRoute.length.AsString());
-
-      //DumpPath(graph, roundtripRoute.path);
-      if (dumpCount<=dumpLimit) {
-        //osmscout::log.Info() << "Exporting gpx route " << roundtripRoute.path.size();
-        ExportGpx(graph,roundtripRoute.path,"Solution",dumpCount);
-        ++dumpCount;
-      }
-
-      ++awayRoute;
     }
 
-    // TODO: After collecting all possible routes (or stopping after a while) do the following:
+      // TODO: After collecting all possible routes (or stopping after a while) do the following:
     // - Cluster them regarding target regions
     // - Find the "best" route within each cluster
     // - Find the "best" route over all clusters
