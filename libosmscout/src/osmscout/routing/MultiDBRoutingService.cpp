@@ -101,10 +101,14 @@ namespace osmscout {
     }
 
     for (auto& handle : handles) {
-      handle.routingDatabase->Close();
-      handle.routingDatabase.reset();
-      handle.router->Close();
-      handle.router.reset();
+      if (handle.routingDatabase) {
+        handle.routingDatabase->Close();
+        handle.routingDatabase.reset();
+      }
+      if (handle.router) {
+        handle.router->Close();
+        handle.router.reset();
+      }
       handle.profile.reset();
     }
 
