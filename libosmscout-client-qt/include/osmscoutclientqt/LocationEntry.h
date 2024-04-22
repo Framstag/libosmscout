@@ -105,6 +105,7 @@ public:
   QString getTypeString() const;
   QString getObjectType() const;
   QString getLabel() const;
+  QString getDebugString() const;
   QString getAltName() const;
   QList<AdminRegionInfoRef> getAdminRegionList() const;
   QString getDatabase() const;

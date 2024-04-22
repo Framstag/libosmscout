@@ -53,7 +53,8 @@ RoutingListModel::~RoutingListModel()
 
 void RoutingListModel::setStartAndTarget(LocationEntry* start,
                                          LocationEntry* target,
-                                         QString vehicleStr)
+                                         QString vehicleStr,
+                                         double vehicleBearing)
 {
   osmscout::Vehicle vehicle=osmscout::Vehicle::vehicleCar;
   if (vehicleStr=="bicycle"){
@@ -62,12 +63,13 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
     vehicle=osmscout::Vehicle::vehicleFoot;
   }
   QmlRoutingProfile profile(vehicle);
-  setStartAndTarget(start, target, &profile);
+  setStartAndTarget(start, target, &profile, vehicleBearing);
 }
 
 void RoutingListModel::setStartAndTarget(LocationEntry* start,
                                          LocationEntry* target,
-                                         QmlRoutingProfile *routingProfile)
+                                         QmlRoutingProfile *routingProfile,
+                                         double vehicleBearing)
 {
   cancel(); // cancel current computation
   clear(); // clear model
@@ -97,7 +99,8 @@ void RoutingListModel::setStartAndTarget(LocationEntry* start,
   QmlRoutingProfileRef profileRef=std::make_shared<QmlRoutingProfile>(*routingProfile);
   profileRef->setParent(Q_NULLPTR);
 
-  emit routeRequest(startRef,targetRef,profileRef,++requestId,breaker);
+  emit routeRequest(startRef,targetRef,profileRef,++requestId,breaker,
+                    (vehicleBearing < 0 ? std::nullopt : std::make_optional<Bearing>(Bearing::Radians(vehicleBearing))));
 }
 
 void RoutingListModel::onRouteComputed(QtRouteData route,

@@ -58,7 +58,8 @@ signals:
                     LocationEntryRef target,
                     QmlRoutingProfileRef profile,
                     int requestId,
-                    osmscout::BreakerRef breaker);
+                    osmscout::BreakerRef breaker,
+                    std::optional<osmscout::Bearing> bearing);
 
   void computingChanged();
 
@@ -67,13 +68,30 @@ signals:
   void routingProgress(int percent);
 
 public slots:
-  void setStartAndTarget(LocationEntry* start,
-                         LocationEntry* target,
-                         QString vehicleStr="car");
 
+  /** Compute new route.
+   *
+   * @param start
+   * @param target
+   * @param vehicleStr predefined vehicle string. It may be car|bicycle|foot
+   * @param vehicleBearing in radians, when negative, it is not taken into account
+   */
   void setStartAndTarget(LocationEntry* start,
                          LocationEntry* target,
-                         QmlRoutingProfile *routingProfile);
+                         QString vehicleStr="car",
+                         double vehicleBearing = -1);
+
+  /** Compute new route.
+   *
+   * @param start
+   * @param target
+   * @param routingProfile profile of the routing
+   * @param vehicleBearing in radians, when negative, it is not taken into account
+   */
+  void setStartAndTarget(LocationEntry* start,
+                         LocationEntry* target,
+                         QmlRoutingProfile *routingProfile,
+                         double vehicleBearing = -1);
 
   void clear();
 

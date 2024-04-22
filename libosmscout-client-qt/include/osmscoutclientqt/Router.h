@@ -122,7 +122,8 @@ public slots:
                       LocationEntryRef target,
                       QmlRoutingProfileRef profile,
                       int requestId,
-                      osmscout::BreakerRef breaker);
+                      osmscout::BreakerRef breaker,
+                      std::optional<osmscout::Bearing> bearing);
 signals:
   void routeComputed(QtRouteData route,
                      int requestId);

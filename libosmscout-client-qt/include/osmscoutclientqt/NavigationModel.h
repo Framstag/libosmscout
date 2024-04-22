@@ -82,6 +82,10 @@ signals:
 
   void positionEstimateInTunnelChanged();
 
+  /** Requesting computation of the new route when wehicle leave current route.
+   *
+   * bearingAngle is in radians.
+   */
   void rerouteRequest(double fromLat, double fromLon,
                       const QString bearing,
                       double bearingAngle,

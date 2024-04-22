@@ -205,6 +205,18 @@ QString LocationEntry::getLabel() const
     return label;
 }
 
+QString LocationEntry::getDebugString() const
+{
+  switch (type) {
+    case LocationInfo::Type::typeObject:
+      return label + " (" + QString::fromStdString(coord.GetDisplayText()) + ")";
+    case LocationInfo::Type::typeCoordinate:
+      return QString::fromStdString(coord.GetDisplayText());
+    default:
+      return "none";
+  }
+}
+
 QString LocationEntry::getAltName() const
 {
   return altName;

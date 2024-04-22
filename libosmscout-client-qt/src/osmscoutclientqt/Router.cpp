@@ -255,11 +255,13 @@ void Router::onRouteRequest(LocationEntryRef start,
                             LocationEntryRef target,
                             QmlRoutingProfileRef profile,
                             int requestId,
-                            osmscout::BreakerRef breaker)
+                            BreakerRef breaker,
+                            std::optional<osmscout::Bearing> bearing)
 {
-  osmscout::log.Debug() << "Routing from '" << start->getLabel().toStdString() <<
-    "' to '" << target->getLabel().toStdString() << "'" <<
-    " by '" << vehicleStr(profile->getVehicle()) << "'";
+  osmscout::log.Debug() << "Routing from '" << start->getDebugString().toStdString() <<
+    "' to '" << target->getDebugString().toStdString() << "'" <<
+    " by '" << vehicleStr(profile->getVehicle()) << "' " <<
+    (bearing ? "bearing " + bearing->LongDisplayString() : "no bearing");
 
   dbThread->RunSynchronousJob(
     [this,profile,requestId,start,target,breaker](const std::list<DBInstanceRef>& databases) {
