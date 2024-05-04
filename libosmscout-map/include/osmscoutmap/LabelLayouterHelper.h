@@ -52,15 +52,13 @@ namespace osmscout {
     {
     }
 
-    ScreenPixelRectangle& Set(int nx, int ny, int nw, int nh)
-    {
-      x = nx;
-      y = ny;
-      width = nw;
-      height = nh;
-      return *this;
-    }
-
+    /**
+     * Returns true , if the area of the rectangles intersect. The area is defined by
+     * area including [x-x+width-1] and [y,y+height-1]. x+width or y+height is outside the rectangle.
+     *
+     * @param other rectangle
+     * @return true, if areas intersect, else false
+     */
     bool Intersects(const ScreenPixelRectangle &other) const
     {
       return !(
@@ -132,22 +130,47 @@ namespace osmscout {
 
     bool Intersects(const ScreenRectMask& other) const;
 
+    /**
+     * Return starting index of row (y-coordinate of rectangle)
+     * @return index
+     */
     int GetFirstRow() const {
       return rowFrom;
     }
 
+    /**
+     * Return final index of row (y+height-1 of rectangle)
+     * @return index
+     */
     int GetLastRow() const {
       return rowTo;
     }
 
+    /**
+     * Return the index of the initial, left-sided bit mask cell (containing x coordinate of rectangle)
+     * @return index
+     */
     int GetFirstCell() const {
       return cellFrom;
     }
 
+    /**
+     * Return the index of the final, right-sided bit mask cell (containing x+width-1 coordinate of rectangle)
+     * @return index
+     */
     int GetLastCell() const {
       return cellTo;
     }
 
+    /**
+     * Return the cells in the interval [GetFirstCell(),GetLastCell()]. A cell contains a part
+     * of the bitmask of a row of the rectangle.
+     *
+     * The lowest bit 0x1 is the first bit in the mask, higher bits represent further bits to the "right" in the mask
+     *
+     * @param idx the index
+     * @return te bit mask
+     */
     uint64_t GetCell(size_t idx) const;
   };
 

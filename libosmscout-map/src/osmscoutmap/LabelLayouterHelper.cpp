@@ -23,8 +23,8 @@ namespace osmscout {
   ScreenRectMask::ScreenRectMask(size_t screenWidth,
                                  const ScreenPixelRectangle &rect)
   {
-    size_t   bitsPerCell=64u;
-    uint64_t allBitsSet=~0;
+    constexpr size_t   bitsPerCell=64u;
+    constexpr uint64_t allBitsSet=~0;
 
     size_t rowLength=screenWidth / bitsPerCell +1;
 
@@ -37,10 +37,12 @@ namespace osmscout {
 
     bitmask.resize(rowLength);
 
+    // Rectangle is to the right of the screen
     if (rect.x>(int)screenWidth) {
       return;
     }
 
+    // Rectangle is to the left of the screen
     if (rect.x+rect.width-1<0) {
       return;
     }
@@ -60,15 +62,19 @@ namespace osmscout {
       return;
     }
 
+    // Fill everything between and including start and end with a "full" msk
+    // start and end will be corrected later
     for (int x=cellFrom; x<=cellTo; x++) {
       bitmask[x]=allBitsSet;
     }
 
+    // Starting mask cell
     size_t bitOffsetStart=startX % bitsPerCell;
     if (bitOffsetStart!=0u) {
       bitmask[cellFrom] =  bitmask[cellFrom] & (allBitsSet << bitOffsetStart);
     }
 
+    // Final mask cell (may also be the starting cell!)
     size_t bitOffsetEnd=endX % bitsPerCell;
     if (bitOffsetEnd!=0u) {
       bitmask[cellTo] = bitmask[cellTo] & (allBitsSet >> (bitsPerCell-bitOffsetEnd-1));
@@ -85,10 +91,12 @@ namespace osmscout {
 
   bool ScreenRectMask::Intersects(const ScreenRectMask& other) const
   {
+    // Other is to the right of us
     if (other.rowFrom>rowTo) {
       return false;
     }
 
+    // Other is to the left of us
     if (other.rowTo<rowFrom) {
       return false;
     }
