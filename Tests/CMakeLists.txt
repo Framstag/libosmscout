@@ -149,6 +149,9 @@ osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 #---- ScanConversion
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
+#---- ScreenMask
+osmscout_test_project(NAME ScreenMaskTest SOURCES src/ScreenMaskTest.cpp)
+
 #---- StringUtils
 osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 

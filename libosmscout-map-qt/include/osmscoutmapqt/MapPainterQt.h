@@ -123,7 +123,7 @@ namespace osmscout {
                              const qreal angle,
                              const qreal baseline) const;
 
-    osmscout::DoubleRectangle GlyphBoundingBox(const QGlyphRun &glyph) const;
+    osmscout::ScreenVectorRectangle GlyphBoundingBox(const QGlyphRun &glyph) const;
 
     void DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const;
 
@@ -166,7 +166,7 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const DoubleRectangle& labelRectangle,
+                   const ScreenVectorRectangle& labelRectangle,
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
@@ -181,6 +181,7 @@ namespace osmscout {
      */
     void RegisterRegularLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              const ObjectFileRef& ref,
                               const std::vector<LabelData>& labels,
                               const Vertex2D& position,
                               double objectWidth) override;
@@ -190,6 +191,7 @@ namespace osmscout {
      */
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              const ObjectFileRef& ref,
                               const PathLabelData& label,
                               const LabelPath& labelPath) override;
 

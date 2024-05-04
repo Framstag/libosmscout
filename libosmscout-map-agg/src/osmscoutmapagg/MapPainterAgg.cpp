@@ -268,7 +268,7 @@ namespace osmscout {
 
   void MapPainterAgg::DrawLabel(const Projection& /*projection*/,
                                 const MapParameter& /*parameter*/,
-                                const DoubleRectangle& labelRectangle,
+                                const ScreenVectorRectangle& labelRectangle,
                                 const LabelData& label,
                                 const NativeLabel& layout)
   {
@@ -339,10 +339,10 @@ namespace osmscout {
     }
   }
 
-  osmscout::DoubleRectangle MapPainterAgg::GlyphBoundingBox(const NativeGlyph &glyph) const
+  osmscout::ScreenVectorRectangle MapPainterAgg::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
-    return DoubleRectangle(glyph.aggGlyph->bounds.x1, glyph.aggGlyph->bounds.y1,
-                           glyph.aggGlyph->bounds.x2, glyph.aggGlyph->bounds.y2);
+    return ScreenVectorRectangle(glyph.aggGlyph->bounds.x1, glyph.aggGlyph->bounds.y1,
+                                 glyph.aggGlyph->bounds.x2, glyph.aggGlyph->bounds.y2);
   }
 
   template<>
@@ -407,11 +407,17 @@ namespace osmscout {
 
   void MapPainterAgg::RegisterRegularLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const std::vector<LabelData> &labels,
                                            const Vertex2D &position,
                                            double objectWidth)
   {
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    labelLayouter.RegisterLabel(projection,
+                                parameter,
+                                ref,
+                                position,
+                                labels,
+                                objectWidth);
   }
 
   /**
@@ -419,11 +425,13 @@ namespace osmscout {
    */
   void MapPainterAgg::RegisterContourLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const PathLabelData &label,
                                            const LabelPath &labelPath)
   {
     labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       ref,
                                        label,
                                        labelPath);
   }
@@ -446,7 +454,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const MapData& /*data*/)
   {
-    labelLayouter.SetViewport(DoubleRectangle(0, 0, projection.GetWidth(), projection.GetHeight()));
+    labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, projection.GetWidth(), projection.GetHeight()));
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 

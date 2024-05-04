@@ -28,6 +28,8 @@
 
 #include <osmscoutmap/StyleConfig.h>
 #include <osmscoutmap/LabelPath.h>
+#include <osmscoutmap/LabelLayouterHelper.h>
+
 #include <osmscout/system/Math.h>
 
 #include <iostream>
@@ -39,52 +41,6 @@ constexpr bool debugLabelLayouter = true;
 #else
 constexpr bool debugLabelLayouter = false;
 #endif
-
-  template <typename T>
-  struct Rectangle {
-    T x;
-    T y;
-    T width;
-    T height;
-
-    // not initialised viewport
-    Rectangle() = default;
-
-    Rectangle(T x, T y, T width, T height):
-        x(x), y(y), width(width), height(height)
-    {
-    }
-
-    Rectangle<T>& Set(T nx, T ny, T nw, T nh)
-    {
-      x = nx;
-      y = ny;
-      width = nw;
-      height = nh;
-      return *this;
-    }
-
-    /**
-     * Test if this Rectangle intersects with another.
-     * It is using open interval, so if two rectangles are just touching
-     * each other, these don't intersects.
-     *
-     * @param other
-     * @return true if intersects
-     */
-    bool Intersects(const Rectangle<T> &other)
-    {
-      return !(
-          (x + width) < other.x ||
-          x > (other.x + other.width) ||
-          (y + height) < other.y ||
-          y > (other.y + other.height)
-      );
-    }
-  };
-
-  using IntRectangle = Rectangle<int>;
-  using DoubleRectangle = Rectangle<double>;
 
   class PathLabelData
   {
@@ -147,12 +103,12 @@ constexpr bool debugLabelLayouter = false;
   class Glyph {
   public:
     NativeGlyph glyph;
-    osmscout::Vertex2D position;        //!< glyph baseline position
-    double angle{0};                    //!< clock-wise rotation in radians
+    Vertex2D    position;        //!< glyph baseline position
+    double      angle{0};        //!< clock-wise rotation in radians
 
-    osmscout::Vertex2D trPosition{0,0}; //!< top-left position after rotation
-    double trWidth{0};                  //!< width after rotation
-    double trHeight{0};                 //!< height after rotation
+    Vertex2D    trPosition{0,0}; //!< top-left position after rotation
+    double      trWidth{0};      //!< width after rotation
+    double      trHeight{0};     //!< height after rotation
   };
 
   /**
@@ -200,6 +156,7 @@ constexpr bool debugLabelLayouter = false;
     };
 
   public:
+    ObjectFileRef         ref;
     size_t                priority{std::numeric_limits<size_t>::max()}; //!< Priority of the entry (minimum of priority label elements)
     // TODO: move priority from label to element
     std::vector<Element>  elements;
@@ -214,62 +171,37 @@ constexpr bool debugLabelLayouter = false;
     double                          offset;   //!< The offset of the label in relation the the way start (if debug))
     Vertex2D                        start;    //!< Screen coordinates of the start of the path
 #endif
+    ObjectFileRef                   ref;
     size_t                          priority; //!< Priority of the label
     std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphs of the label text (see text)
     osmscout::PathTextStyleRef      style;    //!< Style for drawing the text of the label
-  };
-
-  class Mask
-  {
-  public:
-    explicit Mask(size_t rowSize) : d(rowSize)
-    {
-    };
-
-    Mask(const Mask &m) = default;
-    ~Mask() = default;
-
-    Mask(Mask &&m) = delete;
-    Mask &operator=(const Mask &m) = delete;
-    Mask &operator=(Mask &&m) = delete;
-
-    OSMSCOUT_MAP_API void prepare(const IntRectangle &rect);
-
-    int64_t size() const
-    {
-      return d.size();
-    };
-
-    std::vector<uint64_t> d;
-
-    int cellFrom{0};
-    int cellTo{0};
-    int rowFrom{0};
-    int rowTo{0};
   };
 
   template <class NativeGlyph, class NativeLabel>
   static bool LabelInstanceSorter(const LabelInstance<NativeGlyph, NativeLabel> &a,
                                   const LabelInstance<NativeGlyph, NativeLabel> &b)
   {
-    if (a.priority == b.priority) {
-      assert(!a.elements.empty());
-      assert(!b.elements.empty());
-      return a.elements[0].x < b.elements[0].x;
+    if (a.priority != b.priority) {
+      return a.priority < b.priority;
     }
-    return a.priority < b.priority;
+
+    return a.ref < b.ref;
   }
 
   template <class NativeGlyph>
   static bool ContourLabelSorter(const ContourLabel<NativeGlyph> &a,
                                  const ContourLabel<NativeGlyph> &b)
   {
-    if (a.priority == b.priority) {
-      assert(!a.glyphs.empty());
-      assert(!b.glyphs.empty());
-      return a.glyphs[0].trPosition.GetX() < b.glyphs[0].trPosition.GetX();
+
+    if (a.priority != b.priority) {
+      return a.priority < b.priority;
     }
-    return a.priority < b.priority;
+
+    if (a.ref != b.ref) {
+      return a.ref < b.ref;
+    }
+
+    return a.glyphs[0].trPosition.GetX() < b.glyphs[0].trPosition.GetX();
   }
 
   /**
@@ -280,7 +212,7 @@ constexpr bool debugLabelLayouter = false;
    *   required methods:
    *
    *    // glyph bounding box relative to its base point
-   *    DoubleRectangle GlyphBoundingBox(const NativeGlyph &) const
+   *    DoubleScreenRectangle GlyphBoundingBox(const NativeGlyph &) const
    *
    *    // layout text for label
    *    std::shared_ptr<Label<NativeGlyph, NativeLabel>> Layout(
@@ -308,7 +240,7 @@ constexpr bool debugLabelLayouter = false;
         textLayouter(textLayouter)
     {};
 
-    void SetViewport(const DoubleRectangle& v)
+    void SetViewport(const ScreenVectorRectangle& v)
     {
       visibleViewport = v;
       SetLayoutOverlap(layoutOverlap);
@@ -344,7 +276,7 @@ constexpr bool debugLabelLayouter = false;
      * it is added and pixels on canvas mark.
      */
     struct LayoutJob {
-      DoubleRectangle layoutViewport;
+      ScreenVectorRectangle layoutViewport;
 
       double iconPadding;
       double labelPadding;
@@ -352,29 +284,26 @@ constexpr bool debugLabelLayouter = false;
       double contourLabelPadding;
       double overlayLabelPadding;
 
-      int64_t rowSize;
-
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
 
-      std::vector<uint64_t> iconCanvas;
-      std::vector<uint64_t> labelCanvas;
-      std::vector<uint64_t> overlayCanvas;
+      ScreenMask iconCanvas;
+      ScreenMask labelCanvas;
+      ScreenMask overlayCanvas;
 
-      LayoutJob(const DoubleRectangle &layoutViewport,
+      LayoutJob(const ScreenVectorRectangle &layoutViewport,
                 const Projection& projection,
                 const MapParameter& parameter):
-        layoutViewport(layoutViewport),
-        iconPadding(projection.ConvertWidthToPixel(parameter.GetIconPadding())),
-        labelPadding(projection.ConvertWidthToPixel(parameter.GetLabelPadding())),
-        shieldLabelPadding(projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding())),
-        contourLabelPadding(projection.ConvertWidthToPixel(parameter.GetContourLabelPadding())),
-        overlayLabelPadding(projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())),
-        rowSize((int64_t(layoutViewport.width) / 64)+1)
+              layoutViewport(layoutViewport),
+              iconPadding(projection.ConvertWidthToPixel(parameter.GetIconPadding())),
+              labelPadding(projection.ConvertWidthToPixel(parameter.GetLabelPadding())),
+              shieldLabelPadding(projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding())),
+              contourLabelPadding(projection.ConvertWidthToPixel(parameter.GetContourLabelPadding())),
+              overlayLabelPadding(projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())),
+              iconCanvas(layoutViewport.width,layoutViewport.height),
+              labelCanvas(layoutViewport.width,layoutViewport.height),
+              overlayCanvas(layoutViewport.width,layoutViewport.height)
       {
-        iconCanvas.resize((size_t)(rowSize*layoutViewport.height));
-        labelCanvas.resize((size_t)(rowSize*layoutViewport.height));
-        overlayCanvas.resize((size_t)(rowSize*layoutViewport.height));
       }
 
       LayoutJob(const LayoutJob&) = delete;
@@ -401,75 +330,66 @@ constexpr bool debugLabelLayouter = false;
                          ContourLabelSorter<NativeGlyph>);
       }
 
-      void MarkLabelPlace(std::vector<uint64_t> &canvas,
-                          const Mask &mask,
-                          int viewportHeight) const
-      {
-        for (int r=std::max(0,mask.rowFrom); r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
-          for (int c=std::max(0,mask.cellFrom); c<=std::min((int)mask.size()-1, mask.cellTo); c++){
-            canvas[r*mask.size() + c] = mask.d[c] | canvas[r*mask.size() + c];
-          }
-        }
-      }
-
-      bool CheckLabelCollision(const std::vector<uint64_t> &canvas,
-                               const Mask &mask,
-                               int64_t viewportHeight) const
-      {
-        bool collision=false;
-        for (int r=std::max(0,mask.rowFrom); !collision && r<=std::min((int)viewportHeight-1, mask.rowTo); r++){
-          for (int c=std::max(0,mask.cellFrom); !collision && c<=std::min((int)mask.size()-1,mask.cellTo); c++){
-            if ((mask.d[c] & canvas[r*mask.size() + c]) != 0u) {
-              collision = true;
-            }
-          }
-        }
-        return collision;
-      }
-
-      double LabelPadding(const LabelData &labelData) const
+      double GetLabelPadding(const LabelData &labelData) const
       {
         if (labelData.type==LabelData::Icon || labelData.type==LabelData::Symbol) {
           return iconPadding;
         }
+
         if (IsOverlay(labelData)) {
           return overlayLabelPadding;
         }
+
         if (dynamic_cast<const ShieldStyle*>(labelData.style.get())!=nullptr){
           return shieldLabelPadding;
         }
+
         return labelPadding;
+      }
+
+      ScreenMask* GetCanvas(LabelData data) {
+        if (data.type==LabelData::Icon || data.type==LabelData::Symbol){
+          return &iconCanvas;
+        }
+
+        if (IsOverlay(data)) {
+          return &overlayCanvas;
+        }
+
+        return &labelCanvas;
       }
 
       void ProcessLabelInstance(const LabelInstanceType &currentLabel,
                                 std::vector<LabelInstanceType> &labelInstances)
-      {
-        size_t elementCount = currentLabel.elements.size();
-        std::vector<Mask> masks(elementCount, Mask(rowSize));
-        std::vector<std::vector<uint64_t> *> canvases(elementCount, nullptr);
 
+      {
+        size_t elementCount = currentLabel.elements.size();       // Number of elements in label
+        std::vector<ScreenRectMask> masks(elementCount);          // Vector of masks of each individual object
+        std::vector<ScreenMask*> canvases(elementCount, nullptr); // Corresponding canvas for each label or null (if collision)
+
+        // List of elements to be rendered (no collision)
         std::vector<typename LabelInstance<NativeGlyph, NativeLabel>::Element> visibleElements;
 
-        for (size_t eli=0; eli < elementCount; eli++){
+        for (size_t eli=0; eli < elementCount; eli++) {
           const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel.elements[eli];
-          Mask& row=masks[eli];
+          ScreenRectMask &mask=masks[eli];
+          ScreenMask     *canvas=GetCanvas(element.labelData);
+          double         padding=GetLabelPadding(element.labelData);
 
-          double padding = LabelPadding(element.labelData);
+          ScreenPixelRectangle rectangle{(int)(element.x - layoutViewport.x - padding),
+                                         (int)(element.y - layoutViewport.y - padding),
+                                         0, 0 };
 
-          IntRectangle rectangle{ (int)std::floor(element.x - layoutViewport.x - padding),
-                                  (int)std::floor(element.y - layoutViewport.y - padding),
-                                  0, 0 };
-          std::vector<uint64_t> *canvas = &labelCanvas;
           if (element.labelData.type==LabelData::Icon || element.labelData.type==LabelData::Symbol){
             if (element.labelData.iconStyle->IsOverlay()) {
               rectangle.width = 0;
               rectangle.height = 0;
             }
             else {
-              rectangle.width = std::ceil(element.labelData.iconWidth + 2*padding);
-              rectangle.height = std::ceil(element.labelData.iconHeight + 2*padding);
+              rectangle.width = element.labelData.iconWidth + 2*padding;
+              rectangle.height = element.labelData.iconHeight + 2*padding;
             }
-            canvas = &iconCanvas;
+
             if constexpr (debugLabelLayouter) {
               if (element.labelData.type == LabelData::Icon) {
                 std::cout << "Test icon " << element.labelData.iconStyle->GetIconName() <<
@@ -479,26 +399,28 @@ constexpr bool debugLabelLayouter = false;
                           " prio " << currentLabel.priority;
               }
             }
-          } else {
+          }
+          else {
             if constexpr (debugLabelLayouter) {
               std::cout << "Test " << (IsOverlay(element.labelData) ? "overlay " : "")
                         << "label prio " << currentLabel.priority << ": "
                         << element.labelData.text;
             }
 
-            rectangle.width = std::ceil(element.label->width + 2*padding);
-            rectangle.height = std::ceil(element.label->height + 2*padding);
-
-            if (IsOverlay(element.labelData)){
-              canvas = &overlayCanvas;
-            }
+            rectangle.width = element.label->width + 2*padding;
+            rectangle.height = element.label->height + 2*padding;
           }
-          row.prepare(rectangle);
-          bool collision = CheckLabelCollision(*canvas, row, layoutViewport.height);
+
+          mask=ScreenRectMask(layoutViewport.width,
+                              rectangle);
+
+          bool collision = canvas->HasCollision(mask);
+
           if (!collision) {
             visibleElements.push_back(element);
             canvases[eli]=canvas;
           }
+
           if constexpr (debugLabelLayouter) {
             std::cout << " -> " << (collision ? "skipped" : "added") << std::endl;
             // p->DrawRectangle(rectangle.x, rectangle.y,
@@ -508,13 +430,14 @@ constexpr bool debugLabelLayouter = false;
         }
 
         if (!visibleElements.empty()) {
-          LabelInstanceType instanceCopy{currentLabel.priority, visibleElements};
+          LabelInstanceType instanceCopy{currentLabel.ref,currentLabel.priority, visibleElements};
           labelInstances.push_back(instanceCopy);
 
           // mark all labels at once (elements of single label may have no padding)
+
           for (size_t eli=0; eli < elementCount; eli++) {
             if (canvases[eli] != nullptr) {
-              MarkLabelPlace(*(canvases[eli]), masks[eli], layoutViewport.height);
+              canvases[eli]->AddMask(masks[eli]);
             }
           }
         }
@@ -529,26 +452,32 @@ constexpr bool debugLabelLayouter = false;
           std::cout << "Test contour label prio " << currentContourLabel.priority << ": " << currentContourLabel.text;
         }
 
-        Mask m(rowSize);
-        std::vector<Mask> masks(glyphCnt, m);
-        bool collision=false;
-        for (int gi=0; !collision && gi<glyphCnt; gi++) {
+        std::vector<ScreenRectMask> masks(glyphCnt);
 
+        bool collision=false;
+        for (int gi=0; gi<glyphCnt; gi++) {
           auto glyph=currentContourLabel.glyphs[gi];
-          IntRectangle rect{
+          ScreenPixelRectangle rect{
             (int)(glyph.trPosition.GetX() - layoutViewport.x - contourLabelPadding),
             (int)(glyph.trPosition.GetY() - layoutViewport.y - contourLabelPadding),
             (int)(glyph.trWidth + 2*contourLabelPadding),
             (int)(glyph.trHeight + 2*contourLabelPadding)
           };
-          masks[gi].prepare(rect);
-          collision |= CheckLabelCollision(labelCanvas, masks[gi], layoutViewport.height);
+
+          masks[gi]=ScreenRectMask(layoutViewport.width,
+                                   rect);
+
+          if (labelCanvas.HasCollision(masks[gi])) {
+            collision=true;
+            break;
+          }
         }
 
         if (!collision) {
           for (int gi=0; gi<glyphCnt; gi++) {
-            MarkLabelPlace(labelCanvas, masks[gi], layoutViewport.height);
+            labelCanvas.AddMask(masks[gi]);
           }
+
           contourLabelInstances.push_back(currentContourLabel);
         }
 
@@ -563,33 +492,38 @@ constexpr bool debugLabelLayouter = false;
         labelInstances.reserve(allSortedLabels.size());
         contourLabelInstances.reserve(allSortedContourLabels.size());
 
+        // Get first entries
+
         auto labelIter = allSortedLabels.begin();
         auto contourLabelIter = allSortedContourLabels.begin();
-        while (labelIter != allSortedLabels.end()
-               || contourLabelIter != allSortedContourLabels.end()) {
 
-          auto currentLabel = labelIter;
-          auto currentContourLabel = contourLabelIter;
-          if (currentLabel != allSortedLabels.end()
-              && currentContourLabel != allSortedContourLabels.end()) {
-            if (currentLabel->priority != currentContourLabel->priority) {
-              if (currentLabel->priority < currentContourLabel->priority) {
-                currentContourLabel = allSortedContourLabels.end();
-              } else {
-                currentLabel = allSortedLabels.end();
-              }
-            }
+        // While both lists are not completely processed...
+        //   Process first all contour labels of a priority and then all normal labels of the same priority
+
+        while (labelIter != allSortedLabels.end() &&
+           contourLabelIter != allSortedContourLabels.end()) {
+
+          if (contourLabelIter->priority<=labelIter->priority) {
+            ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances);
+            contourLabelIter++;
           }
-
-          if (currentLabel != allSortedLabels.end()){
-            ProcessLabelInstance(*currentLabel, labelInstances);
+          else {
+            ProcessLabelInstance(*labelIter, labelInstances);
             labelIter++;
           }
 
-          if (currentContourLabel != allSortedContourLabels.end()){
-            ProcessLabelContourLabel(*currentContourLabel, contourLabelInstances);
-            contourLabelIter++;
-          }
+        }
+
+        // Process all the rest... (there should only be one of the two lists left)
+
+        while (contourLabelIter != allSortedContourLabels.end()) {
+          ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances);
+          contourLabelIter++;
+        }
+
+        while (labelIter != allSortedLabels.end()) {
+          ProcessLabelInstance(*labelIter, labelInstances);
+          labelIter++;
         }
       }
     };
@@ -628,7 +562,7 @@ constexpr bool debugLabelLayouter = false;
      *
      *      void DrawLabel(const Projection& projection,
      *                     const MapParameter& parameter,
-     *                     const DoubleRectangle& labelRectangle,
+     *                     const DoubleScreenRectangle& labelRectangle,
      *                     const LabelData& label,
      *                     const std::shared_ptr<NativeLabel>& layout);
      *
@@ -652,7 +586,7 @@ constexpr bool debugLabelLayouter = false;
 
       for (const LabelInstanceType &inst : Labels()){
         for (const typename LabelInstanceType::Element &el : inst.elements) {
-          DoubleRectangle elementRectangle;
+          ScreenVectorRectangle elementRectangle;
           if (el.labelData.type==LabelData::Text) {
             elementRectangle.Set(el.x, el.y, el.label->width, el.label->height);
           }else{
@@ -692,13 +626,13 @@ constexpr bool debugLabelLayouter = false;
       // draw postponed text elements
       for (const typename LabelInstanceType::Element *el : textElements) {
         p->DrawLabel(projection, parameter,
-                     DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
+                     ScreenVectorRectangle(el->x, el->y, el->label->width, el->label->height),
                      el->labelData, el->label->label);
       }
 
       for (const typename LabelInstanceType::Element *el : overlayElements) {
         p->DrawLabel(projection, parameter,
-                     DoubleRectangle(el->x, el->y, el->label->width, el->label->height),
+                     ScreenVectorRectangle(el->x, el->y, el->label->width, el->label->height),
                      el->labelData, el->label->label);
       }
 
@@ -720,45 +654,54 @@ constexpr bool debugLabelLayouter = false;
                       double objectWidth)
     {
       typename LabelInstance<NativeGlyph, NativeLabel>::Element element;
+
       element.labelData=data;
+
       if (data.type==LabelData::Type::Icon || data.type==LabelData::Type::Symbol){
         instance.priority = std::min(data.priority, instance.priority);
         element.x = point.GetX() - data.iconWidth / 2;
         if (offset<0){
           element.y = point.GetY() - data.iconHeight / 2;
           offset = point.GetY() + data.iconHeight / 2;
-        } else {
+        }
+        else {
           element.y = offset;
           offset += data.iconHeight;
         }
-      }else {
+      }
+      else {
         instance.priority = std::min(data.priority, instance.priority);
         // TODO: should we take style into account?
         // Qt allows to split text layout and style setup
         element.label = textLayouter->Layout(projection, parameter,
                                              data.text, data.fontSize,
                                              objectWidth,
-          /*enable wrapping*/ true,
-          /*contour label*/ false);
+                                             /*enable wrapping*/ true,
+                                             /*contour label*/ false);
         element.x = point.GetX() - element.label->width / 2;
         if (offset<0){
           element.y = point.GetY() - element.label->height / 2;
           offset = point.GetY() + element.label->height / 2;
-        } else {
+        }
+        else {
           element.y = offset;
           offset += element.label->height;
         }
       }
+
       instance.elements.push_back(element);
     }
 
     void RegisterLabel(const Projection& projection,
                        const MapParameter& parameter,
+                       const ObjectFileRef& ref,
                        const Vertex2D& point,
                        const LabelData& data,
                        double objectWidth = 10.0)
     {
       LabelInstanceType instance;
+
+      instance.ref=ref;
 
       double offset=-1;
       ProcessLabel(projection,
@@ -774,11 +717,14 @@ constexpr bool debugLabelLayouter = false;
 
     void RegisterLabel(const Projection& projection,
                        const MapParameter& parameter,
+                       const ObjectFileRef& ref,
                        const Vertex2D& point,
                        const std::vector<LabelData>& data,
                        double objectWidth = 10.0)
     {
       LabelInstanceType instance;
+
+      instance.ref=ref;
 
       double offset=-1;
       for (const auto& d : data) {
@@ -796,6 +742,7 @@ constexpr bool debugLabelLayouter = false;
 
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              const ObjectFileRef& ref,
                               const PathLabelData &labelData,
                               const LabelPath &labelPath)
     {
@@ -837,6 +784,7 @@ constexpr bool debugLabelLayouter = false;
 
         ContourLabelType cLabel;
 
+        cLabel.ref = ref;
         cLabel.priority = labelData.priority;
         cLabel.style = labelData.style;
 
@@ -859,7 +807,7 @@ constexpr bool debugLabelLayouter = false;
                                offset + glyph.position.GetX();
           osmscout::Vertex2D point=labelPath.PointAtLength(glyphOffset);
 
-          DoubleRectangle textBoundingBox = textLayouter->GlyphBoundingBox(glyph.glyph);
+          ScreenVectorRectangle textBoundingBox = textLayouter->GlyphBoundingBox(glyph.glyph);
           double w = textBoundingBox.width;
           double h = textBoundingBox.height;
           osmscout::Vertex2D tl(textBoundingBox.x, textBoundingBox.y);
@@ -872,7 +820,7 @@ constexpr bool debugLabelLayouter = false;
           double diagonal=w+h+std::abs(textBaselineOffset);
 
           // fast check if current glyph can be visible
-          if (!layoutViewport.Intersects(DoubleRectangle{
+          if (!layoutViewport.Intersects(ScreenVectorRectangle{
             point.GetX()-diagonal,
             point.GetY()-diagonal,
             2*diagonal,
@@ -945,8 +893,8 @@ constexpr bool debugLabelLayouter = false;
     TextLayouter *textLayouter;
     std::vector<ContourLabelType> contourLabelInstances;
     std::vector<LabelInstanceType> labelInstances;
-    DoubleRectangle visibleViewport{0,0,0,0};
-    DoubleRectangle layoutViewport{0,0,0,0};
+    ScreenVectorRectangle visibleViewport{0,0,0,0};
+    ScreenVectorRectangle layoutViewport{0,0,0,0};
     uint32_t layoutOverlap=0; // overlap [pixels] used for label layouting
   };
 

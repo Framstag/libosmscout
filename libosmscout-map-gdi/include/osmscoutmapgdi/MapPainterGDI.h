@@ -111,6 +111,7 @@ namespace osmscout {
      */
     void RegisterRegularLabel(const Projection &projection,
                               const MapParameter &parameter,
+                              const ObjectFileRef& ref,
                               const std::vector<LabelData> &labels,
                               const Vertex2D &position,
                               double objectWidth) override;
@@ -120,6 +121,7 @@ namespace osmscout {
      */
     void RegisterContourLabel(const Projection &projection,
                               const MapParameter &parameter,
+                              const ObjectFileRef& ref,
                               const PathLabelData &label,
                               const LabelPath &labelPath) override;
 

@@ -55,6 +55,7 @@ namespace osmscout {
 
   void MapPainterNoOp::RegisterRegularLabel(const Projection& /*projection*/,
                                             const MapParameter& /*parameter*/,
+                                            const ObjectFileRef& /*ref*/,
                                             const std::vector<LabelData> &/*labels*/,
                                             const Vertex2D& /*position*/,
                                             const double /*objectWidth*/)
@@ -65,6 +66,7 @@ namespace osmscout {
 
   void MapPainterNoOp::RegisterContourLabel(const Projection & /*projection*/,
                                             const MapParameter & /*parameter*/,
+                                            const ObjectFileRef& /*ref*/,
                                             const PathLabelData & /*label*/,
                                             const LabelPath & /*labelPath*/)
   {

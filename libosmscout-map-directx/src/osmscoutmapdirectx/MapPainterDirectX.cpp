@@ -680,11 +680,12 @@ namespace osmscout
 
   void MapPainterDirectX::RegisterRegularLabel(const Projection &projection,
 	  const MapParameter &parameter,
+      const ObjectFileRef& ref,
 	  const std::vector<LabelData> &labels,
 	  const Vertex2D &position,
 	  double objectWidth)
   {
-    m_LabelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    m_LabelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
   }
 
   /**
@@ -692,10 +693,11 @@ namespace osmscout
   */
   void MapPainterDirectX::RegisterContourLabel(const Projection &projection,
 	  const MapParameter &parameter,
+      const ObjectFileRef& ref,
 	  const PathLabelData &label,
 	  const LabelPath &labelPath)
   {
-    m_LabelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    m_LabelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
   }
 
   void MapPainterDirectX::DrawLabels(const Projection& projection,

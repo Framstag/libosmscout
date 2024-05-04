@@ -100,39 +100,4 @@ namespace osmscout {
 
     return {countLabels,offset,labelSpace};
   }
-
-
-  OSMSCOUT_MAP_API void Mask::prepare(const IntRectangle &rect)
-  {
-    // clear
-    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
-      d[c] = 0;
-    }
-
-    // setup
-    cellFrom = rect.x / 64;
-    uint16_t cellFromBit = rect.x < 0 ? 0 : rect.x % 64;
-    int to = (rect.x + rect.width);
-    if (to < 0 || cellFrom >= (int)d.size())
-      return; // mask is outside viewport, keep it blank
-    cellTo = to / 64;
-    uint16_t cellToBit = (rect.x + rect.width) % 64;
-    if (cellToBit == 0){
-      cellTo --;
-    }
-
-    rowFrom = rect.y;
-    rowTo = rect.y + rect.height;
-
-    constexpr uint64_t mask = ~0;
-    for (int c = std::max(0, cellFrom); c <= std::min((int) d.size() - 1, cellTo); c++) {
-      d[c] = mask;
-    }
-    if (cellFrom >= 0 && cellFrom < size() && cellFromBit > 0) {
-      d[cellFrom] = mask << cellFromBit;
-    }
-    if (cellTo >= 0 && cellTo < size() && cellToBit > 0) {
-      d[cellTo] = d[cellTo] & (mask >> (64 - cellToBit));
-    }
-  }
 }

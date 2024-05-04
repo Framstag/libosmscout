@@ -302,7 +302,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabel(const Projection& /*projection*/,
                                const MapParameter& /*parameter*/,
-                               const DoubleRectangle& labelRect,
+                               const ScreenVectorRectangle& labelRect,
                                const LabelData& label,
                                const QTextLayout& textLayout)
   {
@@ -844,7 +844,7 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& /*data*/)
   {
-    labelLayouter.SetViewport(DoubleRectangle(0, 0, painter->window().width(), painter->window().height()));
+    labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, painter->window().width(), painter->window().height()));
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
@@ -871,20 +871,28 @@ namespace osmscout {
 
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          const ObjectFileRef& ref,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
                                           double objectWidth)
   {
-    GetLayouter().RegisterLabel(projection, parameter, position, labels, objectWidth);
+    GetLayouter().RegisterLabel(projection,
+                                parameter,
+                                ref,
+                                position,
+                                labels,
+                                objectWidth);
   }
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          const ObjectFileRef& ref,
                                           const PathLabelData &label,
                                           const LabelPath &labelPath)
   {
     GetLayouter().RegisterContourLabel(projection,
                                        parameter,
+                                       ref,
                                        label,
                                        labelPath);
   }
@@ -906,11 +914,11 @@ namespace osmscout {
     labelLayouter.Reset();
   }
 
-  DoubleRectangle MapPainterQt::GlyphBoundingBox(const QGlyphRun &glyph) const
+  ScreenVectorRectangle MapPainterQt::GlyphBoundingBox(const QGlyphRun &glyph) const
   {
     auto bbox=glyph.boundingRect();
     auto tl=bbox.topLeft();
-    return DoubleRectangle(tl.x(), tl.y(), bbox.width(), bbox.height());
+    return ScreenVectorRectangle(tl.x(), tl.y(), bbox.width(), bbox.height());
   }
 
   void MapPainterQt::DrawGlyph(QPainter *painter, const Glyph<QGlyphRun> &glyph) const

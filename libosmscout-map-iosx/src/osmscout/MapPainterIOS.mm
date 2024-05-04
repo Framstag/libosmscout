@@ -545,17 +545,19 @@ namespace osmscout {
 
     void MapPainterIOS::RegisterRegularLabel(const Projection &projection,
                                              const MapParameter &parameter,
+                                             const ObjectFileRef& ref,
                                              const std::vector<LabelData> &labels,
                                              const Vertex2D &position,
                                              double objectWidth){
-        labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+        labelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
     }
 
     void MapPainterIOS::RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      const ObjectFileRef& ref,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath){
-        labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+        labelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
     }
 
     void MapPainterIOS::DrawLabels(const Projection& projection,

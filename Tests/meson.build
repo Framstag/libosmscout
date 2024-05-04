@@ -404,6 +404,16 @@ ScreenBox = executable('ScreenBox',
 
 test('Check ScreenBox functionality', ScreenBox)
 
+ScreenMaskTest = executable('ScreenMaskTest',
+                       'src/ScreenMaskTest.cpp',
+                       include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                       dependencies: [mathDep, openmpDep],
+                       link_with: [osmscoutmap, osmscout],
+                       install: true,
+                       install_dir: testInstallDir)
+
+test('Check ScreenMask functionality', ScreenMaskTest)
+
 StdByteTest = executable('StdByteTest',
              'src/StdByteTest.cpp',
              include_directories: [testIncDir],
