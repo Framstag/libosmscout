@@ -137,13 +137,13 @@ namespace osmscout {
     return label;
   }
 
-  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
     pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
 
-    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
+    return ScreenVectorRectangle((double)(extends.x) / (double)PANGO_SCALE,
                            (double)(extends.y) / (double)PANGO_SCALE,
                            (double)(extends.width) / (double)PANGO_SCALE,
                            (double)(extends.height) / (double)PANGO_SCALE);
