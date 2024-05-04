@@ -431,7 +431,7 @@ namespace osmscout
                                         const MapParameter& parameter,
                                         const MapData& /*data*/)
   {
-    DoubleRectangle viewport;
+    ScreenVectorRectangle viewport;
 
     viewport.x=0;
     viewport.y=0;
@@ -521,7 +521,7 @@ namespace osmscout
       return fontHeightMap[fontSize];
     }
 
-    DoubleRectangle dimension;
+    ScreenVectorRectangle dimension;
 
     dimension = GetTextDimension(projection, parameter, /*objectWidth*/ -1, fontSize, "App");
     fontHeightMap[fontSize] = dimension.height;
@@ -529,14 +529,14 @@ namespace osmscout
     return dimension.height;
   }
 
-  DoubleRectangle MapPainterDirectX::GetTextDimension(
+  ScreenVectorRectangle MapPainterDirectX::GetTextDimension(
     const Projection& projection,
     const MapParameter& parameter,
     double /*objectWidth*/,
     double fontSize,
     const std::string& text)
   {
-	DoubleRectangle dimension;
+	ScreenVectorRectangle dimension;
 
 #ifdef MBUC
     std::wstring sample = s2w(text);
@@ -591,7 +591,7 @@ namespace osmscout
 
   void MapPainterDirectX::DrawLabel(const Projection& /*projection*/,
                                     const MapParameter& /*parameter*/,
-                                    const DoubleRectangle& labelRectangle,
+                                    const ScreenVectorRectangle& labelRectangle,
                                     const LabelData& label,
                                     const DirectXTextLayout& textLayout)
 
@@ -875,9 +875,9 @@ namespace osmscout
     return label;
   }
 
-  osmscout::DoubleRectangle MapPainterDirectX::GlyphBoundingBox(const DirectXNativeGlyph &glyph) const
+  osmscout::ScreenVectorRectangle MapPainterDirectX::GlyphBoundingBox(const DirectXNativeGlyph &glyph) const
   {
-    return DoubleRectangle(0,
+    return ScreenVectorRectangle(0,
                            glyph.height * -1,
                            glyph.width,
                            glyph.height);

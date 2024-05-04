@@ -848,12 +848,12 @@ namespace osmscout {
 
 #else
 
-  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
   {
-    return DoubleRectangle(0,
-                           glyph.height * -1,
-                           glyph.width,
-                           glyph.height);
+    return ScreenVectorRectangle(0,
+                                 glyph.height * -1,
+                                 glyph.width,
+                                 glyph.height);
   }
 
   template<>

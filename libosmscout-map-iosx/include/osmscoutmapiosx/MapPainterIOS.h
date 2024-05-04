@@ -211,7 +211,7 @@ namespace osmscout {
 
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,
-                       const DoubleRectangle& labelRectangle,
+                       const ScreenVectorRectangle& labelRectangle,
                        const LabelData& label,
                        const IOSRunInLine& layout);
 
@@ -294,7 +294,7 @@ namespace osmscout {
                                          double objectWidth,
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
-        DoubleRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
+        ScreenVectorRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
         void DrawGlyphs(const Projection &projection,
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,

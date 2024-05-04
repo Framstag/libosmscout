@@ -55,7 +55,7 @@ namespace osmscout {
 		static DWORD                       m_gdiplusInstCount;
 
 	private:
-    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+    osmscout::ScreenVectorRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
 
     std::shared_ptr<GdiLabel> Layout(const Projection &projection,
                                      const MapParameter &parameter,
@@ -67,7 +67,7 @@ namespace osmscout {
 
     void DrawLabel(const Projection &projection,
                    const MapParameter &parameter,
-                   const DoubleRectangle &labelRectangle,
+                   const ScreenVectorRectangle &labelRectangle,
                    const LabelData &label,
                    const NativeLabel &layout);
 
