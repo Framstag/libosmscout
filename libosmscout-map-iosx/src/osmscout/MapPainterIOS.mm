@@ -294,10 +294,10 @@ namespace osmscout {
         return averageCharWidth.insert(std::pair<size_t,double>(convFontSize,averageWidth)).first->second;
     }
 
-    DoubleRectangle MapPainterIOS::GlyphBoundingBox(const IOSGlyphInRun &glyph) const {
+    ScreenVectorRectangle MapPainterIOS::GlyphBoundingBox(const IOSGlyphInRun &glyph) const {
         CFRange range = CFRangeMake(glyph.index, 1);
         CGRect glyphRect = CTRunGetImageBounds(glyph.run, cg, range);
-        return DoubleRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
+        return ScreenVectorRectangle(glyphRect.origin.x,glyphRect.origin.y,glyphRect.size.width,glyphRect.size.height);
     }
 
     template<> std::vector<IOSGlyph> IOSLabel::ToGlyphs() const {
@@ -487,7 +487,7 @@ namespace osmscout {
 
     void MapPainterIOS::DrawLabel(const Projection& /*projection*/,
                                   const MapParameter& /*parameter*/,
-                                  const DoubleRectangle& labelRect,
+                                  const ScreenVectorRectangle& labelRect,
                                   const LabelData& label,
                                   const IOSRunInLine& layout) {
 
@@ -539,23 +539,25 @@ namespace osmscout {
                                       const Projection& projection,
                                       const MapParameter& parameter,
                                       const MapData& /*data*/){
-        labelLayouter.SetViewport(DoubleRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
+        labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
         labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
 
     void MapPainterIOS::RegisterRegularLabel(const Projection &projection,
                                              const MapParameter &parameter,
+                                             const ObjectFileRef& ref,
                                              const std::vector<LabelData> &labels,
                                              const Vertex2D &position,
                                              double objectWidth){
-        labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+        labelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
     }
 
     void MapPainterIOS::RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      const ObjectFileRef& ref,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath){
-        labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+        labelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
     }
 
     void MapPainterIOS::DrawLabels(const Projection& projection,

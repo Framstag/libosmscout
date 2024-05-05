@@ -140,7 +140,7 @@ namespace osmscout {
                          const MapParameter &parameter,
                          double fontSize) override;
 
-	DoubleRectangle GetTextDimension(const Projection& projection,
+	ScreenVectorRectangle GetTextDimension(const Projection& projection,
                                    const MapParameter& parameter,
                                    double objectWidth,
                                    double fontSize,
@@ -152,7 +152,7 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const DoubleRectangle& labelRectangle,
+                   const ScreenVectorRectangle& labelRectangle,
                    const LabelData& label,
                    const DirectXTextLayout& textLayout);
 
@@ -167,6 +167,7 @@ namespace osmscout {
 	*/
   void RegisterRegularLabel(const Projection &projection,
                             const MapParameter &parameter,
+                            const ObjectFileRef& ref,
                             const std::vector<LabelData> &labels,
                             const Vertex2D &position,
                             double objectWidth) override;
@@ -176,6 +177,7 @@ namespace osmscout {
 	*/
   void RegisterContourLabel(const Projection &projection,
                             const MapParameter &parameter,
+                            const ObjectFileRef& ref,
                             const PathLabelData &label,
                             const LabelPath &labelPath) override;
 
@@ -210,7 +212,7 @@ namespace osmscout {
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
 
-    osmscout::DoubleRectangle GlyphBoundingBox(const DirectXNativeGlyph &glyph) const;
+    osmscout::ScreenVectorRectangle GlyphBoundingBox(const DirectXNativeGlyph &glyph) const;
 
 	/*
     virtual void DrawContourLabel(const Projection& projection,

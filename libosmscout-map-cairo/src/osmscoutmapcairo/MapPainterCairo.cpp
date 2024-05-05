@@ -654,7 +654,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const MapData& /*data*/)
   {
-    DoubleRectangle viewport;
+    ScreenVectorRectangle viewport;
     double x2, y2;
     cairo_clip_extents(draw, &viewport.x, &viewport.y, &x2, &y2);
     viewport.width = x2 - viewport.x;
@@ -787,16 +787,16 @@ namespace osmscout {
     return label;
   }
 
-  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
     pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
 
-    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
-                           (double)(extends.y) / (double)PANGO_SCALE,
-                           (double)(extends.width) / (double)PANGO_SCALE,
-                           (double)(extends.height) / (double)PANGO_SCALE);
+    return ScreenVectorRectangle((double)(extends.x) / (double)PANGO_SCALE,
+                                 (double)(extends.y) / (double)PANGO_SCALE,
+                                 (double)(extends.width) / (double)PANGO_SCALE,
+                                 (double)(extends.height) / (double)PANGO_SCALE);
   }
 
   void MapPainterCairo::DrawGlyphs(const Projection &/*projection*/,
@@ -848,12 +848,12 @@ namespace osmscout {
 
 #else
 
-  DoubleRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
   {
-    return DoubleRectangle(0,
-                           glyph.height * -1,
-                           glyph.width,
-                           glyph.height);
+    return ScreenVectorRectangle(0,
+                                 glyph.height * -1,
+                                 glyph.width,
+                                 glyph.height);
   }
 
   template<>
@@ -943,7 +943,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
                                   const MapParameter &/*parameter*/,
-                                  const DoubleRectangle &labelRectangle,
+                                  const ScreenVectorRectangle &labelRectangle,
                                   const LabelData &label,
                                   const CairoNativeLabel &layout)
   {
@@ -1078,12 +1078,14 @@ namespace osmscout {
 
   void MapPainterCairo::RegisterRegularLabel(const Projection &projection,
                                              const MapParameter &parameter,
+                                             const ObjectFileRef& ref,
                                              const std::vector<LabelData> &labels,
                                              const Vertex2D &position,
                                              double objectWidth)
   {
     labelLayouter.RegisterLabel(projection,
                                 parameter,
+                                ref,
                                 position,
                                 labels,
                                 objectWidth);
@@ -1093,12 +1095,14 @@ namespace osmscout {
    * Register contour label
    */
   void MapPainterCairo::RegisterContourLabel(const Projection &projection,
-                                    const MapParameter &parameter,
-                                    const PathLabelData &label,
-                                    const LabelPath &labelPath)
+                                             const MapParameter &parameter,
+                                             const ObjectFileRef& ref,
+                                             const PathLabelData &label,
+                                             const LabelPath &labelPath)
   {
     labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       ref,
                                        label,
                                        labelPath);
   }

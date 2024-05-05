@@ -148,7 +148,7 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const DoubleRectangle& labelRectangle,
+                   const ScreenVectorRectangle& labelRectangle,
                    const LabelData& label,
                    const NativeLabel& layout);
 
@@ -157,7 +157,7 @@ namespace osmscout {
                     const osmscout::PathTextStyleRef style,
                     const std::vector<AggGlyph> &glyphs);
 
-    osmscout::DoubleRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
+    osmscout::ScreenVectorRectangle GlyphBoundingBox(const NativeGlyph &glyph) const;
 
     std::shared_ptr<AggLabel> Layout(const Projection& projection,
                                      const MapParameter& parameter,
@@ -173,6 +173,7 @@ namespace osmscout {
      */
     virtual void RegisterRegularLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      const ObjectFileRef& ref,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
                                       double objectWidth) override;
@@ -182,6 +183,7 @@ namespace osmscout {
      */
     virtual void RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      const ObjectFileRef& ref,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath) override;
 

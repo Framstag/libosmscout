@@ -137,13 +137,13 @@ namespace osmscout {
     return label;
   }
 
-  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
     pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
 
-    return DoubleRectangle((double)(extends.x) / (double)PANGO_SCALE,
+    return ScreenVectorRectangle((double)(extends.x) / (double)PANGO_SCALE,
                            (double)(extends.y) / (double)PANGO_SCALE,
                            (double)(extends.width) / (double)PANGO_SCALE,
                            (double)(extends.height) / (double)PANGO_SCALE);
@@ -246,12 +246,12 @@ namespace osmscout {
     return result;
   }
 
-  DoubleRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
+  ScreenVectorRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
-    return DoubleRectangle(0.0,
-                           (double)(glyph.height * -1),
-                           (double)glyph.width,
-                           (double)glyph.height);
+    return ScreenVectorRectangle(0.0,
+                                 (double)(glyph.height * -1),
+                                 (double)glyph.width,
+                                 (double)glyph.height);
   }
 
   std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
@@ -275,7 +275,7 @@ namespace osmscout {
 
   void MapPainterSVG::DrawLabel(const Projection &projection,
                                 const MapParameter &parameter,
-                                const DoubleRectangle &labelRectangle,
+                                const ScreenVectorRectangle &labelRectangle,
                                 const LabelData &label,
                                 const NativeLabel &/*layout*/)
   {
@@ -604,8 +604,8 @@ namespace osmscout {
   {
     stream << "  <g id=\"map\">" << std::endl;
 
-    DoubleRectangle viewport(0.0,0.0,
-                             (double)projection.GetWidth(), (double)projection.GetHeight());
+    ScreenVectorRectangle viewport(0.0,0.0,
+                                   (double)projection.GetWidth(), (double)projection.GetHeight());
 
     labelLayouter.SetViewport(viewport);
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
@@ -718,11 +718,17 @@ namespace osmscout {
 
   void MapPainterSVG::RegisterRegularLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const std::vector<LabelData> &labels,
                                            const Vertex2D &position,
                                            double objectWidth)
   {
-    labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    labelLayouter.RegisterLabel(projection,
+                                parameter,
+                                ref,
+                                position,
+                                labels,
+                                objectWidth);
   }
 
   /**
@@ -730,11 +736,13 @@ namespace osmscout {
    */
   void MapPainterSVG::RegisterContourLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const PathLabelData &label,
                                            const LabelPath &labelPath)
   {
     labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       ref,
                                        label,
                                        labelPath);
   }

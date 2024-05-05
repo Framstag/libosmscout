@@ -365,7 +365,7 @@ namespace osmscout {
     return result;
   }
 
-  DoubleRectangle MapPainterGDI::GlyphBoundingBox(const NativeGlyph &glyph) const {
+  ScreenVectorRectangle MapPainterGDI::GlyphBoundingBox(const NativeGlyph &glyph) const {
     return {0.0,
             (double) (glyph.height * -1),
             (double) glyph.width,
@@ -403,7 +403,7 @@ namespace osmscout {
 
   void MapPainterGDI::DrawLabel(const Projection &projection,
                                 const MapParameter &parameter,
-                                const DoubleRectangle &labelRectangle,
+                                const ScreenVectorRectangle &labelRectangle,
                                 const LabelData &label,
                                 const NativeLabel &/*layout*/) {
     RENDEROBJECT(pRender);
@@ -541,7 +541,7 @@ namespace osmscout {
                                     const Projection &projection,
                                     const MapParameter &parameter,
                                     const MapData & /*data*/) {
-    DoubleRectangle viewport(0.0, 0.0, (double) projection.GetWidth(), (double) projection.GetHeight());
+    ScreenVectorRectangle viewport(0.0, 0.0, (double) projection.GetWidth(), (double) projection.GetHeight());
     m_labelLayouter.SetViewport(viewport);
     m_labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
@@ -613,17 +613,19 @@ namespace osmscout {
 
   void MapPainterGDI::RegisterRegularLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const std::vector<LabelData> &labels,
                                            const Vertex2D &position,
                                            double objectWidth) {
-    m_labelLayouter.RegisterLabel(projection, parameter, position, labels, objectWidth);
+    m_labelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
   }
 
   void MapPainterGDI::RegisterContourLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           const ObjectFileRef& ref,
                                            const PathLabelData &label,
                                            const LabelPath &labelPath) {
-    m_labelLayouter.RegisterContourLabel(projection, parameter, label, labelPath);
+    m_labelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
   }
 
   void MapPainterGDI::DrawLabels(const Projection &projection,

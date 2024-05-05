@@ -211,7 +211,7 @@ namespace osmscout {
 
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,
-                       const DoubleRectangle& labelRectangle,
+                       const ScreenVectorRectangle& labelRectangle,
                        const LabelData& label,
                        const IOSRunInLine& layout);
 
@@ -222,12 +222,14 @@ namespace osmscout {
 
         virtual void RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          const ObjectFileRef& ref,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
                                           double objectWidth) override;
 
         virtual void RegisterContourLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          const ObjectFileRef& ref,
                                           const PathLabelData &label,
                                           const LabelPath &labelPath) override;
 
@@ -292,7 +294,7 @@ namespace osmscout {
                                          double objectWidth,
                                          bool enableWrapping = false,
                                          bool contourLabel = false);
-        DoubleRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
+        ScreenVectorRectangle GlyphBoundingBox(const IOSGlyphInRun &glyph) const;
         void DrawGlyphs(const Projection &projection,
                         const MapParameter &parameter,
                         const osmscout::PathTextStyleRef style,

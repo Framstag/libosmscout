@@ -149,6 +149,13 @@ osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 #---- ScanConversion
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
+#---- ScreenMask
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME ScreenMaskTest SOURCES src/ScreenMaskTest.cpp TARGET OSMScout::Map)
+else()
+	message("Skip ScreenMask test, libosmscout-map is missing.")
+endif()
+
 #---- StringUtils
 osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
 

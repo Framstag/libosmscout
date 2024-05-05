@@ -30,9 +30,9 @@ namespace osmscout {
   struct Segment
   {
     Vertex2D start;
-    double offset;
-    double length;
-    double angle;
+    double   offset;
+    double   length;
+    double   angle;
   };
 
   /**
@@ -43,12 +43,12 @@ namespace osmscout {
   class OSMSCOUT_MAP_API LabelPath
   {
   private:
-    double length;
+    double               length;
     std::vector<Segment> segments;
-    std::vector<size_t> offsetIndex; // segment offset by length 100
-    double minSegmentLength;
-    Vertex2D end;
-    double endDistance;
+    std::vector<size_t>  offsetIndex; // segment offset by length 100
+    double               minSegmentLength;
+    Vertex2D             end;
+    double               endDistance;
 
   public:
     explicit LabelPath(double minSegmentLength=5);

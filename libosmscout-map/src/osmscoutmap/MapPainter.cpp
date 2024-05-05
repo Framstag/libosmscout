@@ -330,6 +330,7 @@ constexpr bool debugGroundTiles = false;
 
       RegisterRegularLabel(projection,
                            parameter,
+                           ObjectFileRef(),
                            labelData,
                            pixel,
                            /*proposedWidth*/ -1);
@@ -356,6 +357,7 @@ constexpr bool debugGroundTiles = false;
    */
   void MapPainter::LayoutPointLabels(const Projection& projection,
                                      const MapParameter& parameter,
+                                     const ObjectFileRef& ref,
                                      const FeatureValueBuffer& buffer,
                                      const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
@@ -460,6 +462,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterRegularLabel(projection,
                          parameter,
+                         ref,
                          labelLayoutData,
                          screenPos,
                          objectBox.GetWidth());
@@ -548,6 +551,7 @@ constexpr bool debugGroundTiles = false;
 
     LayoutPointLabels(projection,
                       parameter,
+                      areaData.ref,
                       *areaData.buffer,
                       iconStyle,
                       textStyles,
@@ -608,6 +612,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         areaData.ref,
                          labelData,
                          labelPath);
 
@@ -678,6 +683,7 @@ constexpr bool debugGroundTiles = false;
 
     LayoutPointLabels(projection,
                       parameter,
+                      node->GetObjectFileRef(),
                       node->GetFeatureValueBuffer(),
                       iconStyle,
                       textStyles,
@@ -935,6 +941,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         ObjectFileRef(data.ref,RefType::refWay),
                          labelData,
                          labelPath);
 
@@ -2261,6 +2268,7 @@ constexpr bool debugGroundTiles = false;
         vect.push_back(labelBox);
         RegisterRegularLabel(projection,
                              parameter,
+                             ObjectFileRef(),
                              vect,
                              pixel,
                              /*proposedWidth*/ -1);
@@ -2979,6 +2987,7 @@ constexpr bool debugGroundTiles = false;
               vect.push_back(labelBox);
               RegisterRegularLabel(projection,
                                    parameter,
+                                   ObjectFileRef(),
                                    vect,
                                    screenPos,
                                    /*proposedWidth*/ -1);
