@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
   std::cout << "Calculate route..." << std::endl;
 
   osmscout::RoutingParameter parameter;
-  auto                       routingResult=router->CalculateRoute(startNode,targetNode,parameter);
+  auto                       routingResult=router->CalculateRoute(startNode,targetNode,std::nullopt,parameter);
 
   if (!routingResult.Success()){
     std::cerr << "Route failed" << std::endl;

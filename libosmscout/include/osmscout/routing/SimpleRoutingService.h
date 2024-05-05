@@ -108,7 +108,7 @@ namespace osmscout {
    * - Transformation of the resulting route to a simple list of points
    * - Transformation of the resulting route to a routing description with is the base
    * for further transformations to a textual or visual description of the route
-   * - Returning the closest routeable node to  given geolocation
+   * - Returning the closest route-able node to given geolocation
    */
   class OSMSCOUT_API SimpleRoutingService: public AbstractRoutingService<RoutingProfile>
   {
@@ -152,6 +152,8 @@ namespace osmscout {
                     DatabaseId database,
                     const WayRef &way,
                     const Distance &wayLength) override;
+
+    double GetUTurnCost(const RoutingProfile& profile, const DatabaseId databaseId) override;
 
     double GetEstimateCosts(const RoutingProfile& profile,
                             DatabaseId database,

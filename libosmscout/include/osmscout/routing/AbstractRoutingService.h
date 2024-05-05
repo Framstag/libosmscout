@@ -41,11 +41,6 @@
 #include <osmscout/routing/MultiDBRoutingState.h>
 
 namespace osmscout {
-#ifdef OSMSCOUT_DEBUG_ROUTING
-constexpr bool debugRouting = true;
-#else
-constexpr bool debugRouting = false;
-#endif
 
   /**
    * Result of a routing calculation. This object is always returned.
@@ -221,6 +216,8 @@ constexpr bool debugRouting = false;
                             size_t inPathIndex,
                             size_t outPathIndex) = 0;
 
+    virtual double GetUTurnCost(const RoutingState& state, const DatabaseId databaseId) = 0;
+
     virtual double GetCosts(const RoutingState& state,
                             DatabaseId database,
                             const WayRef &way,
@@ -243,8 +240,8 @@ constexpr bool debugRouting = false;
 
     /**
      * Return the route node for the given db offset
-     * @param offset
-     *    Offset in given db
+     * @param id
+     *    Database and Offset in given db
      * @param node
      *    Node instance to write the result back
      * @return
@@ -380,6 +377,7 @@ constexpr bool debugRouting = false;
     RoutingResult CalculateRoute(RoutingState& state,
                                  const RoutePosition& start,
                                  const RoutePosition& target,
+                                 const std::optional<osmscout::Bearing> &bearing,
                                  const RoutingParameter& parameter);
 
     RouteDescriptionResult TransformRouteDataToRouteDescription(const RouteData& data);

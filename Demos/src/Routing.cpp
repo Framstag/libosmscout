@@ -25,6 +25,7 @@
 #include <list>
 #include <sstream>
 #include <fstream>
+#include <optional>
 
 #include <osmscout/db/Database.h>
 
@@ -34,6 +35,7 @@
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 
 #include <osmscout/cli/CmdLineParsing.h>
+#include <osmscout/util/Bearing.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Time.h>
 
@@ -69,6 +71,7 @@ struct Arguments
   osmscout::GeoCoord                start;
   std::vector<osmscout::GeoCoord>   via;
   osmscout::GeoCoord                target;
+  std::optional<osmscout::Bearing>  initialBearing;
   bool                              debug=false;
   bool                              dataDebug=false;
   bool                              routeDebug=false;
@@ -751,6 +754,11 @@ int main(int argc, char* argv[])
                       "penalty-max",
                       "Maximum junction penalty, time [s]. Default "s + std::to_string(duration_cast<seconds>(args.maxPenalty).count()));
 
+  argParser.AddOption(osmscout::CmdLineDoubleOption([&args](double value) {
+                        args.initialBearing=osmscout::Bearing::Degrees(value);
+                      }),
+                      "initial-bearing",
+                      "Initial vehicle bearing (degrees, North is 0, East is 90...).");
 
   argParser.AddOption(osmscout::CmdLineGeoCoordOption([&args](const osmscout::GeoCoord& value) {
                         args.via.push_back(value);
@@ -889,6 +897,7 @@ int main(int argc, char* argv[])
     result=router->CalculateRoute(*routingProfile,
                                   start,
                                   target,
+                                  args.initialBearing,
                                   parameter);
   }
 

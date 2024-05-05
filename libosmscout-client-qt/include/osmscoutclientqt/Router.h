@@ -162,11 +162,13 @@ private:
                            const LocationEntryRef &start,
                            const LocationEntryRef &target,
                            int requestId,
-                           const osmscout::BreakerRef &breaker);
+                           const osmscout::BreakerRef &breaker,
+                           const std::optional<osmscout::Bearing> &bearing);
 
   bool CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                       const osmscout::RoutePosition& start,
                       const osmscout::RoutePosition& target,
+                      const std::optional<osmscout::Bearing> &bearing,
                       osmscout::RouteData& route,
                       int requestId,
                       const osmscout::BreakerRef &breaker);

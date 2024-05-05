@@ -21,12 +21,6 @@
 
 namespace osmscout {
 
-  RoutePosition::RoutePosition()
-  : nodeIndex(0)
-  {
-    // no code
-  }
-
   RoutePosition::RoutePosition(const ObjectFileRef& object,
                                size_t nodeIndex,
                                DatabaseId database)
