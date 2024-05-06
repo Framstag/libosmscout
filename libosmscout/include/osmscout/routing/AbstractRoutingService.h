@@ -370,6 +370,13 @@ namespace osmscout {
                            Distance &currentMaxDistance,
                            const Distance &overallDistance,
                            const double &costLimit);
+
+    bool RestrictInitialUTurn(const RoutingState& state,
+                              const Bearing& vehicleBearing,
+                              const RoutePosition& start,
+                              RNodeRef startForwardNode,
+                              RNodeRef startBackwardNode);
+
   public:
     explicit AbstractRoutingService(const RouterParameter& parameter);
     ~AbstractRoutingService() override;
