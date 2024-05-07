@@ -227,6 +227,7 @@ namespace osmscout {
             reduced=true;
           }
           else if (way.GetSerial(n-1)==0) {
+            nodeBuffer.back()=way.nodes[n]; // do not throw away node[n].serial value
             way.nodes[n-1]=way.nodes[n];
             duplicateCount++;
             reduced=true;
