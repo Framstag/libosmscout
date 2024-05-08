@@ -120,6 +120,11 @@ namespace osmscout {
     return profile.GetCosts(*way,wayLength);
   }
 
+  double SimpleRoutingService::GetUTurnCost(const RoutingProfile& profile, const DatabaseId /*databaseId*/)
+  {
+    return profile.GetUTurnCost();
+  }
+
   double SimpleRoutingService::GetEstimateCosts(const RoutingProfile& profile,
                                                 const DatabaseId /*db*/,
                                                 const Distance &targetDistance)
@@ -422,6 +427,7 @@ namespace osmscout {
                                    RoutePosition(toObject,
                                                  toNodeIndex,/*db*/
                                                  0),
+                                   std::nullopt,
                                    parameter);
       if (!partialResult.Success()) {
         result.GetRoute().Clear();

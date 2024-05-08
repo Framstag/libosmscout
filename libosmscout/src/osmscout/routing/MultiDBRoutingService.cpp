@@ -198,6 +198,12 @@ namespace osmscout {
     return handles[database].profile->GetCosts(*way,wayLength);
   }
 
+  double MultiDBRoutingService::GetUTurnCost(const MultiDBRoutingState& /*state*/, const DatabaseId database)
+  {
+    assert(handles.size()>database);
+    return handles[database].profile->GetUTurnCost();
+  }
+
   double MultiDBRoutingService::GetEstimateCosts(const MultiDBRoutingState& /*state*/,
                                                  const DatabaseId database,
                                                  const Distance &targetDistance)
@@ -380,6 +386,7 @@ namespace osmscout {
 
   RoutingResult MultiDBRoutingService::CalculateRoute(const RoutePosition &start,
                                                       const RoutePosition &target,
+                                                      const std::optional<osmscout::Bearing> &bearing,
                                                       const RoutingParameter &parameter)
   {
     RoutingResult result;
@@ -395,6 +402,7 @@ namespace osmscout {
       return service->CalculateRoute(*handles[dbId].profile,
                                      start,
                                      target,
+                                     bearing,
                                      parameter);
     }
 
@@ -404,8 +412,6 @@ namespace osmscout {
       log.Error() << "Can't find start db " << start.GetDatabaseId();
       return result;
     }
-
-    // DatabaseRef database1=handles[start.GetDatabaseId()].db;
 
     if (target.GetDatabaseId()>=handles.size() ||
         !handles[target.GetDatabaseId()].database) {
@@ -417,6 +423,7 @@ namespace osmscout {
     return AbstractRoutingService<MultiDBRoutingState>::CalculateRoute(state,
                                                                        start,
                                                                        target,
+                                                                       bearing,
                                                                        parameter);
   }
 
@@ -459,6 +466,7 @@ namespace osmscout {
 
         partialResult=CalculateRoute(fromRoutePosition,
                                      toRoutePosition,
+                                     std::nullopt,
                                      parameter);
         if (!partialResult.Success()) {
           result.GetRoute().Clear();

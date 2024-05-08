@@ -77,6 +77,8 @@ namespace osmscout {
                     const WayRef &way,
                     const Distance &wayLength) override;
 
+    double GetUTurnCost(const MultiDBRoutingState& state, const DatabaseId databaseId) override;
+
     double GetEstimateCosts(const MultiDBRoutingState& state,
                             DatabaseId database,
                             const Distance &targetDistance) override;
@@ -143,6 +145,7 @@ namespace osmscout {
 
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
+                                 const std::optional<osmscout::Bearing> &bearing,
                                  const RoutingParameter &parameter);
 
     RoutingResult CalculateRoute(const std::vector<osmscout::GeoCoord>& via,

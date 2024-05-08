@@ -25,6 +25,7 @@
 #include <chrono>
 #include <iostream>
 #include <list>
+#include <optional>
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -653,6 +654,7 @@ int main(int argc, char* argv[])
   osmscout::RoutingResult result=router->CalculateRoute(routingProfile,
                                                         start,
                                                         target,
+                                                        std::nullopt,
                                                         parameter);
 
   if (!result.Success()) {

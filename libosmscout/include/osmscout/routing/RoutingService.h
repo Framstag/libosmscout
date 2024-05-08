@@ -66,11 +66,11 @@ namespace osmscout {
   {
   private:
     ObjectFileRef object;
-    size_t        nodeIndex;
+    size_t        nodeIndex=0;
     DatabaseId    database;
 
   public:
-    RoutePosition();
+    RoutePosition() = default;
     RoutePosition(const ObjectFileRef& object,
                   size_t nodeIndex,
                   DatabaseId database);
@@ -223,6 +223,8 @@ namespace osmscout {
       DBId          id;                   //!< The file offset of the current route node
       RouteNodeRef  node;                 //!< The current route node
       DBId          prev;                 //!< The file offset of the previous route node
+      Id            exclude;              //!< excluded node to go, similar to route-node excludes,
+                                          //!< but used by routing service when initial bearing is restricted
       bool          prevRestricted=false; //!< previous node is restricted
       ObjectFileRef object;               //!< The object (way/area) visited from the current route node
 

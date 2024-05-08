@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <optional>
 
 #include <osmscout/db/Database.h>
 
@@ -52,14 +53,15 @@
 
 struct Arguments
 {
-  bool                   help=false;
-  bool                   debug=false;
-  std::string            router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
-  osmscout::Vehicle      vehicle=osmscout::Vehicle::vehicleCar;
-  std::string            databaseDirectory;
-  osmscout::GeoCoord     start;
-  osmscout::GeoCoord     target;
-  std::string            gpxFile;
+  bool                              help=false;
+  bool                              debug=false;
+  std::string                       router=osmscout::RoutingService::DEFAULT_FILENAME_BASE;
+  osmscout::Vehicle                 vehicle=osmscout::Vehicle::vehicleCar;
+  std::string                       databaseDirectory;
+  osmscout::GeoCoord                start;
+  osmscout::GeoCoord                target;
+  std::optional<osmscout::Bearing>  initialBearing;
+  std::string                       gpxFile;
 };
 
 class ConsoleRoutingProgress : public osmscout::RoutingProgress
@@ -558,6 +560,12 @@ int main(int argc, char* argv[])
                       "gpxFile",
                       "Name of the gpx file containing the route");
 
+  argParser.AddOption(osmscout::CmdLineDoubleOption([&args](double value) {
+                        args.initialBearing=osmscout::Bearing::Degrees(value);
+                      }),
+                      "initial-bearing",
+                      "Initial vehicle bearing (degrees, North is 0, East is 90...).");
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=value;
                           }),
@@ -667,6 +675,7 @@ int main(int argc, char* argv[])
   auto routingResult=router->CalculateRoute(*routingProfile,
                                             start,
                                             target,
+                                            args.initialBearing,
                                             parameter);
 
   if (!routingResult.Success()) {

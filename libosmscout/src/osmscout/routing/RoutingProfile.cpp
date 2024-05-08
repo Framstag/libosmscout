@@ -359,7 +359,12 @@ namespace osmscout {
     return false;
   }
 
-  ShortestPathRoutingProfile::ShortestPathRoutingProfile(const TypeConfigRef& typeConfig)
+  double AbstractRoutingProfile::GetUTurnCost() const
+  {
+    return 0;
+  }
+
+ShortestPathRoutingProfile::ShortestPathRoutingProfile(const TypeConfigRef& typeConfig)
   : AbstractRoutingProfile(typeConfig)
   {
     // no code

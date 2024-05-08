@@ -20,13 +20,6 @@ Window {
     width: 1024
     height: 768
 
-    function reroute(){
-        var startLoc = routingModel.locationEntryFromPosition(simulator.latitude, simulator.longitude);
-        var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
-        console.log("We leave route, reroute from " + Utils.locationStr(startLoc) + " -> " + Utils.locationStr(destinationLoc));
-        routingModel.setStartAndTarget(startLoc, destinationLoc);
-    }
-
     PositionSimulator {
         id: simulator
         track: PositionSimulationTrack
@@ -59,7 +52,10 @@ Window {
 
         onRerouteRequest: {
             if (routingModel.ready){
-                reroute();
+                var startLoc = routingModel.locationEntryFromPosition(fromLat, fromLon);
+                var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
+                console.log("We leave route, reroute from " + Utils.locationStr(startLoc) + " -> " + Utils.locationStr(destinationLoc) + ", bearing: " + bearingAngle);
+                routingModel.setStartAndTarget(startLoc, destinationLoc, "car", bearingAngle);
             }
         }
         onPositionEstimate: {

@@ -79,6 +79,7 @@ osmscout::MultiDBRoutingServiceRef Router::MakeRoutingService(const std::list<DB
 bool Router::CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
                             const osmscout::RoutePosition& start,
                             const osmscout::RoutePosition& target,
+                            const std::optional<osmscout::Bearing> &bearing,
                             osmscout::RouteData& route,
                             int requestId,
                             const osmscout::BreakerRef &breaker)
@@ -96,6 +97,7 @@ bool Router::CalculateRoute(osmscout::MultiDBRoutingServiceRef &routingService,
 
   result=routingService->CalculateRoute(start,
                                         target,
+                                        bearing,
                                         parameter);
 
   if (!result.Success()){
@@ -181,7 +183,8 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
                                  const LocationEntryRef &start,
                                  const LocationEntryRef &target,
                                  int requestId,
-                                 const osmscout::BreakerRef &breaker)
+                                 const osmscout::BreakerRef &breaker,
+                                 const std::optional<osmscout::Bearing> &bearing)
 {
   std::optional<RoutePosition> startNodeOpt=LocationToRoutePosition(routingService, start);
   if (!startNodeOpt) {
@@ -207,6 +210,7 @@ void Router::ProcessRouteRequest(osmscout::MultiDBRoutingServiceRef &routingServ
   if (!CalculateRoute(routingService,
                       startNode,
                       targetNode,
+                      bearing,
                       routeData,
                       requestId,
                       breaker)) {
@@ -255,21 +259,23 @@ void Router::onRouteRequest(LocationEntryRef start,
                             LocationEntryRef target,
                             QmlRoutingProfileRef profile,
                             int requestId,
-                            osmscout::BreakerRef breaker)
+                            BreakerRef breaker,
+                            std::optional<osmscout::Bearing> bearing)
 {
-  osmscout::log.Debug() << "Routing from '" << start->getLabel().toStdString() <<
-    "' to '" << target->getLabel().toStdString() << "'" <<
-    " by '" << vehicleStr(profile->getVehicle()) << "'";
+  osmscout::log.Debug() << "Routing from '" << start->getDebugString().toStdString() <<
+    "' to '" << target->getDebugString().toStdString() << "'" <<
+    " by '" << vehicleStr(profile->getVehicle()) << "' " <<
+    (bearing ? "bearing " + bearing->LongDisplayString() : "no bearing");
 
   dbThread->RunSynchronousJob(
-    [this,profile,requestId,start,target,breaker](const std::list<DBInstanceRef>& databases) {
+    [this,profile,requestId,start,target,breaker,bearing](const std::list<DBInstanceRef>& databases) {
       osmscout::MultiDBRoutingServiceRef routingService=MakeRoutingService(databases,profile);
       if (!routingService){
         osmscout::log.Warn() << "Can't open routing service";
         emit routeFailed("Can't open routing service",requestId);
         return;
       }
-      ProcessRouteRequest(routingService,start,target,requestId,breaker);
+      ProcessRouteRequest(routingService,start,target,requestId,breaker,bearing);
       routingService->Close();
     }
   );

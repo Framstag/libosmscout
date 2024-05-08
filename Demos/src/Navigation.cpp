@@ -38,6 +38,7 @@
 #include <sstream>
 #include <cmath>
 #include <cstring>
+#include <optional>
 
 #include <osmscout/db/Database.h>
 
@@ -589,6 +590,7 @@ int main(int argc, char *argv[]){
     osmscout::RoutingResult result=router->CalculateRoute(*routingProfile,
                                                           start,
                                                           target,
+                                                          std::nullopt,
                                                           parameter);
 
     if (!result.Success()) {

@@ -648,7 +648,7 @@ namespace osmscout {
         }
         inPathIndex++;
       }
-      // in case of roundabout, node don't contains path back
+      // in case of roundabout, node don't contain path back
       inPathValid=inPathIndex < currentRouteNode->paths.size();
     }
 
@@ -661,6 +661,20 @@ namespace osmscout {
           std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " "
                     << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
           std::cout << " => back to the last node visited" << std::endl;
+        }
+        nodesIgnoredCount++;
+        i++;
+
+        continue;
+      }
+
+      if (path.id==current->exclude) {
+        if constexpr (debugRouting) {
+          std::cout << "  Skipping route";
+          std::cout << " to " << path.id;
+          std::cout << " (" << currentRouteNode->objects[path.objectIndex].object.GetTypeName() << " "
+                    << currentRouteNode->objects[path.objectIndex].object.GetFileOffset() << ")";
+          std::cout << " => special exclusion because of vehicle bearing" << std::endl;
         }
         nodesIgnoredCount++;
         i++;
@@ -869,6 +883,93 @@ namespace osmscout {
     return true;
   }
 
+  template <class RoutingState>
+  bool AbstractRoutingService<RoutingState>::RestrictInitialUTurn(const RoutingState& state,
+                                                                  const Bearing& bearing,
+                                                                  const RoutePosition& start,
+                                                                  RNodeRef startForwardNode,
+                                                                  RNodeRef startBackwardNode)
+  {
+    if (startForwardNode && startBackwardNode && start.GetObjectFileRef().GetType()==refWay) {
+      // start is on the way between two route nodes, lets evaluate what route node is in opposite
+      // direction and add u-turn penalty to it and avoid return from node ahead
+      WayRef way;
+      if (!GetWayByOffset(DBFileOffset(start.GetDatabaseId(),
+                                       start.GetObjectFileRef().GetFileOffset()),
+                          way)) {
+        log.Error() << "Cannot get start way!";
+        return false;
+      }
+      if (CanUseForward(state,start.GetDatabaseId(),way) &&
+          CanUseBackward(state,start.GetDatabaseId(),way) &&
+          start.GetNodeIndex() > 0 &&
+          start.GetNodeIndex() < way->nodes.size() -1) {
+        auto pos = way->nodes[start.GetNodeIndex()].GetCoord();
+        auto forwardPos = way->nodes[start.GetNodeIndex()+1].GetCoord();
+        auto backwardPos = way->nodes[start.GetNodeIndex()-1].GetCoord();
+        auto forwardBearing = GetSphericalBearingInitial(pos, forwardPos);
+        auto backwardBearing = GetSphericalBearingInitial(pos, backwardPos);
+        auto forwardBearingDiff = (forwardBearing-bearing).AsDegrees();
+        forwardBearingDiff = forwardBearingDiff > 180 ? 360 - forwardBearingDiff : forwardBearingDiff;
+        auto backwardBearingDiff = (backwardBearing-bearing).AsDegrees();
+        backwardBearingDiff = backwardBearingDiff > 180 ? 360 - backwardBearingDiff : backwardBearingDiff;
+
+        auto penalizedRNode = ( forwardBearingDiff < backwardBearingDiff ) ? startBackwardNode : startForwardNode;
+        if constexpr (debugRouting) {
+          std::cout << "Adding u-turn penalty to route node " << penalizedRNode->id;
+        }
+        auto aheadRNode = ( forwardBearingDiff < backwardBearingDiff ) ? startForwardNode : startBackwardNode;
+        penalizedRNode->currentCost += GetUTurnCost(state, penalizedRNode->id.database);
+        penalizedRNode->overallCost = penalizedRNode->currentCost + penalizedRNode->estimateCost;
+
+        // avoid return from aheadRNode to penalizedRNode
+        aheadRNode->exclude = penalizedRNode->id.id;
+      }
+    }
+    if (startForwardNode && !startBackwardNode && start.GetObjectFileRef().GetType()==refWay) {
+      // start is directly on route-node, try to find what path is our source and add exclusion to it
+      double restrictedPathBearing = 20; // degrees
+      auto oppositeVehicleBearing = bearing - Bearing::Degrees(180);
+      for (const auto& path : startForwardNode->node->paths) {
+        auto object = startForwardNode->node->objects[path.objectIndex].object;
+        if (object.GetType() != refWay) {
+          continue;
+        }
+        WayRef way;
+        if (!GetWayByOffset(DBFileOffset(startForwardNode->id.database,
+                                         object.GetFileOffset()),
+                            way)) {
+          log.Error() << "Cannot get starting junction way!";
+          return false;
+        }
+
+        int fromNode=-1;
+        int toNode=-1;
+        for (size_t i= 0; i < way->nodes.size() && (fromNode<0 || toNode<0); i++) {
+          if (way->nodes[i].GetId() == startForwardNode->node->GetId()) {
+            fromNode = i;
+          }
+          if (way->nodes[i].GetId() == path.id) {
+            toNode = i;
+          }
+        }
+        assert(fromNode>=0);
+        assert(toNode>=0);
+        assert(fromNode!=toNode);
+        auto pathBearing = fromNode < toNode ?
+                           GetSphericalBearingInitial(way->nodes[fromNode].GetCoord(), way->nodes[fromNode+1].GetCoord()) :
+                           GetSphericalBearingInitial(way->nodes[fromNode].GetCoord(), way->nodes[fromNode-1].GetCoord());
+        auto bearingDiff = (pathBearing - oppositeVehicleBearing).AsDegrees();
+        bearingDiff = bearingDiff > 180 ? 360 - bearingDiff : bearingDiff;
+        if (bearingDiff < restrictedPathBearing) {
+          startForwardNode->exclude = path.id;
+          restrictedPathBearing = bearingDiff;
+        }
+      }
+    }
+    return true;
+  }
+
   /**
    * Calculate a route
    *
@@ -878,6 +979,8 @@ namespace osmscout {
    *    Start of the route
    * @param target
    *    Target of teh route
+   * @param bearing
+   *    Initial vehicle bearing, route will start by the way in specified direction. When possible.
    * @param progress
    *    Optional callback for handling routing progress
    * @param route
@@ -889,6 +992,7 @@ namespace osmscout {
   RoutingResult AbstractRoutingService<RoutingState>::CalculateRoute(RoutingState& state,
                                                                      const RoutePosition& start,
                                                                      const RoutePosition& target,
+                                                                     const std::optional<osmscout::Bearing> &bearing,
                                                                      const RoutingParameter& parameter)
   {
     RoutingResult            result;
@@ -960,6 +1064,12 @@ namespace osmscout {
     if (parameter.GetBreaker() &&
         parameter.GetBreaker()->IsAborted()) {
       return result;
+    }
+
+    if (bearing) {
+      if (!RestrictInitialUTurn(state, *bearing, start, startForwardNode, startBackwardNode)) {
+        return result;
+      }
     }
 
     if (startForwardNode) {
