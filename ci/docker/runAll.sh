@@ -48,7 +48,7 @@ if [ $RESULT_debian_buster_gcc_meson     -eq 0 ] ; then echo "OK"; else echo "FA
 echo -ne "debian_bullseye_gcc_meson      "
 if [ $RESULT_debian_bullseye_gcc_meson   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_bullseye_gcc_meson      "
+echo -ne "debian_bookworm_gcc_meson      "
 if [ $RESULT_debian_bookworm_gcc_meson   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_22.04_gcc_cmake         "
