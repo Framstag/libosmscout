@@ -29,6 +29,13 @@ RESULT_ubuntu_22_04_gcc_meson_qt6=$?
 ./ubuntu_22.04_aarch64_gcc_cmake/run.sh "$@"
 RESULT_ubuntu_22_04_aarch64_gcc_cmake=$?
 
+./ubuntu_24.04_gcc_cmake/run.sh "$@"
+RESULT_ubuntu_24_04_gcc_cmake=$?
+
+./ubuntu_24.04_gcc_meson_qt6/run.sh "$@"
+RESULT_ubuntu_24_04_gcc_meson_qt6=$?
+
+
 # print results
 set +x
 echo
@@ -48,7 +55,7 @@ if [ $RESULT_debian_buster_gcc_meson     -eq 0 ] ; then echo "OK"; else echo "FA
 echo -ne "debian_bullseye_gcc_meson      "
 if [ $RESULT_debian_bullseye_gcc_meson   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
-echo -ne "debian_bullseye_gcc_meson      "
+echo -ne "debian_bookworm_gcc_meson      "
 if [ $RESULT_debian_bookworm_gcc_meson   -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
 
 echo -ne "ubuntu_22.04_gcc_cmake         "
@@ -59,3 +66,10 @@ if [ $RESULT_ubuntu_22_04_gcc_meson_qt6  -eq 0 ] ; then echo "OK"; else echo "FA
 
 echo -ne "ubuntu_22.04_aarch64_gcc_cmake "
 if [ $RESULT_ubuntu_22_04_aarch64_gcc_cmake -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_24.04_gcc_cmake         "
+if [ $RESULT_ubuntu_24_04_gcc_cmake      -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
+echo -ne "ubuntu_24.04_gcc_meson_qt6     "
+if [ $RESULT_ubuntu_24_04_gcc_meson_qt6  -eq 0 ] ; then echo "OK"; else echo "FAILURE"; fi
+
