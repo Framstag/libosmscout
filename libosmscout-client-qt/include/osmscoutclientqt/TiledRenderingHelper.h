@@ -56,7 +56,8 @@ public:
                           const MapViewStruct& request,
                           QList<TileCache*> &layerCaches,
                           const QColor &unknownColor,
-                          double overlap=-1);
+                          double overlap=-1,
+                          const QColor &gridColor=QColor::fromRgbF(0.8,0.8,0.8));
 };
 }
 

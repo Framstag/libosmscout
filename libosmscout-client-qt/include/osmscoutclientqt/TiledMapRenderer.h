@@ -78,6 +78,7 @@ private:
   size_t                        loadEpoch; // guarded by lock
 
   QColor                        unknownColor;
+  QColor                        tileGridColor;
 
   Slot<OnlineTileProvider> onlineTileProviderSlot{ std::bind(&TiledMapRenderer::onlineTileProviderSignal, this, std::placeholders::_1) };
   Slot<bool> onlineTileEnabledSlot{ std::bind(&TiledMapRenderer::onlineTilesEnabledSignal, this, std::placeholders::_1) };

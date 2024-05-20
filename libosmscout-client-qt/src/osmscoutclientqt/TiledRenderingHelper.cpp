@@ -34,7 +34,8 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                                        const MapViewStruct &request,
                                        QList<TileCache*> &layerCaches,
                                        const QColor &unknownColor,
-                                       double overlap)
+                                       double overlap,
+                                       const QColor &gridColor)
 {
   osmscout::MercatorProjection projection;
 
@@ -72,8 +73,6 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
                  height);
 
   osmscout::GeoBox boundingBox(projection.GetDimensions());
-
-  QColor grey2 = QColor::fromRgbF(0.8,0.8,0.8);
 
   // OpenStreetMap render its tiles up to latitude +-85.0511
   double osmMinLat = OSMTile::minLat();
@@ -120,7 +119,7 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
     painter.translate(translateVector);
   }
 
-  painter.setPen(grey2);
+  painter.setPen(gridColor);
 
   painter.fillRect(0,0,
                    projection.GetWidth(),projection.GetHeight(),
