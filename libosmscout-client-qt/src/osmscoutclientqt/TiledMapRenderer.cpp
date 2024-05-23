@@ -138,8 +138,14 @@ void TiledMapRenderer::onStylesheetFilenameChanged()
                                    fillColor.GetG(),
                                    fillColor.GetB(),
                                    fillColor.GetA());
-              break;
             }
+
+            tileGridColor=QColor::fromRgbF(0.8,0.8,0.8);
+            if (styledConfig->HasFlag("daylight") && !styledConfig->GetFlagByName("daylight")) {
+              tileGridColor=QColor::fromRgbF(0.2,0.2,0.2);
+            }
+
+            break;
           }
         }
       }
@@ -185,7 +191,7 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
 
-  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor)){
+  if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor,-1,tileGridColor)){
     return false;
   }
 

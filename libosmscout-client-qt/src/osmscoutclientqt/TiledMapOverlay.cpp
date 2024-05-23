@@ -186,7 +186,7 @@ void TiledMapOverlay::paint(QPainter *painter)
     request.height = boundingBox.height();
     request.dpi = view->mapDpi;
 
-    TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,transparentColor, /*overlap*/ 0);
+    TiledRenderingHelper::RenderTiles(*painter,request,layerCaches,transparentColor, /*overlap*/ 0, QColor::fromRgbF(0,0,0,0));
   });
 }
 
