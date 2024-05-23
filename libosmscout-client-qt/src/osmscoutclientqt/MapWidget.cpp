@@ -550,6 +550,9 @@ void MapWidget::setLockToPosition(bool lock){
 }
 
 void MapWidget::setFollowVehicle(bool follow){
+  if (vehicle.follow == follow) {
+    return;
+  }
   vehicle.follow = follow;
   vehicle.lastGesture.invalidate(); // set to invalid state
   if (follow){
