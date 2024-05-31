@@ -5,12 +5,12 @@ based on OpenStreetMap data.
 
 Supported platforms:
 * 32bit or 64 bit platforms in general are supported.
-* Requires a compiler that supports C++17.
+* Requires a compiler that supports C++20.
 * Supported build systems are CMake and Meson.
 * Linux using recent versions of gcc or clang.
 * Mac OS X and iOS using XCode/clang.
 * Windows using MinGW-based gcc compiler or Visual Studio 2019.
-* Android 7 or newer using NDK 18b or newer (with C++17 support).
+* Android 7 or newer using NDK r26 or newer (with C++20 support).
 
 # License
 

@@ -26,4 +26,4 @@ The following platforms are supported:
 * Sailfish OS using Qt backend
 * Ubuntu phone using Qt backend
 
-The compiler must at least support C++17.
+The compiler must at least support C++20.
