@@ -116,6 +116,26 @@ namespace osmscout {
       return radians != o.radians;
     }
 
+    bool operator<(const Bearing& o) const
+    {
+      return radians<o.radians;
+    }
+
+    bool operator>(const Bearing& o) const
+    {
+      return radians>o.radians;
+    }
+
+    bool operator<=(const Bearing& o) const
+    {
+      return radians<=o.radians;
+    }
+
+    bool operator>=(const Bearing& o) const
+    {
+      return radians>=o.radians;
+    }
+
     inline static Bearing Radians(double radians)
     {
       return Bearing(radians);
