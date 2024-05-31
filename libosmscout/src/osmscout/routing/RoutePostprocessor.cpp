@@ -1591,120 +1591,169 @@ namespace osmscout {
     return true;
   }
 
-  void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const RouteDescription::Node &node, const std::list<RouteDescription::Node*> &backBuffer) const
+  void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const RoutePostprocessor& postprocessor,
+                                                                               const RouteDescription::Node &node,
+                                                                               const std::list<RouteDescription::Node*> &backBuffer) const
   {
+    if (node.GetPathObject().GetType()!=refWay) {
+      return; // areas not considered now
+    }
+
+    assert(!backBuffer.empty());
+    const RouteDescription::Node &prevNode=*backBuffer.back();
+    DatabaseId dbId = node.GetDatabaseId();
+    if (prevNode.GetDatabaseId() != dbId) {
+      return; // we consider nodes just from the same database for simplicity
+    }
+
+    assert(dbId<postprocessor.profiles.size() && postprocessor.profiles[dbId]);
+    auto profile=postprocessor.profiles[dbId];
+
     auto lanes = GetLaneDescription(node);
     assert(lanes);
-    auto prevLanes = GetLaneDescription(*backBuffer.back());
+    auto prevLanes = GetLaneDescription(prevNode);
     assert(prevLanes);
 
-    RouteDescription::DirectionDescriptionRef direction = std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(node.GetDescription(RouteDescription::DIRECTION_DESC));
+    // read lanes on the ALL junction ways, use heuristics what lanes we can use to move forward
+    Id nodeId = postprocessor.GetNodeId(node);
 
-    using Move = RouteDescription::DirectionDescription::Move;
-    Move directionMove = direction ? direction->GetTurn() : Move::straightOn;
+    WayRef prevWay = postprocessor.GetWay(prevNode.GetDBFileOffset());
+    Id prevNodeId = prevWay->GetId(prevNode.GetCurrentNodeIndex());
+    // bearing from current node to previous
+    Bearing prevNodeBearing = GetSphericalBearingInitial(prevWay->nodes[prevNode.GetTargetNodeIndex()].GetCoord(),
+                                                         prevWay->nodes[prevNode.GetCurrentNodeIndex()].GetCoord());
 
-    int allowedLaneFrom = -1;
-    int allowedLaneTo = -1; // inclusive
+    WayRef way = postprocessor.GetWay(node.GetDBFileOffset());
+    Id nextNodeId = way->GetId(node.GetTargetNodeIndex());
+    Bearing nextNodeBearing = GetSphericalBearingInitial(way->nodes[node.GetCurrentNodeIndex()].GetCoord(),
+                                                         way->nodes[node.GetTargetNodeIndex()].GetCoord());
 
-    auto LookupLanesTurns = [&](const std::set<LaneTurn> &possibilities){
-      for (size_t i = 0; i < prevLanes->GetLaneTurns().size(); i++){
-        LaneTurn turn = prevLanes->GetLaneTurns()[i];
-        if (possibilities.find(turn) != possibilities.end()){
-          // it is possible to use this turn
-          if (allowedLaneFrom < 0) {
-            allowedLaneFrom=static_cast<int>(i);
-            allowedLaneTo=static_cast<int>(i);
-          } else {
-            allowedLaneTo=static_cast<int>(i);
-          }
-        } else {
-          if (allowedLaneFrom>0){
-            break;
-          }
-        }
-      }
+    struct JunctionExit {
+      Id nextId;
+      Bearing bearing;
+      Bearing relativeBearing; // angle between exit and selected way
+      RouteDescription::LaneDescription lanes;
     };
+    std::vector<JunctionExit> junctionExits; // excluding incoming and outgoing way
+    std::vector<JunctionExit> junctionLeftExits;
+    std::vector<JunctionExit> junctionRightExits;
+    junctionExits.reserve(node.GetObjects().size());
+    junctionLeftExits.reserve(node.GetObjects().size());
+    junctionRightExits.reserve(node.GetObjects().size());
 
-    static const std::set<LaneTurn> leftPossibilities{
-      LaneTurn::Left,
-      LaneTurn::SlightLeft,
-      LaneTurn::Through_Left,
-      LaneTurn::Through_SlightLeft,
-      LaneTurn::Through_SharpLeft};
-
-    static const std::set<LaneTurn> straightPossibilities{
-      LaneTurn::Through_Left,
-      LaneTurn::Through_SlightRight,
-      LaneTurn::Through_SharpLeft,
-      LaneTurn::Through,
-      LaneTurn::None, // no-sign implicitly as through
-      LaneTurn::Through_Right,
-      LaneTurn::Through_SlightRight,
-      LaneTurn::Through_SharpRight};
-
-    static const std::set<LaneTurn> rightPossibilities{
-      LaneTurn::Right,
-      LaneTurn::SlightRight,
-      LaneTurn::Through_Right,
-      LaneTurn::Through_SlightRight,
-      LaneTurn::Through_SharpRight};
-
-    // after some direction change, we will evaluate allowed lanes in backBuffer
-    if (!prevLanes->GetLaneTurns().empty()){
-      // we know explicit lane turns
-      switch (directionMove){
-        case Move::sharpLeft:
-        case Move::left:
-        case Move::slightlyLeft:
-          LookupLanesTurns(leftPossibilities);
-          break;
-        case Move::straightOn:
-          LookupLanesTurns(straightPossibilities);
-          break;
-        case Move::slightlyRight:
-        case Move::right:
-        case Move::sharpRight:
-          LookupLanesTurns(rightPossibilities);
-          break;
+    for (const auto &o: node.GetObjects()){
+      if (!o.IsWay()) {
+        continue; // areas not considered now
       }
-    }
-    if (allowedLaneFrom < 0){
-      // explicit turns are not available, or evaluation was not successful
-      // it may happen when we detected move is for example slightlyLeft but lane turn is "through"
 
-      // so, just estimate lanes on the count
-      assert(lanes->GetLaneCount()>0);
-      switch (directionMove){
-        case Move::sharpLeft:
-        case Move::left:
-        case Move::slightlyLeft:
-          allowedLaneFrom = 0;
-          allowedLaneTo = lanes->GetLaneCount() - 1;
-          break;
-        case Move::straightOn:
-          // ignore right now, we cannot estimate which lanes
-          // are through without deeper analysis
-          break;
-        case Move::slightlyRight:
-        case Move::right:
-        case Move::sharpRight:
-          allowedLaneFrom = prevLanes->GetLaneCount() - lanes->GetLaneCount();
-          allowedLaneTo = prevLanes->GetLaneCount() -1;
-          break;
-      }
-    }
-
-    if (allowedLaneFrom >= 0) {
-      assert(allowedLaneTo >= allowedLaneFrom);
-      auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo);
-      for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
-        auto* nodePtr = *it;
-        auto nodeLanes = GetLaneDescription(*nodePtr);
-        if (*prevLanes != *nodeLanes){
+      way=postprocessor.GetWay(DBFileOffset(node.GetDatabaseId(), o.GetFileOffset()));
+      for (size_t i = 0; i < way->nodes.size(); i++) {
+        if (way->nodes[i].GetId() == nodeId) {
+          if (i < way->nodes.size()-1 && profile->CanUseForward(*way)) {
+            Id junctionNodeId = way->nodes[i+1].GetId();
+            if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId) {
+              auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i + 1].GetCoord());
+              auto wayLanes = postprocessor.GetLanes(node.GetDatabaseId(), way, true);
+              junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+            }
+          }
+          if (i > 0 && profile->CanUseBackward(*way)) {
+            Id junctionNodeId = way->nodes[i-1].GetId();
+            if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId) {
+              auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i - 1].GetCoord());
+              auto wayLanes = postprocessor.GetLanes(node.GetDatabaseId(), way, false);
+              junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+            }
+          }
           break;
         }
-        nodePtr->AddDescription(RouteDescription::SUGGESTED_LANES_DESC, suggested);
       }
+    }
+
+    Bearing prevNodeRelativeBearing = prevNodeBearing - nextNodeBearing;
+    for (JunctionExit &exit: junctionExits){
+      Bearing relativeBearing = exit.bearing - nextNodeBearing;
+      if (relativeBearing > Bearing::Radians(M_PI)) {
+        exit.relativeBearing = relativeBearing*-1;
+      }
+      if (relativeBearing < prevNodeRelativeBearing) {
+        junctionRightExits.push_back(exit);
+      } else {
+        junctionLeftExits.push_back(exit);
+      }
+    }
+
+    // sort by bearing, descent
+    std::sort(junctionRightExits.begin(), junctionRightExits.end(), [](const JunctionExit &j1, const JunctionExit &j2) -> bool {
+      return j1.bearing > j2.bearing;
+    });
+    std::sort(junctionLeftExits.begin(), junctionLeftExits.end(), [](const JunctionExit &j1, const JunctionExit &j2) -> bool {
+      return j1.bearing > j2.bearing;
+    });
+
+    int allowedLaneFrom = 0;
+    int allowedLaneTo = prevLanes->GetLaneCount()-1; // inclusive
+    std::vector<LaneTurn> laneTurns = prevLanes->GetLaneTurns();
+
+    // remove allowed lanes used for left exits
+    for (const auto &exit: junctionLeftExits) {
+      LaneTurn exitVariant = LaneTurn::Through;
+      if (size_t(allowedLaneFrom) < laneTurns.size()) {
+        exitVariant=laneTurns[allowedLaneFrom];
+      }
+      for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
+        LaneTurn turn = LaneTurn::Through;
+        if (size_t(allowedLaneFrom) < laneTurns.size()) {
+          turn=laneTurns[allowedLaneFrom];
+        }
+        if (turn==LaneTurn::Through_Left ||
+            turn==LaneTurn::Through_SlightLeft ||
+            turn==LaneTurn::Through_SharpLeft) {
+          // do not consume lane when it allows to use with two directions, just remove left direction
+          laneTurns[allowedLaneTo]=LaneTurn::Through;
+        }
+        if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
+          allowedLaneFrom++;
+        } else {
+          break;
+        }
+      }
+    }
+    // remove allowed lanes used for right exits
+    for (const auto &exit: junctionRightExits) {
+      LaneTurn exitVariant = LaneTurn::Through;
+      if (size_t(allowedLaneTo) < laneTurns.size()) {
+        exitVariant=laneTurns[allowedLaneTo];
+      }
+      for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
+        LaneTurn turn = LaneTurn::Through;
+        if (size_t(allowedLaneTo) < laneTurns.size()) {
+          turn=laneTurns[allowedLaneTo];
+        }
+        if (turn==LaneTurn::Through_Right ||
+            turn==LaneTurn::Through_SlightRight ||
+            turn==LaneTurn::Through_SharpRight) {
+          // do not consume lane when it allows to use with two directions, just remove left direction
+          laneTurns[allowedLaneTo]=LaneTurn::Through;
+        }
+        if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
+          allowedLaneTo--;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // setup suggested lane description to incoming route segment
+    assert(allowedLaneTo >= allowedLaneFrom);
+    auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo);
+    for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
+      auto* nodePtr = *it;
+      auto nodeLanes = GetLaneDescription(*nodePtr);
+      if (*prevLanes != *nodeLanes){
+        break;
+      }
+      nodePtr->AddDescription(RouteDescription::SUGGESTED_LANES_DESC, suggested);
     }
   }
 
@@ -1713,7 +1762,7 @@ namespace osmscout {
     return std::dynamic_pointer_cast<RouteDescription::LaneDescription>(node.GetDescription(RouteDescription::LANES_DESC));
   }
 
-  bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const RoutePostprocessor& /*postprocessor*/,
+  bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const RoutePostprocessor& postprocessor,
                                                                 RouteDescription& description)
   {
     using namespace std::string_view_literals;
@@ -1738,7 +1787,7 @@ namespace osmscout {
         assert(prevLanes);
         if (prevLanes->GetLaneCount() > lanes->GetLaneCount()) { // lane count was decreased
 
-          EvaluateLaneSuggestion(node, backBuffer);
+          EvaluateLaneSuggestion(postprocessor, node, backBuffer);
 
           backBuffer.clear();
         }
@@ -2137,40 +2186,46 @@ namespace osmscout {
     return speed;
   }
 
+  RouteDescription::LaneDescription RoutePostprocessor::GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const
+  {
+    auto lanesReader=lanesReaders.find(dbId);
+    auto accessReader=accessReaders.find(dbId);
+    assert(lanesReader != lanesReaders.end());
+    assert(accessReader != accessReaders.end());
+
+    AccessFeatureValue *accessValue=accessReader->second->GetValue(way->GetFeatureValueBuffer());
+    bool oneway=accessValue!=nullptr && accessValue->IsOneway();
+
+    uint8_t laneCount;
+    std::vector<LaneTurn> laneTurns;
+    LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
+    if (lanesValue!=nullptr) {
+      laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
+      laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
+      while (laneTurns.size() < laneCount) {
+        laneTurns.push_back(LaneTurn::None);
+      }
+    } else {
+      // default lane count by object type
+      if (oneway) {
+        laneCount=way->GetType()->GetOnewayLanes();
+      } else {
+        laneCount=std::max(1,way->GetType()->GetLanes()/2);
+      }
+    }
+
+    return RouteDescription::LaneDescription(oneway, laneCount, laneTurns);
+  }
+
   RouteDescription::LaneDescriptionRef RoutePostprocessor::GetLanes(const RouteDescription::Node& node) const
   {
     RouteDescription::LaneDescriptionRef lanes;
     if (node.GetPathObject().GetType()==refWay) {
-      auto lanesReader=lanesReaders.find(node.GetDatabaseId());
-      auto accessReader=accessReaders.find(node.GetDatabaseId());
-      assert(lanesReader != lanesReaders.end());
-      assert(accessReader != accessReaders.end());
 
       WayRef way=GetWay(node.GetDBFileOffset());
-
       bool forward = node.GetCurrentNodeIndex() < node.GetTargetNodeIndex();
 
-      AccessFeatureValue *accessValue=accessReader->second->GetValue(way->GetFeatureValueBuffer());
-      bool oneway=accessValue!=nullptr && accessValue->IsOneway();
-
-      uint8_t laneCount;
-      std::vector<LaneTurn> laneTurns;
-      LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
-      if (lanesValue!=nullptr) {
-        laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
-        laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
-        while (laneTurns.size() < laneCount) {
-          laneTurns.push_back(LaneTurn::None);
-        }
-      } else {
-        // default lane count by object type
-        if (oneway) {
-          laneCount=way->GetType()->GetOnewayLanes();
-        } else {
-          laneCount=std::max(1,way->GetType()->GetLanes()/2);
-        }
-      }
-      lanes=std::make_shared<RouteDescription::LaneDescription>(oneway, laneCount, laneTurns);
+      lanes=std::make_shared<RouteDescription::LaneDescription>(GetLanes(node.GetDatabaseId(), way, forward));
     }
     return lanes;
   }
