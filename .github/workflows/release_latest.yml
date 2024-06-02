@@ -48,7 +48,7 @@ jobs:
         run:  meson dist -C dist --formats "xztar,zip" --no-tests --allow-dirty
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRO }}
