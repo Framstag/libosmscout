@@ -18,7 +18,7 @@ TEST_CASE("Current Directory")
 TEST_CASE("GetDirectory")
 {
 #if defined(__WIN32__) || defined(WIN32)
-  std::cout << "Windows path mode using '" << std::filesystem::path::preferred_separator << "'" << std::endl;
+  std::wcout << L"Windows path mode using '" << std::filesystem::path::preferred_separator << "'" << std::endl;
   std::vector<std::pair<std::string,std::string>> testData = {{"c:\\directory\\file.txt", "c:\\directory\\"},
                                                               {"c:\\directory\\", "c:\\directory\\"},
                                                               {"c:\\directory", "c:\\"},

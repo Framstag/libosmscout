@@ -2,7 +2,7 @@ project('libosmscout',
         'cpp',
         version: 'latest',
         meson_version: '>=0.63.0',
-        default_options: ['cpp_std=c++17', 'buildtype=debugoptimized', 'warning_level=3'],
+        default_options: ['cpp_std=c++20', 'buildtype=debugoptimized', 'warning_level=3'],
         license: ['LGPL'])
 
 libraryVersion='1.1.1'
@@ -10,7 +10,7 @@ libraryVersion='1.1.1'
 if build_machine.system()=='darwin'
   add_languages(['objcpp'])
   # Workarounds...
-  add_project_arguments(['-fobjc-arc', '-std=c++17'], language: 'objcpp')
+  add_project_arguments(['-fobjc-arc', '-std=c++20'], language: 'objcpp')
   add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
 endif
 
