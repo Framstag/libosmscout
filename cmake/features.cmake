@@ -365,13 +365,17 @@ if(PTHREAD_NAME_OK)
   set(OSMSCOUT_PTHREAD_NAME TRUE)
 endif()
 
-find_package(TBB QUIET)
-if (TBB_FOUND)
-  try_compile(TBB_HAS_SCHEDULER_INIT "${PROJECT_BINARY_DIR}"
-      "${PROJECT_SOURCE_DIR}/cmake/TestTBBSchedulerInit.cpp"
-      LINK_LIBRARIES TBB::tbb)
+if(MSVC)
+  set(HAVE_STD_EXECUTION 1)
+else()
+   find_package(TBB QUIET)
+   if (TBB_FOUND)
+   try_compile(TBB_HAS_SCHEDULER_INIT "${PROJECT_BINARY_DIR}"
+         "${PROJECT_SOURCE_DIR}/cmake/TestTBBSchedulerInit.cpp"
+         LINK_LIBRARIES TBB::tbb)
+   endif()
+   set(HAVE_STD_EXECUTION ${TBB_FOUND})
 endif()
-set(HAVE_STD_EXECUTION ${TBB_FOUND})
 
 find_program(HUGO_PATH hugo)
 
