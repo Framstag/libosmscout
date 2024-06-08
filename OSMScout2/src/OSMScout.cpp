@@ -51,30 +51,30 @@ static QObject *ThemeProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
     return theme;
 }
 
-#define DEBUG   4
-#define INFO    3
-#define WARNING 2
-#define ERROR   1
+#define DEBUG_VALUE   4
+#define INFO_VALUE    3
+#define WARNING_VALUE 2
+#define ERROR_VALUE   1
 
 static int LogEnv(const QString& env)
 {
   if (env.toUpper()=="DEBUG") {
-    return DEBUG;
+    return DEBUG_VALUE;
   }
 
   if (env.toUpper()=="INFO") {
-    return INFO;
+    return INFO_VALUE;
   }
 
   if (env.toUpper()=="WARNING") {
-    return INFO;
+    return INFO_VALUE;
   }
 
   if (env.toUpper()=="ERROR") {
-    return ERROR;
+    return ERROR_VALUE;
   }
 
-  return WARNING;
+  return WARNING_VALUE;
 }
 
 struct Arguments {
@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
 
   int logEnv=LogEnv(logLevelName);
 
-  osmscout::log.Debug(logEnv>=DEBUG);
-  osmscout::log.Info(logEnv>=INFO);
-  osmscout::log.Warn(logEnv>=WARNING);
-  osmscout::log.Error(logEnv>=ERROR);
+  osmscout::log.Debug(logEnv >= DEBUG_VALUE);
+  osmscout::log.Info(logEnv >= INFO_VALUE);
+  osmscout::log.Warn(logEnv >= WARNING_VALUE);
+  osmscout::log.Error(logEnv >= ERROR_VALUE);
 
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
