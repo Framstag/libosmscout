@@ -170,7 +170,7 @@ if(MARISA_FOUND)
 	target_link_libraries(OSMScoutImport ${MARISA_LIBRARIES})
 endif()
 
-if (HAVE_STD_EXECUTION)
+if (TBB_FOUND)
 	target_link_libraries(OSMScoutImport TBB::tbb)
 endif()
 

@@ -44,7 +44,7 @@ osmscout_library_project(
 	SKIP_HEADER
 )
 
-if (HAVE_STD_EXECUTION)
+if (TBB_FOUND)
 	target_link_libraries(OSMScoutClient TBB::tbb)
 endif()
 
