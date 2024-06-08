@@ -475,7 +475,7 @@ namespace osmscout {
     {
       bool somethingToStore=std::any_of(page.begin(),
                                         page.end(),
-                                        [](PageEntry entry) {
+                                        [](const PageEntry& entry) {
                                           return entry.isSet;
                                         });
 
@@ -645,7 +645,7 @@ namespace osmscout {
     rawCoordPageSortWorker.Wait();
     coordDatFileWorker.Wait();
 
-    return rawCoordPageSortWorker.WasSuccessful() &&
+    return rawCoordReaderWorker.WasSuccessful() &&
            rawCoordPageSortWorker.WasSuccessful() &&
            coordDatFileWorker.WasSuccessful();
   }
