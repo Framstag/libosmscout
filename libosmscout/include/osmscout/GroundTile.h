@@ -101,7 +101,13 @@ namespace osmscout {
     GroundTile() = default;
 
     explicit GroundTile(Type type)
-    : type(type)
+    : type(type),
+      xAbs(0),
+      yAbs(0),
+      xRel(0),
+      yRel(0),
+      cellWidth(0.0),
+      cellHeight(0.0)
     {
       // no code
     }
