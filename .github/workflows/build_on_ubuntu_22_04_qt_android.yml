@@ -29,7 +29,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: "platform-tools platforms;android-34 build-tools;34.0.5 ndk;26.3.11579264"
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0 ndk;26.3.11579264"
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
