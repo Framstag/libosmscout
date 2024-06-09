@@ -27,6 +27,12 @@ jobs:
           PKG_CONFIG_PATH: "/usr/local/opt/qt@5/lib/pkgconfig:/usr/local/opt/libxml2/lib/pkgconfig"
       - name: Dump Dependencies
         run: meson introspect -a debug | jq
+      - name: List directory
+        run: ls -l /opt/homebrew/Cellar/glm/1.0.1/include
+      - name: List directory
+        run: ls -l /usr/local/Cellar/glm/1.0.1/include
+      - name: Find glm
+        run: ‚find / -type d -name glm
       - name: Build project
         run: meson compile -C debug
       - name: Execute tests
