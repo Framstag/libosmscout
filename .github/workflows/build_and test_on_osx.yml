@@ -20,7 +20,7 @@ jobs:
       - name: Install build tool
         run: brew install meson ninja
       - name: Install dependencies
-        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig jq
+        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
         env:
@@ -29,10 +29,8 @@ jobs:
         run: meson introspect -a debug | jq
       - name: List directory
         run: ls -l /opt/homebrew/Cellar/glm/1.0.1/include
-      - name: List directory
-        run: ls -l /usr/local/Cellar/glm/1.0.1/include
       - name: Find glm
-        run: ‚find / -type d -name glm
+        run: find / -type d -name glm
       - name: Build project
         run: meson compile -C debug
       - name: Execute tests
