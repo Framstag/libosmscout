@@ -259,7 +259,7 @@ if buildMapOpenGL and glfwDep.found() and ftDep.found() and glewDep.found()
                          'src/DrawMapOpenGL.cpp',
                          cpp_args: ['-fPIC'],
                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapopenglIncDir, demoIncDir],
-                         dependencies: [mathDep, openmpDep, openGLDep, ftDep, glfwDep, threadDep, glewDep],
+                         dependencies: [mathDep, openmpDep, openGLDep, ftDep, glfwDep, threadDep, glmDep, glewDep],
                          link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
                          install: true,
                          install_dir: demoInstallDir)

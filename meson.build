@@ -8,7 +8,7 @@ project('libosmscout',
 libraryVersion='1.1.1'
 
 if build_machine.system()=='darwin'
-  add_languages(['objcpp'])
+  add_languages('objcpp', native: false, required: true)
   # Workarounds...
   add_project_arguments(['-fobjc-arc', '-std=c++20'], language: 'objcpp')
   add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
@@ -40,7 +40,7 @@ if compiler.get_id()=='msvc'
   add_project_arguments('-D_CRT_NONSTDC_NO_DEPRECATE', language: 'cpp')
   add_project_arguments('-D_USE_MATH_DEFINES', language: 'cpp')
 
-  # Fast floating point processing
+  # Fast floatinglmg point processing
   add_project_arguments('/fp:fast', language: 'cpp')
 
   # Disable some over-eager compiler warnings
