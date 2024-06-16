@@ -112,8 +112,8 @@ namespace osmscout {
         ObjectOSMRef  osmRef(id,(OSMRefType)typeByte);
         ObjectFileRef fileRef(fileOffset,fileType);
 
-        if (ids.find(osmRef)!=ids.end() ||
-            fileOffsets.find(fileRef)!=fileOffsets.end()) {
+        if (ids.contains(osmRef) ||
+            fileOffsets.contains(fileRef)) {
           idFileOffsetMap.emplace(osmRef,fileRef);
           fileOffsetIdMap.emplace(fileRef,osmRef);
         }

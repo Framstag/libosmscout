@@ -364,7 +364,7 @@ namespace osmscout {
                          argument,
                          stopParsing);
 
-    assert(options.find(option.argument)==options.end());
+    assert(!options.contains(option.argument));
 
     options.emplace(option.argument,option);
 
@@ -405,7 +405,7 @@ namespace osmscout {
                            argument,
                            stopParsing);
 
-      assert(options.find(option.argument)==options.end());
+      assert(!options.contains(option.argument));
 
       options.emplace(option.argument,option);
 

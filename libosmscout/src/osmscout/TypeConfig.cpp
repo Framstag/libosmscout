@@ -156,7 +156,7 @@
   TypeInfo& TypeInfo::AddFeature(const FeatureRef& feature)
   {
     assert(feature);
-    assert(nameToFeatureMap.find(feature->GetName())==nameToFeatureMap.end());
+    assert(!nameToFeatureMap.contains(feature->GetName()));
 
     size_t featureBit=0;
     size_t index=0;
@@ -220,7 +220,7 @@
 
   bool TypeInfo::HasFeature(const std::string& featureName) const
   {
-    return nameToFeatureMap.find(featureName)!=nameToFeatureMap.end();
+    return nameToFeatureMap.contains(featureName);
   }
 
   /**
@@ -815,7 +815,7 @@
     assert(feature);
     assert(!feature->GetName().empty());
 
-    if (nameToFeatureMap.find(feature->GetName())!=nameToFeatureMap.end()) {
+    if (nameToFeatureMap.contains(feature->GetName())) {
       return;
     }
 

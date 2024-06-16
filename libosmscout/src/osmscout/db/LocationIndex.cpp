@@ -97,12 +97,12 @@ namespace osmscout {
 
   bool LocationIndex::IsRegionIgnoreToken(const std::string& token) const
   {
-    return regionIgnoreTokenSet.find(token)!=regionIgnoreTokenSet.end();
+    return regionIgnoreTokenSet.contains(token);
   }
 
   bool LocationIndex::IsLocationIgnoreToken(const std::string& token) const
   {
-    return locationIgnoreTokenSet.find(token)!=locationIgnoreTokenSet.end();
+    return locationIgnoreTokenSet.contains(token);
   }
 
   LocationIndex::FileScannerPtr LocationIndex::FileScannerPool::Borrow()
@@ -803,7 +803,7 @@ namespace osmscout {
         std::list<FileOffset> newOffsets;
 
         for (const auto& offset : offsets) {
-          if (refs.find(offset)!=refs.end()) {
+          if (refs.contains(offset)) {
             continue;
           }
 

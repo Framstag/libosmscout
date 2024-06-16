@@ -556,7 +556,7 @@ namespace osmscout {
                                          current->id.database,
                                          currentRouteNode->GetId());
     for (const auto& twin : twins) {
-      if (closedSet.find(VNode(twin, current->restricted))!=closedSet.end()) {
+      if (closedSet.contains(VNode(twin, current->restricted))) {
         if constexpr (debugRouting) {
           std::cout << "Twin node " << twin << " is closed already, ignore it" << std::endl;
         }
@@ -714,7 +714,7 @@ namespace osmscout {
         continue;
       }
 
-      if (closedSet.find(VNode(DBId(dbId,path.id), path.IsRestricted(vehicle)))!=closedSet.end()) {
+      if (closedSet.contains(VNode(DBId(dbId,path.id), path.IsRestricted(vehicle)))) {
         if constexpr (debugRouting) {
           std::cout << "  Skipping route";
           std::cout << " to " << dbId << " / " << path.id;
@@ -1221,7 +1221,7 @@ namespace osmscout {
 
     // If we have keep the last node open because of access violations, add it
     // after routing is done
-    if (closedSet.find(VNode(current->id, current->restricted))==closedSet.end()) {
+    if (!closedSet.contains(VNode(current->id, current->restricted))) {
       closedSet.insert(VNode(current->id,
                              current->restricted,
                              current->object,
