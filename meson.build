@@ -359,7 +359,10 @@ if buildImport
     subdir('Import')
 endif
 
-subdir('Demos')
+if get_option('buildDemos')
+  subdir('Demos')
+endif
+
 subdir('DumpData')
 subdir('PublicTransportMap')
 
@@ -447,7 +450,7 @@ summary({
 summary({
   'BasemapImport': buildImport,
   'Import': buildImport,
-  'Demos': true,
+  'Demos': get_option('buildDemos'),
   'DumpData': true,
   'OSMScout2': buildOSMScout2,
   'StyleEditor': buildStyleEditor,

@@ -12,4 +12,5 @@ option('enableMapQt',      type: 'boolean', value: true, description: 'Build Qt 
 option('enableMapSvg',     type: 'boolean', value: true, description: 'Build SVG backend')
 option('enableClientQt',   type: 'boolean', value: true, description: 'Build Qt/QML library')
 option('enableXML',        type: 'boolean', value: true, description: 'Use libxml2')
+option('buildDemos',       type: 'boolean', value: true, description: 'Build demo applications')
 option('qtVersion',        type: 'integer', value: 5, min: 5, max: 6, description: 'QT version to use (5 or 6)')
