@@ -81,7 +81,7 @@ macro(osmscout_library_project)
 	set_target_properties(${_name} PROPERTIES
 		OUTPUT_NAME "${_output}"
 		VERSION ${OSMSCOUT_LIBRARY_VERSION}
-		SOVERSION ${OSMSCOUT_LIBRARY_VERSION}
+		SOVERSION ${PROJECT_VERSION_MAJOR}
 		FOLDER "${_folder}"
 	)
 	if(EXISTS ${_template})
