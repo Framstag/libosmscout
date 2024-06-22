@@ -13,14 +13,14 @@ on:
 jobs:
   build_meson:
     name: meson
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install build tool
         run: brew install meson ninja
       - name: Install dependencies
-        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
+        run: brew install openjdk protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm pkgconfig
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug -Dopenmp=false
         env:
@@ -32,14 +32,14 @@ jobs:
 
   build_cmake:
     name: cmake
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install build tool
         run:  brew install cmake ninja
       - name: Install dependencies
-        run: brew install openjdk protobuf protobuf-c qt5 cairo libxml2 gettext pango glfw3 glew glm pkgconfig
+        run: brew install openjdk protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm pkgconfig
       - name: Configure build project
         run: cmake -B build -DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
         env:

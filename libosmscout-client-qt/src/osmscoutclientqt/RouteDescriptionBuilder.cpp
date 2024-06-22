@@ -69,23 +69,23 @@ static QString TurnCommandType(const RouteDescription::DirectionDescriptionRef& 
 static QString ShortTurnCommand(const RouteDescription::DirectionDescriptionRef& directionDescription)
 {
   if (!directionDescription){
-    return osmscout::RouteDescriptionBuilder::tr("Turn");
+    return RouteDescriptionBuilder::tr("Turn");
   }
   switch (directionDescription->GetCurve()) {
     case RouteDescription::DirectionDescription::sharpLeft:
-      return osmscout::RouteDescriptionBuilder::tr("Turn sharp left");
+      return RouteDescriptionBuilder::tr("Turn sharp left");
     case RouteDescription::DirectionDescription::left:
-      return osmscout::RouteDescriptionBuilder::tr("Turn left");
+      return RouteDescriptionBuilder::tr("Turn left");
     case RouteDescription::DirectionDescription::slightlyLeft:
-      return osmscout::RouteDescriptionBuilder::tr("Turn slightly left");
+      return RouteDescriptionBuilder::tr("Turn slightly left");
     case RouteDescription::DirectionDescription::straightOn:
-      return osmscout::RouteDescriptionBuilder::tr("Straight on");
+      return RouteDescriptionBuilder::tr("Straight on");
     case RouteDescription::DirectionDescription::slightlyRight:
-      return osmscout::RouteDescriptionBuilder::tr("Turn slightly right");
+      return RouteDescriptionBuilder::tr("Turn slightly right");
     case RouteDescription::DirectionDescription::right:
-      return osmscout::RouteDescriptionBuilder::tr("Turn right");
+      return RouteDescriptionBuilder::tr("Turn right");
     case RouteDescription::DirectionDescription::sharpRight:
-      return osmscout::RouteDescriptionBuilder::tr("Turn sharp right");
+      return RouteDescriptionBuilder::tr("Turn sharp right");
   }
 
   assert(false);
@@ -95,23 +95,23 @@ static QString ShortTurnCommand(const RouteDescription::DirectionDescriptionRef&
 static QString FullTurnCommand(const RouteDescription::DirectionDescriptionRef& directionDescription)
 {
   if (!directionDescription){
-    return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong> into %2");
+    return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong> into %2");
   }
   switch (directionDescription->GetCurve()) {
     case RouteDescription::DirectionDescription::sharpLeft:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong> into %2");
     case RouteDescription::DirectionDescription::left:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn left</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn left</strong> into %2");
     case RouteDescription::DirectionDescription::slightlyLeft:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly left</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly left</strong> into %2");
     case RouteDescription::DirectionDescription::straightOn:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Straight on</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Straight on</strong> into %2");
     case RouteDescription::DirectionDescription::slightlyRight:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly right</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly right</strong> into %2");
     case RouteDescription::DirectionDescription::right:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn right</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn right</strong> into %2");
     case RouteDescription::DirectionDescription::sharpRight:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp right</strong> into %2");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp right</strong> into %2");
   }
 
   assert(false);
@@ -121,23 +121,23 @@ static QString FullTurnCommand(const RouteDescription::DirectionDescriptionRef& 
 static QString TurnCommandWithList(const RouteDescription::DirectionDescriptionRef& directionDescription)
 {
   if (!directionDescription){
-    return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong>");
+    return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong>");
   }
   switch (directionDescription->GetCurve()) {
     case RouteDescription::DirectionDescription::sharpLeft:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong>");
     case RouteDescription::DirectionDescription::left:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn left</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn left</strong>");
     case RouteDescription::DirectionDescription::slightlyLeft:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly left</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly left</strong>");
     case RouteDescription::DirectionDescription::straightOn:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Straight on</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Straight on</strong>");
     case RouteDescription::DirectionDescription::slightlyRight:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly right</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn slightly right</strong>");
     case RouteDescription::DirectionDescription::right:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn right</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn right</strong>");
     case RouteDescription::DirectionDescription::sharpRight:
-      return osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp right</strong>");
+      return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp right</strong>");
   }
 
   assert(false);
@@ -151,18 +151,18 @@ static QString FormatName(const RouteDescription::NameDescription &nameDescripti
   if (name.empty() &&
       ref.empty()) {
     //: unknown road name
-    return osmscout::RouteDescriptionBuilder::tr("unnamed road");
+    return RouteDescriptionBuilder::tr("unnamed road");
   }
   if (name.empty()){
     //: road just with ref number
-    return osmscout::RouteDescriptionBuilder::tr("(%1)").arg(QString::fromStdString(ref));
+    return RouteDescriptionBuilder::tr("(%1)").arg(QString::fromStdString(ref));
   }
   if (ref.empty()){
     //: road just with name, without ref
-    return osmscout::RouteDescriptionBuilder::tr("\"%1\"").arg(QString::fromStdString(name));
+    return RouteDescriptionBuilder::tr("\"%1\"").arg(QString::fromStdString(name));
   }
   //: road with name (%1) and ref (%2)
-  return osmscout::RouteDescriptionBuilder::tr("\"%1\" (%2)")
+  return RouteDescriptionBuilder::tr("\"%1\" (%2)")
     .arg(QString::fromStdString(name))
     .arg(QString::fromStdString(ref));
 }
@@ -174,18 +174,18 @@ static QString FormatMotorwayJunctionName(const RouteDescription::NameDescriptio
   if (name.empty() &&
       ref.empty()) {
     //: unnamed motorway exit
-    return osmscout::RouteDescriptionBuilder::tr("On unnamed exit");
+    return RouteDescriptionBuilder::tr("On unnamed exit");
   }
   if (name.empty()){
     //: motorway exit just with ref
-    return osmscout::RouteDescriptionBuilder::tr("On exit %1").arg(QString::fromStdString(ref));
+    return RouteDescriptionBuilder::tr("On exit %1").arg(QString::fromStdString(ref));
   }
   if (ref.empty()){
     //: motorway exit with name, without ref
-    return osmscout::RouteDescriptionBuilder::tr("On exit \"%1\"").arg(QString::fromStdString(name));
+    return RouteDescriptionBuilder::tr("On exit \"%1\"").arg(QString::fromStdString(name));
   }
   //: motorway exit with ref (%1) and name (%2)
-  return osmscout::RouteDescriptionBuilder::tr("On exit %1 \"%2\"")
+  return RouteDescriptionBuilder::tr("On exit %1 \"%2\"")
     .arg(QString::fromStdString(ref))
     .arg(QString::fromStdString(name));
 }
@@ -252,7 +252,7 @@ void RouteDescriptionBuilder::Callback::OnStart(const RouteDescription::StartDes
   QString startDesc;
   QString driveAlongDesc;
   if (startDescription && !startDescription->GetDescription().empty()) {
-    startDesc = osmscout::RouteDescriptionBuilder::tr("\"%1\"")
+    startDesc = RouteDescriptionBuilder::tr("\"%1\"")
         .arg(QString::fromStdString(startDescription->GetDescription()));
   }
   if (nameDescription && nameDescription->HasName()) {
@@ -261,25 +261,25 @@ void RouteDescriptionBuilder::Callback::OnStart(const RouteDescription::StartDes
 
   if (!startDesc.isEmpty()){
     RouteStep startAt = MkStep("start");
-    startAt.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong> at %1").arg(startDesc);
-    startAt.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
+    startAt.description=RouteDescriptionBuilder::tr("<strong>Start</strong> at %1").arg(startDesc);
+    startAt.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
 
     if (!driveAlongDesc.isEmpty()) {
       RouteStep driveAlong = MkStep("drive-along");
-      driveAlong.description=osmscout::RouteDescriptionBuilder::tr("<strong>Continue</strong> along %1").arg(driveAlongDesc);
-      driveAlong.shortDescription=osmscout::RouteDescriptionBuilder::tr("Continue");
+      driveAlong.description=RouteDescriptionBuilder::tr("<strong>Continue</strong> along %1").arg(driveAlongDesc);
+      driveAlong.shortDescription=RouteDescriptionBuilder::tr("Continue");
       routeSteps.push_back(driveAlong);
     }
   } else if (!driveAlongDesc.isEmpty()) {
     RouteStep startAt = MkStep("start");
-    startAt.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong> along %1").arg(driveAlongDesc);
-    startAt.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
+    startAt.description=RouteDescriptionBuilder::tr("<strong>Start</strong> along %1").arg(driveAlongDesc);
+    startAt.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(startAt);
   } else {
     RouteStep start = MkStep("start");
-    start.description=osmscout::RouteDescriptionBuilder::tr("<strong>Start</strong>");
-    start.shortDescription=osmscout::RouteDescriptionBuilder::tr("Start");
+    start.description=RouteDescriptionBuilder::tr("<strong>Start</strong>");
+    start.shortDescription=RouteDescriptionBuilder::tr("Start");
     routeSteps.push_back(start);
   }
 }
@@ -290,15 +290,15 @@ void RouteDescriptionBuilder::Callback::OnTargetReached(const RouteDescription::
 
   QString targetDesc;
   if (targetDescription && !targetDescription->GetDescription().empty()){
-    targetDesc = osmscout::RouteDescriptionBuilder::tr("\"%1\"")
+    targetDesc = RouteDescriptionBuilder::tr("\"%1\"")
         .arg(QString::fromStdString(targetDescription->GetDescription()));
   }
   if (!targetDesc.isEmpty()){
-    targetReached.description=osmscout::RouteDescriptionBuilder::tr("<strong>Target reached</strong> at %1").arg(targetDesc);
+    targetReached.description=RouteDescriptionBuilder::tr("<strong>Target reached</strong> at %1").arg(targetDesc);
   }else{
-    targetReached.description=osmscout::RouteDescriptionBuilder::tr("<strong>Target reached</strong>");
+    targetReached.description=RouteDescriptionBuilder::tr("<strong>Target reached</strong>");
   }
-  targetReached.shortDescription=osmscout::RouteDescriptionBuilder::tr("Target reached");
+  targetReached.shortDescription=RouteDescriptionBuilder::tr("Target reached");
   routeSteps.push_back(targetReached);
 }
 
@@ -353,12 +353,12 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutEnter(const RouteDescription
   }
 
   if (!crossingWaysString.isEmpty()) {
-    enter.description=osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter roundabout</strong>")
+    enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter roundabout</strong>")
         .arg(crossingWaysString);
   }else {
-    enter.description=osmscout::RouteDescriptionBuilder::tr("<strong>Enter roundabout</strong>");
+    enter.description=RouteDescriptionBuilder::tr("<strong>Enter roundabout</strong>");
   }
-  enter.shortDescription=osmscout::RouteDescriptionBuilder::tr("Enter roundabout");
+  enter.shortDescription=RouteDescriptionBuilder::tr("Enter roundabout");
   routeSteps.push_back(enter);
 }
 
@@ -371,27 +371,27 @@ void RouteDescriptionBuilder::Callback::OnRoundaboutLeave(const RouteDescription
 
   switch (roundaboutLeaveDescription->GetExitCount()){
     case 1:
-      leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Take the first exit");
+      leave.shortDescription=RouteDescriptionBuilder::tr("Take the first exit");
       break;
     case 2:
-      leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Take the second exit");
+      leave.shortDescription=RouteDescriptionBuilder::tr("Take the second exit");
       break;
     case 3:
-      leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Take the third exit");
+      leave.shortDescription=RouteDescriptionBuilder::tr("Take the third exit");
       break;
     default:
-      leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Take the %1th exit")
+      leave.shortDescription=RouteDescriptionBuilder::tr("Take the %1th exit")
           .arg(roundaboutLeaveDescription->GetExitCount());
   }
 
   if (nameDescription &&
       nameDescription->HasName()) {
 
-    leave.description=osmscout::RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit into street %2")
+    leave.description=RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit into street %2")
         .arg(roundaboutLeaveDescription->GetExitCount())
         .arg(FormatName(*nameDescription));
   }else{
-    leave.description=osmscout::RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit")
+    leave.description=RouteDescriptionBuilder::tr("<strong>Leave roundabout</strong> on %1. exit")
         .arg(roundaboutLeaveDescription->GetExitCount());
   }
 
@@ -403,7 +403,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 {
   RouteStep enter = MkStep("enter-motorway");
 
-  enter.shortDescription=osmscout::RouteDescriptionBuilder::tr("Enter motorway");
+  enter.shortDescription=RouteDescriptionBuilder::tr("Enter motorway");
 
   QString crossingWaysString;
 
@@ -415,19 +415,19 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
       motorwayEnterDescription->GetToDescription()->HasName()) {
 
     if (!crossingWaysString.isEmpty()){
-      enter.description=osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong> %2")
+      enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong> %2")
           .arg(crossingWaysString)
           .arg(FormatName(*(motorwayEnterDescription->GetToDescription())));
     }else {
-      enter.description=osmscout::RouteDescriptionBuilder::tr("<strong>Enter motorway</strong> %1")
+      enter.description=RouteDescriptionBuilder::tr("<strong>Enter motorway</strong> %1")
           .arg(FormatName(*(motorwayEnterDescription->GetToDescription())));
     }
   }else{
     if (!crossingWaysString.isEmpty()){
-      enter.description=osmscout::RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong>")
+      enter.description=RouteDescriptionBuilder::tr("At crossing %1<strong>Enter motorway</strong>")
           .arg(crossingWaysString);
     }else {
-      enter.description=osmscout::RouteDescriptionBuilder::tr("<strong>Enter motorway</strong>");
+      enter.description=RouteDescriptionBuilder::tr("<strong>Enter motorway</strong>");
     }
   }
 
@@ -453,7 +453,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
   }
   RouteStep change = MkStep(stepName);
 
-  change.shortDescription=osmscout::RouteDescriptionBuilder::tr("Change motorway");
+  change.shortDescription=RouteDescriptionBuilder::tr("Change motorway");
 
   QString exitDescription;
   if (motorwayJunctionDescription &&
@@ -468,22 +468,22 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
       motorwayChangeDescription->GetToDescription()->HasName()) {
 
     if (exitDescription.isEmpty()) {
-      change.description = osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
+      change.description = RouteDescriptionBuilder::tr("<strong>Change motorway</strong> from %1 to %2")
           .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
           .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
     } else {
       //: %1 is motorway exit description
-      change.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong> from %2 to %3")
+      change.description = RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong> from %2 to %3")
           .arg(exitDescription)
           .arg(FormatName(*(motorwayChangeDescription->GetFromDescription())))
           .arg(FormatName(*(motorwayChangeDescription->GetToDescription())));
     }
   }else{
     if (exitDescription.isEmpty()) {
-      change.description = osmscout::RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
+      change.description = RouteDescriptionBuilder::tr("<strong>Change motorway</strong>");
     } else {
       //: %1 is motorway exit description
-      change.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong>")
+      change.description = RouteDescriptionBuilder::tr("%1 <strong>Change motorway</strong>")
           .arg(exitDescription);
     }
   }
@@ -515,7 +515,7 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
   }
   RouteStep leave = MkStep(stepName);
 
-  leave.shortDescription=osmscout::RouteDescriptionBuilder::tr("Leave motorway");
+  leave.shortDescription=RouteDescriptionBuilder::tr("Leave motorway");
 
   QString exitDescription;
   if (motorwayJunctionDescription &&
@@ -531,33 +531,33 @@ void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::
         nameDescription->HasName()) {
 
       if (exitDescription.isEmpty()) {
-        leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
+        leave.description = RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1 into %2")
             .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
             .arg(FormatName(*nameDescription));
       } else {
         //: %1 is motorway exit description
-        leave.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2 into %3")
+        leave.description = RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2 into %3")
             .arg(exitDescription)
             .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())))
             .arg(FormatName(*nameDescription));
       }
     }else{
       if (exitDescription.isEmpty()) {
-        leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
+        leave.description = RouteDescriptionBuilder::tr("<strong>Leave motorway</strong> %1")
             .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
       } else {
         //: %1 is motorway exit description
-        leave.description = osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2")
+        leave.description = RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong> %2")
             .arg(exitDescription)
             .arg(FormatName(*(motorwayLeaveDescription->GetFromDescription())));
       }
     }
   }else{
     if (exitDescription.isEmpty()) {
-      leave.description = osmscout::RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
+      leave.description = RouteDescriptionBuilder::tr("<strong>Leave motorway</strong>");
     } else {
       //: %1 is motorway exit description
-      leave.description=osmscout::RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong>")
+      leave.description=RouteDescriptionBuilder::tr("%1 <strong>Leave motorway</strong>")
           .arg(exitDescription);
     }
   }
@@ -591,14 +591,14 @@ void RouteDescriptionBuilder::Callback::OnPathNameChange(const RouteDescription:
 
   RouteStep changed = MkStep("name-change");
 
-  changed.shortDescription=osmscout::RouteDescriptionBuilder::tr("Way changes name");
+  changed.shortDescription=RouteDescriptionBuilder::tr("Way changes name");
 
   if (nameChangedDescription->GetOriginDescription()) {
-    changed.description=osmscout::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> from %1 to %2")
+    changed.description=RouteDescriptionBuilder::tr("<strong>Way changes name</strong> from %1 to %2")
         .arg(FormatName(*(nameChangedDescription->GetOriginDescription())))
         .arg(FormatName(*(nameChangedDescription->GetTargetDescription())));
   } else {
-    changed.description=osmscout::RouteDescriptionBuilder::tr("<strong>Way changes name</strong> to %1")
+    changed.description=RouteDescriptionBuilder::tr("<strong>Way changes name</strong> to %1")
       .arg(FormatName(*(nameChangedDescription->GetTargetDescription())));
   }
 

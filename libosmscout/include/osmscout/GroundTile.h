@@ -89,14 +89,14 @@ namespace osmscout {
       }
     };
 
-    Type               type;          //!< The type of the cell
-    size_t             xAbs;          //!< Absolute x coordinate of the cell in relation to level and cell size
-    size_t             yAbs;          //!< Absolute y coordinate of the cell in relation to level and cell size
-    size_t             xRel;          //!< X coordinate of cell in relation to cell index of this level
-    size_t             yRel;          //!< Y coordinate of cell in relation to cell index of this level
-    double             cellWidth;     //!< Width of cell
-    double             cellHeight;    //!< Height of cell
-    std::vector<Coord> coords;        //!< Optional coordinates for coastline
+    Type               type;            //!< The type of the cell
+    size_t             xAbs{0};         //!< Absolute x coordinate of the cell in relation to level and cell size
+    size_t             yAbs{0};         //!< Absolute y coordinate of the cell in relation to level and cell size
+    size_t             xRel{0};         //!< X coordinate of cell in relation to cell index of this level
+    size_t             yRel{0};         //!< Y coordinate of cell in relation to cell index of this level
+    double             cellWidth{0.0};  //!< Width of cell
+    double             cellHeight{0.0}; //!< Height of cell
+    std::vector<Coord> coords;          //!< Optional coordinates for coastline
 
     GroundTile() = default;
 

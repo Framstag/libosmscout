@@ -90,29 +90,9 @@ struct Station
     return name==rhs.name;
   }
 
-  bool operator!=(const Station& rhs) const
+  auto operator<=>(const Station& rhs) const
   {
-    return !(rhs==*this);
-  }
-
-  bool operator<(const Station& rhs) const
-  {
-    return name<rhs.name;
-  }
-
-  bool operator>(const Station& rhs) const
-  {
-    return rhs<*this;
-  }
-
-  bool operator<=(const Station& rhs) const
-  {
-    return !(rhs<*this);
-  }
-
-  bool operator>=(const Station& rhs) const
-  {
-    return !(*this<rhs);
+    return name<=>rhs.name;
   }
 };
 

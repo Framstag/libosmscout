@@ -33,7 +33,7 @@ namespace osmscout {
   void Feature::RegisterLabel(size_t index,
                               const std::string& labelName)
   {
-    assert(labels.find(labelName)==labels.end());
+    assert(!labels.contains(labelName));
 
     labels[labelName]=index;
   }
@@ -41,7 +41,7 @@ namespace osmscout {
   void Feature::RegisterFlag(size_t index,
                              const std::string& flagName)
   {
-    assert(flags.find(flagName)==flags.end());
+    assert(!flags.contains(flagName));
 
     flags[flagName]=index;
   }

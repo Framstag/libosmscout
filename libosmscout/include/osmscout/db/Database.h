@@ -118,7 +118,7 @@ namespace osmscout {
     void SetIndexMMap(bool mmap);
 
     // Temporary
-    void SetSRTMDirectory(const std::string& directory)
+    void SetSRTMDirectory(const std::string_view& directory)
     {
       this->srtmDirectory=directory;
     }

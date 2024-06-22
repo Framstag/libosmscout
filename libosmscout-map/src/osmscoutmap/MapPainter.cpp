@@ -1795,7 +1795,7 @@ constexpr bool debugGroundTiles = false;
 
           // collapse colors
           const auto& pathData=memberWay->second.wayData;
-          if (memberWay->second.colors.find(color)!=memberWay->second.colors.end()){
+          if (memberWay->second.colors.contains(color)){
             FlushRouteData();
             continue;
           }
@@ -2252,7 +2252,7 @@ constexpr bool debugGroundTiles = false;
         projection.GeoToPixel(GeoCoord(lat, lon),
                               pixel);
 
-        if (drawnLabels.find(GeoCoord(x, y)) != drawnLabels.end()) {
+        if (drawnLabels.contains(GeoCoord(x, y))) {
           continue;
         }
 

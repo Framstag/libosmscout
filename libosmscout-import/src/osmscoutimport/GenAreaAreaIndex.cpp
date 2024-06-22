@@ -98,10 +98,10 @@ namespace osmscout {
   {
     try {
       for (auto& ring : area.rings) {
-        NameFeatureValue       *nameValue=nameReader->GetValue(ring.GetFeatureValueBuffer());
-        LocationFeatureValue   *locationValue=locationReader->GetValue(ring.GetFeatureValueBuffer());
-        AddressFeatureValue    *addressValue=addressReader->GetValue(ring.GetFeatureValueBuffer());
-        PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(ring.GetFeatureValueBuffer());
+        const NameFeatureValue       *nameValue=nameReader->GetValue(ring.GetFeatureValueBuffer());
+        const LocationFeatureValue   *locationValue=locationReader->GetValue(ring.GetFeatureValueBuffer());
+        const AddressFeatureValue    *addressValue=addressReader->GetValue(ring.GetFeatureValueBuffer());
+        const PostalCodeFeatureValue *postalCodeValue=postalCodeReader->GetValue(ring.GetFeatureValueBuffer());
 
         std::string          name;
         std::string          location;
@@ -1004,7 +1004,7 @@ namespace osmscout {
   {
 
     try {
-      for (auto& filter : filters) {
+      for (const auto& filter : filters) {
         if (!filter->BeforeProcessingStart(parameter,
                                            progress,
                                            *typeConfig)) {
@@ -1025,7 +1025,7 @@ namespace osmscout {
                                  progress);
 
     try {
-      for (auto& filter : filters) {
+      for (const auto& filter : filters) {
         if (!filter->AfterProcessingEnd(parameter,
                                         progress,
                                         *typeConfig)) {

@@ -164,7 +164,7 @@ POILookupModule::LookupFuture POILookupModule::lookupPOIRequest(int requestId,
                                                                 const std::vector<std::string> &types,
                                                                 const Distance &maxDistance)
 {
-  return Async<LookupResult>([=](Breaker &breaker) -> LookupResult {
+  return Async<LookupResult>([=,this](Breaker &breaker) -> LookupResult {
     LookupResult result;
     GeoBox searchBoundingBox=GeoBox::BoxByCenterAndRadius(searchCenter, maxDistance);
 
@@ -174,7 +174,7 @@ POILookupModule::LookupFuture POILookupModule::lookupPOIRequest(int requestId,
           lookupAborted.Emit(requestId);
           break;
         }
-        auto partialResult=doPOIlookup(db, searchBoundingBox, types);
+        auto partialResult=this->doPOIlookup(db, searchBoundingBox, types);
         lookupResult.Emit(requestId,partialResult);
         std::copy(partialResult.begin(), partialResult.end(), std::back_inserter(result));
       }

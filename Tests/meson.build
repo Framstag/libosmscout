@@ -355,6 +355,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     includes += osmscoutmapopenglIncDir
     deps += openGLDep
     deps += glfwDep
+    deps += glmDep
     deps += glewDep
     links += osmscoutmapopengl
   endif

@@ -94,7 +94,7 @@ int main(int /*argc*/, char* /*argv*/[])
   osmscout::StopClock stestsetTimer;
 
   for (auto id : ids) {
-    if (set.find(id)==set.end()) {
+    if (!set.contains(id)) {
       std::cerr << "set error!" << std::endl;
     }
   }
@@ -106,7 +106,7 @@ int main(int /*argc*/, char* /*argv*/[])
   osmscout::StopClock stestusetTimer;
 
   for (auto id : ids) {
-    if (uset.find(id)==uset.end()) {
+    if (!uset.contains(id)) {
       std::cerr << "unordered_set error!" << std::endl;
     }
   }

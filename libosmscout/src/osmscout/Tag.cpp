@@ -191,7 +191,7 @@ namespace osmscout {
       return false;
     }
 
-    return tagValues.find(t->second)!=tagValues.end();
+    return tagValues.contains(t->second);
   }
 
   TagInfo::TagInfo(TagId id,

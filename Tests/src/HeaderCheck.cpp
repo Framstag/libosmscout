@@ -247,7 +247,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscout-test => osmscoutimport",
 };
 
-std::list<fs::path> GetFiles(const fs::path& directory, const std::string& extension)
+static std::list<fs::path> GetFiles(const fs::path& directory, const std::string& extension)
 {
     std::list<fs::path> files;
 
@@ -262,7 +262,7 @@ std::list<fs::path> GetFiles(const fs::path& directory, const std::string& exten
     return files;
 }
 
-std::list<fs::path> GetAllFiles(const fs::path& sourceRoot) {
+static std::list<fs::path> GetAllFiles(const fs::path& sourceRoot) {
     std::list<fs::path> allFiles;
     fs::path            root=sourceRoot;
 
@@ -285,7 +285,7 @@ std::list<fs::path> GetAllFiles(const fs::path& sourceRoot) {
     return allFiles;
 }
 
-std::list<std::string> GetIncludes(const fs::path& filename)
+static std::list<std::string> GetIncludes(const fs::path& filename)
 {
     std::list<std::string> includes;
     std::regex include("#include *[<\"][a-zA-Z0-9/.]+[>\"]");
@@ -305,7 +305,7 @@ std::list<std::string> GetIncludes(const fs::path& filename)
     return includes;
 }
 
-std::string FilenameToPackage(const std::string& filename) {
+static std::string FilenameToPackage(const std::string& filename) {
     auto startOfPackage=filename.find("/osmscout");
 
     if (startOfPackage==std::string::npos) {
@@ -329,7 +329,7 @@ std::string FilenameToPackage(const std::string& filename) {
     return package;
 }
 
-std::string IncludeToPackage(const std::string& filename) {
+static std::string IncludeToPackage(const std::string& filename) {
     auto startOfPackage=filename.find("osmscout");
 
     if (startOfPackage!=0) {
@@ -430,7 +430,7 @@ TEST_CASE("Check include dependencies")
 
                 foundDependencies.insert(dependencyDescription);
 
-                if (allowedDependencies.find(dependencyDescription)==allowedDependencies.end()) {
+                if (!allowedDependencies.contains(dependencyDescription)) {
                     std::cerr << "File '" << file.generic_string() << " in package '" << filePackage << "' has forbidden dependency to package '" << includePackage << "'" << '\n';
                     violationCount++;
                 }
@@ -439,7 +439,7 @@ TEST_CASE("Check include dependencies")
     }
 
     for (const auto& expectedDependency : allowedDependencies) {
-        if (foundDependencies.find(expectedDependency) == foundDependencies.end()) {
+        if (!foundDependencies.contains(expectedDependency)) {
             std::cerr << "We expected dependency '" << expectedDependency << "' but did not find it in the code, please check" << '\n';
             violationCount++;
         }

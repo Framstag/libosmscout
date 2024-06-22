@@ -24,6 +24,8 @@
 
 #if defined(__WIN32__) || defined(WIN32)
 #include <cairo.h>
+#elif defined(__APPLE__) && __APPLE__
+#include <cairo.h>
 #else
 #include <cairo/cairo.h>
 #endif

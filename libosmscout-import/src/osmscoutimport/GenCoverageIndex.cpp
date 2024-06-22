@@ -29,7 +29,7 @@
 
 namespace osmscout {
 
-  static uint32_t cellLevel=14;
+  static const uint32_t cellLevel=14;
 
   CoverageIndexGenerator::CellSet CoverageIndexGenerator::ScanNodes(const TypeConfigRef& typeConfig,
                                                                     const ImportParameter& parameter,

@@ -1141,7 +1141,7 @@ namespace osmscout {
             painter!=lastPainter){
 
           for (auto im=painter->images.begin(); im != painter->images.end(); im++){
-            if (lastPainter->images.find(im->first) == lastPainter->images.end()) {
+            if (!lastPainter->images.contains(im->first)) {
               lastPainter->images[im->first] = im->second;
             }
           }
