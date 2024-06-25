@@ -374,6 +374,21 @@ namespace osmscout {
 
       bool Process(const RoutePostprocessor& postprocessor,
                    RouteDescription& description) override;
+
+    private:
+      RouteDescription::LaneDescriptionRef GetLaneDescription(const RouteDescription::Node &node) const;
+
+      /** Evaluate suggested lanes on nodes from "backBuffer", followed by "node".
+       * Node itself is junction, where count of lanes (on way from the node)
+       * is smaller than on the previous node (back of backBuffer).
+       *
+       * @param node
+       * @param backBuffer buffer of traveled nodes, recent node at back
+       */
+      void EvaluateLaneSuggestion(const RoutePostprocessor& postprocessor,
+                                  const RouteDescription::Node &node,
+                                  const std::list<RouteDescription::Node*> &backBuffer) const;
+
     private:
       Distance distanceBefore;
     };
@@ -452,6 +467,8 @@ namespace osmscout {
     RouteDescription::DestinationDescriptionRef GetDestination(const RouteDescription::Node& node) const;
 
     uint8_t GetMaxSpeed(const RouteDescription::Node& node) const;
+
+    RouteDescription::LaneDescription GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const;
 
     RouteDescription::LaneDescriptionRef GetLanes(const RouteDescription::Node& node) const;
 

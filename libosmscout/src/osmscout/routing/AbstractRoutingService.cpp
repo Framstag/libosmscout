@@ -892,7 +892,7 @@ namespace osmscout {
   {
     if (startForwardNode && startBackwardNode && start.GetObjectFileRef().GetType()==refWay) {
       // start is on the way between two route nodes, lets evaluate what route node is in opposite
-      // direction and add u-turn penalty to it and avoid return from node ahead
+      // direction and add exclusion for the opposite node to avoid return from node ahead
       WayRef way;
       if (!GetWayByOffset(DBFileOffset(start.GetDatabaseId(),
                                        start.GetObjectFileRef().GetFileOffset()),
@@ -927,7 +927,7 @@ namespace osmscout {
       }
     }
     if (startForwardNode && !startBackwardNode && start.GetObjectFileRef().GetType()==refWay) {
-      // start is directly on route-node, try to find what path is our source and add exclusion to it
+      // start is directly on route-node, try to find what path is our source and add exclusion for it
       double restrictedPathBearing = 20; // degrees
       auto oppositeVehicleBearing = bearing - Bearing::Degrees(180);
       for (const auto& path : startForwardNode->node->paths) {
