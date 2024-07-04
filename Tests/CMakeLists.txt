@@ -147,6 +147,9 @@ osmscout_test_project(NAME GeoCoordParse SOURCES src/GeoCoordParse.cpp)
 osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
 
 #---- ScanConversion
+osmscout_test_project(NAME RoutePostprocessor SOURCES src/RoutePostprocessor.cpp)
+
+#---- ScanConversion
 osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
 
 #---- ScreenMask

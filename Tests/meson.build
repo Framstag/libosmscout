@@ -385,6 +385,16 @@ ReaderScannerPerformance = executable('ReaderScannerPerformance',
 
 test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
 
+RoutePostprocessor = executable('RoutePostprocessor',
+                            'src/RoutePostprocessor.cpp',
+                            include_directories: [testIncDir, osmscoutIncDir],
+                            dependencies: [mathDep, openmpDep],
+                            link_with: [osmscout],
+                            install: true,
+                            install_dir: testInstallDir)
+
+test('Check route postprocessor', RoutePostprocessor)
+
 ScanConversion = executable('ScanConversion',
              'src/ScanConversion.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
