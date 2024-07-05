@@ -17,8 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <cstdlib>
-#include <iostream>
+#include <cstdio>
+#include <string>
+#include <filesystem>
 
 #include <osmscout/routing/RoutePostprocessor.h>
 
@@ -27,15 +28,46 @@
 using namespace std;
 using namespace osmscout;
 
+struct TmpFile
+{
+  std::filesystem::path path;
+
+  TmpFile(const std::string &baseName, const std::string &suffix)
+  {
+    for (int i=0;; i++) {
+      path = filesystem::temp_directory_path() / (baseName + std::to_string(i) + suffix);
+      if (!std::filesystem::exists(path)) { // there is possible race condition between this check and file creation...
+        break;
+      }
+    }
+  };
+
+  TmpFile(const TmpFile&) = delete;
+  TmpFile(TmpFile&&) = delete;
+  TmpFile& operator=(const TmpFile&) = delete;
+  TmpFile& operator=(TmpFile&&) = delete;
+
+  ~TmpFile()
+  {
+    if (filesystem::exists(path)) {
+      filesystem::remove(path);
+    }
+  }
+};
+
+using TmpFileRef=std::shared_ptr<TmpFile>;
+
+
 class MockDatabase {
 private:
   TypeConfigRef typeConfig;
+  TmpFileRef wayFile;
   FileScanner wayScanner;
 
 public:
-  MockDatabase(TypeConfigRef typeConfig, const std::string &wayFile): typeConfig(typeConfig)
+  MockDatabase(TypeConfigRef typeConfig, const TmpFileRef &wayFile): typeConfig(typeConfig), wayFile(wayFile)
   {
-    wayScanner.Open(wayFile, FileScanner::Mode::FastRandom, true);
+    wayScanner.Open(wayFile->path.string(), FileScanner::Mode::FastRandom, true);
   }
 
   ~MockDatabase()
@@ -64,7 +96,7 @@ private:
   TypeConfigRef typeConfig=std::make_shared<TypeConfig>();
   FileWriter writer;
   TypeInfoRef type;
-  std::string wayFile="/tmp/test-ways.dat"; // TODO: make temporary, make sure that it is deleted
+  TmpFileRef wayFile=std::make_shared<TmpFile>("test-ways", ".dat");
   // needs to correspond to feature registration order
   static constexpr size_t laneFeatureIndex=0;
   static constexpr size_t accessFeatureIndex=1;
@@ -86,7 +118,7 @@ public:
 
     typeConfig->RegisterType(type);
 
-    writer.Open(wayFile);
+    writer.Open(wayFile->path.string());
   }
 
   ~MockDatabaseBuilder()
