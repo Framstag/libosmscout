@@ -427,7 +427,10 @@ TEST_CASE("Suggest right lane on simple junction")
 {
   using namespace osmscout;
 
+  // https://www.openstreetmap.org/#map=19/50.09267/14.53044
   MockDatabaseBuilder databaseBuilder;
+  // street Českobrodská to east https://www.openstreetmap.org/way/936270761
+  // with two lanes
   ObjectFileRef way1Ref=databaseBuilder.AddWay(
     {GeoCoord(50.09294, 14.52899), GeoCoord(50.09282, 14.52976)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
@@ -435,6 +438,8 @@ TEST_CASE("Suggest right lane on simple junction")
       access->SetAccess(AccessFeatureValue::onewayForward | AccessFeatureValue::carForward);
     });
 
+  // continuation of Českobrodská https://www.openstreetmap.org/way/62143601
+  // single lane
   ObjectFileRef way2Ref=databaseBuilder.AddWay(
     {GeoCoord(50.09282, 14.52976), GeoCoord(50.09263, 14.53118)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
@@ -442,6 +447,8 @@ TEST_CASE("Suggest right lane on simple junction")
       access->SetAccess(AccessFeatureValue::onewayForward | AccessFeatureValue::carForward);
     });
 
+  // link between Českobrodská a Průmyslová https://www.openstreetmap.org/way/936270757
+  // single lane
   ObjectFileRef way3Ref=databaseBuilder.AddWay(
     {GeoCoord(50.09282, 14.52976), GeoCoord(50.09261, 14.53093)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
@@ -451,6 +458,7 @@ TEST_CASE("Suggest right lane on simple junction")
 
   RouteDescription description;
 
+  // route is going in direction to Průmyslová
   description.AddNode(0, 0, {way1Ref}, way1Ref, 1);
   description.AddNode(0, 0, {way1Ref, way2Ref, way3Ref}, way3Ref, 1);
   description.AddNode(0, 1, {way3Ref}, ObjectFileRef(), 0);
@@ -464,8 +472,30 @@ TEST_CASE("Suggest right lane on simple junction")
   postprocessor.Process(context, description);
 
   // should suggest right lane
-  auto nodeIt = description.Nodes().begin();
-  auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
-  REQUIRE(suggestedLanes->GetFrom()==1);
-  REQUIRE(suggestedLanes->GetTo()==1);
+  {
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes->GetFrom() == 1);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+  }
+
+  description.Clear();
+
+  // route continue to the east
+  description.AddNode(0, 0, {way1Ref}, way1Ref, 1);
+  description.AddNode(0, 0, {way1Ref, way2Ref, way3Ref}, way2Ref, 1);
+  description.AddNode(0, 1, {way2Ref}, ObjectFileRef(), 0);
+
+  lanesPostprocessor.Process(context, description);
+  postprocessor.Process(context, description);
+
+  // should suggest left lane
+  {
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 0);
+  }
 }
