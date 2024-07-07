@@ -33,6 +33,68 @@
 
 namespace osmscout {
 
+  RouteDescription::LaneDescription PostprocessorContext::GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const
+  {
+    auto lanesReader = GetLaneReader(dbId);
+    auto accessReader = GetAccessReader(dbId);
+
+    AccessFeatureValue *accessValue=accessReader.GetValue(way->GetFeatureValueBuffer());
+    bool oneway=accessValue!=nullptr && accessValue->IsOneway();
+
+    uint8_t laneCount;
+    std::vector<LaneTurn> laneTurns;
+    LanesFeatureValue *lanesValue=lanesReader.GetValue(way->GetFeatureValueBuffer());
+    if (lanesValue!=nullptr) {
+      laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
+      laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
+      while (laneTurns.size() < laneCount) {
+        laneTurns.push_back(LaneTurn::None);
+      }
+    } else {
+      // default lane count by object type
+      if (oneway) {
+        laneCount=way->GetType()->GetOnewayLanes();
+      } else {
+        laneCount=std::max(1,way->GetType()->GetLanes()/2);
+      }
+    }
+
+    return RouteDescription::LaneDescription(oneway, laneCount, laneTurns);
+  }
+
+  RouteDescription::LaneDescriptionRef PostprocessorContext::GetLanes(const RouteDescription::Node& node) const
+  {
+    RouteDescription::LaneDescriptionRef lanes;
+    if (node.GetPathObject().GetType()==refWay) {
+
+      WayRef way=GetWay(node.GetDBFileOffset());
+      bool forward = node.GetCurrentNodeIndex() < node.GetTargetNodeIndex();
+
+      lanes=std::make_shared<RouteDescription::LaneDescription>(GetLanes(node.GetDatabaseId(), way, forward));
+    }
+    return lanes;
+  }
+
+  Id PostprocessorContext::GetNodeId(const RouteDescription::Node& node) const
+  {
+    const ObjectFileRef& object=node.GetPathObject();
+    size_t nodeIndex=node.GetCurrentNodeIndex();
+    if (object.GetType()==refArea) {
+      AreaRef area=GetArea(node.GetDBFileOffset());
+
+      return area->rings.front().nodes[nodeIndex].GetId();
+    }
+
+    if (object.GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+
+      return way->GetId(nodeIndex);
+    }
+
+    assert(false);
+    return 0;
+  }
+
   RoutePostprocessor::StartPostprocessor::StartPostprocessor(const std::string& startDescription)
   : startDescription(startDescription)
   {
@@ -1918,6 +1980,21 @@ namespace osmscout {
     return entry->second;
   }
 
+  const LanesFeatureValueReader& RoutePostprocessor::GetLaneReader(const DatabaseId &dbId) const
+  {
+    auto lanesReader=lanesReaders.find(dbId);
+    assert(lanesReader != lanesReaders.end());
+    return *(lanesReader->second);
+  }
+
+  const AccessFeatureValueReader& RoutePostprocessor::GetAccessReader(const DatabaseId &dbId) const
+  {
+    auto accessReader=accessReaders.find(dbId);
+    assert(accessReader != accessReaders.end());
+    return *(accessReader->second);
+  }
+
+
   Duration RoutePostprocessor::GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const
   {
     assert(dbId<profiles.size() && profiles[dbId]);
@@ -2165,70 +2242,6 @@ namespace osmscout {
       }
     }
     return speed;
-  }
-
-  RouteDescription::LaneDescription RoutePostprocessor::GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const
-  {
-    auto lanesReader=lanesReaders.find(dbId);
-    auto accessReader=accessReaders.find(dbId);
-    assert(lanesReader != lanesReaders.end());
-    assert(accessReader != accessReaders.end());
-
-    AccessFeatureValue *accessValue=accessReader->second->GetValue(way->GetFeatureValueBuffer());
-    bool oneway=accessValue!=nullptr && accessValue->IsOneway();
-
-    uint8_t laneCount;
-    std::vector<LaneTurn> laneTurns;
-    LanesFeatureValue *lanesValue=lanesReader->second->GetValue(way->GetFeatureValueBuffer());
-    if (lanesValue!=nullptr) {
-      laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
-      laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
-      while (laneTurns.size() < laneCount) {
-        laneTurns.push_back(LaneTurn::None);
-      }
-    } else {
-      // default lane count by object type
-      if (oneway) {
-        laneCount=way->GetType()->GetOnewayLanes();
-      } else {
-        laneCount=std::max(1,way->GetType()->GetLanes()/2);
-      }
-    }
-
-    return RouteDescription::LaneDescription(oneway, laneCount, laneTurns);
-  }
-
-  RouteDescription::LaneDescriptionRef RoutePostprocessor::GetLanes(const RouteDescription::Node& node) const
-  {
-    RouteDescription::LaneDescriptionRef lanes;
-    if (node.GetPathObject().GetType()==refWay) {
-
-      WayRef way=GetWay(node.GetDBFileOffset());
-      bool forward = node.GetCurrentNodeIndex() < node.GetTargetNodeIndex();
-
-      lanes=std::make_shared<RouteDescription::LaneDescription>(GetLanes(node.GetDatabaseId(), way, forward));
-    }
-    return lanes;
-  }
-
-  Id RoutePostprocessor::GetNodeId(const RouteDescription::Node& node) const
-  {
-    const ObjectFileRef& object=node.GetPathObject();
-    size_t nodeIndex=node.GetCurrentNodeIndex();
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(node.GetDBFileOffset());
-
-      return area->rings.front().nodes[nodeIndex].GetId();
-    }
-
-    if (object.GetType()==refWay) {
-      WayRef way=GetWay(node.GetDBFileOffset());
-
-      return way->GetId(nodeIndex);
-    }
-
-    assert(false);
-    return 0;
   }
 
   size_t RoutePostprocessor::GetNodeIndex(const RouteDescription::Node& node,

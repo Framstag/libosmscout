@@ -56,6 +56,9 @@ namespace osmscout {
     virtual WayRef GetWay(const DBFileOffset &offset) const = 0;
     virtual NodeRef GetNode(const DBFileOffset &offset) const = 0;
 
+    virtual const LanesFeatureValueReader& GetLaneReader(const DatabaseId &dbId) const = 0;
+    virtual const AccessFeatureValueReader& GetAccessReader(const DatabaseId &dbId) const = 0;
+
     virtual Duration GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const = 0;
     virtual Duration GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const = 0;
 
@@ -83,11 +86,11 @@ namespace osmscout {
 
     virtual uint8_t GetMaxSpeed(const RouteDescription::Node& node) const = 0;
 
-    virtual RouteDescription::LaneDescription GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const = 0;
+    virtual RouteDescription::LaneDescription GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const;
 
-    virtual RouteDescription::LaneDescriptionRef GetLanes(const RouteDescription::Node& node) const = 0;
+    virtual RouteDescription::LaneDescriptionRef GetLanes(const RouteDescription::Node& node) const;
 
-    virtual Id GetNodeId(const RouteDescription::Node& node) const = 0;
+    virtual Id GetNodeId(const RouteDescription::Node& node) const;
 
     virtual size_t GetNodeIndex(const RouteDescription::Node& node,
                                 Id nodeId) const = 0;
@@ -517,6 +520,9 @@ namespace osmscout {
     WayRef GetWay(const DBFileOffset &offset) const override;
     NodeRef GetNode(const DBFileOffset &offset) const override;
 
+    const LanesFeatureValueReader& GetLaneReader(const DatabaseId &dbId) const override;
+    const AccessFeatureValueReader& GetAccessReader(const DatabaseId &dbId) const override;
+
     Duration GetTime(DatabaseId dbId,const Area& area,const Distance &deltaDistance) const override;
     Duration GetTime(DatabaseId dbId,const Way& way,const Distance &deltaDistance) const override;
 
@@ -543,12 +549,6 @@ namespace osmscout {
     RouteDescription::DestinationDescriptionRef GetDestination(const RouteDescription::Node& node) const override;
 
     uint8_t GetMaxSpeed(const RouteDescription::Node& node) const override;
-
-    RouteDescription::LaneDescription GetLanes(const DatabaseId& dbId, const WayRef& way, bool forward) const override;
-
-    RouteDescription::LaneDescriptionRef GetLanes(const RouteDescription::Node& node) const override;
-
-    Id GetNodeId(const RouteDescription::Node& node) const override;
 
     size_t GetNodeIndex(const RouteDescription::Node& node,
                         Id nodeId) const override;
