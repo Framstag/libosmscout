@@ -186,6 +186,19 @@ public:
     return osmscout::NodeRef();
   }
 
+  const LanesFeatureValueReader& GetLaneReader(const DatabaseId &dbId) const override
+  {
+    assert(dbId==0);
+    return lanesReader;
+  }
+
+  const AccessFeatureValueReader& GetAccessReader(const DatabaseId &dbId) const override
+  {
+    assert(dbId==0);
+    return accessReader;
+  }
+
+
   osmscout::Duration
   GetTime([[maybe_unused]] osmscout::DatabaseId dbId, [[maybe_unused]] const osmscout::Area &area, [[maybe_unused]] const osmscout::Distance &deltaDistance) const override
   {
@@ -290,68 +303,6 @@ public:
 
   uint8_t GetMaxSpeed([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
-    return 0;
-  }
-
-  osmscout::RouteDescription::LaneDescription
-  GetLanes(const osmscout::DatabaseId &dbId, const osmscout::WayRef &way, bool forward) const override
-  {
-    assert(dbId==0);
-
-    AccessFeatureValue *accessValue=accessReader.GetValue(way->GetFeatureValueBuffer());
-    bool oneway=accessValue!=nullptr && accessValue->IsOneway();
-
-    uint8_t laneCount;
-    std::vector<LaneTurn> laneTurns;
-    LanesFeatureValue *lanesValue=lanesReader.GetValue(way->GetFeatureValueBuffer());
-    if (lanesValue!=nullptr) {
-      laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
-      laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
-      while (laneTurns.size() < laneCount) {
-        laneTurns.push_back(LaneTurn::None);
-      }
-    } else {
-      // default lane count by object type
-      if (oneway) {
-        laneCount=way->GetType()->GetOnewayLanes();
-      } else {
-        laneCount=std::max(1,way->GetType()->GetLanes()/2);
-      }
-    }
-
-    return RouteDescription::LaneDescription(oneway, laneCount, laneTurns);
-  }
-
-  osmscout::RouteDescription::LaneDescriptionRef GetLanes(const osmscout::RouteDescription::Node &node) const override
-  {
-    RouteDescription::LaneDescriptionRef lanes;
-    if (node.GetPathObject().GetType()==refWay) {
-
-      WayRef way=GetWay(node.GetDBFileOffset());
-      bool forward = node.GetCurrentNodeIndex() < node.GetTargetNodeIndex();
-
-      lanes=std::make_shared<RouteDescription::LaneDescription>(GetLanes(node.GetDatabaseId(), way, forward));
-    }
-    return lanes;
-  }
-
-  osmscout::Id GetNodeId(const osmscout::RouteDescription::Node &node) const override
-  {
-    const ObjectFileRef& object=node.GetPathObject();
-    size_t nodeIndex=node.GetCurrentNodeIndex();
-    if (object.GetType()==refArea) {
-      AreaRef area=GetArea(node.GetDBFileOffset());
-
-      return area->rings.front().nodes[nodeIndex].GetId();
-    }
-
-    if (object.GetType()==refWay) {
-      WayRef way=GetWay(node.GetDBFileOffset());
-
-      return way->GetId(nodeIndex);
-    }
-
     assert(false);
     return 0;
   }
