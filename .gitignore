@@ -18,6 +18,7 @@
 **/*.iml
 /cmake-build-debug
 .vscode
+.cache
 
 # Backup
 **/*~

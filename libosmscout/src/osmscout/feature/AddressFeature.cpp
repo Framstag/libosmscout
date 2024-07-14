@@ -98,7 +98,7 @@ namespace osmscout {
 
     if (street==tags.end()) {
       // We are cheating here, but from library view, there is no
-      // difference in addr:street or addr:place. It is just a address.
+      // difference in addr:street or addr:place. It is just an address.
       street=tags.find(tagAddrPlace);
       if (street==tags.end()) {
         return;

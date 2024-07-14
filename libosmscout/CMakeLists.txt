@@ -48,8 +48,10 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessRestrictedFeature.h
         include/osmscout/feature/AddressFeature.h
         include/osmscout/feature/AdminLevelFeature.h
+        include/osmscout/feature/BrandFeature.h
         include/osmscout/feature/BridgeFeature.h
         include/osmscout/feature/BuildingFeature.h
+        include/osmscout/feature/ChargingStationFeature.h
         include/osmscout/feature/ClockwiseDirectionFeature.h
         include/osmscout/feature/ColorFeature.h
         include/osmscout/feature/ConstructionYearFeature.h
@@ -224,8 +226,10 @@ set(SOURCE_FILES
     src/osmscout/feature/AccessRestrictedFeature.cpp
     src/osmscout/feature/AddressFeature.cpp
     src/osmscout/feature/AdminLevelFeature.cpp
+    src/osmscout/feature/BrandFeature.cpp
     src/osmscout/feature/BridgeFeature.cpp
     src/osmscout/feature/BuildingFeature.cpp
+    src/osmscout/feature/ChargingStationFeature.cpp
     src/osmscout/feature/ClockwiseDirectionFeature.cpp
     src/osmscout/feature/ColorFeature.cpp
     src/osmscout/feature/ConstructionYearFeature.cpp

@@ -33,6 +33,8 @@
 #include <osmscout/feature/AccessRestrictedFeature.h>
 #include <osmscout/feature/AddressFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
+#include <osmscout/feature/ChargingStationFeature.h>
 #include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/LanesFeature.h>
 #include <osmscout/feature/LayerFeature.h>
@@ -570,6 +572,25 @@ static void DumpLanesFeatureValue(const osmscout::LanesFeatureValue& lanesValue,
   std::cout << "}" << std::endl;
 }
 
+static void DumpChargingStationFeatureValue(const osmscout::ChargingStationFeatureValue& chargingStationValue,
+                                            size_t indent)
+{
+  DumpIndent(indent);
+  std::cout << "ChargingStation {" << std::endl;
+
+  DumpIndent(indent+2);
+  if (chargingStationValue.GetCapacity()>0) {
+    std::cout << "capacity: "<< (unsigned int) chargingStationValue.GetCapacity() << std::endl;
+  }
+  else {
+    std::cout << "capacity: <unknown>"<< std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "}" << std::endl;
+
+}
+
 static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                                    size_t indent)
 {
@@ -665,6 +686,12 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
           DumpIndent(indent);
           std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
         }
+        else if (const auto* brandValue = dynamic_cast<osmscout::BrandFeatureValue*>(value);
+                brandValue != nullptr) {
+
+          DumpIndent(indent);
+          std::cout << "Brand: " << brandValue->GetName() << std::endl;
+        }
         else if (const auto* sidewayValue = dynamic_cast<osmscout::SidewayFeatureValue*>(value);
                  sidewayValue != nullptr) {
 
@@ -675,6 +702,11 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
 
           DumpLanesFeatureValue(*lanesValue,
                                 indent);
+        }
+        else if (const auto* chargingStationValue = dynamic_cast<osmscout::ChargingStationFeatureValue*>(value);
+                chargingStationValue != nullptr) {
+
+          DumpChargingStationFeatureValue(*chargingStationValue,indent);
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);

@@ -25,8 +25,10 @@
 #include <osmscout/feature/AccessRestrictedFeature.h>
 #include <osmscout/feature/AddressFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/BridgeFeature.h>
 #include <osmscout/feature/BuildingFeature.h>
+#include <osmscout/feature/ChargingStationFeature.h>
 #include <osmscout/feature/ClockwiseDirectionFeature.h>
 #include <osmscout/feature/ColorFeature.h>
 #include <osmscout/feature/ConstructionYearFeature.h>
@@ -731,6 +733,7 @@
     featureLanes=std::make_shared<LanesFeature>();
     RegisterFeature(featureLanes);
 
+    RegisterFeature(std::make_shared<BrandFeature>());
     RegisterFeature(std::make_shared<OperatorFeature>());
     RegisterFeature(std::make_shared<NetworkFeature>());
     RegisterFeature(std::make_shared<FromToFeature>());
@@ -738,6 +741,8 @@
 
     featureOpeningHours=std::make_shared<OpeningHoursFeature>();
     RegisterFeature(featureOpeningHours);
+
+    RegisterFeature(std::make_shared<ChargingStationFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
