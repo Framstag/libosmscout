@@ -36,7 +36,7 @@ namespace osmscout {
 
   void ChargingStationFeatureValue::Write(FileWriter& writer)
   {
-    writer.WriteNumber(sockets.size());
+    writer.WriteNumber(static_cast<uint64_t>(sockets.size()));
 
     for (const auto& socket : sockets) {
       writer.Write(static_cast<uint8_t>(socket.type));
