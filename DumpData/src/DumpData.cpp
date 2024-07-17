@@ -578,12 +578,19 @@ static void DumpChargingStationFeatureValue(const osmscout::ChargingStationFeatu
   DumpIndent(indent);
   std::cout << "ChargingStation {" << std::endl;
 
-  DumpIndent(indent+2);
-  if (chargingStationValue.GetCapacity()>0) {
-    std::cout << "capacity: "<< (unsigned int) chargingStationValue.GetCapacity() << std::endl;
-  }
-  else {
-    std::cout << "capacity: <unknown>"<< std::endl;
+  for (const auto& socket : chargingStationValue.GetSockets()) {
+    DumpIndent(indent+2);
+    std::cout << "Socket {" << std::endl;
+
+    DumpIndent(indent+4);
+    std::cout << "capacity: " << (unsigned int) socket.capacity << std::endl;
+    DumpIndent(indent+4);
+    std::cout << "type: " << osmscout::EnumToString(socket.type) << std::endl;
+    DumpIndent(indent+4);
+    std::cout << "output: " << socket.output << std::endl;
+
+    DumpIndent(indent+2);
+    std::cout << "}" << std::endl;
   }
 
   DumpIndent(indent);

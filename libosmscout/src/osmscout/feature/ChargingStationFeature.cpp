@@ -25,12 +25,24 @@ namespace osmscout {
 
   void ChargingStationFeatureValue::Read(FileScanner& scanner)
   {
-    capacity=scanner.ReadUInt8();
+    sockets.resize(scanner.ReadUInt64Number());
+
+    for (auto& socket : sockets) {
+      socket.type=static_cast<ChargingStationFeatureValue::SocketType>(scanner.ReadUInt8());
+      socket.capacity=scanner.ReadUInt8();
+      socket.output=scanner.ReadString();
+    }
   }
 
   void ChargingStationFeatureValue::Write(FileWriter& writer)
   {
-    writer.Write(capacity);
+    writer.WriteNumber(sockets.size());
+
+    for (const auto& socket : sockets) {
+      writer.Write(static_cast<uint8_t>(socket.type));
+      writer.Write(socket.capacity);
+      writer.Write(socket.output);
+    }
   }
 
   ChargingStationFeatureValue& ChargingStationFeatureValue::operator=(const FeatureValue& other)
@@ -38,7 +50,7 @@ namespace osmscout {
     if (this!=&other) {
       const auto& otherValue=static_cast<const ChargingStationFeatureValue&>(other);
 
-     this->capacity=otherValue.capacity;
+     this->sockets=otherValue.sockets;
     }
 
     return *this;
@@ -48,7 +60,7 @@ namespace osmscout {
   {
     const auto& otherValue=static_cast<const ChargingStationFeatureValue&>(other);
 
-    return this->capacity==otherValue.capacity;
+    return this->sockets==otherValue.sockets;
   }
 
   const char* const ChargingStationFeature::NAME = "ChargingStation";
@@ -57,6 +69,49 @@ namespace osmscout {
   {
     tagAmenity=tagRegistry.RegisterTag("amenity");
     tagCapacity=tagRegistry.RegisterTag("capacity");
+
+    socketTagsMap = {
+            {
+              ChargingStationFeatureValue::SocketType::Type1,
+                    {tagRegistry.RegisterTag("socket:type1"),
+                     tagRegistry.RegisterTag("socket:type1:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::Typ1Combo,
+                    {tagRegistry.RegisterTag("socket:type1_combo"),
+                     tagRegistry.RegisterTag("socket:type1_combo:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::Type2,
+                    {tagRegistry.RegisterTag("socket:type2"),
+                     tagRegistry.RegisterTag("socket:type2:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::Type2Cable,
+                    {tagRegistry.RegisterTag("socket:type2_cable"),
+                     tagRegistry.RegisterTag("socket:type2_cable:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::Type2Combo,
+                    {tagRegistry.RegisterTag("socket:type1_combo"),
+                     tagRegistry.RegisterTag("socket:type1_combo:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::Chademo,
+                    {tagRegistry.RegisterTag("socket:chademo"),
+                     tagRegistry.RegisterTag("socket:chademo:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::TeslaSupercharger,
+                    {tagRegistry.RegisterTag("socket:tesla_supercharger"),
+                     tagRegistry.RegisterTag("socket:tesla_supercharger:output")}
+              },
+            {
+              ChargingStationFeatureValue::SocketType::TeslaDestination,
+                    {tagRegistry.RegisterTag("socket:tesla_detination"),
+                     tagRegistry.RegisterTag("socket:tesla_detination:output")}
+            }
+    };
   }
 
   std::string ChargingStationFeature::GetName() const
@@ -86,18 +141,69 @@ namespace osmscout {
                             const TagMap& tags,
                             FeatureValueBuffer& buffer) const
   {
-    auto amenity = tags.find(tagAmenity);
-
-    if (amenity != tags.end() && amenity->second=="charging_station") {
-      auto *value = static_cast<ChargingStationFeatureValue *>(buffer.AllocateValue(feature.GetIndex()));
-      uint8_t capacityValue=0;
-
-      auto capacity = tags.find(tagCapacity);
-      if (capacity!=tags.end()) {
-        StringToNumber(capacity->second,
-                       capacityValue);
-      }
-      value->SetCapacity(capacityValue);
+    if (auto amenity = tags.find(tagAmenity);
+        amenity == tags.end() || amenity->second!="charging_station") {
+      return;
     }
+
+    auto *value = static_cast<ChargingStationFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
+    uint8_t capacityValue=0;
+
+    // capacity
+
+    if (auto capacity = tags.find(tagCapacity); capacity!=tags.end()) {
+      StringToNumber(capacity->second,
+                     capacityValue);
+    }
+
+    for (const auto& [socketType, socketTags] : socketTagsMap) {
+      if (auto socketTypeTag = tags.find(socketTags.socketType); socketTypeTag != tags.end()) {
+        ChargingStationFeatureValue::Socket socket;
+        if (StringToNumber(socketTypeTag->second,
+                           socket.capacity)) {
+          socket.type=socketType;
+
+          if (auto outputTag = tags.find(socketTags.output); outputTag != tags.end()) {
+            socket.output=outputTag->second;
+          }
+
+          value->AddSocket(socket);
+        }
+      }
+    }
+
+    if (capacityValue > 0 && !value->HasSockets()) {
+      ChargingStationFeatureValue::Socket socket;
+
+      socket.type=ChargingStationFeatureValue::SocketType::Unknown;
+      socket.capacity=capacityValue;
+      value->AddSocket(socket);
+    }
+  }
+
+  const char* EnumToString(const ChargingStationFeatureValue::SocketType& value)
+  {
+    switch (value) {
+      case ChargingStationFeatureValue::SocketType::Unknown:
+        return "Unknown";
+      case ChargingStationFeatureValue::SocketType::Type1:
+        return "Type 1";
+      case ChargingStationFeatureValue::SocketType::Typ1Combo:
+        return "Type 1 Combo";
+      case ChargingStationFeatureValue::SocketType::Type2:
+        return "Type 2";
+      case ChargingStationFeatureValue::SocketType::Type2Cable:
+        return "Type 2 Cable";
+      case ChargingStationFeatureValue::SocketType::Type2Combo:
+        return "Type 2 Combo";
+      case ChargingStationFeatureValue::SocketType::Chademo:
+        return "Chademo";
+      case ChargingStationFeatureValue::SocketType::TeslaSupercharger:
+        return "Tesla Supercharger";
+      case ChargingStationFeatureValue::SocketType::TeslaDestination:
+        return "Tesla Destination";
+    }
+
+    return "???";
   }
 }

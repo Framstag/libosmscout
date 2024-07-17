@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <unordered_map>
+
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeFeature.h>
 
@@ -29,18 +31,45 @@ namespace osmscout {
 
   class OSMSCOUT_API ChargingStationFeatureValue : public FeatureValue
   {
+  public:
+    enum class SocketType : uint8_t
+    {
+      Unknown           = 0,
+      Type1             = 1,
+      Typ1Combo         = 2,
+      Type2             = 3,
+      Type2Cable        = 4,
+      Type2Combo        = 5,
+      Chademo           = 6,
+      TeslaSupercharger = 7,
+      TeslaDestination  = 8
+    };
+
+    struct Socket
+    {
+      SocketType  type;
+      uint8_t     capacity;
+      std::string output;
+
+      bool operator<=>(const Socket& other) const = default;
+    };
+
   private:
-    uint8_t capacity;
+    std::vector<Socket>  sockets;
 
   public:
-    void SetCapacity(uint8_t capacity)
-    {
-      this->capacity = capacity;
+    void AddSocket(const Socket& socket) {
+      sockets.push_back(socket);
     }
 
-    uint8_t GetCapacity() const
+    bool HasSockets() const
     {
-      return capacity;
+      return !sockets.empty();
+    }
+
+    const std::vector<Socket>& GetSockets() const
+    {
+      return sockets;
     }
 
   public:
@@ -56,13 +85,21 @@ namespace osmscout {
 
   class OSMSCOUT_API ChargingStationFeature : public Feature
   {
-  private:
-    TagId tagAmenity;
-    TagId tagCapacity;
-
   public:
     /** Name of this feature */
     static const char* const NAME;
+
+  private:
+    struct SocketTags
+    {
+      TagId socketType;
+      TagId output;
+    };
+
+    TagId   tagAmenity;
+    TagId   tagCapacity;
+
+    std::unordered_map<ChargingStationFeatureValue::SocketType,SocketTags> socketTagsMap;
 
   public:
     void Initialize(TagRegistry& tagRegistry) override;
@@ -82,6 +119,8 @@ namespace osmscout {
   };
 
   using ChargingStationFeatureValueReader = FeatureValueReader<ChargingStationFeature, ChargingStationFeatureValue>;
+
+  extern OSMSCOUT_API const char* EnumToString(const ChargingStationFeatureValue::SocketType& value);
 }
 
 #endif
