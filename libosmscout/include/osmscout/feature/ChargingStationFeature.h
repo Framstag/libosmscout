@@ -51,7 +51,7 @@ namespace osmscout {
       uint8_t     capacity;
       std::string output;
 
-      bool operator<=>(const Socket& other) const = default;
+      std::strong_ordering operator<=>(const Socket& other) const = default;
     };
 
   private:
