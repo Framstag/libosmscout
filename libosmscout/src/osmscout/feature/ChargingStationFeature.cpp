@@ -134,10 +134,10 @@ namespace osmscout {
     return new (buffer) ChargingStationFeatureValue();
   }
 
-  void ChargingStationFeature::Parse(TagErrorReporter& /*errorReporter*/,
+  void ChargingStationFeature::Parse(TagErrorReporter& errorReporter,
                             const TagRegistry& /*tagRegistry*/,
                             const FeatureInstance& feature,
-                            const ObjectOSMRef& /*object*/,
+                            const ObjectOSMRef& object,
                             const TagMap& tags,
                             FeatureValueBuffer& buffer) const
   {
@@ -173,6 +173,8 @@ namespace osmscout {
     }
 
     if (capacityValue > 0 && !value->HasSockets()) {
+      errorReporter.ReportTag(object,tags,"Only capacity given for charging_station, but no socket:type!");
+
       ChargingStationFeatureValue::Socket socket;
 
       socket.type=ChargingStationFeatureValue::SocketType::Unknown;

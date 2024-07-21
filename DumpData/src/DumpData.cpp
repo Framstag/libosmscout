@@ -35,10 +35,12 @@
 #include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/ChargingStationFeature.h>
+#include <osmscout/feature/FeeFeature.h>
 #include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/LanesFeature.h>
 #include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/LocationFeature.h>
+#include <osmscout/feature/MaxStayFeature.h>
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/NameAltFeature.h>
 #include <osmscout/feature/RefFeature.h>
@@ -586,8 +588,11 @@ static void DumpChargingStationFeatureValue(const osmscout::ChargingStationFeatu
     std::cout << "capacity: " << (unsigned int) socket.capacity << std::endl;
     DumpIndent(indent+4);
     std::cout << "type: " << osmscout::EnumToString(socket.type) << std::endl;
-    DumpIndent(indent+4);
-    std::cout << "output: " << socket.output << std::endl;
+
+    if (!socket.output.empty()) {
+      DumpIndent(indent+4);
+      std::cout << "output: " << socket.output << std::endl;
+    }
 
     DumpIndent(indent+2);
     std::cout << "}" << std::endl;
@@ -714,6 +719,39 @@ static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
                 chargingStationValue != nullptr) {
 
           DumpChargingStationFeatureValue(*chargingStationValue,indent);
+        }
+        else if (const auto* maxStayValue = dynamic_cast<osmscout::MaxStayFeatureValue*>(value);
+                maxStayValue != nullptr) {
+          DumpIndent(indent);
+          std::cout << "MaxStay {" << std::endl;
+
+          DumpIndent(indent+2);
+          std::cout << "value: " << maxStayValue->GetValue() << std::endl;
+
+          if (maxStayValue->HasCondition()) {
+            DumpIndent(indent+2);
+            std::cout << "condition: " << maxStayValue->GetCondition() << std::endl;
+          }
+
+          DumpIndent(indent);
+          std::cout << "}" << std::endl;
+        }
+        else if (const auto* feeValue = dynamic_cast<osmscout::FeeFeatureValue*>(value);
+                feeValue != nullptr) {
+          DumpIndent(indent);
+          std::cout << "Fee {" << std::endl;
+
+          DumpIndent(indent+2);
+          std::cout << "value: " << EnumToString(feeValue->GetValue()) << std::endl;
+
+          if (feeValue->HasCondition()) {
+            DumpIndent(indent+2);
+            std::cout << "condition: " << feeValue->GetCondition() << std::endl;
+          }
+
+          DumpIndent(indent);
+          std::cout << "}" << std::endl;
+
         }
         else if (meta.GetFeature()->HasLabel()) {
           DumpIndent(indent);
