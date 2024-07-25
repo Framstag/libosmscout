@@ -278,6 +278,7 @@ TYPES
   TYPE highway_street_lamp
      // Too many for mobile offline map?
     = NODE ("highway"=="street_lamp")
+      {Brand, Operator, MaxStay, ChargingStation}
 
   // Since rendering of speed cameras is not allowed everywhere, it is disabled by default
   TYPE speed_camera
@@ -977,7 +978,7 @@ TYPES
 
   TYPE amenity_charging_station
     = NODE ("amenity"=="charging_station")
-      {Operator}
+      {Name, Location, Address, Brand, Operator, ChargingStation, OpeningHours, MaxStay, Fee}
       GROUP amenity
 
   TYPE amenity_clock
@@ -1067,7 +1068,7 @@ TYPES
 
   TYPE amenity_parking_building
     = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt}
+      {Name, NameAlt, Fee, OpeningHours}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
@@ -1083,7 +1084,7 @@ TYPES
 
   TYPE amenity_parking
     = NODE AREA ("amenity"=="parking")
-      {Name, NameAlt}
+      {Name, NameAlt, Fee, OpeningHours}
       ADDRESS POI
       GROUP amenity
 

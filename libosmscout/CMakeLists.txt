@@ -48,14 +48,17 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessRestrictedFeature.h
         include/osmscout/feature/AddressFeature.h
         include/osmscout/feature/AdminLevelFeature.h
+        include/osmscout/feature/BrandFeature.h
         include/osmscout/feature/BridgeFeature.h
         include/osmscout/feature/BuildingFeature.h
+        include/osmscout/feature/ChargingStationFeature.h
         include/osmscout/feature/ClockwiseDirectionFeature.h
         include/osmscout/feature/ColorFeature.h
         include/osmscout/feature/ConstructionYearFeature.h
         include/osmscout/feature/DestinationFeature.h
         include/osmscout/feature/EleFeature.h
         include/osmscout/feature/EmbankmentFeature.h
+        include/osmscout/feature/FeeFeature.h
         include/osmscout/feature/FromToFeature.h
         include/osmscout/feature/GradeFeature.h
         include/osmscout/feature/IsInFeature.h
@@ -63,6 +66,7 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/LayerFeature.h
         include/osmscout/feature/LocationFeature.h
         include/osmscout/feature/MaxSpeedFeature.h
+        include/osmscout/feature/MaxStayFeature.h
         include/osmscout/feature/NameFeature.h
         include/osmscout/feature/NameAltFeature.h
         include/osmscout/feature/NameShortFeature.h
@@ -224,14 +228,17 @@ set(SOURCE_FILES
     src/osmscout/feature/AccessRestrictedFeature.cpp
     src/osmscout/feature/AddressFeature.cpp
     src/osmscout/feature/AdminLevelFeature.cpp
+    src/osmscout/feature/BrandFeature.cpp
     src/osmscout/feature/BridgeFeature.cpp
     src/osmscout/feature/BuildingFeature.cpp
+    src/osmscout/feature/ChargingStationFeature.cpp
     src/osmscout/feature/ClockwiseDirectionFeature.cpp
     src/osmscout/feature/ColorFeature.cpp
     src/osmscout/feature/ConstructionYearFeature.cpp
     src/osmscout/feature/DestinationFeature.cpp
     src/osmscout/feature/EleFeature.cpp
     src/osmscout/feature/EmbankmentFeature.cpp
+    src/osmscout/feature/FeeFeature.cpp
     src/osmscout/feature/FromToFeature.cpp
     src/osmscout/feature/GradeFeature.cpp
     src/osmscout/feature/IsInFeature.cpp
@@ -239,6 +246,7 @@ set(SOURCE_FILES
     src/osmscout/feature/LayerFeature.cpp
     src/osmscout/feature/LocationFeature.cpp
     src/osmscout/feature/MaxSpeedFeature.cpp
+    src/osmscout/feature/MaxStayFeature.cpp
     src/osmscout/feature/NameFeature.cpp
     src/osmscout/feature/NameAltFeature.cpp
     src/osmscout/feature/NameShortFeature.cpp

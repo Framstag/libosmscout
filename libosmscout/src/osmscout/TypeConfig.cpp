@@ -25,21 +25,26 @@
 #include <osmscout/feature/AccessRestrictedFeature.h>
 #include <osmscout/feature/AddressFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/BridgeFeature.h>
 #include <osmscout/feature/BuildingFeature.h>
+#include <osmscout/feature/ChargingStationFeature.h>
 #include <osmscout/feature/ClockwiseDirectionFeature.h>
 #include <osmscout/feature/ColorFeature.h>
 #include <osmscout/feature/ConstructionYearFeature.h>
 #include <osmscout/feature/DestinationFeature.h>
 #include <osmscout/feature/EleFeature.h>
 #include <osmscout/feature/EmbankmentFeature.h>
+#include <osmscout/feature/FeeFeature.h>
 #include <osmscout/feature/FromToFeature.h>
 #include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/LanesFeature.h>
 #include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/LocationFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
+#include <osmscout/feature/MaxStayFeature.h>
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/NameAltFeature.h>
 #include <osmscout/feature/NameShortFeature.h>
@@ -731,6 +736,7 @@
     featureLanes=std::make_shared<LanesFeature>();
     RegisterFeature(featureLanes);
 
+    RegisterFeature(std::make_shared<BrandFeature>());
     RegisterFeature(std::make_shared<OperatorFeature>());
     RegisterFeature(std::make_shared<NetworkFeature>());
     RegisterFeature(std::make_shared<FromToFeature>());
@@ -738,6 +744,10 @@
 
     featureOpeningHours=std::make_shared<OpeningHoursFeature>();
     RegisterFeature(featureOpeningHours);
+
+    RegisterFeature(std::make_shared<ChargingStationFeature>());
+    RegisterFeature(std::make_shared<MaxStayFeature>());
+    RegisterFeature(std::make_shared<FeeFeature>());
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
