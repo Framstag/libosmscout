@@ -1,6 +1,6 @@
-import QtQuick 2.2
+import QtQuick 2.7
 
-import QtQuick.Controls 1.1
+import QtQuick.Controls 2.7
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.1
 import QtQuick.Window 2.0
@@ -305,7 +305,7 @@ Window {
 
                 MapButton {
                     id: about
-                    label: "?"
+                    text: "?"
 
                     onClicked: {
                         openAboutDialog()
@@ -321,10 +321,20 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
+/*
+                MapButton {
+                    id: analysis
+                    checkable: true
+                    text: "🔍"
+
+                    onClicked: {
+                        console.log("Toggle analysis mode "+checked);
+                    }
+                }*/
 
                 MapButton {
                     id: resetRotation
-                    label: "|"
+                    text: "|"
 
                     onClicked: {
                         map.rotateTo(0);
@@ -333,7 +343,7 @@ Window {
 
                 MapButton {
                     id: recenter
-                    label: "*"
+                    text: "⊹"
 
                     onClicked: {
                         map.recenter()
@@ -342,7 +352,7 @@ Window {
 
                 MapButton {
                     id: zoomIn
-                    label: "+"
+                    text: "˖"
 
                     onClicked: {
                         map.zoomIn(2.0)
@@ -351,7 +361,7 @@ Window {
 
                 MapButton {
                     id: zoomOut
-                    label: "-"
+                    text: "˗"
 
                     onClicked: {
                         map.zoomOut(2.0)
