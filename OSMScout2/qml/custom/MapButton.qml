@@ -1,58 +1,37 @@
-import QtQuick 2.2
+import QtQuick 2.7
+import QtQuick.Controls 2.7
+import QtQuick.Layouts 1.1
 import QtGraphicalEffects 1.0
 
 import net.sf.libosmscout.map 1.0
 
-Rectangle {
+Button {
   id: mapButton
-  
-  property color defaultColor: "white"
-  property color hoverColor: Qt.darker(defaultColor, 1.1)
-  property string label
 
-  property alias font: mapButtonLabel.font
+    display: AbstractButton.TextOnly
 
-  signal clicked
-  
-  width: Math.max(Theme.mapButtonWidth, mapButtonLabel.width + Theme.horizSpace*2)
-  height: Theme.mapButtonHeight
-  color: defaultColor
-  border.color: "grey"
-  border.width: 1
-  opacity: 0.8
-  
-  
-  MouseArea {
-    id: mapButtonMouseArea
-    anchors.fill: parent
-    
-    hoverEnabled: true
-    onEntered: {
-      parent.color = hoverColor
-    }
-    
-    onExited:  {
-      parent.color = defaultColor
-    }
-    
-    onClicked: {
-      parent.clicked()
-    }
-  }
-  
-  Text {
-    id: mapButtonLabel
-    anchors.centerIn: parent
-    color: "black"
     font.pixelSize: Theme.mapButtonFontSize
-    text: label
-  }
-  
-  scale: mapButtonMouseArea.pressed ? 1.2 : 1.0
-  
-  Behavior on scale {
-    NumberAnimation { 
-      duration: 55
+    //font: mapButtonLabel.font
+
+    background: Rectangle {
+        opacity: 0.3
+        border.color: black
+        border.width: 1
+        color: parent.checked ? "#ff0000" :
+            (parent.down ? "#555555" :
+                (parent.hovered ? "#aaaaaa" : "#ffffff"))
     }
-  }
+
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    Layout.preferredWidth: Theme.mapButtonHeight
+    Layout.preferredHeight: Theme.mapButtonHeight
+
+    scale: down ? 1.2 : 1.0
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: 55
+        }
+    }
 }
