@@ -276,6 +276,7 @@ public:
       return NameSpace::Unknown;
     }
     static std::unordered_map<std::string,NameSpace> nameSpaceMap{
+      {"http://www.topografix.com/GPX/1/0", NameSpace::Gpx},
       {"http://www.topografix.com/GPX/1/1", NameSpace::Gpx},
       {"http://www.garmin.com/xmlschemas/GpxExtensions/v3", NameSpace::GarminExtensions},
     };
