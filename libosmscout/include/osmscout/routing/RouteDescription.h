@@ -631,7 +631,7 @@ namespace osmscout {
     /**
      * \ingroup Routing
      *
-     * A suggested route lanes. It specifies range of lanes <from, to> that drive
+     * A suggested route lanes. It specifies range of lanes <from, to> that driver
      * should use. Lanes are counted from left (just route direction, not opposite direction),
      * left-most lane has index 0, both indexes are inclusive.
      */
