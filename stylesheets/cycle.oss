@@ -82,54 +82,41 @@ CONST
 
   // Label priorities
   UINT labelPrioWaypoint            = 0;
-  UINT labelPrioContinent           = 1;
-  UINT labelPrioIsland              = 1;
-  UINT labelPrioCountry             = 2;
-  UINT labelPrioState               = 3;
-  UINT labelPrioRegion              = 4;
-  UINT labelPrioCounty              = 5;
-  UINT labelPrioMillionCity         = 6;
-  UINT labelPrioBigCity             = 7;
-  UINT labelPrioCity                = 8;
 
-  UINT labelShieldMotorway          = 9;
-  UINT labelShieldTrunk             = 11;
-  UINT labelShieldPrimary           = 11;
+  // Prio 1-20 are reserved for places upto cities and bigger
 
-  UINT labelPrioTown                = 12;
-  UINT labelPrioVillage             = 13;
-  UINT labelPrioHamlet              = 14;
-  UINT labelPrioSuburb              = 15;
-  UINT labelPrioLocality            = 16;
+  UINT labelShieldMotorway          = 20;
+  UINT labelShieldTrunk             = 21;
+  UINT labelShieldPrimary           = 22;
 
-  UINT labelPrioCycle               = 17;
-  UINT labelPrioAeroway             = 17;
-  UINT labelPrioFerry               = 17;
-  UINT labelPrioPublicTransportWay  = 17;
-  UINT labelPrioHighway             = 18;
-  UINT labelPrioOtherWays           = 19;
+  UINT labelPrioCycle               = 25;
+  UINT labelPrioAeroway             = 25;
+  UINT labelPrioFerry               = 25;
+  UINT labelPrioPublicTransportWay  = 25;
+  UINT labelPrioHighway             = 26;
+  UINT labelPrioOtherWays           = 26;
 
-  UINT labelPrioNatural             = 20;
-  UINT labelPrioLanduse             = 25;
-  UINT labelPrioLeisure             = 26;
+  UINT labelPrioNatural             = 30;
+  UINT labelPrioLanduse             = 32;
+  UINT labelPrioLeisure             = 32;
 
-  UINT labelPrioPeak                = 29;
+  UINT labelPrioPeak                = 35;
 
-  UINT labelPrioHighwayServices     = 34;
-  UINT labelPrioRailwayStation      = 35;
+  UINT labelPrioHighwayServices     = 40;
+  UINT labelPrioRailwayStation      = 41;
 
-  UINT labelPrioSpecialBuilding     = 37;
-  UINT labelPrioMajorBuilding       = 38;
+  UINT labelPrioSpecialBuilding     = 45;
+  UINT labelPrioMajorBuilding       = 46;
 
-  UINT labelPrioRailwayHalt         = 40;
-  UINT labelPrioTramHalt            = 40;
+  UINT labelPrioRailwayHalt         = 50;
+  UINT labelPrioTramHalt            = 50;
 
-  UINT labelPrioHighwayArea         = 43;
+  UINT labelPrioHighwayArea         = 45;
 
-  UINT labelPrioAmenity             = 45;
-  UINT labelPrioShop                = 50;
-  UINT labelPrioHistoric            = 51;
-  UINT labelPrioOffice              = 52;
+  UINT labelPrioAmenity             = 50;
+  UINT labelPrioShop                = 51;
+  UINT labelPrioHistoric            = 52;
+  UINT labelPrioOffice              = 53;
 
   UINT labelPrioHighwayJunction     = 55;
 
@@ -311,11 +298,6 @@ CONST
 
   COLOR busSymbolColor             = #7885b0;
 
-  COLOR railwayColor               = #bb75d9;
-  COLOR railwaySymbolColor         = @railwayColor;
-  COLOR railwayLabelColor          = darken(@railwayColor, 0.5);
-  COLOR railwayStationColor        = @railwayColor;
-
   // Leisure
 
   COLOR natureReserveColor         = #abde9622;
@@ -371,10 +353,15 @@ CONST
 
 MODULE "include/symbols"
 MODULE "include/land_sea"
+
+MODULE "include/place"
+
 MODULE "include/roads"
 MODULE "include/man_made"
 
 MODULE "include/aeroway"
+MODULE "include/railway"
+
 MODULE "include/historic"
 MODULE "include/military"
 MODULE "include/office"
@@ -616,95 +603,6 @@ STYLE
 
  // -------------------------------------------------------
  //
- // railway
- //
-
- IF _railway {
-   [MAG detail-] {
-     [TYPE railway_rail] {
-       [SIZE 5m 0.25mm:3px<] {
-         WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
-         WAY {color: #505050; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 5m;}
-       }
-       [SIZE 5m <0.25mm:3px] WAY {color: #404040; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
-     }
-   }
-
-   [MAG close-] {
-     [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
-
-     [TYPE railway_tram] WAY {color: #808080; displayWidth: 0.25mm; priority: 50;}
-     [TYPE railway_light_rail] WAY {color: #808080; displayWidth: 0.25mm; width: 5m;}
-     [TYPE railway_narrow_gauge, railway_preserved] WAY {color: #808080; displayWidth: 0.20mm; width: 4m;}
-     [TYPE railway_funicular] WAY {color: #808080; displayWidth: 0.20mm; width: 4m;}
-
-     [TYPE railway_subway] {
-       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
-     }
-   }
-
-   [MAG closer-] {
-     [TYPE railway_tram,
-           railway_light_rail,
-           railway_narrow_gauge,
-           railway_preserved,
-           railway_funicular
-         SIZE 5m 0.25mm:3px<] {
-       [FEATURE Tunnel] {
-         WAY {dash: 1,1; joinCap: butt; endCap: butt;}
-       }
-       [FEATURE Bridge] {
-         WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
-         WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
-       }
-     }
-     [TYPE railway_rail SIZE 5m 0.25mm:3px<] {
-       // Better rendering?
-       [FEATURE Tunnel] {
-         WAY#outline { dash: 0.5,0.5; }
-       }
-
-       [FEATURE Bridge] {
-         WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
-         WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
-       }
-     }
-
-   }
-
-   [MAG veryClose-] {
-     [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
-
-     [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
-   }
-
-   // Labels
-
-   [MAG close-] {
-     [TYPE railway_station] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
-   }
-
-   [MAG veryClose-] {
-     [TYPE railway_halt] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioRailwayHalt;}
-     [TYPE railway_tram_stop] NODE.TEXT {label: Name.name; style: emphasize; color: @railwayLabelColor; priority: @labelPrioTramHalt; }
-   }
-
-   [MAG @labelPathsMag-] {
-     [TYPE railway_rail,
-           railway_tram,
-           railway_light_rail,
-           railway_narrow_gauge,
-           railway_preserved,
-           railway_funicular,
-           railway_subway,
-           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
-
-     [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
-   }
- }
-
- // -------------------------------------------------------
- //
  // Landuse
  //
 
@@ -931,7 +829,6 @@ STYLE
        AREA { color: @hospitalBuildingColor; }
        AREA.BORDER { color: @hospitalBuildingBorderColor; width: 0.1mm; }
    }
-   [TYPE railway_station] AREA { color: @railwayStationColor; }
    [TYPE leisure_stadium] AREA { color: #33cb98; }
  }
 
@@ -997,8 +894,6 @@ STYLE
  // Labels
 
  [MAG @labelSpecialBuildingMag-] {
-   [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; color: @railwayLabelColor;}
-
    [TYPE amenity_hospital_building,
          amenity_hospital] {
      NODE.TEXT {label: Name.name; style: emphasize; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
@@ -1075,75 +970,5 @@ STYLE
            amenity_parking_building] AREA.TEXT { label: Name.name; style: emphasize; color: #4bb2da; size: 0.9; priority: @labelPrioMajorBuilding; }
    }
  }
-
- // -------------------------------------------------------
- //
- // Places
- //
-
- [MAG world-continent] {
-   [TYPE place_continent] NODE.TEXT {label: Name.name; style: emphasize; size: 2.7; priority: 1; }
- }
-
- [MAG 3-state] {
-   [TYPE place_country] NODE.TEXT {label: Name.name; style: emphasize; size: 2.1; priority: 2; }
- }
-
- [MAG state-county] {
-   [TYPE place_state] NODE.TEXT {label: Name.name; style: emphasize; size: 1.7; priority: 3; }
- }
-
- [MAG region-city] {
-   [TYPE place_region] NODE.TEXT {label: Name.name; style: emphasize; size: 1.6; priority: 4; }
- }
-
- [MAG county-city] {
-   [TYPE place_county] NODE.TEXT {label: Name.name; style: emphasize; size: 1.5; priority: 5;}
- }
-
- [MAG stateOver-city] {
-   [TYPE place_millioncity] NODE.TEXT {label: Name.name; style: emphasize; size: 1.4; priority: 6;}
- }
-
- [MAG county-city] {
-   [TYPE place_bigcity] NODE.TEXT {label: Name.name; style: emphasize; size: 1.3; priority: 7;}
- }
-
- [MAG county-city] {
-   [TYPE place_city] NODE.TEXT {label: Name.name; style: emphasize; size: 1.3; priority: 8;}
- }
-
- [MAG region-city] {
-   [TYPE place_town] NODE.TEXT {label: Name.name; style: emphasize; size: 1.2; priority: 9;}
- }
-
- [MAG city-veryClose] {
-   [TYPE place_island] {
-     NODE.TEXT {label: Name.name; style: emphasize; size: 0.9;}
-     AREA.TEXT { label: Name.name; style: emphasize; size: 0.9; }
-   }
- }
- [MAG region-] {
-   [TYPE place_island,
-         place_islet] {
-     AREA {color: @landColor;}
-   }
- }
-
- [MAG cityOver-veryClose] {
-   [TYPE place_village] NODE.TEXT {label: Name.name; style: emphasize; size: 1.2; priority: 10;}
- }
-
- [MAG cityOver-veryClose] {
-   [TYPE place_suburb] NODE.TEXT {label: Name.name; style: normal; size: 1.0; color: #555555; priority: 12;}
- }
-
- [MAG suburb-veryClose] {
-   [TYPE place_hamlet] NODE.TEXT {label: Name.name; style: emphasize; size: 1.1; priority: 11;}
- }
-
- [MAG close-] {
-   [TYPE place_locality] NODE.TEXT {label: Name.name; style: normal; size: 0.9; color: #555555; priority: 13;}
-}
 
 END

@@ -1,0 +1,142 @@
+OSS
+
+CONST
+  COLOR railwayColor               = #bb75d9;
+  COLOR railwaySymbolColor         = @railwayColor;
+  COLOR railwayLabelColor          = darken(@railwayColor, 0.5);
+  COLOR railwayStationColor        = @railwayColor;
+
+  SYMBOL railway_station
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+  SYMBOL railway_halt
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+  SYMBOL railway_subway_entrance
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @railwaySymbolColor; }
+    }
+    RECTANGLE 0.5,0.5 1 x 1 {
+      AREA { color: #ffffff; }
+    }
+
+  SYMBOL railway_tram_stop
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @railwaySymbolColor; }
+    }
+
+STYLE
+
+ IF _railway {
+   [MAG suburb-] {
+     [TYPE railway_rail] {
+       [SIZE 3m 0.3mm:3px<] {
+         WAY#outline { color: #b3b3b3; width: 3m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
+         WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 3m;}
+       }
+       [SIZE 3m <0.3mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.3mm;}
+     }
+   }
+
+   [MAG close-] {
+     [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+
+     [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 2.5m;}
+     [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
+     [TYPE railway_narrow_gauge, railway_preserved] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+
+     [TYPE railway_subway] {
+       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
+     }
+   }
+
+   [MAG closer-] {
+     [TYPE railway_tram,
+           railway_light_rail,
+           railway_narrow_gauge,
+           railway_preserved,
+           railway_funicular
+         SIZE 5m 0.25mm:3px<] {
+       [FEATURE Tunnel] {
+         WAY {dash: 1,1; joinCap: butt; endCap: butt;}
+       }
+       [FEATURE Bridge] {
+         WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
+         WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+       }
+     }
+     [TYPE railway_rail SIZE 5m 0.25mm:3px<] {
+       // Better rendering?
+       [FEATURE Tunnel] {
+         WAY#outline { dash: 0.5,0.5; }
+       }
+
+       [FEATURE Bridge] {
+         WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
+         WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+       }
+     }
+
+   }
+
+   [MAG veryClose-] {
+     [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
+     [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
+   }
+
+   // Labels
+
+   [MAG veryClose-] {
+     [TYPE railway_halt] NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor; priority: @labelPrioRailwayHalt;}
+     [TYPE railway_tram_stop] NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor; priority: @labelPrioTramHalt; }
+   }
+
+   [MAG @labelPathsMag-] {
+     [TYPE railway_rail,
+           railway_tram,
+           railway_light_rail,
+           railway_narrow_gauge,
+           railway_preserved,
+           railway_funicular,
+           public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
+
+     // Do not show labels of subways, clutters display
+     //[TYPE railway_subway] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
+
+     [TYPE public_transport_platform] AREA.TEXT { label: Name.name; color: #524a4a; size: 0.8; priority: @labelPrioTramHalt; }
+   }
+ }
+
+ [MAG block-] {
+   [TYPE railway_subway_entrance] {
+     NODE.ICON { symbol: railway_subway_entrance; }
+   }
+ }
+
+IF _building {
+   [MAG close-] {
+     [TYPE railway_station] {
+       NODE.ICON { symbol: railway_station; }
+       NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor; priority: @labelPrioRailwayStation; }
+     }
+   }
+
+   [MAG closer-] {
+     [TYPE railway_station] AREA.ICON { symbol: railway_station; }
+   }
+
+   [MAG @specialBuildingMag-] {
+     [TYPE railway_station] AREA { color: @railwayStationColor; }
+   }
+
+   [MAG @labelSpecialBuildingMag-] {
+     [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor;}
+   }
+}
+
+END

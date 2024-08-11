@@ -1,5 +1,15 @@
 OSS
 
+CONST
+  COLOR busstopColor               = #bb75d9;
+  COLOR busstopSymbolColor         = @busstopColor;
+  COLOR busstopLabelColor          = darken(@busstopColor, 0.5);
+
+  COLOR airwayColor               = #bb75d9;
+  COLOR airwaySymbolColor         = @airwayColor;
+  COLOR airwayLabelColor          = darken(@busstopColor, 0.5);
+
+
 STYLE
  // -------------------------------------------------------
  //
@@ -482,7 +492,7 @@ STYLE
 
    [TYPE highway_service] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
 
-   [TYPE highway_bus_stop] NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor; priority: @labelPrioTramHalt;}
+   [TYPE highway_bus_stop] NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @busstopLabelColor; priority: @labelPrioTramHalt;}
  }
 
  [MAG @labelPathsMag-] {
@@ -511,7 +521,7 @@ STYLE
 
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @railwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
+         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
 
  }
 

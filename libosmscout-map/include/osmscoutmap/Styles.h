@@ -558,6 +558,7 @@ namespace osmscout {
     bool IsVisible() const override
     {
       return label &&
+             GetSize()>0.0 &&
              GetTextColor().IsVisible();
     }
 
@@ -666,7 +667,8 @@ namespace osmscout {
     bool IsVisible() const override
     {
       return label &&
-             GetTextColor().IsVisible();
+              GetSize()>0.0 &&
+              GetTextColor().IsVisible();
     }
 
     double GetAlpha() const override
@@ -848,6 +850,7 @@ namespace osmscout {
     bool IsVisible() const
     {
       return label &&
+             GetSize()>0.0 &&
              textColor.IsVisible();
     }
 

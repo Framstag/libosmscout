@@ -1,0 +1,215 @@
+OSS
+
+// See: https://wiki.openstreetmap.org/wiki/Key:place
+// We assume that a suburb is equal of size to a town, a city is thus bigger, a village is smaller than "1.0"
+
+/*
+    static MagnificationLevel magWorld;     //  0
+    static MagnificationLevel magContinent; //  4
+    static MagnificationLevel magState;     //  5
+    static MagnificationLevel magStateOver; //  6
+    static MagnificationLevel magCounty;    //  7
+    static MagnificationLevel magRegion;    //  8
+    static MagnificationLevel magProximity; //  9
+    static MagnificationLevel magCityOver;  // 10
+    static MagnificationLevel magCity;      // 11
+    static MagnificationLevel magSuburb;    // 12
+    static MagnificationLevel magDetail;    // 13
+    static MagnificationLevel magClose;     // 14
+    static MagnificationLevel magCloser;    // 15
+    static MagnificationLevel magVeryClose; // 16
+    static MagnificationLevel magBlock;     // 18
+    static MagnificationLevel magStreet;    // 19
+    static MagnificationLevel magHouse;     // 20
+*/
+
+CONST
+  UINT labelPrioContinent           = 1;
+  UINT labelPrioIsland              = 2;
+  UINT labelPrioIslet               = 5;
+  UINT labelPrioLocality            = 14;
+
+  UINT labelPrioCountry             = 2;
+  UINT labelPrioState               = 3;
+  UINT labelPrioRegion              = 4;
+  UINT labelPrioCounty              = 5;
+
+  UINT labelPrioMillionCity         = 6;
+  UINT labelPrioHalfmillionCity     = 7;
+  UINT labelPrioBigCity             = 8;
+  UINT labelPrioCity                = 9;
+  UINT labelPrioSuburb              = 10;
+
+  UINT labelPrioTown                = 10;
+  UINT labelPrioVillage             = 11;
+  UINT labelPrioHamlet              = 12;
+
+  IF daylight {
+    COLOR placeLabelColor           = #000000;
+    COLOR placeEmphasizeColor       = #cccccc;
+  }
+  ELSE {
+    COLOR placeLabelColor           = #a0a0a0;
+    COLOR placeEmphasizeColor       = #909090;
+  }
+
+  SYMBOL place_city
+    CIRCLE 0,0 0.8 {
+      AREA.BORDER {color: #888888; width: 0.5mm; }
+    }
+
+STYLE
+  // Label priority
+
+  // Other places
+  [TYPE place_continent]       NODE.TEXT {label: IName; priority: @labelPrioContinent; size: 0; }
+  // Archipelago
+  [TYPE place_island]          NODE.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
+  [TYPE place_island]          AREA.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
+  [TYPE place_islet]           NODE.TEXT {label: IName; priority: @labelPrioIslet; size: 0; }
+  [TYPE place_islet]           AREA.TEXT {label: IName; priority: @labelPrioIslet; size: 0; }
+  // Square
+  [TYPE place_locality]        NODE.TEXT {label: IName; priority: @labelPrioLocality; size: 0; }
+  // Polder
+  // Sea
+  // Ocean
+
+  // Administratively declared places
+  [TYPE place_country]         NODE.TEXT {label: IName; priority: @labelPrioCounty; size: 0; }
+  [TYPE place_state]           NODE.TEXT {label: IName; priority: @labelPrioState; size: 0;  }
+  [TYPE place_region]          NODE.TEXT {label: IName; priority: @labelPrioRegion; size: 0; }
+  // Province
+  // District
+  [TYPE place_county]          NODE.TEXT {label: IName; priority: @labelPrioCounty; size: 0; }
+  // Subdistrict
+  // Miniciplaity
+
+  // Populated settlements, urban
+  [TYPE place_millioncity]     NODE.TEXT {label: IName; priority: @labelPrioMillionCity; size: 0;  }
+  [TYPE place_halfmillioncity] NODE.TEXT {label: IName; priority: @labelPrioHalfmillionCity; size: 0;  }
+  [TYPE place_bigcity]         NODE.TEXT {label: IName; priority: @labelPrioBigCity; size: 0; }
+  [TYPE place_city]            NODE.TEXT {label: IName; priority: @labelPrioCity; size: 0;  }
+  // Borough
+  [TYPE place_suburb]          NODE.TEXT {label: IName; priority: @labelPrioSuburb; size: 0; }
+  // Quarter
+  // Neighbourhood
+  // City_Block
+  // Plot
+
+  // Populated settlements, urban and rural
+  [TYPE place_town]            NODE.TEXT {label: IName; priority: @labelPrioTown; size: 0; }
+  [TYPE place_village]         NODE.TEXT {label: IName; priority: @labelPrioVillage; size: 0; }
+  [TYPE place_hamlet]          NODE.TEXT {label: IName; priority: @labelPrioHamlet; size: 0; }
+  // Isolated dwelling
+  // Farm
+  // Allotments
+
+
+  [MAG world-continent] {
+    [TYPE place_continent] NODE.TEXT {size: 1.6; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: alpha(@placeLabelColor, 0.5); }
+  }
+
+  [MAG 2-] {
+     [TYPE place_continent] NODE.TEXT {size: 4.0; color: alpha(@placeLabelColor, 0.37); }
+   }
+
+  [MAG continent-] {
+    [TYPE place_continent] NODE.TEXT {size: 6.0; color: alpha(@placeLabelColor, 0.25); }
+  }
+
+  [MAG continent-stateOver] {
+    [TYPE place_country] NODE.TEXT {size: 2.2; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; }
+  }
+
+  [MAG state-] {
+    [TYPE place_country] NODE.TEXT {size: 3.0; color: alpha(@placeLabelColor, 0.5); }
+  }
+
+  [MAG stateOver-] {
+    [TYPE place_country] NODE.TEXT {size: 4.0; color: alpha(@placeLabelColor, 0.37); }
+  }
+
+  [MAG state-county] {
+    [TYPE place_state] NODE.TEXT {size: 1.7; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; scaleMag: state;}
+  }
+
+  // TODO: overlay
+  [MAG region-city] {
+    [TYPE place_region] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+  }
+
+  // TODO: overlay
+  [MAG county-city] {
+    [TYPE place_county] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+  }
+
+  // City names are rendered up to city level and then disappear again
+
+  [MAG stateOver-city] {
+    [TYPE place_millioncity, place_halfmillioncity, place_bigcity] {
+       NODE.TEXT {style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; position: 2; }
+       NODE.ICON { symbol: place_city; position: 1; }
+    }
+
+    [TYPE place_millioncity] {
+      NODE.TEXT {size: 1.4;}
+      NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioMillionCity;}
+    }
+
+    [TYPE place_halfmillioncity] {
+      NODE.TEXT {size: 1.3;}
+      NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioHalfmillionCity;}
+    }
+
+    [TYPE place_bigcity] {
+      NODE.TEXT {size: 1.2;}
+      NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioBigCity;}
+    }
+  }
+
+  [MAG proximity-city] {
+    [TYPE place_millioncity] NODE.TEXT {scaleMag: county;}
+    [TYPE place_halfmillioncity] NODE.TEXT {scaleMag: county;}
+    [TYPE place_bigcity] NODE.TEXT {scaleMag: county;}
+
+    [TYPE place_city] {
+      NODE.TEXT {size: 1.1; scaleMag: region; color: @placeLabelColor; position: 2;}
+      NODE.ICON { symbol: place_city; position: 1;  priority: @labelPrioCity;}
+    }
+
+    [TYPE place_town] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; size: 1.3; color: @placeLabelColor;}
+  }
+
+  [MAG region-veryClose] {
+    [TYPE place_island,
+         place_islet] {
+     NODE.TEXT {size: 1.3; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+     AREA.TEXT {size: 1.3; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; autoSize: true; }
+    }
+  }
+
+  [MAG region-] {
+    [TYPE place_island,
+         place_islet] {
+     AREA {color: @landColor; }
+    }
+  }
+
+  [MAG suburb-veryClose] {
+    [TYPE place_suburb] NODE.TEXT {size: 1.0; scaleMag: city; color: @placeLabelColor;}
+  }
+
+  [MAG city-veryClose] {
+    [TYPE place_town] NODE.TEXT {size: 1.0; scaleMag: region;}
+    [TYPE place_village] NODE.TEXT {size: 0.9; color: @placeLabelColor;}
+  }
+
+  [MAG suburb-suburb] {
+    [TYPE place_village] NODE.TEXT {size: 0.9; scaleMag: suburb; color: @placeLabelColor; }
+    [TYPE place_hamlet] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
+  }
+
+  [MAG closer-] {
+    [TYPE place_locality] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
+  }
+END
