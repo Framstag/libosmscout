@@ -106,19 +106,21 @@ void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states
     touchPoint.setPressure(1);
     touchPoint.setPos(event->pos());
     touchPoint.setState(states);
-#else
-    QEventPoint touchPoint(0, QEventPoint::Pressed, event->pos(), QPointF());
-#endif
-
     QList<QTouchEvent::TouchPoint> points;
     points << touchPoint;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    QTouchEvent touchEvnt(QEvent::TouchBegin,0, Qt::NoModifier, 0, points);
-#elif QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QTouchEvent touchEvnt(QEvent::TouchBegin, 0, Qt::NoModifier, Qt::TouchPointStates(), points);
+    QTouchEvent touchEvnt(QEvent::TouchBegin, 0, Qt::NoModifier, 0, points);
 #else
-    QTouchEvent touchEvnt(QEvent::TouchBegin, 0, Qt::NoModifier, points);
+    QTouchEvent touchEvnt(QEvent::TouchBegin, 0, Qt::NoModifier, Qt::TouchPointStates(), points);
 #endif
+#else
+    // TODO: rework
+    // 6.7.2: CTOR QEventPoint fails to initialize the position, so pass directly event points
+    // 6.7.2: Without passing a valid pointer to device, it will crash later on released event by
+    //        calling QQuickWindowPrivate::clearGrabbers >> QPointerEvent::setExclusiveGrabber
+    QTouchEvent touchEvnt(QEvent::TouchBegin, event->pointingDevice(), Qt::NoModifier, event->points());
+#endif
+
     //qDebug() << "translate mouse event to touch event: "<< touchEvnt;
     touchEvent(&touchEvnt);
 }
