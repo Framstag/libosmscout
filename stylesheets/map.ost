@@ -1952,6 +1952,11 @@ TYPES
       {Name, NameAlt, IsIn}
       ADMIN_REGION
 
+  TYPE place_halfmillioncity
+    = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">500000)
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
   TYPE place_bigcity
     = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">100000)
       {Name, NameAlt, IsIn}

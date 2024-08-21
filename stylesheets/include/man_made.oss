@@ -58,8 +58,6 @@ STYLE
      AREA { color: @damColor; }
      WAY { color: @damColor; width: 4.0m; }
    }
-
-   [TYPE railway_station] NODE.ICON { symbol: railway_station; }
  }
 
  [MAG closer-] {
@@ -83,9 +81,6 @@ STYLE
      AREA { color: @parkingColor;}
      AREA.BORDER { color: @parkingBorderColor; width: 0.1mm; }
    }
-
-   [TYPE railway_station] AREA.ICON { symbol: railway_station; }
-
 
    [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
@@ -142,12 +137,6 @@ STYLE
    [TYPE barrier_fence] {
       WAY {color: #aaaaaa; displayWidth: 0.1mm;}
       AREA.BORDER {color: #aaaaaa; width: 0.1mm;}
-   }
- }
-
- [MAG block-] {
-   [TYPE railway_subway_entrance] {
-     NODE.ICON { symbol: railway_subway_entrance; }
    }
  }
 
