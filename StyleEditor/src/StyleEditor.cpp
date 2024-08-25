@@ -23,6 +23,7 @@
 #include <QGuiApplication>
 #include <QQuickView>
 #include <QApplication>
+#include <QStandardPaths>
 
 // OSMScout library
 #include <osmscoutclient/Settings.h>
@@ -32,7 +33,7 @@
 #include <MainWindow.h>
 
 // Custom QML objects
-#include <FileIO.h>
+#include <DocumentHandler.h>
 
 using namespace osmscout;
 
@@ -53,7 +54,7 @@ int main(int argc, char* argv[])
   OSMScoutQt::RegisterQmlTypes();
 
   qRegisterMetaType<QSet<int>>("QSet<int>");
-  qmlRegisterType<FileIO, 1>("FileIO", 1, 0, "FileIO");
+  qmlRegisterType<DocumentHandler, 1>("DocumentHandler", 1, 0, "DocumentHandler");
 
   OSMScoutQtBuilder builder=OSMScoutQt::NewInstance();
 
@@ -72,26 +73,27 @@ int main(int argc, char* argv[])
 
   if (cmdLineArgs.size() > 2){
     QFileInfo stylesheetFile(cmdLineArgs.at(2));
-    builder.WithStyleSheetDirectory(stylesheetFile.dir().path())
+    builder.WithStyleSheetDirectory(stylesheetFile.dir().absolutePath())
      .WithStyleSheetFile(stylesheetFile.fileName());
   }
 
-  QString iconDirectory;
   if (cmdLineArgs.size() > 3){
-    iconDirectory = cmdLineArgs.at(3);
+    QFileInfo iconDirectory(cmdLineArgs.at(3));
+    builder.WithIconDirectory(iconDirectory.absoluteFilePath());
   }else{
     if (cmdLineArgs.size() > 1){
-      iconDirectory = cmdLineArgs.at(1) + "icons";
+      QFileInfo iconDirectory(cmdLineArgs.at(1) + QDir::separator() + "icons");
+      builder.WithIconDirectory(iconDirectory.absoluteFilePath());
     }else{
-      iconDirectory = "icons";
+      QFileInfo iconDirectory(QDir::currentPath() + QDir::separator() + "icons");
+      builder.WithIconDirectory(iconDirectory.absoluteFilePath());
     }
   }
 
   builder
-    .WithIconDirectory(iconDirectory)
     .WithMapLookupDirectories(mapLookupDirectories)
     .AddOnlineTileProviders(":/resources/online-tile-providers.json")
-    .WithUserAgent("OSMScoutStyleEditor", "v?");
+    .WithUserAgent("OSMScoutStyleEditor", "v2");
 
   if (!builder.Init()){
     osmscout::log.Error() << "Cannot initialize OSMScout library";
@@ -103,9 +105,10 @@ int main(int argc, char* argv[])
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
 
     MainWindow window(dbThread);
+
     result = app.exec();
 
-    QString tmpStylesheet = QString::fromStdString(dbThread->GetStylesheetFilename()+TMP_SUFFIX);
+    QString tmpStylesheet = QString::fromStdString(dbThread->GetStylesheetFilename()).append(DocumentHandler::tmpSuffix());
     if(QFile::exists(tmpStylesheet)){
       QFile::remove(tmpStylesheet);
     }
@@ -118,7 +121,7 @@ int main(int argc, char* argv[])
 
 #if defined(__WIN32__) || defined(WIN32)
 int CALLBACK WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/){
-	main(0, nullptr);
+        main(0, nullptr);
 
   return 0;
 }

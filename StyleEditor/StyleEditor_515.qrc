@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+        <file>resources/online-tile-providers.json</file>
+        <file>images/copy.svg</file>
+        <file>images/cut.svg</file>
+        <file>images/next.svg</file>
+        <file>images/paste.svg</file>
+        <file>images/previous.svg</file>
+        <file>images/save.svg</file>
+        <file>images/load.svg</file>
+        <file>images/render.svg</file>
+        <file alias="qml/main.qml">qml_515/main.qml</file>
+        <file alias="qml/Units.qml">qml_515/Units.qml</file>
+        <file alias="qml/AboutDialog.qml">qml_515/AboutDialog.qml</file>
+        <file alias="qml/MapControl.qml">qml_515/MapControl.qml</file>
+        <file alias="qml/TextEditor.qml">qml_515/TextEditor.qml</file>
+        <file alias="qml/SearchGeocodeDialog.qml">qml_515/SearchGeocodeDialog.qml</file>
+        <file alias="qml/SearchLocationDialog.qml">qml_515/SearchLocationDialog.qml</file>
+        <file alias="qml/custom/LocationEdit.qml">qml_515/custom/LocationEdit.qml</file>
+        <file alias="qml/custom/ScrollIndicator.qml">qml_515/custom/ScrollIndicator.qml</file>
+        <file alias="qml/custom/LineEdit.qml">qml_515/custom/LineEdit.qml</file>
+        <file alias="qml/custom/DialogAction.qml">qml_515/custom/DialogAction.qml</file>
+        <file alias="qml/custom/DialogBase.qml">qml_515/custom/DialogBase.qml</file>
+        <file alias="qml/custom/MapButton.qml">qml_515/custom/MapButton.qml</file>
+    </qresource>
+</RCC>

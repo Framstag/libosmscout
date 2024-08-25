@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.12
 
 import net.sf.libosmscout.map 1.0
 
@@ -140,9 +140,6 @@ LineEdit {
         visible: false
 
         function showPopup() {
-            var root = findRoot()
-
-            parent = root
             anchors.fill = parent
 
             var locationEditXY=mapFromItem(locationEdit,0,locationEdit.height)
@@ -156,16 +153,6 @@ LineEdit {
             }
 
             popup.visible = true
-        }
-
-        function findRoot() {
-            var p = locationEdit
-
-            while (p.objectName !== "main" && p.parent) {
-                p = p.parent
-            }
-
-            return p
         }
 
         MouseArea {
@@ -189,19 +176,20 @@ LineEdit {
                 id: suggestionView
 
                 anchors.fill: parent
-                anchors.margins: 1
+                anchors.margins: units.dp(1)
                 clip: true
 
                 model: suggestionModel
 
                 delegate: Component {
                     Item {
-                        height: text.implicitHeight+4
+                        height: text.implicitHeight + units.gu(0.5)
                         width: suggestionView.width
 
                         Text {
                             id: text
                             anchors.fill: parent
+                            font.pixelSize: units.fs("large")
                             text: label
                         }
 

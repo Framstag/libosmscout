@@ -39,7 +39,7 @@ public:
 
     ~Highlighter() override = default;
 
-    void setStyle(qreal m_baseFontPointSize);
+    void setStyle();
 
 public slots:
     void onProblematicLines(QSet<int> errorLines, QSet<int> warningLines);
@@ -57,8 +57,6 @@ private:
     void updateRules();
 
     QVector<HighlightingRule> highlightingRules;
-
-    qreal m_baseFontPointSize{0};
 
     QRegExp commentStartExpression;
     QRegExp commentEndExpression;

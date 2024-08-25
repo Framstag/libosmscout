@@ -107,7 +107,7 @@ void Highlighter::updateRules()
     rule.format = commentsFormat;
     highlightingRules.append(rule);
 
-    errorFormat.setBackground(QBrush(QColor(255, 0, 0, 80), Qt::SolidPattern));
+    errorFormat.setBackground(QBrush(QColor(255, 0, 0, 30), Qt::SolidPattern));
     warningFormat.setBackground(QBrush(QColor(255, 255, 0, 50), Qt::SolidPattern));
 
     multiLineCommentFormat.setFontItalic(true);
@@ -116,10 +116,6 @@ void Highlighter::updateRules()
 
 void Highlighter::highlightBlock(const QString &text)
 {
-    if (m_baseFontPointSize == 0.0) {
-            return;
-    }
-
     int line = currentBlock().firstLineNumber()+1;
     if (currentBlock().lineCount() == 1){
       if (errorLines.contains(line)) {
@@ -164,9 +160,8 @@ void Highlighter::highlightBlock(const QString &text)
     }
 }
 
-void Highlighter::setStyle(qreal baseFontPointSize)
+void Highlighter::setStyle()
 {
-    m_baseFontPointSize = baseFontPointSize;
     this->updateRules();
     this->rehighlight();
 }
@@ -189,9 +184,4 @@ void Highlighter::onProblematicLines(QSet<int> errorLines, QSet<int> warningLine
         rehighlightBlock(block);
       }
     }
-
-    // FIXME: this is hack that should not be needed by documentation
-    // but rehighlightBlock don't update view for some reason
-    // setDocument do it immediately
-    setDocument(document());
 }

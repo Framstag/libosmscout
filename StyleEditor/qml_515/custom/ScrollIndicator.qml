@@ -1,13 +1,13 @@
-import QtQuick 2.2
+import QtQuick 2.12
 
 Rectangle {
     id: container
 
     property Flickable flickableArea
 
-    x: flickableArea.x+flickableArea.width-6
+    x: flickableArea.x+flickableArea.width - units.gu(0.5)
     y: flickableArea.y
-    width: 4
+    width: units.gu(0.5)
     height: flickableArea.height
 
     color: "#00000000"

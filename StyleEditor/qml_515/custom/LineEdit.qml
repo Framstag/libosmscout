@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.12
 
 Item {
     id: lineEdit
@@ -16,7 +16,7 @@ Item {
 
     signal accepted
 
-    height: input.implicitHeight+4
+    height: input.implicitHeight + units.gu(0.5)
 
     Rectangle {
         id: background
@@ -24,15 +24,15 @@ Item {
 
         color: backgroundColor
         border.color: focusColor
-        border.width: 1
+        border.width: units.dp(1)
     }
 
     TextInput {
         id: input
-        height: parent.height-4
-        width: parent.width-4
+        width: parent.width - units.gu(0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        font.pixelSize: units.fs("large")
         clip: true
 
         onFocusChanged: {
