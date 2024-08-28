@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.2
 import DocumentHandler 1.0
 
+import "custom"
+
 Item {
     id: textEditor
     property color baseColor: "#f2f2f2"
@@ -323,10 +325,10 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 icon.source: "qrc:/images/load.svg"
                 onClicked: {
-                    var savedTextPosition = textArea.cursorPosition;
-                    document.load()
-                    map.reloadStyle()
-                    textArea.cursorPosition = savedTextPosition
+                    if (document.modified)
+                        reloadDialog.open();
+                    else
+                        reloadStyle();
                 }
             }
             ToolButton {
@@ -524,4 +526,28 @@ Item {
             }
         }
     }
+
+    function reloadStyle() {
+        var savedTextPosition = textArea.cursorPosition;
+        document.load()
+        map.reloadStyle()
+        textArea.cursorPosition = savedTextPosition
+    }
+
+    DialogAction {
+        id: reloadDialog
+        actionName: qsTr("Reload")
+        title: qsTr("Style file is not saved !")
+        text: qsTr("Reload file anyway ?")
+
+        Component.onCompleted: {
+            reloadDialog.reply.connect(function(accepted){
+                reloadDialog.visible = false;
+                if (accepted) {
+                    reloadStyle();
+                }
+            })
+        }
+    }
+
 }
