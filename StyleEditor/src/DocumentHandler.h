@@ -48,6 +48,7 @@ class DocumentHandler : public QObject
   Q_PROPERTY(int selectionEnd READ selectionEnd WRITE setSelectionEnd NOTIFY selectionEndChanged)
 
   Q_PROPERTY(QString indentString READ indentString WRITE setIndentString NOTIFY indentStringChanged)
+  Q_PROPERTY(bool styleAnalyserEnabled READ styleAnalyserEnabled WRITE setStyleAnalyserEnabled NOTIFY styleAnalyserEnabledChanged)
 
   Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
   Q_PROPERTY(QString fileName READ fileName NOTIFY sourceChanged)
@@ -73,6 +74,9 @@ public:
 
   QString indentString() const;
   void setIndentString(const QString& str);
+
+  bool styleAnalyserEnabled() const;
+  void setStyleAnalyserEnabled(bool yesno);
 
   QString source() { return m_filePath; }
   void setSource(const QString& source) {
@@ -107,6 +111,7 @@ Q_SIGNALS:
   void selectionStartChanged();
   void selectionEndChanged();
   void indentStringChanged();
+  void styleAnalyserEnabledChanged();
 
   void textChanged();
   void sourceChanged(const QString& source);
@@ -123,6 +128,7 @@ private:
   QTextDocument *textDocument() const;
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
 
+  void startStyleAnalyser();
   void stopStyleAnalyser();
 
   QQuickTextDocument *m_document;
@@ -131,8 +137,10 @@ private:
   int m_selectionStart;
   int m_selectionEnd;
 
+  bool m_styleAnalyserEnabled{true};
   QString m_indentString;
   QString m_filePath;
+  Highlighter *m_highlighter{nullptr};
   StyleAnalyser *m_styleAnalyser{nullptr}; // owned, different thread
 };
 

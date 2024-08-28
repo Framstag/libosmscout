@@ -41,8 +41,14 @@ public:
 
     void setStyle();
 
+signals:
+    void documentUpdated(QTextDocument *doc);
+
 public slots:
     void onProblematicLines(QSet<int> errorLines, QSet<int> warningLines);
+
+private slots:
+    void onContentsChange(int position, int removed, int added);
 
 protected:
     void highlightBlock(const QString &text) override;

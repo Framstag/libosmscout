@@ -294,8 +294,6 @@ Item {
         Row {
             id: fileRow
             anchors.verticalCenter: parent.verticalCenter
-            leftPadding: units.gu(0)
-            rightPadding: units.gu(0)
             height: parent.height
 
             Rectangle {
@@ -454,10 +452,25 @@ Item {
         Text {
             id: statusText
             anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            width: parent.width - analyser.width - units.gu(1)
+            clip: true
             leftPadding: units.gu(1)
-            rightPadding: units.gu(1)
             color: "#ff0000"
             font.pixelSize: units.fs("medium")
+        }
+
+        CheckBox {
+            id: analyser
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            checked: document.styleAnalyserEnabled
+            onClicked: {
+                if (checked)
+                    document.styleAnalyserEnabled = true;
+                else
+                    document.styleAnalyserEnabled = false;
+            }
         }
 
         Rectangle {

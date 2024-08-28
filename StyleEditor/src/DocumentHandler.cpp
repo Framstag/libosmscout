@@ -118,6 +118,24 @@ void DocumentHandler::setIndentString(const QString &str)
   emit indentStringChanged();
 }
 
+bool DocumentHandler::styleAnalyserEnabled() const
+{
+  return m_styleAnalyserEnabled;
+}
+
+void DocumentHandler::setStyleAnalyserEnabled(bool yesno)
+{
+  if (m_styleAnalyserEnabled == yesno)
+    return;
+  m_styleAnalyserEnabled = yesno;
+  emit styleAnalyserEnabledChanged();
+  if (yesno)
+    startStyleAnalyser();
+  else
+    stopStyleAnalyser();
+  m_highlighter->setStyle();
+}
+
 QString DocumentHandler::fileName() const
 {
   const QString fileName = QFileInfo(m_filePath).fileName();
@@ -140,14 +158,13 @@ void DocumentHandler::load()
       if (QTextDocument *doc = textDocument()) {
         doc->clear();
 
-        if (!m_styleAnalyser) {
-          Highlighter *highlighter = new Highlighter(doc); // owned by doc (parent)
-          highlighter->setStyle();
-          QThread *analyserThread = osmscout::OSMScoutQt::GetInstance().makeThread("StyleAnalyser");
-          m_styleAnalyser = new StyleAnalyser(analyserThread, doc, *highlighter);
-          m_styleAnalyser->moveToThread(analyserThread);
-          analyserThread->start();
+        if (!m_highlighter) {
+          m_highlighter = new Highlighter(doc); // owned by doc (parent)
+          if (!m_styleAnalyser)
+            startStyleAnalyser();
         }
+
+        m_highlighter->setStyle();
 
         QTextCodec *codec = QTextCodec::codecForUtfText(data);
         emit loaded(codec->toUnicode(data), Qt::PlainText);
@@ -265,10 +282,21 @@ QTextDocument *DocumentHandler::textDocument() const
   return m_document->textDocument();
 }
 
+void DocumentHandler::startStyleAnalyser()
+{
+  if (m_styleAnalyser || !m_styleAnalyserEnabled)
+    return;
+
+  QThread *analyserThread = osmscout::OSMScoutQt::GetInstance().makeThread("StyleAnalyser");
+  m_styleAnalyser = new StyleAnalyser(analyserThread, m_highlighter);
+  m_styleAnalyser->moveToThread(analyserThread);
+  analyserThread->start();
+}
+
 void DocumentHandler::stopStyleAnalyser()
 {
   if (m_styleAnalyser) {
-    m_styleAnalyser->deleteLater();
+    delete m_styleAnalyser;
     m_styleAnalyser = nullptr;
   }
 }

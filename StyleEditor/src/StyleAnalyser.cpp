@@ -42,25 +42,20 @@ osmscout::TypeConfigRef getTypeConfig()
   return typeConfig;
 }
 
-
-StyleAnalyser::StyleAnalyser(QThread *thread,
-                             QTextDocument *doc,
-                             Highlighter &highlighter):
-    thread(thread), typeConfig(getTypeConfig()), doc(doc)
+StyleAnalyser::StyleAnalyser(QThread *thread, Highlighter *highlighter)
+    : thread(thread)
+    , typeConfig(getTypeConfig())
 {
   if (typeConfig) {
-    connect(doc, SIGNAL(contentsChanged()),
-            this, SLOT(onContentsChanged()));
-
-    connect(this, SIGNAL(updateRequest(QString)),
-            this, SLOT(update(QString)),
+    connect(highlighter, SIGNAL(documentUpdated(QTextDocument*)),
+            this, SLOT(update(QTextDocument*)),
             Qt::QueuedConnection);
 
     connect(this, SIGNAL(problematicLines(QSet<int>, QSet<int>)),
-            &highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
+            highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
             Qt::QueuedConnection);
 
-    onContentsChanged();
+    update(highlighter->document());
   }
 }
 
@@ -69,20 +64,12 @@ StyleAnalyser::~StyleAnalyser()
   thread->quit();
 }
 
-void StyleAnalyser::onContentsChanged()
+void StyleAnalyser::update(QTextDocument *doc)
 {
-  QString content = doc->toPlainText();
-  if (content == lastContent) {
+  if (doc == nullptr)
     return;
-  }
-  lastContent = content;
-  emit updateRequest(content);
-}
-
-void StyleAnalyser::update(QString content)
-{
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent("main.oss", content.toStdString());
+  styleConfig->LoadContent("main.oss", doc->toPlainText().toStdString());
 
   QSet<int> errorLines;
   QSet<int> warningLines;

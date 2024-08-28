@@ -34,27 +34,17 @@ class StyleAnalyser : public QObject
 
 signals:
   void problematicLines(QSet<int> errorLines, QSet<int> warningLines);
-  void updateRequest(QString content);
-
-public slots:
-  void onContentsChanged();
 
 private slots:
-  void update(QString content);
+  void update(QTextDocument *doc);
 
 public:
-  StyleAnalyser(QThread *thread,
-                QTextDocument *doc,
-                Highlighter &highlighter);
+  StyleAnalyser(QThread *thread, Highlighter *highlighter);
   ~StyleAnalyser() override;
 
 private:
   QThread *thread;
   osmscout::TypeConfigRef typeConfig;
-  QTextDocument *doc; // not owned
-  QString lastContent;
 };
-
-
 
 #endif //LIBOSMSCOUT_STYLEANALYSER_H
