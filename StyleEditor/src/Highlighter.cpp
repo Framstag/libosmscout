@@ -101,6 +101,13 @@ void Highlighter::updateRules()
     rule.format = kwONEWAYFormat;
     highlightingRules.append(rule);
 
+    kwMODULEFormat.setFontWeight(QFont::Bold);
+    kwMODULEFormat.setForeground(QColor("#820761"));
+    rule.pattern = QRegExp("MODULE");
+    rule.pattern.setMinimal(true);
+    rule.format = kwMODULEFormat;
+    highlightingRules.append(rule);
+
     commentsFormat.setFontItalic(true);
     commentsFormat.setForeground(QColor("#309030"));
     rule.pattern = QRegExp("//.*");

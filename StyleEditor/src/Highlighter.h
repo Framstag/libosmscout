@@ -71,6 +71,7 @@ private:
     QTextCharFormat kwTEXTICONFormat;
     QTextCharFormat kwTUNNELBRIDGEFormat;
     QTextCharFormat kwONEWAYFormat;
+    QTextCharFormat kwMODULEFormat;
     QTextCharFormat commentsFormat;
     QTextCharFormat multiLineCommentFormat;
 
