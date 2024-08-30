@@ -35,14 +35,14 @@ void Highlighter::updateRules()
 
     kwSectionFormat.setFontWeight(QFont::Bold);
     kwSectionFormat.setForeground(QColor("#3000ff"));
-    rule.pattern = QRegExp("OSS|ORDER\\sWAYS|CONST|END");
+    rule.pattern = QRegExp("OSS|FLAG|ORDER\\sWAYS|CONST|END");
     rule.pattern.setMinimal(true);
     rule.format = kwSectionFormat;
     highlightingRules.append(rule);
 
     kwFormat.setFontWeight(QFont::Bold);
     kwFormat.setForeground(QColor("#7070ff"));
-    rule.pattern = QRegExp("GROUP|COLOR|SYMBOL|UINT");
+    rule.pattern = QRegExp("GROUP|COLOR|SYMBOL|UINT|WIDTH");
     rule.pattern.setMinimal(true);
     rule.format = kwFormat;
     highlightingRules.append(rule);
