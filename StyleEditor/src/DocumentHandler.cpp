@@ -250,6 +250,13 @@ int DocumentHandler::backtabSelectedText()
     if (fragment.mid(begin, m_indentString.length()) == m_indentString) {
       fragment.remove(begin, m_indentString.length());
       end -= m_indentString.length();
+    } else {
+      for (int i = 0; i < m_indentString.length(); ++i) {
+        if (fragment.length() == 0 || fragment.mid(begin, 1) != m_indentString.mid(i, 1))
+          break;
+        fragment.remove(begin, 1);
+        end -= 1;
+      }
     }
     begin = fragment.indexOf(nl, begin);
     begin = (begin < 0 ? end : begin + 1);
