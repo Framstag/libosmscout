@@ -46,6 +46,10 @@ StyleAnalyser::StyleAnalyser(QThread *thread, Highlighter *highlighter)
     : thread(thread)
     , typeConfig(getTypeConfig())
 {
+  // setup the root path for modules
+  styleSheetFilePath = QString::fromUtf8(osmscout::OSMScoutQt::GetInstance().GetSettings()->GetStyleSheetDirectory().c_str())
+                       + QDir::separator() + "main.oss";
+
   if (typeConfig) {
     connect(highlighter, SIGNAL(documentUpdated(QTextDocument*)),
             this, SLOT(update(QTextDocument*)),
@@ -69,7 +73,7 @@ void StyleAnalyser::update(QTextDocument *doc)
   if (doc == nullptr)
     return;
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent("main.oss", doc->toPlainText().toStdString());
+  styleConfig->LoadContent(styleSheetFilePath.toStdString(), doc->toPlainText().toStdString());
 
   QSet<int> errorLines;
   QSet<int> warningLines;

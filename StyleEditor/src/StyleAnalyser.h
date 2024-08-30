@@ -45,6 +45,7 @@ public:
 private:
   QThread *thread;
   osmscout::TypeConfigRef typeConfig;
+  QString styleSheetFilePath;
 };
 
 #endif //LIBOSMSCOUT_STYLEANALYSER_H
