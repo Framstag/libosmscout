@@ -52,14 +52,17 @@ StyleAnalyser::StyleAnalyser(QThread *thread, Highlighter *highlighter)
 
   if (typeConfig) {
     connect(highlighter, SIGNAL(documentUpdated(QTextDocument*)),
-            this, SLOT(update(QTextDocument*)),
+            this, SLOT(onDocumentUpdated(QTextDocument*)));
+
+    connect(this, SIGNAL(updateRequest(QString)),
+            this, SLOT(update(QString)),
             Qt::QueuedConnection);
 
     connect(this, SIGNAL(problematicLines(QSet<int>, QSet<int>)),
             highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
             Qt::QueuedConnection);
 
-    update(highlighter->document());
+    onDocumentUpdated(highlighter->document());
   }
 }
 
@@ -68,12 +71,16 @@ StyleAnalyser::~StyleAnalyser()
   thread->quit();
 }
 
-void StyleAnalyser::update(QTextDocument *doc)
+void StyleAnalyser::onDocumentUpdated(QTextDocument *doc)
 {
-  if (doc == nullptr)
-    return;
+  if (doc)
+    emit updateRequest(doc->toPlainText());
+}
+
+void StyleAnalyser::update(QString content)
+{
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent(styleSheetFilePath.toStdString(), doc->toPlainText().toStdString());
+  styleConfig->LoadContent(styleSheetFilePath.toStdString(), content.toStdString());
 
   QSet<int> errorLines;
   QSet<int> warningLines;

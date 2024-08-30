@@ -34,9 +34,11 @@ class StyleAnalyser : public QObject
 
 signals:
   void problematicLines(QSet<int> errorLines, QSet<int> warningLines);
+  void updateRequest(QString content);
 
 private slots:
-  void update(QTextDocument *doc);
+  void onDocumentUpdated(QTextDocument *doc);
+  void update(QString content);
 
 public:
   StyleAnalyser(QThread *thread, Highlighter *highlighter);
