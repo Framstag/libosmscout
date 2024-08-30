@@ -218,8 +218,8 @@ Item {
                 font.pixelSize: units.fs("medium")
                 selectByMouse: true
                 persistentSelection: true
-                leftPadding: units.gu(0.5)
-                rightPadding: units.gu(0.5)
+                leftPadding: units.gu(1)
+                rightPadding: units.gu(2)
                 topPadding: 0
                 bottomPadding: 0
                 background: Rectangle {
