@@ -1,7 +1,8 @@
-import QtQuick 2.6
+import QtQuick 2.12
+
+import net.sf.libosmscout.map 1.0
 
 import "custom"
-import net.sf.libosmscout.map 1.0
 
 Rectangle {
     property alias stylesheetFilename: mapView.stylesheetFilename
@@ -88,7 +89,7 @@ Rectangle {
         onMouseMove: {
           if (modifiers & Qt.ControlModifier){
             //console.log("popup "+mapObjectInfo.rowCount());
-            mapObjectInfo.setPosition(mapView.view, 
+            mapObjectInfo.setPosition(mapView.view,
                                       mapView.width, mapView.height,
                                       screenX, screenY);
             mapObjectInfoPopup.visible=true;

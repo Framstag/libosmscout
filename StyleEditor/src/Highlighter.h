@@ -39,10 +39,16 @@ public:
 
     ~Highlighter() override = default;
 
-    void setStyle(qreal m_baseFontPointSize);
+    void setStyle();
+
+signals:
+    void documentUpdated(QTextDocument *doc);
 
 public slots:
     void onProblematicLines(QSet<int> errorLines, QSet<int> warningLines);
+
+private slots:
+    void onContentsChange(int position, int removed, int added);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -58,8 +64,6 @@ private:
 
     QVector<HighlightingRule> highlightingRules;
 
-    qreal m_baseFontPointSize{0};
-
     QRegExp commentStartExpression;
     QRegExp commentEndExpression;
 
@@ -73,6 +77,7 @@ private:
     QTextCharFormat kwTEXTICONFormat;
     QTextCharFormat kwTUNNELBRIDGEFormat;
     QTextCharFormat kwONEWAYFormat;
+    QTextCharFormat kwMODULEFormat;
     QTextCharFormat commentsFormat;
     QTextCharFormat multiLineCommentFormat;
 

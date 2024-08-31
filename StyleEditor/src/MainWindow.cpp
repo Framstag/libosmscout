@@ -22,13 +22,16 @@
 #include <osmscout/log/Logger.h>
 
 #include <QGuiApplication>
+#include <QFontDatabase>
+#include <QQmlContext>
 #include <SettingsDialog.h>
 
 using namespace osmscout;
 
 MainWindow::MainWindow(const DBThreadRef& dbThread)
- : QQmlApplicationEngine(QUrl("qrc:/qml/main.qml")),
+ : QQmlApplicationEngine(),
    dbThread(dbThread)
 {
+  load(QUrl("qrc:/qml/main.qml"));
   dbThread->databaseLoadFinished.Connect(dbLoadedSlot);
 }

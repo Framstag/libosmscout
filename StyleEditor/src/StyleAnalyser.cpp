@@ -42,25 +42,27 @@ osmscout::TypeConfigRef getTypeConfig()
   return typeConfig;
 }
 
-
-StyleAnalyser::StyleAnalyser(QThread *thread,
-                             QTextDocument *doc,
-                             Highlighter &highlighter):
-    thread(thread), typeConfig(getTypeConfig()), doc(doc)
+StyleAnalyser::StyleAnalyser(QThread *thread, Highlighter *highlighter)
+    : thread(thread)
+    , typeConfig(getTypeConfig())
 {
+  // setup the root path for modules
+  styleSheetFilePath = QString::fromUtf8(osmscout::OSMScoutQt::GetInstance().GetSettings()->GetStyleSheetDirectory().c_str())
+                       + QDir::separator() + "main.oss";
+
   if (typeConfig) {
-    connect(doc, SIGNAL(contentsChanged()),
-            this, SLOT(onContentsChanged()));
+    connect(highlighter, SIGNAL(documentUpdated(QTextDocument*)),
+            this, SLOT(onDocumentUpdated(QTextDocument*)));
 
     connect(this, SIGNAL(updateRequest(QString)),
             this, SLOT(update(QString)),
             Qt::QueuedConnection);
 
     connect(this, SIGNAL(problematicLines(QSet<int>, QSet<int>)),
-            &highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
+            highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
             Qt::QueuedConnection);
 
-    onContentsChanged();
+    onDocumentUpdated(highlighter->document());
   }
 }
 
@@ -69,20 +71,16 @@ StyleAnalyser::~StyleAnalyser()
   thread->quit();
 }
 
-void StyleAnalyser::onContentsChanged()
+void StyleAnalyser::onDocumentUpdated(QTextDocument *doc)
 {
-  QString content = doc->toPlainText();
-  if (content == lastContent) {
-    return;
-  }
-  lastContent = content;
-  emit updateRequest(content);
+  if (doc)
+    emit updateRequest(doc->toPlainText());
 }
 
 void StyleAnalyser::update(QString content)
 {
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent("main.oss", content.toStdString());
+  styleConfig->LoadContent(styleSheetFilePath.toStdString(), content.toStdString());
 
   QSet<int> errorLines;
   QSet<int> warningLines;

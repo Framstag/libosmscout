@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg498"
+   sodipodi:docname="paste.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs502" />
+  <sodipodi:namedview
+     id="namedview500"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.4609375"
+     inkscape:cx="256"
+     inkscape:cy="256"
+     inkscape:window-width="2508"
+     inkscape:window-height="1374"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg498" />
+  <path
+     d="M 112.80451,59.271715 H 74.40466 c -33.38706,0 -60.53178,27.14472 -60.53178,60.531775 v 257.26007 c 0,33.38706 27.14472,60.53178 60.53178,60.53178 h 90.79767 V 392.1965 H 74.40466 c -8.32312,0 -15.132945,-6.80982 -15.132945,-15.13294 V 119.80349 c 0,-8.32311 6.809825,-15.13294 15.132945,-15.13294 h 15.132945 c 0,16.74082 13.525065,30.26589 30.265885,30.26589 h 68.47658 C 204.92631,116.39858 229.13902,104.67055 256,104.67055 h 58.64016 C 307.92492,78.56622 284.18511,59.271715 256,59.271715 h -38.39985 c -3.59407,-25.631426 -25.726,-45.398835 -52.39782,-45.398835 -26.67182,0 -48.80375,19.767409 -52.39782,45.398835 z m 37.26487,7.566472 a 15.132945,15.132945 0 1 1 30.26589,0 15.132945,15.132945 0 1 1 -30.26589,0 z M 437.59534,452.72828 H 256 c -8.32312,0 -15.13295,-6.80982 -15.13295,-15.13294 V 195.46822 c 0,-8.32312 6.80983,-15.13295 15.13295,-15.13295 h 132.50785 l 64.22043,64.22044 v 193.03963 c 0,8.32312 -6.80982,15.13294 -15.13294,15.13294 z M 256,498.12712 h 181.59534 c 33.38706,0 60.53178,-27.14472 60.53178,-60.53178 V 244.55571 c 0,-12.01178 -4.82363,-23.55065 -13.33591,-32.06293 l -64.22043,-64.22043 c -8.51229,-8.51228 -20.05116,-13.33591 -32.06293,-13.33591 H 256 c -33.38706,0 -60.53178,27.14472 -60.53178,60.53178 v 242.12712 c 0,33.38706 27.14472,60.53178 60.53178,60.53178 z"
+     id="path496"
+     style="stroke-width:1" />
+</svg>
