@@ -88,7 +88,6 @@ public:
 
   QString fileName() const;
   QString fileType() const;
-  QUrl fileUrl() const;
 
   bool modified() const;
   void setModified(bool m);
@@ -104,6 +103,9 @@ public Q_SLOTS:
   int tabSelectedText();
   /* Returns the new size of the selected block */
   int backtabSelectedText();
+
+  int positionNextPage(int pageSize);
+  int positionPreviousPage(int pageSize);
 
 Q_SIGNALS:
   void documentChanged();

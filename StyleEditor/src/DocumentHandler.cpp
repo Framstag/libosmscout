@@ -259,6 +259,28 @@ int DocumentHandler::backtabSelectedText()
   return end + 1;
 }
 
+int DocumentHandler::positionNextPage(int pageSize)
+{
+  QTextCursor cursor = textCursor();
+  for (int i = 0; i < pageSize; ++i) {
+    cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor);
+  }
+  cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+  return cursor.position();
+}
+
+int DocumentHandler::positionPreviousPage(int pageSize)
+{
+  QTextCursor cursor = textCursor();
+  for (int i = 0; i < pageSize; ++i) {
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor);
+  }
+  cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+  return cursor.position();
+}
+
 QTextCursor DocumentHandler::textCursor() const
 {
   QTextDocument *doc = textDocument();

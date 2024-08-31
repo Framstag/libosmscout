@@ -83,42 +83,14 @@ Item {
         enabled: textArea.focus == true
         sequence: StandardKey.MoveToNextPage
         onActivated: {
-            var p = textArea.cursorPosition;
-            var c = 0;
-            for (;;) {
-                p = textArea.text.indexOf("\n", p + 1);
-                if (p > 0) {
-                    if (++c > textArea.visibleLineCount) {
-                        ++p; // go to 1st char of next line
-                        break;
-                    }
-                } else {
-                    p = textArea.text.length; // go to end
-                    break;
-                }
-            }
-            textArea.cursorPosition = p;
+            textArea.cursorPosition = document.positionNextPage(textArea.visibleLineCount);
         }
     }
     Shortcut {
         enabled: textArea.focus == true
         sequence: StandardKey.MoveToPreviousPage
         onActivated: {
-            var p = textArea.cursorPosition;
-            var c = 0;
-            for (;;) {
-                p = textArea.text.lastIndexOf("\n", p - 1);
-                if (p > 0) {
-                    if (++c > textArea.visibleLineCount + 1) {
-                        ++p; // go to 1st char of next line
-                        break;
-                    }
-                } else {
-                    p = 0; // go to begin
-                    break;
-                }
-            }
-            textArea.cursorPosition = p;
+            textArea.cursorPosition = document.positionPreviousPage(textArea.visibleLineCount);
         }
     }
 
@@ -158,6 +130,7 @@ Item {
 
     // the text editor
     Item {
+        id: pageArea
         width: parent.width
         anchors.top: header.bottom
         anchors.bottom: footer.top
@@ -226,8 +199,9 @@ Item {
                     color: backgroundColor
                 }
 
-                property int visibleLineCount: flickable.visibleArea.heightRatio * textArea.lineCount - 1
-                property real rowHeight: height / textArea.lineCount
+                // fickable height ratio is not accurate
+                property int visibleLineCount: (pageArea.height / textArea.height)  * textArea.lineCount
+                property real rowHeight: textArea.height / textArea.lineCount
 
                 MouseArea {
                     acceptedButtons: Qt.RightButton
@@ -491,16 +465,17 @@ Item {
     function findToken(lno, cno) {
         var p = 0;
         var c = 1;
+        var text = textArea.text;
         while (c < lno) {
-            p = textArea.text.indexOf('\n', p);
+            p = text.indexOf('\n', p);
             if (p < 0)
                 return {"start": 0, "end": 0};
             ++p;
             ++c;
         }
-        var ret = {"start": (p + cno - 1), "end": textArea.text.length - 1};
+        var ret = {"start": (p + cno - 1), "end": text.length - 1};
         ['\n', ';', ' '].forEach((e) => {
-            let ee = textArea.text.indexOf(e, ret.start) - 1;
+            let ee = text.indexOf(e, ret.start) - 1;
             if (ee >= ret.start && ee < ret.end)
                 ret.end = ee;
         });
