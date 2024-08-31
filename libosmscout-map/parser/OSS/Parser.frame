@@ -141,7 +141,7 @@ void Parser::SynErr(int n)
 
 void Parser::SemErr(const char* msg)
 {
-  if (!state && errors->hasErrors) {
+  if (!state) {
     return;
   }
 
