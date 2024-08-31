@@ -54,6 +54,8 @@ elseif(QT_VERSION_MAJOR EQUAL 6)
       qml_640/SearchLocationDialog.qml
       qml_640/MapControl.qml
       )
+else()
+  message(FATAL_ERROR "Missing Qt dependencies")
 endif()
 
 add_executable(StyleEditor ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
