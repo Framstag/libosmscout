@@ -61,7 +61,7 @@ void Parser::SynErr(int n)
 
 void Parser::SemErr(const char* msg)
 {
-  if (!state && errors->hasErrors) {
+  if (!state) {
     return;
   }
 
@@ -698,8 +698,7 @@ void Parser::COLORCONSTDEF() {
 		
 		   SemErr(e.c_str());
 		 }
-		
-		 if (!errors->hasErrors) {
+		 else {
 		   config.AddConstant(name,std::make_shared<StyleConstantColor>(color));
 		 }
 		}
@@ -723,8 +722,7 @@ void Parser::MAGCONSTDEF() {
 		
 		   SemErr(e.c_str());
 		 }
-		
-		 if (!errors->hasErrors) {
+		 else {
 		   config.AddConstant(name,std::make_shared<StyleConstantMag>(magnification));
 		 }
 		}
@@ -748,8 +746,7 @@ void Parser::UINTCONSTDEF() {
 		
 		   SemErr(e.c_str());
 		 }
-		
-		 if (!errors->hasErrors) {
+		 else {
 		   config.AddConstant(name,std::make_shared<StyleConstantUInt>(value));
 		 }
 		}
@@ -761,7 +758,6 @@ void Parser::WIDTHCONSTDEF() {
 		StyleConstantRef         constant;
 		double                   width;
 		std::string              unitValue;
-		StyleConstantWidth::Unit unit=StyleConstantWidth::Unit::mm;
 		
 		Expect(35 /* "WIDTH" */);
 		IDENT(name);
@@ -784,20 +780,17 @@ void Parser::WIDTHCONSTDEF() {
 		
 		   SemErr(e.c_str());
 		 }
-		
-		 if (unitValue=="mm") {
-		   unit=StyleConstantWidth::Unit::mm;
-		 }
-		 else if (unitValue=="m") {
-		   unit=StyleConstantWidth::Unit::m;
-		 }
 		 else {
-		   std::string e="Unsupported unit '"+unitValue+"'";
-		   SemErr(e.c_str());
-		 }
-		
-		 if (!errors->hasErrors) {
-		   config.AddConstant(name,std::make_shared<StyleConstantWidth>(width,unit));
+		   if (unitValue=="mm") {
+		     config.AddConstant(name,std::make_shared<StyleConstantWidth>(width,StyleConstantWidth::Unit::mm));
+		   }
+		   else if (unitValue=="m") {
+		     config.AddConstant(name,std::make_shared<StyleConstantWidth>(width,StyleConstantWidth::Unit::m));
+		   }
+		   else {
+		     std::string e="Unsupported unit '"+unitValue+"'";
+		     SemErr(e.c_str());
+		   }
 		 }
 		}
 		
@@ -849,17 +842,18 @@ void Parser::COLOR(Color& color) {
 			if (!constant) {
 			 color=Color::BLACK;
 			}
-			else if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
-			 std::string e="Constant is not of type 'COLOR'";
-			
-			 SemErr(e.c_str());
-			
-			 color=Color::BLACK;
-			}
 			else {
 			 StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+			 if (colorConstant==nullptr) {
+			   std::string e="Constant is not of type 'COLOR'";
 			
-			 color=colorConstant->GetColor();
+			   SemErr(e.c_str());
+			
+			   color=Color::BLACK;
+			 }
+			 else {
+			   color=colorConstant->GetColor();
+			 }
 			}
 			
 		} else SynErr(87);
@@ -893,15 +887,16 @@ void Parser::MAG(Magnification& magnification) {
 			if (!constant) {
 			 magnification.SetLevel(osmscout::MagnificationLevel(0));
 			}
-			else if (dynamic_cast<StyleConstantMag*>(constant.get())==nullptr) {
-			 std::string e="Variable is not of type 'MAG'";
-			
-			 SemErr(e.c_str());
-			}
 			else {
 			 StyleConstantMag* magConstant=dynamic_cast<StyleConstantMag*>(constant.get());
+			 if (magConstant==nullptr) {
+			   std::string e="Variable is not of type 'MAG'";
 			
-			 magnification=magConstant->GetMag();
+			   SemErr(e.c_str());
+			 }
+			 else {
+			   magnification=magConstant->GetMag();
+			 }
 			}
 			
 		} else SynErr(88);
@@ -925,16 +920,16 @@ void Parser::UINT(size_t& value) {
 			
 			 SemErr(e.c_str());
 			}
-			else if (dynamic_cast<StyleConstantUInt*>(constant.get())==nullptr) {
-			 std::string e="Constant is not of type 'UINT'";
-			
-			 SemErr(e.c_str());
-			}
-			
-			if (!errors->hasErrors) {
+			else {
 			 StyleConstantUInt* uintConstant=dynamic_cast<StyleConstantUInt*>(constant.get());
+			 if (uintConstant==nullptr) {
+			   std::string e="Constant is not of type 'UINT'";
 			
-			 value=uintConstant->GetUInt();
+			   SemErr(e.c_str());
+			 }
+			 else {
+			   value=uintConstant->GetUInt();
+			 }
 			}
 			
 		} else SynErr(89);
@@ -1276,15 +1271,13 @@ void Parser::UMAP(double& width) {
 			CONSTANT(constant);
 		} else SynErr(92);
 		if (constant) {
-		 if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
+		 StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
+		 if (widthConstant==nullptr) {
 		   std::string e="Constant is not of type 'WIDTH'";
 		
 		   SemErr(e.c_str());
 		 }
-		
-		 if (!errors->hasErrors) {
-		   StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
-		
+		 else {
 		   if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
 		     std::string e="Constant is not of unit 'm'";
 		
@@ -1292,14 +1285,13 @@ void Parser::UMAP(double& width) {
 		   }
 		   else {
 		     width=widthConstant->GetWidth();
+		     if (width<0.0) {
+		       std::string e="Width must be >= 0.0";
+		
+		       SemErr(e.c_str());
+		     }
 		   }
 		 }
-		}
-		
-		if (width<0.0) {
-		 std::string e="Width must be >= 0.0";
-		
-		 SemErr(e.c_str());
 		}
 		
 }
@@ -1866,63 +1858,58 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		else if (descriptor.GetType()==StyleAttributeType::TYPE_COLOR) {
 		 if (valueType==ValueType::COLOR) {
 		   if (constant) {
-		     if (StyleConstantColor* colorConstant = dynamic_cast<StyleConstantColor*>(constant.get());
-		         colorConstant == nullptr) {
+		     StyleConstantColor* colorConstant = dynamic_cast<StyleConstantColor*>(constant.get());
+		     if (colorConstant == nullptr) {
 		       std::string e="Constant is not of type 'COLOR'";
 		
 		       SemErr(e.c_str());
 		     }
 		     else {
 		       color=colorConstant->GetColor();
-		     }
-		   }
 		
-		   if (!function.empty()) {
-		     if (factor<0.0 || factor>1.0) {
-		       std::string e="Factor must be in the range [0..1]";
+		       if (!function.empty()) {
+		         if (factor<0.0 || factor>1.0) {
+		           std::string e="Factor must be in the range [0..1]";
 		
-		       SemErr(e.c_str());
-		     }
+		           SemErr(e.c_str());
+		         }
+		         else {
+		           if (function=="lighten") {
+		             style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
+		           }
+		           else if (function=="darken") {
+		             style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
+		           }
+		           else if (function=="alpha") {
+		             style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
+		           }
+		           else {
+		             std::string e="Unknown color function '"+function+"'";
 		
-		     if (function=="lighten") {
-		       if (!errors->hasErrors) {
-		         style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
+		             SemErr(e.c_str());
+		           }
+		         }
+		       }
+		       else {
+		         style.SetColorValue(descriptor.GetAttribute(),color);
 		       }
 		     }
-		     else if (function=="darken") {
-		       if (!errors->hasErrors) {
-		         style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
-		       }
-		     }
-		     else if (function=="alpha") {
-		       if (!errors->hasErrors) {
-		         style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
-		       }
-		     }
-		     else {
-		       std::string e="Unknown color function '"+function+"'";
-		
-		       SemErr(e.c_str());
-		     }
-		   }
-		   else {
-		     style.SetColorValue(descriptor.GetAttribute(),color);
 		   }
 		 }
 		 else if (valueType==ValueType::CONSTANT) {
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantColor*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'COLOR'";
-		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     StyleConstantColor* colorConstant=dynamic_cast<StyleConstantColor*>(constant.get());
+		     if (colorConstant==nullptr) {
+		       std::string e="Constant is not of type 'COLOR'";
 		
-		     style.SetColorValue(descriptor.GetAttribute(),colorConstant->GetColor());
+		       SemErr(e.c_str());
+		     }
+		     else {
+		       style.SetColorValue(descriptor.GetAttribute(),colorConstant->GetColor());
+		     }
 		   }
 		 }
 		 else {
@@ -1961,16 +1948,16 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantMag*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'MAGNIFICATION'";
+		   else {
+		       StyleConstantMag* uintConstant=dynamic_cast<StyleConstantMag*>(constant.get());
+		       if (uintConstant==nullptr) {
+		       std::string e="Constant is not of type 'MAGNIFICATION'";
 		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
-		     StyleConstantMag* uintConstant=dynamic_cast<StyleConstantMag*>(constant.get());
-		
-		     style.SetMagnificationValue(descriptor.GetAttribute(),uintConstant->GetMag());
+		       SemErr(e.c_str());
+		     }
+		     else {
+		       style.SetMagnificationValue(descriptor.GetAttribute(),uintConstant->GetMag());
+		     }
 		   }
 		 }
 		 else {
@@ -2009,14 +1996,12 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     if (negate) {
 		       value=-value;
 		     }
@@ -2033,20 +2018,17 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (unit!="mm") {
+		   else if (unit!="mm") {
 		     std::string e="Value must have unit 'mm' and not '"+unit+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     style.SetDoubleValue(descriptor.GetAttribute(),value);
 		   }
 		 }
@@ -2060,14 +2042,12 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     if (negate) {
 		       value=-value;
 		     }
@@ -2078,22 +2058,22 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'WIDTH'";
-		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
-		
-		     if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
-		       std::string e="Constant is not of unit 'm'";
+		     if (widthConstant==nullptr) {
+		       std::string e="Constant is not of type 'WIDTH'";
 		
 		       SemErr(e.c_str());
 		     }
 		     else {
-		       style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+		       if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
+		         std::string e="Constant is not of unit 'm'";
+		
+		         SemErr(e.c_str());
+		       }
+		       else {
+		         style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+		       }
 		     }
 		   }
 		 }
@@ -2107,20 +2087,17 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (unit!="m") {
+		   else if (unit!="m") {
 		     std::string e="Value must have unit 'm' and not '"+unit+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     style.SetDoubleValue(descriptor.GetAttribute(),value);
 		   }
 		 }
@@ -2128,27 +2105,27 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantWidth*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'WIDTH'";
-		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     StyleConstantWidth* widthConstant=dynamic_cast<StyleConstantWidth*>(constant.get());
-		
-		     if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
-		       std::string e="Constant is not of unit 'm'";
-		
-		       SemErr(e.c_str());
-		     }
-		     else if (widthConstant->GetWidth()<0.0) {
-		       std::string e="Width must be >= 0.0";
+		     if (widthConstant==nullptr) {
+		         std::string e="Constant is not of type 'WIDTH'";
 		
 		       SemErr(e.c_str());
 		     }
 		     else {
-		       style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+		       if (widthConstant->GetUnit()!=StyleConstantWidth::Unit::m) {
+		         std::string e="Constant is not of unit 'm'";
+		
+		         SemErr(e.c_str());
+		       }
+		       else if (widthConstant->GetWidth()<0.0) {
+		         std::string e="Width must be >= 0.0";
+		
+		         SemErr(e.c_str());
+		       }
+		       else {
+		         style.SetDoubleValue(descriptor.GetAttribute(),widthConstant->GetWidth());
+		       }
 		     }
 		   }
 		 }
@@ -2162,14 +2139,12 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     if (negate) {
 		       value=-value;
 		     }
@@ -2186,20 +2161,17 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!unit.empty()) {
+		   else if (!unit.empty()) {
 		     std::string e="Value must not have unit";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     style.SetDoubleValue(descriptor.GetAttribute(),value);
 		   }
 		 }
@@ -2215,33 +2187,35 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!unit.empty()) {
+		   else if (!unit.empty()) {
 		     std::string e="Value must not have unit";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
+		   else {
+		     valueList.push_back(value);
 		
-		   valueList.push_back(value);
+		     bool invalid = false;
+		     for (const auto& number : numberList) {
+		       if (!StringToNumber(number,value)) {
+		         std::string e="Cannot parse number '"+number+"'";
 		
-		   for (const auto& number : numberList) {
-		     if (!StringToNumber(number,value)) {
-		       std::string e="Cannot parse number '"+number+"'";
-		
-		       SemErr(e.c_str());
+		         SemErr(e.c_str());
+		         invalid = true;
+		       }
+		       else {
+		         valueList.push_back(value);
+		       }
 		     }
 		
-		     valueList.push_back(value);
-		   }
-		
-		   if (!errors->hasErrors) {
-		     style.SetDoubleArrayValue(descriptor.GetAttribute(),valueList);
+		     if (!invalid) {
+		       style.SetDoubleArrayValue(descriptor.GetAttribute(),valueList);
+		     }
 		   }
 		 }
 		}
@@ -2329,8 +2303,7 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     if (negate) {
 		       value=-value;
 		     }
@@ -2341,16 +2314,16 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantInt*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'INT'";
+		   else {
+		     StyleConstantInt* intConstant=dynamic_cast<StyleConstantInt*>(constant.get());
+		     if (intConstant==nullptr) {
+		       std::string e="Constant is not of type 'INT'";
 		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
-		     StyleConstantInt* uintConstant=dynamic_cast<StyleConstantInt*>(constant.get());
-		
+		       SemErr(e.c_str());
+		     }
+		     else {
 		     style.SetIntValue(descriptor.GetAttribute(),intConstant->GetInt());
+		     }
 		   }
 		 }*/
 		 else {
@@ -2368,20 +2341,17 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!unit.empty()) {
+		   else if (!unit.empty()) {
 		     std::string e="Vaue must not have a unit";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!StringToNumber(number,value)) {
+		   else if (!StringToNumber(number,value)) {
 		     std::string e="Cannot parse number '"+number+"'";
 		
 		     SemErr(e.c_str());
 		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     style.SetUIntValue(descriptor.GetAttribute(),value);
 		   }
 		 }
@@ -2389,16 +2359,16 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		   if (!constant) {
 		     // no code
 		   }
-		   else if (dynamic_cast<StyleConstantUInt*>(constant.get())==nullptr) {
-		     std::string e="Constant is not of type 'UINT'";
-		
-		     SemErr(e.c_str());
-		   }
-		
-		   if (!errors->hasErrors) {
+		   else {
 		     StyleConstantUInt* uintConstant=dynamic_cast<StyleConstantUInt*>(constant.get());
+		     if (uintConstant==nullptr) {
+		       std::string e="Constant is not of type 'UINT'";
 		
-		     style.SetUIntValue(descriptor.GetAttribute(),uintConstant->GetUInt());
+		       SemErr(e.c_str());
+		     }
+		     else {
+		       style.SetUIntValue(descriptor.GetAttribute(),uintConstant->GetUInt());
+		     }
 		   }
 		 }
 		 else {
@@ -2420,8 +2390,7 @@ void Parser::COLOR_VALUE(Color& color) {
 		
 		 SemErr(e.c_str());
 		}
-		
-		if (!errors->hasErrors) {
+		else {
 		 color=PostprocessColor(osmscout::Color::FromHexString(c));
 		}
 		
