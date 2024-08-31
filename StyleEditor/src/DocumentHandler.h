@@ -20,8 +20,6 @@
 #ifndef DOCUMENTHANDLER_H
 #define DOCUMENTHANDLER_H
 
-#include <StyleAnalyser.h>
-
 #include <QFont>
 #include <QObject>
 #include <QTextCursor>
@@ -37,6 +35,8 @@ QT_END_NAMESPACE
 
 Q_DECLARE_OPAQUE_POINTER(QTextDocument)
 Q_DECLARE_OPAQUE_POINTER(QQuickTextDocument)
+
+class Highlighter;
 
 class DocumentHandler : public QObject
 {
@@ -58,7 +58,7 @@ class DocumentHandler : public QObject
 
 public:
   explicit DocumentHandler(QObject *parent = nullptr);
-  virtual ~DocumentHandler();
+  virtual ~DocumentHandler() = default;
 
   QQuickTextDocument *document() const;
   void setDocument(QQuickTextDocument *document);
@@ -128,9 +128,6 @@ private:
   QTextDocument *textDocument() const;
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
 
-  void startStyleAnalyser();
-  void stopStyleAnalyser();
-
   QQuickTextDocument *m_document;
 
   int m_cursorPosition;
@@ -141,7 +138,6 @@ private:
   QString m_indentString;
   QString m_filePath;
   Highlighter *m_highlighter{nullptr};
-  StyleAnalyser *m_styleAnalyser{nullptr}; // owned, different thread
 };
 
 #endif // DOCUMENTHANDLER_H

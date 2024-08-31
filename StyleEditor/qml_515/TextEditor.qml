@@ -542,8 +542,8 @@ Item {
 
     function reloadStyle() {
         var savedTextPosition = textArea.cursorPosition;
-        document.load()
         map.reloadStyle()
+        document.load()
         textArea.cursorPosition = savedTextPosition
     }
 

@@ -18,9 +18,7 @@
  */
 
 #include <StyleAnalyser.h>
-
 #include <osmscoutclient/DBThread.h>
-
 #include <osmscoutclientqt/OSMScoutQt.h>
 
 using namespace osmscout;
@@ -42,54 +40,79 @@ osmscout::TypeConfigRef getTypeConfig()
   return typeConfig;
 }
 
-StyleAnalyser::StyleAnalyser(QThread *thread, Highlighter *highlighter)
-    : thread(thread)
-    , typeConfig(getTypeConfig())
+StyleAnalyser::StyleAnalyser(const QString& threadName)
+    : typeConfig(getTypeConfig())
 {
+  thread = osmscout::OSMScoutQt::GetInstance().makeThread(threadName);
+  this->moveToThread(thread);
+  thread->start();
+
   // setup the root path for modules
   styleSheetFilePath = QString::fromUtf8(osmscout::OSMScoutQt::GetInstance().GetSettings()->GetStyleSheetDirectory().c_str())
                        + QDir::separator() + "main.oss";
 
   if (typeConfig) {
-    connect(highlighter, SIGNAL(documentUpdated(QTextDocument*)),
-            this, SLOT(onDocumentUpdated(QTextDocument*)));
-
-    connect(this, SIGNAL(updateRequest(QString)),
-            this, SLOT(update(QString)),
+    connect(this, SIGNAL(updateRequest(QTextDocument*)),
+            this, SLOT(update(QTextDocument*)),
             Qt::QueuedConnection);
-
-    connect(this, SIGNAL(problematicLines(QSet<int>, QSet<int>)),
-            highlighter, SLOT(onProblematicLines(QSet<int>, QSet<int>)),
-            Qt::QueuedConnection);
-
-    onDocumentUpdated(highlighter->document());
+  } else {
+    osmscout::log.Error() << "Type Config not set";
   }
 }
 
 StyleAnalyser::~StyleAnalyser()
 {
   thread->quit();
+  if (thread->isRunning())
+    thread->requestInterruption();
+  thread->deleteLater();
 }
 
 void StyleAnalyser::onDocumentUpdated(QTextDocument *doc)
 {
-  if (doc)
-    emit updateRequest(doc->toPlainText());
+  if (doc) {
+    lock.lock();
+    if (!pending) {
+      pending = true;
+      lock.unlock(); // unlock before long op
+      emit updateRequest(doc);
+    } else {
+      delayed = true;
+      lock.unlock();
+    }
+  }
 }
 
-void StyleAnalyser::update(QString content)
+void StyleAnalyser::update(QTextDocument *doc)
 {
-  osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
-  styleConfig->LoadContent(styleSheetFilePath.toStdString(), content.toStdString());
+  lock.lock();
+  for(;;) {
+    delayed = false; // starting analysis, I reset delayed
+    lock.unlock();
 
-  QSet<int> errorLines;
-  QSet<int> warningLines;
-  for (const auto &w: styleConfig->GetWarnings()) {
-    warningLines << w.GetLine();
-  }
-  for (const auto &w: styleConfig->GetErrors()) {
-    errorLines << w.GetLine();
-  }
+    if (thread->isInterruptionRequested())
+      break;
 
-  emit problematicLines(errorLines, warningLines);
+    osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+    styleConfig->LoadContent(styleSheetFilePath.toStdString(), doc->toPlainText().toStdString());
+
+    QSet<int> errorLines;
+    QSet<int> warningLines;
+    for (const auto &w: styleConfig->GetWarnings()) {
+      warningLines << w.GetLine();
+    }
+    for (const auto &w: styleConfig->GetErrors()) {
+      errorLines << w.GetLine();
+    }
+
+    emit problematicLines(errorLines, warningLines);
+
+    lock.lock();
+    if (delayed)
+      continue;
+    else
+      break;
+  }
+  pending = false;
+  lock.unlock();
 }
