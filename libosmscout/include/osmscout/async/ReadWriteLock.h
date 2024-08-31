@@ -40,8 +40,8 @@ class OSMSCOUT_API Latch {
 private:
   mutable std::atomic<bool> s_spin = false;
 
-  volatile int x_wait = 0;              /* counts requests in wait for X  */
-  volatile int x_flag = 0;              /* X status: 0, 1, 2, or 3        */
+  int x_wait = 0;                       /* counts requests in wait for X  */
+  int x_flag = 0;                       /* X status: 0, 1, 2, or 3        */
   std::thread::id x_owner;              /* X owner (thread id)            */
 
   std::mutex x_gate_lock;
