@@ -245,6 +245,24 @@ Item {
                     var start = textArea.selectionStart;
                     textArea.select(start, start + document.backtabSelectedText());
                 }
+
+                Component.onCompleted: {
+                    font.family = selectFontFamily(font.family);
+                }
+
+                function selectFontFamily(family) {
+                    var prefered = [ 'Monospace', 'Liberation Mono', 'Monaco', 'PT Mono', 'Consolas', 'Courier New' ];
+                    var availableFamilies = Qt.fontFamilies();
+                    var selected = family;
+                    for(var i = 0; i < prefered.length; ++i) {
+                        if (availableFamilies.findIndex((f) => { return prefered[i] === f; }) >= 0) {
+                            selected = prefered[i];
+                            break;
+                        }
+                    }
+                    console.log("Select font family '" + selected + "'");
+                    return selected;
+                }
             }
 
             ScrollBar.vertical: ScrollBar {
