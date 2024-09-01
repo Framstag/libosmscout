@@ -86,7 +86,7 @@ Rectangle {
         focus: true
         property bool shift: false;
 
-        onMouseMove: {
+        onMouseMove: function(screenX, screenY, lat, lon, modifiers) {
           if (modifiers & Qt.ControlModifier){
             //console.log("popup "+mapObjectInfo.rowCount());
             mapObjectInfo.setPosition(mapView.view,
