@@ -665,5 +665,174 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
   }
+}
+
+TEST_CASE("Suggest lanes on A3/A4 highway split")
+{
+  using namespace osmscout;
+
+  // https://www.openstreetmap.org/query?lat=47.341840&lon=8.454964#map=19/47.341780/8.453880
+  MockDatabaseBuilder databaseBuilder;
+  // highway A3/A4 https://www.openstreetmap.org/way/1304846969
+  // with three lanes
+  ObjectFileRef a3a4Ref=databaseBuilder.AddWay(
+    {GeoCoord(47.341814, 8.453848), GeoCoord(47.341844, 8.454816)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::Through, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // highway A3 https://www.openstreetmap.org/way/38698216
+  // with two lanes
+  ObjectFileRef a3Ref=databaseBuilder.AddWay(
+    {GeoCoord(47.341844, 8.454816), GeoCoord(47.341923, 8.456367)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // highway A4 https://www.openstreetmap.org/way/1205837033
+  // with two lanes
+  ObjectFileRef a4Ref=databaseBuilder.AddWay(
+    {GeoCoord(47.341844, 8.454816), GeoCoord(47.341756, 8.455870)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  RouteDescription description;
+
+  MockContext context(databaseBuilder.Build());
+
+  RoutePostprocessor::LanesPostprocessor lanesPostprocessor;
+  RoutePostprocessor::SuggestedLanesPostprocessor postprocessor;
+
+  {
+    description.Clear();
+
+    // route continue to A4
+    description.AddNode(0, 0, {a3a4Ref}, a3a4Ref, 1);
+    description.AddNode(0, 0, {a3a4Ref, a3Ref, a4Ref}, a4Ref, 1);
+    description.AddNode(0, 1, {a4Ref}, ObjectFileRef(), 0);
+
+    lanesPostprocessor.Process(context, description);
+    postprocessor.Process(context, description);
+
+    // should suggest right lane
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 2);
+    REQUIRE(suggestedLanes->GetTo() == 2);
+  }
+
+  {
+    description.Clear();
+
+    // route continue to A3
+    description.AddNode(0, 0, {a3a4Ref}, a3a4Ref, 1);
+    description.AddNode(0, 0, {a3a4Ref, a3Ref, a4Ref}, a3Ref, 1);
+    description.AddNode(0, 1, {a3Ref}, ObjectFileRef(), 0);
+
+    lanesPostprocessor.Process(context, description);
+    postprocessor.Process(context, description);
+
+    // should suggest two left through lanes
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+  }
+}
+
+TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
+{
+  using namespace osmscout;
+
+  // https://www.openstreetmap.org/way/116756494#map=18/47.407778/8.424867
+  MockDatabaseBuilder databaseBuilder;
+
+  // highway A3/A4 https://www.openstreetmap.org/way/116756494
+  // with three lanes
+  ObjectFileRef a3a4Ref = databaseBuilder.AddWay(
+    {GeoCoord(47.407328, 8.423713), GeoCoord(47.407877, 8.424234)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::SlightLeft, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // highway A3 https://www.openstreetmap.org/way/26834628
+  // with one lane
+  ObjectFileRef a3Ref = databaseBuilder.AddWay(
+    {GeoCoord(47.407877, 8.424234), GeoCoord(47.409503, 8.425961)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
+      lanes->SetLanes(1, 0);
+      lanes->SetTurnLanes({}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // highway A4 https://www.openstreetmap.org/way/10589763
+  // with two lanes
+  ObjectFileRef a4Ref = databaseBuilder.AddWay(
+    {GeoCoord(47.407877, 8.424234), GeoCoord(47.408958, 8.425497)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  RouteDescription description;
+
+  MockContext context(databaseBuilder.Build());
+
+  RoutePostprocessor::LanesPostprocessor lanesPostprocessor;
+  RoutePostprocessor::SuggestedLanesPostprocessor postprocessor;
+
+  {
+    description.Clear();
+
+    // route continue to A3
+    description.AddNode(0, 0, {a3a4Ref}, a3a4Ref, 1);
+    description.AddNode(0, 0, {a3a4Ref, a3Ref, a4Ref}, a3Ref, 1);
+    description.AddNode(0, 1, {a3Ref}, ObjectFileRef(), 0);
+
+    lanesPostprocessor.Process(context, description);
+    postprocessor.Process(context, description);
+
+    // should suggest left lane
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 0);
+  }
+
+  {
+    description.Clear();
+
+    // route continue to A4
+    description.AddNode(0, 0, {a3a4Ref}, a3a4Ref, 1);
+    description.AddNode(0, 0, {a3a4Ref, a3Ref, a4Ref}, a4Ref, 1);
+    description.AddNode(0, 1, {a4Ref}, ObjectFileRef(), 0);
+
+    lanesPostprocessor.Process(context, description);
+    postprocessor.Process(context, description);
+
+    // should suggest two right lanes
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 1);
+    REQUIRE(suggestedLanes->GetTo() == 2);
+  }
 
 }
