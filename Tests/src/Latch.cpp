@@ -498,7 +498,7 @@ TEST_CASE("Check Re-Entrant One Reader Writer") {
       osmscout::WriteLock wl(latch);
       {
         osmscout::ReadLock rl1(latch);
-        i++;
+        i = i + 1;
       }
     }
   });
@@ -530,7 +530,7 @@ TEST_CASE("Check write precedence") {
 
   std::thread t([&i](){
     osmscout::WriteLock wl(latch);
-    i++;
+    i = i + 1;
   });
 
   // wait until writer lock is requested
@@ -563,7 +563,7 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
 
     std::thread t([&i](){
       osmscout::WriteLock wl(latch);
-      i++;
+      i = i + 1;
     });
 
     // wait until writer lock is requested

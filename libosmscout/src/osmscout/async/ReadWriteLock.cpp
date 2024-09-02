@@ -133,14 +133,14 @@ void Latch::lock() {
 
   if (x_owner != tid) {
     /* increments the count of request in wait */
-    ++x_wait;
+    x_wait += 1;
     for (;;) {
       /* if flag is 0 or 2 then it hold X with no wait,
        * in other case it have to wait for X gate
        */
       if (x_flag == X_STEP_0 || x_flag == X_STEP_2) {
         x_flag = X_STEP_1;
-        --x_wait;
+        x_wait -= 1;
         break;
       } else {
         /* !!! pop gate then unlock spin */
@@ -180,7 +180,7 @@ void Latch::lock() {
     x_owner = tid;
   } else {
     /* recursive X lock */
-    ++x_flag;
+    x_flag += 1;
   }
 
   spin_unlock();
@@ -190,7 +190,8 @@ void Latch::unlock() {
   spin_lock();
   if (x_owner == std::this_thread::get_id()) {
     /* decrement recursive lock */
-    if (--x_flag == X_STEP_2) {
+    x_flag -= 1;
+    if (x_flag == X_STEP_2) {
       x_owner = std::thread::id();
       /* hand-over to a request in wait for X, else release */
       if (x_wait == 0) {
