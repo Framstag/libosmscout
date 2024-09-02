@@ -108,7 +108,7 @@ void Highlighter::updateRules()
   rule.pattern.setMinimal(true);
   rule.format = QTextCharFormat();
   rule.format.setFontWeight(QFont::Bold);
-  rule.format.setForeground(QColor("#50ff50"));
+  rule.format.setForeground(QColor("#2ce838"));
   highlightingRules.append(rule);
 
   rule.pattern = QRegExp("MODULE");
