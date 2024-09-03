@@ -19,7 +19,6 @@
 
 #include <DocumentHandler.h>
 #include <Highlighter.h>
-#include <osmscoutclientqt/OSMScoutQt.h>
 
 #include <QFile>
 #include <QFileInfo>
@@ -37,11 +36,6 @@ DocumentHandler::DocumentHandler(QObject *parent)
     , m_selectionEnd(0)
     , m_indentString('\t')
 {
-}
-
-DocumentHandler::~DocumentHandler()
-{
-  stopStyleAnalyser();
 }
 
 QQuickTextDocument *DocumentHandler::document() const
@@ -130,9 +124,9 @@ void DocumentHandler::setStyleAnalyserEnabled(bool yesno)
   m_styleAnalyserEnabled = yesno;
   emit styleAnalyserEnabledChanged();
   if (yesno)
-    startStyleAnalyser();
+    m_highlighter->startStyleAnalyser();
   else
-    stopStyleAnalyser();
+    m_highlighter->stopStyleAnalyser();
   m_highlighter->setStyle();
 }
 
@@ -160,8 +154,8 @@ void DocumentHandler::load()
 
         if (!m_highlighter) {
           m_highlighter = new Highlighter(doc); // owned by doc (parent)
-          if (!m_styleAnalyser)
-            startStyleAnalyser();
+          if (m_styleAnalyserEnabled)
+            m_highlighter->startStyleAnalyser();
         }
 
         m_highlighter->setStyle();
@@ -265,6 +259,28 @@ int DocumentHandler::backtabSelectedText()
   return end + 1;
 }
 
+int DocumentHandler::positionNextPage(int pageSize)
+{
+  QTextCursor cursor = textCursor();
+  for (int i = 0; i < pageSize; ++i) {
+    cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor);
+  }
+  cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+  return cursor.position();
+}
+
+int DocumentHandler::positionPreviousPage(int pageSize)
+{
+  QTextCursor cursor = textCursor();
+  for (int i = 0; i < pageSize; ++i) {
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor);
+  }
+  cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+  return cursor.position();
+}
+
 QTextCursor DocumentHandler::textCursor() const
 {
   QTextDocument *doc = textDocument();
@@ -287,25 +303,6 @@ QTextDocument *DocumentHandler::textDocument() const
     return nullptr;
 
   return m_document->textDocument();
-}
-
-void DocumentHandler::startStyleAnalyser()
-{
-  if (m_styleAnalyser || !m_styleAnalyserEnabled)
-    return;
-
-  QThread *analyserThread = osmscout::OSMScoutQt::GetInstance().makeThread("StyleAnalyser");
-  m_styleAnalyser = new StyleAnalyser(analyserThread, m_highlighter);
-  m_styleAnalyser->moveToThread(analyserThread);
-  analyserThread->start();
-}
-
-void DocumentHandler::stopStyleAnalyser()
-{
-  if (m_styleAnalyser) {
-    delete m_styleAnalyser;
-    m_styleAnalyser = nullptr;
-  }
 }
 
 bool DocumentHandler::modified() const

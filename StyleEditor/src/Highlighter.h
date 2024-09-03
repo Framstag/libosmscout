@@ -21,14 +21,13 @@
  */
 
 #include <QSyntaxHighlighter>
-
 #include <QHash>
 #include <QTextCharFormat>
 #include <QRegExp>
-
 #include <QtQuick/QQuickItem>
 
 class QTextDocument;
+class StyleAnalyser;
 
 class Highlighter : public QSyntaxHighlighter
 {
@@ -37,9 +36,11 @@ class Highlighter : public QSyntaxHighlighter
 public:
     Highlighter(QTextDocument *parent = nullptr);
 
-    ~Highlighter() override = default;
+    ~Highlighter() override;
 
     void setStyle();
+    void startStyleAnalyser();
+    void stopStyleAnalyser();
 
 signals:
     void documentUpdated(QTextDocument *doc);
@@ -63,27 +64,11 @@ private:
     void updateRules();
 
     QVector<HighlightingRule> highlightingRules;
+    QTextCharFormat commentFormat;
 
-    QRegExp commentStartExpression;
-    QRegExp commentEndExpression;
-
-    QTextCharFormat kwSectionFormat;
-    QTextCharFormat kwFormat;
-    QTextCharFormat kwGeomFormat;
-    QTextCharFormat kwTYPEFormat;
-    QTextCharFormat kwMAGFormat;
-    QTextCharFormat kwGEOFormat;
-    QTextCharFormat kwSIZEFormat;
-    QTextCharFormat kwTEXTICONFormat;
-    QTextCharFormat kwTUNNELBRIDGEFormat;
-    QTextCharFormat kwONEWAYFormat;
-    QTextCharFormat kwMODULEFormat;
-    QTextCharFormat commentsFormat;
-    QTextCharFormat multiLineCommentFormat;
-
+    StyleAnalyser *styleAnalyser{nullptr};
     QTextCharFormat errorFormat;
     QTextCharFormat warningFormat;
-
     QSet<int> errorLines;
     QSet<int> warningLines;
 };
