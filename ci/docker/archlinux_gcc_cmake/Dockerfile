@@ -1,4 +1,4 @@
-FROM archlinux:base-20231112.0.191179
+FROM archlinux:base-20240825.0.257728
 
 RUN pacman --noconfirm --needed -Sy \
           git \
