@@ -1285,12 +1285,15 @@ void Parser::UMAP(double& width) {
 		   }
 		   else {
 		     width=widthConstant->GetWidth();
-		     if (width<0.0) {
-		       std::string e="Width must be >= 0.0";
-		
-		       SemErr(e.c_str());
-		     }
 		   }
+		 }
+		}
+		
+		if (!errors->hasErrors) {
+		 if (width<0.0) {
+		   std::string e="Width must be >= 0.0";
+		
+		   SemErr(e.c_str());
 		 }
 		}
 		
@@ -1866,33 +1869,35 @@ void Parser::ATTRIBUTEVALUE(PartialStyleBase& style, const StyleAttributeDescrip
 		     }
 		     else {
 		       color=colorConstant->GetColor();
+		     }
+		   }
 		
-		       if (!function.empty()) {
-		         if (factor<0.0 || factor>1.0) {
-		           std::string e="Factor must be in the range [0..1]";
+		   if (!errors->hasErrors) {
+		     if (!function.empty()) {
+		       if (factor<0.0 || factor>1.0) {
+		         std::string e="Factor must be in the range [0..1]";
+		
+		         SemErr(e.c_str());
+		       }
+		       else {
+		         if (function=="lighten") {
+		           style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
+		         }
+		         else if (function=="darken") {
+		           style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
+		         }
+		         else if (function=="alpha") {
+		           style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
+		         }
+		         else {
+		           std::string e="Unknown color function '"+function+"'";
 		
 		           SemErr(e.c_str());
 		         }
-		         else {
-		           if (function=="lighten") {
-		             style.SetColorValue(descriptor.GetAttribute(),color.Lighten(factor));
-		           }
-		           else if (function=="darken") {
-		             style.SetColorValue(descriptor.GetAttribute(),color.Darken(factor));
-		           }
-		           else if (function=="alpha") {
-		             style.SetColorValue(descriptor.GetAttribute(),color.Alpha(factor));
-		           }
-		           else {
-		             std::string e="Unknown color function '"+function+"'";
-		
-		             SemErr(e.c_str());
-		           }
-		         }
 		       }
-		       else {
-		         style.SetColorValue(descriptor.GetAttribute(),color);
-		       }
+		     }
+		     else {
+		       style.SetColorValue(descriptor.GetAttribute(),color);
 		     }
 		   }
 		 }
