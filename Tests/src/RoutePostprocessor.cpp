@@ -186,13 +186,13 @@ public:
     return osmscout::NodeRef();
   }
 
-  const LanesFeatureValueReader& GetLaneReader(const DatabaseId &dbId) const override
+  const LanesFeatureValueReader& GetLaneReader([[maybe_unused]] const DatabaseId &dbId) const override
   {
     assert(dbId==0);
     return lanesReader;
   }
 
-  const AccessFeatureValueReader& GetAccessReader(const DatabaseId &dbId) const override
+  const AccessFeatureValueReader& GetAccessReader([[maybe_unused]] const DatabaseId &dbId) const override
   {
     assert(dbId==0);
     return accessReader;
