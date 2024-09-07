@@ -1285,12 +1285,15 @@ void Parser::UMAP(double& width) {
 		   }
 		   else {
 		     width=widthConstant->GetWidth();
-		     if (width<0.0) {
-		       std::string e="Width must be >= 0.0";
-		
-		       SemErr(e.c_str());
-		     }
 		   }
+		 }
+		}
+		
+		if (!errors->hasErrors) {
+		 if (width<0.0) {
+		   std::string e="Width must be >= 0.0";
+		
+		   SemErr(e.c_str());
 		 }
 		}
 		
