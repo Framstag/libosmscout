@@ -2199,7 +2199,7 @@ namespace osmscout {
     TypeInfoSet junctionTypeSet=it->second;
     for (const auto &obj : node.GetObjects()) {
       if (obj.IsNode()) {
-        NodeRef n = GetNode(node.GetDBFileOffset());
+        NodeRef n = GetNode(DBFileOffset(node.GetDatabaseId(), obj.GetFileOffset()));
         if (junctionTypeSet.IsSet(n->GetType())) {
           return n;
         }
