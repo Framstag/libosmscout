@@ -33,6 +33,11 @@
 
 namespace osmscout {
 
+/*
+ * TRANSLATOR osmscout::RouteDescriptionBuilder
+ * please keep above comment here, to make Qt lupdate tool happy without full namespace specification
+ */
+
 RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<RouteStep> &routeSteps,
                                                                      const Distance &stopAfter,
                                                                      bool skipInformative):
