@@ -232,6 +232,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<VoiceProvider>("VoiceProvider");
   qRegisterMetaType<MapProvider>("MapProvider");
   qRegisterMetaType<QmlRoutingProfileRef>("QmlRoutingProfileRef");
+  qRegisterMetaType<VoicePlayer::PlaybackState>("VoicePlayer::PlaybackState");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");

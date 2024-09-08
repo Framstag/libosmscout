@@ -24,6 +24,7 @@
 #include <QThread>
 #include <QDateTime>
 #include <QDir>
+#include <QDebug>
 
 namespace osmscout {
 
@@ -60,21 +61,8 @@ void NavigationModule::InitPlayer()
   }
 
   if (mediaPlayer==nullptr){
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    assert(currentPlaylist==nullptr);
-#endif
-    mediaPlayer = new QMediaPlayer(this);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    currentPlaylist = new QMediaPlaylist(mediaPlayer);
-#endif
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    connect(mediaPlayer, &QMediaPlayer::stateChanged, this, &NavigationModule::playerStateChanged);
-#else
-    connect(mediaPlayer, &QMediaPlayer::playbackStateChanged, this, &NavigationModule::playerStateChanged);
-#endif
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    mediaPlayer->setPlaylist(currentPlaylist);
-#endif
+    mediaPlayer = new VoiceCorePlayer(this);
+    connect(mediaPlayer, SIGNAL(playbackStateChanged(VoicePlayer::PlaybackState)), this, SLOT(playerStateChanged(VoicePlayer::PlaybackState)));
   }
 }
 
@@ -142,11 +130,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
         nextMessage = voiceInstructionMessage->message;
         InitPlayer();
         assert(mediaPlayer);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        playerStateChanged(mediaPlayer->state());
-#else
         playerStateChanged(mediaPlayer->playbackState());
-#endif
       }
     } else if (auto* laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get());
                laneMessage != nullptr) {
@@ -333,38 +317,26 @@ QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSam
   }
 }
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  void NavigationModule::playerStateChanged(QMediaPlayer::State state)
-#else
-  void NavigationModule::playerStateChanged(QMediaPlayer::PlaybackState state)
-#endif
-{
-  if (thread!=QThread::currentThread()){
-    qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
-  }
+  void NavigationModule::playerStateChanged(VoicePlayer::PlaybackState state)
+  {
+    if (thread!=QThread::currentThread()){
+      qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
+    }
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  qDebug() << "Voice player state:" << mediaPlayer->state() << "(" << currentPlaylist->currentIndex() << "/" << currentPlaylist->mediaCount() << ")";
-#endif
+  qDebug() << "Voice player state:" << mediaPlayer->playbackState() << "(" << mediaPlayer->index() << "/" << mediaPlayer->queueCount() << ")";
   if (!voiceDir.isEmpty() &&
       !nextMessage.empty() &&
-      state == QMediaPlayer::StoppedState) {
+      state == VoicePlayer::StoppedState) {
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    currentPlaylist->clear();
-#endif
+    mediaPlayer->clearQueue();
 
     for (const auto& sample : nextMessage){
       auto sampleUrl = QUrl::fromLocalFile(voiceDir + QDir::separator() + sampleFile(sample));
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       qDebug() << "Adding to playlist:" << sampleUrl;
-      currentPlaylist->addMedia(sampleUrl);
-#endif
+      mediaPlayer->addToQueue(sampleUrl);
     }
     nextMessage.clear();
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    currentPlaylist->setCurrentIndex(0);
-#endif
+    mediaPlayer->setCurrentIndex(0);
     mediaPlayer->play();
   }
 }

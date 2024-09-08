@@ -54,6 +54,8 @@ set(HEADER_FILES
     include/osmscoutclientqt/InstalledMapsModel.h
     include/osmscoutclientqt/Voice.h
     include/osmscoutclientqt/VoiceManager.h
+    include/osmscoutclientqt/VoicePlayer.h
+    include/osmscoutclientqt/VoiceCorePlayerImpl.h
     include/osmscoutclientqt/AvailableVoicesModel.h
     include/osmscoutclientqt/InstalledVoicesModel.h
 )
@@ -109,32 +111,33 @@ set(SOURCE_FILES
     src/osmscoutclientqt/InstalledMapsModel.cpp
     src/osmscoutclientqt/Voice.cpp
     src/osmscoutclientqt/VoiceManager.cpp
+    src/osmscoutclientqt/VoicePlayer.cpp
     src/osmscoutclientqt/AvailableVoicesModel.cpp
     src/osmscoutclientqt/InstalledVoicesModel.cpp
 )
 
 if (QT_VERSION_MAJOR EQUAL 6)
-	osmscout_library_project(
-			NAME OSMScoutClientQt
-			ALIAS ClientQt
-			OUTPUT_NAME "osmscout_client_qt"
-			SOURCE ${SOURCE_FILES}
-			HEADER ${HEADER_FILES}
-			INCLUDEDIR osmscoutclientqt
-			TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
-			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt6::Core5Compat Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
-	)
+          osmscout_library_project(
+                              NAME OSMScoutClientQt
+                              ALIAS ClientQt
+                              OUTPUT_NAME "osmscout_client_qt"
+                              SOURCE ${SOURCE_FILES}
+                              HEADER ${HEADER_FILES}
+                              INCLUDEDIR osmscoutclientqt
+                              TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
+                              TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt6::Core5Compat Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
+          )
 else ()
-	osmscout_library_project(
-			NAME OSMScoutClientQt
-			ALIAS ClientQt
-			OUTPUT_NAME "osmscout_client_qt"
-			SOURCE ${SOURCE_FILES}
-			HEADER ${HEADER_FILES}
-			INCLUDEDIR osmscoutclientqt
-			TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
-			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
-	)
+          osmscout_library_project(
+                              NAME OSMScoutClientQt
+                              ALIAS ClientQt
+                              OUTPUT_NAME "osmscout_client_qt"
+                              SOURCE ${SOURCE_FILES}
+                              HEADER ${HEADER_FILES}
+                              INCLUDEDIR osmscoutclientqt
+                              TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutclientqt/ClientQtFeatures.h.cmake
+                              TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Core Qt::Gui Qt::Quick Qt::Multimedia OSMScout::Client
+          )
 endif ()
 
 if(MARISA_FOUND)
@@ -143,12 +146,12 @@ if(MARISA_FOUND)
 endif()
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
-	set_target_properties(OSMScoutClientQt PROPERTIES
-		FRAMEWORK TRUE
-		FRAMEWORK_VERSION C
-		MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
-		#MACOSX_FRAMEWORK_INFO_PLIST Info.plist
-		PUBLIC_HEADER     "${HEADER_FILES}"
-		CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-		OUTPUT_NAME "OSMScoutClientQt")
+          set_target_properties(OSMScoutClientQt PROPERTIES
+                    FRAMEWORK TRUE
+                    FRAMEWORK_VERSION C
+                    MACOSX_FRAMEWORK_IDENTIFIER com.cmake.dynamicFramework
+                    #MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+                    PUBLIC_HEADER     "${HEADER_FILES}"
+                    CODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+                    OUTPUT_NAME "OSMScoutClientQt")
 endif()

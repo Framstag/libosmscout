@@ -28,12 +28,10 @@
 
 #include <QAbstractListModel>
 #include <QList>
-#include <QMediaPlayer>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QMediaPlaylist>
-#endif
 
 namespace osmscout {
+
+class VoiceCorePlayer;
 
 /**
  * Model providing access to currently installed voices on device
@@ -89,10 +87,7 @@ private:
   SettingsRef settings;
 
   // we setup QObject parents, objects are cleaned after Module destruction
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  QMediaPlaylist *currentPlaylist{nullptr};
-#endif
-  QMediaPlayer *mediaPlayer{nullptr};
+  VoiceCorePlayer *mediaPlayer{nullptr};
 };
 }
 #endif //OSMSCOUT_CLIENT_QT_INSTALLEDVOICESMODEL_H
