@@ -20,8 +20,16 @@ foreach hdr : osmscoutclientqtHeader
   mocHeaders += headerTemplate.format('include/',hdr)
 endforeach
 
-  mocFiles = qt.preprocess(moc_headers : mocHeaders,
-                            include_directories: include_directories('include'))
+  qtvers = qtClientDep.version().split('.')
+  moc_defines = [
+    '-DQT_VERSION_MAJOR=' + qtvers[0],
+    '-DQT_VERSION_MINOR=' + qtvers[1],
+    '-DQT_VERSION_PATCH=' + qtvers[2]
+    ]
+
+  mocFiles = qt.preprocess(moc_extra_arguments : moc_defines,
+                           moc_headers : mocHeaders,
+                           include_directories: include_directories('include'))
 
   osmscoutclientqt = library('osmscout_client_qt',
                              mocFiles,

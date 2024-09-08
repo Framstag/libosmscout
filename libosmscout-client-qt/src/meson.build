@@ -49,6 +49,7 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/InstalledMapsModel.cpp',
             'src/osmscoutclientqt/Voice.cpp',
             'src/osmscoutclientqt/VoiceManager.cpp',
+            'src/osmscoutclientqt/VoicePlayer.cpp',
             'src/osmscoutclientqt/AvailableVoicesModel.cpp',
             'src/osmscoutclientqt/InstalledVoicesModel.cpp',
           ]
