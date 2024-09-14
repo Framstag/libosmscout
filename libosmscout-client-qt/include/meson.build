@@ -52,6 +52,8 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/InstalledMapsModel.h',
             'osmscoutclientqt/Voice.h',
             'osmscoutclientqt/VoiceManager.h',
+            'osmscoutclientqt/VoicePlayer.h',
+            'osmscoutclientqt/VoiceCorePlayerImpl.h',
             'osmscoutclientqt/AvailableVoicesModel.h',
             'osmscoutclientqt/InstalledVoicesModel.h',
           ]

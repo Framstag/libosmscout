@@ -19,6 +19,7 @@
 
 #include <osmscoutclientqt/InstalledVoicesModel.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
+#include <osmscoutclientqt/VoicePlayer.h>
 
 #include <algorithm>
 
@@ -136,30 +137,21 @@ void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringLis
     return;
   }
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   if (mediaPlayer==nullptr){
-    assert(currentPlaylist==nullptr);
-    mediaPlayer = new QMediaPlayer(this);
-    currentPlaylist = new QMediaPlaylist(mediaPlayer);
-    mediaPlayer->setPlaylist(currentPlaylist);
+    mediaPlayer = new VoiceCorePlayer(this);
   }
 
-  currentPlaylist->clear();
+  mediaPlayer->clearQueue();
 
   for (const auto& file : sample){
     auto sampleUrl = QUrl::fromLocalFile(voice.getDir().path() + QDir::separator() + file);
     qDebug() << "Adding to playlist:" << sampleUrl;
-    currentPlaylist->addMedia(sampleUrl);
+    mediaPlayer->addToQueue(sampleUrl);
   }
 
-  currentPlaylist->setCurrentIndex(0);
-#else
-  // TODO: add support for Qt6
-  qWarning() << "Audio playback is not supported with Qt6 yet";
-#endif
+  mediaPlayer->setCurrentIndex(0);
   mediaPlayer->play();
 }
-
 QHash<int, QByteArray> InstalledVoicesModel::roleNames() const
 {
   QHash<int, QByteArray> roles=QAbstractListModel::roleNames();
