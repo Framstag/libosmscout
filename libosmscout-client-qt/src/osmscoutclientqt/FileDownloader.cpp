@@ -126,8 +126,13 @@ void FileDownloader::startDownload()
           this, &FileDownloader::onNetworkReadyRead);
   connect(reply, &QNetworkReply::finished,
           this, &FileDownloader::onDownloaded);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+  connect(reply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)),
+          this, SLOT(onNetworkError(QNetworkReply::NetworkError)));
+#else
   connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
           this, SLOT(onNetworkError(QNetworkReply::NetworkError)));
+#endif
 
   timeoutTimer.start();
 }
