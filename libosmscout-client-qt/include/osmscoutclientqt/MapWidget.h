@@ -204,10 +204,10 @@ public slots:
   void zoomOut(double zoomFactor, const QPoint widgetPosition);
 
   void move(QVector2D vector);
-  void left();
-  void right();
-  void up();
-  void down();
+  void moveLeft();
+  void moveRight();
+  void moveUp();
+  void moveDown();
 
   /**
    * Rotate view to specified angle [radians; [0 ~ 2*PI) ]
