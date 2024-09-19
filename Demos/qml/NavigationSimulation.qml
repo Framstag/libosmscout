@@ -94,11 +94,11 @@ Window {
                 event.accepted = true
             }
             else if (event.key === Qt.Key_Up) {
-                map.up()
+                map.moveUp()
                 event.accepted = true
             }
             else if (event.key === Qt.Key_Down) {
-                map.down()
+                map.moveDown()
                 event.accepted = true
             }
             else if (event.key === Qt.Key_Left) {
@@ -106,7 +106,7 @@ Window {
                     map.rotateLeft();
                 }
                 else {
-                    map.left();
+                    map.moveLeft();
                 }
                 event.accepted = true
             }
@@ -115,7 +115,7 @@ Window {
                     map.rotateRight();
                 }
                 else {
-                    map.right();
+                    map.moveRight();
                 }
                 event.accepted = true
             }
