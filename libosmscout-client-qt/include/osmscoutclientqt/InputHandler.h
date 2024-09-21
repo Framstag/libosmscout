@@ -276,6 +276,7 @@ public:
     virtual bool move(const QVector2D &vector); // move vector in pixels
     virtual bool rotateTo(double angle);
     virtual bool rotateBy(double angleChange);
+    virtual bool pivotBy(double angleChange);
     virtual bool touch(const QTouchEvent &event);
     virtual bool currentPosition(bool locationValid, osmscout::GeoCoord currentPosition);
     virtual bool vehiclePosition(const VehiclePosition &vehiclePosition, bool autoRotateMap);
@@ -306,8 +307,9 @@ private:
     MapView startMapView;
     QVector2D _move;
     osmscout::Magnification targetMagnification;
-    double targetAngle;
-    int animationDuration;
+    double targetAngle = 0.0;
+    int animationDuration = 0;
+    bool linearProgression = false;
 
     const int MOVE_ANIMATION_DURATION = 1000; // ms
     const int ZOOM_ANIMATION_DURATION = 500; // ms
@@ -335,6 +337,7 @@ public:
     bool move(const QVector2D &vector) override; // move vector in pixels
     bool rotateTo(double angle) override;
     bool rotateBy(double angleChange) override;
+    bool pivotBy(double angleChange) override;
     bool touch(const QTouchEvent &event) override;
 };
 

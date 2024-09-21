@@ -216,6 +216,7 @@ public slots:
   void rotateTo(double angle);
   void rotateLeft();
   void rotateRight();
+  void pivotBy(double angleChange);
 
   void toggleDaylight();
   void reloadStyle();

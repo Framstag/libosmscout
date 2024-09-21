@@ -218,6 +218,10 @@ bool InputHandler::rotateBy(double /*angleChange*/)
 {
     return false;
 }
+bool InputHandler::pivotBy(double /*angleChange*/)
+{
+  return false;
+}
 bool InputHandler::touch(const QTouchEvent &/*event*/)
 {
     return false;
@@ -271,8 +275,11 @@ void MoveHandler::onTimeout()
         progress = 1.0;
         timer.stop();
     }
-    //double scale = std::log( progress * (M_E - 1) + 1);
-    double scale = std::log10( progress * (10 - 1) + 1);
+    double scale = progress;
+    if (!linearProgression) {
+      //scale = std::log( progress * (M_E - 1) + 1);
+      scale = std::log10( progress * (10 - 1) + 1);
+    }
 
     osmscout::MercatorProjection projection;
 
@@ -359,6 +366,7 @@ bool MoveHandler::zoom(double zoomFactor, const QPoint &widgetPosition, const QR
         }
     }
     //emit viewChanged(view);
+    linearProgression = false;
     animationDuration = ZOOM_ANIMATION_DURATION;
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -377,6 +385,7 @@ bool MoveHandler::move(const QVector2D &move)
     _move.setX(move.x());
     _move.setY(move.y());
 
+    linearProgression = false;
     animationDuration = MOVE_ANIMATION_DURATION;
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -429,6 +438,7 @@ bool MoveHandler::rotateTo(double angle)
     _move.setX(0);
     _move.setY(0);
 
+    linearProgression = false;
     animationDuration = ROTATE_ANIMATION_DURATION;
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -449,6 +459,7 @@ bool MoveHandler::rotateBy(double angleChange)
     _move.setX(0);
     _move.setY(0);
 
+    linearProgression = false;
     animationDuration = ROTATE_ANIMATION_DURATION;
     animationStart.restart();
     timer.setInterval(ANIMATION_TICK);
@@ -456,6 +467,26 @@ bool MoveHandler::rotateBy(double angleChange)
     onTimeout();
 
     return true;
+}
+
+bool MoveHandler::pivotBy(double angleChange)
+{
+  startMapView = view;
+  targetMagnification = view.magnification;
+
+  targetAngle = view.angle.AsRadians()+angleChange;
+
+  _move.setX(0);
+  _move.setY(0);
+
+  linearProgression = true;
+  animationDuration = ROTATE_ANIMATION_DURATION;
+  animationStart.restart();
+  timer.setInterval(ANIMATION_TICK);
+  timer.start();
+  onTimeout();
+
+  return true;
 }
 
 ZoomGestureHandler::ZoomGestureHandler(const MapView &view, const QPoint &p, double zoomDistance):

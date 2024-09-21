@@ -518,6 +518,15 @@ void MapWidget::rotateRight()
     }
 }
 
+void MapWidget::pivotBy(double angleChange)
+{
+  vehicle.lastGesture.restart();
+  if (!inputHandler->pivotBy(angleChange)){
+    setupInputHandler(new MoveHandler(*view));
+    inputHandler->pivotBy(angleChange);
+  }
+}
+
 void MapWidget::toggleDaylight()
 {
     DBThreadRef dbThread=OSMScoutQt::GetInstance().GetDBThread();
