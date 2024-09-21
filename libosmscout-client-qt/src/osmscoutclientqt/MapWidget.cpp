@@ -471,22 +471,22 @@ void MapWidget::move(QVector2D vector)
     }
 }
 
-void MapWidget::left()
+void MapWidget::moveLeft()
 {
     move(QVector2D( width()/-3, 0 ));
 }
 
-void MapWidget::right()
+void MapWidget::moveRight()
 {
     move(QVector2D( width()/3, 0 ));
 }
 
-void MapWidget::up()
+void MapWidget::moveUp()
 {
     move(QVector2D( 0, height()/-3 ));
 }
 
-void MapWidget::down()
+void MapWidget::moveDown()
 {
     move(QVector2D( 0, height()/+3 ));
 }

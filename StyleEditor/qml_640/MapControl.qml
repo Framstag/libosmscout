@@ -122,16 +122,16 @@ Rectangle {
                 mapView.zoomOut(2.0)
             }
             else if (event.key === Qt.Key_Up) {
-                mapView.up()
+                mapView.moveUp()
             }
             else if (event.key === Qt.Key_Down) {
-                mapView.down()
+                mapView.moveDown()
             }
             else if (event.key === Qt.Key_Left) {
-                mapView.left()
+                mapView.moveLeft()
             }
             else if (event.key === Qt.Key_Right) {
-                mapView.right()
+                mapView.moveRight()
             }
         }
         */
