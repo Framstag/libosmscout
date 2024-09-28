@@ -192,6 +192,15 @@ namespace osmscout {
     }
   }
 
+  uint32_t Database::GetDatabaseFileFormatVersion(const std::string& path)
+  {
+    return TypeConfig::GetDatabaseFileFormatVersion(path);
+  }
+  uint32_t Database::GetLibraryFileFormatVersion()
+  {
+    return FILE_FORMAT_VERSION;
+  }
+
   bool Database::Open(const std::string& path)
   {
     assert(!path.empty());

@@ -371,6 +371,9 @@ namespace osmscout {
     explicit Database(const DatabaseParameter& parameter);
     ~Database();
 
+    static uint32_t GetDatabaseFileFormatVersion(const std::string& path);
+    static uint32_t GetLibraryFileFormatVersion();
+
     bool Open(const std::string& path);
     bool IsOpen() const;
     void Close();
