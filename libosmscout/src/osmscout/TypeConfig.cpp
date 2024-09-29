@@ -1197,6 +1197,35 @@
   }
 
   /**
+   * Returns the file format version of the given database (scanning the
+   * "types.dat" file in the given directory) or an IOException.
+   *
+   * @param directory
+   * @return
+   */
+  uint32_t TypeConfig::GetDatabaseFileFormatVersion(const std::string& directory)
+  {
+    FileScanner scanner;
+
+    try {
+      scanner.Open(AppendFileToDir(directory,
+                                   "types.dat"),
+                   FileScanner::Sequential,
+                   true);
+
+      uint32_t fileFormatVersion=scanner.ReadUInt32();
+
+      scanner.Close();
+
+      return fileFormatVersion;
+    }
+    catch (const IOException& e) {
+      scanner.CloseFailsafe();
+     throw e;
+    }
+  }
+
+  /**
    * Loads the type configuration from the given binary data file.
    *
    * Note:

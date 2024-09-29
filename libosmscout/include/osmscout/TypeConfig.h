@@ -1384,9 +1384,12 @@ namespace osmscout {
      * Methods for loading/storing of type information from/to files.
      */
     //@{
+    static uint32_t GetDatabaseFileFormatVersion(const std::string& directory);
+
     bool LoadFromOSTFile(const std::string& filename);
     bool LoadFromDataFile(const std::string& directory);
     bool StoreToDataFile(const std::string& directory) const;
+
     //@}
   };
 
