@@ -24,7 +24,7 @@ static std::string GetTestDatabaseDirectory()
     throw osmscout::UninitializedException("Environment variable 'TESTS_TOP_DIR' does not point to directory");
   }
 
-  return std::filesystem::path(testsTopDir).append("data").append("testregion").native();
+  return std::filesystem::path(testsTopDir).append("data").append("testregion").string();
 }
 
 TEST_CASE("TypeConfig::GetFileFormatVersion(dir) throws exception on missing db") {
