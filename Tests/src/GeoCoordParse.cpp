@@ -2,7 +2,7 @@
 
 #include <osmscout/GeoCoord.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 bool CheckParseFail(const std::string& text)
 {

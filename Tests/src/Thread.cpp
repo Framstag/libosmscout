@@ -1,9 +1,10 @@
 #include <osmscout/async/Signal.h>
 #include <osmscout/async/Thread.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
+#include <iostream>
 
 TEST_CASE("Thread exit signal") {
 

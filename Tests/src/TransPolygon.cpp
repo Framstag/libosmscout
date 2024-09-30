@@ -27,7 +27,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Transformation.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 

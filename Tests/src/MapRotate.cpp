@@ -23,7 +23,7 @@
 
 #include <osmscoutmap/MapPainterNoOp.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 static const double ringCoords[] = {
   50.08336917, 14.41309835,

@@ -2,7 +2,7 @@
 
 #include <osmscout/async/CancelableFuture.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Call callback immediately") {
   osmscout::CancelableFuture<int>::Promise promise;

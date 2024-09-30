@@ -148,6 +148,8 @@ macro(target_exists target var)
   endif()
 endmacro()
 
+find_package(Catch2 3 REQUIRED)
+
 if(NOT IOS)
   find_package(Marisa)
 endif()

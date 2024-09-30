@@ -1,6 +1,6 @@
 #include <osmscout/util/Geometry.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Simple point") {
   std::vector<osmscout::ScanCell> cells;

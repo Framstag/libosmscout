@@ -8,7 +8,7 @@
 
 #include <osmscout/util/TagErrorReporter.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 std::string AccessToString(uint8_t access)
 {

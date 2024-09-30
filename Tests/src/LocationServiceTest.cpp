@@ -7,7 +7,8 @@
 
 #include <osmscout/location/LocationService.h>
 
-#include <TestRunner.h>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_session.hpp>
 
 osmscout::DatabaseRef        database;
 osmscout::LocationServiceRef locationService;

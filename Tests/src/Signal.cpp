@@ -1,8 +1,9 @@
 #include <osmscout/async/Signal.h>
 
-#include <TestMain.h>
-
+#include <map>
 #include <string>
+
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("basic signal <-> slot connection") {
   osmscout::Signal<std::string, double> source;

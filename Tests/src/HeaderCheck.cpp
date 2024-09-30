@@ -1,7 +1,11 @@
-#include <TestMain.h>
-
 #include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <list>
+#include <regex>
+#include <set>
+
+#include <catch2/catch_test_macros.hpp>
 
 namespace fs = std::filesystem;
 

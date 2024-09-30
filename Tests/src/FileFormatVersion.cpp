@@ -4,7 +4,7 @@
 #include <osmscout/db/Database.h>
 #include <osmscout/TypeConfig.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 static std::string GetTestDatabaseDirectory()
 {

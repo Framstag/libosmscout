@@ -4,7 +4,7 @@
 
 int errors=0;
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 bool CheckBitsNeededToEncodeNumber(unsigned long number, uint8_t expectedBits)
 {

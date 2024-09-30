@@ -19,7 +19,9 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
+// Deprecated, see comments under https://github.com/catchorg/Catch2/blob/devel/docs/comparing-floating-point-numbers.md#approx
+#include <catch2/catch_approx.hpp>
 
 osmscout::GeoCoord defaultCenter(51.51241,
                                  7.46525);
@@ -152,7 +154,7 @@ TEST_CASE("GetPixelSize()")
     defaultWidth,
     defaultHeight);
 
-  REQUIRE(projection.GetPixelSize()==Approx(5.9462763732));
+  REQUIRE(projection.GetPixelSize()==Catch::Approx(5.9462763732));
 }
 
 TEST_CASE("GetMeterInMM()")
@@ -166,7 +168,7 @@ TEST_CASE("GetMeterInMM()")
     defaultWidth,
     defaultHeight);
 
-  REQUIRE(projection.GetMeterInMM()==Approx(0.0444956334));
+  REQUIRE(projection.GetMeterInMM()==Catch::Approx(0.0444956334));
 }
 
 TEST_CASE("GetMeterInPixel()")
@@ -180,7 +182,7 @@ TEST_CASE("GetMeterInPixel()")
     defaultWidth,
     defaultHeight);
 
-  REQUIRE(projection.GetMeterInPixel()==Approx(0.1681724725));
+  REQUIRE(projection.GetMeterInPixel()==Catch::Approx(0.1681724725));
 }
 
 TEST_CASE("ConvertWidthToPixel()")
@@ -194,7 +196,7 @@ TEST_CASE("ConvertWidthToPixel()")
     defaultWidth,
     defaultHeight);
 
-  REQUIRE(projection.ConvertWidthToPixel(100.0)==Approx(377.9527559055));
+  REQUIRE(projection.ConvertWidthToPixel(100.0)==Catch::Approx(377.9527559055));
 }
 
 TEST_CASE("ConvertPixelToWidth()")
@@ -208,7 +210,7 @@ TEST_CASE("ConvertPixelToWidth()")
     defaultWidth,
     defaultHeight);
 
-  REQUIRE(projection.ConvertPixelToWidth(377.9527559055)==Approx(100.0));
+  REQUIRE(projection.ConvertPixelToWidth(377.9527559055)==Catch::Approx(100.0));
 }
 
 TEST_CASE("PixelToGeo()")

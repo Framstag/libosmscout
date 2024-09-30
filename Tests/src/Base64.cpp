@@ -1,6 +1,6 @@
 #include <osmscout/util/Base64.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 const char TestString[] = "Lorem ipsum dolor sit amet, "
                                     "consectetuer adipiscing elit. "

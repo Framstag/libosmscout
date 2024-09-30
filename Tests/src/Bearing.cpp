@@ -3,7 +3,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Bearing.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Normalise") {
   osmscout::Bearing bearing;

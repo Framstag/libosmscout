@@ -2,7 +2,7 @@
 
 #include <osmscout/util/Number.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 bool CheckEncode(uint64_t value,
                  const char* expected, size_t expectedLength)

@@ -28,7 +28,7 @@
 #include <osmscout/async/ProcessingQueue.h>
 #include <osmscout/util/StopClock.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std::chrono_literals;
 

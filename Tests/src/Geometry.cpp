@@ -23,7 +23,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/GeoCoord.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
@@ -197,7 +197,7 @@ TEST_CASE("Ellipsoidal distance right")
 
   osmscout::GeoCoord target=location.Add(angle,distance);
 
-  INFO(target.GetDisplayText())
+  INFO(target.GetDisplayText());
 
   REQUIRE(target.GetLon()>location.GetLon());
   REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));
@@ -223,7 +223,7 @@ TEST_CASE("Ellipsoidal distance left")
 
   osmscout::GeoCoord target=location.Add(angle,distance);
 
-  INFO(target.GetDisplayText())
+  INFO(target.GetDisplayText());
 
   REQUIRE(target.GetLon()<location.GetLon());
   REQUIRE(IsSame(target.GetLat(),location.GetLat(),1e-4));

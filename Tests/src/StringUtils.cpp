@@ -1,8 +1,9 @@
 #include <iostream>
+#include <cmath>
 
 #include <osmscout/util/String.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Split empty string")
 {

@@ -24,7 +24,7 @@
 #include <osmscout/util/PolygonCenter.h>
 #include <osmscout/log/Logger.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 static const std::vector<std::vector<int>> water1Data = {
     std::vector<int>{3116, 3071, 3118, 3068, 3108, 3102, 3100, 3105, 3096, 3113, 3099, 3121, 3091, 3135, 3099, 3133,

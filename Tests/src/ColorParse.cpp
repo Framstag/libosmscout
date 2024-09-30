@@ -2,7 +2,7 @@
 
 #include <osmscout/util/Color.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 struct TestData
 {
