@@ -640,9 +640,10 @@ namespace osmscout {
     private:
       uint8_t from = uint8_t(-1); //!< left-most suggested lane, inclusive
       uint8_t to = uint8_t(-1); //!< right-most suggested lane, inclusive
+      LaneTurn turn{LaneTurn::None};
 
     public:
-      SuggestedLaneDescription(uint8_t from, uint8_t to);
+      SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn);
 
       std::string GetDebugString() const override;
 
@@ -654,6 +655,11 @@ namespace osmscout {
       uint8_t GetTo() const
       {
         return to;
+      }
+
+      LaneTurn GetTurn() const
+      {
+        return turn;
       }
     };
 

@@ -22,6 +22,7 @@
 #include <filesystem>
 
 #include <osmscout/routing/RoutePostprocessor.h>
+#include <osmscout/log/Logger.h>
 
 #include <TestMain.h>
 
@@ -327,7 +328,7 @@ public:
         assert(false);
       }
 
-      if (fromNodeIndex>0) {
+      if (fromNodeIndex==0) {
         return false;
       }
 
@@ -463,6 +464,7 @@ TEST_CASE("Suggest lanes on simple junction")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Unknown);
   }
 
   {
@@ -483,6 +485,7 @@ TEST_CASE("Suggest lanes on simple junction")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Unknown);
   }
 }
 
@@ -490,6 +493,8 @@ TEST_CASE("Suggest lanes on simple junction")
 TEST_CASE("Suggest lanes on slightly complex junction")
 {
   using namespace osmscout;
+
+  ::osmscout::log.Debug(true);
 
   // https://www.openstreetmap.org/#map=19/50.077838/14.511968
   MockDatabaseBuilder databaseBuilder;
@@ -552,11 +557,11 @@ TEST_CASE("Suggest lanes on slightly complex junction")
 
   RouteDescription description;
 
-  RoutePostprocessor::LanesPostprocessor lanesPostprocessor;
-  lanesPostprocessor.Process(context, description);
+  RoutePostprocessor::LanesPostprocessor lanesPostproc;
+  lanesPostproc.Process(context, description);
 
-  RoutePostprocessor::SuggestedLanesPostprocessor postprocessor;
-  postprocessor.Process(context, description);
+  RoutePostprocessor::SuggestedLanesPostprocessor suggestedLanesPostproc;
+  suggestedLanesPostproc.Process(context, description);
 
   { // route is going from west to east on Cernokostelecka
     description.Clear();
@@ -564,16 +569,16 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 0, {southCernokostelecka1Ref, southCernokostelecka2Ref, drevcicka2Ref}, southCernokostelecka2Ref, 1);
     description.AddNode(0, 1, {southCernokostelecka2Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
-    // TODO: should suggest right lane, through
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
       nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
-    // REQUIRE(suggestedLanes);
-    // REQUIRE(suggestedLanes->GetFrom() == 1);
-    // REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 1);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
   }
 
   { // route is going from west on Cernokostelecka to north on Drevcicka
@@ -583,8 +588,8 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 1, {northCernokostelecka1Ref, drevcicka1Ref, drevcicka2Ref, northCernokostelecka2Ref}, drevcicka1Ref, 0);
     description.AddNode(0, 1, {drevcicka1Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
     // should suggest left lane, left turn
     auto nodeIt = description.Nodes().begin();
@@ -593,6 +598,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
   }
 
   { // route is going from the east to west on Cernokostelecka
@@ -601,14 +607,17 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 0, {northCernokostelecka1Ref, drevcicka1Ref, drevcicka2Ref, northCernokostelecka2Ref}, northCernokostelecka2Ref, 1);
     description.AddNode(0, 0, {northCernokostelecka2Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
-    // both lanes are usable, should provide no suggestion
+    // both lanes are usable, we don't need suggestion as going through, but let's provide it
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
       nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
-    REQUIRE(suggestedLanes==nullptr);
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
   }
 
   { // route is going from the east on Cernokostelecka to north on Drevcicka
@@ -617,8 +626,8 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 1, {northCernokostelecka1Ref, drevcicka1Ref, drevcicka2Ref, northCernokostelecka2Ref}, drevcicka1Ref, 0);
     description.AddNode(0, 0, {drevcicka1Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
     // should suggest right lane to the right
     auto nodeIt = description.Nodes().begin();
@@ -627,6 +636,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
   }
 
   { // route is going from the north from Drevcicka to the west on Cernokostelecka
@@ -635,16 +645,17 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 0, {northCernokostelecka1Ref, drevcicka1Ref, drevcicka2Ref, northCernokostelecka2Ref}, northCernokostelecka2Ref, 1);
     description.AddNode(0, 0, {northCernokostelecka2Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
     // TODO: should suggest right lane to the right
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
       nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
-    // REQUIRE(suggestedLanes);
-    // REQUIRE(suggestedLanes->GetFrom() == 1);
-    // REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 1);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
   }
 
   { // route is going from the north from Drevcicka to the east on Cernokostelecka
@@ -654,8 +665,8 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     description.AddNode(0, 0, {southCernokostelecka1Ref, southCernokostelecka2Ref, drevcicka2Ref}, southCernokostelecka2Ref, 1);
     description.AddNode(0, 0, {southCernokostelecka2Ref}, ObjectFileRef(), 0);
 
-    lanesPostprocessor.Process(context, description);
-    postprocessor.Process(context, description);
+    lanesPostproc.Process(context, description);
+    suggestedLanesPostproc.Process(context, description);
 
     // should suggest left lane to the left
     auto nodeIt = description.Nodes().begin();
@@ -664,6 +675,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
   }
 }
 
@@ -728,6 +740,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 2);
     REQUIRE(suggestedLanes->GetTo() == 2);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::SlightRight);
   }
 
   {
@@ -748,6 +761,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
   }
 }
 
@@ -813,6 +827,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::SlightLeft);
   }
 
   {
@@ -833,6 +848,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 2);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
   }
 
 }
