@@ -512,14 +512,16 @@ namespace osmscout {
     return !((*this)==o);
   }
 
-  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to):
-      from(from), to(to)
+  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn):
+      from(from), to(to), turn(turn)
   {}
 
   std::string RouteDescription::SuggestedLaneDescription::GetDebugString() const
   {
     std::stringstream ss;
-    ss << "Suggested lanes: <";
+    ss << "Suggested lanes: ";
+    ss << LaneTurnString(turn);
+    ss << " <";
     ss << (int)from;
     ss << ", ";
     ss << (int)to;

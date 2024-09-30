@@ -1603,6 +1603,80 @@ namespace osmscout {
     return true;
   }
 
+
+  namespace {
+    uint32_t TurnToBits(LaneTurn turn)
+    {
+      switch (turn) {
+        case LaneTurn::None:
+          return 0b11111111;
+        case LaneTurn::SlightLeft:
+          return 0b00000001;
+        case LaneTurn::Left:
+          return 0b00000010;
+        case LaneTurn::SharpLeft:
+          return 0b00000100;
+        case LaneTurn::Through_SlightLeft:
+          return 0b00001001;
+        case LaneTurn::Through_Left:
+          return 0b00001010;
+        case LaneTurn::Through_SharpLeft:
+          return 0b00001100;
+        case LaneTurn::Through:
+          return 0b00001000;
+        case LaneTurn::Through_SlightRight:
+          return 0b00011000;
+        case LaneTurn::Through_Right:
+          return 0b00101000;
+        case LaneTurn::Through_SharpRight:
+          return 0b01001000;
+        case LaneTurn::SlightRight:
+          return 0b00010000;
+        case LaneTurn::Right:
+          return 0b00100000;
+        case LaneTurn::MergeToRight:
+          return 0b01000000;
+        default:
+          return 0b00000000;
+      }
+    };
+
+    LaneTurn BitsToTurn(uint32_t turnBits)
+    {
+      switch (turnBits) {
+        case 0b00000001:
+          return LaneTurn::SlightLeft;
+        case 0b00000010:
+          return LaneTurn::Left;
+        case 0b00000100:
+          return LaneTurn::SharpLeft;
+        case 0b00001001:
+          return LaneTurn::Through_SlightLeft;
+        case 0b00001010:
+          return LaneTurn::Through_Left;
+        case 0b00001100:
+          return LaneTurn::Through_SharpLeft;
+        case 0b00001000:
+          return LaneTurn::Through;
+        case 0b00011000:
+          return LaneTurn::Through_SlightRight;
+        case 0b00101000:
+          return LaneTurn::Through_Right;
+        case 0b01001000:
+          return LaneTurn::Through_SharpRight;
+        case 0b00010000:
+          return LaneTurn::SlightRight;
+        case 0b00100000:
+          return LaneTurn::Right;
+        case 0b01000000:
+          return LaneTurn::MergeToRight;
+        default:
+          return LaneTurn::Unknown;
+      }
+    };
+
+  } // end of anonymous namespace
+
   void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const PostprocessorContext& postprocessor,
                                                                                const RouteDescription::Node &node,
                                                                                const std::list<RouteDescription::Node*> &backBuffer) const
@@ -1640,7 +1714,7 @@ namespace osmscout {
     struct JunctionExit {
       Id nextId;
       Bearing bearing;
-      Bearing relativeBearing; // angle between exit and selected way
+      Bearing relativeBearing; // angle between current way and the straight direction. 0°-180° means to right, 180°-360° is left
       RouteDescription::LaneDescription lanes;
     };
     std::vector<JunctionExit> junctionExits; // excluding incoming and outgoing way
@@ -1679,13 +1753,12 @@ namespace osmscout {
       }
     }
 
-    Bearing prevNodeRelativeBearing = prevNodeBearing - nextNodeBearing;
+    Bearing prevNodeRelativeToNextBearing = prevNodeBearing - nextNodeBearing;
     for (JunctionExit &exit: junctionExits){
-      Bearing relativeBearing = exit.bearing - nextNodeBearing;
-      if (relativeBearing > Bearing::Radians(M_PI)) {
-        exit.relativeBearing = relativeBearing*-1;
-      }
-      if (relativeBearing < prevNodeRelativeBearing) {
+      Bearing relativeToNextBearing = exit.bearing - nextNodeBearing; // relative to next
+      exit.relativeBearing = exit.bearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
+
+      if (relativeToNextBearing < prevNodeRelativeToNextBearing) {
         junctionRightExits.push_back(exit);
       } else {
         junctionLeftExits.push_back(exit);
@@ -1710,6 +1783,9 @@ namespace osmscout {
       if (size_t(allowedLaneFrom) < laneTurns.size()) {
         exitVariant=laneTurns[allowedLaneFrom];
       }
+      if (exitVariant==LaneTurn::Through and exit.relativeBearing < Bearing::Degrees(-40) and exit.relativeBearing > Bearing::Degrees(-180)) {
+        continue; // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
+      }
       for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
         LaneTurn turn = LaneTurn::Through;
         if (size_t(allowedLaneFrom) < laneTurns.size()) {
@@ -1720,6 +1796,7 @@ namespace osmscout {
             turn==LaneTurn::Through_SharpLeft) {
           // do not consume lane when it allows to use with two directions, just remove left direction
           laneTurns[allowedLaneTo]=LaneTurn::Through;
+          continue;
         }
         if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
           allowedLaneFrom++;
@@ -1734,6 +1811,9 @@ namespace osmscout {
       if (size_t(allowedLaneTo) < laneTurns.size()) {
         exitVariant=laneTurns[allowedLaneTo];
       }
+      if (exitVariant==LaneTurn::Through and exit.relativeBearing > Bearing::Degrees(40) and exit.relativeBearing < Bearing::Degrees(180)) {
+        continue; // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
+      }
       for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
         LaneTurn turn = LaneTurn::Through;
         if (size_t(allowedLaneTo) < laneTurns.size()) {
@@ -1742,8 +1822,9 @@ namespace osmscout {
         if (turn==LaneTurn::Through_Right ||
             turn==LaneTurn::Through_SlightRight ||
             turn==LaneTurn::Through_SharpRight) {
-          // do not consume lane when it allows to use with two directions, just remove left direction
+          // do not consume lane when it allows to use with two directions, just remove right direction
           laneTurns[allowedLaneTo]=LaneTurn::Through;
+          continue;
         }
         if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
           allowedLaneTo--;
@@ -1755,7 +1836,32 @@ namespace osmscout {
 
     // setup suggested lane description to incoming route segment
     assert(allowedLaneTo >= allowedLaneFrom);
-    auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo);
+
+    // detect what all allowed turns have common
+    // keep in mind that laneTurns may have removed directions used by exits, it is benefitial here
+    uint32_t suggestedTurnBits = TurnToBits(laneTurns[allowedLaneFrom]);
+    for (int i = allowedLaneFrom + 1; i <= allowedLaneTo; i++) {
+      suggestedTurnBits &= TurnToBits(laneTurns[i]);
+    }
+    // evaluate suggested direction from lane turns
+    Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
+    LaneTurn suggestedTurn = BitsToTurn(suggestedTurnBits);
+    if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right  || suggestedTurn == LaneTurn::Through_SharpRight) {
+      if (relativeBearing > Bearing::Degrees(30) and relativeBearing < Bearing::Degrees(180)) {
+        suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
+      } else {
+        suggestedTurn = LaneTurn::Through;
+      }
+    }
+    if (suggestedTurn == LaneTurn::Through_SlightLeft || suggestedTurn == LaneTurn::Through_Left  || suggestedTurn == LaneTurn::Through_SharpLeft) {
+      if (relativeBearing < Bearing::Degrees(-30) and relativeBearing > Bearing::Degrees(180)) {
+        suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
+      } else {
+        suggestedTurn = LaneTurn::Through;
+      }
+    }
+
+    auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo, suggestedTurn);
     for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
       auto* nodePtr = *it;
       auto nodeLanes = GetLaneDescription(*nodePtr);
@@ -1794,7 +1900,8 @@ namespace osmscout {
       if (!backBuffer.empty() && !node.GetObjects().empty()) { // we know history and there is some crossing on current node
         auto prevLanes = GetLaneDescription(*backBuffer.back());
         assert(prevLanes);
-        if (prevLanes->GetLaneCount() > lanes->GetLaneCount()) { // lane count was decreased
+        if (prevLanes->GetLaneCount() > lanes->GetLaneCount() // lane count was decreased
+            || prevLanes->GetLaneTurns() != lanes->GetLaneTurns()) { // lane turns changed
 
           EvaluateLaneSuggestion(postprocessor, node, backBuffer);
 
