@@ -1639,7 +1639,7 @@ namespace osmscout {
         default:
           return 0b00000000;
       }
-    };
+    }
 
     LaneTurn BitsToTurn(uint32_t turnBits)
     {
@@ -1673,7 +1673,7 @@ namespace osmscout {
         default:
           return LaneTurn::Unknown;
       }
-    };
+    }
 
   } // end of anonymous namespace
 
