@@ -271,7 +271,7 @@ else
     buildImport=false
 endif
 
-if get_option('enableTests')
+if get_option('enableTests') and catch2Dep.found() and catch2MainDep.found()
     buildTests=true
 else
     buildTests=false
