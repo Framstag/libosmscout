@@ -3,6 +3,7 @@
   "version-string": "1.1.0",
   "builtin-baseline": "501db0f17ef6df184fcdbfbe0f87cde2313b6ab1",
   "dependencies": [
+    "catch2",
     "zlib",
     "libiconv",
     "libxml2",
