@@ -1776,6 +1776,9 @@ namespace osmscout {
     int allowedLaneFrom = 0;
     int allowedLaneTo = prevLanes->GetLaneCount()-1; // inclusive
     std::vector<LaneTurn> laneTurns = prevLanes->GetLaneTurns();
+    if (laneTurns.empty()) {
+      return;
+    }
 
     // remove allowed lanes used for left exits
     for (const auto &exit: junctionLeftExits) {
@@ -2634,7 +2637,7 @@ namespace osmscout {
     RouteDescription::Node *previousNode = nullptr;
     for (auto &node : description.Nodes()) {
         if (--nodeCount == 0) {
-            
+
             if (previousNode) {
                 RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(sectionCount, sectionLengths[sectionCount - 1]);
                 previousNode->AddDescription(RouteDescription::NODE_VIA_DESC, desc);
@@ -2642,18 +2645,18 @@ namespace osmscout {
 
             previousNode = &node;
             nodeCount = sectionLengths[sectionCount++];
-            
+
             if (sectionCount >= nbSections) {
                 break;
             }
         }
     }
-      
+
     if (previousNode) {
         RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(nbSections, sectionLengths[nbSections - 1]);
         previousNode->AddDescription(RouteDescription::NODE_VIA_DESC, desc);
     }
-      
+
     return true;
   }
 }
