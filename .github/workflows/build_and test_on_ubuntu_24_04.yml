@@ -32,7 +32,7 @@ jobs:
               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
               qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
               qttools5-dev qtmultimedia5-dev
-              libglm-dev libglew-dev freeglut3 freeglut3-dev
+              libglm-dev libglew-dev libglut-dev
               libmarisa-dev"
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug
@@ -63,7 +63,7 @@ jobs:
                libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
                qttools5-dev qtmultimedia5-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev
+               libglm-dev libglew-dev libglut-dev
                libmarisa-dev"
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized --unity on debug
@@ -91,7 +91,7 @@ jobs:
                libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
                qttools5-dev qtmultimedia5-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
                xvfb
                libmarisa-dev"
       - name: Configure build project
