@@ -1839,9 +1839,18 @@ namespace osmscout {
 
     // detect what all allowed turns have common
     // keep in mind that laneTurns may have removed directions used by exits, it is benefitial here
-    uint32_t suggestedTurnBits = TurnToBits(laneTurns[allowedLaneFrom]);
+    uint32_t suggestedTurnBits;
+    if (allowedLaneFrom < int(laneTurns.size())) {
+      suggestedTurnBits = TurnToBits(laneTurns[allowedLaneFrom]);
+    } else {
+      suggestedTurnBits = TurnToBits(LaneTurn::Unknown);
+    }
     for (int i = allowedLaneFrom + 1; i <= allowedLaneTo; i++) {
-      suggestedTurnBits &= TurnToBits(laneTurns[i]);
+      if (i < int(laneTurns.size())) {
+        suggestedTurnBits &= TurnToBits(laneTurns[i]);
+      } else {
+        suggestedTurnBits &= TurnToBits(LaneTurn::Unknown);
+      }
     }
     // evaluate suggested direction from lane turns
     Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
