@@ -22,9 +22,7 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install clang compiler and Co
-        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config
-      - name: Install meson and ninja via pip
-        run:  "pip install meson ninja"
+        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
               catch2
@@ -55,9 +53,7 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config
-      - name: Install meson and ninja via pip
-        run:  "pip install meson ninja"
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
               catch2
@@ -119,9 +115,7 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config
-      - name: Install meson and ninja via pip
-        run:  "pip install meson ninja"
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config meson ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2

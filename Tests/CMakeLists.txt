@@ -1,17 +1,17 @@
 #---- AccessParse
-osmscout_test_project(NAME AccessParse SOURCES src/AccessParse.cpp)
+osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
 
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessing SOURCES src/AsyncProcessing.cpp)
 
 #---- AsyncWorker
-osmscout_test_project(NAME AsyncWorker SOURCES src/AsyncWorker.cpp)
+osmscout_test_project(NAME AsyncWorkerTest SOURCES src/AsyncWorkerTest.cpp)
 
 #---- Bearing
-osmscout_test_project(NAME Bearing SOURCES src/Bearing.cpp)
+osmscout_test_project(NAME BearingTest SOURCES src/BearingTest.cpp)
 
 #---- BitsAndBytesNeeded
-osmscout_test_project(NAME BitsAndBytesNeeded SOURCES src/BitsAndBytesNeeded.cpp)
+osmscout_test_project(NAME BitsAndBytesNeededTest SOURCES src/BitsAndBytesNeededTest.cpp)
 
 #---- ByteTest
 osmscout_test_project(NAME ByteTest SOURCES src/ByteTest.cpp)
@@ -23,23 +23,23 @@ osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COM
 osmscout_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
 
 #---- CancelableFuture
-osmscout_test_project(NAME CancelableFuture SOURCES src/CancelableFuture.cpp)
+osmscout_test_project(NAME CancelableFutureTest SOURCES src/CancelableFutureTest.cpp)
 
 #---- CmdLineParsing
-osmscout_test_project(NAME CmdLineParsing SOURCES src/CmdLineParsing.cpp)
+osmscout_test_project(NAME CmdLineParsingTest SOURCES src/CmdLineParsingTest.cpp)
 
 #---- ColorParse
-osmscout_test_project(NAME ColorParse SOURCES src/ColorParse.cpp)
+osmscout_test_project(NAME ColorParseTest SOURCES src/ColorParseTest.cpp)
 
 #---- CoordinateEncoding
 osmscout_test_project(NAME CoordinateEncoding SOURCES src/CoordinateEncoding.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- FileFormatVersion
-osmscout_test_project(NAME FileFormatVersion SOURCES src/FileFormatVersion.cpp)
-set_tests_properties(FileFormatVersion PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+osmscout_test_project(NAME FileFormatVersionTest SOURCES src/FileFormatVersionTest.cpp)
+set_tests_properties(FileFormatVersionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
 #---- Latch
-osmscout_test_project(NAME Latch SOURCES src/Latch.cpp)
+osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
 
 #---- LocationLookup
 osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp TARGET OSMScout::Test OSMScout::Import)
@@ -51,7 +51,7 @@ set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 osmscout_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
 
 #---- OpeningHours
-osmscout_test_project(NAME OpeningHours SOURCES src/OpeningHours.cpp)
+osmscout_test_project(NAME OpeningHoursTest SOURCES src/OpeningHoursTest.cpp)
 
 #---- ReaderScannerPerformance
 osmscout_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
@@ -95,7 +95,7 @@ else()
 endif()
 
 #---- Thread
-osmscout_test_project(NAME Thread SOURCES src/Thread.cpp)
+osmscout_test_project(NAME ThreadTest SOURCES src/ThreadTest.cpp)
 
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)
@@ -107,15 +107,15 @@ else()
 endif()
 
 #---- Geometry
-osmscout_test_project(NAME Geometry SOURCES src/Geometry.cpp)
+osmscout_test_project(NAME GeometryTest SOURCES src/GeometryTest.cpp)
 
 #---- HeaderCheck
-osmscout_test_project(NAME HeaderCheck SOURCES src/HeaderCheck.cpp)
-set_tests_properties(HeaderCheck PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
+osmscout_test_project(NAME HeaderCheckTest SOURCES src/HeaderCheckTest.cpp)
+set_tests_properties(HeaderCheckTest PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
 
 #---- WaterIndex
 if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
-	osmscout_test_project(NAME WaterIndex SOURCES src/WaterIndex.cpp TARGET OSMScout::Import)
+	osmscout_test_project(NAME WaterIndexTest SOURCES src/WaterIndexTest.cpp TARGET OSMScout::Import)
 else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()
@@ -126,35 +126,35 @@ osmscout_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
 #---- MapRotate
 if(NOT MINGW AND NOT MSYS)
 	if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
-		osmscout_test_project(NAME MapRotate SOURCES src/MapRotate.cpp TARGET OSMScout::Map)
+		osmscout_test_project(NAME MapRotateTest SOURCES src/MapRotateTest.cpp TARGET OSMScout::Map)
 	else()
 		message("Skip MapRotate test, libosmscout-map is missing.")
 	endif()
 endif()
 
 #---- EncodeNumber
-osmscout_test_project(NAME EncodeNumber SOURCES src/EncodeNumber.cpp)
+osmscout_test_project(NAME EncodeNumberTest SOURCES src/EncodeNumberTest.cpp)
 
 #---- FeatureLabelTest
 osmscout_test_project(NAME FeatureLabelTest SOURCES src/FeatureLabelTest.cpp)
 
 #---- File
-osmscout_test_project(NAME File SOURCES src/File.cpp)
+osmscout_test_project(NAME FileTest SOURCES src/FileTest.cpp)
 
 #---- FileScannerWriter
-osmscout_test_project(NAME FileScannerWriter SOURCES src/FileScannerWriter.cpp)
+osmscout_test_project(NAME FileScannerWriterTest SOURCES src/FileScannerWriterTest.cpp)
 
 #---- GeoCoordParse
-osmscout_test_project(NAME GeoCoordParse SOURCES src/GeoCoordParse.cpp)
+osmscout_test_project(NAME GeoCoordParseTest SOURCES src/GeoCoordParseTest.cpp)
 
 #---- NumberSet
-osmscout_test_project(NAME NumberSet SOURCES src/NumberSet.cpp)
+osmscout_test_project(NAME NumberSetTest SOURCES src/NumberSetTest.cpp)
 
 #---- ScanConversion
-osmscout_test_project(NAME RoutePostprocessor SOURCES src/RoutePostprocessor.cpp)
+osmscout_test_project(NAME RoutePostprocessorTest SOURCES src/RoutePostprocessorTest.cpp)
 
 #---- ScanConversion
-osmscout_test_project(NAME ScanConversion SOURCES src/ScanConversion.cpp)
+osmscout_test_project(NAME ScanConversionTest SOURCES src/ScanConversionTest.cpp)
 
 #---- ScreenMask
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
@@ -164,28 +164,28 @@ else()
 endif()
 
 #---- StringUtils
-osmscout_test_project(NAME StringUtils SOURCES src/StringUtils.cpp)
+osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
 #---- Signal
-osmscout_test_project(NAME Signal SOURCES src/Signal.cpp)
+osmscout_test_project(NAME SignalTest SOURCES src/SignalTest.cpp)
 
 #---- TilingTest
 osmscout_test_project(NAME TilingTest SOURCES src/TilingTest.cpp)
 
 #---- TimeParse
-osmscout_test_project(NAME TimeParse SOURCES src/TimeParse.cpp)
+osmscout_test_project(NAME TimeParseTest SOURCES src/TimeParseTest.cpp)
 
 #---- WStringStringConversion
-osmscout_test_project(NAME WStringStringConversion SOURCES src/WStringStringConversion.cpp)
+osmscout_test_project(NAME WStringStringConversionTest SOURCES src/WStringStringConversionTest.cpp)
 
 #---- TransPolygon
-osmscout_test_project(NAME TransPolygon SOURCES src/TransPolygon.cpp)
+osmscout_test_project(NAME TransPolygonTest SOURCES src/TransPolygonTest.cpp)
 
 #---- GeoBox
-osmscout_test_project(NAME GeoBox SOURCES src/GeoBox.cpp)
+osmscout_test_project(NAME GeoBoxTest SOURCES src/GeoBoxTest.cpp)
 
 #---- OSTAndOSSCheck
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
@@ -296,7 +296,7 @@ else()
 endif()
 
 #---- Base64
-osmscout_test_project(NAME Base64 SOURCES src/Base64.cpp)
+osmscout_test_project(NAME Base64Test SOURCES src/Base64Test.cpp)
 
 #---- CoordBufferTest
 osmscout_test_project(NAME CoordBufferTest SOURCES src/CoordBufferTest.cpp)
@@ -314,20 +314,20 @@ endif()
 if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
 	set(src_files src/QtFileDownloader.cpp)
 	qt_wrap_cpp(src_files include/DownloaderTest.h)
-	osmscout_test_project(NAME QtFileDownloader SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets SKIPTEST)
+	osmscout_test_project(NAME QtFileDownloaderTest SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets SKIPTEST)
 else()
 	message("Skip QtFileDownloader test, libosmscout-client-qt is missing.")
 endif()
 
 #---- ScreenBox
-osmscout_test_project(NAME ScreenBox SOURCES src/ScreenBox.cpp)
+osmscout_test_project(NAME ScreenBoxTest SOURCES src/ScreenBoxTest.cpp)
 
 #---- SunriseSunsetTest
 osmscout_test_project(NAME SunriseSunsetTest SOURCES src/SunriseSunsetTest.cpp)
 
 #---- PolygonCenterTest
-osmscout_test_project(NAME PolygonCenterTest SOURCES src/PolygonCenter.cpp)
+osmscout_test_project(NAME PolygonCenterTest SOURCES src/PolygonCenterTest.cpp)
 
 #---- MercatorProjection
-osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjection.cpp)
+osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjectionTest.cpp)
 

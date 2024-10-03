@@ -843,7 +843,7 @@ TEST_CASE()
 
   osmscout::GeoCoord center(50.107252570499767, 14.459053009732296);
 
-  osmscout::MercatorProjection  projection;
+  osmscout::MercatorProjection projection;
 
   for (double angle=0; angle<2*M_PI; angle+= 2*M_PI/32.0){
     projection.Set(center, angle, mag,
