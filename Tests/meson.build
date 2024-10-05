@@ -12,13 +12,15 @@ AccessParseTest =  executable('AccessParseTest',
 
 test('Check parsing of access rights', AccessParseTest)
 
-AsyncProcessing =  executable('AsyncProcessing',
-             'src/AsyncProcessing.cpp',
+AsyncProcessingTest =  executable('AsyncProcessingTest',
+             'src/AsyncProcessingTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
+
+test('Check asynchronous processing', AsyncProcessingTest)
 
 AsyncWorkerTest =  executable('AsyncWorkerTest',
              'src/AsyncWorkerTest.cpp',
@@ -69,25 +71,25 @@ ByteTest = executable('ByteTest',
 
 test('Check std_byte behaviour', ByteTest)
 
-CachePerformance = executable('CachePerformance',
-             'src/CachePerformance.cpp',
+CachePerformanceTest = executable('CachePerformanceTest',
+             'src/CachePerformanceTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check cache functionality with CachePerformance', CachePerformance, args : ['--size', '1000'])
+test('Check cache functionality with CachePerformance', CachePerformanceTest, args : ['--size', '1000'])
 
-CalculateResolution = executable('CalculateResolution',
-             'src/CalculateResolution.cpp',
+CalculateResolutionTest = executable('CalculateResolutionTest',
+             'src/CalculateResolutionTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check position accuracy with coordinate bits', CalculateResolution)
+test('Check position accuracy with coordinate bits', CalculateResolutionTest)
 
 CancelableFutureTest = executable('CancelableFutureTest',
              'src/CancelableFutureTest.cpp',
@@ -142,15 +144,15 @@ CoordBufferTest = executable('CoordBufferTest',
 
 test('Check coordinate buffer conversions', CoordBufferTest)
 
-CoordinateEncoding = executable('CoordinateEncoding',
-             'src/CoordinateEncoding.cpp',
+CoordinateEncodingTest = executable('CoordinateEncodingTest',
+             'src/CoordinateEncodingTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check parsing of ways.dat', CoordinateEncoding, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check parsing of ways.dat', CoordinateEncodingTest, args : [meson.current_source_dir() + '/data/testregion'])
 
 if buildMapQt
     drawtextMocs = qt.preprocess(moc_headers : ['include/DrawWindow.h'])
@@ -323,25 +325,25 @@ MercatorProjectionTest = executable('MercatorProjectionTest',
 
 test('Check MercatorProjection', MercatorProjectionTest)
 
-MultiDBRouting = executable('MultiDBRouting',
-             'src/MultiDBRouting.cpp',
+MultiDBRoutingTest = executable('MultiDBRoutingTest',
+             'src/MultiDBRoutingTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check routing', MultiDBRouting, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
+test('Check routing', MultiDBRoutingTest, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
 
-NumberSetPerformance = executable('NumberSetPerformance',
-                                  'src/NumberSetPerformance.cpp',
+NumberSetPerformanceTest = executable('NumberSetPerformanceTest',
+                                  'src/NumberSetPerformanceTest.cpp',
                                   include_directories: [osmscoutIncDir],
                                   dependencies: [mathDep, openmpDep],
                                   link_with: [osmscout],
                                   install: true,
                                   install_dir: testInstallDir)
 
-test('Check number set performance', NumberSetPerformance, timeout: 180)
+test('Check number set performance', NumberSetPerformanceTest, timeout: 180)
 
 NumberSetTest = executable('NumberSetTest',
              'src/NumberSetTest.cpp',
@@ -363,13 +365,31 @@ OpeningHoursTest = executable('OpeningHoursTest',
 
 test('Check parsing of opening hours', OpeningHoursTest)
 
-OSTAndOSSCheck = executable('OSTAndOSSCheck',
-             'src/OSTAndOSSCheck.cpp',
+OSTAndOSSTest = executable('OSTAndOSSTest',
+             'src/OSTAndOSSTest.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
              install: true,
              install_dir: testInstallDir)
+
+stylesheets = [
+  'standard.oss',
+  'winter-sports.oss',
+  'boundaries.oss',
+  'railways.oss',
+  'motorways.oss',
+  'public-transport.oss',
+  'cycle.oss'
+]
+
+foreach stylesheet : stylesheets
+  test('Check OSS/T file '+stylesheet,
+       OSTAndOSSTest,
+       args : ['--warning-as-error',
+               meson.current_source_dir() + '/../stylesheets/map.ost',
+               meson.current_source_dir() + '/../stylesheets/' + stylesheet])
+endforeach
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
@@ -437,8 +457,8 @@ test('Check PolygonCenter utility', PolygonCenterTest)
 if buildClientQt
   testMocs = qt.preprocess(moc_headers : ['include/DownloaderTest.h'])
 
-  QtFileDownloader = executable('QtFileDownloader',
-                                'src/QtFileDownloader.cpp',
+  QtFileDownloaderTest = executable('QtFileDownloaderTest',
+                                'src/QtFileDownloaderTest.cpp',
                                 testMocs,
                                 include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir, osmscoutclientIncDir, osmscoutclientqtIncDir],
                                 dependencies: [mathDep, threadDep, openmpDep, qtClientDep],
@@ -447,15 +467,15 @@ if buildClientQt
                                 install_dir: testInstallDir)
 endif
 
-ReaderScannerPerformance = executable('ReaderScannerPerformance',
-             'src/ReaderScannerPerformance.cpp',
+ReaderScannerPerformanceTest = executable('ReaderScannerPerformanceTest',
+             'src/ReaderScannerPerformanceTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check reader scanner performance', ReaderScannerPerformance, args : [meson.current_source_dir() + '/data/testregion'])
+test('Check reader scanner performance', ReaderScannerPerformanceTest, args : [meson.current_source_dir() + '/data/testregion'])
 
 RoutePostprocessorTest = executable('RoutePostprocessorTest',
                             'src/RoutePostprocessorTest.cpp',
@@ -559,15 +579,15 @@ if marisaDep.found()
          'bosyne'])
 endif
 
-ThreadedDatabase = executable('ThreadedDatabase',
-             'src/ThreadedDatabase.cpp',
+ThreadedDatabaseTest = executable('ThreadedDatabaseTest',
+             'src/ThreadedDatabaseTest.cpp',
              include_directories: [osmscoutmapIncDir, osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscoutmap, osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check threaded database', ThreadedDatabase, args : [
+test('Check threaded database', ThreadedDatabaseTest, args : [
         '--threads', '100',
         '--iterations', '1000',
         meson.current_source_dir() + '/data/testregion',
@@ -623,15 +643,15 @@ WaterIndexTest = executable('WaterIndexTest',
 
 test('Check water index import code', WaterIndexTest)
 
-WorkQueue = executable('WorkQueue',
-             'src/WorkQueue.cpp',
+WorkQueueTest = executable('WorkQueueTest',
+             'src/WorkQueueTest.cpp',
              include_directories: [osmscoutIncDir],
              dependencies: [mathDep, threadDep, openmpDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
 
-test('Check implementation of work queue', WorkQueue)
+test('Check implementation of work queue', WorkQueueTest)
 
 WStringStringConversionTest = executable('WStringStringConversionTest',
              'src/WStringStringConversionTest.cpp',
@@ -643,21 +663,4 @@ WStringStringConversionTest = executable('WStringStringConversionTest',
 
 test('Check WString<=>String conversion code', WStringStringConversionTest)
 
-stylesheets = [
-            'standard.oss',
-            'winter-sports.oss',
-            'boundaries.oss',
-            'railways.oss',
-            'motorways.oss',
-            'public-transport.oss',
-            'cycle.oss'
-            ]
-
-foreach stylesheet : stylesheets
-    test('Check OSS/T file '+stylesheet,
-            OSTAndOSSCheck,
-            args : ['--warning-as-error',
-                    meson.current_source_dir() + '/../stylesheets/map.ost',
-                    meson.current_source_dir() + '/../stylesheets/' + stylesheet])
-endforeach
 

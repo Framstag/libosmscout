@@ -1,8 +1,9 @@
 #---- AccessParse
+#---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
 
 #---- AsyncProcessing
-osmscout_test_project(NAME AsyncProcessing SOURCES src/AsyncProcessing.cpp)
+osmscout_test_project(NAME AsyncProcessingTest SOURCES src/AsyncProcessingTest.cpp)
 
 #---- AsyncWorker
 osmscout_test_project(NAME AsyncWorkerTest SOURCES src/AsyncWorkerTest.cpp)
@@ -17,10 +18,10 @@ osmscout_test_project(NAME BitsAndBytesNeededTest SOURCES src/BitsAndBytesNeeded
 osmscout_test_project(NAME ByteTest SOURCES src/ByteTest.cpp)
 
 #---- CachePerformance
-osmscout_test_project(NAME CachePerformance SOURCES src/CachePerformance.cpp COMMAND --size 1000)
+osmscout_test_project(NAME CachePerformanceTest SOURCES src/CachePerformanceTest.cpp COMMAND --size 1000)
 
 #---- CalculateResolution
-osmscout_test_project(NAME CalculateResolution SOURCES src/CalculateResolution.cpp)
+osmscout_test_project(NAME CalculateResolutionTest SOURCES src/CalculateResolutionTest.cpp)
 
 #---- CancelableFuture
 osmscout_test_project(NAME CancelableFutureTest SOURCES src/CancelableFutureTest.cpp)
@@ -32,7 +33,7 @@ osmscout_test_project(NAME CmdLineParsingTest SOURCES src/CmdLineParsingTest.cpp
 osmscout_test_project(NAME ColorParseTest SOURCES src/ColorParseTest.cpp)
 
 #---- CoordinateEncoding
-osmscout_test_project(NAME CoordinateEncoding SOURCES src/CoordinateEncoding.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
+osmscout_test_project(NAME CoordinateEncodingTest SOURCES src/CoordinateEncodingTest.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- FileFormatVersion
 osmscout_test_project(NAME FileFormatVersionTest SOURCES src/FileFormatVersionTest.cpp)
@@ -48,20 +49,20 @@ set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${
 set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 
 #---- NumberSetPerformance
-osmscout_test_project(NAME NumberSetPerformance SOURCES src/NumberSetPerformance.cpp)
+osmscout_test_project(NAME NumberSetPerformanceTest SOURCES src/NumberSetPerformanceTest.cpp)
 
 #---- OpeningHours
 osmscout_test_project(NAME OpeningHoursTest SOURCES src/OpeningHoursTest.cpp)
 
 #---- ReaderScannerPerformance
-osmscout_test_project(NAME ReaderScannerPerformance SOURCES src/ReaderScannerPerformance.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
+osmscout_test_project(NAME ReaderScannerPerformanceTest SOURCES src/ReaderScannerPerformanceTest.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- MultiDBRouting
-osmscout_test_project(NAME MultiDBRouting SOURCES src/MultiDBRouting.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
+osmscout_test_project(NAME MultiDBRoutingTest SOURCES src/MultiDBRoutingTest.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
-	osmscout_test_project(NAME ThreadedDatabase SOURCES src/ThreadedDatabase.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
+	osmscout_test_project(NAME ThreadedDatabaseTest SOURCES src/ThreadedDatabaseTest.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
 else()
 	message("Skip ThreadedDatabase test, libosmscout-map is missing.")
 endif()
@@ -121,7 +122,7 @@ else()
 endif()
 
 #---- WorkQueue
-osmscout_test_project(NAME WorkQueue SOURCES src/WorkQueue.cpp)
+osmscout_test_project(NAME WorkQueueTest SOURCES src/WorkQueueTest.cpp)
 
 #---- MapRotate
 if(NOT MINGW AND NOT MSYS)
@@ -187,9 +188,9 @@ osmscout_test_project(NAME TransPolygonTest SOURCES src/TransPolygonTest.cpp)
 #---- GeoBox
 osmscout_test_project(NAME GeoBoxTest SOURCES src/GeoBoxTest.cpp)
 
-#---- OSTAndOSSCheck
+#---- OSTAndOSSTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
-	osmscout_test_project(NAME OSTAndOSSCheck SOURCES src/OSTAndOSSCheck.cpp TARGET OSMScout::Map SKIPTEST)
+	osmscout_test_project(NAME OSTAndOSSTest SOURCES src/OSTAndOSSTest.cpp TARGET OSMScout::Map SKIPTEST)
 
 	set(STYLESHEETS
 		standard.oss
@@ -202,13 +203,13 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 
 	foreach(STYLESHEET ${STYLESHEETS})
 		add_test(NAME CheckStyleSheet-${STYLESHEET}
-			COMMAND OSTAndOSSCheck
+			COMMAND OSTAndOSSTest
 			--warning-as-error
 			${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost
 			${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET})
 	endforeach()
 else()
-    message("Skip OSTAndOSSCheck test, libosmscout-map is missing.")
+    message("Skip OSTAndOSS test, libosmscout-map is missing.")
 endif()
 
 #---- PerformanceTest
@@ -312,7 +313,7 @@ endif()
 
 #---- QtFileDownloader
 if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::MapQt AND TARGET OSMScout::ClientQt)
-	set(src_files src/QtFileDownloader.cpp)
+	set(src_files src/QtFileDownloaderTest.cpp)
 	qt_wrap_cpp(src_files include/DownloaderTest.h)
 	osmscout_test_project(NAME QtFileDownloaderTest SOURCES ${src_files} TARGET OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets SKIPTEST)
 else()
