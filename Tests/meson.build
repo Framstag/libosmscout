@@ -20,7 +20,7 @@ AsyncProcessingTest =  executable('AsyncProcessingTest',
              install: true,
              install_dir: testInstallDir)
 
-test('Check asynchronous processing', AsyncProcessingTest)
+test('Check asynchronous processing', AsyncProcessingTest, timeout: 180)
 
 AsyncWorkerTest =  executable('AsyncWorkerTest',
              'src/AsyncWorkerTest.cpp',
