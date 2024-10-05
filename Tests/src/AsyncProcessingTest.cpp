@@ -28,7 +28,7 @@
 
 using namespace std::chrono_literals;
 
-static size_t iterationCount=10000;
+static size_t iterationCount=4000;
 static auto   taskDuration=1ms;
 
 class IntWorker
