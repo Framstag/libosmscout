@@ -3,7 +3,9 @@
 #include <osmscout/util/String.h>
 #include <osmscout/util/SunriseSunset.h>
 
-#include <TestMain.h>
+#include <iostream>
+
+#include <catch2/catch_test_macros.hpp>
 
 // Prints sunrise and sunset time in specific timezone.
 // Note that printed string is ISO8601 with UTC timezone - it is not correct (when tzOffset != 0)

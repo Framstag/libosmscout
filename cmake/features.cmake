@@ -148,6 +148,8 @@ macro(target_exists target var)
   endif()
 endmacro()
 
+find_package(Catch2 3)
+
 if(NOT IOS)
   find_package(Marisa)
 endif()
@@ -155,7 +157,7 @@ set(HAVE_LIB_MARISA ${MARISA_FOUND})
 set(OSMSCOUT_HAVE_LIB_MARISA ${HAVE_LIB_MARISA})
 set(OSMSCOUT_IMPORT_HAVE_LIB_MARISA ${MARISA_FOUND})
 
-find_package(LibXml2 QUIET)
+find_package(LibXml2)
 if (TARGET LibXml2::LibXml2 AND NOT BUILD_SHARED_LIBS)
   # seems that FindLibXml2.cmake don't handle static libraries properly
   # as a workaround we append PC_LIBXML_STATIC_LIBRARIES to LIBXML2_LIBRARIES
@@ -171,21 +173,21 @@ endif()
 target_exists(LibXml2::LibXml2 HAVE_LIB_XML)
 target_exists(LibXml2::LibXml2 OSMSCOUT_GPX_HAVE_LIB_XML)
 
-find_package(Protobuf QUIET)
+find_package(Protobuf)
 if (TARGET protobuf::libprotobuf AND NOT EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "Protobuf library found, but protoc compiler is missing")
 endif()
 target_exists(protobuf::libprotobuf HAVE_LIB_PROTOBUF)
 
-find_package(ZLIB QUIET)
+find_package(ZLIB)
 target_exists(ZLIB::ZLIB HAVE_LIB_ZLIB)
 
-find_package(LibLZMA QUIET)
+find_package(LibLZMA)
 
-find_package(PNG QUIET)
+find_package(PNG)
 set(HAVE_LIB_PNG ${PNG_FOUND})
 
-find_package(Cairo QUIET)
+find_package(Cairo)
 if(CAIRO_FOUND)
   option(CAIRO_STATIC "Switch on if the found cairo library is static" OFF)
   if(CAIRO_STATIC)
@@ -195,27 +197,27 @@ if(CAIRO_FOUND)
 endif()
 set(HAVE_LIB_CAIRO ${CAIRO_FOUND})
 
-find_package(LibAgg QUIET)
+find_package(LibAgg)
 set(HAVE_LIB_AGG ${LIBAGG_FOUND})
 
-find_package(Freetype QUIET)
+find_package(Freetype)
 set(HAVE_LIB_FREETYPE ${FREETYPE_FOUND})
 
-find_package(Pango QUIET)
+find_package(Pango)
 set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
 
-find_package(harfbuzz QUIET)
+find_package(harfbuzz)
 target_exists(harfbuzz::harfbuzz HAVE_LIB_HARFBUZZ)
 
 set(OpenGL_GL_PREFERENCE "GLVND") # Prever non-legacy OpenGL libraries
-find_package(OpenGL QUIET)
+find_package(OpenGL)
 set(HAVE_LIB_OPENGL ${OPENGL_FOUND})
 
-find_package(GLEW QUIET)
+find_package(GLEW)
 
-find_package(glm QUIET)
+find_package(glm)
 if(NOT TARGET glm::glm)
   message(STATUS "glm NOT found")
   find_package(Git QUIET)
@@ -234,7 +236,7 @@ if(NOT TARGET glm::glm)
   endif()
 endif()
 
-find_package(glfw3 QUIET)
+find_package(glfw3)
 
 if (QT_VERSION_PREFERRED AND QT_VERSION_PREFERRED EQUAL 5)
   message(STATUS "Try loading Qt5 (explicitly preferred)...")
@@ -351,7 +353,7 @@ else()
   set(GPERFTOOLS_USAGE OFF)
 endif()
 
-find_package(Direct2D QUIET)
+find_package(Direct2D)
 
 find_package(Threads)
 if(THREADS_HAVE_PTHREAD_ARG)

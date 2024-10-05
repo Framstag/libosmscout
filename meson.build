@@ -76,9 +76,6 @@ fseeki64Available = compiler.has_function('_fseeki64')
 ftelli64Available = compiler.has_function('_ftelli64')
 fseekoAvailable = compiler.has_function('fseeko')
 
-# Check for external programs
-swigExe = find_program('swig', required: false)
-
 # Base
 mathDep = compiler.find_library('m', required : false)
 threadDep = dependency('threads')
@@ -99,6 +96,10 @@ if stdExecutionAvailable
  stdExecutionAvailable = tbbDep.found()
 endif
 
+# Testing
+catch2Dep = dependency('catch2', version: '>=3.0.0', required: false)
+catch2MainDep = dependency('catch2-with-main', version: '>=3.0.0', required: false)
+
 # Optional
 marisaDep = dependency('marisa', required : false)
 
@@ -116,6 +117,9 @@ protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','pr
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
 protocCmd = find_program('protoc', required: false)
+
+# Check for external programs
+swigExe = find_program('swig', required: false)
 
 # Backends
 
@@ -267,7 +271,7 @@ else
     buildImport=false
 endif
 
-if get_option('enableTests')
+if get_option('enableTests') and catch2Dep.found() and catch2MainDep.found()
     buildTests=true
 else
     buildTests=false
@@ -422,6 +426,11 @@ summary({
   'Library version': libraryVersion,
   'Project license': meson.project_license(),
   }, section: 'Project')
+
+summary({
+    'Catch2 dependency': catch2Dep.version(),
+    'Catch2 with main dependency': catch2MainDep.version(),
+  }, section: 'Test dependencies')
 
 summary({
   'Qt map dependency': qtMapDep.version(),

@@ -2,7 +2,7 @@
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/Tiling.h>
 
-#include <TestMain.h>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("TileIdBox calculation") {
   osmscout::Magnification magnification(osmscout::Magnification::magClose);
