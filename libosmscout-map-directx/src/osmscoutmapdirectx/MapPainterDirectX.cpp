@@ -19,8 +19,6 @@
 
 #include <osmscoutmapdirectx/MapPainterDirectX.h>
 
-#include <iostream>
-#include <iomanip>
 #include <limits>
 #include <list>
 
@@ -415,7 +413,7 @@ namespace osmscout
       return m_Fonts.insert(std::make_pair(hash, pTextFormat)).first->second;
     }
 
-    std::cerr << "Could not get font " << parameter.GetFontName() << " " << fontSize << std::endl;
+    log.Error() << "Could not get font " << parameter.GetFontName() << " " << fontSize;
     return nullptr;
   }
 
@@ -506,7 +504,7 @@ namespace osmscout
       }
     }
 
-    std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+    log.Error() << "ERROR while loading image '" << style.GetIconName() << "'";
     style.SetIconId(0);
 
     return false;

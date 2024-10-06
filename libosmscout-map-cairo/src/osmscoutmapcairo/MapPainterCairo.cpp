@@ -19,8 +19,6 @@
 
 #include <osmscoutmapcairo/MapPainterCairo.h>
 
-#include <iostream>
-#include <iomanip>
 #include <limits>
 #include <list>
 
@@ -499,13 +497,13 @@ namespace osmscout {
 
         images[idx] = image;
 
-        std::cout << "Loaded image '" << filename << "'" << std::endl;
+        log.Debug() << "Loaded image '" << filename << "'";
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+    log.Error() << "ERROR while loading image '" << style.GetIconName() << "'";
     style.SetIconId(0);
 
     return false;
@@ -553,13 +551,13 @@ namespace osmscout {
         cairo_matrix_init_scale(&matrix, 1, 1);
         cairo_pattern_set_matrix(patterns[idx], &matrix);
 
-        std::cout << "Loaded pattern image '" << filename << "'" << std::endl;
+        log.Debug() << "Loaded pattern image '" << filename << "'";
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading pattern image '" << style.GetPatternName() << "'" << std::endl;
+    log.Error() << "ERROR while loading pattern image '" << style.GetPatternName() << "'";
     style.SetPatternId(0);
 
     return false;
@@ -680,7 +678,7 @@ namespace osmscout {
     std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
 
     if constexpr (debugLabelLayouter) {
-      std::cout << " = getting glyphs for label: " << text << std::endl;
+      log.Debug() << " = getting glyphs for label: " << text;
     }
 
     for (PangoLayoutIter *iter = pango_layout_get_iter(label.get());
@@ -696,7 +694,7 @@ namespace osmscout {
       g_object_ref(font.get());
 
       if constexpr (debugLabelLayouter) {
-        std::cout << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << "):" << std::endl;
+        log.Debug() << "   run with " << run->glyphs->num_glyphs << " glyphs (font " << font.get() << ")";
       }
 
       for (int gi=0; gi < run->glyphs->num_glyphs; gi++){
@@ -718,8 +716,8 @@ namespace osmscout {
                                         (double)glyphInfo.geometry.y_offset/(double)PANGO_SCALE);
 
         if constexpr (debugLabelLayouter) {
-          std::cout << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x "
-                    << result.back().position.GetY() << std::endl;
+          log.Debug() << "     " << glyphInfo.glyph << ": " << result.back().position.GetX() << " x "
+                    << result.back().position.GetY();
         }
 
         glyphInfo.geometry.x_offset = 0;
