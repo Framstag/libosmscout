@@ -9,6 +9,7 @@ osmscoutSrc = [
             'src/osmscout/async/Thread.cpp',
             'src/osmscout/async/Worker.cpp',
             'src/osmscout/async/WorkQueue.cpp',
+            'src/osmscout/description/DescriptionService.cpp',
             'src/osmscout/feature/AccessFeature.cpp',
             'src/osmscout/feature/AccessRestrictedFeature.cpp',
             'src/osmscout/feature/AddressFeature.cpp',
