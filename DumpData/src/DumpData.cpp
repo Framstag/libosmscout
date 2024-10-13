@@ -23,7 +23,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <glm/ext/vector_integer.hpp>
 
 #include <osmscout/db/Database.h>
 #include <osmscout/db/DebugDatabase.h>
@@ -34,7 +33,6 @@
 #include <osmscout/routing/RoutingService.h>
 
 #include <osmscout/description/DescriptionService.h>
-
 
 /*
  * Example:
