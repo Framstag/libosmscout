@@ -48,6 +48,9 @@ jobs:
           CC: gcc
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
+        env:
+          CXX: g++
+          CC: gcc
       - name: Create gcov files
         run:  mkdir gcov && cd gcov && gcov -p ../debug//*/*/*
       - name: SonarCloud Scan
