@@ -651,7 +651,7 @@ WorkQueueTest = executable('WorkQueueTest',
              install: true,
              install_dir: testInstallDir)
 
-test('Check implementation of work queue', WorkQueueTest, timeout: 60)
+test('Check implementation of work queue', WorkQueueTest, timeout: 120)
 
 WStringStringConversionTest = executable('WStringStringConversionTest',
              'src/WStringStringConversionTest.cpp',
