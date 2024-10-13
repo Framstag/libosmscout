@@ -19,7 +19,7 @@ jobs:
     environment: SONAR
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Update package list
@@ -27,7 +27,7 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, meson and ninja
-        run:  sudo apt-get -y install gcc-11 g++-11 libtbb-dev ccache libtool pkg-config
+        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config
       - name: Install meson, ninja, lcov and gcovr via pip
         run:  pip install meson ninja lcov gcovr==6.0
       - name: Install libosmscout dependencies
@@ -41,12 +41,12 @@ jobs:
               libglm-dev libglew-dev freeglut3 freeglut3-dev
               libmarisa-dev"
       - name: Install sonar-scanner and build-wrapper
-        uses: sonarsource/sonarcloud-github-c-cpp@v2
+        uses: sonarsource/sonarcloud-github-c-cpp@v3
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized -Db_coverage=true --unity on debug
         env:
-          CXX: g++-11
-          CC: gcc-11
+          CXX: g++-12
+          CC: gcc-12
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
       - name: Create gcov files
