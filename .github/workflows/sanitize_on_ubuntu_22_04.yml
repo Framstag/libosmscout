@@ -27,7 +27,7 @@ jobs:
         run: "sudo apt-get install -y
               libxml2-dev
               libprotobuf-dev protobuf-compiler
-              libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+              libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
               libmarisa-dev
               xvfb"
       - name: Configure build project
@@ -79,7 +79,7 @@ jobs:
                libxml2-dev
                libprotobuf-dev protobuf-compiler
                libmarisa-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
                xvfb"
       - name: Configure build project
         run: "cmake -B build
