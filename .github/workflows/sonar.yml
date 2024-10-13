@@ -30,6 +30,7 @@ jobs:
         run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config meson ninja-build lcov gcovr
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
+              catch2
               libxml2-dev
               libprotobuf-dev protobuf-compiler liblzma-dev
               libagg-dev
