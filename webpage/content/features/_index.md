@@ -15,15 +15,16 @@ menu:
 All basic features for
 
 * importing OSM data
-* quering the resulting database
+* querying the resulting database
 * rendering fancy maps nobody have ever seen
 * finding locations no one else could find
-* and routing you to all these strange places
+* routing you to all these strange places
+* and describing a object
 
 are implemented.
 
 You should be able to implement your application with all
-basic features required for a navigation application. However there are still
+basic features required for a navigation application. However, there are still
 corners, we have not yet visited, some ideas though of but not implemented
 yet. The following list of documents should give you an overview what is
 already there - and what is not.
