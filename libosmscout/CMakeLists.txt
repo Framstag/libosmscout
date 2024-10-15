@@ -43,6 +43,10 @@ set(HEADER_FILES_ASYNC
         include/osmscout/async/Worker.h
         include/osmscout/async/WorkQueue.h)
 
+set(HEADER_FILES_DESCRIPTION
+        include/osmscout/description/DescriptionService.h
+)
+
 set(HEADER_FILES_FEATURE
         include/osmscout/feature/AccessFeature.h
         include/osmscout/feature/AccessRestrictedFeature.h
@@ -224,6 +228,7 @@ set(SOURCE_FILES
     src/osmscout/async/Thread.cpp
     src/osmscout/async/Worker.cpp
     src/osmscout/async/WorkQueue.cpp
+    src/osmscout/description/DescriptionService.cpp
     src/osmscout/feature/AccessFeature.cpp
     src/osmscout/feature/AccessRestrictedFeature.cpp
     src/osmscout/feature/AddressFeature.cpp
@@ -385,6 +390,7 @@ set(HEADER_FILES
     ${HEADER_FILES_LOG}
     ${HEADER_FILES_CLI}
     ${HEADER_FILES_ASYNC}
+    ${HEADER_FILES_DESCRIPTION}
     ${HEADER_FILES_FEATURE}
     ${HEADER_FILES_IO}
     ${HEADER_FILES_DB}

@@ -15,15 +15,15 @@ This article tries to explain some general concepts of libosmscout.
 ## Import
 
 Libosmscout has its own internal representation of OSM data. This is necssary
-to offer fast access of the data and reduze the size of the data on disk.
+to offer fast access of the data and reduce the size of the data on disk.
 Standard export formats like .osm or *.osm.pbf files are used as data dump
 from the OSM SQL database for further processing and are designed  for fast,
 index random data access.
 
 For importing the data the `Import` tool is used. The import tool generates
-a custom libosmsocut database from the raw data passed.
+a custom libosmscout database from the raw data passed.
 
-An import normally is restrictied to a certain area of the world. Normally
+An import normally is restricted to a certain area of the world. Normally
 you find imports for countries or counties or bigger cities.
 
 Take a look at the [import tutorial]({{< ref "/tutorials/Importing.md" >}}) for
@@ -38,7 +38,7 @@ act as index into data and still other files have index and actual data combined
 You can find a description of the individual database files
 [here]({{< ref "/documentation/database.md" >}}).
 
-Libomssocut assumes (but does not enforce this) that all maps are stored under
+Libomsscout assumes (but does not enforce this) that all maps are stored under
 the same directory. Each database has its own sub directory storing the
 individual files.
 
@@ -48,7 +48,7 @@ The `Database` class allows easy to all database files.
 
 ## Services
 
-To further hide the details or complexity o f the low level access code a number
+To further hide the details or complexity of the low level access code, a number
 of Services have been defined that offer a more suitable API.
 
 Currently the following services exist:
@@ -57,6 +57,7 @@ Currently the following services exist:
 * `LocationService`
 * `RoutingService`
 * `POIService`
+* `DescriptionService`
 
 ## BasemapDatabase
 

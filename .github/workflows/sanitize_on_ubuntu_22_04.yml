@@ -13,7 +13,7 @@ on:
 jobs:
   sanitize_clang:
     name: clang
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
         run: "sudo apt-get install -y
               libxml2-dev
               libprotobuf-dev protobuf-compiler
-              libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+              libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
               libmarisa-dev
               xvfb"
       - name: Configure build project
@@ -66,20 +66,20 @@ jobs:
 
   sanitize_gcc:
     name: gcc
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, cmake and ninja
-        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config cmake ninja-build
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                libxml2-dev
                libprotobuf-dev protobuf-compiler
                libmarisa-dev
-               libglm-dev libglew-dev freeglut3 freeglut3-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
                xvfb"
       - name: Configure build project
         run: "cmake -B build
@@ -100,8 +100,8 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
         env:
-          CXX: g++-12
-          CC: gcc-12
+          CXX: g++
+          CC: gcc
       - name: Build project
         run: cmake --build build
       - name: Install project

@@ -15,11 +15,11 @@ on:
 jobs:
   sonar_gcc_meson:
     name: sonar, gcc and meson
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     environment: SONAR
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Update package list
@@ -27,32 +27,39 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler, meson and ninja
-        run:  sudo apt-get -y install gcc-11 g++-11 libtbb-dev ccache libtool pkg-config
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config
       - name: Install meson, ninja, lcov and gcovr via pip
-        run:  pip install meson ninja lcov gcovr==6.0
+        run:  pip install --user meson ninja lcov gcovr --break-system-packages
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
+              catch2
               libxml2-dev
-              libprotobuf-dev protobuf-compiler
+              libprotobuf-dev protobuf-compiler liblzma-dev
               libagg-dev
               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
               qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
               qttools5-dev qtmultimedia5-dev
-              libglm-dev libglew-dev freeglut3 freeglut3-dev
+              libglm-dev libglew-dev libglut-dev
               libmarisa-dev"
       - name: Install sonar-scanner and build-wrapper
-        uses: sonarsource/sonarcloud-github-c-cpp@v2
+        uses: sonarsource/sonarcloud-github-c-cpp@v3
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized -Db_coverage=true --unity on debug
         env:
-          CXX: g++-11
-          CC: gcc-11
+          CXX: g++
+          CC: gcc
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
-      - name: Create gcov files
-        run:  mkdir gcov && cd gcov && gcov -p ../debug//*/*/*
+        env:
+          CXX: g++
+          CC: gcc
       - name: SonarCloud Scan
-        run:  sonar-scanner -Dsonar.cfamily.build-wrapper-output=sonar-build-output -Dsonar.cfamily.gcov.reportsPath=gcov -Dsonar.token=$SONAR_TOKEN
+        run:  "sonar-scanner 
+               -Dsonar.cfamily.compile-commands=sonar-build-output/compile_commands.json
+               -Dsonar.cfamily.cppunit.reportsPath=debug/meson-logs/testlog.junit.xml
+               -Dsonar.coverageReportPaths=debug/meson-logs/sonarqube.xml
+               -Dsonar.cfamily.cobertura.reportPaths=debug/meson-logs/coverage.xml
+               -Dsonar.token=$SONAR_TOKEN"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

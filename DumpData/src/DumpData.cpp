@@ -23,32 +23,17 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscout/db/Database.h>
 #include <osmscout/db/DebugDatabase.h>
 
 #include <osmscout/routing/RouteNode.h>
 
-#include <osmscout/feature/AccessFeature.h>
-#include <osmscout/feature/AccessRestrictedFeature.h>
-#include <osmscout/feature/AddressFeature.h>
-#include <osmscout/feature/AdminLevelFeature.h>
-#include <osmscout/feature/BrandFeature.h>
-#include <osmscout/feature/ChargingStationFeature.h>
-#include <osmscout/feature/FeeFeature.h>
-#include <osmscout/feature/IsInFeature.h>
-#include <osmscout/feature/LanesFeature.h>
-#include <osmscout/feature/LayerFeature.h>
-#include <osmscout/feature/LocationFeature.h>
-#include <osmscout/feature/MaxStayFeature.h>
-#include <osmscout/feature/NameFeature.h>
-#include <osmscout/feature/NameAltFeature.h>
-#include <osmscout/feature/RefFeature.h>
-#include <osmscout/feature/SidewayFeature.h>
-#include <osmscout/feature/WidthFeature.h>
-
 #include <osmscout/routing/RouteNodeDataFile.h>
 #include <osmscout/routing/RoutingService.h>
+
+#include <osmscout/description/DescriptionService.h>
 
 /*
  * Example:
@@ -62,7 +47,7 @@ struct Job
 
   Job() = default;
 
-  Job(osmscout::OSMRefType type, osmscout::Id id)
+  Job(osmscout::OSMRefType type, osmscout::OSMId id)
   : osmRef(id,type)
   {
     // no code
@@ -75,247 +60,21 @@ struct Job
   }
 };
 
-static const size_t IDENT=2;
-
-static bool ParseArguments(int argc,
-                           char* argv[],
-                           std::string& map,
-                           std::set<osmscout::OSMId>& coordIds,
-                           std::set<osmscout::OSMId>& routeNodeCoordIds,
-                           std::set<osmscout::Id>& routeNodeIds,
-                           std::list<Job>& jobs)
+struct Arguments
 {
-  if (argc<2) {
-    std::cerr << "DumpData <map directory> {Search arguments}" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "Search arguments:" << std::endl;
-    std::cerr << "   -c  <OSMId>        OSM coord ids" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -n  <OSMId>        OSM node id" << std::endl;
-    std::cerr << "   -no <FileOffset>   osmscout node file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -w  <OSMId>        OSM way id" << std::endl;
-    std::cerr << "   -wo <FileOffset>   osmscout way file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -r  <OSMId>        OSM relation id" << std::endl;
-    std::cerr << "   -ao <FileOffset>   osmscout area file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -rn <OSMId>        route node by OSM node id" << std::endl;
-    std::cerr << "   -ri <RouteNodeId>  osmscout route node id" << std::endl;
-    return false;
-  }
+  std::string               map;
+  std::set<osmscout::OSMId> coordIds;
+  std::set<osmscout::OSMId> routeNodeCoordIds;
+  std::set<osmscout::Id>    routeNodeIds;
+  std::list<Job>            jobs;
+  bool                      help;
+};
 
-  int arg=1;
-
-  map=argv[arg];
-
-  arg++;
-
-  while (arg<argc) {
-    if (strcmp(argv[arg],"-c")==0) {
-      long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -c requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%ld",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      coordIds.insert(id);
-
-      arg++;
-    }
-
-    //
-    // OSM types (nodes, ways, relations)
-    //
-
-    else if (strcmp(argv[arg],"-n")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -n requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::osmRefNode,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-w")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -w requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::osmRefWay,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-r")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -r requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Relation id is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::osmRefRelation,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-rn")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -rn requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Route node coord id is not numeric!" << std::endl;
-        return false;
-      }
-
-      routeNodeCoordIds.insert(id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-ri")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -ri requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Route node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      routeNodeIds.insert(id);
-
-      arg++;
-    }
-
-    //
-    // libosmscout types (nodes, ways, areas)
-    //
-
-    else if (strcmp(argv[arg],"-no")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -no requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::refNode,fileOffset);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-wo")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -wo requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Way file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::refWay,fileOffset);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-ao")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -ao requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Area file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.emplace_back(osmscout::refArea,fileOffset);
-
-      arg++;
-    }
-
-
-    else {
-      std::cerr << "Unknown parameter '" << argv[arg] << "'!" << std::endl;
-      return false;
-    }
-  }
-
-  return true;
-}
-
-static uint32_t CalculateCellLevel(const osmscout::GeoBox& boundingBox)
-{
-  uint32_t level=25;
-  while (true) {
-    if (boundingBox.GetWidth()<=osmscout::cellDimension[level].width &&
-        boundingBox.GetHeight()<=osmscout::cellDimension[level].height) {
-      break;
-    }
-
-    if (level==0) {
-      break;
-    }
-
-    level--;
-  }
-
-  return level;
-}
+static const size_t INDENT=2;
 
 static void DumpIndent(size_t indent)
 {
+  assert(indent<=10);
   for (size_t i=1; i<=indent; i++) {
     std::cout << " ";
   }
@@ -383,556 +142,208 @@ static void DumpRouteNode(const osmscout::RouteNode& routeNode)
   std::cout << "}" << std::endl;
 }
 
-static void DumpAccessFeatureValue(const osmscout::AccessFeatureValue& accessValue,
-                                   size_t indent,
-                                   bool defaultValue)
+static void DumpDescription(const osmscout::ObjectDescription& description,
+                            size_t indent)
 {
-  DumpIndent(indent);
+  std::string previousSection;
+  std::string previousSubsection;
+  size_t      previousIndex=std::numeric_limits<size_t>::max();
 
-  if (defaultValue) {
-    std::cout << "(Access) {" << std::endl;
-  }
-  else {
-    std::cout << "Access {" << std::endl;
-  }
-
-  if (accessValue.IsOnewayForward()) {
-    DumpIndent(indent+2);
-    std::cout << "oneway: forward" << std::endl;
-  }
-  else if (accessValue.IsOnewayBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "oneway: backward" << std::endl;
-  }
-
-  if (accessValue.CanRouteFootForward() && accessValue.CanRouteFootBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "foot: both" << std::endl;
-  }
-  else if (accessValue.CanRouteFootForward()) {
-    DumpIndent(indent+2);
-    std::cout << "foot: forward" << std::endl;
-  }
-  else if (accessValue.CanRouteFootBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "foot: backward" << std::endl;
-  }
-
-  if (accessValue.CanRouteBicycleForward() && accessValue.CanRouteBicycleBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "bicycle: both" << std::endl;
-  }
-  else if (accessValue.CanRouteBicycleForward()) {
-    DumpIndent(indent+2);
-    std::cout << "bicycle: forward" << std::endl;
-  }
-  else if (accessValue.CanRouteBicycleBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "bicycle: backward" << std::endl;
-  }
-
-  if (accessValue.CanRouteCarForward() && accessValue.CanRouteCarBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "car: both" << std::endl;
-  }
-  else if (accessValue.CanRouteCarForward()) {
-    DumpIndent(indent+2);
-    std::cout << "car: forward" << std::endl;
-  }
-  else if (accessValue.CanRouteCarBackward()) {
-    DumpIndent(indent+2);
-    std::cout << "car: backward" << std::endl;
-  }
-
-  DumpIndent(indent);
-  std::cout << "}" << std::endl;
-}
-
-static void DumpAccessRestrictedFeatureValue(const osmscout::AccessRestrictedFeatureValue& accessValue,
-                                             size_t indent)
-{
-  DumpIndent(indent);
-  std::cout << "AccessRestricted {" << std::endl;
-
-  if (!accessValue.CanAccessFoot()) {
-    DumpIndent(indent+2);
-    std::cout << "foot: restricted" << std::endl;
-  }
-
-  if (!accessValue.CanAccessBicycle()) {
-    DumpIndent(indent+2);
-    std::cout << "bicycle: restricted" << std::endl;
-  }
-
-  if (!accessValue.CanAccessCar()) {
-    DumpIndent(indent+2);
-    std::cout << "car: restricted" << std::endl;
-  }
-
-  DumpIndent(indent);
-  std::cout << "}" << std::endl;
-}
-
-static void DumpSidewayFeatureValue(const osmscout::SidewayFeatureValue& sidewayValue,
-                                    size_t indent)
-{
-  DumpIndent(indent);
-  std::cout << "Sideway {" << std::endl;
-
-  if (sidewayValue.HasSidewalkTrackLeft() &&
-      sidewayValue.HasSidewalkTrackRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: track both" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkTrackLeft()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: track left" << std::endl;
-  }
-  else if (sidewayValue.HasSidewalkTrackRight()) {
-    DumpIndent(indent+2);
-    std::cout << "sidewalk: track right" << std::endl;
-  }
-
-  if (sidewayValue.HasCyclewayLaneLeft() &&
-      sidewayValue.HasCyclewayLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: lane both" << std::endl;
-  }
-  else if (sidewayValue.HasCyclewayLaneLeft()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: lane left" << std::endl;
-  }
-  else if (sidewayValue.HasCyclewayLaneRight()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: lane right" << std::endl;
-  }
-
-  if (sidewayValue.HasCyclewayTrackLeft() &&
-      sidewayValue.HasCyclewayTrackRight()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: track both" << std::endl;
-  }
-  else if (sidewayValue.HasCyclewayTrackLeft()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: track left" << std::endl;
-  }
-  else if (sidewayValue.HasCyclewayTrackRight()) {
-    DumpIndent(indent+2);
-    std::cout << "cycleway: track right" << std::endl;
-  }
-
-  DumpIndent(indent);
-  std::cout << "}" << std::endl;
-}
-
-static void DumpLanesFeatureValue(const osmscout::LanesFeatureValue& lanesValue,
-                                  size_t indent)
-{
-  DumpIndent(indent);
-  std::cout << "Lanes {" << std::endl;
-
-  DumpIndent(indent+2);
-  std::cout << "Lanes: ";
-  if (lanesValue.HasSingleLane()) {
-    std::cout << "1" << std::endl;
-  }
-  else {
-    std::cout << (size_t)lanesValue.GetForwardLanes() << " " << (size_t)lanesValue.GetBackwardLanes() << std::endl;
-  }
-
-  if (!lanesValue.GetTurnForward().empty()) {
-    DumpIndent(indent+2);
-    std::cout << "TurnForward: ";
-    for (auto turn: lanesValue.GetTurnForward()) {
-      std::cout << LaneTurnString(turn);
-      std::cout << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  if (!lanesValue.GetTurnBackward().empty()) {
-    DumpIndent(indent+2);
-    std::cout << "TurnBackward: ";
-    for (auto turn: lanesValue.GetTurnForward()) {
-      std::cout << LaneTurnString(turn);
-      std::cout << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  if (!lanesValue.GetDestinationForward().empty()) {
-    DumpIndent(indent+2);
-    std::cout << "DestinationForward: " << lanesValue.GetDestinationForward() << std::endl;
-  }
-
-  if (!lanesValue.GetDestinationBackward().empty()) {
-    DumpIndent(indent+2);
-    std::cout << "DestinationBackward: " << lanesValue.GetDestinationBackward() << std::endl;
-  }
-
-  DumpIndent(indent);
-  std::cout << "}" << std::endl;
-}
-
-static void DumpChargingStationFeatureValue(const osmscout::ChargingStationFeatureValue& chargingStationValue,
-                                            size_t indent)
-{
-  DumpIndent(indent);
-  std::cout << "ChargingStation {" << std::endl;
-
-  for (const auto& socket : chargingStationValue.GetSockets()) {
-    DumpIndent(indent+2);
-    std::cout << "Socket {" << std::endl;
-
-    DumpIndent(indent+4);
-    std::cout << "capacity: " << (unsigned int) socket.capacity << std::endl;
-    DumpIndent(indent+4);
-    std::cout << "type: " << osmscout::EnumToString(socket.type) << std::endl;
-
-    if (!socket.output.empty()) {
-      DumpIndent(indent+4);
-      std::cout << "output: " << socket.output << std::endl;
+  for (const auto& entry : description.GetEntries()) {
+    // Close previous subsection, if subsection changes
+    if (!previousSubsection.empty() &&
+      (entry.GetSubsectionKey()!=previousSubsection || !entry.HasSubsection())) {
+      assert(indent>=2);
+      indent-=2;
+      DumpIndent(indent);
+      std::cout << "}" << std::endl;
     }
 
-    DumpIndent(indent+2);
+    // Close previous section, if section changes
+    if (!previousSection.empty() &&
+      entry.GetSectionKey()!=previousSection) {
+      assert(indent>=2);
+      indent-=2;
+      DumpIndent(indent);
+      std::cout << "}" << std::endl;
+    }
+
+    if (entry.GetSectionKey()!=previousSection) {
+      if (!previousSection.empty()) {
+        std::cout << std::endl;
+      }
+
+      DumpIndent(indent);
+      std::cout << entry.GetSectionKey() << " {" << std::endl;
+      indent+=2;
+    }
+
+    if (entry.HasSubsection() && entry.GetSubsectionKey()!=previousSubsection) {
+      DumpIndent(indent);
+      std::cout << entry.GetSubsectionKey() << " {" << std::endl;
+      indent+=2;
+    }
+
+
+    if (entry.HasIndex() && entry.GetIndex()>1 && entry.GetIndex()!=previousIndex) {
+      assert(indent>=2);
+      DumpIndent(indent-2);
+      std::cout << "}" << std::endl;
+      DumpIndent(indent-2);
+      std::cout << entry.GetSubsectionKey() << " {" << std::endl;
+    }
+
+    previousSection=entry.GetSectionKey();
+    previousSubsection=entry.GetSubsectionKey();
+
+    if (entry.HasIndex()) {
+      previousIndex=entry.GetIndex();
+    }
+    else {
+      previousIndex=std::numeric_limits<size_t>::max();
+    }
+
+    DumpIndent(indent);
+    std::cout << entry.GetLabelKey() << ": ";
+    std::cout << entry.GetValue() << std::endl;
+  }
+
+  if (!previousSubsection.empty()) {
+    assert(indent>=2);
+    indent-=2;
+    DumpIndent(indent);
     std::cout << "}" << std::endl;
   }
 
-  DumpIndent(indent);
-  std::cout << "}" << std::endl;
-
-}
-
-static void DumpFeatureValueBuffer(const osmscout::FeatureValueBuffer& buffer,
-                                   size_t indent)
-{
-  for (size_t idx=0; idx<buffer.GetFeatureCount(); idx++) {
-    osmscout::FeatureInstance meta=buffer.GetFeature(idx);
-
-    if (buffer.HasFeature(idx)) {
-      if (meta.GetFeature()->HasValue()) {
-        osmscout::FeatureValue *value=buffer.GetValue(idx);
-
-        if (const auto* nameValue = dynamic_cast<osmscout::NameFeatureValue*>(value);
-            nameValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Name: " << nameValue->GetName() << std::endl;
-        }
-        else if (const auto* nameAltValue = dynamic_cast<osmscout::NameAltFeatureValue*>(value);
-                 nameAltValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "NameAlt: " << nameAltValue->GetNameAlt() << std::endl;
-        }
-        else if (const auto* refValue = dynamic_cast<osmscout::RefFeatureValue*>(value);
-                 refValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Ref: " << refValue->GetRef() << std::endl;
-        }
-        else if (const auto* locationValue = dynamic_cast<osmscout::LocationFeatureValue*>(value);
-                 locationValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Location: "<< locationValue->GetLocation() << std::endl;
-        }
-        else if (const auto* addressValue = dynamic_cast<osmscout::AddressFeatureValue*>(value);
-                 addressValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Address: " << addressValue->GetAddress() << std::endl;
-        }
-        else if (const auto* accessValue = dynamic_cast<osmscout::AccessFeatureValue*>(value);
-                 accessValue != nullptr) {
-
-          DumpAccessFeatureValue(*accessValue,
-                                 indent,
-                                 false);
-        }
-        else if (const auto* accessValue=dynamic_cast<osmscout::AccessRestrictedFeatureValue*>(value);
-                 accessValue != nullptr) {
-
-          DumpAccessRestrictedFeatureValue(*accessValue,
-                                           indent);
-        }
-        else if (const auto* layerValue = dynamic_cast<osmscout::LayerFeatureValue*>(value);
-                 layerValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Layer: " << (int)layerValue->GetLayer() << std::endl;
-        }
-        else if (const auto* widthValue = dynamic_cast<osmscout::WidthFeatureValue*>(value);
-                 widthValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Width: " << (int)widthValue->GetWidth() << std::endl;
-        }
-        else if (const auto* maxSpeedValue = dynamic_cast<osmscout::MaxSpeedFeatureValue*>(value);
-                 maxSpeedValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "MaxSpeed: " << (int)maxSpeedValue->GetMaxSpeed() << std::endl;
-        }
-        else if (const auto* gradeValue = dynamic_cast<osmscout::GradeFeatureValue*>(value);
-                 gradeValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Grade: " << (int)gradeValue->GetGrade() << std::endl;
-        }
-        else if (const auto* adminLevelValue = dynamic_cast<osmscout::AdminLevelFeatureValue*>(value);
-                 adminLevelValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "AdminLevel: " << (unsigned int)adminLevelValue->GetAdminLevel();
-
-          if (!adminLevelValue->GetIsIn().empty()) {
-            std::cout << " is in " << adminLevelValue->GetIsIn();
-          }
-
-          std::cout << std::endl;
-        }
-        else if (const auto* isInValue = dynamic_cast<osmscout::IsInFeatureValue*>(value);
-                 isInValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "IsIn: " << isInValue->GetIsIn() << std::endl;
-        }
-        else if (const auto* brandValue = dynamic_cast<osmscout::BrandFeatureValue*>(value);
-                brandValue != nullptr) {
-
-          DumpIndent(indent);
-          std::cout << "Brand: " << brandValue->GetName() << std::endl;
-        }
-        else if (const auto* sidewayValue = dynamic_cast<osmscout::SidewayFeatureValue*>(value);
-                 sidewayValue != nullptr) {
-
-          DumpSidewayFeatureValue(*sidewayValue,indent);
-        }
-        else if (const auto* lanesValue = dynamic_cast<osmscout::LanesFeatureValue*>(value);
-                 lanesValue != nullptr) {
-
-          DumpLanesFeatureValue(*lanesValue,
-                                indent);
-        }
-        else if (const auto* chargingStationValue = dynamic_cast<osmscout::ChargingStationFeatureValue*>(value);
-                chargingStationValue != nullptr) {
-
-          DumpChargingStationFeatureValue(*chargingStationValue,indent);
-        }
-        else if (const auto* maxStayValue = dynamic_cast<osmscout::MaxStayFeatureValue*>(value);
-                maxStayValue != nullptr) {
-          DumpIndent(indent);
-          std::cout << "MaxStay {" << std::endl;
-
-          DumpIndent(indent+2);
-          std::cout << "value: " << maxStayValue->GetValue() << std::endl;
-
-          if (maxStayValue->HasCondition()) {
-            DumpIndent(indent+2);
-            std::cout << "condition: " << maxStayValue->GetCondition() << std::endl;
-          }
-
-          DumpIndent(indent);
-          std::cout << "}" << std::endl;
-        }
-        else if (const auto* feeValue = dynamic_cast<osmscout::FeeFeatureValue*>(value);
-                feeValue != nullptr) {
-          DumpIndent(indent);
-          std::cout << "Fee {" << std::endl;
-
-          DumpIndent(indent+2);
-          std::cout << "value: " << EnumToString(feeValue->GetValue()) << std::endl;
-
-          if (feeValue->HasCondition()) {
-            DumpIndent(indent+2);
-            std::cout << "condition: " << feeValue->GetCondition() << std::endl;
-          }
-
-          DumpIndent(indent);
-          std::cout << "}" << std::endl;
-
-        }
-        else if (meta.GetFeature()->HasLabel()) {
-          DumpIndent(indent);
-          std::cout << meta.GetFeature()->GetName() << ": ";
-          std::cout << value->GetLabel(osmscout::Locale(), 0);
-          std::cout << std::endl;
-        }
-        else {
-          DumpIndent(indent);
-          std::cout << meta.GetFeature()->GetName() << ": ";
-          std::cout << "<Unknown value>";
-          std::cout << std::endl;
-        }
-      }
-      // Flag-like Features
-      else {
-        // We are just a flag...
-        DumpIndent(indent);
-        std::cout << meta.GetFeature()->GetName() << ": true";
-        std::cout << std::endl;
-      }
-    }
-    // Features with default value
-    else {
-      if (meta.GetFeature()->GetName()==osmscout::AccessFeature::NAME) {
-        osmscout::AccessFeatureValue accessValue(buffer.GetType()->GetDefaultAccess());
-
-        DumpAccessFeatureValue(accessValue,
-                               indent,
-                               true);
-      }
-      else if (!meta.GetFeature()->HasValue()) {
-        // We are just a flag...
-        DumpIndent(indent);
-        std::cout << "(" << meta.GetFeature()->GetName() << ")" << ": false";
-        std::cout << std::endl;
-      }
-    }
+  if (!previousSection.empty()) {
+    assert(indent>=2);
+    indent-=2;
+    DumpIndent(indent);
+    std::cout << "}" << std::endl;
   }
 }
 
-static void DumpNode(const osmscout::NodeRef& node,
+
+static void DumpNode(const osmscout::DescriptionService& descriptionService,
+                     const osmscout::Node& node,
                      osmscout::OSMId id)
 {
+  osmscout::ObjectDescription description=descriptionService.GetDescription(node);
+
   std::cout << "Node {" << std::endl;
   std::cout << "  OSM id: " << id << std::endl;
-  std::cout << "  fileOffset: " << node->GetFileOffset() << std::endl;
-  std::cout << "  type: " << node->GetType()->GetName() << std::endl;
+  std::cout << std::endl;
+  DumpDescription(description,2);
 
   std::cout << std::endl;
 
-  DumpFeatureValueBuffer(node->GetFeatureValueBuffer(),
-                         IDENT);
-
-  std::cout << std::endl;
-
-  std::cout << "  lat: " << node->GetCoords().GetLat() << std::endl;
-  std::cout << "  lon: " << node->GetCoords().GetLon() << std::endl;
+  std::cout << "  lat: " << node.GetCoords().GetLat() << std::endl;
+  std::cout << "  lon: " << node.GetCoords().GetLon() << std::endl;
 
   std::cout << "}" << std::endl;
-
 }
 
-static void DumpWay(const osmscout::WayRef& way,
-                    osmscout::OSMId id)
+static void DumpWay(const osmscout::DescriptionService& descriptionService,
+                     const osmscout::Way& way,
+                     osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox=way->GetBoundingBox();
+  osmscout::ObjectDescription description=descriptionService.GetDescription(way);
 
   std::cout << "Way {" << std::endl;
-
   std::cout << "  OSM id: " << id << std::endl;
-  std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
-  std::cout << "  type: " << way->GetType()->GetName() << std::endl;
-  std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
-  std::cout << "  center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
-  std::cout << "  cell level: " << CalculateCellLevel(boundingBox) << std::endl;
-
   std::cout << std::endl;
+  DumpDescription(description,2);
 
-  DumpFeatureValueBuffer(way->GetFeatureValueBuffer(),
-                         IDENT);
-
-  if (!way->nodes.empty()) {
+  if (!way.nodes.empty()) {
     std::cout << std::endl;
 
-    for (size_t n=0; n<way->nodes.size(); n++) {
+    for (size_t n=0; n<way.nodes.size(); n++) {
       std::cout << "  node[" << n << "] {";
 
-      if (way->GetSerial(n)!=0) {
-        std::cout << " serial: " << way->GetSerial(n);
-        std::cout << " id: " << way->GetId(n);
+      if (way.GetSerial(n)!=0) {
+        std::cout << " serial: " << way.GetSerial(n);
+        std::cout << " id: " << way.GetId(n);
       }
 
-      std::cout << " lat: " << way->GetCoord(n).GetLat() << " lon: "<< way->GetCoord(n).GetLon() << " }" << std::endl;
+      std::cout << " lat: " << way.GetCoord(n).GetLat() << " lon: "<< way.GetCoord(n).GetLon() << " }" << std::endl;
     }
   }
 
   std::cout << "}" << std::endl;
 }
 
-static void DumpArea(const osmscout::AreaRef& area,
+static void DumpArea(const osmscout::DescriptionService& descriptionService,
+                     const osmscout::Area& area,
                      osmscout::OSMId id)
 {
-  osmscout::GeoBox boundingBox=area->GetBoundingBox();
+  osmscout::ObjectDescription description=descriptionService.GetDescription(area);
 
   std::cout << "Area {" << std::endl;
-
   std::cout << "  OSM id: " << id << std::endl;
-  std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
-  std::cout << "  type: " << area->GetType()->GetName() << std::endl;
-  std::cout << "  boundingBox: " << boundingBox.GetDisplayText() << std::endl;
-  std::cout << "  center: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
-  std::cout << "  cell level: " << CalculateCellLevel(boundingBox) << std::endl;
-
   std::cout << std::endl;
 
-  DumpFeatureValueBuffer(area->rings.front().GetFeatureValueBuffer(),
-                         IDENT);
+  DumpDescription(description,2);
 
-  for (size_t r=0; r<area->rings.size(); r++) {
+  for (size_t r=0; r<area.rings.size(); r++) {
     std::cout << std::endl;
 
-    size_t ident;
-    if (area->rings[r].IsMaster()) {
-      ident=IDENT;
+    size_t indent;
+    if (area.rings[r].IsMaster()) {
+      indent=INDENT;
     }
     else {
       std::cout << "  role[" << r << "] {" << std::endl;
-      ident=IDENT+2;
+      indent=INDENT+2;
     }
 
-    if (area->rings[r].IsMaster()) {
-      DumpIndent(ident);
-      std::cout << "master" << std::endl;
+    if (area.rings[r].IsMaster()) {
+      DumpIndent(indent);
+      std::cout << "role: master" << std::endl;
     }
-    else if (area->rings[r].IsTopOuter()) {
-      DumpIndent(ident);
-      std::cout << "outer" << std::endl;
-      DumpIndent(ident);
-      std::cout << "type: " << area->rings[r].GetType()->GetName() << std::endl;
+    else if (area.rings[r].IsTopOuter()) {
+      DumpIndent(indent);
+      std::cout << "role: outer" << std::endl;
     }
     else {
-      DumpIndent(ident);
-      std::cout << "ring: " << (size_t)area->rings[r].GetRing() << std::endl;
-      DumpIndent(ident);
-      std::cout << "type: " << area->rings[r].GetType()->GetName() << std::endl;
+      DumpIndent(indent);
+      std::cout << "ring: " << (size_t)area.rings[r].GetRing() << std::endl;
     }
 
-    if (!area->rings[r].nodes.empty()) {
-      DumpIndent(ident);
+    if (!area.rings[r].nodes.empty()) {
+      osmscout::GeoBox boundingBox=area.rings[r].GetBoundingBox();
+      DumpIndent(indent);
       std::cout << "boundingBox: " << boundingBox.GetDisplayText() << std::endl;
-      DumpIndent(ident);
+      DumpIndent(indent);
       std::cout << "center of bounding box: " << boundingBox.GetCenter().GetDisplayText() << std::endl;
 
-      if (area->rings[r].center) {
-        DumpIndent(ident);
-        std::cout << "visual center: " << area->rings[r].center.value().GetDisplayText() << std::endl;
+      if (area.rings[r].center) {
+        DumpIndent(indent);
+        std::cout << "visual center: " << area.rings[r].center.value().GetDisplayText() << std::endl;
       }
     }
 
-    DumpFeatureValueBuffer(area->rings[r].GetFeatureValueBuffer(),
-                           ident);
+    osmscout::ObjectDescription rinDescription=descriptionService.GetDescription(area.rings[r].GetFeatureValueBuffer());
 
-    if (!area->rings[r].nodes.empty()) {
+    DumpDescription(rinDescription,indent);
+
+    if (!area.rings[r].nodes.empty()) {
       std::cout << std::endl;
 
-      for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
-        DumpIndent(ident);
+      for (size_t n=0; n<area.rings[r].nodes.size(); n++) {
+        DumpIndent(indent);
         std::cout << "node[" << n << "] {";
 
-        if (area->rings[r].GetSerial(n)!=0) {
-          std::cout << "serial: " << area->rings[r].GetSerial(n);
+        if (area.rings[r].GetSerial(n)!=0) {
+          std::cout << "serial: " << area.rings[r].GetSerial(n);
         }
 
-        std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
+        std::cout << " lat: " << area.rings[r].nodes[n].GetLat() << " lon: "<< area.rings[r].nodes[n].GetLon() << " }" << std::endl;
       }
     }
 
-    if (!area->rings[r].IsMaster()) {
-      ident-=2;
-      DumpIndent(ident);
+    if (!area.rings[r].IsMaster()) {
+      indent-=2;
+      DumpIndent(indent);
       std::cout << "}" << std::endl;
     }
   }
@@ -940,14 +351,94 @@ static void DumpArea(const osmscout::AreaRef& area,
   std::cout << "}" << std::endl;
 }
 
+osmscout::CmdLineParseResult ParseArguments(int argc, char** argv, Arguments& args)
+{
+  osmscout::CmdLineParser argParser("DumpData",
+                                    argc, argv);
+  std::vector<std::string> helpArgs{"h", "help"};
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.map=value;
+                          }),
+                          "map",
+                          "Libosmscout map directory");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.coordIds.insert(value);
+                      }),
+                      "c",
+                      "OSM coord id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefNode, value);
+                      }),
+                      "n",
+                      "OSM node id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefWay, value);
+                      }),
+                      "w",
+                      "OSM way id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefRelation, value);
+                      }),
+                      "r",
+                      "OSM relation id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.routeNodeCoordIds.insert(value);
+                      }),
+                      "rn",
+                      "OSM routing node id");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refNode, value);
+                      }),
+                      "no",
+                      "Libosmscout node fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refWay, value);
+                      }),
+                      "wo",
+                      "Libosmscout way fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refArea, value);
+                      }),
+                      "ao",
+                      "Libosmscout area fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.routeNodeIds.insert(value);
+                      }),
+                      "ri",
+                      "Libosmscout route node id");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+  }
+
+  return result;
+}
+
 int main(int argc, char* argv[])
 {
-  std::string                    map;
-  std::list<Job>                 jobs;
-  std::set<osmscout::OSMId>      coordIds;
-
-  std::set<osmscout::OSMId>      routeNodeCoordIds;
-  std::set<osmscout::Id>         routeNodeIds;
+  // Try to initialize current locale
 
   try {
     std::locale::global(std::locale(""));
@@ -956,14 +447,15 @@ int main(int argc, char* argv[])
     std::cerr << "ERROR: Cannot set locale" << std::endl;
   }
 
-  if (!ParseArguments(argc,
-                      argv,
-                      map,
-                      coordIds,
-                      routeNodeCoordIds,
-                      routeNodeIds,
-                      jobs)) {
+  Arguments args;
+
+  if (osmscout::CmdLineParseResult result=ParseArguments(argc, argv, args);
+    result.HasError()) {
     return 1;
+  }
+
+  if (args.help) {
+    return 0;
   }
 
   osmscout::DatabaseParameter      databaseParameter;
@@ -971,20 +463,21 @@ int main(int argc, char* argv[])
   osmscout::DebugDatabaseParameter debugDatabaseParameter;
   osmscout::DebugDatabase          debugDatabase(debugDatabaseParameter);
 
-  osmscout::RouteNodeDataFile routeNodeDataFile(
-      osmscout::RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
-      1000);
+  osmscout::RouteNodeDataFile routeNodeDataFile(osmscout::RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
+                                                1000);
 
-  if (!database.Open(map)) {
+  osmscout::DescriptionService descriptionService;
+
+  if (!database.Open(args.map)) {
     std::cerr << "Cannot open db" << std::endl;
   }
 
-  if (!debugDatabase.Open(map)) {
+  if (!debugDatabase.Open(args.map)) {
     std::cerr << "Cannot open debug db" << std::endl;
   }
 
   if (!routeNodeDataFile.Open(database.GetTypeConfig(),
-                              map,
+                              args.map,
                               true)) {
     std::cerr << "Cannot open routing db" << std::endl;
   }
@@ -993,7 +486,7 @@ int main(int argc, char* argv[])
   std::set<osmscout::ObjectOSMRef>  osmRefs;
   std::set<osmscout::ObjectFileRef> fileRefs;
 
-  for (const auto& job : jobs) {
+  for (const auto& job : args.jobs) {
     switch (job.osmRef.GetType()) {
     case osmscout::osmRefNone:
       break;
@@ -1036,17 +529,21 @@ int main(int argc, char* argv[])
   osmscout::CoordDataFile::ResultMap                      routeCoordsMap;
   std::unordered_map<osmscout::Id,osmscout::RouteNodeRef> routeNodeMap;
 
-  if (!coordIds.empty()) {
+  //
+  // Load data
+  //
 
-    if (!debugDatabase.GetCoords(coordIds,
+  if (!args.coordIds.empty()) {
+
+    if (!debugDatabase.GetCoords(args.coordIds,
                                  coordsMap)) {
       std::cerr << "Error whole loading coords by id" << std::endl;
     }
   }
 
-  if (!routeNodeCoordIds.empty()) {
+  if (!args.routeNodeCoordIds.empty()) {
 
-    if (!debugDatabase.GetCoords(routeNodeCoordIds,
+    if (!debugDatabase.GetCoords(args.routeNodeCoordIds,
                                  routeCoordsMap)) {
       std::cerr << "Error whole loading route node coords by id" << std::endl;
     }
@@ -1101,20 +598,20 @@ int main(int argc, char* argv[])
     }
   }
 
-  for (const auto id : routeNodeCoordIds) {
+  for (const auto id : args.routeNodeCoordIds) {
     auto coordsEntry=routeCoordsMap.find(id);
 
     if (coordsEntry!=routeCoordsMap.end()) {
-      routeNodeIds.insert(coordsEntry->second.GetId());
+      args.routeNodeIds.insert(coordsEntry->second.GetId());
     }
     else {
       std::cerr << "Cannot find route node coord with id " << id << std::endl;
     }
   }
 
-  if (!routeNodeIds.empty() &&
+  if (!args.routeNodeIds.empty() &&
       routeNodeDataFile.IsOpen()) {
-    for (const osmscout::Id id:routeNodeIds){
+    for (const osmscout::Id id : args.routeNodeIds){
       osmscout::RouteNodeRef node;
       if (!routeNodeDataFile.Get(id,node)) {
         std::cerr << "Error loading route nodes by id" << std::endl;
@@ -1128,52 +625,53 @@ int main(int argc, char* argv[])
     }
   }
 
-  bool firstCoord=true;
-  for (const auto id : coordIds) {
+  //
+  // Start of dump
+  //
+
+  size_t dumpCounter=0;
+
+  for (const auto id : args.coordIds) {
     auto coordsEntry=coordsMap.find(id);
 
     if (coordsEntry!=coordsMap.end()) {
-      if (!firstCoord) {
-        std::cout << std::endl;
+      if (dumpCounter>0) {
+        std::cout << "---" << std::endl;
       }
 
       DumpPoint(coordsEntry->first,
                 coordsEntry->second);
+      dumpCounter++;
     }
     else {
       std::cerr << "Cannot find coord with id " << id << std::endl;
     }
-
-    firstCoord=false;
   }
 
-  bool firstRouteNode=true;
-  for (const auto id : routeNodeIds) {
+  for (const auto id : args.routeNodeIds) {
     auto routeNodeEntry=routeNodeMap.find(id);
 
     if (routeNodeEntry!=routeNodeMap.end()) {
-      if (!firstRouteNode) {
-        std::cout << std::endl;
+      if (dumpCounter>0) {
+        std::cout << "---" << std::endl;
       }
 
       DumpRouteNode(*routeNodeEntry->second);
+      dumpCounter++;
     }
     else {
       std::cerr << "Cannot find route node with id " << id << std::endl;
     }
-
-    firstRouteNode=false;
   }
 
   std::streamsize         oldPrecision=std::cout.precision(5);
   std::ios_base::fmtflags oldFlags=std::cout.setf(std::ios::fixed,std::ios::floatfield);
 
-  for (std::list<Job>::const_iterator job=jobs.begin();
-       job!=jobs.end();
+  for (std::list<Job>::const_iterator job=args.jobs.begin();
+       job!=args.jobs.end();
        ++job) {
-    if (job!=jobs.begin() ||
-        !coordIds.empty()) {
-      std::cout << std::endl;
+    if (dumpCounter>0) {
+      std::cout << "---" << std::endl;
     }
 
     if (job->osmRef.GetType()!=osmscout::osmRefNone) {
@@ -1191,7 +689,8 @@ int main(int argc, char* argv[])
           case osmscout::refNode:
             for (const auto &node : nodes) {
               if (reference->second.GetFileOffset() == node->GetFileOffset()) {
-                DumpNode(node, reference->first.GetId());
+                DumpNode(descriptionService, *node, reference->first.GetId());
+                dumpCounter++;
                 break;
               }
             }
@@ -1199,7 +698,8 @@ int main(int argc, char* argv[])
           case osmscout::refArea:
             for (const auto &area : areas) {
               if (reference->second.GetFileOffset() == area->GetFileOffset()) {
-                DumpArea(area, reference->first.GetId());
+                DumpArea(descriptionService,*area, reference->first.GetId());
+                dumpCounter++;
                 break;
               }
             }
@@ -1207,7 +707,8 @@ int main(int argc, char* argv[])
           case osmscout::refWay:
             for (const auto &way : ways) {
               if (reference->second.GetFileOffset() == way->GetFileOffset()) {
-                DumpWay(way, reference->first.GetId());
+                DumpWay(descriptionService, *way, reference->first.GetId());
+                dumpCounter++;
                 break;
               }
             }
@@ -1229,7 +730,8 @@ int main(int argc, char* argv[])
       case osmscout::refNode:
         for (const auto& node : nodes) {
           if (reference->first.GetFileOffset()==node->GetFileOffset()) {
-            DumpNode(node,reference->second.GetId());
+            DumpNode(descriptionService,*node,reference->second.GetId());
+            dumpCounter++;
             break;
           }
         }
@@ -1237,7 +739,8 @@ int main(int argc, char* argv[])
       case osmscout::refArea:
         for (const auto& area : areas) {
           if (reference->first.GetFileOffset()==area->GetFileOffset()) {
-            DumpArea(area,reference->second.GetId());
+            DumpArea(descriptionService,*area, reference->second.GetId());
+            dumpCounter++;
             break;
           }
         }
@@ -1245,7 +748,8 @@ int main(int argc, char* argv[])
       case osmscout::refWay:
         for (const auto& way : ways) {
           if (reference->first.GetFileOffset()==way->GetFileOffset()) {
-            DumpWay(way,reference->second.GetId());
+            DumpWay(descriptionService, *way, reference->second.GetId());
+            dumpCounter++;
             break;
           }
         }
