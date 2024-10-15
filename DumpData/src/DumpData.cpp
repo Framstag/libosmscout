@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscout/db/Database.h>
 #include <osmscout/db/DebugDatabase.h>
@@ -66,223 +67,10 @@ struct Arguments
   std::set<osmscout::OSMId> routeNodeCoordIds;
   std::set<osmscout::Id>    routeNodeIds;
   std::list<Job>            jobs;
+  bool                      help;
 };
 
 static const size_t INDENT=2;
-
-static bool ParseArguments(int argc,
-                           char* argv[],
-                           Arguments& args)
-{
-  if (argc<2) {
-    std::cerr << "DumpData <map directory> {Search arguments}" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "Search arguments:" << std::endl;
-    std::cerr << "   -c  <OSMId>        OSM coord ids" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -n  <OSMId>        OSM node id" << std::endl;
-    std::cerr << "   -no <FileOffset>   osmscout node file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -w  <OSMId>        OSM way id" << std::endl;
-    std::cerr << "   -wo <FileOffset>   osmscout way file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -r  <OSMId>        OSM relation id" << std::endl;
-    std::cerr << "   -ao <FileOffset>   osmscout area file offset" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "   -rn <OSMId>        route node by OSM node id" << std::endl;
-    std::cerr << "   -ri <RouteNodeId>  osmscout route node id" << std::endl;
-    return false;
-  }
-
-  int arg=1;
-
-  args.map=argv[arg];
-
-  arg++;
-
-  while (arg<argc) {
-    if (strcmp(argv[arg],"-c")==0) {
-      long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -c requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%ld",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.coordIds.insert(id);
-
-      arg++;
-    }
-
-    //
-    // OSM types (nodes, ways, relations)
-    //
-
-    else if (strcmp(argv[arg],"-n")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -n requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::osmRefNode,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-w")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -w requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::osmRefWay,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-r")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -r requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Relation id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::osmRefRelation,id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-rn")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -rn requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Route node coord id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.routeNodeCoordIds.insert(id);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-ri")==0) {
-      unsigned long id;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -ri requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
-        std::cerr << "Route node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.routeNodeIds.insert(id);
-
-      arg++;
-    }
-
-    //
-    // libosmscout types (nodes, ways, areas)
-    //
-
-    else if (strcmp(argv[arg],"-no")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -no requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::refNode,fileOffset);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-wo")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -wo requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Way file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::refWay,fileOffset);
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-ao")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -ao requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Area file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      args.jobs.emplace_back(osmscout::refArea,fileOffset);
-
-      arg++;
-    }
-
-
-    else {
-      std::cerr << "Unknown parameter '" << argv[arg] << "'!" << std::endl;
-      return false;
-    }
-  }
-
-  return true;
-}
 
 static void DumpIndent(size_t indent)
 {
@@ -563,10 +351,93 @@ static void DumpArea(const osmscout::DescriptionService& descriptionService,
   std::cout << "}" << std::endl;
 }
 
+osmscout::CmdLineParseResult ParseArguments(int argc, char** argv, Arguments& args)
+{
+  osmscout::CmdLineParser argParser("DumpData",
+                                    argc, argv);
+  std::vector<std::string> helpArgs{"h", "help"};
+
+  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                        args.help=value;
+                      }),
+                      helpArgs,
+                      "Return argument help",
+                      true);
+
+  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.map=value;
+                          }),
+                          "map",
+                          "Libosmscout map directory");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.coordIds.insert(value);
+                      }),
+                      "c",
+                      "OSM coord id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefNode, value);
+                      }),
+                      "n",
+                      "OSM node id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefWay, value);
+                      }),
+                      "w",
+                      "OSM way id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.jobs.emplace_back(osmscout::osmRefRelation, value);
+                      }),
+                      "r",
+                      "OSM relation id");
+
+  argParser.AddOption(osmscout::CmdLineInt64TOption([&args](const int64_t& value) {
+                        args.routeNodeCoordIds.insert(value);
+                      }),
+                      "rn",
+                      "OSM routing node id");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refNode, value);
+                      }),
+                      "no",
+                      "Libosmscout node fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refWay, value);
+                      }),
+                      "wo",
+                      "Libosmscout way fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.jobs.emplace_back(osmscout::refArea, value);
+                      }),
+                      "ao",
+                      "Libosmscout area fileoffset");
+
+  argParser.AddOption(osmscout::CmdLineUInt64TOption([&args](const uint64_t& value) {
+                        args.routeNodeIds.insert(value);
+                      }),
+                      "ri",
+                      "Libosmscout route node id");
+
+  osmscout::CmdLineParseResult result=argParser.Parse();
+  if (result.HasError()) {
+    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
+    std::cout << argParser.GetHelp() << std::endl;
+  }
+  else if (args.help) {
+    std::cout << argParser.GetHelp() << std::endl;
+  }
+
+  return result;
+}
+
 int main(int argc, char* argv[])
 {
-  Arguments args;
-
   // Try to initialize current locale
 
   try {
@@ -576,10 +447,15 @@ int main(int argc, char* argv[])
     std::cerr << "ERROR: Cannot set locale" << std::endl;
   }
 
-  if (!ParseArguments(argc,
-                      argv,
-                      args)) {
+  Arguments args;
+
+  if (osmscout::CmdLineParseResult result=ParseArguments(argc, argv, args);
+    result.HasError()) {
     return 1;
+  }
+
+  if (args.help) {
+    return 0;
   }
 
   osmscout::DatabaseParameter      databaseParameter;
@@ -587,11 +463,10 @@ int main(int argc, char* argv[])
   osmscout::DebugDatabaseParameter debugDatabaseParameter;
   osmscout::DebugDatabase          debugDatabase(debugDatabaseParameter);
 
-  osmscout::RouteNodeDataFile routeNodeDataFile(
-      osmscout::RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
-      1000);
+  osmscout::RouteNodeDataFile routeNodeDataFile(osmscout::RoutingService::GetDataFilename(osmscout::RoutingService::DEFAULT_FILENAME_BASE),
+                                                1000);
 
-  osmscout::DescriptionService     descriptionService;
+  osmscout::DescriptionService descriptionService;
 
   if (!database.Open(args.map)) {
     std::cerr << "Cannot open db" << std::endl;

@@ -307,6 +307,18 @@ namespace osmscout {
   }
 
   template<class ...Args>
+  CmdLineArgParserRef CmdLineInt64TOption(Args&& ...args)
+  {
+    return std::make_shared<CmdLineNumberArgParser<int64_t>>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
+  CmdLineArgParserRef CmdLineUInt64TOption(Args&& ...args)
+  {
+    return std::make_shared<CmdLineNumberArgParser<uint64_t>>(std::forward<Args>(args)...);
+  }
+
+  template<class ...Args>
   CmdLineArgParserRef CmdLineDoubleOption(Args&& ...args)
   {
     return std::make_shared<CmdLineNumberArgParser<double>>(std::forward<Args>(args)...);
