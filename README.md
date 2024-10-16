@@ -4,7 +4,7 @@ Libosmscout is a C++ library for offline map rendering, routing and location loo
 based on OpenStreetMap data.
 
 Supported platforms:
-* 32bit or 64 bit platforms in general are supported.
+* 32bit or 64 bit platforms in general are supported. We recommend 64 bit on desktop.
 * Requires a compiler that supports C++20.
 * Supported build systems are CMake and Meson.
 * Linux using recent versions of gcc or clang.
@@ -59,19 +59,21 @@ We plan to move all documentation for the repository to the homepage.
 
 # Automatic builds
 
-Automatic builds can be found at [Github Actions](https://github.com/Framstag/libosmscout/actions),
-[Appveyor](https//ci.appveyor.com/project/Framstag/libosmscout) and [Wecker](https://app.wercker.com/project/byKey/39a4ba230c28d1d9e4ecae6158b283e8).
+Automatic builds can be found at [Github Actions](https://github.com/Framstag/libosmscout/actions).
 Static code analysis on [Sonar cloud](https://sonarcloud.io/dashboard?id=Framstag_libosmscout).
 Goal is to check all supported platforms, compilers and build systems to keep project in good condition.
 
 Current build status:
 
-|Operating Systems|Provider|Status|
-|-----------------|--------|------|
-|iOS|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml)|
-|Windows, MSYS/MINGW64|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml)|
-|Mac OS X|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml)|
-|Linux (Ubuntu 20.04)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_20_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_20_04.yml)|
-|Windows, Visual Studio 2019|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml)|
-|Android (on Ubuntu 18.04)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_18_04_qt_android.yml)|
-|Linux (with sanitizers)|Github Actions|[![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_20_04.yml)|
+| Operating Systems           | Provider                    | Status                                                                                                                                                                                                                      |
+|-----------------------------|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Linux (Ubuntu 22.04)        | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_22_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_22_04.yml) |
+| Linux (Ubuntu 24.04)        | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_24_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ubuntu_24_04.yml) |
+| Linux (with sanitizers)     | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_22_04.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/sanitize_on_ubuntu_22_04.yml)                 |
+| Android (on Ubuntu 22.04)   | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_22_04_qt_android.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_on_ubuntu_22_04_qt_android.yml) |
+| iOS                         | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_ios.yml)                   |
+| Mac OS X                    | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_osx.yml)                   |
+| Windows, MSYS/MINGW64       | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_msys.yml)                 |
+| Windows, Visual Studio 2019 | Github Actions              | [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/build_and%20test_on_vs2019.yml)             |
+| Sonar                       | GitHub Actions| [![Build Status](https://github.com/Framstag/libosmscout/actions/workflows/sonar.yml/badge.svg)](https://github.com/Framstag/libosmscout/actions/workflows/sonar.yml)                                                       |
+| Sonar                       | SonarCloud | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Framstag_libosmscout&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Framstag_libosmscout)                                 |
