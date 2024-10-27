@@ -289,7 +289,6 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
   QMutexLocker locker(&mutex);
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
     [this,location](const std::list<DBInstanceRef> &databases){
-      int count = 0;
       for (auto db:databases){
         osmscout::LocationDescription description;
         osmscout::GeoBox dbBox=db->GetDBGeoBox();
@@ -304,8 +303,6 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
         }
 
         if (description.GetAtAddressDescription()){
-          count++;
-
           auto place = description.GetAtAddressDescription()->GetPlace();
           emit locationDescription(location, QString::fromStdString(db->path), description,
                                    BuildAdminRegionList(db, place.GetAdminRegion(), regionMap));
@@ -317,8 +314,6 @@ void LookupModule::requestLocationDescription(const osmscout::GeoCoord location)
         }
 
         if (description.GetAtPOIDescription()){
-          count++;
-
           auto place = description.GetAtPOIDescription()->GetPlace();
           emit locationDescription(location, QString::fromStdString(db->path), description,
                                    BuildAdminRegionList(db, place.GetAdminRegion(), regionMap));
