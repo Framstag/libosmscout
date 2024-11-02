@@ -349,18 +349,16 @@ namespace osmscout {
 
     void ProcessingLoop() override
     {
-      while (true) {
+      while (!inQueue.Finished()) {
         std::optional<AreaMergeJob> value=inQueue.PopTask();
 
-        if (!value) {
-          break;
+        if (value) {
+          AreaMergeJob job=std::move(value.value());
+
+          AreaMergeResult result=ProcessJob(job);
+
+          outQueue.PushTask(result);
         }
-
-        AreaMergeJob job=std::move(value.value());
-
-        AreaMergeResult result=ProcessJob(job);
-
-        outQueue.PushTask(result);
       }
 
       outQueue.Stop();

@@ -178,7 +178,7 @@ namespace osmscout {
     template <class ...Args>
     explicit ThreadedWorkerPool(Args&&... args)
     {
-      unsigned int size=std::thread::hardware_concurrency();
+      unsigned int size=std::max(1u,std::thread::hardware_concurrency());
 
       for (unsigned int i = 0; i < size; i++) {
         workerPool.push_back(std::make_shared<W>(std::forward<Args>(args)...));

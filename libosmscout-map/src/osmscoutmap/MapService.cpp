@@ -616,10 +616,8 @@ namespace osmscout {
   {
     SetThreadName("NodeLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (nodeWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=nodeWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 
@@ -627,10 +625,8 @@ namespace osmscout {
   {
     SetThreadName("WayLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (wayWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=wayWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 
@@ -638,10 +634,8 @@ namespace osmscout {
   {
     SetThreadName("WayLowZoomLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (wayLowZoomWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=wayLowZoomWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 
@@ -649,10 +643,8 @@ namespace osmscout {
   {
     SetThreadName("AreaLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (areaWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=areaWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 
@@ -660,10 +652,8 @@ namespace osmscout {
   {
     SetThreadName("AreaLowZoomLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (areaLowZoomWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=areaLowZoomWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 
@@ -671,10 +661,8 @@ namespace osmscout {
   {
     SetThreadName("RouteLoader");
 
-    std::packaged_task<bool()> task;
-
-    while (routeWorkerQueue.PopTask(task)) {
-      task();
+    while (auto task=routeWorkerQueue.PopTask()) {
+      task.value()();
     }
   }
 

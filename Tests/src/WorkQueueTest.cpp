@@ -31,21 +31,14 @@ private:
   osmscout::WorkQueue<int> queue;
 
 private:
-  int Work(int a, int b)
-  {
-    std::cout << "Doing task #" << a << std::endl;
-
-    return a+b;
-  }
-
   void TaskLoop()
   {
-    std::packaged_task<int()> task;
-
     std::cout << "Starting TaskLoop()..." << std::endl;
 
-    while (queue.PopTask(task)) {
-      task();
+    while (!queue.Finished()) {
+      if (auto optionalTask=queue.PopTask(); optionalTask) {
+        optionalTask.value()();
+      }
     }
 
     std::cout << "Quit TaskLoop()" << std::endl;
@@ -65,7 +58,11 @@ public:
 
   std::future<int> PushWork(int a, int b)
   {
-    std::packaged_task<int()> task(std::bind(&Worker::Work,this,a,b));
+    std::packaged_task<int()> task([a,b] {
+      std::cout << "Doing task #" << a << std::endl;
+
+      return a+b;
+    });
 
     std::future<int> future=task.get_future();
 

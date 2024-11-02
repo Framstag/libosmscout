@@ -20,54 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <condition_variable>
-#include <deque>
 #include <future>
-#include <memory>
-#include <limits>
-#include <thread>
-
-#include <osmscout/lib/CoreImportExport.h>
 #include <osmscout/async/ProcessingQueue.h>
 
 namespace osmscout {
-
   template<typename R>
-  class WorkQueue: public ProcessingQueue<std::packaged_task<R ()>>
-  {
-  private:
-    using Task = std::packaged_task<R ()>;
-
-  public:
-    WorkQueue() = default;
-
-    explicit WorkQueue(size_t queueLimit);
-    ~WorkQueue() override = default;
-
-    bool PopTask(Task& task);
-  };
-
-
-  template<class R>
-  WorkQueue<R>::WorkQueue(size_t queueLimit)
-    : ProcessingQueue<Task>(queueLimit)
-  {
-    // no code
-  }
-
-  template<class R>
-  bool WorkQueue<R>::PopTask(Task& task)
-  {
-    auto taskOpt = ProcessingQueue<Task>::PopTask();
-
-    if (!taskOpt) {
-      return false;
-    }
-
-    task=std::move(taskOpt.value());
-
-    return true;
-  }
+  using WorkQueue = ProcessingQueue<std::packaged_task<R ()>>;
 }
 
 #endif

@@ -44,10 +44,10 @@ AsyncWorker::~AsyncWorker()
 
 void AsyncWorker::Loop()
 {
-  while (true) {
+  while (!queue.Finished()) {
     auto taskOpt = queue.PopTask();
     if (!taskOpt) {
-      break;
+      continue;
     }
 
     taskOpt.value()();

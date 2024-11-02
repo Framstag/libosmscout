@@ -76,6 +76,8 @@ namespace osmscout {
     std::optional<T> PopTask();
 
     void Stop();
+
+    bool Finished();
   };
 
   /**
@@ -157,8 +159,7 @@ namespace osmscout {
 
     popCondition.wait(lock,[this]{return !tasks.empty() || !running;});
 
-    if (!running &&
-        tasks.empty()) {
+    if (tasks.empty()) {
       return std::nullopt;
     }
 
@@ -177,7 +178,6 @@ namespace osmscout {
    *
    * @tparam R
    */
-
   template<class R>
   void ProcessingQueue<R>::Stop()
   {
@@ -189,6 +189,20 @@ namespace osmscout {
 
     popCondition.notify_all();
   }
+
+  /**
+   * Return true, if the queue is stopped and empty, else false.
+   * @tparam R
+   * @return true, if stopped and empty, else false
+   */
+  template<class R>
+  bool ProcessingQueue<R>::Finished()
+  {
+    std::unique_lock lock(mutex);
+
+    return !running && tasks.empty();
+  }
+
 }
 
 #endif
