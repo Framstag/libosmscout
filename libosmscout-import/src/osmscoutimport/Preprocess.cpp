@@ -657,10 +657,12 @@ namespace osmscout {
 
   void Preprocess::Callback::BlockWorkerLoop()
   {
-    std::packaged_task<ProcessedDataRef()> task;
+    while (!blockWorkerQueue.Finished()) {
+      auto optionalTask=blockWorkerQueue.PopTask();
 
-    while (blockWorkerQueue.PopTask(task)) {
-      task();
+      if (optionalTask) {
+        optionalTask.value()();
+      }
     }
   }
 
@@ -742,10 +744,12 @@ namespace osmscout {
 
   void Preprocess::Callback::WriteWorkerLoop()
   {
-    std::packaged_task<void()> task;
+    while (!writeWorkerQueue.Finished()) {
+      auto optionalTask=writeWorkerQueue.PopTask();
 
-    while (writeWorkerQueue.PopTask(task)) {
-      task();
+      if (optionalTask) {
+        optionalTask.value()();
+      }
     }
   }
 

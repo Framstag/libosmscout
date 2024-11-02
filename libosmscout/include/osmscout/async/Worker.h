@@ -20,8 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <vector>
 #include <thread>
-#include <optional>
 
 #include <osmscout/async/ProcessingQueue.h>
 
@@ -167,6 +167,42 @@ namespace osmscout {
     {
     }
   };
+
+  template <typename W>
+  class ThreadedWorkerPool
+  {
+  private:
+    std::vector<std::shared_ptr<W>> workerPool;
+
+  public:
+    template <class ...Args>
+    explicit ThreadedWorkerPool(Args&&... args)
+    {
+      unsigned int size=std::max(1u,std::thread::hardware_concurrency());
+
+      for (unsigned int i = 0; i < size; i++) {
+        workerPool.push_back(std::make_shared<W>(std::forward<Args>(args)...));
+      }
+    }
+
+    template <class ...Args>
+    explicit ThreadedWorkerPool(size_t size, Args&&... args)
+    {
+      for (size_t i = 0; i < size; i++) {
+        workerPool.push_back(std::make_shared<W>(std::forward<Args>(args)...));
+      }
+    }
+
+    void Wait()
+    {
+      for (auto& worker : workerPool) {
+        worker->Wait();
+      }
+
+      workerPool.clear();
+    }
+  };
+
 
 }
 
