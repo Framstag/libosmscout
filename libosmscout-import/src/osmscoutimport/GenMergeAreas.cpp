@@ -333,11 +333,10 @@ namespace osmscout {
     {
       progress.Info("Merging areas of type "+job.type->GetName());
 
-      AreaMergeResult result;
       StopClock       mergeStopClock;
 
-      result=MergeAreas(progress,
-                        job);
+      AreaMergeResult result=MergeAreas(progress,
+                                        job);
 
       mergeStopClock.Stop();
       progress.Info(
@@ -391,14 +390,10 @@ namespace osmscout {
     std::vector<AreaMergeResult>              mergeResult(typeConfig.GetTypeCount());
     ProcessingQueue<AreaMergeJob>             queue1(10000);
     ProcessingQueue<AreaMergeResult>          queue2(10000);
-    std::vector<std::shared_ptr<MergeWorker>> mergeWorkerPool;
     std::vector<AreaMergeJob>                 mergeJobList;
-
-    for (size_t t=1; t<=std::thread::hardware_concurrency(); t++) {
-      mergeWorkerPool.push_back(std::make_shared<MergeWorker>(progress,
-                                                              queue1,
-                                                              queue2));
-    }
+    ThreadedWorkerPool<MergeWorker>           workerPool(progress,
+                                                         queue1,
+                                                         queue2);
 
     for (const auto& type : loadedTypes) {
       if (!mergeJobs[type->GetIndex()].areas.empty()) {
@@ -407,12 +402,11 @@ namespace osmscout {
     }
 
     // Sort job list by area count (job with most areas first) to increase chance for usage of all threads
-    std::sort(mergeJobList.begin(),
-              mergeJobList.end(),
-              [](const AreaMergeJob& a,
-                 const AreaMergeJob& b) {
-                return a.areas.size()>b.areas.size();
-              });
+    std::ranges::sort(mergeJobList,
+                      [](const AreaMergeJob& a,
+                         const AreaMergeJob& b) {
+                        return a.areas.size()>b.areas.size();
+                      });
 
     // Push all jobs
     for (auto& job : mergeJobList) {
@@ -420,13 +414,7 @@ namespace osmscout {
     }
     queue1.Stop();
 
-    // Wait for all worker to finish
-    for (auto& worker : mergeWorkerPool) {
-      worker->Wait();
-    }
-
-    // Free workers
-    mergeWorkerPool.clear();
+    workerPool.Wait();
 
     // Read worker results from queue until queue is empty
     while (true) {
