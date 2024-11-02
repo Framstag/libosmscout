@@ -248,6 +248,7 @@ void NavigationModel::setRoute(QObject *o)
   }
   arrivalEstimate=QDateTime();
   remainingDistance=std::nullopt;
+  lane=LaneAgent::Lane();
   endResetModel();
 
   emit arrivalUpdate();
@@ -255,6 +256,7 @@ void NavigationModel::setRoute(QObject *o)
   emit vehiclePositionChanged();
   emit positionEstimateInTunnelChanged();
   emit update();
+  emit laneUpdate();
   emit currentSpeedUpdate(0);
   emit maxAllowedSpeedUpdate(0);
 }

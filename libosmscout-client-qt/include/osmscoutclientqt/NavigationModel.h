@@ -53,7 +53,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(bool positionEstimateInTunnel READ getPositionEstimateInTunnel NOTIFY positionEstimateInTunnelChanged)
 
   Q_PROPERTY(QDateTime arrivalEstimate READ getArrivalEstimate    NOTIFY arrivalUpdate)
-  Q_PROPERTY(double remainingDistance  READ getRemainingDinstance NOTIFY arrivalUpdate)
+  Q_PROPERTY(double remainingDistance  READ getRemainingDistance  NOTIFY arrivalUpdate)
 
   // km/h, <0 when unknown
   Q_PROPERTY(double currentSpeed    READ getCurrentSpeed    NOTIFY currentSpeedUpdate)
@@ -180,7 +180,7 @@ public:
     return arrivalEstimate;
   }
 
-  inline double getRemainingDinstance() const
+  inline double getRemainingDistance() const
   {
     if (!remainingDistance.has_value()){
       return 0;
