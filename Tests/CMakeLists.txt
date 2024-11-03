@@ -96,7 +96,9 @@ else()
 endif()
 
 #---- Thread
-osmscout_test_project(NAME ThreadTest SOURCES src/ThreadTest.cpp)
+if(NOT MINGW AND NOT MSYS)
+  osmscout_test_project(NAME ThreadTest SOURCES src/ThreadTest.cpp)
+endif()
 
 #---- DrawTextQt
 if(${OSMSCOUT_BUILD_MAP_QT} AND TARGET OSMScout::MapQt)

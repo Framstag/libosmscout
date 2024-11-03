@@ -7,6 +7,7 @@
 #include <iostream>
 
 TEST_CASE("Thread exit signal") {
+  std::cout << "MainThread id: " << std::this_thread::get_id() << std::endl;
 
   auto cnt=std::atomic_int(0);
 
@@ -17,12 +18,22 @@ TEST_CASE("Thread exit signal") {
 
   REQUIRE(cnt==0);
 
+  std::cout << "Starting background thread..." << std::endl;
   std::thread t1([&threadEndSlot](){
-    std::cout << "ThreadFn " << std::this_thread::get_id() << std::endl;
+    std::cout << "Background thread id: " << std::this_thread::get_id() << std::endl;
+    std::cout << "Connect..." << std::endl;
     osmscout::ThreadExitSignal().Connect(threadEndSlot);
+    std::cout << "Connect...done" << std::endl;
+    std::cout << "Background thread...done" << std::endl;
   });
 
+  std::cout << "Joining background thread..." << std::endl;
   t1.join();
+  std::cout << "Joining background thread...done" << std::endl;
+
+  std::cout << "Value of cnt: " << cnt << std::endl;
 
   REQUIRE(cnt==1);
+
+  std::cout << "Test...done" << std::endl;
 }
