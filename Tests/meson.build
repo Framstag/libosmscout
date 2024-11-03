@@ -601,7 +601,11 @@ ThreadTest = executable('ThreadTest',
                     install: true,
                     install_dir: testInstallDir)
 
-test('Check Thread utilities', ThreadTest)
+if (compiler.get_id()=='gcc' and target_machine.system()=='windows')
+    warning('Test "Check Thread utilities" does not run under MSYS because of partial support for thread local')
+else
+    test('Check Thread utilities', ThreadTest)
+endif
 
 TilingTest = executable('TilingTest',
                         'src/TilingTest.cpp',
