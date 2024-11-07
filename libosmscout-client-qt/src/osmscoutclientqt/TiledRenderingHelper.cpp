@@ -65,16 +65,10 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
     }
   }
 
-  // enable subpixel rendering so that magnification up to 2x remains
-  // as smooth as possible
-  static constexpr double pitchFactor = 1.5;
-  // the magnification level is adjusted taking into account the pixel
-  // ratio of the request and the fixed dpi of the OSM tile
   projection.Set(request.coord,
                  0,
-                 Magnification(request.magnification.GetMagnification()
-                               * pitchFactor * request.dpi / OSMTile::tileDPI()),
-                 OSMTile::tileDPI() / pitchFactor,
+                 request.magnification,
+                 request.dpi,
                  width,
                  height);
 
