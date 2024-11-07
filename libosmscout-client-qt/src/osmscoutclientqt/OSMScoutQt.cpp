@@ -97,8 +97,8 @@ bool OSMScoutQtBuilder::Init()
    *   130 - PC (24" FullHD)
    *   100 - Qt default (reported by SailfishOS < 2.0.1)
    */
-  QScreen *srn=QGuiApplication::screens().at(0);
-  double physicalDpi = (double)srn->physicalDotsPerInch();
+  QScreen *srn=QGuiApplication::primaryScreen();
+  double physicalDpi = srn ? (double)srn->physicalDotsPerInch() : 100;
 
   QLocale locale;
   QString defaultUnits;

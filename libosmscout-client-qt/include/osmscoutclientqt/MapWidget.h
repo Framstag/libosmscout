@@ -188,6 +188,7 @@ signals:
   void styleErrorsChanged();
   void databaseLoaded(osmscout::GeoBox);
   void renderingTypeChanged(QString type);
+  void screenChanged(QScreen*);
 
 public slots:
   void changeView(const MapView &view);
@@ -309,6 +310,8 @@ private slots:
 
   void onResize();
 
+  void onWindowChanged(QQuickWindow *window);
+
 private:
   void setupInputHandler(InputHandler *newGesture);
 
@@ -319,6 +322,8 @@ private:
    * @return approximated magnification by object dimension
    */
   osmscout::Magnification magnificationByDimension(const Distance &dimension);
+
+  void setupRenderer();
 
 public:
   MapWidget(QQuickItem* parent = nullptr);

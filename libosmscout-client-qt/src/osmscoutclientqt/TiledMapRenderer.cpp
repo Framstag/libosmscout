@@ -418,10 +418,17 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
             (double)loadXFrom + (double)width/2.0,
             (double)loadYFrom + (double)height/2.0);
 
-    double osmTileDimension = (double)OSMTile::osmTileOriginalWidth() * (mapDpi / OSMTile::tileDPI() ); // pixels
+    /** tiles are up-scaled almost two times, when zoom level is near its next integer value (for example 16.99)
+     * to avoid blured result, we render tiles two times bigger than its minimum visual size.
+     * Another possible upscale (screenPixelRatio) is for HiDPI screens - when there is ratio 2.0, 100px on Qt canvas
+     * is displayed as 200px on the screen. To provide best results on HiDPI screen, we upscale tiles by this pixel ratio.
+     */
+    double finalDpi = mapDpi * 2 * this->screenPixelRatio;
 
-    QImage canvas((double)width * osmTileDimension,
-                  (double)height * osmTileDimension,
+    uint32_t tileDimension = (double)OSMTile::osmTileOriginalWidth() * (finalDpi / OSMTile::tileDPI()); // pixels
+
+    QImage canvas(width * tileDimension,
+                  height * tileDimension,
                   QImage::Format_ARGB32_Premultiplied); // TODO: verify best format with profiler (callgrind)
 
     QColor transparent = QColor::fromRgbF(1, 1, 1, 0.0);
@@ -468,7 +475,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     osmscout::MercatorProjection projection;
     osmscout::Magnification magnification(loadZ);
 
-    projection.Set(tileVisualCenter, /* angle */ 0, magnification, mapDpi,
+    projection.Set(tileVisualCenter, /* angle */ 0, magnification, finalDpi,
                    canvas.width(), canvas.height());
     projection.SetLinearInterpolationUsage(loadZ.Get() >= 10);
 
@@ -519,9 +526,9 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                 for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
 
                     QImage tile = canvas.copy(
-                            (double)(x - loadXFrom) * osmTileDimension,
-                            (double)(y - loadYFrom) * osmTileDimension,
-                            osmTileDimension, osmTileDimension
+                            (x - loadXFrom) * tileDimension,
+                            (y - loadYFrom) * tileDimension,
+                            tileDimension, tileDimension
                             );
 
                     offlineTileCache.put(loadZ.Get(), x, y, tile, loadEpoch);
