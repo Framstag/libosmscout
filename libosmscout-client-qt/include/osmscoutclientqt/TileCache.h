@@ -70,7 +70,7 @@ QDebug& operator<<(QDebug &out, const TileCacheKey &key);
 struct TileCacheVal
 {
   QElapsedTimer lastAccess;
-  QPixmap image;
+  QImage image;
   size_t epoch;
 };
 
@@ -141,7 +141,7 @@ public:
    * @return true if there was such request
    */
   bool removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
-  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, QImage image, size_t epoch = 0);
+  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &image, size_t epoch = 0);
 
   void cleanupCache();
 
