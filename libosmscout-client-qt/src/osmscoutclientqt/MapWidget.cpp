@@ -27,6 +27,7 @@
 #include <QtSvg/QSvgRenderer>
 #include <QtGlobal>
 #include <QQuickWindow>
+#include <QGuiApplication>
 
 namespace osmscout {
 
@@ -45,7 +46,8 @@ MapWidget::MapWidget(QQuickItem* parent)
     setAcceptTouchEvents(true);
 #endif
 
-    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    setupRenderer();
+
     auto settings=OSMScoutQt::GetInstance().GetSettings();
 
     DBThreadRef dbThread = OSMScoutQt::GetInstance().GetDBThread();
@@ -57,9 +59,6 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
-    connect(renderer, &MapRenderer::Redraw,
-            this, &MapWidget::redraw);
-
     connect(&tapRecognizer, &TapRecognizer::tap,        this, &MapWidget::onTap);
     connect(&tapRecognizer, &TapRecognizer::doubleTap,  this, &MapWidget::onDoubleTap);
     connect(&tapRecognizer, &TapRecognizer::longTap,    this, &MapWidget::onLongTap);
@@ -68,6 +67,7 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
     connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
+    connect(this, &QQuickItem::windowChanged, this, &MapWidget::onWindowChanged);
 
     connect(&iconAnimation, &IconAnimation::update, this, &MapWidget::redraw);
 
@@ -97,6 +97,38 @@ MapWidget::~MapWidget()
     if (iconLookup!=nullptr) {
       iconLookup->deleteLater();
       iconLookup = nullptr;
+    }
+}
+
+void MapWidget::setupRenderer()
+{
+    if (renderer) {
+      renderer->deleteLater();
+    }
+
+    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+
+    connect(renderer, &MapRenderer::Redraw,
+            this, &MapWidget::redraw);
+
+    connect(this, &MapWidget::screenChanged,
+            renderer, &MapRenderer::SetScreen,
+            Qt::QueuedConnection);
+
+    QQuickWindow *window = this->window();
+    if (window) {
+      emit screenChanged(window->screen());
+    } else {
+      emit screenChanged(QGuiApplication::primaryScreen());
+    }
+}
+
+void MapWidget::onWindowChanged(QQuickWindow *window)
+{
+    if (window) {
+      emit screenChanged(window->screen());
+      connect(window, &QWindow::screenChanged,
+              this, &MapWidget::screenChanged);
     }
 }
 
@@ -1024,14 +1056,13 @@ void MapWidget::SetRenderingType(QString strType)
     renderingType=type;
 
     std::map<int,OverlayObjectRef> overlayWays = renderer->getOverlayObjects();
-    renderer->deleteLater();
 
-    renderer = OSMScoutQt::GetInstance().MakeMapRenderer(renderingType);
+    setupRenderer();
+
     for (auto &p:overlayWays){
       renderer->addOverlayObject(p.first, p.second);
     }
-    connect(renderer, &MapRenderer::Redraw,
-            this, &MapWidget::redraw);
+
     emit renderingTypeChanged(GetRenderingType());
   }
 }

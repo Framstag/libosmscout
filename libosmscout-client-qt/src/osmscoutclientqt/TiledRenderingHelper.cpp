@@ -65,16 +65,10 @@ bool TiledRenderingHelper::RenderTiles(QPainter &painter,
     }
   }
 
-  // enable subpixel rendering so that magnification up to 2x remains
-  // as smooth as possible
-  static constexpr double pitchFactor = 1.5;
-  // the magnification level is adjusted taking into account the pixel
-  // ratio of the request and the fixed dpi of the OSM tile
   projection.Set(request.coord,
                  0,
-                 Magnification(request.magnification.GetMagnification()
-                               * pitchFactor * request.dpi / OSMTile::tileDPI()),
-                 OSMTile::tileDPI() / pitchFactor,
+                 request.magnification,
+                 request.dpi,
                  width,
                  height);
 
@@ -224,8 +218,7 @@ bool TiledRenderingHelper::lookupAndDrawTile(TileCache& tileCache, QPainter& pai
         QRectF imageViewport(imageWidth * lookupTileViewport.x(), imageHeight * lookupTileViewport.y(),
                              imageWidth * lookupTileViewport.width(), imageHeight * lookupTileViewport.height() );
 
-        // TODO: support map rotation
-        painter.drawPixmap(QRectF(x, y, renderTileWidth+overlap, renderTileHeight+overlap), val.image, imageViewport);
+        painter.drawImage(QRectF(x, y, renderTileWidth+overlap, renderTileHeight+overlap), val.image, imageViewport);
       }
       lookupTileFound = true;
       if (lookupTileZoom == zoomLevel && val.epoch == tileCache.getEpoch()) {
@@ -300,7 +293,7 @@ void TiledRenderingHelper::lookupAndDrawBottomTileRecursive(TileCache& tileCache
         if (!val.image.isNull()){
           double imageWidth = val.image.width();
           double imageHeight = val.image.height();
-          painter.drawPixmap(
+          painter.drawImage(
               QRectF(x + tx * (renderTileWidth/tileCnt), y + ty * (renderTileHeight/tileCnt), renderTileWidth/tileCnt + overlap, renderTileHeight/tileCnt + overlap),
               val.image,
               QRectF(0.0, 0.0, imageWidth, imageHeight));

@@ -157,6 +157,23 @@ void MapRenderer::onUnitsChanged(const QString& units)
   emit Redraw();
 }
 
+void MapRenderer::SetScreen(const QScreen *screen)
+{
+  bool changed=false;
+  {
+    QMutexLocker locker(&lock);
+    if (this->screenPixelRatio != screen->devicePixelRatio()) {
+      this->screenPixelRatio = screen->devicePixelRatio();
+      log.Debug() << "Screen pixel ratio: " << this->screenPixelRatio;
+      changed = true;
+    }
+  }
+  if (changed) {
+    InvalidateVisualCache();
+    emit Redraw();
+  }
+}
+
 void MapRenderer::addOverlayObject(int id, const OverlayObjectRef& obj)
 {
   {
