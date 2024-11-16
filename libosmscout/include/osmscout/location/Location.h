@@ -27,6 +27,11 @@
 #include <osmscout/ObjectRef.h>
 #include <osmscout/TypeConfig.h>
 
+#ifdef GetObject
+#undef GetObject
+#endif
+
+
 namespace osmscout {
   /**
    * \defgroup Location Location related data structures and services
