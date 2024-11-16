@@ -88,6 +88,7 @@ FocusScope {
             y: 2
 
             columns: 2
+            rows: 1
             columnSpacing: 0
 
             LocationSearch {
@@ -98,7 +99,7 @@ FocusScope {
 
                 focus: true
 
-                Layout.column: 1
+                Layout.column: 0
                 Layout.row: 1
                 Layout.fillWidth: true
                 Layout.minimumWidth: Theme.averageCharWidth*5
@@ -123,7 +124,7 @@ FocusScope {
 
                 visible: false
 
-                Layout.column: 2
+                Layout.column: 1
                 Layout.row: 1
 
                 width: searchEdit.height
@@ -161,7 +162,7 @@ FocusScope {
 
                 visible: false
 
-                Layout.column: 1
+                Layout.column: 0
                 Layout.row: 2
                 Layout.fillWidth: true
                 Layout.minimumWidth: Theme.averageCharWidth*5
@@ -182,7 +183,7 @@ FocusScope {
 
                 visible: false
 
-                Layout.column: 2
+                Layout.column: 1
                 Layout.row: 2
 
                 width: searchEdit.height

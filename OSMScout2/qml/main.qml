@@ -168,9 +168,10 @@ Window {
                 console.log("tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
                 map.focus=true;
 
+                /*
                 if (pick.checked) {
                     map.pick(lat,lon);
-                }
+                }*/
             }
             onLongTap: {
                 console.log("long tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon);
@@ -188,10 +189,11 @@ Window {
             }
 
             onObjectPicked: {
+                /*
                 if (pick.checked) {
                     console.log("Object picked: " + object);
                     openObjectInfoDialog(object)
-                }
+                }*/
             }
 
             Keys.onPressed: {
@@ -352,6 +354,7 @@ Window {
                     }
                 }*/
 
+                /*
                 MapButton {
                     id: pick
                     checkable: true
@@ -360,7 +363,7 @@ Window {
                     onClicked: {
                         console.log("Toggle analysis mode "+checked);
                     }
-                }
+                }*/
 
                 MapButton {
                     id: resetRotation
