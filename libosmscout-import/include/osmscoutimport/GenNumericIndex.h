@@ -110,7 +110,7 @@ namespace osmscout {
     // Writing index file
     //
 
-    progress.SetAction(std::string("Generating '")+indexfile+"'");
+    progress.SetAction("Generating '{}'",indexfile);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),

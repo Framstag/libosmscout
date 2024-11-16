@@ -163,7 +163,7 @@ private:
   LookupModule     *lookupModule;
 
 signals:
-  void searchResult(const QString searchPattern, const QList<LocationEntry>);
+  void searchResult(const QString searchPattern, const QList<osmscout::LocationEntry>);
   void searchFinished(const QString searchPattern, bool error);
 
 public slots:

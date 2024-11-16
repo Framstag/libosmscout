@@ -200,6 +200,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<std::optional<osmscout::Bearing>>("std::optional<osmscout::Bearing>");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
+  qRegisterMetaType<osmscout::ObjectFileRef>("osmscout::ObjectFileRef");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
   qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
   qRegisterMetaType<osmscout::TileRef>("osmscout::TileRef");
