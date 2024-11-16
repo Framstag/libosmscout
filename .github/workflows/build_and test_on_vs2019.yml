@@ -91,7 +91,7 @@ jobs:
         with:
           architecture: x64
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false build
+        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false -Dcpp_std=vc++latest build
       - name: Dump found dependencies
         run:  meson introspect --dependencies
         working-directory: build
