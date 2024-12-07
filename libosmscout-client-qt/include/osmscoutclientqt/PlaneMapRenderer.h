@@ -64,6 +64,8 @@ private:
                                                 // reverse order is possible
   QImage                        *finishedImage;
   size_t                        finishedEpoch{0};
+  std::chrono::steady_clock::time_point
+                                finishedLastUsage;
   osmscout::GeoCoord            finishedCoord;
   double                        finishedAngle;
   osmscout::Magnification       finishedMagnification;
@@ -83,6 +85,7 @@ signals:
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
+  virtual void FlushVisualCaches(const std::chrono::milliseconds &idleMs);
   virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox);
 
   void DrawMap();

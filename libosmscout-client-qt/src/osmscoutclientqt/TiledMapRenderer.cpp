@@ -166,6 +166,15 @@ void TiledMapRenderer::InvalidateVisualCache()
   emit Redraw();
 }
 
+void TiledMapRenderer::FlushVisualCaches(const std::chrono::milliseconds &idleMs)
+{
+  {
+    QMutexLocker locker(&tileCacheMutex);
+    offlineTileCache.cleanupCache(std::numeric_limits<uint32_t>::max(), idleMs);
+    onlineTileCache.cleanupCache(std::numeric_limits<uint32_t>::max(), idleMs);
+  }
+}
+
 /**
  * Render map defined by request to painter
  * @param painter

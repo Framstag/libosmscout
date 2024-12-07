@@ -481,6 +481,8 @@ const std::map<std::string,bool> DBThread::GetStyleFlags() const
 
 CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &idleMs)
 {
+  flushCachesSignal.Emit(idleMs);
+
   return Async<bool>([this, idleMs](const Breaker& breaker) {
     if (breaker.IsAborted()) {
       return false;

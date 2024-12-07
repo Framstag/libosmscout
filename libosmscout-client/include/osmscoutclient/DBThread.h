@@ -136,6 +136,8 @@ public:
     std::bind(&DBThread::FlushCaches, this, std::placeholders::_1)
   };
 
+  Signal<std::chrono::milliseconds> flushCachesSignal;
+
 private:
   MapManagerRef                      mapManager;
   std::string                        basemapLookupDirectory;

@@ -56,6 +56,7 @@ MapWidget::MapWidget(QQuickItem* parent)
     dbThread->stylesheetFilenameChanged.Connect(stylesheetFilenameChangedSlot);
     dbThread->styleErrorsChanged.Connect(styleErrorsChangedSlot);
     dbThread->databaseLoadFinished.Connect(databaseLoadedSlot);
+    dbThread->flushCachesSignal.Connect(flushCachesSlot);
 
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
@@ -1065,5 +1066,10 @@ void MapWidget::SetRenderingType(QString strType)
 
     emit renderingTypeChanged(GetRenderingType());
   }
+}
+
+void MapWidget::FlushCaches(const std::chrono::milliseconds &idleMs)
+{
+  renderer->FlushVisualCaches(idleMs);
 }
 }

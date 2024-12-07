@@ -92,6 +92,7 @@ signals:
 public slots:
   virtual void Initialize();
   virtual void InvalidateVisualCache();
+  virtual void FlushVisualCaches(const std::chrono::milliseconds &idleMs);
   virtual void onStylesheetFilenameChanged();
   virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox);
 

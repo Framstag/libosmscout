@@ -53,14 +53,7 @@ QDebug& operator<<(QDebug &out, const TileCacheKey &key)
 }
 
 TileCache::TileCache(size_t cacheSize):
-  tiles(), 
-  requests(),
-  cacheSize(cacheSize), 
-  maximumLivetimeMs(5 * 60 * 1000)
-{
-}
-
-TileCache::~TileCache() 
+  cacheSize(cacheSize)
 {
 }
 
@@ -174,10 +167,10 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
     TileCacheKey key = {zoomLevel, x, y};
     if (!tiles.contains(key)){
         qWarning() << this << "No tile in cache for key " << key;
-        return {QElapsedTimer(), QImage(), epoch}; // throw std::underflow_error ?
+        return {std::chrono::steady_clock::now(), QImage(), epoch}; // throw std::underflow_error ?
     }
     TileCacheVal val = tiles.value(key);
-    val.lastAccess.start();
+    val.lastAccess = std::chrono::steady_clock::now();
     tiles.insert(key, val);
     return val;
 }
@@ -197,9 +190,7 @@ void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &im
 {
     removeRequest(zoomLevel, x, y);
     TileCacheKey key = {zoomLevel, x, y};
-    QElapsedTimer now;
-    now.start();
-    TileCacheVal val = {now, image, epoch};
+    TileCacheVal val = {std::chrono::steady_clock::now(), image, epoch};
 
 #ifdef DEBUG_TILE_CACHE
     qDebug() << this << "inserting tile" << key;
@@ -207,60 +198,62 @@ void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &im
 
     tiles.insert(key, val);
 
-    cleanupCache();
+    if (tiles.size() > (int)cacheSize) {
+      cleanupCache(cacheSize / 10, std::chrono::minutes{5});
+    }
 }
 
-void TileCache::cleanupCache()
+void TileCache::cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds &maximumLifetime)
 {
-    
-    if (tiles.size() > (int)cacheSize){
-        /** 
-         * maximum size reached
-         * 
-         * first, we will iterate over all entries and remove up to 10% tiles 
-         * older than `maximumLivetimeMs`, if no such entry found, remove oldest
-         *
-         * Goal is to remove more items at once and minimise frequency of this expensive cleaning
-         */
+    if (maxRemove==std::numeric_limits<uint32_t>::max() && maximumLifetime.count() == 0) {
+      // flush cache completely
+      tiles.clear();
+      return;
+    }
+
+    /**
+     * first, we will iterate over all entries and remove up to maxRemove tiles
+     * older than `maximumLifetime`, if no such entry found and size is bigger than cacheSize,
+     * remove oldest tile
+     *
+     * Goal is to remove more items at once and minimise frequency of this expensive cleaning
+     */
 
 #ifdef DEBUG_TILE_CACHE
-        qDebug() << this << "Cleaning tile cache (" << cacheSize << ")";
+    qDebug() << this << "Cleaning tile cache (" << cacheSize << ")";
 #endif
 
-        uint32_t removed = 0;
-        int oldest = 0;
-        TileCacheKey key;
-        TileCacheKey oldestKey;
+    uint32_t removed = 0;
+    std::chrono::steady_clock::duration oldest;
+    TileCacheKey key;
+    TileCacheKey oldestKey;
+    auto now = std::chrono::steady_clock::now();
 
-        QMutableHashIterator<TileCacheKey, TileCacheVal> it(tiles);
-        while (it.hasNext() && removed < (cacheSize / 10)){
-            it.next();
+    QMutableHashIterator<TileCacheKey, TileCacheVal> it(tiles);
+    while (it.hasNext() && removed < maxRemove){
+        it.next();
 
-            //QHash<TileCacheKey, TileCacheVal>::const_iterator it = tiles.constBegin();
-            //while (it != tiles.constEnd() && removed < (cacheSize / 10)){
+        key = it.key();
+        TileCacheVal val = it.value();
 
-            key = it.key();
-            TileCacheVal val = it.value();
-
-            int elapsed = val.lastAccess.elapsed();
-            if (elapsed > oldest){
-              oldest = elapsed;
-              oldestKey = key;
-            }
-
-            if (elapsed > (int)maximumLivetimeMs){
-#ifdef DEBUG_TILE_CACHE
-                qDebug() << this << "removing" << key;
-#endif
-
-              //tiles.remove(key);
-              it.remove();
-
-              removed ++;
-            }
-            //++it;
+        auto elapsed = now - val.lastAccess;
+        if (elapsed > oldest){
+          oldest = elapsed;
+          oldestKey = key;
         }
-        if (removed == 0 && oldest > 0){
+
+        if (elapsed > duration_cast<std::chrono::steady_clock::duration>(maximumLifetime)){
+#ifdef DEBUG_TILE_CACHE
+          qDebug() << this << "removing" << key;
+#endif
+
+          it.remove();
+
+          removed ++;
+        }
+    }
+    if (tiles.size() > (int)cacheSize){
+        if (removed == 0 && oldest.count() > 0){
           key = oldestKey;
 #ifdef DEBUG_TILE_CACHE
           qDebug() << this << "removing" << key;
