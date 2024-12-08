@@ -85,6 +85,11 @@ private:
   bool                enabled;
   QColor              transparentColor;
 
+
+  Slot<std::chrono::milliseconds> flushCachesSlot {
+    std::bind(&TiledMapOverlay::FlushCaches, this, std::placeholders::_1)
+  };
+
 public slots:
   void tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y);
 
@@ -102,6 +107,8 @@ public:
 
   bool isEnabled();
   void setEnabled(bool b);
+
+  void FlushCaches(const std::chrono::milliseconds &idleMs);
 };
 
 }

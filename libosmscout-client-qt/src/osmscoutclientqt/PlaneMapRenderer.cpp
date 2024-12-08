@@ -100,6 +100,17 @@ void PlaneMapRenderer::InvalidateVisualCache()
   emit Redraw();
 }
 
+void PlaneMapRenderer::FlushVisualCaches(const std::chrono::milliseconds &idleMs)
+{
+  {
+    QMutexLocker finishedLocker(&finishedMutex);
+    if (std::chrono::steady_clock::now() - finishedLastUsage > idleMs) {
+      osmscout::log.Debug() << "Flush finished image";
+      finishedImage = nullptr;
+    }
+  }
+}
+
 /**
  * Render map defined by request to painter
  * @param painter
@@ -230,6 +241,7 @@ bool PlaneMapRenderer::RenderMap(QPainter& painter,
     targetRectangle.setSize(sourceRectangle.size());
   }
 
+  finishedLastUsage=std::chrono::steady_clock::now();
   painter.drawImage(targetRectangle,
                     *finishedImage,
                     sourceRectangle);

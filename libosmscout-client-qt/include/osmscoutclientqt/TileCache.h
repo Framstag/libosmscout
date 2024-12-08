@@ -37,7 +37,9 @@
 #include <osmscout/util/GeoBox.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
-//#define DEBUG_TILE_CACHE
+#include <chrono>
+
+// #define DEBUG_TILE_CACHE
 
 namespace osmscout {
 
@@ -69,7 +71,7 @@ QDebug& operator<<(QDebug &out, const TileCacheKey &key);
  */
 struct TileCacheVal
 {
-  QElapsedTimer lastAccess;
+  std::chrono::steady_clock::time_point lastAccess;
   QImage image;
   size_t epoch;
 };
@@ -97,7 +99,7 @@ signals:
 
 public:
   explicit TileCache(size_t cacheSize);
-  ~TileCache() override;
+  ~TileCache() override = default;
 
   /**
    * remove all pending requests
@@ -143,7 +145,7 @@ public:
   bool removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
   void put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &image, size_t epoch = 0);
 
-  void cleanupCache();
+  void cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds &maximumLifetime);
 
   inline size_t getEpoch() const
   {
@@ -159,7 +161,6 @@ private:
   QHash<TileCacheKey, TileCacheVal> tiles;
   QHash<TileCacheKey, RequestState> requests;
   size_t                            cacheSize; // maximum count of elements in cache
-  uint32_t                          maximumLivetimeMs;
   size_t                            epoch{0};
 };
 

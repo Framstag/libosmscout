@@ -298,6 +298,11 @@ private:
     }
   };
 
+  Slot<std::chrono::milliseconds> flushCachesSlot {
+    std::bind(&MapWidget::FlushCaches, this, std::placeholders::_1)
+  };
+
+
 private slots:
 
   virtual void onTap(const QPoint p);
@@ -534,6 +539,8 @@ public:
   {
     preventMouseStealing = b;
   }
+
+  void FlushCaches(const std::chrono::milliseconds &idleMs);
 
   /**
    * Helper for loading SVG graphics

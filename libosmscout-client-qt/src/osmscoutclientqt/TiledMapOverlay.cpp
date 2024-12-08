@@ -82,7 +82,7 @@ void TileLoaderThread::onProviderChanged(const OnlineTileProvider &newProvider)
 {
   QMutexLocker locker(&tileCacheMutex);
   onlineTileCache.clearPendingRequests();
-  onlineTileCache.cleanupCache();
+  onlineTileCache.invalidate();
 
   provider=newProvider;
   if (tileDownloader!=nullptr){
@@ -150,6 +150,9 @@ TiledMapOverlay::TiledMapOverlay(QQuickItem* parent):
   connect(loader, &TileLoaderThread::downloaded,
           this, &TiledMapOverlay::tileDownloaded,
           Qt::QueuedConnection);
+
+  auto dbThread=OSMScoutQt::GetInstance().GetDBThread();
+  dbThread->flushCachesSignal.Connect(flushCachesSlot);
 }
 
 TiledMapOverlay::~TiledMapOverlay()
@@ -239,9 +242,16 @@ void TiledMapOverlay::setEnabled(bool b)
   if (!enabled){
     // cleanup cache to release memory
     loader->accessCache([&](TileCache& onlineTileCache) {
-      onlineTileCache.cleanupCache();
+      onlineTileCache.cleanupCache(std::numeric_limits<uint32_t>::max(), std::chrono::milliseconds(0));
     });
   }
   redraw();
+}
+
+void TiledMapOverlay::FlushCaches(const std::chrono::milliseconds &idleMs)
+{
+  loader->accessCache([&](TileCache& onlineTileCache) {
+    onlineTileCache.cleanupCache(std::numeric_limits<uint32_t>::max(), idleMs);
+  });
 }
 }

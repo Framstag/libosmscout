@@ -168,6 +168,7 @@ public slots:
   virtual void Initialize() = 0;
 
   virtual void InvalidateVisualCache() = 0;
+  virtual void FlushVisualCaches(const std::chrono::milliseconds &idleMs) = 0;
   virtual void onStylesheetFilenameChanged();
   virtual void onDatabaseLoaded(osmscout::GeoBox boundingBox) = 0;
 
