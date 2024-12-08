@@ -649,7 +649,7 @@ namespace osmscout
             continue;
           }
 
-          progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type)->GetName());
+          progress.SetAction("Optimizing type {}",typeConfig.GetTypeInfo(type)->GetName());
 
           //
           // Join ways

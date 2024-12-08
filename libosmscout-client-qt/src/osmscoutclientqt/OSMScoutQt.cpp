@@ -192,7 +192,8 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
 {
   // TODO: unify usage of osmscout namespace in signals and slots
   // register osmscout + standard types for usage in Qt signals/slots
-  qRegisterMetaType<LocationEntryRef>("LocationEntryRef");
+  qRegisterMetaType<osmscout::LocationEntry>("LocationEntry");
+  qRegisterMetaType<osmscout::LocationEntryRef>("LocationEntryRef");
   qRegisterMetaType<osmscout::BreakerRef>("osmscout::BreakerRef");
   qRegisterMetaType<osmscout::Distance>("osmscout::Distance");
   qRegisterMetaType<osmscout::Bearing>("osmscout::Bearing");
@@ -200,13 +201,13 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<std::optional<osmscout::Bearing>>("std::optional<osmscout::Bearing>");
   qRegisterMetaType<osmscout::GeoBox>("osmscout::GeoBox");
   qRegisterMetaType<osmscout::GeoCoord>("osmscout::GeoCoord");
+  qRegisterMetaType<osmscout::ObjectFileRef>("osmscout::ObjectFileRef");
   qRegisterMetaType<osmscout::LocationDescription>("osmscout::LocationDescription");
   qRegisterMetaType<osmscout::MapData>("osmscout::MapData");
   qRegisterMetaType<osmscout::TileRef>("osmscout::TileRef");
   qRegisterMetaType<osmscout::Vehicle>("osmscout::Vehicle");
   qRegisterMetaType<osmscout::PositionAgent::PositionState>("osmscout::PositionAgent::PositionState");
   qRegisterMetaType<osmscout::LaneAgent::Lane>("osmscout::LaneAgent::Lane");
-  qRegisterMetaType<QList<LocationEntry>>("QList<LocationEntry>");
   qRegisterMetaType<QList<QDir>>("QList<QDir>");
   qRegisterMetaType<MapViewStruct>("MapViewStruct");
   qRegisterMetaType<QtRouteData>("QtRouteData");
@@ -217,7 +218,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QList<AdminRegionInfoRef>>("QList<AdminRegionInfoRef>");
   qRegisterMetaType<std::unordered_map<std::string,bool>>("std::unordered_map<std::string,bool>");
   qRegisterMetaType<QMap<QString,bool>>("QMap<QString,bool>");
-  qRegisterMetaType<LocationEntry>("LocationEntry");
+  qRegisterMetaType<QList<osmscout::LocationEntry>>("QList<osmscout::LocationEntry>");
   qRegisterMetaType<OnlineTileProvider>("OnlineTileProvider");
   qRegisterMetaType<RouteStep>("RouteStep");
   qRegisterMetaType<std::list<RouteStep>>("std::list<RouteStep>");

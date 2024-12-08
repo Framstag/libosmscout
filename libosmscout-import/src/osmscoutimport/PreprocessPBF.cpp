@@ -514,7 +514,7 @@ namespace osmscout {
     FileOffset fileSize;
     FileOffset currentPosition;
 
-    progress.SetAction(std::string("Parsing *.osm.pbf file '")+filename+"'");
+    progress.SetAction("Parsing *.osm.pbf file '{}'",filename);
 
     try {
       fileSize=GetFileSize(filename);

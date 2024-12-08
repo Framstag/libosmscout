@@ -28,6 +28,15 @@ Window {
         dialog.open()
     }
 
+    function openObjectInfoDialog(object) {
+        var component = Qt.createComponent("ObjectInfoDialog.qml")
+        var dialog = component.createObject(mainWindow, {})
+
+        dialog.opened.connect(onDialogOpened)
+        dialog.closed.connect(onDialogClosed)
+        dialog.open()
+    }
+
     function openMapDownloadDialog() {
         var component = Qt.createComponent("MapDownloadDialog.qml")
         var dialog = component.createObject(mainWindow, {})
@@ -158,6 +167,11 @@ Window {
             onTap: {
                 console.log("tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon + " (map center "+ map.view.lat + " " + map.view.lon + ")");
                 map.focus=true;
+
+                /*
+                if (pick.checked) {
+                    map.pick(lat,lon);
+                }*/
             }
             onLongTap: {
                 console.log("long tap: " + screenX + "x" + screenY + " @ " + lat + " " + lon);
@@ -172,6 +186,14 @@ Window {
             }
             onDatabaseLoaded: {
                 setupInitialPosition();
+            }
+
+            onObjectPicked: {
+                /*
+                if (pick.checked) {
+                    console.log("Object picked: " + object);
+                    openObjectInfoDialog(object)
+                }*/
             }
 
             Keys.onPressed: {
@@ -321,11 +343,22 @@ Window {
                 y: parent.height-height-Theme.vertSpace
 
                 spacing: Theme.mapButtonSpace
-/*
+
+                /*
                 MapButton {
-                    id: analysis
-                    checkable: true
+                    id: search
                     text: "🔍"
+
+                    onClicked: {
+                        //map.rotateTo(0);
+                    }
+                }*/
+
+                /*
+                MapButton {
+                    id: pick
+                    checkable: true
+                    text: "👁️"
 
                     onClicked: {
                         console.log("Toggle analysis mode "+checked);

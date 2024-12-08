@@ -1396,7 +1396,7 @@ namespace osmscout {
         areasFound++;
       }
 
-      progress.Info(std::string("Found ")+std::to_string(areasFound)+" place regions of type 'area'");
+      progress.Info("Found {} place regions of type 'area'",areasFound);
 
       scanner.Close();
     }
@@ -2741,7 +2741,9 @@ namespace osmscout {
 
       size_t level=0;
       for (const auto& regionList : boundaryAreas) {
-        progress.SetAction("Sorting in "+std::to_string(regionList.size())+" administrative boundaries of level "+std::to_string(level));
+        progress.SetAction("Sorting in {} administrative boundaries of level {}",
+          regionList.size(),
+          level);
 
         SortInBoundaries(progress,
                          *rootRegion,
@@ -2934,7 +2936,7 @@ namespace osmscout {
       // Generate file with all areas, where areas reference parent and children by offset
       //
 
-      progress.SetAction(std::string("Write '")+LocationIndex::FILENAME_LOCATION_IDX+"'");
+      progress.SetAction("Write '{}'",LocationIndex::FILENAME_LOCATION_IDX);
 
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                   LocationIndex::FILENAME_LOCATION_IDX));

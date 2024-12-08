@@ -295,98 +295,62 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 {
   progress.SetStep("Dump parameter");
   for (const auto& filename : parameter.GetMapfiles()) {
-    progress.Info(std::string("Mapfile: ")+filename);
+    progress.Info("Mapfile: {}",filename);
   }
 
-  progress.Info(std::string("typefile: ")+parameter.GetTypefile());
-  progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
-  progress.Info(std::string("Steps: ")+
-                std::to_string(parameter.GetStartStep())+
-                " - "+
-                std::to_string(parameter.GetEndStep()));
+  progress.Info("Typefile: {}",parameter.GetTypefile());
+  progress.Info("Destination directory: {}",parameter.GetDestinationDirectory());
+  progress.Info("Steps: {} - {}",
+                parameter.GetStartStep(),
+                parameter.GetEndStep());
 
 
 
   for (const auto& router : parameter.GetRouter()) {
-    progress.Info(std::string("Router: ") + VehicleMaskToString(router.GetVehicleMask()) + " - '" + router.GetFilenamebase() + "'");
+    progress.Info("Router: {} - '{}'",VehicleMaskToString(router.GetVehicleMask()),router.GetFilenamebase());
   }
 
-  progress.Info(std::string("StrictAreas: ")+
-                (parameter.GetStrictAreas() ? "true" : "false"));
+  progress.Info("StrictAreas: {}",parameter.GetStrictAreas());
+  progress.Info("ProcessingQueueSize: {}",parameter.GetProcessingQueueSize());
+  progress.Info("NumericIndexPageSize: {}",parameter.GetNumericIndexPageSize());
+  progress.Info("RawCoordBlockSize: {}",parameter.GetRawCoordBlockSize());
 
-  progress.Info(std::string("ProcessingQueueSize: ")+
-                std::to_string(parameter.GetProcessingQueueSize()));
+  progress.Info("RawNodeDataMemoryMaped: {}",parameter.GetRawNodeDataMemoryMaped());
+  progress.Info("RawWayIndexMemoryMaped: {}",parameter.GetRawWayIndexMemoryMaped());
+  progress.Info("RawWayDataMemoryMaped: {}",parameter.GetRawWayDataMemoryMaped());
+  progress.Info("RawWayIndexCacheSize: {}",parameter.GetRawWayIndexCacheSize());
+  progress.Info("RawWayBlockSize: {}",parameter.GetRawWayBlockSize());
 
-  progress.Info(std::string("NumericIndexPageSize: ")+
-                std::to_string(parameter.GetNumericIndexPageSize()));
+  progress.Info("SortObjects: {}",parameter.GetSortObjects());
+  progress.Info("SortBlockSize: {}",parameter.GetSortBlockSize());
 
-  progress.Info(std::string("RawCoordBlockSize: ")+
-                std::to_string(parameter.GetRawCoordBlockSize()));
+  progress.Info("CoordDataMemoryMaped: {}",parameter.GetCoordDataMemoryMaped());
+  progress.Info("CoordIndexCacheSize: {}",parameter.GetCoordIndexCacheSize());
+  progress.Info("CoordBlockSize: {}",parameter.GetCoordBlockSize());
 
-  progress.Info(std::string("RawNodeDataMemoryMaped: ")+
-                (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
+  progress.Info("AreaDataMemoryMaped: {}",parameter.GetAreaDataMemoryMaped());
+  progress.Info("AreaDataCacheSize: {}",parameter.GetAreaDataCacheSize());
+  progress.Info("AreaWayIndexMinMag: {}",parameter.GetAreaWayIndexMinMag().Get());
+  progress.Info("AreaWayIndexMaxMag: {}",parameter.GetAreaWayIndexMaxMag().Get());
 
-  progress.Info(std::string("RawWayIndexMemoryMaped: ")+
-                (parameter.GetRawWayIndexMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawWayDataMemoryMaped: ")+
-                (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("RawWayIndexCacheSize: ")+
-                std::to_string(parameter.GetRawWayIndexCacheSize()));
-  progress.Info(std::string("RawWayBlockSize: ")+
-                std::to_string(parameter.GetRawWayBlockSize()));
+  progress.Info("WayDataMemoryMaped: {}",parameter.GetWayDataMemoryMaped());
+  progress.Info("WayDataCacheSize: {}",parameter.GetWayDataCacheSize());
 
+  progress.Info("AreaNodeGridMag: {}",parameter.GetAreaNodeGridMag().Get());
+  progress.Info("AreaNodeSimpleListLimit: {}",parameter.GetAreaNodeSimpleListLimit());
+  progress.Info("AreaNodeTileListLimit: {}",parameter.GetAreaNodeTileListLimit());
+  progress.Info("AreaNodeTileListCoordLimit: {}",parameter.GetAreaNodeTileListCoordLimit());
+  progress.Info("AreaNodeBitmapMaxMag: {}",parameter.GetAreaNodeBitmapMaxMag().Get());
+  progress.Info("AreaNodeBitmapLimit: {}",parameter.GetAreaNodeBitmapLimit());
 
-  progress.Info(std::string("SortObjects: ")+
-                (parameter.GetSortObjects() ? "true" : "false"));
-  progress.Info(std::string("SortBlockSize: ")+
-                std::to_string(parameter.GetSortBlockSize()));
-
-  progress.Info(std::string("CoordDataMemoryMaped: ")+
-                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("CoordIndexCacheSize: ")+
-                std::to_string(parameter.GetCoordIndexCacheSize()));
-  progress.Info(std::string("CoordBlockSize: ")+
-                std::to_string(parameter.GetCoordBlockSize()));
-
-  progress.Info(std::string("AreaDataMemoryMaped: ")+
-                (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("AreaDataCacheSize: ")+
-                std::to_string(parameter.GetAreaDataCacheSize()));
-  progress.Info(std::string("AreaWayIndexMinMag: ")+
-                std::to_string(parameter.GetAreaWayIndexMinMag().Get()));
-  progress.Info(std::string("AreaWayIndexMaxMag: ")+
-                std::to_string(parameter.GetAreaWayIndexMaxMag().Get()));
-
-  progress.Info(std::string("WayDataMemoryMaped: ")+
-                (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
-  progress.Info(std::string("WayDataCacheSize: ")+
-                std::to_string(parameter.GetWayDataCacheSize()));
-
-  progress.Info("AreaNodeGridMag: "+
-                std::to_string(parameter.GetAreaNodeGridMag().Get()));
-  progress.Info("AreaNodeSimpleListLimit: "+
-                std::to_string(parameter.GetAreaNodeSimpleListLimit()));
-  progress.Info("AreaNodeTileListLimit: "+
-                std::to_string(parameter.GetAreaNodeTileListLimit()));
-  progress.Info("AreaNodeTileListCoordLimit: "+
-                std::to_string(parameter.GetAreaNodeTileListCoordLimit()));
-  progress.Info("AreaNodeBitmapMaxMag: "+
-                std::to_string(parameter.GetAreaNodeBitmapMaxMag().Get()));
-  progress.Info("AreaNodeBitmapLimit: "+
-                std::to_string(parameter.GetAreaNodeBitmapLimit()));
-
-  progress.Info(std::string("RouteNodeBlockSize: ")+
-                std::to_string(parameter.GetRouteNodeBlockSize()));
+  progress.Info("RouteNodeBlockSize: {}",parameter.GetRouteNodeBlockSize());
 
 
-  progress.Info(std::string("MaxAdminLevel: ")+
-                std::to_string(parameter.GetMaxAdminLevel()));
+  progress.Info("MaxAdminLevel: {}",parameter.GetMaxAdminLevel());
 
-  progress.Info(std::string("Eco: ")+
-                (parameter.IsEco() ? "true" : "false"));
+  progress.Info("Eco: {}",parameter.IsEco());
 
-  progress.Info(std::string("TextIndexVariant: ") +
-                TextIndexVariantStr(parameter.GetTextIndexVariant()));
+  progress.Info("TextIndexVariant: {}",TextIndexVariantStr(parameter.GetTextIndexVariant()));
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -405,12 +369,12 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
 
       fileSize=osmscout::GetFileSize(filePath);
 
-      progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
+      progress.Info("File '{}': {}",filename,osmscout::ByteSizeToString(fileSize));
 
       dataSize+=fileSize;
     }
 
-    progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
+    progress.Info("=> {}",osmscout::ByteSizeToString(dataSize));
 
     progress.Info("Optional files:");
 
@@ -422,12 +386,12 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
 
       fileSize=osmscout::GetFileSize(filePath);
 
-      progress.Info(std::string("File ")+filename+": "+osmscout::ByteSizeToString(fileSize));
+      progress.Info("File '{}': {}",filename,osmscout::ByteSizeToString(fileSize));
 
       dataSize+=fileSize;
     }
 
-    progress.Info(std::string("=> ")+osmscout::ByteSizeToString(dataSize));
+    progress.Info("=> {}",osmscout::ByteSizeToString(dataSize));
   }
   catch (osmscout::IOException& e) {
     progress.Error(e.GetDescription());
@@ -447,7 +411,7 @@ static void DeleteFilesIgnoreError(const osmscout::ImportParameter& parameter,
 
     if (osmscout::ExistsInFilesystem(absoluteFilename))
     {
-      progress.Info(("Deleting '" + absoluteFilename +"'"));
+      progress.Info("Deleting '" + absoluteFilename +"'");
 
       osmscout::RemoveFile(absoluteFilename);
     }

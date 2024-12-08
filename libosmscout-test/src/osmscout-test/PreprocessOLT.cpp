@@ -69,7 +69,7 @@ namespace osmscout {
         nodeData.id=nodeId++;
         nodeData.coord=box.GetCenter();
 
-        progress.Info("Generating node region '"+region.GetName()+"' "+std::to_string(nodeData.id)+"...");
+        progress.Info("Generating node region '{}' {}...",region.GetName(),nodeData.id);
 
         switch (region.GetPlaceType()) {
         case PlaceType::county:
@@ -104,7 +104,7 @@ namespace osmscout {
 
         wayData.id=wayId++;
 
-        progress.Info("Generating area region '"+region.GetName()+"' "+std::to_string(wayData.id)+"...");
+        progress.Info("Generating area region '{}' {}...",region.GetName(),wayData.id);
 
         switch (region.GetPlaceType()) {
         case PlaceType::county:
@@ -151,7 +151,7 @@ namespace osmscout {
 
       if (!region.GetRegionList().empty() &&
           locationInRegionCount>0) {
-        progress.Error("Region "+region.GetName()+": Locations are only allowed for leaves of the region tree");
+        progress.Error("Region {}: Locations are only allowed for leaves of the region tree",region.GetName());
       }
 
       // Generate a way for each location
@@ -162,7 +162,7 @@ namespace osmscout {
 
           locationData.id=wayId++;
 
-          progress.Info("Generating way '"+location->GetName()+"' "+std::to_string(locationData.id)+"...");
+          progress.Info("Generating way '{}' {}...",location->GetName(),locationData.id);
 
           GeoCoord wayLeftCoord(box.GetMinLat()+currentLocation*box.GetHeight()/(locationInRegionCount+1),
                                 box.GetMinLon()+box.GetWidth()/10.0);
@@ -187,7 +187,7 @@ namespace osmscout {
 
             buildingData.id=wayId++;
 
-            progress.Info("Generating building '"+address->GetName()+"' "+std::to_string(buildingData.id)+"...");
+            progress.Info("Generating building '{}' {}...",address->GetName(),buildingData.id);
 
             buildingData.tags[tagBuilding]="yes";
             buildingData.tags[tagAddrCity]=region.GetName();
@@ -295,7 +295,7 @@ namespace osmscout {
                                Progress& progress,
                                const std::string& filename)
     {
-      progress.SetAction(std::string("Parsing *.olt file '")+filename+"'");
+      progress.SetAction("Parsing *.olt file '{}'",filename);
 
       tagAdminLevel=typeConfig->GetTagId("admin_level");
       tagBoundary=typeConfig->GetTagId("boundary");

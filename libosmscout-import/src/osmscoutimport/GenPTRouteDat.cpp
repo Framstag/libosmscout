@@ -51,7 +51,7 @@ namespace osmscout {
     FileWriter writer;
     uint32_t   routesWrittenCount=static_cast<uint32_t>(routes.size());
 
-    progress.SetAction("Writing "+std::string(PTRouteDataFile::PTROUTES_DAT));
+    progress.SetAction("Writing '{}'",PTRouteDataFile::PTROUTES_DAT);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),

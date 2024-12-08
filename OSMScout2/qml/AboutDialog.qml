@@ -6,7 +6,7 @@ import net.sf.libosmscout.map 1.0
 import "custom"
 
 MapDialog {
-    id: dialog
+    id: aboutDialog
 
     label: "About..."
 
@@ -40,9 +40,7 @@ MapDialog {
 
         RowLayout {
             id: buttonRow
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            Layout.fillWidth: true
             spacing: 10
 
             Item {

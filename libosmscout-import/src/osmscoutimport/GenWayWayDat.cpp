@@ -244,7 +244,9 @@ namespace osmscout {
     // If we are done, remove all successfully collected types from our list of "not yet collected" types.
     types.Remove(currentTypes);
 
-    progress.SetAction("Collected "+std::to_string(collectedWaysCount)+" ways for "+std::to_string(currentTypes.Size())+" types");
+    progress.SetAction("Collected {} ways for types",
+                       collectedWaysCount,
+                        currentTypes.Size());
 
     return true;
   }
@@ -587,11 +589,7 @@ namespace osmscout {
 
           // skip invalid nodes
           while (prev==coordsMap.end() && osmIdIt != endIt){
-            progress.Error("Cannot resolve node with id "+
-                           std::to_string(*osmIdIt)+
-                           " for way "+
-                           std::to_string(way->GetId())+
-                           ", splitting");
+            progress.Error("Cannot resolve node with id {} for way {}, splitting",*osmIdIt,way->GetId());
             osmIdIt ++;
             segmentStart = osmIdIt;
             if (osmIdIt != endIt){
@@ -645,11 +643,9 @@ namespace osmscout {
       auto coord=coordsMap.find(rawWay.GetNodeId(n));
 
       if (coord==coordsMap.end()) {
-        progress.Error("Cannot resolve node with id "+
-                       std::to_string(rawWay.GetNodeId(n))+
-                       " for Way "+
-                       std::to_string(wayId)+
-                       ", skipping");
+        progress.Error("Cannot resolve node with id {} for Way {}, skipping",
+                       rawWay.GetNodeId(n),
+                       wayId);
         return;
       }
 
@@ -658,8 +654,8 @@ namespace osmscout {
     }
 
     if (!IsValidToWrite(way.nodes)) {
-      progress.Error("Way coordinates are not dense enough to be written for Way "+
-                     std::to_string(wayId)+", skipping");
+      progress.Error("Way coordinates are not dense enough to be written for Way {}, skipping",
+                     wayId);
       return;
     }
 
@@ -734,7 +730,9 @@ namespace osmscout {
                *way);
     }
 
-    progress.SetAction("Collected "+std::to_string(collectedAreasCount)+" areas for "+std::to_string(types.Size())+" types");
+    progress.SetAction("Collected {} areas for {} types",
+                       collectedAreasCount,
+                       types.Size());
 
     return true;
   }
@@ -761,7 +759,7 @@ namespace osmscout {
 
     if (!typeDistributionDataFile.Load(*typeConfig,
                                        parameter.GetDestinationDirectory())) {
-      progress.Error("Cannot load data file '"+typeDistributionDataFile.GetFilename()+"'");
+      progress.Error("Cannot load data file '{}'",typeDistributionDataFile.GetFilename());
       return false;
     }
 
@@ -854,8 +852,10 @@ namespace osmscout {
 
 #pragma omp critical
             if (waysByType[typeIdx].size()<originalWayCount) {
-              progress.Info("Reduced ways of '"+typeConfig->GetTypeInfo(typeIdx)->GetName()+"' from "+
-                            std::to_string(originalWayCount)+" to "+std::to_string(waysByType[typeIdx].size())+ " way(s)");
+              progress.Info("Reduced ways of '{}' from {} to {} way(s)",
+                            typeConfig->GetTypeInfo(typeIdx)->GetName(),
+                            originalWayCount,
+                            waysByType[typeIdx].size());
               mergeCount+=originalWayCount-waysByType[typeIdx].size();
             }
           }
@@ -874,7 +874,7 @@ namespace osmscout {
           }
         }
 
-        progress.SetAction("Loading "+std::to_string(nodeIds.size())+" nodes");
+        progress.SetAction("Loading {} nodes",nodeIds.size());
 
         if (!coordDataFile.Get(nodeIds,
                                coordsMap)) {
@@ -945,9 +945,10 @@ namespace osmscout {
       wayWriter.Write(writtenWayCount);
       wayWriter.Close();
 
-      progress.Info(std::to_string(rawWayCount) + " raw way(s) read, "+
-                    std::to_string(writtenWayCount) + " way(s) written, "+
-                    std::to_string(mergeCount) + " merges");
+      progress.Info("{} raw way(s) read, {} way(s) written, {} merges",
+                    rawWayCount,
+                    writtenWayCount,
+                    mergeCount);
     }
     catch (IOException& e) {
       progress.Error(e.GetDescription());

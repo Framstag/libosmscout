@@ -57,7 +57,7 @@ namespace osmscout {
     // Count the bounding box by the way...
     //
 
-    progress.SetAction("Generating "+std::string(NODES_TMP));
+    progress.SetAction("Generating '{}'",NODES_TMP);
 
     FileScanner scanner;
     FileWriter  writer;

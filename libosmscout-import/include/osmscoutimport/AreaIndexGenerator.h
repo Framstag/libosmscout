@@ -352,7 +352,7 @@ namespace osmscout {
     // Scanning distribution
     //
 
-    progress.SetAction("Scanning level distribution of "s + typeName + " types"s);
+    progress.SetAction("Scanning level distribution of {} type",typeName);
 
     if (!CalculateDistribution(*typeConfig,
                                parameter,
@@ -378,7 +378,7 @@ namespace osmscout {
     // Writing index file
     //
 
-    progress.SetAction("Generating '"s + indexFile + "'"s);
+    progress.SetAction("Generating '{}'",indexFile);
 
     try {
       writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),indexFile));

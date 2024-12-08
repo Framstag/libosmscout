@@ -559,9 +559,11 @@ namespace osmscout {
 
         pageSplitter.FileCompletelyScanned();
 
-        progress.SetAction("Written "+std::to_string(pageFileOffsetIndex.size())+" pages to disk, using "+std::to_string(pageSplitter.GetProcessedPagesCount())+" page dumps");
+        progress.SetAction("Written {} pages to disk, using {} page dumps",
+          pageFileOffsetIndex.size(),
+          pageSplitter.GetProcessedPagesCount());
 
-        progress.SetAction("Writing "+std::to_string(pageFileOffsetIndex.size())+" pages index to disk");
+        progress.SetAction("Writing {} pages index to disk",pageFileOffsetIndex.size());
 
         // Remember index start
         FileOffset indexStartOffset=writer.GetPos();

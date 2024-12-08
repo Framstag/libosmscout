@@ -176,7 +176,7 @@ namespace osmscout {
       routeWriter.SetPos(0);
       routeWriter.Write(routeCount); // write actual number of routes in file
 
-      progress.Info(std::string("Process ") + std::to_string(rawRouteCount) + " routes");
+      progress.Info("Process {} routes",rawRouteCount);
 
       rawRouteScanner.Close();
       routeWriter.Close();
