@@ -29,7 +29,6 @@
 
 #include <osmscout/util/GeoBox.h>
 #include <osmscout/util/Geometry.h>
-#include <osmscout/util/Progress.h>
 
 #include <osmscout/io/FileScanner.h>
 #include <osmscout/io/FileWriter.h>

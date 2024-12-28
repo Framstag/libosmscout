@@ -31,6 +31,7 @@
 
 #include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Progress.h>
 
 #include <osmscoutgpx/GpxFile.h>
 #include <osmscoutgpx/Export.h>
