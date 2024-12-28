@@ -224,7 +224,7 @@ void TileCache::cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds
 #endif
 
     uint32_t removed = 0;
-    std::chrono::steady_clock::duration oldest;
+    auto oldest=std::chrono::steady_clock::duration::zero();
     TileCacheKey key;
     TileCacheKey oldestKey;
     auto now = std::chrono::steady_clock::now();
