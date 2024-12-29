@@ -167,10 +167,10 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
     TileCacheKey key = {zoomLevel, x, y};
     if (!tiles.contains(key)){
         qWarning() << this << "No tile in cache for key " << key;
-        return {std::chrono::steady_clock::now(), QImage(), epoch}; // throw std::underflow_error ?
+        return {TileCacheVal::clock::now(), QImage(), epoch}; // throw std::underflow_error ?
     }
     TileCacheVal val = tiles.value(key);
-    val.lastAccess = std::chrono::steady_clock::now();
+    val.lastAccess = TileCacheVal::clock::now();
     tiles.insert(key, val);
     return val;
 }
@@ -190,7 +190,7 @@ void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &im
 {
     removeRequest(zoomLevel, x, y);
     TileCacheKey key = {zoomLevel, x, y};
-    TileCacheVal val = {std::chrono::steady_clock::now(), image, epoch};
+    TileCacheVal val = {TileCacheVal::clock::now(), image, epoch};
 
 #ifdef DEBUG_TILE_CACHE
     qDebug() << this << "inserting tile" << key;
@@ -224,10 +224,10 @@ void TileCache::cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds
 #endif
 
     uint32_t removed = 0;
-    std::chrono::steady_clock::duration oldest;
+    auto oldest=TileCacheVal::clock::duration::zero();
     TileCacheKey key;
     TileCacheKey oldestKey;
-    auto now = std::chrono::steady_clock::now();
+    auto now = TileCacheVal::clock::now();
 
     QMutableHashIterator<TileCacheKey, TileCacheVal> it(tiles);
     while (it.hasNext() && removed < maxRemove){
@@ -242,7 +242,7 @@ void TileCache::cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds
           oldestKey = key;
         }
 
-        if (elapsed > duration_cast<std::chrono::steady_clock::duration>(maximumLifetime)){
+        if (elapsed > duration_cast<TileCacheVal::clock::duration>(maximumLifetime)){
 #ifdef DEBUG_TILE_CACHE
           qDebug() << this << "removing" << key;
 #endif

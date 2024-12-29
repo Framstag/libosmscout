@@ -71,7 +71,8 @@ QDebug& operator<<(QDebug &out, const TileCacheKey &key);
  */
 struct TileCacheVal
 {
-  std::chrono::steady_clock::time_point lastAccess;
+  using clock=std::chrono::steady_clock;
+  clock::time_point lastAccess;
   QImage image;
   size_t epoch;
 };
