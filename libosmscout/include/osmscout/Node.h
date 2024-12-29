@@ -30,8 +30,6 @@
 #include <osmscout/io/FileScanner.h>
 #include <osmscout/io/FileWriter.h>
 
-#include <osmscout/util/Progress.h>
-
 #include <osmscout/system/Compiler.h>
 
 namespace osmscout {
