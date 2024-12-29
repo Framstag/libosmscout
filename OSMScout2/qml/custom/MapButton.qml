@@ -15,11 +15,11 @@ Button {
 
     background: Rectangle {
         opacity: 0.3
-        border.color: black
+        border.color: "black"
         border.width: 1
-        color: parent.checked ? "#ff0000" :
+        color: parent.checked ? "red" :
             (parent.down ? "#555555" :
-                (parent.hovered ? "#aaaaaa" : "#ffffff"))
+                (parent.hovered ? "#aaaaaa" : "white"))
     }
 
     Layout.fillWidth: true

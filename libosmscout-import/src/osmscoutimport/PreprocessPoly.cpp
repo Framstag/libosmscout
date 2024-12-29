@@ -96,7 +96,7 @@ namespace osmscout {
                               Progress& progress,
                               const std::string& filename)
   {
-    progress.SetAction(std::string("Parsing *.poly file '")+filename+"'");
+    progress.SetAction("Parsing *.poly file '{}'",filename);
 
     std::ifstream       infile(filename);
     std::string         line;

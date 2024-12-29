@@ -385,7 +385,7 @@ namespace osmscout {
                              Progress& progress,
                              const std::string& filename)
   {
-    progress.SetAction(std::string("Parsing *.osm file '")+filename+"'");
+    progress.SetAction("Parsing *.osm file '{}'",filename);
 
     Parser        parser(*typeConfig,
                          progress,

@@ -381,7 +381,7 @@ namespace osmscout {
                                                  Progress& progress,
                                                  std::vector<AreaMergeJob>& mergeJobs /* we move the job into the queue so no const */)
   {
-    progress.SetAction("Merging areas with "+std::to_string(std::thread::hardware_concurrency())+" thread(s)");
+    progress.SetAction("Merging areas with {} thread(s)",std::thread::hardware_concurrency());
 
     StopClock stopClock;
 
@@ -427,7 +427,7 @@ namespace osmscout {
 
     stopClock.Stop();
 
-    progress.SetAction("Merged "+std::to_string(loadedTypes.Size())+" types in "+stopClock.ResultString());
+    progress.SetAction("Merged {} types in {}",loadedTypes.Size(),stopClock.ResultString());
 
     return mergeResult;
   }
@@ -470,7 +470,7 @@ void MergeAreasGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                                    const TypeInfoSet& mergeTypes,
                                                    uint32_t& areasWritten)
   {
-    progress.SetAction("Scanning for nodes joining areas from '"+scanner.GetFilename()+"'");
+    progress.SetAction("Scanning for nodes joining areas from '{}'",scanner.GetFilename());
 
     std::vector<AreaMergeJob> mergeJobs(typeConfig.GetTypeCount());
 
@@ -568,7 +568,7 @@ void MergeAreasGenerator::GetDescription(const ImportParameter& /*parameter*/,
     size_t collectedAreasCount=0;
     size_t typesWithAreas     =0;
 
-    progress.SetAction("Collecting area data by type ("+std::to_string(candidateTypes.Size())+" type(s))");
+    progress.SetAction("Collecting area data by type ({} type(s))",candidateTypes.Size());
 
     StopClock stopClock;
 

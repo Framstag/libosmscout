@@ -142,7 +142,7 @@ private:
     QImage noGpsSignalIcon;
     QImage inTunnelIcon;
 
-    QImage getIcon()
+    QImage getIcon() const
     {
       if (position==nullptr){
         return QImage();
@@ -189,6 +189,8 @@ signals:
   void databaseLoaded(osmscout::GeoBox);
   void renderingTypeChanged(QString type);
   void screenChanged(QScreen*);
+
+  void objectPicked(const ObjectFileRef object);
 
 public slots:
   void changeView(const MapView &view);
@@ -276,6 +278,8 @@ public slots:
   void setVehicleScaleFactor(float factor);
 
   void onIconFound(QPoint lookupCoord, MapIcon icon);
+
+  //void pick(double lat,double lon);
 
 private:
   Slot<double> mapDpiSlot{ std::bind(&MapWidget::onMapDPIChange, this, std::placeholders::_1) };

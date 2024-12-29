@@ -51,7 +51,7 @@ public:
                             osmscout::Progress& progress)
     : progress(progress)
   {
-    progress.SetAction("Scanning world coastline file '"+coastlineShapeFile+"'");
+    progress.SetAction("Scanning world coastline file '{}'",coastlineShapeFile);
 
     coastlineCount=0;
     continuation=false;
@@ -64,7 +64,7 @@ public:
       progress.Error("Last element is not properly closed");
     }
 
-    progress.Info("Found "+std::to_string(coastlineCount)+ " coastline(s)");
+    progress.Info("Found {} coastline(s)",coastlineCount);
   }
 
   void AddCoast(const std::vector<osmscout::GeoCoord>& coords)
@@ -249,7 +249,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
 
     processor.DumpIndexHeader(writer,
                               levels);
-    progress.Info("Generating index for level "+std::to_string(indexMinMag)+" to "+std::to_string(indexMaxMag));
+    progress.Info("Generating index for level {} to {}",indexMinMag,indexMaxMag);
 
     for (auto& level : levels) {
       osmscout::Magnification                                    magnification(osmscout::MagnificationLevel(level.level));
@@ -259,7 +259,7 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
 
       projection.Set(osmscout::GeoCoord(0.0,0.0),magnification,72,640,480);
 
-      progress.SetAction("Building tiles for level "+std::to_string(level.level));
+      progress.SetAction("Building tiles for level {}",level.level);
 
       if (!visitor.coasts.empty()) {
         osmscout::WaterIndexProcessor::Data data;

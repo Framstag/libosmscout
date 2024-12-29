@@ -81,7 +81,7 @@ Q_OBJECT
   Q_PROPERTY(QStringList types READ GetTypes WRITE SetTypes)
 
 public:
-  enum Roles {
+  enum Roles : uint16_t {
     LabelRole = Qt::UserRole,
     TypeRole = Qt::UserRole +1,
     RegionRole = Qt::UserRole +2,
@@ -100,11 +100,11 @@ signals:
   void SearchingChanged(bool);
 
   void lookupFinished(int requestId);
-  void lookupResult(int requestId, QList<LocationEntry> locations);
+  void lookupResult(int requestId, QList<osmscout::LocationEntry> locations);
 
 public slots:
   void onLookupFinished(int requestId);
-  void onLookupResult(int requestId, QList<LocationEntry> locations);
+  void onLookupResult(int requestId, QList<osmscout::LocationEntry> locations);
 
 private:
   int currentRequest{0};
@@ -144,12 +144,12 @@ public:
 
   QHash<int, QByteArray> roleNames() const override;
 
-  inline bool isSearching() const
+  bool isSearching() const
   {
     return future.has_value();
   }
 
-  inline double GetLat() const
+  double GetLat() const
   {
     return searchCenter.GetLat();
   }
@@ -162,7 +162,7 @@ public:
     }
   }
 
-  inline double GetLon() const
+  double GetLon() const
   {
     return searchCenter.GetLon();
   }
@@ -175,7 +175,7 @@ public:
     }
   }
 
-  inline double GetMaxDistance() const
+  double GetMaxDistance() const
   {
     return maxDistance.AsMeter();
   }
@@ -188,12 +188,12 @@ public:
     }
   }
 
-  inline int GetResultLimit() const
+  int GetResultLimit() const
   {
     return resultLimit;
   }
 
-  inline void SetResultLimit(int limit)
+  void SetResultLimit(int limit)
   {
     if (resultLimit!=limit){
       resultLimit=limit;
@@ -201,12 +201,12 @@ public:
     }
   }
 
-  inline QStringList GetTypes() const
+  QStringList GetTypes() const
   {
     return types;
   }
 
-  inline void SetTypes(QStringList t)
+  void SetTypes(QStringList t)
   {
     if (types!=t){
       types=t;

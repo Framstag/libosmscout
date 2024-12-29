@@ -159,7 +159,7 @@ namespace osmscout {
 
     progress.SetAction("Generating 'coverage.idx'");
 
-    progress.Info(std::to_string(cells.size())+" bitmap entries");
+    progress.Info("{} bitmap entries",cells.size());
 
     Pixel minCell(std::numeric_limits<uint32_t>::max(),
                   std::numeric_limits<uint32_t>::max());

@@ -21,9 +21,9 @@
 */
 
 #include <ctime>
+#include <format>
 #include <string>
 
-#include <osmscout/lib/CoreFeatures.h>
 #include <osmscout/lib/CoreImportExport.h>
 
 #include <osmscout/system/Compiler.h>
@@ -39,7 +39,12 @@ namespace osmscout {
     Progress();
 
   public:
+    Progress(const Progress& other) = delete;
+    Progress(const Progress&& other) = delete;
     virtual ~Progress() = default;
+
+    Progress operator=(const Progress& other) = delete;
+    Progress operator=(const Progress&& other) = delete;
 
     void SetOutputDebug(bool outputDebug);
     bool OutputDebug() const;
@@ -54,6 +59,42 @@ namespace osmscout {
     virtual void Info(const std::string& text);
     virtual void Warning(const std::string& text);
     virtual void Error(const std::string& text);
+
+    template<class... Args>
+    void SetStep(std::format_string<Args...> format, Args&& ...args)
+    {
+      SetStep(std::vformat(format.get(), std::make_format_args(args...)));
+    }
+
+    template<class... Args>
+    void SetAction(std::format_string<Args...> format, Args&& ...args)
+    {
+      this->SetAction(std::vformat(format.get(), std::make_format_args(args...)));
+    }
+
+    template<class... Args>
+    void Debug(std::format_string<Args...> format, Args&& ...args)
+    {
+      this->Debug(std::vformat(format.get(), std::make_format_args(args...)));
+    }
+
+    template<class... Args>
+    void Info(std::format_string<Args...> format, Args&& ...args)
+    {
+      this->Info(std::vformat(format.get(), std::make_format_args(args...)));
+    }
+
+    template<class... Args>
+    void Warning(std::format_string<Args...> format, Args&& ...args)
+    {
+      this->Warning(std::vformat(format.get(), std::make_format_args(args...)));
+    }
+
+    template<class... Args>
+    void Error(std::format_string<Args...> format, Args&& ...args)
+    {
+      this->Error(std::vformat(format.get(), std::make_format_args(args...)));
+    }
   };
 
   class OSMSCOUT_API SilentProgress CLASS_FINAL : public Progress
