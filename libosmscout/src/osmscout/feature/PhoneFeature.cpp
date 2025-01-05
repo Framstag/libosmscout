@@ -94,11 +94,6 @@ namespace osmscout {
                            const TagMap& tags,
                            FeatureValueBuffer& buffer) const
   {
-    // ignore ways for now
-    if (object.GetType() == OSMRefType::osmRefWay) {
-      return;
-    }
-
     std::string strValue;
 
     // object may hold multiple phone tags - phone, contact:phone, contact:mobile

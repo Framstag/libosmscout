@@ -91,11 +91,6 @@ namespace osmscout {
                              const TagMap& tags,
                              FeatureValueBuffer& buffer) const
   {
-    // ignore ways for now
-    if (object.GetType() == OSMRefType::osmRefWay) {
-      return;
-    }
-
     std::string strValue;
 
     std::vector<TagId> websiteTags{tagWebsite, tagContactWebsite};
