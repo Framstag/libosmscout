@@ -64,6 +64,7 @@ class OSMSCOUT_CLIENT_QT_API NavigationModel : public QAbstractListModel
   Q_PROPERTY(bool laneSuggested READ isLaneSuggested NOTIFY laneUpdate)
   Q_PROPERTY(int suggestedLaneFrom READ getSuggestedLaneFrom NOTIFY laneUpdate)
   Q_PROPERTY(int suggestedLaneTo READ getSuggestedLaneTo NOTIFY laneUpdate)
+  Q_PROPERTY(QString laneTurn READ getLaneTurn NOTIFY laneUpdate)
   Q_PROPERTY(QStringList laneTurns READ getLaneTurns NOTIFY laneUpdate)
 
 signals:
@@ -216,6 +217,11 @@ public:
   int getSuggestedLaneTo() const
   {
     return lane.suggestedTo;
+  }
+
+  QString getLaneTurn() const
+  {
+    return QString::fromStdString(LaneTurnString(lane.turn));
   }
 
   QStringList getLaneTurns() const
