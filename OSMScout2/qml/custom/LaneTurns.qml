@@ -8,6 +8,7 @@ Rectangle{
     height: 60
 
     property var laneTurns: ["", "through", "through;right", "right"]
+    property var laneTurn: "through"
     property var suggestedLaneFrom: 1
     property var suggestedLaneTo: 2
     property var maxWidth: height * 4
@@ -70,14 +71,15 @@ Rectangle{
         parentObj.width = 0;
         for (var i in laneTurns){
             var turn = laneTurns[i];
-            console.log("turn " + i + ": " + turn + " <" + suggestedLaneFrom + ", " + suggestedLaneTo + ">");
+            console.log("turn " + i + ": " + turn + " <" + suggestedLaneFrom + ", " + suggestedLaneTo + ">: " + laneTurn);
             var icon = iconComponent.createObject(parentObj,
                                               {
                                                   id: "turnIcon" + i,
                                                   turnType: turn,
+                                                  suggestedTurn: laneTurn,
                                                   height: parentObj.height,
                                                   width: iconWidth,
-                                                  outline: ( i < suggestedLaneFrom || i > suggestedLaneTo)
+                                                  suggested: ( i >= suggestedLaneFrom && i <= suggestedLaneTo)
                                               });
             if (icon == null) {
                 // Error Handling
