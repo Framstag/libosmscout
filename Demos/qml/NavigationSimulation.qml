@@ -459,6 +459,7 @@ Window {
             id: laneTurnsComponent
 
             laneTurns: navigationModel.laneTurns
+            laneTurn: navigationModel.laneTurn
             visible: navigationModel.laneSuggested
             suggestedLaneFrom: navigationModel.suggestedLaneFrom
             suggestedLaneTo: navigationModel.suggestedLaneTo

@@ -39,8 +39,10 @@ LaneAgent::Lane::Lane(const RouteDescription::LaneDescriptionRef laneDsc,
     suggested = true;
     suggestedFrom = suggestedLaneDsc->GetFrom();
     suggestedTo = suggestedLaneDsc->GetTo();
+    turn = suggestedLaneDsc->GetTurn();
   } else {
     suggestedTo = count-1;
+    turn = LaneTurn::None;
   }
 }
 
@@ -51,7 +53,8 @@ bool LaneAgent::Lane::operator!=(const LaneAgent::Lane &o) const
          suggested!=o.suggested ||
          suggestedFrom!=o.suggestedFrom ||
          suggestedTo!=o.suggestedTo ||
-         turns!=o.turns;
+         turns!=o.turns ||
+         turn!=o.turn;
 }
 
 std::list<NavigationMessageRef> LaneAgent::Process(const NavigationMessageRef& message)

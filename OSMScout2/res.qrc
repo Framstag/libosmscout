@@ -66,6 +66,10 @@
         <file>pics/laneturn/through_right_outline.svg</file>
         <file>pics/laneturn/through_right.svg</file>
         <file>pics/laneturn/through.svg</file>
+        <file>pics/laneturn/through_left-left.svg</file>
+        <file>pics/laneturn/through_left-through.svg</file>
+        <file>pics/laneturn/through_right-right.svg</file>
+        <file>pics/laneturn/through_right-through.svg</file>
 
         <file>resources/online-tile-providers.json</file>
         <file>resources/map-providers.json</file>

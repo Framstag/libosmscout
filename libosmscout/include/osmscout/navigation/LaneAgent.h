@@ -34,12 +34,14 @@ public:
    */
   struct OSMSCOUT_API Lane
   {
-    bool oneway{false};
-    int count{1};
-    bool suggested{false};
-    int suggestedFrom{0};
-    int suggestedTo{0};
-    std::vector<LaneTurn> turns;
+    bool oneway{false}; /// when route is oneway
+    int count{1}; /// number of route lanes
+    std::vector<LaneTurn> turns; /// individual turns for lanes
+
+    bool suggested{false}; /// when suggested lanes and turn is valid
+    int suggestedFrom{0}; /// suggested lanes (from), inclusive
+    int suggestedTo{0}; /// suggested lanes (to), inclusive
+    LaneTurn turn{LaneTurn::None}; /// turn that we should take
 
     Lane() = default;
 
