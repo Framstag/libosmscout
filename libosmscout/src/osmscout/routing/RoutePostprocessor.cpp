@@ -30,6 +30,7 @@
 #include <cassert>
 #include <iostream>
 #include <string_view>
+#include <numeric>
 
 namespace osmscout {
 
@@ -1777,6 +1778,11 @@ namespace osmscout {
     int allowedLaneTo = prevLanes->GetLaneCount()-1; // inclusive
     std::vector<LaneTurn> laneTurns = prevLanes->GetLaneTurns();
 
+    // when number of outgoing lanes match to incoming one, we may decide easily what lane belong to what exit...
+    bool laneCntMatch = laneTurns.size() ==
+      std::transform_reduce(junctionExits.begin(), junctionExits.end(), size_t(lanes->GetLaneCount()), std::plus{},
+                            [](const auto &exit) -> size_t { return exit.lanes.GetLaneCount(); });
+
     // remove allowed lanes used for left exits
     for (const auto &exit: junctionLeftExits) {
       LaneTurn exitVariant = LaneTurn::Through;
@@ -1798,7 +1804,7 @@ namespace osmscout {
           laneTurns[allowedLaneTo]=LaneTurn::Through;
           continue;
         }
-        if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
+        if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
           allowedLaneFrom++;
         } else {
           break;
@@ -1826,7 +1832,7 @@ namespace osmscout {
           laneTurns[allowedLaneTo]=LaneTurn::Through;
           continue;
         }
-        if (exitVariant==turn && allowedLaneFrom < allowedLaneTo) {
+        if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
           allowedLaneTo--;
         } else {
           break;
