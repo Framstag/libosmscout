@@ -125,21 +125,30 @@ public:
 		std::cout << "Device independent resources created." << std::endl;
 
 		// Register the window class.
-		WNDCLASSEX wcex;
+		WNDCLASSEX wcex = {};
 
-    wcex.cbSize= sizeof(WNDCLASSEX);
+        wcex.cbSize= sizeof(WNDCLASSEX);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
 		wcex.lpfnWndProc = DrawMapDirectX::WndProc;
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = sizeof(LONG_PTR);
 		wcex.hInstance = HINST_THISCOMPONENT;
+        wcex.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+        wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 		wcex.hbrBackground = nullptr;
 		wcex.lpszMenuName = nullptr;
-		wcex.hCursor = LoadCursor(nullptr, IDI_APPLICATION);
 		wcex.lpszClassName = _T("DemoDrawMapDirectX");
 
-		RegisterClassEx(&wcex);
+        ATOM classAtom = RegisterClassEx(&wcex);
 
+        if (classAtom == 0) {
+            DWORD lastError = GetLastError();
+
+            std::cout << "Cannot register window class: " << lastError << std::endl;
+
+            MessageBox(m_hwnd, _T("Cannot register window class"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
+            return E_FAIL;
+        }
 
 		// Because the CreateWindow function takes its size in pixels,
 		// obtain the system DPI and use it to scale the window size.
@@ -170,6 +179,11 @@ public:
 
 		if (!SUCCEEDED(hr))
 		{
+            DWORD lastError = GetLastError();
+
+            osmscout::log.Error() << "Cannot open window: " << lastError;
+            std::cout << "Cannot open window: " << lastError << std::endl;
+
 			MessageBox(m_hwnd, _T("Cannot create window"), _T("DrawMapDirectX"), MB_OK | MB_ICONERROR);
 			return E_FAIL;
 		}
@@ -359,7 +373,7 @@ private:
 		}
 	}
 
-	// The windows procedure.
+	// The window procedure.
 	static LRESULT CALLBACK WndProc(
 		HWND hWnd,
 		UINT message,
