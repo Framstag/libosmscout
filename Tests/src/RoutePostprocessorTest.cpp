@@ -66,7 +66,24 @@ private:
   FileScanner wayScanner;
 
 public:
-  MockDatabase(TypeConfigRef typeConfig, const TmpFileRef &wayFile): typeConfig(typeConfig), wayFile(wayFile)
+  TypeInfoRef highwayType;
+  TypeInfoRef roundaboutType;
+  TypeInfoRef motorwayType;
+  TypeInfoRef motorwayLinkType;
+
+public:
+  MockDatabase(TypeConfigRef typeConfig,
+               const TmpFileRef &wayFile,
+               const TypeInfoRef &highwayType,
+               const TypeInfoRef &roundaboutType,
+               const TypeInfoRef &motorwayType,
+               const TypeInfoRef &motorwayLinkType):
+    typeConfig(typeConfig),
+    wayFile(wayFile),
+    highwayType(highwayType),
+    roundaboutType(roundaboutType),
+    motorwayType(motorwayType),
+    motorwayLinkType(motorwayLinkType)
   {
     wayScanner.Open(wayFile->path.string(), FileScanner::Mode::FastRandom, true);
   }
@@ -96,8 +113,15 @@ class MockDatabaseBuilder {
 private:
   TypeConfigRef typeConfig=std::make_shared<TypeConfig>();
   FileWriter writer;
-  TypeInfoRef type;
   TmpFileRef wayFile=std::make_shared<TmpFile>("test-ways", ".dat");
+  osmscout::FeatureRef laneFeature;
+  osmscout::FeatureRef accessFeature;
+
+  TypeInfoRef highwayType;
+  TypeInfoRef roundaboutType;
+  TypeInfoRef motorwayType;
+  TypeInfoRef motorwayLinkType;
+
   // needs to correspond to feature registration order
   static constexpr size_t laneFeatureIndex=0;
   static constexpr size_t accessFeatureIndex=1;
@@ -105,19 +129,15 @@ private:
 public:
   MockDatabaseBuilder()
   {
-    osmscout::FeatureRef laneFeature = typeConfig->GetFeature(LanesFeature::NAME);
+    laneFeature = typeConfig->GetFeature(LanesFeature::NAME);
     assert(laneFeature);
-    osmscout::FeatureRef accessFeature = typeConfig->GetFeature(AccessFeature::NAME);
+    accessFeature = typeConfig->GetFeature(AccessFeature::NAME);
     assert(accessFeature);
 
-    type=std::make_shared<TypeInfo>("highway");
-    // type->SetInternal()
-    type->CanBeWay(true)
-      .CanRouteCar(true)
-      .AddFeature(laneFeature)
-      .AddFeature(accessFeature);
-
-    typeConfig->RegisterType(type);
+    highwayType = RegisterHighwayType("highway");
+    roundaboutType = RegisterHighwayType("roundabout");
+    motorwayType = RegisterHighwayType("motorway");
+    motorwayLinkType = RegisterHighwayType("motorway_link");
 
     writer.Open(wayFile->path.string());
   }
@@ -129,7 +149,40 @@ public:
     }
   }
 
-  ObjectFileRef AddWay(const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
+  TypeInfoRef RegisterHighwayType(const std::string &name)
+  {
+    TypeInfoRef type=std::make_shared<TypeInfo>(name);
+    // type->SetInternal()
+    type->CanBeWay(true)
+      .CanRouteCar(true)
+      .AddFeature(laneFeature)
+      .AddFeature(accessFeature);
+
+    typeConfig->RegisterType(type);
+    return type;
+  }
+
+  ObjectFileRef AddHighway(const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
+  {
+    return AddWay(highwayType, coords, setupFeatures);
+  }
+
+  ObjectFileRef AddRoundabout(const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
+  {
+    return AddWay(roundaboutType, coords, setupFeatures);
+  }
+
+  ObjectFileRef AddMotorway(const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
+  {
+    return AddWay(motorwayType, coords, setupFeatures);
+  }
+
+  ObjectFileRef AddMotorwayLink(const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
+  {
+    return AddWay(motorwayLinkType, coords, setupFeatures);
+  }
+
+  ObjectFileRef AddWay(const TypeInfoRef &type, const std::vector<GeoCoord> &coords, std::function<void(AccessFeatureValue*, LanesFeatureValue*)> setupFeatures)
   {
     Way way;
 
@@ -152,7 +205,7 @@ public:
   MockDatabaseRef Build()
   {
     writer.Close();
-    return std::make_shared<MockDatabase>(typeConfig, wayFile);
+    return std::make_shared<MockDatabase>(typeConfig, wayFile, highwayType, roundaboutType, motorwayType, motorwayLinkType);
   }
 };
 
@@ -249,25 +302,29 @@ public:
   GetNameDescription([[maybe_unused]] osmscout::DatabaseId dbId,
                      [[maybe_unused]] const osmscout::Way &way) const override
   {
-    assert(false);
-    return osmscout::RouteDescription::NameDescriptionRef();
+    return std::make_shared<RouteDescription::NameDescription>("", "");
   }
 
-  bool IsMotorwayLink([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
+  bool IsMotorwayLink(const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
+    if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return database->motorwayLinkType == way->GetType();
+    }
     return false;
   }
 
-  bool IsMotorway([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
+  bool IsMotorway(const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
+    if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return database->motorwayType == way->GetType();
+    }
     return false;
   }
 
   bool IsMiniRoundabout([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
     return false;
   }
 
@@ -279,13 +336,15 @@ public:
 
   bool IsRoundabout([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
+    if (node.GetPathObject().GetType()==refWay) {
+      WayRef way=GetWay(node.GetDBFileOffset());
+      return database->roundaboutType == way->GetType();
+    }
     return false;
   }
 
   bool IsBridge([[maybe_unused]] const osmscout::RouteDescription::Node &node) const override
   {
-    assert(false);
     return false;
   }
 
@@ -415,7 +474,7 @@ TEST_CASE("Suggest lanes on simple junction")
   MockDatabaseBuilder databaseBuilder;
   // street Českobrodská to east https://www.openstreetmap.org/way/936270761
   // with two lanes (street was split to separate oneway for east and west direction at the summer 2024)
-  ObjectFileRef way1Ref=databaseBuilder.AddWay(
+  ObjectFileRef way1Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.09294, 14.52899), GeoCoord(50.09282, 14.52976)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -424,7 +483,7 @@ TEST_CASE("Suggest lanes on simple junction")
 
   // continuation of Českobrodská https://www.openstreetmap.org/way/62143601
   // single lane
-  ObjectFileRef way2Ref=databaseBuilder.AddWay(
+  ObjectFileRef way2Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.09282, 14.52976), GeoCoord(50.09263, 14.53118)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(1, 0);
@@ -433,7 +492,7 @@ TEST_CASE("Suggest lanes on simple junction")
 
   // link between Českobrodská a Průmyslová https://www.openstreetmap.org/way/936270757
   // single lane
-  ObjectFileRef way3Ref=databaseBuilder.AddWay(
+  ObjectFileRef way3Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.09282, 14.52976), GeoCoord(50.09261, 14.53093)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(1, 0);
@@ -446,6 +505,10 @@ TEST_CASE("Suggest lanes on simple junction")
 
   RoutePostprocessor::LanesPostprocessor lanesPostprocessor;
   RoutePostprocessor::SuggestedLanesPostprocessor postprocessor;
+
+  RoutePostprocessor::WayNamePostprocessor wayNamePostprocessor;
+  RoutePostprocessor::DirectionPostprocessor directionPostprocessor;
+  RoutePostprocessor::InstructionPostprocessor instructionPostprocessor;
 
   {
     // route is going in direction to Průmyslová
@@ -465,6 +528,10 @@ TEST_CASE("Suggest lanes on simple junction")
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Unknown);
+
+    wayNamePostprocessor.Process(context, description);
+    directionPostprocessor.Process(context, description);
+    instructionPostprocessor.Process(context, description);
   }
 
   {
@@ -499,7 +566,7 @@ TEST_CASE("Suggest lanes on simple junction with lane turns")
   MockDatabaseBuilder databaseBuilder;
   // street Českobrodská to east https://www.openstreetmap.org/way/1327814207
   // with three lanes forward, two backward
-  ObjectFileRef way1Ref=databaseBuilder.AddWay(
+  ObjectFileRef way1Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.092173, 14.533681), GeoCoord(50.092102, 14.534022)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(3, 2);
@@ -509,7 +576,7 @@ TEST_CASE("Suggest lanes on simple junction with lane turns")
 
   // continuation of Českobrodská https://www.openstreetmap.org/way/1327814206
   // left and through lanes continue...
-  ObjectFileRef way2Ref=databaseBuilder.AddWay(
+  ObjectFileRef way2Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.092102, 14.534022), GeoCoord(50.092038, 14.534400)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 2);
@@ -519,7 +586,7 @@ TEST_CASE("Suggest lanes on simple junction with lane turns")
 
   // link between Českobrodská a Průmyslová https://www.openstreetmap.org/way/4779018
   // single lane
-  ObjectFileRef way3Ref=databaseBuilder.AddWay(
+  ObjectFileRef way3Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.092102, 14.534022), GeoCoord(50.091858, 14.534306)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(1, 0);
@@ -586,7 +653,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
   MockDatabaseBuilder databaseBuilder;
   // street Dřevčická to south https://www.openstreetmap.org/way/1308678203
   // with three lanes
-  ObjectFileRef drevcicka1Ref=databaseBuilder.AddWay(
+  ObjectFileRef drevcicka1Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.078024, 14.511979), GeoCoord(50.077919, 14.511966)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 1);
@@ -596,7 +663,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
 
   // continuation of Dřevčická street to south https://www.openstreetmap.org/way/501228496
   // with two lanes
-  ObjectFileRef drevcicka2Ref=databaseBuilder.AddWay(
+  ObjectFileRef drevcicka2Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.077919, 14.511966), GeoCoord(50.077766, 14.511963)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(1, 1);
@@ -605,7 +672,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     });
 
   // north lanes of Černokostelecká, from east to west https://www.openstreetmap.org/way/22823101
-  ObjectFileRef northCernokostelecka1Ref=databaseBuilder.AddWay(
+  ObjectFileRef northCernokostelecka1Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.077845, 14.513782), GeoCoord(50.077919, 14.511966)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -614,7 +681,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     });
 
   // https://www.openstreetmap.org/way/1094576469
-  ObjectFileRef northCernokostelecka2Ref=databaseBuilder.AddWay(
+  ObjectFileRef northCernokostelecka2Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.077919, 14.511966), GeoCoord(50.077937, 14.510528)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -623,7 +690,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     });
 
   // south lanes of Černokostelecká, from west to east https://www.openstreetmap.org/way/1094576467
-  ObjectFileRef southCernokostelecka1Ref=databaseBuilder.AddWay(
+  ObjectFileRef southCernokostelecka1Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.077776, 14.510397), GeoCoord(50.077766, 14.511963)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -632,7 +699,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
     });
 
   // https://www.openstreetmap.org/way/1094576468
-  ObjectFileRef southCernokostelecka2Ref=databaseBuilder.AddWay(
+  ObjectFileRef southCernokostelecka2Ref=databaseBuilder.AddHighway(
     {GeoCoord(50.077766, 14.511963), GeoCoord(50.077685,14.513725)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -773,7 +840,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
   MockDatabaseBuilder databaseBuilder;
   // highway A3/A4 https://www.openstreetmap.org/way/1304846969
   // with three lanes
-  ObjectFileRef a3a4Ref=databaseBuilder.AddWay(
+  ObjectFileRef a3a4Ref=databaseBuilder.AddMotorway(
     {GeoCoord(47.341814, 8.453848), GeoCoord(47.341844, 8.454816)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(3, 0);
@@ -783,7 +850,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
 
   // highway A3 https://www.openstreetmap.org/way/38698216
   // with two lanes
-  ObjectFileRef a3Ref=databaseBuilder.AddWay(
+  ObjectFileRef a3Ref=databaseBuilder.AddMotorway(
     {GeoCoord(47.341844, 8.454816), GeoCoord(47.341923, 8.456367)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -793,7 +860,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
 
   // highway A4 https://www.openstreetmap.org/way/1205837033
   // with two lanes
-  ObjectFileRef a4Ref=databaseBuilder.AddWay(
+  ObjectFileRef a4Ref=databaseBuilder.AddMotorway(
     {GeoCoord(47.341844, 8.454816), GeoCoord(47.341756, 8.455870)},
     [](AccessFeatureValue* access, LanesFeatureValue* lanes){
       lanes->SetLanes(2, 0);
@@ -860,7 +927,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
 
   // highway A3/A4 https://www.openstreetmap.org/way/116756494
   // with three lanes
-  ObjectFileRef a3a4Ref = databaseBuilder.AddWay(
+  ObjectFileRef a3a4Ref = databaseBuilder.AddMotorway(
     {GeoCoord(47.407328, 8.423713), GeoCoord(47.407877, 8.424234)},
     [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
       lanes->SetLanes(3, 0);
@@ -870,7 +937,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
 
   // highway A3 https://www.openstreetmap.org/way/26834628
   // with one lane
-  ObjectFileRef a3Ref = databaseBuilder.AddWay(
+  ObjectFileRef a3Ref = databaseBuilder.AddMotorway(
     {GeoCoord(47.407877, 8.424234), GeoCoord(47.409503, 8.425961)},
     [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
       lanes->SetLanes(1, 0);
@@ -880,7 +947,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
 
   // highway A4 https://www.openstreetmap.org/way/10589763
   // with two lanes
-  ObjectFileRef a4Ref = databaseBuilder.AddWay(
+  ObjectFileRef a4Ref = databaseBuilder.AddMotorway(
     {GeoCoord(47.407877, 8.424234), GeoCoord(47.408958, 8.425497)},
     [](AccessFeatureValue *access, LanesFeatureValue *lanes) {
       lanes->SetLanes(2, 0);
