@@ -446,7 +446,7 @@ namespace osmscout {
 
       if (prevNode!=description.Nodes().end() &&
           nextNode!=description.Nodes().end() &&
-          nextNode->HasPathObject()) {
+          node->HasPathObject()) {
 
         GeoCoord prevCoord=postprocessor.GetCoordinates(*prevNode,
                                                         prevNode->GetCurrentNodeIndex());
@@ -454,8 +454,8 @@ namespace osmscout {
         GeoCoord coord=postprocessor.GetCoordinates(*node,
                                                     node->GetCurrentNodeIndex());
 
-        GeoCoord nextCoord=postprocessor.GetCoordinates(*nextNode,
-                                                        nextNode->GetCurrentNodeIndex());
+        GeoCoord nextCoord=postprocessor.GetCoordinates(*node,
+                                                        node->GetTargetNodeIndex());
 
         double inBearing=GetSphericalBearingFinal(prevCoord,coord).AsDegrees();
         double outBearing=GetSphericalBearingInitial(coord,nextCoord).AsDegrees();
@@ -1022,7 +1022,7 @@ namespace osmscout {
         continue;
       }
 
-      // Non-Link, non-motorway to motorway (enter motorway))
+      // Non-Link, non-motorway to motorway (enter motorway)
       if (!postprocessor.IsMotorwayLink(*lastNode) &&
           !postprocessor.IsMotorway(*lastNode) &&
           postprocessor.IsMotorway(*node)) {
