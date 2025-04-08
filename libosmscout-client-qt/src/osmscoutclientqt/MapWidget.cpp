@@ -1054,6 +1054,7 @@ void MapWidget::SetRenderingType(QString strType)
     type=RenderingType::TiledRendering;
   }
   if (type!=renderingType){
+    QMutexLocker locker(&rendererMutex);
     renderingType=type;
 
     std::map<int,OverlayObjectRef> overlayWays = renderer->getOverlayObjects();
@@ -1070,6 +1071,7 @@ void MapWidget::SetRenderingType(QString strType)
 
 void MapWidget::FlushCaches(const std::chrono::milliseconds &idleMs)
 {
+  QMutexLocker locker(&rendererMutex);
   renderer->FlushVisualCaches(idleMs);
 }
 }

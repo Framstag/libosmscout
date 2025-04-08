@@ -95,6 +95,7 @@ class OSMSCOUT_CLIENT_QT_API MapWidget : public QQuickPaintedItem
   Q_PROPERTY(bool interactiveIcons READ hasInteractiveIcons WRITE setInteractiveIcons)
 
 private:
+  mutable QMutex   rendererMutex;
   MapRenderer      *renderer{nullptr};
 
   MapView          *view{nullptr};
