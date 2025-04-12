@@ -192,6 +192,8 @@ signals:
 
   void objectPicked(const ObjectFileRef object);
 
+  void flushCachesRequest(const std::chrono::milliseconds &idleMs);
+
 public slots:
   void changeView(const MapView &view);
   void redraw();
@@ -303,7 +305,7 @@ private:
   };
 
   Slot<std::chrono::milliseconds> flushCachesSlot {
-    std::bind(&MapWidget::FlushCaches, this, std::placeholders::_1)
+    std::bind(&MapWidget::flushCachesRequest, this, std::placeholders::_1)
   };
 
 
