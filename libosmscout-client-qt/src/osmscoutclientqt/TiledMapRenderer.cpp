@@ -428,16 +428,13 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
             (double)loadXFrom + (double)width/2.0,
             (double)loadYFrom + (double)height/2.0);
 
-    // For HiDPI screens (screenPixelRatio > 1) tiles as up-scaled before displaying. When there is ratio 2.0, 100px on Qt canvas
-    // is displayed as 200px on the screen. To provide best results on HiDPI screen, we upscale tiles by this pixel ratio.
-    double finalDpi = mapDpi * this->screenPixelRatio;
-
-    uint32_t tileDimension = double(OSMTile::osmTileOriginalWidth()) * (finalDpi / OSMTile::tileDPI()); // pixels
+    uint32_t tileDimension = double(OSMTile::osmTileOriginalWidth()) * (mapDpi / OSMTile::tileDPI()); // pixels
 
     // older/mobile OpenGL (without GL_ARB_texture_non_power_of_two) requires textures with size of power of two
     // we should provide tiles with required size to avoid scaling in QOpenGLTextureCache::bindTexture
     tileDimension = qNextPowerOfTwo(tileDimension - 1);
-    finalDpi = (double(tileDimension) / double(OSMTile::osmTileOriginalWidth())) * OSMTile::tileDPI();
+
+    double finalDpi = (double(tileDimension) / double(OSMTile::osmTileOriginalWidth())) * OSMTile::tileDPI();
 
     QImage canvas(width * tileDimension,
                   height * tileDimension,
