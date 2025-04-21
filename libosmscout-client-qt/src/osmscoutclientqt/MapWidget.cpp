@@ -58,6 +58,9 @@ MapWidget::MapWidget(QQuickItem* parent)
     dbThread->databaseLoadFinished.Connect(databaseLoadedSlot);
     dbThread->flushCachesSignal.Connect(flushCachesSlot);
 
+    // DBThread::flushCachesSignal can be emitted from arbitrary thread
+    connect(this, &MapWidget::flushCachesRequest, this, &MapWidget::FlushCaches, Qt::QueuedConnection);
+
     tapRecognizer.setPhysicalDpi(dbThread->GetPhysicalDpi());
 
     connect(&tapRecognizer, &TapRecognizer::tap,        this, &MapWidget::onTap);
@@ -1070,6 +1073,7 @@ void MapWidget::SetRenderingType(QString strType)
 
 void MapWidget::FlushCaches(const std::chrono::milliseconds &idleMs)
 {
+  assert(QThread::currentThread() == this->thread());
   renderer->FlushVisualCaches(idleMs);
 }
 }
