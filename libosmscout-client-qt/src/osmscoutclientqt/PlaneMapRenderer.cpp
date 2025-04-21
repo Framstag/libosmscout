@@ -338,7 +338,7 @@ void PlaneMapRenderer::DrawMap()
 
       currentImage=new QImage(QSize(currentWidth,
                                     currentHeight),
-                              QImage::Format_RGBA8888_Premultiplied);
+                              QImage::Format_RGB888);
     }
 
     osmscout::MapParameter       drawParameter;
