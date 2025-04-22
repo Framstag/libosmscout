@@ -29,6 +29,8 @@
 #include <QGuiApplication>
 #include <QScreen>
 #include <QtCore>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
 
 namespace osmscout {
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
@@ -37,11 +39,13 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    QString iconDirectory,
                                    QString tileCacheDirectory,
                                    size_t onlineTileCacheSize,
-                                   size_t offlineTileCacheSize):
+                                   size_t offlineTileCacheSize,
+                                   GLPowerOfTwoTexture glPowerOfTwoTexture):
   MapRenderer(thread,settings,dbThread,iconDirectory),
   tileCacheDirectory(tileCacheDirectory),
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
+  glPowerOfTwoTexture(glPowerOfTwoTexture),
   tileDownloader(nullptr), // it will be created in different thread
   loadJob(nullptr),
   unknownColor(QColor::fromRgbF(1.0,1.0,1.0)) // white
@@ -49,7 +53,6 @@ TiledMapRenderer::TiledMapRenderer(QThread *thread,
   QScreen *srn=QGuiApplication::primaryScreen();
   screenWidth=srn->availableSize().width();
   screenHeight=srn->availableSize().height();
-
 
   onlineTilesEnabled = settings->GetOnlineTilesEnabled();
   offlineTilesEnabled = settings->GetOfflineMap();
@@ -200,6 +203,16 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
 
   onlineTileCache.clearPendingRequests();
   offlineTileCache.clearPendingRequests();
+
+  if (QOpenGLContext *glContext = QOpenGLContext::currentContext();
+      glContext
+      && this->glPowerOfTwoTexture != GLPowerOfTwoTexture::NoScaling
+      && glContext->functions()->hasOpenGLFeature(QOpenGLFunctions::NPOTTextures)) {
+
+    // we have GL_ARB_texture_non_power_of_two extension available, there is no need to scale tiles
+    QMutexLocker rendererLocker(&lock);
+    this->glPowerOfTwoTexture = GLPowerOfTwoTexture::NoScaling;
+  }
 
   if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor,-1,tileGridColor)){
     return false;
@@ -434,9 +447,22 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     uint32_t tileDimension = double(OSMTile::osmTileOriginalWidth()) * (finalDpi / OSMTile::tileDPI()); // pixels
 
-    // older/mobile OpenGL (without GL_ARB_texture_non_power_of_two) requires textures with size of power of two
-    // we should provide tiles with required size to avoid scaling in QOpenGLTextureCache::bindTexture
-    tileDimension = qNextPowerOfTwo(tileDimension - 1);
+    if (this->glPowerOfTwoTexture!=GLPowerOfTwoTexture::NoScaling) {
+        double next = qNextPowerOfTwo(tileDimension - 1);
+        if (this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Upscaling) {
+            tileDimension = next;
+        } else if (this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Downscaling && next!=tileDimension) {
+            tileDimension = next / 2;
+        } else {
+            assert(this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Nearest);
+            if ((next - tileDimension) < (tileDimension - (next / 2))) {
+              tileDimension = next;
+            } else {
+              tileDimension = next / 2;
+            }
+        }
+    }
+
     finalDpi = (double(tileDimension) / double(OSMTile::osmTileOriginalWidth())) * OSMTile::tileDPI();
 
     QImage canvas(width * tileDimension,

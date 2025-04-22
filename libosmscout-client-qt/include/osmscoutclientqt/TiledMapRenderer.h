@@ -38,6 +38,22 @@
 
 namespace osmscout {
 
+/**
+ * \ingroup QtAPI
+ *
+ * Older/mobile OpenGL (without GL_ARB_texture_non_power_of_two) requires textures with size of power of two.
+ * To be able upload texture to GPU without rescaling in QOpenGLTextureCache::bindTexture,
+ * we may scale tiles to proper size.
+ *
+ * This enum control how to do it.
+ */
+enum class GLPowerOfTwoTexture {
+  NoScaling = 0, // GL_ARB_texture_non_power_of_two is supported, or we can justify the performance penalty of image rescaling
+  Upscaling = 1, // next "power of two" size is used
+  Downscaling = 2, // previous "power of two" size is used
+  Nearest = 3 // closest "power of two" size
+};
+
 class OSMSCOUT_CLIENT_QT_API TiledMapRenderer : public MapRenderer {
   Q_OBJECT
 
@@ -59,6 +75,8 @@ private:
   mutable QMutex                tileCacheMutex;
   TileCache                     onlineTileCache;
   TileCache                     offlineTileCache;
+
+  GLPowerOfTwoTexture           glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling}; // guarded by lock
 
   OsmTileDownloader             *tileDownloader=nullptr;
 
@@ -118,7 +136,8 @@ public:
                    QString iconDirectory,
                    QString tileCacheDirectory,
                    size_t onlineTileCacheSize,
-                   size_t offlineTileCacheSize);
+                   size_t offlineTileCacheSize,
+                   GLPowerOfTwoTexture glPowerOfTwoTexture);
 
   virtual ~TiledMapRenderer();
 
