@@ -27,7 +27,6 @@
 #include <QtSvg/QSvgRenderer>
 #include <QtGlobal>
 #include <QQuickWindow>
-#include <QGuiApplication>
 
 namespace osmscout {
 
@@ -71,7 +70,6 @@ MapWidget::MapWidget(QQuickItem* parent)
 
     connect(this, &QQuickItem::widthChanged, this, &MapWidget::onResize);
     connect(this, &QQuickItem::heightChanged, this, &MapWidget::onResize);
-    connect(this, &QQuickItem::windowChanged, this, &MapWidget::onWindowChanged);
 
     connect(&iconAnimation, &IconAnimation::update, this, &MapWidget::redraw);
 
@@ -114,26 +112,6 @@ void MapWidget::setupRenderer()
 
     connect(renderer, &MapRenderer::Redraw,
             this, &MapWidget::redraw);
-
-    connect(this, &MapWidget::screenChanged,
-            renderer, &MapRenderer::SetScreen,
-            Qt::QueuedConnection);
-
-    QQuickWindow *window = this->window();
-    if (window) {
-      emit screenChanged(window->screen());
-    } else {
-      emit screenChanged(QGuiApplication::primaryScreen());
-    }
-}
-
-void MapWidget::onWindowChanged(QQuickWindow *window)
-{
-    if (window) {
-      emit screenChanged(window->screen());
-      connect(window, &QWindow::screenChanged,
-              this, &MapWidget::screenChanged);
-    }
 }
 
 void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)

@@ -188,7 +188,6 @@ signals:
   void styleErrorsChanged();
   void databaseLoaded(osmscout::GeoBox);
   void renderingTypeChanged(QString type);
-  void screenChanged(QScreen*);
 
   void objectPicked(const ObjectFileRef object);
 
@@ -320,8 +319,6 @@ private slots:
   void onMapDPIChange(double dpi);
 
   void onResize();
-
-  void onWindowChanged(QQuickWindow *window);
 
 private:
   void setupInputHandler(InputHandler *newGesture);
