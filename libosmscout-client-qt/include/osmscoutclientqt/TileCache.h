@@ -73,7 +73,7 @@ struct TileCacheVal
 {
   using clock=std::chrono::steady_clock;
   clock::time_point lastAccess;
-  QImage image;
+  std::shared_ptr<QImage> image;
   size_t epoch;
 };
 
@@ -144,7 +144,7 @@ public:
    * @return true if there was such request
    */
   bool removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y);
-  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &image, size_t epoch = 0);
+  void put(uint32_t zoomLevel, uint32_t x, uint32_t y, std::shared_ptr<QImage> image, size_t epoch = 0);
 
   void cleanupCache(uint32_t maxRemove, const std::chrono::milliseconds &maximumLifetime);
 

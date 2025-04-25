@@ -260,7 +260,7 @@ void TiledMapRenderer::onlineTileRequest(uint32_t zoomLevel, uint32_t xtile, uin
         // put Null image
         {
             QMutexLocker locker(&tileCacheMutex);
-            onlineTileCache.put(zoomLevel, xtile, ytile, QImage());
+            onlineTileCache.put(zoomLevel, xtile, ytile, std::make_shared<QImage>());
         }
     }
 }
@@ -340,7 +340,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
     }else{
         // put Null image
         QMutexLocker tileCacheLocker(&tileCacheMutex);
-        offlineTileCache.put(zoomLevel, xtile, ytile, QImage(), loadEpoch);
+        offlineTileCache.put(zoomLevel, xtile, ytile, std::make_shared<QImage>(), loadEpoch);
     }
 }
 
@@ -348,7 +348,7 @@ void TiledMapRenderer::tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y
 {
     {
         QMutexLocker locker(&tileCacheMutex);
-        onlineTileCache.put(zoomLevel, x, y, image);
+        onlineTileCache.put(zoomLevel, x, y, std::make_shared<QImage>(image));
     }
     //std::cout << "  put: " << zoomLevel << " xtile: " << x << " ytile: " << y << std::endl;
     emit Redraw();
@@ -439,15 +439,15 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     tileDimension = qNextPowerOfTwo(tileDimension - 1);
     finalDpi = (double(tileDimension) / double(OSMTile::osmTileOriginalWidth())) * OSMTile::tileDPI();
 
-    QImage canvas(width * tileDimension,
+    auto canvas = std::make_unique<QImage>(width * tileDimension,
                   height * tileDimension,
                   QImage::Format_RGBA8888_Premultiplied);
 
     QColor transparent = QColor::fromRgbF(1, 1, 1, 0.0);
-    canvas.fill(transparent);
+    canvas->fill(transparent);
 
     QPainter p;
-    p.begin(&canvas);
+    p.begin(canvas.get());
 
     osmscout::MapParameter        drawParameter;
     std::list<std::string>        paths;
@@ -488,7 +488,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
     osmscout::Magnification magnification(loadZ);
 
     projection.Set(tileVisualCenter, /* angle */ 0, magnification, finalDpi,
-                   canvas.width(), canvas.height());
+                   canvas->width(), canvas->height());
     projection.SetLinearInterpolationUsage(loadZ.Get() >= 10);
 
     // overlay ways
@@ -532,16 +532,16 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
         }
 
         if (width == 1 && height == 1){
-            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, canvas, loadEpoch);
+            offlineTileCache.put(loadZ.Get(), loadXFrom, loadYFrom, std::shared_ptr<QImage>(std::move(canvas)), loadEpoch);
         }else{
             for (uint32_t y = loadYFrom; y <= loadYTo; ++y){
                 for (uint32_t x = loadXFrom; x <= loadXTo; ++x){
 
-                    QImage tile = canvas.copy(
-                            (x - loadXFrom) * tileDimension,
-                            (y - loadYFrom) * tileDimension,
-                            tileDimension, tileDimension
-                            );
+                  auto tile = std::make_shared<QImage>(canvas->copy(
+                          (x - loadXFrom) * tileDimension,
+                          (y - loadYFrom) * tileDimension,
+                          tileDimension, tileDimension
+                      ));
 
                     offlineTileCache.put(loadZ.Get(), x, y, tile, loadEpoch);
                 }

@@ -101,7 +101,7 @@ void TileLoaderThread::tileDownloaded(uint32_t zoomLevel, uint32_t x, uint32_t y
 {
   {
     QMutexLocker locker(&tileCacheMutex);
-    onlineTileCache.put(zoomLevel, x, y, image);
+    onlineTileCache.put(zoomLevel, x, y, std::make_shared<QImage>(image));
   }
 
   emit downloaded(zoomLevel, x, y);

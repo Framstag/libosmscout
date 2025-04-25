@@ -167,7 +167,7 @@ TileCacheVal TileCache::get(uint32_t zoomLevel, uint32_t x, uint32_t y)
     TileCacheKey key = {zoomLevel, x, y};
     if (!tiles.contains(key)){
         qWarning() << this << "No tile in cache for key " << key;
-        return {TileCacheVal::clock::now(), QImage(), epoch}; // throw std::underflow_error ?
+        return {TileCacheVal::clock::now(), std::make_shared<QImage>(), epoch}; // throw std::underflow_error ?
     }
     TileCacheVal val = tiles.value(key);
     val.lastAccess = TileCacheVal::clock::now();
@@ -186,7 +186,7 @@ bool TileCache::removeRequest(uint32_t zoomLevel, uint32_t x, uint32_t y)
     return requests.remove(key) > 0;
 }
 
-void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, const QImage &image, size_t epoch)
+void TileCache::put(uint32_t zoomLevel, uint32_t x, uint32_t y, std::shared_ptr<QImage> image, size_t epoch)
 {
     removeRequest(zoomLevel, x, y);
     TileCacheKey key = {zoomLevel, x, y};

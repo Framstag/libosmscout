@@ -212,13 +212,13 @@ bool TiledRenderingHelper::lookupAndDrawTile(TileCache& tileCache, QPainter& pai
     //qDebug() << "  - lookup tile " << lookupXTile << " " << lookupYTile << " zoom " << lookupTileZoom << " " << " viewport " << lookupTileViewport;
     if (tileCache.contains(lookupTileZoom, lookupXTile, lookupYTile)){
       TileCacheVal val = tileCache.get(lookupTileZoom, lookupXTile, lookupYTile);
-      if (!val.image.isNull()){
-        double imageWidth = val.image.width();
-        double imageHeight = val.image.height();
+      if (!val.image->isNull()){
+        double imageWidth = val.image->width();
+        double imageHeight = val.image->height();
         QRectF imageViewport(imageWidth * lookupTileViewport.x(), imageHeight * lookupTileViewport.y(),
                              imageWidth * lookupTileViewport.width(), imageHeight * lookupTileViewport.height() );
 
-        painter.drawImage(QRectF(x, y, renderTileWidth+overlap, renderTileHeight+overlap), val.image, imageViewport);
+        painter.drawImage(QRectF(x, y, renderTileWidth+overlap, renderTileHeight+overlap), *val.image, imageViewport);
       }
       lookupTileFound = true;
       if (lookupTileZoom == zoomLevel && val.epoch == tileCache.getEpoch()) {
@@ -290,12 +290,12 @@ void TiledRenderingHelper::lookupAndDrawBottomTileRecursive(TileCache& tileCache
       bool found = false;
       if (tileCache.contains(lookupTileZoom, lookupXTile, lookupYTile)){
         TileCacheVal val = tileCache.get(lookupTileZoom, lookupXTile, lookupYTile);
-        if (!val.image.isNull()){
-          double imageWidth = val.image.width();
-          double imageHeight = val.image.height();
+        if (!val.image->isNull()){
+          double imageWidth = val.image->width();
+          double imageHeight = val.image->height();
           painter.drawImage(
               QRectF(x + tx * (renderTileWidth/tileCnt), y + ty * (renderTileHeight/tileCnt), renderTileWidth/tileCnt + overlap, renderTileHeight/tileCnt + overlap),
-              val.image,
+              *val.image,
               QRectF(0.0, 0.0, imageWidth, imageHeight));
           found = true;
         }
