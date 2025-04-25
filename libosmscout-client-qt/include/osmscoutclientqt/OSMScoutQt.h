@@ -65,6 +65,7 @@ private:
 
   size_t onlineTileCacheSize{100};
   size_t offlineTileCacheSize{200};
+  PixelRatioSetup pixelRatio;
 
   QString voiceLookupDirectory;
 
@@ -179,6 +180,11 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithFixedPixelRatio(double ratio){
+    this->pixelRatio=FixedPixelRatio{ratio};
+    return *this;
+  }
+
   inline OSMScoutQtBuilder& WithUserAgent(const QString &appName,
                                           const QString &appVersion){
     this->appName=appName;
@@ -247,6 +253,7 @@ private:
   QString          cacheLocation;
   size_t           onlineTileCacheSize;
   size_t           offlineTileCacheSize;
+  PixelRatioSetup  pixelRatio;
   QString          userAgent;
   std::atomic_int  liveBackgroundThreads;
 
@@ -262,6 +269,7 @@ private:
              QString cacheLocation,
              size_t onlineTileCacheSize,
              size_t offlineTileCacheSize,
+             const PixelRatioSetup &pixelRatio,
              QString userAgent,
              QStringList customPoiTypes);
 

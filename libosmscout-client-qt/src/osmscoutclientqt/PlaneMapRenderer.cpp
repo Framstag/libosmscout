@@ -40,8 +40,9 @@ static int UPDATED_DATA_RENDERING_TIMEOUT = 200;
 PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread,
-                                   QString iconDirectory):
-  MapRenderer(thread,settings,dbThread,iconDirectory),
+                                   const QString &iconDirectory,
+                                   const PixelRatioSetup &pixelRatio):
+  MapRenderer(thread,settings,dbThread,iconDirectory, pixelRatio),
   canvasOverrun(1.5),
   loadJob(nullptr),
   pendingRenderingTimer(this),
