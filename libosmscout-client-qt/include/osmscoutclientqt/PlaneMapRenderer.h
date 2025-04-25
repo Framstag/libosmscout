@@ -99,7 +99,8 @@ public:
   PlaneMapRenderer(QThread *thread,
                    SettingsRef settings,
                    DBThreadRef dbThread,
-                   QString iconDirectory);
+                   const QString &iconDirectory,
+                   const PixelRatioSetup &pixelRatio);
 
   virtual ~PlaneMapRenderer();
 

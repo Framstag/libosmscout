@@ -67,6 +67,7 @@ private:
   size_t onlineTileCacheSize{100};
   size_t offlineTileCacheSize{200};
   GLPowerOfTwoTexture glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling};
+  PixelRatioSetup pixelRatio;
 
   QString voiceLookupDirectory;
 
@@ -186,6 +187,11 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithFixedPixelRatio(double ratio){
+    this->pixelRatio=FixedPixelRatio{ratio};
+    return *this;
+  }
+
   inline OSMScoutQtBuilder& WithUserAgent(const QString &appName,
                                           const QString &appVersion){
     this->appName=appName;
@@ -255,6 +261,7 @@ private:
   size_t              onlineTileCacheSize;
   size_t              offlineTileCacheSize;
   GLPowerOfTwoTexture glPowerOfTwoTexture;
+  PixelRatioSetup     pixelRatio;
   QString             userAgent;
   std::atomic_int     liveBackgroundThreads;
 
@@ -271,6 +278,7 @@ private:
              size_t onlineTileCacheSize,
              size_t offlineTileCacheSize,
              GLPowerOfTwoTexture glPowerOfTwoTexture,
+             const PixelRatioSetup &pixelRatio,
              QString userAgent,
              QStringList customPoiTypes);
 

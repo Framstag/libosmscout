@@ -29,10 +29,12 @@ namespace osmscout {
 MapRenderer::MapRenderer(QThread *thread,
                          SettingsRef settings,
                          DBThreadRef dbThread,
-                         QString iconDirectory):
+                         const QString &iconDirectory,
+                         const PixelRatioSetup &pixelRatio):
   thread(thread),
   settings(settings),
   dbThread(dbThread),
+  pixelRatio(pixelRatio),
   iconDirectory(iconDirectory)
 {
   mapDpi = settings->GetMapDPI();
@@ -162,9 +164,10 @@ void MapRenderer::SetScreen(const QScreen *screen)
   bool changed=false;
   {
     QMutexLocker locker(&lock);
-    if (this->screenPixelRatio != screen->devicePixelRatio()) {
-      this->screenPixelRatio = screen->devicePixelRatio();
-      log.Debug() << "Screen pixel ratio: " << this->screenPixelRatio;
+    if (std::holds_alternative<ScreenPixelRatio>(this->pixelRatio)
+        && std::get<ScreenPixelRatio>(this->pixelRatio).ratio != screen->devicePixelRatio()) {
+      this->pixelRatio = ScreenPixelRatio{screen->devicePixelRatio()};
+      log.Debug() << "Screen pixel ratio: " << screen->devicePixelRatio();
       changed = true;
     }
   }

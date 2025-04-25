@@ -36,12 +36,13 @@ namespace osmscout {
 TiledMapRenderer::TiledMapRenderer(QThread *thread,
                                    SettingsRef settings,
                                    DBThreadRef dbThread,
-                                   QString iconDirectory,
-                                   QString tileCacheDirectory,
+                                   const QString &iconDirectory,
+                                   const QString &tileCacheDirectory,
                                    size_t onlineTileCacheSize,
                                    size_t offlineTileCacheSize,
-                                   GLPowerOfTwoTexture glPowerOfTwoTexture):
-  MapRenderer(thread,settings,dbThread,iconDirectory),
+                                   GLPowerOfTwoTexture glPowerOfTwoTexture,
+                                   const PixelRatioSetup &pixelRatio):
+  MapRenderer(thread,settings,dbThread,iconDirectory,pixelRatio),
   tileCacheDirectory(tileCacheDirectory),
   onlineTileCache(onlineTileCacheSize), // online tiles can be loaded from disk cache easily
   offlineTileCache(offlineTileCacheSize), // render offline tile is expensive
@@ -444,7 +445,8 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     // For HiDPI screens (screenPixelRatio > 1) tiles as up-scaled before displaying. When there is ratio 2.0, 100px on Qt canvas
     // is displayed as 200px on the screen. To provide best results on HiDPI screen, we upscale tiles by this pixel ratio.
-    double finalDpi = mapDpi * this->screenPixelRatio;
+    double finalDpi = mapDpi * (std::holds_alternative<ScreenPixelRatio>(this->pixelRatio) ?
+                                std::get<ScreenPixelRatio>(this->pixelRatio).ratio : std::get<FixedPixelRatio>(this->pixelRatio).ratio);
 
     uint32_t tileDimension = double(OSMTile::osmTileOriginalWidth()) * (finalDpi / OSMTile::tileDPI()); // pixels
 
