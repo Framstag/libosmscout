@@ -876,7 +876,6 @@ TEST_CASE("Suggest lanes on slightly complex junction")
 
     Postprocess(description, context);
 
-    // TODO: should suggest right lane to the right
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
       nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
