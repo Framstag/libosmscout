@@ -210,8 +210,9 @@ bool TiledMapRenderer::RenderMap(QPainter& painter,
       && glContext->functions()->hasOpenGLFeature(QOpenGLFunctions::NPOTTextures)) {
 
     // we have GL_ARB_texture_non_power_of_two extension available, there is no need to scale tiles
-    QMutexLocker rendererLocker(&lock);
     this->glPowerOfTwoTexture = GLPowerOfTwoTexture::NoScaling;
+    // This is changed just once (on the first render request),
+    // so there is no need to invalidate tile cache after the change.
   }
 
   if (!TiledRenderingHelper::RenderTiles(painter,request,layerCaches,unknownColor,-1,tileGridColor)){
@@ -447,14 +448,15 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
 
     uint32_t tileDimension = double(OSMTile::osmTileOriginalWidth()) * (finalDpi / OSMTile::tileDPI()); // pixels
 
-    if (this->glPowerOfTwoTexture!=GLPowerOfTwoTexture::NoScaling) {
+    GLPowerOfTwoTexture glPowerOfTwoTextureSnap = this->glPowerOfTwoTexture;
+    if (glPowerOfTwoTextureSnap!=GLPowerOfTwoTexture::NoScaling) {
         double next = qNextPowerOfTwo(tileDimension - 1);
-        if (this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Upscaling) {
+        if (glPowerOfTwoTextureSnap==GLPowerOfTwoTexture::Upscaling) {
             tileDimension = next;
-        } else if (this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Downscaling && next!=tileDimension) {
+        } else if (glPowerOfTwoTextureSnap==GLPowerOfTwoTexture::Downscaling && next!=tileDimension) {
             tileDimension = next / 2;
         } else {
-            assert(this->glPowerOfTwoTexture==GLPowerOfTwoTexture::Nearest);
+            assert(glPowerOfTwoTextureSnap==GLPowerOfTwoTexture::Nearest);
             if ((next - tileDimension) < (tileDimension - (next / 2))) {
               tileDimension = next;
             } else {

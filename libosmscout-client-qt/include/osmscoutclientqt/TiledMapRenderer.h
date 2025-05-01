@@ -68,15 +68,15 @@ private:
   // for areas not covered by db.
   //
   // When offlineTileCache is invalidated, cache keeps unchanged,
-  // just its epoch is increased. When there is retrieved pixmap with
+  // just its epoch is increased. When there is retrieved image with
   // old epoch from cache, it is used, but rendering request is triggered.
   //
   // Offline tiles should be in ARGB format on db area interface.
-  mutable QMutex                tileCacheMutex;
+  mutable QMutex                tileCacheMutex; // MapRenderer::lock need to be acquired first, when both locks are hold together
   TileCache                     onlineTileCache;
   TileCache                     offlineTileCache;
 
-  GLPowerOfTwoTexture           glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling}; // guarded by lock
+  std::atomic<GLPowerOfTwoTexture> glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling};
 
   OsmTileDownloader             *tileDownloader=nullptr;
 
