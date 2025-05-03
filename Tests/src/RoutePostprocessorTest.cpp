@@ -494,7 +494,7 @@ void Postprocess(RouteDescription &description, MockContext &context)
   RoutePostprocessor::InstructionPostprocessor().Process(context, description);
 }
 
-TEST_CASE("Suggest lanes on simple junction")
+TEST_CASE("Describe simple junction")
 {
   using namespace osmscout;
 
@@ -592,7 +592,7 @@ TEST_CASE("Suggest lanes on simple junction")
 }
 
 
-TEST_CASE("Suggest lanes on simple junction with lane turns")
+TEST_CASE("Describe simple junction with lane turns")
 {
   using namespace osmscout;
 
@@ -692,7 +692,7 @@ TEST_CASE("Suggest lanes on simple junction with lane turns")
 }
 
 
-TEST_CASE("Suggest lanes on slightly complex junction")
+TEST_CASE("Describe slightly complex junction")
 {
   using namespace osmscout;
 
@@ -930,7 +930,7 @@ TEST_CASE("Suggest lanes on slightly complex junction")
   }
 }
 
-TEST_CASE("Suggest lanes on A3/A4 highway split")
+TEST_CASE("Describe A3/A4 highway split")
 {
   using namespace osmscout;
 
@@ -1029,7 +1029,7 @@ TEST_CASE("Suggest lanes on A3/A4 highway split")
   }
 }
 
-TEST_CASE("Suggest lanes on A3/A4 highway near Zurich")
+TEST_CASE("Describe A3/A4 highway near Zurich")
 {
   using namespace osmscout;
 
