@@ -587,17 +587,35 @@ namespace osmscout {
       size_t i=0;
       size_t j;
       bool updated=true;
-      // following while is just performance optimisation,
+      // following while is just performance optimization,
       // we don't start searching intersections from start again
       while (updated) {
         if (FindIntersection(optimised,i,j)) {
           isSimple=false;
           modified=true;
-          if (isArea && j-i > i+(optimised.size()-j)){
-            optimised.erase(optimised.begin()+j+1, optimised.end());
-            optimised.erase(optimised.begin(), optimised.begin()+i);
-            optimised.push_back(optimised.front());
-            i=0;
+
+          if (isArea) {
+            // try to cut off the smaller portion of the area
+            GeoBox middleBox;
+            GeoBox startBox;
+            GeoBox endBox;
+
+            GetSegmentBoundingBox(optimised, i, j + 1, middleBox);
+            GetSegmentBoundingBox(optimised, 0, i + 1, startBox);
+            GetSegmentBoundingBox(optimised, j, optimised.size(), endBox);
+
+            GeoBox unionBox=startBox;
+            unionBox.Include(endBox);
+
+            if (middleBox.GetSize() > unionBox.GetSize()){
+              optimised.erase(optimised.begin()+j+1, optimised.end());
+              optimised.erase(optimised.begin(), optimised.begin()+i);
+              optimised.push_back(optimised.front());
+              i=0;
+            }
+            else {
+              optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
+            }
           }
           else {
             optimised.erase(optimised.begin()+i+1, optimised.begin()+j+1);
