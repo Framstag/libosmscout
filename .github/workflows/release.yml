@@ -14,7 +14,7 @@ env:
 jobs:
   create_release:
     name: Create release
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc-12 g++-12 libtbb-dev ccache libtool pkg-config
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config
 
       - name: Install meson and ninja via pip
         run:  "pip install meson ninja"
@@ -36,8 +36,8 @@ jobs:
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback
         env:
-          CXX: g++-12
-          CC: gcc-12
+          CXX: g++
+          CC: gcc
 
       - name: Create distribution archive
         run:  meson dist -C dist --formats "xztar,zip" --no-tests --allow-dirty

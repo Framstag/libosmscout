@@ -32,7 +32,7 @@ jobs:
         with:
           packages: "platform-tools platforms;android-34 build-tools;34.0.0 ndk;27.2.12479018"
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '5.15.2'
           host: 'linux'

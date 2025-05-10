@@ -10,7 +10,7 @@ on:
 jobs:
   webpage:
     name: webpage
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     environment: SOURCEFORGE
     steps:
       - name: Checkout
@@ -20,9 +20,9 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install python3-pygments python-pygments doxygen lftp
       - name: Download Hugo static webpage builder
-        run: wget https://github.com/gohugoio/hugo/releases/download/v0.83.1/hugo_0.83.1_Linux-64bit.deb
+        run: wget https://github.com/gohugoio/hugo/releases/download/v0.147.2/hugo_0.147.2_Linux-64bit.deb
       - name: Install Hugo
-        run: sudo dpkg -i hugo_0.83.1_Linux-64bit.deb
+        run: sudo dpkg -i hugo_0.147.2_Linux-64bit.deb
       - name: Generate doxygen documentation
         run: ( cat doxygen.cfg ; echo "OUTPUT_DIRECTORY=webpage/static/api-doc" ) | doxygen -
       - name: Generate static webpages using Hugo
