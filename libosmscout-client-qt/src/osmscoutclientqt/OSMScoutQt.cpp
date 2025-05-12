@@ -181,6 +181,7 @@ bool OSMScoutQtBuilder::Init()
                                   onlineTileCacheSize,
                                   offlineTileCacheSize,
                                   glPowerOfTwoTexture,
+                                  pixelRatio,
                                   userAgent,
                                   customPoiTypes);
 
@@ -296,6 +297,7 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        size_t onlineTileCacheSize,
                        size_t offlineTileCacheSize,
                        GLPowerOfTwoTexture glPowerOfTwoTexture,
+                       const PixelRatioSetup &pixelRatio,
                        QString userAgent,
                        QStringList customPoiTypes):
         settings(settings),
@@ -305,6 +307,7 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
         onlineTileCacheSize(onlineTileCacheSize),
         offlineTileCacheSize(offlineTileCacheSize),
         glPowerOfTwoTexture(glPowerOfTwoTexture),
+        pixelRatio(pixelRatio),
         userAgent(userAgent),
         liveBackgroundThreads(0)
 {
@@ -456,9 +459,10 @@ MapRenderer* OSMScoutQt::MakeMapRenderer(RenderingType type)
                                      cacheLocation,
                                      onlineTileCacheSize,
                                      offlineTileCacheSize,
-                                     glPowerOfTwoTexture);
+                                     glPowerOfTwoTexture,
+                                     pixelRatio);
   }else{
-    mapRenderer=new PlaneMapRenderer(thread,settings,dbThread,iconDirectory);
+    mapRenderer=new PlaneMapRenderer(thread,settings,dbThread,iconDirectory,pixelRatio);
   }
   mapRenderer->moveToThread(thread);
   thread->start();

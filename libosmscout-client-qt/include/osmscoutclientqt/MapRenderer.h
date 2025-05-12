@@ -40,6 +40,30 @@ namespace osmscout {
 /**
  * \ingroup QtAPI
  */
+struct FixedPixelRatio
+{
+  double ratio=1.0;
+};
+
+/**
+ * \ingroup QtAPI
+ */
+struct ScreenPixelRatio
+{
+  double ratio=1.0;
+};
+
+/**
+ * \ingroup QtAPI
+ *
+ * Pixel ratio configuration for HiDPI display. It may either follow screen pixel ratio
+ * or used fixed ratio value.
+ */
+using PixelRatioSetup = std::variant<FixedPixelRatio, ScreenPixelRatio>;
+
+/**
+ * \ingroup QtAPI
+ */
 class OSMSCOUT_CLIENT_QT_API DBRenderJob : public QObject, public DBJob{
   Q_OBJECT
 private:
@@ -97,15 +121,15 @@ protected:
   QRecursiveMutex lock;
 #endif
 
-  double      mapDpi;
-  double      screenPixelRatio{1.0};
-  bool        renderSea;
+  double          mapDpi;
+  PixelRatioSetup pixelRatio{ScreenPixelRatio{1.0}};
+  bool            renderSea;
 
-  QString     fontName;
-  double      fontSize;
-  QString     iconDirectory;
-  bool        showAltLanguage{false};
-  QString     units;
+  QString         fontName;
+  double          fontSize;
+  QString         iconDirectory;
+  bool            showAltLanguage{false};
+  QString         units;
 
   mutable QMutex                 overlayLock;
   std::map<int,OverlayObjectRef> overlayObjectMap; // <! map guarded by overlayLock, OverlayWay object is multithread
@@ -185,7 +209,8 @@ protected:
   MapRenderer(QThread *thread,
               SettingsRef settings,
               DBThreadRef dbThread,
-              QString iconDirectory);
+              const QString &iconDirectory,
+              const PixelRatioSetup &pixelRatio);
 
   osmscout::GeoBox overlayObjectsBox() const;
 

@@ -133,11 +133,12 @@ public:
   TiledMapRenderer(QThread *thread,
                    SettingsRef settings,
                    DBThreadRef dbThread,
-                   QString iconDirectory,
-                   QString tileCacheDirectory,
+                   const QString &iconDirectory,
+                   const QString &tileCacheDirectory,
                    size_t onlineTileCacheSize,
                    size_t offlineTileCacheSize,
-                   GLPowerOfTwoTexture glPowerOfTwoTexture);
+                   GLPowerOfTwoTexture glPowerOfTwoTexture,
+                   const PixelRatioSetup &pixelRatio);
 
   virtual ~TiledMapRenderer();
 
