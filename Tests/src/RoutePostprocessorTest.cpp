@@ -1085,6 +1085,76 @@ TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
   }
 }
 
+TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
+{
+  using namespace osmscout;
+
+  // https://www.openstreetmap.org/#map=19/50.050041/14.442011
+
+  MockDatabaseBuilder databaseBuilder;
+
+  // north lanes of Na Strzi: https://www.openstreetmap.org/way/4647670
+  ObjectFileRef naStrziNorth1Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050415, 14.441638), GeoCoord(50.050149, 14.441129)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through_Right}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Strzi");
+    });
+
+  // continuation: https://www.openstreetmap.org/way/218366354
+  ObjectFileRef naStrziNorth2Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050149, 14.441129), GeoCoord(50.050026, 14.440976)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through_Right}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Strzi");
+    });
+
+  // east lanes of no name: https://www.openstreetmap.org/way/4415195
+  ObjectFileRef noNameEast1Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050021, 14.441265), GeoCoord(50.050149, 14.441129)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // east lanes of Na Pankraci: https://www.openstreetmap.org/way/1340371643
+  ObjectFileRef naPankraciEast2Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050149, 14.441129), GeoCoord(50.050434, 14.440868)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Pankraci");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  { // route is going from the east to the north
+    RouteDescription description;
+
+    description.AddNode(0, 0, {naStrziNorth1Ref}, naStrziNorth1Ref, 1);
+    description.AddNode(0, 0, {naPankraciEast2Ref, naStrziNorth1Ref, naStrziNorth2Ref, noNameEast1Ref}, naPankraciEast2Ref, 1);
+    description.AddNode(0, 0, {naPankraciEast2Ref}, ObjectFileRef(), 1);
+
+    Postprocess(description, context);
+
+    // should suggest right lane to the right
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    // TODO: improve lane evaluation on similar junctions
+    // REQUIRE(suggestedLanes->GetFrom() == 2);
+    // REQUIRE(suggestedLanes->GetTo() == 2);
+    // REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
+  }
+}
+
 TEST_CASE("Describe A3/A4 highway split")
 {
   using namespace osmscout;
