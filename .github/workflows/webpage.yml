@@ -18,7 +18,7 @@ jobs:
       - name: Update package list
         run:  sudo apt-get update
       - name: Install additional tools
-        run: sudo apt-get install python3-pygments python-pygments doxygen lftp
+        run: sudo apt-get install python3-pygments doxygen lftp
       - name: Download Hugo static webpage builder
         run: wget https://github.com/gohugoio/hugo/releases/download/v0.147.2/hugo_0.147.2_Linux-64bit.deb
       - name: Install Hugo
