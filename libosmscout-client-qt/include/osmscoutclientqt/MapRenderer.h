@@ -35,6 +35,8 @@
 #include <QPainter>
 #include <QScreen>
 
+#include <variant>
+
 namespace osmscout {
 
 /**
