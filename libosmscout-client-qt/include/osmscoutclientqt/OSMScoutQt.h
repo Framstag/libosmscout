@@ -38,6 +38,7 @@
 #include <osmscoutclientqt/VoiceManager.h>
 #include <osmscoutclientqt/ElevationModule.h>
 #include <osmscoutclientqt/IconLookup.h>
+#include <osmscoutclientqt/TiledMapRenderer.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
 
@@ -65,6 +66,8 @@ private:
 
   size_t onlineTileCacheSize{100};
   size_t offlineTileCacheSize{200};
+  GLPowerOfTwoTexture glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling};
+  PixelRatioSetup pixelRatio;
 
   QString voiceLookupDirectory;
 
@@ -179,6 +182,16 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithTilePowerOfTwoScaling(GLPowerOfTwoTexture glPowerOfTwoTexture){
+    this->glPowerOfTwoTexture=glPowerOfTwoTexture;
+    return *this;
+  }
+
+  inline OSMScoutQtBuilder& WithFixedPixelRatio(double ratio){
+    this->pixelRatio=FixedPixelRatio{ratio};
+    return *this;
+  }
+
   inline OSMScoutQtBuilder& WithUserAgent(const QString &appName,
                                           const QString &appVersion){
     this->appName=appName;
@@ -240,19 +253,21 @@ class OSMSCOUT_CLIENT_QT_API OSMScoutQt : public QObject {
   friend class OSMScoutQtBuilder;
 
 private:
-  SettingsRef      settings;
-  MapManagerRef    mapManager;
-  DBThreadRef      dbThread;
-  QString          iconDirectory;
-  QString          cacheLocation;
-  size_t           onlineTileCacheSize;
-  size_t           offlineTileCacheSize;
-  QString          userAgent;
-  std::atomic_int  liveBackgroundThreads;
+  SettingsRef         settings;
+  MapManagerRef       mapManager;
+  DBThreadRef         dbThread;
+  QString             iconDirectory;
+  QString             cacheLocation;
+  size_t              onlineTileCacheSize;
+  size_t              offlineTileCacheSize;
+  GLPowerOfTwoTexture glPowerOfTwoTexture;
+  PixelRatioSetup     pixelRatio;
+  QString             userAgent;
+  std::atomic_int     liveBackgroundThreads;
 
-  std::mutex       mutex;
-  MapDownloaderRef mapDownloader; // created lazy, guarded by mutex
-  VoiceManagerRef  voiceManager; // created lazy, guarded by mutex
+  std::mutex          mutex;
+  MapDownloaderRef    mapDownloader; // created lazy, guarded by mutex
+  VoiceManagerRef     voiceManager; // created lazy, guarded by mutex
 
 private:
   OSMScoutQt(SettingsRef settings,
@@ -262,6 +277,8 @@ private:
              QString cacheLocation,
              size_t onlineTileCacheSize,
              size_t offlineTileCacheSize,
+             GLPowerOfTwoTexture glPowerOfTwoTexture,
+             const PixelRatioSetup &pixelRatio,
              QString userAgent,
              QStringList customPoiTypes);
 

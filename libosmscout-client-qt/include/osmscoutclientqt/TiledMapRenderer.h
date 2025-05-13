@@ -38,6 +38,22 @@
 
 namespace osmscout {
 
+/**
+ * \ingroup QtAPI
+ *
+ * Older/mobile OpenGL (without GL_ARB_texture_non_power_of_two) requires textures with size of power of two.
+ * To be able upload texture to GPU without rescaling in QOpenGLTextureCache::bindTexture,
+ * we may scale tiles to proper size.
+ *
+ * This enum control how to do it.
+ */
+enum class GLPowerOfTwoTexture {
+  NoScaling = 0, // GL_ARB_texture_non_power_of_two is supported, or we can justify the performance penalty of image rescaling
+  Upscaling = 1, // next "power of two" size is used
+  Downscaling = 2, // previous "power of two" size is used
+  Nearest = 3 // closest "power of two" size
+};
+
 class OSMSCOUT_CLIENT_QT_API TiledMapRenderer : public MapRenderer {
   Q_OBJECT
 
@@ -52,13 +68,15 @@ private:
   // for areas not covered by db.
   //
   // When offlineTileCache is invalidated, cache keeps unchanged,
-  // just its epoch is increased. When there is retrieved pixmap with
+  // just its epoch is increased. When there is retrieved image with
   // old epoch from cache, it is used, but rendering request is triggered.
   //
   // Offline tiles should be in ARGB format on db area interface.
-  mutable QMutex                tileCacheMutex;
+  mutable QMutex                tileCacheMutex; // MapRenderer::lock need to be acquired first, when both locks are hold together
   TileCache                     onlineTileCache;
   TileCache                     offlineTileCache;
+
+  std::atomic<GLPowerOfTwoTexture> glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling};
 
   OsmTileDownloader             *tileDownloader=nullptr;
 
@@ -115,10 +133,12 @@ public:
   TiledMapRenderer(QThread *thread,
                    SettingsRef settings,
                    DBThreadRef dbThread,
-                   QString iconDirectory,
-                   QString tileCacheDirectory,
+                   const QString &iconDirectory,
+                   const QString &tileCacheDirectory,
                    size_t onlineTileCacheSize,
-                   size_t offlineTileCacheSize);
+                   size_t offlineTileCacheSize,
+                   GLPowerOfTwoTexture glPowerOfTwoTexture,
+                   const PixelRatioSetup &pixelRatio);
 
   virtual ~TiledMapRenderer();
 
