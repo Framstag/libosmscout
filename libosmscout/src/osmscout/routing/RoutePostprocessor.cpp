@@ -1692,8 +1692,7 @@ namespace osmscout {
                               int &allowedLaneFrom,
                               int allowedLaneTo,
                               bool laneCntMatch,
-                              const JunctionExit &exit
-                      )
+                              const JunctionExit &exit)
     {
       LaneTurn exitVariant = LaneTurn::Through;
       if (size_t(allowedLaneFrom) < laneTurns.size()) {
@@ -1729,8 +1728,7 @@ namespace osmscout {
                              int allowedLaneFrom,
                              int &allowedLaneTo,
                              bool laneCntMatch,
-                             const JunctionExit &exit
-  )
+                             const JunctionExit &exit)
   {
     LaneTurn exitVariant = LaneTurn::Through;
     if (size_t(allowedLaneTo) < laneTurns.size()) {
@@ -1761,6 +1759,47 @@ namespace osmscout {
     return true;
   }
 
+  bool EvaluateLanesForRightTurn(std::vector<LaneTurn> &laneTurns,
+                                 int targetLaneTurns,
+                                 int &allowedLaneFrom,
+                                 int allowedLaneTo)
+  {
+    LaneTurn exitVariant=LaneTurn::Null;
+    int testLane=allowedLaneTo;
+    int confirmedLaneFrom=allowedLaneTo;
+    for (int i=0; i < targetLaneTurns; i++) {
+      if (testLane <= allowedLaneFrom) {
+        break;
+      }
+      testLane=allowedLaneTo-i;
+      assert(size_t(testLane) < laneTurns.size());
+      LaneTurn exit=laneTurns[testLane];
+      if (exitVariant==LaneTurn::Null) {
+        exitVariant=exit;
+        if (exitVariant==LaneTurn::Through_Right) {
+          exitVariant=LaneTurn::Right;
+          //laneTurns[testLane]=LaneTurn::Through;
+        } else if (exitVariant==LaneTurn::Through_SlightRight) {
+          exitVariant=LaneTurn::SlightRight;
+          //laneTurns[testLane]=LaneTurn::Through;
+        } else if (exitVariant==LaneTurn::Through_SharpRight) {
+          exitVariant=LaneTurn::SharpRight;
+          //laneTurns[testLane]=LaneTurn::Through;
+        }
+      } else {
+        uint32_t commonTurnBits = TurnToBits(exitVariant) & TurnToBits(exit);
+        if (commonTurnBits != TurnToBits(exitVariant)) {
+          break;
+        }
+        if (commonTurnBits != TurnToBits(exit)) {
+          laneTurns[testLane]=BitsToTurn(commonTurnBits);
+        }
+      }
+      confirmedLaneFrom=testLane;
+    }
+    allowedLaneFrom=confirmedLaneFrom;
+    return true;
+  }
 
   } // end of anonymous namespace
 
@@ -1863,21 +1902,28 @@ namespace osmscout {
       std::transform_reduce(junctionExits.begin(), junctionExits.end(), size_t(lanes->GetLaneCount()), std::plus{},
                             [](const auto &exit) -> size_t { return exit.lanes.GetLaneCount(); });
 
-    // remove allowed lanes used for left exits
-    for (const auto &exit: junctionLeftExits) {
-      ConsumeLanesFromLeft(laneTurns,
-                           allowedLaneFrom,
-                           allowedLaneTo,
-                           laneCntMatch,
-                           exit);
-    }
-    // remove allowed lanes used for right exits
-    for (const auto &exit: junctionRightExits) {
-      ConsumeLanesFromRight(laneTurns,
-                            allowedLaneFrom,
-                            allowedLaneTo,
-                            laneCntMatch,
-                            exit);
+    if (junctionRightExits.empty()) {
+      EvaluateLanesForRightTurn(laneTurns,
+                                lanes->GetLaneCount(),
+                                allowedLaneFrom,
+                                allowedLaneTo);
+    } else {
+      // remove allowed lanes used for left exits
+      for (const auto &exit: junctionLeftExits) {
+        ConsumeLanesFromLeft(laneTurns,
+                             allowedLaneFrom,
+                             allowedLaneTo,
+                             laneCntMatch,
+                             exit);
+      }
+      // remove allowed lanes used for right exits
+      for (const auto &exit: junctionRightExits) {
+        ConsumeLanesFromRight(laneTurns,
+                              allowedLaneFrom,
+                              allowedLaneTo,
+                              laneCntMatch,
+                              exit);
+      }
     }
 
     // setup suggested lane description to incoming route segment
@@ -1901,15 +1947,15 @@ namespace osmscout {
     // evaluate suggested direction from lane turns
     Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
     LaneTurn suggestedTurn = BitsToTurn(suggestedTurnBits);
-    if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right  || suggestedTurn == LaneTurn::Through_SharpRight) {
-      if (relativeBearing > Bearing::Degrees(30) and relativeBearing < Bearing::Degrees(180)) {
+    if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right || suggestedTurn == LaneTurn::Through_SharpRight) {
+      if (relativeBearing > Bearing::Degrees(30) && relativeBearing < Bearing::Degrees(180)) {
         suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
       } else {
         suggestedTurn = LaneTurn::Through;
       }
     }
-    if (suggestedTurn == LaneTurn::Through_SlightLeft || suggestedTurn == LaneTurn::Through_Left  || suggestedTurn == LaneTurn::Through_SharpLeft) {
-      if (relativeBearing < Bearing::Degrees(-30) and relativeBearing > Bearing::Degrees(180)) {
+    if (suggestedTurn == LaneTurn::Through_SlightLeft || suggestedTurn == LaneTurn::Through_Left || suggestedTurn == LaneTurn::Through_SharpLeft) {
+      if (relativeBearing < Bearing::Degrees(-30) && relativeBearing > Bearing::Degrees(180)) {
         suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
       } else {
         suggestedTurn = LaneTurn::Through;

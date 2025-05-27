@@ -1116,7 +1116,7 @@ TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
   // east lanes of no name: https://www.openstreetmap.org/way/4415195
   ObjectFileRef noNameEast1Ref = databaseBuilder.AddMotorway(
     {GeoCoord(50.050021, 14.441265), GeoCoord(50.050149, 14.441129)},
-    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *) {
       lanes->SetLanes(2, 0);
       lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
       access->SetAccess(AccessFeatureValue::carForward);
@@ -1148,10 +1148,9 @@ TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
     auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
       nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
     REQUIRE(suggestedLanes);
-    // TODO: improve lane evaluation on similar junctions
-    // REQUIRE(suggestedLanes->GetFrom() == 2);
-    // REQUIRE(suggestedLanes->GetTo() == 2);
-    // REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
+    REQUIRE(suggestedLanes->GetFrom() == 2);
+    REQUIRE(suggestedLanes->GetTo() == 2);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
   }
 }
 
