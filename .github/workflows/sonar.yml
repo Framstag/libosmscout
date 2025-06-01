@@ -60,7 +60,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.cfamily.compile-commands=sonar-build-output/ninja/compile_commands.json
+            -Dsonar.cfamily.compile-commands=sonar-build-output/compile_commands.json
             -Dsonar.cfamily.cppunit.reportsPath=debug/meson-logs/testlog.junit.xml
             -Dsonar.coverageReportPaths=debug/meson-logs/sonarqube.xml
             -Dsonar.cfamily.cobertura.reportPaths=debug/meson-logs/coverage.xml
