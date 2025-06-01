@@ -53,6 +53,10 @@ jobs:
         env:
           CXX: g++
           CC: gcc
+      - name: Debug output
+        run: ls -lR sonar-build-output
+      - name: Debug build
+        run: ls -lR debug
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
@@ -60,7 +64,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.cfamily.compile-commands=sonar-build-output/compile_commands.json
+            -Dsonar.cfamily.build-wrapper-output=sonar-build-output
             -Dsonar.cfamily.cppunit.reportsPath=debug/meson-logs/testlog.junit.xml
             -Dsonar.coverageReportPaths=debug/meson-logs/sonarqube.xml
             -Dsonar.cfamily.cobertura.reportPaths=debug/meson-logs/coverage.xml
