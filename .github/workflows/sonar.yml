@@ -49,14 +49,14 @@ jobs:
           CXX: g++
           CC: gcc
       - name: Install Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@5
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@5.2.0
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} -C debug all test coverage
         env:
           CXX: g++
           CC: gcc
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@5
+        uses: SonarSource/sonarqube-scan-action@5.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
