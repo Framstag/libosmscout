@@ -324,8 +324,19 @@ namespace osmscout {
      */
     class OSMSCOUT_API TurnDescription : public Description
     {
+    private:
+      RouteDescription::DirectionDescription::Move direction;
     public:
+      explicit TurnDescription(RouteDescription::DirectionDescription::Move direction):
+        direction(direction)
+      {}
+
       std::string GetDebugString() const override;
+
+      RouteDescription::DirectionDescription::Move GetDirection() const
+      {
+        return direction;
+      }
     };
 
     using TurnDescriptionRef = std::shared_ptr<TurnDescription>;

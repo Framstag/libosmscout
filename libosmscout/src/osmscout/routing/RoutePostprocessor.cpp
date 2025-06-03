@@ -901,11 +901,31 @@ namespace osmscout {
     lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
     nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
-    RouteDescription::DescriptionRef          desc=node->GetDescription(RouteDescription::DIRECTION_DESC);
-    RouteDescription::DirectionDescriptionRef directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(desc);
+    RouteDescription::DirectionDescriptionRef directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(node->GetDescription(RouteDescription::DIRECTION_DESC));
+    RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(node->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
 
-    if (!directionDesc ||
-        directionDesc->GetCurve()==RouteDescription::DirectionDescription::straightOn) {
+    RouteDescription::DirectionDescription::Move direction = RouteDescription::DirectionDescription::straightOn;
+    bool directionFromGeometry=false;
+    // when there is explicit lane turn, use it as precedence before direction evaluated from the geometry
+    if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::Left) {
+      direction = RouteDescription::DirectionDescription::left;
+    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SharpLeft) {
+      direction = RouteDescription::DirectionDescription::sharpLeft;
+    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SlightLeft) {
+      direction = RouteDescription::DirectionDescription::slightlyLeft;
+    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::Right) {
+      direction = RouteDescription::DirectionDescription::right;
+    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SharpRight) {
+      direction = RouteDescription::DirectionDescription::sharpRight;
+    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SlightRight) {
+      direction = RouteDescription::DirectionDescription::slightlyRight;
+    } else {
+      if (directionDesc) {
+        direction = directionDesc->GetCurve();
+        directionFromGeometry = true;
+      }
+    }
+    if (direction == RouteDescription::DirectionDescription::straightOn) {
       return false;
     }
 
@@ -923,28 +943,21 @@ namespace osmscout {
       }
     }
 
-    if (lastName &&
+    if (directionFromGeometry &&
+        lastName &&
         nextName &&
         lastName->GetName()==nextName->GetName() &&
-        lastName->GetRef()==nextName->GetRef()) {
-      if (directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyLeft &&
-          directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyRight) {
-
-          node->AddDescription(RouteDescription::TURN_DESC,
-                               std::make_shared<RouteDescription::TurnDescription>());
-
-          return true;
-      }
-    }
-    else {
-
-      node->AddDescription(RouteDescription::TURN_DESC,
-                           std::make_shared<RouteDescription::TurnDescription>());
-
-      return true;
+        lastName->GetRef()==nextName->GetRef() &&
+        (direction==RouteDescription::DirectionDescription::slightlyLeft || direction==RouteDescription::DirectionDescription::slightlyRight)
+        ) {
+      // when the direction is from the geometry and name/ref was not changed, ignore slightly left/right turns
+      return false;
     }
 
-    return false;
+    node->AddDescription(RouteDescription::TURN_DESC,
+                         std::make_shared<RouteDescription::TurnDescription>(direction));
+
+    return true;
   }
 
   bool RoutePostprocessor::InstructionPostprocessor::Process(const PostprocessorContext& postprocessor,
