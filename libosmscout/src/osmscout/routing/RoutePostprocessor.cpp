@@ -1676,6 +1676,131 @@ namespace osmscout {
       }
     }
 
+    struct JunctionExit {
+      Id nextId;
+      Bearing bearing;
+      Bearing relativeBearing; // angle between current way and the straight direction. 0°-180° means to right, 180°-360° is left
+      RouteDescription::LaneDescription lanes;
+    };
+
+    enum class ExitDirection {
+      Left,
+      Right
+    };
+
+    bool ConsumeLanesFromLeft(std::vector<LaneTurn> &laneTurns,
+                              int &allowedLaneFrom,
+                              int allowedLaneTo,
+                              bool laneCntMatch,
+                              const JunctionExit &exit)
+    {
+      LaneTurn exitVariant = LaneTurn::Through;
+      if (size_t(allowedLaneFrom) < laneTurns.size()) {
+        exitVariant = laneTurns[allowedLaneFrom];
+      }
+      if (exitVariant==LaneTurn::Through && exit.relativeBearing < Bearing::Degrees(-40) && exit.relativeBearing > Bearing::Degrees(-180)) {
+        // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
+        return false;
+      }
+
+      for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
+        LaneTurn turn = LaneTurn::Through;
+        if (size_t(allowedLaneFrom) < laneTurns.size()) {
+          turn = laneTurns[allowedLaneFrom];
+        }
+        if (turn == LaneTurn::Through_Left ||
+            turn == LaneTurn::Through_SlightLeft ||
+            turn == LaneTurn::Through_SharpLeft) {
+          // do not consume lane when it allows to use with two directions, just remove left direction
+          laneTurns[allowedLaneTo] = LaneTurn::Through;
+          continue;
+        }
+        if ((laneCntMatch || exitVariant == turn) && allowedLaneFrom < allowedLaneTo) {
+          allowedLaneFrom++;
+        } else {
+          break;
+        }
+      }
+      return true;
+    }
+
+  bool ConsumeLanesFromRight(std::vector<LaneTurn> &laneTurns,
+                             int allowedLaneFrom,
+                             int &allowedLaneTo,
+                             bool laneCntMatch,
+                             const JunctionExit &exit)
+  {
+    LaneTurn exitVariant = LaneTurn::Through;
+    if (size_t(allowedLaneTo) < laneTurns.size()) {
+      exitVariant=laneTurns[allowedLaneTo];
+    }
+    if (exitVariant==LaneTurn::Through && exit.relativeBearing > Bearing::Degrees(40) && exit.relativeBearing < Bearing::Degrees(180)) {
+      return false; // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
+    }
+
+    for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
+      LaneTurn turn = LaneTurn::Through;
+      if (size_t(allowedLaneTo) < laneTurns.size()) {
+        turn=laneTurns[allowedLaneTo];
+      }
+      if (turn==LaneTurn::Through_Right ||
+          turn==LaneTurn::Through_SlightRight ||
+          turn==LaneTurn::Through_SharpRight) {
+        // do not consume lane when it allows to use with two directions, just remove right direction
+        laneTurns[allowedLaneTo]=LaneTurn::Through;
+        continue;
+      }
+      if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
+        allowedLaneTo--;
+      } else {
+        break;
+      }
+    }
+    return true;
+  }
+
+  bool EvaluateLanesForRightTurn(std::vector<LaneTurn> &laneTurns,
+                                 int targetLaneTurns,
+                                 int &allowedLaneFrom,
+                                 int allowedLaneTo)
+  {
+    LaneTurn exitVariant=LaneTurn::Null;
+    int testLane=allowedLaneTo;
+    int confirmedLaneFrom=allowedLaneTo;
+    for (int i=0; i < targetLaneTurns; i++) {
+      if (testLane <= allowedLaneFrom) {
+        break;
+      }
+      testLane=allowedLaneTo-i;
+      assert(size_t(testLane) < laneTurns.size());
+      LaneTurn exit=laneTurns[testLane];
+      if (exitVariant==LaneTurn::Null) {
+        exitVariant=exit;
+        if (exitVariant==LaneTurn::Through_Right) {
+          exitVariant=LaneTurn::Right;
+          //laneTurns[testLane]=LaneTurn::Through;
+        } else if (exitVariant==LaneTurn::Through_SlightRight) {
+          exitVariant=LaneTurn::SlightRight;
+          //laneTurns[testLane]=LaneTurn::Through;
+        } else if (exitVariant==LaneTurn::Through_SharpRight) {
+          exitVariant=LaneTurn::SharpRight;
+          //laneTurns[testLane]=LaneTurn::Through;
+        }
+      } else {
+        uint32_t commonTurnBits = TurnToBits(exitVariant) & TurnToBits(exit);
+        if (commonTurnBits != TurnToBits(exitVariant)) {
+          break;
+        }
+        if (commonTurnBits != TurnToBits(exit)) {
+          laneTurns[testLane]=BitsToTurn(commonTurnBits);
+        }
+      }
+      confirmedLaneFrom=testLane;
+    }
+    allowedLaneFrom=confirmedLaneFrom;
+    return true;
+  }
+
   } // end of anonymous namespace
 
   void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const PostprocessorContext& postprocessor,
@@ -1712,12 +1837,6 @@ namespace osmscout {
     Bearing nextNodeBearing = GetSphericalBearingInitial(way->nodes[node.GetCurrentNodeIndex()].GetCoord(),
                                                          way->nodes[node.GetTargetNodeIndex()].GetCoord());
 
-    struct JunctionExit {
-      Id nextId;
-      Bearing bearing;
-      Bearing relativeBearing; // angle between current way and the straight direction. 0°-180° means to right, 180°-360° is left
-      RouteDescription::LaneDescription lanes;
-    };
     std::vector<JunctionExit> junctionExits; // excluding incoming and outgoing way
     std::vector<JunctionExit> junctionLeftExits;
     std::vector<JunctionExit> junctionRightExits;
@@ -1783,60 +1902,27 @@ namespace osmscout {
       std::transform_reduce(junctionExits.begin(), junctionExits.end(), size_t(lanes->GetLaneCount()), std::plus{},
                             [](const auto &exit) -> size_t { return exit.lanes.GetLaneCount(); });
 
-    // remove allowed lanes used for left exits
-    for (const auto &exit: junctionLeftExits) {
-      LaneTurn exitVariant = LaneTurn::Through;
-      if (size_t(allowedLaneFrom) < laneTurns.size()) {
-        exitVariant=laneTurns[allowedLaneFrom];
+    if (junctionRightExits.empty()) {
+      EvaluateLanesForRightTurn(laneTurns,
+                                lanes->GetLaneCount(),
+                                allowedLaneFrom,
+                                allowedLaneTo);
+    } else {
+      // remove allowed lanes used for left exits
+      for (const auto &exit: junctionLeftExits) {
+        ConsumeLanesFromLeft(laneTurns,
+                             allowedLaneFrom,
+                             allowedLaneTo,
+                             laneCntMatch,
+                             exit);
       }
-      if (exitVariant==LaneTurn::Through and exit.relativeBearing < Bearing::Degrees(-40) and exit.relativeBearing > Bearing::Degrees(-180)) {
-        continue; // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
-      }
-      for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
-        LaneTurn turn = LaneTurn::Through;
-        if (size_t(allowedLaneFrom) < laneTurns.size()) {
-          turn=laneTurns[allowedLaneFrom];
-        }
-        if (turn==LaneTurn::Through_Left ||
-            turn==LaneTurn::Through_SlightLeft ||
-            turn==LaneTurn::Through_SharpLeft) {
-          // do not consume lane when it allows to use with two directions, just remove left direction
-          laneTurns[allowedLaneTo]=LaneTurn::Through;
-          continue;
-        }
-        if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
-          allowedLaneFrom++;
-        } else {
-          break;
-        }
-      }
-    }
-    // remove allowed lanes used for right exits
-    for (const auto &exit: junctionRightExits) {
-      LaneTurn exitVariant = LaneTurn::Through;
-      if (size_t(allowedLaneTo) < laneTurns.size()) {
-        exitVariant=laneTurns[allowedLaneTo];
-      }
-      if (exitVariant==LaneTurn::Through and exit.relativeBearing > Bearing::Degrees(40) and exit.relativeBearing < Bearing::Degrees(180)) {
-        continue; // hack: ignore the exit, relative bearing is too high and lane turn is through, probably not allowed to go there (U-Turn?)
-      }
-      for (int used=0; used < exit.lanes.GetLaneCount(); used++) {
-        LaneTurn turn = LaneTurn::Through;
-        if (size_t(allowedLaneTo) < laneTurns.size()) {
-          turn=laneTurns[allowedLaneTo];
-        }
-        if (turn==LaneTurn::Through_Right ||
-            turn==LaneTurn::Through_SlightRight ||
-            turn==LaneTurn::Through_SharpRight) {
-          // do not consume lane when it allows to use with two directions, just remove right direction
-          laneTurns[allowedLaneTo]=LaneTurn::Through;
-          continue;
-        }
-        if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
-          allowedLaneTo--;
-        } else {
-          break;
-        }
+      // remove allowed lanes used for right exits
+      for (const auto &exit: junctionRightExits) {
+        ConsumeLanesFromRight(laneTurns,
+                              allowedLaneFrom,
+                              allowedLaneTo,
+                              laneCntMatch,
+                              exit);
       }
     }
 
@@ -1861,15 +1947,15 @@ namespace osmscout {
     // evaluate suggested direction from lane turns
     Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
     LaneTurn suggestedTurn = BitsToTurn(suggestedTurnBits);
-    if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right  || suggestedTurn == LaneTurn::Through_SharpRight) {
-      if (relativeBearing > Bearing::Degrees(30) and relativeBearing < Bearing::Degrees(180)) {
+    if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right || suggestedTurn == LaneTurn::Through_SharpRight) {
+      if (relativeBearing > Bearing::Degrees(30) && relativeBearing < Bearing::Degrees(180)) {
         suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
       } else {
         suggestedTurn = LaneTurn::Through;
       }
     }
-    if (suggestedTurn == LaneTurn::Through_SlightLeft || suggestedTurn == LaneTurn::Through_Left  || suggestedTurn == LaneTurn::Through_SharpLeft) {
-      if (relativeBearing < Bearing::Degrees(-30) and relativeBearing > Bearing::Degrees(180)) {
+    if (suggestedTurn == LaneTurn::Through_SlightLeft || suggestedTurn == LaneTurn::Through_Left || suggestedTurn == LaneTurn::Through_SharpLeft) {
+      if (relativeBearing < Bearing::Degrees(-30) && relativeBearing > Bearing::Degrees(180)) {
         suggestedTurn = BitsToTurn(suggestedTurnBits ^ TurnToBits(LaneTurn::Through));
       } else {
         suggestedTurn = LaneTurn::Through;

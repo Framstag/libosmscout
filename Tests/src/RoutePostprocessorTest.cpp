@@ -930,6 +930,230 @@ TEST_CASE("Describe slightly complex junction")
   }
 }
 
+TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
+{
+  using namespace osmscout;
+
+  // https://www.openstreetmap.org/#map=18/50.071261/14.536248
+
+  MockDatabaseBuilder databaseBuilder;
+
+  // west lanes of "Prumyslova" highway, directing to south https://www.openstreetmap.org/way/313479831
+  // with four lanes
+  ObjectFileRef prumyslovaWest1Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071767, 14.537331), GeoCoord(50.071368, 14.537289)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // continuation, the middle of the junction with four lanes... https://www.openstreetmap.org/way/1333169461
+  ObjectFileRef prumyslovaWest2Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071368, 14.537289), GeoCoord(50.071256, 14.537254)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // continuation after junction, with two lanes... https://www.openstreetmap.org/way/896731161
+  ObjectFileRef prumyslovaWest3Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071256, 14.537254), GeoCoord(50.071030, 14.537224)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // east lanes of "Prumyslova" highway, directing to north https://www.openstreetmap.org/way/1024991959
+  // with three lanes
+  ObjectFileRef prumyslovaEast1Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.070965, 14.537447), GeoCoord(50.071228, 14.537474)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // continuation, the middle of the junction with three lanes https://www.openstreetmap.org/way/1333169460
+  ObjectFileRef prumyslovaEast2Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071228, 14.537474), GeoCoord(50.071347, 14.537514)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // continuation, after junction with two lanes https://www.openstreetmap.org/way/896731147
+  ObjectFileRef prumyslovaEast3Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071347, 14.537514), GeoCoord(50.071669, 14.537536)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Prumyslova");
+    });
+
+  // north lanes of "Cernokostelecka", directing to west https://www.openstreetmap.org/way/219625343
+  ObjectFileRef cernokosteleckaNorth1Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071328, 14.538123), GeoCoord(50.071347, 14.537514)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  // continuation, middle of the junction https://www.openstreetmap.org/way/1333169462
+  ObjectFileRef cernokosteleckaNorth2Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071347, 14.537514), GeoCoord(50.071368, 14.537289)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  // continuation after the junction https://www.openstreetmap.org/way/896731169
+  ObjectFileRef cernokosteleckaNorth3Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071368, 14.537289), GeoCoord(50.071416, 14.536884)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  // south lanes of "Cernokostelecka", directing to east https://www.openstreetmap.org/way/360156805
+  ObjectFileRef cernokosteleckaSouth1Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071309, 14.536822), GeoCoord(50.071256, 14.537254)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  // continuation, middle of the junction https://www.openstreetmap.org/way/1333169463
+  ObjectFileRef cernokosteleckaSouth2Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071256, 14.537254), GeoCoord(50.071228, 14.537474)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Left, LaneTurn::Through, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  // continuation, after the junction https://www.openstreetmap.org/way/896731153
+  ObjectFileRef cernokosteleckaSouth3Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(50.071228, 14.537474), GeoCoord(50.071211, 14.537850)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Cernokostelecka");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  { // route is going from the north from Prumyslova to the east Cernokostelecka
+    RouteDescription description;
+
+    description.AddNode(0, 0, {prumyslovaWest1Ref}, prumyslovaWest1Ref, 1);
+    description.AddNode(0, 0, {prumyslovaWest1Ref, prumyslovaWest2Ref, cernokosteleckaNorth2Ref, cernokosteleckaNorth3Ref}, prumyslovaWest2Ref, 1);
+    description.AddNode(0, 0, {prumyslovaWest2Ref, prumyslovaWest3Ref, cernokosteleckaSouth1Ref, cernokosteleckaSouth2Ref}, cernokosteleckaSouth2Ref, 1);
+    description.AddNode(0, 0, {cernokosteleckaSouth2Ref, cernokosteleckaSouth3Ref, prumyslovaEast1Ref, prumyslovaEast2Ref}, cernokosteleckaSouth3Ref, 1);
+    description.AddNode(0, 0, {cernokosteleckaSouth3Ref}, ObjectFileRef(), 1);
+
+    Postprocess(description, context);
+
+    // should suggest two lanes to the left
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    // TODO: improve lane evaluation on similar junctions
+    // REQUIRE(suggestedLanes->GetFrom() == 0);
+    // REQUIRE(suggestedLanes->GetTo() == 1);
+    // REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
+  }
+}
+
+TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
+{
+  using namespace osmscout;
+
+  // https://www.openstreetmap.org/#map=19/50.050041/14.442011
+
+  MockDatabaseBuilder databaseBuilder;
+
+  // north lanes of Na Strzi: https://www.openstreetmap.org/way/4647670
+  ObjectFileRef naStrziNorth1Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050415, 14.441638), GeoCoord(50.050149, 14.441129)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through_Right}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Strzi");
+    });
+
+  // continuation: https://www.openstreetmap.org/way/218366354
+  ObjectFileRef naStrziNorth2Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050149, 14.441129), GeoCoord(50.050026, 14.440976)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Through_Right}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Strzi");
+    });
+
+  // east lanes of no name: https://www.openstreetmap.org/way/4415195
+  ObjectFileRef noNameEast1Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050021, 14.441265), GeoCoord(50.050149, 14.441129)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+    });
+
+  // east lanes of Na Pankraci: https://www.openstreetmap.org/way/1340371643
+  ObjectFileRef naPankraciEast2Ref = databaseBuilder.AddMotorway(
+    {GeoCoord(50.050149, 14.441129), GeoCoord(50.050434, 14.440868)},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Na Pankraci");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  { // route is going from the east to the north
+    RouteDescription description;
+
+    description.AddNode(0, 0, {naStrziNorth1Ref}, naStrziNorth1Ref, 1);
+    description.AddNode(0, 0, {naPankraciEast2Ref, naStrziNorth1Ref, naStrziNorth2Ref, noNameEast1Ref}, naPankraciEast2Ref, 1);
+    description.AddNode(0, 0, {naPankraciEast2Ref}, ObjectFileRef(), 1);
+
+    Postprocess(description, context);
+
+    // should suggest right lane to the right
+    auto nodeIt = description.Nodes().begin();
+    auto suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 2);
+    REQUIRE(suggestedLanes->GetTo() == 2);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
+  }
+}
+
 TEST_CASE("Describe A3/A4 highway split")
 {
   using namespace osmscout;
