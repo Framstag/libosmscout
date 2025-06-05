@@ -1246,9 +1246,13 @@ TEST_CASE("Describe A3/A4 highway split")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
-    // continue straight, no explicit turn
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC)==nullptr);
-    // TODO: there should be explicit right turn (MotorwayChange) as the right lane was suggested on previous node and motorway was changed
+
+    // explicit motorway change
+    auto motorwayChange = std::dynamic_pointer_cast<RouteDescription::MotorwayChangeDescription>(
+      nodeIt->GetDescription(RouteDescription::MOTORWAY_CHANGE_DESC));
+    REQUIRE(motorwayChange);
+    REQUIRE(motorwayChange->GetFromDescription()->GetName() == "A3/A4");
+    REQUIRE(motorwayChange->GetToDescription()->GetName() == "A4");
   }
 
   {

@@ -350,6 +350,8 @@ namespace osmscout {
                               const std::list<RouteDescription::Node>::const_iterator &lastNode,
                               const std::list<RouteDescription::Node>::iterator &node,
                               const std::list<RouteDescription::Node>::const_iterator &end);
+      bool NameChanged(const RouteDescription::NameDescriptionRef &lastName,
+                       const RouteDescription::NameDescriptionRef &nextName);
       bool HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
                             std::list<RouteDescription::Node>::iterator& node,
                             const std::list<RouteDescription::Node>::const_iterator &end);

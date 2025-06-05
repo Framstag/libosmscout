@@ -833,19 +833,12 @@ namespace osmscout {
     }
   }
 
-  bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
-                                                                      std::list<RouteDescription::Node>::iterator& node,
-                                                                      const std::list<RouteDescription::Node>::const_iterator &end)
+  bool RoutePostprocessor::InstructionPostprocessor::NameChanged(const RouteDescription::NameDescriptionRef &lastName,
+                                                                 const RouteDescription::NameDescriptionRef &nextName)
   {
-    RouteDescription::NameDescriptionRef nextName;
-    RouteDescription::NameDescriptionRef lastName;
-
-    if (lastNode==end) {
+    if (!lastName || !nextName) {
       return false;
     }
-
-    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
     // Nothing changed
     if (lastName->GetName()==nextName->GetName() &&
@@ -870,6 +863,27 @@ namespace osmscout {
     // ref changes, but name stays the same
     if (!lastName->GetName().empty() &&
         lastName->GetName()==nextName->GetName()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
+                                                                      std::list<RouteDescription::Node>::iterator& node,
+                                                                      const std::list<RouteDescription::Node>::const_iterator &end)
+  {
+    RouteDescription::NameDescriptionRef nextName;
+    RouteDescription::NameDescriptionRef lastName;
+
+    if (lastNode==end) {
+      return false;
+    }
+
+    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+
+    if (!NameChanged(lastName, nextName)) {
       return false;
     }
 
@@ -1060,7 +1074,7 @@ namespace osmscout {
       }
 
       if (!postprocessor.IsMotorwayLink(*lastNode) &&
-               postprocessor.IsMotorwayLink(*node)) {
+          postprocessor.IsMotorwayLink(*node)) {
 
         // adds MotorwayEnter, MotorwayChange or MotorwayLeave depending on what is after motorway_link
         HandleMotorwayLink(postprocessor,
@@ -1068,6 +1082,19 @@ namespace osmscout {
                            lastNode,
                            node,
                            description.Nodes().end());
+
+        lastNode=node++;
+
+        continue;
+      }
+
+      if (postprocessor.IsMotorway(*lastNode) &&
+          postprocessor.IsMotorway(*node) &&
+          node->GetObjects().size() >= 3 &&
+          NameChanged(originName, targetName)) {
+
+        node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
+                             std::make_shared<RouteDescription::MotorwayChangeDescription>(originName, targetName));
 
         lastNode=node++;
 
