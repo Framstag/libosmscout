@@ -658,8 +658,12 @@ TEST_CASE("Describe simple junction with lane turns")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::slightlyRight);
+
     // explicit turn
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
+      nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
 
   {
@@ -812,7 +816,12 @@ TEST_CASE("Describe slightly complex junction")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::left);
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC));
+
+    // explicit turn
+    auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
+      nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::left);
   }
 
   { // route is going from the east to west on Cernokostelecka
@@ -864,7 +873,11 @@ TEST_CASE("Describe slightly complex junction")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::right);
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC));
+
+    auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
+      nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
 
   { // route is going from the north from Drevcicka to the west on Cernokostelecka
@@ -889,7 +902,11 @@ TEST_CASE("Describe slightly complex junction")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::right);
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC));
+
+    auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
+      nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
 
   { // route is going from the north from Drevcicka to the east on Cernokostelecka
@@ -912,12 +929,23 @@ TEST_CASE("Describe slightly complex junction")
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
 
     ++nodeIt;
+    suggestedLanes = std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      nodeIt->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    REQUIRE(suggestedLanes);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 0);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
+
     RouteDescription::DirectionDescriptionRef directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
-    // continue straight, no explicit turn
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC)==nullptr);
+
+    // continue straight, but explicit turn evaluated from the lanes
+    auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
+      nodeIt->GetDescription(RouteDescription::TURN_DESC));
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::left);
 
     ++nodeIt;
     directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(
@@ -926,7 +954,6 @@ TEST_CASE("Describe slightly complex junction")
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::left);
     // there is just one possible exit from the way, it is expected that there is no need for explicit turn
     REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC)==nullptr);
-    // TODO: there should be explicit turn, probably on the second node as the lane turn indicates
   }
 }
 
@@ -1219,9 +1246,14 @@ TEST_CASE("Describe A3/A4 highway split")
       nodeIt->GetDescription(RouteDescription::DIRECTION_DESC));
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
-    // continue straight, no explicit turn
-    REQUIRE(nodeIt->GetDescription(RouteDescription::TURN_DESC)==nullptr);
-    // TODO: there should be explicit right turn (MotorwayChange) as the right lane was suggested on previous node and motorway was changed
+
+    // explicit motorway change
+    auto motorwayChange = std::dynamic_pointer_cast<RouteDescription::MotorwayChangeDescription>(
+      nodeIt->GetDescription(RouteDescription::MOTORWAY_CHANGE_DESC));
+    REQUIRE(motorwayChange);
+    REQUIRE(motorwayChange->GetFromDescription()->GetName() == "A3/A4");
+    REQUIRE(motorwayChange->GetToDescription()->GetName() == "A4");
+    REQUIRE(motorwayChange->GetDirection() == RouteDescription::DirectionDescription::Move::slightlyRight);
   }
 
   {
@@ -1321,7 +1353,7 @@ TEST_CASE("Describe A3/A4 highway near Zurich")
     RouteDescription::MotorwayLeaveDescriptionRef motorwayLeaveDesc=std::dynamic_pointer_cast<RouteDescription::MotorwayLeaveDescription>(
       nodeIt->GetDescription(RouteDescription::MOTORWAY_LEAVE_DESC));
     REQUIRE(motorwayLeaveDesc);
-    // TODO: add direction / lane information to MotorwayLeave and MotorwayChange descriptions
+    REQUIRE(motorwayLeaveDesc->GetDirection() == RouteDescription::DirectionDescription::Move::slightlyLeft);
   }
 
   {
