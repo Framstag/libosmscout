@@ -772,10 +772,11 @@ namespace osmscout {
                         desc);
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayLeave(RouteDescription::Node& node,
+  void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayLeave(const RouteDescription::Node& previousNode,
+                                                                               RouteDescription::Node& node,
                                                                                const RouteDescription::NameDescriptionRef& fromName)
   {
-    RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(fromName);
+    RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(fromName, Direction(previousNode, node));
 
     node.AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
                         desc);
@@ -810,13 +811,15 @@ namespace osmscout {
 
     if (originIsMotorway && targetIsMotorway) {
       RouteDescription::MotorwayChangeDescriptionRef desc=std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
-                                                                                                                        nextName);
+                                                                                                                        nextName,
+                                                                                                                        Direction(*lastNode, *node));
 
       node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
                            desc);
     }
     else if (originIsMotorway && !targetIsMotorway) {
-      RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName);
+      RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName,
+                                                                                                                      Direction(*lastNode, *node));
 
       node->AddDescription(RouteDescription::MOTORWAY_LEAVE_DESC,
                            desc);
@@ -869,6 +872,57 @@ namespace osmscout {
     return true;
   }
 
+  std::optional<RouteDescription::DirectionDescription::Move> RoutePostprocessor::InstructionPostprocessor::DirectionFromLane(const RouteDescription::Node &node)
+  {
+    RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
+      node.GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+
+    if (!suggestedLaneDesc) {
+      return std::nullopt;
+    }
+
+    switch (suggestedLaneDesc->GetTurn()) {
+      case LaneTurn::Left:
+        return RouteDescription::DirectionDescription::left;
+      case LaneTurn::SharpLeft:
+        return RouteDescription::DirectionDescription::sharpLeft;
+      case LaneTurn::SlightLeft:
+        return RouteDescription::DirectionDescription::slightlyLeft;
+      case LaneTurn::Right:
+        return RouteDescription::DirectionDescription::right;
+      case LaneTurn::SharpRight:
+        return RouteDescription::DirectionDescription::sharpRight;
+      case LaneTurn::SlightRight:
+        return RouteDescription::DirectionDescription::slightlyRight;
+      default:
+        return std::nullopt;
+    }
+  }
+
+  RouteDescription::DirectionDescription::Move RoutePostprocessor::InstructionPostprocessor::Direction(const RouteDescription::Node &previousNode,
+                                                                                                       const RouteDescription::Node &node,
+                                                                                                       bool *fromGeometry)
+  {
+    // when there is explicit lane turn, use it as precedence before direction evaluated from the geometry
+    if (auto directionOpt = DirectionFromLane(previousNode); directionOpt) {
+      if (fromGeometry!=nullptr) {
+        *fromGeometry = false;
+      }
+      return *directionOpt;
+    } else {
+      if (auto directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(
+            node.GetDescription(RouteDescription::DIRECTION_DESC));
+          directionDesc) {
+
+        if (fromGeometry!=nullptr) {
+          *fromGeometry = true;
+        }
+        return directionDesc->GetCurve();
+      }
+    }
+    return RouteDescription::DirectionDescription::straightOn;
+  }
+
   bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
                                                                       std::list<RouteDescription::Node>::iterator& node,
                                                                       const std::list<RouteDescription::Node>::const_iterator &end)
@@ -915,30 +969,9 @@ namespace osmscout {
     lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
     nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
-    RouteDescription::DirectionDescriptionRef directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(node->GetDescription(RouteDescription::DIRECTION_DESC));
-    RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(node->GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
-
-    RouteDescription::DirectionDescription::Move direction = RouteDescription::DirectionDescription::straightOn;
     bool directionFromGeometry=false;
-    // when there is explicit lane turn, use it as precedence before direction evaluated from the geometry
-    if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::Left) {
-      direction = RouteDescription::DirectionDescription::left;
-    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SharpLeft) {
-      direction = RouteDescription::DirectionDescription::sharpLeft;
-    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SlightLeft) {
-      direction = RouteDescription::DirectionDescription::slightlyLeft;
-    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::Right) {
-      direction = RouteDescription::DirectionDescription::right;
-    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SharpRight) {
-      direction = RouteDescription::DirectionDescription::sharpRight;
-    } else if (suggestedLaneDesc && suggestedLaneDesc->GetTurn() == LaneTurn::SlightRight) {
-      direction = RouteDescription::DirectionDescription::slightlyRight;
-    } else {
-      if (directionDesc) {
-        direction = directionDesc->GetCurve();
-        directionFromGeometry = true;
-      }
-    }
+    RouteDescription::DirectionDescription::Move direction = Direction(*lastNode, *node, &directionFromGeometry);
+
     if (direction == RouteDescription::DirectionDescription::straightOn) {
       return false;
     }
@@ -1065,8 +1098,7 @@ namespace osmscout {
       if (postprocessor.IsMotorway(*lastNode) &&
           !postprocessor.IsMotorwayLink(*node) &&
           !postprocessor.IsMotorway(*node)) {
-        HandleDirectMotorwayLeave(*node,
-                                  originName);
+        HandleDirectMotorwayLeave(*lastNode, *node, originName);
 
         lastNode=node++;
 
@@ -1094,7 +1126,9 @@ namespace osmscout {
           NameChanged(originName, targetName)) {
 
         node->AddDescription(RouteDescription::MOTORWAY_CHANGE_DESC,
-                             std::make_shared<RouteDescription::MotorwayChangeDescription>(originName, targetName));
+                             std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
+                                                                                           targetName,
+                                                                                           Direction(*lastNode, *node)));
 
         lastNode=node++;
 

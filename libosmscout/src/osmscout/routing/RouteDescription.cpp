@@ -355,9 +355,11 @@ namespace osmscout {
   }
 
   RouteDescription::MotorwayChangeDescription::MotorwayChangeDescription(const NameDescriptionRef& fromDescription,
-                                                                         const NameDescriptionRef& toDescription)
+                                                                         const NameDescriptionRef& toDescription,
+                                                                         const RouteDescription::DirectionDescription::Move& direction)
   : fromDescription(fromDescription),
-    toDescription(toDescription)
+    toDescription(toDescription),
+    direction(direction)
   {
     // no code
   }
@@ -367,8 +369,10 @@ namespace osmscout {
     return "Change motorway";
   }
 
-  RouteDescription::MotorwayLeaveDescription::MotorwayLeaveDescription(const NameDescriptionRef& fromDescription)
-  : fromDescription(fromDescription)
+  RouteDescription::MotorwayLeaveDescription::MotorwayLeaveDescription(const NameDescriptionRef& fromDescription,
+                                                                       const RouteDescription::DirectionDescription::Move& direction)
+  : fromDescription(fromDescription),
+    direction(direction)
   {
     // no code
   }

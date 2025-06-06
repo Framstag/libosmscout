@@ -663,7 +663,7 @@ TEST_CASE("Describe simple junction with lane turns")
     auto turnDesc=std::dynamic_pointer_cast<RouteDescription::TurnDescription>(
       nodeIt->GetDescription(RouteDescription::TURN_DESC));
     REQUIRE(turnDesc);
-    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::slightlyRight);
+    REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
 
   {
@@ -1253,6 +1253,7 @@ TEST_CASE("Describe A3/A4 highway split")
     REQUIRE(motorwayChange);
     REQUIRE(motorwayChange->GetFromDescription()->GetName() == "A3/A4");
     REQUIRE(motorwayChange->GetToDescription()->GetName() == "A4");
+    REQUIRE(motorwayChange->GetDirection() == RouteDescription::DirectionDescription::Move::slightlyRight);
   }
 
   {
@@ -1352,7 +1353,7 @@ TEST_CASE("Describe A3/A4 highway near Zurich")
     RouteDescription::MotorwayLeaveDescriptionRef motorwayLeaveDesc=std::dynamic_pointer_cast<RouteDescription::MotorwayLeaveDescription>(
       nodeIt->GetDescription(RouteDescription::MOTORWAY_LEAVE_DESC));
     REQUIRE(motorwayLeaveDesc);
-    // TODO: add direction / lane information to MotorwayLeave and MotorwayChange descriptions
+    REQUIRE(motorwayLeaveDesc->GetDirection() == RouteDescription::DirectionDescription::Move::slightlyLeft);
   }
 
   {

@@ -422,10 +422,12 @@ namespace osmscout {
     private:
       NameDescriptionRef fromDescription;
       NameDescriptionRef toDescription;
+      RouteDescription::DirectionDescription::Move direction;
 
     public:
       MotorwayChangeDescription(const NameDescriptionRef& fromDescription,
-                                const NameDescriptionRef& toDescription);
+                                const NameDescriptionRef& toDescription,
+                                const RouteDescription::DirectionDescription::Move& direction);
 
       std::string GetDebugString() const override;
 
@@ -437,6 +439,11 @@ namespace osmscout {
       NameDescriptionRef GetToDescription() const
       {
         return toDescription;
+      }
+
+      RouteDescription::DirectionDescription::Move GetDirection() const
+      {
+        return direction;
       }
     };
 
@@ -450,15 +457,22 @@ namespace osmscout {
     {
     private:
       NameDescriptionRef fromDescription;
+      RouteDescription::DirectionDescription::Move direction;
 
     public:
-      explicit MotorwayLeaveDescription(const NameDescriptionRef& fromDescription);
+      MotorwayLeaveDescription(const NameDescriptionRef& fromDescription,
+                               const RouteDescription::DirectionDescription::Move& direction);
 
       std::string GetDebugString() const override;
 
       NameDescriptionRef GetFromDescription() const
       {
         return fromDescription;
+      }
+
+      RouteDescription::DirectionDescription::Move GetDirection() const
+      {
+        return direction;
       }
     };
 
