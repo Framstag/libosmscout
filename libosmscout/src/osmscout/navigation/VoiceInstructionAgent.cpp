@@ -158,18 +158,18 @@ public:
     }
   }
 
-  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
-              const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/,
-              const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-              const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
-              const osmscout::RouteDescription::NameDescriptionRef& /*nameDescription*/) override
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+              [[maybe_unused]] const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(directionDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     using DirectionDescription = RouteDescription::DirectionDescription;
     MessageType type = MessageType::NoMessage;
-    switch (directionDescription->GetCurve()) {
+    switch (turnDescription->GetDirection()) {
       case DirectionDescription::sharpLeft:
         type = MessageType::SharpLeft;
         break;

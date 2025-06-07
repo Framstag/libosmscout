@@ -385,7 +385,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
   }
 
-  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
               const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
               [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
               const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
@@ -403,12 +403,8 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     }
 
     NextLine(lineCount);
-    if (directionDescription) {
-      std::cout << MoveToTurnCommand(directionDescription->GetCurve());
-    }
-    else {
-      std::cout << "Turn";
-    }
+
+    std::cout << MoveToTurnCommand(turnDescription->GetDirection());
 
     std::cout << " into";
 
