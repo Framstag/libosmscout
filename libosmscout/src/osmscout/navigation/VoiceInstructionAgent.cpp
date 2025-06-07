@@ -52,19 +52,19 @@ public:
     distance=node.GetDistance();
   }
 
-  void OnMotorwayLeave(const RouteDescription::DirectionDescriptionRef& directionDescription)
+  void OnMotorwayLeave(const RouteDescription::DirectionDescription::Move& move)
   {
-    VoiceInstructionAgent::MessageType type=VoiceInstructionAgent::MessageType::LeaveMotorway;
-    if (directionDescription) {
-      if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
-          directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
-          directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
-        type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
-      } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
-                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
-                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
-        type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
-      }
+    VoiceInstructionAgent::MessageType type;
+    if (move==RouteDescription::DirectionDescription::sharpLeft ||
+        move==RouteDescription::DirectionDescription::left ||
+        move==RouteDescription::DirectionDescription::slightlyLeft) {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
+    } else if (move==RouteDescription::DirectionDescription::sharpRight ||
+               move==RouteDescription::DirectionDescription::right ||
+               move==RouteDescription::DirectionDescription::slightlyRight) {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
+    } else {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorway;
     }
 
     if (!nextMessage){
@@ -74,21 +74,23 @@ public:
     }
   }
 
-  void OnMotorwayChange([[maybe_unused]] const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+  void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                         [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                         [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
   {
-    OnMotorwayLeave(directionDescription);
+    assert(motorwayChangeDescription);
+    OnMotorwayLeave(motorwayChangeDescription->GetDirection());
   }
 
-  void OnMotorwayLeave([[maybe_unused]] const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+  void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                        [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                       const RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                        [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
                        [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& destinationDescription) override
   {
-    OnMotorwayLeave(directionDescription);
+    assert(motorwayLeaveDescription);
+    OnMotorwayLeave(motorwayLeaveDescription->GetDirection());
   }
 
   void OnRoundaboutEnter([[maybe_unused]] const RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDescription,
