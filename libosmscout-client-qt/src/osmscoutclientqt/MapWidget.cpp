@@ -200,7 +200,7 @@ void MapWidget::setupInputHandler(InputHandler *newGesture)
     if (locked != inputHandler->isLockedToPosition()){
         emit lockToPositionChanged();
     }
-    //qDebug() << "Input handler changed (" << (newGesture->animationInProgress()? "animation": "stationary") << ")";
+    // qDebug() << "Input handler changed to" << inputHandler->metaObject()->className();
 }
 
 void MapWidget::redraw()
@@ -607,7 +607,9 @@ void MapWidget::setFollowVehicle(bool follow){
       setupInputHandler(new VehicleFollowHandler(*view, QSizeF(width(), height())));
     }
   }else{
-    setupInputHandler(new InputHandler(*view));
+    if (inputHandler->isFollowVehicle()) {
+      setupInputHandler(new InputHandler(*view));
+    }
   }
 }
 
