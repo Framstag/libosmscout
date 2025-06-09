@@ -1970,6 +1970,10 @@ namespace osmscout {
     int allowedLaneFrom = 0;
     int allowedLaneTo = prevLanes->GetLaneCount()-1; // inclusive
     std::vector<LaneTurn> laneTurns = prevLanes->GetLaneTurns();
+    // fill missing lanes
+    while (prevLanes->GetLaneCount() > laneTurns.size()) {
+      laneTurns.push_back(LaneTurn::None);
+    }
 
     // when number of outgoing lanes match to incoming one, we may decide easily what lane belong to what exit...
     bool laneCntMatch = laneTurns.size() ==
