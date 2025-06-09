@@ -343,13 +343,20 @@ namespace osmscout {
 
       void HandleDirectMotorwayEnter(RouteDescription::Node& node,
                                      const RouteDescription::NameDescriptionRef& toName);
-      void HandleDirectMotorwayLeave(RouteDescription::Node& node,
+      void HandleDirectMotorwayLeave(const RouteDescription::Node& previousNode,
+                                     RouteDescription::Node& node,
                                      const RouteDescription::NameDescriptionRef& fromName);
       void HandleMotorwayLink(const PostprocessorContext& context,
                               const RouteDescription::NameDescriptionRef &originName,
                               const std::list<RouteDescription::Node>::const_iterator &lastNode,
                               const std::list<RouteDescription::Node>::iterator &node,
                               const std::list<RouteDescription::Node>::const_iterator &end);
+      bool NameChanged(const RouteDescription::NameDescriptionRef &lastName,
+                       const RouteDescription::NameDescriptionRef &nextName);
+      std::optional<RouteDescription::DirectionDescription::Move> DirectionFromLane(const RouteDescription::Node &node);
+      RouteDescription::DirectionDescription::Move Direction(const RouteDescription::Node &previousNode,
+                                                             const RouteDescription::Node &node,
+                                                             bool *fromGeometry = nullptr);
       bool HandleNameChange(std::list<RouteDescription::Node>::const_iterator& lastNode,
                             std::list<RouteDescription::Node>::iterator& node,
                             const std::list<RouteDescription::Node>::const_iterator &end);

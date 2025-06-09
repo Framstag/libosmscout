@@ -52,19 +52,19 @@ public:
     distance=node.GetDistance();
   }
 
-  void OnMotorwayLeave(const RouteDescription::DirectionDescriptionRef& directionDescription)
+  void OnMotorwayLeave(const RouteDescription::DirectionDescription::Move& move)
   {
-    VoiceInstructionAgent::MessageType type=VoiceInstructionAgent::MessageType::LeaveMotorway;
-    if (directionDescription) {
-      if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
-          directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
-          directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
-        type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
-      } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
-                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
-                 directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
-        type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
-      }
+    VoiceInstructionAgent::MessageType type;
+    if (move==RouteDescription::DirectionDescription::sharpLeft ||
+        move==RouteDescription::DirectionDescription::left ||
+        move==RouteDescription::DirectionDescription::slightlyLeft) {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
+    } else if (move==RouteDescription::DirectionDescription::sharpRight ||
+               move==RouteDescription::DirectionDescription::right ||
+               move==RouteDescription::DirectionDescription::slightlyRight) {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
+    } else {
+      type=VoiceInstructionAgent::MessageType::LeaveMotorway;
     }
 
     if (!nextMessage){
@@ -74,21 +74,23 @@ public:
     }
   }
 
-  void OnMotorwayChange([[maybe_unused]] const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+  void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                         [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                         [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
   {
-    OnMotorwayLeave(directionDescription);
+    assert(motorwayChangeDescription);
+    OnMotorwayLeave(motorwayChangeDescription->GetDirection());
   }
 
-  void OnMotorwayLeave([[maybe_unused]] const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+  void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                        [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                       const RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                        [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
                        [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& destinationDescription) override
   {
-    OnMotorwayLeave(directionDescription);
+    assert(motorwayLeaveDescription);
+    OnMotorwayLeave(motorwayLeaveDescription->GetDirection());
   }
 
   void OnRoundaboutEnter([[maybe_unused]] const RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDescription,
@@ -156,18 +158,18 @@ public:
     }
   }
 
-  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
-              const osmscout::RouteDescription::CrossingWaysDescriptionRef& /*crossingWaysDescription*/,
-              const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
-              const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
-              const osmscout::RouteDescription::NameDescriptionRef& /*nameDescription*/) override
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+              [[maybe_unused]] const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(directionDescription);
 
     using MessageType = VoiceInstructionAgent::MessageType;
     using DirectionDescription = RouteDescription::DirectionDescription;
     MessageType type = MessageType::NoMessage;
-    switch (directionDescription->GetCurve()) {
+    switch (turnDescription->GetDirection()) {
       case DirectionDescription::sharpLeft:
         type = MessageType::SharpLeft;
         break;

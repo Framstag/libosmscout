@@ -385,9 +385,9 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
   }
 
-  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+  void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
               const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-              const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+              [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
               const osmscout::RouteDescription::TypeNameDescriptionRef& typeNameDescription,
               const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
@@ -403,12 +403,8 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
     }
 
     NextLine(lineCount);
-    if (directionDescription) {
-      std::cout << MoveToTurnCommand(directionDescription->GetCurve());
-    }
-    else {
-      std::cout << "Turn";
-    }
+
+    std::cout << MoveToTurnCommand(turnDescription->GetDirection());
 
     std::cout << " into";
 
@@ -487,7 +483,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
   void OnMotorwayChange(const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                         const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                        const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                        [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                         const osmscout::RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
   {
     NextLine(lineCount);
@@ -515,11 +511,10 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
       std::cout << " from '" << motorwayChangeDescription->GetFromDescription()->GetDescription() << "'";
     }
 
-    if (directionDescription &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
-      std::cout << " " << MoveToTurnCommand(directionDescription->GetCurve());
+    if (motorwayChangeDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
+        motorwayChangeDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
+        motorwayChangeDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
+      std::cout << " " << MoveToTurnCommand(motorwayChangeDescription->GetDirection());
     }
 
     if (motorwayChangeDescription->GetToDescription() &&
@@ -536,7 +531,7 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
 
   void OnMotorwayLeave(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                        const osmscout::RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                       const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
                        const osmscout::RouteDescription::NameDescriptionRef& nameDescription,
                        const osmscout::RouteDescription::DestinationDescriptionRef& destinationDescription) override
   {
@@ -564,11 +559,10 @@ struct RouteDescriptionGeneratorCallback : public osmscout::RouteDescriptionPost
       std::cout << " '" << motorwayLeaveDescription->GetFromDescription()->GetDescription() << "'";
     }
 
-    if (directionDescription &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
-        directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
-      std::cout << " " << MoveToTurnCommand(directionDescription->GetCurve());
+    if (motorwayLeaveDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
+        motorwayLeaveDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
+        motorwayLeaveDescription->GetDirection()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
+      std::cout << " " << MoveToTurnCommand(motorwayLeaveDescription->GetDirection());
     }
 
     if (nameDescription &&
