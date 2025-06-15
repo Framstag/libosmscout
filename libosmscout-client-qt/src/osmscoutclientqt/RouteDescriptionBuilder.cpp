@@ -45,12 +45,9 @@ RouteDescriptionBuilder::RouteDescriptionBuilder::Callback::Callback(QList<Route
 {
 }
 
-static QString TurnCommandType(const RouteDescription::DirectionDescriptionRef& directionDescription)
+static QString TurnCommandType(const RouteDescription::DirectionDescription::Move& move)
 {
-  if (!directionDescription) {
-    return "turn";
-  }
-  switch (directionDescription->GetCurve()) {
+  switch (move) {
     case RouteDescription::DirectionDescription::sharpLeft:
       return "turn-sharp-left";
     case RouteDescription::DirectionDescription::left:
@@ -71,12 +68,9 @@ static QString TurnCommandType(const RouteDescription::DirectionDescriptionRef& 
   return "???";
 }
 
-static QString ShortTurnCommand(const RouteDescription::DirectionDescriptionRef& directionDescription)
+static QString ShortTurnCommand(const RouteDescription::DirectionDescription::Move& move)
 {
-  if (!directionDescription){
-    return RouteDescriptionBuilder::tr("Turn");
-  }
-  switch (directionDescription->GetCurve()) {
+  switch (move) {
     case RouteDescription::DirectionDescription::sharpLeft:
       return RouteDescriptionBuilder::tr("Turn sharp left");
     case RouteDescription::DirectionDescription::left:
@@ -97,12 +91,9 @@ static QString ShortTurnCommand(const RouteDescription::DirectionDescriptionRef&
   return "???";
 }
 
-static QString FullTurnCommand(const RouteDescription::DirectionDescriptionRef& directionDescription)
+static QString FullTurnCommand(const RouteDescription::DirectionDescription::Move& move)
 {
-  if (!directionDescription){
-    return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong> into %2");
-  }
-  switch (directionDescription->GetCurve()) {
+  switch (move) {
     case RouteDescription::DirectionDescription::sharpLeft:
       return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong> into %2");
     case RouteDescription::DirectionDescription::left:
@@ -123,12 +114,9 @@ static QString FullTurnCommand(const RouteDescription::DirectionDescriptionRef& 
   return "???";
 }
 
-static QString TurnCommandWithList(const RouteDescription::DirectionDescriptionRef& directionDescription)
+static QString TurnCommandWithList(const RouteDescription::DirectionDescription::Move& move)
 {
-  if (!directionDescription){
-    return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn</strong>");
-  }
-  switch (directionDescription->GetCurve()) {
+  switch (move) {
     case RouteDescription::DirectionDescription::sharpLeft:
       return RouteDescriptionBuilder::tr("At crossing %1<strong>Turn sharp left</strong>");
     case RouteDescription::DirectionDescription::left:
@@ -307,14 +295,15 @@ void RouteDescriptionBuilder::Callback::OnTargetReached(const RouteDescription::
   routeSteps.push_back(targetReached);
 }
 
-void RouteDescriptionBuilder::Callback::OnTurn(const RouteDescription::TurnDescriptionRef& /*turnDescription*/,
+void RouteDescriptionBuilder::Callback::OnTurn(const RouteDescription::TurnDescriptionRef& turnDescription,
                                                const RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
-                                               const RouteDescription::DirectionDescriptionRef& directionDescription,
-                                               const RouteDescription::TypeNameDescriptionRef& /*typeNameDescription*/,
+                                               [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                               [[maybe_unused]] const RouteDescription::TypeNameDescriptionRef& typeNameDescription,
                                                const RouteDescription::NameDescriptionRef& nameDescription)
 {
-  RouteStep turn = MkStep(TurnCommandType(directionDescription));
-  turn.shortDescription=ShortTurnCommand(directionDescription);
+  assert(turnDescription);
+  RouteStep turn = MkStep(TurnCommandType(turnDescription->GetDirection()));
+  turn.shortDescription=ShortTurnCommand(turnDescription->GetDirection());
 
   QString crossingWaysString;
   QString targetName;
@@ -327,9 +316,9 @@ void RouteDescriptionBuilder::Callback::OnTurn(const RouteDescription::TurnDescr
   }
 
   if (!crossingWaysString.isEmpty() && !targetName.isEmpty()) {
-    turn.description=FullTurnCommand(directionDescription).arg(crossingWaysString).arg(targetName);
+    turn.description=FullTurnCommand(turnDescription->GetDirection()).arg(crossingWaysString).arg(targetName);
   } else if (!crossingWaysString.isEmpty()) {
-    turn.description=TurnCommandWithList(directionDescription).arg(crossingWaysString);
+    turn.description=TurnCommandWithList(turnDescription->GetDirection()).arg(crossingWaysString);
   } else {
     turn.description=QString("<strong>%1</strong>").arg(turn.shortDescription);
   }
@@ -441,20 +430,18 @@ void RouteDescriptionBuilder::Callback::OnMotorwayEnter(const RouteDescription::
 
 void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
                                                          const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                                         const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                                         [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                                                          const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription)
 {
   QString stepName="change-motorway";
-  if (directionDescription) {
-    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
-        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
-        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
-      stepName="change-motorway-left";
-    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
-               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
-               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
-      stepName="change-motorway-right";
-    }
+  if (motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::sharpLeft ||
+      motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::left ||
+      motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::slightlyLeft) {
+    stepName="change-motorway-left";
+  } else if (motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::sharpRight ||
+             motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::right ||
+             motorwayChangeDescription->GetDirection()==RouteDescription::DirectionDescription::slightlyRight) {
+    stepName="change-motorway-right";
   }
   RouteStep change = MkStep(stepName);
 
@@ -502,19 +489,19 @@ void RouteDescriptionBuilder::Callback::OnMotorwayChange(const RouteDescription:
 
 void RouteDescriptionBuilder::Callback::OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
                                                         const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                                                        const RouteDescription::DirectionDescriptionRef& directionDescription,
+                                                        [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
                                                         const RouteDescription::NameDescriptionRef& nameDescription,
                                                         const RouteDescription::DestinationDescriptionRef& destinationDescription)
 {
   QString stepName="leave-motorway";
   if (directionDescription) {
-    if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpLeft ||
-        directionDescription->GetCurve()==RouteDescription::DirectionDescription::left ||
-        directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyLeft) {
+    if (motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::sharpLeft ||
+        motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::left ||
+        motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::slightlyLeft) {
       stepName="leave-motorway-left";
-    } else if (directionDescription->GetCurve()==RouteDescription::DirectionDescription::sharpRight ||
-               directionDescription->GetCurve()==RouteDescription::DirectionDescription::right ||
-               directionDescription->GetCurve()==RouteDescription::DirectionDescription::slightlyRight) {
+    } else if (motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::sharpRight ||
+               motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::right ||
+               motorwayLeaveDescription->GetDirection()==RouteDescription::DirectionDescription::slightlyRight) {
       stepName="leave-motorway-right";
     }
   }
