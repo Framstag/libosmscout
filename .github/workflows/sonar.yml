@@ -11,7 +11,6 @@ on:
       - '.github/workflows/**'
   workflow_dispatch:
 
-
 jobs:
   sonar_gcc_meson:
     name: sonar, gcc and meson

@@ -9,6 +9,7 @@ on:
       - master
     paths-ignore:
       - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build_meson:
