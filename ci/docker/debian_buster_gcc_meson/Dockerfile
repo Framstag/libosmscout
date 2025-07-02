@@ -1,6 +1,8 @@
 FROM debian:buster
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y \
           git make libtool pkg-config \
           libxml2-dev libprotobuf-dev protobuf-compiler \
           libagg-dev \
@@ -12,7 +14,7 @@ RUN apt-get update && apt-get install -y \
           freeglut3 freeglut3-dev \
           libmarisa-dev \
           doxygen \
-          swig openjdk-11-jdk \
+          swig \
           locales \
     && rm -rf /var/lib/apt/lists/*
 
