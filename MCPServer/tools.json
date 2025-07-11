@@ -1,0 +1,69 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "name": "version",
+        "title": "Request Libosmscout Version",
+        "description": "Tool to request the version of the libosmscout library",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "title": "Version",
+              "description": "Version of the libosmscout library"
+            }
+          },
+          "required": ["version"]
+        }
+      },
+      {
+        "name": "locationDescription",
+        "title": "Describe Location",
+        "description": "Tool to describe the given geo location",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "title": "latitude",
+              "description": "The latitude part of the geo location"
+            },
+            "longitude": {
+              "type": "number",
+              "title": "longitude",
+              "description": "The longitude part of the geo location"
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude"
+          ]
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "coordinateDescription": {
+              "type": "string",
+              "title": "Coordinate Description",
+              "description": "Description of the geolocation as a simple geo coordinate"
+            },
+            "atNameDescription": {
+              "type": "string",
+              "title": "Name Description",
+              "description": "Description of the geolocation using the nearest nameable object"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
