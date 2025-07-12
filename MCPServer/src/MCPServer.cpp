@@ -18,7 +18,6 @@
 */
 
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -32,180 +31,218 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
-struct Arguments
-{
-  bool        help = false;
-  std::string databaseDirectory;
+namespace {
+  struct Arguments
+  {
+    bool                  help = false;
+    std::string           databaseDirectory;
+    std::filesystem::path dataPath;
+    std::string           host="0.0.0.0";
+    unsigned int          port=8000;
 
-};
+  };
 
-osmscout::CmdLineParseResult ParseArguments(const int argc, char** argv, Arguments& args)
-{
-  osmscout::CmdLineParser argParser("MCPServer",
-                                    argc, argv);
-  const std::vector<std::string> helpArgs{"h", "help"};
+  osmscout::CmdLineParseResult ParseArguments(const int argc, char** argv, Arguments& args)
+  {
+    osmscout::CmdLineParser argParser("MCPServer",
+                                      argc, argv);
+    const std::vector<std::string> helpArgs{"h", "help"};
 
-  argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
-                        args.help=value;
+    argParser.AddOption(osmscout::CmdLineFlag([&args](const bool& value) {
+                          args.help=value;
+                        }),
+                        helpArgs,
+                        "Return argument help",
+                        true);
+
+    argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                      args.host=value;
+                    }),
+                    "host",
+                    "HTTP ip/hostname of server",
+                    true);
+
+    argParser.AddOption(osmscout::CmdLineUIntOption([&args](const unsigned int& value) {
+                        args.port=value;
                       }),
-                      helpArgs,
-                      "Return argument help",
+                      "port",
+                      "HTTP port of server",
                       true);
 
-  argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
-                          args.databaseDirectory=value;
+    argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                          args.dataPath=value;
                         }),
-                        "DATABASE",
-                        "Directory of the db to use");
+                        "DATA_PATH",
+                        "Path of directory with MCP json files");
 
-  osmscout::CmdLineParseResult result=argParser.Parse();
-  if (result.HasError()) {
-    std::cerr << "ERROR: " << result.GetErrorDescription() << std::endl;
-    std::cout << argParser.GetHelp() << std::endl;
-  }
-  else if (args.help) {
-    std::cout << argParser.GetHelp() << std::endl;
-  }
+    argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                            args.databaseDirectory=value;
+                          }),
+                          "DATABASE",
+                          "Directory of the db to use");
 
-  return result;
-}
-
-std::string FileContentToString(const std::filesystem::path& path)
-{
-  std::ifstream file(path, std::ios::in | std::ios::binary);
-  std::string content{std::istreambuf_iterator(file), std::istreambuf_iterator<char>()};
-  file.close();
-
-  return content;
-}
-
-void HandleMessageInitialize(const nlohmann::json& reqObject, httplib::Response& res)
-{
-  unsigned int id = reqObject["id"];
-  const std::string protocolVersion = reqObject["params"]["protocolVersion"];
-
-  osmscout::log.Info() << "*** Message 'initialize' - id: " << id << " protocolVersion: " << protocolVersion;
-
-  nlohmann::json resObject=nlohmann::json::parse(FileContentToString("MCPServer/capabilities.json"));
-
-  resObject.at("id")=id;
-
-  res.set_content(resObject.dump(),"application/json");
-
-  res.status=httplib::StatusCode::OK_200;
-}
-
-void HandleMessageInitialized(const nlohmann::json& /*reqObject*/, httplib::Response& res)
-{
-  osmscout::log.Info() << "*** Message 'initialized'";
-
-  const nlohmann::json resObject=nlohmann::json::parse(FileContentToString("MCPServer/initialized.json"));
-
-  res.set_content(resObject.dump(),"application/json");
-
-  res.status=httplib::StatusCode::OK_200;
-}
-
-void HandleMessageToolsList(const nlohmann::json& reqObject, httplib::Response& res)
-{
-  unsigned int id = reqObject["id"];
-
-  osmscout::log.Info() << "*** Message 'tools/list' - id: " << id;
-
-  nlohmann::json resObject=nlohmann::json::parse(FileContentToString("MCPServer/tools.json"));
-
-  resObject.at("id")=id;
-
-  res.set_content(resObject.dump(),"application/json");
-
-  res.status=httplib::StatusCode::OK_200;
-}
-
-void HandleMessageToolsCall(const nlohmann::json& reqObject,
-                            httplib::Response& res,
-                            const osmscout::LocationDescriptionServiceRef& locationDescriptionService)
-{
-  unsigned int id=reqObject["id"];
-  const std::string tool=reqObject["params"]["name"];
-  osmscout::log.Info() << "*** Calling tool '" << tool << "'...";
-
-  if (tool=="version") {
-    nlohmann::json resObject;
-
-    resObject["jsonrpc"]="2.0";
-    resObject["id"]= id;
-    resObject["result"]["structuredContent"]["version"]="4711";
-
-    res.set_content(resObject.dump(),"application/json");
-
-    res.status=httplib::StatusCode::OK_200;
-  }
-  else if (tool=="locationDescription") {
-    const double latitude=reqObject["params"]["arguments"]["latitude"];
-    const double longitude=reqObject["params"]["arguments"]["longitude"];
-    osmscout::GeoCoord location(latitude,longitude);
-
-    osmscout::LocationDescription description;
-    locationDescriptionService->DescribeLocation(location,description);
-
-    osmscout::LocationCoordDescriptionRef    coordDescription=description.GetCoordDescription();
-    osmscout::LocationAtPlaceDescriptionRef  atNameDescription=description.GetAtNameDescription();
-    osmscout::LocationAtPlaceDescriptionRef  atAddressDescription=description.GetAtAddressDescription();
-    osmscout::LocationAtPlaceDescriptionRef  atPOIDescription=description.GetAtPOIDescription();
-    osmscout::LocationWayDescriptionRef      wayDescription=description.GetWayDescription();
-    osmscout::LocationCrossingDescriptionRef crossingDescription=description.GetCrossingDescription();
-
-    nlohmann::json resObject;
-
-    resObject["jsonrpc"]="2.0";
-    resObject["id"]= id;
-    size_t contentIdx=0;
-
-    if (coordDescription) {
-      resObject["result"]["content"][contentIdx]["type"]="text";
-      resObject["result"]["content"][contentIdx]["text"]=coordDescription->GetLocation().GetDisplayText();
-      resObject["result"]["structuredContent"]["coordinateDescription"]=coordDescription->GetLocation().GetDisplayText();
-      contentIdx++;
+    osmscout::CmdLineParseResult result=argParser.Parse();
+    if (result.HasError()) {
+      osmscout::log.Error() << "ERROR: " << result.GetErrorDescription();
+      osmscout::log.Info() << argParser.GetHelp();
     }
-    if (atNameDescription) {
-      resObject["result"]["content"][contentIdx]["type"]="text";
-      resObject["result"]["content"][contentIdx]["text"]=atNameDescription->GetPlace().GetDisplayString();
-      resObject["result"]["structuredContent"]["atNameDescription"]=atNameDescription->GetPlace().GetDisplayString();
-      //contentIdx++;
+    else if (args.help) {
+      osmscout::log.Info() << argParser.GetHelp();
     }
 
+    return result;
+  }
+
+  std::string FileContentToString(const std::filesystem::path& path)
+  {
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    std::string content{std::istreambuf_iterator(file), std::istreambuf_iterator<char>()};
+    file.close();
+
+    return content;
+  }
+
+  void HandleMessageInitialize(const Arguments& args,
+                               const nlohmann::json& reqObject,
+                               httplib::Response& res)
+  {
+    unsigned int id = reqObject["id"];
+    const std::string protocolVersion = reqObject["params"]["protocolVersion"];
+    const std::string responseFile=osmscout::AppendFileToDir(args.dataPath,"capabilities.json");
+
+    osmscout::log.Info() << "*** Message 'initialize' - id: " << id << " protocolVersion: " << protocolVersion;
+
+    nlohmann::json resObject=nlohmann::json::parse(FileContentToString(responseFile));
+
+    resObject.at("id")=id;
+
     res.set_content(resObject.dump(),"application/json");
 
     res.status=httplib::StatusCode::OK_200;
   }
-  else {
+
+  void HandleMessageInitialized(const Arguments& args,
+                                const nlohmann::json& /*reqObject*/,
+                                httplib::Response& res)
+  {
+    const std::string responseFile=osmscout::AppendFileToDir(args.dataPath,"initialized.json");
+
+    osmscout::log.Info() << "*** Message 'initialized'";
+
+    const nlohmann::json resObject=nlohmann::json::parse(FileContentToString(responseFile));
+
+    res.set_content(resObject.dump(),"application/json");
+
+    res.status=httplib::StatusCode::OK_200;
+  }
+
+  void HandleMessageToolsList(const Arguments& args,
+                              const nlohmann::json& reqObject,
+                              httplib::Response& res)
+  {
+    const std::string responseFile=osmscout::AppendFileToDir(args.dataPath,"tools.json");
+
+    unsigned int id = reqObject["id"];
+
+    osmscout::log.Info() << "*** Message 'tools/list' - id: " << id;
+
+    nlohmann::json resObject=nlohmann::json::parse(FileContentToString(responseFile));
+
+    resObject.at("id")=id;
+
+    res.set_content(resObject.dump(),"application/json");
+
+    res.status=httplib::StatusCode::OK_200;
+  }
+
+  void HandleMessageToolsCall(const nlohmann::json& reqObject,
+                              httplib::Response& res,
+                              const osmscout::LocationDescriptionServiceRef& locationDescriptionService)
+  {
+    unsigned int id=reqObject["id"];
+    const std::string tool=reqObject["params"]["name"];
+    osmscout::log.Info() << "*** Calling tool '" << tool << "'...";
+
+    if (tool=="version") {
+      nlohmann::json resObject;
+
+      resObject["jsonrpc"]="2.0";
+      resObject["id"]= id;
+      resObject["result"]["structuredContent"]["version"]="4711";
+
+      res.set_content(resObject.dump(),"application/json");
+
+      res.status=httplib::StatusCode::OK_200;
+    }
+    else if (tool=="locationDescription") {
+      const double latitude=reqObject["params"]["arguments"]["latitude"];
+      const double longitude=reqObject["params"]["arguments"]["longitude"];
+      osmscout::GeoCoord location(latitude,longitude);
+
+      osmscout::LocationDescription description;
+      locationDescriptionService->DescribeLocation(location,description);
+
+      osmscout::LocationCoordDescriptionRef    coordDescription=description.GetCoordDescription();
+      osmscout::LocationAtPlaceDescriptionRef  atNameDescription=description.GetAtNameDescription();
+      osmscout::LocationAtPlaceDescriptionRef  atAddressDescription=description.GetAtAddressDescription();
+      osmscout::LocationAtPlaceDescriptionRef  atPOIDescription=description.GetAtPOIDescription();
+      osmscout::LocationWayDescriptionRef      wayDescription=description.GetWayDescription();
+      osmscout::LocationCrossingDescriptionRef crossingDescription=description.GetCrossingDescription();
+
+      nlohmann::json resObject;
+
+      resObject["jsonrpc"]="2.0";
+      resObject["id"]= id;
+      size_t contentIdx=0;
+
+      if (coordDescription) {
+        resObject["result"]["content"][contentIdx]["type"]="text";
+        resObject["result"]["content"][contentIdx]["text"]=coordDescription->GetLocation().GetDisplayText();
+        resObject["result"]["structuredContent"]["coordinateDescription"]=coordDescription->GetLocation().GetDisplayText();
+        contentIdx++;
+      }
+      if (atNameDescription) {
+        resObject["result"]["content"][contentIdx]["type"]="text";
+        resObject["result"]["content"][contentIdx]["text"]=atNameDescription->GetPlace().GetDisplayString();
+        resObject["result"]["structuredContent"]["atNameDescription"]["location"]=atNameDescription->GetPlace().GetDisplayString();
+        resObject["result"]["structuredContent"]["atNameDescription"]["distanceInMeter"]=atNameDescription->GetDistance().AsMeter();
+        resObject["result"]["structuredContent"]["atNameDescription"]["bearing"]=atNameDescription->GetBearing().DisplayString();
+        //contentIdx++;
+      }
+
+      res.set_content(resObject.dump(),"application/json");
+
+      res.status=httplib::StatusCode::OK_200;
+    }
+    else {
+      nlohmann::json resObject;
+
+      resObject["jsonrpc"]="2.0";
+      resObject["id"]= id;
+      resObject["error"]["message"]="Unknown tool: invalid_tool_name";
+
+      res.set_content(resObject.dump(),"application/json");
+
+      res.status=httplib::StatusCode::OK_200;
+    }
+  }
+
+  void HandleMessagePing(const nlohmann::json& reqObject, httplib::Response& res)
+  {
+    unsigned int id = reqObject["id"];
+
+    osmscout::log.Info() << "*** Message 'ping' - id: " << id;
+
     nlohmann::json resObject;
 
     resObject["jsonrpc"]="2.0";
     resObject["id"]= id;
-    resObject["error"]["message"]="Unknown tool: invalid_tool_name";
+    resObject["result"]=nlohmann::json::object();
 
     res.set_content(resObject.dump(),"application/json");
 
     res.status=httplib::StatusCode::OK_200;
   }
-}
-
-void HandleMessagePing(const nlohmann::json& reqObject, httplib::Response& res)
-{
-  unsigned int id = reqObject["id"];
-
-  osmscout::log.Info() << "*** Message 'ping' - id: " << id;
-
-  nlohmann::json resObject;
-
-  resObject["jsonrpc"]="2.0";
-  resObject["id"]= id;
-  resObject["result"]=nlohmann::json::object();
-
-  res.set_content(resObject.dump(),"application/json");
-
-  res.status=httplib::StatusCode::OK_200;
 }
 
 int main(const int argc, char* argv[])
@@ -216,7 +253,7 @@ int main(const int argc, char* argv[])
     std::locale::global(std::locale(""));
   }
   catch (const std::runtime_error&) {
-    std::cerr << "ERROR: Cannot set locale" << std::endl;
+    osmscout::log.Error() << "ERROR: Cannot set locale";
   }
 
   Arguments args;
@@ -231,11 +268,13 @@ int main(const int argc, char* argv[])
     return 0;
   }
 
+  osmscout::log.Info() << "Opening database at '" << args.databaseDirectory << "'...";
+
   const osmscout::DatabaseParameter databaseParameter;
   osmscout::DatabaseRef             database(new osmscout::Database(databaseParameter));
 
   if (!database->Open(args.databaseDirectory)) {
-    std::cerr << "Cannot open db" << std::endl;
+    osmscout::log.Error() << "Cannot open db";
 
     return 1;
   }
@@ -315,13 +354,13 @@ int main(const int argc, char* argv[])
     const std::string method = reqObject["method"];
 
     if (method=="initialize") {
-      HandleMessageInitialize(reqObject,res);
+      HandleMessageInitialize(args,reqObject,res);
     }
     else if (method=="notifications/initialized") {
-      HandleMessageInitialized(reqObject,res);
+      HandleMessageInitialized(args,reqObject,res);
     }
     else if (method=="tools/list") {
-      HandleMessageToolsList(reqObject,res);
+      HandleMessageToolsList(args,reqObject,res);
     }
     else if (method=="tools/call") {
       HandleMessageToolsCall(reqObject,
@@ -338,8 +377,8 @@ int main(const int argc, char* argv[])
     }
   });
 
-  osmscout::log.Info() << "Starting server...";
-  server.listen("0.0.0.0", 8000);
+  osmscout::log.Info() << "Starting server on " << args.host << ":" << args.port << "...";
+  server.listen(args.host, args.port);
   osmscout::log.Info() << "Starting stopped.";
 
   return 0;

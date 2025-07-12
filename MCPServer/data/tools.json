@@ -57,9 +57,26 @@
               "description": "Description of the geolocation as a simple geo coordinate"
             },
             "atNameDescription": {
-              "type": "string",
+              "type": "object",
               "title": "Name Description",
-              "description": "Description of the geolocation using the nearest nameable object"
+              "description": "Description of the geolocation using the nearest nameable object",
+              "properties": {
+                "location": {
+                  "type": "string",
+                  "title": "Address of object",
+                  "description": "Address of the nearest nameable object"
+                },
+                "distanceInMeter": {
+                  "type": "number",
+                  "title": "Distance to Object",
+                  "description": "Distance to this nearest nameable object in meter"
+                },
+                "bearing": {
+                  "type": "string",
+                  "title": "Direction of Object",
+                  "description": "Direction of object in relation to coordinate"
+                }
+              }
             }
           }
         }

@@ -4,10 +4,13 @@ as is necessary to get it running in mcp-inspector.
 The server can also be used via mcpo to integrate it via the generated
 OpenAPI specification into Open-WebUI as a tool.
 
+PARAMETER:
+- See --help option regarding command line arguments
+- Default Port is 8000 ad can be changed via command line
+
 NOTES:
 - Parts of the protocol messages are outsourced into files and are only patched in code
 - The application must be called from teh repository root directory to find these files
-- Port is hardcoded 8000
 - mcpo call could be 'uvx mcpo --port 8888 --server-type streamable_http -- http://localhost:8000'
 - The return structure is simpler as libosmscout is able to offer. It misse necessary information (distance and direction)
 - Libosmscout could also return more information on location
