@@ -775,7 +775,7 @@ TYPES
 
   TYPE natural_volcano
     = NODE ("natural"=="volcano")
-      {Name, NameAlt}
+      {Name, NameAlt, Ele}
 
   TYPE natural_water
     = NODE AREA ("natural"=="water")
