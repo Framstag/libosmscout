@@ -242,10 +242,7 @@ namespace osmscout {
           auto lastNode=node;
 
           lastNode--;
-
-          RouteDescription::DescriptionRef lastDescription=lastNode->GetDescription(RouteDescription::WAY_NAME_DESC);
-          RouteDescription::NameDescriptionRef lastDesc=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastDescription);
-
+          RouteDescription::NameDescriptionRef lastDesc=lastNode->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
 
           if (lastDesc &&
               lastDesc->GetRef()==nameDesc->GetRef() &&
@@ -747,7 +744,7 @@ namespace osmscout {
   void RoutePostprocessor::InstructionPostprocessor::HandleRoundaboutNode(RouteDescription::Node& node)
   {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
-      RouteDescription::CrossingWaysDescriptionRef crossing=std::dynamic_pointer_cast<RouteDescription::CrossingWaysDescription>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
+      RouteDescription::CrossingWaysDescriptionRef crossing=node.GetDescription<RouteDescription::CrossingWaysDescription>(RouteDescription::CROSSING_WAYS_DESC);
 
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;
@@ -796,7 +793,7 @@ namespace osmscout {
     next++;
     while (next!=end && next->HasPathObject()) {
 
-      nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
+      nextName=next->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
 
       if (!postprocessor.IsMotorwayLink(*next)) {
         break;
@@ -874,8 +871,7 @@ namespace osmscout {
 
   std::optional<RouteDescription::DirectionDescription::Move> RoutePostprocessor::InstructionPostprocessor::DirectionFromLane(const RouteDescription::Node &node)
   {
-    RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=std::dynamic_pointer_cast<RouteDescription::SuggestedLaneDescription>(
-      node.GetDescription(RouteDescription::SUGGESTED_LANES_DESC));
+    RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=node.GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
 
     if (!suggestedLaneDesc) {
       return std::nullopt;
@@ -910,8 +906,7 @@ namespace osmscout {
       }
       return *directionOpt;
     } else {
-      if (auto directionDesc=std::dynamic_pointer_cast<RouteDescription::DirectionDescription>(
-            node.GetDescription(RouteDescription::DIRECTION_DESC));
+      if (auto directionDesc=node.GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
           directionDesc) {
 
         if (fromGeometry!=nullptr) {
@@ -934,8 +929,8 @@ namespace osmscout {
       return false;
     }
 
-    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+    lastName=lastNode->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
+    nextName=node->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
 
     if (!NameChanged(lastName, nextName)) {
       return false;
@@ -966,8 +961,8 @@ namespace osmscout {
       return false;
     }
 
-    lastName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-    nextName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+    lastName=lastNode->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
+    nextName=node->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
 
     bool directionFromGeometry=false;
     RouteDescription::DirectionDescription::Move direction = Direction(*lastNode, *node, &directionFromGeometry);
@@ -1042,10 +1037,10 @@ namespace osmscout {
         continue;
       }
 
-      originName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+      originName=lastNode->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
 
       if (node->HasPathObject()) {
-        targetName=std::dynamic_pointer_cast<RouteDescription::NameDescription>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+        targetName=node->GetDescription<RouteDescription::NameDescription>(RouteDescription::WAY_NAME_DESC);
       }
 
       if (postprocessor.IsMiniRoundabout(*node) &&
@@ -2053,7 +2048,7 @@ namespace osmscout {
 
   RouteDescription::LaneDescriptionRef RoutePostprocessor::SuggestedLanesPostprocessor::GetLaneDescription(const RouteDescription::Node &node) const
   {
-    return std::dynamic_pointer_cast<RouteDescription::LaneDescription>(node.GetDescription(RouteDescription::LANES_DESC));
+    return node.GetDescription<RouteDescription::LaneDescription>(RouteDescription::LANES_DESC);
   }
 
   bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const PostprocessorContext& postprocessor,

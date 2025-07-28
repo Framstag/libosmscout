@@ -547,19 +547,6 @@ namespace osmscout {
     return entry!=descriptionMap.end() && entry->second;
   }
 
-  RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
-  {
-    std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
-
-    entry=descriptionMap.find(name);
-
-    if (entry!=descriptionMap.end()) {
-      return entry->second;
-    }
-
-    return nullptr;
-  }
-
   void RouteDescription::Node::SetDistance(Distance distance)
   {
     this->distance=distance;

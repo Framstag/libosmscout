@@ -95,7 +95,7 @@ namespace osmscout {
             position.state != PositionAgent::Uninitialised &&
             position.state != PositionAgent::OffRoute) {
 
-          return std::dynamic_pointer_cast<Description>(position.routeNode->GetDescription(name));
+          return position.routeNode->GetDescription<Description>(name);
         }
         return nullptr;
       }

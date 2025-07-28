@@ -149,7 +149,7 @@ namespace osmscout {
     for (auto node=first;
          node!=last && callback.Continue();
          ++node) {
-      osmscout::RouteDescription::DescriptionRef                 desc;
+
       osmscout::RouteDescription::NameDescriptionRef             nameDescription;
       osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
       osmscout::RouteDescription::NameChangedDescriptionRef      nameChangedDescription;
@@ -170,96 +170,24 @@ namespace osmscout {
       osmscout::RouteDescription::POIAtRouteDescriptionRef       poiAtRouteDescription;
       osmscout::RouteDescription::ViaDescriptionRef              viaDescription;
 
-      desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
-      if (desc) {
-        nameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::DIRECTION_DESC);
-      if (desc) {
-        directionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DirectionDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-      if (desc) {
-        nameChangedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::NameChangedDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-      if (desc) {
-        crossingWaysDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::CrossingWaysDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
-      if (desc) {
-        startDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::StartDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
-      if (desc) {
-        targetDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TargetDescription>(desc);
-      }
-
-
-      desc=node->GetDescription(osmscout::RouteDescription::TURN_DESC);
-      if (desc) {
-        turnDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TurnDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
-      if (desc) {
-        roundaboutEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutEnterDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
-      if (desc) {
-        roundaboutLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::RoundaboutLeaveDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
-      if (desc) {
-        motorwayEnterDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayEnterDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
-      if (desc) {
-        motorwayChangeDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayChangeDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
-      if (desc) {
-        motorwayLeaveDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayLeaveDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
-      if (desc) {
-        motorwayJunctionDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MotorwayJunctionDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::CROSSING_DESTINATION_DESC);
-      if (desc) {
-        crossingDestinationDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::DestinationDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
-      if (desc) {
-        maxSpeedDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::MaxSpeedDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::WAY_TYPE_NAME_DESC);
-      if (desc) {
-        typeNameDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::TypeNameDescription>(desc);
-      }
-
-      desc=node->GetDescription(osmscout::RouteDescription::POI_AT_ROUTE_DESC);
-      if (desc) {
-        poiAtRouteDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::POIAtRouteDescription>(desc);
-      }
-
-        desc=node->GetDescription(osmscout::RouteDescription::NODE_VIA_DESC);
-        if (desc) {
-          viaDescription=std::dynamic_pointer_cast<osmscout::RouteDescription::ViaDescription>(desc);
-        }
+      nameDescription = node->GetDescription<osmscout::RouteDescription::NameDescription>(osmscout::RouteDescription::WAY_NAME_DESC);
+      directionDescription = node->GetDescription<osmscout::RouteDescription::DirectionDescription>(osmscout::RouteDescription::DIRECTION_DESC);
+      nameChangedDescription = node->GetDescription<osmscout::RouteDescription::NameChangedDescription>(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+      crossingWaysDescription = node->GetDescription<osmscout::RouteDescription::CrossingWaysDescription>(osmscout::RouteDescription::CROSSING_WAYS_DESC);
+      startDescription = node->GetDescription<osmscout::RouteDescription::StartDescription>(osmscout::RouteDescription::NODE_START_DESC);
+      targetDescription = node->GetDescription<osmscout::RouteDescription::TargetDescription>(osmscout::RouteDescription::NODE_TARGET_DESC);
+      turnDescription = node->GetDescription<osmscout::RouteDescription::TurnDescription>(osmscout::RouteDescription::TURN_DESC);
+      roundaboutEnterDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutEnterDescription>(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
+      roundaboutLeaveDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutLeaveDescription>(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
+      motorwayEnterDescription = node->GetDescription<osmscout::RouteDescription::MotorwayEnterDescription>(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
+      motorwayChangeDescription = node->GetDescription<osmscout::RouteDescription::MotorwayChangeDescription>(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
+      motorwayLeaveDescription = node->GetDescription<osmscout::RouteDescription::MotorwayLeaveDescription>(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
+      motorwayJunctionDescription = node->GetDescription<osmscout::RouteDescription::MotorwayJunctionDescription>(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
+      crossingDestinationDescription = node->GetDescription<osmscout::RouteDescription::DestinationDescription>(osmscout::RouteDescription::CROSSING_DESTINATION_DESC);
+      maxSpeedDescription = node->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
+      typeNameDescription = node->GetDescription<osmscout::RouteDescription::TypeNameDescription>(osmscout::RouteDescription::WAY_TYPE_NAME_DESC);
+      poiAtRouteDescription = node->GetDescription<osmscout::RouteDescription::POIAtRouteDescription>(osmscout::RouteDescription::POI_AT_ROUTE_DESC);
+      viaDescription = node->GetDescription<osmscout::RouteDescription::ViaDescription>(osmscout::RouteDescription::NODE_VIA_DESC);
         
       callback.BeforeNode(*node);
 

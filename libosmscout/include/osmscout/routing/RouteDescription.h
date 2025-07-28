@@ -817,7 +817,21 @@ namespace osmscout {
       }
 
       bool HasDescription(const char* name) const;
-      DescriptionRef GetDescription(const char* name) const;
+
+      template <class D>
+      requires std::is_base_of_v<Description, D>
+      std::shared_ptr<D> GetDescription(const char* name) const
+      {
+        std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
+
+        entry=descriptionMap.find(name);
+
+        if (entry!=descriptionMap.end()) {
+          return std::dynamic_pointer_cast<D>(entry->second);
+        }
+
+        return nullptr;
+      }
 
       void SetDistance(Distance distance);
       void SetTime(const Timestamp::duration &duration);
