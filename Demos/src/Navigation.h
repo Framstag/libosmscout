@@ -24,8 +24,8 @@ namespace osmscout {
 
   struct NodeDescription
   {
-    int         roundaboutExitNumber;
-    int         index;
+    int         roundaboutExitNumber{-1};
+    int         index{0};
     std::string instructions;
     Distance    distance;
     Duration    time;
@@ -106,19 +106,19 @@ namespace osmscout {
           RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
           RouteDescription::MotorwayJunctionDescriptionRef motorwayJunctionDescription;
 
-          nameDescription = waypoint->GetDescription<osmscout::RouteDescription::NameDescription>(osmscout::RouteDescription::WAY_NAME_DESC);
-          directionDescription = waypoint->GetDescription<osmscout::RouteDescription::DirectionDescription>(osmscout::RouteDescription::DIRECTION_DESC);
-          nameChangedDescription = waypoint->GetDescription<osmscout::RouteDescription::NameChangedDescription>(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-          crossingWaysDescription = waypoint->GetDescription<osmscout::RouteDescription::CrossingWaysDescription>(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-          startDescription = waypoint->GetDescription<osmscout::RouteDescription::StartDescription>(osmscout::RouteDescription::NODE_START_DESC);
-          targetDescription = waypoint->GetDescription<osmscout::RouteDescription::TargetDescription>(osmscout::RouteDescription::NODE_TARGET_DESC);
-          turnDescription = waypoint->GetDescription<osmscout::RouteDescription::TurnDescription>(osmscout::RouteDescription::TURN_DESC);
-          roundaboutEnterDescription = waypoint->GetDescription<osmscout::RouteDescription::RoundaboutEnterDescription>(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
-          roundaboutLeaveDescription = waypoint->GetDescription<osmscout::RouteDescription::RoundaboutLeaveDescription>(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
-          motorwayEnterDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayEnterDescription>(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
-          motorwayChangeDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayChangeDescription>(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
-          motorwayLeaveDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayLeaveDescription>(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
-          motorwayJunctionDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayJunctionDescription>(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
+          nameDescription = waypoint->GetDescription<osmscout::RouteDescription::NameDescription>();
+          directionDescription = waypoint->GetDescription<osmscout::RouteDescription::DirectionDescription>();
+          nameChangedDescription = waypoint->GetDescription<osmscout::RouteDescription::NameChangedDescription>();
+          crossingWaysDescription = waypoint->GetDescription<osmscout::RouteDescription::CrossingWaysDescription>();
+          startDescription = waypoint->GetDescription<osmscout::RouteDescription::StartDescription>();
+          targetDescription = waypoint->GetDescription<osmscout::RouteDescription::TargetDescription>();
+          turnDescription = waypoint->GetDescription<osmscout::RouteDescription::TurnDescription>();
+          roundaboutEnterDescription = waypoint->GetDescription<osmscout::RouteDescription::RoundaboutEnterDescription>();
+          roundaboutLeaveDescription = waypoint->GetDescription<osmscout::RouteDescription::RoundaboutLeaveDescription>();
+          motorwayEnterDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayEnterDescription>();
+          motorwayChangeDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayChangeDescription>();
+          motorwayLeaveDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayLeaveDescription>();
+          motorwayJunctionDescription = waypoint->GetDescription<osmscout::RouteDescription::MotorwayJunctionDescription>();
 
           if (crossingWaysDescription &&
               roundaboutCrossingCounter>0 &&

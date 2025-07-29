@@ -170,24 +170,24 @@ namespace osmscout {
       osmscout::RouteDescription::POIAtRouteDescriptionRef       poiAtRouteDescription;
       osmscout::RouteDescription::ViaDescriptionRef              viaDescription;
 
-      nameDescription = node->GetDescription<osmscout::RouteDescription::NameDescription>(osmscout::RouteDescription::WAY_NAME_DESC);
-      directionDescription = node->GetDescription<osmscout::RouteDescription::DirectionDescription>(osmscout::RouteDescription::DIRECTION_DESC);
-      nameChangedDescription = node->GetDescription<osmscout::RouteDescription::NameChangedDescription>(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-      crossingWaysDescription = node->GetDescription<osmscout::RouteDescription::CrossingWaysDescription>(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-      startDescription = node->GetDescription<osmscout::RouteDescription::StartDescription>(osmscout::RouteDescription::NODE_START_DESC);
-      targetDescription = node->GetDescription<osmscout::RouteDescription::TargetDescription>(osmscout::RouteDescription::NODE_TARGET_DESC);
-      turnDescription = node->GetDescription<osmscout::RouteDescription::TurnDescription>(osmscout::RouteDescription::TURN_DESC);
-      roundaboutEnterDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutEnterDescription>(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
-      roundaboutLeaveDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutLeaveDescription>(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
-      motorwayEnterDescription = node->GetDescription<osmscout::RouteDescription::MotorwayEnterDescription>(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
-      motorwayChangeDescription = node->GetDescription<osmscout::RouteDescription::MotorwayChangeDescription>(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
-      motorwayLeaveDescription = node->GetDescription<osmscout::RouteDescription::MotorwayLeaveDescription>(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
-      motorwayJunctionDescription = node->GetDescription<osmscout::RouteDescription::MotorwayJunctionDescription>(osmscout::RouteDescription::MOTORWAY_JUNCTION_DESC);
-      crossingDestinationDescription = node->GetDescription<osmscout::RouteDescription::DestinationDescription>(osmscout::RouteDescription::CROSSING_DESTINATION_DESC);
-      maxSpeedDescription = node->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
-      typeNameDescription = node->GetDescription<osmscout::RouteDescription::TypeNameDescription>(osmscout::RouteDescription::WAY_TYPE_NAME_DESC);
-      poiAtRouteDescription = node->GetDescription<osmscout::RouteDescription::POIAtRouteDescription>(osmscout::RouteDescription::POI_AT_ROUTE_DESC);
-      viaDescription = node->GetDescription<osmscout::RouteDescription::ViaDescription>(osmscout::RouteDescription::NODE_VIA_DESC);
+      nameDescription = node->GetDescription<osmscout::RouteDescription::NameDescription>();
+      directionDescription = node->GetDescription<osmscout::RouteDescription::DirectionDescription>();
+      nameChangedDescription = node->GetDescription<osmscout::RouteDescription::NameChangedDescription>();
+      crossingWaysDescription = node->GetDescription<osmscout::RouteDescription::CrossingWaysDescription>();
+      startDescription = node->GetDescription<osmscout::RouteDescription::StartDescription>();
+      targetDescription = node->GetDescription<osmscout::RouteDescription::TargetDescription>();
+      turnDescription = node->GetDescription<osmscout::RouteDescription::TurnDescription>();
+      roundaboutEnterDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutEnterDescription>();
+      roundaboutLeaveDescription = node->GetDescription<osmscout::RouteDescription::RoundaboutLeaveDescription>();
+      motorwayEnterDescription = node->GetDescription<osmscout::RouteDescription::MotorwayEnterDescription>();
+      motorwayChangeDescription = node->GetDescription<osmscout::RouteDescription::MotorwayChangeDescription>();
+      motorwayLeaveDescription = node->GetDescription<osmscout::RouteDescription::MotorwayLeaveDescription>();
+      motorwayJunctionDescription = node->GetDescription<osmscout::RouteDescription::MotorwayJunctionDescription>();
+      crossingDestinationDescription = node->GetDescription<osmscout::RouteDescription::DestinationDescription>();
+      maxSpeedDescription = node->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>();
+      typeNameDescription = node->GetDescription<osmscout::RouteDescription::TypeNameDescription>();
+      poiAtRouteDescription = node->GetDescription<osmscout::RouteDescription::POIAtRouteDescription>();
+      viaDescription = node->GetDescription<osmscout::RouteDescription::ViaDescription>();
         
       callback.BeforeNode(*node);
 

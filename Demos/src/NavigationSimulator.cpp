@@ -176,7 +176,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
   lastPosition=currentNode->GetLocation();
 
   {
-    osmscout::RouteDescription::MaxSpeedDescriptionRef maxSpeedPath=currentNode->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
+    osmscout::RouteDescription::MaxSpeedDescriptionRef maxSpeedPath=currentNode->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>();
 
     if (maxSpeedPath) {
       maxSpeed=maxSpeedPath->GetMaxSpeed();
@@ -190,7 +190,7 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
   ++nextNode;
 
   while (nextNode!=description.Nodes().end()) {
-    osmscout::RouteDescription::MaxSpeedDescriptionRef maxSpeedPath=currentNode->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>(osmscout::RouteDescription::WAY_MAXSPEED_DESC);
+    osmscout::RouteDescription::MaxSpeedDescriptionRef maxSpeedPath=currentNode->GetDescription<osmscout::RouteDescription::MaxSpeedDescription>();
 
     if (maxSpeedPath) {
       maxSpeed=maxSpeedPath->GetMaxSpeed();

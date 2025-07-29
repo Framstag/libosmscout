@@ -542,7 +542,7 @@ TEST_CASE("Describe simple junction")
     Postprocess(description, context);
 
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
 
     // should suggest the right lane
     REQUIRE(suggestedLanes);
@@ -553,11 +553,11 @@ TEST_CASE("Describe simple junction")
     // direction change is minor, it is evaluated as straight on
     // it is the problem of the test data, it doesn't include longer segment of target way
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // no turn description as there is no significant direction change
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 
   {
@@ -572,18 +572,18 @@ TEST_CASE("Describe simple junction")
 
     // should suggest left lane
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Unknown);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // no explicit turn when continue on the same way
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 }
 
@@ -640,7 +640,7 @@ TEST_CASE("Describe simple junction with lane turns")
     Postprocess(description, context);
 
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
 
     // should suggest the right lane
     REQUIRE(suggestedLanes);
@@ -649,12 +649,12 @@ TEST_CASE("Describe simple junction with lane turns")
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::slightlyRight);
 
     // explicit turn
-    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>(RouteDescription::TURN_DESC);
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
     REQUIRE(turnDesc);
     REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
@@ -671,18 +671,18 @@ TEST_CASE("Describe simple junction with lane turns")
 
     // should suggest the central lane
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Unknown);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // no explicit turn when continue on the same way
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 }
 
@@ -768,17 +768,17 @@ TEST_CASE("Describe slightly complex junction")
     Postprocess(description, context);
 
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 
   { // route is going from west on Cernokostelecka to north on Drevcicka
@@ -793,19 +793,19 @@ TEST_CASE("Describe slightly complex junction")
 
     // should suggest left lane, left turn
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::left);
 
     // explicit turn
-    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>(RouteDescription::TURN_DESC);
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
     REQUIRE(turnDesc);
     REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::left);
   }
@@ -821,17 +821,17 @@ TEST_CASE("Describe slightly complex junction")
 
     // both lanes are usable, we don't need suggestion as going through, but let's provide it
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 
   { // route is going from the east on Cernokostelecka to north on Drevcicka
@@ -845,18 +845,18 @@ TEST_CASE("Describe slightly complex junction")
 
     // should suggest right lane to the right
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::right);
 
-    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>(RouteDescription::TURN_DESC);
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
     REQUIRE(turnDesc);
     REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
@@ -871,18 +871,18 @@ TEST_CASE("Describe slightly complex junction")
     Postprocess(description, context);
 
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Right);
 
     ++nodeIt;
-    auto directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    auto directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::right);
 
-    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>(RouteDescription::TURN_DESC);
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
     REQUIRE(turnDesc);
     REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::right);
   }
@@ -899,34 +899,34 @@ TEST_CASE("Describe slightly complex junction")
 
     // should suggest left lane to the left
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
 
     ++nodeIt;
-    suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
 
-    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
 
     // continue straight, but explicit turn evaluated from the lanes
-    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>(RouteDescription::TURN_DESC);
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
     REQUIRE(turnDesc);
     REQUIRE(turnDesc->GetDirection()==RouteDescription::DirectionDescription::Move::left);
 
     ++nodeIt;
-    directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    directionDesc = nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::left);
     // there is just one possible exit from the way, it is expected that there is no need for explicit turn
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 }
 
@@ -1075,7 +1075,7 @@ TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
 
     // should suggest two lanes to the left
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     // TODO: improve lane evaluation on similar junctions
     // REQUIRE(suggestedLanes->GetFrom() == 0);
@@ -1144,7 +1144,7 @@ TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
 
     // should suggest right lane to the right
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 2);
     REQUIRE(suggestedLanes->GetTo() == 2);
@@ -1205,19 +1205,19 @@ TEST_CASE("Describe A3/A4 highway split")
 
     // should suggest right lane
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 2);
     REQUIRE(suggestedLanes->GetTo() == 2);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::SlightRight);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
 
     // explicit motorway change
-    auto motorwayChange = nodeIt->GetDescription<RouteDescription::MotorwayChangeDescription>(RouteDescription::MOTORWAY_CHANGE_DESC);
+    auto motorwayChange = nodeIt->GetDescription<RouteDescription::MotorwayChangeDescription>();
     REQUIRE(motorwayChange);
     REQUIRE(motorwayChange->GetFromDescription()->GetName() == "A3/A4");
     REQUIRE(motorwayChange->GetToDescription()->GetName() == "A4");
@@ -1236,18 +1236,18 @@ TEST_CASE("Describe A3/A4 highway split")
 
     // should suggest two left through lanes
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 1);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // continue straight, no explicit turn
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 }
 
@@ -1303,18 +1303,18 @@ TEST_CASE("Describe A3/A4 highway near Zurich")
 
     // should suggest left lane
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 0);
     REQUIRE(suggestedLanes->GetTo() == 0);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::SlightLeft);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // leave motorway (as there is no connection to A3 in mock data, it would be motorway change)
-    RouteDescription::MotorwayLeaveDescriptionRef motorwayLeaveDesc = nodeIt->GetDescription<RouteDescription::MotorwayLeaveDescription>(RouteDescription::MOTORWAY_LEAVE_DESC);
+    RouteDescription::MotorwayLeaveDescriptionRef motorwayLeaveDesc = nodeIt->GetDescription<RouteDescription::MotorwayLeaveDescription>();
     REQUIRE(motorwayLeaveDesc);
     REQUIRE(motorwayLeaveDesc->GetDirection() == RouteDescription::DirectionDescription::Move::slightlyLeft);
   }
@@ -1331,18 +1331,18 @@ TEST_CASE("Describe A3/A4 highway near Zurich")
 
     // should suggest two right lanes
     auto nodeIt = description.Nodes().begin();
-    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC);
+    auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
     REQUIRE(suggestedLanes->GetFrom() == 1);
     REQUIRE(suggestedLanes->GetTo() == 2);
     REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 
     ++nodeIt;
-    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=nodeIt->GetDescription<RouteDescription::DirectionDescription>();
     REQUIRE(directionDesc);
     REQUIRE(directionDesc->GetTurn()==RouteDescription::DirectionDescription::straightOn);
     // continue straight, no explicit turn
-    REQUIRE_FALSE(nodeIt->HasDescription(RouteDescription::TURN_DESC));
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 
 }
