@@ -136,39 +136,39 @@ namespace osmscout {
 
     bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
     {
-        if (node.HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::StartDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::TargetDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(RouteDescription::WAY_NAME_CHANGED_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::MotorwayChangeDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::RoundaboutEnterDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::MotorwayLeaveDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::TURN_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::TurnDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::MotorwayEnterDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::MotorwayChangeDescription>()) {
             return true;
         }
 
-        if (node.HasDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC)) {
+        if (node.HasDescription<osmscout::RouteDescription::MotorwayLeaveDescription>()) {
             return true;
         }
 
