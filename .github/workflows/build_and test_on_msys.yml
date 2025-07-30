@@ -14,7 +14,7 @@ on:
 jobs:
   build_gcc_cmake:
     name: gcc and cmake
-    runs-on: windows-2019
+    runs-on: windows-2025
     defaults:
       run:
         shell: msys2 {0}
@@ -46,7 +46,7 @@ jobs:
 
   build_gcc_meson:
     name: gcc and meson
-    runs-on: windows-2019
+    runs-on: windows-2025
     defaults:
       run:
         shell: msys2 {0}
