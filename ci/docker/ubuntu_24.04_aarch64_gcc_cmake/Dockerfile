@@ -59,7 +59,7 @@ RUN cd $SYSROOT/var/cache/apt/archives/ \
   && apt-get \
     $APTARGS \
     download -y \
-    libprotobuf-dev:arm64 libprotobuf32t64:arm64 zlib1g:arm64 zlib1g-dev:arm64 \
+    libprotobuf-dev:arm64 libprotobuf32t64:arm64 zlib1g:arm64 zlib1g-dev:arm64 catch2:arm64 \
   && find $SYSROOT/var/cache/apt/archives/ -name '*.deb' -exec /usr/bin/dpkg -x {} $SYSROOT \;
 
 RUN mkdir /work

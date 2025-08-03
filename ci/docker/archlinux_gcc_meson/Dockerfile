@@ -9,7 +9,8 @@ RUN pacman --noconfirm --needed -Sy \
           qt5-quickcontrols qt5-script qt5-sensors qt5-svg qt5-tools \
           qt5-translations qt5-multimedia \
           freeglut glu glew glm glfw-x11 libxcursor libxinerama \
-          marisa xorg-server-xvfb
+          marisa xorg-server-xvfb \
+          catch2
 
 RUN pacman --noconfirm --needed -S \
            meson ninja pkg-config \
