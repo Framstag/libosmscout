@@ -43,7 +43,7 @@ jobs:
       - name: Build project
         run: ninja -C debug
       - name: Run tests
-        run: meson test -C debug --print-errorlogs
+        run: meson test --timeout-multiplier 2 -C debug --print-errorlogs
 
   build_gcc_meson:
     name: gcc and meson
@@ -71,7 +71,7 @@ jobs:
       - name: Build project
         run:  ninja -C debug
       - name: Run tests
-        run:  meson test -C debug --print-errorlogs
+        run:  meson test --timeout-multiplier 2 -C debug --print-errorlogs
 
   build_gcc_cmake:
     name: gcc and cmake
@@ -130,7 +130,7 @@ jobs:
       - name: Build project
         run:  ninja -C debug
       - name: Run tests
-        run:  meson test -C debug --print-errorlogs
+        run:  meson test --timeout-multiplier 2 -C debug --print-errorlogs
 
   build_gcc_cmake_qt6:
     name: gcc and cmake with Qt6

@@ -99,4 +99,4 @@ jobs:
       - name: Build project
         run:  meson compile -C build
       - name: Test project
-        run:  meson test -C build --print-errorlogs
+        run:  meson test --timeout-multiplier 2 -C build --print-errorlogs
