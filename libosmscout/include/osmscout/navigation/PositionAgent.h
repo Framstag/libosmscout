@@ -88,14 +88,15 @@ namespace osmscout {
       ~PositionMessage() override = default;
 
       template<typename Description>
-      std::shared_ptr<Description> GetRouteDescription(const char* name) const
+      requires std::is_base_of_v<RouteDescription::Description, Description>
+      std::shared_ptr<Description> GetRouteDescription() const
       {
         if (route &&
             position.routeNode != route->Nodes().cend() &&
             position.state != PositionAgent::Uninitialised &&
             position.state != PositionAgent::OffRoute) {
 
-          return std::dynamic_pointer_cast<Description>(position.routeNode->GetDescription(name));
+          return position.routeNode->GetDescription<Description>();
         }
         return nullptr;
       }

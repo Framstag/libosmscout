@@ -64,8 +64,8 @@ std::list<NavigationMessageRef> LaneAgent::Process(const NavigationMessageRef& m
   auto positionMsg = dynamic_cast<osmscout::PositionAgent::PositionMessage *>(message.get());
   if (positionMsg){
 
-    Lane updated(positionMsg->GetRouteDescription<RouteDescription::LaneDescription>(RouteDescription::LANES_DESC),
-                 positionMsg->GetRouteDescription<RouteDescription::SuggestedLaneDescription>(RouteDescription::SUGGESTED_LANES_DESC));
+    Lane updated(positionMsg->GetRouteDescription<RouteDescription::LaneDescription>(),
+                 positionMsg->GetRouteDescription<RouteDescription::SuggestedLaneDescription>());
 
     if (lastLane != updated) {
       lastLane=updated;
