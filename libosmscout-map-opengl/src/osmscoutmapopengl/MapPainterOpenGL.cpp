@@ -247,6 +247,9 @@ namespace osmscout {
               if (fabs(p[i].GetLat() - p[j].GetLat()) < 0.000000001 &&
                   fabs(p[i].GetLon() - p[j].GetLon()) < 0.0000000001) {
                 p.erase(p.begin() + i);
+                if (i == p.size()) { // i was the last element
+                  break;
+                }
               }
             }
           }
