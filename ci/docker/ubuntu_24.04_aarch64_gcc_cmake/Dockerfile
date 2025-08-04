@@ -1,11 +1,11 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # disable interactive functions
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y \
     locales git make cmake pkg-config protobuf-compiler \
-    g++-aarch64-linux-gnu qemu-user \
+    g++-aarch64-linux-gnu qemu-user gpg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8
@@ -47,6 +47,10 @@ RUN cp \
 
 ENV APTARGS="-o Dir=$SYSROOT -o Debug::NoLocking=1 -o Acquire::AllowInsecureRepositories=1 --allow-unauthenticated"
 
+RUN mkdir -p $SYSROOT/etc/apt/trusted.gpg.d/
+RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 871920D1991BC93C
+RUN gpg --export 871920D1991BC93C | tee $SYSROOT/etc/apt/trusted.gpg.d/ports.ubuntu.com.gpg
+
 RUN apt-get \
   $APTARGS \
   update
@@ -55,7 +59,7 @@ RUN cd $SYSROOT/var/cache/apt/archives/ \
   && apt-get \
     $APTARGS \
     download -y \
-    libprotobuf-dev:arm64 libprotobuf23:arm64 zlib1g:arm64 zlib1g-dev:arm64 \
+    libprotobuf-dev:arm64 libprotobuf32t64:arm64 zlib1g:arm64 zlib1g-dev:arm64 catch2:arm64 \
   && find $SYSROOT/var/cache/apt/archives/ -name '*.deb' -exec /usr/bin/dpkg -x {} $SYSROOT \;
 
 RUN mkdir /work

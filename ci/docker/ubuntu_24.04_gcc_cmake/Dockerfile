@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
           doxygen \
           swig openjdk-8-jdk \
           locales \
+          catch2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8
