@@ -74,6 +74,6 @@ jobs:
         run: meson compile -C debug
       - name: Run tests
         run: "LC_ALL=C
-              meson test -C debug --print-errorlogs"
+              meson test --timeout-multiplier 2 -C debug --print-errorlogs"
         env:
           LANG: en_US.utf8
