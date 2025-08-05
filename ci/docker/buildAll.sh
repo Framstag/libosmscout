@@ -9,3 +9,4 @@ set -xe
 ./ubuntu_24.04_gcc_cmake/build.sh
 ./ubuntu_24.04_gcc_meson_qt6/build.sh
 ./ubuntu_24.04_aarch64_gcc_cmake/build.sh
+./ubuntu_24.04_webpage/build.sh
