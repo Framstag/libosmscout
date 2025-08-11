@@ -1297,13 +1297,13 @@ TYPES
   TYPE shop_building
     = AREA (EXISTS "shop" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt, OpeningHours, Phone, Website}
-      ADDRESS
+      ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop
     = NODE AREA (EXISTS "shop")
       {Name, NameAlt, OpeningHours, Phone, Website}
-      ADDRESS
+      ADDRESS POI
       GROUP shop, routingPOI
 
   //
