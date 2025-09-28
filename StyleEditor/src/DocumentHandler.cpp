@@ -149,13 +149,17 @@ void DocumentHandler::load()
     QFile file(m_filePath);
     if (file.open(QFile::ReadOnly)) {
       QByteArray data = file.readAll();
-      if (QTextDocument *doc = textDocument()) {
+      QTextDocument *doc = textDocument();
+      if (doc) {
+        // stop the analyzer before clearing
+        if (m_highlighter && m_styleAnalyserEnabled) {
+          m_highlighter->stopStyleAnalyser();
+        }
+
         doc->clear();
 
         if (!m_highlighter) {
           m_highlighter = new Highlighter(doc); // owned by doc (parent)
-          if (m_styleAnalyserEnabled)
-            m_highlighter->startStyleAnalyser();
         }
 
         m_highlighter->setStyle();
@@ -163,6 +167,11 @@ void DocumentHandler::load()
         QTextCodec *codec = QTextCodec::codecForUtfText(data);
         emit loaded(codec->toUnicode(data), Qt::PlainText);
         doc->setModified(false);
+
+        // start the analyzer as needed
+        if (m_styleAnalyserEnabled) {
+          m_highlighter->startStyleAnalyser();
+        }
       }
     }
   }
