@@ -13,7 +13,7 @@ on:
 
 jobs:
   sanitize_clang:
-    name: clang
+    name: clang address and undefined sanitizer
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -65,8 +65,55 @@ jobs:
           ASAN_OPTIONS: detect_leaks=0
         working-directory: build
 
+  sanitize_clang_memory:
+    name: clang memory sanitizer
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Update package list
+        run:  sudo apt-get update
+      - name: Install software-properties-common
+        run: sudo apt-get install software-properties-common
+      - name: Install clang compiler, cmake and ninja
+        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
+      - name: Install libosmscout dependencies
+        run: "sudo apt-get install -y
+              libxml2-dev
+              libprotobuf-dev protobuf-compiler
+              libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+              libmarisa-dev
+              xvfb"
+      - name: Configure build project
+        run: "cmake -B build
+              -DCMAKE_BUILD_TYPE=Debug
+              -DOSMSCOUT_BUILD_DOC_API=OFF
+              -DOSMSCOUT_BUILD_WEBPAGE=OFF
+              -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF
+              -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF
+              -DOSMSCOUT_BUILD_DEMOS=OFF
+              -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
+              -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+              -DOSMSCOUT_DEBUG_LABEL_LAYOUTER=ON
+              -DOSMSCOUT_DEBUG_GROUNDTILES=ON
+              -DOSMSCOUT_DEBUG_COASTLINE=ON
+              -DOSMSCOUT_DEBUG_TILING=ON
+              -DOSMSCOUT_DEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=\"-fsanitize=memory\"
+              -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=memory\"
+              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
+        env:
+          CXX: clang++
+          CC: clang
+      - name: Build project
+        run: cmake --build build
+      - name: Install project
+        run: sudo cmake --install build
+      - name: Run tests
+        run: ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest"
+        working-directory: build
+
   sanitize_gcc:
-    name: gcc
+    name: gcc address and undefined sanitizer
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
