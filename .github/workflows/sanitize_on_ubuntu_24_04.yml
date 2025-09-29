@@ -26,6 +26,7 @@ jobs:
         run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
+              catch2
               libxml2-dev
               libprotobuf-dev protobuf-compiler
               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
@@ -79,6 +80,7 @@ jobs:
         run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
+              catch2
               libxml2-dev
               libprotobuf-dev protobuf-compiler
               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
@@ -124,6 +126,7 @@ jobs:
         run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
+               catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler
                libmarisa-dev
