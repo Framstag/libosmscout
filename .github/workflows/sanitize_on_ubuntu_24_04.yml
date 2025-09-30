@@ -23,7 +23,7 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install clang compiler, cmake and ninja
-        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
+        run: sudo apt-get -y install clang-20 libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
               catch2
@@ -48,10 +48,9 @@ jobs:
               -DOSMSCOUT_DEBUG_TILING=ON
               -DOSMSCOUT_DEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
-              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
-        env:
-          CXX: clang++
-          CC: clang
+              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\"
+              -DCMAKE_C_COMPILER=/usr/bin/clang-20
+              -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20"
       - name: Build project
         run: cmake --build build
       - name: Install project
@@ -76,16 +75,41 @@ jobs:
         run:  sudo apt-get update
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
+
       - name: Install clang compiler, cmake and ninja
-        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config cmake ninja-build
-      - name: Install libosmscout dependencies
-        run: "sudo apt-get install -y
-              catch2
-              libxml2-dev
-              libprotobuf-dev protobuf-compiler
-              libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
-              libmarisa-dev
-              xvfb"
+        run: sudo apt-get -y install clang-20 libclang-20-dev ccache libtool pkg-config cmake ninja-build
+      - name: Build libc++ with memory instrumentation
+        run: "git clone --depth=1 https://github.com/llvm/llvm-project &&
+              cd llvm-project &&
+              mkdir build && cd build &&
+              cmake -GNinja -S ../runtimes
+                -DCMAKE_BUILD_TYPE=RelWithDebug
+                -DLLVM_ENABLE_RUNTIMES=\"libcxx;libcxxabi\"
+                -DLIBCXXABI_USE_LLVM_UNWINDER=off
+                -DCMAKE_C_COMPILER=clang
+                -DCMAKE_CXX_COMPILER=clang++
+                -DLLVM_USE_SANITIZER=MemoryWithOrigins
+                -DCMAKE_C_COMPILER=/usr/bin/clang-20
+                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20 &&
+              cmake --build . &&
+              sudo cmake --install . &&
+              sudo ldconfig -v > /dev/null"
+      - name: Build Catch2 with memory instrumentation
+        run: "git clone --depth=1 https://github.com/catchorg/Catch2.git &&
+              cd Catch2 &&
+              mkdir build && cd build &&
+              cmake -G Ninja -S ..
+                -DCMAKE_BUILD_TYPE=RelWithDebug
+                -DCMAKE_C_COMPILER=/usr/bin/clang-20
+                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20
+                -DCMAKE_PREFIX_PATH=/opt/libcxx-msan
+                -DCMAKE_CXX_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
+                -DCMAKE_EXE_LINKER_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
+                -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\" &&
+              cmake --build . &&
+              sudo cmake --install . &&
+              sudo ldconfig -v > /dev/null"
+      # we do not install optional dependencies as memory sanitizer require all libraries to be instrumented
       - name: Configure build project
         run: "cmake -B build
               -DCMAKE_BUILD_TYPE=Debug
@@ -100,12 +124,13 @@ jobs:
               -DOSMSCOUT_DEBUG_GROUNDTILES=ON
               -DOSMSCOUT_DEBUG_COASTLINE=ON
               -DOSMSCOUT_DEBUG_TILING=ON
-              -DOSMSCOUT_DEBUG_ROUTING=ON -DCMAKE_CXX_FLAGS=\"-fsanitize=memory\"
-              -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=memory\"
-              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
-        env:
-          CXX: clang++
-          CC: clang
+              -DOSMSCOUT_DEBUG_ROUTING=ON
+              -DCMAKE_PREFIX_PATH=/opt/libcxx-msan
+              -DCMAKE_CXX_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
+              -DCMAKE_EXE_LINKER_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
+              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\"
+              -DCMAKE_C_COMPILER=/usr/bin/clang-20
+              -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20"
       - name: Build project
         run: cmake --build build
       - name: Install project
@@ -149,10 +174,9 @@ jobs:
               -DOSMSCOUT_DEBUG_ROUTING=ON
               -DCMAKE_CXX_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
               -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address -fsanitize=undefined\"
-              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\""
-        env:
-          CXX: g++
-          CC: gcc
+              -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\"
+              -DCMAKE_C_COMPILER=/usr/bin/gcc
+              -DCMAKE_CXX_COMPILER=/usr/bin/g++"
       - name: Build project
         run: cmake --build build
       - name: Install project
