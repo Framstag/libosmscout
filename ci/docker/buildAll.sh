@@ -6,7 +6,8 @@ set -xe
 ./archlinux_gcc_cmake/build.sh
 ./archlinux_gcc_meson/build.sh
 ./debian_13_trixie_gcc_meson/build.sh
+./ubuntu_24.04_aarch64_gcc_cmake/build.sh
+./ubuntu_24.04_clang_msan_cmake/build.sh
 ./ubuntu_24.04_gcc_cmake/build.sh
 ./ubuntu_24.04_gcc_meson_qt6/build.sh
-./ubuntu_24.04_aarch64_gcc_cmake/build.sh
 ./ubuntu_24.04_webpage/build.sh
