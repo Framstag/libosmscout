@@ -83,7 +83,7 @@ signals:
 
   void positionEstimateInTunnelChanged();
 
-  /** Requesting computation of the new route when wehicle leave current route.
+  /** Requesting computation of the new route when vehicle leave current route.
    *
    * bearingAngle is in radians.
    */
