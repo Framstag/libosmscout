@@ -74,7 +74,7 @@ namespace osmscout {
 #endif
 
       if (!indexCache.GetEntry(offset,cacheRef)) {
-        IndexCache::CacheEntry cacheEntry(offset);
+        IndexCache::CacheEntry cacheEntry(offset, IndexCell());
 
         cacheRef=indexCache.SetEntry(cacheEntry);
 
