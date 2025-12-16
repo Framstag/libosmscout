@@ -48,9 +48,9 @@ jobs:
       - name: Collect libosmscout-map
         run: copy /Y build\libosmscout-map\Debug\*.dll dist
         shell: cmd
-      - name: Collect libosmscout-map-cairo
-        run: copy /Y build\libosmscout-map-cairo\Debug\*.dll dist
-        shell: cmd
+#      - name: Collect libosmscout-map-cairo
+#        run: copy /Y build\libosmscout-map-cairo\Debug\*.dll dist
+#        shell: cmd
       - name: Collect libosmscout-map-directx
         run: copy /Y build\libosmscout-map-directx\Debug\*.dll dist
         shell: cmd
