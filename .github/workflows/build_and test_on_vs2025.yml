@@ -1,4 +1,4 @@
-name: Visual Studio 2022
+name: Visual Studio 2025
 
 on:
   pull_request:
@@ -14,12 +14,12 @@ on:
 jobs:
   build_cmake:
     name: cmake
-    runs-on: windows-2022
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Copy vcpkg.json
-        run:  copy vcpkg_medium.json vcpkg.json
+        run:  copy vcpkg_minimum.json vcpkg.json
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
         # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
@@ -33,7 +33,7 @@ jobs:
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
-        run:  cmake -G "Visual Studio 17 2022" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
+        run:  cmake -G "Visual Studio 17 2022" -A x64 -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.26100.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
         working-directory: build
       - name: Build project
         run: cmake --build build
@@ -74,7 +74,7 @@ jobs:
 
   build_meson:
     name: meson
-    runs-on: windows-2022
+    runs-on: windows-2025
     defaults:
       run:
         shell: cmd
