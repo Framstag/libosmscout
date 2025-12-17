@@ -29,7 +29,7 @@ jobs:
         with:
           runVcpkgInstall: false
           vcpkgJsonGlob: '**/vcpkg.json'
-          vcpkgGitCommitId: 74e6536215718009aae747d86d84b78376bf9e09 # https://github.com/microsoft/vcpkg/releases/tag/2025.10.17
+          vcpkgGitCommitId: f051cc0be17c68e7333ee6aac08d7a1bd3ce9b16 # Source from 17.12.2025 (should be something like https://github.com/microsoft/vcpkg/releases/tag/2025.12.12)
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
