@@ -28,7 +28,7 @@ jobs:
         uses: lukka/run-vcpkg@v11.5
         with:
           runVcpkgInstall: false
-          vcpkgJsonGlob: '**/vcpkg.json'
+          vcpkgJsonGlob: 'vcpkg.json'
           vcpkgGitCommitId: 55fab67aea1027f7179ae6b5c54a5ba9091c16aa # Source from 29.12.2025 (should be something like https://github.com/microsoft/vcpkg/releases/tag/2025.12.12)
       - name: Create build directory
         run:  mkdir build
