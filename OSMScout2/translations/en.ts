@@ -359,7 +359,7 @@
 <context>
     <name>RoutingStep</name>
     <message>
-        <location filename="../qml6/custom/RoutingStep.qml" line="46"/>
+        <location filename="../qml5/custom/RoutingStep.qml" line="46"/>
         <source>Destinations: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -367,13 +367,13 @@
 <context>
     <name>Utils</name>
     <message>
-        <location filename="../qml6/custom/Utils.js" line="45"/>
+        <location filename="../qml5/custom/Utils.js" line="45"/>
         <source>meters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml6/custom/Utils.js" line="48"/>
-        <location filename="../qml6/custom/Utils.js" line="50"/>
+        <location filename="../qml5/custom/Utils.js" line="48"/>
+        <location filename="../qml5/custom/Utils.js" line="50"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
