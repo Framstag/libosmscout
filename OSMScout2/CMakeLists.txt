@@ -15,25 +15,54 @@ set(SOURCE_FILES
     src/Theme.cpp
     src/AppSettings.cpp
     src/OSMScout.cpp
+  )
 
+
+if(QT_VERSION_MAJOR EQUAL 5)
+  qt_add_resources(RESOURCE_FILES res5.qrc)
+  list(APPEND SOURCE_FILES
     # qml files in CMake sources make it visible in QtCreator
-    qml/AboutDialog.qml
-    qml/main.qml
-    qml/SearchDialog.qml
-    qml/MapDownloadDialog.qml
-    qml/VoiceDownloadDialog.qml
-    qml/custom/MapDialog.qml
-    qml/custom/ScrollIndicator.qml
-    qml/custom/LineEdit.qml
-    qml/custom/LocationSearch.qml
-    qml/custom/DialogActionButton.qml
-    qml/custom/MapButton.qml
-	qml/custom/RoutingStep.qml
-	qml/custom/RouteStepIcon.qml
-	qml/custom/LaneTurnIcon.qml
-	qml/custom/LaneTurns.qml
-	qml/custom/Utils.js
-	)
+    qml5/AboutDialog.qml
+    qml5/main.qml
+    qml5/SearchDialog.qml
+    qml5/MapDownloadDialog.qml
+    qml5/VoiceDownloadDialog.qml
+    qml5/custom/MapDialog.qml
+    qml5/custom/ScrollIndicator.qml
+    qml5/custom/LineEdit.qml
+    qml5/custom/LocationSearch.qml
+    qml5/custom/DialogActionButton.qml
+    qml5/custom/MapButton.qml
+    qml5/custom/RoutingStep.qml
+    qml5/custom/RouteStepIcon.qml
+    qml5/custom/LaneTurnIcon.qml
+    qml5/custom/LaneTurns.qml
+    qml5/custom/Utils.js
+  )
+elseif(QT_VERSION_MAJOR EQUAL 6)
+  qt_add_resources(RESOURCE_FILES res6.qrc)
+  list(APPEND SOURCE_FILES
+    # qml files in CMake sources make it visible in QtCreator
+    qml6/AboutDialog.qml
+    qml6/main.qml
+    qml6/SearchDialog.qml
+    qml6/MapDownloadDialog.qml
+    qml6/VoiceDownloadDialog.qml
+    qml6/custom/MapDialog.qml
+    qml6/custom/ScrollIndicator.qml
+    qml6/custom/LineEdit.qml
+    qml6/custom/LocationSearch.qml
+    qml6/custom/DialogActionButton.qml
+    qml6/custom/MapButton.qml
+    qml6/custom/RoutingStep.qml
+    qml6/custom/RouteStepIcon.qml
+    qml6/custom/LaneTurnIcon.qml
+    qml6/custom/LaneTurns.qml
+    qml6/custom/Utils.js
+  )
+else()
+  message(FATAL_ERROR "Missing Qt dependencies")
+endif()
 
 # XML files with translated phrases.
 # You can add new language translation just by adding new entry here, and run build.
@@ -62,8 +91,6 @@ set(TRANSLATION_SOURCE_FILES
 qt_create_translation(TRANSLATION_QM_FILES
 		${TRANSLATION_SOURCE_FILES}
 		${TRANSLATION_TS_FILES})
-
-qt_add_resources(RESOURCE_FILES res.qrc)
 
 set_property(SOURCE qrc_res.cpp PROPERTY SKIP_AUTOMOC ON)
 

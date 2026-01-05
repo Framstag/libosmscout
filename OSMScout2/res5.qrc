@@ -1,0 +1,78 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="qml/main.qml">qml5/main.qml</file>
+        <file alias="qml/AboutDialog.qml">qml5/AboutDialog.qml</file>
+        <file alias="qml/ObjectInfoDialog.qml">qml5/ObjectInfoDialog.qml</file>
+        <file alias="qml/SearchDialog.qml">qml5/SearchDialog.qml</file>
+        <file alias="qml/MapDownloadDialog.qml">qml5/MapDownloadDialog.qml</file>
+        <file alias="qml/VoiceDownloadDialog.qml">qml5/VoiceDownloadDialog.qml</file>
+
+        <file alias="qml/custom/DialogActionButton.qml">qml5/custom/DialogActionButton.qml</file>
+        <file alias="qml/custom/LineEdit.qml">qml5/custom/LineEdit.qml</file>
+        <file alias="qml/custom/LocationSearch.qml">qml5/custom/LocationSearch.qml</file>
+        <file alias="qml/custom/MapButton.qml">qml5/custom/MapButton.qml</file>
+        <file alias="qml/custom/MapDialog.qml">qml5/custom/MapDialog.qml</file>
+        <file alias="qml/custom/ScrollIndicator.qml">qml5/custom/ScrollIndicator.qml</file>
+        <file alias="qml/custom/RouteStepIcon.qml">qml5/custom/RouteStepIcon.qml</file>
+        <file alias="qml/custom/RoutingStep.qml">qml5/custom/RoutingStep.qml</file>
+        <file alias="qml/custom/LaneTurnIcon.qml">qml5/custom/LaneTurnIcon.qml</file>
+        <file alias="qml/custom/LaneTurns.qml">qml5/custom/LaneTurns.qml</file>
+        <file alias="qml/custom/Utils.js">qml5/custom/Utils.js</file>
+
+        <file>pics/DeleteText.svg</file>
+        <file>pics/Minus.svg</file>
+        <file>pics/Search.svg</file>
+        <file>pics/Route.svg</file>
+        <file>pics/Plus.svg</file>
+        <file>pics/Download.svg</file>
+
+        <file>pics/routestep/enter-motorway.svg</file>
+        <file>pics/routestep/continue-straight-on.svg</file>
+        <file>pics/routestep/drive-along.svg</file>
+        <file>pics/routestep/enter-roundabout.svg</file>
+        <file>pics/routestep/information.svg</file>
+        <file>pics/routestep/invalid-straight.svg</file>
+        <file>pics/routestep/leave-motorway.svg</file>
+        <file>pics/routestep/leave-motorway-left.svg</file>
+        <file>pics/routestep/leave-motorway-right.svg</file>
+        <file>pics/routestep/start.svg</file>
+        <file>pics/routestep/target.svg</file>
+        <file>pics/routestep/turn-left.svg</file>
+        <file>pics/routestep/turn-right.svg</file>
+        <file>pics/routestep/turn-sharp-left.svg</file>
+        <file>pics/routestep/turn-sharp-right.svg</file>
+        <file>pics/routestep/turn-slightly-left.svg</file>
+        <file>pics/routestep/turn-slightly-right.svg</file>
+        <file>pics/routestep/turn.svg</file>
+        <file>pics/routestep/leave-roundabout-1.svg</file>
+        <file>pics/routestep/leave-roundabout-1-lhd.svg</file>
+        <file>pics/routestep/leave-roundabout-2.svg</file>
+        <file>pics/routestep/leave-roundabout-2-lhd.svg</file>
+        <file>pics/routestep/leave-roundabout-3.svg</file>
+        <file>pics/routestep/leave-roundabout-3-lhd.svg</file>
+        <file>pics/routestep/leave-roundabout-4.svg</file>
+        <file>pics/routestep/leave-roundabout-4-lhd.svg</file>
+        <file>pics/routestep/enter-roundabout-lhd.svg</file>
+
+        <file>pics/laneturn/empty_outline.svg</file>
+        <file>pics/laneturn/empty.svg</file>
+        <file>pics/laneturn/left_outline.svg</file>
+        <file>pics/laneturn/left.svg</file>
+        <file>pics/laneturn/right_outline.svg</file>
+        <file>pics/laneturn/right.svg</file>
+        <file>pics/laneturn/through_left_outline.svg</file>
+        <file>pics/laneturn/through_left.svg</file>
+        <file>pics/laneturn/through_outline.svg</file>
+        <file>pics/laneturn/through_right_outline.svg</file>
+        <file>pics/laneturn/through_right.svg</file>
+        <file>pics/laneturn/through.svg</file>
+        <file>pics/laneturn/through_left-left.svg</file>
+        <file>pics/laneturn/through_left-through.svg</file>
+        <file>pics/laneturn/through_right-right.svg</file>
+        <file>pics/laneturn/through_right-through.svg</file>
+
+        <file>resources/online-tile-providers.json</file>
+        <file>resources/map-providers.json</file>
+        <file>resources/voice-providers.json</file>
+    </qresource>
+</RCC>

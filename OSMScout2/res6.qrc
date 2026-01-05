@@ -1,23 +1,23 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/main.qml</file>
-        <file>qml/AboutDialog.qml</file>
-        <file>qml/ObjectInfoDialog.qml</file>
-        <file>qml/SearchDialog.qml</file>
-        <file>qml/MapDownloadDialog.qml</file>
-        <file>qml/VoiceDownloadDialog.qml</file>
+        <file alias="qml/main.qml">qml6/main.qml</file>
+        <file alias="qml/AboutDialog.qml">qml6/AboutDialog.qml</file>
+        <file alias="qml/ObjectInfoDialog.qml">qml6/ObjectInfoDialog.qml</file>
+        <file alias="qml/SearchDialog.qml">qml6/SearchDialog.qml</file>
+        <file alias="qml/MapDownloadDialog.qml">qml6/MapDownloadDialog.qml</file>
+        <file alias="qml/VoiceDownloadDialog.qml">qml6/VoiceDownloadDialog.qml</file>
 
-        <file>qml/custom/DialogActionButton.qml</file>
-        <file>qml/custom/LineEdit.qml</file>
-        <file>qml/custom/LocationSearch.qml</file>
-        <file>qml/custom/MapButton.qml</file>
-        <file>qml/custom/MapDialog.qml</file>
-        <file>qml/custom/ScrollIndicator.qml</file>
-        <file>qml/custom/RouteStepIcon.qml</file>
-        <file>qml/custom/RoutingStep.qml</file>
-        <file>qml/custom/LaneTurnIcon.qml</file>
-        <file>qml/custom/LaneTurns.qml</file>
-        <file>qml/custom/Utils.js</file>
+        <file alias="qml/custom/DialogActionButton.qml">qml6/custom/DialogActionButton.qml</file>
+        <file alias="qml/custom/LineEdit.qml">qml6/custom/LineEdit.qml</file>
+        <file alias="qml/custom/LocationSearch.qml">qml6/custom/LocationSearch.qml</file>
+        <file alias="qml/custom/MapButton.qml">qml6/custom/MapButton.qml</file>
+        <file alias="qml/custom/MapDialog.qml">qml6/custom/MapDialog.qml</file>
+        <file alias="qml/custom/ScrollIndicator.qml">qml6/custom/ScrollIndicator.qml</file>
+        <file alias="qml/custom/RouteStepIcon.qml">qml6/custom/RouteStepIcon.qml</file>
+        <file alias="qml/custom/RoutingStep.qml">qml6/custom/RoutingStep.qml</file>
+        <file alias="qml/custom/LaneTurnIcon.qml">qml6/custom/LaneTurnIcon.qml</file>
+        <file alias="qml/custom/LaneTurns.qml">qml6/custom/LaneTurns.qml</file>
+        <file alias="qml/custom/Utils.js">qml6/custom/Utils.js</file>
 
         <file>pics/DeleteText.svg</file>
         <file>pics/Minus.svg</file>
