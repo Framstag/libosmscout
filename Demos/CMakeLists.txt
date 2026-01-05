@@ -184,31 +184,35 @@ if(${OSMSCOUT_BUILD_CLIENT_QT})
 	endif()
 
 	#---- RoutingParameters
-	osmscout_demo_project(NAME RoutingParameters
-		SOURCES
-			../OSMScout2/src/Theme.h ../OSMScout2/src/Theme.cpp
-			src/RoutingParameters.cpp
-			src/QtDemoApp.cpp
-			${RESOURCE_FILES}
+	if(QT_VERSION_MAJOR EQUAL 5)
+		osmscout_demo_project(NAME RoutingParameters
+			SOURCES
+				../OSMScout2/src/Theme.h ../OSMScout2/src/Theme.cpp
+				src/RoutingParameters.cpp
+				src/QtDemoApp.cpp
+				${RESOURCE_FILES}
 
-			# qml files in CMake sources make it visible in QtCreator
-			qml/RoutingParameters.qml
-			qml/PlaceInput.qml
+				# qml files in CMake sources make it visible in QtCreator
+				qml/RoutingParameters.qml
+				qml/PlaceInput.qml
 
-		INCLUDES ../OSMScout2/src/
-		TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets)
-	target_compile_definitions(RoutingParameters PRIVATE ${QtWidgets_DEFINITIONS})
-	set_target_properties(RoutingParameters PROPERTIES
-		UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
-	if(MSVC)
-		visual_studio_qt_helper("RoutingParameters")
-	endif()
-	if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
-		add_custom_command(TARGET RoutingParameters
-			POST_BUILD
-			COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
-			COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
-			)
+			INCLUDES ../OSMScout2/src/
+			TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt OSMScout::ClientQt Qt::Widgets)
+		target_compile_definitions(RoutingParameters PRIVATE ${QtWidgets_DEFINITIONS})
+		set_target_properties(RoutingParameters PROPERTIES
+			UNITY_BUILD OFF) # generated code for qt resources use static variables with the same name
+		if(MSVC)
+			visual_studio_qt_helper("RoutingParameters")
+		endif()
+		if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt::windeployqt)
+			add_custom_command(TARGET RoutingParameters
+				POST_BUILD
+				COMMAND set PATH=%PATH%$<SEMICOLON>${qt_install_prefix}/bin
+				COMMAND Qt::windeployqt --dir "${CMAKE_BINARY_DIR}/windeployqt" "$<TARGET_FILE_DIR:RoutingParameters>/$<TARGET_FILE_NAME:RoutingParameters>"
+				)
+		endif()
+	else ()
+		message(WARNING "Skip RoutingParameters demo, QML needs to be ported for Qt6 for this demo.")
 	endif()
 
 	#---- QtWidgetsDemoApp
