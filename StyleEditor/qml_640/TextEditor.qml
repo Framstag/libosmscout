@@ -1,13 +1,14 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Universal 2.2
 import DocumentHandler 1.0
 
 import "custom"
 
 Item {
     id: textEditor
-    property color baseColor: "#f2f2f2"
-    property color backgroundColor: "white"
+    property color backgroundColor: Universal.background
+    property color foregroundColor: Universal.foreground
     property alias source: document.source
     property MapControl map
 
@@ -138,7 +139,7 @@ Item {
         // line numbers
         Rectangle {
             id: lineColumn
-            color: baseColor
+            color: "#f2f2f2"
             anchors.left: parent.left
             width: units.gu(6)
             height: parent.height
@@ -195,8 +196,9 @@ Item {
                 rightPadding: units.gu(2)
                 topPadding: 0
                 bottomPadding: 0
+                color: "black"
                 background: Rectangle {
-                    color: backgroundColor
+                    color: "white"
                 }
 
                 // fickable height ratio is not accurate
@@ -281,7 +283,7 @@ Item {
         id: header
         width: parent.width
         height: units.gu(5)
-        color: baseColor
+        color: backgroundColor
 
         Row {
             id: fileRow
@@ -292,10 +294,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: saveButton.width
                 height: saveButton.height
-                //color: "transparent"
-                //border.width: units.dp(2)
-                //border.color: saveButton.enabled ? "red" : "transparent"
-                color: saveButton.enabled ? "#ffd" : "transparent"
+                color: "transparent"
                 ToolButton {
                     id: saveButton
                     height: units.gu(5)
@@ -384,12 +383,13 @@ Item {
                 width: searchText.width + units.gu(1)
                 height: units.gu(3.5)
                 border.width: searchText.focus ? units.dp(2) : units.dp(1)
-                border.color: "black"
-                color: searchText.focus ? "#ffd" : "white"
+                border.color: foregroundColor
+                color: backgroundColor
                 TextInput {
                     id: searchText
                     anchors.centerIn: parent
                     width: units.gu(15)
+                    color: foregroundColor
                     font.pixelSize: units.fs("small")
                     maximumLength: 255
                     clip: true
@@ -439,7 +439,7 @@ Item {
         width: parent.width
         height: units.gu(4)
         anchors.bottom: parent.bottom
-        color: baseColor
+        color: backgroundColor
 
         Text {
             id: statusText

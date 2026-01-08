@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Universal 2.2
 
 Dialog {
     id: dialog
@@ -29,6 +30,9 @@ Dialog {
       \qmlproperty string text
      */
     property string text
+
+    property color foregroundColor: Universal.foreground
+    property color backgroundColor: Universal.background
 
     property real minimumWidth: units.gu(40)
     property real minimumHeight: Math.max(160, units.gu(20))
@@ -71,6 +75,7 @@ Dialog {
                 horizontalAlignment: Text.AlignHCenter
                 text: dialog.text
                 font.pixelSize: units.fs("large")
+                color: foregroundColor
                 wrapMode: Text.Wrap
             }
 

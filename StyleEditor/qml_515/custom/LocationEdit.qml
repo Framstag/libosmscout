@@ -59,9 +59,11 @@ LineEdit {
         console.log("Change")
         if (location == null) {
             locationEdit.backgroundColor = locationEdit.defaultBackgroundColor
+            locationEdit.foregroundColor = locationEdit.defaultForegroundColor
         }
         else {
             locationEdit.backgroundColor = "#ddffdd"
+            locationEdit.foregroundColor = "black"
         }
     }
 
