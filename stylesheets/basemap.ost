@@ -1,0 +1,61 @@
+OST
+
+/*
+  Please see http://libosmscout.sourceforge.net/documentation/typedef/ for a detailed
+  description of the format of this file.
+
+  This import definition is used for preparation of simple, small world-overview basemap.
+*/
+TYPES
+  TYPE boundary_country
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE place_continent
+    = NODE AREA ("place"=="continent")
+      {Name, NameAlt}
+
+  TYPE place_millioncity
+    = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
+      {Name, NameAlt}
+
+  TYPE boundary_state
+    IGNORE
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="4") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="4")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_county
+    IGNORE
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="6") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="6")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_administrative
+    IGNORE
+    = WAY AREA ("boundary"=="administrative") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE place_ocean
+    = NODE ("place"=="ocean")
+      {Name, NameAlt}
+
+  TYPE place_sea
+    = NODE WAY RELATION ("place"=="sea")
+      {Name, NameAlt}
+
+  // TYPE natural_bay
+  //   = NODE WAY RELATION ("natural"=="bay")
+  //     {Name, NameAlt}
+
+  // TYPE natural_mountain_range
+  //   = WAY RELATION ("natural"=="mountain_range)
+  //     {Name, NameAlt}
+
+END
