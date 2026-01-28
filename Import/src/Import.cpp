@@ -150,6 +150,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << std::endl;
   std::cout << " --lowZoomOptMaxMag <number>          maximum level for low-zoom optimized data (default: " << parameter.GetOptimizationMaxMag() << ")" << std::endl;
   std::cout << " --lowZoomOptIndexMinMag <number>     minimum index level for low-zoom optimized data (default: " << parameter.GetOptimizationMinMag() << ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --areaNodeGridMag <number>           magnification level for area node index grid (default: " << parameter.GetAreaNodeGridMag() << ")" << std::endl;
 }
 
 osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
@@ -365,6 +367,8 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
 
   progress.Info("lowZoomOptMaxMag: {}",parameter.GetOptimizationMaxMag().Get());
   progress.Info("lowZoomOptIndexMinMag: {}",parameter.GetOptimizationMinMag().Get());
+
+  progress.Info("areaNodeGridMag: {}", parameter.GetAreaNodeGridMag().Get());
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -1004,6 +1008,19 @@ int main(int argc, char* argv[])
                                        i,
                                        lowZoomOptIndexMinMag)) {
         parameter.SetOptimizationMinMag(osmscout::MagnificationLevel(lowZoomOptIndexMinMag));
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--areaNodeGridMag")==0) {
+      size_t areaNodeGridMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       areaNodeGridMag)) {
+        parameter.SetAreaNodeGridMag(osmscout::MagnificationLevel(areaNodeGridMag));
       }
       else {
         parameterError=true;
