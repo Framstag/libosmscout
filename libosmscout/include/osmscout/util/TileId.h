@@ -337,6 +337,14 @@ namespace osmscout {
 
     bool Intersects(const TileIdBox& other) const;
 
+    bool Includes(const TileId &tile) const
+    {
+      return tile.GetX()>=minTile.GetX() &&
+             tile.GetX()<=maxTile.GetX() &&
+             tile.GetY()>=minTile.GetY() &&
+             tile.GetY()<=maxTile.GetY();
+    }
+
     std::string GetDisplayText() const
     {
       return std::string("["+minTile.GetDisplayText()+" - "+maxTile.GetDisplayText()+"]");
