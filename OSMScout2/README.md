@@ -37,9 +37,7 @@ Example for OSM Mapnik source:
     "id": "mapnik",
     "name": "OSM Mapnik",
     "servers": [
-      "https://a.tile.openstreetmap.org/%1/%2/%3.png",
-      "https://b.tile.openstreetmap.org/%1/%2/%3.png",
-      "https://c.tile.openstreetmap.org/%1/%2/%3.png"
+      "https://tile.openstreetmap.org/%1/%2/%3.png"
     ],
     "maximumZoomLevel": 19, 
     "copyright": "© OpenStreetMap contributors"
