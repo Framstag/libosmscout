@@ -5,6 +5,24 @@ OST
   description of the format of this file.
 
   This import definition is used for preparation of simple, small world-overview basemap.
+
+  Do not try to import planet extracts with OSMScout Import tool directly, it will take
+  tens of hours, instead use preprocessed files with osmium tool:
+
+    osmium tags-filter -t --progress --verbose planet-YYMMDD.osm.pbf \
+      wr/boundary=administrative \
+      nwr/place=continent \
+      nwr/place=city \
+      n/place=ocean \
+      n/place=country \
+      nwr/place=sea \
+      -o planet_extract.osm.pbf
+
+  To get smaller database with good loading performance consider using following Import options:
+    --waterIndexMinMag 4
+    --waterIndexMaxMag 4
+    --lowZoomOptMaxMag 4
+    --areaNodeGridMag 6
 */
 TYPES
   // Do not delete the following type, they are required by the GenLocation import step
