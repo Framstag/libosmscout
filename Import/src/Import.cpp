@@ -131,7 +131,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
   std::cout << std::endl;
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
-            << "                                      efault language (no :language) (default: #)" << std::endl;
+            << "                                      default language is # (no :language suffix)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << std::endl;
   std::cout << " --maxAdminLevel <number>             maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
