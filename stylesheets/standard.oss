@@ -339,6 +339,7 @@ MODULE "include/symbols"
 MODULE "include/route"
 MODULE "include/land_sea"
 
+MODULE "include/basemap"
 MODULE "include/place"
 
 MODULE "include/roads"

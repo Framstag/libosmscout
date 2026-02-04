@@ -4,6 +4,11 @@ CONST
   COLOR turnSymbolColor            = #ffffff80;
   COLOR turnSymbolOutlineColor     = #a0a0a080;
 
+  SYMBOL place_city
+    CIRCLE 0,0 0.8 {
+      AREA.BORDER {color: #888888; width: 0.5mm; }
+    }
+
   SYMBOL viaFerrataEasyCross
     POLYGON -0.5,-0.5 0.5,0.5 {
       AREA.BORDER { width: 0.1mm; color:  @viaFerrataEasyColor;  }
