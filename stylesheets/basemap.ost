@@ -25,9 +25,19 @@ OST
     --areaNodeGridMag 6
 */
 TYPES
+  // separate type for country boundaries for basemap rendering,
+  // as basemap contains just lines and ares optimized for low zoom levels,
+  // we may want to hide them on higher zoom levels
+  TYPE basemap_boundary_country
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
   // Do not delete the following type, they are required by the GenLocation import step
   // just add IGNORE when you want to skip them
   TYPE boundary_country
+    IGNORE // as we have basemap_boundary_country
     = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
       {Name, NameAlt, AdminLevel}
