@@ -23,6 +23,9 @@ OST
     --waterIndexMaxMag 4
     --lowZoomOptMaxMag 4
     --areaNodeGridMag 6
+
+  Also consider using "--langOrder en,#" option if target audience may prefer English names on overview map.
+  Also note that oceans usually do not have "local" names, so English name is better than point without (default) name.
 */
 TYPES
   // separate type for country boundaries for basemap rendering,
