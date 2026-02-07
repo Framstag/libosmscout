@@ -11,6 +11,7 @@ OST
 
     osmium tags-filter -t --progress --verbose planet-YYMMDD.osm.pbf \
       wr/boundary=administrative \
+      wr/natural=coastline \
       nwr/place=continent \
       nwr/place=city \
       n/place=ocean \
