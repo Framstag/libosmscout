@@ -284,3 +284,20 @@ TEST_CASE("GetDimensions() with rotation")
 
   REQUIRE(projection.GetDimensions().GetDisplayText()==expectedBox.GetDisplayText());
 }
+
+TEST_CASE("GetDimensions() when canvas coordinates are outside valid Mercator range")
+{
+  osmscout::MercatorProjection projection;
+  osmscout::GeoBox expectedBox(osmscout::GeoCoord(85.0511,-180.0),
+                               osmscout::GeoCoord(-85.0511,180.0));
+
+  projection.Set(osmscout::GeoCoord(0.0,0.0),
+                 defaultAngle,
+                 osmscout::Magnification(osmscout::Magnification::magWorld),
+                 defaultDpi,
+                 2000000, // very wide canvas
+                 2000000  // very high canvas
+                 );
+
+  REQUIRE(projection.GetDimensions().GetDisplayText()==expectedBox.GetDisplayText());
+}
