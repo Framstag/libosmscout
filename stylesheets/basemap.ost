@@ -1,0 +1,99 @@
+OST
+
+/*
+  Please see http://libosmscout.sourceforge.net/documentation/typedef/ for a detailed
+  description of the format of this file.
+
+  This import definition is used for preparation of simple, small world-overview basemap.
+
+  Do not try to import planet extracts with OSMScout Import tool directly, it will take
+  tens of hours, instead use preprocessed files with osmium tool:
+
+    osmium tags-filter -t --progress --verbose planet-YYMMDD.osm.pbf \
+      wr/boundary=administrative \
+      nwr/place=continent \
+      nwr/place=city \
+      n/place=ocean \
+      n/place=country \
+      nwr/place=sea \
+      -o planet_extract.osm.pbf
+
+  To get smaller database with good loading performance consider using following Import options:
+    --waterIndexMinMag 4
+    --waterIndexMaxMag 4
+    --lowZoomOptMaxMag 4
+    --areaNodeGridMag 6
+
+  Also consider using "--langOrder en,#" option if target audience may prefer English names on overview map.
+  Also note that oceans usually do not have "local" names, so English name is better than point without (default) name.
+*/
+TYPES
+  // separate type for country boundaries for basemap rendering,
+  // as basemap contains just lines and ares optimized for low zoom levels,
+  // we may want to hide them on higher zoom levels
+  TYPE basemap_boundary_country
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  // Do not delete the following type, they are required by the GenLocation import step
+  // just add IGNORE when you want to skip them
+  TYPE boundary_country
+    IGNORE // as we have basemap_boundary_country
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="2") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_state
+    IGNORE
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="4") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="4")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_county
+    IGNORE
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="6") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="6")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_administrative
+    IGNORE
+    = WAY AREA ("boundary"=="administrative") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  // significant places
+  TYPE place_continent
+    = NODE AREA ("place"=="continent")
+      {Name, NameAlt}
+
+  TYPE place_country
+    = NODE ("place"=="country")
+      {Name, NameAlt}
+
+  TYPE place_millioncity
+    = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
+      {Name, NameAlt}
+
+  TYPE place_ocean
+    = NODE ("place"=="ocean")
+      {Name, NameAlt}
+
+  TYPE place_sea
+    = NODE WAY RELATION ("place"=="sea")
+      {Name, NameAlt}
+
+  // TYPE natural_bay
+  //   = NODE WAY RELATION ("natural"=="bay")
+  //     {Name, NameAlt}
+
+  // TYPE natural_mountain_range
+  //   = WAY RELATION ("natural"=="mountain_range)
+  //     {Name, NameAlt}
+
+END

@@ -25,7 +25,9 @@ OSS
 
 CONST
   UINT labelPrioContinent           = 1;
-  UINT labelPrioIsland              = 2;
+  UINT labelPrioOcean               = 2;
+  UINT labelPrioIsland              = 3;
+  UINT labelPrioSea                 = 4;
   UINT labelPrioIslet               = 5;
   UINT labelPrioLocality            = 14;
 
@@ -47,22 +49,24 @@ CONST
   IF daylight {
     COLOR placeLabelColor           = #000000;
     COLOR placeEmphasizeColor       = #cccccc;
+    COLOR oceanLabelColor           = #000040;
+    COLOR seaLabelColor             = #6060b0;
   }
   ELSE {
     COLOR placeLabelColor           = #a0a0a0;
     COLOR placeEmphasizeColor       = #909090;
+    COLOR oceanLabelColor           = #000020;
+    COLOR seaLabelColor             = #000020;
   }
-
-  SYMBOL place_city
-    CIRCLE 0,0 0.8 {
-      AREA.BORDER {color: #888888; width: 0.5mm; }
-    }
 
 STYLE
   // Label priority
 
   // Other places
   [TYPE place_continent]       NODE.TEXT {label: IName; priority: @labelPrioContinent; size: 0; }
+  [TYPE place_ocean]           NODE.TEXT {label: IName; priority: @labelPrioOcean; size: 0; }
+  [TYPE place_sea]             NODE.TEXT {label: IName; priority: @labelPrioSea; size: 0; }
+
   // Archipelago
   [TYPE place_island]          NODE.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
   [TYPE place_island]          AREA.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
@@ -71,8 +75,6 @@ STYLE
   // Square
   [TYPE place_locality]        NODE.TEXT {label: IName; priority: @labelPrioLocality; size: 0; }
   // Polder
-  // Sea
-  // Ocean
 
   // Administratively declared places
   [TYPE place_country]         NODE.TEXT {label: IName; priority: @labelPrioCounty; size: 0; }
@@ -104,17 +106,21 @@ STYLE
   // Farm
   // Allotments
 
-
-  [MAG world-continent] {
-    [TYPE place_continent] NODE.TEXT {size: 1.6; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: alpha(@placeLabelColor, 0.5); }
+  [TYPE place_continent] {
+    [MAG world-continent] NODE.TEXT {size: 0.8; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: alpha(@placeLabelColor, 0.5); }
+    [MAG 2-continent] NODE.TEXT {size: 2.0; color: alpha(@placeLabelColor, 0.37); }
+    [MAG 3-continent] NODE.TEXT {size: 4.0; }
+    [MAG continent-continent] NODE.TEXT {size: 6.0; color: alpha(@placeLabelColor, 0.1); }
   }
 
-  [MAG 2-] {
-     [TYPE place_continent] NODE.TEXT {size: 4.0; color: alpha(@placeLabelColor, 0.37); }
-   }
+  [TYPE place_ocean] {
+    [MAG world-continent] NODE.TEXT { size: 0.6; color: alpha(@oceanLabelColor, 0.5); }
+    [MAG 2-continent] NODE.TEXT {size: 1.8; color: alpha(@oceanLabelColor, 0.35); }
+    [MAG 3-continent] NODE.TEXT {size: 4.0; color: alpha(@oceanLabelColor, 0.20); }
+  }
 
-  [MAG continent-] {
-    [TYPE place_continent] NODE.TEXT {size: 6.0; color: alpha(@placeLabelColor, 0.25); }
+  [TYPE place_sea] {
+    [MAG continent-stateOver] NODE.TEXT {size: 2.0; color: alpha(@seaLabelColor, 0.7); }
   }
 
   [MAG continent-stateOver] {
@@ -145,15 +151,17 @@ STYLE
 
   // City names are rendered up to city level and then disappear again
 
+  [MAG state-city] {
+    [TYPE place_millioncity] {
+       NODE.TEXT {style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; position: 2; size: 1.4; }
+       NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioMillionCity; }
+    }
+  }
+
   [MAG stateOver-city] {
-    [TYPE place_millioncity, place_halfmillioncity, place_bigcity] {
+    [TYPE place_halfmillioncity, place_bigcity] {
        NODE.TEXT {style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; position: 2; }
        NODE.ICON { symbol: place_city; position: 1; }
-    }
-
-    [TYPE place_millioncity] {
-      NODE.TEXT {size: 1.4;}
-      NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioMillionCity;}
     }
 
     [TYPE place_halfmillioncity] {
