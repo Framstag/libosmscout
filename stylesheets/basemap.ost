@@ -86,8 +86,9 @@ TYPES
       {Name, NameAlt}
 
   TYPE place_sea
-    = NODE WAY RELATION ("place"=="sea")
+    = NODE WAY AREA RELATION ("place"=="sea")
       {Name, NameAlt}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
   // TYPE natural_bay
   //   = NODE WAY RELATION ("natural"=="bay")
