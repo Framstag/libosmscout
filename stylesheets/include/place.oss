@@ -66,6 +66,7 @@ STYLE
   [TYPE place_continent]       NODE.TEXT {label: IName; priority: @labelPrioContinent; size: 0; }
   [TYPE place_ocean]           NODE.TEXT {label: IName; priority: @labelPrioOcean; size: 0; }
   [TYPE place_sea]             NODE.TEXT {label: IName; priority: @labelPrioSea; size: 0; }
+  [TYPE place_sea]             AREA.TEXT {label: IName; priority: @labelPrioSea; size: 0; }
 
   // Archipelago
   [TYPE place_island]          NODE.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
@@ -120,7 +121,12 @@ STYLE
   }
 
   [TYPE place_sea] {
-    [MAG continent-stateOver] NODE.TEXT {size: 2.0; color: alpha(@seaLabelColor, 0.7); }
+    [MAG continent-stateOver] {
+        NODE.TEXT { size: 2.0; color: alpha(@seaLabelColor, 0.7); }
+        AREA.TEXT { size: 2.0; color: alpha(@seaLabelColor, 0.7); autoSize: true; }
+        // area text is not rendered when there is no fill or border...
+        AREA.BORDER { color: alpha(@seaLabelColor, 0.2); width: 0.1mm; dash: 1,10; }
+    }
   }
 
   [MAG continent-stateOver] {
