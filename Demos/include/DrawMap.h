@@ -46,7 +46,7 @@ struct Arguments {
   bool renderContourLines=false;
   bool renderHillShading=false;
 
-  std::string map;
+  std::vector<std::string> maps;
   std::string style;
   std::string output;
   size_t      width=1920;
@@ -170,47 +170,34 @@ public:
               "contourlines",
               "Enable contour lines",
               false);
-    if (windowStyle == ARG_WS_WINDOW) {
-        AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                    args.width = value;
-                  }),
-                  "width",
-                  "Image width");
-        AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                    args.height = value;
-                  }),
-                  "height",
-                  "Image height");
-    }
+
+    AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                args.width = value;
+              }),
+              "width",
+              "Image width");
+    AddOption(osmscout::CmdLineSizeTOption([this](const size_t& value) {
+                args.height = value;
+              }),
+              "height",
+              "Image height");
     AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
                 args.srtmDirectory=value;
               }),
               "srtmDirectory",
               "SRTM data lookup directory",
               false);
-
-    AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
-                    args.map=value;
+    AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                    args.maps.push_back(value);
                   }),
-                  "databaseDir",
-                  "Database directory");
+                  "database",
+                  "Database directory (can be specified multiple times)");
+
     AddPositional(osmscout::CmdLineStringOption([this](const std::string& value) {
                     args.style=value;
                   }),
                   "stylesheet",
                   "Map stylesheet");
-    if (windowStyle == ARG_WS_CONSOLE) {
-        AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                        args.width=value;
-                      }),
-                      "width",
-                      "Image width");
-        AddPositional(osmscout::CmdLineSizeTOption([this](const size_t& value) {
-                        args.height=value;
-                      }),
-                      "height",
-                      "Image height");
-    }
     AddPositional(osmscout::CmdLineGeoCoordOption([this](const osmscout::GeoCoord& coord) {
                     args.center = coord;
                   }),
@@ -236,22 +223,25 @@ public:
   }
 };
 
+struct DatabaseEntry
+{
+  osmscout::DatabaseRef     database;
+  osmscout::StyleConfigRef  styleConfig;
+  osmscout::MapServiceRef   mapService;
+};
+
 class DrawMapDemo
 {
 public:
   DrawMapArgParser argParser;
 
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::DatabaseRef       database;
-  osmscout::MapServiceRef     mapService;
-  osmscout::StyleConfigRef    styleConfig;
+  std::vector<DatabaseEntry>  databases;
 
-  osmscout::BasemapDatabaseRef basemapDatabase;
-
-  osmscout::MercatorProjection  projection;
-  osmscout::MapParameter        drawParameter;
-  osmscout::AreaSearchParameter searchParameter;
-  osmscout::MapData             data;
+  osmscout::MercatorProjection    projection;
+  osmscout::MapParameter          drawParameter;
+  osmscout::AreaSearchParameter   searchParameter;
+  std::vector<osmscout::MapData>  data;
 
 public:
   DrawMapDemo(const std::string& appName,
@@ -285,19 +275,28 @@ public:
       databaseParameter.SetSRTMDirectory(args.srtmDirectory);
     }
 
-    database=std::make_shared<osmscout::Database>(databaseParameter);
-
-    if (!database->Open(args.map)) {
-      std::cerr << "Cannot open db" << std::endl;
+    if (args.maps.empty()) {
+      std::cerr << "No map database specified" << std::endl;
       return false;
     }
 
-    mapService=std::make_shared<osmscout::MapService>(database);
+    for (const auto& map : args.maps) {
+      auto database=std::make_shared<osmscout::Database>(databaseParameter);
 
-    styleConfig = std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
-    if (!styleConfig->Load(args.style)) {
-      std::cerr << "Cannot open style" << std::endl;
-      return false;
+      if (!database->Open(map)) {
+        std::cerr << "Cannot open db" << std::endl;
+        return false;
+      }
+
+      auto mapService=std::make_shared<osmscout::MapService>(database);
+
+      auto styleConfig = std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
+      if (!styleConfig->Load(args.style)) {
+        std::cerr << "Cannot open style" << std::endl;
+        return false;
+      }
+
+      databases.emplace_back(database, styleConfig, mapService);
     }
 
     if (!args.fontName.empty()) {
@@ -330,11 +329,22 @@ public:
                    args.height);
 
     if (!args.basemap.empty()) {
-      basemapDatabase=std::make_shared<osmscout::BasemapDatabase>(osmscout::BasemapDatabaseParameter{});
-      if (!basemapDatabase->Open(args.basemap)){
-        std::cerr << "Cannot open base map" << std::endl;
+      auto database=std::make_shared<osmscout::Database>(databaseParameter);
+
+      if (!database->Open(args.basemap, true)) {
+        std::cerr << "Cannot open db" << std::endl;
         return false;
       }
+
+      auto mapService=std::make_shared<osmscout::MapService>(database);
+
+      auto styleConfig = std::make_shared<osmscout::StyleConfig>(database->GetTypeConfig());
+      if (!styleConfig->Load(args.style)) {
+        std::cerr << "Cannot open style" << std::endl;
+        return false;
+      }
+
+      databases.emplace_back(database, styleConfig, mapService);
     }
 
     return true;
@@ -342,47 +352,31 @@ public:
 
   void LoadData()
   {
-    std::list<osmscout::TileRef> tiles;
+    data.clear();
+    for (const auto &[database, styleConfig, mapService] : databases) {
+      osmscout::MapData dbData;
+      std::list<osmscout::TileRef> tiles;
 
-    assert(database);
-    assert(database->IsOpen());
-    assert(mapService);
-    assert(styleConfig);
+      assert(database);
+      assert(database->IsOpen());
+      assert(mapService);
+      assert(styleConfig);
 
-    data.ClearDBData();
+      mapService->LookupTiles(projection,tiles);
+      mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
+      mapService->AddTileDataToMapData(tiles,dbData);
+      if (database->IsBasemap()) {
+        mapService->GetGroundTiles(projection,dbData.baseMapTiles);
+      } else {
+        mapService->GetGroundTiles(projection,dbData.groundTiles);
+      }
 
-    mapService->LookupTiles(projection,tiles);
-    mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
-    mapService->AddTileDataToMapData(tiles,data);
-    mapService->GetGroundTiles(projection,data.groundTiles);
+      if (GetArguments().renderHillShading) {
+        dbData.srtmTile=mapService->GetSRTMData(projection);
+      }
 
-    if (GetArguments().renderHillShading) {
-      data.srtmTile=mapService->GetSRTMData(projection);
+      data.emplace_back(std::move(dbData));
     }
-
-    LoadBaseMapTiles(data.baseMapTiles);
-  }
-
-  bool LoadBaseMapTiles(std::list<osmscout::GroundTile> &tiles)
-  {
-    if (!basemapDatabase) {
-      return true;
-    }
-
-    osmscout::WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
-    if (!waterIndex) {
-      return true;
-    }
-
-    osmscout::GeoBox boundingBox(projection.GetDimensions());
-    if (!waterIndex->GetRegions(boundingBox,
-                                projection.GetMagnification(),
-                                tiles)) {
-      std::cerr << "Failed to read base map tiles" << std::endl;
-      return false;
-    }
-
-    return true;
   }
 
   Arguments GetArguments() const
