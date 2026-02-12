@@ -86,7 +86,7 @@ namespace osmscout {
     std::map<LineStyle,std::string>   lineStyleNameMap;
 
     std::ostream                      stream;
-    TypeConfigRef                     typeConfig;
+    //TypeConfigRef                     typeConfig;
     std::mutex                        mutex;         //! Mutex for locking concurrent calls
 
     std::vector<std::string>          images;
@@ -140,20 +140,17 @@ namespace osmscout {
                   const MapParameter& parameter);
 
   protected:
-    void AfterPreprocessing(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data) override;
+    void AfterPreprocessingCallback(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const std::vector<MapData>& data) override;
 
-    void BeforeDrawing(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data) override;
+    void BeforeDrawingCallback(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::vector<MapData>& data) override;
 
-    void AfterDrawing(const StyleConfig& styleConfig,
-                      const Projection& projection,
-                      const MapParameter& parameter,
-                      const MapData& data) override;
+    void AfterDrawingCallback(const Projection& projection,
+                              const MapParameter& parameter,
+                              const std::vector<MapData>& data) override;
 
     bool HasIcon(const StyleConfig& styleConfig,
                  const Projection& projection,
@@ -190,7 +187,7 @@ namespace osmscout {
 
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data) override;
+                            const std::vector<MapData>& data) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
@@ -225,8 +222,7 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const WayData& data);
 
-    void DrawWay(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    void DrawWay(const Projection& projection,
                  const MapParameter& parameter,
                  const WayData& data) override;
 
@@ -240,13 +236,12 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterSVG(const StyleConfigRef& styleConfig);
+    MapPainterSVG();
     ~MapPainterSVG() override;
-
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  std::ostream& stream);
   };
 }

@@ -63,7 +63,7 @@ namespace osmscout {
 
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
-                    const MapData& data) override;
+                    const std::vector<MapData>& data) override;
 
     void DrawIcon(const IconStyle* style,
                   const Vertex2D& centerPos,
@@ -94,13 +94,13 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterNoOp(const StyleConfigRef& styleConfig);
+    MapPainterNoOp() = default;
 
     ~MapPainterNoOp() override = default;
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);
   };

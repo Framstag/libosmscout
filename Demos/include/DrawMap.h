@@ -228,6 +228,16 @@ struct DatabaseEntry
   osmscout::DatabaseRef     database;
   osmscout::StyleConfigRef  styleConfig;
   osmscout::MapServiceRef   mapService;
+
+  DatabaseEntry(const osmscout::DatabaseRef &database,
+                const osmscout::StyleConfigRef &styleConfig,
+                const osmscout::MapServiceRef &mapService)
+    : database(database),
+      styleConfig(styleConfig),
+      mapService(mapService)
+  {
+    // no code (explicit constructor for AppleClang 15)
+  }
 };
 
 class DrawMapDemo
@@ -361,6 +371,8 @@ public:
       assert(database->IsOpen());
       assert(mapService);
       assert(styleConfig);
+
+      dbData.styleConfig = styleConfig;
 
       mapService->LookupTiles(projection,tiles);
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);

@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <numeric>
 #include <osmscoutmap/MapPainterStatistics.h>
 
 #include <osmscout/TypeInfoSet.h>
@@ -40,18 +41,28 @@ namespace osmscout {
     return statisticList;
   }
 
-  void MapPainterStatistics::DumpMapPainterStatistics(const StyleConfig& styleConfig,
-                                                      const Projection& projection,
+  void MapPainterStatistics::DumpMapPainterStatistics(const Projection& projection,
                                                       const MapParameter& parameter,
-                                                      const MapData& data)
+                                                      const std::vector<MapData>& data)
   {
+    size_t nodeCount=0;
+    size_t poiNodeCount=0;
+    size_t wayCount=0;
+    size_t areaCount=0;
+    for (const auto& mapData : data) {
+      nodeCount+=mapData.nodes.size();
+      poiNodeCount+=mapData.poiNodes.size();
+      wayCount+=mapData.ways.size();
+      areaCount+=mapData.areas.size();
+    }
+
     if (parameter.IsDebugPerformance()) {
       log.Info()
         << "Data: "
-        << data.nodes.size()
-        << "+" << data.poiNodes.size()
-        << " " << data.ways.size()
-        << " " << data.areas.size();
+        << nodeCount
+        << "+" << poiNodeCount
+        << " " << wayCount
+        << " " << areaCount;
     }
 
     if (parameter.GetWarningCoordCountLimit()==0 &&
@@ -60,10 +71,14 @@ namespace osmscout {
       return;
     }
 
-    DumpDataStatistics(styleConfig,
-                       projection,
-                       parameter,
-                       data);
+    int i=0;
+    for (const auto& mapData : data) {
+      log.Info() << "Database " << i++ << ":";
+      DumpDataStatistics(*mapData.styleConfig,
+                         projection,
+                         parameter,
+                         mapData);
+    }
   }
 
   void MapPainterStatistics::DumpDataStatistics(const std::list<DataStatistic>& statistics)

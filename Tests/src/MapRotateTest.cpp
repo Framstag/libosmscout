@@ -786,17 +786,11 @@ static const double ringCoords[] = {
 class TestPainter : public osmscout::MapPainterNoOp
 {
 public:
-  explicit TestPainter(const osmscout::StyleConfigRef& styleConfig);
+  TestPainter() = default;
   bool IsVisibleAreaPublic(const osmscout::Projection& projection,
                            const std::vector<osmscout::Point>& nodes,
                            double pixelOffset);
 };
-
-TestPainter::TestPainter(const osmscout::StyleConfigRef& styleConfig):
-  MapPainterNoOp(styleConfig)
-{
-
-}
 
 bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
                                       const std::vector<osmscout::Point>& nodes,
@@ -810,7 +804,7 @@ bool TestPainter::IsVisibleAreaPublic(const osmscout::Projection& projection,
   // just initialise painter with current projection
   Draw(projection,
        osmscout::MapParameter{},
-       osmscout::MapData{},
+       std::vector<osmscout::MapData>{},
        osmscout::RenderSteps::Initialize,
        osmscout::RenderSteps::Initialize);
 
@@ -824,7 +818,7 @@ TEST_CASE()
   osmscout::TypeConfigRef typeConfig = std::make_shared<osmscout::TypeConfig>();
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
-  TestPainter painter(styleConfig);
+  TestPainter painter;
   std::vector<osmscout::Point> ring;
 
   for (int i=0;;i+=2){

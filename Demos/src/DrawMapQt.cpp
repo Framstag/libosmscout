@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
   drawDemo.LoadData();
 
-  osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig);
+  osmscout::MapPainterQt mapPainter;
 
   if (mapPainter.DrawMap(drawDemo.projection,
                          drawDemo.drawParameter,
