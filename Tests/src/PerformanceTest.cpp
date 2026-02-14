@@ -248,8 +248,7 @@ private:
   std::shared_ptr<osmscout::MapPainterCairo> cairoMapPainter;
 
 public:
-  PerformanceTestBackendCairo(size_t tileWidth, size_t tileHeight,
-                              const osmscout::StyleConfigRef& styleConfig)
+  PerformanceTestBackendCairo(size_t tileWidth, size_t tileHeight)
   {
     cairoSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
                                             int(tileWidth),
@@ -263,7 +262,7 @@ public:
       cairo_surface_destroy(cairoSurface);
       throw std::runtime_error("Cannot create cairo_t for image cairoSurface");
     }
-    cairoMapPainter = std::make_shared<osmscout::MapPainterCairo>(styleConfig);
+    cairoMapPainter = std::make_shared<osmscout::MapPainterCairo>();
   }
 
   ~PerformanceTestBackendCairo() override
@@ -277,9 +276,11 @@ public:
                const osmscout::MapData &data,
                osmscout::RenderSteps step) override
   {
+    std::vector<osmscout::MapData> dataList;
+    dataList.emplace_back(data);
     cairoMapPainter->DrawMap(projection,
                             drawParameter,
-                            data,
+                            dataList,
                             cairo,
                             step,
                             step);
@@ -295,12 +296,10 @@ private:
   QPainter qtPainter;
   osmscout::MapPainterQt qtMapPainter;
 public:
-  PerformanceTestBackendQt(int argc, char* argv[], int tileWidth, int tileHeight,
-                           const osmscout::StyleConfigRef& styleConfig):
+  PerformanceTestBackendQt(int argc, char* argv[], int tileWidth, int tileHeight):
     application(argc, argv, true),
     qtPixmap{tileWidth,tileHeight},
-    qtPainter{&qtPixmap},
-    qtMapPainter{styleConfig}
+    qtPainter{&qtPixmap}
   {
   }
 
@@ -309,9 +308,11 @@ public:
                        const osmscout::MapData &data,
                        osmscout::RenderSteps step) override
   {
+    std::vector<osmscout::MapData> dataList;
+    dataList.emplace_back(data);
     qtMapPainter.DrawMap(projection,
                          drawParameter,
-                         data,
+                         dataList,
                          &qtPainter,
                          step,
                          step);
@@ -327,11 +328,10 @@ private:
   osmscout::MapPainterAgg::AggPixelFormat* pf=nullptr;
   osmscout::MapPainterAgg aggMapPainter;
 public:
-  PerformanceTestBackendAGG(size_t tileWidth, size_t tileHeight, const osmscout::StyleConfigRef& styleConfig):
+  PerformanceTestBackendAGG(size_t tileWidth, size_t tileHeight):
     buffer{new unsigned char[tileWidth * tileHeight * 3]},
     rbuf{new agg::rendering_buffer(buffer, tileWidth, tileHeight, tileWidth * 3)},
-    pf{new osmscout::MapPainterAgg::AggPixelFormat(*rbuf)},
-    aggMapPainter{styleConfig}
+    pf{new osmscout::MapPainterAgg::AggPixelFormat(*rbuf)}
   {
   }
 
@@ -347,9 +347,11 @@ public:
                const osmscout::MapData &data,
                osmscout::RenderSteps step) override
   {
+    std::vector<osmscout::MapData> dataList;
+    dataList.emplace_back(data);
     aggMapPainter.DrawMap(projection,
                           drawParameter,
-                          data,
+                          dataList,
                           pf,
                           step,
                           step);
@@ -443,12 +445,10 @@ private:
   HBITMAP                  bitmap;
   RECT                     paintRect;
   std::shared_ptr<osmscout::MapPainterGDI> gdiMapPainter;
-  osmscout::StyleConfigRef styleConfig;
+
 public:
   PerformanceTestBackendGDI(size_t tileWidth,
-                            size_t tileHeight,
-                            const osmscout::StyleConfigRef& styleConfig):
-    styleConfig{styleConfig}
+                            size_t tileHeight)
   {
     // Create the offscreen renderer
     hdc=CreateCompatibleDC(nullptr);
@@ -471,7 +471,7 @@ public:
     paintRect.bottom=LONG(tileHeight);
 
     // This driver need a valid existing context
-    gdiMapPainter=std::make_shared<osmscout::MapPainterGDI>(styleConfig);
+    gdiMapPainter=std::make_shared<osmscout::MapPainterGDI>();
   }
 
   ~PerformanceTestBackendGDI() override
@@ -485,9 +485,11 @@ public:
                const osmscout::MapData &data,
                osmscout::RenderSteps step) override
   {
+    std::vector<osmscout::MapData> dataList;
+    dataList.emplace_back(data);
     gdiMapPainter->DrawMap(projection,
                            drawParameter,
-                           data,
+                           dataList,
                            hdc,
                            step,
                            step);
@@ -499,8 +501,7 @@ class PerformanceTestBackendNoOp: public PerformanceTestBackend {
 private:
   osmscout::MapPainterNoOp noOpMapPainter;
 public:
-  explicit PerformanceTestBackendNoOp(const osmscout::StyleConfigRef& styleConfig)
-  : noOpMapPainter(styleConfig)
+  explicit PerformanceTestBackendNoOp()
   {}
 
   void DrawMap(const osmscout::TileProjection &projection,
@@ -508,9 +509,11 @@ public:
                const osmscout::MapData &data,
                osmscout::RenderSteps step) override
   {
+    std::vector<osmscout::MapData> dataList;
+    dataList.emplace_back(data);
     noOpMapPainter.DrawMap(projection,
                            drawParameter,
-                           data,
+                           dataList,
                            step,
                            step);
   }
@@ -541,7 +544,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
     std::cout << "Using driver 'cairo'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
     try{
-      return std::make_shared<PerformanceTestBackendCairo>(args.TileWidth(),args.TileHeight(),styleConfig);
+      return std::make_shared<PerformanceTestBackendCairo>(args.TileWidth(),args.TileHeight());
     } catch (const std::runtime_error &e){
       std::cerr << e.what() << std::endl;
       return nullptr;
@@ -554,7 +557,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
   else if (args.driver=="Qt") {
     std::cout << "Using driver 'Qt'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPQT)
-    return std::make_shared<PerformanceTestBackendQt>(argc, argv, args.TileWidth(), args.TileHeight(), styleConfig);
+    return std::make_shared<PerformanceTestBackendQt>(argc, argv, args.TileWidth(), args.TileHeight());
 #else
     std::cerr << "Driver 'Qt' is not enabled" << std::endl;
     return nullptr;
@@ -562,7 +565,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
   } else if (args.driver == "agg") {
     std::cout << "Using driver 'Agg'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPAGG)
-    return std::make_shared<PerformanceTestBackendAGG>(args.TileWidth(), args.TileHeight(), styleConfig);
+    return std::make_shared<PerformanceTestBackendAGG>(args.TileWidth(), args.TileHeight());
 #else
     std::cerr << "Driver 'Agg' is not enabled" << std::endl;
     return nullptr;
@@ -585,8 +588,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
 #if defined(HAVE_LIB_OSMSCOUTMAPGDI)
     try {
       return std::make_shared<PerformanceTestBackendGDI>(args.TileWidth(),
-                                                         args.TileHeight(),
-                                                         styleConfig);
+                                                         args.TileHeight());
     }
     catch (std::runtime_error &e) {
       std::cerr << e.what() << std::endl;
@@ -599,7 +601,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
 }
   else if (args.driver=="noop") {
     std::cout << "Using driver 'noop'..." << std::endl;
-    return std::make_shared<PerformanceTestBackendNoOp>(styleConfig);
+    return std::make_shared<PerformanceTestBackendNoOp>();
   }
   else if (args.driver=="none") {
     std::cout << "Using driver 'none'..." << std::endl;
@@ -837,6 +839,7 @@ int main(int argc, char* argv[])
 
     for (const auto& tile : tileArea) {
       osmscout::MapData       data;
+      data.styleConfig=styleConfig;
       osmscout::OSMTileIdBox  tileBox(osmscout::OSMTileId(tile.GetX()-1,tile.GetY()-1),
                                       osmscout::OSMTileId(tile.GetX()+1,tile.GetY()+1));
 

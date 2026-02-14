@@ -146,10 +146,9 @@ namespace osmscout {
                     const osmscout::PathTextStyleRef& style,
                     const std::vector<CairoGlyph> &glyphs);
 
-    void BeforeDrawing(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data) override;
+    void BeforeDrawingCallback(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::vector<MapData>& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -173,7 +172,7 @@ namespace osmscout {
 
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
-                    const MapData& data) override;
+                    const std::vector<MapData>& data) override;
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
@@ -204,13 +203,13 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterCairo(const StyleConfigRef& styleConfig);
+    MapPainterCairo();
     ~MapPainterCairo() override;
 
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  cairo_t *draw,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);

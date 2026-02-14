@@ -186,7 +186,7 @@ public:
       }
     }
 
-    std::shared_ptr<PainterType> res=std::make_shared<PainterType>(styleConfig);
+    std::shared_ptr<PainterType> res=std::make_shared<PainterType>();
     painterHolder[std::this_thread::get_id()]=res;
 
     ThreadExitSignal().Connect(threadFinishSlot);

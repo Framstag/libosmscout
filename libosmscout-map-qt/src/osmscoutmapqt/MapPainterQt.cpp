@@ -40,10 +40,8 @@
 
 namespace osmscout {
 
-  MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig),
-    painter(nullptr),
-    labelLayouter(this)
+  MapPainterQt::MapPainterQt()
+  : labelLayouter(this)
   {
     sin.resize(360*10);
 
@@ -839,10 +837,9 @@ namespace osmscout {
                                               1)));
   }
 
-  void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const MapData& /*data*/)
+  void MapPainterQt::BeforeDrawingCallback(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const std::vector<MapData>& /*data*/)
   {
     labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, painter->window().width(), painter->window().height()));
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
@@ -899,7 +896,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& /*data*/)
+                                const std::vector<MapData>& /*data*/)
   {
     if (delegateLabelLayouter !=nullptr){
       return;
@@ -1024,8 +1021,11 @@ namespace osmscout {
     painter->setRenderHint(QPainter::TextAntialiasing);
 
     // TODO: remove this method and use standard Draw
-    MapData data;
-    data.baseMapTiles=groundTiles;
+    MapData mapData;
+    mapData.baseMapTiles=groundTiles;
+
+    std::vector<MapData> data;
+    data.emplace_back(std::move(mapData));
 
     Draw(projection,
          parameter,
@@ -1036,7 +1036,7 @@ namespace osmscout {
 
   bool MapPainterQt::DrawMap(const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& data,
+                             const std::vector<MapData>& data,
                              QPainter* painter,
                              RenderSteps startStep,
                              RenderSteps endStep)
@@ -1132,6 +1132,8 @@ namespace osmscout {
 
       for (size_t i=0;i<data.size(); i++){
         const MapData &d=*(data[i]);
+        std::vector<MapData> data;
+        data.push_back(d);
         MapPainterQt *painter = painters[i];
 
         // copy missing icons to last painter cache
@@ -1148,7 +1150,7 @@ namespace osmscout {
         }
         success &= painter->Draw(projection,
                                  parameter,
-                                 d,
+                                 data,
                                  (RenderSteps)step,
                                  (RenderSteps)step);
       }

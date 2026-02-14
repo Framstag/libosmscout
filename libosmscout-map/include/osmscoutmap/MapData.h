@@ -35,16 +35,20 @@
 
 #include <osmscout/system/Compiler.h>
 
+#include <osmscoutmap/StyleConfig.h>
+
 namespace osmscout {
 
   /**
    * \ingroup Renderer
    *
-   * This is the data structure holding all to be rendered data.
+   * This is the data structure holding all to be rendered data together with the style definition.
    */
   class OSMSCOUT_MAP_API MapData CLASS_FINAL
   {
   public:
+    StyleConfigRef        styleConfig;  //!< Style configuration for rendering (specific for database)
+
     std::vector<NodeRef>  nodes;        //!< Nodes as retrieved from db
     std::vector<AreaRef>  areas;        //!< Areas as retrieved from db
     std::vector<WayRef>   ways;         //!< Ways as retrieved from db

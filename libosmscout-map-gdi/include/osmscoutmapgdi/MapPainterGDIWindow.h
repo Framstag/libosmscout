@@ -41,7 +41,8 @@ namespace osmscout {
 
 		osmscout::Projection*     m_pProjection;
 		osmscout::MapParameter*   m_pParameter;
-		osmscout::MapData*        m_pData;
+
+	  const std::vector<osmscout::MapData>* m_pData;
 
     private:
         void LogStatus();
@@ -56,12 +57,11 @@ namespace osmscout {
 		/**
 		@brief Default constructor
 		@details Standard constructor with parameters for map display.
-		@param[in] styleConfig Configuration of the drawing styles
 		@param[in] position Position and size of the drawing window.
 		@param[in] hWndParent Handle of parent Windows or NULL for non-child window.
 		@param[in] hInstance hInstance of the program or NULL for default.
 		*/
-		MapPainterGDIWindow(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance = nullptr);
+		MapPainterGDIWindow(RECT position, HWND hWndParent, HINSTANCE hInstance = nullptr);
 
 		/**
 		@brief Default destructor
@@ -72,12 +72,11 @@ namespace osmscout {
 		/**
 		@brief Creates the drawing window
 		@details Creates the drawing window if it does not yet exist.
-		@param[in] styleConfig Configuration of the drawing styles
 		@param[in] position Position and size of the drawing window.
 		@param[in] hWndParent Handle of parent Windows or NULL for non-child window.
 		@param[in] hInstance hInstance of the program or NULL for default.
 		*/
-		bool CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent = nullptr, HINSTANCE hInstance = nullptr);
+		bool CreateCanvas(RECT position, HWND hWndParent = nullptr, HINSTANCE hInstance = nullptr);
 
 		/**
 		@brief Function for Windows message handling
@@ -104,9 +103,9 @@ namespace osmscout {
 		@details Sets references to the projection, map parameters and map data used for rendering.
 		@param[in] pProjection Pointer on map projection
 		@param[in] pParameter Pointer on map parameter
-		@param[in] pData Pointer on map data
+		@param[in] data pointer to vector of map data
 		*/
-		void Set(osmscout::Projection* pProjection, osmscout::MapParameter* pParameter, osmscout::MapData* pData);
+		void Set(osmscout::Projection* pProjection, osmscout::MapParameter* pParameter, const std::vector<osmscout::MapData> *data);
 
 		/**
 		@brief Move current window

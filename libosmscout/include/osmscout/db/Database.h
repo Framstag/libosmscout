@@ -300,50 +300,65 @@ namespace osmscout {
 
     std::string                     path;                     //!< Path to the directory containing all files
     bool                            isOpen=false;             //!< true, if opened
+    bool                            basemap=false;            //!< basemap database is optimized for world-wide data, it may contain just
+                                                              //!< a subset of the data files optimized for low-zoom map rendering
 
     TypeConfigRef                   typeConfig;               //!< Type config for the currently opened map
 
-    mutable BoundingBoxDataFileRef  boundingBoxDataFile;      //!< Cached access to the bounding box data file
-    mutable std::mutex              boundingBoxDataFileMutex; //!< Mutex to make lazy initialisation of node DataFile thread-safe
+    mutable BoundingBoxDataFileRef  boundingBoxDataFile;            //!< Cached access to the bounding box data file
+    mutable bool                    boundingBoxDataFileExists=true; //!< false when we know that the bounding box data file does not exist or fails to load, true otherwise
+    mutable std::mutex              boundingBoxDataFileMutex;       //!< Mutex to make lazy initialisation of node DataFile thread-safe
 
     mutable NodeDataFileRef         nodeDataFile;             //!< Cached access to the 'nodes.dat' file
+    mutable bool                    nodeDataFileExists=true;  //!< false when we know that the node data file does not exist or fails to load, true otherwise
     mutable std::mutex              nodeDataFileMutex;        //!< Mutex to make lazy initialisation of node DataFile thread-safe
 
     mutable AreaDataFileRef         areaDataFile;             //!< Cached access to the 'areas.dat' file
+    mutable bool                    areaDataFileExists=true;  //!< false when we know that the area data file does not exist or fails to load, true otherwise
     mutable std::mutex              areaDataFileMutex;        //!< Mutex to make lazy initialisation of area DataFile thread-safe
 
     mutable WayDataFileRef          wayDataFile;              //!< Cached access to the 'ways.dat' file
+    mutable bool                    wayDataFileExists=true;   //!< false when we know that the way data file does not exist or fails to load, true otherwise
     mutable std::mutex              wayDataFileMutex;         //!< Mutex to make lazy initialisation of way DataFile thread-safe
 
     mutable RouteDataFileRef        routeDataFile;            //!< Cached access to the 'routes.dat' file
+    mutable bool                    routeDataFileExists=true; //!< false when we know that the route data file does not exist or fails to load, true otherwise
     mutable std::mutex              routeDataFileMutex;       //!< Mutex to make lazy initialisation of route DataFile thread-safe
 
     mutable AreaNodeIndexRef        areaNodeIndex;            //!< Index of nodes by containing area
+    mutable bool                    areaNodeIndexExists=true; //!< false when we know that the area node index does not exist or fails to load, true otherwise
     mutable std::mutex              areaNodeIndexMutex;       //!< Mutex to make lazy initialisation of area node index thread-safe
 
     mutable AreaWayIndexRef         areaWayIndex;             //!< Index of areas by containing area
+    mutable bool                    areaWayIndexExists=true;  //!< false when we know that the area way index does not exist or fails to load, true otherwise
     mutable std::mutex              areaWayIndexMutex;        //!< Mutex to make lazy initialisation of area way index thread-safe
 
     mutable AreaRouteIndexRef       areaRouteIndex;           //!< Index of routes by containing area
+    mutable bool                    areaRouteIndexExists=true; //!< false when we know that the area route index does not exist or fails to load, true otherwise
     mutable std::mutex              areaRouteIndexMutex;      //!< Mutex to make lazy initialisation of area route index thread-safe
 
     mutable AreaAreaIndexRef        areaAreaIndex;            //!< Index of ways by containing area
+    mutable bool                    areaAreaIndexExists=true; //!< false when we know that the area area index does not exist or fails to load, true otherwise
     mutable std::mutex              areaAreaIndexMutex;       //!< Mutex to make lazy initialisation of area area index thread-safe
 
     mutable LocationIndexRef        locationIndex;            //!< Location-based index
+    mutable bool                    locationIndexExists=true; //!< false when we know that the location index does not exist or fails to load, true otherwise
     mutable std::mutex              locationIndexMutex;       //!< Mutex to make lazy initialisation of location index thread-safe
 
     mutable WaterIndexRef           waterIndex;               //!< Index of land/sea tiles
+    mutable bool                    waterIndexExists=true;    //!< false when we know that the water index does not exist or fails to load, true otherwise
     mutable std::mutex              waterIndexMutex;          //!< Mutex to make lazy initialisation of water index thread-safe
 
-    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom;     //!< Optimized data for low zoom situations
-    mutable std::mutex              optimizeAreasMutex;       //!< Mutex to make lazy initialisation of optimized areas index thread-safe
+    mutable OptimizeAreasLowZoomRef optimizeAreasLowZoom;             //!< Optimized data for low zoom situations
+    mutable bool                    optimizeAreasLowZoomExists=true;  //!< false when we know that the optimized areas index does not exist or fails to load, true otherwise
+    mutable std::mutex              optimizeAreasMutex;               //!< Mutex to make lazy initialisation of optimized areas index thread-safe
 
-    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;      //!< Optimized data for low zoom situations
-    mutable std::mutex              optimizeWaysMutex;        //!< Mutex to make lazy initialisation of optimized ways index thread-safe
+    mutable OptimizeWaysLowZoomRef  optimizeWaysLowZoom;              //!< Optimized data for low zoom situations
+    mutable bool                    optimizeWaysLowZoomExists=true;   //!< false when we know that the optimized ways index does not exist or fails to load, true otherwise
+    mutable std::mutex              optimizeWaysMutex;                //!< Mutex to make lazy initialisation of optimized ways index thread-safe
 
-    mutable SRTMRef                 srtmIndex;
-    mutable std::mutex              srtmIndexMutex;           //!< Mutex to make lazy initialisation of optimized ways index thread-safe
+    mutable SRTMRef                 srtmIndex;                //!< Digital elevation data (usually from "Shuttle Radar Topography Mission")
+    mutable std::mutex              srtmIndexMutex;           //!< Mutex to make lazy initialisation of SRTM thread-safe
 
   private:
     template<typename DataFile, typename OffsetsCol, typename DataCol>
@@ -374,9 +389,11 @@ namespace osmscout {
     static uint32_t GetDatabaseFileFormatVersion(const std::string& path);
     static uint32_t GetLibraryFileFormatVersion();
 
-    bool Open(const std::string& path);
+    bool Open(const std::string& path, bool basemap=false);
     bool IsOpen() const;
     void Close();
+
+    bool IsBasemap() const;
 
     std::string GetPath() const;
     TypeConfigRef GetTypeConfig() const;

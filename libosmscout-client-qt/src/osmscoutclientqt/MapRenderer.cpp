@@ -339,6 +339,7 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     osmscout::MapDataRef data = std::make_shared<osmscout::MapData>();
+    data->styleConfig=db->GetStyleConfig();
     db->GetMapService()->AddTileDataToMapData(tileList, *data);
 
     if (first) {
@@ -380,7 +381,8 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       addBasemapData(data);
     }
     addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig());
-    painter=std::make_unique<osmscout::MapPainterQt>(emptyStyleConfig);
+    painter=std::make_unique<osmscout::MapPainterQt>();
+    data->styleConfig=emptyStyleConfig;
     MapPainterQt *p = painter.get();
     batch.AddData(data, p);
   }

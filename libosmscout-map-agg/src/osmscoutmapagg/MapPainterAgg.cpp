@@ -38,9 +38,8 @@
 
 namespace osmscout {
 
-  MapPainterAgg::MapPainterAgg(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig),
-    labelLayouter(this)
+  MapPainterAgg::MapPainterAgg()
+  : labelLayouter(this)
   {
     // no code
   }
@@ -438,7 +437,7 @@ namespace osmscout {
 
   void MapPainterAgg::DrawLabels(const Projection& projection,
                                  const MapParameter& parameter,
-                                 const MapData& /*data*/)
+                                 const std::vector<MapData>& /*data*/)
   {
     labelLayouter.Layout(projection, parameter);
 
@@ -449,10 +448,9 @@ namespace osmscout {
     labelLayouter.Reset();
   }
 
-  void MapPainterAgg::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& /*data*/)
+  void MapPainterAgg::BeforeDrawingCallback(const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const std::vector<MapData>& /*data*/)
   {
     labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, projection.GetWidth(), projection.GetHeight()));
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
@@ -715,7 +713,7 @@ namespace osmscout {
 
   bool MapPainterAgg::DrawMap(const Projection& projection,
                               const MapParameter& parameter,
-                              const MapData& data,
+                              const std::vector<MapData>& data,
                               AggPixelFormat* pf,
                               RenderSteps startStep,
                               RenderSteps endStep)

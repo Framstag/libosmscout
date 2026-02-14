@@ -170,10 +170,9 @@ namespace osmscout {
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
-    void BeforeDrawing(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data) override;
+    void BeforeDrawingCallback(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::vector<MapData>& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -197,7 +196,7 @@ namespace osmscout {
 
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
-                    const MapData& data) override;
+                    const std::vector<MapData>& data) override;
 
     void DrawIcon(const IconStyle* style,
                   const Vertex2D& centerPos,
@@ -228,7 +227,7 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterQt(const StyleConfigRef& styleConfig);
+    MapPainterQt();
     ~MapPainterQt() override;
 
     void DrawGroundTiles(const Projection& projection,
@@ -238,7 +237,7 @@ namespace osmscout {
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  QPainter* painter,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);

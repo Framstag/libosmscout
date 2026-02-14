@@ -170,19 +170,17 @@ namespace osmscout {
         std::map<size_t,double>     averageCharWidth;   // Average char width for a font size
 
     public:
-        OSMSCOUT_API MapPainterIOS(const StyleConfigRef& styleConfig);
+        MapPainterIOS();
         virtual ~MapPainterIOS();
 
-        OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
-                                  const Projection& projection,
+        OSMSCOUT_API bool DrawMap(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data,
+                                  const std::vector<MapData>& data,
                                   CGContextRef paintCG);
 
-        OSMSCOUT_API bool DrawMap(const StyleConfig& styleConfig,
-                                  const Projection& projection,
+        OSMSCOUT_API bool DrawMap(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data,
+                                  const std::vector<MapData>& data,
                                   CGContextRef paintCG,
                                   RenderSteps startStep,
                                   RenderSteps endStep);
@@ -215,10 +213,9 @@ namespace osmscout {
                        const LabelData& label,
                        const IOSRunInLine& layout);
 
-        virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const MapData& data) override;
+        virtual void BeforeDrawingCallback(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const std::vector<MapData>& data) override;
 
         virtual void RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
@@ -235,7 +232,7 @@ namespace osmscout {
 
         virtual void DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data) override;
+                                const std::vector<MapData>& data) override;
 
         void DrawIcon(const IconStyle* style,
                       const Vertex2D& centerPos,

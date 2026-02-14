@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   CGContextConcatCTM(cg, flipVertical);
 
   if (cg) {
-    osmscout::MapPainterIOS painter(drawDemo.styleConfig);
+    osmscout::MapPainterIOS painter;
 
     drawDemo.drawParameter.SetFontName("GillSans");
     drawDemo.drawParameter.SetFontSize(3.0);
@@ -65,8 +65,7 @@ int main(int argc, char* argv[])
 
     drawDemo.LoadData();
 
-    if (painter.DrawMap(*drawDemo.styleConfig,
-                        drawDemo.projection,
+    if (painter.DrawMap(drawDemo.projection,
                         drawDemo.drawParameter,
                         drawDemo.data,
                         cg)) {

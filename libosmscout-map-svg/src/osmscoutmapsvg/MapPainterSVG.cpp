@@ -36,11 +36,10 @@ namespace osmscout {
 
   static const char* valueChar="0123456789abcdef";
 
-  MapPainterSVG::MapPainterSVG(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig),
-    labelLayouter(this),
-    stream(nullptr),
-    typeConfig(nullptr)
+  MapPainterSVG::MapPainterSVG()
+  : labelLayouter(this),
+    stream(nullptr)
+    //typeConfig(nullptr)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
 #if !defined(GLIB_VERSION_2_36)
@@ -429,10 +428,9 @@ namespace osmscout {
     stream << std::endl;
   }
 
-  void MapPainterSVG::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
-                                         const Projection& projection,
-                                         const MapParameter& /*parameter*/,
-                                         const MapData& /*data*/)
+  void MapPainterSVG::AfterPreprocessingCallback(const Projection& projection,
+                                                 const MapParameter& /*parameter*/,
+                                                 const std::vector<MapData>& data)
   {
     stream << "  <defs>" << std::endl;
     stream << "    <style type=\"text/css\">" << std::endl;
@@ -557,14 +555,19 @@ namespace osmscout {
       }
     };
 
-    // landFill
-    addFillStyle(styleConfig->GetLandFillStyle(projection));
-    // seaFill
-    addFillStyle(styleConfig->GetSeaFillStyle(projection));
-    //coastFill
-    addFillStyle(styleConfig->GetCoastFillStyle(projection));
-    // unknownFill
-    addFillStyle(styleConfig->GetUnknownFillStyle(projection));
+    if (!data.empty()) {
+      const auto &styleConfig = data.front().styleConfig;
+      // landFill
+      addFillStyle(styleConfig->GetLandFillStyle(projection));
+      // seaFill
+      addFillStyle(styleConfig->GetSeaFillStyle(projection));
+      //coastFill
+      addFillStyle(styleConfig->GetCoastFillStyle(projection));
+      // unknownFill
+      addFillStyle(styleConfig->GetUnknownFillStyle(projection));
+      // coastlineLine
+      addLineStyle(styleConfig->GetCoastlineLineStyle(projection));
+    }
     // fallbackSeaFill
     addFillStyle(this->seaFill);
     // fallbackLandFill
@@ -576,9 +579,6 @@ namespace osmscout {
     }
 
     stream << std::endl;
-
-    // coastlineLine
-    addLineStyle(styleConfig->GetCoastlineLineStyle(projection));
 
     for (const auto& way : GetWayData()) {
       addLineStyle(way.lineStyle);
@@ -597,10 +597,9 @@ namespace osmscout {
     stream << "</svg>" << std::endl;
   }
 
-  void MapPainterSVG::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                    const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const MapData& /*data*/)
+  void MapPainterSVG::BeforeDrawingCallback(const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const std::vector<MapData>& /*data*/)
   {
     stream << "  <g id=\"map\">" << std::endl;
 
@@ -611,10 +610,9 @@ namespace osmscout {
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
-  void MapPainterSVG::AfterDrawing(const StyleConfig& /*styleConfig*/,
-                    const Projection& /*projection*/,
-                    const MapParameter& /*parameter*/,
-                    const MapData& /*data*/)
+  void MapPainterSVG::AfterDrawingCallback(const Projection& /*projection*/,
+                                           const MapParameter& /*parameter*/,
+                                           const std::vector<MapData>& /*data*/)
   {
     stream << "  </g>" << std::endl;
   }
@@ -773,7 +771,7 @@ namespace osmscout {
 
   void MapPainterSVG::DrawLabels(const Projection& projection,
                                  const MapParameter& parameter,
-                                 const MapData& /*data*/)
+                                 const std::vector<MapData>& /*data*/)
   {
     // insert data of icons
     IconData(projection, parameter);
@@ -942,8 +940,7 @@ namespace osmscout {
     stream << "\" />" << std::endl;
   }
 
-  void MapPainterSVG::DrawWay(const StyleConfig& /*styleConfig*/,
-                              const Projection& projection,
+  void MapPainterSVG::DrawWay(const Projection& projection,
                               const MapParameter& parameter,
                               const WayData& data)
   {
@@ -1036,14 +1033,14 @@ namespace osmscout {
 
   bool MapPainterSVG::DrawMap(const Projection& projection,
                               const MapParameter& parameter,
-                              const MapData& data,
+                              const std::vector<MapData>& data,
                               std::ostream& stream)
   {
     std::lock_guard<std::mutex> guard(mutex);
     bool                        result=true;
 
     this->stream.rdbuf(stream.rdbuf());
-    typeConfig=styleConfig->GetTypeConfig();
+    //typeConfig=styleConfig->GetTypeConfig();
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());
 
