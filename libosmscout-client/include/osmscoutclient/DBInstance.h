@@ -50,28 +50,26 @@ class OSMSCOUT_CLIENT_API DBInstance
 public:
   const std::string                       path;
 
-  using MapPainterRef=std::shared_ptr<MapPainter>;
-
 private:
   mutable std::mutex                      mutex;
   std::chrono::steady_clock::time_point   lastUsage;      ///< last time when db was used, guarded by mutex
 
-  osmscout::GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
-  osmscout::DatabaseRef                   database;
+  GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
+  DatabaseRef                   database;
 
-  osmscout::LocationServiceRef            locationService;
-  osmscout::LocationDescriptionServiceRef locationDescriptionService;
-  osmscout::MapServiceRef                 mapService;
+  LocationServiceRef            locationService;
+  LocationDescriptionServiceRef locationDescriptionService;
+  MapServiceRef                 mapService;
 
-  osmscout::StyleConfigRef                styleConfig;
+  StyleConfigRef                styleConfig;
 
 public:
   DBInstance(const std::string &path,
-             const osmscout::DatabaseRef& database,
-             const osmscout::LocationServiceRef& locationService,
-             const osmscout::LocationDescriptionServiceRef& locationDescriptionService,
-             const osmscout::MapServiceRef& mapService,
-             const osmscout::StyleConfigRef& styleConfig):
+             const DatabaseRef& database,
+             const LocationServiceRef& locationService,
+             const LocationDescriptionServiceRef& locationDescriptionService,
+             const MapServiceRef& mapService,
+             const StyleConfigRef& styleConfig):
     path(path),
     database(database),
     locationService(locationService),

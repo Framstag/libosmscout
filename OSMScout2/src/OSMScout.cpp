@@ -83,6 +83,7 @@ struct Arguments {
   QString style="stylesheets/standard.oss";
   QString iconDirectory="icons";
   QString translationDir;
+  QString basemapDirectory;
 };
 
 int main(int argc, char* argv[])
@@ -148,6 +149,13 @@ int main(int argc, char* argv[])
                       "Directory with translation files (*.qm)",
                       false);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                      args.basemapDirectory=QString::fromStdString(value);
+                    }),
+                    "baseMap",
+                    "Directory with basemap",
+                    false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=QString::fromStdString(value);
                           }),
@@ -205,10 +213,8 @@ int main(int argc, char* argv[])
 
   QDir dir(args.databaseDirectory);
 
-  if (dir.cdUp()) {
-    if (dir.cd("world")) {
-      builder.WithBasemapLookupDirectory(dir.absolutePath());
-    }
+  if (!args.basemapDirectory.isEmpty()) {
+    builder.WithBasemapLookupDirectory(args.basemapDirectory);
   }
 
   QFileInfo stylesheetFile(args.style);

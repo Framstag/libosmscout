@@ -97,7 +97,7 @@ public:
 
   ~DBRenderJob() override = default;
 
-  void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+  void Run(const DBInstanceRef& basemapDatabase,
            const std::list<DBInstanceRef> &allDatabases,
            ReadLock &&locker) override;
 
@@ -106,7 +106,6 @@ public:
   };
 
 private:
-  bool addBasemapData(MapData &data) const;
   bool addOverlayObjectData(MapData &data, TypeConfigRef typeConfig) const;
 };
 

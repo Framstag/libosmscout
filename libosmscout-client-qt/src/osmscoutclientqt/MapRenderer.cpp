@@ -274,7 +274,7 @@ DBRenderJob::DBRenderJob(osmscout::MercatorProjection renderProjection,
 {
 }
 
-void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
                       const std::list<DBInstanceRef> &allDatabases,
                       ReadLock &&locker)
 {
@@ -283,6 +283,10 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     databases = allDatabases;
   }
   DBJob::Run(basemapDatabase,databases,std::move(locker));
+
+  if (renderBasemap && basemapDatabase) {
+    databases.push_back(basemapDatabase); // basemap database is a ordinary database after all
+  }
 
   success=true;
 
@@ -329,7 +333,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   batch.reserve(databases.size());
   size_t i=0;
   for (const auto &db: databases) {
-    bool first = (i == 0);
     bool last = (i == databases.size() - 1);
     bool skip = true;
     ++i;
@@ -345,13 +348,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     data.styleConfig=db->GetStyleConfig();
     db->GetMapService()->AddTileDataToMapData(tileList, data);
 
-    if (first) {
-      // draw base map
-      if (renderBasemap) {
-        skip &= !addBasemapData(data);
-      }
-    }
-
     if (last) {
       osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
       skip &= !addOverlayObjectData(data, typeConfig);
@@ -363,21 +359,15 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
     }
 
     if (drawParameter->GetRenderSeaLand()) {
-      db->GetMapService()->GetGroundTiles(renderProjection,
-                                          data.groundTiles);
+      if (db->GetDatabase()->IsBasemap()) {
+        db->GetMapService()->GetGroundTiles(renderProjection,
+                                            data.baseMapTiles);
+      } else {
+        db->GetMapService()->GetGroundTiles(renderProjection,
+                                            data.groundTiles);
+      }
     }
 
-    batch.emplace_back(std::move(data));
-  }
-
-  std::unique_ptr<MapPainterQt> painter;
-  if (databases.empty() && emptyStyleConfig) {
-    MapData data;
-    data.styleConfig=emptyStyleConfig;
-    if (renderBasemap) {
-      addBasemapData(data);
-    }
-    addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig());
     batch.emplace_back(std::move(data));
   }
 
@@ -387,21 +377,6 @@ void DBRenderJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
                                  batch,
                                  p);
   Close();
-}
-
-bool DBRenderJob::addBasemapData(MapData &data) const
-{
-  if (!basemapDatabase) {
-    return false;
-  }
-  WaterIndexRef waterIndex = basemapDatabase->GetWaterIndex();
-  if (!waterIndex) {
-    return false;
-  }
-  GeoBox boundingBox(renderProjection.GetDimensions());
-  return waterIndex->GetRegions(boundingBox,
-                                renderProjection.GetMagnification(),
-                                data.baseMapTiles);
 }
 
 bool DBRenderJob::addOverlayObjectData(MapData &data, TypeConfigRef typeConfig) const

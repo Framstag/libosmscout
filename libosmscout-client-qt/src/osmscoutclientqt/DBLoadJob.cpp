@@ -25,9 +25,11 @@ namespace osmscout {
 DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      unsigned long maximumAreaLevel,
                      bool lowZoomOptimization,
-                     bool closeOnFinish):
+                     bool closeOnFinish,
+                     bool loadBasemap):
   DBJob(),
   closeOnFinish(closeOnFinish),
+  loadBasemap(loadBasemap),
   breaker(std::make_shared<ThreadedBreaker>()),
   lookupProjection(lookupProjection)
 {
@@ -53,7 +55,7 @@ DBLoadJob::~DBLoadJob()
   //qDebug() << "destroyed:" << this << "in" << QThread::currentThread();
 }
 
-void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+void DBLoadJob::Run(const DBInstanceRef& basemapDatabase,
                     const std::list<DBInstanceRef> &databases,
                     ReadLock &&locker)
 {
@@ -70,6 +72,9 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       continue;
     }
     relevantDatabases.push_back(db);
+  }
+  if (loadBasemap && basemapDatabase) {
+    relevantDatabases.push_back(basemapDatabase);
   }
 
   DBJob::Run(basemapDatabase,relevantDatabases,std::move(locker));

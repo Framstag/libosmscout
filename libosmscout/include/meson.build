@@ -138,7 +138,6 @@ osmscoutHeader = [
             'osmscout/db/TypeDistributionDataFile.h',
             'osmscout/db/Database.h',
             'osmscout/db/DebugDatabase.h',
-            'osmscout/db/BasemapDatabase.h',
             'osmscout/db/LocationIndex.h',
             'osmscout/db/NodeDataFile.h',
             'osmscout/db/OptimizeAreasLowZoom.h',

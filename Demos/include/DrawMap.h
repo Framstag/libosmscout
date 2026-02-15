@@ -22,7 +22,6 @@
 */
 
 #include <osmscout/db/Database.h>
-#include <osmscout/db/BasemapDatabase.h>
 
 #include <osmscout/projection/MercatorProjection.h>
 

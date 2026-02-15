@@ -105,7 +105,6 @@ set(HEADER_FILES_DB
         include/osmscout/db/BoundingBoxDataFile.h
         include/osmscout/db/TypeDistributionDataFile.h
         include/osmscout/db/Database.h
-        include/osmscout/db/BasemapDatabase.h
         include/osmscout/db/DebugDatabase.h
         include/osmscout/db/LocationIndex.h
         include/osmscout/db/NodeDataFile.h
@@ -341,7 +340,6 @@ set(SOURCE_FILES
     src/osmscout/db/TypeDistributionDataFile.cpp
     src/osmscout/db/Database.cpp
     src/osmscout/db/DebugDatabase.cpp
-    src/osmscout/db/BasemapDatabase.cpp
     src/osmscout/db/LocationIndex.cpp
     src/osmscout/db/NodeDataFile.cpp
     src/osmscout/db/OptimizeAreasLowZoom.cpp
