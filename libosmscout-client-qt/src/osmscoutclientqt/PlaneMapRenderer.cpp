@@ -409,6 +409,7 @@ void PlaneMapRenderer::DrawMap()
                       loadJob->GetAllTiles(),
                       &drawParameter,
                       &p,
+                      &mapPainter,
                       overlayObjects,
                       dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ true);

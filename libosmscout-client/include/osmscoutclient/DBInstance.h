@@ -54,7 +54,6 @@ public:
 
 private:
   mutable std::mutex                      mutex;
-  std::map<std::thread::id,MapPainterRef> painterHolder;  ///< thread-local cache of map painters, guarded by mutex
   std::chrono::steady_clock::time_point   lastUsage;      ///< last time when db was used, guarded by mutex
 
   osmscout::GeoBox                        dbBox;          ///< cached db GeoBox, may be accessed without lock and lastUsage update
@@ -65,8 +64,6 @@ private:
   osmscout::MapServiceRef                 mapService;
 
   osmscout::StyleConfigRef                styleConfig;
-
-  Slot<std::thread::id>                   threadFinishSlot;
 
 public:
   DBInstance(const std::string &path,
@@ -80,8 +77,7 @@ public:
     locationService(locationService),
     locationDescriptionService(locationDescriptionService),
     mapService(mapService),
-    styleConfig(styleConfig),
-    threadFinishSlot(std::bind(&DBInstance::OnThreadFinished, this, std::placeholders::_1))
+    styleConfig(styleConfig)
   {
     if (!database->GetBoundingBox(dbBox)){
       osmscout::log.Error() << "Failed to get db GeoBox: " << path;
@@ -160,44 +156,7 @@ public:
                  std::unordered_map<std::string,bool> stylesheetFlags,
                  std::list<StyleError> &errors);
 
-  /**
-   * Get or create thread local MapPainter instance for this map
-   * \note To make sure that painter will not be destroyed during usage,
-   * read-lock for databases should be held.
-   * \warning It may be null when styleConfig is not loaded!
-   * @return pointer to thread-local painter
-   */
-  template<typename PainterType,
-           typename Requires = std::enable_if_t<std::is_base_of_v<MapPainter, PainterType>>>
-  std::shared_ptr<PainterType> GetPainter()
-  {
-    std::scoped_lock lock(mutex);
-    if (!styleConfig) {
-      return nullptr;
-    }
-
-    if (auto it=painterHolder.find(std::this_thread::get_id());
-        it!=painterHolder.end()){
-      if (std::shared_ptr<PainterType> res=std::dynamic_pointer_cast<PainterType>(it->second);
-          res!=nullptr) {
-        return res;
-      } else {
-        log.Warn() << "Thread changed painter type";
-      }
-    }
-
-    std::shared_ptr<PainterType> res=std::make_shared<PainterType>();
-    painterHolder[std::this_thread::get_id()]=res;
-
-    ThreadExitSignal().Connect(threadFinishSlot);
-
-    return res;
-  }
-
   void Close();
-
-private:
-  void OnThreadFinished(const std::thread::id &id);
 };
 
 using DBInstanceRef = std::shared_ptr<DBInstance>;

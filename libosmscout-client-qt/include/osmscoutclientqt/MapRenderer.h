@@ -23,6 +23,8 @@
 
 #include <osmscoutmap/DataTileCache.h>
 
+#include <osmscoutmapqt/MapPainterQt.h>
+
 #include <osmscoutclient/DBThread.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
@@ -72,7 +74,8 @@ private:
   osmscout::MercatorProjection renderProjection;
   QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles;
   osmscout::MapParameter *drawParameter;
-  QPainter *p;
+  QPainter *p; // not owned
+  MapPainterQt *mapPainter; // not owned
   bool success;
   bool drawCanvasBackground;
   bool renderBasemap;
@@ -85,6 +88,7 @@ public:
               QMap<QString,QMap<osmscout::TileKey,osmscout::TileRef>> tiles,
               osmscout::MapParameter *drawParameter,
               QPainter *p,
+              MapPainterQt *mapPainter,
               std::vector<OverlayObjectRef> overlayObjects,
               StyleConfigRef emptyStyleConfig,
               bool drawCanvasBackground=true,
@@ -102,8 +106,8 @@ public:
   };
 
 private:
-  bool addBasemapData(MapDataRef data) const;
-  bool addOverlayObjectData(MapDataRef data, TypeConfigRef typeConfig) const;
+  bool addBasemapData(MapData &data) const;
+  bool addOverlayObjectData(MapData &data, TypeConfigRef typeConfig) const;
 };
 
 /**
@@ -113,9 +117,10 @@ class OSMSCOUT_CLIENT_QT_API MapRenderer : public QObject {
   Q_OBJECT
 
 protected:
-  QThread     *thread;
-  SettingsRef settings;
-  DBThreadRef dbThread;
+  QThread      *thread;
+  SettingsRef  settings;
+  DBThreadRef  dbThread;
+  MapPainterQt mapPainter;
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0) /* For compatibility with QT 5.6 */
   QMutex          lock{QMutex::Recursive};

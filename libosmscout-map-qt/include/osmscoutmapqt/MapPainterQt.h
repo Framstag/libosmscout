@@ -28,7 +28,6 @@
 
 #include <osmscoutmapqt/MapQtImportExport.h>
 
-#include <osmscoutmap/BatchMapPainter.h>
 #include <osmscoutmap/MapPainter.h>
 
 #include <QtGui/QTextLayout>
@@ -243,24 +242,6 @@ namespace osmscout {
                  RenderSteps endStep=RenderSteps::LastStep);
   };
 
-  /**
-   * \ingroup Renderer
-   *
-   * Qt specific MapPainterBatch. When given PainterQt instances
-   * are used from multiple threads, they should be always
-   * added in same order to avoid deadlocks.
-   */
-  class OSMSCOUT_MAP_QT_API BatchMapPainterQt:
-      public BatchMapPainter<MapPainterQt*> {
-  public:
-    explicit BatchMapPainterQt(size_t expectedCount);
-
-    ~BatchMapPainterQt() override;
-
-    bool paint(const Projection& projection,
-               const MapParameter& parameter,
-               QPainter* painter);
-  };
 }
 
 #endif

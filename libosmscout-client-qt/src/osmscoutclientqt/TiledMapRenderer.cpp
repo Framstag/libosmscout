@@ -533,6 +533,7 @@ void TiledMapRenderer::onLoadJobFinished(QMap<QString,QMap<osmscout::TileKey,osm
                       tiles,
                       &drawParameter,
                       &p,
+                      &mapPainter,
                       overlayObjects,
                       dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ false,
