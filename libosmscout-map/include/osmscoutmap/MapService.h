@@ -201,6 +201,10 @@ namespace osmscout {
                     const std::string_view &objectTypeNamePl) const
     {
       if (!areaObjectIndex) {
+        if (!prefill) {
+          tileData.SetComplete();
+          NotifyTileStateCallbacks(tile);
+        }
         return false;
       }
 

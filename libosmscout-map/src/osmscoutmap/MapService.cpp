@@ -244,6 +244,12 @@ namespace osmscout {
     AreaNodeIndexRef areaNodeIndex=database->GetAreaNodeIndex();
 
     if (!areaNodeIndex) {
+      if (!prefill) {
+        // nodes data may be missing by purpose (e.g. for basemap),
+        // lets mark the tile as complete and notify upstream to avoid endless loading
+        tile->GetNodeData().SetComplete();
+        NotifyTileStateCallbacks(tile);
+      }
       return false;
     }
 
@@ -331,8 +337,10 @@ namespace osmscout {
     OptimizeAreasLowZoomRef optimizeAreasLowZoom=database->GetOptimizeAreasLowZoom();
 
     if (!optimizeAreasLowZoom) {
-      tile->GetOptimizedAreaData().SetComplete();
-      NotifyTileStateCallbacks(tile);
+      if (!prefill) {
+        tile->GetOptimizedAreaData().SetComplete();
+        NotifyTileStateCallbacks(tile);
+      }
       return false;
     }
 
@@ -405,6 +413,12 @@ namespace osmscout {
     AreaAreaIndexRef areaAreaIndex=database->GetAreaAreaIndex();
 
     if (!areaAreaIndex) {
+      if (!prefill) {
+        // area data may be missing by purpose (e.g. for basemap),
+        // lets mark the tile as complete and notify upstream to avoid endless loading
+        tile->GetAreaData().SetComplete();
+        NotifyTileStateCallbacks(tile);
+      }
       return false;
     }
 
@@ -493,8 +507,10 @@ namespace osmscout {
     OptimizeWaysLowZoomRef optimizeWaysLowZoom=database->GetOptimizeWaysLowZoom();
 
     if (!optimizeWaysLowZoom) {
-      tile->GetOptimizedWayData().SetComplete();
-      NotifyTileStateCallbacks(tile);
+      if (!prefill) {
+        tile->GetOptimizedWayData().SetComplete();
+        NotifyTileStateCallbacks(tile);
+      }
       return false;
     }
 
