@@ -341,7 +341,7 @@ void TiledMapRenderer::offlineTileRequest(uint32_t zoomLevel, uint32_t xtile, ui
                               maximumAreaLevel,
                               /* lowZoomOptimization */ true,
                               /* closeOnFinish */ false,
-                              /* loadBasemap */ true);
+                              /* loadBasemap */ !onlineTilesEnabled);
 
         connect(loadJob, &DBLoadJob::finished,
                 this, &TiledMapRenderer::onLoadJobFinished);
