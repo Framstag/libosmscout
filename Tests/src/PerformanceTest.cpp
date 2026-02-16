@@ -537,7 +537,7 @@ using PerformanceTestBackendRef = std::shared_ptr<PerformanceTestBackend>;
 PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
                                          [[maybe_unused]] char* argv[],
                                          const Arguments &args,
-                                         const osmscout::StyleConfigRef& styleConfig,
+                                         [[maybe_unused]] const osmscout::StyleConfigRef& styleConfig,
                                          [[maybe_unused]] const osmscout::MapParameter &drawParameter)
 {
   if (args.driver=="cairo") {
