@@ -101,8 +101,8 @@ void DBLoadJob::Run(const DBInstanceRef& basemapDatabase,
 
     // load tiles asynchronous
     db->GetMapService()->LoadMissingTileDataAsync(searchParameter,
-                                             *db->GetStyleConfig(),
-                                             tiles);
+                                                  *db->GetStyleConfig(),
+                                                  tiles);
 
     // process already completed tiles (state callback is not called in such case)
     for (auto &tile:tiles){
