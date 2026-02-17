@@ -459,8 +459,13 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
   styleErrors.clear();
   std::string file = stylesheetFilename+suffix;
   for (const auto& db: databases){
-    log.Debug() << "Loading style " << file << "...";
+    log.Debug() << "Loading style " << file << " for database " << db->path << "...";
     db->LoadStyle(file, stylesheetFlags, styleErrors);
+    log.Debug() << "Loading style done";
+  }
+  if (basemapDatabase) {
+    log.Debug() << "Loading style " << file << " for database " << basemapDatabase->path << "...";
+    basemapDatabase->LoadStyle(file, stylesheetFlags, styleErrors);
     log.Debug() << "Loading style done";
   }
   if (prevErrs || (!styleErrors.empty())){
