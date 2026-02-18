@@ -2029,6 +2029,8 @@ constexpr bool debugGroundTiles = false;
         databaseCache.emplace_back(DatabaseCacheEntry{*typeConfig, data[i].styleConfig});
       } else if (databaseCache[i].typeConfigPtr != typeConfig.get()) {
         databaseCache[i] = DatabaseCacheEntry{*typeConfig, data[i].styleConfig};
+      } else {
+        databaseCache[i].styleConfig = data[i].styleConfig; // update style config in case it has changed
       }
     }
   }
