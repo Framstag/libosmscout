@@ -280,11 +280,14 @@ void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
 {
   std::list<DBInstanceRef> databases; // enabled databases for rendering
   if (renderDatabases) {
-    databases = allDatabases;
+    std::copy_if(allDatabases.begin(),
+                 allDatabases.end(),
+                 std::back_inserter(databases),
+                 [](const auto &db) -> bool { return db->GetStyleConfig() != nullptr; });
   }
   DBJob::Run(basemapDatabase,databases,std::move(locker));
 
-  if (renderBasemap && basemapDatabase) {
+  if (renderBasemap && basemapDatabase && basemapDatabase->GetStyleConfig()) {
     databases.push_back(basemapDatabase); // basemap database is a ordinary database after all
   }
 
