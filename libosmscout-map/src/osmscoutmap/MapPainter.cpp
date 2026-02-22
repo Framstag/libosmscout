@@ -1430,10 +1430,10 @@ constexpr bool debugGroundTiles = false;
                                        const LineStyle& lineStyle) const
   {
     assert(dbIndex<databaseCache.size());
-    const auto &colorReader=databaseCache[dbIndex].colorReader;
     Color color=lineStyle.GetLineColor();
 
     if (lineStyle.GetPreferColorFeature()){
+      const auto &colorReader=databaseCache[dbIndex].colorReader;
       const ColorFeatureValue *colorValue=colorReader.GetValue(buffer);
       if (colorValue != nullptr){
         color=colorValue->GetColor();
