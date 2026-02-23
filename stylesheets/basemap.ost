@@ -20,9 +20,9 @@ OST
       -o planet_extract.osm.pbf
 
   To get smaller database with good loading performance consider using following Import options:
-    --waterIndexMinMag 4
-    --waterIndexMaxMag 4
-    --lowZoomOptMaxMag 4
+    --waterIndexMinMag 6
+    --waterIndexMaxMag 6
+    --lowZoomOptMaxMag 6
     --areaNodeGridMag 6
 
   Also consider using "--langOrder en,#" option if target audience may prefer English names on overview map.
