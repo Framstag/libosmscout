@@ -36,15 +36,16 @@ CONST
   UINT labelPrioRegion              = 4;
   UINT labelPrioCounty              = 5;
 
-  UINT labelPrioMillionCity         = 6;
-  UINT labelPrioHalfmillionCity     = 7;
-  UINT labelPrioBigCity             = 8;
-  UINT labelPrioCity                = 9;
-  UINT labelPrioSuburb              = 10;
+  UINT labelPrioCapitalCity         = 6;
+  UINT labelPrioMillionCity         = 7;
+  UINT labelPrioHalfmillionCity     = 8;
+  UINT labelPrioBigCity             = 9;
+  UINT labelPrioCity                = 10;
+  UINT labelPrioSuburb              = 11;
 
-  UINT labelPrioTown                = 10;
-  UINT labelPrioVillage             = 11;
-  UINT labelPrioHamlet              = 12;
+  UINT labelPrioTown                = 11;
+  UINT labelPrioVillage             = 12;
+  UINT labelPrioHamlet              = 13;
 
   IF daylight {
     COLOR placeLabelColor           = #000000;
@@ -88,6 +89,7 @@ STYLE
   // Miniciplaity
 
   // Populated settlements, urban
+  [TYPE place_capitalcity]     NODE.TEXT {label: IName; priority: @labelPrioMillionCity; size: 0;  }
   [TYPE place_millioncity]     NODE.TEXT {label: IName; priority: @labelPrioMillionCity; size: 0;  }
   [TYPE place_halfmillioncity] NODE.TEXT {label: IName; priority: @labelPrioHalfmillionCity; size: 0;  }
   [TYPE place_bigcity]         NODE.TEXT {label: IName; priority: @labelPrioBigCity; size: 0; }
@@ -158,6 +160,10 @@ STYLE
   // City names are rendered up to city level and then disappear again
 
   [MAG state-city] {
+    [TYPE place_capitalcity] {
+       NODE.TEXT {style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; position: 2; size: 1.4; }
+       NODE.ICON { symbol: place_capital_city; position: 1; priority: @labelPrioCapitalCity; }
+    }
     [TYPE place_millioncity] {
        NODE.TEXT {style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; position: 2; size: 1.4; }
        NODE.ICON { symbol: place_city; position: 1; priority: @labelPrioMillionCity; }
