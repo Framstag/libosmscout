@@ -102,15 +102,42 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   private:
-    using StepMethod = void (MapPainter::*)(const Projection &, const MapParameter &, const MapData &);
+    using StepMethod = void (MapPainter::*)(const Projection &, const MapParameter &, const std::vector<MapData>&);
 
   public:
+    class OSMSCOUT_MAP_API DatabaseCacheEntry
+    {
+    public:
+      const TypeConfig             *typeConfigPtr;     //!< pointer to type config, used just for cache purposes, not owned
+
+      StyleConfigRef               styleConfig;
+
+      /**
+       * Attribute readers
+       */
+      //@{
+      NameFeatureValueReader       nameReader;         //!< Value reader for the 'name' feature
+      NameAltFeatureValueReader    nameAltReader;      //!< Value reader for the 'alternative name' feature
+      RefFeatureValueReader        refReader;          //!< Value reader for the 'ref' feature
+      LayerFeatureValueReader      layerReader;        //!< Value reader for the 'layer' feature
+      WidthFeatureValueReader      widthReader;        //!< Value reader for the 'width' feature
+      AddressFeatureValueReader    addressReader;      //!< Value reader for the 'address' feature
+      LanesFeatureValueReader      lanesReader;        //!< Value reader for the 'lanes' feature
+      AccessFeatureValueReader     accessReader;       //!< Value reader for the 'lanes' feature
+      ColorFeatureValueReader      colorReader;        //!< Value reader for the 'color' feature
+      //@}
+
+    public:
+      explicit DatabaseCacheEntry(const TypeConfig &typeConfig, const StyleConfigRef &styleConfig);
+    };
+
     /**
      * Data structure for holding temporary data about ways
      */
     class OSMSCOUT_MAP_API WayData
     {
     public:
+      size_t                   dbIndex=0xffff;  //!< Index of database this area belongs to, used for accessing style config and attribute readers
       const FeatureValueBuffer *buffer;         //!< Features of the line segment
       int8_t                   layer;           //!< Layer this way is in
       LineStyleRef             lineStyle;       //!< Line style
@@ -161,6 +188,7 @@ namespace osmscout {
      */
     struct OSMSCOUT_MAP_API WayPathData
     {
+      size_t                   dbIndex=0xffff;  //!< Index of database this area belongs to, used for accessing style config and attribute readers
       FileOffset               ref;
       const FeatureValueBuffer *buffer;         //!< Features of the line segment. Not owned pointer.
       CoordBufferRange         coordRange;      //!< Range of coordinates in transformation buffer
@@ -172,6 +200,7 @@ namespace osmscout {
      */
     struct OSMSCOUT_MAP_API AreaData
     {
+      size_t                      dbIndex=0xffff;  //!< Index of database this area belongs to, used for accessing style config and attribute readers
       ObjectFileRef               ref;
       TypeInfoRef                 type;
       const FeatureValueBuffer    *buffer;         //!< Features of the line segment, can be NULL in case of border
@@ -207,7 +236,7 @@ namespace osmscout {
   protected:
     /**
      Internal coordinate transformation data structures
-   */
+     */
     //@{
     TransBuffer                  transBuffer;       //!< Internal buffer for coordinate transformation from geo
                                                     //!< coordinates to display coordinates
@@ -247,22 +276,11 @@ namespace osmscout {
     //@}
 
   protected:
-    StyleConfigRef               styleConfig;        //!< Reference to the style configuration to be used
-
     /**
-     * Attribute readers
+     * Cache of database specific data for rendering, such as attribute readers and style config reference.
+     * The index of the entry corresponds to MapData provided for rendering.
      */
-    //@{
-    NameFeatureValueReader       nameReader;         //!< Value reader for the 'name' feature
-    NameAltFeatureValueReader    nameAltReader;      //!< Value reader for the 'alternative name' feature
-    RefFeatureValueReader        refReader;          //!< Value reader for the 'ref' feature
-    LayerFeatureValueReader      layerReader;        //!< Value reader for the 'layer' feature
-    WidthFeatureValueReader      widthReader;        //!< Value reader for the 'width' feature
-    AddressFeatureValueReader    addressReader;      //!< Value reader for the 'address' feature
-    LanesFeatureValueReader      lanesReader;        //!< Value reader for the 'lanes' feature
-    AccessFeatureValueReader     accessReader;       //!< Value reader for the 'lanes' feature
-    ColorFeatureValueReader      colorReader;        //!< Value reader for the 'color' feature
-    //@}
+    std::vector<DatabaseCacheEntry> databaseCache;
 
     /**
       Presets, precalculations and similar
@@ -287,7 +305,7 @@ namespace osmscout {
                      const MapParameter& parameter,
                      const NodeRef& node);
 
-    void PrepareNodes(const StyleConfig& styleConfig,
+    void PrepareNodes(size_t dbIndex,
                       const Projection& projection,
                       const MapParameter& parameter,
                       const MapData& data);
@@ -297,7 +315,8 @@ namespace osmscout {
                            const Way& way,
                            WayPathData &pathData);
 
-    double CalculateLineWith(const Projection& projection,
+    double CalculateLineWith(size_t dbIndex,
+                             const Projection& projection,
                              const FeatureValueBuffer& buffer,
                              const LineStyle& lineStyle) const;
 
@@ -305,17 +324,21 @@ namespace osmscout {
                                const LineStyle& lineStyle,
                                double lineWidth) const;
 
-    Color CalculateLineColor(const FeatureValueBuffer& buffer,
+    Color CalculateLineColor(size_t dbIndex,
+                             const FeatureValueBuffer& buffer,
                              const LineStyle& lineStyle) const;
 
-    int8_t CalculateLineLayer(const FeatureValueBuffer& buffer) const;
+    int8_t CalculateLineLayer(size_t dbIndex,
+                              const FeatureValueBuffer& buffer) const;
 
-    void CalculateWayPaths(const StyleConfig& styleConfig,
+    void CalculateWayPaths(size_t dbIndex,
+                           const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
                            const Way& way);
 
-    bool PrepareAreaRing(const StyleConfig& styleConfig,
+    bool PrepareAreaRing(size_t dbIndex,
+                         const StyleConfig& styleConfig,
                          const Projection& projection,
                          const MapParameter& parameter,
                          const std::vector<CoordBufferRange>& coordRanges,
@@ -324,13 +347,13 @@ namespace osmscout {
                          size_t i,
                          const TypeInfoRef& type);
 
-    void PrepareArea(const StyleConfig& styleConfig,
+    void PrepareArea(size_t dbIndex,
+                     const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
                      const AreaRef &area);
 
-    void PrepareAreaLabel(const StyleConfig& styleConfig,
-                          const Projection& projection,
+    void PrepareAreaLabel(const Projection& projection,
                           const MapParameter& parameter,
                           const AreaData& areaData);
 
@@ -340,7 +363,8 @@ namespace osmscout {
                                const std::string_view& text,
                                const std::vector<Point>& nodes);
 
-    void LayoutPointLabels(const Projection& projection,
+    void LayoutPointLabels(const StyleConfig& styleConfig,
+                           const Projection& projection,
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
                            const FeatureValueBuffer& buffer,
@@ -349,8 +373,7 @@ namespace osmscout {
                            const Vertex2D& screenPos,
                            const ScreenBox& objectBox);
 
-    bool DrawWayDecoration(const StyleConfig& styleConfig,
-                           const Projection& projection,
+    bool DrawWayDecoration(const Projection& projection,
                            const MapParameter& parameter,
                            const WayPathData& data);
 
@@ -359,8 +382,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const Way& way);
 
-    bool DrawWayContourLabel(const StyleConfig& styleConfig,
-                             const Projection& projection,
+    bool DrawWayContourLabel(const Projection& projection,
                              const MapParameter& parameter,
                              const WayPathData& data);
 
@@ -370,13 +392,11 @@ namespace osmscout {
                              const PathTextStyleRef &pathTextStyle,
                              const std::string_view &textLabel);
 
-    bool DrawAreaBorderLabel(const StyleConfig& styleConfig,
-                             const Projection& projection,
+    bool DrawAreaBorderLabel(const Projection& projection,
                              const MapParameter& parameter,
                              const AreaData& areaData);
 
-    bool DrawAreaBorderSymbol(const StyleConfig& styleConfig,
-                              const Projection& projection,
+    bool DrawAreaBorderSymbol(const Projection& projection,
                               const MapParameter& parameter,
                               const AreaData& areaData);
 
@@ -385,7 +405,8 @@ namespace osmscout {
                          const Magnification& magnification,
                          const LineStyleRef& osmTileLine);
 
-    void DrawGroundTiles(const Projection& projection,
+    void DrawGroundTiles(size_t dbIndex,
+                         const Projection& projection,
                          const MapParameter& parameter,
                          const std::list<GroundTile> &groundTiles);
 
@@ -397,87 +418,92 @@ namespace osmscout {
     //@{
     void InitializeRender(const Projection& projection,
                           const MapParameter& parameter,
-                          const MapData& data);
+                          const std::vector<MapData>& data);
 
     void DumpStatistics(const Projection& projection,
                         const MapParameter& parameter,
-                        const MapData& data);
+                        const std::vector<MapData>& data);
 
     void CalculatePaths(const Projection& projection,
                         const MapParameter& parameter,
-                        const MapData& data);
+                        const std::vector<MapData>& data);
 
     void CalculateWayShields(const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& data);
+                             const std::vector<MapData>& data);
 
     void ProcessAreas(const Projection& projection,
                       const MapParameter& parameter,
-                      const MapData& data);
+                      const std::vector<MapData>& data);
 
     void ProcessRoutes(const Projection& projection,
+                       const MapParameter& parameter,
+                       const std::vector<MapData>& data);
+
+    void ProcessRoutes(size_t dbIndex,
+                       const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
 
     void AfterPreprocessing(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data);
+                            const std::vector<MapData>& data);
 
     void Prerender(const Projection& projection,
                    const MapParameter& parameter,
-                   const MapData& data);
+                   const std::vector<MapData>& data);
 
     void DrawBaseMapTiles(const Projection& projection,
                           const MapParameter& parameter,
-                          const MapData& data);
+                          const std::vector<MapData>& data);
 
     void DrawGroundTiles(const Projection& projection,
                          const MapParameter& parameter,
-                         const MapData& data);
+                         const std::vector<MapData>& data);
 
     void DrawOSMTileGrids(const Projection& projection,
                           const MapParameter& parameter,
-                          const MapData& data);
+                          const std::vector<MapData>& data);
 
     void DrawAreas(const Projection& projection,
                    const MapParameter& parameter,
-                   const MapData& data);
+                   const std::vector<MapData>& data);
 
     void DrawWays(const Projection& projection,
                   const MapParameter& parameter,
-                  const MapData& data);
+                  const std::vector<MapData>& data);
 
     void DrawWayDecorations(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data);
+                            const std::vector<MapData>& data);
 
     void DrawWayContourLabels(const Projection& projection,
                               const MapParameter& parameter,
-                              const MapData& data);
+                              const std::vector<MapData>& data);
 
     void PrepareAreaLabels(const Projection& projection,
                            const MapParameter& parameter,
-                           const MapData& data);
+                           const std::vector<MapData>& data);
 
     void DrawAreaBorderLabels(const Projection& projection,
                               const MapParameter& parameter,
-                              const MapData& data);
+                              const std::vector<MapData>& data);
 
     void DrawAreaBorderSymbols(const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data);
+                               const std::vector<MapData>& data);
 
     void PrepareNodeLabels(const Projection& projection,
                            const MapParameter& parameter,
-                           const MapData& data);
+                           const std::vector<MapData>& data);
 
     void PrepareRouteLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data);
+                            const std::vector<MapData>& data);
 
     void Postrender(const Projection& projection,
                     const MapParameter& parameter,
-                    const MapData& data);
+                    const std::vector<MapData>& data);
     //@]
 
   protected:
@@ -524,18 +550,15 @@ namespace osmscout {
       Some optional callbacks between individual processing steps.
      */
     //@{
-    virtual void AfterPreprocessing(const StyleConfig& styleConfig,
-                                    const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const MapData& data);
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data);
-    virtual void AfterDrawing(const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              const MapParameter& parameter,
-                              const MapData& data);
+    virtual void AfterPreprocessingCallback(const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const std::vector<MapData>& data);
+    virtual void BeforeDrawingCallback(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::vector<MapData>& data);
+    virtual void AfterDrawingCallback(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const std::vector<MapData>& data);
     //@}
 
     /**
@@ -588,15 +611,26 @@ namespace osmscout {
 
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data) = 0;
+                            const std::vector<MapData>& data) = 0;
 
-    virtual void DrawContourLines(const Projection& projection,
+    virtual void DrawContourLines(size_t dbIndex,
+                                  const Projection& projection,
                                   const MapParameter& parameter,
                                   const MapData& data);
 
-    virtual void DrawHillShading(const Projection& projection,
+    virtual void DrawContourLines(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const std::vector<MapData>& data);
+
+    virtual void DrawHillShading(const StyleConfigRef &styleConfig,
+                                 const Projection& projection,
                                  const MapParameter& parameter,
                                  const MapData& data);
+
+    virtual void DrawHillShading(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const std::vector<MapData>& data);
+
 
     /**
       Draw the Icon as defined by the IconStyle at the given pixel coordinate (icon center).
@@ -653,8 +687,7 @@ namespace osmscout {
                                          double objectWidth,
                                          size_t stringLength);
 
-    virtual void DrawWay(const StyleConfig& styleConfig,
-                         const Projection& projection,
+    virtual void DrawWay(const Projection& projection,
                          const MapParameter& parameter,
                          const WayData& data);
 
@@ -663,18 +696,18 @@ namespace osmscout {
     std::vector<OffsetRel> ParseLaneTurns(const LanesFeatureValue& feature) const;
 
   public:
-    explicit MapPainter(const StyleConfigRef& styleConfig);
+    MapPainter();
     virtual ~MapPainter();
 
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
-              const MapData& data,
+              const std::vector<MapData>& data,
               RenderSteps startStep,
               RenderSteps endStep);
 
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
-              const MapData& data);
+              const std::vector<MapData>& data);
   };
 
   /**

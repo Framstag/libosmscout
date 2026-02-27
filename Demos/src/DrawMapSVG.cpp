@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::MapPainterSVG painter(drawDemo.styleConfig);
+  osmscout::MapPainterSVG painter;
 
   painter.DrawMap(drawDemo.projection,
                   drawDemo.drawParameter,

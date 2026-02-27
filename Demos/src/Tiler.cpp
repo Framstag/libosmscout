@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
   searchParameter.SetUseLowZoomOptimization(true);
   searchParameter.SetMaximumAreaLevel(3);
 
-  osmscout::MapPainterAgg painter(styleConfig);
+  osmscout::MapPainterAgg painter;
 
   for (osmscout::MagnificationLevel level=osmscout::MagnificationLevel(std::min(args.startZoom,args.endZoom));
        level<=osmscout::MagnificationLevel(std::max(args.startZoom,args.endZoom));
@@ -362,6 +362,8 @@ int main(int argc, char* argv[])
         osmscout::StopClock timer;
         osmscout::MapData   data;
 
+        data.styleConfig = styleConfig;
+
         projection.Set(osmscout::OSMTileId(x,y),
                        magnification,
                        DPI,
@@ -429,9 +431,11 @@ int main(int argc, char* argv[])
                     tileWidth,tileHeight,
                     tileWidth*xTileCount*3);
 
+        std::vector<osmscout::MapData> dataList;
+        dataList.emplace_back(std::move(data));
         painter.DrawMap(projection,
                         drawParameter,
-                        data,
+                        dataList,
                         &pf);
 
         timer.Stop();

@@ -77,20 +77,17 @@ namespace osmscout {
                     const std::vector<GdiGlyph> &glyphs);
 
 	protected:
-    void AfterPreprocessing(const StyleConfig &styleConfig,
-                            const Projection &projection,
-                            const MapParameter &parameter,
-                            const MapData &data) override;
+    void AfterPreprocessingCallback(const Projection &projection,
+                                    const MapParameter &parameter,
+                                    const std::vector<MapData> &data) override;
 
-    void BeforeDrawing(const StyleConfig &styleConfig,
-                       const Projection &projection,
-                       const MapParameter &parameter,
-                       const MapData &data) override;
+    void BeforeDrawingCallback(const Projection &projection,
+                               const MapParameter &parameter,
+                               const std::vector<MapData> &data) override;
 
-    void AfterDrawing(const StyleConfig &styleConfig,
-                      const Projection &projection,
-                      const MapParameter &parameter,
-                      const MapData &data) override;
+    void AfterDrawingCallback(const Projection &projection,
+                              const MapParameter &parameter,
+                              const std::vector<MapData> &data) override;
 
     bool HasIcon(const StyleConfig &styleConfig,
                  const Projection &projection,
@@ -127,7 +124,7 @@ namespace osmscout {
 
     void DrawLabels(const Projection &projection,
                     const MapParameter &parameter,
-                    const MapData &data) override;
+                    const std::vector<MapData> &data) override;
 
     void DrawSymbol(const Projection &projection,
                     const MapParameter &parameter,
@@ -148,13 +145,11 @@ namespace osmscout {
                   LineStyle::CapStyle endCap,
                   const CoordBufferRange& coordRange) override;
 
-    void DrawWayOutline(const StyleConfig &styleConfig,
-                        const Projection &projection,
+    void DrawWayOutline(const Projection &projection,
                         const MapParameter &parameter,
                         const WayData &data);
 
-    void DrawWay(const StyleConfig &styleConfig,
-                 const Projection &projection,
+    void DrawWay(const Projection &projection,
                  const MapParameter &parameter,
                  const WayData &data) override;
 
@@ -170,7 +165,7 @@ namespace osmscout {
 	public:
 		bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  HDC hdc,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);
@@ -178,9 +173,8 @@ namespace osmscout {
 		/**
 		@brief Default constructor
 		@details Standard constructor with parameters for map display.
-		@param[in] styleConfig Configuration of the drawing styles
 		*/
-		explicit MapPainterGDI(const StyleConfigRef& styleConfig);
+		MapPainterGDI();
 		~MapPainterGDI() override;
 	};
 }

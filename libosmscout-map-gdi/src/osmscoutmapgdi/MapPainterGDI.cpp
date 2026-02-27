@@ -309,9 +309,8 @@ namespace osmscout {
 #define RENDEROBJECTRETURN(r, v) if (m_pBuffer == NULL) return v; \
   GdiRender* r = (GdiRender*)m_pBuffer
 
-  MapPainterGDI::MapPainterGDI(const StyleConfigRef &styleConfig)
-    : MapPainter(styleConfig),
-      m_labelLayouter(this),
+  MapPainterGDI::MapPainterGDI()
+    : m_labelLayouter(this),
       m_pBuffer(nullptr) {
     if (m_gdiplusInstCount == 0) {
       Gdiplus::GdiplusStartupInput gdiplusStartupInput;
@@ -530,26 +529,23 @@ namespace osmscout {
     }
   }
 
-  void MapPainterGDI::AfterPreprocessing(const StyleConfig & /*styleConfig*/,
-                                         const Projection & /*projection*/,
-                                         const MapParameter & /*parameter*/,
-                                         const MapData & /*data*/) {
+  void MapPainterGDI::AfterPreprocessingCallback(const Projection & /*projection*/,
+                                                 const MapParameter & /*parameter*/,
+                                                 const std::vector<MapData> & /*data*/) {
     // Not implemented
   }
 
-  void MapPainterGDI::BeforeDrawing(const StyleConfig & /*styleConfig*/,
-                                    const Projection &projection,
-                                    const MapParameter &parameter,
-                                    const MapData & /*data*/) {
+  void MapPainterGDI::BeforeDrawingCallback(const Projection &projection,
+                                            const MapParameter &parameter,
+                                            const std::vector<MapData> & /*data*/) {
     ScreenVectorRectangle viewport(0.0, 0.0, (double) projection.GetWidth(), (double) projection.GetHeight());
     m_labelLayouter.SetViewport(viewport);
     m_labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
-  void MapPainterGDI::AfterDrawing(const StyleConfig & /*styleConfig*/,
-                                   const Projection & /*projection*/,
-                                   const MapParameter & /*parameter*/,
-                                   const MapData & /*data*/) {
+  void MapPainterGDI::AfterDrawingCallback(const Projection & /*projection*/,
+                                           const MapParameter & /*parameter*/,
+                                           const std::vector<MapData> & /*data*/) {
     // Not implemented
   }
 
@@ -630,7 +626,7 @@ namespace osmscout {
 
   void MapPainterGDI::DrawLabels(const Projection &projection,
                                  const MapParameter &parameter,
-                                 const MapData & /*data*/) {
+                                 const std::vector<MapData> & /*data*/) {
     m_labelLayouter.Layout(projection, parameter);
     m_labelLayouter.DrawLabels(projection,
                                parameter,
@@ -757,15 +753,13 @@ namespace osmscout {
                                     (INT) pRender->pointBuffer.m_Data.size());
   }
 
-  void MapPainterGDI::DrawWayOutline(const StyleConfig & /*styleConfig*/,
-                                     const Projection & /*projection*/,
+  void MapPainterGDI::DrawWayOutline(const Projection & /*projection*/,
                                      const MapParameter & /*parameter*/,
                                      const WayData & /*data*/) {
     // Not implemented
   }
 
-  void MapPainterGDI::DrawWay(const StyleConfig & /*styleConfig*/,
-                              const Projection &projection,
+  void MapPainterGDI::DrawWay(const Projection &projection,
                               const MapParameter &parameter,
                               const WayData &data) {
     if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapColor().GetA() > 0.0) {
@@ -862,7 +856,7 @@ namespace osmscout {
 
   bool MapPainterGDI::DrawMap(const Projection &projection,
                               const MapParameter &parameter,
-                              const MapData &data,
+                              const std::vector<MapData> &data,
                               HDC hdc,
                               RenderSteps startStep,
                               RenderSteps endStep) {

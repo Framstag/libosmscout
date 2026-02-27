@@ -40,10 +40,8 @@
 
 namespace osmscout {
 
-  MapPainterQt::MapPainterQt(const StyleConfigRef& styleConfig)
-  : MapPainter(styleConfig),
-    painter(nullptr),
-    labelLayouter(this)
+  MapPainterQt::MapPainterQt()
+  : labelLayouter(this)
   {
     sin.resize(360*10);
 
@@ -839,10 +837,9 @@ namespace osmscout {
                                               1)));
   }
 
-  void MapPainterQt::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const MapData& /*data*/)
+  void MapPainterQt::BeforeDrawingCallback(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const std::vector<MapData>& /*data*/)
   {
     labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, painter->window().width(), painter->window().height()));
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
@@ -899,7 +896,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabels(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& /*data*/)
+                                const std::vector<MapData>& /*data*/)
   {
     if (delegateLabelLayouter !=nullptr){
       return;
@@ -1024,8 +1021,11 @@ namespace osmscout {
     painter->setRenderHint(QPainter::TextAntialiasing);
 
     // TODO: remove this method and use standard Draw
-    MapData data;
-    data.baseMapTiles=groundTiles;
+    MapData mapData;
+    mapData.baseMapTiles=groundTiles;
+
+    std::vector<MapData> data;
+    data.emplace_back(std::move(mapData));
 
     Draw(projection,
          parameter,
@@ -1036,7 +1036,7 @@ namespace osmscout {
 
   bool MapPainterQt::DrawMap(const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& data,
+                             const std::vector<MapData>& data,
                              QPainter* painter,
                              RenderSteps startStep,
                              RenderSteps endStep)
@@ -1093,73 +1093,5 @@ namespace osmscout {
     return result;
   }
 
-  BatchMapPainterQt::BatchMapPainterQt(size_t expectedCount):
-    BatchMapPainter(expectedCount) {}
-
-  BatchMapPainterQt::~BatchMapPainterQt(){}
-
-  bool BatchMapPainterQt::paint(const Projection& projection,
-                                const MapParameter& parameter,
-                                QPainter* qPainter)
-  {
-    assert(data.size() == painters.size());
-    if (painters.empty()){
-      return true;
-    }
-    qPainter->setRenderHint(QPainter::Antialiasing);
-    qPainter->setRenderHint(QPainter::TextAntialiasing);
-
-    // prepare map painters:
-    // - acquire locks
-    // - setup QPainter instance
-    // - delegate all label layout operations to the last painter
-    std::vector<std::unique_lock<std::mutex>> locks;
-    locks.reserve(painters.size());
-    MapPainterQt* lastPainter = painters.back();
-    for (MapPainterQt* painter: painters){
-      locks.emplace_back(painter->mutex);
-      painter->painter = qPainter;
-
-      if (painter != lastPainter){
-        painter->delegateLabelLayouter = &(lastPainter->labelLayouter);
-      }
-    }
-
-    bool success=true;
-    for (size_t step=osmscout::RenderSteps::FirstStep;
-         step<=osmscout::RenderSteps::LastStep;
-         step++){
-
-      for (size_t i=0;i<data.size(); i++){
-        const MapData &d=*(data[i]);
-        MapPainterQt *painter = painters[i];
-
-        // copy missing icons to last painter cache
-        // because last painter do the real label and icon rendering
-        if (step==osmscout::RenderSteps::DrawLabels &&
-            painter->delegateLabelLayouter == &(lastPainter->labelLayouter) &&
-            painter!=lastPainter){
-
-          for (auto im=painter->images.begin(); im != painter->images.end(); im++){
-            if (!lastPainter->images.contains(im->first)) {
-              lastPainter->images[im->first] = im->second;
-            }
-          }
-        }
-        success &= painter->Draw(projection,
-                                 parameter,
-                                 d,
-                                 (RenderSteps)step,
-                                 (RenderSteps)step);
-      }
-    }
-
-    // cleanup
-    for (MapPainterQt* painter: painters){
-      painter->painter = nullptr;
-      painter->delegateLabelLayouter = nullptr;
-    }
-    return success;
-  }
 }
 

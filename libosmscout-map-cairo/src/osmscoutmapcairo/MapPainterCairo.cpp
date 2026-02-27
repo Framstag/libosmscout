@@ -258,9 +258,8 @@ namespace osmscout {
     delete[] segmentLengths;
   }
 
-  MapPainterCairo::MapPainterCairo(const StyleConfigRef &styleConfig)
-      : MapPainter(styleConfig),
-        labelLayouter(this)
+  MapPainterCairo::MapPainterCairo()
+      : labelLayouter(this)
   {
     // no code
   }
@@ -647,10 +646,9 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
-  void MapPainterCairo::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& /*data*/)
+  void MapPainterCairo::BeforeDrawingCallback(const Projection& projection,
+                                              const MapParameter& parameter,
+                                              const std::vector<MapData>& /*data*/)
   {
     ScreenVectorRectangle viewport;
     double x2, y2;
@@ -1107,7 +1105,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawLabels(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const MapData& /*data*/)
+                                   const std::vector<MapData>& /*data*/)
   {
     labelLayouter.Layout(projection, parameter);
 
@@ -1297,7 +1295,7 @@ namespace osmscout {
 
   bool MapPainterCairo::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data,
+                                const std::vector<MapData>& data,
                                 cairo_t *draw,
                                 RenderSteps startStep,
                                 RenderSteps endStep)

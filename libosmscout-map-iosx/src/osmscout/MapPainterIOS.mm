@@ -33,8 +33,8 @@
 
 namespace osmscout {
 
-    MapPainterIOS::MapPainterIOS(const StyleConfigRef& styleConfig)
-    : MapPainter(styleConfig), labelLayouter(this){
+    MapPainterIOS::MapPainterIOS()
+    : labelLayouter(this){
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         contentScale = [[UIScreen mainScreen] scale];
 #else
@@ -76,10 +76,9 @@ namespace osmscout {
     /*
      * DrawMap() with start and end RenderSteps
      */
-    bool MapPainterIOS::DrawMap(const StyleConfig& /*styleConfig*/,
-                                const Projection& projection,
+    bool MapPainterIOS::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data,
+                                const std::vector<MapData>& data,
                                 CGContextRef paintCG,
                                 RenderSteps startStep,
                                 RenderSteps endStep){
@@ -94,12 +93,11 @@ namespace osmscout {
     /*
      * DrawMap()
      */
-    bool MapPainterIOS::DrawMap(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& data,
-                            CGContextRef paintCG) {
-        return DrawMap(styleConfig, projection, parameter, data, paintCG, RenderSteps::FirstStep, RenderSteps::LastStep);
+    bool MapPainterIOS::DrawMap(const Projection& projection,
+                                const MapParameter& parameter,
+                                const std::vector<MapData>& data,
+                                CGContextRef paintCG) {
+        return DrawMap(projection, parameter, data, paintCG, RenderSteps::FirstStep, RenderSteps::LastStep);
     }
 
     /*
@@ -119,9 +117,12 @@ namespace osmscout {
         MapData data;
         data.baseMapTiles=groundTiles;
 
+        std::vector<MapData> dataList;
+        dataList.push_back(data);
+
         Draw(projection,
              parameter,
-             data,
+             dataList,
              RenderSteps::DrawBaseMapTiles,
              RenderSteps::DrawBaseMapTiles);
     }
@@ -535,10 +536,9 @@ namespace osmscout {
         }
     }
 
-    void MapPainterIOS::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& /*data*/){
+    void MapPainterIOS::BeforeDrawingCallback(const Projection& projection,
+                                              const MapParameter& parameter,
+                                              const std::vector<MapData>& /*data*/){
         labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
         labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
@@ -561,8 +561,8 @@ namespace osmscout {
     }
 
     void MapPainterIOS::DrawLabels(const Projection& projection,
-                            const MapParameter& parameter,
-                            const MapData& /*data*/) {
+                                   const MapParameter& parameter,
+                                   const std::vector<MapData>& /*data*/) {
         labelLayouter.Layout(projection, parameter);
         labelLayouter.DrawLabels(projection,
                                  parameter,

@@ -156,7 +156,9 @@ int main(int argc, char* argv[])
   osmscout::MapParameter        drawParameter;
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
-  osmscout::MapPainterQt        mapPainter(styleConfig);
+  osmscout::MapPainterQt        mapPainter;
+
+  data.styleConfig = styleConfig;
 
   for (std::vector<Action>::const_iterator action=actions.begin();
        action!=actions.end();
@@ -182,9 +184,11 @@ int main(int argc, char* argv[])
 
     osmscout::StopClock renderTimer;
 
+    std::vector<osmscout::MapData> dataList;
+    dataList.push_back(data);
     mapPainter.DrawMap(projection,
                        drawParameter,
-                       data,
+                       dataList,
                        painter);
 
     renderTimer.Stop();

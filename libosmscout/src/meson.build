@@ -122,7 +122,6 @@ osmscoutSrc = [
             'src/osmscout/db/TypeDistributionDataFile.cpp',
             'src/osmscout/db/Database.cpp',
             'src/osmscout/db/DebugDatabase.cpp',
-            'src/osmscout/db/BasemapDatabase.cpp',
             'src/osmscout/db/LocationIndex.cpp',
             'src/osmscout/db/NodeDataFile.cpp',
             'src/osmscout/db/OptimizeAreasLowZoom.cpp',

@@ -150,24 +150,24 @@ int main(int argc, char* argv[])
 
   auto* painter=new QPainter(pixmap);
 
-  osmscout::MapPainterQt        mapPainter(drawDemo.styleConfig);
 
+  /*
   osmscout::TypeInfoRef         buildingType=drawDemo.database->GetTypeConfig()->GetTypeInfo("building");
 
-
   if (buildingType!=nullptr) {
-    /*
     osmscout::FillStyleProcessorRef constructionProcessor=std::make_shared<ConstructionProcessor>(*db->GetTypeConfig());
     drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
-                                             constructionProcessor);*/
+                                             constructionProcessor);
 
-    /*
     osmscout::FillStyleProcessorRef addressProcessor=std::make_shared<AddressProcessor>(*db->GetTypeConfig());
     drawParameter.RegisterFillStyleProcessor(buildingType->GetIndex(),
-                                          addressProcessor);*/
+                                          addressProcessor);
   }
+  */
 
   drawDemo.LoadData();
+
+  osmscout::MapPainterQt mapPainter;
 
   if (mapPainter.DrawMap(drawDemo.projection,
                          drawDemo.drawParameter,

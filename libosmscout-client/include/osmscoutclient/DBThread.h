@@ -23,7 +23,6 @@
 
 #include <osmscoutclient/ClientImportExport.h>
 
-#include <osmscout/db/BasemapDatabase.h>
 #include <osmscout/db/Database.h>
 
 #include <osmscout/location/LocationService.h>
@@ -95,7 +94,7 @@ class OSMSCOUT_CLIENT_API DBThread: public AsyncWorker
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
 
-  using AsynchronousDBJob = std::function<void (const osmscout::BasemapDatabaseRef& basemapDatabase,
+  using AsynchronousDBJob = std::function<void (const DBInstanceRef& basemapDatabase,
                                                 const std::list<DBInstanceRef> &databases,
                                                 ReadLock &&locker)>;
 
@@ -147,9 +146,8 @@ private:
 
   mutable Latch                      latch;
 
-  osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
-  osmscout::BasemapDatabaseRef       basemapDatabase;
-  osmscout::DatabaseParameter        databaseParameter;
+  DBInstanceRef                      basemapDatabase;
+  DatabaseParameter                  databaseParameter;
   std::list<DBInstanceRef>           databases;
 
   TypeConfigRef                      emptyTypeConfig; // type config just with special and custom poi types

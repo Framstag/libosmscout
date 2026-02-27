@@ -39,7 +39,7 @@ namespace osmscout {
    * Load the bounding box data and return, if this operation was successful.
    *
    * @param path
-   *    Directory, wehre the data file has been placed
+   *    Directory, where the data file has been placed
    * @return
    *    True on success, else false
    */

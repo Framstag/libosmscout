@@ -64,7 +64,7 @@ namespace osmscout {
 	{
 	}
 
-	MapPainterGDIWindow::MapPainterGDIWindow(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance)
+	MapPainterGDIWindow::MapPainterGDIWindow(RECT position, HWND hWndParent, HINSTANCE hInstance)
 		: m_hInstance(hInstance)
 		, m_hWnd(nullptr)
 		, m_hWndParent(nullptr)
@@ -73,7 +73,7 @@ namespace osmscout {
 		, m_pParameter(nullptr)
 		, m_pData(nullptr)
 	{
-		CreateCanvas(styleConfig, position, hWndParent, hInstance);
+		CreateCanvas(position, hWndParent, hInstance);
 	}
 
 	MapPainterGDIWindow::~MapPainterGDIWindow()
@@ -95,7 +95,7 @@ namespace osmscout {
         }
     }
 
-	bool MapPainterGDIWindow::CreateCanvas(const StyleConfigRef& styleConfig, RECT position, HWND hWndParent, HINSTANCE hInstance)
+	bool MapPainterGDIWindow::CreateCanvas(RECT position, HWND hWndParent, HINSTANCE hInstance)
 	{
 		if (m_hWnd != nullptr) {
             return true;
@@ -108,7 +108,7 @@ namespace osmscout {
         }
 
 		if (m_pPainter == nullptr) {
-            m_pPainter = new MapPainterGDI(styleConfig);
+            m_pPainter = new MapPainterGDI();
         }
 
 		const wchar_t CLASS_NAME[] = L"MapPainterGDIWindow";
@@ -148,8 +148,8 @@ namespace osmscout {
 	}
 
 	void MapPainterGDIWindow::Set(osmscout::Projection* pProjection,
-                                  osmscout::MapParameter* pParameter,
-                                  osmscout::MapData* pData)
+                                osmscout::MapParameter* pParameter,
+                                const std::vector<osmscout::MapData> *pData)
 	{
 		m_pProjection = pProjection;
 		m_pParameter = pParameter;

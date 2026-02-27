@@ -189,12 +189,11 @@ namespace osmscout {
 
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data) override;
+                            const std::vector<MapData>& data) override;
 
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data) override;
+    virtual void BeforeDrawingCallback(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::vector<MapData>& data) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
@@ -206,12 +205,12 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterAgg(const StyleConfigRef& styleConfig);
+    MapPainterAgg();
     ~MapPainterAgg() override;
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  AggPixelFormat* pf,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);

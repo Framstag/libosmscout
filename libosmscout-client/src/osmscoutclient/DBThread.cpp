@@ -266,11 +266,28 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
     }
 
     if (!basemapLookupDirectory.empty()) {
-      osmscout::BasemapDatabaseRef database = std::make_shared<osmscout::BasemapDatabase>(basemapDatabaseParameter);
+      DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
 
-      if (database->Open(basemapLookupDirectory)) {
-        basemapDatabase=database;
+      if (database->Open(basemapLookupDirectory, true)) {
+        osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+        osmscout::StyleConfigRef styleConfig;
+        if (typeConfig) {
+          registerCustomPoiTypes(typeConfig);
+          styleConfig=makeStyleConfig(typeConfig);
+        }
+        else {
+          log.Warn() << "TypeConfig invalid!";
+          styleConfig=nullptr;
+        }
+
         log.Debug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
+        basemapDatabase=std::make_shared<DBInstance>(basemapLookupDirectory,
+                                                     database,
+                                                     std::make_shared<osmscout::LocationService>(database),
+                                                     std::make_shared<osmscout::LocationDescriptionService>(database),
+                                                     std::make_shared<osmscout::MapService>(database),
+                                                     styleConfig);
       }
       else {
         log.Warn() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
@@ -442,8 +459,13 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
   styleErrors.clear();
   std::string file = stylesheetFilename+suffix;
   for (const auto& db: databases){
-    log.Debug() << "Loading style " << file << "...";
+    log.Debug() << "Loading style " << file << " for database " << db->path << "...";
     db->LoadStyle(file, stylesheetFlags, styleErrors);
+    log.Debug() << "Loading style done";
+  }
+  if (basemapDatabase) {
+    log.Debug() << "Loading style " << file << " for database " << basemapDatabase->path << "...";
+    basemapDatabase->LoadStyle(file, stylesheetFlags, styleErrors);
     log.Debug() << "Loading style done";
   }
   if (prevErrs || (!styleErrors.empty())){

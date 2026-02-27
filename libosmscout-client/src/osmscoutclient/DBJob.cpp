@@ -31,7 +31,7 @@ DBJob::~DBJob()
   Close();
 }
 
-void DBJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+void DBJob::Run(const DBInstanceRef& basemapDatabase,
                 const std::list<DBInstanceRef> &databases,
                 ReadLock &&locker)
 {

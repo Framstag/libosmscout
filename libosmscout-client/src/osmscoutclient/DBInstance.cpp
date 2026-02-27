@@ -52,9 +52,6 @@ bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
   }
 
   if (newStyleConfig->Load(stylesheetFilename, nullptr, false)) {
-    // Tear down
-    painterHolder.clear();
-
     // Recreate
     styleConfig=newStyleConfig;
 
@@ -75,20 +72,9 @@ bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
   return true;
 }
 
-void DBInstance::OnThreadFinished(const std::thread::id &id)
-{
-  std::scoped_lock lock(mutex);
-  if (auto it=painterHolder.find(id);
-      it!=painterHolder.end()){
-    painterHolder.erase(it);
-  }
-}
-
 void DBInstance::Close()
 {
   std::scoped_lock lock(mutex);
-
-  painterHolder.clear();
 
   // release map service, its threads may still use db
   // threads are stopped and joined in MapService destructor
