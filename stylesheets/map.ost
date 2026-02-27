@@ -1946,7 +1946,11 @@ TYPES
     = NODE AREA ("place"=="county")
       {Name, NameAlt, IsIn}
 
-  // Do not delete the following types, they are required by the GenCityStreet import step
+  TYPE place_capitalcity
+    = NODE AREA ("place"=="city" AND EXISTS "capital" AND "capital"=="yes")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
   TYPE place_millioncity
     = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
       {Name, NameAlt, IsIn}

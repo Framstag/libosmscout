@@ -4,6 +4,14 @@ CONST
   COLOR turnSymbolColor            = #ffffff80;
   COLOR turnSymbolOutlineColor     = #a0a0a080;
 
+  SYMBOL place_capital_city
+    CIRCLE 0,0 0.8 {
+      AREA.BORDER {color: #8a4e4e; width: 0.5mm; }
+    }
+    CIRCLE 0,0 0.2 {
+      AREA {color: #8a4e4e; }
+    }
+
   SYMBOL place_city
     CIRCLE 0,0 0.8 {
       AREA.BORDER {color: #888888; width: 0.5mm; }
