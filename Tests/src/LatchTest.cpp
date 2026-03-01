@@ -32,8 +32,8 @@
 
 using namespace std::chrono_literals;
 
-static size_t iterationCount=250;
-static auto   taskDuration=1ms;
+static constexpr size_t iterationCount=250;
+static constexpr auto   taskDuration=1ms;
 
 static size_t refCounter = 0;
 static osmscout::Latch latch;
@@ -263,6 +263,8 @@ public:
 };
 
 TEST_CASE("Multi Reader Worker") {
+  refCounter = 0;
+
   osmscout::StopClock            stopClock;
   osmscout::ProcessingQueue<int> queue(1000);
   ReaderWorker                   worker1(queue);
@@ -306,6 +308,8 @@ TEST_CASE("Multi Reader Worker") {
 }
 
 TEST_CASE("Multi Writer Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterWorker                          worker1(queue);
@@ -351,6 +355,8 @@ TEST_CASE("Multi Writer Worker") {
 }
 
 TEST_CASE("Multi Reader Worker One Writer worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterWorker                          worker1(queue);
@@ -397,6 +403,8 @@ TEST_CASE("Multi Reader Worker One Writer worker") {
 }
 
 TEST_CASE("Multi Recursive Reader Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   ReaderReaderWorker                    worker1(queue);
@@ -441,6 +449,8 @@ TEST_CASE("Multi Recursive Reader Worker") {
 }
 
 TEST_CASE("Multi Recursive Writer Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterReaderWorker                    worker1(queue);
@@ -488,6 +498,8 @@ TEST_CASE("Multi Recursive Writer Worker") {
 }
 
 TEST_CASE("Check Re-Entrant One Reader Writer") {
+  refCounter = 0;
+
   osmscout::StopClock stopClock;
   volatile int i=0;
   osmscout::ReadLock rl(latch);
@@ -525,6 +537,8 @@ TEST_CASE("Check Re-Entrant One Reader Writer") {
 }
 
 TEST_CASE("Check write precedence") {
+  refCounter = 0;
+
   volatile int i=0;
   osmscout::ReadLock rl(latch);
 
@@ -552,6 +566,8 @@ TEST_CASE("Check write precedence") {
 }
 
 TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
+  refCounter = 0;
+
   int nbreader=4;
   volatile int i=0;
   int blocked=0;
