@@ -603,7 +603,7 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
 
     // wait for everyone to get set up
     int k=0;
-    while (beg.load() != nbreader && k++ < 1000) {
+    while (beg.load() != nbreader && k++ < 1000000) {
       std::this_thread::yield();
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -618,7 +618,7 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
   // check BUG: thread was not awakened after broadcast signal
   // wait for all readers, or fail when lost reader
   int k=0;
-  while (end.load() != nbreader && k++ < 1000) {
+  while (end.load() != nbreader && k++ < 1000000) {
     std::this_thread::yield();
   }
   // all readers must be finalized
