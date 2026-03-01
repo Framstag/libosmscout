@@ -40,12 +40,12 @@ static osmscout::Latch latch;
 
 class ReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -79,9 +79,9 @@ private:
 
 public:
   explicit ReaderWorker(osmscout::ProcessingQueue<int>& queue)
-  : queue(queue),
-    thread(&ReaderWorker::ProcessorLoop,this),
-    processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&ReaderWorker::ProcessorLoop,this)
   {
   }
 
@@ -92,12 +92,12 @@ public:
 
 class WriterWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -131,9 +131,9 @@ private:
 
 public:
   explicit WriterWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&WriterWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&WriterWorker::ProcessorLoop,this)
   {
   }
 
@@ -144,12 +144,12 @@ public:
 
 class ReaderReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -189,9 +189,9 @@ private:
 
 public:
   explicit ReaderReaderWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&ReaderReaderWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&ReaderReaderWorker::ProcessorLoop,this)
   {
   }
 
@@ -202,12 +202,12 @@ public:
 
 class WriterReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -251,9 +251,9 @@ private:
 
 public:
   explicit WriterReaderWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&WriterReaderWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&WriterReaderWorker::ProcessorLoop,this)
   {
   }
 
