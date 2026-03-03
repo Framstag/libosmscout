@@ -374,6 +374,15 @@ void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
     batch.emplace_back(std::move(data));
   }
 
+  if (databases.empty() && !overlayObjects.empty() && emptyStyleConfig && emptyStyleConfig->GetTypeConfig()) {
+    // when there is no database (just online map is enabled) we still want to render overlay objects
+    MapData data;
+    if (addOverlayObjectData(data, emptyStyleConfig->GetTypeConfig())) {
+      data.styleConfig=emptyStyleConfig;
+      batch.emplace_back(std::move(data));
+    }
+  }
+
   // draw databases
   success &= mapPainter->DrawMap(renderProjection,
                                  *drawParameter,
@@ -384,6 +393,7 @@ void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
 
 bool DBRenderJob::addOverlayObjectData(MapData &data, TypeConfigRef typeConfig) const
 {
+  assert(typeConfig);
   for (auto const &o: overlayObjects) {
 
     if (o->getObjectType() == osmscout::RefType::refWay) {
