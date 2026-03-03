@@ -557,7 +557,7 @@ namespace osmscout {
       if (!areaRouteIndex->Open(typeConfig,
                                 path,
                                 parameter.GetIndexMMap())) {
-        log.Error() << "Cannot load area way index!";
+        log.Error() << "Cannot load area route index!";
         areaRouteIndexExists=false;
         areaRouteIndex=nullptr;
         return nullptr;
