@@ -30,7 +30,7 @@
 namespace osmscout {
 
 SearchRunnable::SearchRunnable(SearchModule *searchModule,
-                               DBInstanceRef &db,
+                               const DBInstanceRef &db,
                                const QString &searchPattern,
                                int limit,
                                osmscout::BreakerRef &breaker):
@@ -50,7 +50,7 @@ std::future<bool> SearchRunnable::getFuture()
 }
 
 SearchLocationsRunnable::SearchLocationsRunnable(SearchModule *searchModule,
-                                                 DBInstanceRef &db,
+                                                 const DBInstanceRef &db,
                                                  const QString &searchPattern,
                                                  int limit,
                                                  osmscout::BreakerRef &breaker,
@@ -76,7 +76,7 @@ void SearchLocationsRunnable::run()
 }
 
 FreeTextSearchRunnable::FreeTextSearchRunnable(SearchModule *searchModule,
-                                               DBInstanceRef &db,
+                                               const DBInstanceRef &db,
                                                const QString &searchPattern,
                                                int limit,
                                                osmscout::BreakerRef &breaker):
@@ -166,7 +166,12 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
     QList<osmscout::ObjectFileRef> objectSet;
     osmscout::TextSearchIndex textSearch;
     if(!textSearch.Load(db->path)){
-      osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path;
+      if (db->GetDatabase()->IsBasemap()) {
+        // just debug, basemap may omit text indexes to safe the space
+        osmscout::log.Debug() << "Failed to load text index files (basemap) " << db->path;
+      } else {
+        osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path;
+      }
       return true; // silently continue, text indexes are optional in db
     }
     osmscout::TextSearchIndex::ResultsMap resultsTxt;
@@ -226,7 +231,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
-    [this,&searchPattern,&limit,&searchCenter,&breaker,&defaultRegionInfo](const std::list<DBInstanceRef>& databases) {
+    [this,&searchPattern,&limit,&searchCenter,&breaker,&defaultRegionInfo](const std::list<DBInstanceRef>& databases, const DBInstanceRef baseMap) {
 
       // sort databases by distance from search center
       // to provide nearest results first
@@ -266,6 +271,10 @@ void SearchModule::SearchForLocations(const QString searchPattern,
         //std::cout << "  " << db->path.toStdString() << std::endl;
         StartRunnable(new SearchLocationsRunnable(this, db, searchPattern, limit, breaker, defaultRegionInfo));
         StartRunnable(new FreeTextSearchRunnable(this, db, searchPattern, limit, breaker));
+      }
+      if (baseMap) {
+        // we do not expect location index in basemap, but text search index may be present
+        StartRunnable(new FreeTextSearchRunnable(this, baseMap, searchPattern, limit, breaker));
       }
 
       // wait for all runnables
