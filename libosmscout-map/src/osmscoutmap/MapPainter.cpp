@@ -278,6 +278,13 @@ constexpr bool debugGroundTiles = false;
     return width;
   }
 
+  void MapPainter::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                     [[maybe_unused]] const MapParameter& parameter,
+                                     [[maybe_unused]] const std::vector<MapData>& data)
+  {
+    // Nothing to do in the base class implementation
+  }
+
   void MapPainter::AfterPreprocessingCallback(const Projection& /*projection*/,
                                               const MapParameter& /*parameter*/,
                                               const std::vector<MapData>& /*data*/)
@@ -2018,9 +2025,11 @@ constexpr bool debugGroundTiles = false;
                                    parameter,
                                    1.0);
 
+    bool styleSheetShanged=false;
     // make sure that attribute readers are in the same order as data
     if (databaseCache.size() > data.size()) {
       databaseCache.clear();
+      styleSheetShanged=true;
     }
     for (size_t i=0; i<data.size(); ++i) {
       assert(data[i].styleConfig);
@@ -2029,9 +2038,14 @@ constexpr bool debugGroundTiles = false;
         databaseCache.emplace_back(DatabaseCacheEntry{*typeConfig, data[i].styleConfig});
       } else if (databaseCache[i].typeConfigPtr != typeConfig.get()) {
         databaseCache[i] = DatabaseCacheEntry{*typeConfig, data[i].styleConfig};
-      } else {
+        styleSheetShanged=true;
+      } else if (databaseCache[i].styleConfig != data[i].styleConfig){
+        styleSheetShanged=true;
         databaseCache[i].styleConfig = data[i].styleConfig; // update style config in case it has changed
       }
+    }
+    if (styleSheetShanged) {
+      StyleSheetChanged(projection, parameter, data);
     }
   }
 

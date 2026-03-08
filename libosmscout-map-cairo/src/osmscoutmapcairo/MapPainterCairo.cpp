@@ -646,6 +646,32 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
+  void MapPainterCairo::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                          [[maybe_unused]] const MapParameter& parameter,
+                                          [[maybe_unused]] const std::vector<MapData>& data)
+  {
+    for (const auto &image : images) {
+      if (image != nullptr) {
+        cairo_surface_destroy(image);
+      }
+    }
+    images.clear();
+
+    for (const auto &pattern : patterns) {
+      if (pattern != nullptr) {
+        cairo_pattern_destroy(pattern);
+      }
+    }
+    patterns.clear();
+
+    for (const auto &image : patternImages) {
+      if (image != nullptr) {
+        cairo_surface_destroy(image);
+      }
+    }
+    patternImages.clear();
+  }
+
   void MapPainterCairo::BeforeDrawingCallback(const Projection& projection,
                                               const MapParameter& parameter,
                                               const std::vector<MapData>& /*data*/)

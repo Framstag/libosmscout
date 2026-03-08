@@ -837,6 +837,14 @@ namespace osmscout {
                                               1)));
   }
 
+  void MapPainterQt::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                       [[maybe_unused]] const MapParameter& parameter,
+                                       [[maybe_unused]] const std::vector<MapData>& data)
+  {
+    patternImages.clear();
+    patterns.clear();
+  }
+
   void MapPainterQt::BeforeDrawingCallback(const Projection& projection,
                                            const MapParameter& parameter,
                                            const std::vector<MapData>& /*data*/)

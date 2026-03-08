@@ -213,6 +213,10 @@ namespace osmscout {
                        const LabelData& label,
                        const IOSRunInLine& layout);
 
+        void StyleSheetChanged(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::vector<MapData>& data) override;
+
         virtual void BeforeDrawingCallback(const Projection& projection,
                                            const MapParameter& parameter,
                                            const std::vector<MapData>& data) override;
