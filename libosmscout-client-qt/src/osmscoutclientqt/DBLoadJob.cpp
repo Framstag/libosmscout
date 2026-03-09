@@ -63,7 +63,7 @@ void DBLoadJob::Run(const DBInstanceRef& basemapDatabase,
   std::list<DBInstanceRef> relevantDatabases;
   for (const auto &db:databases){
     if (!db->IsOpen() || (!db->GetStyleConfig())) {
-      log.Warn() << "Database is not ready" << db->path;
+      log.Warn() << "Database is not ready " << db->path;
       continue;
     }
     osmscout::GeoBox dbBox=db->GetDBGeoBox();
@@ -74,7 +74,11 @@ void DBLoadJob::Run(const DBInstanceRef& basemapDatabase,
     relevantDatabases.push_back(db);
   }
   if (loadBasemap && basemapDatabase) {
-    relevantDatabases.push_back(basemapDatabase);
+    if (basemapDatabase->IsOpen() && basemapDatabase->GetStyleConfig()) {
+      relevantDatabases.push_back(basemapDatabase);
+    } else {
+      log.Warn() << "Basemap database is not ready " << basemapDatabase->path;
+    }
   }
 
   DBJob::Run(basemapDatabase,relevantDatabases,std::move(locker));
