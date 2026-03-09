@@ -93,6 +93,7 @@ namespace osmscout {
       entry.tile->GetAreaData().Invalidate();
       entry.tile->GetNodeData().Invalidate();
       entry.tile->GetWayData().Invalidate();
+      entry.tile->GetRouteData().Invalidate();
       entry.tile->GetOptimizedAreaData().Invalidate();
       entry.tile->GetOptimizedWayData().Invalidate();
     }
