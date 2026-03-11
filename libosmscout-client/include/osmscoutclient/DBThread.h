@@ -93,6 +93,7 @@ class OSMSCOUT_CLIENT_API DBThread: public AsyncWorker
 {
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
+  using SynchronousDBJob2 = std::function<void (const std::list<DBInstanceRef> &, const DBInstanceRef)>;
 
   using AsynchronousDBJob = std::function<void (const DBInstanceRef& basemapDatabase,
                                                 const std::list<DBInstanceRef> &databases,
@@ -276,6 +277,7 @@ public:
    * @param job
    */
   void RunSynchronousJob(SynchronousDBJob job);
+  void RunSynchronousJob(SynchronousDBJob2 job);
 
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);

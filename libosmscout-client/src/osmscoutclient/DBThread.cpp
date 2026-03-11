@@ -510,21 +510,26 @@ CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &id
       return false;
     }
     bool result=true;
-    RunSynchronousJob([&](const std::list<DBInstanceRef> &dbs){
+    RunSynchronousJob([&](const std::list<DBInstanceRef> &dbs, const DBInstanceRef baseMap){
       if (breaker.IsAborted()) {
         result = false;
         return;
       }
 
-      for (const auto &db:dbs){
-        if (db->LastUsageMs() > idleMs){
+      auto Flush=[&](const auto &db){
+        if (db && db->LastUsageMs() > idleMs){
           auto database=db->GetDatabase();
-          osmscout::log.Debug() << "Flushing caches for " << database->GetPath();
+          log.Debug() << "Flushing caches for " << database->GetPath();
           database->DumpStatistics();
           database->FlushCache();
           db->GetMapService()->FlushTileCache();
         }
+      };
+
+      for (const auto &db:dbs){
+        Flush(db);
       }
+      Flush(baseMap);
     });
     return result;
   });
@@ -549,5 +554,15 @@ void DBThread::RunSynchronousJob(SynchronousDBJob job)
     return;
   }
   job(databases);
+}
+
+void DBThread::RunSynchronousJob(SynchronousDBJob2 job)
+{
+  ReadLock locker(latch);
+  if (!isInitializedInternal()){
+    osmscout::log.Warn() << "ignore request, dbs is not initialized";
+    return;
+  }
+  job(databases, basemapDatabase);
 }
 }

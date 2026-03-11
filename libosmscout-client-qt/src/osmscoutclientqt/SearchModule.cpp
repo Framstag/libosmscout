@@ -30,7 +30,7 @@
 namespace osmscout {
 
 SearchRunnable::SearchRunnable(SearchModule *searchModule,
-                               DBInstanceRef &db,
+                               const DBInstanceRef &db,
                                const QString &searchPattern,
                                int limit,
                                osmscout::BreakerRef &breaker):
@@ -50,7 +50,7 @@ std::future<bool> SearchRunnable::getFuture()
 }
 
 SearchLocationsRunnable::SearchLocationsRunnable(SearchModule *searchModule,
-                                                 DBInstanceRef &db,
+                                                 const DBInstanceRef &db,
                                                  const QString &searchPattern,
                                                  int limit,
                                                  osmscout::BreakerRef &breaker,
@@ -76,7 +76,7 @@ void SearchLocationsRunnable::run()
 }
 
 FreeTextSearchRunnable::FreeTextSearchRunnable(SearchModule *searchModule,
-                                               DBInstanceRef &db,
+                                               const DBInstanceRef &db,
                                                const QString &searchPattern,
                                                int limit,
                                                osmscout::BreakerRef &breaker):
@@ -166,7 +166,12 @@ bool SearchLocationsRunnable::SearchLocations(DBInstanceRef &db,
     QList<osmscout::ObjectFileRef> objectSet;
     osmscout::TextSearchIndex textSearch;
     if(!textSearch.Load(db->path)){
-      osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path;
+      if (db->GetDatabase()->IsBasemap()) {
+        // just debug, basemap may omit text indexes to safe the space
+        osmscout::log.Debug() << "Failed to load text index files (basemap) " << db->path;
+      } else {
+        osmscout::log.Warn() << "Failed to load text index files, search only for locations with db " << db->path;
+      }
       return true; // silently continue, text indexes are optional in db
     }
     osmscout::TextSearchIndex::ResultsMap resultsTxt;
@@ -226,7 +231,7 @@ void SearchModule::SearchForLocations(const QString searchPattern,
   timer.start();
 
   OSMScoutQt::GetInstance().GetDBThread()->RunSynchronousJob(
-    [this,&searchPattern,&limit,&searchCenter,&breaker,&defaultRegionInfo](const std::list<DBInstanceRef>& databases) {
+    [this,&searchPattern,&limit,&searchCenter,&breaker,&defaultRegionInfo](const std::list<DBInstanceRef>& databases, const DBInstanceRef baseMap) {
 
       // sort databases by distance from search center
       // to provide nearest results first
@@ -266,6 +271,10 @@ void SearchModule::SearchForLocations(const QString searchPattern,
         //std::cout << "  " << db->path.toStdString() << std::endl;
         StartRunnable(new SearchLocationsRunnable(this, db, searchPattern, limit, breaker, defaultRegionInfo));
         StartRunnable(new FreeTextSearchRunnable(this, db, searchPattern, limit, breaker));
+      }
+      if (baseMap) {
+        // we do not expect location index in basemap, but text search index may be present
+        StartRunnable(new FreeTextSearchRunnable(this, baseMap, searchPattern, limit, breaker));
       }
 
       // wait for all runnables
@@ -428,6 +437,49 @@ bool SearchRunnable::GetObjectDetails(const osmscout::ObjectFileRef& object,
                           bbox);
 }
 
+namespace {
+/** Object bounding box returned by SearchModule is used to show "preview" map with the object
+ *  - such preview should be properly zoomed to show the object in the best way.
+ *
+ * Most "correct" way howto do it for the objects without geometry (like city, country, ocean... that are represented as a node)
+ * would be to store size with the type.
+ * Or use stylesheet heuristics to determine zoom levels when the object is visible.
+ *
+ * But it is too complicated, so we just hardcode "usual" size for some types.
+ */
+Distance UsualObjectSize(const QString &name)
+{
+  static const QMap<QString, Distance> sizeMap{
+      {"place_ocean",          Kilometers(5000)},
+      {"place_continent",      Kilometers(4000)},
+      {"place_sea",            Kilometers(1000)},
+      {"place_country",        Kilometers(500)},
+      {"place_island",         Kilometers(150)},
+      {"place_state",          Kilometers(100)},
+      {"place_county",         Kilometers(90)},
+      {"place_region",         Kilometers(80)},
+      {"place_peninsula",      Kilometers(80)},
+      {"place_capitalcity",    Kilometers(20)},
+      {"place_millioncity",    Kilometers(20)},
+      {"place_halfmillioncity",Kilometers(16)},
+      {"place_bigcity",        Kilometers(10)},
+      {"place_suburb",         Kilometers(10)},
+      {"place_city",           Kilometers(10)},
+      {"place_town",           Kilometers(6)},
+      {"place_islet",          Kilometers(1)},
+      {"place_hamlet",         Kilometers(1)},
+      {"place_locality",       Kilometers(1)},
+      {"place_village",        Kilometers(0.5)},
+    };
+
+  auto it = sizeMap.find(name);
+  if (it != sizeMap.end()) {
+    return it.value();
+  }
+  return Meters(2.0);
+}
+}
+
 bool SearchRunnable::GetObjectDetails(const std::vector<osmscout::ObjectFileRef>& objects,
                                       const std::string &searchKey,
                                       QString &typeName,
@@ -448,7 +500,7 @@ bool SearchRunnable::GetObjectDetails(const std::vector<osmscout::ObjectFileRef>
         return false;
       }
       GetObjectNames(node->GetFeatureValueBuffer(), typeName, name, altName);
-      bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), Distance::Of<Meter>(2.0)));
+      bbox.Include(osmscout::GeoBox::BoxByCenterAndRadius(node->GetCoords(), UsualObjectSize(typeName)));
     } else if (object.GetType() == osmscout::RefType::refArea) {
       osmscout::AreaRef area;
 
