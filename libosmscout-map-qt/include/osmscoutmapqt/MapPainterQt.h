@@ -169,6 +169,10 @@ namespace osmscout {
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
+    void StyleSheetChanged(const Projection& projection,
+                           const MapParameter& parameter,
+                           const std::vector<MapData>& data) override;
+
     void BeforeDrawingCallback(const Projection& projection,
                                const MapParameter& parameter,
                                const std::vector<MapData>& data) override;

@@ -536,6 +536,21 @@ namespace osmscout {
         }
     }
 
+      void MapPainterIOS::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                            [[maybe_unused]] const MapParameter& parameter,
+                                            [[maybe_unused]] const std::vector<MapData>& data)
+      {
+        for(std::vector<CGImageRef>::const_iterator image=images.begin(); image<images.end();image++){
+            CGImageRelease(*image);
+        }
+        images.clear();
+
+        for(std::vector<CGImageRef>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
+            CGImageRelease(*image);
+        }
+        patternImages.clear();
+      }
+
     void MapPainterIOS::BeforeDrawingCallback(const Projection& projection,
                                               const MapParameter& parameter,
                                               const std::vector<MapData>& /*data*/){

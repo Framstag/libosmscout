@@ -550,6 +550,12 @@ namespace osmscout {
       Some optional callbacks between individual processing steps.
      */
     //@{
+    /**
+     * Stylesheet at least of one of the databases has changed, so the renderer can clear caches and similar.
+     */
+    virtual void StyleSheetChanged(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const std::vector<MapData>& data);
     virtual void AfterPreprocessingCallback(const Projection& projection,
                                             const MapParameter& parameter,
                                             const std::vector<MapData>& data);
