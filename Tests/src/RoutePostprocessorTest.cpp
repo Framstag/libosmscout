@@ -1077,10 +1077,9 @@ TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
-    // TODO: improve lane evaluation on similar junctions
-    // REQUIRE(suggestedLanes->GetFrom() == 0);
-    // REQUIRE(suggestedLanes->GetTo() == 1);
-    // REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
   }
 }
 
