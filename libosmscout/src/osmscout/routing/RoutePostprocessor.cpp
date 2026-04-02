@@ -29,8 +29,9 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <string_view>
 #include <numeric>
+#include <set>
+#include <string_view>
 
 namespace osmscout {
 
@@ -1759,8 +1760,8 @@ namespace osmscout {
             turn == LaneTurn::Through_SlightLeft ||
             turn == LaneTurn::Through_SharpLeft) {
           // do not consume lane when it allows to use with two directions, just remove left direction
-          laneTurns[allowedLaneTo] = LaneTurn::Through;
-          continue;
+          laneTurns[allowedLaneFrom] = LaneTurn::Through;
+          break;
         }
         if ((laneCntMatch || exitVariant == turn) && allowedLaneFrom < allowedLaneTo) {
           allowedLaneFrom++;
@@ -1795,7 +1796,7 @@ namespace osmscout {
           turn==LaneTurn::Through_SharpRight) {
         // do not consume lane when it allows to use with two directions, just remove right direction
         laneTurns[allowedLaneTo]=LaneTurn::Through;
-        continue;
+        break;
       }
       if ((laneCntMatch || exitVariant==turn) && allowedLaneFrom < allowedLaneTo) {
         allowedLaneTo--;
@@ -1851,73 +1852,133 @@ namespace osmscout {
   } // end of anonymous namespace
 
   void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const PostprocessorContext& postprocessor,
-                                                                               const RouteDescription::Node &node,
+                                                                               const std::vector<RouteDescription::Node*> &junctionNodes,
+                                                                               const RouteDescription::Node &lastNode,
                                                                                const std::list<RouteDescription::Node*> &backBuffer) const
   {
-    if (node.GetPathObject().GetType()!=refWay) {
+    assert(!junctionNodes.empty());
+    const RouteDescription::Node &firstJunctionNode = *junctionNodes.front();
+    const RouteDescription::Node &lastJunctionNode = *junctionNodes.back();
+
+    if (firstJunctionNode.GetPathObject().GetType()!=refWay) {
       return; // areas not considered now
     }
 
     assert(!backBuffer.empty());
     const RouteDescription::Node &prevNode=*backBuffer.back();
-    DatabaseId dbId = node.GetDatabaseId();
+    DatabaseId dbId = firstJunctionNode.GetDatabaseId();
     if (prevNode.GetDatabaseId() != dbId) {
       return; // we consider nodes just from the same database for simplicity
     }
 
-    auto lanes = GetLaneDescription(node);
+    auto lanes = GetLaneDescription(lastNode);
+    if (!lanes) {
+      lanes = GetLaneDescription(lastJunctionNode);
+    }
     assert(lanes);
-    auto prevLanes = GetLaneDescription(prevNode);
+    // When backward grouping pulled approach nodes out of backBuffer, use their lane
+    // config (from firstJunctionNode) instead of the now-exposed backBuffer.back().
+    // The grouped nodes were verified to have the approach config during grouping.
+    RouteDescription::LaneDescriptionRef prevLanes;
+    if (junctionNodes.size() > 1) {
+      prevLanes = GetLaneDescription(firstJunctionNode);
+    }
+    if (!prevLanes) {
+      prevLanes = GetLaneDescription(prevNode);
+    }
     assert(prevLanes);
 
-    // read lanes on the ALL junction ways, use heuristics what lanes we can use to move forward
-    Id nodeId = postprocessor.GetNodeId(node);
+    // Collect node IDs internal to the junction group (to exclude from exits)
+    std::set<Id> internalNodeIds;
+    for (const auto* jNode : junctionNodes) {
+      internalNodeIds.insert(postprocessor.GetNodeId(*jNode));
+    }
 
     WayRef prevWay = postprocessor.GetWay(prevNode.GetDBFileOffset());
     Id prevNodeId = prevWay->GetId(prevNode.GetCurrentNodeIndex());
-    // bearing from current node to previous
+    // bearing from first junction node to previous node
     Bearing prevNodeBearing = GetSphericalBearingInitial(prevWay->nodes[prevNode.GetTargetNodeIndex()].GetCoord(),
                                                          prevWay->nodes[prevNode.GetCurrentNodeIndex()].GetCoord());
 
-    WayRef way = postprocessor.GetWay(node.GetDBFileOffset());
-    Id nextNodeId = way->GetId(node.GetTargetNodeIndex());
-    Bearing nextNodeBearing = GetSphericalBearingInitial(way->nodes[node.GetCurrentNodeIndex()].GetCoord(),
-                                                         way->nodes[node.GetTargetNodeIndex()].GetCoord());
+    // Outgoing way: from the last junction node
+    WayRef outWay;
+    Id nextNodeId;
+    Bearing nextNodeBearing;
+    if (lastJunctionNode.GetPathObject().Valid() && lastJunctionNode.GetPathObject().GetType() == refWay) {
+      outWay = postprocessor.GetWay(lastJunctionNode.GetDBFileOffset());
+      nextNodeId = outWay->GetId(lastJunctionNode.GetTargetNodeIndex());
+      nextNodeBearing = GetSphericalBearingInitial(outWay->nodes[lastJunctionNode.GetCurrentNodeIndex()].GetCoord(),
+                                                    outWay->nodes[lastJunctionNode.GetTargetNodeIndex()].GetCoord());
+    } else {
+      return; // no valid outgoing way
+    }
+
+    // Collect exits from ALL junction nodes
+    size_t totalObjects = 0;
+    for (const auto* jNode : junctionNodes) {
+      totalObjects += jNode->GetObjects().size();
+    }
 
     std::vector<JunctionExit> junctionExits; // excluding incoming and outgoing way
     std::vector<JunctionExit> junctionLeftExits;
     std::vector<JunctionExit> junctionRightExits;
-    junctionExits.reserve(node.GetObjects().size());
-    junctionLeftExits.reserve(node.GetObjects().size());
-    junctionRightExits.reserve(node.GetObjects().size());
+    junctionExits.reserve(totalObjects);
+    junctionLeftExits.reserve(totalObjects);
+    junctionRightExits.reserve(totalObjects);
 
-    for (const auto &o: node.GetObjects()){
-      if (!o.IsWay()) {
-        continue; // areas not considered now
-      }
+    // Track exit node IDs we've already added to avoid duplicates from overlapping object lists
+    std::set<Id> addedExitNodeIds;
 
-      way=postprocessor.GetWay(DBFileOffset(node.GetDatabaseId(), o.GetFileOffset()));
-      for (size_t i = 0; i < way->nodes.size(); i++) {
-        if (way->nodes[i].GetId() == nodeId) {
-          if (i < way->nodes.size()-1 && postprocessor.CanUseForward(dbId, nodeId, o)) {
-            Id junctionNodeId = way->nodes[i+1].GetId();
-            if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId) {
-              auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i + 1].GetCoord());
-              auto wayLanes = postprocessor.GetLanes(node.GetDatabaseId(), way, true);
-              junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+    for (const auto* jNode : junctionNodes) {
+      Id jNodeId = postprocessor.GetNodeId(*jNode);
+
+      for (const auto &o: jNode->GetObjects()) {
+        if (!o.IsWay()) {
+          continue; // areas not considered now
+        }
+
+        WayRef way = postprocessor.GetWay(DBFileOffset(dbId, o.GetFileOffset()));
+        for (size_t i = 0; i < way->nodes.size(); i++) {
+          if (way->nodes[i].GetId() == jNodeId) {
+            if (i < way->nodes.size()-1 && postprocessor.CanUseForward(dbId, jNodeId, o)) {
+              Id junctionNodeId = way->nodes[i+1].GetId();
+              if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId
+                  && internalNodeIds.count(junctionNodeId) == 0
+                  && addedExitNodeIds.count(junctionNodeId) == 0) {
+                auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i + 1].GetCoord());
+                auto wayLanes = postprocessor.GetLanes(dbId, way, true);
+                junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+                addedExitNodeIds.insert(junctionNodeId);
+              }
             }
-          }
-          if (i > 0 && postprocessor.CanUseBackward(dbId, nodeId, o)) {
-            Id junctionNodeId = way->nodes[i-1].GetId();
-            if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId) {
-              auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i - 1].GetCoord());
-              auto wayLanes = postprocessor.GetLanes(node.GetDatabaseId(), way, false);
-              junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+            if (i > 0 && postprocessor.CanUseBackward(dbId, jNodeId, o)) {
+              Id junctionNodeId = way->nodes[i-1].GetId();
+              if (junctionNodeId!=prevNodeId && junctionNodeId!=nextNodeId
+                  && internalNodeIds.count(junctionNodeId) == 0
+                  && addedExitNodeIds.count(junctionNodeId) == 0) {
+                auto bearing = GetSphericalBearingInitial(way->nodes[i].GetCoord(), way->nodes[i - 1].GetCoord());
+                auto wayLanes = postprocessor.GetLanes(dbId, way, false);
+                junctionExits.push_back({junctionNodeId, bearing, Bearing(), wayLanes});
+                addedExitNodeIds.insert(junctionNodeId);
+              }
             }
+            break;
           }
-          break;
         }
       }
+    }
+
+    // Filter exits whose bearing is too close to the incoming direction (opposite carriageway / U-turn).
+    // An exit within ~30° of prevNodeBearing is going back toward where we came from.
+    if (junctionNodes.size() > 1) {
+      junctionExits.erase(
+        std::remove_if(junctionExits.begin(), junctionExits.end(),
+          [&prevNodeBearing](const JunctionExit &exit) {
+            Bearing diff = exit.bearing - prevNodeBearing;
+            // diff near 0° means exit goes same direction as "junction→prev", i.e., back where we came from
+            return diff < Bearing::Degrees(30) || diff > Bearing::Degrees(330);
+          }),
+        junctionExits.end());
     }
 
     Bearing prevNodeRelativeToNextBearing = prevNodeBearing - nextNodeBearing;
@@ -1947,6 +2008,7 @@ namespace osmscout {
     while (prevLanes->GetLaneCount() > laneTurns.size()) {
       laneTurns.push_back(LaneTurn::None);
     }
+    std::vector<LaneTurn> originalLaneTurns = laneTurns;
 
     // when number of outgoing lanes match to incoming one, we may decide easily what lane belong to what exit...
     bool laneCntMatch = laneTurns.size() ==
@@ -1980,6 +2042,66 @@ namespace osmscout {
     // setup suggested lane description to incoming route segment
     assert(allowedLaneTo >= allowedLaneFrom);
 
+    Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
+
+    // For turn-change triggers (same lane count, different turns), refine the suggestion
+    // using lane turn annotations. This handles cases like [left, through, through;right]
+    // changing to [left, through, through] where exits may over-consume compound lanes
+    // and leave incompatible edge lanes.
+    if (prevLanes->GetLaneCount() == lanes->GetLaneCount()) {
+      constexpr uint32_t throughBit = 0b00001000;
+      constexpr uint32_t leftBits   = 0b00000111;
+      constexpr uint32_t rightBits  = 0b01110000;
+
+      // Restore consumed compound lanes (through+right / through+left).
+      // These serve multiple directions and shouldn't be fully consumed.
+      while (allowedLaneTo < int(originalLaneTurns.size()) - 1) {
+        uint32_t origBits = TurnToBits(originalLaneTurns[allowedLaneTo + 1]);
+        if ((origBits & throughBit) && (origBits & (leftBits | rightBits))) {
+          allowedLaneTo++;
+        } else {
+          break;
+        }
+      }
+      while (allowedLaneFrom > 0) {
+        uint32_t origBits = TurnToBits(originalLaneTurns[allowedLaneFrom - 1]);
+        if ((origBits & throughBit) && (origBits & (leftBits | rightBits))) {
+          allowedLaneFrom--;
+        } else {
+          break;
+        }
+      }
+
+      // Narrow edges whose turn is incompatible with the route direction.
+      // For through routes, only narrow from the left — slight road curves
+      // can make through lanes appear as slight_right in annotations.
+      bool routeIsRight = relativeBearing > Bearing::Degrees(40) && relativeBearing < Bearing::Degrees(180);
+      bool routeIsLeft  = relativeBearing > Bearing::Degrees(180) && relativeBearing < Bearing::Degrees(320);
+
+      uint32_t routeDirectionBits = throughBit;
+      if (routeIsRight) { routeDirectionBits = rightBits; }
+      else if (routeIsLeft) { routeDirectionBits = leftBits; }
+
+      while (allowedLaneFrom < allowedLaneTo && allowedLaneFrom < int(originalLaneTurns.size())) {
+        uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneFrom]);
+        if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
+          allowedLaneFrom++;
+        } else {
+          break;
+        }
+      }
+      if (routeIsLeft || routeIsRight) {
+        while (allowedLaneTo > allowedLaneFrom && allowedLaneTo < int(originalLaneTurns.size())) {
+          uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneTo]);
+          if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
+            allowedLaneTo--;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
     // detect what all allowed turns have common
     // keep in mind that laneTurns may have removed directions used by exits, it is benefitial here
     uint32_t suggestedTurnBits;
@@ -1995,8 +2117,6 @@ namespace osmscout {
         suggestedTurnBits &= TurnToBits(LaneTurn::Unknown);
       }
     }
-    // evaluate suggested direction from lane turns
-    Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
     LaneTurn suggestedTurn = BitsToTurn(suggestedTurnBits);
     if (suggestedTurn == LaneTurn::Through_SlightRight || suggestedTurn == LaneTurn::Through_Right || suggestedTurn == LaneTurn::Through_SharpRight) {
       if (relativeBearing > Bearing::Degrees(30) && relativeBearing < Bearing::Degrees(180)) {
@@ -2022,6 +2142,15 @@ namespace osmscout {
       }
       nodePtr->AddDescription(suggested);
     }
+    // Also write suggestion to grouped junction nodes that have the same lane config
+    // as the approach. These nodes were removed from backBuffer during grouping but
+    // still represent approach segments that need the suggestion.
+    for (auto* jNode : junctionNodes) {
+      auto nodeLanes = GetLaneDescription(*jNode);
+      if (nodeLanes && *prevLanes == *nodeLanes) {
+        jNode->AddDescription(suggested);
+      }
+    }
   }
 
   RouteDescription::LaneDescriptionRef RoutePostprocessor::SuggestedLanesPostprocessor::GetLaneDescription(const RouteDescription::Node &node) const
@@ -2032,8 +2161,6 @@ namespace osmscout {
   bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const PostprocessorContext& postprocessor,
                                                                 RouteDescription& description)
   {
-    using namespace std::string_view_literals;
-
     // buffer of traveled nodes, recent node at back
     std::list<RouteDescription::Node*> backBuffer;
     for (auto& node : description.Nodes()) {
@@ -2055,9 +2182,58 @@ namespace osmscout {
         if (prevLanes->GetLaneCount() > lanes->GetLaneCount() // lane count was decreased
             || prevLanes->GetLaneTurns() != lanes->GetLaneTurns()) { // lane turns changed
 
-          EvaluateLaneSuggestion(postprocessor, node, backBuffer);
+          // Group junction nodes: scan backwards through backBuffer for preceding junction nodes
+          // that are close together and have the same lane config. This handles complex intersections
+          // modeled as multiple OSM nodes connected by short internal segments.
+          std::vector<RouteDescription::Node*> junctionNodes;
+          junctionNodes.push_back(&node);
+
+          size_t backwardCount = 0;
+          for (auto bufIt = backBuffer.rbegin(); bufIt != backBuffer.rend(); ++bufIt) {
+            // Keep at least one node in backBuffer as the prevNode for evaluation
+            if (backwardCount + 1 >= backBuffer.size()) {
+              break;
+            }
+
+            RouteDescription::Node* candidate = *bufIt;
+
+            // Must be a real junction (multiple ways crossing)
+            if (candidate->GetObjects().size() <= 1) {
+              break;
+            }
+            // Must be close to the trigger node (first junction node)
+            Distance dist = GetSphericalDistance(candidate->GetLocation(),
+                                                junctionNodes.front()->GetLocation());
+            if (dist > Meters(35)) {
+              break;
+            }
+            // The segment from this node should have the same lane config as the approach
+            auto candidateLanes = GetLaneDescription(*candidate);
+            if (!candidateLanes ||
+                candidateLanes->GetLaneCount() != prevLanes->GetLaneCount() ||
+                candidateLanes->GetLaneTurns() != prevLanes->GetLaneTurns()) {
+              break;
+            }
+
+            junctionNodes.push_back(candidate);
+            backwardCount++;
+          }
+
+          // Reverse so junctionNodes is in route order (earliest first)
+          std::reverse(junctionNodes.begin(), junctionNodes.end());
+
+          // Remove backward-grouped nodes from backBuffer
+          for (size_t i = 0; i < backwardCount && !backBuffer.empty(); ++i) {
+            backBuffer.pop_back();
+          }
+
+          if (!backBuffer.empty()) {
+            EvaluateLaneSuggestion(postprocessor, junctionNodes, node, backBuffer);
+          }
 
           backBuffer.clear();
+          backBuffer.push_back(&node);
+          continue;
         }
       }
 
