@@ -2101,15 +2101,6 @@ namespace osmscout {
   bool RoutePostprocessor::SuggestedLanesPostprocessor::Process(const PostprocessorContext& postprocessor,
                                                                 RouteDescription& description)
   {
-    // Helper to get a node's geographic coordinate from its path way object
-    auto getNodeCoord = [&postprocessor](const RouteDescription::Node &n) -> GeoCoord {
-      if (n.GetPathObject().Valid() && n.GetPathObject().GetType() == refWay) {
-        WayRef w = postprocessor.GetWay(n.GetDBFileOffset());
-        return w->nodes[n.GetCurrentNodeIndex()].GetCoord();
-      }
-      return n.GetLocation();
-    };
-
     // buffer of traveled nodes, recent node at back
     std::list<RouteDescription::Node*> backBuffer;
     for (auto& node : description.Nodes()) {
@@ -2151,8 +2142,8 @@ namespace osmscout {
               break;
             }
             // Must be close to the most recently grouped junction node
-            Distance dist = GetSphericalDistance(getNodeCoord(*candidate),
-                                                getNodeCoord(*junctionNodes.back()));
+            Distance dist = GetSphericalDistance(candidate->GetLocation(),
+                                                junctionNodes.back()->GetLocation());
             if (dist > Meters(50)) {
               break;
             }
