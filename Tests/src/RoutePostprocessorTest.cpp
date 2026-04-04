@@ -272,6 +272,7 @@ public:
   osmscout::Duration
   GetTime([[maybe_unused]] osmscout::DatabaseId dbId, [[maybe_unused]] const osmscout::Way &way, [[maybe_unused]] const osmscout::Distance &deltaDistance) const override
   {
+    // DistanceAndTimePostprocessor using this method, but we don't need valid time for testing
     return osmscout::Duration();
   }
 
