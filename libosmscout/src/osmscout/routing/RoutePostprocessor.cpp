@@ -2730,19 +2730,22 @@ namespace osmscout {
       motorwayTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:motorwayTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
-        motorwayTypes[dbId].Set(type);
+        if (type)
+          motorwayTypes[dbId].Set(type);
       }
 
       motorwayLinkTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:motorwayLinkTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
-        motorwayLinkTypes[dbId].Set(type);
+        if (type)
+          motorwayLinkTypes[dbId].Set(type);
       }
 
       junctionTypes[dbId]; // insert empty TypeInfoSet
       for (const std::string &typeName:junctionTypeNames){
         TypeInfoRef type=typeConfig->GetTypeInfo(typeName);
-        junctionTypes[dbId].Set(type);
+        if (type)
+          junctionTypes[dbId].Set(type);
       }
 
       miniRoundaboutTypes[dbId]=typeConfig->GetTypeInfo(miniRoundaboutTypeName);
@@ -2786,7 +2789,7 @@ namespace osmscout {
     RouteDescription::Node *previousNode = nullptr;
     for (auto &node : description.Nodes()) {
         if (--nodeCount == 0) {
-            
+
             if (previousNode) {
                 RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(sectionCount, sectionLengths[sectionCount - 1]);
                 previousNode->AddDescription(desc);
@@ -2794,18 +2797,18 @@ namespace osmscout {
 
             previousNode = &node;
             nodeCount = sectionLengths[sectionCount++];
-            
+
             if (sectionCount >= nbSections) {
                 break;
             }
         }
     }
-      
+
     if (previousNode) {
         RouteDescription::ViaDescriptionRef desc=std::make_shared<RouteDescription::ViaDescription>(nbSections, sectionLengths[nbSections - 1]);
         previousNode->AddDescription(desc);
     }
-      
+
     return true;
   }
 }
