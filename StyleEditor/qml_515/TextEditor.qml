@@ -201,6 +201,31 @@ Item {
                     color: "white"
                 }
 
+                // custom blinking cursor
+                cursorDelegate: Rectangle {
+                    id: cursor
+                    visible: textArea.cursorVisible
+                    color: textArea.color
+                    width: units.dp(2)
+
+                    SequentialAnimation {
+                        loops: Animation.Infinite
+                        running: true
+                        PropertyAction {
+                            target: cursor
+                            property: 'opacity'
+                            value: 1.0
+                        }
+                        PauseAnimation { duration: 500 }
+                        PropertyAction {
+                            target: cursor
+                            property: 'opacity'
+                            value: 0.0
+                        }
+                        PauseAnimation { duration: 500 }
+                    }
+                }
+
                 // fickable height ratio is not accurate
                 property int visibleLineCount: (pageArea.height / textArea.height)  * textArea.lineCount
                 property real rowHeight: textArea.height / textArea.lineCount
