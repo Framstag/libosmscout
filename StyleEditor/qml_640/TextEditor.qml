@@ -208,6 +208,18 @@ Item {
                     color: textArea.color
                     width: units.dp(2)
 
+                    // scrolling area will break the binding
+                    // so rebind the property and force redraw
+                    Connections {
+                        target: textArea
+                        onCursorPositionChanged: {
+                            visible = textArea.cursorVisible
+                        }
+                        onActiveFocusChanged: {
+                            visible = textArea.cursorVisible
+                        }
+                    }
+
                     SequentialAnimation {
                         loops: Animation.Infinite
                         running: true
