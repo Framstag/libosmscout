@@ -334,3 +334,19 @@ osmscout_test_project(NAME PolygonCenterTest SOURCES src/PolygonCenterTest.cpp)
 #---- MercatorProjection
 osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjectionTest.cpp)
 
+#---- LaneEvaluation (manual evaluation tooling, not a CI test)
+set(_lane_eval_sources
+    src/LaneEvaluation.cpp
+    src/LaneEvaluationCommon.cpp
+    src/LaneEvaluationCompare.cpp)
+
+add_executable(LaneEvaluation ${_lane_eval_sources})
+set_target_properties(LaneEvaluation PROPERTIES FOLDER "Tests")
+target_link_libraries(LaneEvaluation OSMScout::OSMScout)
+target_include_directories(LaneEvaluation PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if(${OSMSCOUT_BUILD_MAP_CAIRO})
+    target_link_libraries(LaneEvaluation OSMScout::Map OSMScout::MapCairo)
+    target_compile_definitions(LaneEvaluation PRIVATE HAVE_MAP_CAIRO=1)
+endif()
+
