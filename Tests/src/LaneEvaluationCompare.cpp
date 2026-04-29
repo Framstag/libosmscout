@@ -1,6 +1,7 @@
 #include <LaneEvaluationCompare.h>
 #include <LaneEvaluationCommon.h>
 
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <map>
@@ -27,6 +28,8 @@ struct SuggestionDiff
   std::optional<NodeLaneInfo> lanes;
   std::optional<NodeSuggestedLaneInfo> oldSuggestion;
   std::optional<NodeSuggestedLaneInfo> newSuggestion;
+  std::vector<RouteNodeInfo> routeNodes;
+  size_t junctionLocalIndex = 0;
 };
 
 static bool SuggestedLanesEqual(const std::optional<NodeSuggestedLaneInfo> &a,
@@ -71,6 +74,15 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
       diff.lanes = newNode.lanes;
       diff.oldSuggestion = oldNode.suggestedLanes;
       diff.newSuggestion = newNode.suggestedLanes;
+
+      constexpr size_t kNodeWindowRadius = 5;
+      size_t windowStart = (i >= kNodeWindowRadius) ? (i - kNodeWindowRadius) : 0;
+      size_t windowEnd = std::min(i + kNodeWindowRadius + 1, maxNodes);
+      diff.junctionLocalIndex = i - windowStart;
+      for (size_t j = windowStart; j < windowEnd; j++) {
+        diff.routeNodes.push_back(newRoute.nodes[j]);
+      }
+
       diffs.push_back(std::move(diff));
     }
   }
@@ -85,57 +97,178 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
 
 #ifdef HAVE_MAP_CAIRO
 
+static void RenderLegend(cairo_t *cairo,
+                         const SuggestionDiff &diff,
+                         const std::optional<NodeSuggestedLaneInfo> &suggestion,
+                         const std::string &label)
+{
+  const auto &node = diff.routeNodes[diff.junctionLocalIndex];
+
+  std::vector<std::string> lines;
+  lines.push_back(label);
+  lines.push_back("node: " + std::to_string(diff.nodeIndex) +
+                  "  (" + std::to_string(diff.lat) + ", " + std::to_string(diff.lon) + ")");
+  if (!node.name.empty()) {
+    lines.push_back("name: " + node.name);
+  }
+  if (!node.typeName.empty()) {
+    lines.push_back("type: " + node.typeName);
+  }
+  if (!node.turn.empty()) {
+    lines.push_back("turn: " + node.turn);
+  }
+  if (node.lanes.has_value()) {
+    std::string lanesStr = "lanes: count=" + std::to_string(node.lanes->laneCount) +
+                           " oneway=" + (node.lanes->oneway ? "true" : "false");
+    if (!node.lanes->laneTurns.empty()) {
+      lanesStr += " turns=[";
+      for (size_t i = 0; i < node.lanes->laneTurns.size(); i++) {
+        if (i > 0) lanesStr += ",";
+        lanesStr += node.lanes->laneTurns[i];
+      }
+      lanesStr += "]";
+    }
+    lines.push_back(lanesStr);
+  }
+  lines.push_back("suggested: " + FormatSuggestion(suggestion));
+
+  double fontSize = 16.0;
+  double padding = 10.0;
+  double lineHeight = fontSize + 4.0;
+  double x = padding;
+  double y = padding;
+
+  cairo_set_font_size(cairo, fontSize);
+
+  double maxWidth = 0;
+  for (const auto &line : lines) {
+    cairo_text_extents_t ext;
+    cairo_text_extents(cairo, line.c_str(), &ext);
+    maxWidth = std::max(maxWidth, ext.width);
+  }
+
+  double boxW = maxWidth + 2 * padding;
+  double boxH = lines.size() * lineHeight + 2 * padding;
+
+  cairo_set_source_rgba(cairo, 1.0, 1.0, 1.0, 0.85);
+  cairo_rectangle(cairo, x, y, boxW, boxH);
+  cairo_fill(cairo);
+
+  cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.5);
+  cairo_set_line_width(cairo, 1.0);
+  cairo_rectangle(cairo, x, y, boxW, boxH);
+  cairo_stroke(cairo);
+
+  cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.9);
+  for (size_t i = 0; i < lines.size(); i++) {
+    cairo_move_to(cairo, x + padding, y + padding + fontSize + i * lineHeight);
+    cairo_show_text(cairo, lines[i].c_str());
+  }
+}
+
 static void RenderLaneOverlay(cairo_t *cairo,
                               const MercatorProjection &projection,
-                              double junctionLat,
-                              double junctionLon,
-                              const std::optional<NodeLaneInfo> &lanes,
+                              const SuggestionDiff &diff,
                               const std::optional<NodeSuggestedLaneInfo> &suggestion,
                               const std::string &label)
 {
-  Vertex2D centerPixel;
-  GeoCoord junctionCoord(junctionLat, junctionLon);
-  if (!projection.GeoToPixel(junctionCoord, centerPixel)) {
-    return;
-  }
-  double centerX = centerPixel.GetX();
-  double centerY = centerPixel.GetY();
-
-  int laneCount = lanes.has_value() ? lanes->laneCount : 0;
-  if (laneCount <= 0) {
+  if (diff.routeNodes.size() < 2) {
     return;
   }
 
-  double laneWidth = 8.0;
-  double totalWidth = laneCount * laneWidth;
-  double startX = centerX - totalWidth / 2.0;
-  double laneHeight = 60.0;
-  double topY = centerY - laneHeight / 2.0;
+  struct PixelNode {
+    Vertex2D pixel;
+    bool valid = false;
+  };
 
-  for (int i = 0; i < laneCount; i++) {
-    double x = startX + i * laneWidth;
+  std::vector<PixelNode> pixelNodes;
+  pixelNodes.reserve(diff.routeNodes.size());
+  for (const auto &rn : diff.routeNodes) {
+    PixelNode pn;
+    GeoCoord coord(rn.lat, rn.lon);
+    pn.valid = projection.GeoToPixel(coord, pn.pixel);
+    pixelNodes.push_back(pn);
+  }
 
-    bool suggested = suggestion.has_value() &&
-                     i >= suggestion->from && i <= suggestion->to;
+  double laneSpacing = 8.0;
 
-    if (suggested) {
-      cairo_set_source_rgba(cairo, 0.0, 0.8, 0.0, 0.6);
-    } else {
-      cairo_set_source_rgba(cairo, 0.5, 0.5, 0.5, 0.4);
+  for (size_t seg = 0; seg + 1 < pixelNodes.size(); seg++) {
+    if (!pixelNodes[seg].valid || !pixelNodes[seg + 1].valid) {
+      continue;
     }
-    cairo_rectangle(cairo, x, topY, laneWidth - 1, laneHeight);
-    cairo_fill(cairo);
 
-    cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.7);
-    cairo_set_line_width(cairo, 0.5);
-    cairo_rectangle(cairo, x, topY, laneWidth - 1, laneHeight);
-    cairo_stroke(cairo);
+    const auto &segNode = diff.routeNodes[seg];
+    int segLaneCount = segNode.lanes.has_value() ? segNode.lanes->laneCount : 0;
+    if (segLaneCount <= 0) {
+      continue;
+    }
+
+    double dx = pixelNodes[seg + 1].pixel.GetX() - pixelNodes[seg].pixel.GetX();
+    double dy = pixelNodes[seg + 1].pixel.GetY() - pixelNodes[seg].pixel.GetY();
+    double len = std::sqrt(dx * dx + dy * dy);
+    if (len < 1e-6) {
+      continue;
+    }
+
+    double perpX = -dy / len;
+    double perpY = dx / len;
+
+    double totalWidth = (segLaneCount - 1) * laneSpacing;
+
+    bool adjacentToJunction = seg == diff.junctionLocalIndex ||
+                              (diff.junctionLocalIndex > 0 && seg == diff.junctionLocalIndex - 1);
+
+    for (int lane = 0; lane < segLaneCount; lane++) {
+      double offset = -totalWidth / 2.0 + lane * laneSpacing;
+
+      double x0 = pixelNodes[seg].pixel.GetX() + perpX * offset;
+      double y0 = pixelNodes[seg].pixel.GetY() + perpY * offset;
+      double x1 = pixelNodes[seg + 1].pixel.GetX() + perpX * offset;
+      double y1 = pixelNodes[seg + 1].pixel.GetY() + perpY * offset;
+
+      bool isSuggested = adjacentToJunction && suggestion.has_value() &&
+                         lane >= suggestion->from && lane <= suggestion->to;
+
+      if (isSuggested) {
+        cairo_set_source_rgba(cairo, 0.0, 0.8, 0.0, 0.8);
+        cairo_set_line_width(cairo, 5.0);
+        cairo_set_dash(cairo, nullptr, 0, 0.0);
+      } else {
+        cairo_set_source_rgba(cairo, 0.5, 0.5, 0.5, 0.5);
+        cairo_set_line_width(cairo, 3.0);
+        double dashes[] = {6.0, 6.0};
+        cairo_set_dash(cairo, dashes, 2, 0.0);
+      }
+
+      cairo_move_to(cairo, x0, y0);
+      cairo_line_to(cairo, x1, y1);
+      cairo_stroke(cairo);
+    }
   }
 
-  cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0);
-  cairo_set_font_size(cairo, 12.0);
-  cairo_move_to(cairo, centerX - 40, topY - 8);
-  cairo_show_text(cairo, label.c_str());
+  cairo_set_dash(cairo, nullptr, 0, 0.0);
+
+  for (size_t ni = 0; ni < pixelNodes.size(); ni++) {
+    if (!pixelNodes[ni].valid) {
+      continue;
+    }
+    bool isIncoming = ni < diff.junctionLocalIndex;
+    bool isJunction = ni == diff.junctionLocalIndex;
+
+    if (isJunction) {
+      cairo_set_source_rgba(cairo, 1.0, 1.0, 0.0, 0.9);
+    } else if (isIncoming) {
+      cairo_set_source_rgba(cairo, 0.0, 0.8, 0.0, 0.8);
+    } else {
+      cairo_set_source_rgba(cairo, 0.8, 0.0, 0.0, 0.8);
+    }
+    double radius = isJunction ? 8.0 : 5.0;
+    cairo_arc(cairo, pixelNodes[ni].pixel.GetX(), pixelNodes[ni].pixel.GetY(),
+              radius, 0, 2 * M_PI);
+    cairo_fill(cairo);
+  }
+
+  RenderLegend(cairo, diff, suggestion, label);
 }
 
 static bool RenderJunctionImage(const std::string &databaseDir,
@@ -158,14 +291,14 @@ static bool RenderJunctionImage(const std::string &databaseDir,
     return false;
   }
 
-  size_t width = 600;
-  size_t height = 400;
+  size_t width = 1920;
+  size_t height = 1080;
   GeoCoord center(diff.lat, diff.lon);
 
   MercatorProjection projection;
   projection.Set(center,
                  Magnification(Magnification::magBlock),
-                 96.0,
+                 192.0,
                  width, height);
 
   MapParameter drawParameter;
@@ -209,8 +342,7 @@ static bool RenderJunctionImage(const std::string &databaseDir,
   std::string label = useOldSuggestion ? "OLD: " : "NEW: ";
   label += FormatSuggestion(suggestion);
 
-  RenderLaneOverlay(cairo, projection, diff.lat, diff.lon,
-                    diff.lanes, suggestion, label);
+  RenderLaneOverlay(cairo, projection, diff, suggestion, label);
 
   if (cairo_surface_write_to_png(surface, outputPath.c_str()) != CAIRO_STATUS_SUCCESS) {
     log.Error() << "Cannot write PNG: " << outputPath;
@@ -229,7 +361,7 @@ static bool RenderJunctionImage(const std::string &databaseDir,
 static int CompareFile(const std::string &oldFile,
                        const std::string &newFile,
                        const std::string &basename,
-                       const CompareOptions &options,
+                       [[maybe_unused]] const CompareOptions &options,
                        int &totalDiffs)
 {
   RouteInfo oldRoute;
