@@ -168,108 +168,64 @@ bool ComputeRoute(const std::string &databasePath,
   return true;
 }
 
-static std::string JsonEscape(const std::string &str)
-{
-  std::string buffer;
-  buffer.reserve(str.size());
-  for (char c : str) {
-    switch (c) {
-    case '"':  buffer.append("\\\""); break;
-    case '\\': buffer.append("\\\\"); break;
-    case '\n': buffer.append("\\n"); break;
-    case '\r': buffer.append("\\r"); break;
-    case '\t': buffer.append("\\t"); break;
-    default:   buffer.push_back(c); break;
-    }
-  }
-  return buffer;
-}
-
 void WriteRouteJson(const RouteDescription &description,
                     const GeoCoord &start,
                     const GeoCoord &target,
                     const std::string &databasePath,
                     std::ostream &out)
 {
-  out.precision(8);
-  out.imbue(std::locale("C"));
+  nlohmann::json j;
+  j["version"] = 1;
+  j["start"] = {{"lat", start.GetLat()}, {"lon", start.GetLon()}};
+  j["target"] = {{"lat", target.GetLat()}, {"lon", target.GetLon()}};
+  j["database"] = databasePath;
 
-  out << "{\n";
-  out << "  \"version\": 1,\n";
-  out << "  \"start\": { \"lat\": " << start.GetLat() << ", \"lon\": " << start.GetLon() << " },\n";
-  out << "  \"target\": { \"lat\": " << target.GetLat() << ", \"lon\": " << target.GetLon() << " },\n";
-  out << "  \"database\": \"" << JsonEscape(databasePath) << "\",\n";
-  out << "  \"nodes\": [\n";
+  auto &nodesArr = j["nodes"];
+  nodesArr = nlohmann::json::array();
 
   size_t nodeIndex = 0;
-  bool first = true;
   for (const auto &node : description.Nodes()) {
-    if (!first) {
-      out << ",\n";
-    }
-    first = false;
-
-    out << "    {\n";
-    out << "      \"nodeIndex\": " << nodeIndex << ",\n";
-    out << "      \"lat\": " << node.GetLocation().GetLat() << ",\n";
-    out << "      \"lon\": " << node.GetLocation().GetLon() << ",\n";
-    out << "      \"distanceKm\": " << node.GetDistance().As<Kilometer>() << "";
+    nlohmann::json nodeObj;
+    nodeObj["nodeIndex"] = nodeIndex;
+    nodeObj["lat"] = node.GetLocation().GetLat();
+    nodeObj["lon"] = node.GetLocation().GetLon();
+    nodeObj["distanceKm"] = node.GetDistance().As<Kilometer>();
 
     for (const auto &desc : node.GetDescriptions()) {
-      if (auto nameDesc = dynamic_cast<RouteDescription::NameDescription *>(desc.get());
-          nameDesc != nullptr) {
-        out << ",\n";
-        out << "      \"name\": \"" << JsonEscape(nameDesc->GetName()) << "\",\n";
-        out << "      \"ref\": \"" << JsonEscape(nameDesc->GetRef()) << "\"";
-      } else if (auto typeNameDesc = dynamic_cast<RouteDescription::TypeNameDescription *>(desc.get());
-                 typeNameDesc != nullptr) {
-        out << ",\n";
-        out << "      \"type\": \"" << JsonEscape(typeNameDesc->GetName()) << "\"";
-      } else if (auto directionDesc = dynamic_cast<RouteDescription::DirectionDescription *>(desc.get());
-                 directionDesc != nullptr) {
-        out << ",\n";
-        out << "      \"turn\": \"" << JsonEscape(MoveToTurnCommand(directionDesc->GetTurn())) << "\"";
+      if (auto nameDesc = dynamic_cast<RouteDescription::NameDescription *>(desc.get())) {
+        nodeObj["name"] = nameDesc->GetName();
+        nodeObj["ref"] = nameDesc->GetRef();
+      } else if (auto typeNameDesc = dynamic_cast<RouteDescription::TypeNameDescription *>(desc.get())) {
+        nodeObj["type"] = typeNameDesc->GetName();
+      } else if (auto directionDesc = dynamic_cast<RouteDescription::DirectionDescription *>(desc.get())) {
+        nodeObj["turn"] = MoveToTurnCommand(directionDesc->GetTurn());
       }
     }
 
-    auto laneDesc = node.GetDescription<RouteDescription::LaneDescription>();
-    if (laneDesc) {
-      out << ",\n";
-      out << "      \"lanes\": {\n";
-      out << "        \"oneway\": " << (laneDesc->IsOneway() ? "true" : "false") << ",\n";
-      out << "        \"laneCount\": " << static_cast<int>(laneDesc->GetLaneCount()) << ",\n";
-      out << "        \"laneTurns\": [";
-      bool firstTurn = true;
+    if (auto laneDesc = node.GetDescription<RouteDescription::LaneDescription>()) {
+      nlohmann::json lanesObj;
+      lanesObj["oneway"] = laneDesc->IsOneway();
+      lanesObj["laneCount"] = static_cast<int>(laneDesc->GetLaneCount());
+      lanesObj["laneTurns"] = nlohmann::json::array();
       for (const auto &turn : laneDesc->GetLaneTurns()) {
-        if (!firstTurn) {
-          out << ", ";
-        }
-        firstTurn = false;
-        out << "\"" << LaneTurnString(turn) << "\"";
+        lanesObj["laneTurns"].push_back(LaneTurnString(turn));
       }
-      out << "]\n";
-      out << "      }";
+      nodeObj["lanes"] = lanesObj;
     }
 
-    auto suggestedDesc = node.GetDescription<RouteDescription::SuggestedLaneDescription>();
-    if (suggestedDesc) {
-      out << ",\n";
-      out << "      \"suggestedLanes\": {\n";
-      out << "        \"from\": " << static_cast<int>(suggestedDesc->GetFrom()) << ",\n";
-      out << "        \"to\": " << static_cast<int>(suggestedDesc->GetTo()) << ",\n";
-      out << "        \"turn\": \"" << LaneTurnString(suggestedDesc->GetTurn()) << "\"\n";
-      out << "      }";
+    if (auto suggestedDesc = node.GetDescription<RouteDescription::SuggestedLaneDescription>()) {
+      nodeObj["suggestedLanes"] = {
+        {"from", static_cast<int>(suggestedDesc->GetFrom())},
+        {"to", static_cast<int>(suggestedDesc->GetTo())},
+        {"turn", LaneTurnString(suggestedDesc->GetTurn())}
+      };
     }
 
-    out << "\n";
-    out << "    }";
-
+    nodesArr.push_back(std::move(nodeObj));
     nodeIndex++;
   }
 
-  out << "\n";
-  out << "  ]\n";
-  out << "}\n";
+  out << j.dump(2) << "\n";
 }
 
 RouteInfo ReadRouteJson(const std::string &inputPath)
