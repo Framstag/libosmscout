@@ -14,7 +14,6 @@
 #include <osmscoutmap/MapService.h>
 #include <osmscoutmap/MapPainter.h>
 #include <osmscoutmapcairo/MapPainterCairo.h>
-#include <cairo/cairo.h>
 #endif
 
 namespace osmscout {
