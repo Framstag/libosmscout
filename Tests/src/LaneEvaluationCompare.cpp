@@ -21,8 +21,7 @@ namespace osmscout {
 struct SuggestionDiff
 {
   size_t nodeIndex = 0;
-  double lat = 0.0;
-  double lon = 0.0;
+  GeoCoord coord;
   std::string name;
   std::optional<NodeLaneInfo> lanes;
   std::optional<NodeSuggestedLaneInfo> oldSuggestion;
@@ -67,8 +66,7 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
     if (!SuggestedLanesEqual(oldNode.suggestedLanes, newNode.suggestedLanes)) {
       SuggestionDiff diff;
       diff.nodeIndex = i;
-      diff.lat = newNode.lat;
-      diff.lon = newNode.lon;
+      diff.coord = newNode.coord;
       diff.name = newNode.name;
       diff.lanes = newNode.lanes;
       diff.oldSuggestion = oldNode.suggestedLanes;
@@ -106,7 +104,7 @@ static void RenderLegend(cairo_t *cairo,
   std::vector<std::string> lines;
   lines.push_back(label);
   lines.push_back("node: " + std::to_string(diff.nodeIndex) +
-                  "  (" + std::to_string(diff.lat) + ", " + std::to_string(diff.lon) + ")");
+                  "  (" + diff.coord.GetDisplayText() + ")");
   if (!node.name.empty()) {
     lines.push_back("name: " + node.name);
   }
@@ -184,8 +182,7 @@ static void RenderLaneOverlay(cairo_t *cairo,
   pixelNodes.reserve(diff.routeNodes.size());
   for (const auto &rn : diff.routeNodes) {
     PixelNode pn;
-    GeoCoord coord(rn.lat, rn.lon);
-    pn.valid = projection.GeoToPixel(coord, pn.pixel);
+    pn.valid = projection.GeoToPixel(rn.coord, pn.pixel);
     pixelNodes.push_back(pn);
   }
 
@@ -292,7 +289,7 @@ static bool RenderJunctionImage(const std::string &databaseDir,
 
   size_t width = 1920;
   size_t height = 1080;
-  GeoCoord center(diff.lat, diff.lon);
+  GeoCoord center=diff.coord;
 
   MercatorProjection projection;
   projection.Set(center,
@@ -394,7 +391,7 @@ static int CompareFile(const std::string &oldFile,
 
   for (const auto &diff : diffs) {
     std::cout << "  Node " << diff.nodeIndex
-              << " (" << diff.lat << ", " << diff.lon << ")";
+              << " (" << diff.coord.GetDisplayText() << ")";
     if (!diff.name.empty()) {
       std::cout << " \"" << diff.name << "\"";
     }

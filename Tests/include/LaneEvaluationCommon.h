@@ -8,6 +8,7 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/db/Database.h>
+#include <osmscout/util/Distance.h>
 #include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RoutingService.h>
 
@@ -30,9 +31,8 @@ struct NodeSuggestedLaneInfo
 struct RouteNodeInfo
 {
   size_t nodeIndex = 0;
-  double lat = 0.0;
-  double lon = 0.0;
-  double distanceKm = 0.0;
+  GeoCoord coord;
+  Distance distance;
   std::string name;
   std::string ref;
   std::string typeName;

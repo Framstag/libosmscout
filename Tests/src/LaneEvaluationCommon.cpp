@@ -293,9 +293,8 @@ RouteInfo ReadRouteJson(const std::string &inputPath)
   for (const auto &nodeJson : j["nodes"]) {
     RouteNodeInfo nodeInfo;
     nodeInfo.nodeIndex = nodeJson["nodeIndex"].get<size_t>();
-    nodeInfo.lat = nodeJson["lat"].get<double>();
-    nodeInfo.lon = nodeJson["lon"].get<double>();
-    nodeInfo.distanceKm = nodeJson.value("distanceKm", 0.0);
+    nodeInfo.coord.Set(nodeJson["lat"].get<double>(), nodeJson["lon"].get<double>());
+    nodeInfo.distance = Kilometers(nodeJson.value("distanceKm", 0.0));
     nodeInfo.name = nodeJson.value("name", "");
     nodeInfo.ref = nodeJson.value("ref", "");
     nodeInfo.typeName = nodeJson.value("type", "");
