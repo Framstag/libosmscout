@@ -188,6 +188,7 @@ STYLE
   }
 
   [MAG proximity-city] {
+    [TYPE place_capitalcity] NODE.TEXT {scaleMag: county;}
     [TYPE place_millioncity] NODE.TEXT {scaleMag: county;}
     [TYPE place_halfmillioncity] NODE.TEXT {scaleMag: county;}
     [TYPE place_bigcity] NODE.TEXT {scaleMag: county;}
