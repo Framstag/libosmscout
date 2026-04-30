@@ -667,4 +667,27 @@ WStringStringConversionTest = executable('WStringStringConversionTest',
 
 test('Check WString<=>String conversion code', WStringStringConversionTest)
 
+if buildMapCairo
+  LaneEvaluation = executable('LaneEvaluation',
+               ['src/LaneEvaluation.cpp',
+                'src/LaneEvaluationCommon.cpp',
+                'src/LaneEvaluationCompare.cpp'],
+               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, pangocairoDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+               cpp_args: ['-DHAVE_MAP_CAIRO=1'],
+               install: true,
+               install_dir: testInstallDir)
+else
+  LaneEvaluation = executable('LaneEvaluation',
+               ['src/LaneEvaluation.cpp',
+                'src/LaneEvaluationCommon.cpp',
+                'src/LaneEvaluationCompare.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep],
+               link_with: [osmscout],
+               install: true,
+               install_dir: testInstallDir)
+endif
+
 
