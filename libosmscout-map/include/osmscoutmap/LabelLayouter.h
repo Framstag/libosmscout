@@ -45,7 +45,7 @@ constexpr bool debugLabelLayouter = false;
   class PathLabelData
   {
   public:
-    size_t            priority{0}; //!< Priority of the entry
+    size_t            priority{0}; //!< Priority of the entry (from stylesheet)
     std::string       text;        //!< The label text (type==Text|PathText)
     double            height;
     PathTextStyleRef  style;
@@ -64,7 +64,7 @@ constexpr bool debugLabelLayouter = false;
     };
   public:
     Type              type{Type::Text};
-    size_t            priority{0}; //!< Priority of the entry
+    size_t            priority{0}; //!< Priority of the entry (from stylesheet)
     size_t            position{0}; //!< Relative position of the label
 
     double            alpha{1.0};   //!< Alpha value of the label; 0.0 = fully transparent, 1.0 = solid
@@ -142,6 +142,48 @@ constexpr bool debugLabelLayouter = false;
     std::vector<Glyph<NativeGlyph>> ToGlyphs() const;
   };
 
+  struct LabelPriority
+  {
+    /** LabelPriority is used to determine the order of labels and to decide which label to show when there is a collision.
+     *
+     * - `priority` is defined by the stylesheet
+     * - `basemap` flag is here to give precedence to labels from ordinary map databases before world overview (basemap)
+     * - `ref` is used for providing stable output for two labels with the same priority (and basemap flag)
+     */
+    size_t                priority{std::numeric_limits<size_t>::max()}; //!< Priority from the stylesheet
+    bool                  basemap{false}; //!< true when label is for object from basemap database
+    ObjectFileRef         ref;
+
+    LabelPriority() = default;
+
+    LabelPriority(size_t priority, bool basemap, const ObjectFileRef& ref):
+      priority(priority), basemap(basemap), ref(ref)
+    {}
+
+    bool operator<(const LabelPriority& other) const
+    {
+      return std::tie(priority, basemap, ref) < std::tie(other.priority, other.basemap, other.ref);
+    }
+
+    bool operator<=(const LabelPriority& other) const
+    {
+      return std::tie(priority, basemap, ref) <= std::tie(other.priority, other.basemap, other.ref);
+    }
+
+    bool operator!=(const LabelPriority& other) const
+    {
+      return std::tie(priority, basemap, ref) != std::tie(other.priority, other.basemap, other.ref);
+    }
+
+    friend std::ostream& operator<<(std::ostream& stream, const LabelPriority &prio);
+  };
+
+  inline std::ostream& operator<<(std::ostream& stream, const LabelPriority &prio)
+  {
+    stream << "LabelPriority(" << prio.priority << ", " << prio.basemap << ", " << prio.ref.GetName() << ")";
+    return stream;
+  }
+
   template<class NativeGlyph, class NativeLabel>
   class LabelInstance
   {
@@ -156,9 +198,8 @@ constexpr bool debugLabelLayouter = false;
     };
 
   public:
-    ObjectFileRef         ref;
-    size_t                priority{std::numeric_limits<size_t>::max()}; //!< Priority of the entry (minimum of priority label elements)
-    // TODO: move priority from label to element
+    LabelPriority priority; //!< Priority of the entry (minimum of priority label elements)
+
     std::vector<Element>  elements;
   };
 
@@ -167,25 +208,20 @@ constexpr bool debugLabelLayouter = false;
   {
   public:
 #ifdef OSMSCOUT_DEBUG_LABEL_LAYOUTER
-    std::string                     text;     //!< The original label (if debug))
-    double                          offset;   //!< The offset of the label in relation the the way start (if debug))
+    std::string                     text;     //!< The original label (if debug)
+    double                          offset;   //!< The offset of the label in relation the way start (if debug)
     Vertex2D                        start;    //!< Screen coordinates of the start of the path
 #endif
-    ObjectFileRef                   ref;
-    size_t                          priority; //!< Priority of the label
+    LabelPriority                   priority; //!< Priority of the label
     std::vector<Glyph<NativeGlyph>> glyphs;   //!< Vector of glyphs of the label text (see text)
-    osmscout::PathTextStyleRef      style;    //!< Style for drawing the text of the label
+    PathTextStyleRef                style;    //!< Style for drawing the text of the label
   };
 
   template <class NativeGlyph, class NativeLabel>
   static bool LabelInstanceSorter(const LabelInstance<NativeGlyph, NativeLabel> &a,
                                   const LabelInstance<NativeGlyph, NativeLabel> &b)
   {
-    if (a.priority != b.priority) {
-      return a.priority < b.priority;
-    }
-
-    return a.ref < b.ref;
+    return a.priority < b.priority;
   }
 
   template <class NativeGlyph>
@@ -195,10 +231,6 @@ constexpr bool debugLabelLayouter = false;
 
     if (a.priority != b.priority) {
       return a.priority < b.priority;
-    }
-
-    if (a.ref != b.ref) {
-      return a.ref < b.ref;
     }
 
     return a.glyphs[0].trPosition.GetX() < b.glyphs[0].trPosition.GetX();
@@ -430,7 +462,7 @@ constexpr bool debugLabelLayouter = false;
         }
 
         if (!visibleElements.empty()) {
-          LabelInstanceType instanceCopy{currentLabel.ref,currentLabel.priority, visibleElements};
+          LabelInstanceType instanceCopy{currentLabel.priority, visibleElements};
           labelInstances.push_back(instanceCopy);
 
           // mark all labels at once (elements of single label may have no padding)
@@ -658,7 +690,9 @@ constexpr bool debugLabelLayouter = false;
       element.labelData=data;
 
       if (data.type==LabelData::Type::Icon || data.type==LabelData::Type::Symbol){
-        instance.priority = std::min(data.priority, instance.priority);
+        instance.priority = std::min(
+          LabelPriority(data.priority, instance.priority.basemap, instance.priority.ref),
+          instance.priority);
         element.x = point.GetX() - data.iconWidth / 2;
         if (offset<0){
           element.y = point.GetY() - data.iconHeight / 2;
@@ -670,7 +704,9 @@ constexpr bool debugLabelLayouter = false;
         }
       }
       else {
-        instance.priority = std::min(data.priority, instance.priority);
+        instance.priority = std::min(
+          LabelPriority(data.priority, instance.priority.basemap, instance.priority.ref),
+          instance.priority);
         // TODO: should we take style into account?
         // Qt allows to split text layout and style setup
         element.label = textLayouter->Layout(projection, parameter,
@@ -694,6 +730,7 @@ constexpr bool debugLabelLayouter = false;
 
     void RegisterLabel(const Projection& projection,
                        const MapParameter& parameter,
+                       bool basemap,
                        const ObjectFileRef& ref,
                        const Vertex2D& point,
                        const LabelData& data,
@@ -702,6 +739,7 @@ constexpr bool debugLabelLayouter = false;
       LabelInstanceType instance;
 
       instance.ref=ref;
+      instance.basemap=basemap;
 
       double offset=-1;
       ProcessLabel(projection,
@@ -717,6 +755,7 @@ constexpr bool debugLabelLayouter = false;
 
     void RegisterLabel(const Projection& projection,
                        const MapParameter& parameter,
+                       bool basemap,
                        const ObjectFileRef& ref,
                        const Vertex2D& point,
                        const std::vector<LabelData>& data,
@@ -724,7 +763,7 @@ constexpr bool debugLabelLayouter = false;
     {
       LabelInstanceType instance;
 
-      instance.ref=ref;
+      instance.priority=LabelPriority(std::numeric_limits<size_t>::max(), basemap, ref);
 
       double offset=-1;
       for (const auto& d : data) {
@@ -742,6 +781,7 @@ constexpr bool debugLabelLayouter = false;
 
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              bool basemap,
                               const ObjectFileRef& ref,
                               const PathLabelData &labelData,
                               const LabelPath &labelPath)
@@ -784,8 +824,7 @@ constexpr bool debugLabelLayouter = false;
 
         ContourLabelType cLabel;
 
-        cLabel.ref = ref;
-        cLabel.priority = labelData.priority;
+        cLabel.priority = LabelPriority(labelData.priority, basemap, ref);
         cLabel.style = labelData.style;
 
         if constexpr (debugLabelLayouter) {
