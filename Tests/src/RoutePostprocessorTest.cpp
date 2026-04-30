@@ -272,7 +272,7 @@ public:
   osmscout::Duration
   GetTime([[maybe_unused]] osmscout::DatabaseId dbId, [[maybe_unused]] const osmscout::Way &way, [[maybe_unused]] const osmscout::Distance &deltaDistance) const override
   {
-    assert(false);
+    // DistanceAndTimePostprocessor using this method, but we don't need valid time for testing
     return osmscout::Duration();
   }
 
@@ -486,6 +486,7 @@ public:
 
 void Postprocess(RouteDescription &description, MockContext &context)
 {
+  RoutePostprocessor::DistanceAndTimePostprocessor().Process(context, description);
   RoutePostprocessor::LanesPostprocessor().Process(context, description);
   RoutePostprocessor::SuggestedLanesPostprocessor().Process(context, description);
 
@@ -1077,10 +1078,9 @@ TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
     auto nodeIt = description.Nodes().begin();
     auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
     REQUIRE(suggestedLanes);
-    // TODO: improve lane evaluation on similar junctions
-    // REQUIRE(suggestedLanes->GetFrom() == 0);
-    // REQUIRE(suggestedLanes->GetTo() == 1);
-    // REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
+    REQUIRE(suggestedLanes->GetFrom() == 0);
+    REQUIRE(suggestedLanes->GetTo() == 1);
+    REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Left);
   }
 }
 
