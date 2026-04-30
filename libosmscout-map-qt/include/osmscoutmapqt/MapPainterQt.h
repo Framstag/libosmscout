@@ -78,13 +78,6 @@ namespace osmscout {
 
     QtLabelLayouter            labelLayouter;
 
-    /**
-     * non-owning pointer to layouter
-     * when it is not null, all labels are registered to it
-     * and DrawLabels method is no-op
-     */
-    QtLabelLayouter            *delegateLabelLayouter{nullptr};
-
     std::map<std::string,QImage,std::less<>> images;        //! map of QImage for icons, key is name of the icon
                                                 //! - it should be independent on the specific style configuration
     std::vector<QImage>          patternImages; //! vector of QImage for fill patterns, index is patter id
@@ -183,6 +176,7 @@ namespace osmscout {
      */
     void RegisterRegularLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              bool basemap,
                               const ObjectFileRef& ref,
                               const std::vector<LabelData>& labels,
                               const Vertex2D& position,
@@ -193,6 +187,7 @@ namespace osmscout {
      */
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              bool basemap,
                               const ObjectFileRef& ref,
                               const PathLabelData& label,
                               const LabelPath& labelPath) override;

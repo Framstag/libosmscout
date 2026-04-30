@@ -111,6 +111,7 @@ namespace osmscout {
       const TypeConfig             *typeConfigPtr;     //!< pointer to type config, used just for cache purposes, not owned
 
       StyleConfigRef               styleConfig;
+      bool                         basemap{false};
 
       /**
        * Attribute readers
@@ -128,7 +129,9 @@ namespace osmscout {
       //@}
 
     public:
-      explicit DatabaseCacheEntry(const TypeConfig &typeConfig, const StyleConfigRef &styleConfig);
+      explicit DatabaseCacheEntry(const TypeConfig &typeConfig,
+                                  const StyleConfigRef &styleConfig,
+                                  bool basemap);
     };
 
     /**
@@ -303,6 +306,7 @@ namespace osmscout {
     void PrepareNode(const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
+                     bool basemap,
                      const NodeRef& node);
 
     void PrepareNodes(size_t dbIndex,
@@ -366,6 +370,7 @@ namespace osmscout {
     void LayoutPointLabels(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
+                           bool basemap,
                            const ObjectFileRef& ref,
                            const FeatureValueBuffer& buffer,
                            const IconStyleRef& iconStyle,
@@ -601,6 +606,7 @@ namespace osmscout {
      */
     virtual void RegisterRegularLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      bool basemap,
                                       const ObjectFileRef& ref,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
@@ -611,6 +617,7 @@ namespace osmscout {
      */
     virtual void RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      bool basemap,
                                       const ObjectFileRef& ref,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath) = 0;

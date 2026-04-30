@@ -372,6 +372,7 @@ public:
       assert(styleConfig);
 
       dbData.styleConfig = styleConfig;
+      dbData.basemap = database->IsBasemap();
 
       mapService->LookupTiles(projection,tiles);
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
