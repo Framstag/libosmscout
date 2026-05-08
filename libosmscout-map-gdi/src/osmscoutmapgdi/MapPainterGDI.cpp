@@ -609,19 +609,21 @@ namespace osmscout {
 
   void MapPainterGDI::RegisterRegularLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           bool basemap,
                                            const ObjectFileRef& ref,
                                            const std::vector<LabelData> &labels,
                                            const Vertex2D &position,
                                            double objectWidth) {
-    m_labelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
+    m_labelLayouter.RegisterLabel(projection, parameter, basemap, ref, position, labels, objectWidth);
   }
 
   void MapPainterGDI::RegisterContourLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           bool basemap,
                                            const ObjectFileRef& ref,
                                            const PathLabelData &label,
                                            const LabelPath &labelPath) {
-    m_labelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
+    m_labelLayouter.RegisterContourLabel(projection, parameter, basemap, ref, label, labelPath);
   }
 
   void MapPainterGDI::DrawLabels(const Projection &projection,

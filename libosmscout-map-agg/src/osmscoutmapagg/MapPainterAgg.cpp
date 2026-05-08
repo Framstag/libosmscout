@@ -406,6 +406,7 @@ namespace osmscout {
 
   void MapPainterAgg::RegisterRegularLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           bool basemap,
                                            const ObjectFileRef& ref,
                                            const std::vector<LabelData> &labels,
                                            const Vertex2D &position,
@@ -413,6 +414,7 @@ namespace osmscout {
   {
     labelLayouter.RegisterLabel(projection,
                                 parameter,
+                                basemap,
                                 ref,
                                 position,
                                 labels,
@@ -424,12 +426,14 @@ namespace osmscout {
    */
   void MapPainterAgg::RegisterContourLabel(const Projection &projection,
                                            const MapParameter &parameter,
+                                           bool basemap,
                                            const ObjectFileRef& ref,
                                            const PathLabelData &label,
                                            const LabelPath &labelPath)
   {
     labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       basemap,
                                        ref,
                                        label,
                                        labelPath);

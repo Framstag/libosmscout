@@ -349,6 +349,7 @@ void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
 
     MapData data;
     data.styleConfig=db->GetStyleConfig();
+    data.basemap=db->GetDatabase()->IsBasemap();
     db->GetMapService()->AddTileDataToMapData(tileList, data);
 
     if (last) {

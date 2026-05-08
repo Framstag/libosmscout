@@ -48,6 +48,7 @@ namespace osmscout {
   {
   public:
     StyleConfigRef        styleConfig;  //!< Style configuration for rendering (specific for database)
+    bool                  basemap{false};
 
     std::vector<NodeRef>  nodes;        //!< Nodes as retrieved from db
     std::vector<AreaRef>  areas;        //!< Areas as retrieved from db

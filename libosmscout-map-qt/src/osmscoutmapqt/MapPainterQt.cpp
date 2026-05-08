@@ -853,14 +853,6 @@ namespace osmscout {
     labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
-  MapPainterQt::QtLabelLayouter& MapPainterQt::GetLayouter()
-  {
-    if (delegateLabelLayouter){
-      return *delegateLabelLayouter;
-    }
-    return labelLayouter;
-  }
-
   void MapPainterQt::DrawRectangle(int x, int y,
                                    int width, int height,
                                    const Color &color)
@@ -876,13 +868,15 @@ namespace osmscout {
 
   void MapPainterQt::RegisterRegularLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          bool basemap,
                                           const ObjectFileRef& ref,
                                           const std::vector<LabelData> &labels,
                                           const Vertex2D &position,
                                           double objectWidth)
   {
-    GetLayouter().RegisterLabel(projection,
+    labelLayouter.RegisterLabel(projection,
                                 parameter,
+                                basemap,
                                 ref,
                                 position,
                                 labels,
@@ -891,12 +885,14 @@ namespace osmscout {
 
   void MapPainterQt::RegisterContourLabel(const Projection &projection,
                                           const MapParameter &parameter,
+                                          bool basemap,
                                           const ObjectFileRef& ref,
                                           const PathLabelData &label,
                                           const LabelPath &labelPath)
   {
-    GetLayouter().RegisterContourLabel(projection,
+    labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       basemap,
                                        ref,
                                        label,
                                        labelPath);
@@ -906,10 +902,6 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const std::vector<MapData>& /*data*/)
   {
-    if (delegateLabelLayouter !=nullptr){
-      return;
-    }
-
     labelLayouter.Layout(projection, parameter);
 
     labelLayouter.DrawLabels(projection,

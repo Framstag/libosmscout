@@ -152,9 +152,12 @@ constexpr bool debugGroundTiles = false;
     return a.position<b.position;
   }
 
-  MapPainter::DatabaseCacheEntry::DatabaseCacheEntry(const TypeConfig &typeConfig, const StyleConfigRef &styleConfig):
+  MapPainter::DatabaseCacheEntry::DatabaseCacheEntry(const TypeConfig &typeConfig,
+                                                     const StyleConfigRef &styleConfig,
+                                                     bool basemap):
     typeConfigPtr(&typeConfig),
     styleConfig(styleConfig),
+    basemap(basemap),
     nameReader(typeConfig),
     nameAltReader(typeConfig),
     refReader(typeConfig),
@@ -339,6 +342,7 @@ constexpr bool debugGroundTiles = false;
 
       RegisterRegularLabel(projection,
                            parameter,
+                           false,
                            ObjectFileRef(),
                            labelData,
                            pixel,
@@ -367,6 +371,7 @@ constexpr bool debugGroundTiles = false;
   void MapPainter::LayoutPointLabels(const StyleConfig& styleConfig,
                                      const Projection& projection,
                                      const MapParameter& parameter,
+                                     bool basemap,
                                      const ObjectFileRef& ref,
                                      const FeatureValueBuffer& buffer,
                                      const IconStyleRef& iconStyle,
@@ -472,6 +477,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterRegularLabel(projection,
                          parameter,
+                         basemap,
                          ref,
                          labelLayoutData,
                          screenPos,
@@ -513,10 +519,13 @@ constexpr bool debugGroundTiles = false;
   {
     assert(dbIndex<databaseCache.size());
     const auto &styleConfig=*databaseCache[dbIndex].styleConfig;
+    bool basemap=databaseCache[dbIndex].basemap;
+
     for (const auto& node : data.nodes) {
       PrepareNode(styleConfig,
                   projection,
                   parameter,
+                  basemap,
                   node);
     }
 
@@ -524,6 +533,7 @@ constexpr bool debugGroundTiles = false;
       PrepareNode(styleConfig,
                   projection,
                   parameter,
+                  basemap,
                   node);
     }
   }
@@ -534,6 +544,7 @@ constexpr bool debugGroundTiles = false;
   {
     assert(areaData.dbIndex<databaseCache.size());
     const auto &styleConfig=*databaseCache[areaData.dbIndex].styleConfig;
+    bool basemap=databaseCache[areaData.dbIndex].basemap;
     IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(areaData.type,
                                                         *areaData.buffer,
                                                         projection);
@@ -565,6 +576,7 @@ constexpr bool debugGroundTiles = false;
     LayoutPointLabels(styleConfig,
                       projection,
                       parameter,
+                      basemap,
                       areaData.ref,
                       *areaData.buffer,
                       iconStyle,
@@ -579,6 +591,7 @@ constexpr bool debugGroundTiles = false;
   {
     assert(areaData.dbIndex<databaseCache.size());
     const auto &styleConfig=*databaseCache[areaData.dbIndex].styleConfig;
+    bool basemap=databaseCache[areaData.dbIndex].basemap;
     PathTextStyleRef borderTextStyle=styleConfig.GetAreaBorderTextStyle(areaData.type,
                                                                         *areaData.buffer,
                                                                         projection);
@@ -627,6 +640,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         basemap,
                          areaData.ref,
                          labelData,
                          labelPath);
@@ -683,6 +697,7 @@ constexpr bool debugGroundTiles = false;
   void MapPainter::PrepareNode(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
+                               bool basemap,
                                const NodeRef& node)
   {
     IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
@@ -700,6 +715,7 @@ constexpr bool debugGroundTiles = false;
     LayoutPointLabels(styleConfig,
                       projection,
                       parameter,
+                      basemap,
                       node->GetObjectFileRef(),
                       node->GetFeatureValueBuffer(),
                       iconStyle,
@@ -924,6 +940,8 @@ constexpr bool debugGroundTiles = false;
                                        const std::string_view &textLabel)
   {
     assert(pathTextStyle);
+    assert(data.dbIndex<databaseCache.size());
+    bool basemap=databaseCache[data.dbIndex].basemap;
 
     double           lineOffset=0.0;
     CoordBufferRange range=data.coordRange;
@@ -960,6 +978,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         basemap,
                          ObjectFileRef(data.ref,RefType::refWay),
                          labelData,
                          labelPath);
@@ -2035,9 +2054,9 @@ constexpr bool debugGroundTiles = false;
       assert(data[i].styleConfig);
       auto typeConfig = data[i].styleConfig->GetTypeConfig();
       if (databaseCache.size() <= i) {
-        databaseCache.emplace_back(DatabaseCacheEntry{*typeConfig, data[i].styleConfig});
+        databaseCache.emplace_back(DatabaseCacheEntry{*typeConfig, data[i].styleConfig, data[i].basemap});
       } else if (databaseCache[i].typeConfigPtr != typeConfig.get()) {
-        databaseCache[i] = DatabaseCacheEntry{*typeConfig, data[i].styleConfig};
+        databaseCache[i] = DatabaseCacheEntry{*typeConfig, data[i].styleConfig, data[i].basemap};
         styleSheetShanged=true;
       } else if (databaseCache[i].styleConfig != data[i].styleConfig){
         styleSheetShanged=true;
@@ -2379,6 +2398,7 @@ constexpr bool debugGroundTiles = false;
         vect.push_back(labelBox);
         RegisterRegularLabel(projection,
                              parameter,
+                             false,
                              ObjectFileRef(),
                              vect,
                              pixel,
@@ -3135,6 +3155,7 @@ constexpr bool debugGroundTiles = false;
               vect.push_back(labelBox);
               RegisterRegularLabel(projection,
                                    parameter,
+                                   false,
                                    ObjectFileRef(),
                                    vect,
                                    screenPos,
