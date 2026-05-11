@@ -675,6 +675,34 @@ namespace osmscout {
       return rootRegion;
     }
 
+    std::vector<RegionRef> RegionIndex::GetRegionsForNode(const RegionRef& rootRegion,
+                                                          const GeoCoord& coord) const
+    {
+      std::vector<RegionRef> result;
+
+      uint32_t minX=(uint32_t)((coord.GetLon()+180.0)/cellWidth);
+      uint32_t minY=(uint32_t)((coord.GetLat()+90.0)/cellHeight);
+
+      const auto indexCell=index.find(Pixel(minX,minY));
+
+      if (indexCell!=index.end()) {
+        for (const auto& region : indexCell->second) {
+          for (const auto& area : region->areas) {
+            if (IsCoordInArea(coord,area)) {
+              result.push_back(region);
+              break;
+            }
+          }
+        }
+      }
+
+      if (result.empty()) {
+        result.push_back(rootRegion);
+      }
+
+      return result;
+    }
+
     std::string RegionLocation::GetName() const
     {
       std::string name;
@@ -1719,7 +1747,8 @@ namespace osmscout {
                                                   const std::string& address,
                                                   const std::string &postalCode,
                                                   bool allowDuplicates,
-                                                  bool& added)
+                                                  bool& added,
+                                                  bool& locationResolved)
   {
     std::map<std::string,locidx::RegionLocation>::iterator loc;
     auto                                           postalAreaEntry=region.postalAreas.end();
@@ -1760,10 +1789,11 @@ namespace osmscout {
     }
 
     if (!locFound) {
-      errorReporter->ReportLocationDebug(object,
-                                         std::string("Street '")+location +"' of address '"+address+"' cannot be resolved in region '"+region.name+"'");
+      locationResolved=false;
       return;
     }
+
+    locationResolved=true;
 
     // If there is a non-default postal area but the location is in the default postal area => make a copy
     if (foundInDefaultArea &&
@@ -1803,7 +1833,8 @@ namespace osmscout {
                                                       const std::string &postalCode,
                                                       const std::vector<Point>& nodes,
                                                       const GeoBox& boundingBox,
-                                                      bool& added)
+                                                      bool& added,
+                                                      bool& locationResolved)
   {
     for (const auto& childRegion : region.regions) {
       // Fast check, if the object is in the bounds of the area
@@ -1818,7 +1849,8 @@ namespace osmscout {
                                    postalCode,
                                    nodes,
                                    boundingBox,
-                                   added);
+                                   added,
+                                   locationResolved);
             return;
           }
         }
@@ -1832,7 +1864,8 @@ namespace osmscout {
                        address,
                        postalCode,
                        false,
-                       added);
+                       added,
+                       locationResolved);
   }
 
   bool LocationIndexGenerator::IndexAddressAreas(const TypeConfig& typeConfig,
@@ -1896,21 +1929,36 @@ namespace osmscout {
           continue;
         }
 
-        locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                              boundingBox.GetCenter());
-
         if (isAddress) {
           bool added=false;
+          bool locationResolved=false;
 
-          AddAddressAreaToRegion(progress,
-                                 *region,
-                                 fileOffset,
-                                 location,
-                                 address,
-                                 postalCode,
-                                 nodes,
-                                 boundingBox,
-                                 added);
+          std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
+                                                                               boundingBox.GetCenter());
+          for (const auto& region : regions) {
+            if (region->level>=0 && region->level<6) {
+              break;
+            }
+            AddAddressAreaToRegion(progress,
+                                   *region,
+                                   fileOffset,
+                                   location,
+                                   address,
+                                   postalCode,
+                                   nodes,
+                                   boundingBox,
+                                   added,
+                                   locationResolved);
+            if (locationResolved) {
+              break;
+            }
+          }
+
+          if (!locationResolved) {
+            assert(!regions.empty());
+            errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
+                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+regions.front()->name+"'");
+          }
 
           if (added) {
             addressFound++;
@@ -1920,6 +1968,8 @@ namespace osmscout {
         if (isPOI) {
           bool added=false;
 
+          locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                                boundingBox.GetCenter());
           region->AddPOIArea(fileOffset,
                              name,
                              nodes,
@@ -1982,6 +2032,7 @@ namespace osmscout {
       }
     }
 
+    bool locationResolved=false;
     AddAddressToRegion(progress,
                        region,
                        ObjectFileRef(fileOffset,refWay),
@@ -1989,7 +2040,8 @@ namespace osmscout {
                        address,
                        "",
                        false,
-                       added);
+                       added,
+                       locationResolved);
 
     for (const auto& area : region.areas) {
       if (IsAreaCompletelyInArea(nodes,area)) {
@@ -2150,6 +2202,7 @@ namespace osmscout {
                                                       const std::string &postalCode,
                                                       bool& added)
   {
+    bool locationResolved=false;
     AddAddressToRegion(progress,
                        region,
                        ObjectFileRef(fileOffset,refNode),
@@ -2157,7 +2210,8 @@ namespace osmscout {
                        address,
                        postalCode,
                        true,
-                       added);
+                       added,
+                       locationResolved);
   }
 
   bool LocationIndexGenerator::IndexAddressNodes(const TypeConfig& typeConfig,
@@ -2219,23 +2273,36 @@ namespace osmscout {
           continue;
         }
 
-        locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
-                                                              coord);
-
-        if (!region) {
-          continue;
-        }
-
         if (isAddress) {
           bool added=false;
+          bool locationResolved=false;
 
-          AddAddressNodeToRegion(progress,
-                                 *region,
-                                 fileOffset,
-                                 location,
-                                 address,
-                                 postalCode,
-                                 added);
+          std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
+                                                                               coord);
+          for (const auto& region : regions) {
+            if (region->level>=0 && region->level<6) {
+              break;
+            }
+            AddAddressToRegion(progress,
+                               *region,
+                               ObjectFileRef(fileOffset,refNode),
+                               location,
+                               address,
+                               postalCode,
+                               true,
+                               added,
+                               locationResolved);
+            if (locationResolved) {
+              break;
+            }
+          }
+
+          if (!locationResolved) {
+            assert(!regions.empty());
+            errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
+                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+regions.front()->name+"'");
+          }
+
           if (added) {
             addressFound++;
           }
@@ -2244,9 +2311,13 @@ namespace osmscout {
         if (isPOI) {
           bool added=false;
 
-          region->AddPOINode(fileOffset,
-                             name,
-                             added);
+          locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                                coord);
+          if (region) {
+            region->AddPOINode(fileOffset,
+                               name,
+                               added);
+          }
           if (added) {
             poiFound++;
           }

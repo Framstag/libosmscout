@@ -276,6 +276,9 @@ namespace osmscout {
 
       RegionRef GetRegionForNode(const RegionRef& rootRegion,
                                  const GeoCoord& coord) const;
+
+      std::vector<RegionRef> GetRegionsForNode(const RegionRef& rootRegion,
+                                               const GeoCoord& coord) const;
     };
 
   }
@@ -381,7 +384,8 @@ namespace osmscout {
                             const std::string& address,
                             const std::string &postalCode,
                             bool allowDuplicates,
-                            bool& added);
+                            bool& added,
+                            bool& locationResolved);
 
     void AddAddressAreaToRegion(Progress& progress,
                                 locidx::Region& region,
@@ -391,7 +395,8 @@ namespace osmscout {
                                 const std::string &postalCode,
                                 const std::vector<Point>& nodes,
                                 const GeoBox& boundingBox,
-                                bool& added);
+                                bool& added,
+                                bool& locationResolved);
 
     bool IndexAddressAreas(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
