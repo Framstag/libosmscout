@@ -1933,31 +1933,48 @@ namespace osmscout {
           bool added=false;
           bool locationResolved=false;
 
-          std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
-                                                                               boundingBox.GetCenter());
-          for (const auto& region : regions) {
-            if (region->level>=0 && region->level<6) {
-              break;
-            }
-            AddAddressAreaToRegion(progress,
-                                   *region,
-                                   fileOffset,
-                                   location,
-                                   address,
-                                   postalCode,
-                                   nodes,
-                                   boundingBox,
-                                   added,
-                                   locationResolved);
-            if (locationResolved) {
-              break;
+          locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                                boundingBox.GetCenter());
+          AddAddressAreaToRegion(progress,
+                                 *region,
+                                 fileOffset,
+                                 location,
+                                 address,
+                                 postalCode,
+                                 nodes,
+                                 boundingBox,
+                                 added,
+                                 locationResolved);
+
+          if (!locationResolved) {
+            std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
+                                                                                 boundingBox.GetCenter());
+            for (const auto& parentRegion : regions) {
+              if (parentRegion==region) {
+                continue;
+              }
+              if (parentRegion->level>=0 && parentRegion->level<6) {
+                break;
+              }
+              AddAddressAreaToRegion(progress,
+                                     *parentRegion,
+                                     fileOffset,
+                                     location,
+                                     address,
+                                     postalCode,
+                                     nodes,
+                                     boundingBox,
+                                     added,
+                                     locationResolved);
+              if (locationResolved) {
+                break;
+              }
             }
           }
 
           if (!locationResolved) {
-            assert(!regions.empty());
             errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refArea),
-                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+regions.front()->name+"'");
+                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+region->name+"'");
           }
 
           if (added) {
@@ -2277,30 +2294,46 @@ namespace osmscout {
           bool added=false;
           bool locationResolved=false;
 
-          std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
-                                                                               coord);
-          for (const auto& region : regions) {
-            if (region->level>=0 && region->level<6) {
-              break;
-            }
-            AddAddressToRegion(progress,
-                               *region,
-                               ObjectFileRef(fileOffset,refNode),
-                               location,
-                               address,
-                               postalCode,
-                               true,
-                               added,
-                               locationResolved);
-            if (locationResolved) {
-              break;
+          locidx::RegionRef region=regionIndex.GetRegionForNode(rootRegion,
+                                                                coord);
+          AddAddressToRegion(progress,
+                             *region,
+                             ObjectFileRef(fileOffset,refNode),
+                             location,
+                             address,
+                             postalCode,
+                             true,
+                             added,
+                             locationResolved);
+
+          if (!locationResolved) {
+            std::vector<locidx::RegionRef> regions=regionIndex.GetRegionsForNode(rootRegion,
+                                                                                 coord);
+            for (const auto& parentRegion : regions) {
+              if (parentRegion==region) {
+                continue;
+              }
+              if (parentRegion->level>=0 && parentRegion->level<6) {
+                break;
+              }
+              AddAddressToRegion(progress,
+                                 *parentRegion,
+                                 ObjectFileRef(fileOffset,refNode),
+                                 location,
+                                 address,
+                                 postalCode,
+                                 true,
+                                 added,
+                                 locationResolved);
+              if (locationResolved) {
+                break;
+              }
             }
           }
 
           if (!locationResolved) {
-            assert(!regions.empty());
             errorReporter->ReportLocationDebug(ObjectFileRef(fileOffset,refNode),
-                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+regions.front()->name+"'");
+                                               std::string("Street '")+location+"' of address '"+address+"' cannot be resolved in region '"+region->name+"'");
           }
 
           if (added) {
