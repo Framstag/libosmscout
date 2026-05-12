@@ -276,6 +276,9 @@ namespace osmscout {
 
       RegionRef GetRegionForNode(const RegionRef& rootRegion,
                                  const GeoCoord& coord) const;
+
+      std::vector<RegionRef> GetRegionsForNode(const RegionRef& rootRegion,
+                                               const GeoCoord& coord) const;
     };
 
   }
@@ -293,6 +296,26 @@ namespace osmscout {
     uint8_t                bytesForWayFileOffset;
 
     ImportErrorReporterRef errorReporter;
+
+    struct AddressData
+    {
+      ObjectFileRef object;
+      GeoCoord coord;
+      std::string name;
+      std::string location;
+      std::string address;
+      std::string postalCode;
+    };
+
+    struct AreaAddressData: public AddressData
+    {
+      std::vector<Point> nodes;
+      GeoBox boundingBox;
+    };
+
+    struct NodeAddressData: public AddressData
+    {
+    };
 
   private:
     void Write(FileWriter& writer,
@@ -374,24 +397,34 @@ namespace osmscout {
                                  const std::string& postalCode,
                                  const locidx::RegionIndex& regionIndex);
 
+    void AddGenericAddressToRegion(Progress& progress,
+                                   locidx::Region& region,
+                                   const AddressData &address,
+                                   bool allowDuplicates,
+                                   bool& added,
+                                   bool& locationResolved);
+
     void AddAddressToRegion(Progress& progress,
                             locidx::Region& region,
-                            const ObjectFileRef& object,
-                            const std::string& location,
-                            const std::string& address,
-                            const std::string &postalCode,
+                            const NodeAddressData& nodeAddress,
+                            bool allowDuplicates,
+                            bool& added,
+                            bool& locationResolved);
+
+    void AddAddressToRegion(Progress& progress,
+                            locidx::Region& region,
+                            const AreaAddressData& areaAddress,
+                            bool allowDuplicates,
+                            bool& added,
+                            bool& locationResolved);
+
+    template <class Address>
+    void AddAddressToRegion(Progress& progress,
+                            const locidx::RegionIndex& regionIndex,
+                            const locidx::RegionRef& rootRegion,
+                            const Address& address,
                             bool allowDuplicates,
                             bool& added);
-
-    void AddAddressAreaToRegion(Progress& progress,
-                                locidx::Region& region,
-                                const FileOffset& fileOffset,
-                                const std::string& location,
-                                const std::string& address,
-                                const std::string &postalCode,
-                                const std::vector<Point>& nodes,
-                                const GeoBox& boundingBox,
-                                bool& added);
 
     bool IndexAddressAreas(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
@@ -427,17 +460,10 @@ namespace osmscout {
      * @return a valid iterator to the location else locations.end()
      */
     std::map<std::string,locidx::RegionLocation>::iterator FindLocation(Progress& progress,
-                                                                const locidx::Region& region,
-                                                                locidx::PostalArea& postalArea,
-                                                                const std::string &locationName) const;
+                                                                        const locidx::Region& region,
+                                                                        locidx::PostalArea& postalArea,
+                                                                        const std::string &locationName) const;
 
-    void AddAddressNodeToRegion(Progress& progress,
-                                locidx::Region& region,
-                                const FileOffset& fileOffset,
-                                const std::string& location,
-                                const std::string& address,
-                                const std::string& postalCode,
-                                bool& added);
 
     bool IndexAddressNodes(const TypeConfig& typeConfig,
                            const ImportParameter& parameter,
