@@ -37,7 +37,7 @@ TYPES
 
   TYPE highway_motorway
     = WAY ("highway"=="motorway")
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 2]
       DESC
         en: "motorway"
@@ -45,7 +45,7 @@ TYPES
 
   TYPE highway_motorway_trunk
     = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 2]
       DESC
         en: "trunk"
@@ -53,19 +53,19 @@ TYPES
 
   TYPE highway_motorway_primary
     = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY LANES[2 1]
 
   TYPE highway_motorway_link
     = WAY ("highway"=="motorway_link")
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   // Other roads mainly for cars
 
   TYPE highway_trunk
     = WAY ("highway"=="trunk")
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
       DESC
         en: "trunk"
@@ -73,7 +73,7 @@ TYPES
 
   TYPE highway_trunk_link
     = WAY ("highway"=="trunk_link")
-      {Name, NameAlt, Ref, Destination}
+      {Name, NameAlt, Ref, Destination, HighwayMilestone}
       PATH[FOOT BICYCLE CAR] LOCATION OPTIMIZE_LOW_ZOOM PIN_WAY
 
   TYPE highway_primary
@@ -136,5 +136,9 @@ TYPES
       DESC
         en: "service"
         de: "Erschließungsweg"
+
+  TYPE highway_milestone
+    = NODE ("highway"=="milestone")
+      {HighwayMilestone}
 
 END

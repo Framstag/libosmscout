@@ -28,6 +28,7 @@ osmscoutHeader = [
             'osmscout/feature/ConstructionYearFeature.h',
             'osmscout/feature/DestinationFeature.h',
             'osmscout/feature/EleFeature.h',
+            'osmscout/feature/HighwayMilestoneFeature.h',
             'osmscout/feature/EmbankmentFeature.h',
             'osmscout/feature/FeeFeature.h',
             'osmscout/feature/FromToFeature.h',

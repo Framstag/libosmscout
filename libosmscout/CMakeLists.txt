@@ -61,6 +61,7 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/ConstructionYearFeature.h
         include/osmscout/feature/DestinationFeature.h
         include/osmscout/feature/EleFeature.h
+        include/osmscout/feature/HighwayMilestoneFeature.h
         include/osmscout/feature/EmbankmentFeature.h
         include/osmscout/feature/FeeFeature.h
         include/osmscout/feature/FromToFeature.h
@@ -241,6 +242,7 @@ set(SOURCE_FILES
     src/osmscout/feature/ConstructionYearFeature.cpp
     src/osmscout/feature/DestinationFeature.cpp
     src/osmscout/feature/EleFeature.cpp
+    src/osmscout/feature/HighwayMilestoneFeature.cpp
     src/osmscout/feature/EmbankmentFeature.cpp
     src/osmscout/feature/FeeFeature.cpp
     src/osmscout/feature/FromToFeature.cpp
