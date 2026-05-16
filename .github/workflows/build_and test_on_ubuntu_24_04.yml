@@ -23,7 +23,9 @@ jobs:
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
       - name: Install clang compiler and Co
-        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config meson ninja-build
+        run: sudo apt-get -y install clang libc++-dev ccache libtool pkg-config python3-pip
+      - name: Install current meson and ninja
+        run: pip3 install --break-system-packages meson ninja
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
               catch2
@@ -54,7 +56,9 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config meson ninja-build
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config python3-pip
+      - name: Install current meson and ninja
+        run: pip3 install --break-system-packages meson ninja
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
@@ -116,7 +120,9 @@ jobs:
       - name: Install software-properties-common
         run:  sudo apt-get install software-properties-common
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config meson ninja-build
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config python3-pip
+      - name: Install current meson and ninja
+        run: pip3 install --break-system-packages meson ninja
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
