@@ -23,4 +23,9 @@ osmscoutmapopengl = library('osmscout_map_opengl',
                             install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapopengl)
+pkg.generate(osmscoutmapopengl,
+             name: 'libosmscout_map_opengl',
+             filebase: 'libosmscout_map_opengl',
+             description: 'Library for rendering OSM data using OpenGL',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

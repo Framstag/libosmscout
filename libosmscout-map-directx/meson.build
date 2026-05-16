@@ -23,4 +23,9 @@ osmscoutmapdirectx = library('osmscout_map_directx',
                              install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapdirectx)
+pkg.generate(osmscoutmapdirectx,
+             name: 'libosmscout_map_directx',
+             filebase: 'libosmscout_map_directx',
+             description: 'Library for rendering OSM data using DirectX',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

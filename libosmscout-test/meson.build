@@ -23,4 +23,9 @@ osmscouttest = library('osmscout_test',
                        install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscouttest)
+pkg.generate(osmscouttest,
+             name: 'libosmscout_map_test',
+             filebase: 'libosmscout_map_test',
+             description: 'Library with test functionality for testing libosmscout',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

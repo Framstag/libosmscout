@@ -23,4 +23,9 @@ osmscoutmapsvg = library('osmscout_map_svg',
                          install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapsvg)
+pkg.generate(osmscoutmapsvg,
+             name: 'libosmscout_map_svg',
+             filebase: 'libosmscout_map_svg',
+             description: 'Library for rendering OSM data by generating SVGs',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

@@ -23,4 +23,9 @@ osmscoutmap = library('osmscout_map',
                       install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmap)
+pkg.generate(osmscoutmap,
+             name: 'libosmscout_map',
+             filebase: 'libosmscout_map',
+             description: 'Base library for rendering OSM data via libosmscout databases',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

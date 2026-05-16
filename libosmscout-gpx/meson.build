@@ -23,4 +23,9 @@ osmscoutgpx = library('osmscout_gpx',
                       install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutgpx)
+pkg.generate(osmscoutgpx,
+             name: 'libosmscout_gpx',
+             filebase: 'libosmscout_gpx',
+             description: 'Library for working with GPX files',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

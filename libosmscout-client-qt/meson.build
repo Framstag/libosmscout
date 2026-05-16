@@ -42,4 +42,9 @@ endforeach
                              install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutclientqt)
+pkg.generate(osmscoutclientqt,
+             name: 'libosmscout_client_qt',
+             filebase: 'libosmscout_client_qt',
+             description: 'Base library for creating Qt based libosmscout clients',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')
