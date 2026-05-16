@@ -34,4 +34,9 @@ osmscoutclient = library('osmscout_client',
                          install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutclient)
+pkg.generate(osmscoutclient,
+             name: 'libosmscout_client',
+             filebase: 'libosmscout_client',
+             description: 'Base library for creating libosmscout clients',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

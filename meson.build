@@ -3,7 +3,7 @@ project('libosmscout',
         version: 'latest',
         meson_version: '>=0.63.0',
         default_options: ['cpp_std=c++20', 'buildtype=debugoptimized', 'warning_level=3'],
-        license: ['LGPL'])
+        license: 'LGPL')
 
 libraryVersion='1.1.1'
 
