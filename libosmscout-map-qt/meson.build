@@ -23,4 +23,9 @@ osmscoutmapqt = library('osmscout_map_qt',
                       install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapqt)
+pkg.generate(osmscoutmapqt,
+             name: 'libosmscout_map_qt',
+             filebase: 'libosmscout_map_qt',
+             description: 'Library for rendering OSM data using Qt',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

@@ -17,4 +17,9 @@ osmscoutmapiosx = library('osmscout_map_iosx',
                            install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapiosx)
+pkg.generate(osmscoutmapiosx,
+             name: 'libosmscout_map_iosx',
+             filebase: 'libosmscout_map_iosx',
+             description: 'Library for rendering OSM data using the iOS/OSX rendering stack',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

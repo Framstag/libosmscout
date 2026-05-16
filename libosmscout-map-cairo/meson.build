@@ -24,4 +24,9 @@ osmscoutmapcairo = library('osmscout_map_cairo',
                            install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapcairo)
+pkg.generate(osmscoutmapcairo,
+             name: 'libosmscout_map_cairo',
+             filebase: 'libosmscout_map_cairo',
+             description: 'Library for rendering OSM data using Cairo',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')
