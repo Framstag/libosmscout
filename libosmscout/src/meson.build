@@ -23,6 +23,7 @@ osmscoutSrc = [
             'src/osmscout/feature/ConstructionYearFeature.cpp',
             'src/osmscout/feature/DestinationFeature.cpp',
             'src/osmscout/feature/EleFeature.cpp',
+            'src/osmscout/feature/HighwayMilestoneFeature.cpp',
             'src/osmscout/feature/EmbankmentFeature.cpp',
             'src/osmscout/feature/FeeFeature.cpp',
             'src/osmscout/feature/FromToFeature.cpp',

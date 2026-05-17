@@ -1,0 +1,16 @@
+schema: spec-driven
+
+context: |
+  Stack: Current C++20
+  Testing: Unit testing using Catch2
+
+rules:
+  proposal:
+    - Do not mention concrete technical solutions
+  specs:
+    - Write acceptance criteria in Given/When/Then (Gherkin) format
+  design:
+    - Include sequence diagram for non-trivial flows
+  tasks:
+    - Each task must reference its parent spec
+    - Estimate effort in story points (1/2/3/5/8)  

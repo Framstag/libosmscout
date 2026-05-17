@@ -386,6 +386,26 @@ namespace osmscout {
   };
 
   /**
+   * @ingroup Description
+   *
+   * Information regarding highway milestones (distance, ref, carriageway_ref, marker)
+   */
+  class OSMSCOUT_API HighwayMilestoneDescriptionProcessor : public FeatureToDescriptionProcessor
+  {
+  public:
+    static const std::string SECTION_NAME_MILESTONE;
+
+    static const std::string LABEL_KEY_MILESTONE_DISTANCE;
+    static const std::string LABEL_KEY_MILESTONE_REF;
+    static const std::string LABEL_KEY_MILESTONE_CARRIAGEWAY_REF;
+    static const std::string LABEL_KEY_MILESTONE_MARKER;
+
+  public:
+    void Process(const FeatureValueBuffer& buffer,
+                 ObjectDescription& description) override;
+  };
+
+  /**
    * Service,to get a structured description of an object on the map (Area, Way or Node).
    * Explicitly designed, to offer information within map popup dialogs or similar.
    *
