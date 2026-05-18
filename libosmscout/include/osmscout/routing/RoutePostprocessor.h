@@ -459,15 +459,19 @@ namespace osmscout {
     private:
       RouteDescription::LaneDescriptionRef GetLaneDescription(const RouteDescription::Node &node) const;
 
-      /** Evaluate suggested lanes on nodes from "backBuffer", followed by "node".
-       * Node itself is junction, where count of lanes (on way from the node)
-       * is smaller than on the previous node (back of backBuffer).
+      /** Evaluate suggested lanes on nodes from "backBuffer", followed by junction node(s).
+       * Junction nodes are crossings where the route transitions from the incoming lane
+       * configuration (back of backBuffer) to a different one. Multiple consecutive junction
+       * nodes that are close together and connected by segments with the same lane configuration
+       * are grouped into a single logical junction — their exits are aggregated.
        *
-       * @param node
-       * @param backBuffer buffer of traveled nodes, recent node at back
+       * @param junctionNodes one or more consecutive junction nodes forming a logical junction
+       * @param lastNode the node after the last junction node (provides outgoing way info)
+       * @param backBuffer buffer of traveled nodes before the junction, recent node at back
        */
       void EvaluateLaneSuggestion(const PostprocessorContext& context,
-                                  const RouteDescription::Node &node,
+                                  const std::vector<const RouteDescription::Node*> &junctionNodes,
+                                  const RouteDescription::Node &lastNode,
                                   const std::list<RouteDescription::Node*> &backBuffer) const;
 
     private:
