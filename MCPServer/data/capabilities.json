@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": 0,
+  "result": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {
+      "tools": {
+      }
+    },
+    "serverInfo": {
+      "name": "OSMScoutMCP",
+      "title": "libosmscout MCP Server",
+      "version": "1.0.0"
+    },
+    "instructions": "Call this MCP server, to get information based on geographical information"
+  }
+}
