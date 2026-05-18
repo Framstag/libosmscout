@@ -79,6 +79,50 @@ meson compile -C build
 - Per-subproject `meson.build` files
 - Supports shared/static via `default_library`
 
+### Running Tests
+
+CMake:
+```bash
+cd build && ctest -j 2 --output-on-failure
+# With GUI tests (requires X server or xvfb):
+cd build && xvfb-run ctest -j 2 --output-on-failure
+# Single test:
+cd build && ctest -R <TestName> --output-on-failure
+```
+
+Meson:
+```bash
+meson test --timeout-multiplier 2 -C build --print-errorlogs
+```
+
+Environment variables for tests:
+- `QT_QPA_PLATFORM=offscreen` — required for running Qt-based tests without X server (e.g. in docker containers)
+- `TESTS_TOP_DIR=<source>/Tests` — some tests need path to test data
+- `TESTS_TMP_DIR=<build>/Tests` — some tests need writable temp dir
+
+### Building with AddressSanitizer + UndefinedBehaviorSanitizer
+
+```bash
+cmake -B build-asan \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address -fsanitize=undefined" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address -fsanitize=undefined" \
+  -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF \
+  -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF \
+  -DOSMSCOUT_BUILD_DEMOS=OFF \
+  -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF \
+  -DOSMSCOUT_BUILD_BINDING_JAVA=OFF \
+  -DCMAKE_UNITY_BUILD=ON -G "Ninja"
+
+cmake --build build-asan
+cd build-asan && ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest"
+```
+
+Notes:
+- PerformanceTest is excluded because UI libraries leak on exit; run separately with `ASAN_OPTIONS=detect_leaks=0`
+- Works with both GCC and Clang
+- CI runs this on every PR (see `.github/workflows/sanitize_on_ubuntu_24_04.yml`)
+
 ### Dependencies
 - **Conan**: `conanfile.txt` (loaded automatically when `conanbuildinfo.cmake` exists)
 - **vcpkg**: Three profiles — `vcpkg_full.json`, `vcpkg_medium.json`, `vcpkg_minimum.json`
