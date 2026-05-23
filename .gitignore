@@ -42,3 +42,6 @@
 /Tests/*.html
 /Tests/Testing/Temporary/*
 /Tests/data/testregion/stats.dot
+
+# mise
+/mise.local.toml

@@ -5,8 +5,7 @@ file(GLOB_RECURSE WEBPAGE_SOURCE_FILES *.md *.css *.html *.png)
 
 add_custom_target(
         webpage ALL
-        COMMAND ${HUGO_PATH}
-        --verbose
+        COMMAND ${HUGO_PATH} build
         --source ${CMAKE_SOURCE_DIR}/webpage
         --destination ${CMAKE_CURRENT_BINARY_DIR}/public
         SOURCES ${WEBPAGE_SOURCE_FILES}
