@@ -27,47 +27,6 @@
 
 namespace osmscout {
 
-  /** Constant for a description of the start node (StartDescription) */
-  const char* const RouteDescription::NODE_START_DESC        = "NodeStart";
-  /** Constant for a description of the target node (TargetDescription) */
-  const char* const RouteDescription::NODE_TARGET_DESC       = "NodeTarget";
-  /** Constant for a description of name of the way (NameDescription) */
-  const char* const RouteDescription::WAY_NAME_DESC          = "WayName";
-  /** Constant for a description of a change of way name (NameChangedDescription) */
-  const char* const RouteDescription::WAY_NAME_CHANGED_DESC  = "WayChangedName";
-  /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
-  const char* const RouteDescription::CROSSING_WAYS_DESC     = "CrossingWays";
-  /** Constant for a description of a turn (TurnDescription) */
-  const char* const RouteDescription::DIRECTION_DESC         = "Direction";
-  /** Constant for doing description of an explicit turn (TurnDescription) */
-  const char* const RouteDescription::TURN_DESC              = "Turn";
-  /** Constant for a description of entering a roundabout (RoundaboutEnterDescription) */
-  const char* const RouteDescription::ROUNDABOUT_ENTER_DESC  = "RountaboutEnter";
-  /** Constant for a description of entering a roundabout (RoundaboutLeaveDescription) */
-  const char* const RouteDescription::ROUNDABOUT_LEAVE_DESC  = "RountaboutLeave";
-  /** Constant for a description of entering a motorway (MotorwayEnterDescription) */
-  const char* const RouteDescription::MOTORWAY_ENTER_DESC    = "MotorwayEnter";
-  /** Constant for a description of changing a motorway (MotorwayChangeDescription) */
-  const char* const RouteDescription::MOTORWAY_CHANGE_DESC   = "MotorwayChange";
-  /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
-  const char* const RouteDescription::MOTORWAY_LEAVE_DESC    = "MotorwayLeave";
-  /** Constant for a description of motorway junction (MotorwayJunctionDescription) */
-  const char* const RouteDescription::MOTORWAY_JUNCTION_DESC = "MotorwayJunction";
-  /** Constant for a description of a destination to choose at a junction */
-  const char* const RouteDescription::CROSSING_DESTINATION_DESC = "CrossingDestination";
-  /** Constant for a description of the maximum speed for the given way */
-  const char* const RouteDescription::WAY_MAXSPEED_DESC      = "MaxSpeed";
-  /** Constant for a description of type name of the way (TypeNameDescription) */
-  const char* const RouteDescription::WAY_TYPE_NAME_DESC     = "TypeName";
-  /** Constant for a description of type name of the way (TypeNameDescription) */
-  const char* const RouteDescription::POI_AT_ROUTE_DESC      = "POIAtRoute";
-  /** Constant for a description of route lanes (LaneDescription) */
-  const char* const RouteDescription::LANES_DESC             = "Lanes";
-  /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
-  const char* const RouteDescription::SUGGESTED_LANES_DESC   = "SuggestedLanes";
-  /** Constant for a description of a via on the rote (first node of a route section) */
-  const char* const RouteDescription::NODE_VIA_DESC          = "NodeVia";
-
   RouteDescription::StartDescription::StartDescription(const std::string& description)
   : description(description)
   {
@@ -538,28 +497,6 @@ namespace osmscout {
     return "Section number: "+std::to_string(sectionNumber)+" node count: "+std::to_string(nodeCount);
   }
 
-  bool RouteDescription::Node::HasDescription(const char* name) const
-  {
-    std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
-
-    entry=descriptionMap.find(name);
-
-    return entry!=descriptionMap.end() && entry->second;
-  }
-
-  RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
-  {
-    std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
-
-    entry=descriptionMap.find(name);
-
-    if (entry!=descriptionMap.end()) {
-      return entry->second;
-    }
-
-    return nullptr;
-  }
-
   void RouteDescription::Node::SetDistance(Distance distance)
   {
     this->distance=distance;
@@ -574,13 +511,6 @@ namespace osmscout {
   void RouteDescription::Node::SetTime(const Timestamp::duration &duration)
   {
     this->time=duration;
-  }
-
-  void RouteDescription::Node::AddDescription(const char* name,
-                                              const DescriptionRef& description)
-  {
-    descriptions.push_back(description);
-    descriptionMap[name]=description;
   }
 
   void RouteDescription::SetDatabaseMapping(const std::map<DatabaseId, std::string>& databaseMapping)

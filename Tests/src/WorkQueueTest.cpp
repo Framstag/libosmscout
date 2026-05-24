@@ -27,8 +27,8 @@
 class Worker
 {
 private:
-  std::thread              worker;
   osmscout::WorkQueue<int> queue;
+  std::thread              worker;
 
 private:
   void TaskLoop()

@@ -32,20 +32,20 @@
 
 using namespace std::chrono_literals;
 
-static size_t iterationCount=250;
-static auto   taskDuration=1ms;
+static constexpr size_t iterationCount=250;
+static constexpr auto   taskDuration=1ms;
 
 static size_t refCounter = 0;
 static osmscout::Latch latch;
 
 class ReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -79,9 +79,9 @@ private:
 
 public:
   explicit ReaderWorker(osmscout::ProcessingQueue<int>& queue)
-  : queue(queue),
-    thread(&ReaderWorker::ProcessorLoop,this),
-    processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&ReaderWorker::ProcessorLoop,this)
   {
   }
 
@@ -92,12 +92,12 @@ public:
 
 class WriterWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -131,9 +131,9 @@ private:
 
 public:
   explicit WriterWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&WriterWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&WriterWorker::ProcessorLoop,this)
   {
   }
 
@@ -144,12 +144,12 @@ public:
 
 class ReaderReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -189,9 +189,9 @@ private:
 
 public:
   explicit ReaderReaderWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&ReaderReaderWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&ReaderReaderWorker::ProcessorLoop,this)
   {
   }
 
@@ -202,12 +202,12 @@ public:
 
 class WriterReaderWorker
 {
+public:
+  size_t                          processedCount;
+
 private:
   osmscout::ProcessingQueue<int>& queue;
   std::thread                     thread;
-
-public:
-  size_t                          processedCount;
 
 private:
   void ProcessorLoop()
@@ -251,9 +251,9 @@ private:
 
 public:
   explicit WriterReaderWorker(osmscout::ProcessingQueue<int>& queue)
-      : queue(queue),
-      thread(&WriterReaderWorker::ProcessorLoop,this),
-      processedCount(0)
+  : processedCount(0),
+    queue(queue),
+    thread(&WriterReaderWorker::ProcessorLoop,this)
   {
   }
 
@@ -263,6 +263,8 @@ public:
 };
 
 TEST_CASE("Multi Reader Worker") {
+  refCounter = 0;
+
   osmscout::StopClock            stopClock;
   osmscout::ProcessingQueue<int> queue(1000);
   ReaderWorker                   worker1(queue);
@@ -306,6 +308,8 @@ TEST_CASE("Multi Reader Worker") {
 }
 
 TEST_CASE("Multi Writer Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterWorker                          worker1(queue);
@@ -351,6 +355,8 @@ TEST_CASE("Multi Writer Worker") {
 }
 
 TEST_CASE("Multi Reader Worker One Writer worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterWorker                          worker1(queue);
@@ -397,6 +403,8 @@ TEST_CASE("Multi Reader Worker One Writer worker") {
 }
 
 TEST_CASE("Multi Recursive Reader Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   ReaderReaderWorker                    worker1(queue);
@@ -441,6 +449,8 @@ TEST_CASE("Multi Recursive Reader Worker") {
 }
 
 TEST_CASE("Multi Recursive Writer Worker") {
+  refCounter = 0;
+
   osmscout::StopClock                   stopClock;
   osmscout::ProcessingQueue<int>        queue(1000);
   WriterReaderWorker                    worker1(queue);
@@ -488,6 +498,8 @@ TEST_CASE("Multi Recursive Writer Worker") {
 }
 
 TEST_CASE("Check Re-Entrant One Reader Writer") {
+  refCounter = 0;
+
   osmscout::StopClock stopClock;
   volatile int i=0;
   osmscout::ReadLock rl(latch);
@@ -525,6 +537,8 @@ TEST_CASE("Check Re-Entrant One Reader Writer") {
 }
 
 TEST_CASE("Check write precedence") {
+  refCounter = 0;
+
   volatile int i=0;
   osmscout::ReadLock rl(latch);
 
@@ -552,6 +566,8 @@ TEST_CASE("Check write precedence") {
 }
 
 TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
+  refCounter = 0;
+
   int nbreader=4;
   volatile int i=0;
   int blocked=0;
@@ -587,7 +603,7 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
 
     // wait for everyone to get set up
     int k=0;
-    while (beg.load() != nbreader && k++ < 1000) {
+    while (beg.load() != nbreader && k++ < 1000000) {
       std::this_thread::yield();
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -602,7 +618,7 @@ TEST_CASE("Second shared lock should be blocked when exclusive is requested") {
   // check BUG: thread was not awakened after broadcast signal
   // wait for all readers, or fail when lost reader
   int k=0;
-  while (end.load() != nbreader && k++ < 1000) {
+  while (end.load() != nbreader && k++ < 1000000) {
     std::this_thread::yield();
   }
   // all readers must be finalized

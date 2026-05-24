@@ -99,12 +99,12 @@ struct VectorData
 
 class VectorWorker
 {
+public:
+  size_t                                 processedCount;
+
 private:
   osmscout::ProcessingQueue<VectorData>& queue;
   std::thread                            thread;
-
-public:
-  size_t                                 processedCount;
 
 private:
   void ProcessorLoop()
@@ -136,9 +136,9 @@ private:
 
 public:
   explicit VectorWorker(osmscout::ProcessingQueue<VectorData>& queue)
-    : queue(queue),
-      thread(&VectorWorker::ProcessorLoop,this),
-      processedCount(0)
+    : processedCount(0),
+      queue(queue),
+      thread(&VectorWorker::ProcessorLoop,this)
   {
   }
 

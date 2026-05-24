@@ -53,6 +53,7 @@
 #include <osmscout/feature/TunnelFeature.h>
 #include <osmscout/feature/WebsiteFeature.h>
 #include <osmscout/feature/WidthFeature.h>
+#include <osmscout/feature/HighwayMilestoneFeature.h>
 
 namespace osmscout {
   static uint32_t CalculateCellLevel(const osmscout::GeoBox& boundingBox)
@@ -782,6 +783,39 @@ namespace osmscout {
     }
   }
 
+  const std::string HighwayMilestoneDescriptionProcessor::SECTION_NAME_MILESTONE = "HighwayMilestone";
+
+  const std::string HighwayMilestoneDescriptionProcessor::LABEL_KEY_MILESTONE_DISTANCE = "Distance";
+  const std::string HighwayMilestoneDescriptionProcessor::LABEL_KEY_MILESTONE_REF = "Ref";
+  const std::string HighwayMilestoneDescriptionProcessor::LABEL_KEY_MILESTONE_CARRIAGEWAY_REF = "CarriagewayRef";
+  const std::string HighwayMilestoneDescriptionProcessor::LABEL_KEY_MILESTONE_MARKER = "Marker";
+
+  void HighwayMilestoneDescriptionProcessor::Process(const FeatureValueBuffer &buffer, ObjectDescription &description)
+  {
+    if (const auto* value=dynamic_cast<HighwayMilestoneFeatureValue*>(GetFeatureValue(buffer,HighwayMilestoneFeature::NAME));
+        value!=nullptr) {
+      description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
+                                            LABEL_KEY_MILESTONE_DISTANCE,
+                                            std::to_string(value->GetDistance())));
+
+      description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
+                                            LABEL_KEY_MILESTONE_REF,
+                                            value->GetRef()));
+
+      if (!value->GetCarriagewayRef().empty()) {
+        description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
+                                              LABEL_KEY_MILESTONE_CARRIAGEWAY_REF,
+                                              value->GetCarriagewayRef()));
+      }
+
+      if (!value->GetMarker().empty()) {
+        description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
+                                              LABEL_KEY_MILESTONE_MARKER,
+                                              value->GetMarker()));
+      }
+    }
+  }
+
   DescriptionService::DescriptionService()
   {
     featureProcessors.push_back(std::make_shared<GeneralDescriptionProcessor>());
@@ -794,6 +828,7 @@ namespace osmscout {
     featureProcessors.push_back(std::make_shared<ContactDescriptionProcessor>());
     featureProcessors.push_back(std::make_shared<PaymentDescriptionProcessor>());
     featureProcessors.push_back(std::make_shared<ChargingStationDescriptionProcessor>());
+    featureProcessors.push_back(std::make_shared<HighwayMilestoneDescriptionProcessor>());
   }
 
   void DescriptionService::GetDescription(const FeatureValueBuffer& buffer,

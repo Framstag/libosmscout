@@ -20,6 +20,9 @@
 #include <osmscout/location/LocationDescriptionService.h>
 
 #include <algorithm>
+#include <deque>
+#include <map>
+#include <set>
 
 #include <osmscout/FeatureReader.h>
 
@@ -31,6 +34,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/log/Logger.h>
 #include <osmscout/util/String.h>
+#include <osmscout/feature/HighwayMilestoneFeature.h>
 
 #include <osmscout/system/Math.h>
 
@@ -101,6 +105,45 @@ namespace osmscout {
     // no code
   }
 
+  LocationHighwayMilestoneDescription::LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                                                           const FeatureValueBufferRef& objectFeatures)
+    : object(object),
+      objectFeatures(objectFeatures)
+  {
+    // no code
+  }
+
+  LocationHighwayMilestoneDescription::LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                                                           const FeatureValueBufferRef& objectFeatures,
+                                                                           const Distance& distance,
+                                                                           const Bearing& bearing)
+    : object(object),
+      objectFeatures(objectFeatures),
+      atPlace(false),
+      distance(distance),
+      bearing(bearing)
+  {
+    // no code
+  }
+
+  LocationHighwayMilestoneDescription::LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                                                           const FeatureValueBufferRef& objectFeatures,
+                                                                           const Distance& distance,
+                                                                           const Bearing& bearing,
+                                                                           uint32_t milestoneDistance,
+                                                                           const std::string& milestoneRef,
+                                                                           const std::string& milestoneCarriagewayRef)
+    : object(object),
+      objectFeatures(objectFeatures),
+      atPlace(false),
+      distance(distance),
+      bearing(bearing),
+      milestoneDistance(milestoneDistance),
+      milestoneRef(milestoneRef),
+      milestoneCarriagewayRef(milestoneCarriagewayRef)
+  {
+  }
+
   void LocationDescription::SetCoordDescription(const LocationCoordDescriptionRef& description)
   {
     this->coordDescription=description;
@@ -131,6 +174,11 @@ namespace osmscout {
     this->crossingDescription=description;
   }
 
+  void LocationDescription::SetHighwayMilestoneDescription(const LocationHighwayMilestoneDescriptionRef& description)
+  {
+    this->highwayMilestoneDescription=description;
+  }
+
   LocationCoordDescriptionRef LocationDescription::GetCoordDescription() const
   {
     return coordDescription;
@@ -159,6 +207,11 @@ namespace osmscout {
   LocationCrossingDescriptionRef LocationDescription::GetCrossingDescription() const
   {
     return crossingDescription;
+  }
+
+  LocationHighwayMilestoneDescriptionRef LocationDescription::GetHighwayMilestoneDescription() const
+  {
+    return highwayMilestoneDescription;
   }
 
   /**
@@ -1408,15 +1461,258 @@ namespace osmscout {
       return false;
     }
 
+
+
+
     if (!DescribeLocationByWay(location,
                                description,
                                lookupDistance)) {
       return false;
     }
 
+    if (!DescribeLocationByHighwayMilestone(location,
+                                             description,
+                                             lookupDistance,
+                                             Distance::Of<Meter>(2000))) {
+      return false;
+    }
+
     return DescribeLocationByCrossing(location,
                                       description,
                                       lookupDistance);
-
+    return DescribeLocationByCrossing(location,
+                                      description,
+                                      lookupDistance);
   }
+
+  bool LocationDescriptionService::DescribeLocationByHighwayMilestone(const GeoCoord& location,
+                                                                       LocationDescription& description,
+                                                                       const Distance& lookupDistance,
+                                                                       const Distance& milestoneLookupDistance)
+  {
+    LocationWayDescriptionRef wayDescription=description.GetWayDescription();
+    if (!wayDescription) {
+      return true;
+    }
+
+    TypeConfigRef          typeConfig=database->GetTypeConfig();
+    if (!typeConfig) {
+      return false;
+    }
+
+    NameFeatureLabelReader nameFeatureLabelReader(*typeConfig);
+    RefFeatureLabelReader  refFeatureLabelReader(*typeConfig);
+
+    LocationIndex::ScopeCacheCleaner cacheCleaner(database->GetLocationIndex());
+
+    // Collect way types (same filter as DescribeLocationByWay)
+    TypeInfoSet wayTypes;
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeWay() &&
+          (type->HasFeature(NameFeature::NAME) ||
+           type->HasFeature(RefFeature::NAME))) {
+        wayTypes.Set(type);
+      }
+    }
+
+    if (wayTypes.Empty()) {
+      return true;
+    }
+
+    // Collect milestone node types
+    TypeInfoSet milestoneTypes;
+    for (const auto& type : typeConfig->GetTypes()) {
+      if (type->CanBeNode() &&
+          type->HasFeature(HighwayMilestoneFeature::NAME)) {
+        milestoneTypes.Set(type);
+      }
+    }
+
+    if (milestoneTypes.Empty()) {
+      return true;
+    }
+
+    std::vector<WayRef> candidates;
+    if (!wayTypes.Empty()) {
+      WayRegionSearchResult waySearchResult=database->LoadWaysInRadius(location,
+                                                                       wayTypes,
+                                                                       lookupDistance);
+      for (const auto& entry : waySearchResult.GetWayResults()) {
+        candidates.push_back(entry.GetWay());
+      }
+    }
+
+    candidates.erase(std::remove_if(candidates.begin(),
+                                    candidates.end(),
+                                    [&nameFeatureLabelReader,&refFeatureLabelReader](const WayRef& candidate) -> bool {
+      return nameFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty() &&
+             refFeatureLabelReader.GetLabel(candidate->GetFeatureValueBuffer()).empty();
+    }),candidates.end());
+
+    if (candidates.empty()) {
+      return true;
+    }
+
+    // Build connectivity map: node coordinate -> set of way indices
+    std::map<Point,std::set<size_t>> nodeToWays;
+    for (size_t i=0; i<candidates.size(); ++i) {
+      const auto& candidate=candidates[i];
+      for (const auto& node : candidate->nodes) {
+        nodeToWays[node].insert(i);
+      }
+    }
+
+    // BFS from the closest way (from wayDescription)
+    ObjectFileRef wayRef=wayDescription->GetWay().GetObject();
+    FileOffset wayOffset=wayRef.GetFileOffset();
+
+    // Find the index of the closest way in our candidates
+    size_t seedIndex=0;
+    for (size_t i=0; i<candidates.size(); ++i) {
+      if (candidates[i]->GetFileOffset()==wayOffset) {
+        seedIndex=i;
+        break;
+      }
+    }
+
+    std::set<Point>       visitedNodes;
+    std::set<size_t>      traversedWays;
+    std::deque<Point>     queue;
+
+    traversedWays.insert(seedIndex);
+
+    // Seed BFS with the closest way's endpoint nodes
+    const auto& seedWay=candidates[seedIndex];
+    if (!seedWay->nodes.empty()) {
+      queue.push_back(seedWay->nodes.front());
+      queue.push_back(seedWay->nodes.back());
+      visitedNodes.insert(seedWay->nodes.front());
+      visitedNodes.insert(seedWay->nodes.back());
+    }
+
+    while (!queue.empty()) {
+      Point current=queue.front();
+      queue.pop_front();
+
+      auto waysAtNode=nodeToWays.find(current);
+      if (waysAtNode==nodeToWays.end()) {
+        continue;
+      }
+
+      // Check if this is a crossing (>2 ways share this node)
+      if (waysAtNode->second.size()>2) {
+        continue; // do not cross
+      }
+
+      for (size_t wayIdx : waysAtNode->second) {
+        if (traversedWays.find(wayIdx)!=traversedWays.end()) {
+          continue;
+        }
+
+        const auto& way=candidates[wayIdx];
+
+        // Check distance cutoff: is any part of this way within milestoneLookupDistance?
+        bool withinDistance=false;
+        for (size_t i=0; i+1<way->nodes.size() && !withinDistance; ++i) {
+          double r,intersectLon,intersectLat;
+          DistanceToSegment(location.GetLon(), location.GetLat(),
+                            way->nodes[i].GetLon(), way->nodes[i].GetLat(),
+                            way->nodes[i+1].GetLon(), way->nodes[i+1].GetLat(),
+                            r, intersectLon, intersectLat);
+          Distance segmentDistance=GetSphericalDistance(location, GeoCoord(intersectLat, intersectLon));
+          if (segmentDistance<=milestoneLookupDistance) {
+            withinDistance=true;
+          }
+        }
+
+        if (!withinDistance) {
+          continue;
+        }
+
+        traversedWays.insert(wayIdx);
+
+        // Add unvisited endpoint nodes to queue
+        if (!way->nodes.empty()) {
+          const Point& front=way->nodes.front();
+          const Point& back=way->nodes.back();
+
+          if (visitedNodes.find(front)==visitedNodes.end()) {
+            visitedNodes.insert(front);
+            queue.push_back(front);
+          }
+          if (visitedNodes.find(back)==visitedNodes.end()) {
+            visitedNodes.insert(back);
+            queue.push_back(back);
+          }
+        }
+      }
+    }
+
+    NodeRegionSearchResult nodeSearchResult=database->LoadNodesInRadius(location,
+                                                                        milestoneTypes,
+                                                                        milestoneLookupDistance);
+
+    // Build set of traversed way node coordinates for fast lookup
+    std::set<Point> traversedNodes;
+    for (size_t wayIdx : traversedWays) {
+      for (const auto& node : candidates[wayIdx]->nodes) {
+        traversedNodes.insert(node);
+      }
+    }
+
+    // Filter milestone nodes to those on traversed ways
+    std::vector<std::pair<Distance,const Node*>> milestoneCandidates;
+    HighwayMilestoneFeatureValueReader milestoneReader(*typeConfig);
+
+    for (const auto& entry : nodeSearchResult.GetNodeResults()) {
+      const NodeRef& node=entry.GetNode();
+      // Check if node coordinates match a traversed way node
+      for (const auto& traversedNode : traversedNodes) {
+        if (traversedNode.GetCoord()==node->GetCoords()) {
+          auto* milestoneValue=milestoneReader.GetValue(node->GetFeatureValueBuffer());
+          if (milestoneValue!=nullptr) {
+            milestoneCandidates.emplace_back(entry.GetDistance(), node.get());
+          }
+          break;
+        }
+      }
+    }
+
+    if (milestoneCandidates.empty()) {
+      return true;
+    }
+
+    // Pick closest milestone
+    std::sort(milestoneCandidates.begin(), milestoneCandidates.end(),
+              [](const auto& a, const auto& b) {
+                return a.first<b.first;
+              });
+
+    const Node* closestNode=milestoneCandidates.front().second;
+    Distance closestDistance=milestoneCandidates.front().first;
+    Bearing bearing=GetSphericalBearingInitial(closestNode->GetCoords(), location);
+
+    auto* milestoneValue=milestoneReader.GetValue(closestNode->GetFeatureValueBuffer());
+    if (milestoneValue==nullptr) {
+      return true;
+    }
+
+    LocationHighwayMilestoneDescriptionRef milestoneDescription;
+    if (closestNode->GetCoords()==location) {
+      milestoneDescription=std::make_shared<LocationHighwayMilestoneDescription>(closestNode->GetObjectFileRef(),
+                                                                                 std::make_shared<FeatureValueBuffer>(closestNode->GetFeatureValueBuffer()));
+    }
+    else {
+      milestoneDescription=std::make_shared<LocationHighwayMilestoneDescription>(closestNode->GetObjectFileRef(),
+                                                                                 std::make_shared<FeatureValueBuffer>(closestNode->GetFeatureValueBuffer()),
+                                                                                 closestDistance, bearing,
+                                                                                 milestoneValue->GetDistance(),
+                                                                                 milestoneValue->GetRef(),
+                                                                                 milestoneValue->GetCarriagewayRef());
+    }
+    description.SetHighwayMilestoneDescription(milestoneDescription);
+
+    return true;
+  }
+
 }

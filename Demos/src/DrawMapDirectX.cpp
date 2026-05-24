@@ -367,9 +367,7 @@ private:
 		if (width > 0 && height > 0)
 		{
 			m_pBaseData->projection.Set(m_pBaseData->projection.GetCenter(), m_pBaseData->projection.GetMagnification(), m_pBaseData->projection.GetDPI(), width, height);
-			m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
-			m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
-			m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
+		  m_pBaseData->LoadData();
 		}
 	}
 
@@ -396,8 +394,7 @@ private:
 
 			result = 1;
 
-			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_pBaseData->styleConfig,
-                                                            pDemoApp->m_pDirect2dFactory,
+			pDemoApp->m_Painter = new osmscout::MapPainterDirectX(pDemoApp->m_pDirect2dFactory,
                                                             pDemoApp->m_pWriteFactory);
 		}
 		else

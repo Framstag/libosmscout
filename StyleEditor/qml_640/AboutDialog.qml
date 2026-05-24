@@ -21,6 +21,7 @@ DialogBase {
 
             text: "<b>StyleEditor</b>"
             font.pixelSize: units.fs("large")
+            color: foregroundColor
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -29,6 +30,7 @@ DialogBase {
 
             text: "Style sheet editor for the libosmscout library<br/>See http://libosmscout.sf.net"
             font.pixelSize: units.fs("medium")
+            color: foregroundColor
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -37,6 +39,7 @@ DialogBase {
 
             text: "All geographic data:<br/>© OpenStreetMap contributors<br/>See www.openstreetmap.org/copyright"
             font.pixelSize: units.fs("medium")
+            color: foregroundColor
             horizontalAlignment: Text.AlignHCenter
         }
     }

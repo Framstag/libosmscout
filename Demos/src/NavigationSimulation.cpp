@@ -84,9 +84,9 @@ public:
 
     QtDemoApp::SetupQmlContext(context, args);
     assert(context);
-    const NavSimArgs &eleArgs = static_cast<const NavSimArgs&>(args);
-    context->setContextProperty("routeVehicle", eleArgs.vehicle);
-    context->setContextProperty("PositionSimulationTrack", eleArgs.track);
+    const NavSimArgs &simulatorArgs = static_cast<const NavSimArgs&>(args);
+    context->setContextProperty("routeVehicle", simulatorArgs.vehicle);
+    context->setContextProperty("PositionSimulationTrack", simulatorArgs.track);
   }
 };
 

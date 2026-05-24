@@ -258,9 +258,8 @@ namespace osmscout {
     delete[] segmentLengths;
   }
 
-  MapPainterCairo::MapPainterCairo(const StyleConfigRef &styleConfig)
-      : MapPainter(styleConfig),
-        labelLayouter(this)
+  MapPainterCairo::MapPainterCairo()
+      : labelLayouter(this)
   {
     // no code
   }
@@ -647,10 +646,35 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
-  void MapPainterCairo::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const MapData& /*data*/)
+  void MapPainterCairo::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                          [[maybe_unused]] const MapParameter& parameter,
+                                          [[maybe_unused]] const std::vector<MapData>& data)
+  {
+    for (const auto &image : images) {
+      if (image != nullptr) {
+        cairo_surface_destroy(image);
+      }
+    }
+    images.clear();
+
+    for (const auto &pattern : patterns) {
+      if (pattern != nullptr) {
+        cairo_pattern_destroy(pattern);
+      }
+    }
+    patterns.clear();
+
+    for (const auto &image : patternImages) {
+      if (image != nullptr) {
+        cairo_surface_destroy(image);
+      }
+    }
+    patternImages.clear();
+  }
+
+  void MapPainterCairo::BeforeDrawingCallback(const Projection& projection,
+                                              const MapParameter& parameter,
+                                              const std::vector<MapData>& /*data*/)
   {
     ScreenVectorRectangle viewport;
     double x2, y2;
@@ -1076,6 +1100,7 @@ namespace osmscout {
 
   void MapPainterCairo::RegisterRegularLabel(const Projection &projection,
                                              const MapParameter &parameter,
+                                             bool basemap,
                                              const ObjectFileRef& ref,
                                              const std::vector<LabelData> &labels,
                                              const Vertex2D &position,
@@ -1083,6 +1108,7 @@ namespace osmscout {
   {
     labelLayouter.RegisterLabel(projection,
                                 parameter,
+                                basemap,
                                 ref,
                                 position,
                                 labels,
@@ -1094,12 +1120,14 @@ namespace osmscout {
    */
   void MapPainterCairo::RegisterContourLabel(const Projection &projection,
                                              const MapParameter &parameter,
+                                             bool basemap,
                                              const ObjectFileRef& ref,
                                              const PathLabelData &label,
                                              const LabelPath &labelPath)
   {
     labelLayouter.RegisterContourLabel(projection,
                                        parameter,
+                                       basemap,
                                        ref,
                                        label,
                                        labelPath);
@@ -1107,7 +1135,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawLabels(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const MapData& /*data*/)
+                                   const std::vector<MapData>& /*data*/)
   {
     labelLayouter.Layout(projection, parameter);
 
@@ -1297,7 +1325,7 @@ namespace osmscout {
 
   bool MapPainterCairo::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data,
+                                const std::vector<MapData>& data,
                                 cairo_t *draw,
                                 RenderSteps startStep,
                                 RenderSteps endStep)

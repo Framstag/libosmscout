@@ -57,7 +57,7 @@ protected:
 
 public:
   SearchRunnable(SearchModule *searchModule,
-                 DBInstanceRef &db,
+                 const DBInstanceRef &db,
                  const QString &searchPattern,
                  int limit,
                  osmscout::BreakerRef &breaker);
@@ -97,7 +97,7 @@ private:
 
 public:
   SearchLocationsRunnable(SearchModule *searchModule,
-                          DBInstanceRef &db,
+                          const DBInstanceRef &db,
                           const QString &searchPattern,
                           int limit,
                           osmscout::BreakerRef &breaker,
@@ -125,7 +125,7 @@ class OSMSCOUT_CLIENT_QT_API FreeTextSearchRunnable : public SearchRunnable {
 
 public:
   FreeTextSearchRunnable(SearchModule *searchModule,
-                         DBInstanceRef &db,
+                         const DBInstanceRef &db,
                          const QString &searchPattern,
                          int limit,
                          osmscout::BreakerRef &breaker);

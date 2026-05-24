@@ -246,16 +246,16 @@ namespace osmscout {
     struct OSMSCOUT_IMPORT_API Level
     {
       // Transient
-      uint32_t             level;            //!< The actual zoom level
-      FileOffset           indexEntryOffset; //!< File offset of this entry on disk
+      uint32_t             level;             //!< The actual zoom level
+      FileOffset           indexEntryOffset;  //!< File offset of this entry on disk
 
       // Persistent
-      bool                 hasCellData;      //!< If true, we have cell data
-      uint8_t              dataOffsetBytes;  //!< Number of bytes per entry in bitmap
-      State                defaultCellData;  //!< If hasCellData is false, this is the value to be returned for all cells
-      FileOffset           indexDataOffset;  //!< File offset of start cell state data on disk
+      bool                 hasCellData;       //!< If true, we have cell data
+      uint8_t              dataOffsetBytes=0; //!< Number of bytes per entry in bitmap
+      State                defaultCellData;   //!< If hasCellData is false, this is the value to be returned for all cells
+      FileOffset           indexDataOffset;   //!< File offset of start cell state data on disk
 
-      StateMap             stateMap;         //!< Index to handle state of cells
+      StateMap             stateMap;          //!< Index to handle state of cells
 
       void SetBox(const GeoBox& boundingBox,
                   double cellWidth,

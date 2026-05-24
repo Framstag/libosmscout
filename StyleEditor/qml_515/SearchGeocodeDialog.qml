@@ -34,6 +34,7 @@ DialogBase {
             Text {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
                 font.pixelSize: units.fs("large")
+                color: foregroundColor
                 text: "Latitude:"
             }
 
@@ -53,6 +54,7 @@ DialogBase {
             Text {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignBaseline
                 font.pixelSize: units.fs("large")
+                color: foregroundColor
                 text: "Longitude:"
             }
 

@@ -86,10 +86,9 @@ namespace osmscout {
   public:
     MapPainterStatistics() = default;
 
-    void DumpMapPainterStatistics(const StyleConfig& styleConfig,
-                                  const Projection& projection,
+    void DumpMapPainterStatistics(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data);
+                                  const std::vector<MapData>& data);
   };
 }
 #endif

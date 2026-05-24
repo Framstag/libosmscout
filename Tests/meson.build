@@ -299,6 +299,16 @@ if buildImport
     ostandossEnv = environment()
     ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)
+
+LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
+                                           'src/LocationDescriptionServiceTest.cpp',
+                                           include_directories: [osmscoutIncDir],
+                                           dependencies: [mathDep, openmpDep, catch2MainDep],
+                                           link_with: [osmscout],
+                                           install: true,
+                                           install_dir: testInstallDir)
+
+test('Check HighwayMilestone location description', LocationDescriptionServiceTest)
 endif
 
 MapRotateTest = executable('MapRotateTest',
@@ -666,5 +676,28 @@ WStringStringConversionTest = executable('WStringStringConversionTest',
              install_dir: testInstallDir)
 
 test('Check WString<=>String conversion code', WStringStringConversionTest)
+
+if buildMapCairo
+  LaneEvaluation = executable('LaneEvaluation',
+               ['src/LaneEvaluation.cpp',
+                'src/LaneEvaluationCommon.cpp',
+                'src/LaneEvaluationCompare.cpp'],
+               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, pangocairoDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+               cpp_args: ['-DHAVE_MAP_CAIRO=1'],
+               install: true,
+               install_dir: testInstallDir)
+else
+  LaneEvaluation = executable('LaneEvaluation',
+               ['src/LaneEvaluation.cpp',
+                'src/LaneEvaluationCommon.cpp',
+                'src/LaneEvaluationCompare.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep],
+               link_with: [osmscout],
+               install: true,
+               install_dir: testInstallDir)
+endif
 
 

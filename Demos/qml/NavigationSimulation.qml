@@ -1,8 +1,7 @@
 import QtQuick 2.2
 
-import QtQuick.Controls 1.1
+import QtQuick.Controls 2.7
 import QtQuick.Layouts 1.1
-import QtQuick.Controls.Styles 1.1
 import QtQuick.Window 2.0
 
 import QtPositioning 5.2
@@ -29,7 +28,7 @@ Window {
         onEndChanged: {
             var startLoc = routingModel.locationEntryFromPosition(simulator.startLat, simulator.startLon);
             var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
-            routingModel.setStartAndTarget(startLoc, destinationLoc);
+            routingModel.setStartAndTarget(startLoc, destinationLoc, routeVehicle);
         }
 
         onPositionChanged: {
@@ -55,7 +54,7 @@ Window {
                 var startLoc = routingModel.locationEntryFromPosition(fromLat, fromLon);
                 var destinationLoc = routingModel.locationEntryFromPosition(simulator.endLat, simulator.endLon);
                 console.log("We leave route, reroute from " + Utils.locationStr(startLoc) + " -> " + Utils.locationStr(destinationLoc) + ", bearing: " + bearingAngle);
-                routingModel.setStartAndTarget(startLoc, destinationLoc, "car", bearingAngle);
+                routingModel.setStartAndTarget(startLoc, destinationLoc, routeVehicle, bearingAngle);
             }
         }
         onPositionEstimate: {

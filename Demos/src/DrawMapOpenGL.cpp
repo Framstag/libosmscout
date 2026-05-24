@@ -142,7 +142,10 @@ int main(int argc, char* argv[]) {
   painter->SetCenter(drawDemo.projection.GetCenter());
   painter->SetMagnification(drawDemo.projection.GetMagnification());
 
-  painter->ProcessData(drawDemo.data, drawDemo.projection, drawDemo.styleConfig);
+  if (!drawDemo.data.empty()) {
+    // TODO: support multiple databases
+    painter->ProcessData(drawDemo.data.front(), drawDemo.projection, drawDemo.data.front().styleConfig);
+  }
   painter->SwapData();
 
   painter->DrawMap();

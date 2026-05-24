@@ -4,6 +4,19 @@ CONST
   COLOR turnSymbolColor            = #ffffff80;
   COLOR turnSymbolOutlineColor     = #a0a0a080;
 
+  SYMBOL place_capital_city
+    CIRCLE 0,0 0.8 {
+      AREA.BORDER {color: #8a4e4e; width: 0.5mm; }
+    }
+    CIRCLE 0,0 0.2 {
+      AREA {color: #8a4e4e; }
+    }
+
+  SYMBOL place_city
+    CIRCLE 0,0 0.8 {
+      AREA.BORDER {color: #888888; width: 0.5mm; }
+    }
+
   SYMBOL viaFerrataEasyCross
     POLYGON -0.5,-0.5 0.5,0.5 {
       AREA.BORDER { width: 0.1mm; color:  @viaFerrataEasyColor;  }
@@ -106,6 +119,11 @@ CONST
   SYMBOL natural_peak
     POLYGON -0.75,0 0.75,0 0.0,-1.5 {
       AREA { color: @peakSymbolColor; }
+    }
+
+  SYMBOL natural_volcano
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @volcanoSymbolColor; }
     }
 
   SYMBOL highway_bus_stop

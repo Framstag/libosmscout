@@ -33,4 +33,9 @@ osmscout = library('osmscout',
                    install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscout)
+pkg.generate(osmscout,
+             name: 'libosmscout',
+             filebase: 'libosmscout',
+             description: 'Base library for accessing OSM data via libosmscout databases',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

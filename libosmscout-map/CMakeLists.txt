@@ -2,10 +2,8 @@ set(HEADER_FILES
 	include/osmscoutmap/MapImportExport.h
 	include/osmscoutmap/oss/Parser.h
 	include/osmscoutmap/oss/Scanner.h
-	include/osmscoutmap/BatchMapPainter.h
 	include/osmscoutmap/LabelLayouter.h
 	include/osmscoutmap/LabelLayouterHelper.h
-	include/osmscoutmap/BatchMapPainter.h
 	include/osmscoutmap/MapPainter.h
 	include/osmscoutmap/MapPainterStatistics.h
 	include/osmscoutmap/MapParameter.h

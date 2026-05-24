@@ -28,7 +28,6 @@
 
 #include <osmscoutmapqt/MapQtImportExport.h>
 
-#include <osmscoutmap/BatchMapPainter.h>
 #include <osmscoutmap/MapPainter.h>
 
 #include <QtGui/QTextLayout>
@@ -78,13 +77,6 @@ namespace osmscout {
     QPainter                   *painter{nullptr}; //! non-owning pointer to Qt painter
 
     QtLabelLayouter            labelLayouter;
-
-    /**
-     * non-owning pointer to layouter
-     * when it is not null, all labels are registered to it
-     * and DrawLabels method is no-op
-     */
-    QtLabelLayouter            *delegateLabelLayouter{nullptr};
 
     std::map<std::string,QImage,std::less<>> images;        //! map of QImage for icons, key is name of the icon
                                                 //! - it should be independent on the specific style configuration
@@ -170,10 +162,13 @@ namespace osmscout {
                    const LabelData& label,
                    const QTextLayout& textLayout);
 
-    void BeforeDrawing(const StyleConfig& styleConfig,
-                       const Projection& projection,
-                       const MapParameter& parameter,
-                       const MapData& data) override;
+    void StyleSheetChanged(const Projection& projection,
+                           const MapParameter& parameter,
+                           const std::vector<MapData>& data) override;
+
+    void BeforeDrawingCallback(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::vector<MapData>& data) override;
 
     /**
       Register regular label with given text at the given pixel coordinate
@@ -181,6 +176,7 @@ namespace osmscout {
      */
     void RegisterRegularLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              bool basemap,
                               const ObjectFileRef& ref,
                               const std::vector<LabelData>& labels,
                               const Vertex2D& position,
@@ -191,13 +187,14 @@ namespace osmscout {
      */
     void RegisterContourLabel(const Projection& projection,
                               const MapParameter& parameter,
+                              bool basemap,
                               const ObjectFileRef& ref,
                               const PathLabelData& label,
                               const LabelPath& labelPath) override;
 
     void DrawLabels(const Projection& projection,
                     const MapParameter& parameter,
-                    const MapData& data) override;
+                    const std::vector<MapData>& data) override;
 
     void DrawIcon(const IconStyle* style,
                   const Vertex2D& centerPos,
@@ -228,7 +225,7 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterQt(const StyleConfigRef& styleConfig);
+    MapPainterQt();
     ~MapPainterQt() override;
 
     void DrawGroundTiles(const Projection& projection,
@@ -238,30 +235,12 @@ namespace osmscout {
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  QPainter* painter,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);
   };
 
-  /**
-   * \ingroup Renderer
-   *
-   * Qt specific MapPainterBatch. When given PainterQt instances
-   * are used from multiple threads, they should be always
-   * added in same order to avoid deadlocks.
-   */
-  class OSMSCOUT_MAP_QT_API BatchMapPainterQt:
-      public BatchMapPainter<MapPainterQt*> {
-  public:
-    explicit BatchMapPainterQt(size_t expectedCount);
-
-    ~BatchMapPainterQt() override;
-
-    bool paint(const Projection& projection,
-               const MapParameter& parameter,
-               QPainter* painter);
-  };
 }
 
 #endif

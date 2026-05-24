@@ -2,8 +2,7 @@ name: Sonar
 
 on:
   pull_request:
-    branches:
-      - master
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - master
@@ -14,6 +13,8 @@ on:
 jobs:
   sonar_gcc_meson:
     name: sonar, gcc and meson
+    # secrets are not available for pull requests from forks
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     environment: SONAR
     steps:
@@ -46,7 +47,7 @@ jobs:
           CXX: g++
           CC: gcc
       - name: Install Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5.2.0
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v6.0.0
       - name: Build project
         run:  build-wrapper-linux-x86-64 --out-dir sonar-build-output ninja -C debug all test coverage
         env:
@@ -57,7 +58,7 @@ jobs:
       - name: Debug build
         run: ls -lR debug
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5.2.0
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

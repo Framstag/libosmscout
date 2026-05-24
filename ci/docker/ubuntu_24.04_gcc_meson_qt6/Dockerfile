@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
           libgl-dev \
           locales \
           meson ninja-build g++ \
+          catch2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8

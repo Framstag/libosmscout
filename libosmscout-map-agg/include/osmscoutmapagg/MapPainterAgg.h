@@ -173,6 +173,7 @@ namespace osmscout {
      */
     virtual void RegisterRegularLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      bool basemap,
                                       const ObjectFileRef& ref,
                                       const std::vector<LabelData> &labels,
                                       const Vertex2D &position,
@@ -183,18 +184,18 @@ namespace osmscout {
      */
     virtual void RegisterContourLabel(const Projection &projection,
                                       const MapParameter &parameter,
+                                      bool basemap,
                                       const ObjectFileRef& ref,
                                       const PathLabelData &label,
                                       const LabelPath &labelPath) override;
 
     virtual void DrawLabels(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& data) override;
+                            const std::vector<MapData>& data) override;
 
-    virtual void BeforeDrawing(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data) override;
+    virtual void BeforeDrawingCallback(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const std::vector<MapData>& data) override;
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
@@ -206,12 +207,12 @@ namespace osmscout {
                   const AreaData& area) override;
 
   public:
-    explicit MapPainterAgg(const StyleConfigRef& styleConfig);
+    MapPainterAgg();
     ~MapPainterAgg() override;
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  AggPixelFormat* pf,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);

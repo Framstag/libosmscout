@@ -1,10 +1,13 @@
 import QtQuick 2.12
+import QtQuick.Controls.Universal 2.2
 
 Item {
     id: lineEdit
 
-    property color defaultBackgroundColor: "white"
+    readonly property color defaultForegroundColor: Universal.foreground
+    readonly property color defaultBackgroundColor: Universal.background
 
+    property color foregroundColor: defaultForegroundColor
     property color backgroundColor: defaultBackgroundColor
     property color focusColor: "lightgrey"
     property color selectedFocusColor: "lightblue"
@@ -33,6 +36,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         font.pixelSize: units.fs("large")
+        color: foregroundColor
         clip: true
 
         onFocusChanged: {

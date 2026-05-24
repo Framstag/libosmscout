@@ -131,7 +131,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << parameter.GetRouteNodeBlockSize() << ")" << std::endl;
   std::cout << std::endl;
   std::cout << " --langOrder <#|lang1[,#|lang2]..>    language order when parsing lang[:language] and place_name[:language] tags" << std::endl
-            << "                                      efault language (no :language) (default: #)" << std::endl;
+            << "                                      default language is # (no :language suffix)" << std::endl;
   std::cout << " --altLangOrder <#|lang1[,#|lang2]..> same as --langOrder for a second alternate language (default: none)" << std::endl;
   std::cout << std::endl;
   std::cout << " --maxAdminLevel <number>             maximum admin level evaluated (default: " << parameter.GetMaxAdminLevel() << ")" << std::endl;
@@ -143,6 +143,15 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --delete-report-files true|false     deletes all report files after execution of the importer" << std::endl;
   std::cout << " --textIndexVariant transliterate|original|both" << std::endl;
   std::cout << "                                      store transliterated, original or both strings to string index (default: " + TextIndexVariantStr(parameter.GetTextIndexVariant()) + ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --waterIndexMinMag <number>          minimum water index zoom level (default: " << parameter.GetWaterIndexMinMag() << ")" << std::endl;
+  std::cout << " --waterIndexMaxMap <number>          maximum water index zoom level (default: " << parameter.GetWaterIndexMaxMag() << ")" << std::endl;
+  std::cout << " --waterMaxDistance <number>          maximum distance (in tiles) from coastline that is filled by water (default: " << parameter.GetFillWaterArea() << ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --lowZoomOptMaxMag <number>          maximum level for low-zoom optimized data (default: " << parameter.GetOptimizationMaxMag() << ")" << std::endl;
+  std::cout << " --lowZoomOptIndexMinMag <number>     minimum index level for low-zoom optimized data (default: " << parameter.GetOptimizationMinMag() << ")" << std::endl;
+  std::cout << std::endl;
+  std::cout << " --areaNodeGridMag <number>           magnification level for area node index grid (default: " << parameter.GetAreaNodeGridMag() << ")" << std::endl;
 }
 
 osmscout::ImportParameter::RouterRef ParseRouterArgument(int argc,
@@ -351,6 +360,15 @@ static void DumpParameter(const osmscout::ImportParameter& parameter,
   progress.Info("Eco: {}",parameter.IsEco());
 
   progress.Info("TextIndexVariant: {}",TextIndexVariantStr(parameter.GetTextIndexVariant()));
+
+  progress.Info("WaterIndexMinMag: {}",parameter.GetWaterIndexMinMag());
+  progress.Info("WaterIndexMaxMap: {}",parameter.GetWaterIndexMaxMag());
+  progress.Info("WaterMaxDistance: {}",parameter.GetFillWaterArea());
+
+  progress.Info("lowZoomOptMaxMag: {}",parameter.GetOptimizationMaxMag().Get());
+  progress.Info("lowZoomOptIndexMinMag: {}",parameter.GetOptimizationMinMag().Get());
+
+  progress.Info("areaNodeGridMag: {}", parameter.GetAreaNodeGridMag().Get());
 }
 
 bool DumpDataSize(const osmscout::ImportParameter& parameter,
@@ -925,6 +943,84 @@ int main(int argc, char* argv[])
                                                i);
       if (textIndexVariant) {
         parameter.SetTextIndexVariant(*textIndexVariant);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--waterIndexMinMag")==0) {
+      size_t waterIndexMinMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       waterIndexMinMag)) {
+        parameter.SetWaterIndexMinMag(waterIndexMinMag);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--waterIndexMaxMag")==0) {
+      size_t waterIndexMaxMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       waterIndexMaxMag)) {
+        parameter.SetWaterIndexMaxMag(waterIndexMaxMag);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--waterMaxDistance")==0) {
+      size_t waterMaxDistance;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       waterMaxDistance)) {
+        parameter.SetFillWaterArea(waterMaxDistance);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--lowZoomOptMaxMag")==0) {
+      size_t lowZoomOptMaxMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       lowZoomOptMaxMag)) {
+        parameter.SetOptimizationMaxMag(osmscout::MagnificationLevel(lowZoomOptMaxMag));
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--lowZoomOptIndexMinMag")==0) {
+      size_t lowZoomOptIndexMinMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       lowZoomOptIndexMinMag)) {
+        parameter.SetOptimizationMinMag(osmscout::MagnificationLevel(lowZoomOptIndexMinMag));
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--areaNodeGridMag")==0) {
+      size_t areaNodeGridMag;
+
+      if (osmscout::ParseSizeTArgument(argc,
+                                       argv,
+                                       i,
+                                       areaNodeGridMag)) {
+        parameter.SetAreaNodeGridMag(osmscout::MagnificationLevel(areaNodeGridMag));
       }
       else {
         parameterError=true;

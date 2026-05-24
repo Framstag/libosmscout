@@ -25,7 +25,7 @@
 
 struct Arguments
 {
-  bool                   help;
+  bool                   help=false;
   osmscout::GeoCoord     coordinate;
   std::list<std::string> mapPaths;
 };

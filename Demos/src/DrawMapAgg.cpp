@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
   agg::pixfmt_rgb24 pf(rbuf);
 
-  osmscout::MapPainterAgg       painter(drawDemo.styleConfig);
+  osmscout::MapPainterAgg painter;
   if (painter.DrawMap(drawDemo.projection,
                       drawDemo.drawParameter,
                       drawDemo.data,

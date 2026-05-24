@@ -67,7 +67,7 @@ struct Arguments
   std::set<osmscout::OSMId> routeNodeCoordIds;
   std::set<osmscout::Id>    routeNodeIds;
   std::list<Job>            jobs;
-  bool                      help;
+  bool                      help=false;
 };
 
 static const size_t INDENT=2;

@@ -7,7 +7,7 @@
 class Arguments
 {
 private:
-  bool               help;
+  bool               help=false;
   bool               magicFlag;
   bool               witchyFlag;
   size_t             distance;

@@ -152,17 +152,25 @@ constexpr bool debugGroundTiles = false;
     return a.position<b.position;
   }
 
-  MapPainter::MapPainter(const StyleConfigRef& styleConfig)
-  : styleConfig(styleConfig),
-    nameReader(*styleConfig->GetTypeConfig()),
-    nameAltReader(*styleConfig->GetTypeConfig()),
-    refReader(*styleConfig->GetTypeConfig()),
-    layerReader(*styleConfig->GetTypeConfig()),
-    widthReader(*styleConfig->GetTypeConfig()),
-    addressReader(*styleConfig->GetTypeConfig()),
-    lanesReader(*styleConfig->GetTypeConfig()),
-    accessReader(*styleConfig->GetTypeConfig()),
-    colorReader(*styleConfig->GetTypeConfig())
+  MapPainter::DatabaseCacheEntry::DatabaseCacheEntry(const TypeConfig &typeConfig,
+                                                     const StyleConfigRef &styleConfig,
+                                                     bool basemap):
+    typeConfigPtr(&typeConfig),
+    styleConfig(styleConfig),
+    basemap(basemap),
+    nameReader(typeConfig),
+    nameAltReader(typeConfig),
+    refReader(typeConfig),
+    layerReader(typeConfig),
+    widthReader(typeConfig),
+    addressReader(typeConfig),
+    lanesReader(typeConfig),
+    accessReader(typeConfig),
+    colorReader(typeConfig)
+  {
+  }
+
+  MapPainter::MapPainter()
   {
     log.Debug() << "MapPainter::MapPainter()";
 
@@ -273,26 +281,30 @@ constexpr bool debugGroundTiles = false;
     return width;
   }
 
-  void MapPainter::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
-                                      const Projection& /*projection*/,
-                                      const MapParameter& /*parameter*/,
-                                      const MapData& /*data*/)
+  void MapPainter::StyleSheetChanged([[maybe_unused]] const Projection& projection,
+                                     [[maybe_unused]] const MapParameter& parameter,
+                                     [[maybe_unused]] const std::vector<MapData>& data)
   {
     // Nothing to do in the base class implementation
   }
 
-  void MapPainter::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                 const Projection& /*projection*/,
-                                 const MapParameter& /*parameter*/,
-                                 const MapData& /*data*/)
+  void MapPainter::AfterPreprocessingCallback(const Projection& /*projection*/,
+                                              const MapParameter& /*parameter*/,
+                                              const std::vector<MapData>& /*data*/)
   {
     // Nothing to do in the base class implementation
   }
 
-  void MapPainter::AfterDrawing(const StyleConfig& /*styleConfig*/,
-                                const Projection& /*projection*/,
-                                const MapParameter& /*parameter*/,
-                                const MapData& /*data*/)
+  void MapPainter::BeforeDrawingCallback(const Projection& /*projection*/,
+                                         const MapParameter& /*parameter*/,
+                                         const std::vector<MapData>& /*data*/)
+  {
+    // Nothing to do in the base class implementation
+  }
+
+  void MapPainter::AfterDrawingCallback(const Projection& /*projection*/,
+                                        const MapParameter& /*parameter*/,
+                                        const std::vector<MapData>& /*data*/)
   {
     // Nothing to do in the base class implementation
   }
@@ -330,6 +342,7 @@ constexpr bool debugGroundTiles = false;
 
       RegisterRegularLabel(projection,
                            parameter,
+                           false,
                            ObjectFileRef(),
                            labelData,
                            pixel,
@@ -355,8 +368,10 @@ constexpr bool debugGroundTiles = false;
    * @param objectBox
    *    The (rough) size of the object
    */
-  void MapPainter::LayoutPointLabels(const Projection& projection,
+  void MapPainter::LayoutPointLabels(const StyleConfig& styleConfig,
+                                     const Projection& projection,
                                      const MapParameter& parameter,
+                                     bool basemap,
                                      const ObjectFileRef& ref,
                                      const FeatureValueBuffer& buffer,
                                      const IconStyleRef& iconStyle,
@@ -368,7 +383,7 @@ constexpr bool debugGroundTiles = false;
 
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
-          HasIcon(*styleConfig,
+          HasIcon(styleConfig,
                   projection,
                   parameter,
                   *iconStyle)) {
@@ -462,6 +477,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterRegularLabel(projection,
                          parameter,
+                         basemap,
                          ref,
                          labelLayoutData,
                          screenPos,
@@ -496,15 +512,20 @@ constexpr bool debugGroundTiles = false;
     return proposedWidth;
   }
 
-  void MapPainter::PrepareNodes(const StyleConfig& styleConfig,
+  void MapPainter::PrepareNodes(size_t dbIndex,
                                 const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
+    assert(dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[dbIndex].styleConfig;
+    bool basemap=databaseCache[dbIndex].basemap;
+
     for (const auto& node : data.nodes) {
       PrepareNode(styleConfig,
                   projection,
                   parameter,
+                  basemap,
                   node);
     }
 
@@ -512,15 +533,18 @@ constexpr bool debugGroundTiles = false;
       PrepareNode(styleConfig,
                   projection,
                   parameter,
+                  basemap,
                   node);
     }
   }
 
-  void MapPainter::PrepareAreaLabel(const StyleConfig& styleConfig,
-                                    const Projection& projection,
+  void MapPainter::PrepareAreaLabel(const Projection& projection,
                                     const MapParameter& parameter,
                                     const AreaData& areaData)
   {
+    assert(areaData.dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[areaData.dbIndex].styleConfig;
+    bool basemap=databaseCache[areaData.dbIndex].basemap;
     IconStyleRef iconStyle=styleConfig.GetAreaIconStyle(areaData.type,
                                                         *areaData.buffer,
                                                         projection);
@@ -549,8 +573,10 @@ constexpr bool debugGroundTiles = false;
       areaCenter=areaScreenBox.GetCenter();
     }
 
-    LayoutPointLabels(projection,
+    LayoutPointLabels(styleConfig,
+                      projection,
                       parameter,
+                      basemap,
                       areaData.ref,
                       *areaData.buffer,
                       iconStyle,
@@ -559,11 +585,13 @@ constexpr bool debugGroundTiles = false;
                       areaScreenBox);
   }
 
-  bool MapPainter::DrawAreaBorderLabel(const StyleConfig& styleConfig,
-                                       const Projection& projection,
+  bool MapPainter::DrawAreaBorderLabel(const Projection& projection,
                                        const MapParameter& parameter,
                                        const AreaData& areaData)
   {
+    assert(areaData.dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[areaData.dbIndex].styleConfig;
+    bool basemap=databaseCache[areaData.dbIndex].basemap;
     PathTextStyleRef borderTextStyle=styleConfig.GetAreaBorderTextStyle(areaData.type,
                                                                         *areaData.buffer,
                                                                         projection);
@@ -612,6 +640,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         basemap,
                          areaData.ref,
                          labelData,
                          labelPath);
@@ -619,11 +648,12 @@ constexpr bool debugGroundTiles = false;
     return true;
   }
 
-  bool MapPainter::DrawAreaBorderSymbol(const StyleConfig& styleConfig,
-                                        const Projection& projection,
+  bool MapPainter::DrawAreaBorderSymbol(const Projection& projection,
                                         const MapParameter& parameter,
                                         const AreaData& areaData)
   {
+    assert(areaData.dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[areaData.dbIndex].styleConfig;
     PathSymbolStyleRef borderSymbolStyle=styleConfig.GetAreaBorderSymbolStyle(areaData.type,
                                                                               *areaData.buffer,
                                                                               projection);
@@ -667,6 +697,7 @@ constexpr bool debugGroundTiles = false;
   void MapPainter::PrepareNode(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
+                               bool basemap,
                                const NodeRef& node)
   {
     IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
@@ -681,8 +712,10 @@ constexpr bool debugGroundTiles = false;
     projection.GeoToPixel(node->GetCoords(),
                           screenPos);
 
-    LayoutPointLabels(projection,
+    LayoutPointLabels(styleConfig,
+                      projection,
                       parameter,
+                      basemap,
                       node->GetObjectFileRef(),
                       node->GetFeatureValueBuffer(),
                       iconStyle,
@@ -691,8 +724,7 @@ constexpr bool debugGroundTiles = false;
                       ScreenBox::EMPTY);
   }
 
-  void MapPainter::DrawWay(const StyleConfig& /*styleConfig*/,
-                           const Projection& projection,
+  void MapPainter::DrawWay(const Projection& projection,
                            const MapParameter& parameter,
                            const WayData& data)
   {
@@ -719,11 +751,13 @@ constexpr bool debugGroundTiles = false;
              data.coordRange);
   }
 
-  bool MapPainter::DrawWayDecoration(const StyleConfig& styleConfig,
-                                     const Projection& projection,
+  bool MapPainter::DrawWayDecoration(const Projection& projection,
                                      const MapParameter& parameter,
                                      const MapPainter::WayPathData& data)
   {
+    assert(data.dbIndex<databaseCache.size());
+    const auto &lanesReader=databaseCache[data.dbIndex].lanesReader;
+    const auto &styleConfig=*databaseCache[data.dbIndex].styleConfig;
     styleConfig.GetWayPathSymbolStyle(*data.buffer,
                                       projection,
                                       symbolStyles);
@@ -767,18 +801,18 @@ constexpr bool debugGroundTiles = false;
             range=coordBuffer.GenerateParallelWay(range,
                                                   laneOffset);
 
-            ContourSymbolData data;
+            ContourSymbolData symbolData;
 
-            data.symbolSpace=symbolSpace;
-            data.symbolOffset=symbolSpace/2.0;
-            data.symbolScale=1.0;
-            data.coordRange=range;
+            symbolData.symbolSpace=symbolSpace;
+            symbolData.symbolOffset=symbolSpace/2.0;
+            symbolData.symbolScale=1.0;
+            symbolData.coordRange=range;
 
 
             DrawContourSymbol(projection,
                               parameter,
                               *pathSymbolStyle->GetSymbol(),
-                              data);
+                              symbolData);
           }
           laneOffset+=lanesSpace;
         }
@@ -872,11 +906,12 @@ constexpr bool debugGroundTiles = false;
     return true;
   }
 
-  bool MapPainter::DrawWayContourLabel(const StyleConfig& styleConfig,
-                                       const Projection& projection,
+  bool MapPainter::DrawWayContourLabel(const Projection& projection,
                                        const MapParameter& parameter,
                                        const WayPathData& data)
   {
+    assert(data.dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[data.dbIndex].styleConfig;
     PathTextStyleRef pathTextStyle = styleConfig.GetWayPathTextStyle(*data.buffer,
                                                                      projection);
 
@@ -905,6 +940,8 @@ constexpr bool debugGroundTiles = false;
                                        const std::string_view &textLabel)
   {
     assert(pathTextStyle);
+    assert(data.dbIndex<databaseCache.size());
+    bool basemap=databaseCache[data.dbIndex].basemap;
 
     double           lineOffset=0.0;
     CoordBufferRange range=data.coordRange;
@@ -941,6 +978,7 @@ constexpr bool debugGroundTiles = false;
 
     RegisterContourLabel(projection,
                          parameter,
+                         basemap,
                          ObjectFileRef(data.ref,RefType::refWay),
                          labelData,
                          labelPath);
@@ -953,6 +991,8 @@ constexpr bool debugGroundTiles = false;
                                    const Magnification& magnification,
                                    const LineStyleRef& osmTileLine)
   {
+    assert(!databaseCache.empty());
+    size_t                  dbIndex=0; // we can use any database
     GeoBox                  boundingBox(projection.GetDimensions());
     osmscout::OSMTileId     tileA(OSMTileId::GetOSMTile(magnification,
                                                         boundingBox.GetMinCoord()));
@@ -989,6 +1029,7 @@ constexpr bool debugGroundTiles = false;
 
       WayData data;
 
+      data.dbIndex=dbIndex;
       data.buffer=&coastlineSegmentAttributes;
       data.layer=0;
       data.lineStyle=osmTileLine;
@@ -1020,6 +1061,7 @@ constexpr bool debugGroundTiles = false;
 
       WayData data;
 
+      data.dbIndex=dbIndex;
       data.buffer=&coastlineSegmentAttributes;
       data.layer=0;
       data.lineStyle=osmTileLine;
@@ -1035,7 +1077,8 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
-  bool MapPainter::PrepareAreaRing(const StyleConfig& styleConfig,
+  bool MapPainter::PrepareAreaRing(size_t dbIndex,
+                                   const StyleConfig& styleConfig,
                                    const Projection& projection,
                                    const MapParameter& parameter,
                                    const std::vector<CoordBufferRange>& coordRanges,
@@ -1113,6 +1156,7 @@ constexpr bool debugGroundTiles = false;
       return true;
     });
 
+    a.dbIndex=dbIndex;
     a.ref=area.GetObjectFileRef();
     a.type=type;
     a.buffer=&ring.GetFeatureValueBuffer();
@@ -1148,6 +1192,7 @@ constexpr bool debugGroundTiles = false;
 
       // Add a copy of the AreaData definition without the buffer and the fill but only the border
 
+      a.dbIndex=dbIndex;
       a.ref=area.GetObjectFileRef();
       a.type=type;
       a.buffer=nullptr;
@@ -1161,7 +1206,8 @@ constexpr bool debugGroundTiles = false;
     return true;
   }
 
-  void MapPainter::PrepareArea(const StyleConfig& styleConfig,
+  void MapPainter::PrepareArea(size_t dbIndex,
+                               const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
                                const AreaRef &area)
@@ -1208,10 +1254,11 @@ constexpr bool debugGroundTiles = false;
       }
     }
 
-    area->VisitRings([this,&styleConfig,&projection,&parameter,&td,&area](size_t i,
+    area->VisitRings([this,&styleConfig,&projection,&parameter,&td,&area, &dbIndex](size_t i,
                          const Area::Ring& ring,
                          const TypeInfoRef& type)->bool {
-      return PrepareAreaRing(styleConfig,
+      return PrepareAreaRing(dbIndex,
+                             styleConfig,
                              projection,
                              parameter,
                              td,
@@ -1224,24 +1271,29 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::ProcessAreas(const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data)
+                                const std::vector<MapData>& data)
   {
     areaData.clear();
 
-    //Areas
-    for (const auto& area : data.areas) {
-      PrepareArea(*styleConfig,
-                  projection,
-                  parameter,
-                  area);
-    }
+    for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
+      const auto& mapData = data[dbIndex];
+      //Areas
+      for (const auto& area : mapData.areas) {
+        PrepareArea(dbIndex,
+                    *mapData.styleConfig,
+                    projection,
+                    parameter,
+                    area);
+      }
 
-    // POI Areas
-    for (const auto& area : data.poiAreas) {
-      PrepareArea(*styleConfig,
-                  projection,
-                  parameter,
-                  area);
+      // POI Areas
+      for (const auto& area : mapData.poiAreas) {
+        PrepareArea(dbIndex,
+                    *mapData.styleConfig,
+                    projection,
+                    parameter,
+                    area);
+      }
     }
   }
 
@@ -1325,10 +1377,13 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
-  double MapPainter::CalculateLineWith(const Projection& projection,
+  double MapPainter::CalculateLineWith(size_t dbIndex,
+                                       const Projection& projection,
                                        const FeatureValueBuffer& buffer,
                                        const LineStyle& lineStyle) const
   {
+    assert(dbIndex<databaseCache.size());
+    const auto &widthReader=databaseCache[dbIndex].widthReader;
     double lineWidth=0.0;
 
     if (lineStyle.GetWidth()>0.0) {
@@ -1396,12 +1451,15 @@ constexpr bool debugGroundTiles = false;
     return lineOffset;
   }
 
-  Color MapPainter::CalculateLineColor(const FeatureValueBuffer& buffer,
+  Color MapPainter::CalculateLineColor(size_t dbIndex,
+                                       const FeatureValueBuffer& buffer,
                                        const LineStyle& lineStyle) const
   {
+    assert(dbIndex<databaseCache.size());
     Color color=lineStyle.GetLineColor();
 
     if (lineStyle.GetPreferColorFeature()){
+      const auto &colorReader=databaseCache[dbIndex].colorReader;
       const ColorFeatureValue *colorValue=colorReader.GetValue(buffer);
       if (colorValue != nullptr){
         color=colorValue->GetColor();
@@ -1411,8 +1469,11 @@ constexpr bool debugGroundTiles = false;
     return color;
   }
 
-  int8_t MapPainter::CalculateLineLayer(const FeatureValueBuffer& buffer) const
+  int8_t MapPainter::CalculateLineLayer(size_t dbIndex,
+                                        const FeatureValueBuffer& buffer) const
   {
+    assert(dbIndex<databaseCache.size());
+    const auto &layerReader=databaseCache[dbIndex].layerReader;
     const LayerFeatureValue *layerValue=layerReader.GetValue(buffer);
 
     if (layerValue!=nullptr) {
@@ -1422,11 +1483,16 @@ constexpr bool debugGroundTiles = false;
     return 0;
   }
 
-  void MapPainter::CalculateWayPaths(const StyleConfig& styleConfig,
+  void MapPainter::CalculateWayPaths(size_t dbIndex,
+                                     const StyleConfig& styleConfig,
                                      const Projection& projection,
                                      const MapParameter& parameter,
                                      const Way& way)
   {
+    assert(dbIndex<databaseCache.size());
+    const auto &lanesReader=databaseCache[dbIndex].lanesReader;
+    const auto &accessReader=databaseCache[dbIndex].accessReader;
+
     FileOffset ref=way.GetFileOffset();
     const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
 
@@ -1445,6 +1511,7 @@ constexpr bool debugGroundTiles = false;
 
     WayPathData pathData;
 
+    pathData.dbIndex = dbIndex;
     pathData.ref=ref;
     pathData.buffer=&buffer;
     pathData.mainSlotWidth=0.0;
@@ -1452,7 +1519,8 @@ constexpr bool debugGroundTiles = false;
     // Calculate mainSlotWidth
     for (const auto& lineStyle : lineStyles) {
       if (lineStyle->GetSlot().empty()) {
-        pathData.mainSlotWidth=CalculateLineWith(projection,
+        pathData.mainSlotWidth=CalculateLineWith(dbIndex,
+                                                 projection,
                                                  buffer,
                                                  *lineStyle);
       }
@@ -1471,7 +1539,8 @@ constexpr bool debugGroundTiles = false;
         lineWidth=pathData.mainSlotWidth;
       }
       else {
-        lineWidth=CalculateLineWith(projection,
+        lineWidth=CalculateLineWith(dbIndex,
+                                    projection,
                                     buffer,
                                     *lineStyle);
       }
@@ -1513,11 +1582,11 @@ constexpr bool debugGroundTiles = false;
         wayPathData.push_back(pathData);
       }
 
+      data.dbIndex=dbIndex;
       data.buffer=&buffer;
       data.lineStyle=lineStyle;
-      data.layer=CalculateLineLayer(buffer);
-      data.color=CalculateLineColor(buffer,
-                                    *lineStyle);
+      data.layer=CalculateLineLayer(dbIndex, buffer);
+      data.color=CalculateLineColor(dbIndex, buffer, *lineStyle);
       data.wayPriority=styleConfig.GetWayPrio(buffer.GetType());
       data.coordRange=pathData.coordRange;
       data.startIsClosed=!way.GetFront().IsRelevant();
@@ -1586,67 +1655,94 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::CalculatePaths(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data)
+                                  const std::vector<MapData>& data)
   {
     wayData.clear();
     wayPathData.clear();
     routeLabelData.clear();
 
-    for (const auto& way : data.ways) {
-      if (way->IsValid()) {
-        CalculateWayPaths(*styleConfig,
-                          projection,
-                          parameter,
-                          *way);
-      }
-    }
+    assert(data.size() == databaseCache.size());
+    for (size_t dbIndex = 0; dbIndex < data.size(); ++dbIndex) {
+      const auto& mapData = data[dbIndex];
 
-    for (const auto& way : data.poiWays) {
-      if (way->IsValid()) {
-        CalculateWayPaths(*styleConfig,
-                          projection,
-                          parameter,
-                          *way);
+      for (const auto& way : mapData.ways) {
+        if (way->IsValid()) {
+          CalculateWayPaths(dbIndex,
+                            *mapData.styleConfig,
+                            projection,
+                            parameter,
+                            *way);
+        }
+      }
+
+      for (const auto& way : mapData.poiWays) {
+        if (way->IsValid()) {
+          CalculateWayPaths(dbIndex,
+                            *mapData.styleConfig,
+                            projection,
+                            parameter,
+                            *way);
+        }
       }
     }
   }
 
   void MapPainter::CalculateWayShields(const Projection& projection,
                                        const MapParameter& parameter,
-                                       const MapData& data)
+                                       const std::vector<MapData>& data)
   {
-    if (!styleConfig->HasWayPathShieldStyle(projection)) {
-      return;
-    }
-
-    for (const auto& way : data.ways) {
-      if (way->IsValid()) {
-        CalculateWayShieldLabels(*styleConfig,
-                                 projection,
-                                 parameter,
-                                 *way);
+    for (const auto& mapData : data) {
+      if (!mapData.styleConfig->HasWayPathShieldStyle(projection)) {
+        return;
       }
-    }
 
-    for (const auto& way : data.poiWays) {
-      if (way->IsValid()) {
-        CalculateWayShieldLabels(*styleConfig,
-                                 projection,
-                                 parameter,
-                                 *way);
+      for (const auto& way : mapData.ways) {
+        if (way->IsValid()) {
+          CalculateWayShieldLabels(*mapData.styleConfig,
+                                   projection,
+                                   parameter,
+                                   *way);
+        }
+      }
+
+      for (const auto& way : mapData.poiWays) {
+        if (way->IsValid()) {
+          CalculateWayShieldLabels(*mapData.styleConfig,
+                                   projection,
+                                   parameter,
+                                   *way);
+        }
       }
     }
   }
 
   void MapPainter::ProcessRoutes(const Projection& projection,
                                  const MapParameter& parameter,
-                                 const MapData& data)
+                                 const std::vector<MapData>& data)
   {
     routeLabelData.clear();
 
+    assert(data.size() == databaseCache.size());
+    for (size_t dbIndex = 0; dbIndex < data.size(); ++dbIndex) {
+      const auto& mapData = data[dbIndex];
+
+      ProcessRoutes(dbIndex,
+                    projection,
+                    parameter,
+                    mapData);
+    }
+  }
+
+  void MapPainter::ProcessRoutes(size_t dbIndex,
+                                 const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const MapData& data)
+  {
     if (data.routes.empty()){
       return;
     }
+
+    const auto styleConfig = data.styleConfig;
 
     struct RouteSegmentData
     {
@@ -1705,9 +1801,9 @@ constexpr bool debugGroundTiles = false;
       PathTextStyleRef routeTextStyle=styleConfig->GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
                                                                          projection);
 
-      Color color=CalculateLineColor(route->GetFeatureValueBuffer(),*lineStyle);
+      Color color=CalculateLineColor(dbIndex, route->GetFeatureValueBuffer(),*lineStyle);
 
-      double lineWidth=CalculateLineWith(projection,route->GetFeatureValueBuffer(),*lineStyle);
+      double lineWidth=CalculateLineWith(dbIndex, projection,route->GetFeatureValueBuffer(),*lineStyle);
 
       RouteData routeTmp;
       auto FlushRouteData = [&](){
@@ -1723,6 +1819,7 @@ constexpr bool debugGroundTiles = false;
 
             WayData segmentWay;
 
+            segmentWay.dbIndex=dbIndex;
             segmentWay.buffer=&(route->GetFeatureValueBuffer());
             segmentWay.layer=0;
             segmentWay.lineStyle=lineStyle;
@@ -1764,6 +1861,7 @@ constexpr bool debugGroundTiles = false;
               }
               WayPathData pathData;
 
+              pathData.dbIndex=dbIndex;
               pathData.ref=member.way;
               pathData.buffer=&(it->second->GetFeatureValueBuffer());
               TransformPathData(projection, parameter, *(it->second), pathData);
@@ -1890,7 +1988,7 @@ constexpr bool debugGroundTiles = false;
 
   bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
-                        const MapData& data,
+                        const std::vector<MapData>& data,
                         RenderSteps startStep,
                         RenderSteps endStep)
   {
@@ -1915,7 +2013,7 @@ constexpr bool debugGroundTiles = false;
 
   bool MapPainter::Draw(const Projection& projection,
                         const MapParameter& parameter,
-                        const MapData& data)
+                        const std::vector<MapData>& data)
   {
     return Draw(projection,
                 parameter,
@@ -1930,7 +2028,7 @@ constexpr bool debugGroundTiles = false;
    */
   void MapPainter::InitializeRender(const Projection& projection,
                                     const MapParameter& parameter,
-                                    const MapData& /*data*/)
+                                    const std::vector<MapData>& data)
   {
     errorTolerancePixel=projection.ConvertWidthToPixel(parameter.GetOptimizeErrorToleranceMm());
     areaMinDimension   =projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
@@ -1945,42 +2043,62 @@ constexpr bool debugGroundTiles = false;
     standardFontSize=GetFontHeight(projection,
                                    parameter,
                                    1.0);
+
+    bool styleSheetShanged=false;
+    // make sure that attribute readers are in the same order as data
+    if (databaseCache.size() > data.size()) {
+      databaseCache.clear();
+      styleSheetShanged=true;
+    }
+    for (size_t i=0; i<data.size(); ++i) {
+      assert(data[i].styleConfig);
+      auto typeConfig = data[i].styleConfig->GetTypeConfig();
+      if (databaseCache.size() <= i) {
+        databaseCache.emplace_back(DatabaseCacheEntry{*typeConfig, data[i].styleConfig, data[i].basemap});
+      } else if (databaseCache[i].typeConfigPtr != typeConfig.get()) {
+        databaseCache[i] = DatabaseCacheEntry{*typeConfig, data[i].styleConfig, data[i].basemap};
+        styleSheetShanged=true;
+      } else if (databaseCache[i].styleConfig != data[i].styleConfig){
+        styleSheetShanged=true;
+        databaseCache[i].styleConfig = data[i].styleConfig; // update style config in case it has changed
+      }
+    }
+    if (styleSheetShanged) {
+      StyleSheetChanged(projection, parameter, data);
+    }
   }
 
   void MapPainter::DumpStatistics(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data)
+                                  const std::vector<MapData>& data)
   {
     MapPainterStatistics statistics;
 
-    statistics.DumpMapPainterStatistics(*styleConfig,
-                                        projection,
+    statistics.DumpMapPainterStatistics(projection,
                                         parameter,
                                         data);
   }
 
   void MapPainter::AfterPreprocessing(const Projection& projection,
                                       const MapParameter& parameter,
-                                      const MapData& data)
+                                      const std::vector<MapData>& data)
   {
     wayData.sort();
     areaData.sort(AreaSorter);
 
     // Optional callback after preprocessing data
-    AfterPreprocessing(*styleConfig,
-                       projection,
-                       parameter,
-                       data);
+    AfterPreprocessingCallback(projection,
+                               parameter,
+                               data);
   }
 
   void MapPainter::Prerender(const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& data)
+                             const std::vector<MapData>& data)
   {
-    BeforeDrawing(*styleConfig,
-                  projection,
-                  parameter,
-                  data);
+    BeforeDrawingCallback(projection,
+                          parameter,
+                          data);
 
     if (parameter.IsDebugPerformance()) {
       GeoBox boundingBox(projection.GetDimensions());
@@ -1995,7 +2113,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawBaseMapTiles(const Projection& projection,
                                     const MapParameter& parameter,
-                                    const MapData& data)
+                                    const std::vector<MapData>& data)
   {
     if (parameter.GetRenderBackground()) {
       DrawGround(projection,
@@ -2003,18 +2121,26 @@ constexpr bool debugGroundTiles = false;
                  *landFill);
     }
 
-    DrawGroundTiles(projection,
-                    parameter,
-                    data.baseMapTiles);
+    for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
+      const auto& mapData = data[dbIndex];
+      DrawGroundTiles(dbIndex,
+                      projection,
+                      parameter,
+                      mapData.baseMapTiles);
+    }
   }
 
   void MapPainter::DrawGroundTiles(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const MapData& data)
+                                   const std::vector<MapData>& data)
   {
-    DrawGroundTiles(projection,
-                    parameter,
-                    data.groundTiles);
+    for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
+      const auto& mapData = data[dbIndex];
+      DrawGroundTiles(dbIndex,
+                      projection,
+                      parameter,
+                      mapData.groundTiles);
+    }
   }
 
   static void DumpGroundTile(const GroundTile& tile)
@@ -2035,21 +2161,24 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
-  void MapPainter::DrawGroundTiles(const Projection& projection,
+  void MapPainter::DrawGroundTiles(size_t dbIndex,
+                                   const Projection& projection,
                                    const MapParameter& parameter,
                                    const std::list<GroundTile>& groundTiles)
   {
     if (!parameter.GetRenderSeaLand()) {
       return;
     }
+    assert(dbIndex<databaseCache.size());
+    const auto &styleConfig=*databaseCache[dbIndex].styleConfig;
 
     [[maybe_unused]] std::set<GeoCoord> drawnLabels; // used when debugGroundTiles == true
 
-    FillStyleRef          landFill=styleConfig->GetLandFillStyle(projection);
-    FillStyleRef          seaFill=styleConfig->GetSeaFillStyle(projection);
-    FillStyleRef          coastFill=styleConfig->GetCoastFillStyle(projection);
-    FillStyleRef          unknownFill=styleConfig->GetUnknownFillStyle(projection);
-    LineStyleRef          coastlineLine=styleConfig->GetCoastlineLineStyle(projection);
+    FillStyleRef          landFill=styleConfig.GetLandFillStyle(projection);
+    FillStyleRef          seaFill=styleConfig.GetSeaFillStyle(projection);
+    FillStyleRef          coastFill=styleConfig.GetCoastFillStyle(projection);
+    FillStyleRef          unknownFill=styleConfig.GetUnknownFillStyle(projection);
+    LineStyleRef          coastlineLine=styleConfig.GetCoastlineLineStyle(projection);
     std::vector<GeoCoord> coords;
     size_t                start=0; // Make the compiler happy
     size_t                end=0;   // Make the compiler happy
@@ -2209,6 +2338,7 @@ constexpr bool debugGroundTiles = false;
             if (lineStart!=lineEnd) {
               WayData wd;
 
+              wd.dbIndex=dbIndex;
               wd.buffer=&coastlineSegmentAttributes;
               wd.layer=0;
               wd.lineStyle=coastlineLine;
@@ -2268,6 +2398,7 @@ constexpr bool debugGroundTiles = false;
         vect.push_back(labelBox);
         RegisterRegularLabel(projection,
                              parameter,
+                             false,
                              ObjectFileRef(),
                              vect,
                              pixel,
@@ -2280,8 +2411,12 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawOSMTileGrids(const Projection& projection,
                                     const MapParameter& parameter,
-                                    const MapData& /*data*/)
+                                    const std::vector<MapData>& data)
   {
+    if (data.empty()) {
+      return;
+    }
+    const auto styleConfig = data.front().styleConfig;
     LineStyleRef osmSubTileLine=styleConfig->GetOSMSubTileBorderLineStyle(projection);
 
     if (osmSubTileLine) {
@@ -2309,7 +2444,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawAreas(const Projection& projection,
                              const MapParameter& parameter,
-                             const MapData& /*data*/)
+                             const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
 
@@ -2329,13 +2464,12 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawWays(const Projection& projection,
                             const MapParameter& parameter,
-                            const MapData& /*data*/)
+                            const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
 
     for (const auto& way : wayData) {
-      DrawWay(*styleConfig,
-              projection,
+      DrawWay(projection,
               parameter,
               way);
     }
@@ -2350,7 +2484,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawWayDecorations(const Projection& projection,
                                       const MapParameter& parameter,
-                                      const MapData& /*data*/)
+                                      const std::vector<MapData>& /*data*/)
   {
     //
     // Path decorations (like arrows and similar)
@@ -2360,8 +2494,8 @@ constexpr bool debugGroundTiles = false;
     size_t    drawnCount=0;
 
     for (const auto& way: wayPathData) {
-      if (DrawWayDecoration(*styleConfig,
-                            projection,
+      assert(way.dbIndex < databaseCache.size());
+      if (DrawWayDecoration(projection,
                             parameter,
                             way)) {
         ++drawnCount;
@@ -2377,12 +2511,16 @@ constexpr bool debugGroundTiles = false;
   }
 
   void MapPainter::DrawWayContourLabels(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const MapData& /*data*/)
+                                        const MapParameter& parameter,
+                                        const std::vector<MapData>& /*data*/)
   {
     // Draw labels only if there is a style for the current zoom level
     // that requires labels
-    if (!styleConfig->HasWayPathTextStyle(projection)){
+    if (!std::any_of(databaseCache.begin(),
+                     databaseCache.end(),
+                     [&](const DatabaseCacheEntry& entry) {
+                       return entry.styleConfig->HasWayPathTextStyle(projection);
+                     })){
       return;
     }
 
@@ -2390,8 +2528,7 @@ constexpr bool debugGroundTiles = false;
     size_t    drawnCount=0;
 
     for (const auto& way : wayPathData) {
-      if (DrawWayContourLabel(*styleConfig,
-                              projection,
+      if (DrawWayContourLabel(projection,
                               parameter,
                               way)) {
         ++drawnCount;
@@ -2408,7 +2545,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::PrepareAreaLabels(const Projection& projection,
                                      const MapParameter& parameter,
-                                     const MapData& /*data*/)
+                                     const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
     size_t    drawnCount=0;
@@ -2419,8 +2556,7 @@ constexpr bool debugGroundTiles = false;
         continue;
       }
 
-      PrepareAreaLabel(*styleConfig,
-                       projection,
+      PrepareAreaLabel(projection,
                        parameter,
                        area);
 
@@ -2437,7 +2573,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawAreaBorderLabels(const Projection& projection,
                                         const MapParameter& parameter,
-                                        const MapData& /*data*/)
+                                        const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
     size_t    drawnCount=0;
@@ -2447,8 +2583,7 @@ constexpr bool debugGroundTiles = false;
         continue;
       }
 
-      if (DrawAreaBorderLabel(*styleConfig,
-                              projection,
+      if (DrawAreaBorderLabel(projection,
                               parameter,
                               area)) {
         ++drawnCount;
@@ -2465,7 +2600,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawAreaBorderSymbols(const Projection& projection,
                                          const MapParameter& parameter,
-                                         const MapData& /*data*/)
+                                         const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
     size_t    drawnCount=0;
@@ -2475,8 +2610,7 @@ constexpr bool debugGroundTiles = false;
         continue;
       }
 
-      if (DrawAreaBorderSymbol(*styleConfig,
-                               projection,
+      if (DrawAreaBorderSymbol(projection,
                                parameter,
                                area)) {
         ++drawnCount;
@@ -2493,14 +2627,15 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::PrepareNodeLabels(const Projection& projection,
                                      const MapParameter& parameter,
-                                     const MapData& data)
+                                     const std::vector<MapData>& data)
   {
     StopClock timer;
-
-    PrepareNodes(*styleConfig,
-                 projection,
-                 parameter,
-                 data);
+    for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
+      PrepareNodes(dbIndex,
+                   projection,
+                   parameter,
+                   data[dbIndex]);
+    }
 
     timer.Stop();
 
@@ -2512,7 +2647,7 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::PrepareRouteLabels(const Projection& projection,
                                       const MapParameter& parameter,
-                                      const MapData& /*data*/)
+                                      const std::vector<MapData>& /*data*/)
   {
     StopClock timer;
     size_t    drawnCount=0;
@@ -2571,8 +2706,23 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::DrawContourLines(const Projection& projection,
                                     const MapParameter& parameter,
+                                    const std::vector<MapData>& data)
+  {
+    for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
+      DrawContourLines(dbIndex,
+                       projection,
+                       parameter,
+                       data[dbIndex]);
+    }
+  }
+
+  void MapPainter::DrawContourLines(size_t dbIndex,
+                                    const Projection& projection,
+                                    const MapParameter& parameter,
                                     const MapData& data)
   {
+    assert(dbIndex<databaseCache.size());
+    const auto &styleConfig=databaseCache[dbIndex].styleConfig;
     if (!parameter.GetRenderContourLines()) {
       return;
     }
@@ -2665,6 +2815,7 @@ constexpr bool debugGroundTiles = false;
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
 
+                wd.dbIndex=dbIndex;
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
@@ -2677,7 +2828,7 @@ constexpr bool debugGroundTiles = false;
                 wd.startIsClosed=false;
                 wd.endIsClosed=false;
 
-                DrawWay(*styleConfig,projection,parameter,wd);
+                DrawWay(projection,parameter,wd);
               }
             }
 
@@ -2703,6 +2854,7 @@ constexpr bool debugGroundTiles = false;
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
 
+                wd.dbIndex=dbIndex;
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
@@ -2715,7 +2867,7 @@ constexpr bool debugGroundTiles = false;
                 wd.startIsClosed=false;
                 wd.endIsClosed=false;
 
-                DrawWay(*styleConfig,projection,parameter,wd);
+                DrawWay(projection,parameter,wd);
               }
             }
 
@@ -2741,6 +2893,7 @@ constexpr bool debugGroundTiles = false;
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
 
+                wd.dbIndex=dbIndex;
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
@@ -2753,7 +2906,7 @@ constexpr bool debugGroundTiles = false;
                 wd.startIsClosed=false;
                 wd.endIsClosed=false;
 
-                DrawWay(*styleConfig,projection,parameter,wd);
+                DrawWay(projection,parameter,wd);
 
               }
             }
@@ -2780,6 +2933,7 @@ constexpr bool debugGroundTiles = false;
                                                     TransPolygon::none,
                                                     errorTolerancePixel);
 
+                wd.dbIndex=dbIndex;
                 wd.buffer=&buffer;
                 wd.layer=0;
                 wd.lineStyle=contourLineStyles[0];
@@ -2792,7 +2946,7 @@ constexpr bool debugGroundTiles = false;
                 wd.startIsClosed=false;
                 wd.endIsClosed=false;
 
-                DrawWay(*styleConfig,projection,parameter,wd);
+                DrawWay(projection,parameter,wd);
 
               }
             }
@@ -2866,6 +3020,7 @@ constexpr bool debugGroundTiles = false;
               for (const auto& borderStyle : areaBorderStyles) {
                 AreaData tileData;
 
+                tileData.dbIndex=dbIndex;
                 tileData.borderStyle=borderStyle;
                 tileData.boundingBox=tileBoundingBox;
                 tileData.ref=ObjectFileRef();
@@ -2883,6 +3038,19 @@ constexpr bool debugGroundTiles = false;
   }
 
   void MapPainter::DrawHillShading(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const std::vector<MapData>& data)
+  {
+    for (const auto &d: data) {
+      DrawHillShading(d.styleConfig,
+                      projection,
+                      parameter,
+                      d);
+    }
+  }
+
+  void MapPainter::DrawHillShading(const StyleConfigRef &styleConfig,
+                                   const Projection& projection,
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
@@ -2987,6 +3155,7 @@ constexpr bool debugGroundTiles = false;
               vect.push_back(labelBox);
               RegisterRegularLabel(projection,
                                    parameter,
+                                   false,
                                    ObjectFileRef(),
                                    vect,
                                    screenPos,
@@ -3019,11 +3188,10 @@ constexpr bool debugGroundTiles = false;
 
   void MapPainter::Postrender(const Projection& projection,
                               const MapParameter& parameter,
-                              const MapData& data)
+                              const std::vector<MapData>& data)
   {
-    AfterDrawing(*styleConfig,
-                 projection,
-                 parameter,
-                 data);
+    AfterDrawingCallback(projection,
+                         parameter,
+                         data);
   }
 }

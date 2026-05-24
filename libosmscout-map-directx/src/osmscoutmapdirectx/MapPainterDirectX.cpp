@@ -417,17 +417,15 @@ namespace osmscout
     return nullptr;
   }
 
-  void MapPainterDirectX::AfterPreprocessing(const StyleConfig& /*styleConfig*/,
-                                             const Projection& /*projection*/,
-                                             const MapParameter& /*parameter*/,
-                                             const MapData& /*data*/)
+  void MapPainterDirectX::AfterPreprocessingCallback(const Projection& /*projection*/,
+                                                     const MapParameter& /*parameter*/,
+                                                     const std::vector<MapData>& /*data*/)
   {
   }
 
-  void MapPainterDirectX::BeforeDrawing(const StyleConfig& /*styleConfig*/,
-                                        const Projection& projection,
-                                        const MapParameter& parameter,
-                                        const MapData& /*data*/)
+  void MapPainterDirectX::BeforeDrawingCallback(const Projection& projection,
+                                                const MapParameter& parameter,
+                                                const std::vector<MapData>& /*data*/)
   {
     ScreenVectorRectangle viewport;
 
@@ -440,10 +438,9 @@ namespace osmscout
     m_LabelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
   }
 
-  void MapPainterDirectX::AfterDrawing(const StyleConfig& /*styleConfig*/,
-                                       const Projection& /*projection*/,
-                                       const MapParameter& /*parameter*/,
-                                       const MapData& /*data*/)
+  void MapPainterDirectX::AfterDrawingCallback(const Projection& /*projection*/,
+                                               const MapParameter& /*parameter*/,
+                                               const std::vector<MapData>& /*data*/)
   {
     for (GeometryMap::const_iterator entry = m_Polygons.begin(); entry != m_Polygons.end(); ++entry) {
       if (entry->second != nullptr) {
@@ -678,12 +675,13 @@ namespace osmscout
 
   void MapPainterDirectX::RegisterRegularLabel(const Projection &projection,
 	  const MapParameter &parameter,
-      const ObjectFileRef& ref,
+	  bool basemap,
+    const ObjectFileRef& ref,
 	  const std::vector<LabelData> &labels,
 	  const Vertex2D &position,
 	  double objectWidth)
   {
-    m_LabelLayouter.RegisterLabel(projection, parameter, ref, position, labels, objectWidth);
+    m_LabelLayouter.RegisterLabel(projection, parameter, basemap, ref, position, labels, objectWidth);
   }
 
   /**
@@ -691,16 +689,17 @@ namespace osmscout
   */
   void MapPainterDirectX::RegisterContourLabel(const Projection &projection,
 	  const MapParameter &parameter,
-      const ObjectFileRef& ref,
+	  bool basemap,
+    const ObjectFileRef& ref,
 	  const PathLabelData &label,
 	  const LabelPath &labelPath)
   {
-    m_LabelLayouter.RegisterContourLabel(projection, parameter, ref, label, labelPath);
+    m_LabelLayouter.RegisterContourLabel(projection, parameter, basemap, ref, label, labelPath);
   }
 
   void MapPainterDirectX::DrawLabels(const Projection& projection,
 	  const MapParameter& parameter,
-	  const MapData& /*data*/)
+	  const std::vector<MapData>& /*data*/)
   {
     m_LabelLayouter.Layout(projection, parameter);
 
@@ -1041,10 +1040,9 @@ namespace osmscout
     }
   }
 
-  MapPainterDirectX::MapPainterDirectX(const StyleConfigRef& styleConfig,
-                                       ID2D1Factory* pDirect2dFactory,
+  MapPainterDirectX::MapPainterDirectX(ID2D1Factory* pDirect2dFactory,
                                        IDWriteFactory* pWriteFactory)
-    : MapPainter(styleConfig),
+    :
     m_dashLessStrokeStyle(nullptr),
     m_pDirect2dFactory(pDirect2dFactory),
     m_pWriteFactory(pWriteFactory),
@@ -1054,7 +1052,6 @@ namespace osmscout
     m_pPathTextRenderer(nullptr),
     dpiX(0.0f),
     dpiY(0.0f),
-    typeConfig(nullptr),
     m_LabelLayouter(this)
   {
     pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
@@ -1122,7 +1119,7 @@ namespace osmscout
 
   bool MapPainterDirectX::DrawMap(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const MapData& data,
+                                  const std::vector<MapData>& data,
                                   ID2D1RenderTarget* renderTarget)
   {
     bool result = true;
@@ -1132,7 +1129,6 @@ namespace osmscout
       return false;
     }
 
-    typeConfig = styleConfig->GetTypeConfig();
     m_pRenderTarget = renderTarget;
 
     IDWriteRenderingParams* renderingParams;

@@ -23,7 +23,6 @@
 
 #include <osmscoutclient/ClientImportExport.h>
 
-#include <osmscout/db/BasemapDatabase.h>
 #include <osmscout/db/Database.h>
 
 #include <osmscout/location/LocationService.h>
@@ -94,8 +93,9 @@ class OSMSCOUT_CLIENT_API DBThread: public AsyncWorker
 {
 public:
   using SynchronousDBJob = std::function<void (const std::list<DBInstanceRef> &)>;
+  using SynchronousDBJob2 = std::function<void (const std::list<DBInstanceRef> &, const DBInstanceRef)>;
 
-  using AsynchronousDBJob = std::function<void (const osmscout::BasemapDatabaseRef& basemapDatabase,
+  using AsynchronousDBJob = std::function<void (const DBInstanceRef& basemapDatabase,
                                                 const std::list<DBInstanceRef> &databases,
                                                 ReadLock &&locker)>;
 
@@ -147,9 +147,8 @@ private:
 
   mutable Latch                      latch;
 
-  osmscout::BasemapDatabaseParameter basemapDatabaseParameter;
-  osmscout::BasemapDatabaseRef       basemapDatabase;
-  osmscout::DatabaseParameter        databaseParameter;
+  DBInstanceRef                      basemapDatabase;
+  DatabaseParameter                  databaseParameter;
   std::list<DBInstanceRef>           databases;
 
   TypeConfigRef                      emptyTypeConfig; // type config just with special and custom poi types
@@ -278,6 +277,7 @@ public:
    * @param job
    */
   void RunSynchronousJob(SynchronousDBJob job);
+  void RunSynchronousJob(SynchronousDBJob2 job);
 
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);

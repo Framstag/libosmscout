@@ -54,48 +54,6 @@ namespace osmscout {
   class OSMSCOUT_API RouteDescription
   {
   public:
-    /** Constant for a description of the start node (StartDescription) */
-    static const char* const NODE_START_DESC;
-    /** Constant for a description of the target node (TargetDescription) */
-    static const char* const NODE_TARGET_DESC;
-    /** Constant for a description of name of the way (NameDescription) */
-    static const char* const WAY_NAME_DESC;
-    /** Constant for a description of a change of way name (NameChangedDescription) */
-    static const char* const WAY_NAME_CHANGED_DESC;
-    /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
-    static const char* const CROSSING_WAYS_DESC;
-    /** Constant for a description of drive direction (DirectionDescription) */
-    static const char* const DIRECTION_DESC;
-    /** Constant for a description of an explicit turn (TurnDescription) */
-    static const char* const TURN_DESC;
-    /** Constant for a description of entering a roundabout  (RoundaboutEnterDescription) */
-    static const char* const ROUNDABOUT_ENTER_DESC;
-    /** Constant for a description of leaving a roundabout (RoundaboutLeaveDescription) */
-    static const char* const ROUNDABOUT_LEAVE_DESC;
-    /** Constant for a description of entering a motorway (MotorwayEnterDescription) */
-    static const char* const MOTORWAY_ENTER_DESC;
-    /** Constant for a description of changing a motorway (MotorwayChangeDescription) */
-    static const char* const MOTORWAY_CHANGE_DESC;
-    /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
-    static const char* const MOTORWAY_LEAVE_DESC;
-    /** Constant for a description of node describing a motorway junction */
-    static const char* const MOTORWAY_JUNCTION_DESC;
-    /** Constant for a description of a destination to choose at a junction */
-    static const char* const CROSSING_DESTINATION_DESC;
-    /** Constant for a description of the maximum speed for the given way */
-    static const char* const WAY_MAXSPEED_DESC;
-    /** Constant for a description of type name of the way (TypeNameDescription) */
-    static const char* const WAY_TYPE_NAME_DESC;
-    /** Constant for a description of pois at the route (POIAtRouteDescription) */
-    static const char* const POI_AT_ROUTE_DESC;
-    /** Constant for a description of route lanes (LaneDescription) */
-    static const char* const LANES_DESC;
-    /** Constant for a description of suggested route lanes (SuggestedLaneDescription) */
-    static const char* const SUGGESTED_LANES_DESC;
-    /** Constant for a description of the first node of a route section */
-    static const char* const NODE_VIA_DESC;
-      
-  public:
     /**
      * \ingroup Routing
      * Base class of all descriptions.
@@ -125,6 +83,8 @@ namespace osmscout {
       std::string GetDebugString() const override;
 
       std::string GetDescription() const;
+
+      static constexpr std::string_view Key = "NodeStart";
     };
 
     using StartDescriptionRef = std::shared_ptr<StartDescription>;
@@ -144,6 +104,8 @@ namespace osmscout {
       std::string GetDebugString() const override;
 
       std::string GetDescription() const;
+
+      static constexpr std::string_view Key = "NodeTarget";
     };
 
     using TargetDescriptionRef = std::shared_ptr<TargetDescription>;
@@ -173,6 +135,8 @@ namespace osmscout {
       std::string GetRef() const;
 
       std::string GetDescription() const;
+
+      static constexpr std::string_view Key = "WayName";
     };
 
     using NameDescriptionRef = std::shared_ptr<NameDescription>;
@@ -202,6 +166,8 @@ namespace osmscout {
       {
         return targetDescription;
       }
+
+      static constexpr std::string_view Key = "WayChangedName";
     };
 
     using NameChangedDescriptionRef = std::shared_ptr<NameChangedDescription>;
@@ -251,6 +217,8 @@ namespace osmscout {
       {
         return descriptions;
       }
+
+      static constexpr std::string_view Key = "CrossingWays";
     };
 
     using CrossingWaysDescriptionRef = std::shared_ptr<CrossingWaysDescription>;
@@ -314,6 +282,8 @@ namespace osmscout {
       {
         return curve;
       }
+
+      static constexpr std::string_view Key = "Direction";
     };
 
     using DirectionDescriptionRef = std::shared_ptr<DirectionDescription>;
@@ -337,6 +307,8 @@ namespace osmscout {
       {
         return direction;
       }
+
+      static constexpr std::string_view Key = "Turn";
     };
 
     using TurnDescriptionRef = std::shared_ptr<TurnDescription>;
@@ -359,6 +331,8 @@ namespace osmscout {
       {
         return clockwise;
       }
+
+      static constexpr std::string_view Key = "RoundaboutEnter";
     };
 
     using RoundaboutEnterDescriptionRef = std::shared_ptr<RoundaboutEnterDescription>;
@@ -387,6 +361,8 @@ namespace osmscout {
       {
         return clockwise;
       }
+
+      static constexpr std::string_view Key = "RoundaboutLeave";
     };
 
     using RoundaboutLeaveDescriptionRef = std::shared_ptr<RoundaboutLeaveDescription>;
@@ -409,6 +385,8 @@ namespace osmscout {
       {
         return toDescription;
       }
+
+      static constexpr std::string_view Key = "MotorwayEnter";
     };
 
     using MotorwayEnterDescriptionRef = std::shared_ptr<MotorwayEnterDescription>;
@@ -445,6 +423,8 @@ namespace osmscout {
       {
         return direction;
       }
+
+      static constexpr std::string_view Key = "MotorwayChange";
     };
 
     using MotorwayChangeDescriptionRef = std::shared_ptr<MotorwayChangeDescription>;
@@ -474,6 +454,8 @@ namespace osmscout {
       {
         return direction;
       }
+
+      static constexpr std::string_view Key = "MotorwayLeave";
     };
 
     using MotorwayLeaveDescriptionRef = std::shared_ptr<MotorwayLeaveDescription>;
@@ -496,6 +478,8 @@ namespace osmscout {
       {
         return junctionDescription;
       }
+
+      static constexpr std::string_view Key = "MotorwayJunction";
     };
 
     using MotorwayJunctionDescriptionRef = std::shared_ptr<MotorwayJunctionDescription>;
@@ -515,6 +499,8 @@ namespace osmscout {
       std::string GetDebugString() const override;
 
       std::string GetDescription() const;
+
+      static constexpr std::string_view Key = "CrossingDestination";
     };
 
     using DestinationDescriptionRef = std::shared_ptr<DestinationDescription>;
@@ -537,6 +523,8 @@ namespace osmscout {
       {
         return maxSpeed;
       }
+
+      static constexpr std::string_view Key = "MaxSpeed";
     };
 
     using MaxSpeedDescriptionRef = std::shared_ptr<MaxSpeedDescription>;
@@ -560,6 +548,8 @@ namespace osmscout {
       std::string GetName() const;
 
       std::string GetDescription() const;
+
+      static constexpr std::string_view Key = "TypeName";
     };
 
     using TypeNameDescriptionRef = std::shared_ptr<TypeNameDescription>;
@@ -603,6 +593,8 @@ namespace osmscout {
       {
         return distance;
       }
+
+      static constexpr std::string_view Key = "POIAtRoute";
     };
 
     using POIAtRouteDescriptionRef = std::shared_ptr<POIAtRouteDescription>;
@@ -649,6 +641,8 @@ namespace osmscout {
 
       bool operator==(const LaneDescription &o) const;
       bool operator!=(const LaneDescription &o) const;
+
+      static constexpr std::string_view Key = "Lanes";
     };
 
     using LaneDescriptionRef = std::shared_ptr<LaneDescription>;
@@ -686,6 +680,8 @@ namespace osmscout {
       {
         return turn;
       }
+
+      static constexpr std::string_view Key = "SuggestedLanes";
     };
 
     using SuggestedLaneDescriptionRef = std::shared_ptr<SuggestedLaneDescription>;
@@ -708,6 +704,8 @@ namespace osmscout {
         int GetSectionNumber() const { return sectionNumber; };
          
         int GetNodeCount() const { return nodeCount; };
+
+       static constexpr std::string_view Key = "NodeVia";
       };
 
       using ViaDescriptionRef = std::shared_ptr<ViaDescription>;
@@ -816,15 +814,43 @@ namespace osmscout {
         return location;
       }
 
-      bool HasDescription(const char* name) const;
-      DescriptionRef GetDescription(const char* name) const;
+      template <class D>
+      requires std::is_base_of_v<Description, D>
+      bool HasDescription() const
+      {
+        std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
+
+        entry=descriptionMap.find(std::string(D::Key));
+
+        return entry!=descriptionMap.end() && entry->second;
+      }
+
+      template <class D>
+      requires std::is_base_of_v<Description, D>
+      std::shared_ptr<D> GetDescription() const
+      {
+        std::unordered_map<std::string,DescriptionRef>::const_iterator entry;
+
+        entry=descriptionMap.find(std::string(D::Key));
+
+        if (entry!=descriptionMap.end()) {
+          return std::dynamic_pointer_cast<D>(entry->second);
+        }
+
+        return nullptr;
+      }
 
       void SetDistance(Distance distance);
       void SetTime(const Timestamp::duration &duration);
       void SetLocation(const GeoCoord &coord);
 
-      void AddDescription(const char* name,
-                          const DescriptionRef& description);
+      template <class D>
+      requires std::is_base_of_v<Description, D>
+      void AddDescription(const std::shared_ptr<D>& description)
+      {
+        descriptions.push_back(description);
+        descriptionMap[std::string(D::Key)]=description;
+      }
     };
 
     using NodeIterator = std::list<RouteDescription::Node>::const_iterator;

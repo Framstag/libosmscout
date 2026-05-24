@@ -531,8 +531,11 @@ option(OSMSCOUT_BUILD_EXTERN_MATLAB "Enable generation of MATLAB mex function" $
 add_subdirectory(libosmscout-extern)
 
 # Tests
-option(OSMSCOUT_BUILD_TESTS "Enable build of test applications" ON)
+option(OSMSCOUT_BUILD_TESTS "Enable build of test applications" ${OSMSCOUT_BUILD_IMPORT})
 if(OSMSCOUT_BUILD_TESTS)
+  if (NOT OSMSCOUT_BUILD_IMPORT)
+    message(FATAL_ERROR "Tests require the import library to be built")
+  endif()
   enable_testing()
   add_subdirectory(libosmscout-test)
   if (TARGET Catch2::Catch2 AND TARGET Catch2::Catch2WithMain)

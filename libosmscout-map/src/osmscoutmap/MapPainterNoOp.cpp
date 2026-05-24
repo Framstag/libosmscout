@@ -24,12 +24,6 @@ namespace osmscout {
   static double FONT_HEIGHT_FACTOR=10; //!< Height of the font in pixel in relation to the given fontSize
   //static double FONT_WIDTH_HEIGHT_FACTOR=1; //!< Width of an individual character in relation to its height
 
-  MapPainterNoOp::MapPainterNoOp(const StyleConfigRef& styleConfig)
-          : MapPainter(styleConfig)
-  {
-    // no code
-  }
-
   bool MapPainterNoOp::HasIcon(const StyleConfig& /*styleConfig*/,
                                const Projection& /*projection*/,
                                const MapParameter& /*parameter*/,
@@ -55,6 +49,7 @@ namespace osmscout {
 
   void MapPainterNoOp::RegisterRegularLabel(const Projection& /*projection*/,
                                             const MapParameter& /*parameter*/,
+                                            bool /*basemap*/,
                                             const ObjectFileRef& /*ref*/,
                                             const std::vector<LabelData> &/*labels*/,
                                             const Vertex2D& /*position*/,
@@ -66,6 +61,7 @@ namespace osmscout {
 
   void MapPainterNoOp::RegisterContourLabel(const Projection & /*projection*/,
                                             const MapParameter & /*parameter*/,
+                                            bool /*basemap*/,
                                             const ObjectFileRef& /*ref*/,
                                             const PathLabelData & /*label*/,
                                             const LabelPath & /*labelPath*/)
@@ -73,9 +69,9 @@ namespace osmscout {
     // no code
   }
 
-  void MapPainterNoOp::DrawLabels(const osmscout::Projection&,
-                                  const osmscout::MapParameter&,
-                                  const osmscout::MapData&)
+  void MapPainterNoOp::DrawLabels(const Projection&,
+                                  const MapParameter&,
+                                  const std::vector<MapData>&)
   {
     // no code
   }
@@ -128,7 +124,7 @@ namespace osmscout {
 
   bool MapPainterNoOp::DrawMap(const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data,
+                               const std::vector<MapData>& data,
                                RenderSteps startStep,
                                RenderSteps endStep)
   {

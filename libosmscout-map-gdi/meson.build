@@ -23,4 +23,9 @@ osmscoutmapgdi = library('osmscout_map_gdi',
                          install: true)
 
 pkg = import('pkgconfig')
-pkg.generate(osmscoutmapgdi)
+pkg.generate(osmscoutmapgdi,
+             name: 'libosmscout_map_gdi',
+             filebase: 'libosmscout_map_gdi',
+             description: 'Library for rendering OSM data using GDI',
+             url: 'https://github.com/Framstag/libosmscout',
+             license: 'GPL')

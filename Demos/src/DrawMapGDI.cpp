@@ -67,7 +67,7 @@ public:
 			(screenHeight + LONG(args.height)) / 2
 		};
 
-    if (!CreateCanvas(m_pBaseData->styleConfig, size, nullptr, hInstance))
+    if (!CreateCanvas(size, nullptr, hInstance))
     {
         return false;
     }
@@ -165,13 +165,14 @@ public:
 	void OnTileUpdate() override
 	{
         osmscout::log.Info() << "OnTileUpdate()...";
-        m_pBaseData->data.ClearDBData();
-		m_pBaseData->mapService->LookupTiles(m_pBaseData->projection, m_Tiles);
-		m_pBaseData->mapService->LoadMissingTileData(m_pBaseData->searchParameter, *m_pBaseData->styleConfig, m_Tiles);
-		m_pBaseData->mapService->AddTileDataToMapData(m_Tiles, m_pBaseData->data);
-        osmscout::log.Info() << "Nodes: "  << m_pBaseData->data.nodes.size();
-        osmscout::log.Info() << "Ways: "  << m_pBaseData->data.ways.size();
-        osmscout::log.Info() << "Areas: "  << m_pBaseData->data.areas.size();
+	      m_pBaseData->LoadData();
+	      for (size_t i = 0; i < m_pBaseData->data.size(); i++) {
+	        const auto &dbData = m_pBaseData->data[i];
+          osmscout::log.Info() << "Database " << i << ":";
+	        osmscout::log.Info() << " Nodes: "  << dbData.nodes.size();
+	        osmscout::log.Info() << " Ways: "  << dbData.ways.size();
+	        osmscout::log.Info() << " Areas: "  << dbData.areas.size();
+	      }
         osmscout::log.Info() << "OnTileUpdate() done";
 	}
 };

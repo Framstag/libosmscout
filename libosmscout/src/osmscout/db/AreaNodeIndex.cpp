@@ -172,43 +172,56 @@ namespace osmscout {
     TileIdBox tileBox(TileId::GetTile(gridMag,boundingBox.GetMinCoord()),
                       TileId::GetTile(gridMag,boundingBox.GetMaxCoord()));
 
-    for (const auto& tileId : tileBox) {
-      auto tile=typeData.listTiles.find(tileId);
+    auto TileProcess=[this, &boundingBox, &offsets](const ListTile &tile) {
+      scanner.SetPos(tile.fileOffset);
 
-      if (tile!=typeData.listTiles.end()) {
-        scanner.SetPos(tile->second.fileOffset);
+      FileOffset previousOffset=0;
 
-        FileOffset previousOffset=0;
+      if (tile.storeGeoCoord) {
+        for (auto i=1; i<=tile.entryCount; i++) {
+          GeoCoord   coord;
+          FileOffset fileOffset;
 
-        if (tile->second.storeGeoCoord) {
-          for (auto i=1; i<=tile->second.entryCount; i++) {
-            GeoCoord   coord;
-            FileOffset fileOffset;
+          coord=scanner.ReadCoord();
+          fileOffset=scanner.ReadUInt64Number();
 
-            coord=scanner.ReadCoord();
-            fileOffset=scanner.ReadUInt64Number();
+          fileOffset+=previousOffset;
 
-            fileOffset+=previousOffset;
+          previousOffset=fileOffset;
 
-            previousOffset=fileOffset;
-
-            if (boundingBox.Includes(coord)) {
-              offsets.push_back(fileOffset);
-            }
-          }
-        }
-        else {
-          for (auto i=1; i<=tile->second.entryCount; i++) {
-            FileOffset fileOffset;
-
-            fileOffset=scanner.ReadUInt64Number();
-
-            fileOffset+=previousOffset;
-
-            previousOffset=fileOffset;
-
+          if (boundingBox.Includes(coord)) {
             offsets.push_back(fileOffset);
           }
+        }
+      }
+      else {
+        for (auto i=1; i<=tile.entryCount; i++) {
+          FileOffset fileOffset;
+
+          fileOffset=scanner.ReadUInt64Number();
+
+          fileOffset+=previousOffset;
+
+          previousOffset=fileOffset;
+
+          offsets.push_back(fileOffset);
+        }
+      }
+    };
+
+    if (tileBox.GetCount() > typeData.listTiles.size()) {
+      // If the search box is larger than the number of tiles we have, it's faster to just iterate all tiles
+      // it may happen for types with very sparse distribution on low-zoom lookup
+      for (const auto& tile : typeData.listTiles) {
+        if (tileBox.Includes(tile.first)) {
+          TileProcess(tile.second);
+        }
+      }
+    } else {
+      for (const auto& tileId : tileBox) {
+        auto tile=typeData.listTiles.find(tileId);
+        if (tile!=typeData.listTiles.end()) {
+          TileProcess(tile->second);
         }
       }
     }

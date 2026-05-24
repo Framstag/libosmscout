@@ -122,11 +122,21 @@ namespace osmscout {
 
     GeoCoord topLeft;
 
-    PixelToGeo(0.0,0.0,topLeft);
+    if (!PixelToGeo(0.0,0.0,topLeft)) {
+      // canvas 0,0 is out of valid Mercator range, lets adjust it
+      topLeft.Set(std::max(MinLat, std::min(MaxLat, topLeft.GetLat())),
+                  std::max(MinLon, std::min(MaxLon, topLeft.GetLon())));
+      assert(IsValidFor(topLeft));
+    }
 
     GeoCoord bottomRight;
 
-    PixelToGeo((double)width,(double)height,bottomRight);
+    if (!PixelToGeo((double)width,(double)height,bottomRight)) {
+      // canvas width,height is out of valid Mercator range, lets adjust it
+      bottomRight.Set(std::max(MinLat, std::min(MaxLat, bottomRight.GetLat())),
+                  std::max(MinLon, std::min(MaxLon, bottomRight.GetLon())));
+      assert(IsValidFor(bottomRight));
+    }
 
     // evaluate bounding box, crop bounding box to valid Mercator area
 

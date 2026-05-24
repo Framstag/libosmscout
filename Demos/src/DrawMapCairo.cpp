@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     cairo_t *cairo=cairo_create(surface);
 
     if (cairo!=nullptr) {
-      osmscout::MapPainterCairo     painter(drawDemo.styleConfig);
+      osmscout::MapPainterCairo painter;
 
       if (painter.DrawMap(drawDemo.projection,
                           drawDemo.drawParameter,

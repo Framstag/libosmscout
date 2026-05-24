@@ -1,0 +1,38 @@
+OSS
+// Border of countries on low-zoom levels (up to stateOver)
+// other basemap elements are defined in places.oss
+
+/*
+    static MagnificationLevel magWorld;     //  0
+    static MagnificationLevel magContinent; //  4
+    static MagnificationLevel magState;     //  5
+    static MagnificationLevel magStateOver; //  6
+    static MagnificationLevel magCounty;    //  7
+    static MagnificationLevel magRegion;    //  8
+    static MagnificationLevel magProximity; //  9
+    static MagnificationLevel magCityOver;  // 10
+    static MagnificationLevel magCity;      // 11
+    static MagnificationLevel magSuburb;    // 12
+    static MagnificationLevel magDetail;    // 13
+    static MagnificationLevel magClose;     // 14
+    static MagnificationLevel magCloser;    // 15
+    static MagnificationLevel magVeryClose; // 16
+    static MagnificationLevel magBlock;     // 18
+    static MagnificationLevel magStreet;    // 19
+    static MagnificationLevel magHouse;     // 20
+*/
+
+CONST
+
+STYLE
+  [TYPE basemap_boundary_country] {
+    [MAG 2-3] {
+        WAY {color: alpha(@countryBorderColor, 0.1); displayWidth: 0.1mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.1); width: 0.1mm;}
+    }
+    [MAG continent-stateOver] {
+        WAY {color: alpha(@countryBorderColor, 0.3); displayWidth: 0.1mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.3); width: 0.1mm;}
+    }
+  }
+END

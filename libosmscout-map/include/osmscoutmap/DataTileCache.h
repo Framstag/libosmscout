@@ -201,6 +201,8 @@ namespace osmscout {
       return complete;
     }
 
+
+
     /**
      * Return the list of types of the data stored in the tile.
      *
@@ -409,7 +411,7 @@ namespace osmscout {
     }
 
     /**
-     * Return 'true' if no data at all has been assigned
+     * Return 'true' if all data are mark as complete
      */
      bool IsComplete() const
     {
@@ -422,9 +424,22 @@ namespace osmscout {
     }
 
     /**
+     * Mark the tile as incomplete, without actually clearing data.
+     */
+    void Invalidate()
+     {
+       areaData.Invalidate();
+       nodeData.Invalidate();
+       wayData.Invalidate();
+       routeData.Invalidate();
+       optimizedAreaData.Invalidate();
+       optimizedWayData.Invalidate();
+     }
+
+    /**
      * Return 'true' if no data for any type has been assigned
      */
-     bool IsEmpty() const
+    bool IsEmpty() const
     {
       return nodeData.IsEmpty() &&
              wayData.IsEmpty() &&

@@ -25,9 +25,11 @@ namespace osmscout {
 DBLoadJob::DBLoadJob(osmscout::MercatorProjection lookupProjection,
                      unsigned long maximumAreaLevel,
                      bool lowZoomOptimization,
-                     bool closeOnFinish):
+                     bool closeOnFinish,
+                     bool loadBasemap):
   DBJob(),
   closeOnFinish(closeOnFinish),
+  loadBasemap(loadBasemap),
   breaker(std::make_shared<ThreadedBreaker>()),
   lookupProjection(lookupProjection)
 {
@@ -53,7 +55,7 @@ DBLoadJob::~DBLoadJob()
   //qDebug() << "destroyed:" << this << "in" << QThread::currentThread();
 }
 
-void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+void DBLoadJob::Run(const DBInstanceRef& basemapDatabase,
                     const std::list<DBInstanceRef> &databases,
                     ReadLock &&locker)
 {
@@ -61,7 +63,7 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
   std::list<DBInstanceRef> relevantDatabases;
   for (const auto &db:databases){
     if (!db->IsOpen() || (!db->GetStyleConfig())) {
-      log.Warn() << "Database is not ready" << db->path;
+      log.Warn() << "Database is not ready " << db->path;
       continue;
     }
     osmscout::GeoBox dbBox=db->GetDBGeoBox();
@@ -70,6 +72,13 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
       continue;
     }
     relevantDatabases.push_back(db);
+  }
+  if (loadBasemap && basemapDatabase) {
+    if (basemapDatabase->IsOpen() && basemapDatabase->GetStyleConfig()) {
+      relevantDatabases.push_back(basemapDatabase);
+    } else {
+      log.Warn() << "Basemap database is not ready " << basemapDatabase->path;
+    }
   }
 
   DBJob::Run(basemapDatabase,relevantDatabases,std::move(locker));
@@ -96,8 +105,8 @@ void DBLoadJob::Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
 
     // load tiles asynchronous
     db->GetMapService()->LoadMissingTileDataAsync(searchParameter,
-                                             *db->GetStyleConfig(),
-                                             tiles);
+                                                  *db->GetStyleConfig(),
+                                                  tiles);
 
     // process already completed tiles (state callback is not called in such case)
     for (auto &tile:tiles){

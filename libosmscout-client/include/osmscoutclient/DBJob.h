@@ -25,7 +25,7 @@
 #include <osmscoutclient/DBInstance.h>
 
 #include <osmscout/async/ReadWriteLock.h>
-#include <osmscout/db/BasemapDatabase.h>
+#include <osmscout/db/Database.h>
 
 #include <thread>
 #include <list>
@@ -39,7 +39,7 @@ namespace osmscout {
 class OSMSCOUT_CLIENT_API DBJob {
 
 protected:
-  osmscout::BasemapDatabaseRef basemapDatabase; //!< Optional reference to the basemap db
+  DBInstanceRef                basemapDatabase; //!< Optional reference to the basemap db
   std::list<DBInstanceRef>     databases;       //!< borrowed databases
   std::thread::id              threadId;        //!< job thread
 
@@ -54,7 +54,7 @@ public:
   DBJob& operator=(DBJob&&) = delete;
   virtual ~DBJob();
 
-  virtual void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+  virtual void Run(const DBInstanceRef& basemapDatabase,
                    const std::list<DBInstanceRef> &databases,
                    ReadLock &&locker);
   virtual void Close();

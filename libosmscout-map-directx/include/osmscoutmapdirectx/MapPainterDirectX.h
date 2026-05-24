@@ -101,7 +101,6 @@ namespace osmscout {
     PathTextRenderer* m_pPathTextRenderer;
     FLOAT dpiX, dpiY;
     std::map<double, double> fontHeightMap;
-    TypeConfigRef typeConfig;
 
     DirectXLabelLayouter            m_LabelLayouter;
 
@@ -115,20 +114,17 @@ namespace osmscout {
     IDWriteTextFormat* GetFont(const Projection& projection, const MapParameter& parameter, double fontSize);
 
   protected:
-    void AfterPreprocessing(const StyleConfig &styleConfig,
-                            const Projection &projection,
-                            const MapParameter &parameter,
-                            const MapData &data) override;
+    void AfterPreprocessingCallback(const Projection &projection,
+                                    const MapParameter &parameter,
+                                    const std::vector<MapData> &data) override;
 
-    void BeforeDrawing(const StyleConfig &styleConfig,
-                       const Projection &projection,
-                       const MapParameter &parameter,
-                       const MapData &data) override;
+    void BeforeDrawingCallback(const Projection &projection,
+                               const MapParameter &parameter,
+                               const std::vector<MapData> &data) override;
 
-    void AfterDrawing(const StyleConfig &styleConfig,
-                      const Projection &projection,
-                      const MapParameter &parameter,
-                      const MapData &data) override;
+    void AfterDrawingCallback(const Projection &projection,
+                              const MapParameter &parameter,
+                              const std::vector<MapData> &data) override;
 
     bool HasIcon(const StyleConfig &styleConfig,
                  const Projection &projection,
@@ -167,6 +163,7 @@ namespace osmscout {
 	*/
   void RegisterRegularLabel(const Projection &projection,
                             const MapParameter &parameter,
+                            bool basemap,
                             const ObjectFileRef& ref,
                             const std::vector<LabelData> &labels,
                             const Vertex2D &position,
@@ -177,13 +174,14 @@ namespace osmscout {
 	*/
   void RegisterContourLabel(const Projection &projection,
                             const MapParameter &parameter,
+                            bool basemap,
                             const ObjectFileRef& ref,
                             const PathLabelData &label,
                             const LabelPath &labelPath) override;
 
     void DrawLabels(const Projection &projection,
                     const MapParameter &parameter,
-                    const MapData &data) override;
+                    const std::vector<MapData> &data) override;
 
     void DrawIcon(const IconStyle *style,
                   const Vertex2D& centerPos,
@@ -233,8 +231,7 @@ namespace osmscout {
                   const AreaData &area) override;
 
   public:
-    MapPainterDirectX(const StyleConfigRef &styleConfig,
-                      ID2D1Factory *pDirect2dFactory,
+    MapPainterDirectX(ID2D1Factory *pDirect2dFactory,
                       IDWriteFactory *pWriteFactory);
 
     ~MapPainterDirectX() override;
@@ -243,7 +240,7 @@ namespace osmscout {
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
+                 const std::vector<MapData>& data,
                  ID2D1RenderTarget* renderTarget);
   };
 }

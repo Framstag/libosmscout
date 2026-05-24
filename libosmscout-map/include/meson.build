@@ -4,7 +4,6 @@ osmscoutmapHeader = [
             'osmscoutmap/MapImportExport.h',
             'osmscoutmap/oss/Scanner.h',
             'osmscoutmap/oss/Parser.h',
-            'osmscoutmap/BatchMapPainter.h',
             'osmscoutmap/LabelLayouter.h',
             'osmscoutmap/LabelLayouterHelper.h',
             'osmscoutmap/MapPainter.h',

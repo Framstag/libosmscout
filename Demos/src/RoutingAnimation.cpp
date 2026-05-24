@@ -529,7 +529,9 @@ int main(int argc, char* argv[])
       osmscout::MapParameter        drawParameter;
       osmscout::AreaSearchParameter searchParameter;
       osmscout::MapData             data;
-      osmscout::MapPainterQt        mapPainter(styleConfig);
+      osmscout::MapPainterQt        mapPainter;
+
+      data.styleConfig = styleConfig;
 
       drawParameter.SetFontSize(3.0);
 
@@ -545,9 +547,11 @@ int main(int argc, char* argv[])
       mapService->LoadMissingTileData(searchParameter,*styleConfig,tiles);
       mapService->AddTileDataToMapData(tiles,data);
 
+      std::vector<osmscout::MapData> dataList;
+      dataList.emplace_back(std::move(data));
       if (mapPainter.DrawMap(projection,
                              drawParameter,
-                             data,
+                             dataList,
                              painter)) {
 
         painter->setBrush(QBrush(QColor::fromRgbF(0,0,0, .9)));

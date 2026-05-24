@@ -302,7 +302,7 @@ void IconLookup::onIconRequest(const MapViewStruct &view,
   }
 
   lookupCoord=coord;
-  loadJob=new DBLoadJob(projection, maximumAreaLevel,/* lowZoomOptimization */ true);
+  loadJob=new DBLoadJob(projection, maximumAreaLevel,/* lowZoomOptimization */ true, /*closeOnFinish*/ true, /*loadBasemap*/ true);
 
   connect(loadJob, &DBLoadJob::databaseLoaded,
           this, &IconLookup::onDatabaseLoaded);

@@ -137,4 +137,7 @@ TYPES
         en: "service"
         de: "Erschließungsweg"
 
+  TYPE highway_milestone
+    = NODE ("highway"=="milestone")
+      {HighwayMilestone}
 END

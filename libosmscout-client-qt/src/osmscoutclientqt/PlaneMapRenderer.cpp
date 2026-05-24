@@ -409,6 +409,7 @@ void PlaneMapRenderer::DrawMap()
                       loadJob->GetAllTiles(),
                       &drawParameter,
                       &p,
+                      &mapPainter,
                       overlayObjects,
                       dbThread->GetEmptyStyleConfig(),
                       /*drawCanvasBackground*/ true);
@@ -519,7 +520,8 @@ void PlaneMapRenderer::TriggerMapRendering(const MapViewStruct& request, size_t 
     loadJob=new DBLoadJob(projection,
                           maximumAreaLevel,
                           /* lowZoomOptimization */ true,
-                          /* closeOnFinish */ false);
+                          /* closeOnFinish */ false,
+                          /* loadBasemap */ true);
 
     connect(loadJob, &DBLoadJob::tileStateChanged,
             this, &PlaneMapRenderer::HandleTileStatusChanged,

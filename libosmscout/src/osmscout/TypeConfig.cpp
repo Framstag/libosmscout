@@ -34,6 +34,7 @@
 #include <osmscout/feature/ConstructionYearFeature.h>
 #include <osmscout/feature/DestinationFeature.h>
 #include <osmscout/feature/EleFeature.h>
+#include <osmscout/feature/HighwayMilestoneFeature.h>
 #include <osmscout/feature/EmbankmentFeature.h>
 #include <osmscout/feature/FeeFeature.h>
 #include <osmscout/feature/FromToFeature.h>
@@ -724,6 +725,7 @@
     RegisterFeature(std::make_shared<ClockwiseDirectionFeature>());
 
     RegisterFeature(std::make_shared<EleFeature>());
+    RegisterFeature(std::make_shared<HighwayMilestoneFeature>());
     RegisterFeature(std::make_shared<DestinationFeature>());
     RegisterFeature(std::make_shared<BuildingFeature>());
 

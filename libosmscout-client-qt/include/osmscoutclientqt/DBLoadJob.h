@@ -28,7 +28,7 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
-#include <osmscout/db/BasemapDatabase.h>
+#include <osmscout/db/Database.h>
 
 #include <osmscoutmap/DataTileCache.h>
 
@@ -49,6 +49,7 @@ class OSMSCOUT_CLIENT_QT_API DBLoadJob : public QObject, public DBJob {
 
 private:
   bool                                            closeOnFinish;
+  bool                                            loadBasemap;
   osmscout::BreakerRef                            breaker;
   osmscout::MercatorProjection                    lookupProjection;
   osmscout::AreaSearchParameter                   searchParameter;
@@ -75,11 +76,12 @@ public:
   DBLoadJob(osmscout::MercatorProjection lookupProjection,
             unsigned long maximumAreaLevel,
             bool lowZoomOptimization,
-            bool closeOnFinish=true);
+            bool closeOnFinish=true,
+            bool loadBasemap=false);
 
   ~DBLoadJob() override;
 
-  void Run(const osmscout::BasemapDatabaseRef& basemapDatabase,
+  void Run(const DBInstanceRef& basemapDatabase,
            const std::list<DBInstanceRef> &databases,
            ReadLock &&locker) override;
 

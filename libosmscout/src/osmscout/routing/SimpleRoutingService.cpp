@@ -67,13 +67,10 @@ namespace osmscout {
 
   bool SimpleRoutingService::HasNodeWithId(const std::vector<Point>& nodes) const
   {
-    for (const auto& node : nodes) {
-      if (node.IsRelevant()) {
-        return true;
-      }
-    }
-
-    return false;
+    return std::any_of(nodes.begin(), nodes.end(),
+                       [](const Point& node) {
+                         return node.IsRelevant();
+                       });
   }
 
   Vehicle SimpleRoutingService::GetVehicle(const RoutingProfile& profile)

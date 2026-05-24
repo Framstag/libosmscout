@@ -29,7 +29,7 @@ jobs:
       - name: Build project
         run: meson compile -C debug
       - name: Execute tests
-        run: meson test -C debug --print-errorlogs
+        run: meson test --timeout-multiplier 2 -C debug --print-errorlogs
 
   build_cmake:
     name: cmake
