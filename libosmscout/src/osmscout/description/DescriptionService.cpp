@@ -796,7 +796,7 @@ namespace osmscout {
         value!=nullptr) {
       description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
                                             LABEL_KEY_MILESTONE_DISTANCE,
-                                            std::to_string(value->GetDistance())));
+                                            std::to_string(value->GetDistance() / 1000) + " km"));
 
       description.AddEntry(DescriptionEntry(SECTION_NAME_MILESTONE,
                                             LABEL_KEY_MILESTONE_REF,

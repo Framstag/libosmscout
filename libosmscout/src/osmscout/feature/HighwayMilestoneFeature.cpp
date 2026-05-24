@@ -68,9 +68,9 @@ namespace osmscout {
   std::string HighwayMilestoneFeatureValue::GetLabel(const Locale &locale, size_t /*labelIndex*/) const
   {
     std::stringstream ss;
-    ss << NumberToString(distance, locale);
+    ss << NumberToString(distance / 1000, locale);
     ss << locale.GetUnitsSeparator();
-    ss << "m";
+    ss << "km";
     return ss.str();
   }
 
@@ -126,14 +126,15 @@ namespace osmscout {
       return;
     }
 
-    if (d<0 || d>std::numeric_limits<uint32_t>::max()) {
+    // OSM distance is in km; multiply by 1000 for internal meter storage. Range check prevents overflow after multiplication.
+    if (d<0 || d>(std::numeric_limits<uint32_t>::max()/1000.0)) {
       errorReporter.ReportTag(object,tags,std::string("HighwayMilestone distance tag value '")+distanceTag->second+"' is out of range!");
       return;
     }
 
     auto* value=static_cast<HighwayMilestoneFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-    value->SetDistance(static_cast<uint32_t>(d));
+    value->SetDistance(static_cast<uint32_t>(d * 1000.0));
     value->SetRef(refTag->second);
 
     auto carriagewayRefTag=tags.find(tagCarriagewayRef);

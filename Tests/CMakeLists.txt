@@ -119,6 +119,9 @@ osmscout_test_project(NAME GeometryTest SOURCES src/GeometryTest.cpp)
 
 #---- HeaderCheck
 osmscout_test_project(NAME HeaderCheckTest SOURCES src/HeaderCheckTest.cpp)
+
+#---- HighwayMilestoneFeature
+osmscout_test_project(NAME HighwayMilestoneFeatureTest SOURCES src/HighwayMilestoneFeatureTest.cpp)
 set_tests_properties(HeaderCheckTest PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
 
 #---- WaterIndex
