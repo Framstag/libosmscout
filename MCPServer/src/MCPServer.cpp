@@ -31,6 +31,9 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
+#include "VersionTool.h"
+#include "LocationDescriptionTool.h"
+
 namespace {
   struct Arguments
   {
@@ -161,70 +164,27 @@ namespace {
   {
     unsigned int id=reqObject["id"];
     const std::string tool=reqObject["params"]["name"];
+
     osmscout::log.Info() << "*** Calling tool '" << tool << "'...";
 
+    osmscout::mcp::ToolResult result;
+
     if (tool=="version") {
-      nlohmann::json resObject;
-
-      resObject["jsonrpc"]="2.0";
-      resObject["id"]= id;
-      resObject["result"]["structuredContent"]["version"]="4711";
-
-      res.set_content(resObject.dump(),"application/json");
-
-      res.status=httplib::StatusCode::OK_200;
+      result = osmscout::mcp::HandleVersion(id);
     }
     else if (tool=="locationDescription") {
-      const double latitude=reqObject["params"]["arguments"]["latitude"];
-      const double longitude=reqObject["params"]["arguments"]["longitude"];
-      osmscout::GeoCoord location(latitude,longitude);
-
-      osmscout::LocationDescription description;
-      locationDescriptionService->DescribeLocation(location,description);
-
-      osmscout::LocationCoordDescriptionRef    coordDescription=description.GetCoordDescription();
-      osmscout::LocationAtPlaceDescriptionRef  atNameDescription=description.GetAtNameDescription();
-      osmscout::LocationAtPlaceDescriptionRef  atAddressDescription=description.GetAtAddressDescription();
-      osmscout::LocationAtPlaceDescriptionRef  atPOIDescription=description.GetAtPOIDescription();
-      osmscout::LocationWayDescriptionRef      wayDescription=description.GetWayDescription();
-      osmscout::LocationCrossingDescriptionRef crossingDescription=description.GetCrossingDescription();
-
-      nlohmann::json resObject;
-
-      resObject["jsonrpc"]="2.0";
-      resObject["id"]= id;
-      size_t contentIdx=0;
-
-      if (coordDescription) {
-        resObject["result"]["content"][contentIdx]["type"]="text";
-        resObject["result"]["content"][contentIdx]["text"]=coordDescription->GetLocation().GetDisplayText();
-        resObject["result"]["structuredContent"]["coordinateDescription"]=coordDescription->GetLocation().GetDisplayText();
-        contentIdx++;
-      }
-      if (atNameDescription) {
-        resObject["result"]["content"][contentIdx]["type"]="text";
-        resObject["result"]["content"][contentIdx]["text"]=atNameDescription->GetPlace().GetDisplayString();
-        resObject["result"]["structuredContent"]["atNameDescription"]["location"]=atNameDescription->GetPlace().GetDisplayString();
-        resObject["result"]["structuredContent"]["atNameDescription"]["distanceInMeter"]=atNameDescription->GetDistance().AsMeter();
-        resObject["result"]["structuredContent"]["atNameDescription"]["bearing"]=atNameDescription->GetBearing().DisplayString();
-        //contentIdx++;
-      }
-
-      res.set_content(resObject.dump(),"application/json");
-
-      res.status=httplib::StatusCode::OK_200;
+      const nlohmann::json& arguments = reqObject["params"]["arguments"];
+      result = osmscout::mcp::HandleLocationDescription(id, arguments, locationDescriptionService);
     }
     else {
-      nlohmann::json resObject;
-
-      resObject["jsonrpc"]="2.0";
-      resObject["id"]= id;
-      resObject["error"]["message"]="Unknown tool: invalid_tool_name";
-
-      res.set_content(resObject.dump(),"application/json");
-
-      res.status=httplib::StatusCode::OK_200;
+      result.status = 400;
+      result.body["jsonrpc"] = "2.0";
+      result.body["id"] = id;
+      result.body["error"]["message"] = "Unknown tool: " + tool;
     }
+
+    res.set_content(result.body.dump(), "application/json");
+    res.status = result.status;
   }
 
   void HandleMessagePing(const nlohmann::json& reqObject, httplib::Response& res)
@@ -326,20 +286,7 @@ int main(const int argc, char* argv[])
     return httplib::Server::HandlerResponse::Unhandled;
   });
 
-  server.Options("/openapi.json", [](const auto& req, auto& res) {
-    osmscout::log.Info() << "*** REQUEST OPTIONS /openapi.json";
-    res.set_header("Access-Control-Allow-Origin",req.get_header_value("Origin"));
-    res.set_header("Access-Control-Allow-Methods","OPTIONS, GET");
-    res.set_header("Access-Control-Allow-Headers","authorization,content-type");
-    res.set_header("Access-Control-Allow-Headers","86400");
-    res.status=httplib::StatusCode::OK_200;
-  });
-
-  server.Get("/openapi.json", [](const auto&, auto& res) {
-    osmscout::log.Info() << "*** REQUEST GET /openapi.json";
-    res.set_file_content("MCPServer/openapi.json","application/json");
-    res.status=httplib::StatusCode::OK_200;
-  });
+  // OpenAPI served via mcpo proxy, no direct endpoint needed
 
   server.Post("/", [&](const httplib::Request& req, httplib::Response& res) {
     osmscout::log.Info() << "POST /";
