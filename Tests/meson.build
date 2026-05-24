@@ -299,6 +299,16 @@ if buildImport
     ostandossEnv = environment()
     ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)
+
+LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
+                                           'src/LocationDescriptionServiceTest.cpp',
+                                           include_directories: [osmscoutIncDir],
+                                           dependencies: [mathDep, openmpDep, catch2MainDep],
+                                           link_with: [osmscout],
+                                           install: true,
+                                           install_dir: testInstallDir)
+
+test('Check HighwayMilestone location description', LocationDescriptionServiceTest)
 endif
 
 MapRotateTest = executable('MapRotateTest',

@@ -163,6 +163,34 @@ void DumpCrossingDescription(const std::string& label,
   }
 }
 
+void DumpHighwayMilestoneDescription(const std::string& label,
+                                     osmscout::LocationHighwayMilestoneDescription& description)
+{
+  std::cout << label << ":" << std::endl;
+
+  if (description.IsAtPlace()) {
+    std::cout << "  * You are at a highway milestone" << std::endl;
+  }
+  else {
+    std::cout.precision(1);
+    std::cout << "  * You are " << std::fixed << description.GetDistance().AsMeter() << "m ";
+    std::cout << description.GetBearing().DisplayString();
+    std::cout << " of a highway milestone" << std::endl;
+  }
+
+  // Print milestone feature values
+  std::cout << "    - node id of milestone: " << description.GetObject().GetFileOffset() << std::endl;
+  std::cout << "    - milestone distance: " << description.GetMilestoneDistance() << "m" << std::endl;
+  std::cout << "    - milestone ref: " << description.GetMilestoneRef() << std::endl;
+  if (!description.GetMilestoneCarriagewayRef().empty()) {
+    std::cout << "    - carriageway ref: " << description.GetMilestoneCarriagewayRef() << std::endl;
+  }
+  std::cout << std::endl;
+  if (description.GetObjectFeatures()) {
+    DumpFeatures(*description.GetObjectFeatures(),"    ");
+  }
+}
+
 void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,
                             const osmscout::DatabaseRef &database,
                             const osmscout::AdminRegionRef& adminRegion)
@@ -311,6 +339,12 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
     DumpCrossingDescription("Nearest crossing",*crossingDescription);
     DumpParentAdminRegions(locationService, database, crossingDescription->GetWays().front().GetAdminRegion());
+  }
+
+  osmscout::LocationHighwayMilestoneDescriptionRef highwayMilestoneDescription=description.GetHighwayMilestoneDescription();
+  if (highwayMilestoneDescription) {
+    std::cout << std::endl;
+    DumpHighwayMilestoneDescription("Nearest highway milestone",*highwayMilestoneDescription);
   }
 
   database->Close();
