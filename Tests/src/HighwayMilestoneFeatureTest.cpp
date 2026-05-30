@@ -1,6 +1,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <filesystem>
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/feature/HighwayMilestoneFeature.h>
@@ -457,18 +459,21 @@ TEST_CASE("HighwayMilestone round-trip serialization with only ref set")
   REQUIRE(original.GetMarker()=="");
 
   // Round-trip through serialization
+  std::filesystem::path tempPath=std::filesystem::temp_directory_path() / "highway_milestone_minimal_roundtrip.dat";
   osmscout::FileWriter writer;
-  writer.Open("/tmp/highway_milestone_minimal_roundtrip.dat");
+  writer.Open(tempPath.string());
 
   original.Write(writer);
   writer.Close();
 
   osmscout::FileScanner scanner;
-  scanner.Open("/tmp/highway_milestone_minimal_roundtrip.dat", osmscout::FileScanner::Sequential, false);
+  scanner.Open(tempPath.string(), osmscout::FileScanner::Sequential, false);
 
   osmscout::HighwayMilestoneFeatureValue restored;
   restored.Read(scanner);
   scanner.Close();
+
+  std::filesystem::remove(tempPath);
 
   REQUIRE(restored.GetDistance()==original.GetDistance());
   REQUIRE(restored.GetRef()==original.GetRef());
@@ -486,18 +491,21 @@ TEST_CASE("HighwayMilestone round-trip serialization with all defaults")
   REQUIRE(original.GetMarker()=="");
 
   // Round-trip through serialization
+  std::filesystem::path tempPath=std::filesystem::temp_directory_path() / "highway_milestone_default_roundtrip.dat";
   osmscout::FileWriter writer;
-  writer.Open("/tmp/highway_milestone_default_roundtrip.dat");
+  writer.Open(tempPath.string());
 
   original.Write(writer);
   writer.Close();
 
   osmscout::FileScanner scanner;
-  scanner.Open("/tmp/highway_milestone_default_roundtrip.dat", osmscout::FileScanner::Sequential, false);
+  scanner.Open(tempPath.string(), osmscout::FileScanner::Sequential, false);
 
   osmscout::HighwayMilestoneFeatureValue restored;
   restored.Read(scanner);
   scanner.Close();
+
+  std::filesystem::remove(tempPath);
 
   REQUIRE(restored.GetDistance()==original.GetDistance());
   REQUIRE(restored.GetRef()==original.GetRef());
