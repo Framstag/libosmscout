@@ -25,6 +25,7 @@
 #include <list>
 
 #include <osmscout/system/Assert.h>
+#include <osmscoutmapsvg/SymbolRendererSVG.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/io/File.h>
@@ -436,7 +437,7 @@ namespace osmscout {
     stream << "    <style type=\"text/css\">" << std::endl;
     stream << "       <![CDATA[" << std::endl;
 
-    stream << "        .area_fill_transparent { fill-opacity: 0.0; fillRule:nonzero }" << std::endl;
+    stream << "        .area_fill_transparent { fill-opacity: 0.0; fill-rule:nonzero }" << std::endl;
 
     stream << std::endl;
 
@@ -463,7 +464,7 @@ namespace osmscout {
             stream << ";fill-opacity:" << fillStyle->GetFillColor().GetA();
           }
 
-          stream << ";fillRule:nonzero";
+          stream << ";fill-rule:nonzero";
           stream << "}" << std::endl;
         }
       }
@@ -793,68 +794,12 @@ namespace osmscout {
                                  const MapParameter& /*parameter*/,
                                  const Symbol& symbol,
                                  const Vertex2D& screenPos,
-                                 double /*scaleFactor*/)
+                                 double scaleFactor)
   {
-    ScreenBox boundingBox=symbol.GetBoundingBox(projection);
-    Vertex2D center=boundingBox.GetCenter();
-
     stream << "    <!-- symbol: " << symbol.GetName() << " -->" << std::endl;
-    for (const auto& primitive : symbol.GetPrimitives()) {
-      const DrawPrimitive *primitivePtr = primitive.get();
 
-      const auto *polygon=dynamic_cast<const PolygonPrimitive*>(primitivePtr);
-      const auto *rectangle=dynamic_cast<const RectanglePrimitive*>(primitivePtr);
-      const auto *circle=dynamic_cast<const CirclePrimitive*>(primitivePtr);
-
-      if (polygon != nullptr) {
-        const FillStyleRef   fillStyle=polygon->GetFillStyle();
-        const BorderStyleRef borderStyle=polygon->GetBorderStyle();
-
-        stream << "    <polyline";
-        SetupFillAndStroke(fillStyle, borderStyle);
-        stream << std::endl;
-
-        stream << "              points=\"";
-
-        for (auto pixel=polygon->GetCoords().begin();
-             pixel!=polygon->GetCoords().end();
-             ++pixel) {
-          if (pixel!=polygon->GetCoords().begin()) {
-            stream << " ";
-          }
-
-          stream << (screenPos.GetX()+projection.ConvertWidthToPixel(pixel->GetX())-center.GetX())
-                 << "," << (screenPos.GetY()+projection.ConvertWidthToPixel(pixel->GetY())-center.GetY());
-        }
-
-        stream << "\" />" << std::endl;
-
-      } else if (rectangle != nullptr) {
-        const FillStyleRef   fillStyle=rectangle->GetFillStyle();
-        const BorderStyleRef borderStyle=rectangle->GetBorderStyle();
-
-        stream << "    <rect";
-        stream << " x=\"" << ((screenPos.GetX()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetX())-center.GetX())) << "\"";
-        stream << " y=\"" << ((screenPos.GetY()+projection.ConvertWidthToPixel(rectangle->GetTopLeft().GetY())-center.GetY())) << "\"";
-        stream << " width=\"" << (projection.ConvertWidthToPixel(rectangle->GetWidth())) << "\"";
-        stream << " height=\"" << (projection.ConvertWidthToPixel(rectangle->GetHeight())) << "\"";
-
-        SetupFillAndStroke(fillStyle, borderStyle);
-        stream << " />" << std::endl;
-
-      } else if (circle != nullptr) {
-        const FillStyleRef   fillStyle=circle->GetFillStyle();
-        const BorderStyleRef borderStyle=circle->GetBorderStyle();
-
-        stream << "    <circle";
-        stream << " cx=\"" << (screenPos.GetX()+projection.ConvertWidthToPixel(circle->GetCenter().GetX())-center.GetX()) << "\"";
-        stream << " cy=\"" << (screenPos.GetY()+projection.ConvertWidthToPixel(circle->GetCenter().GetY())-center.GetY()) << "\"";
-        stream << " r=\"" << (projection.ConvertWidthToPixel(circle->GetRadius())) << "\"";
-
-        SetupFillAndStroke(fillStyle, borderStyle);
-        stream << " />" << std::endl;
-      }
-    }
+    SymbolRendererSVG renderer(stream);
+    renderer.Render(projection, symbol, screenPos, scaleFactor);
   }
 
   void MapPainterSVG::DrawIcon(const IconStyle* style,
@@ -1005,7 +950,7 @@ namespace osmscout {
     stream << std::endl;
 
     if (!area.clippings.empty()) {
-      stream << "          fillRule=\"evenodd\"" << std::endl;
+      stream << "          fill-rule=\"evenodd\"" << std::endl;
     }
 
     stream << "          d=\"";

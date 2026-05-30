@@ -339,6 +339,13 @@ osmscout_test_project(NAME SunriseSunsetTest SOURCES src/SunriseSunsetTest.cpp)
 #---- PolygonCenterTest
 osmscout_test_project(NAME PolygonCenterTest SOURCES src/PolygonCenterTest.cpp)
 
+#---- SymbolRendererSVG
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map AND TARGET OSMScout::MapSVG)
+  osmscout_test_project(NAME SymbolRendererSVGTest SOURCES src/SymbolRendererSVGTest.cpp TARGET OSMScout::Map OSMScout::MapSVG)
+else()
+  message("Skip SymbolRendererSVG test, libosmscout-map-svg is missing.")
+endif()
+
 #---- MercatorProjection
 osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjectionTest.cpp)
 
