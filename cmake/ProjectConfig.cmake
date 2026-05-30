@@ -105,11 +105,11 @@ macro(osmscout_library_project)
 		create_win32_dll_resource(${_name} "${_output}")
 	endif()
 	install(TARGETS ${_name}
-			RUNTIME DESTINATION bin
-			BUNDLE DESTINATION bin
-			LIBRARY DESTINATION lib
-			ARCHIVE DESTINATION lib
-			FRAMEWORK DESTINATION lib)
+			RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+			BUNDLE DESTINATION "${CMAKE_INSTALL_BINDIR}"
+			LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+			FRAMEWORK DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 	if(NOT ${_skip_header})
 		if(NOT _exclude)
 			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/${_includedir} DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "private" EXCLUDE)
@@ -139,7 +139,7 @@ macro(osmscout_library_project)
 		endif()
 	endif()
 	configure_file("${PROJECT_SOURCE_DIR}/pkgconfig-template.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" @ONLY)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" DESTINATION lib/pkgconfig)
+	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${_output}.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endmacro(osmscout_library_project)
 
 macro(osmscout_demo_project)
@@ -174,7 +174,7 @@ macro(osmscout_demo_project)
 	add_executable(${_name} ${_sources})
 	set_target_properties(${_name} PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Demos")
 	target_link_libraries(${_name} ${_targets})
-	install(TARGETS ${_name} RUNTIME DESTINATION share/osmscout/demos BUNDLE DESTINATION share/osmscout/demos LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	install(TARGETS ${_name} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" BUNDLE DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 	target_include_directories(${_name} PRIVATE ${_includes})
 	if(WIN32 AND HAVE_WINRES_H)
 		create_win32_demo_resource(${_name})
@@ -224,7 +224,7 @@ macro(osmscout_test_project)
 	add_executable(${_name} ${_sources})
 	set_target_properties(${_name} PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tests")
 	target_link_libraries(${_name} ${_targets})
-	install(TARGETS ${_name} RUNTIME DESTINATION share/osmscout/tests BUNDLE DESTINATION share/osmscout/tests LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	install(TARGETS ${_name} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" BUNDLE DESTINATION "${CMAKE_INSTALL_BINDIR}" LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 	target_include_directories(${_name} PRIVATE ${_includes})
 	if(WIN32)
 		create_win32_test_resource(${_name})

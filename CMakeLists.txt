@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(libosmscout VERSION 1.1.1 LANGUAGES C CXX)
+include(GNUInstallDirs)
 set(OSMSCOUT_LIBRARY_VERSION 1.1.1)
 
 # global settings
@@ -726,7 +727,7 @@ if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
 endif()
 
 if(UNIX)
-  set(config_install_dir "${CMAKE_INSTALL_PREFIX}/lib/cmake/${PROJECT_NAME}")
+  set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 else()
   set(config_install_dir CMake)
 endif()
