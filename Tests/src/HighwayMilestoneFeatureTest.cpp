@@ -120,6 +120,130 @@ TEST_CASE("HighwayMilestone Parse converts decimal OSM km to internal meters")
   REQUIRE(value->GetDistance()==35500);
 }
 
+TEST_CASE("HighwayMilestone Parse handles km unit suffix")
+{
+  osmscout::TypeConfig typeConfig;
+  osmscout::TypeInfoRef testType=std::make_shared<osmscout::TypeInfo>("TestType");
+  osmscout::FeatureRef milestoneFeature;
+  size_t featureInstanceIndex;
+
+  milestoneFeature=typeConfig.GetFeature(osmscout::HighwayMilestoneFeature::NAME);
+
+  testType->CanRouteFoot(false);
+  testType->CanRouteBicycle(false);
+  testType->CanRouteCar(false);
+  testType->AddFeature(milestoneFeature);
+
+  typeConfig.RegisterType(testType);
+
+  REQUIRE(testType->GetFeature(osmscout::HighwayMilestoneFeature::NAME,
+                               featureInstanceIndex));
+
+  osmscout::FeatureInstance featureInstance=testType->GetFeature(featureInstanceIndex);
+
+  struct TestCase {
+    std::string distance;
+    uint32_t    expected;
+    std::string label;
+  };
+
+  const TestCase cases[]={
+    {"35.0 km", 35000, "decimal km suffix"},
+    {"35 km",   35000, "integer km suffix"}
+  };
+
+  for (const auto& tc : cases) {
+    osmscout::SilentTagErrorReporter reporter;
+    std::unordered_map<osmscout::TagId,std::string> tags;
+
+    osmscout::TagId tagDistance=typeConfig.GetTagRegistry().RegisterTag("distance");
+    osmscout::TagId tagRef=typeConfig.GetTagRegistry().RegisterTag("ref");
+
+    tags[tagDistance]=tc.distance;
+    tags[tagRef]="A2";
+
+    osmscout::FeatureValueBuffer buffer;
+    buffer.SetType(testType);
+
+    milestoneFeature->Parse(reporter,
+                            typeConfig.GetTagRegistry(),
+                            featureInstance,
+                            osmscout::ObjectOSMRef(1,osmscout::osmRefNode),
+                            tags,
+                            buffer);
+
+    osmscout::HighwayMilestoneFeatureValueReader valueReader(typeConfig);
+
+    const osmscout::HighwayMilestoneFeatureValue *value=valueReader.GetValue(buffer);
+
+    REQUIRE(value!=nullptr);
+    REQUIRE(value->GetDistance()==tc.expected);
+    REQUIRE(value->GetRef()=="A2");
+  }
+}
+
+TEST_CASE("HighwayMilestone Parse handles mi unit suffix")
+{
+  osmscout::TypeConfig typeConfig;
+  osmscout::TypeInfoRef testType=std::make_shared<osmscout::TypeInfo>("TestType");
+  osmscout::FeatureRef milestoneFeature;
+  size_t featureInstanceIndex;
+
+  milestoneFeature=typeConfig.GetFeature(osmscout::HighwayMilestoneFeature::NAME);
+
+  testType->CanRouteFoot(false);
+  testType->CanRouteBicycle(false);
+  testType->CanRouteCar(false);
+  testType->AddFeature(milestoneFeature);
+
+  typeConfig.RegisterType(testType);
+
+  REQUIRE(testType->GetFeature(osmscout::HighwayMilestoneFeature::NAME,
+                               featureInstanceIndex));
+
+  osmscout::FeatureInstance featureInstance=testType->GetFeature(featureInstanceIndex);
+
+  struct TestCase {
+    std::string distance;
+    uint32_t    expected;
+    std::string label;
+  };
+
+  const TestCase cases[]={
+    {"10 mi",   16093, "integer mi suffix"},
+    {"10.5 mi", 16898, "decimal mi suffix"}
+  };
+
+  for (const auto& tc : cases) {
+    osmscout::SilentTagErrorReporter reporter;
+    std::unordered_map<osmscout::TagId,std::string> tags;
+
+    osmscout::TagId tagDistance=typeConfig.GetTagRegistry().RegisterTag("distance");
+    osmscout::TagId tagRef=typeConfig.GetTagRegistry().RegisterTag("ref");
+
+    tags[tagDistance]=tc.distance;
+    tags[tagRef]="A2";
+
+    osmscout::FeatureValueBuffer buffer;
+    buffer.SetType(testType);
+
+    milestoneFeature->Parse(reporter,
+                            typeConfig.GetTagRegistry(),
+                            featureInstance,
+                            osmscout::ObjectOSMRef(1,osmscout::osmRefNode),
+                            tags,
+                            buffer);
+
+    osmscout::HighwayMilestoneFeatureValueReader valueReader(typeConfig);
+
+    const osmscout::HighwayMilestoneFeatureValue *value=valueReader.GetValue(buffer);
+
+    REQUIRE(value!=nullptr);
+    REQUIRE(value->GetDistance()==tc.expected);
+    REQUIRE(value->GetRef()=="A2");
+  }
+}
+
 TEST_CASE("HighwayMilestone Parse logs warning on invalid distance but still allocates feature value")
 {
   osmscout::TypeConfig typeConfig;
@@ -147,9 +271,9 @@ TEST_CASE("HighwayMilestone Parse logs warning on invalid distance but still all
   };
 
   const TestCase cases[]={
-    {"35.0 mi", "unit suffix"},
-    {"45 + 5",  "combined km+m format"},
-    {"35,5",    "comma separator"}
+    {"35.0 nmi", "unknown unit suffix"},
+    {"45 + 5",   "combined km+m format"},
+    {"35,5",     "comma separator"}
   };
 
   for (const auto& tc : cases) {
