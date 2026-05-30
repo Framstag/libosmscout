@@ -262,6 +262,16 @@ HeaderCheckTest = executable('HeaderCheckTest',
 
 test('Check use of \'<\'...\'>\' for includes', HeaderCheckTest, env: headerCheckEnv)
 
+HighwayMilestoneFeatureTest = executable('HighwayMilestoneFeatureTest',
+             'src/HighwayMilestoneFeatureTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check HighwayMilestone feature parsing and labeling', HighwayMilestoneFeatureTest)
+
 LabelPathTest = executable('LabelPathTest',
                            'src/LabelPathTest.cpp',
                            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
@@ -299,6 +309,16 @@ if buildImport
     ostandossEnv = environment()
     ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)
+
+LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
+                                           'src/LocationDescriptionServiceTest.cpp',
+                                           include_directories: [osmscoutIncDir],
+                                           dependencies: [mathDep, openmpDep, catch2MainDep],
+                                           link_with: [osmscout],
+                                           install: true,
+                                           install_dir: testInstallDir)
+
+test('Check HighwayMilestone location description', LocationDescriptionServiceTest)
 endif
 
 MapRotateTest = executable('MapRotateTest',

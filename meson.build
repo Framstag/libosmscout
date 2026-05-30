@@ -223,6 +223,12 @@ else
   glfwDep = compiler.find_library('glfw', required: false)
 endif
 
+# cpp-httplib
+httpLibAvailable=compiler.has_header('httplib.h', required: false)
+
+# nlohmann_json
+jsonDep = dependency('nlohmann_json', required: false)
+
 if openGLDep.found() and glmDep.found() and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
@@ -388,6 +394,10 @@ endif
 
 if buildTests
     subdir('Tests')
+endif
+
+if httpLibAvailable and jsonDep.found()
+  subdir('MCPServer')
 endif
 
 #if buildBinding

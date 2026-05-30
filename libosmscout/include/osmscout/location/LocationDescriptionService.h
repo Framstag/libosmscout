@@ -268,6 +268,78 @@ namespace osmscout {
   //! Reference counted reference to a LocationCrossingDescription instance
   using LocationCrossingDescriptionRef = std::shared_ptr<LocationCrossingDescription>;
 
+  class OSMSCOUT_API LocationHighwayMilestoneDescription CLASS_FINAL
+  {
+  private:
+    ObjectFileRef         object;
+    FeatureValueBufferRef objectFeatures;
+    bool                              atPlace=true;
+    Distance                          distance;
+    Bearing                           bearing;
+    uint32_t    milestoneDistance=0;
+    std::string milestoneRef;
+    std::string milestoneCarriagewayRef;
+  public:
+    explicit LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                                  const FeatureValueBufferRef& objectFeatures);
+
+    LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                         const FeatureValueBufferRef& objectFeatures,
+                                         const Distance& distance,
+                                         const Bearing& bearing);
+
+    LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                         const FeatureValueBufferRef& objectFeatures,
+                                         const Distance& distance,
+                                         const Bearing& bearing,
+                                         uint32_t milestoneDistance,
+                                         const std::string& milestoneRef,
+                                         const std::string& milestoneCarriagewayRef);
+
+    ObjectFileRef GetObject() const
+    {
+      return object;
+    }
+
+    FeatureValueBufferRef GetObjectFeatures() const
+    {
+      return objectFeatures;
+    }
+
+    bool IsAtPlace() const
+    {
+      return atPlace;
+    }
+
+    Distance GetDistance() const
+    {
+      return distance;
+    }
+
+    Bearing GetBearing() const
+    {
+      return bearing;
+    }
+
+    uint32_t GetMilestoneDistance() const
+    {
+      return milestoneDistance;
+    }
+
+    std::string GetMilestoneRef() const
+    {
+      return milestoneRef;
+    }
+
+    std::string GetMilestoneCarriagewayRef() const
+    {
+      return milestoneCarriagewayRef;
+    }
+  };
+
+  //! Reference counted reference to a LocationHighwayMilestoneDescription instance
+  using LocationHighwayMilestoneDescriptionRef = std::shared_ptr<LocationHighwayMilestoneDescription>;
+
   /**
    * \ingroup Location
    *
@@ -283,6 +355,7 @@ namespace osmscout {
     LocationAtPlaceDescriptionRef  atPOIDescription;
     LocationWayDescriptionRef      wayDescription;
     LocationCrossingDescriptionRef crossingDescription;
+    LocationHighwayMilestoneDescriptionRef highwayMilestoneDescription;
 
   public:
     void SetCoordDescription(const LocationCoordDescriptionRef& description);
@@ -291,6 +364,7 @@ namespace osmscout {
     void SetAtPOIDescription(const LocationAtPlaceDescriptionRef& description);
     void SetWayDescription(const LocationWayDescriptionRef& description);
     void SetCrossingDescription(const LocationCrossingDescriptionRef& description);
+    void SetHighwayMilestoneDescription(const LocationHighwayMilestoneDescriptionRef& description);
 
     /**
      * Return the location is geo coordinates
@@ -327,6 +401,12 @@ namespace osmscout {
      * @return
      */
     LocationCrossingDescriptionRef GetCrossingDescription() const;
+
+    /**
+     * Return the location in relation to a close highway milestone
+     * @return
+     */
+    LocationHighwayMilestoneDescriptionRef GetHighwayMilestoneDescription() const;
   };
 
   /**
@@ -434,6 +514,11 @@ namespace osmscout {
     bool DescribeLocationByWay(const GeoCoord& location,
                                LocationDescription& description,
                                const Distance& lookupDistance=Distance::Of<Meter>(100));
+
+    bool DescribeLocationByHighwayMilestone(const GeoCoord& location,
+                                             LocationDescription& description,
+                                             const Distance& lookupDistance=Distance::Of<Meter>(100),
+                                             const Distance& milestoneLookupDistance=Distance::Of<Meter>(2000));
   };
 
   //! \ingroup Service

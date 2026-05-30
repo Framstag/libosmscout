@@ -389,6 +389,13 @@ endif()
 
 find_program(HUGO_PATH hugo)
 
+# Find nlohmann_json (header-only, used by MCPServer)
+find_package(nlohmann_json QUIET)
+
+# Find httplib (header-only, used by MCPServer)
+include(CheckIncludeFileCXX)
+check_include_file_cxx(httplib.h HAVE_HTTPLIB)
+
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})
 set(OSMSCOUT_HAVE_INT32_T ${HAVE_INT32_T})

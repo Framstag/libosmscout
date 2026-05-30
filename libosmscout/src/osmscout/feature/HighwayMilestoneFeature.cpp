@@ -68,9 +68,9 @@ namespace osmscout {
   std::string HighwayMilestoneFeatureValue::GetLabel(const Locale &locale, size_t /*labelIndex*/) const
   {
     std::stringstream ss;
-    ss << NumberToString(distance, locale);
+    ss << NumberToString(distance / 1000, locale);
     ss << locale.GetUnitsSeparator();
-    ss << "m";
+    ss << "km";
     return ss.str();
   }
 
@@ -111,30 +111,26 @@ namespace osmscout {
                                       const TagMap& tags,
                                       FeatureValueBuffer& buffer) const
   {
-    auto distanceTag=tags.find(tagDistance);
-    auto refTag=tags.find(tagRef);
-
-    if (distanceTag==tags.end() || refTag==tags.end()) {
-      return;
-    }
-
-    std::string distanceString=distanceTag->second;
-    double      d;
-
-    if (!StringToNumber(distanceString,d)) {
-      errorReporter.ReportTag(object,tags,std::string("HighwayMilestone distance tag value '")+distanceTag->second+"' is not a valid number!");
-      return;
-    }
-
-    if (d<0 || d>std::numeric_limits<uint32_t>::max()) {
-      errorReporter.ReportTag(object,tags,std::string("HighwayMilestone distance tag value '")+distanceTag->second+"' is out of range!");
-      return;
-    }
-
     auto* value=static_cast<HighwayMilestoneFeatureValue*>(buffer.AllocateValue(feature.GetIndex()));
 
-    value->SetDistance(static_cast<uint32_t>(d));
-    value->SetRef(refTag->second);
+    auto distanceTag=tags.find(tagDistance);
+    if (distanceTag!=tags.end()) {
+      std::string distanceString=distanceTag->second;
+      double      d;
+
+      if (!StringToNumber(distanceString,d)) {
+        errorReporter.ReportTag(object,tags,std::string("HighwayMilestone distance tag value '")+distanceTag->second+"' is not a valid number!");
+      } else if (d<0 || d>(std::numeric_limits<uint32_t>::max()/1000.0)) {
+        errorReporter.ReportTag(object,tags,std::string("HighwayMilestone distance tag value '")+distanceTag->second+"' is out of range!");
+      } else {
+        value->SetDistance(static_cast<uint32_t>(d * 1000.0));
+      }
+    }
+
+    auto refTag=tags.find(tagRef);
+    if (refTag!=tags.end()) {
+      value->SetRef(refTag->second);
+    }
 
     auto carriagewayRefTag=tags.find(tagCarriagewayRef);
     if (carriagewayRefTag!=tags.end()) {

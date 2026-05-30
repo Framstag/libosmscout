@@ -1,0 +1,148 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "name": "version",
+        "title": "Request Libosmscout Version",
+        "description": "Tool to request the version of the libosmscout library",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "title": "Version",
+              "description": "Version of the libosmscout library"
+            }
+          },
+          "required": ["version"]
+        }
+      },
+      {
+        "name": "locationDescription",
+        "title": "Describe Location",
+        "description": "Tool to describe the given geo location",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "title": "latitude",
+              "description": "The latitude part of the geo location"
+            },
+            "longitude": {
+              "type": "number",
+              "title": "longitude",
+              "description": "The longitude part of the geo location"
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude"
+          ]
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "coordinateDescription": {
+              "type": "object",
+              "title": "Coordinate Description",
+              "description": "The geo coordinate of the location",
+              "properties": {
+                "latitude": { "type": "number", "title": "Latitude" },
+                "longitude": { "type": "number", "title": "Longitude" },
+                "displayText": { "type": "string", "title": "Display Text" }
+              }
+            },
+            "atNameDescription": {
+              "type": "object",
+              "title": "At Name Description",
+              "description": "Description relative to the nearest named object",
+              "properties": {
+                "atPlace": { "type": "boolean", "title": "At Place" },
+                "distanceInMeter": { "type": "number", "title": "Distance in Meters" },
+                "bearing": { "type": "string", "title": "Bearing" },
+                "adminRegion": { "type": "object", "title": "Admin Region", "properties": { "name": { "type": "string" }, "altName": { "type": "string" }, "postalAreas": { "type": "array", "items": { "type": "string" } } } },
+                "postalArea": { "type": "string", "title": "Postal Area" },
+                "poi": { "type": "string", "title": "POI" },
+                "street": { "type": "string", "title": "Street" },
+                "houseNumber": { "type": "string", "title": "House Number" }
+              }
+            },
+            "atAddressDescription": {
+              "type": "object",
+              "title": "At Address Description",
+              "description": "Description relative to the nearest address",
+              "properties": {
+                "atPlace": { "type": "boolean" },
+                "distanceInMeter": { "type": "number" },
+                "bearing": { "type": "string" },
+                "adminRegion": { "type": "object", "properties": { "name": { "type": "string" }, "altName": { "type": "string" }, "postalAreas": { "type": "array", "items": { "type": "string" } } } },
+                "postalArea": { "type": "string" },
+                "poi": { "type": "string" },
+                "street": { "type": "string" },
+                "houseNumber": { "type": "string" }
+              }
+            },
+            "atPOIDescription": {
+              "type": "object",
+              "title": "At POI Description",
+              "description": "Description relative to the nearest POI",
+              "properties": {
+                "atPlace": { "type": "boolean" },
+                "distanceInMeter": { "type": "number" },
+                "bearing": { "type": "string" },
+                "adminRegion": { "type": "object", "properties": { "name": { "type": "string" }, "altName": { "type": "string" }, "postalAreas": { "type": "array", "items": { "type": "string" } } } },
+                "postalArea": { "type": "string" },
+                "poi": { "type": "string" },
+                "street": { "type": "string" },
+                "houseNumber": { "type": "string" }
+              }
+            },
+            "wayDescription": {
+              "type": "object",
+              "title": "Way Description",
+              "description": "Description relative to the nearest way",
+              "properties": {
+                "way": { "type": "string", "title": "Way Name" },
+                "distanceInMeter": { "type": "number", "title": "Distance in Meters" }
+              }
+            },
+            "crossingDescription": {
+              "type": "object",
+              "title": "Crossing Description",
+              "description": "Description relative to the nearest crossing",
+              "properties": {
+                "crossingLatitude": { "type": "number", "title": "Crossing Latitude" },
+                "crossingLongitude": { "type": "number", "title": "Crossing Longitude" },
+                "atPlace": { "type": "boolean", "title": "At Place" },
+                "distanceInMeter": { "type": "number", "title": "Distance in Meters" },
+                "bearing": { "type": "string", "title": "Bearing" },
+                "ways": { "type": "array", "items": { "type": "string" }, "title": "Ways" }
+              }
+            },
+            "highwayMilestoneDescription": {
+              "type": "object",
+              "title": "Highway Milestone Description",
+              "description": "Description relative to the nearest highway milestone",
+              "properties": {
+                "atPlace": { "type": "boolean", "title": "At Place" },
+                "distanceInMeter": { "type": "number", "title": "Distance in Meters" },
+                "bearing": { "type": "string", "title": "Bearing" },
+                "milestoneDistance": { "type": "number", "title": "Milestone Distance" },
+                "milestoneRef": { "type": "string", "title": "Milestone Reference" },
+                "carriagewayRef": { "type": "string", "title": "Carriageway Reference" }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
