@@ -97,8 +97,8 @@ if stdExecutionAvailable
 endif
 
 # Testing
-catch2Dep = dependency('catch2', version: '>=3.0.0', required: false)
-catch2MainDep = dependency('catch2-with-main', version: '>=3.0.0', required: false)
+catch2Dep = dependency('catch2', version: '>=3.0.0', required: false, fallback: ['catch2','catch2_dep'])
+catch2MainDep = dependency('catch2-with-main', version: '>=3.0.0', required: false, fallback: ['catch2','catch2_with_main_dep'])
 
 # Optional
 marisaDep = dependency('marisa', required : false)
@@ -108,12 +108,12 @@ zlibDep = dependency('zlib', required : false, fallback: ['zlib','zlib_dep'])
 lzmaDep = dependency('liblzma', required : false, fallback: ['liblzma','lzma_dep'])
 
 if get_option('enableXML')
-  xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','xml2lib_dep'])
+  xml2Dep = dependency('libxml-2.0', version: '>= 2.6.0', required : false, fallback: ['libxml2','libxml-2.0_dep'])
 else
   xml2Dep = dependency('', required: false)
 endif
 
-protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','protoc_dep'])
+protobufDep = dependency('protobuf', required : false, fallback: ['protobuf','protobuf_dep'])
 wsock32Dep=compiler.find_library('wsock32', required: false)
 
 protocCmd = find_program('protoc', required: false)
@@ -158,7 +158,7 @@ cairoDep = dependency('cairo', required : false)
 pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
-pngDep = dependency('libpng', required: false)
+pngDep = dependency('libpng', required: false, fallback: ['libpng','libpng_dep'])
 gobjectDep = dependency('gobject-2.0',required: false)
 
 # DirectX
