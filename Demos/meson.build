@@ -197,6 +197,86 @@ LookupPOI = executable('LookupPOI',
                        install: true,
                        install_dir: demoInstallDir)
 
+# ---- DrawMapAll
+if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL or buildMapDirectX or buildMapGDI or buildMapIOSX
+
+  drawMapAllSrc = ['src/DrawMapAll.cpp']
+  drawMapAllDep = [mathDep, openmpDep]
+  drawMapAllLink = [osmscout, osmscoutmap]
+  drawMapAllIncDirs = []
+  drawMapAllDef = []
+  drawMapAllNeedPng = false
+
+  if buildMapAgg
+    drawMapAllLink += osmscoutmapagg
+    drawMapAllIncDirs += [osmscoutmapaggIncDir]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_AGG']
+    drawMapAllNeedPng = true
+  endif
+
+  if buildMapCairo
+    drawMapAllLink += osmscoutmapcairo
+    drawMapAllIncDirs += [osmscoutmapcairoIncDir]
+    drawMapAllDep += [cairoDep, pangocairoDep]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_CAIRO']
+  endif
+  if buildMapOpenGL and glfwDep.found() and ftDep.found() and glewDep.found()
+    drawMapAllLink += osmscoutmapopengl
+    drawMapAllIncDirs += [osmscoutmapopenglIncDir]
+    drawMapAllDep += [openGLDep, ftDep, glfwDep, threadDep, glmDep, glewDep]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_OPENGL']
+    drawMapAllNeedPng = true
+  endif
+
+  if buildMapQt
+    drawMapAllLink += osmscoutmapqt
+    drawMapAllIncDirs += [osmscoutmapqtIncDir]
+    drawMapAllDep += qtMapDep
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_QT']
+  endif
+
+  if buildMapSVG
+    drawMapAllLink += osmscoutmapsvg
+    drawMapAllIncDirs += [osmscoutmapsvgIncDir]
+    drawMapAllDep += pangoDep
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_SVG']
+  endif
+
+  if buildMapIOSX
+    drawMapAllSrc += 'src/DrawMapAllOSX.mm'
+    drawMapAllLink += osmscoutmapiosx
+    drawMapAllIncDirs += [include_directories('../libosmscout-map-iosx/include', '../build/libosmscout-map-iosx/include')]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_IOSX']
+  endif
+
+  if buildMapDirectX
+    drawMapAllLink += osmscoutmapdirectx
+    drawMapAllIncDirs += [osmscoutmapdirectxIncDir]
+    drawMapAllDep += [d2d1Dep, dwriteDep, winCodecsDep]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_DIRECTX']
+  endif
+
+  if buildMapGDI
+    drawMapAllLink += osmscoutmapgdi
+    drawMapAllIncDirs += [osmscoutmapgdiIncDir]
+    drawMapAllDep += [gdiplusDep]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_GDI']
+  endif
+
+  if drawMapAllNeedPng
+    drawMapAllDep += pngDep
+  endif
+
+  DrawMapAll = executable('DrawMapAll',
+    drawMapAllSrc,
+    cpp_args: drawMapAllDef + ['-fPIC'],
+    include_directories: [osmscoutIncDir, demoIncDir, osmscoutmapIncDir] + drawMapAllIncDirs,
+    dependencies: drawMapAllDep,
+    link_with: drawMapAllLink,
+    install: true,
+    install_dir: demoInstallDir)
+endif
+
 Srtm = executable('Srtm',
                   'src/Srtm.cpp',
                   include_directories: [osmscoutIncDir],

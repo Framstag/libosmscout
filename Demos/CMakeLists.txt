@@ -285,4 +285,76 @@ else()
 endif()
 
 #---- Srtm
-osmscout_demo_project(NAME Srtm SOURCES src/Srtm.cpp TARGET OSMScout::OSMScout)
+#---- DrawMapAll
+# Collect available backends for the multi-backend renderer
+set(DRAWMAPALL_SOURCES src/DrawMapAll.cpp)
+set(DRAWMAPALL_TARGETS OSMScout::OSMScout OSMScout::Map)
+set(DRAWMAPALL_DEFS)
+set(DRAWMAPALL_NEEDS_PNG OFF)
+
+# AGG
+if(${OSMSCOUT_BUILD_MAP_AGG})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapAGG)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_AGG)
+  set(DRAWMAPALL_NEEDS_PNG ON)
+endif()
+
+# Cairo
+if(${OSMSCOUT_BUILD_MAP_CAIRO})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapCairo)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_CAIRO)
+endif()
+
+# OpenGL
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET glfw)
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapOpenGL glfw)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_OPENGL)
+  set(DRAWMAPALL_NEEDS_PNG ON)
+endif()
+
+# Qt
+if(${OSMSCOUT_BUILD_MAP_QT})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapQt Qt::Widgets)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_QT)
+endif()
+
+# SVG
+if(${OSMSCOUT_BUILD_MAP_SVG})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapSVG)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_SVG)
+endif()
+
+# OSX
+if(APPLE AND NOT IOS AND ${OSMSCOUT_BUILD_MAP_IOSX})
+  list(APPEND DRAWMAPALL_SOURCES src/DrawMapAllOSX.mm)
+  list(APPEND DRAWMAPALL_TARGETS OSMScoutMapIOSX)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_IOSX)
+endif()
+
+# DirectX (Windows only)
+if(${OSMSCOUT_BUILD_MAP_DIRECTX})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapDirectX ${Direct2D_LIBRARIES} "Shell32.lib")
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_DIRECTX)
+endif()
+
+# GDI (Windows only)
+if(${OSMSCOUT_BUILD_MAP_GDI})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapGDI)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_GDI)
+endif()
+
+if(DRAWMAPALL_TARGETS)
+  osmscout_demo_project(NAME DrawMapAll SOURCES ${DRAWMAPALL_SOURCES} TARGET ${DRAWMAPALL_TARGETS})
+  target_compile_definitions(DrawMapAll PRIVATE ${DRAWMAPALL_DEFS})
+  if(DRAWMAPALL_NEEDS_PNG)
+    target_link_libraries(DrawMapAll PNG::PNG)
+  endif()
+  if(APPLE AND NOT IOS AND ${OSMSCOUT_BUILD_MAP_IOSX})
+    include_directories(DrawMapAll PRIVATE ${CMAKE_SOURCE_DIR}/libosmscout-map-iOSX/include ${CMAKE_BINARY_DIR}/libosmscout-map-iOSX/include)
+    set_target_properties(DrawMapAll PROPERTIES UNITY_BUILD OFF)
+  endif()
+else()
+  message("Skip DrawMapAll demo, no map rendering backends available.")
+endif()
+
+#---- Srtm

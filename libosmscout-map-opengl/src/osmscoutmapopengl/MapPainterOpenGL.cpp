@@ -47,8 +47,15 @@ namespace osmscout {
     glewExperimental = GL_TRUE;
     GLenum res = glewInit();
     if (res != GLEW_OK) {
-      log.Error() << "Glew init error: " << glewGetErrorString(res);
-      return;
+      if (res == GLEW_ERROR_NO_GLX_DISPLAY) {
+        // Expected on native Wayland with standard GLEW.
+        // Clear any spurious GL error triggered during init.
+        while (glGetError() != GL_NO_ERROR) {}
+      }
+      else {
+        log.Error() << "Glew init error: " << res << " - " << glewGetErrorString(res);
+        return;
+      }
     }
 
     if (std::string projectionSource;
