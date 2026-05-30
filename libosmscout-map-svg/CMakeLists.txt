@@ -1,10 +1,12 @@
 set(HEADER_FILES
     include/osmscoutmapsvg/MapSVGImportExport.h
     include/osmscoutmapsvg/MapPainterSVG.h
+    include/osmscoutmapsvg/SymbolRendererSVG.h
 )
 
 set(SOURCE_FILES
     src/osmscoutmapsvg/MapPainterSVG.cpp
+    src/osmscoutmapsvg/SymbolRendererSVG.cpp
 )
 
 osmscout_library_project(
