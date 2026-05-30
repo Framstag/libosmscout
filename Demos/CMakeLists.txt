@@ -257,7 +257,7 @@ if(APPLE AND NOT IOS)
 endif()
 
 #---- GpxPipe & ElevationProfile
-if(${LIBXML2_FOUND} AND ${OSMSCOUT_BUILD_GPX})
+if(TARGET LibXml2::LibXml2 AND ${OSMSCOUT_BUILD_GPX})
     #---- GpxPipe
     osmscout_demo_project(NAME GpxPipe SOURCES src/GpxPipe.cpp TARGET OSMScout::OSMScout OSMScout::GPX)
 
