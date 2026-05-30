@@ -1,9 +1,10 @@
 [wrap-file]
-directory = libxml2-2.9.7
+directory = libxml2-2.15.3
+source_url = https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.3.tar.xz
+source_fallback_url = https://wrapdb.mesonbuild.com/v2/libxml2_2.15.3-1/get_source/libxml2-2.15.3.tar.xz
+source_filename = libxml2-2.15.3.tar.xz
+source_hash = 78262a6e7ac170d6528ebfe2efccdf220191a5af6a6cd61ea4a9a9a5042c7a07
+wrapdb_version = 2.15.3-1
 
-source_url = ftp://xmlsoft.org/libxml2/libxml2-2.9.7.tar.gz
-source_filename = libxml2-2.9.7.tar.gz
-source_hash = f63c5e7d30362ed28b38bfa1ac6313f9a80230720b7fb6c80575eeab3ff5900c
-patch_url = https://wrapdb.mesonbuild.com/v1/projects/libxml2/2.9.7/6/get_zip
-patch_filename = libxml2-2.9.7-6-wrap.zip
-patch_hash = 4f56174fef39fdcc83f235e7021f18ec638403ab3ee2c314fb2509a8bf599b27
+[provide]
+dependency_names = libxml-2.0
