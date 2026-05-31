@@ -29,7 +29,6 @@ bool RenderWithOSX(DrawMapDemo& drawDemo,
   drawDemo.drawParameter.SetLabelLineFitToWidth(
       std::min(drawDemo.projection.GetWidth(), drawDemo.projection.GetHeight()));
 
-  CGSize size = CGSizeMake(width, height);
   CGContextRef bitmapContext = CGBitmapContextCreate(
       nullptr, width, height, 8, 0,
       [[NSColorSpace genericRGBColorSpace] CGColorSpace],
@@ -64,9 +63,6 @@ bool RenderWithOSX(DrawMapDemo& drawDemo,
       std::string path = outputDir + "/DrawMapOSX.png";
       NSString* nsPath = [[NSString alloc] initWithUTF8String:path.c_str()];
       ok = [imgData writeToFile:nsPath atomically:NO];
-
-      [nsPath release];
-      [bitmapRep release];
       CGImageRelease(cgImage);
     } else {
       std::cerr << "  FAIL: OSX CGImage creation" << std::endl;
