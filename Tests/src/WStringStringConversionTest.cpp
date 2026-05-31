@@ -13,6 +13,7 @@ TEST_CASE("Check ANSI charset conversion")
   REQUIRE(oText == uText);
 }
 
+
 TEST_CASE("Check german umlauts upper and lower case and euro-sign charset conversion")
 {
   try {
@@ -81,4 +82,47 @@ TEST_CASE("Check UTF8StringToU32String")
     REQUIRE(u32Text ==
             std::u32string{char32_t(0x74000000), char32_t(0x65000000), char32_t(0x73000000), char32_t(0x74000000)});
   }
+}
+
+TEST_CASE("Check UTF8StringToU32StringLE")
+{
+  try {
+    std::locale::global(std::locale(""));
+  }
+  catch (const std::exception &e) {
+    std::cerr << "error: cannot set locale: " << e.what() << std::endl;
+  }
+  std::u32string u32Text = osmscout::UTF8StringToU32StringLE("");
+  REQUIRE(u32Text.empty());
+
+  // ASCII
+  u32Text = osmscout::UTF8StringToU32StringLE("test");
+  REQUIRE(u32Text.size() == 4);
+  REQUIRE(u32Text[0] == char32_t('t'));
+  REQUIRE(u32Text[1] == char32_t('e'));
+  REQUIRE(u32Text[2] == char32_t('s'));
+  REQUIRE(u32Text[3] == char32_t('t'));
+
+  // 2-byte UTF-8: U+00DF (sharp s)
+  u32Text = osmscout::UTF8StringToU32StringLE("\xc3\x9f");
+  REQUIRE(u32Text.size() == 1);
+  REQUIRE(u32Text[0] == char32_t(0xDF));
+
+  // 3-byte UTF-8: U+6C34 (water CJK)
+  u32Text = osmscout::UTF8StringToU32StringLE("\xe6\xb0\xb4");
+  REQUIRE(u32Text.size() == 1);
+  REQUIRE(u32Text[0] == char32_t(0x6C34));
+
+  // 4-byte UTF-8: U+1F34C (banana emoji)
+  u32Text = osmscout::UTF8StringToU32StringLE("\xf0\x9f\x8d\x8c");
+  REQUIRE(u32Text.size() == 1);
+  REQUIRE(u32Text[0] == char32_t(0x1F34C));
+
+  // Mixed multi-byte
+  u32Text = osmscout::UTF8StringToU32StringLE("a\xc3\x9f\xe6\xb0\xb4\xf0\x9f\x8d\x8c");
+  REQUIRE(u32Text.size() == 4);
+  REQUIRE(u32Text[0] == char32_t('a'));
+  REQUIRE(u32Text[1] == char32_t(0xDF));
+  REQUIRE(u32Text[2] == char32_t(0x6C34));
+  REQUIRE(u32Text[3] == char32_t(0x1F34C));
 }

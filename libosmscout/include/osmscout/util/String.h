@@ -472,6 +472,19 @@ namespace osmscout {
   /**
    * \ingroup Util
    *
+   * Convert the given std::string containing a UTF8 character sequence to a std::u32string
+   * with explicit little-endian byte order.
+   *
+   * @param text
+   *    String to get converted
+   * @return
+   *    corresponding std::u32string in little-endian order
+   */
+  extern OSMSCOUT_API std::u32string UTF8StringToU32StringLE(const std::string& text);
+
+  /**
+   * \ingroup Util
+   *
    * Convert the given std::wstring to a std::string containing a corresponding UTF8 character sequence
    *
    * @param text
