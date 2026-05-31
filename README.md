@@ -57,6 +57,30 @@ features of the library.
 
 We plan to move all documentation for the repository to the homepage.
 
+### Code Formatting
+
+This project uses [Uncrustify](https://github.com/uncrustify/uncrustify) 0.83.0 for
+consistent C++ code formatting. The configuration file is `.uncrustify` at the
+project root, tuned to produce minimal diffs on existing code.
+
+To apply formatting to all tracked source files:
+```
+./scripts/format-check.sh apply
+```
+
+To verify files are correctly formatted (exit 0 = clean, exit 1 = unformatted):
+```
+./scripts/format-check.sh check
+```
+
+To see what changes uncrustify would make without modifying anything:
+```
+./scripts/format-check.sh diff
+```
+
+Note: Directories `Android/`, `Apple/`, and `subprojects/` are excluded.
+They contain platform-specific or third-party code with their own formatting.
+
 # Automatic builds
 
 Automatic builds can be found at [Github Actions](https://github.com/Framstag/libosmscout/actions).

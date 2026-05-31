@@ -1,4 +1,4 @@
-# Uncrustify-0.69.0_f
+# Uncrustify-0.83.0_f
 
 #
 # General options
@@ -67,20 +67,29 @@ utf8_force                      = false    # true/false
 
 # Add or remove space around non-assignment symbolic operators ('+', '/', '%',
 # '<<', and so forth).
-sp_arith                        = remove   # ignore/add/remove/force
+sp_arith                        = ignore   # ignore/add/remove/force
 
 # Add or remove space around arithmetic operators '+' and '-'.
 #
 # Overrides sp_arith.
-sp_arith_additive               = remove   # ignore/add/remove/force
+sp_arith_additive               = ignore   # ignore/add/remove/force
 
 # Add or remove space around assignment operator '=', '+=', etc.
-sp_assign                       = remove   # ignore/add/remove/force
+sp_assign                       = ignore   # ignore/add/remove/force
 
 # Add or remove space around '=' in C++11 lambda capture specifications.
 #
 # Overrides sp_assign.
 sp_cpp_lambda_assign            = remove   # ignore/add/remove/force
+sp_cpp_lambda_square_brace      = remove   # ignore/add/remove/force
+# space after lambda capture ']' before '('.
+sp_cpp_lambda_square_paren      = remove   # ignore/add/remove/force
+# space between lambda '(' and ')'.
+sp_cpp_lambda_fparen            = ignore   # ignore/add/remove/force
+# space between lambda '()' and '{'.
+sp_cpp_lambda_paren_brace       = ignore   # ignore/add/remove/force
+# space inside lambda argument list '(' and ')'.
+sp_cpp_lambda_argument_list     = ignore   # ignore/add/remove/force
 
 # Add or remove space after the capture specification in C++11 lambda.
 sp_cpp_lambda_paren             = remove   # ignore/add/remove/force
@@ -93,12 +102,12 @@ sp_assign_default               = remove   # ignore/add/remove/force
 # Add or remove space before assignment operator '=', '+=', etc.
 #
 # Overrides sp_assign.
-sp_before_assign                = remove   # ignore/add/remove/force
+sp_before_assign                = ignore   # ignore/add/remove/force
 
 # Add or remove space after assignment operator '=', '+=', etc.
 #
 # Overrides sp_assign.
-sp_after_assign                 = remove   # ignore/add/remove/force
+sp_after_assign                 = ignore   # ignore/add/remove/force
 
 # Add or remove space in 'NS_ENUM ('.
 sp_enum_paren                   = ignore   # ignore/add/remove/force
@@ -136,7 +145,7 @@ sp_before_pp_stringify          = ignore   # ignore/add/remove/force
 sp_bool                         = force    # ignore/add/remove/force
 
 # Add or remove space around compare operator '<', '>', '==', etc.
-sp_compare                      = remove   # ignore/add/remove/force
+sp_compare                      = ignore    # ignore/add/remove/force
 
 # Add or remove space inside '(' and ')'.
 sp_inside_paren                 = remove   # ignore/add/remove/force
@@ -219,7 +228,7 @@ sp_before_template_paren        = ignore   # ignore/add/remove/force
 
 # Add or remove space between 'template' and '<'.
 # If set to ignore, sp_before_angle is used.
-sp_template_angle               = force    # ignore/add/remove/force
+sp_template_angle               = remove   # ignore/add/remove/force
 
 # Add or remove space before '<'.
 sp_before_angle                 = remove   # ignore/add/remove/force
@@ -314,6 +323,12 @@ sp_after_semi_for_empty         = ignore   # ignore/add/remove/force
 
 # Add or remove space before '[' (except '[]').
 sp_before_square                = remove   # ignore/add/remove/force
+# space before '[' for C++17 structured bindings.
+sp_cpp_before_struct_binding   = ignore   # ignore/add/remove/force
+# space after '&' in structured binding, e.g. 'auto& [a,b]'.
+sp_cpp_before_struct_binding_after_byref = ignore   # ignore/add/remove/force
+# space before '[' in variable definition (e.g. 'int[3]').
+sp_before_vardef_square        = remove   # ignore/add/remove/force
 
 # Add or remove space before '[]'.
 sp_before_squares               = remove   # ignore/add/remove/force
@@ -460,6 +475,8 @@ sp_type_func                    = ignore   # ignore/add/remove/force
 # Add or remove space between type and open brace of an unnamed temporary
 # direct-list-initialization.
 sp_type_brace_init_lst          = ignore   # ignore/add/remove/force
+# space between function type and '(' in 'void (*x)(...)'.
+sp_func_type_paren             = ignore   # ignore/add/remove/force
 
 # Add or remove space between function name and '(' on function declaration.
 sp_func_proto_paren             = remove   # ignore/add/remove/force
@@ -516,6 +533,10 @@ sp_func_call_paren_empty        = ignore   # ignore/add/remove/force
 # like:
 #   set func_call_user tr _ i18n
 sp_func_call_user_paren         = remove   # ignore/add/remove/force
+# space inside user function '(' and ')'.
+sp_func_call_user_inside_fparen = ignore   # ignore/add/remove/force
+# space inside user function right paren and next token.
+sp_func_call_user_inside_rparen = ignore   # ignore/add/remove/force
 
 # Add or remove space inside user function '(' and ')'.
 sp_func_call_user_inside_fparen = ignore   # ignore/add/remove/force
@@ -540,6 +561,10 @@ sp_return_brace                 = ignore   # ignore/add/remove/force
 
 # Add or remove space between '__attribute__' and '('.
 sp_attribute_paren              = ignore   # ignore/add/remove/force
+# space before ref qualifier '&' (lvalue ref qualifier on methods).
+sp_before_ref_qualifier        = ignore   # ignore/add/remove/force
+# space after ref qualifier '&'.
+sp_after_ref_qualifier         = ignore   # ignore/add/remove/force
 
 # Add or remove space between 'defined' and '(' in '#if defined (FOO)'.
 sp_defined_paren                = ignore   # ignore/add/remove/force
@@ -851,6 +876,10 @@ sp_before_tr_emb_cmt            = ignore   # ignore/add/remove/force
 
 # Number of spaces before a trailing or embedded comment.
 sp_num_before_tr_emb_cmt        = 0        # unsigned number
+# space before trailing comment (replaces deprecated sp_before_tr_emb_cmt).
+sp_before_tr_cmt               = ignore   # ignore/add/remove/force
+# number of spaces before trailing comment (replaces deprecated sp_num_before_tr_emb_cmt).
+sp_num_before_tr_cmt           = 0        # unsigned number
 
 # (Java) Add or remove space between an annotation and the open parenthesis.
 sp_annotation_paren             = ignore   # ignore/add/remove/force
@@ -860,6 +889,16 @@ sp_skip_vbrace_tokens           = false    # true/false
 
 # Add or remove space after 'noexcept'.
 sp_after_noexcept               = ignore   # ignore/add/remove/force
+# space after ellipsis '...'.
+sp_after_ellipsis              = ignore   # ignore/add/remove/force
+# space between pointer and reference, e.g. 'Foo*&'.
+sp_between_ptr_ref             = ignore   # ignore/add/remove/force
+# space between '&...' (byref followed by ellipsis).
+sp_byref_ellipsis              = ignore   # ignore/add/remove/force
+# space after bit ':' in bitfields.
+sp_after_bit_colon             = ignore   # ignore/add/remove/force
+# space before bit ':' in bitfields.
+sp_before_bit_colon            = ignore   # ignore/add/remove/force
 
 # Add or remove space after '_'.
 sp_vala_after_translation       = ignore   # ignore/add/remove/force
@@ -1349,7 +1388,7 @@ nl_brace_else                   = force    # ignore/add/remove/force
 nl_elseif_brace                 = remove   # ignore/add/remove/force
 
 # Add or remove newline between 'else' and '{'.
-nl_else_brace                   = remove   # ignore/add/remove/force
+nl_else_brace                   = ignore   # ignore/add/remove/force
 
 # Add or remove newline between 'else' and 'if'.
 nl_else_if                      = ignore   # ignore/add/remove/force
@@ -2558,7 +2597,7 @@ mod_sort_using                  = false    # true/false
 # Whether to sort consecutive single-line '#include' statements (C/C++) and
 # '#import' statements (Objective-C). Be aware that this has the potential to
 # break your code if your includes/imports have ordering dependencies.
-mod_sort_include                = true     # true/false
+mod_sort_include                = false    # true/false
 
 # Whether to move a 'break' that appears after a fully braced 'case' before
 # the close brace, as in 'case X: { ... } break;' => 'case X: { ... break; }'.
