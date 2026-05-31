@@ -1,6 +1,6 @@
 # CMake
-**/cmake_install.cmake
-**/CMakeFiles
+/**/cmake_install.cmake
+/**/CMakeFiles
 # cmake standard build directory
 /build/
 # cmake build directory for android builds
@@ -9,16 +9,17 @@
 /unity/
 
 # IDEs
-**/.cproject
-**/.project
-**/.settings
-**/.classpath
-**/nbproject
-**/.idea
-**/*.iml
+/**/.cproject
+/**/.project
+/**/.settings
+/**/.classpath
+/**/nbproject
+/**/.idea
+/**/*.iml
 /cmake-build-debug
-.vscode
-.cache
+/.vscode
+/.cache
+/.junie
 
 # Backup
 **/*~
@@ -45,3 +46,7 @@
 
 # mise
 /mise.local.toml
+
+# AI
+
+/.pi
