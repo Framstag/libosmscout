@@ -246,6 +246,7 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL o
     drawMapAllSrc += 'src/DrawMapAllOSX.mm'
     drawMapAllLink += osmscoutmapiosx
     drawMapAllIncDirs += [osmscoutmapiosxIncDir]
+    drawMapAllDep += [foundationDep, coreGraphicsDep, cocoaDep, appKitDep]
     drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_IOSX']
   endif
 
