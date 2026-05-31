@@ -245,7 +245,7 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL o
   if buildMapIOSX
     drawMapAllSrc += 'src/DrawMapAllOSX.mm'
     drawMapAllLink += osmscoutmapiosx
-    drawMapAllIncDirs += [include_directories('../libosmscout-map-iosx/include', '../build/libosmscout-map-iosx/include')]
+    drawMapAllIncDirs += [osmscoutmapiosxIncDir]
     drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_IOSX']
   endif
 

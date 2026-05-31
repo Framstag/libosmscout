@@ -350,7 +350,7 @@ if(DRAWMAPALL_TARGETS)
     target_link_libraries(DrawMapAll PNG::PNG)
   endif()
   if(APPLE AND NOT IOS AND ${OSMSCOUT_BUILD_MAP_IOSX})
-    include_directories(DrawMapAll PRIVATE ${CMAKE_SOURCE_DIR}/libosmscout-map-iOSX/include ${CMAKE_BINARY_DIR}/libosmscout-map-iOSX/include)
+    target_include_directories(DrawMapAll PRIVATE ${CMAKE_SOURCE_DIR}/libosmscout-map-iOSX/include ${CMAKE_BINARY_DIR}/libosmscout-map-iOSX/include)
     set_target_properties(DrawMapAll PROPERTIES UNITY_BUILD OFF)
   endif()
 else()
@@ -358,3 +358,4 @@ else()
 endif()
 
 #---- Srtm
+osmscout_demo_project(NAME Srtm SOURCES src/Srtm.cpp TARGET OSMScout::OSMScout)
