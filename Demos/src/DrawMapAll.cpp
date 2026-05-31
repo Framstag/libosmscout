@@ -27,7 +27,9 @@
 #include <string>
 #include <vector>
 
+#if defined(HAVE_OSMSCOUT_MAP_AGG) || defined(HAVE_OSMSCOUT_MAP_OPENGL)
 #include <png.h>
+#endif
 
 // ---- Backend includes (conditional per platform) ----
 
@@ -67,7 +69,9 @@
 #endif
 
 #if defined(_WIN32) && defined(HAVE_OSMSCOUT_MAP_DIRECTX)
+#if !defined(NOMINMAX)
   #define NOMINMAX
+#endif
   #include <windows.h>
   #include <d2d1.h>
   #include <dwrite.h>
@@ -83,6 +87,7 @@
 
 // ---- Helper: Write raw RGB buffer to PNG via libpng ----
 
+#if defined(HAVE_OSMSCOUT_MAP_AGG) || defined(HAVE_OSMSCOUT_MAP_OPENGL)
 static bool WriteRGBToPNG(const std::string& path,
                            size_t width,
                            size_t height,
@@ -139,6 +144,7 @@ static bool WriteRGBToPNG(const std::string& path,
   fclose(fp);
   return true;
 }
+#endif
 
 // ---- Helper: Output file path for a backend ----
 
@@ -521,7 +527,7 @@ int main(int argc, char* argv[])
             hr = wicFactory->CreateStream(&stream);
           }
           if (SUCCEEDED(hr)) {
-            hr = stream->InitializeFromFilename(wpath.c(), GENERIC_WRITE);
+            hr = stream->InitializeFromFilename(wpath.c_str(), GENERIC_WRITE);
           }
           if (SUCCEEDED(hr)) {
             hr = encoder->Initialize(stream, WICBitmapEncoderNoCache);
