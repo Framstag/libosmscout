@@ -28,8 +28,10 @@
 #include <osmscout/cli/CmdLineParsing.h>
 
 #include <osmscoutmap/MapService.h>
+#include <osmscout/io/File.h>
 
 #include <iostream>
+#include <filesystem>
 
 struct Arguments {
   bool       help=false;
@@ -63,6 +65,31 @@ struct Arguments {
   double fontSize{3.0};
   std::string fontName;
 };
+
+/**
+ * Validate font-related CLI arguments.
+ * Prints error to std::cerr and returns false on invalid.
+ */
+inline bool ValidateFontArguments(const Arguments& args)
+{
+  if (args.fontName.empty()) {
+    std::cerr << "ERROR: No font specified. Use --fontName to specify a font file." << std::endl;
+    return false;
+  }
+  if (std::filesystem::is_directory(args.fontName)) {
+    std::cerr << "ERROR: Font path \"" << args.fontName << "\" is a directory, not a font file." << std::endl;
+    return false;
+  }
+  if (!osmscout::ExistsInFilesystem(args.fontName)) {
+    std::cerr << "ERROR: Font file \"" << args.fontName << "\" does not exist." << std::endl;
+    return false;
+  }
+  if (args.fontSize <= 0) {
+    std::cerr << "ERROR: Invalid font size " << args.fontSize << ". Must be positive." << std::endl;
+    return false;
+  }
+  return true;
+}
 
 enum DrawMapArgParserWindowStyle
 {

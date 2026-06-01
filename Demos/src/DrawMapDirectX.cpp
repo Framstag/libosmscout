@@ -160,6 +160,10 @@ public:
 
 		Arguments args = m_pBaseData->GetArguments();
 
+		if (!ValidateFontArguments(args)) {
+			return 1;
+		}
+
 		// Create the window.
 		m_hwnd = CreateWindow(
 			_T("DemoDrawMapDirectX"),

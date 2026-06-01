@@ -45,7 +45,8 @@ namespace osmscout {
 
     for (char32_t &i : utf32) {
 
-      int size_i = (int) size * defaultFontSize;
+      int size_i = static_cast<int>(size * defaultFontSize);
+      log.Debug() << "AddCharactersToTextureAtlas: size=" << size << " defaultFontSize=" << defaultFontSize << " size_i=" << size_i;
       std::pair<char32_t, int> p = std::pair<char32_t, int>(i, size_i);
       if (!(characterIndices.find(p) == characterIndices.end())) {
         int in = characterIndices.at(p);

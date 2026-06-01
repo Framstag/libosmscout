@@ -41,6 +41,10 @@ int main(int argc, char* argv[])
 
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
+
   cairo_surface_t *surface;
 
   surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,

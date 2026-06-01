@@ -45,6 +45,10 @@ int main(int argc, char* argv[])
 
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return false;
+  }
+
   CGSize size = CGSizeMake(args.width, args.height);
   CGContextRef bitmapContext = CGBitmapContextCreate(nullptr, args.width, args.height, 8, 0, [[NSColorSpace genericRGBColorSpace] CGColorSpace], kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst);
   NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithCGContext:bitmapContext flipped:YES];

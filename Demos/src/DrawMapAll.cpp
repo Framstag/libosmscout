@@ -206,6 +206,10 @@ int main(int argc, char* argv[])
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
+
   // Create output directory
   std::string outputDir = args.output;
   try {

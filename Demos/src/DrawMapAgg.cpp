@@ -64,6 +64,10 @@ int main(int argc, char* argv[])
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
+
   auto *buffer=new unsigned char[args.width*args.height*3];
 
   memset(buffer,255,args.width*args.height*3);
