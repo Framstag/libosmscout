@@ -45,16 +45,23 @@ namespace osmscout {
 
     for (char32_t &i : utf32) {
 
-      int size_i = static_cast<int>(size * defaultFontSize);
-      log.Debug() << "AddCharactersToTextureAtlas: size=" << size << " defaultFontSize=" << defaultFontSize << " size_i=" << size_i;
-      std::pair<char32_t, int> p = std::pair<char32_t, int>(i, size_i);
+      // size is ratio (e.g. 1.0), defaultFontSize is in mm
+      // Convert mm to points: mm * 72 / 25.4, then to 1/64th of a point for FreeType
+      double pointSize = size * defaultFontSize * 72.0 / 25.4;
+      FT_F26Dot6 charSize = (FT_F26Dot6)(pointSize * 64.0 + 0.5);
+
+      log.Debug() << "AddCharactersToTextureAtlas: size=" << size
+                  << " defaultFontSize=" << defaultFontSize
+                  << " pointSize=" << pointSize;
+
+      std::pair<char32_t, int> p = std::pair<char32_t, int>(i, static_cast<int>(pointSize * 64.0 + 0.5));
       if (!(characterIndices.find(p) == characterIndices.end())) {
         int in = characterIndices.at(p);
         indices.push_back(in);
         continue;
       }
 
-      FT_Set_Char_Size(face, (size_i) << 6, (size_i) << 6, 96, 96);
+      FT_Set_Char_Size(face, charSize, charSize, 96, 96);
 
       FT_UInt glyph_index = FT_Get_Char_Index(face, i);
       if (FT_Load_Glyph(face, glyph_index, FT_LOAD_RENDER)) {
@@ -155,7 +162,12 @@ namespace osmscout {
       return false;
     }
 
-    FT_Set_Char_Size(face, defaultFontSize << 6, defaultFontSize << 6, dpi, dpi);
+    // defaultFontSize is in mm, convert to 1/64th of a point for FreeType
+    double initialPointSize = defaultFontSize * 72.0 / 25.4;
+    FT_Set_Char_Size(face,
+                     (FT_F26Dot6)(initialPointSize * 64.0 + 0.5),
+                     (FT_F26Dot6)(initialPointSize * 64.0 + 0.5),
+                     dpi, dpi);
 
     FT_Select_Charmap(
         face,
