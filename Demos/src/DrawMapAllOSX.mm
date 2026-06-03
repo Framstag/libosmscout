@@ -21,6 +21,10 @@ bool RenderWithOSX(DrawMapDemo& drawDemo,
                    size_t height)
 {
   Arguments args = drawDemo.GetArguments();
+
+  if (!ValidateFontArguments(args)) {
+    return false;
+  }
   drawDemo.drawParameter.SetFontName("GillSans");
   drawDemo.drawParameter.SetFontSize(3.0);
   drawDemo.drawParameter.SetLabelLineMinCharCount(15);

@@ -145,6 +145,10 @@ int main(int argc, char* argv[])
 
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
+
   auto *pixmap=new QPixmap(static_cast<int>(args.width),
                            static_cast<int>(args.height));
 

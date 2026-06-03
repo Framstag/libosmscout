@@ -105,6 +105,7 @@ namespace osmscout {
       return;
     }
 
+    textRenderer.SetVerticesSize(11);
     if (!textRenderer.InitContext(shaderDir,
                                   "TextVertexShader.vert",
                                   "TextFragmentShader.frag",
@@ -1224,6 +1225,7 @@ namespace osmscout {
     imageRenderer.SetView(lookX, lookY);
     imageRenderer.Draw();
 
+    glDisable(GL_DEPTH_TEST);
     textRenderer.BindBuffers();
     textRenderer.LoadTextures();
     textRenderer.UseProgram();
@@ -1239,8 +1241,14 @@ namespace osmscout {
 
     textRenderer.SetMapProjection(mapProjection);
     textRenderer.AddUniform("textureHeight", textRenderer.GetTextureHeight());
-    textRenderer.AddUniform("textureWidthSum", textRenderer.GetTextureWidth());
+    long tw = textRenderer.GetTextureWidth();
+    log.Debug() << "textRenderer textureWidth=" << tw
+                << " height=" << textRenderer.GetTextureHeight()
+                << " elements=" << textRenderer.GetElementCount();
+    textRenderer.AddUniform("textureWidthSum", (float)tw);
     textRenderer.AddUniform("z", 0.001);
+    // sampler tex bound to unit 0 in LoadTextures
+    // sampler uniform "tex" bound to unit 0 in LoadTextures
 
     textRenderer.SetProjection(mapProjection.GetWidth(), mapProjection.GetHeight());
     textRenderer.SetModel();

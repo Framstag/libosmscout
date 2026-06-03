@@ -43,6 +43,10 @@ int main(int argc, char* argv[])
 
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
+
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
 #ifdef WIN32
   // Windows font file fix for SVG
   char drive1[_MAX_DRIVE], dir1[_MAX_DIR], fname1[_MAX_FNAME], ext1[_MAX_EXT];

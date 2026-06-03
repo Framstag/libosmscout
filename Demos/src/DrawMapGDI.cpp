@@ -57,6 +57,10 @@ public:
 	{
 		Arguments args = m_pBaseData->GetArguments();
 
+		if (!ValidateFontArguments(args)) {
+			return false;
+		}
+
     LONG screenWidth=GetSystemMetrics(SM_CXSCREEN);
     LONG screenHeight=GetSystemMetrics(SM_CYSCREEN);
 

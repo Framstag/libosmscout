@@ -26,7 +26,9 @@
 
 #include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/log/Logger.h>
+#include <osmscout/io/File.h>
 
+#include <filesystem>
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 
 #include <GLFW/glfw3.h>
@@ -112,6 +114,10 @@ int main(int argc, char* argv[]) {
   drawDemo.LoadData();
   Arguments args = drawDemo.GetArguments();
 
+  if (!ValidateFontArguments(args)) {
+    return 1;
+  }
+
   // Create the offscreen renderer
   glfwSetErrorCallback([](int, const char *err_str) {
     std::cerr << "GLFW Error: " << err_str << std::endl;
@@ -149,6 +155,8 @@ int main(int argc, char* argv[]) {
   painter->SwapData();
 
   painter->DrawMap();
+
+  glFinish();
 
   if (args.debug) {
     glEnable(GL_DEBUG_OUTPUT);

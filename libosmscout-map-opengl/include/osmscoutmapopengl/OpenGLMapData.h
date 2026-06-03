@@ -254,13 +254,20 @@ namespace osmscout {
 
     void LoadTextures() {
       glActiveTexture(GL_TEXTURE0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+      glBindTexture(GL_TEXTURE_2D, tex);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glPixelStorei(GL_UNPACK_ALIGNMENT, TexturePixelSize);
-      glBindTexture(GL_TEXTURE_2D, tex);
       glTexImage2D(GL_TEXTURE_2D, 0, TexturePixelType, textureWidth, textureHeight, 0, TexturePixelType, GL_UNSIGNED_BYTE, textures);
+      glUseProgram(shaderProgram);
+      GLint texLoc = glGetUniformLocation(shaderProgram, "tex");
+      if (texLoc >= 0) glUniform1i(texLoc, 0);
+      GLenum tErr = glGetError();
+      if (tErr != GL_NO_ERROR) {
+        log.Error() << "LoadTextures GL error: 0x" << tErr;
+      }
     }
 
     void LoadVertices() {
@@ -268,6 +275,13 @@ namespace osmscout {
       LoadEBO();
     }
 
+    void SetTextureUniform() {
+      glUseProgram(shaderProgram);
+      GLint txl = glGetUniformLocation(shaderProgram, "tex");
+      if (txl != -1) {
+        glUniform1i(txl, 0);
+      }
+    }
     void AddNewVertex(GLfloat vertex) {
       this->verticesBuffer.push_back(vertex);
     }
@@ -288,6 +302,13 @@ namespace osmscout {
       this->verticesSize = size;
     }
 
+    int GetVerticesSize() {
+      return verticesSize;
+    }
+
+    size_t GetElementCount() {
+      return elements.size();
+    }
     int GetNumOfVertices() {
       return this->verticesBuffer.size();
     }
@@ -349,7 +370,8 @@ namespace osmscout {
     }
 
     void SetProjection(float width, float height) {
-      projection = glm::perspective(glm::radians(60.0f), (float) width / (float) height, 0.1f, 10.0f);
+      float aspect = width / height;
+      projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, 0.1f, 10.0f);
       GLint uniProj = glGetUniformLocation(shaderProgram, "Projection");
       glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(projection));
     }

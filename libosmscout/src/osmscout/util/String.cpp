@@ -597,6 +597,18 @@ namespace osmscout {
 #endif
   }
 
+  std::u32string UTF8StringToU32StringLE(const std::string& text)
+  {
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+    // See https://stackoverflow.com/questions/30765256/linker-error-using-vs-2015-rc-cant-find-symbol-related-to-stdcodecvt
+    std::wstring_convert<std::codecvt_utf8<int32_t, 0x10ffff, std::little_endian>, int32_t> conv;
+    return reinterpret_cast<const char32_t*>(conv.from_bytes(text).c_str());
+#else
+    std::wstring_convert<std::codecvt_utf8<char32_t, 0x10ffff, std::little_endian>, char32_t> conv;
+    return conv.from_bytes(text);
+#endif
+  }
+
   std::string WStringToUTF8String(const std::wstring& text)
   {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
