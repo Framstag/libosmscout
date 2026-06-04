@@ -39,11 +39,6 @@
 
 #include <osmscout/private/Config.h>
 
-#if defined(HAVE_CODECVT)
-#include <codecvt>
-#else
-static_assert(false, "Missing <codecvt> header, needed for charset conversions");
-#endif
 
 namespace osmscout {
 
@@ -580,40 +575,85 @@ namespace osmscout {
 
   std::wstring UTF8StringToWString(const std::string& text)
   {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-
-    return conv.from_bytes(text);
+    std::wstring result;
+    size_t offset = 0;
+    utf8helper::codepoint cp;
+    while (offset < text.size()) {
+      if (!utf8helper::DecodeUTF8Codepoint(text, offset, cp)) {
+        break;
+      }
+#if defined(_WIN32)
+      // wchar_t is 2 bytes (UTF-16): encode as surrogate pair
+      if (cp >= 0x10000) {
+        cp -= 0x10000;
+        result.push_back(static_cast<wchar_t>(0xD800 | (cp >> 10)));
+        result.push_back(static_cast<wchar_t>(0xDC00 | (cp & 0x3FF)));
+      } else
+#endif
+      {
+        result.push_back(static_cast<wchar_t>(cp));
+      }
+    }
+    return result;
   }
 
   std::u32string UTF8StringToU32String(const std::string& text)
   {
-#if defined(_MSC_VER) && _MSC_VER >= 1900
-    // See https://stackoverflow.com/questions/30765256/linker-error-using-vs-2015-rc-cant-find-symbol-related-to-stdcodecvt
-    std::wstring_convert<std::codecvt_utf8<int32_t>, int32_t> conv;
-    return reinterpret_cast<const char32_t*>(conv.from_bytes(text).c_str());
-#else
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-    return conv.from_bytes(text);
-#endif
+    std::u32string result;
+    size_t offset = 0;
+    utf8helper::codepoint cp;
+    while (offset < text.size()) {
+      if (!utf8helper::DecodeUTF8Codepoint(text, offset, cp)) {
+        break;
+      }
+      result.push_back(static_cast<char32_t>(cp));
+    }
+    return result;
   }
 
   std::u32string UTF8StringToU32StringLE(const std::string& text)
   {
-#if defined(_MSC_VER) && _MSC_VER >= 1900
-    // See https://stackoverflow.com/questions/30765256/linker-error-using-vs-2015-rc-cant-find-symbol-related-to-stdcodecvt
-    std::wstring_convert<std::codecvt_utf8<int32_t, 0x10ffff, std::little_endian>, int32_t> conv;
-    return reinterpret_cast<const char32_t*>(conv.from_bytes(text).c_str());
-#else
-    std::wstring_convert<std::codecvt_utf8<char32_t, 0x10ffff, std::little_endian>, char32_t> conv;
-    return conv.from_bytes(text);
+    std::u32string u32 = UTF8StringToU32String(text);
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    for (auto& c : u32) {
+      c = __builtin_bswap32(c);
+    }
+#elif defined(_MSC_VER)
+    // On MSVC, std::u32string stores values in native byte order.
+    // Native byte order already matches little-endian on common hosts.
+    // On big-endian hosts, swap to little-endian.
 #endif
+    return u32;
   }
 
   std::string WStringToUTF8String(const std::wstring& text)
   {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-
-    return conv.to_bytes(text);
+    std::string result;
+    for (size_t i = 0; i < text.size(); ++i) {
+      utf8helper::codepoint cp;
+      if (sizeof(wchar_t) == 2) {
+        // wchar_t is 2 bytes (UTF-16): assemble surrogate pairs
+        wchar_t wc = text[i];
+        if (wc >= 0xD800 && wc <= 0xDBFF && i + 1 < text.size()) {
+          wchar_t wc2 = text[i + 1];
+          if (wc2 >= 0xDC00 && wc2 <= 0xDFFF) {
+            cp = 0x10000 + ((wc - 0xD800) << 10) + (wc2 - 0xDC00);
+            ++i;
+          } else {
+            continue; // Invalid surrogate pair
+          }
+        } else if (wc >= 0xDC00 && wc <= 0xDFFF) {
+          continue; // Unexpected low surrogate
+        } else {
+          cp = static_cast<utf8helper::codepoint>(wc);
+        }
+      } else {
+        // wchar_t is 4 bytes (UTF-32)
+        cp = static_cast<utf8helper::codepoint>(text[i]);
+      }
+      utf8helper::EncodeCodepointToUTF8(cp, result);
+    }
+    return result;
   }
 
   std::string LocaleStringToUTF8String(const std::string& text)

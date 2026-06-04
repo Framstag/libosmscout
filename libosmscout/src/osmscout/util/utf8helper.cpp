@@ -499,4 +499,89 @@ void Parser::Reset() {
   u = NullCodepoint;
 }
 
+bool DecodeUTF8Codepoint(const std::string& text, size_t& offset, codepoint& cp) {
+  if (offset >= text.size()) {
+    return false;
+  }
+
+  unsigned char c = static_cast<unsigned char>(text[offset]);
+
+  if (c < 0x80) {
+    // 1-byte sequence (ASCII)
+    cp = c;
+    offset += 1;
+    return true;
+  }
+
+  // Determine sequence length and minimum valid codepoint
+  size_t length;
+  codepoint minCp;
+  if (c < 0xE0) {
+    length = 2;
+    minCp = 0x80;
+    cp = c & 0x1F;
+  } else if (c < 0xF0) {
+    length = 3;
+    minCp = 0x800;
+    cp = c & 0x0F;
+  } else if (c < 0xF8) {
+    length = 4;
+    minCp = 0x10000;
+    cp = c & 0x07;
+  } else {
+    return false; // Invalid lead byte
+  }
+
+  if (offset + length > text.size()) {
+    return false; // Truncated sequence
+  }
+
+  // Decode continuation bytes
+  for (size_t i = 1; i < length; ++i) {
+    unsigned char b = static_cast<unsigned char>(text[offset + i]);
+    if ((b & 0xC0) != 0x80) {
+      return false; // Invalid continuation byte
+    }
+    cp = (cp << 6) | (b & 0x3F);
+  }
+
+  // Reject overlong sequences
+  if (cp < minCp) {
+    return false;
+  }
+
+  // Reject surrogate halves (U+D800-U+DFFF)
+  if (cp >= 0xD800 && cp <= 0xDFFF) {
+    return false;
+  }
+
+  // Reject codepoints beyond valid Unicode range
+  if (cp > 0x10FFFF) {
+    return false;
+  }
+
+  offset += length;
+  return true;
+}
+
+void EncodeCodepointToUTF8(codepoint cp, std::string& out) {
+  if (cp < 0x80) {
+    out += static_cast<char>(cp);
+  } else if (cp < 0x800) {
+    out += static_cast<char>(0xC0 | (cp >> 6));
+    out += static_cast<char>(0x80 | (cp & 0x3F));
+  } else if (cp < 0x10000) {
+    out += static_cast<char>(0xE0 | (cp >> 12));
+    out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+    out += static_cast<char>(0x80 | (cp & 0x3F));
+  } else if (cp <= 0x10FFFF) {
+    out += static_cast<char>(0xF0 | (cp >> 18));
+    out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+    out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+    out += static_cast<char>(0x80 | (cp & 0x3F));
+  }
+  // Codepoints > 0x10FFFF are silently ignored (invalid Unicode)
+}
+
+
 }

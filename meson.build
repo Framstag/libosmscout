@@ -59,7 +59,6 @@ endif
 # Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
-codecvtAvailable = compiler.has_header('codecvt')
 jniAvailable = compiler.has_header('jni.h')
 
 # Check for header symbols

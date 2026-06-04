@@ -79,6 +79,22 @@ struct Parser {
   void Reset();
 };
 
+/**
+ * @brief Decode one UTF-8 codepoint from text starting at offset.
+ * @param text  The UTF-8 encoded input string
+ * @param offset  On input: byte index to start decoding. On success: advanced past decoded bytes.
+ * @param cp  Output: the decoded codepoint
+ * @return true if a valid codepoint was decoded, false on invalid UTF-8 or end of string
+ */
+extern bool DecodeUTF8Codepoint(const std::string& text, size_t& offset, codepoint& cp);
+
+/**
+ * @brief Encode one codepoint as UTF-8 and append to output string.
+ * @param cp  The codepoint to encode
+ * @param out  Output string to append the UTF-8 bytes to
+ */
+extern void EncodeCodepointToUTF8(codepoint cp, std::string& out);
+
 
 class UTF8String {
   using storage_type = std::vector<codepoint>;
