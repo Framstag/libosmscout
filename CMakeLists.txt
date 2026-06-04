@@ -27,7 +27,7 @@ set(OSMSCOUT_BASE_DIR_BUILD ${CMAKE_CURRENT_BINARY_DIR})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ## Pre-feature options
-option(QT_VERSION_PREFERRED "preferred Qt version, if multiple version are available. Value can be 5 or 6")
+option(QT_VERSION_PREFERRED "preferred Qt version, if multiple version are available. Value can be 5 or 6. Default is 6.")
 
 option(OSMSCOUT_BUILD_IMPORT_TOOL_FOR_DISTRIBUTION "Import tool for distribution" OFF)
 if(APPLE)
@@ -722,7 +722,7 @@ message(STATUS "documentation:                   ${OSMSCOUT_BUILD_DOC_API}")
 message(STATUS "webpage:                         ${OSMSCOUT_BUILD_WEBPAGE}")
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/stylesheets DESTINATION share/osmscout)
-if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt5::windeployqt)
+if(OSMSCOUT_INSTALL_QT_DLL AND TARGET Qt6::windeployqt)
 	install(DIRECTORY "${CMAKE_BINARY_DIR}/windeployqt/" DESTINATION bin)
 endif()
 

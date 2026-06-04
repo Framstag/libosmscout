@@ -67,7 +67,7 @@ cmake --build build
 - Root: `CMakeLists.txt`
 - Each subproject has its own `CMakeLists.txt`
 - Features gated by `OSMSCOUT_BUILD_*` options
-- Qt version selectable via `QT_VERSION_PREFERRED` (5 or 6)
+- Qt version selectable via `QT_VERSION_PREFERRED` (6 or 5)
 - macOS frameworks: `OSMSCOUT_BUILD_FRAMEWORKS`
 
 ### Meson (alternative)

@@ -190,7 +190,17 @@ haveQt6ClientDep=haveQt6MapDep and qt6ClientDep.found() and qt6ClientDep.version
 buildMapQt=false
 buildClientQt=false
 
-if get_option('qtVersion') == 5 and haveQt5MapDep
+if get_option('qtVersion') == 6 and haveQt6MapDep
+    message('Qt6 version : @0@ (required >= 6.0)'.format(qt6MapDep.version()))
+    buildMapQt=true
+    qtMapDep=qt6MapDep
+    qt=qt6
+
+    if haveQt6ClientDep
+      qtClientDep=qt6ClientDep
+      buildClientQt=true
+    endif
+elif haveQt5MapDep
     message('Qt5 version : @0@ (required >= 5.6)'.format(qt5MapDep.version()))
     buildMapQt=true
     qtMapDep=qt5MapDep
@@ -200,16 +210,6 @@ if get_option('qtVersion') == 5 and haveQt5MapDep
       qtClientDep=qt5ClientDep
       buildClientQt=true
     endif
-elif haveQt6MapDep
-    message('Qt6 version : @0@ (required >= 6.0)'.format(qt6MapDep.version()))
-    buildMapQt=true
-    qtMapDep=qt6MapDep
-    qt=qt6
-
-    if haveQt6ClientDep
-      qtClientDep=qt6ClientDep
-      buildClientQt=true
-  endif
 endif
 
 # OpenGL
