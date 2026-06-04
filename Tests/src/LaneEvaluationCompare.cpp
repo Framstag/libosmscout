@@ -26,7 +26,8 @@ struct SuggestionDiff
   std::optional<NodeLaneInfo> lanes;
   std::optional<NodeSuggestedLaneInfo> oldSuggestion;
   std::optional<NodeSuggestedLaneInfo> newSuggestion;
-  std::vector<RouteNodeInfo> routeNodes;
+  std::vector<RouteNodeInfo> oldRouteNodes;
+  std::vector<RouteNodeInfo> newRouteNodes;
   size_t junctionLocalIndex = 0;
 };
 
@@ -77,7 +78,8 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
       size_t windowEnd = std::min(i + kNodeWindowRadius + 1, maxNodes);
       diff.junctionLocalIndex = i - windowStart;
       for (size_t j = windowStart; j < windowEnd; j++) {
-        diff.routeNodes.push_back(newRoute.nodes[j]);
+        diff.oldRouteNodes.push_back(oldRoute.nodes[j]);
+        diff.newRouteNodes.push_back(newRoute.nodes[j]);
       }
 
       diffs.push_back(std::move(diff));
@@ -96,10 +98,11 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
 
 static void RenderLegend(cairo_t *cairo,
                          const SuggestionDiff &diff,
+                         const std::vector<RouteNodeInfo> &routeNodes,
                          const std::optional<NodeSuggestedLaneInfo> &suggestion,
                          const std::string &label)
 {
-  const auto &node = diff.routeNodes[diff.junctionLocalIndex];
+  const auto &node = routeNodes[diff.junctionLocalIndex];
 
   std::vector<std::string> lines;
   lines.push_back(label);
@@ -166,10 +169,11 @@ static void RenderLegend(cairo_t *cairo,
 static void RenderLaneOverlay(cairo_t *cairo,
                               const MercatorProjection &projection,
                               const SuggestionDiff &diff,
+                              const std::vector<RouteNodeInfo> &routeNodes,
                               const std::optional<NodeSuggestedLaneInfo> &suggestion,
                               const std::string &label)
 {
-  if (diff.routeNodes.size() < 2) {
+  if (routeNodes.size() < 2) {
     return;
   }
 
@@ -179,8 +183,8 @@ static void RenderLaneOverlay(cairo_t *cairo,
   };
 
   std::vector<PixelNode> pixelNodes;
-  pixelNodes.reserve(diff.routeNodes.size());
-  for (const auto &rn : diff.routeNodes) {
+  pixelNodes.reserve(routeNodes.size());
+  for (const auto &rn : routeNodes) {
     PixelNode pn;
     pn.valid = projection.GeoToPixel(rn.coord, pn.pixel);
     pixelNodes.push_back(pn);
@@ -193,7 +197,7 @@ static void RenderLaneOverlay(cairo_t *cairo,
       continue;
     }
 
-    const auto &segNode = diff.routeNodes[seg];
+    const auto &segNode = routeNodes[seg];
     int segLaneCount = segNode.lanes.has_value() ? segNode.lanes->laneCount : 0;
     if (segLaneCount <= 0) {
       continue;
@@ -214,6 +218,8 @@ static void RenderLaneOverlay(cairo_t *cairo,
     bool adjacentToJunction = seg == diff.junctionLocalIndex ||
                               (diff.junctionLocalIndex > 0 && seg == diff.junctionLocalIndex - 1);
 
+    const auto &segSuggestion = segNode.suggestedLanes;
+
     for (int lane = 0; lane < segLaneCount; lane++) {
       double offset = -totalWidth / 2.0 + lane * laneSpacing;
 
@@ -222,8 +228,8 @@ static void RenderLaneOverlay(cairo_t *cairo,
       double x1 = pixelNodes[seg + 1].pixel.GetX() + perpX * offset;
       double y1 = pixelNodes[seg + 1].pixel.GetY() + perpY * offset;
 
-      bool isSuggested = adjacentToJunction && suggestion.has_value() &&
-                         lane >= suggestion->from && lane <= suggestion->to;
+      bool isSuggested = adjacentToJunction && segSuggestion.has_value() &&
+                         lane >= segSuggestion->from && lane <= segSuggestion->to;
 
       if (isSuggested) {
         cairo_set_source_rgba(cairo, 0.0, 0.8, 0.0, 0.8);
@@ -264,7 +270,7 @@ static void RenderLaneOverlay(cairo_t *cairo,
     cairo_fill(cairo);
   }
 
-  RenderLegend(cairo, diff, suggestion, label);
+  RenderLegend(cairo, diff, routeNodes, suggestion, label);
 }
 
 static bool RenderJunctionImage(const std::string &databaseDir,
@@ -335,10 +341,11 @@ static bool RenderJunctionImage(const std::string &databaseDir,
   painter.DrawMap(projection, drawParameter, dataVec, cairo);
 
   const auto &suggestion = useOldSuggestion ? diff.oldSuggestion : diff.newSuggestion;
+  const auto &routeNodes = useOldSuggestion ? diff.oldRouteNodes : diff.newRouteNodes;
   std::string label = useOldSuggestion ? "OLD: " : "NEW: ";
   label += FormatSuggestion(suggestion);
 
-  RenderLaneOverlay(cairo, projection, diff, suggestion, label);
+  RenderLaneOverlay(cairo, projection, diff, routeNodes, suggestion, label);
 
   if (cairo_surface_write_to_png(surface, outputPath.c_str()) != CAIRO_STATUS_SUCCESS) {
     log.Error() << "Cannot write PNG: " << outputPath;
