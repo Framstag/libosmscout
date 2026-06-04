@@ -582,15 +582,16 @@ namespace osmscout {
       if (!utf8helper::DecodeUTF8Codepoint(text, offset, cp)) {
         break;
       }
-#if defined(_WIN32)
-      // wchar_t is 2 bytes (UTF-16): encode as surrogate pair
-      if (cp >= 0x10000) {
-        cp -= 0x10000;
-        result.push_back(static_cast<wchar_t>(0xD800 | (cp >> 10)));
-        result.push_back(static_cast<wchar_t>(0xDC00 | (cp & 0x3FF)));
-      } else
-#endif
-      {
+      if constexpr (sizeof(wchar_t) == 2) {
+        // wchar_t is 2 bytes (UTF-16): encode as surrogate pair
+        if (cp >= 0x10000) {
+          cp -= 0x10000;
+          result.push_back(static_cast<wchar_t>(0xD800 | (cp >> 10)));
+          result.push_back(static_cast<wchar_t>(0xDC00 | (cp & 0x3FF)));
+        } else {
+          result.push_back(static_cast<wchar_t>(cp));
+        }
+      } else {
         result.push_back(static_cast<wchar_t>(cp));
       }
     }
@@ -614,14 +615,10 @@ namespace osmscout {
   std::u32string UTF8StringToU32StringLE(const std::string& text)
   {
     std::u32string u32 = UTF8StringToU32String(text);
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     for (auto& c : u32) {
       c = __builtin_bswap32(c);
     }
-#elif defined(_MSC_VER)
-    // On MSVC, std::u32string stores values in native byte order.
-    // Native byte order already matches little-endian on common hosts.
-    // On big-endian hosts, swap to little-endian.
 #endif
     return u32;
   }
@@ -631,7 +628,7 @@ namespace osmscout {
     std::string result;
     for (size_t i = 0; i < text.size(); ++i) {
       utf8helper::codepoint cp;
-      if (sizeof(wchar_t) == 2) {
+      if constexpr (sizeof(wchar_t) == 2) {
         // wchar_t is 2 bytes (UTF-16): assemble surrogate pairs
         wchar_t wc = text[i];
         if (wc >= 0xD800 && wc <= 0xDBFF && i + 1 < text.size()) {
