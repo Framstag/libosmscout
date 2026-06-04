@@ -1,5 +1,5 @@
 /*
-  ThreadedDatabase - a test program for libosmscout
+  WorkQueue - a test program for libosmscout
   Copyright (C) 2015  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,8 @@
 
 #include <osmscout/async/WorkQueue.h>
 
+#include <catch2/catch_test_macros.hpp>
+
 class Worker
 {
 private:
@@ -33,15 +35,11 @@ private:
 private:
   void TaskLoop()
   {
-    std::cout << "Starting TaskLoop()..." << std::endl;
-
     while (!queue.Finished()) {
       if (auto optionalTask=queue.PopTask(); optionalTask) {
         optionalTask.value()();
       }
     }
-
-    std::cout << "Quit TaskLoop()" << std::endl;
   }
 
 public:
@@ -59,7 +57,6 @@ public:
   std::future<int> PushWork(int a, int b)
   {
     std::packaged_task<int()> task([a,b] {
-      std::cout << "Doing task #" << a << std::endl;
 
       return a+b;
     });
@@ -77,33 +74,20 @@ public:
   }
 };
 
-int main(int /*argc*/, char* /*argv*/[])
+TEST_CASE("WorkQueue")
 {
   Worker                        worker;
   std::vector<std::future<int>> futures;
 
-  std::cout << std::this_thread::get_id() << ": Pushing work..." << std::endl;
   for (int i=1; i<=100; i++) {
-    std::cout << "Pushing task #" << i << std::endl;
     futures.push_back(worker.PushWork(i,i*2));
   }
 
-  std::cout << "Waiting for futures..." << std::endl;
-
-  for (auto& future : futures) {
-    future.wait();
-
-    std::cout << "Result: " << future.get() << std::endl;
+  for (size_t i=0; i<futures.size(); i++) {
+    int expected=static_cast<int>(i+1)+(static_cast<int>(i+1)*2);
+    REQUIRE(futures[i].get()==expected);
   }
 
-  std::cout << "Signaling worker stop..." << std::endl;
   worker.Stop();
-
-  std::cout << "Waiting for 1 seconds..." << std::endl;
-
   std::this_thread::sleep_for (std::chrono::seconds(1));
-
-  std::cout << "Bye" << std::endl;
-
-  return 0;
 }
