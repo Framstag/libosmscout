@@ -12,8 +12,7 @@ if build_machine.system()=='windows'
     translationInstallDir = 'C:/ProgramData/libosmscout/OSMScout2/translations'
 endif
 
-# https://github.com/mesonbuild/meson/blob/master/docs/markdown/Qt5-module.md
-if get_option('qtVersion') == 5
+if get_option('qtVersion') == 5 and haveQt5MapDep
   osmscout2Trs = qt5.compile_translations(ts_files : [
                                               'cs.ts',
                                               'en.ts',
@@ -21,7 +20,7 @@ if get_option('qtVersion') == 5
                                           build_by_default : true,
                                           install_dir: translationInstallDir
                                           )
-elif get_option('qtVersion') == 6
+elif get_option('qtVersion') == 6 and haveQt6MapDep
   osmscout2Trs = qt6.compile_translations(ts_files : [
                                               'cs.ts',
                                               'en.ts',
