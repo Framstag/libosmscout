@@ -15,7 +15,7 @@ test('Check parsing of access rights', AccessParseTest)
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
              include_directories: [osmscoutIncDir],
-             dependencies: [mathDep, threadDep, openmpDep],
+             dependencies: [mathDep, threadDep, openmpDep, catch2MainDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
@@ -682,7 +682,7 @@ test('Check water index import code', WaterIndexTest)
 WorkQueueTest = executable('WorkQueueTest',
              'src/WorkQueueTest.cpp',
              include_directories: [osmscoutIncDir],
-             dependencies: [mathDep, threadDep, openmpDep],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
              link_with: [osmscout],
              install: true,
              install_dir: testInstallDir)
