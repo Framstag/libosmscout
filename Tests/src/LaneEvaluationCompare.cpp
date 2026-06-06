@@ -123,7 +123,7 @@ static void RenderLegend(cairo_t *cairo,
     if (!node.lanes->laneTurns.empty()) {
       lanesStr += " turns=[";
       for (size_t i = 0; i < node.lanes->laneTurns.size(); i++) {
-        if (i > 0) lanesStr += ",";
+        if (i > 0) lanesStr += " | ";
         lanesStr += node.lanes->laneTurns[i];
       }
       lanesStr += "]";
