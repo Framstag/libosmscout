@@ -170,16 +170,19 @@ namespace osmscout::mcp {
   nlohmann::json ToJson(const LocationHighwayMilestoneDescription& desc)
   {
     nlohmann::json obj;
-    obj["atPlace"] = desc.IsAtPlace();
-    obj["distanceInMeter"] = desc.GetDistance().AsMeter();
-    obj["bearing"] = desc.GetBearing().DisplayString();
-    obj["milestoneDistance"] = desc.GetMilestoneDistance();
-    obj["milestoneRef"] = desc.GetMilestoneRef();
-    obj["carriagewayRef"] = desc.GetMilestoneCarriagewayRef();
-    return obj;
+  obj["atPlace"] = desc.IsAtPlace();
+  obj["distanceInMeter"] = desc.GetDistance().AsMeter();
+  obj["bearing"] = desc.GetBearing().DisplayString();
+  obj["previousMilestoneDistance"] = desc.GetPreviousMilestoneDistance();
+  obj["previousMilestoneRef"] = desc.GetPreviousMilestoneRef();
+  obj["previousCarriagewayRef"] = desc.GetPreviousMilestoneCarriagewayRef();
+  if (desc.IsBetweenMilestones()) {
+    obj["nextMilestoneDistance"] = desc.GetNextMilestoneDistance();
+    obj["nextMilestoneRef"] = desc.GetNextMilestoneRef();
+    obj["nextCarriagewayRef"] = desc.GetNextMilestoneCarriagewayRef();
   }
-
-  // === Layer 3: Payload mapper ===
+  return obj;
+  }
 
   void ToJson(const LocationDescription& desc,
               nlohmann::json& content,
@@ -241,7 +244,14 @@ namespace osmscout::mcp {
 
     if (auto hmDesc = desc.GetHighwayMilestoneDescription()) {
       content[contentIdx]["type"] = "text";
-      content[contentIdx]["text"] = "Highway milestone " + hmDesc->GetMilestoneRef();
+      if (hmDesc->IsBetweenMilestones()) {
+        content[contentIdx]["text"] = "Between milestone " + hmDesc->GetPreviousMilestoneRef() +
+                                        " (" + std::to_string(hmDesc->GetPreviousMilestoneDistance()) + "m) and " +
+                                        hmDesc->GetNextMilestoneRef() + " (" +
+                                        std::to_string(hmDesc->GetNextMilestoneDistance()) + "m)";
+      } else {
+        content[contentIdx]["text"] = "Highway milestone " + hmDesc->GetPreviousMilestoneRef();
+      }
       structured["highwayMilestoneDescription"] = ToJson(*hmDesc);
       contentIdx++;
     }

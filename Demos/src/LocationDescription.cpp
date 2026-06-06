@@ -180,15 +180,25 @@ void DumpHighwayMilestoneDescription(const std::string& label,
 
   // Print milestone feature values
   std::cout << "    - node id of milestone: " << description.GetObject().GetFileOffset() << std::endl;
-  std::cout << "    - milestone distance: " << description.GetMilestoneDistance() << "m" << std::endl;
-  std::cout << "    - milestone ref: " << description.GetMilestoneRef() << std::endl;
-  if (!description.GetMilestoneCarriagewayRef().empty()) {
-    std::cout << "    - carriageway ref: " << description.GetMilestoneCarriagewayRef() << std::endl;
+  if (description.IsBetweenMilestones()) {
+    std::cout << "    - previous milestone distance: " << description.GetPreviousMilestoneDistance() << "m" << std::endl;
+    std::cout << "    - previous milestone ref: " << description.GetPreviousMilestoneRef() << std::endl;
+    if (!description.GetPreviousMilestoneCarriagewayRef().empty()) {
+      std::cout << "    - previous carriageway ref: " << description.GetPreviousMilestoneCarriagewayRef() << std::endl;
+    }
+    std::cout << "    - next milestone distance: " << description.GetNextMilestoneDistance() << "m" << std::endl;
+    std::cout << "    - next milestone ref: " << description.GetNextMilestoneRef() << std::endl;
+    if (!description.GetNextMilestoneCarriagewayRef().empty()) {
+      std::cout << "    - next carriageway ref: " << description.GetNextMilestoneCarriagewayRef() << std::endl;
+    }
+  } else {
+    std::cout << "    - milestone distance: " << description.GetPreviousMilestoneDistance() << "m" << std::endl;
+    std::cout << "    - milestone ref: " << description.GetPreviousMilestoneRef() << std::endl;
+    if (!description.GetPreviousMilestoneCarriagewayRef().empty()) {
+      std::cout << "    - carriageway ref: " << description.GetPreviousMilestoneCarriagewayRef() << std::endl;
+    }
   }
   std::cout << std::endl;
-  if (description.GetObjectFeatures()) {
-    DumpFeatures(*description.GetObjectFeatures(),"    ");
-  }
 }
 
 void DumpParentAdminRegions(const osmscout::LocationServiceRef& locationService,

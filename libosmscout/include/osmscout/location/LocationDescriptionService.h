@@ -276,9 +276,12 @@ namespace osmscout {
     bool                              atPlace=true;
     Distance                          distance;
     Bearing                           bearing;
-    uint32_t    milestoneDistance=0;
-    std::string milestoneRef;
-    std::string milestoneCarriagewayRef;
+    uint32_t previousMilestoneDistance=0;
+    std::string previousMilestoneRef;
+    std::string previousMilestoneCarriagewayRef;
+    uint32_t nextMilestoneDistance=0;
+    std::string nextMilestoneRef;
+    std::string nextMilestoneCarriagewayRef;
   public:
     explicit LocationHighwayMilestoneDescription(const ObjectFileRef& object,
                                                   const FeatureValueBufferRef& objectFeatures);
@@ -292,9 +295,20 @@ namespace osmscout {
                                          const FeatureValueBufferRef& objectFeatures,
                                          const Distance& distance,
                                          const Bearing& bearing,
-                                         uint32_t milestoneDistance,
-                                         const std::string& milestoneRef,
-                                         const std::string& milestoneCarriagewayRef);
+                                         uint32_t previousMilestoneDistance,
+                                         const std::string& previousMilestoneRef,
+                                         const std::string& previousMilestoneCarriagewayRef);
+
+    LocationHighwayMilestoneDescription(const ObjectFileRef& object,
+                                         const FeatureValueBufferRef& objectFeatures,
+                                         const Distance& distance,
+                                         const Bearing& bearing,
+                                         uint32_t previousMilestoneDistance,
+                                         const std::string& previousMilestoneRef,
+                                         const std::string& previousMilestoneCarriagewayRef,
+                                         uint32_t nextMilestoneDistance,
+                                         const std::string& nextMilestoneRef,
+                                         const std::string& nextMilestoneCarriagewayRef);
 
     ObjectFileRef GetObject() const
     {
@@ -320,20 +334,46 @@ namespace osmscout {
     {
       return bearing;
     }
-
-    uint32_t GetMilestoneDistance() const
+    uint32_t GetPreviousMilestoneDistance() const
     {
-      return milestoneDistance;
+      return previousMilestoneDistance;
     }
 
-    std::string GetMilestoneRef() const
+    std::string GetPreviousMilestoneRef() const
     {
-      return milestoneRef;
+      return previousMilestoneRef;
     }
 
-    std::string GetMilestoneCarriagewayRef() const
+    std::string GetPreviousMilestoneCarriagewayRef() const
     {
-      return milestoneCarriagewayRef;
+      return previousMilestoneCarriagewayRef;
+    }
+
+    uint32_t GetNextMilestoneDistance() const
+    {
+      return nextMilestoneDistance;
+    }
+
+    std::string GetNextMilestoneRef() const
+    {
+      return nextMilestoneRef;
+    }
+
+    std::string GetNextMilestoneCarriagewayRef() const
+    {
+      return nextMilestoneCarriagewayRef;
+    }
+
+    bool IsBetweenMilestones() const
+    {
+      if (previousMilestoneRef.empty() || nextMilestoneRef.empty()) {
+        return false;
+      }
+      if (previousMilestoneRef == nextMilestoneRef &&
+          previousMilestoneDistance == nextMilestoneDistance) {
+        return false;
+      }
+      return true;
     }
   };
 
