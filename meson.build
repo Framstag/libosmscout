@@ -430,6 +430,7 @@ summary({
   'Host CPU': build_machine.cpu(),
   'Target OS': target_machine.system(),
   'Target CPU': build_machine.cpu(),
+  'Java support': javaSupport,
   }, section: 'OS')
 
 summary({
@@ -437,7 +438,7 @@ summary({
   'Compiler arg. syntax': compiler.get_argument_syntax(),
   'OpenMP support': openmpDep.found(),
   'C++17 execution support': stdExecutionAvailable,
-  }, section: 'Compiler')
+  }, section: 'C++ Compiler')
 
 summary({
   'Meson backend': meson.backend(),
