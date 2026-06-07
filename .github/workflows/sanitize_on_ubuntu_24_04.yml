@@ -71,13 +71,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Add LLVM 21 repo
+        run: |
+          sudo wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
+            | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" \
+            | sudo tee /etc/apt/sources.list.d/apt.llvm.org-21.list
       - name: Update package list
-        run:  sudo apt-get update
+        run:  sudo apt-get update -qq
       - name: Install software-properties-common
         run: sudo apt-get install software-properties-common
 
       - name: Install clang compiler, cmake and ninja
-        run: sudo apt-get -y install clang-20 libclang-20-dev ccache libtool pkg-config cmake ninja-build
+        run: sudo apt-get -y install clang-21 libclang-21-dev ccache libtool pkg-config cmake ninja-build
       - name: Build libc++ with memory instrumentation
         run: "git clone --depth=1 https://github.com/llvm/llvm-project &&
               cd llvm-project &&
@@ -89,8 +95,8 @@ jobs:
                 -DCMAKE_C_COMPILER=clang
                 -DCMAKE_CXX_COMPILER=clang++
                 -DLLVM_USE_SANITIZER=MemoryWithOrigins
-                -DCMAKE_C_COMPILER=/usr/bin/clang-20
-                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20 &&
+                -DCMAKE_C_COMPILER=/usr/bin/clang-21
+                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-21 &&
               cmake --build . &&
               sudo cmake --install . &&
               sudo ldconfig -v > /dev/null"
@@ -100,8 +106,8 @@ jobs:
               mkdir build && cd build &&
               cmake -G Ninja -S ..
                 -DCMAKE_BUILD_TYPE=RelWithDebug
-                -DCMAKE_C_COMPILER=/usr/bin/clang-20
-                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20
+                -DCMAKE_C_COMPILER=/usr/bin/clang-21
+                -DCMAKE_CXX_COMPILER=/usr/bin/clang++-21
                 -DCMAKE_PREFIX_PATH=/opt/libcxx-msan
                 -DCMAKE_CXX_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
                 -DCMAKE_EXE_LINKER_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
@@ -129,8 +135,8 @@ jobs:
               -DCMAKE_CXX_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
               -DCMAKE_EXE_LINKER_FLAGS=\"-stdlib=libc++ -fsanitize=memory\"
               -DCMAKE_UNITY_BUILD=ON -Wno-dev -G \"Ninja\"
-              -DCMAKE_C_COMPILER=/usr/bin/clang-20
-              -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20"
+              -DCMAKE_C_COMPILER=/usr/bin/clang-21
+              -DCMAKE_CXX_COMPILER=/usr/bin/clang++-21"
       - name: Build project
         run: cmake --build build
       - name: Install project
