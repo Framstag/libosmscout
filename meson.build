@@ -7,12 +7,16 @@ project('libosmscout',
 
 libraryVersion='1.1.1'
 
+# Additional programming languages
+
 if build_machine.system()=='darwin'
   add_languages('objcpp', native: false, required: true)
   # Workarounds...
   add_project_arguments(['-fobjc-arc', '-std=c++20'], language: 'objcpp')
   add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
 endif
+
+javaSupport = add_languages('java', native: true, required: false)
 
 compiler = meson.get_compiler('cpp')
 
@@ -59,7 +63,6 @@ endif
 # Check for headers
 fcntlAvailable = compiler.has_header('fcntl.h')
 statAvailable = compiler.has_header('sys/stat.h')
-jniAvailable = compiler.has_header('jni.h')
 
 # Check for header symbols
 sharedMutexAvailable = compiler.has_header_symbol('shared_mutex','shared_mutex', prefix: 'using namespace std;')
@@ -228,6 +231,9 @@ httpLibAvailable=compiler.has_header('httplib.h', required: false)
 # nlohmann_json
 jsonDep = dependency('nlohmann_json', required: false)
 
+# JNI support
+jniDep = dependency('jni', version: '>= 17', required: false)
+
 if openGLDep.found() and glmDep.found() and glewDep.found() and ftDep.found() and get_option('enableMapOpenGL')
   buildMapOpenGL=true
 else
@@ -311,7 +317,16 @@ else
   buildBinding=false
 endif
 
+# Allways build the client lbrary since it does not have additional dependencies
 buildClient=true
+
+if javaSupport and jniDep.found()
+  buildJava = true
+  java = import('java')
+  javaCompiler = meson.get_compiler('java')
+else
+  buildJava = false
+endif
 
 buildOSMScout2=buildGpx and buildMapQt and buildClientQt
 buildStyleEditor=buildMapQt and buildClientQt
@@ -445,6 +460,13 @@ summary({
   'Qt map dependency': qtMapDep.version(),
   'Qt client dependency': qtClientDep.version(),
   }, section: 'Qt dependencies')
+
+if buildJava
+  summary({
+            'Compiler id': javaCompiler.get_id(),
+            'Compiler version': javaCompiler.version(),
+          }, section: 'Java')
+endif
 
 summary({
   'libosmscout': true,
