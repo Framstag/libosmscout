@@ -30,6 +30,15 @@ jobs:
           runVcpkgInstall: false
           vcpkgJsonGlob: 'vcpkg.json'
           vcpkgGitCommitId: 55fab67aea1027f7179ae6b5c54a5ba9091c16aa # Source from 29.12.2025 (should be something like https://github.com/microsoft/vcpkg/releases/tag/2025.12.12)
+      - name: Cache vcpkg binary archives
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_ROOT }}/archives
+          key: ${{ runner.os }}-vcpkg-archives-${{ hashFiles('vcpkg.json') }}
+      - name: Configure vcpkg to use binary cache
+        run: |
+          echo "VCPKG_BINARY_SOURCES=clear;files,${{ env.VCPKG_ROOT }}/archives,readwrite" >> $env:GITHUB_ENV
+        shell: pwsh
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
