@@ -20,13 +20,15 @@
 #include <iostream>
 
 // Qt includes
+#include <QApplication>
+#include <QDir>
+#include <QFileInfo>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QApplication>
-#include <QFileInfo>
 #include <QQmlContext>
-#include <QTranslator>
+#include <QProcessEnvironment>
 #include <QStandardPaths>
+#include <QTranslator>
 
 // OSM Scout library singleton
 #include <osmscoutclientqt/OSMScoutQt.h>

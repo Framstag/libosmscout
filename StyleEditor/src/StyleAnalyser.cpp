@@ -21,6 +21,8 @@
 #include <osmscoutclient/DBThread.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
+#include <QDir>
+
 using namespace osmscout;
 
 osmscout::TypeConfigRef getTypeConfig()

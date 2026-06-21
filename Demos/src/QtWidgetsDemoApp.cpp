@@ -1,4 +1,6 @@
 #include <QApplication>
+#include <QFileInfo>
+#include <QDir>
 #include <QWidget>
 #include <QMouseEvent>
 

@@ -26,18 +26,7 @@
 
 #include <osmscoutclient/MapManager.h>
 #include <osmscoutclient/DBThread.h>
-#include <osmscoutclient/POILookupModule.h>
 
-#include <osmscoutclientqt/LookupModule.h>
-#include <osmscoutclientqt/MapDownloader.h>
-#include <osmscoutclientqt/MapRenderer.h>
-#include <osmscoutclientqt/Router.h>
-#include <osmscoutclientqt/SearchModule.h>
-#include <osmscoutclientqt/StyleModule.h>
-#include <osmscoutclientqt/NavigationModule.h>
-#include <osmscoutclientqt/VoiceManager.h>
-#include <osmscoutclientqt/ElevationModule.h>
-#include <osmscoutclientqt/IconLookup.h>
 #include <osmscoutclientqt/TiledMapRenderer.h>
 
 #include <osmscoutclientqt/ClientQtImportExport.h>
@@ -46,7 +35,22 @@
 
 namespace osmscout {
 
+class POILookupModule;
+class LookupModule;
+class MapDownloader;
+class MapRenderer;
+class Router;
+class SearchModule;
+class StyleModule;
+class NavigationModule;
+class VoiceManager;
+class ElevationModule;
+class IconLookup;
+
 class OSMScoutQt;
+
+using MapDownloaderRef = std::shared_ptr<MapDownloader>;
+using VoiceManagerRef = std::shared_ptr<VoiceManager>;
 
 /**
  * \ingroup QtAPI
