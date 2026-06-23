@@ -2102,17 +2102,17 @@ namespace osmscout {
       }
     }
 
-    // detect what all allowed turns have common
-    // keep in mind that laneTurns may have removed directions used by exits, it is benefitial here
+    // detect what all allowed turns have common, using original (pre-consumption) turns
+    // so compound turns like through;right are preserved for direction resolution
     uint32_t suggestedTurnBits;
-    if (allowedLaneFrom < int(laneTurns.size())) {
-      suggestedTurnBits = TurnToBits(laneTurns[allowedLaneFrom]);
+    if (allowedLaneFrom < int(originalLaneTurns.size())) {
+      suggestedTurnBits = TurnToBits(originalLaneTurns[allowedLaneFrom]);
     } else {
       suggestedTurnBits = TurnToBits(LaneTurn::Unknown);
     }
     for (int i = allowedLaneFrom + 1; i <= allowedLaneTo; i++) {
-      if (i < int(laneTurns.size())) {
-        suggestedTurnBits &= TurnToBits(laneTurns[i]);
+      if (i < int(originalLaneTurns.size())) {
+        suggestedTurnBits &= TurnToBits(originalLaneTurns[i]);
       } else {
         suggestedTurnBits &= TurnToBits(LaneTurn::Unknown);
       }

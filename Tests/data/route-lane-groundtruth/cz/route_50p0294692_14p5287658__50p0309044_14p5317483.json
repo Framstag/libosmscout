@@ -1,0 +1,200 @@
+{
+  "database": "../Maps/europe-czech-republic-20260304-014921/",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.029348135213155,
+      "lon": 14.528790075546425,
+      "name": "Bajkonurská",
+      "nodeIndex": 0,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.08276126281524226,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.030081719384214,
+      "lon": 14.528596956495903,
+      "name": "Bajkonurská",
+      "nodeIndex": 1,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.09697168065641162,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": false
+      },
+      "lat": 50.03020778320885,
+      "lon": 14.528564769987497,
+      "name": "Bajkonurská",
+      "nodeIndex": 2,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "right"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.10572753776312992,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": false
+      },
+      "lat": 50.03028556727085,
+      "lon": 14.52854599452425,
+      "name": "Bajkonurská",
+      "nodeIndex": 3,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "right"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.12147286069604424,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": false
+      },
+      "lat": 50.03042504214068,
+      "lon": 14.528508443597758,
+      "name": "Bajkonurská",
+      "nodeIndex": 4,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "right"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.1370712268948681,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.03056317590597,
+      "lon": 14.528470892671265,
+      "name": "Opatovská",
+      "nodeIndex": 5,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.15451604781655334,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.03059402130987,
+      "lon": 14.528709609275381,
+      "name": "Opatovská",
+      "nodeIndex": 6,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.21232523004670456,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.03068655752156,
+      "lon": 14.529503543149701,
+      "name": "Opatovská",
+      "nodeIndex": 7,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.2331487697154116,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.030716061820954,
+      "lon": 14.529790539516426,
+      "name": "Opatovská",
+      "nodeIndex": 8,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.2331487697154116,
+      "lat": 50.030716061820954,
+      "lon": 14.529790539516426,
+      "nodeIndex": 9
+    }
+  ],
+  "start": {
+    "lat": 50.0294692,
+    "lon": 14.5287658
+  },
+  "target": {
+    "lat": 50.0309044,
+    "lon": 14.5317483
+  },
+  "version": 1
+}
