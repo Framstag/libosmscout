@@ -20,9 +20,10 @@
 #include <osmscout/log/Logger.h>
 
 // Qt includes
+#include <QApplication>
+#include <QDir>
 #include <QGuiApplication>
 #include <QQuickView>
-#include <QApplication>
 #include <QStandardPaths>
 
 // OSMScout library

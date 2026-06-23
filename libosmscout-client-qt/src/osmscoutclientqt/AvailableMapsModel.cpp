@@ -31,6 +31,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QStandardPaths>
+#include <QDir>
 
 #include <algorithm>
 

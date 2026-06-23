@@ -318,10 +318,10 @@ void DownloadJob::start(const QString &serverBasePath, const QStringList &fileNa
 {
   for (const auto& fileName:fileNames){
     auto *job=new FileDownloader(webCtrl, serverBasePath+"/"+fileName, target.filePath(fileName));
-    connect(job, &FileDownloader::finished, this, &MapDownloadJob::onJobFinished);
-    connect(job, &FileDownloader::error, this, &MapDownloadJob::onJobFailed);
-    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::downloadProgress);
-    connect(job, &FileDownloader::writtenBytes, this, &MapDownloadJob::onDownloadProgress);
+    connect(job, &FileDownloader::finished, this, &DownloadJob::onJobFinished);
+    connect(job, &FileDownloader::error, this, &DownloadJob::onJobFailed);
+    connect(job, &FileDownloader::writtenBytes, this, &DownloadJob::downloadProgress);
+    connect(job, &FileDownloader::writtenBytes, this, &DownloadJob::onDownloadProgress);
     jobs << job;
   }
   started=true;

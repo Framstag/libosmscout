@@ -23,6 +23,7 @@
 
 #include <QGuiApplication>
 #include <QApplication>
+#include <QDir>
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
 #include <QTranslator>

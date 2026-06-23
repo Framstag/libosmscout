@@ -23,6 +23,7 @@
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/StyleModule.h>
 
+#include <QFileInfo>
 #include <QObject>
 #include <QList>
 #include <QMap>

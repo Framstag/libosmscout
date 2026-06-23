@@ -28,6 +28,7 @@
 #include <QtGlobal>
 #include <QQuickWindow>
 #include <QGuiApplication>
+#include <QDir>
 
 namespace osmscout {
 
