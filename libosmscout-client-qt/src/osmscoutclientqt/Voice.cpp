@@ -28,23 +28,41 @@
 namespace osmscout {
 
 AvailableVoice::AvailableVoice(const VoiceProvider &provider,
+                               const QString &type,
                                const QString &lang,
+                               const QString &langCode,
                                const QString &gender,
                                const QString &name,
                                const QString &license,
                                const QString &directory,
                                const QString &author,
-                               const QString &description) :
-    valid(true), provider(provider), lang(lang), gender(gender), name(name), license(license),
-    directory(directory), author(author), description(description)
+                               const QString &description,
+                               const QString &model,
+                               const QString &metadataPath) :
+    valid(true), provider(provider), type(type), lang(lang), langCode(langCode), gender(gender),
+    name(name), license(license), directory(directory), author(author), description(description),
+    model(model), metadataPath(metadataPath)
 {
 }
 
 AvailableVoice::AvailableVoice(const AvailableVoice &o) :
-    QObject(o.parent()), valid(o.valid), provider(o.provider), lang(o.lang), gender(o.gender),
-    name(o.name), license(o.license), directory(o.directory),
-    author(o.author), description(o.description)
+    QObject(o.parent()), valid(o.valid), provider(o.provider), type(o.type), lang(o.lang),
+    langCode(o.langCode), gender(o.gender), name(o.name), license(o.license), directory(o.directory),
+    author(o.author), description(o.description), model(o.model), metadataPath(o.metadataPath)
 {}
+
+QStringList Voice::files() const
+{
+  if (isPiper()) {
+    QStringList fileNames;
+    if (!modelFile.isEmpty()) {
+      fileNames << modelFile
+                << (modelFile + ".json");
+    }
+    return fileNames;
+  }
+  return marbleFiles();
+}
 
 bool Voice::deleteVoice()
 {
@@ -70,7 +88,7 @@ bool Voice::deleteVoice()
   return result;
 }
 
-QStringList Voice::files()
+QStringList Voice::marbleFiles()
 {
   QStringList fileNames;
   fileNames << "After.ogg"
@@ -146,9 +164,36 @@ QStringList Voice::files()
 Voice::Voice(QDir dir):
     dir(dir)
 {
-  QStringList fileNames=Voice::files();
+  // metadata (read first, it also tells us the voice type)
+  if (dir.exists(MapDirectory::FileMetadata)){
+    QFile jsonFile(dir.filePath(MapDirectory::FileMetadata));
+    jsonFile.open(QFile::OpenModeFlag::ReadOnly);
+    QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
+    QJsonObject metadataObject = doc.object();
+    if (metadataObject.contains("lang") &&
+        metadataObject.contains("name")){
+
+      type = metadataObject["type"].toString(VoiceTypeVoiceOfMarble);
+      lang = metadataObject["lang"].toString();
+      langCode = metadataObject["lang_code"].toString();
+      gender = metadataObject["gender"].toString();
+      name = metadataObject["name"].toString();
+      license = metadataObject["license"].toString();
+      author = metadataObject["author"].toString();
+      description = metadataObject["description"].toString();
+      modelFile = metadataObject["model"].toString();
+
+      metadata = true;
+    }
+  }
+
+  QStringList fileNames = files();
   osmscout::log.Debug() << "Checking voice files in directory " << dir.absolutePath().toStdString();
-  valid=true;
+  valid = !fileNames.isEmpty();
+  if (isPiper() && !metadata) {
+    // Piper voices can't be validated without metadata (variable file names)
+    valid = false;
+  }
   for (const auto &fileName: fileNames) {
     bool exists=dir.exists(fileName);
     if (!exists){
@@ -158,30 +203,6 @@ Voice::Voice(QDir dir):
   }
   if (!valid){
     osmscout::log.Warn() << "Can't use voice " << dir.absolutePath().toStdString() << ", some mandatory files are missing.";
-  }
-
-  // metadata
-  if (dir.exists(MapDirectory::FileMetadata)){
-    QFile jsonFile(dir.filePath(MapDirectory::FileMetadata));
-    jsonFile.open(QFile::OpenModeFlag::ReadOnly);
-    QJsonDocument doc = QJsonDocument::fromJson(jsonFile.readAll());
-    QJsonObject metadataObject = doc.object();
-    if (metadataObject.contains("lang") &&
-        metadataObject.contains("gender") &&
-        metadataObject.contains("name") &&
-        metadataObject.contains("license") &&
-        metadataObject.contains("author") &&
-        metadataObject.contains("description")){
-
-      lang = metadataObject["lang"].toString();
-      gender = metadataObject["gender"].toString();
-      name = metadataObject["name"].toString();
-      license = metadataObject["license"].toString();
-      author = metadataObject["author"].toString();
-      description = metadataObject["description"].toString();
-
-      metadata = true;
-    }
   }
 }
 
