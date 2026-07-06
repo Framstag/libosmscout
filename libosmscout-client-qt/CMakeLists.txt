@@ -145,6 +145,10 @@ if(MARISA_FOUND)
     target_link_libraries(OSMScoutClientQt ${MARISA_LIBRARIES})
 endif()
 
+if(TARGET Piper::Piper)
+    target_link_libraries(OSMScoutClientQt Piper::Piper)
+endif()
+
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
           set_target_properties(OSMScoutClientQt PROPERTIES
                     FRAMEWORK TRUE

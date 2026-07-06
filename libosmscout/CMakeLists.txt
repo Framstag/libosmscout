@@ -419,6 +419,7 @@ if(MARISA_FOUND)
     target_link_libraries(OSMScout ${MARISA_LIBRARIES})
 endif()
 
+
 if(CMAKE_THREAD_LIBS_INIT)
     target_link_libraries(OSMScout ${CMAKE_THREAD_LIBS_INIT})
 endif()

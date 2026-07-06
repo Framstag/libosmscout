@@ -664,6 +664,12 @@ if (HAVE_HTTPLIB)
 else ()
   message(STATUS "- httplib:                       FALSE")
 endif ()
+if (HAVE_LIB_PIPER)
+  message(STATUS "- piper:                         TRUE")
+else ()
+  message(STATUS "- piper:                         FALSE")
+endif ()
+
 message(STATUS "")
 
 message(STATUS "Qt5 libraries (${Qt5_FOUND}):")
