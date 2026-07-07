@@ -18,6 +18,7 @@
 */
 
 #include <osmscoutclientqt/AvailableVoicesModel.h>
+#include <osmscoutclientqt/ClientQtFeatures.h>
 #include <osmscoutclientqt/PersistentCookieJar.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 
@@ -108,6 +109,12 @@ bool availableVoiceItemLessThan(const AvailableVoice *i1, const AvailableVoice *
   }
   return i1->getName().localeAwareCompare(i2->getName()) < 0;
 }
+
+#ifdef OSMSCOUT_HAVE_LIB_PIPER
+constexpr bool piperAvailable=true;
+#else
+constexpr bool piperAvailable=false;
+#endif
 }
 
 void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetworkReply* reply)
@@ -130,6 +137,10 @@ void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetwor
       QString type=obj.value("type").toString(VoiceTypeVoiceOfMarble);
 
       if (type == VoiceTypePiper) {
+        if constexpr (!piperAvailable) {
+          qDebug() << "Piper voice found but libpiper is not available, skipping:" << obj;
+          continue;
+        }
         // Piper TTS voice: onnx model + json config.
         auto lang=obj.value("lang");
         auto langCode=obj.value("lang_code");
