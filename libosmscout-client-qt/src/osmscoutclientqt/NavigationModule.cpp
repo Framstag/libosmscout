@@ -102,7 +102,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
              nextInstruction != nullptr) {
 
       if (!nextInstruction->nextRouteInstruction.shortDescription.isEmpty()) {
-        log.Debug() << "In " << nextInstruction->nextRouteInstruction.distanceTo.AsMeter() << " m: "
+        log.Debug() << "In " << qRound(nextInstruction->nextRouteInstruction.distanceTo.AsMeter()) << " m: "
                     << nextInstruction->nextRouteInstruction.shortDescription.toStdString();
       }
       emit updateNext(nextInstruction->nextRouteInstruction);
@@ -317,11 +317,11 @@ QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSam
   }
 }
 
-  void NavigationModule::playerStateChanged(VoicePlayer::PlaybackState state)
-  {
-    if (thread!=QThread::currentThread()){
-      qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
-    }
+void NavigationModule::playerStateChanged(VoicePlayer::PlaybackState state)
+{
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Player state changed from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
 
   qDebug() << "Voice player state:" << mediaPlayer->playbackState() << "(" << mediaPlayer->index() << "/" << mediaPlayer->queueCount() << ")";
   if (!voiceDir.isEmpty() &&
