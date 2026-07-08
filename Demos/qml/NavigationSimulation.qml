@@ -244,6 +244,9 @@ Window {
                 id: voiceComboBox
                 editable: true
 
+                Layout.preferredWidth: 300
+                Layout.fillWidth: true
+
                 property bool initialized: false
 
                 function getData(row, role){
