@@ -18,6 +18,7 @@
  */
 
 #include <osmscoutclientqt/NavigationModule.h>
+#include <osmscoutclientqt/Voice.h>
 
 #include <osmscout/log/Logger.h>
 
@@ -25,6 +26,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QDebug>
+
 
 namespace osmscout {
 
@@ -239,6 +241,22 @@ void NavigationModule::onVoiceChanged(const QString dir)
   voiceDir = dir;
   if (!QDir(voiceDir).exists()){
     voiceDir.clear(); // disable voice
+  }
+
+  auto now = std::chrono::system_clock::now();
+  if (voiceDir.isEmpty()) {
+    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now,NavigationVoiceType::None)));
+  } else {
+    Voice voice(voiceDir);
+    NavigationVoiceType type = NavigationVoiceType::None;
+    if (voice.getType() == VoiceTypePiper) {
+      type = NavigationVoiceType::TextToSpeech;
+    } else if (voice.getType() == VoiceTypeVoiceOfMarble) {
+      type = NavigationVoiceType::VoiceOfMarble;
+    } else {
+      qWarning() << "Unknown voice type:" << voice.getType();
+    }
+    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now, std::move(type))));
   }
 }
 

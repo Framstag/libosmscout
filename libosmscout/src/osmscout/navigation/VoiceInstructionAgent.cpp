@@ -342,12 +342,18 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
 {
   std::list<NavigationMessageRef> result;
 
-  auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage*>(message.get());
-  if (routeUpdateMessage != nullptr){
+  if (auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage*>(message.get());
+      routeUpdateMessage != nullptr){
     // reset state
     lastMessage.type=MessageType::NoMessage;
     lastMessagePosition=Distance::Zero();
     vehicle=routeUpdateMessage->vehicle;
+    return result;
+  }
+
+  if (auto voiceSetup = dynamic_cast<VoiceSetupMessage*>(message.get());
+      voiceSetup != nullptr){
+    voiceType=voiceSetup->type;
     return result;
   }
 

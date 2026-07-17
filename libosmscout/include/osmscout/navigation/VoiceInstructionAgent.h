@@ -27,6 +27,22 @@
 
 namespace osmscout {
 
+enum class NavigationVoiceType: int
+{
+  None = 0,
+  VoiceOfMarble = 1,
+  TextToSpeech = 2
+};
+
+struct OSMSCOUT_API VoiceSetupMessage CLASS_FINAL : public NavigationMessage
+{
+  NavigationVoiceType type;
+
+  inline VoiceSetupMessage(const Timestamp& timestamp, NavigationVoiceType &&type):
+    NavigationMessage(timestamp), type(type)
+  {}
+};
+
 struct OSMSCOUT_API VoiceInstructionMessage CLASS_FINAL : public NavigationMessage
 {
   enum class VoiceSample {
@@ -178,6 +194,7 @@ public:
 private:
   DistanceUnitSystem units{DistanceUnitSystem::Metrics};
   Vehicle vehicle{vehicleCar};
+  NavigationVoiceType voiceType{NavigationVoiceType::None};
 
   // state used for triggering GpsFound / GpsLost messages
   bool prevGpsSignal{true};
