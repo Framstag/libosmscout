@@ -158,6 +158,10 @@ bool OSMScoutQtBuilder::Init()
   // setup voice
   settings->SetVoiceLookupDirectory(voiceLookupDirectory.toStdString());
 
+  if (navigationTranslationDir.isEmpty()) {
+    navigationTranslationDir = QStandardPaths::locate(QStandardPaths::AppLocalDataLocation, "translations", QStandardPaths::LocateDirectory);
+  }
+
   std::vector<std::filesystem::path> paths;
   for (const auto &dir: mapLookupDirectories) {
     paths.push_back(dir.toStdString());
@@ -183,7 +187,8 @@ bool OSMScoutQtBuilder::Init()
                                   glPowerOfTwoTexture,
                                   pixelRatio,
                                   userAgent,
-                                  customPoiTypes);
+                                  customPoiTypes,
+                                  navigationTranslationDir);
 
   return true;
 }
@@ -299,7 +304,8 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        GLPowerOfTwoTexture glPowerOfTwoTexture,
                        const PixelRatioSetup &pixelRatio,
                        QString userAgent,
-                       QStringList customPoiTypes):
+                       QStringList customPoiTypes,
+                       const QString &navigationTranslationDir):
         settings(settings),
         mapManager(mapManager),
         iconDirectory(iconDirectory),
@@ -309,7 +315,8 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
         glPowerOfTwoTexture(glPowerOfTwoTexture),
         pixelRatio(pixelRatio),
         userAgent(userAgent),
-        liveBackgroundThreads(0)
+        liveBackgroundThreads(0),
+        navigationTranslationDir(navigationTranslationDir)
 {
 
   std::vector<std::string> customPoiTypeVector;
@@ -484,7 +491,7 @@ NavigationModule* OSMScoutQt::MakeNavigation()
 {
   QThread *thread=makeThread("Navigation");
 
-  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread);
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread,navigationTranslationDir);
   navigation->moveToThread(thread);
   thread->start();
   return navigation;

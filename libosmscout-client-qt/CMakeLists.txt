@@ -58,6 +58,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/VoiceCorePlayerImpl.h
     include/osmscoutclientqt/AvailableVoicesModel.h
     include/osmscoutclientqt/InstalledVoicesModel.h
+    include/osmscoutclientqt/TTSMessageGeneratorQt.h
 )
 
 set(SOURCE_FILES
@@ -114,6 +115,7 @@ set(SOURCE_FILES
     src/osmscoutclientqt/VoicePlayer.cpp
     src/osmscoutclientqt/AvailableVoicesModel.cpp
     src/osmscoutclientqt/InstalledVoicesModel.cpp
+    src/osmscoutclientqt/TTSMessageGeneratorQt.cpp
 )
 
 if (QT_VERSION_MAJOR EQUAL 6)

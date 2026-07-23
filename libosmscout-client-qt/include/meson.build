@@ -56,6 +56,7 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/VoiceCorePlayerImpl.h',
             'osmscoutclientqt/AvailableVoicesModel.h',
             'osmscoutclientqt/InstalledVoicesModel.h',
+            'osmscoutclientqt/TTSMessageGeneratorQt.h',
           ]
 
 if meson.version().version_compare('>=0.63.0')

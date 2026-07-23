@@ -37,13 +37,14 @@ enum class NavigationVoiceType: int
 struct OSMSCOUT_API VoiceSetupMessage CLASS_FINAL : public NavigationMessage
 {
   NavigationVoiceType type;
+  std::string languageCode;
 
-  inline VoiceSetupMessage(const Timestamp& timestamp, NavigationVoiceType &&type):
-    NavigationMessage(timestamp), type(type)
+  VoiceSetupMessage(const Timestamp& timestamp, const NavigationVoiceType &type, const std::string &languageCode):
+    NavigationMessage(timestamp), type(type), languageCode(languageCode)
   {}
 };
 
-struct OSMSCOUT_API VoiceInstructionMessage CLASS_FINAL : public NavigationMessage
+struct OSMSCOUT_API SampleVoiceInstructionMessage CLASS_FINAL : public NavigationMessage
 {
   enum class VoiceSample {
     After,
@@ -114,27 +115,33 @@ struct OSMSCOUT_API VoiceInstructionMessage CLASS_FINAL : public NavigationMessa
 
   std::vector<VoiceSample> message;
 
-  inline VoiceInstructionMessage(const Timestamp& timestamp, std::vector<VoiceSample> &&message):
+  inline SampleVoiceInstructionMessage(const Timestamp& timestamp, std::vector<VoiceSample> &&message):
     NavigationMessage(timestamp), message(message)
   {}
 };
 
-/**
- * This agent prepares voice messages for concatenation voice synthesis.
- * It follows simple pattern described on "Voice of Marble" project page:
- * https://community.kde.org/Marble/VoiceOfMarble/Translations
- *
- * Message pattern is same for all languages. There is no need for translations,
- * just concatenate samples recorded in required language.
- *
- * There are existing samples recorded by Marble community that can be used:
- * https://marble.kde.org/speakers.php
- */
-class OSMSCOUT_API VoiceInstructionAgent CLASS_FINAL : public NavigationAgent
+/** Some TTS engines may have high latency, this message signalize that message may be prepared, but not played yet. */
+struct OSMSCOUT_API TTSVoiceInstructionPrepareMessage CLASS_FINAL : public NavigationMessage
 {
-public:
+  std::string message;
 
-  enum class MessageType: int {
+  inline TTSVoiceInstructionPrepareMessage(const Timestamp& timestamp, std::string &&message):
+    NavigationMessage(timestamp), message(message)
+  {}
+};
+
+/** This message should be played right away. */
+struct OSMSCOUT_API TTSVoiceInstructionMessage CLASS_FINAL : public NavigationMessage
+{
+  std::string message;
+
+  inline TTSVoiceInstructionMessage(const Timestamp& timestamp, std::string &&message):
+    NavigationMessage(timestamp), message(message)
+  {}
+};
+
+struct VoiceMessageStruct {
+  enum class OSMSCOUT_API Type: int {
     NoMessage = 0,
 
     LeaveRbExit1,
@@ -156,56 +163,107 @@ public:
     LeaveMotorwayRight,
     LeaveMotorwayLeft,
 
+    GpsLost,
+    GpsFound,
+
     Silent
   };
 
-  struct MessageStruct {
-    MessageType type{MessageType::NoMessage};
-    Distance distance;
+  Type type{Type::NoMessage};
+  Distance distance;
 
-    MessageStruct() = default;
-    MessageStruct(const MessageStruct&) = default;
-    MessageStruct(MessageStruct &&) = default;
+  VoiceMessageStruct() = default;
+  VoiceMessageStruct(const VoiceMessageStruct&) = default;
+  VoiceMessageStruct(VoiceMessageStruct &&) = default;
 
-    MessageStruct(MessageType type, const Distance &distance):
-      type{type}, distance{distance} {}
+  VoiceMessageStruct(Type type, const Distance &distance):
+    type{type}, distance{distance} {}
 
-    ~MessageStruct() = default;
+  ~VoiceMessageStruct() = default;
 
-    MessageStruct &operator=(const MessageStruct&) = default;
-    MessageStruct &operator=(MessageStruct&&) = default;
+  VoiceMessageStruct &operator=(const VoiceMessageStruct&) = default;
+  VoiceMessageStruct &operator=(VoiceMessageStruct&&) = default;
 
-    explicit operator bool() const
-    {
-      return type != MessageType::NoMessage;
-    }
+  explicit operator bool() const
+  {
+    return type != Type::NoMessage;
+  }
 
-    bool operator==(const MessageStruct &other) const
-    {
-      return type==other.type && distance==other.distance;
-    }
+  bool operator==(const VoiceMessageStruct &other) const
+  {
+    return type==other.type && distance==other.distance;
+  }
 
-    bool operator!=(const MessageStruct &other) const
-    {
-      return !(*this==other);
-    }
+  bool operator!=(const VoiceMessageStruct &other) const
+  {
+    return !(*this==other);
+  }
+};
+
+/** Abstract class for generating template-based messages for TTS engine
+ */
+class OSMSCOUT_API TTSMessageGenerator
+{
+public:
+  virtual ~TTSMessageGenerator() = default;
+
+  /**
+   * Set the language of the generated messages
+   * @param languageCode
+   * @return true if language is supported
+   */
+  virtual bool SetLanguage(const std::string &languageCode) = 0;
+
+  virtual std::optional<std::string> GenerateMessage(const VoiceMessageStruct &message, const VoiceMessageStruct &then) = 0;
+};
+
+using TTSMessageGeneratorRef = std::shared_ptr<TTSMessageGenerator>;
+
+class OSMSCOUT_API NoOpTTSMessageGenerator : public TTSMessageGenerator
+{
+public:
+  ~NoOpTTSMessageGenerator() override = default;
+
+  bool SetLanguage([[maybe_unused]] const std::string &languageCode) override
+  {
+    return false;
   };
 
+  std::optional<std::string> GenerateMessage([[maybe_unused]] const VoiceMessageStruct &message, [[maybe_unused]] const VoiceMessageStruct &then) override
+  {
+    return std::nullopt;
+  }
+};
+
+/**
+ * This agent prepares voice messages for concatenation voice synthesis.
+ * It follows simple pattern described on "Voice of Marble" project page:
+ * https://community.kde.org/Marble/VoiceOfMarble/Translations
+ *
+ * Message pattern is same for all languages. There is no need for translations,
+ * just concatenate samples recorded in required language.
+ *
+ * There are existing samples recorded by Marble community that can be used:
+ * https://marble.kde.org/speakers.php
+ */
+class OSMSCOUT_API VoiceInstructionAgent CLASS_FINAL : public NavigationAgent
+{
 private:
   DistanceUnitSystem units{DistanceUnitSystem::Metrics};
   Vehicle vehicle{vehicleCar};
   NavigationVoiceType voiceType{NavigationVoiceType::None};
+  TTSMessageGeneratorRef ttsMessageGenerator;
 
   // state used for triggering GpsFound / GpsLost messages
   bool prevGpsSignal{true};
   Timestamp lastSeenGpsSignal{Timestamp::min()};
 
-  MessageStruct lastMessage;
-  Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.disntace usually)
+  VoiceMessageStruct lastMessage;
+  Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.distance usually)
 
 public:
-  explicit VoiceInstructionAgent(DistanceUnitSystem units):
-    units{units}
+  VoiceInstructionAgent(DistanceUnitSystem units, TTSMessageGeneratorRef ttsMessageGenerator):
+    units{units}, ttsMessageGenerator(ttsMessageGenerator)
   {};
 
   ~VoiceInstructionAgent() override = default;
@@ -213,13 +271,13 @@ public:
   std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 
 private:
-  void toSamples(std::vector<VoiceInstructionMessage::VoiceSample> &samples,
-                 const MessageType &messageType,
+  void toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples,
+                 const VoiceMessageStruct::Type &messageType,
                  bool shortRoundaboutMessage);
 
-  std::vector<VoiceInstructionMessage::VoiceSample> toSamples(const Distance &distanceFromStart,
-                                                              const MessageStruct &message,
-                                                              const MessageStruct &then);
+  std::vector<SampleVoiceInstructionMessage::VoiceSample> toSamples(const Distance &distanceFromStart,
+                                                                    const VoiceMessageStruct &message,
+                                                                    const VoiceMessageStruct &then);
 };
 }
 

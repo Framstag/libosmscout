@@ -173,6 +173,7 @@ int QtDemoApp::Run(const Arguments &args, const QUrl &qmlFileUrl)
       .AddOnlineTileProviders(":/resources/online-tile-providers.json")
       .AddMapProviders(":/resources/map-providers.json")
       .AddVoiceProviders(":/resources/voice-providers.json")
+      .WithNavigationTranslationDir(translationDir)
       .WithUserAgent(QApplication::applicationName(), QApplication::applicationVersion());
 
   if (!builder.Init()){

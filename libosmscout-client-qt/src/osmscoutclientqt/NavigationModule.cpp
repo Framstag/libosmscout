@@ -32,8 +32,9 @@ namespace osmscout {
 
 NavigationModule::NavigationModule(QThread *thread,
                                    SettingsRef settings,
-                                   DBThreadRef dbThread):
-  thread(thread), settings(settings), dbThread(dbThread)
+                                   DBThreadRef dbThread,
+                                   const QString &translationDir):
+  thread(thread), settings(settings), dbThread(dbThread), translationDir(translationDir)
 {
   assert(settings);
   assert(dbThread);
@@ -125,7 +126,7 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
              maxSpeedMessage != nullptr) {
 
       emit maxAllowedSpeed(maxSpeedMessage->maxAllowedSpeed);
-    } else if (auto voiceInstructionMessage = dynamic_cast<osmscout::VoiceInstructionMessage*>(message.get());
+    } else if (auto voiceInstructionMessage = dynamic_cast<osmscout::SampleVoiceInstructionMessage*>(message.get());
                voiceInstructionMessage != nullptr) {
 
       if (!voiceDir.isEmpty()) {
@@ -245,10 +246,11 @@ void NavigationModule::onVoiceChanged(const QString dir)
 
   auto now = std::chrono::system_clock::now();
   if (voiceDir.isEmpty()) {
-    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now,NavigationVoiceType::None)));
+    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now,NavigationVoiceType::None, "")));
   } else {
     Voice voice(voiceDir);
     NavigationVoiceType type = NavigationVoiceType::None;
+
     if (voice.getType() == VoiceTypePiper) {
       type = NavigationVoiceType::TextToSpeech;
     } else if (voice.getType() == VoiceTypeVoiceOfMarble) {
@@ -256,13 +258,13 @@ void NavigationModule::onVoiceChanged(const QString dir)
     } else {
       qWarning() << "Unknown voice type:" << voice.getType();
     }
-    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now, std::move(type))));
+    ProcessMessages(engine.Process(std::make_shared<VoiceSetupMessage>(now, type, voice.getLangCode().toStdString())));
   }
 }
 
-QString NavigationModule::sampleFile(osmscout::VoiceInstructionMessage::VoiceSample sample) const
+QString NavigationModule::sampleFile(osmscout::SampleVoiceInstructionMessage::VoiceSample sample) const
 {
-  using VoiceSample = osmscout::VoiceInstructionMessage::VoiceSample;
+  using VoiceSample = osmscout::SampleVoiceInstructionMessage::VoiceSample;
   switch(sample){
     case VoiceSample::After: return "After.ogg";
     case VoiceSample::AhExitLeft: return "AhExitLeft.ogg";

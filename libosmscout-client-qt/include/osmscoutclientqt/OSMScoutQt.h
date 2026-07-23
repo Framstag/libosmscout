@@ -75,6 +75,8 @@ private:
 
   QString voiceLookupDirectory;
 
+  QString navigationTranslationDir;
+
   QString styleSheetDirectory;
   bool styleSheetDirectoryConfigured{false};
 
@@ -203,6 +205,11 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithNavigationTranslationDir(const QString &navigationTranslationDir){
+    this->navigationTranslationDir=navigationTranslationDir;
+    return *this;
+  }
+
   bool Init();
 };
 
@@ -268,6 +275,7 @@ private:
   PixelRatioSetup     pixelRatio;
   QString             userAgent;
   std::atomic_int     liveBackgroundThreads;
+  QString             navigationTranslationDir;
 
   std::mutex          mutex;
   MapDownloaderRef    mapDownloader; // created lazy, guarded by mutex
@@ -284,7 +292,8 @@ private:
              GLPowerOfTwoTexture glPowerOfTwoTexture,
              const PixelRatioSetup &pixelRatio,
              QString userAgent,
-             QStringList customPoiTypes);
+             QStringList customPoiTypes,
+             const QString &navigationTranslationDir);
 
 public slots:
   void threadFinished();

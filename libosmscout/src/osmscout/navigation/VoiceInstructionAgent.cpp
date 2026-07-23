@@ -35,8 +35,8 @@ private:
   std::optional<Distance> roundaboutEnter; //<! distance of roundabout enter before nextMessage
 
 public:
-  VoiceInstructionAgent::MessageStruct nextMessage;
-  VoiceInstructionAgent::MessageStruct thenMessage;
+  VoiceMessageStruct nextMessage;
+  VoiceMessageStruct thenMessage;
 
 public:
   PostprocessorCallback(const Distance &distanceFromStart, const Distance &stopAfter):
@@ -54,23 +54,23 @@ public:
 
   void OnMotorwayLeave(const RouteDescription::DirectionDescription::Move& move)
   {
-    VoiceInstructionAgent::MessageType type;
+    VoiceMessageStruct::Type type;
     if (move==RouteDescription::DirectionDescription::sharpLeft ||
         move==RouteDescription::DirectionDescription::left ||
         move==RouteDescription::DirectionDescription::slightlyLeft) {
-      type=VoiceInstructionAgent::MessageType::LeaveMotorwayLeft;
+      type=VoiceMessageStruct::Type::LeaveMotorwayLeft;
     } else if (move==RouteDescription::DirectionDescription::sharpRight ||
                move==RouteDescription::DirectionDescription::right ||
                move==RouteDescription::DirectionDescription::slightlyRight) {
-      type=VoiceInstructionAgent::MessageType::LeaveMotorwayRight;
+      type=VoiceMessageStruct::Type::LeaveMotorwayRight;
     } else {
-      type=VoiceInstructionAgent::MessageType::LeaveMotorway;
+      type=VoiceMessageStruct::Type::LeaveMotorway;
     }
 
     if (!nextMessage){
-      nextMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+      nextMessage = VoiceMessageStruct{type, distance};
     } else if (!thenMessage){
-      thenMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+      thenMessage = VoiceMessageStruct{type, distance};
     }
   }
 
@@ -105,12 +105,12 @@ public:
                          [[maybe_unused]] const osmscout::RouteDescription::NameDescriptionRef& nameDescription) override
   {
     assert(roundaboutLeaveDescription);
-    using MessageType = VoiceInstructionAgent::MessageType;
+    using MessageType = VoiceMessageStruct::Type;
 
     if (!roundaboutEnter) {
       if (!nextMessage) {
         // we are on the roundabout right now, be silent until we leave it
-        nextMessage = VoiceInstructionAgent::MessageStruct{MessageType::Silent, distance};
+        nextMessage = VoiceMessageStruct{MessageType::Silent, distance};
       }
       return;
     }
@@ -141,9 +141,9 @@ public:
     }
     // say the message before entering the roundabout
     if (!nextMessage){
-      nextMessage = VoiceInstructionAgent::MessageStruct{type, *roundaboutEnter};
+      nextMessage = VoiceMessageStruct{type, *roundaboutEnter};
     } else if (!thenMessage){
-      thenMessage = VoiceInstructionAgent::MessageStruct{type, *roundaboutEnter};
+      thenMessage = VoiceMessageStruct{type, *roundaboutEnter};
     }
     roundaboutEnter = std::nullopt;
   }
@@ -151,9 +151,9 @@ public:
   void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef& /*targetDescription*/) override
   {
     if (!nextMessage){
-      using MessageType = VoiceInstructionAgent::MessageType;
+      using MessageType = VoiceMessageStruct::Type;
       if (distance - distanceFromStart < Meters(40)) {
-        nextMessage = VoiceInstructionAgent::MessageStruct{MessageType::TargetReached, distance};
+        nextMessage = VoiceMessageStruct{MessageType::TargetReached, distance};
       }
     }
   }
@@ -166,7 +166,7 @@ public:
   {
     assert(directionDescription);
 
-    using MessageType = VoiceInstructionAgent::MessageType;
+    using MessageType = VoiceMessageStruct::Type;
     using DirectionDescription = RouteDescription::DirectionDescription;
     MessageType type = MessageType::NoMessage;
     switch (turnDescription->GetDirection()) {
@@ -196,9 +196,9 @@ public:
     }
     if (type != MessageType::NoMessage){
       if (!nextMessage) {
-        nextMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+        nextMessage = VoiceMessageStruct{type, distance};
       } else if (!thenMessage) {
-        thenMessage = VoiceInstructionAgent::MessageStruct{type, distance};
+        thenMessage = VoiceMessageStruct{type, distance};
       }
     }
   }
@@ -209,62 +209,62 @@ public:
   }
 };
 
-void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::VoiceSample> &samples, const MessageType &type, bool shortRoundaboutMessage)
+void VoiceInstructionAgent::toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples, const VoiceMessageStruct::Type &type, bool shortRoundaboutMessage)
 {
-  using VoiceSample = VoiceInstructionMessage::VoiceSample;
+  using VoiceSample = SampleVoiceInstructionMessage::VoiceSample;
 
-  if (!shortRoundaboutMessage && type>=MessageType::LeaveRbExit1 && type<=MessageType::LeaveRbExit6) {
+  if (!shortRoundaboutMessage && type>=VoiceMessageStruct::Type::LeaveRbExit1 && type<=VoiceMessageStruct::Type::LeaveRbExit6) {
     samples.push_back(VoiceSample::RbCross);
   }
 
   switch (type) {
 
-    case MessageType::LeaveRbExit1:
+    case VoiceMessageStruct::Type::LeaveRbExit1:
       samples.push_back(VoiceSample::RbExit1);
       break;
-    case MessageType::LeaveRbExit2:
+    case VoiceMessageStruct::Type::LeaveRbExit2:
       samples.push_back(VoiceSample::RbExit2);
       break;
-    case MessageType::LeaveRbExit3:
+    case VoiceMessageStruct::Type::LeaveRbExit3:
       samples.push_back(VoiceSample::RbExit3);
       break;
-    case MessageType::LeaveRbExit4:
+    case VoiceMessageStruct::Type::LeaveRbExit4:
       samples.push_back(VoiceSample::RbExit4);
       break;
-    case MessageType::LeaveRbExit5:
+    case VoiceMessageStruct::Type::LeaveRbExit5:
       samples.push_back(VoiceSample::RbExit5);
       break;
-    case MessageType::LeaveRbExit6:
+    case VoiceMessageStruct::Type::LeaveRbExit6:
       samples.push_back(VoiceSample::RbExit6);
       break;
 
-    case MessageType::TargetReached:
+    case VoiceMessageStruct::Type::TargetReached:
       samples.push_back(VoiceSample::Arrive);
       break;
 
-    case MessageType::SharpLeft:
+    case VoiceMessageStruct::Type::SharpLeft:
       samples.push_back(VoiceSample::SharpLeft);
       break;
-    case MessageType::TurnLeft:
+    case VoiceMessageStruct::Type::TurnLeft:
       samples.push_back(VoiceSample::TurnLeft);
       break;
-    case MessageType::StraightOn:
+    case VoiceMessageStruct::Type::StraightOn:
       samples.push_back(VoiceSample::Straight);
       break;
-    case MessageType::TurnRight:
+    case VoiceMessageStruct::Type::TurnRight:
       samples.push_back(VoiceSample::TurnRight);
       break;
-    case MessageType::SharpRight:
+    case VoiceMessageStruct::Type::SharpRight:
       samples.push_back(VoiceSample::SharpRight);
       break;
 
-    case MessageType::LeaveMotorway:
+    case VoiceMessageStruct::Type::LeaveMotorway:
       samples.push_back(VoiceSample::MwExit);
       break;
-    case MessageType::LeaveMotorwayRight:
+    case VoiceMessageStruct::Type::LeaveMotorwayRight:
       samples.push_back(VoiceSample::MwExitRight);
       break;
-    case MessageType::LeaveMotorwayLeft:
+    case VoiceMessageStruct::Type::LeaveMotorwayLeft:
       samples.push_back(VoiceSample::MwExitLeft);
       break;
 
@@ -274,16 +274,16 @@ void VoiceInstructionAgent::toSamples(std::vector<VoiceInstructionMessage::Voice
   }
 }
 
-std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSamples(const Distance &distanceFromStart,
-                                                                                   const MessageStruct &message,
-                                                                                   const MessageStruct &then)
+std::vector<SampleVoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSamples(const Distance &distanceFromStart,
+                                                                                         const VoiceMessageStruct &message,
+                                                                                         const VoiceMessageStruct &then)
 {
-  using VoiceSample = VoiceInstructionMessage::VoiceSample;
-  std::vector<VoiceInstructionMessage::VoiceSample> samples;
+  using VoiceSample = SampleVoiceInstructionMessage::VoiceSample;
+  std::vector<SampleVoiceInstructionMessage::VoiceSample> samples;
 
   assert(message);
 
-  if (message.type == MessageType::Silent) {
+  if (message.type == VoiceMessageStruct::Type::Silent) {
     return samples;
   }
 
@@ -296,7 +296,7 @@ std::vector<VoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::toSampl
   }
 
   // We are close to roundabout, we will use short roundabout message in such case.
-  bool shortRoundaboutMessage = message.type >= MessageType::LeaveRbExit1 && message.type <= MessageType::LeaveRbExit6 &&
+  bool shortRoundaboutMessage = message.type >= VoiceMessageStruct::Type::LeaveRbExit1 && message.type <= VoiceMessageStruct::Type::LeaveRbExit6 &&
     distanceInUnits < 120;
 
   if (bool skipDistanceInformation = (distanceInUnits < 80 && vehicle == vehicleCar);
@@ -345,7 +345,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   if (auto routeUpdateMessage = dynamic_cast<RouteUpdateMessage*>(message.get());
       routeUpdateMessage != nullptr){
     // reset state
-    lastMessage.type=MessageType::NoMessage;
+    lastMessage.type=VoiceMessageStruct::Type::NoMessage;
     lastMessagePosition=Distance::Zero();
     vehicle=routeUpdateMessage->vehicle;
     return result;
@@ -354,15 +354,21 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   if (auto voiceSetup = dynamic_cast<VoiceSetupMessage*>(message.get());
       voiceSetup != nullptr){
     voiceType=voiceSetup->type;
+    if (!ttsMessageGenerator) {
+      voiceType=NavigationVoiceType::None; // no generator set, do not generate voice instructions
+    }
+    if (!ttsMessageGenerator->SetLanguage(voiceSetup->languageCode)) {
+      voiceType=NavigationVoiceType::None; // language is not supported, do not generate voice instructions
+    }
     return result;
   }
 
   auto positionMessage = dynamic_cast<PositionAgent::PositionMessage*>(message.get());
-  if (positionMessage==nullptr) {
+  if (positionMessage==nullptr || voiceType==NavigationVoiceType::None) {
     return result;
   }
 
-  using VoiceSample = VoiceInstructionMessage::VoiceSample;
+  using VoiceSample = SampleVoiceInstructionMessage::VoiceSample;
   using namespace std::chrono;
   Timestamp now = positionMessage->timestamp;
 
@@ -375,15 +381,31 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   // and triggers GpsLost message after longer time.
   if (!prevGpsSignal && gpsSignal){
     // GpsFound
-    result.push_back(std::make_shared<VoiceInstructionMessage>(
-        positionMessage->timestamp,
-        std::vector<VoiceSample>{VoiceSample::GpsFound}));
+    if (voiceType==NavigationVoiceType::VoiceOfMarble) {
+      result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
+          positionMessage->timestamp,
+          std::vector<VoiceSample>{VoiceSample::GpsFound}));
+    } else {
+      assert(voiceType==NavigationVoiceType::TextToSpeech);
+      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(VoiceMessageStruct(VoiceMessageStruct::Type::GpsFound, Distance::Zero()),VoiceMessageStruct())) {
+        result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
+          positionMessage->timestamp, std::move(*ttsMessage)));
+      }
+    }
     prevGpsSignal = gpsSignal;
   } else if (prevGpsSignal && !gpsSignal && (now - lastSeenGpsSignal) > seconds(10)){
     // GpsLost
-    result.push_back(std::make_shared<VoiceInstructionMessage>(
-        positionMessage->timestamp,
-        std::vector<VoiceSample>{VoiceSample::GpsLost}));
+    if (voiceType==NavigationVoiceType::VoiceOfMarble) {
+      result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
+          positionMessage->timestamp,
+          std::vector<VoiceSample>{VoiceSample::GpsLost}));
+    } else {
+      assert(voiceType==NavigationVoiceType::TextToSpeech);
+      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(VoiceMessageStruct(VoiceMessageStruct::Type::GpsLost, Distance::Zero()),VoiceMessageStruct())) {
+        result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
+          positionMessage->timestamp, std::move(*ttsMessage)));
+      }
+    }
     prevGpsSignal = gpsSignal;
   }
   if (gpsSignal){
@@ -426,9 +448,19 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   if (callback.nextMessage && distanceInUnits < 900){
 
     if (callback.nextMessage != lastMessage){
-      result.push_back(std::make_shared<VoiceInstructionMessage>(
-        positionMessage->timestamp,
-        toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
+
+      if (voiceType==NavigationVoiceType::VoiceOfMarble) {
+        result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
+          positionMessage->timestamp,
+          toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
+      } else {
+        assert(voiceType==NavigationVoiceType::TextToSpeech);
+        if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(callback.nextMessage, callback.thenMessage)) {
+          result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
+            positionMessage->timestamp, std::move(*ttsMessage)));
+        }
+      }
+
       lastMessage=callback.nextMessage;
       lastMessagePosition=distanceFromStart;
     } else {
@@ -439,9 +471,17 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
           (distanceInUnits < 150 && distFromLast > Meters(200)) ||
           (distanceInUnits < 60 && distFromLast > Meters(100))) {
 
-        result.push_back(std::make_shared<VoiceInstructionMessage>(
-            positionMessage->timestamp,
-            toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
+        if (voiceType==NavigationVoiceType::VoiceOfMarble) {
+          result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
+              positionMessage->timestamp,
+              toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
+        } else {
+          assert(voiceType==NavigationVoiceType::TextToSpeech);
+          if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(callback.nextMessage, callback.thenMessage)) {
+            result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
+              positionMessage->timestamp, std::move(*ttsMessage)));
+          }
+        }
         lastMessage=callback.nextMessage;
         lastMessagePosition=distanceFromStart;
       }

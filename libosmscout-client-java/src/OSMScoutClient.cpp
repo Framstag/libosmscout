@@ -1472,7 +1472,7 @@ public:
         std::make_shared<osmscout::ArrivalEstimateAgent>(),
         std::make_shared<osmscout::SpeedAgent>(),
         std::make_shared<osmscout::LaneAgent>(),
-        std::make_shared<osmscout::VoiceInstructionAgent>(osmscout::DistanceUnitSystem::Metrics),
+        std::make_shared<osmscout::VoiceInstructionAgent>(osmscout::DistanceUnitSystem::Metrics, std::make_shared<osmscout::NoOpTTSMessageGenerator>()),
         std::make_shared<osmscout::RouteInstructionAgent<JavaRouteInstruction, JavaRouteInstructionBuilder>>()
       }
   {
@@ -1647,6 +1647,7 @@ private:
 
     auto startTime = std::chrono::system_clock::now();
     ProcessEngineMessage(std::make_shared<osmscout::InitializeMessage>(startTime));
+    ProcessEngineMessage(std::make_shared<osmscout::VoiceSetupMessage>(startTime, osmscout::NavigationVoiceType::VoiceOfMarble, ""));
     ProcessEngineMessage(std::make_shared<osmscout::RouteUpdateMessage>(startTime, routeDescription, vehicle));
 
     // Use the playback/GPS timeline for ticks. This keeps the engine's "now"
@@ -1771,7 +1772,7 @@ private:
       env->DeleteLocalRef(turnStr);
       env->DeleteLocalRef(turnsArray);
     }
-    else if (auto voiceMessage = dynamic_cast<osmscout::VoiceInstructionMessage *>(message.get());
+    else if (auto voiceMessage = dynamic_cast<osmscout::SampleVoiceInstructionMessage *>(message.get());
              voiceMessage != nullptr) {
       jsize count = static_cast<jsize>(voiceMessage->message.size());
       jintArray samples = env->NewIntArray(count);

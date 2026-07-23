@@ -52,5 +52,6 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/VoicePlayer.cpp',
             'src/osmscoutclientqt/AvailableVoicesModel.cpp',
             'src/osmscoutclientqt/InstalledVoicesModel.cpp',
+            'src/osmscoutclientqt/TTSMessageGeneratorQt.cpp',
           ]
 

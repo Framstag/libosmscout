@@ -229,6 +229,7 @@ int main(int argc, char* argv[])
     .AddOnlineTileProviders(":/resources/online-tile-providers.json")
     .AddMapProviders(":/resources/map-providers.json")
     .AddVoiceProviders(":/resources/voice-providers.json")
+    .WithNavigationTranslationDir(translationDir)
     .WithUserAgent("OSMScout2DemoApp", "v?");
 
   if (!builder.Init()){
