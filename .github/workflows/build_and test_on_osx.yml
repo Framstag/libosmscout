@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: brew install openjdk catch2 protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm libpng pkgconfig
       - name: Configure build project
-        run: cmake -B build -DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
+        run: cmake -B build -DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
         env:
           PKG_CONFIG_PATH: "/usr/local/opt/qt@5/lib/pkgconfig:/usr/local/opt/libxml2/lib/pkgconfig"
       - name: Build project
