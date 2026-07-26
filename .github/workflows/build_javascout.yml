@@ -38,7 +38,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                cmake ninja-build
-               libcatch2-dev
+               catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
@@ -128,7 +128,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                python3-pip
-               libcatch2-dev
+               catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
