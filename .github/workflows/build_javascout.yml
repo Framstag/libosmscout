@@ -97,8 +97,6 @@ jobs:
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
         working-directory: JavaScout
-        env:
-          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
   meson:
     name: meson + maven
@@ -142,7 +140,7 @@ jobs:
 
       - name: Configure Meson
         run: >
-          meson setup build --unity on --wrap-mode=nofallback
+          meson setup build --unity on
           -DenableImport=false
           -DenableGpx=false
           -DenableMapAgg=false
@@ -177,5 +175,3 @@ jobs:
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
         working-directory: JavaScout
-        env:
-          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
