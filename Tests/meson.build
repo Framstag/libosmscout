@@ -444,9 +444,13 @@ foreach stylesheet : stylesheets
 endforeach
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
-  includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
+  includes = [osmscoutIncDir, osmscoutmapIncDir]
   deps = [mathDep, openmpDep]
   links = [osmscout, osmscoutmap]
+
+  if buildDemos
+    includes += demosIncDir
+  endif
 
   if buildMapCairo
     includes += osmscoutmapcairoIncDir

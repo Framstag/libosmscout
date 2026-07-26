@@ -95,10 +95,16 @@ target_link_libraries(osmscout_client_java
   PRIVATE
     OSMScout::OSMScout
     OSMScout::Map
-    OSMScout::MapCairo
     OSMScout::Client
     ${JNI_LIBRARIES}
 )
+
+if(TARGET OSMScout::MapCairo)
+  target_link_libraries(osmscout_client_java
+    PRIVATE
+      OSMScout::MapCairo
+  )
+endif()
 
 # Depend on Java compilation so JNI headers exist before C++ compile
 add_dependencies(osmscout_client_java java_compile)

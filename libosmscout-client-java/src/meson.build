@@ -28,13 +28,22 @@ if buildGpx
   gpxIncludes = [osmscoutgpxIncDir]
 endif
 
+cairoDeps = []
+cairoLink = []
+cairoIncludes = []
+if buildMapCairo
+  cairoDeps = [cairoDep, pangoDep, pangocairoDep]
+  cairoLink = [osmscoutmapcairo]
+  cairoIncludes = [osmscoutmapcairoIncDir]
+endif
+
 osmscoutclientjava = library('osmscout_client_java',
                          [osmscoutclientjavaSrc, osmscoutclientjavaJniHeaders],
-                         include_directories: [osmscoutclientjavaIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir, osmscoutclientIncDir, osmscoutclientjavaJniIncDir, gpxIncludes],
+                         include_directories: [osmscoutclientjavaIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir, osmscoutclientjavaJniIncDir, cairoIncludes, gpxIncludes],
                          cpp_args: cppArgs,
-                         dependencies: [mathDep, threadDep, jniDep, cairoDep, pangoDep, pangocairoDep, gpxDeps],
+                         dependencies: [mathDep, threadDep, jniDep, cairoDeps, gpxDeps],
                          link_args: link_args,
-                         link_with: [osmscout, osmscoutmap, osmscoutmapcairo, osmscoutclient, gpxLink],
+                         link_with: [osmscout, osmscoutmap, osmscoutclient, cairoLink, gpxLink],
                          version: libraryVersion,
                          install: true)
 

@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/**'
   push:
     branches:
       - master
@@ -36,7 +38,7 @@ jobs:
                     mingw-w64-x86_64-libpng
                     mingw-w64-x86_64-directx-headers"
       - name: Configure build project
-        run: DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST} cmake -B build -DCMAKE_UNITY_BUILD=ON -Wno-dev -G "Ninja"
+        run: DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST} cmake -B build -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
       - name: Build project
         run: cmake --build build
       - name: Run tests
