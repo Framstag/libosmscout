@@ -705,15 +705,17 @@ TransPolygonTest = executable('TransPolygonTest',
 
 test('Check polygon transformation code', TransPolygonTest)
 
-WaterIndexTest = executable('WaterIndexTest',
-             'src/WaterIndexTest.cpp',
-             include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
-             dependencies: [mathDep, openmpDep, catch2MainDep],
-             link_with: [osmscout, osmscoutimport],
-             install: true,
-             install_dir: testInstallDir)
+if buildImport
+  WaterIndexTest = executable('WaterIndexTest',
+               'src/WaterIndexTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
 
-test('Check water index import code', WaterIndexTest)
+  test('Check water index import code', WaterIndexTest)
+endif
 
 WorkQueueTest = executable('WorkQueueTest',
              'src/WorkQueueTest.cpp',
