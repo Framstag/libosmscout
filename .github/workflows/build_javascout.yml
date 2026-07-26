@@ -1,4 +1,5 @@
 name: JavaScout build
+description: Build and test JavaScout with CMake and Meson, including C++ and Java tests
 
 on:
   pull_request:
