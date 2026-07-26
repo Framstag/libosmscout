@@ -41,7 +41,8 @@ jobs:
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
-               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev"
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+               xvfb"
 
       - name: Configure CMake
         run: >
@@ -84,11 +85,11 @@ jobs:
         working-directory: JavaScout
 
       - name: Build JavaScout
-        run: ./mvnw package -q
+        run: ./mvnw package -DskipTests
         working-directory: JavaScout
 
       - name: Run JavaScout tests
-        run: ./mvnw test
+        run: xvfb-run ./mvnw test
         working-directory: JavaScout
 
   meson:
@@ -124,7 +125,8 @@ jobs:
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
-               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev"
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+               xvfb"
 
       - name: Install meson and ninja
         run: "pip3 install --only-binary :all: --break-system-packages meson ninja"
@@ -158,9 +160,9 @@ jobs:
         working-directory: JavaScout
 
       - name: Build JavaScout
-        run: ./mvnw package -q
+        run: ./mvnw package -DskipTests
         working-directory: JavaScout
 
       - name: Run JavaScout tests
-        run: ./mvnw test
+        run: xvfb-run ./mvnw test
         working-directory: JavaScout
