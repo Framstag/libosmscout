@@ -227,7 +227,7 @@ bool MapDownloadService::DownloadMapInternal(std::vector<DownloadJobState> &jobs
       }
       return false;
     }
-    write(fd, metaJson.c_str(), metaJson.size());
+    (void)write(fd, metaJson.c_str(), metaJson.size());
     close(fd);
   }
 
@@ -423,7 +423,7 @@ bool MapDownloadService::PrepareMapDirectory(const AvailableMapEntry &entry,
                           << ": " << strerror(errno);
     return false;
   }
-  write(fd, metaJson.c_str(), metaJson.size());
+  (void)write(fd, metaJson.c_str(), metaJson.size());
   close(fd);
 
   return true;

@@ -38,6 +38,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                cmake ninja-build
+               catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
@@ -65,13 +66,18 @@ jobs:
           -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF
           -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF
           -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
-          -DOSMSCOUT_BUILD_TESTS=OFF
 
       - name: Build C++ libraries
         run: cmake --build build
 
       - name: Install C++ libraries
         run: sudo cmake --install build
+
+      - name: Run C++ tests
+        run: xvfb-run ctest -j 2 --output-on-failure
+        working-directory: build
+        env:
+          QT_QPA_PLATFORM: offscreen
 
       - name: Install client jar to local Maven repository
         run: >
@@ -87,10 +93,14 @@ jobs:
       - name: Build JavaScout
         run: ./mvnw package -DskipTests
         working-directory: JavaScout
+        env:
+          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
         working-directory: JavaScout
+        env:
+          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
   meson:
     name: meson + maven
@@ -122,6 +132,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                python3-pip
+               catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
@@ -133,7 +144,7 @@ jobs:
 
       - name: Configure Meson
         run: >
-          meson setup build
+          meson setup build --unity on --wrap-mode=nofallback
           -DenableImport=false
           -DenableGpx=false
           -DenableMapAgg=false
@@ -142,11 +153,13 @@ jobs:
           -DenableMapQt=false
           -DenableMapSvg=false
           -DenableClientQt=false
-          -DenableTests=false
           -DbuildDemos=false
 
       - name: Build C++ libraries
         run: ninja -C build
+
+      - name: Run C++ tests
+        run: xvfb-run meson test --timeout-multiplier 2 -C build --print-errorlogs
 
       - name: Install client jar to local Maven repository
         run: >
@@ -162,7 +175,11 @@ jobs:
       - name: Build JavaScout
         run: ./mvnw package -DskipTests
         working-directory: JavaScout
+        env:
+          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
         working-directory: JavaScout
+        env:
+          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
