@@ -93,8 +93,6 @@ jobs:
       - name: Build JavaScout
         run: ./mvnw package -DskipTests
         working-directory: JavaScout
-        env:
-          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
@@ -175,8 +173,6 @@ jobs:
       - name: Build JavaScout
         run: ./mvnw package -DskipTests
         working-directory: JavaScout
-        env:
-          MAVEN_OPTS: "--enable-native-access=ALL-UNNAMED -Djava.security.manager=allow"
 
       - name: Run JavaScout tests
         run: xvfb-run ./mvnw test
