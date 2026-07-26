@@ -448,7 +448,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   deps = [mathDep, openmpDep]
   links = [osmscout, osmscoutmap]
 
-  if buildDemos
+  if get_option('buildDemos')
     includes += demosIncDir
   endif
 
