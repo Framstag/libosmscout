@@ -1,11 +1,62 @@
 OSS
 
 CONST
-  COLOR routeColor = #ff000088;
+  COLOR routeColor           = #ff000088;
+  COLOR routeStartColor      = #00aa00;
+  COLOR routeEndColor        = #ff0000;
+  COLOR favoriteMarkerColor  = #ff8800;
+  COLOR favoriteBorderColor  = #ffffff;
+  COLOR searchMarkerColor    = #ff00ff;
+  COLOR searchBorderColor    = #ffffff;
+  COLOR trackColor           = #0088ff;
+SYMBOL route_start
+  CIRCLE 0,0 0.9 {
+    AREA { color: @routeStartColor; }
+    AREA.BORDER { color: #ffffff; width: 0.15mm; }
+  }
+
+SYMBOL route_end
+  CIRCLE 0,0 0.9 {
+    AREA { color: @routeEndColor; }
+    AREA.BORDER { color: #ffffff; width: 0.15mm; }
+  }
+
+SYMBOL favorite_marker
+  CIRCLE 0,0 1.1 {
+    AREA { color: @favoriteMarkerColor; }
+    AREA.BORDER { color: @favoriteBorderColor; width: 0.3mm; }
+  }
+
+SYMBOL search_marker
+  CIRCLE 0,0 1.4 {
+    AREA { color: @searchMarkerColor; }
+    AREA.BORDER { color: @searchBorderColor; width: 0.35mm; }
+  }
 
 STYLE
   [MAG world-] {
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100; }
+
+    // Imported GPX track. Rendered as a thinner blue polyline so it is
+    // distinguishable from the active route. Visible from city zoom upward.
+    [MAG city-] {
+      [TYPE _track] WAY {color: @trackColor; displayWidth: 0.8mm; width: 4m; priority: 90; }
+    }
+
+    // Route start/end markers. Visible from city zoom upward so they do not
+    // clutter the view at low magnification.
+    [MAG city-] {
+      [TYPE _route_start] NODE.ICON { symbol: route_start; }
+      [TYPE _route_end]   NODE.ICON { symbol: route_end;   }
+    }
+
+    // Favorite and search-selection markers are rendered a bit larger and only
+    // from detail zoom upward to stay readable on busy maps. A high numeric
+    // priority places them above typical POI icons (railway/amenity/shop).
+    [MAG detail-] {
+      [TYPE _favorite]        NODE.ICON { symbol: favorite_marker; priority: 200; }
+      [TYPE _search_selected] NODE.ICON { symbol: search_marker; priority: 250; }
+    }
   }
 
 END

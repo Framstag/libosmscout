@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.github/workflows/**'
   push:
     branches:
       - master
@@ -42,6 +44,7 @@ jobs:
               -DOSMSCOUT_BUILD_DEMOS=OFF
               -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
               -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+              -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF
               -DOSMSCOUT_DEBUG_LABEL_LAYOUTER=ON
               -DOSMSCOUT_DEBUG_GROUNDTILES=ON
               -DOSMSCOUT_DEBUG_COASTLINE=ON
@@ -126,6 +129,7 @@ jobs:
               -DOSMSCOUT_BUILD_DEMOS=OFF
               -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
               -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+              -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF
               -DOSMSCOUT_DEBUG_LABEL_LAYOUTER=ON
               -DOSMSCOUT_DEBUG_GROUNDTILES=ON
               -DOSMSCOUT_DEBUG_COASTLINE=ON
@@ -174,6 +178,7 @@ jobs:
               -DOSMSCOUT_BUILD_DEMOS=OFF
               -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
               -DOSMSCOUT_BUILD_BINDING_JAVA=OFF
+              -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF
               -DOSMSCOUT_DEBUG_LABEL_LAYOUTER=ON
               -DOSMSCOUT_DEBUG_GROUNDTILES=ON
               -DOSMSCOUT_DEBUG_COASTLINE=ON

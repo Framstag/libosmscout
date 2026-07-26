@@ -1,0 +1,276 @@
+/* JavaScout base styling */
+
+.root {
+    -fx-font-family: "Segoe UI", "System", sans-serif;
+    -fx-background-color: #f5f5f5;
+}
+
+/* Map panel placeholder */
+.placeholder {
+    -fx-font-size: 18px;
+    -fx-text-fill: #999;
+}
+
+/* Map canvas fills the panel */
+#mapCanvas {
+    -fx-background-color: #000;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-background-color: #333;
+    -fx-padding: 4 10;
+    -fx-spacing: 8;
+}
+
+.status-bar .label {
+    -fx-text-fill: #ccc;
+    -fx-font-size: 12px;
+}
+
+.coord-label {
+    -fx-alignment: center-right;
+}
+
+/* Search overlay */
+.search-overlay-button {
+    -fx-font-size: 20px;
+    -fx-background-radius: 20px;
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.search-overlay-button:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* Route overlay button (above search button) */
+.route-overlay-button {
+    -fx-font-size: 20px;
+    -fx-background-radius: 20px;
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.route-overlay-button:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* Zoom overlay buttons (top-right) */
+.zoom-overlay-button {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.zoom-overlay-button:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+/* Main menu overlay button (top-left) */
+.menu-overlay-button {
+    -fx-font-size: 20px;
+    -fx-background-radius: 20px;
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.menu-overlay-button:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+.context-menu {
+    -fx-background-color: #fff;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
+}
+
+.context-menu .menu-item {
+    -fx-padding: 6 12;
+}
+
+.context-menu .menu-item:focused, .context-menu .menu-item:hover {
+    -fx-background-color: #e8e8e8;
+}
+
+.context-menu .menu-item .label {
+    -fx-font-size: 13px;
+}
+
+.search-overlay-panel {
+    -fx-background-color: #fff;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 4);
+}
+
+.search-overlay-panel .text-field {
+    -fx-padding: 4 8;
+}
+
+.search-overlay-panel .button {
+    -fx-padding: 4 8;
+}
+
+.search-overlay-panel .list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 2px;
+}
+
+.search-overlay-panel .list-cell {
+    -fx-padding: 4px;
+    -fx-cursor: hand;
+}
+
+.search-overlay-panel .list-cell:hover {
+    -fx-background-color: #e0f0ff;
+}
+
+.search-result-line1 {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.search-result-line2 {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666;
+}
+
+.search-result-line3 {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+    -fx-font-family: monospace;
+}
+
+.search-clear-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #999;
+    -fx-cursor: hand;
+}
+
+.search-clear-button:hover {
+    -fx-text-fill: #333;
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 4px;
+}
+
+/* Route panel */
+.route-overlay-panel {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 4);
+}
+
+.route-panel-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.route-location-label {
+    -fx-text-fill: #555;
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 3px;
+    -fx-cursor: hand;
+    -fx-wrap-text: true;
+    -fx-padding: 4 6;
+}
+
+.route-location-label:hover {
+    -fx-background-color: #e0e0ff;
+}
+
+.route-swap-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-min-width: 28px;
+}
+
+.route-swap-button:hover {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 3px;
+}
+
+.route-calculate-button {
+    -fx-background-color: #4a90d9;
+    -fx-text-fill: white;
+    -fx-padding: 4 12;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.route-calculate-button:hover {
+    -fx-background-color: #357abd;
+}
+
+.route-calculate-button:disabled {
+    -fx-background-color: #ccc;
+    -fx-text-fill: #999;
+}
+
+.route-info-toggle {
+    -fx-background-color: #e8e8e8;
+    -fx-text-fill: #555;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.route-info-toggle:selected {
+    -fx-background-color: #4a90d9;
+    -fx-text-fill: white;
+}
+
+.route-clear-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c0392b;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.route-clear-button:hover {
+    -fx-background-color: #fce4e4;
+    -fx-background-radius: 4px;
+}
+
+.route-progress-box {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 6, 0, 0, 2);
+}
+
+.route-cancel-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-padding: 4 12;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.route-cancel-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Route description list — columnar text with monospace */
+.route-desc-list {
+    -fx-background-color: transparent;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 2px;
+    -fx-font-family: "Courier New", "DejaVu Sans Mono", monospace;
+}
+
+.route-desc-list .list-cell {
+    -fx-padding: 2 4;
+    -fx-font-family: "Courier New", "DejaVu Sans Mono", monospace;
+}
+
+.route-error-label {
+    -fx-text-fill: #c0392b;
+}

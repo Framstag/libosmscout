@@ -33,6 +33,10 @@
 
 # Maven
 /libosmscout-kotlin/target/
+/JavaScout/target/
+
+# Private test data
+/JavaScout/*.gpx
 
 # Generation of db for tests
 /Tests/*.dat
@@ -48,5 +52,18 @@
 /mise.local.toml
 
 # AI
-
 /.pi
+
+# User-specific
+/CMakeUserPresets.json
+/mise.toml
+/codestyle-review.md
+
+# Build output
+/output/
+
+# Meson lock
+/subprojects/.wraplock
+
+# Hugo lock
+/webpage/.hugo_build.lock

@@ -2,6 +2,16 @@ testIncDir = include_directories('include')
 
 testInstallDir = 'share/osmscout/tests'
 
+FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
+             'src/FavoriteLocationServiceTest.cpp',
+             include_directories: [testIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check FavoriteLocationService', FavoriteLocationServiceTest)
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -189,14 +199,26 @@ test('Check label formatting', FeatureLabelTest)
 
 FileFormatVersionTest = executable('FileFormatVersionTest',
                                'src/FileFormatVersionTest.cpp',
-                               include_directories: [testIncDir, osmscoutIncDir],
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
                                dependencies: [mathDep, openmpDep, catch2MainDep],
-                               link_with: [osmscout],
+                               link_with: [osmscout, osmscoutclient],
                                install: true,
                                install_dir: testInstallDir)
 
 test('Check FileFormatVersion APIs',
      FileFormatVersionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+MapDownloadServiceTest = executable('MapDownloadServiceTest',
+                               'src/MapDownloadServiceTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutclient],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapDownloadService APIs',
+     MapDownloadServiceTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
 FileScannerWriterTest = executable('FileScannerWriterTest',
@@ -319,6 +341,16 @@ LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
                                            install_dir: testInstallDir)
 
 test('Check HighwayMilestone location description', LocationDescriptionServiceTest)
+
+DescriptionServiceTest = executable('DescriptionServiceTest',
+                                    'src/DescriptionServiceTest.cpp',
+                                    include_directories: [osmscoutIncDir],
+                                    dependencies: [mathDep, openmpDep, catch2MainDep],
+                                    link_with: [osmscout],
+                                    install: true,
+                                    install_dir: testInstallDir)
+
+test('Check object description service', DescriptionServiceTest)
 endif
 
 MapRotateTest = executable('MapRotateTest',
@@ -412,9 +444,13 @@ foreach stylesheet : stylesheets
 endforeach
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
-  includes = [demosIncDir, osmscoutIncDir, osmscoutmapIncDir]
+  includes = [osmscoutIncDir, osmscoutmapIncDir]
   deps = [mathDep, openmpDep]
   links = [osmscout, osmscoutmap]
+
+  if get_option('buildDemos')
+    includes += demosIncDir
+  endif
 
   if buildMapCairo
     includes += osmscoutmapcairoIncDir
@@ -455,13 +491,15 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     links += osmscoutmapgdi
   endif
 
-  PerformanceTest = executable('PerformanceTest',
-                               'src/PerformanceTest.cpp',
-                               cpp_args: ['-fPIC'],
-                               include_directories: includes,
-                               dependencies: deps,
-                               link_with: links,
-                               install: true)
+  if get_option('buildDemos')
+    PerformanceTest = executable('PerformanceTest',
+                                 'src/PerformanceTest.cpp',
+                                 cpp_args: ['-fPIC'],
+                                 include_directories: includes,
+                                 dependencies: deps,
+                                 link_with: links,
+                                 install: true)
+  endif
 endif
 
 PolygonCenterTest = executable('PolygonCenterTest',
@@ -669,15 +707,17 @@ TransPolygonTest = executable('TransPolygonTest',
 
 test('Check polygon transformation code', TransPolygonTest)
 
-WaterIndexTest = executable('WaterIndexTest',
-             'src/WaterIndexTest.cpp',
-             include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
-             dependencies: [mathDep, openmpDep, catch2MainDep],
-             link_with: [osmscout, osmscoutimport],
-             install: true,
-             install_dir: testInstallDir)
+if buildImport
+  WaterIndexTest = executable('WaterIndexTest',
+               'src/WaterIndexTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
 
-test('Check water index import code', WaterIndexTest)
+  test('Check water index import code', WaterIndexTest)
+endif
 
 WorkQueueTest = executable('WorkQueueTest',
              'src/WorkQueueTest.cpp',

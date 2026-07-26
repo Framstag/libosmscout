@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Ensure CMake installs libraries, pkg-config files, CMake config files, and executables to the correct platform-specific directories determined by `GNUInstallDirs`.
+
+## Requirements
 
 ### Requirement: Libraries install to correct platform libdir
 

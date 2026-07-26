@@ -1,16 +1,59 @@
 schema: spec-driven
 
 context: |
-  Stack: Current C++20
-  Testing: Unit testing using Catch2
+  Tech Stack: C++20, Java
+  Libraries: protobuf, Qt, Cairo, AGG, GDI, DirectX, OpenGL, iOS and MacOS, SVG
+  Dependencies: vcpkg, Conan
+  Build: cmake, meson, maven
+  Testing: Catch2
+  Platforms: Linux, macOS, iOS, Android, Windows
 
 rules:
   proposal:
     - Do not mention concrete technical solutions
+    - Each capability must be concrete enough to derive specs from — avoid vague names
+    - List affected files and modules explicitly in the Impact section
+
   specs:
     - Write acceptance criteria in Given/When/Then (Gherkin) format
+    - Every requirement must have at least one scenario
+    - Scenarios must be testable — no "system should work" scenarios
+    - Specs define the contract, not the implementation — avoid prescribing how
+
   design:
     - Include sequence diagram for non-trivial flows
+    - Document at least 2 alternatives per decision with rationale for the chosen one
+    - Reference specific files and modules that will change
+    - Include risk assessment per approach
+
   tasks:
     - Each task must reference its parent spec
-    - Estimate effort in story points (1/2/3/5/8)
+    - Always include tasks that verify the build compiles without errors
+    - Always include tasks that verify existing tests still pass
+    - Always include explicit tasks for creating new unit tests when new code is added (unless testing is not feasible)
+    - Order tasks by dependency — what must be done first
+    - Each task should be completable in one session — if too big, split it
+    - Group related tasks under numbered headings
+
+  apply:
+    - Before marking implementation complete, run the build and verify it compiles without errors
+    - Before marking implementation complete, verify tests exist for all new/modified code and they pass
+    - If build or tests fail, do NOT mark tasks complete — report failures and fix them first
+    - Check all new/modified code against every document in guidelines/ — all conventions and rules defined there must be followed
+    - Run linters and static analysis before marking complete (.clang-tidy, .uncrustify)
+    - Update README or documentation if behavior changes
+    - Update AGENTS.md and TODO.md if the change affects project structure, build, or roadmap
+    - Verify no regressions in unrelated areas
+
+validation:
+  - All spec scenarios must be traceable to a task
+  - All tasks must be traceable to a spec requirement
+  - No task references a deleted or renamed spec
+
+review:
+  - Build compiles without errors
+  - All existing tests still pass
+  - New unit tests exist for all new or modified code (unless testing is not feasible)
+  - Every new public API has documentation
+  - No hardcoded paths or magic numbers
+  - Error messages are user-actionable

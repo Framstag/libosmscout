@@ -1,3 +1,6 @@
+#---- FavoriteLocationService
+osmscout_test_project(NAME FavoriteLocationServiceTest SOURCES src/FavoriteLocationServiceTest.cpp TARGET OSMScout::Client)
+
 #---- AccessParse
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
@@ -36,8 +39,12 @@ osmscout_test_project(NAME ColorParseTest SOURCES src/ColorParseTest.cpp)
 osmscout_test_project(NAME CoordinateEncodingTest SOURCES src/CoordinateEncodingTest.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
 #---- FileFormatVersion
-osmscout_test_project(NAME FileFormatVersionTest SOURCES src/FileFormatVersionTest.cpp)
+osmscout_test_project(NAME FileFormatVersionTest SOURCES src/FileFormatVersionTest.cpp TARGET OSMScout::Client)
 set_tests_properties(FileFormatVersionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
+#---- MapDownloadService
+osmscout_test_project(NAME MapDownloadServiceTest SOURCES src/MapDownloadServiceTest.cpp TARGET OSMScout::Client)
+set_tests_properties(MapDownloadServiceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
 #---- Latch
 osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
@@ -52,6 +59,10 @@ set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 osmscout_test_project(NAME LocationDescriptionServiceTest SOURCES src/LocationDescriptionServiceTest.cpp)
 set_tests_properties(LocationDescriptionServiceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 set_tests_properties(LocationDescriptionServiceTest PROPERTIES UNITY_BUILD FALSE)
+
+#---- DescriptionService
+osmscout_test_project(NAME DescriptionServiceTest SOURCES src/DescriptionServiceTest.cpp)
+set_tests_properties(DescriptionServiceTest PROPERTIES UNITY_BUILD FALSE)
 
 #---- NumberSetPerformance
 osmscout_test_project(NAME NumberSetPerformanceTest SOURCES src/NumberSetPerformanceTest.cpp)

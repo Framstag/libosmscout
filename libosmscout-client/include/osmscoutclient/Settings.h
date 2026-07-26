@@ -106,6 +106,8 @@ public:
   Signal<double> fontSizeChanged;
   Signal<bool> showAltLanguageChanged;
   Signal<std::string> unitsChanged;
+  Signal<std::string> mapsDirectoryChanged;
+  Signal<std::string> mapProviderIdChanged;
 
 public:
   /**
@@ -179,6 +181,12 @@ public:
 
   std::string GetUnits() const;
   void SetUnits(const std::string &units);
+
+  std::string GetMapsDirectory() const;
+  void SetMapsDirectory(const std::string &dir);
+
+  std::string GetMapProviderId() const;
+  void SetMapProviderId(const std::string &id);
 };
 
 /**

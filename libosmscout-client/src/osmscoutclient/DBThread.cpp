@@ -164,7 +164,8 @@ DatabaseCoverage DBThread::databaseCoverage(const osmscout::Magnification &magni
 
 void DBThread::Initialize()
 {
-  mapManager->LookupDatabases();
+  // Initial scan is deferred — triggered by first database list change
+  // mapManager->LookupDatabases();
 }
 
 CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories)

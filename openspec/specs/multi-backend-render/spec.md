@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provide a single command-line demo `DrawMapAll` that renders the same map view through every compiled-in map backend and writes one output file per backend.
+
+## Requirements
 
 ### Requirement: Unified command-line interface
 

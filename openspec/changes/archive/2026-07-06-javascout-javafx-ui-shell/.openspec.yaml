@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-06
+goal: Replace CLI-only JavaScout with JavaFX window containing menu bar, empty
+  map panel, and status bar

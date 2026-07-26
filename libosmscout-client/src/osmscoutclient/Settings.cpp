@@ -374,4 +374,30 @@ void Settings::SetUnits(const std::string &units)
     unitsChanged.Emit(units);
   }
 }
+
+std::string Settings::GetMapsDirectory() const
+{
+  return storage->GetString("OSMScoutLib/Download/MapsDirectory", "");
+}
+
+void Settings::SetMapsDirectory(const std::string &dir)
+{
+  if (GetMapsDirectory()!=dir){
+    storage->SetValue("OSMScoutLib/Download/MapsDirectory", dir);
+    mapsDirectoryChanged.Emit(dir);
+  }
+}
+
+std::string Settings::GetMapProviderId() const
+{
+  return storage->GetString("OSMScoutLib/Download/MapProviderId", "");
+}
+
+void Settings::SetMapProviderId(const std::string &id)
+{
+  if (GetMapProviderId()!=id){
+    storage->SetValue("OSMScoutLib/Download/MapProviderId", id);
+    mapProviderIdChanged.Emit(id);
+  }
+}
 }
