@@ -2,6 +2,16 @@ testIncDir = include_directories('include')
 
 testInstallDir = 'share/osmscout/tests'
 
+FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
+             'src/FavoriteLocationServiceTest.cpp',
+             include_directories: [testIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check FavoriteLocationService', FavoriteLocationServiceTest)
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -189,14 +199,26 @@ test('Check label formatting', FeatureLabelTest)
 
 FileFormatVersionTest = executable('FileFormatVersionTest',
                                'src/FileFormatVersionTest.cpp',
-                               include_directories: [testIncDir, osmscoutIncDir],
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
                                dependencies: [mathDep, openmpDep, catch2MainDep],
-                               link_with: [osmscout],
+                               link_with: [osmscout, osmscoutclient],
                                install: true,
                                install_dir: testInstallDir)
 
 test('Check FileFormatVersion APIs',
      FileFormatVersionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+MapDownloadServiceTest = executable('MapDownloadServiceTest',
+                               'src/MapDownloadServiceTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutclient],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapDownloadService APIs',
+     MapDownloadServiceTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
 FileScannerWriterTest = executable('FileScannerWriterTest',
@@ -319,6 +341,16 @@ LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
                                            install_dir: testInstallDir)
 
 test('Check HighwayMilestone location description', LocationDescriptionServiceTest)
+
+DescriptionServiceTest = executable('DescriptionServiceTest',
+                                    'src/DescriptionServiceTest.cpp',
+                                    include_directories: [osmscoutIncDir],
+                                    dependencies: [mathDep, openmpDep, catch2MainDep],
+                                    link_with: [osmscout],
+                                    install: true,
+                                    install_dir: testInstallDir)
+
+test('Check object description service', DescriptionServiceTest)
 endif
 
 MapRotateTest = executable('MapRotateTest',

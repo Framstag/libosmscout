@@ -43,8 +43,9 @@ public:
   Signal<std::vector<std::filesystem::path>> databaseListChanged;
 
 private:
-  const std::vector<std::filesystem::path> databaseLookupDirs;
+  std::vector<std::filesystem::path> databaseLookupDirs;
   std::vector<MapDirectory> databaseDirectories;
+  mutable std::mutex lookupMutex;
   std::mutex mutex;
 
 public:
@@ -59,8 +60,15 @@ public:
 
   std::vector<std::filesystem::path> GetLookupDirectories() const
   {
+    std::unique_lock<std::mutex> lock(lookupMutex);
     return databaseLookupDirs;
   }
+
+  /**
+   * Add a directory to the lookup path and trigger a database rescan.
+   * Thread-safe.
+   */
+  void AddLookupDirectory(const std::filesystem::path &dir);
 
   std::vector<MapDirectory> GetDatabaseDirectories() const
   {

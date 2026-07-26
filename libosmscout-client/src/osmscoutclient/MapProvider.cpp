@@ -29,6 +29,10 @@ MapProvider MapProvider::fromJson(const nlohmann::json &obj)
     return MapProvider();
   }
 
+  if (!(obj.contains("name") && obj.contains("uri") && obj.contains("listUri"))){
+    return MapProvider();
+  }
+
   auto name = obj["name"];
   auto uri = obj["uri"];
   auto listUri = obj["listUri"];

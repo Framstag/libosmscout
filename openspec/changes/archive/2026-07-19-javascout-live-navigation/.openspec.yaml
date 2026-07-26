@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-18
+goal: Enable live turn-by-turn navigation simulation and real GPS mode in the
+  JavaScout desktop demo.

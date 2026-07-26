@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Add bicycle and pedestrian routing support with a selectable vehicle
+  profile in the route panel UI

@@ -1,12 +1,16 @@
 set(HEADER_FILES
   include/osmscoutclient/json/json.hpp
   include/osmscoutclient/json/json_fwd.hpp
+  include/osmscoutclient/AvailableMapEntry.h
+  include/osmscoutclient/FavoriteLocationService.h
   include/osmscoutclient/AdminRegionInfo.h
   include/osmscoutclient/DBInstance.h
   include/osmscoutclient/DBJob.h
   include/osmscoutclient/DBThread.h
+  include/osmscoutclient/HttpClient.h
   include/osmscoutclient/LocationInfo.h
   include/osmscoutclient/MapDirectory.h
+  include/osmscoutclient/MapDownloadService.h
   include/osmscoutclient/MapManager.h
   include/osmscoutclient/MapProvider.h
   include/osmscoutclient/ClientImportExport.h
@@ -17,10 +21,13 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+  src/osmscoutclient/AvailableMapEntry.cpp
   src/osmscoutclient/DBInstance.cpp
   src/osmscoutclient/DBJob.cpp
   src/osmscoutclient/DBThread.cpp
+  src/osmscoutclient/FavoriteLocationService.cpp
   src/osmscoutclient/MapDirectory.cpp
+  src/osmscoutclient/MapDownloadService.cpp
   src/osmscoutclient/MapManager.cpp
   src/osmscoutclient/MapProvider.cpp
   src/osmscoutclient/OnlineTileProvider.cpp

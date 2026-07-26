@@ -53,6 +53,13 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
     if (lastPosition &&
         (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
 
+      // GPS gap > 10s means signal was lost (tunnel, dropout).
+      // Reset FIFO to avoid computing bogus speed from the position jump.
+      auto gap = gpsUpdateMsg->timestamp - lastPosition.time;
+      if (gap > seconds(10)) {
+        segmentFifo.clear();
+      }
+
       segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
                              gpsUpdateMsg->timestamp-lastPosition.time});
       Timestamp::duration fifoDuration{Timestamp::duration::zero()};
@@ -64,6 +71,10 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
       auto sec=duration_cast<duration<double>>(fifoDuration);
       if (sec.count()>0){
         double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
+        // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
+        if (speed > 200.0) {
+          speed = -1.0;
+        }
         result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
       }
       // pop fifo

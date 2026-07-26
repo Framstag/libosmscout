@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Wire C++ RouteInstructionAgent through JNI so JavaScout shows next turn,
+  distance, and street name during navigation

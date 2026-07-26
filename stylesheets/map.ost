@@ -2378,4 +2378,6 @@ TYPES
   // Debugging
   TYPE srtm_tile IGNORE
     = WAY AREA ("type"=="srtm_tile")
+
+
 END

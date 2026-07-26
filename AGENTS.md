@@ -184,7 +184,7 @@ libosmscout/
 
 ## C++ Coding Style
 
-See [CODING_STYLE.md](CODING_STYLE.md) for full guide derived from actual code.
+See [CodeStyles.md](guidelines/CodeStyles.md) for full guide derived from actual code.
 Covers naming, indentation, braces, classes, methods, pointers, enums,
 include order, comments, formatting, header guards, templates, and error handling.
 ## Architecture Overview

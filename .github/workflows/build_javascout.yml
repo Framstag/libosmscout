@@ -1,0 +1,167 @@
+name: JavaScout build
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  cmake:
+    name: cmake + maven
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Cache Maven wrapper
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/wrapper
+          key: mvn-wrapper-${{ runner.os }}-${{ hashFiles('JavaScout/.mvn/wrapper/maven-wrapper.properties') }}
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-repo-${{ runner.os }}-${{ hashFiles('JavaScout/pom.xml') }}
+          restore-keys: |
+            maven-repo-${{ runner.os }}-
+
+      - name: Install C++ dependencies
+        run: sudo apt-get update && sudo apt-get install -y
+          cmake ninja-build
+          libxml2-dev
+          libprotobuf-dev protobuf-compiler liblzma-dev
+          libpng-dev
+          libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+
+      - name: Configure CMake
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_UNITY_BUILD=ON
+          -DOSMSCOUT_BUILD_CLIENT_JAVA=ON
+          -DOSMSCOUT_BUILD_IMPORT=OFF
+          -DOSMSCOUT_BUILD_GPX=OFF
+          -DOSMSCOUT_BUILD_MAP_AGG=OFF
+          -DOSMSCOUT_BUILD_MAP_CAIRO=ON
+          -DOSMSCOUT_BUILD_MAP_OPENGL=OFF
+          -DOSMSCOUT_BUILD_MAP_QT=OFF
+          -DOSMSCOUT_BUILD_MAP_SVG=OFF
+          -DOSMSCOUT_BUILD_CLIENT_QT=OFF
+          -DOSMSCOUT_BUILD_DEMOS=OFF
+          -DOSMSCOUT_BUILD_TOOL_IMPORT=OFF
+          -DOSMSCOUT_BUILD_TOOL_DUMPDATA=OFF
+          -DOSMSCOUT_BUILD_TOOL_MCPSERVER=OFF
+          -DOSMSCOUT_BUILD_TOOL_PUBLICTRANSPORTMAP=OFF
+          -DOSMSCOUT_BUILD_TOOL_OSMSCOUT2=OFF
+          -DOSMSCOUT_BUILD_TOOL_OSMSCOUTOPENGL=OFF
+          -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF
+          -DOSMSCOUT_BUILD_TESTS=OFF
+
+      - name: Build C++ libraries
+        run: cmake --build build
+
+      - name: Install C++ libraries
+        run: sudo cmake --install build
+
+      - name: Install client jar to local Maven repository
+        run: >
+          ./JavaScout/mvnw install:install-file
+          -Dfile=build/libosmscout-client-java/libosmscoutclientjava.jar
+          -DgroupId=net.sf.libosmscout
+          -DartifactId=libosmscout-client-java
+          -Dversion=1.0-SNAPSHOT
+          -Dpackaging=jar
+          -q
+        working-directory: JavaScout
+
+      - name: Build JavaScout
+        run: ./mvnw package -q
+        working-directory: JavaScout
+
+      - name: Run JavaScout tests
+        run: ./mvnw test
+        working-directory: JavaScout
+
+  meson:
+    name: meson + maven
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Cache Maven wrapper
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/wrapper
+          key: mvn-wrapper-${{ runner.os }}-${{ hashFiles('JavaScout/.mvn/wrapper/maven-wrapper.properties') }}
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-repo-${{ runner.os }}-${{ hashFiles('JavaScout/pom.xml') }}
+          restore-keys: |
+            maven-repo-${{ runner.os }}-
+
+      - name: Install C++ dependencies
+        run: sudo apt-get update && sudo apt-get install -y
+          python3-pip
+          libxml2-dev
+          libprotobuf-dev protobuf-compiler liblzma-dev
+          libpng-dev
+          libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+
+      - name: Install meson and ninja
+        run: pip3 install --only-binary :all: --break-system-packages meson ninja
+
+      - name: Configure Meson
+        run: >
+          meson setup build
+          -Dbuild_java=true
+          -DenableImport=false
+          -DenableGpx=false
+          -DenableMapAgg=false
+          -DenableMapCairo=true
+          -DenableMapOpenGL=false
+          -DenableMapQt=false
+          -DenableMapSvg=false
+          -DenableClientQt=false
+          -DenableTests=false
+          -DbuildDemos=false
+
+      - name: Build C++ libraries
+        run: ninja -C build
+
+      - name: Install client jar to local Maven repository
+        run: >
+          ./mvnw install:install-file
+          -Dfile=build/libosmscout-client-java/java/libosmscoutclientjava.jar
+          -DgroupId=net.sf.libosmscout
+          -DartifactId=libosmscout-client-java
+          -Dversion=1.0-SNAPSHOT
+          -Dpackaging=jar
+          -q
+        working-directory: JavaScout
+
+      - name: Build JavaScout
+        run: ./mvnw package -q
+        working-directory: JavaScout
+
+      - name: Run JavaScout tests
+        run: ./mvnw test
+        working-directory: JavaScout

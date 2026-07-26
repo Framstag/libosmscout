@@ -16,7 +16,7 @@ if build_machine.system()=='darwin'
   add_project_link_arguments(['-dynamiclib'], language: 'objcpp')
 endif
 
-javaSupport = add_languages('java', native: true, required: false)
+javaSupport = add_languages('java', native: false, required: false)
 
 compiler = meson.get_compiler('cpp')
 
@@ -309,20 +309,19 @@ else
     buildMapSVG=false
 endif
 
-# Binding
+# Allways build the client lbrary since it does not have additional dependencies
+buildClient=true
 
+# Binding
 if swigExe.found()
   buildBinding=true
 else
   buildBinding=false
 endif
 
-# Allways build the client lbrary since it does not have additional dependencies
-buildClient=true
-
 if javaSupport and jniDep.found()
   buildJava = true
-  java = import('java')
+  javaModule = import('java')
   javaCompiler = meson.get_compiler('java')
 else
   buildJava = false
@@ -418,6 +417,11 @@ endif
 #  subdir('libosmscout-binding')
 #endif
 
+if buildJava
+  subdir('libosmscout-client-java')
+  # JavaScout now uses Maven — see JavaScout/pom.xml
+  # subdir('JavaScout')
+endif
 
 run_target('cppcheck', command : ['scripts/cppcheck.sh',
   meson.current_build_dir(),
@@ -466,6 +470,7 @@ if buildJava
   summary({
             'Compiler id': javaCompiler.get_id(),
             'Compiler version': javaCompiler.version(),
+            'JNI dependency': jniDep,
           }, section: 'Java')
 endif
 
@@ -485,6 +490,7 @@ summary({
   'libosmscout-gpx': buildGpx,
   'libosmscout-client': buildClient,
   'libosmscout-client-qt': buildClientQt,
+  'libosmscout-client-java': buildJava,
   'libosmscout-binding': buildBinding
 }, section: 'Libraries')
 

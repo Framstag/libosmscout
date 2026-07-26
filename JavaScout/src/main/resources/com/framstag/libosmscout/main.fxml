@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:controller="com.framstag.libosmscout.MainController"
+            xmlns:fx="http://javafx.com/fxml"
+            stylesheets="@style.css">
+
+    <!-- Center: map canvas -->
+    <center>
+        <StackPane fx:id="mapPanel">
+            <Canvas fx:id="mapCanvas" />
+            <Label fx:id="placeholderLabel"
+                   text="No map loaded — download a map via the menu"
+                   styleClass="placeholder" />
+        </StackPane>
+    </center>
+
+    <!-- Bottom: status bar -->
+    <bottom>
+        <HBox fx:id="statusBar" styleClass="status-bar">
+            <Label fx:id="dbPathLabel"
+                   text="No maps directory configured"
+                   HBox.hgrow="ALWAYS" />
+            <Label fx:id="coordLabel"
+                   text="Lat: --  Lon: --"
+                   styleClass="coord-label" />
+        </HBox>
+    </bottom>
+
+</BorderPane>

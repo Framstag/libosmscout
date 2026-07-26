@@ -1,8 +1,15 @@
-# C++ Coding Style — libosmscout
+# Code styles
+
+## General requirements for source files
+
+- Source should have one public class, multiple private classes are 
+  allowed if they have strong coupling.
+
+## C++ Coding Style — libosmscout
 
 Derived from analyzing headers and implementation in `libosmscout/` core library (GeoCoord.h, Tag.h, TypeConfig.h, ObjectRef.h, TypeConfig.cpp, OSMScoutTypes.h, Compiler.h, Assert.h, NameFeature.h, FileScanner.h).
 
-## Naming
+### Naming
 
 | Element | Convention | Example |
 |---------|-----------|--------|
@@ -16,7 +23,7 @@ Derived from analyzing headers and implementation in `libosmscout/` core library
 | Template params | PascalCase | `template<std::size_t FlagCnt>` |
 | Macros | `OSMSCOUT_*` uppercase | `OSMSCOUT_API`, `CLASS_FINAL` |
 
-## Namespace
+### Namespace
 
 - Single top-level namespace: `osmscout`
 - Opening brace on line after `namespace` declaration
@@ -35,7 +42,7 @@ namespace osmscout {
 } // namespace osmscout
 ```
 
-## Indentation & Braces
+### Indentation & Braces
 
 - **2-space** indentation. No tabs.
 - **Class declarations**: opening brace on its **own line**
@@ -76,7 +83,7 @@ public:
 };
 ```
 
-## Member Declarations
+### Member Declarations
 
 - **In-class initializers** preferred over constructor init for primitives:
   ```cpp
@@ -98,7 +105,7 @@ public:
   };
   ```
 
-## Classes
+### Classes
 
 - **`CLASS_FINAL`**: use the macro at end of class declaration. `#define CLASS_FINAL final` (empty for SWIG)
 - **Export macro**: every public class marked with library-specific macro (`OSMSCOUT_API`, etc.)
@@ -129,7 +136,7 @@ protected:
 };
 ```
 
-## Methods
+### Methods
 
 - **Getter pattern**: `GetX()` / `SetX()` naming (not `x()` / `setX()`)
 - **Boolean queries**: `IsValid()`, `CanRoute()`, `HasFeature()`, `HasValue()` — `Is`/`Can`/`Has` prefix
@@ -145,7 +152,7 @@ protected:
 - **Static methods**: used for factory/parse patterns: `static bool Parse(...)`, `static TypeInfoRef Read(...)`
 - **Short bodies** defined inline in header; **long bodies** in `.cpp` file
 
-## Pointers & References
+### Pointers & References
 
 - **Reference placement**: attached to type (left): `const std::string& name`
 - **Pointer placement**: `uint8_t *featureBits=nullptr` — space on left, not right
@@ -153,7 +160,7 @@ protected:
 - **Raw pointers** used for non-owning access to feature value buffers
 - **`nullptr`** not `NULL` or `0` (except integral zero constants)
 
-## Enums
+### Enums
 
 Two patterns coexist:
 
@@ -185,7 +192,7 @@ enum class SpecialType : uint8_t {
 };
 ```
 
-## Include Order
+### Include Order
 
 Each header/source file follows a strict order:
 1. **Own header** first (for `.cpp` files)
@@ -194,7 +201,7 @@ Each header/source file follows a strict order:
 4. **Project headers** alphabetically by full path: `<osmscout/TypeConfig.h>`, `<osmscout/feature/NameFeature.h>`, `<osmscout/system/Compiler.h>`, `<osmscout/util/Parsing.h>`
 5. **Platform-specific** `#ifdef` blocks at end
 
-## Comments
+### Comments
 
 - **Doxygen blocks** for public API, using `/** ... */` style
 - Standard Doxygen tags: `\ingroup`, `@param`, `@return`, `@note`, `@throws`
@@ -224,7 +231,7 @@ Each header/source file follows a strict order:
     }
 ```
 
-## Formatting Details
+### Formatting Details
 
 - **Spaces around operators**: `lat==other.lat && lon==other.lon` — no space inside empty parens, one space around binary operators (except `::`, `->`, `.`)
 - **Spaces inside parens**: none — `GetFeature(idx)` not `GetFeature( idx )`
@@ -240,7 +247,7 @@ Each header/source file follows a strict order:
 - **Switch cases**: fall through 
 - **Empty bodies**: explicit `// no code` comment inside empty braces
 
-## Header Guards
+### Header Guards
 
 Traditional `#ifndef` / `#define` / `#endif` pattern (not `#pragma once`):
 ```cpp
@@ -251,7 +258,7 @@ Traditional `#ifndef` / `#define` / `#endif` pattern (not `#pragma once`):
 ```
 Guard name: `OSMSCOUT_<MODULE>_<NAME>_H`
 
-## Template & Modern C++
+### Template & Modern C++
 
 - **Templates** used sparingly, mostly for type-safe Read/Write with flag arrays
 - **`using` aliases over `typedef`** for type definitions
@@ -261,9 +268,13 @@ Guard name: `OSMSCOUT_<MODULE>_<NAME>_H`
 - **`std::string_view`** in newer feature code parameter signatures
 - **`// NOLINT`** annotations for lint suppression on intentional public members
 
-## Error Handling
+### Error Handling
 
 - **`assert()`** from `<cassert>` via `osmscout/system/Assert.h` for internal invariants only
 - **`@throws IOException`** documented in Doxygen for file I/O methods
 - Legacy code transitioning toward Status-based error codes
 - No exceptions visible in headers besides I/O operations
+
+## Java files
+
+- The styling of Java files follow the Java standard formatting.

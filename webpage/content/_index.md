@@ -5,10 +5,10 @@ weight = 1
 +++
 
 libosmscout offers applications simple, high-level interfaces for __offline__
-__location and POI lokup__, __rendering__ and __routing__ functionalities based
+__location and POI lookup__, __rendering__ and __routing__ functionalities based
 on OpenStreetMap (OSM) data.
 
-It offers you much of the functionality you need, to implement a offline-capable
+It offers you much of the functionality you need to implement a offline-capable
 routing application (or similar) based on OSM data.
 
 This means:

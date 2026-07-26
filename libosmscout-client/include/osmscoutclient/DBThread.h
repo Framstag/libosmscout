@@ -230,6 +230,11 @@ public:
 
   double GetPhysicalDpi() const;
 
+  std::string GetIconDirectory() const
+  {
+    return iconDirectory;
+  }
+
   std::string GetStylesheetFilename() const
   {
     return stylesheetFilename;

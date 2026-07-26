@@ -43,34 +43,76 @@ CancelableFuture<bool> MapManager::LookupDatabases()
     std::vector<std::filesystem::path> databaseFsDirectories;
 
     for (const auto &lookupDir:databaseLookupDirs){
-      // Symlinks are automatically resolved when using exists() and is_directory().
-      // https://en.cppreference.com/w/cpp/filesystem/exists
-      // https://en.cppreference.com/w/cpp/filesystem/is_directory
-      // https://en.cppreference.com/w/cpp/filesystem/status
+      osmscout::log.Info() << "Scanning maps lookup directory: " << lookupDir.string();
+
       if (!std::filesystem::exists(lookupDir) || !std::filesystem::is_directory(lookupDir)) {
         osmscout::log.Warn() << "Lookup dir " << lookupDir.string() << " doesn't exist or isn't a directory";
         continue;
       }
 
-      for (const auto & fInfo : std::filesystem::recursive_directory_iterator(lookupDir)) {
-        auto entryPath = fInfo.path();
-        if (fInfo.is_regular_file() && entryPath.has_filename() && entryPath.has_parent_path() && entryPath.filename() == TypeConfig::FILE_TYPES_DAT){
-          MapDirectory mapDir(entryPath.parent_path());
-          if (mapDir.IsValid()) {
-            osmscout::log.Info() << "found db " << mapDir.GetName() << ": " << mapDir.GetDirStr();
-            if (uniqPaths.find(mapDir.GetDir()) == uniqPaths.end()) {
-              databaseDirectories.push_back(mapDir);
-              databaseFsDirectories.push_back(mapDir.GetDir());
-              uniqPaths.insert(mapDir.GetDir());
+      size_t candidateCount = 0;
+      size_t validCount = 0;
+      size_t invalidCount = 0;
+
+      try {
+        for (const auto & fInfo : std::filesystem::recursive_directory_iterator(lookupDir)) {
+          auto entryPath = fInfo.path();
+          if (fInfo.is_regular_file() && entryPath.has_filename() && entryPath.has_parent_path() && entryPath.filename() == TypeConfig::FILE_TYPES_DAT){
+            candidateCount++;
+            try {
+              MapDirectory mapDir(entryPath.parent_path());
+              if (mapDir.IsValid()) {
+                validCount++;
+                std::string displayName = mapDir.GetName();
+                if (displayName.empty()) {
+                  displayName = mapDir.GetDir().filename().string();
+                }
+                osmscout::log.Info() << "  found valid map '" << displayName
+                                     << "' at " << mapDir.GetDirStr()
+                                     << (mapDir.HasMetadata() ? " (with metadata)" : " (no metadata)");
+                if (uniqPaths.find(mapDir.GetDir()) == uniqPaths.end()) {
+                  databaseDirectories.push_back(mapDir);
+                  databaseFsDirectories.push_back(mapDir.GetDir());
+                  uniqPaths.insert(mapDir.GetDir());
+                }
+              } else {
+                invalidCount++;
+                osmscout::log.Info() << "  skipping invalid map directory: " << entryPath.parent_path().string();
+              }
+            } catch (const std::exception &e) {
+              invalidCount++;
+              osmscout::log.Warn() << "  error checking database at " << entryPath.parent_path().string() << ": " << e.what();
             }
           }
         }
+      } catch (const std::exception &e) {
+        osmscout::log.Warn() << "Error iterating directory " << lookupDir.string() << ": " << e.what();
       }
+
+      osmscout::log.Info() << "Lookup directory " << lookupDir.string()
+                           << " scan complete: " << candidateCount << " candidates, "
+                           << validCount << " valid, " << invalidCount << " invalid";
     }
+    osmscout::log.Info() << "Total installed maps found: " << databaseDirectories.size();
     databaseListChanged.Emit(databaseFsDirectories);
 
     return true;
   });
+}
+
+void MapManager::AddLookupDirectory(const std::filesystem::path &dir)
+{
+  {
+    std::unique_lock<std::mutex> lock(lookupMutex);
+    // Avoid duplicates
+    for (const auto &existing : databaseLookupDirs) {
+      if (std::filesystem::equivalent(existing, dir)) {
+        return;
+      }
+    }
+    databaseLookupDirs.push_back(dir);
+  }
+  LookupDatabases();
 }
 
 CancelableFuture<bool> MapManager::DeleteOther(const std::vector<std::string> &mapPath, const std::filesystem::path &fsPath)
