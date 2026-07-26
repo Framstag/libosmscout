@@ -22,13 +22,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven wrapper
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/wrapper
           key: mvn-wrapper-${{ runner.os }}-${{ hashFiles('JavaScout/.mvn/wrapper/maven-wrapper.properties') }}
 
       - name: Cache Maven repository
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/repository
           key: maven-repo-${{ runner.os }}-${{ hashFiles('JavaScout/pom.xml') }}
@@ -75,7 +75,7 @@ jobs:
       - name: Install client jar to local Maven repository
         run: >
           ./mvnw install:install-file
-          -Dfile=build/libosmscout-client-java/libosmscoutclientjava.jar
+          -Dfile=${{ github.workspace }}/build/libosmscout-client-java/libosmscoutclientjava.jar
           -DgroupId=net.sf.libosmscout
           -DartifactId=libosmscout-client-java
           -Dversion=1.0-SNAPSHOT
@@ -105,13 +105,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven wrapper
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/wrapper
           key: mvn-wrapper-${{ runner.os }}-${{ hashFiles('JavaScout/.mvn/wrapper/maven-wrapper.properties') }}
 
       - name: Cache Maven repository
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/repository
           key: maven-repo-${{ runner.os }}-${{ hashFiles('JavaScout/pom.xml') }}
@@ -132,7 +132,6 @@ jobs:
       - name: Configure Meson
         run: >
           meson setup build
-          -Dbuild_java=true
           -DenableImport=false
           -DenableGpx=false
           -DenableMapAgg=false
@@ -150,7 +149,7 @@ jobs:
       - name: Install client jar to local Maven repository
         run: >
           ./mvnw install:install-file
-          -Dfile=build/libosmscout-client-java/java/libosmscoutclientjava.jar
+          -Dfile=${{ github.workspace }}/build/libosmscout-client-java/java/libosmscoutclientjava.jar
           -DgroupId=net.sf.libosmscout
           -DartifactId=libosmscout-client-java
           -Dversion=1.0-SNAPSHOT
