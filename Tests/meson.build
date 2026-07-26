@@ -491,13 +491,15 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     links += osmscoutmapgdi
   endif
 
-  PerformanceTest = executable('PerformanceTest',
-                               'src/PerformanceTest.cpp',
-                               cpp_args: ['-fPIC'],
-                               include_directories: includes,
-                               dependencies: deps,
-                               link_with: links,
-                               install: true)
+  if get_option('buildDemos')
+    PerformanceTest = executable('PerformanceTest',
+                                 'src/PerformanceTest.cpp',
+                                 cpp_args: ['-fPIC'],
+                                 include_directories: includes,
+                                 dependencies: deps,
+                                 link_with: links,
+                                 install: true)
+  endif
 endif
 
 PolygonCenterTest = executable('PolygonCenterTest',
