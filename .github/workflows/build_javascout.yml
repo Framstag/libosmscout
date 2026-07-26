@@ -36,12 +36,12 @@ jobs:
             maven-repo-${{ runner.os }}-
 
       - name: Install C++ dependencies
-        run: sudo apt-get update && sudo apt-get install -y
-          cmake ninja-build
-          libxml2-dev
-          libprotobuf-dev protobuf-compiler liblzma-dev
-          libpng-dev
-          libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+        run: "sudo apt-get update && sudo apt-get install -y
+               cmake ninja-build
+               libxml2-dev
+               libprotobuf-dev protobuf-compiler liblzma-dev
+               libpng-dev
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev"
 
       - name: Configure CMake
         run: >
@@ -74,7 +74,7 @@ jobs:
 
       - name: Install client jar to local Maven repository
         run: >
-          ./JavaScout/mvnw install:install-file
+          ./mvnw install:install-file
           -Dfile=build/libosmscout-client-java/libosmscoutclientjava.jar
           -DgroupId=net.sf.libosmscout
           -DartifactId=libosmscout-client-java
@@ -119,15 +119,15 @@ jobs:
             maven-repo-${{ runner.os }}-
 
       - name: Install C++ dependencies
-        run: sudo apt-get update && sudo apt-get install -y
-          python3-pip
-          libxml2-dev
-          libprotobuf-dev protobuf-compiler liblzma-dev
-          libpng-dev
-          libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
+        run: "sudo apt-get update && sudo apt-get install -y
+               python3-pip
+               libxml2-dev
+               libprotobuf-dev protobuf-compiler liblzma-dev
+               libpng-dev
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev"
 
       - name: Install meson and ninja
-        run: pip3 install --only-binary :all: --break-system-packages meson ninja
+        run: "pip3 install --only-binary :all: --break-system-packages meson ninja"
 
       - name: Configure Meson
         run: >
