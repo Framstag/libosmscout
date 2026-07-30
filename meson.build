@@ -163,6 +163,22 @@ pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false, fallback: ['libpng','libpng_dep'])
 gobjectDep = dependency('gobject-2.0',required: false)
 
+# Skia
+skiaDep = dependency('skia', required : false)
+if not skiaDep.found()
+  # Manual fallback: check for SkCanvas.h and libskia
+  skiaHeader = compiler.has_header('core/SkCanvas.h')
+  if skiaHeader
+    skiaLib = compiler.find_library('skia', required: false)
+    if skiaLib.found()
+      skiaDep = declare_dependency(
+        dependencies: skiaLib,
+        include_directories: include_directories('/usr')
+      )
+    endif
+  endif
+endif
+
 # DirectX
 d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)
@@ -309,6 +325,13 @@ else
     buildMapSVG=false
 endif
 
+# Skia
+if skiaDep.found() and get_option('enableMapSkia')
+  buildMapSkia=true
+else
+  buildMapSkia=false
+endif
+
 # Allways build the client lbrary since it does not have additional dependencies
 buildClient=true
 
@@ -367,6 +390,10 @@ endif
 
 if buildMapSVG
     subdir('libosmscout-map-svg')
+endif
+
+if buildMapSkia
+    subdir('libosmscout-map-skia')
 endif
 
 subdir('libosmscout-client')
@@ -487,6 +514,7 @@ summary({
   'libosmscout-map-opengl': buildMapOpenGL,
   'libosmscout-map-qt': buildMapQt,
   'libosmscout-map-svg': buildMapSVG,
+  'libosmscout-map-skia': buildMapSkia,
   'libosmscout-gpx': buildGpx,
   'libosmscout-client': buildClient,
   'libosmscout-client-qt': buildClientQt,

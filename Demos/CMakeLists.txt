@@ -228,6 +228,13 @@ else()
 	message("Skip DrawMapSVG demo, libosmscout-map-svg is missing.")
 endif()
 
+#---- DrawMapSkia
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+    osmscout_demo_project(NAME DrawMapSkia SOURCES src/DrawMapSkia.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia)
+else()
+	message("Skip DrawMapSkia demo, libosmscout-map-skia is missing.")
+endif()
+
 #---- DrawMapDirectX
 if(${OSMSCOUT_BUILD_MAP_DIRECTX})
     osmscout_demo_project(NAME DrawMapDirectX SOURCES src/DrawMapDirectX.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapDirectX ${Direct2D_LIBRARIES} "Shell32.lib")
@@ -322,6 +329,12 @@ endif()
 if(${OSMSCOUT_BUILD_MAP_SVG})
   list(APPEND DRAWMAPALL_TARGETS OSMScout::MapSVG)
   list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_SVG)
+endif()
+
+# Skia
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  list(APPEND DRAWMAPALL_TARGETS OSMScout::MapSkia)
+  list(APPEND DRAWMAPALL_DEFS HAVE_OSMSCOUT_MAP_SKIA)
 endif()
 
 # OSX

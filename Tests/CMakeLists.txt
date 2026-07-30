@@ -376,3 +376,18 @@ if(${OSMSCOUT_BUILD_MAP_CAIRO})
     target_compile_definitions(LaneEvaluation PRIVATE HAVE_MAP_CAIRO=1)
 endif()
 
+#---- MapPainterSkiaTest
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  osmscout_test_project(NAME MapPainterSkiaTest SOURCES src/MapPainterSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- SymbolRendererSkiaTest
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  osmscout_test_project(NAME SymbolRendererSkiaTest SOURCES src/SymbolRendererSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- SVGIconSkiaTest
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  osmscout_test_project(NAME SVGIconSkiaTest SOURCES src/SVGIconSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+

@@ -388,6 +388,87 @@ endif()
 
 find_program(HUGO_PATH hugo)
 
+# Find Skia
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(SKIA skia)
+endif()
+
+if(NOT SKIA_FOUND)
+  # Skia headers use #include "include/core/..." so the include root
+  # must be the parent of the directory containing 'include/'.
+  # Try standard layout: /usr/include/skia/include/core/SkCanvas.h
+  # Try flat layout:    /usr/include/core/SkCanvas.h
+  #
+  # We check common install locations directly since find_path()
+  # may not search all system paths in all CMake versions.
+  set(SKIA_HEADER_CANDIDATES
+    "/usr/include/skia/include/core/SkCanvas.h"
+    "/usr/local/include/skia/include/core/SkCanvas.h"
+    "/usr/include/core/SkCanvas.h"
+    "/usr/local/include/core/SkCanvas.h"
+  )
+  foreach(candidate IN LISTS SKIA_HEADER_CANDIDATES)
+    if(EXISTS "${candidate}")
+      get_filename_component(SKIA_INCLUDE_DIRS "${candidate}" PATH)
+      # Go up two levels: from .../core/SkCanvas.h to .../include/core/SkCanvas.h
+      # we need the root that makes #include "include/core/..." resolve.
+      # For flat layout (/usr/include/core/SkCanvas.h), root = /usr
+      # For standard layout (/usr/include/skia/include/core/SkCanvas.h), root = /usr/include/skia
+      get_filename_component(SKIA_INCLUDE_DIRS "${SKIA_INCLUDE_DIRS}" PATH)
+      get_filename_component(SKIA_INCLUDE_DIRS "${SKIA_INCLUDE_DIRS}" PATH)
+      break()
+    endif()
+  endforeach()
+  find_library(SKIA_LIBRARY skia
+    PATH_SUFFIXES lib
+  )
+  if(SKIA_INCLUDE_DIRS AND SKIA_LIBRARY)
+    set(SKIA_FOUND TRUE)
+  endif()
+endif()
+
+if(SKIA_FOUND AND NOT TARGET Skia::skia)
+  add_library(Skia::skia UNKNOWN IMPORTED)
+  set_target_properties(Skia::skia PROPERTIES
+    IMPORTED_LOCATION "${SKIA_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${SKIA_INCLUDE_DIRS}"
+  )
+endif()
+
+mark_as_advanced(SKIA_INCLUDE_DIRS SKIA_LIBRARY)
+
+# Detect Skia SVG module (SkSVGDOM) for SVG icon support
+# If unavailable, nanosvg fallback is used instead
+set(OSMSCOUT_HAVE_SKIA_SVG OFF CACHE INTERNAL "Skia SVG module available")
+if(SKIA_FOUND)
+  include(CheckIncludeFileCXX)
+  set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+  CHECK_INCLUDE_FILE_CXX(svg/include/SkSVGDOM.h HAVE_SKIA_SVG_HEADER)
+  if(HAVE_SKIA_SVG_HEADER)
+    # Verify SVG symbols are actually in libskia (not just headers)
+    include(CheckCXXSourceCompiles)
+    set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${SKIA_LIBRARY})
+    check_cxx_source_compiles("
+      #include <svg/include/SkSVGDOM.h>
+      int main() {
+        auto stream = SkFILEStream(\"test.svg\");
+        auto dom = SkSVGDOM::Make(stream);
+        return dom ? 0 : 1;
+      }
+    " SKIA_SVG_WORKS)
+    if(SKIA_SVG_WORKS)
+      set(OSMSCOUT_HAVE_SKIA_SVG ON CACHE INTERNAL "Skia SVG module available")
+      message(STATUS "Skia SVG module detected — SkSVGDOM will be used for SVG icons")
+    else()
+      message(STATUS "Skia SVG headers found but module not compiled in libskia — nanosvg fallback")
+    endif()
+  else()
+    message(STATUS "Skia SVG headers not found — nanosvg fallback")
+  endif()
+endif()
+
 # Find nlohmann_json (header-only, used by MCPServer)
 find_package(nlohmann_json QUIET)
 

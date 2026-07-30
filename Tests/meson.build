@@ -762,4 +762,16 @@ else
                install_dir: testInstallDir)
 endif
 
+if buildMapSkia
+  MapPainterSkiaTest = executable('MapPainterSkiaTest',
+               'src/MapPainterSkiaTest.cpp',
+               include_directories: [testIncDir, osmscoutmapskiaIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, skiaDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapskia],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check MapPainterSkia compilation', MapPainterSkiaTest)
+endif
+
 

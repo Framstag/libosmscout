@@ -10,6 +10,7 @@ option('enableMapIOSX',    type: 'boolean', value: true, description: 'Build iOS
 option('enableMapOpenGL',  type: 'boolean', value: true, description: 'Build OpenGL backend')
 option('enableMapQt',      type: 'boolean', value: true, description: 'Build Qt backend')
 option('enableMapSvg',     type: 'boolean', value: true, description: 'Build SVG backend')
+option('enableMapSkia',    type: 'boolean', value: true, description: 'Build Skia backend')
 option('enableClientQt',   type: 'boolean', value: true, description: 'Build Qt/QML library')
 option('enableXML',        type: 'boolean', value: true, description: 'Use libxml2')
 option('buildDemos',       type: 'boolean', value: true, description: 'Build demo applications')
