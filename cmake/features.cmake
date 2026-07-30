@@ -429,16 +429,30 @@ if(NOT SKIA_FOUND)
 endif()
 
 if(SKIA_FOUND AND NOT TARGET Skia::skia)
-  # pkg_check_modules sets SKIA_LIBRARIES (plural); find_library sets
-  # SKIA_LIBRARY (singular). Normalize to SKIA_LIBRARY.
-  if(NOT SKIA_LIBRARY AND SKIA_LIBRARIES)
-    list(GET SKIA_LIBRARIES 0 SKIA_LIBRARY)
+  # pkg_check_modules sets SKIA_LIBRARIES (plural, library names only);
+  # find_library sets SKIA_LIBRARY (singular, full path).
+  # Resolve to a full path via find_library if needed.
+  if(NOT SKIA_LIBRARY)
+    if(SKIA_LIBRARIES)
+      find_library(SKIA_LIBRARY NAMES ${SKIA_LIBRARIES}
+        PATHS ${SKIA_LIBRARY_DIRS}
+        PATH_SUFFIXES lib lib64
+        NO_DEFAULT_PATH)
+    endif()
+    # Fallback: try without hints
+    if(NOT SKIA_LIBRARY)
+      find_library(SKIA_LIBRARY skia)
+    endif()
   endif()
-  add_library(Skia::skia UNKNOWN IMPORTED)
-  set_target_properties(Skia::skia PROPERTIES
-    IMPORTED_LOCATION "${SKIA_LIBRARY}"
-    INTERFACE_INCLUDE_DIRECTORIES "${SKIA_INCLUDE_DIRS}"
-  )
+  if(SKIA_LIBRARY)
+    add_library(Skia::skia UNKNOWN IMPORTED)
+    set_target_properties(Skia::skia PROPERTIES
+      IMPORTED_LOCATION "${SKIA_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${SKIA_INCLUDE_DIRS}"
+    )
+  else()
+    set(SKIA_FOUND FALSE)
+  endif()
 endif()
 
 mark_as_advanced(SKIA_INCLUDE_DIRS SKIA_LIBRARY)

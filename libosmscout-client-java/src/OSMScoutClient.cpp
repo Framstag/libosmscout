@@ -69,7 +69,9 @@
 #include <osmscout/navigation/VoiceInstructionAgent.h>
 #include <osmscout/navigation/RouteInstructionAgent.h>
 
+#ifdef HAVE_MAP_CAIRO
 #include <cairo.h>
+#endif
 
 #include <jni.h>
 

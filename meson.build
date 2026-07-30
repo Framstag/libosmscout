@@ -185,7 +185,10 @@ endif
 # misses the inner include/. Detect and fix.
 if skiaDep.found() and not compiler.has_header('core/SkCanvas.h', dependencies: skiaDep)
   # Try to get the include dir from pkg-config and append /include
-  incDir = skiaDep.get_pkgconfig_variable('includedir', default_value : '')
+  incDir = ''
+  if skiaDep.type_name() == 'pkgconfig'
+    incDir = skiaDep.get_variable(pkgconfig : 'includedir', default_value : '')
+  endif
   foreach candidate : [incDir + '/include', incDir]
     if candidate != '' and compiler.has_header('core/SkCanvas.h', args : '-I' + candidate)
       skiaDep = declare_dependency(
