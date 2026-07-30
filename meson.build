@@ -179,6 +179,24 @@ if not skiaDep.found()
   endif
 endif
 
+# Some Skia packages (e.g. MSYS2 mingw) install headers under
+# <prefix>/include/skia/include/core/ (nested include/ dir).
+# The pkg-config file may point to <prefix>/include/skia which
+# misses the inner include/. Detect and fix.
+if skiaDep.found() and not compiler.has_header('core/SkCanvas.h', dependencies: skiaDep)
+  # Try to get the include dir from pkg-config and append /include
+  incDir = skiaDep.get_pkgconfig_variable('includedir', default_value : '')
+  foreach candidate : [incDir + '/include', incDir]
+    if candidate != '' and compiler.has_header('core/SkCanvas.h', args : '-I' + candidate)
+      skiaDep = declare_dependency(
+        dependencies: skiaDep,
+        include_directories: include_directories(candidate)
+      )
+      break
+    endif
+  endforeach
+endif
+
 # DirectX
 d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)
