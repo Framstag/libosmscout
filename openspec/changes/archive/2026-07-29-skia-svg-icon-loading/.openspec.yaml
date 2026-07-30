@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-27
+goal: Add SVG icon support to libosmscout-map-skia via Skia's SkSVGDOM, enabling
+  SVG icons from .oss stylesheets to render alongside existing PNG icons
