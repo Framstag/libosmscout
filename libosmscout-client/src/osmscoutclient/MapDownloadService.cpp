@@ -25,12 +25,8 @@
 #include <osmscout/log/Logger.h>
 
 #include <chrono>
-#include <cstring>
-#include <fcntl.h>
 #include <fstream>
 #include <set>
-#include <sys/stat.h>
-#include <unistd.h>
 
 namespace osmscout {
 
@@ -178,7 +174,7 @@ bool MapDownloadService::DownloadMapInternal(std::vector<DownloadJobState> &jobs
   // Only check if directory has metadata file (indicates previous download attempt)
   std::string dirStr = targetDir.string();
   std::string metaPathStr = dirStr + "/" + MapDirectory::FileMetadata;
-  bool hasMetaFile = (access(metaPathStr.c_str(), F_OK) == 0);
+  bool hasMetaFile = std::filesystem::exists(metaPathStr);
   if (hasMetaFile) {
     // Partial download exists — clean it up by removing all files
     for (const auto &f : MapDirectory::MandatoryFiles()) {
@@ -214,10 +210,9 @@ bool MapDownloadService::DownloadMapInternal(std::vector<DownloadJobState> &jobs
   std::string metadataPathStr = dirStr + "/" + MapDirectory::FileMetadata;
   std::string metaJson = metadata.dump(2);
   {
-    int fd = open(metadataPathStr.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd < 0) {
-      osmscout::log.Error() << "Failed to write metadata to " << metadataPathStr
-                            << ": " << strerror(errno);
+    std::ofstream ofs(metadataPathStr);
+    if (!ofs.is_open()) {
+      osmscout::log.Error() << "Failed to write metadata to " << metadataPathStr;
       std::unique_lock<std::mutex> lock(jobsMutex);
       for (auto &j : jobs) {
         if (j.targetDir == targetDir) {
@@ -227,8 +222,7 @@ bool MapDownloadService::DownloadMapInternal(std::vector<DownloadJobState> &jobs
       }
       return false;
     }
-    (void)write(fd, metaJson.c_str(), metaJson.size());
-    close(fd);
+    ofs << metaJson;
   }
 
   // Collect all files to download
@@ -417,14 +411,12 @@ bool MapDownloadService::PrepareMapDirectory(const AvailableMapEntry &entry,
 
   std::string metadataPathStr = dirStr + "/" + MapDirectory::FileMetadata;
   std::string metaJson = metadata.dump(2);
-  int fd = open(metadataPathStr.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-  if (fd < 0) {
-    osmscout::log.Error() << "Failed to write metadata to " << metadataPathStr
-                          << ": " << strerror(errno);
+  std::ofstream ofs(metadataPathStr);
+  if (!ofs.is_open()) {
+    osmscout::log.Error() << "Failed to write metadata to " << metadataPathStr;
     return false;
   }
-  (void)write(fd, metaJson.c_str(), metaJson.size());
-  close(fd);
+  ofs << metaJson;
 
   return true;
 }
