@@ -429,6 +429,11 @@ if(NOT SKIA_FOUND)
 endif()
 
 if(SKIA_FOUND AND NOT TARGET Skia::skia)
+  # pkg_check_modules sets SKIA_LIBRARIES (plural); find_library sets
+  # SKIA_LIBRARY (singular). Normalize to SKIA_LIBRARY.
+  if(NOT SKIA_LIBRARY AND SKIA_LIBRARIES)
+    list(GET SKIA_LIBRARIES 0 SKIA_LIBRARY)
+  endif()
   add_library(Skia::skia UNKNOWN IMPORTED)
   set_target_properties(Skia::skia PROPERTIES
     IMPORTED_LOCATION "${SKIA_LIBRARY}"

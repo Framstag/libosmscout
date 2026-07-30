@@ -409,27 +409,6 @@ if(OSMSCOUT_BUILD_MAP_SKIA)
     message(SEND_ERROR "Skia is required for Skia map drawing backend")
     set(OSMSCOUT_BUILD_MAP_SKIA OFF)
   endif()
-
-  # Some Skia packages (e.g. MSYS2 mingw) don't set IMPORTED_LOCATION
-  # for RelWithDebInfo. Copy from another config if missing.
-  if(TARGET Skia::skia)
-    get_target_property(_skia_loc_relwithdebinfo Skia::skia IMPORTED_LOCATION_RELWITHDEBINFO)
-    if(NOT _skia_loc_relwithdebinfo)
-      foreach(_suffix "" "_RELEASE" "_DEBUG" "_MINSIZEREL")
-        get_target_property(_skia_loc Skia::skia "IMPORTED_LOCATION${_suffix}")
-        if(_skia_loc AND NOT "${_skia_loc}" MATCHES "-NOTFOUND$")
-          set_target_properties(Skia::skia PROPERTIES
-            IMPORTED_LOCATION_RELWITHDEBINFO "${_skia_loc}")
-          if(_suffix)
-            set_target_properties(Skia::skia PROPERTIES
-              IMPORTED_LOCATION "${_skia_loc}")
-          endif()
-          break()
-        endif()
-      endforeach()
-    endif()
-  endif()
-
   if(OSMSCOUT_BUILD_MAP_SKIA)
     message(STATUS "Checking preconditions for libosmscout-map-skia...OK")
     add_subdirectory(libosmscout-map-skia)
