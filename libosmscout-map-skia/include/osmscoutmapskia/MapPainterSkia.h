@@ -35,7 +35,6 @@
 #include <core/SkPath.h>
 #include <core/SkShader.h>
 #include <core/SkTypeface.h>
-#include <ports/SkFontMgr_fontconfig.h>
 
 #include <osmscoutmapskia/MapSkiaImportExport.h>
 

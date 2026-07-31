@@ -25,9 +25,16 @@ osmscout_library_project(
 # Detect which Skia font manager is available
 include(CheckCXXSourceCompiles)
 
-# Try DirectWrite (Windows)
+# Use SKIA_LIBRARY path directly (imported targets not visible in try_compile subproject)
+set(_skia_check_libs "")
+if(SKIA_LIBRARY)
+  set(_skia_check_libs "${SKIA_LIBRARY}")
+endif()
+
 set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_LIBRARIES Skia::skia)
+set(CMAKE_REQUIRED_LIBRARIES ${_skia_check_libs})
+
+# Try DirectWrite (Windows)
 check_cxx_source_compiles(
   "#include <core/SkFontMgr.h>
    #include <ports/SkTypeface_win.h>
@@ -78,19 +85,9 @@ if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE AND NOT HAVE_SKIA_FONTMGR_GDI AND NOT HAVE_
   )
 endif()
 
-if(HAVE_SKIA_FONTMGR_DIRECTWRITE)
-  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_DIRECTWRITE)
-elseif(HAVE_SKIA_FONTMGR_GDI)
-  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_GDI)
-elseif(HAVE_SKIA_FONTMGR_FONTCONFIG)
-  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_FONTCONFIG)
-  # FontConfig needs FreeType scanner
-  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTSCANNER_FREETYPE)
-elseif(HAVE_SKIA_FONTMGR_EMPTY)
-  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_EMPTY)
-else()
-  message(WARNING "No Skia font manager found! Text rendering will not work.")
-endif()
+unset(_skia_check_libs)
+unset(CMAKE_REQUIRED_INCLUDES)
+unset(CMAKE_REQUIRED_LIBRARIES)
 
 # Find fontconfig for Skia font manager
 find_package(PkgConfig QUIET)
