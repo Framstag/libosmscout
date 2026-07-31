@@ -256,7 +256,7 @@ TEST_CASE("AppendFileToDir produces correct path for SVG lookup", "[SVGIcon]") {
 
   std::string result = osmscout::AppendFileToDir(dir, iconName + ".svg");
 
-  REQUIRE(result == expectedPath);
+  REQUIRE(std::filesystem::path(result) == std::filesystem::path(expectedPath));
   REQUIRE(std::filesystem::exists(result));
 
   CleanupTempFile(svgPath);
