@@ -38,7 +38,15 @@
 #include <core/SkSurface.h>
 #include <core/SkTypeface.h>
 #include <effects/SkDashPathEffect.h>
-#include <ports/SkFontScanner_FreeType.h>
+
+#if defined(_WIN32)
+  #include <ports/SkTypeface_win.h>
+#elif defined(__APPLE__)
+  #include <ports/SkFontMgr_mac_ct.h>
+#else
+  #include <ports/SkFontMgr_fontconfig.h>
+  #include <ports/SkFontScanner_FreeType.h>
+#endif
 
 #include <osmscoutmapskia/MapSkiaFeatures.h>
 
@@ -73,7 +81,13 @@ namespace osmscout {
 
   MapPainterSkia::MapPainterSkia()
   : labelLayouter(this),
+#if defined(_WIN32)
+    fontMgr(SkFontMgr_New_DirectWrite())
+#elif defined(__APPLE__)
+    fontMgr(SkFontMgr_New_CoreText(nullptr))
+#else
     fontMgr(SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType()))
+#endif
   {
     log.Debug() << "MapPainterSkia::MapPainterSkia() fontMgr=" << (fontMgr ? "valid" : "null");
   }
