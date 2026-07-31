@@ -90,7 +90,7 @@ namespace osmscout {
 #elif defined(HAVE_SKIA_FONTMGR_FONTCONFIG)
     fontMgr(SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType()))
 #else
-    fontMgr(SkFontMgr_New_Custom_Empty())
+    fontMgr(SkFontMgr::RefEmpty())
 #endif
   {
     log.Debug() << "MapPainterSkia::MapPainterSkia() fontMgr=" << (fontMgr ? "valid" : "null");

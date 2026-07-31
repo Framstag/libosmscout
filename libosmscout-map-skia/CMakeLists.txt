@@ -73,16 +73,7 @@ if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE AND NOT HAVE_SKIA_FONTMGR_GDI)
 endif()
 
 if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE AND NOT HAVE_SKIA_FONTMGR_GDI AND NOT HAVE_SKIA_FONTMGR_FONTCONFIG)
-  # Fallback: empty font manager
-  check_cxx_source_compiles(
-    "#include <core/SkFontMgr.h>
-     #include <ports/SkFontMgr_empty.h>
-     int main() {
-       auto mgr = SkFontMgr_New_Custom_Empty();
-       return mgr ? 0 : 1;
-     }"
-    HAVE_SKIA_FONTMGR_EMPTY
-  )
+  message(STATUS "No Skia font manager port found — using SkFontMgr::RefEmpty()")
 endif()
 
 unset(_skia_check_libs)
