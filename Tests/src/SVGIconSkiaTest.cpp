@@ -52,11 +52,11 @@ std::string CreateTestSVGContent() {
 
 // Write content to a temp file, return path
 std::string WriteTempFile(const std::string& content, const std::string& suffix) {
-  char tmpDir[] = "/tmp/osmscout_test_XXXXXX";
-  char* dir = mkdtemp(tmpDir);
-  REQUIRE(dir != nullptr);
+  auto tmpDir = std::filesystem::temp_directory_path();
+  auto dir = tmpDir / "osmscout_test_XXXXXX";
+  std::filesystem::create_directories(dir);
 
-  std::string path = std::string(dir) + "/test" + suffix;
+  std::string path = (dir / ("test" + suffix)).string();
   std::ofstream file(path, std::ios::binary);
   file << content;
   file.close();
@@ -67,6 +67,9 @@ std::string WriteTempFile(const std::string& content, const std::string& suffix)
 void CleanupTempFile(const std::string& path) {
   std::filesystem::remove(path);
   std::filesystem::remove(std::filesystem::path(path).parent_path());
+  // Remove the temp dir if empty
+  std::error_code ec;
+  std::filesystem::remove(std::filesystem::path(path).parent_path().parent_path() / "osmscout_test_XXXXXX", ec);
 }
 
 } // anonymous namespace
