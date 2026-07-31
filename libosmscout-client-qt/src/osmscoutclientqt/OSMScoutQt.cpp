@@ -82,7 +82,7 @@ OSMScoutQtBuilder::~OSMScoutQtBuilder()
 {
 }
 
-bool OSMScoutQtBuilder::Init()
+  bool OSMScoutQtBuilder::Init()
 {
   if (osmScoutInstance!=nullptr){
     return false;
@@ -188,7 +188,8 @@ bool OSMScoutQtBuilder::Init()
                                   pixelRatio,
                                   userAgent,
                                   customPoiTypes,
-                                  navigationTranslationDir);
+                                  navigationTranslationDir,
+                                  espeakDataDir);
 
   return true;
 }
@@ -305,7 +306,8 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        const PixelRatioSetup &pixelRatio,
                        QString userAgent,
                        QStringList customPoiTypes,
-                       const QString &navigationTranslationDir):
+                       const QString &navigationTranslationDir,
+                       const QString &espeakDataDir):
         settings(settings),
         mapManager(mapManager),
         iconDirectory(iconDirectory),
@@ -316,7 +318,8 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
         pixelRatio(pixelRatio),
         userAgent(userAgent),
         liveBackgroundThreads(0),
-        navigationTranslationDir(navigationTranslationDir)
+        navigationTranslationDir(navigationTranslationDir),
+        espeakDataDir(espeakDataDir)
 {
 
   std::vector<std::string> customPoiTypeVector;
@@ -491,7 +494,7 @@ NavigationModule* OSMScoutQt::MakeNavigation()
 {
   QThread *thread=makeThread("Navigation");
 
-  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread,navigationTranslationDir);
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread,navigationTranslationDir,espeakDataDir);
   navigation->moveToThread(thread);
   thread->start();
   return navigation;

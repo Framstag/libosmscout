@@ -57,7 +57,13 @@ osmscoutclientqtHeader = [
             'osmscoutclientqt/AvailableVoicesModel.h',
             'osmscoutclientqt/InstalledVoicesModel.h',
             'osmscoutclientqt/TTSMessageGeneratorQt.h',
+            'osmscoutclientqt/TTSEngine.h',
           ]
+
+# Piper TTS engine is optional, its header is only used when libpiper is available
+if piperDep.found()
+  osmscoutclientqtHeader += ['osmscoutclientqt/PiperTTSEngine.h']
+endif
 
 if meson.version().version_compare('>=0.63.0')
     install_headers(osmscoutclientqtHeader,

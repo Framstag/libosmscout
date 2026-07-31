@@ -59,6 +59,7 @@ set(HEADER_FILES
     include/osmscoutclientqt/AvailableVoicesModel.h
     include/osmscoutclientqt/InstalledVoicesModel.h
     include/osmscoutclientqt/TTSMessageGeneratorQt.h
+    include/osmscoutclientqt/TTSEngine.h
 )
 
 set(SOURCE_FILES
@@ -116,7 +117,14 @@ set(SOURCE_FILES
     src/osmscoutclientqt/AvailableVoicesModel.cpp
     src/osmscoutclientqt/InstalledVoicesModel.cpp
     src/osmscoutclientqt/TTSMessageGeneratorQt.cpp
+    src/osmscoutclientqt/TTSEngine.cpp
 )
+
+# Piper TTS engine is optional, build it only when libpiper is available
+if(TARGET Piper::Piper)
+    list(APPEND HEADER_FILES include/osmscoutclientqt/PiperTTSEngine.h)
+    list(APPEND SOURCE_FILES src/osmscoutclientqt/PiperTTSEngine.cpp)
+endif()
 
 if (QT_VERSION_MAJOR EQUAL 6)
           osmscout_library_project(

@@ -354,11 +354,13 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   if (auto voiceSetup = dynamic_cast<VoiceSetupMessage*>(message.get());
       voiceSetup != nullptr){
     voiceType=voiceSetup->type;
-    if (!ttsMessageGenerator) {
-      voiceType=NavigationVoiceType::None; // no generator set, do not generate voice instructions
-    }
-    if (!ttsMessageGenerator->SetLanguage(voiceSetup->languageCode)) {
-      voiceType=NavigationVoiceType::None; // language is not supported, do not generate voice instructions
+    if (voiceType==NavigationVoiceType::TextToSpeech) {
+      if (!ttsMessageGenerator) {
+        voiceType=NavigationVoiceType::None; // no generator set, do not generate voice instructions
+      }
+      if (!ttsMessageGenerator->SetLanguage(voiceSetup->languageCode)) {
+        voiceType=NavigationVoiceType::None; // language is not supported, do not generate voice instructions
+      }
     }
     return result;
   }
