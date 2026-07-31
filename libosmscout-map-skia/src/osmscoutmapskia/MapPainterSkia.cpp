@@ -37,7 +37,6 @@
 #include <core/SkShader.h>
 #include <core/SkSurface.h>
 #include <core/SkTypeface.h>
-#include <core/SkUTF.h>
 #include <effects/SkDashPathEffect.h>
 #include <ports/SkFontScanner_FreeType.h>
 
@@ -852,6 +851,32 @@ namespace osmscout {
     return label;
   }
 
+  // Inline UTF-8 decoder (SkUTF::NextUTF8 moved out of public API in Skia M143)
+  static SkUnichar NextUTF8(const char** ptr, const char* end)
+  {
+    if (*ptr >= end) return -1;
+    uint8_t lead = static_cast<uint8_t>(**ptr);
+    if (lead < 0x80) {
+      *ptr += 1;
+      return lead;
+    }
+    int len;
+    SkUnichar cp;
+    if (lead < 0xC0) return -1;
+    else if (lead < 0xE0) { len = 2; cp = lead & 0x1F; }
+    else if (lead < 0xF0) { len = 3; cp = lead & 0x0F; }
+    else if (lead < 0xF8) { len = 4; cp = lead & 0x07; }
+    else return -1;
+    if (*ptr + len > end) return -1;
+    for (int i = 1; i < len; ++i) {
+      uint8_t b = static_cast<uint8_t>((*ptr)[i]);
+      if ((b & 0xC0) != 0x80) return -1;
+      cp = (cp << 6) | (b & 0x3F);
+    }
+    *ptr += len;
+    return cp;
+  }
+
   template<>
   std::vector<Glyph<MapPainterSkia::SkiaNativeGlyph>> MapPainterSkia::SkiaLabel::ToGlyphs() const
   {
@@ -885,7 +910,7 @@ namespace osmscout {
       // Get actual glyph bounds for tighter bounding box
       const char* charPtr = character.c_str();
       const char* charEnd = charPtr + character.length();
-      SkUnichar uni = SkUTF::NextUTF8(&charPtr, charEnd);
+      SkUnichar uni = NextUTF8(&charPtr, charEnd);
       if (uni >= 0) {
         SkGlyphID glyphID = font.unicharToGlyph(uni);
         SkRect glyphBounds;

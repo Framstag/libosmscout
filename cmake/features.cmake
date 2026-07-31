@@ -429,6 +429,27 @@ if(NOT SKIA_FOUND)
 endif()
 
 if(SKIA_FOUND AND NOT TARGET Skia::skia)
+  # Some Skia packages (e.g. MSYS2 mingw) install headers under
+  # <prefix>/include/skia/include/core/ (nested include/ dir).
+  # The pkg-config file may point to <prefix>/include/skia which
+  # misses the inner include/. Detect and fix.
+  set(_skia_need_include_subdir FALSE)
+  foreach(_dir ${SKIA_INCLUDE_DIRS})
+    if(NOT EXISTS "${_dir}/core/SkCanvas.h")
+      set(_skia_need_include_subdir TRUE)
+    endif()
+  endforeach()
+  if(_skia_need_include_subdir)
+    set(_skia_fixed_dirs "")
+    foreach(_dir ${SKIA_INCLUDE_DIRS})
+      list(APPEND _skia_fixed_dirs "${_dir}")
+      if(EXISTS "${_dir}/include/core/SkCanvas.h")
+        list(APPEND _skia_fixed_dirs "${_dir}/include")
+      endif()
+    endforeach()
+    set(SKIA_INCLUDE_DIRS ${_skia_fixed_dirs})
+  endif()
+
   # pkg_check_modules sets SKIA_LIBRARIES (plural, library names only);
   # find_library sets SKIA_LIBRARY (singular, full path).
   # Resolve to a full path via find_library if needed.
