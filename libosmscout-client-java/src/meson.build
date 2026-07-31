@@ -35,6 +35,7 @@ if buildMapCairo
   cairoDeps = [cairoDep, pangoDep, pangocairoDep]
   cairoLink = [osmscoutmapcairo]
   cairoIncludes = [osmscoutmapcairoIncDir]
+  cppArgs += ['-DHAVE_MAP_CAIRO=1']
 endif
 
 osmscoutclientjava = library('osmscout_client_java',
