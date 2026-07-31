@@ -39,13 +39,15 @@
 #include <core/SkTypeface.h>
 #include <effects/SkDashPathEffect.h>
 
-#if defined(_WIN32)
+#if defined(HAVE_SKIA_FONTMGR_DIRECTWRITE)
   #include <ports/SkTypeface_win.h>
-#elif defined(__APPLE__)
-  #include <ports/SkFontMgr_mac_ct.h>
-#else
+#elif defined(HAVE_SKIA_FONTMGR_GDI)
+  #include <ports/SkTypeface_win.h>
+#elif defined(HAVE_SKIA_FONTMGR_FONTCONFIG)
   #include <ports/SkFontMgr_fontconfig.h>
   #include <ports/SkFontScanner_FreeType.h>
+#elif defined(HAVE_SKIA_FONTMGR_EMPTY)
+  #include <ports/SkFontMgr_empty.h>
 #endif
 
 #include <osmscoutmapskia/MapSkiaFeatures.h>
@@ -81,12 +83,14 @@ namespace osmscout {
 
   MapPainterSkia::MapPainterSkia()
   : labelLayouter(this),
-#if defined(_WIN32)
+#if defined(HAVE_SKIA_FONTMGR_DIRECTWRITE)
     fontMgr(SkFontMgr_New_DirectWrite())
-#elif defined(__APPLE__)
-    fontMgr(SkFontMgr_New_CoreText(nullptr))
-#else
+#elif defined(HAVE_SKIA_FONTMGR_GDI)
+    fontMgr(SkFontMgr_New_GDI())
+#elif defined(HAVE_SKIA_FONTMGR_FONTCONFIG)
     fontMgr(SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType()))
+#else
+    fontMgr(SkFontMgr_New_Custom_Empty())
 #endif
   {
     log.Debug() << "MapPainterSkia::MapPainterSkia() fontMgr=" << (fontMgr ? "valid" : "null");

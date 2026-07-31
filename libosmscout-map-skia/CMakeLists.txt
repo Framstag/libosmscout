@@ -22,6 +22,76 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout OSMScout::Map Skia::skia
 )
 
+# Detect which Skia font manager is available
+include(CheckCXXSourceCompiles)
+
+# Try DirectWrite (Windows)
+set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_LIBRARIES Skia::skia)
+check_cxx_source_compiles(
+  "#include <core/SkFontMgr.h>
+   #include <ports/SkTypeface_win.h>
+   int main() {
+     auto mgr = SkFontMgr_New_DirectWrite();
+     return mgr ? 0 : 1;
+   }"
+  HAVE_SKIA_FONTMGR_DIRECTWRITE
+)
+
+if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE)
+  # Try GDI (Windows fallback)
+  check_cxx_source_compiles(
+    "#include <core/SkFontMgr.h>
+     #include <ports/SkTypeface_win.h>
+     int main() {
+       auto mgr = SkFontMgr_New_GDI();
+       return mgr ? 0 : 1;
+     }"
+    HAVE_SKIA_FONTMGR_GDI
+  )
+endif()
+
+if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE AND NOT HAVE_SKIA_FONTMGR_GDI)
+  # Try FontConfig (Linux)
+  check_cxx_source_compiles(
+    "#include <core/SkFontMgr.h>
+     #include <ports/SkFontMgr_fontconfig.h>
+     #include <ports/SkFontScanner_FreeType.h>
+     int main() {
+       auto mgr = SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType());
+       return mgr ? 0 : 1;
+     }"
+    HAVE_SKIA_FONTMGR_FONTCONFIG
+  )
+endif()
+
+if(NOT HAVE_SKIA_FONTMGR_DIRECTWRITE AND NOT HAVE_SKIA_FONTMGR_GDI AND NOT HAVE_SKIA_FONTMGR_FONTCONFIG)
+  # Fallback: empty font manager
+  check_cxx_source_compiles(
+    "#include <core/SkFontMgr.h>
+     #include <ports/SkFontMgr_empty.h>
+     int main() {
+       auto mgr = SkFontMgr_New_Custom_Empty();
+       return mgr ? 0 : 1;
+     }"
+    HAVE_SKIA_FONTMGR_EMPTY
+  )
+endif()
+
+if(HAVE_SKIA_FONTMGR_DIRECTWRITE)
+  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_DIRECTWRITE)
+elseif(HAVE_SKIA_FONTMGR_GDI)
+  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_GDI)
+elseif(HAVE_SKIA_FONTMGR_FONTCONFIG)
+  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_FONTCONFIG)
+  # FontConfig needs FreeType scanner
+  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTSCANNER_FREETYPE)
+elseif(HAVE_SKIA_FONTMGR_EMPTY)
+  target_compile_definitions(OSMScoutMapSkia PRIVATE HAVE_SKIA_FONTMGR_EMPTY)
+else()
+  message(WARNING "No Skia font manager found! Text rendering will not work.")
+endif()
+
 # Find fontconfig for Skia font manager
 find_package(PkgConfig QUIET)
 if(PkgConfig_FOUND)
