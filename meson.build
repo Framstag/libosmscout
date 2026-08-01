@@ -200,6 +200,33 @@ if skiaDep.found() and not compiler.has_header('core/SkCanvas.h', dependencies: 
   endforeach
 endif
 
+# Verify Skia actually works at runtime. Some packages are compiled with
+# CPU instructions not available on every runner, which only shows up once
+# real rendering code is executed.
+if skiaDep.found()
+  skiaRuntimeCheck = compiler.run('''
+#include <core/SkBitmap.h>
+#include <core/SkCanvas.h>
+#include <core/SkColor.h>
+#include <core/SkImageInfo.h>
+#include <core/SkPaint.h>
+#include <core/SkSurface.h>
+int main() {
+  auto info = SkImageInfo::Make(8, 8, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+  auto surface = SkSurfaces::Raster(info);
+  if (!surface) { return 1; }
+  SkPaint paint;
+  paint.setColor(SK_ColorRED);
+  surface->getCanvas()->drawPaint(paint);
+  return 0;
+}
+''', name: 'Skia runtime check', dependencies: skiaDep)
+  if not skiaRuntimeCheck.compiled() or skiaRuntimeCheck.returncode() != 0
+    warning('Skia runtime check failed — disabling Skia backend')
+    skiaDep = disabler()
+  endif
+endif
+
 # DirectX
 d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)

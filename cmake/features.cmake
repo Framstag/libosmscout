@@ -1,33 +1,33 @@
 # add ccache support
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
-  set(CCCACHE_EXPORTS "")
   set(CCACHE_OPTIONS "" CACHE STRING "options for ccache")
-  foreach(option ${CCACHE_OPTIONS})
-    set(CCCACHE_EXPORTS "${CCCACHE_EXPORTS}\nexport ${option}")
-  endforeach()
-  set(C_LAUNCHER "${CCACHE_PROGRAM}")
-  set(CXX_LAUNCHER "${CCACHE_PROGRAM}")
-  if(MSVC)
-    # ccache supports MSVC directly since v4.0; no shell wrapper needed
+  if(MSVC OR NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    # ccache supports MSVC directly since v4.0. For Makefiles/Ninja the
+    # compiler is passed as the first argument, so a direct launcher works
+    # everywhere (including MSYS2/MinGW on Windows, where a shell script
+    # cannot be executed by Ninja via CreateProcess).
     set(CMAKE_C_COMPILER_LAUNCHER   "${CCACHE_PROGRAM}" CACHE INTERNAL "")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}" CACHE INTERNAL "")
   else()
+    # Xcode generator does not pass the compiler as the first argument, so
+    # keep the shell wrapper that normalises the command line.
+    set(CCCACHE_EXPORTS "")
+    foreach(option ${CCACHE_OPTIONS})
+      set(CCCACHE_EXPORTS "${CCCACHE_EXPORTS}\nexport ${option}")
+    endforeach()
+    set(C_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CXX_LAUNCHER "${CCACHE_PROGRAM}")
     configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-c.in" "${CMAKE_BINARY_DIR}/launch-c")
     configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-cxx.in" "${CMAKE_BINARY_DIR}/launch-cxx")
     execute_process(COMMAND chmod a+rx
       "${CMAKE_BINARY_DIR}/launch-c"
       "${CMAKE_BINARY_DIR}/launch-cxx"
     )
-    if(CMAKE_GENERATOR STREQUAL "Xcode")
-      set(CMAKE_XCODE_ATTRIBUTE_CC         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
-      set(CMAKE_XCODE_ATTRIBUTE_CXX        "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
-      set(CMAKE_XCODE_ATTRIBUTE_LD         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
-      set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
-    else()
-      set(CMAKE_C_COMPILER_LAUNCHER   "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
-      set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_BINARY_DIR}/launch-cxx")
-    endif()
+    set(CMAKE_XCODE_ATTRIBUTE_CC         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_CXX        "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_LD         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
+    set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
   endif()
 endif()
 
@@ -492,20 +492,33 @@ if(SKIA_FOUND)
   include(CheckCXXSourceRuns)
   set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES ${SKIA_LIBRARY})
+  unset(SKIA_RUNTIME_WORKS CACHE)
 
-  # Verify Skia DLL actually works at runtime (MSYS2 Skia package may be
-  # compiled with CPU instructions not available on all runners)
+  # Verify Skia actually works at runtime. Some Skia packages are built with
+  # CPU instructions (AVX-512, etc.) not available on every runner, which
+  # only shows up once real rendering code is executed.
   check_cxx_source_runs(
-    "#include <core/SkPaint.h>
+    "#include <core/SkBitmap.h>
+#include <core/SkCanvas.h>
+#include <core/SkColor.h>
+#include <core/SkImageInfo.h>
+#include <core/SkPaint.h>
+#include <core/SkSurface.h>
      int main() {
+       auto info = SkImageInfo::Make(8, 8,
+                                     kRGBA_8888_SkColorType,
+                                     kPremul_SkAlphaType);
+       auto surface = SkSurfaces::Raster(info);
+       if (!surface) { return 1; }
        SkPaint paint;
        paint.setColor(SK_ColorRED);
+       surface->getCanvas()->drawPaint(paint);
        return 0;
      }"
-    SKIA_RUNTIME_WORKS
+    SKIA_RUNTIME_COMPATIBLE
   )
 
-  if(NOT SKIA_RUNTIME_WORKS)
+  if(NOT SKIA_RUNTIME_COMPATIBLE)
     message(STATUS "Skia runtime check failed — disabling Skia backend")
     set(SKIA_FOUND FALSE)
   endif()
