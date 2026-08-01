@@ -489,6 +489,30 @@ mark_as_advanced(SKIA_INCLUDE_DIRS SKIA_LIBRARY)
 set(OSMSCOUT_HAVE_SKIA_SVG OFF CACHE INTERNAL "Skia SVG module available")
 if(SKIA_FOUND)
   include(CheckIncludeFileCXX)
+  include(CheckCXXSourceRuns)
+  set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${SKIA_LIBRARY})
+
+  # Verify Skia DLL actually works at runtime (MSYS2 Skia package may be
+  # compiled with CPU instructions not available on all runners)
+  check_cxx_source_runs(
+    "#include <core/SkPaint.h>
+     int main() {
+       SkPaint paint;
+       paint.setColor(SK_ColorRED);
+       return 0;
+     }"
+    SKIA_RUNTIME_WORKS
+  )
+
+  if(NOT SKIA_RUNTIME_WORKS)
+    message(STATUS "Skia runtime check failed — disabling Skia backend")
+    set(SKIA_FOUND FALSE)
+  endif()
+endif()
+
+if(SKIA_FOUND)
+  include(CheckIncludeFileCXX)
   set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
   CHECK_INCLUDE_FILE_CXX(svg/include/SkSVGDOM.h HAVE_SKIA_SVG_HEADER)
   if(HAVE_SKIA_SVG_HEADER)
