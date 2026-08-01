@@ -60,6 +60,15 @@
   #include <osmscoutmapsvg/MapPainterSVG.h>
 #endif
 
+#if defined(HAVE_OSMSCOUT_MAP_SKIA)
+  #include <osmscoutmapskia/MapPainterSkia.h>
+  #include <core/SkBitmap.h>
+  #include <core/SkCanvas.h>
+  #include <core/SkImage.h>
+  #include <core/SkImageInfo.h>
+  #include <core/SkSurface.h>
+#endif
+
 #if defined(__APPLE__) && defined(HAVE_OSMSCOUT_MAP_IOSX)
   // OSX backend implemented in DrawMapAllOSX.mm
   bool RenderWithOSX(DrawMapDemo& drawDemo,
@@ -444,6 +453,71 @@ int main(int argc, char* argv[])
       stream.close();
       ReportOK(path);
       anySuccess = true;
+    }
+  }
+#endif
+
+  // ================================================================
+  // Skia backend
+  // ================================================================
+#if defined(HAVE_OSMSCOUT_MAP_SKIA)
+  {
+    std::cout << "Skia backend..." << std::endl;
+
+    std::string path = BackendPath(outputDir, "Skia", "ppm");
+
+    SkImageInfo skiaInfo = SkImageInfo::MakeN32Premul(
+        static_cast<int>(w),
+        static_cast<int>(h));
+
+    sk_sp<SkSurface> surface = SkSurfaces::Raster(skiaInfo);
+
+    if (!surface) {
+      std::cerr << "  FAIL: Cannot create Skia surface" << std::endl;
+      anyFailure = true;
+    } else {
+      SkCanvas* canvas = surface->getCanvas();
+      canvas->clear(SK_ColorWHITE);
+
+      osmscout::MapPainterSkia painter;
+      if (painter.DrawMap(drawDemo.projection,
+                           drawDemo.drawParameter,
+                           drawDemo.data,
+                           canvas)) {
+        SkBitmap bitmap;
+        bitmap.allocPixels(skiaInfo);
+        if (surface->readPixels(bitmap, 0, 0)) {
+          FILE* fp = fopen(path.c_str(), "wb");
+          if (fp) {
+            fprintf(fp, "P6\n%zu %zu\n255\n",
+                    static_cast<size_t>(w),
+                    static_cast<size_t>(h));
+            for (int y = 0; y < static_cast<int>(h); ++y) {
+              for (int x = 0; x < static_cast<int>(w); ++x) {
+                SkColor pixel = bitmap.getColor(x, y);
+                unsigned char rgb[3] = {
+                    static_cast<unsigned char>(SkColorGetR(pixel)),
+                    static_cast<unsigned char>(SkColorGetG(pixel)),
+                    static_cast<unsigned char>(SkColorGetB(pixel))
+                };
+                fwrite(rgb, 1, 3, fp);
+              }
+            }
+            fclose(fp);
+            ReportOK(path);
+            anySuccess = true;
+          } else {
+            std::cerr << "  FAIL: Cannot open " << path << " for writing" << std::endl;
+            anyFailure = true;
+          }
+        } else {
+          std::cerr << "  FAIL: Cannot read pixels from surface" << std::endl;
+          anyFailure = true;
+        }
+      } else {
+        std::cerr << "  FAIL: DrawMap failed" << std::endl;
+        anyFailure = true;
+      }
     }
   }
 #endif

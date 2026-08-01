@@ -163,6 +163,70 @@ pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false, fallback: ['libpng','libpng_dep'])
 gobjectDep = dependency('gobject-2.0',required: false)
 
+# Skia
+skiaDep = dependency('skia', required : false)
+if not skiaDep.found()
+  # Manual fallback: check for SkCanvas.h and libskia
+  skiaHeader = compiler.has_header('core/SkCanvas.h')
+  if skiaHeader
+    skiaLib = compiler.find_library('skia', required: false)
+    if skiaLib.found()
+      skiaDep = declare_dependency(
+        dependencies: skiaLib,
+        include_directories: include_directories('/usr')
+      )
+    endif
+  endif
+endif
+
+# Some Skia packages (e.g. MSYS2 mingw) install headers under
+# <prefix>/include/skia/include/core/ (nested include/ dir).
+# The pkg-config file may point to <prefix>/include/skia which
+# misses the inner include/. Detect and fix.
+if skiaDep.found() and not compiler.has_header('core/SkCanvas.h', dependencies: skiaDep)
+  # Try to get the include dir from pkg-config and append /include
+  incDir = ''
+  if skiaDep.type_name() == 'pkgconfig'
+    incDir = skiaDep.get_variable(pkgconfig : 'includedir', default_value : '')
+  endif
+  foreach candidate : [incDir + '/include', incDir]
+    if candidate != '' and compiler.has_header('core/SkCanvas.h', args : '-I' + candidate)
+      skiaDep = declare_dependency(
+        dependencies: skiaDep,
+        include_directories: include_directories(candidate)
+      )
+      break
+    endif
+  endforeach
+endif
+
+# Verify Skia actually works at runtime. Some packages are compiled with
+# CPU instructions not available on every runner, which only shows up once
+# real rendering code is executed.
+if skiaDep.found()
+  skiaRuntimeCheck = compiler.run('''
+#include <core/SkBitmap.h>
+#include <core/SkCanvas.h>
+#include <core/SkColor.h>
+#include <core/SkImageInfo.h>
+#include <core/SkPaint.h>
+#include <core/SkSurface.h>
+int main() {
+  auto info = SkImageInfo::Make(8, 8, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+  auto surface = SkSurfaces::Raster(info);
+  if (!surface) { return 1; }
+  SkPaint paint;
+  paint.setColor(SK_ColorRED);
+  surface->getCanvas()->drawPaint(paint);
+  return 0;
+}
+''', name: 'Skia runtime check', dependencies: skiaDep)
+  if not skiaRuntimeCheck.compiled() or skiaRuntimeCheck.returncode() != 0
+    warning('Skia runtime check failed — disabling Skia backend')
+    skiaDep = disabler()
+  endif
+endif
+
 # DirectX
 d2d1Dep = compiler.find_library('d2d1', required: false)
 dwriteDep = compiler.find_library('dwrite', required: false)
@@ -309,6 +373,13 @@ else
     buildMapSVG=false
 endif
 
+# Skia
+if skiaDep.found() and get_option('enableMapSkia')
+  buildMapSkia=true
+else
+  buildMapSkia=false
+endif
+
 # Allways build the client lbrary since it does not have additional dependencies
 buildClient=true
 
@@ -367,6 +438,10 @@ endif
 
 if buildMapSVG
     subdir('libosmscout-map-svg')
+endif
+
+if buildMapSkia
+    subdir('libosmscout-map-skia')
 endif
 
 subdir('libosmscout-client')
@@ -487,6 +562,7 @@ summary({
   'libosmscout-map-opengl': buildMapOpenGL,
   'libosmscout-map-qt': buildMapQt,
   'libosmscout-map-svg': buildMapSVG,
+  'libosmscout-map-skia': buildMapSkia,
   'libosmscout-gpx': buildGpx,
   'libosmscout-client': buildClient,
   'libosmscout-client-qt': buildClientQt,

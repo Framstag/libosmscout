@@ -35,7 +35,9 @@
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapService.h>
 
+#ifdef HAVE_MAP_CAIRO
 #include <osmscoutmapcairo/MapPainterCairo.h>
+#endif
 
 #include <osmscout/projection/MercatorProjection.h>
 
@@ -67,7 +69,9 @@
 #include <osmscout/navigation/VoiceInstructionAgent.h>
 #include <osmscout/navigation/RouteInstructionAgent.h>
 
+#ifdef HAVE_MAP_CAIRO
 #include <cairo.h>
+#endif
 
 #include <jni.h>
 
@@ -830,6 +834,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
       }
 
       // Create Cairo surface and render
+#ifdef HAVE_MAP_CAIRO
       cairo_surface_t *surface = cairo_image_surface_create(
           CAIRO_FORMAT_RGB24,
           static_cast<int>(width),
@@ -872,6 +877,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
       cairo_surface_destroy(surface);
       rendered = true;
+#else
+      osmscout::log.Warn() << "Cairo backend not available, cannot render";
+      return;
+#endif
     }
   );
 

@@ -33,18 +33,18 @@ jobs:
                     mingw-w64-x86_64-catch
                     mingw-w64-x86_64-protobuf
                     mingw-w64-x86_64-libxml2
+                    mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm
                     mingw-w64-x86_64-libpng
+                    mingw-w64-x86_64-skia
                     mingw-w64-x86_64-directx-headers"
       - name: Configure build project
         run: DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST} cmake -B build -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run:  "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt
-               LC_ALL=C
-               ctest -j 4 --output-on-failure --exclude-regex PerformanceTest"
+        run: env "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-skia:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt:${MINGW_PREFIX}/bin" ctest -j 4 --output-on-failure --exclude-regex PerformanceTest
         working-directory: build
 
   build_gcc_meson:
@@ -68,7 +68,9 @@ jobs:
                     mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm
-                    mingw-w64-x86_64-libpng"
+                    mingw-w64-x86_64-libpng
+                    mingw-w64-x86_64-skia
+                    mingw-w64-x86_64-directx-headers"
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug
         env:

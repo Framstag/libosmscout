@@ -61,6 +61,7 @@ struct Arguments {
 
   osmscout::MapParameter::IconMode iconMode{osmscout::MapParameter::IconMode::FixedSizePixmap};
   std::list<std::string> iconPaths;
+  double iconSize{3.7};
 
   double fontSize{3.0};
   std::string fontName;
@@ -177,6 +178,12 @@ public:
               }),
               "iconMode",
               "FixedSizePixmap | ScaledPixmap | OriginalPixmap | Scalable",
+              false);
+    AddOption(osmscout::CmdLineDoubleOption([this](const double& value) {
+                args.iconSize=value;
+              }),
+              "iconSize",
+              "Icon size in mm (" + std::to_string(args.iconSize) + ")",
               false);
     AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
                 args.basemap=value;
@@ -348,6 +355,14 @@ public:
 
     drawParameter.SetIconMode(args.iconMode);
     drawParameter.SetIconPaths(args.iconPaths);
+    drawParameter.SetIconSize(args.iconSize);
+
+    if (!args.iconPaths.empty() &&
+        args.iconMode != osmscout::MapParameter::IconMode::Scalable &&
+        args.iconMode != osmscout::MapParameter::IconMode::ScaledPixmap) {
+      std::cerr << "WARNING: iconPath set but iconMode is not Scalable or ScaledPixmap. "
+                << "SVG icons require --iconMode Scalable." << std::endl;
+    }
 
     drawParameter.SetDebugData(args.debug);
     drawParameter.SetDebugPerformance(args.debug);

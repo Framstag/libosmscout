@@ -1,27 +1,33 @@
 # add ccache support
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
-  set(CCCACHE_EXPORTS "")
   set(CCACHE_OPTIONS "" CACHE STRING "options for ccache")
-  foreach(option ${CCACHE_OPTIONS})
-    set(CCCACHE_EXPORTS "${CCCACHE_EXPORTS}\nexport ${option}")
-  endforeach()
-  set(C_LAUNCHER "${CCACHE_PROGRAM}")
-  set(CXX_LAUNCHER "${CCACHE_PROGRAM}")
-  configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-c.in" "${CMAKE_BINARY_DIR}/launch-c")
-  configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-cxx.in" "${CMAKE_BINARY_DIR}/launch-cxx")
-  execute_process(COMMAND chmod a+rx
-    "${CMAKE_BINARY_DIR}/launch-c"
-    "${CMAKE_BINARY_DIR}/launch-cxx"
-  )
-  if(CMAKE_GENERATOR STREQUAL "Xcode")
+  if(MSVC OR NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    # ccache supports MSVC directly since v4.0. For Makefiles/Ninja the
+    # compiler is passed as the first argument, so a direct launcher works
+    # everywhere (including MSYS2/MinGW on Windows, where a shell script
+    # cannot be executed by Ninja via CreateProcess).
+    set(CMAKE_C_COMPILER_LAUNCHER   "${CCACHE_PROGRAM}" CACHE INTERNAL "")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}" CACHE INTERNAL "")
+  else()
+    # Xcode generator does not pass the compiler as the first argument, so
+    # keep the shell wrapper that normalises the command line.
+    set(CCCACHE_EXPORTS "")
+    foreach(option ${CCACHE_OPTIONS})
+      set(CCCACHE_EXPORTS "${CCCACHE_EXPORTS}\nexport ${option}")
+    endforeach()
+    set(C_LAUNCHER "${CCACHE_PROGRAM}")
+    set(CXX_LAUNCHER "${CCACHE_PROGRAM}")
+    configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-c.in" "${CMAKE_BINARY_DIR}/launch-c")
+    configure_file("${OSMSCOUT_BASE_DIR_SOURCE}/cmake/launch-cxx.in" "${CMAKE_BINARY_DIR}/launch-cxx")
+    execute_process(COMMAND chmod a+rx
+      "${CMAKE_BINARY_DIR}/launch-c"
+      "${CMAKE_BINARY_DIR}/launch-cxx"
+    )
     set(CMAKE_XCODE_ATTRIBUTE_CC         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
     set(CMAKE_XCODE_ATTRIBUTE_CXX        "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
     set(CMAKE_XCODE_ATTRIBUTE_LD         "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
     set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_BINARY_DIR}/launch-cxx" CACHE INTERNAL "")
-  else()
-    set(CMAKE_C_COMPILER_LAUNCHER   "${CMAKE_BINARY_DIR}/launch-c" CACHE INTERNAL "")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_BINARY_DIR}/launch-cxx")
   endif()
 endif()
 
@@ -387,6 +393,164 @@ else()
 endif()
 
 find_program(HUGO_PATH hugo)
+
+# Find Skia
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(SKIA skia)
+endif()
+
+if(NOT SKIA_FOUND)
+  # Skia headers use #include "include/core/..." so the include root
+  # must be the parent of the directory containing 'include/'.
+  # Try standard layout: /usr/include/skia/include/core/SkCanvas.h
+  # Try flat layout:    /usr/include/core/SkCanvas.h
+  #
+  # We check common install locations directly since find_path()
+  # may not search all system paths in all CMake versions.
+  set(SKIA_HEADER_CANDIDATES
+    "/usr/include/skia/include/core/SkCanvas.h"
+    "/usr/local/include/skia/include/core/SkCanvas.h"
+    "/usr/include/core/SkCanvas.h"
+    "/usr/local/include/core/SkCanvas.h"
+  )
+  foreach(candidate IN LISTS SKIA_HEADER_CANDIDATES)
+    if(EXISTS "${candidate}")
+      get_filename_component(SKIA_INCLUDE_DIRS "${candidate}" PATH)
+      # Go up two levels: from .../core/SkCanvas.h to .../include/core/SkCanvas.h
+      # we need the root that makes #include "include/core/..." resolve.
+      # For flat layout (/usr/include/core/SkCanvas.h), root = /usr
+      # For standard layout (/usr/include/skia/include/core/SkCanvas.h), root = /usr/include/skia
+      get_filename_component(SKIA_INCLUDE_DIRS "${SKIA_INCLUDE_DIRS}" PATH)
+      get_filename_component(SKIA_INCLUDE_DIRS "${SKIA_INCLUDE_DIRS}" PATH)
+      break()
+    endif()
+  endforeach()
+  find_library(SKIA_LIBRARY skia
+    PATH_SUFFIXES lib
+  )
+  if(SKIA_INCLUDE_DIRS AND SKIA_LIBRARY)
+    set(SKIA_FOUND TRUE)
+  endif()
+endif()
+
+if(SKIA_FOUND AND NOT TARGET Skia::skia)
+  # Some Skia packages (e.g. MSYS2 mingw) install headers under
+  # <prefix>/include/skia/include/core/ (nested include/ dir).
+  # The pkg-config file may point to <prefix>/include/skia which
+  # misses the inner include/. Detect and fix.
+  set(_skia_need_include_subdir FALSE)
+  foreach(_dir ${SKIA_INCLUDE_DIRS})
+    if(NOT EXISTS "${_dir}/core/SkCanvas.h")
+      set(_skia_need_include_subdir TRUE)
+    endif()
+  endforeach()
+  if(_skia_need_include_subdir)
+    set(_skia_fixed_dirs "")
+    foreach(_dir ${SKIA_INCLUDE_DIRS})
+      list(APPEND _skia_fixed_dirs "${_dir}")
+      if(EXISTS "${_dir}/include/core/SkCanvas.h")
+        list(APPEND _skia_fixed_dirs "${_dir}/include")
+      endif()
+    endforeach()
+    set(SKIA_INCLUDE_DIRS ${_skia_fixed_dirs})
+  endif()
+
+  # pkg_check_modules sets SKIA_LIBRARIES (plural, library names only);
+  # find_library sets SKIA_LIBRARY (singular, full path).
+  # Resolve to a full path via find_library if needed.
+  if(NOT SKIA_LIBRARY)
+    if(SKIA_LIBRARIES)
+      find_library(SKIA_LIBRARY NAMES ${SKIA_LIBRARIES}
+        PATHS ${SKIA_LIBRARY_DIRS}
+        PATH_SUFFIXES lib lib64
+        NO_DEFAULT_PATH)
+    endif()
+    # Fallback: try without hints
+    if(NOT SKIA_LIBRARY)
+      find_library(SKIA_LIBRARY skia)
+    endif()
+  endif()
+  if(SKIA_LIBRARY)
+    add_library(Skia::skia UNKNOWN IMPORTED)
+    set_target_properties(Skia::skia PROPERTIES
+      IMPORTED_LOCATION "${SKIA_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${SKIA_INCLUDE_DIRS}"
+    )
+  else()
+    set(SKIA_FOUND FALSE)
+  endif()
+endif()
+
+mark_as_advanced(SKIA_INCLUDE_DIRS SKIA_LIBRARY)
+
+# Detect Skia SVG module (SkSVGDOM) for SVG icon support
+# If unavailable, nanosvg fallback is used instead
+set(OSMSCOUT_HAVE_SKIA_SVG OFF CACHE INTERNAL "Skia SVG module available")
+if(SKIA_FOUND)
+  include(CheckIncludeFileCXX)
+  include(CheckCXXSourceRuns)
+  set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${SKIA_LIBRARY})
+  unset(SKIA_RUNTIME_WORKS CACHE)
+
+  # Verify Skia actually works at runtime. Some Skia packages are built with
+  # CPU instructions (AVX-512, etc.) not available on every runner, which
+  # only shows up once real rendering code is executed.
+  check_cxx_source_runs(
+    "#include <core/SkBitmap.h>
+#include <core/SkCanvas.h>
+#include <core/SkColor.h>
+#include <core/SkImageInfo.h>
+#include <core/SkPaint.h>
+#include <core/SkSurface.h>
+     int main() {
+       auto info = SkImageInfo::Make(8, 8,
+                                     kRGBA_8888_SkColorType,
+                                     kPremul_SkAlphaType);
+       auto surface = SkSurfaces::Raster(info);
+       if (!surface) { return 1; }
+       SkPaint paint;
+       paint.setColor(SK_ColorRED);
+       surface->getCanvas()->drawPaint(paint);
+       return 0;
+     }"
+    SKIA_RUNTIME_COMPATIBLE
+  )
+
+  if(NOT SKIA_RUNTIME_COMPATIBLE)
+    message(STATUS "Skia runtime check failed — disabling Skia backend")
+    set(SKIA_FOUND FALSE)
+  endif()
+endif()
+
+if(SKIA_FOUND)
+  include(CheckIncludeFileCXX)
+  set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+  CHECK_INCLUDE_FILE_CXX(svg/include/SkSVGDOM.h HAVE_SKIA_SVG_HEADER)
+  if(HAVE_SKIA_SVG_HEADER)
+    # Verify SVG symbols are actually in libskia (not just headers)
+    include(CheckCXXSourceCompiles)
+    set(CMAKE_REQUIRED_INCLUDES ${SKIA_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_LIBRARIES ${SKIA_LIBRARY})
+    check_cxx_source_compiles("
+      #include <svg/include/SkSVGDOM.h>
+      int main() {
+        auto stream = SkFILEStream(\"test.svg\");
+        auto dom = SkSVGDOM::Make(stream);
+        return dom ? 0 : 1;
+      }
+    " SKIA_SVG_WORKS)
+    if(SKIA_SVG_WORKS)
+      set(OSMSCOUT_HAVE_SKIA_SVG ON CACHE INTERNAL "Skia SVG module available")
+      message(STATUS "Skia SVG module detected — SkSVGDOM will be used for SVG icons")
+    else()
+      message(STATUS "Skia SVG headers found but module not compiled in libskia — nanosvg fallback")
+    endif()
+  else()
+    message(STATUS "Skia SVG headers not found — nanosvg fallback")
+  endif()
+endif()
 
 # Find nlohmann_json (header-only, used by MCPServer)
 find_package(nlohmann_json QUIET)

@@ -198,7 +198,7 @@ LookupPOI = executable('LookupPOI',
                        install_dir: demoInstallDir)
 
 # ---- DrawMapAll
-if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL or buildMapDirectX or buildMapGDI or buildMapIOSX
+if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL or buildMapDirectX or buildMapGDI or buildMapIOSX or buildMapSkia
 
   drawMapAllSrc = ['src/DrawMapAll.cpp']
   drawMapAllDep = [mathDep, openmpDep]
@@ -240,6 +240,13 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL o
     drawMapAllIncDirs += [osmscoutmapsvgIncDir]
     drawMapAllDep += pangoDep
     drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_SVG']
+  endif
+
+  if buildMapSkia
+    drawMapAllLink += osmscoutmapskia
+    drawMapAllIncDirs += [osmscoutmapskiaIncDir]
+    drawMapAllDep += [skiaDep]
+    drawMapAllDef += ['-DHAVE_OSMSCOUT_MAP_SKIA']
   endif
 
   if buildMapIOSX
@@ -322,6 +329,16 @@ if buildMapCairo
                             link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
                             install: true,
                             install_dir: demoInstallDir)
+endif
+
+if buildMapSkia
+  DrawMapSkia = executable('DrawMapSkia',
+                          'src/DrawMapSkia.cpp',
+                          include_directories: [osmscoutIncDir, osmscoutmapIncDir, osmscoutmapskiaIncDir, demoIncDir],
+                          dependencies: [mathDep, openmpDep, skiaDep],
+                          link_with: [osmscout, osmscoutmap, osmscoutmapskia],
+                          install: true,
+                          install_dir: demoInstallDir)
 endif
 
 if buildMapQt

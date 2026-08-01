@@ -104,6 +104,10 @@ if(TARGET OSMScout::MapCairo)
     PRIVATE
       OSMScout::MapCairo
   )
+  target_compile_definitions(osmscout_client_java
+    PRIVATE
+      HAVE_MAP_CAIRO=1
+  )
 endif()
 
 # Depend on Java compilation so JNI headers exist before C++ compile
