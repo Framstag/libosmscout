@@ -345,13 +345,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   // scanned recursively by MapManager; don't treat the parent as a database.
   clientData->knownPaths = {};
 
-  // Initialise DBThread
+  // Initialise DBThread (triggers initial database scan)
   clientData->dbThread->Initialize();
-
-  // Scan lookup directories up front so downloaded maps are discovered
-  // and DBThread opens the actual map subdirectories.
-  auto lookupFuture = clientData->mapManager->LookupDatabases();
-  lookupFuture.StdFuture().wait();
 
   // Store the configured maps directory in settings, but do NOT create
   // MapDownloadService here. The Java side performs HTTP map-list fetches
