@@ -998,6 +998,9 @@ struct NavigationListenerMethods
 
   jobject turnTypeClsGlobal{nullptr};
   jmethodID turnTypeValueOf{nullptr};
+
+  jobject laneTurnClsGlobal{nullptr};
+  jmethodID laneTurnFromId{nullptr};
 };
 
 static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
@@ -1028,7 +1031,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
       "(D)V");
   methods.onLaneUpdate = env->GetMethodID(
       listenerCls, "onLaneUpdate",
-      "(ZIZIILjava/lang/String;)V");
+      "(ZIZIILjava/lang/String;[Lcom/framstag/libosmscout/client/LaneTurn;)V");
   methods.onVoiceInstruction = env->GetMethodID(
       listenerCls, "onVoiceInstruction",
       "([I)V");
@@ -1074,6 +1077,14 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.turnTypeValueOf = env->GetStaticMethodID(
         turnTypeCls, "fromString",
         "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/TurnType;");
+  }
+
+  jclass laneTurnCls = env->FindClass("com/framstag/libosmscout/client/LaneTurn");
+  if (laneTurnCls) {
+    methods.laneTurnClsGlobal = env->NewGlobalRef(laneTurnCls);
+    methods.laneTurnFromId = env->GetStaticMethodID(
+        laneTurnCls, "fromId",
+        "(I)Lcom/framstag/libosmscout/client/LaneTurn;");
   }
 
   return true;
@@ -1481,6 +1492,10 @@ public:
           env->DeleteGlobalRef(methods.turnTypeClsGlobal);
           methods.turnTypeClsGlobal = nullptr;
         }
+        if (methods.laneTurnClsGlobal != nullptr) {
+          env->DeleteGlobalRef(methods.laneTurnClsGlobal);
+          methods.laneTurnClsGlobal = nullptr;
+        }
         if (attachedByUs) {
           jvm->DetachCurrentThread();
         }
@@ -1679,14 +1694,33 @@ private:
     else if (auto laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage *>(message.get());
              laneMessage != nullptr) {
       jstring turnStr = env->NewStringUTF(LaneTurnToString(laneMessage->lane.turn).c_str());
+
+      // Build LaneTurn[] array from per-lane turns vector
+      const auto &turns = laneMessage->lane.turns;
+      jsize turnCount = static_cast<jsize>(turns.size());
+      jobjectArray turnsArray = env->NewObjectArray(
+          turnCount,
+          static_cast<jclass>(methods.laneTurnClsGlobal),
+          nullptr);
+      for (jsize i = 0; i < turnCount; i++) {
+        jobject turnObj = env->CallStaticObjectMethod(
+            static_cast<jclass>(methods.laneTurnClsGlobal),
+            methods.laneTurnFromId,
+            static_cast<jint>(turns[i]));
+        env->SetObjectArrayElement(turnsArray, i, turnObj);
+        env->DeleteLocalRef(turnObj);
+      }
+
       env->CallVoidMethod(listenerGlobal, methods.onLaneUpdate,
                           laneMessage->lane.oneway ? JNI_TRUE : JNI_FALSE,
                           static_cast<jint>(laneMessage->lane.count),
                           laneMessage->lane.suggested ? JNI_TRUE : JNI_FALSE,
                           static_cast<jint>(laneMessage->lane.suggestedFrom),
                           static_cast<jint>(laneMessage->lane.suggestedTo),
-                          turnStr);
+                          turnStr,
+                          turnsArray);
       env->DeleteLocalRef(turnStr);
+      env->DeleteLocalRef(turnsArray);
     }
     else if (auto voiceMessage = dynamic_cast<osmscout::VoiceInstructionMessage *>(message.get());
              voiceMessage != nullptr) {

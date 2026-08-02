@@ -7,6 +7,7 @@ import com.framstag.libosmscout.client.NavigationState;
 import com.framstag.libosmscout.client.OSMScoutClient;
 import com.framstag.libosmscout.client.OSMScoutClientBuilder;
 import com.framstag.libosmscout.client.TrackPoint;
+import com.framstag.libosmscout.client.LaneTurn;
 import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.ObjectDescription;
 import com.framstag.libosmscout.client.RouteInstruction;
@@ -169,6 +170,9 @@ public class MainController implements Initializable {
     private Label nextNextDistance;
     private Label nextNextStreet;
     private Label currentRoadLabel;
+
+    // Lane guidance in next-turn overlay
+    private HBox nextTurnLaneRow;
 
     // Tracks whether client+renderer have been initialised
     private boolean initialised = false;
@@ -631,9 +635,16 @@ public class MainController implements Initializable {
 
         nextNextRow.getChildren().addAll(nextNextDistance, nextNextStreet);
 
+        // Row 3: lane guidance
+        nextTurnLaneRow = new HBox(uiScale.px(2));
+        nextTurnLaneRow.setAlignment(Pos.CENTER_LEFT);
+        nextTurnLaneRow.setPadding(new Insets(0, uiScale.px(6), uiScale.px(2), uiScale.px(6 + 18 + 4)));
+        nextTurnLaneRow.setVisible(false);
+        nextTurnLaneRow.setManaged(false);
+
         // Single container VBox: current road on top, then next-turn rows below
         VBox box = new VBox(0);
-        box.getChildren().addAll(currentRoadLabel, row1, nextNextRow);
+        box.getChildren().addAll(currentRoadLabel, row1, nextTurnLaneRow, nextNextRow);
         box.setStyle("-fx-background-color: rgba(255,255,255,0.92); -fx-background-radius: 0 0 4px 0; -fx-border-color: #ccc; -fx-border-width: 0 1px 1px 0;");
         box.setVisible(false);
         box.setManaged(false);
@@ -1251,6 +1262,53 @@ public class MainController implements Initializable {
         }
     }
 
+    private void updateNextTurnLanes(boolean oneway, int count, boolean suggested,
+                                      int suggestedFrom, int suggestedTo,
+                                      LaneTurn[] turns) {
+        if (nextTurnLaneRow == null) return;
+
+        nextTurnLaneRow.getChildren().clear();
+
+        if (count <= 0 || turns == null || turns.length == 0) {
+            nextTurnLaneRow.setVisible(false);
+            nextTurnLaneRow.setManaged(false);
+            return;
+        }
+
+        for (int i = 0; i < turns.length && i < count; i++) {
+            if (i > 0 && !oneway) {
+                Label divider = new Label("|");
+                divider.setStyle("-fx-text-fill: #ccc; -fx-font-size: " + uiScale.smallFontSize() + "px;");
+                nextTurnLaneRow.getChildren().add(divider);
+            }
+            boolean isSuggested = suggested && i >= suggestedFrom && i <= suggestedTo;
+            String arrow = laneTurnToArrow(turns[i]);
+            String color = isSuggested ? "#4a90d9" : "#999";
+            Label arrowLabel = new Label(arrow);
+            arrowLabel.setStyle("-fx-font-size: " + uiScale.bodyFontSize() + "px; -fx-text-fill: " + color + "; -fx-font-weight: " + (isSuggested ? "bold" : "normal") + ";");
+            nextTurnLaneRow.getChildren().add(arrowLabel);
+        }
+        nextTurnLaneRow.setVisible(true);
+        nextTurnLaneRow.setManaged(true);
+    }
+
+    private static String laneTurnToArrow(LaneTurn turn) {
+        switch (turn) {
+            case LEFT:                return "\u2190";
+            case SLIGHTLY_LEFT:       return "\u2196";
+            case SHARP_LEFT:          return "\u21A9";
+            case RIGHT:               return "\u2192";
+            case SLIGHTLY_RIGHT:      return "\u2197";
+            case SHARP_RIGHT:         return "\u21AA";
+            case LEFT_AND_STRAIGHT:   return "\u219E\u2190";
+            case STRAIGHT_AND_RIGHT:  return "\u2192\u219E";
+            case MERGE_TO_LEFT:       return "\u2190\u2192";
+            case MERGE_TO_RIGHT:      return "\u2192\u2190";
+            case STRAIGHT_ON:
+            default:                  return "\u2191";
+        }
+    }
+
     private static String formatDistance(double meters) {
         if (meters < 1000) {
             return String.format("%.0f m", meters);
@@ -1487,13 +1545,20 @@ public class MainController implements Initializable {
 
             @Override
             public void onLaneUpdate(boolean oneway, int count, boolean suggested,
-                                     int suggestedFrom, int suggestedTo, String turn) {
+                                     int suggestedFrom, int suggestedTo, String turn,
+                                     LaneTurn[] turns) {
                 if (isStale()) return;
+                Log.info("[Navigation] laneUpdate: count=" + count
+                    + " suggested=" + suggested
+                    + " from=" + suggestedFrom + " to=" + suggestedTo
+                    + " turn=" + turn
+                    + " turns=" + (turns != null ? turns.length : 0));
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     if (routePanel != null) {
-                        routePanel.updateLaneInfo(oneway, count, suggested, suggestedFrom, suggestedTo, turn);
+                        routePanel.updateLaneInfo(oneway, count, suggested, suggestedFrom, suggestedTo, turn, turns);
                     }
+                    updateNextTurnLanes(oneway, count, suggested, suggestedFrom, suggestedTo, turns);
                 });
             }
 

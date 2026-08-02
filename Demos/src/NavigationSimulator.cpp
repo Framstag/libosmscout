@@ -163,7 +163,6 @@ public:
 PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
                              double maxSpeed)
 {
-  size_t             tickCount=0;
   double             restTime=0.0;
   auto               currentNode=description.Nodes().begin();
   auto               nextNode=currentNode;
@@ -221,8 +220,6 @@ PathGenerator::PathGenerator(const osmscout::RouteDescription& description,
       time+=std::chrono::seconds(1);
 
       restTime=0;
-
-      tickCount++;
     }
 
     restTime=timeInSeconds;
