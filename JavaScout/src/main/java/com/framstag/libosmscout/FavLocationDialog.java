@@ -14,6 +14,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -84,7 +86,27 @@ public class FavLocationDialog extends Stage {
             @Override
             protected void updateItem(FavoriteLocationGroup item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.name);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    String colorStr = item.attributes.get("color");
+                    if (colorStr != null && colorStr.length() == 6) {
+                        Rectangle swatch = new Rectangle(12, 12);
+                        try {
+                            swatch.setFill(Color.web("#" + colorStr));
+                        } catch (Exception e) {
+                            swatch.setFill(Color.TRANSPARENT);
+                        }
+                        swatch.setStroke(Color.GRAY);
+                        swatch.setStrokeWidth(0.5);
+                        setGraphic(swatch);
+                        setText("  " + item.name);
+                    } else {
+                        setGraphic(null);
+                        setText(item.name);
+                    }
+                }
             }
         });
         groupList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -105,7 +127,12 @@ public class FavLocationDialog extends Stage {
         deleteGroupBtn.setStyle("-fx-font-size: " + baseFont + "px;");
         deleteGroupBtn.setOnAction(e -> deleteGroup());
 
-        HBox groupButtons = new HBox(uiScale.px(4), addGroupBtn, deleteGroupBtn);
+        Button colorGroupBtn = new Button("Color");
+        colorGroupBtn.setMinHeight(controlHeight);
+        colorGroupBtn.setStyle("-fx-font-size: " + baseFont + "px;");
+        colorGroupBtn.setOnAction(e -> pickGroupColor());
+
+        HBox groupButtons = new HBox(uiScale.px(4), addGroupBtn, deleteGroupBtn, colorGroupBtn);
         groupButtons.setAlignment(Pos.CENTER_LEFT);
 
         VBox groupPanel = new VBox(uiScale.px(4), groupLabel, groupList, groupButtons);
@@ -125,7 +152,8 @@ public class FavLocationDialog extends Stage {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.name + "  (" + String.format(Locale.US, "%.4f", item.lat) + ", " + String.format(Locale.US, "%.4f", item.lon) + ")");
+                    String star = "true".equals(item.attributes.get("starred")) ? "★ " : "";
+                    setText(star + item.name + "  (" + String.format(Locale.US, "%.4f", item.lat) + ", " + String.format(Locale.US, "%.4f", item.lon) + ")");
                 }
             }
         });
@@ -154,7 +182,12 @@ public class FavLocationDialog extends Stage {
         renameFavBtn.setStyle("-fx-font-size: " + baseFont + "px;");
         renameFavBtn.setOnAction(e -> renameFavorite());
 
-        HBox favButtons = new HBox(uiScale.px(4), addFavBtn, deleteFavBtn, renameFavBtn);
+        Button starFavBtn = new Button("Star");
+        starFavBtn.setMinHeight(controlHeight);
+        starFavBtn.setStyle("-fx-font-size: " + baseFont + "px;");
+        starFavBtn.setOnAction(e -> toggleStar());
+
+        HBox favButtons = new HBox(uiScale.px(4), addFavBtn, deleteFavBtn, renameFavBtn, starFavBtn);
         favButtons.setAlignment(Pos.CENTER_LEFT);
 
         VBox favPanel = new VBox(uiScale.px(4), favLabel, favList, favButtons);
@@ -441,6 +474,85 @@ public class FavLocationDialog extends Stage {
                 } else {
                     showError("Could not rename. Name '" + newName.trim() + "' may already exist.");
                 }
+            }
+        });
+    }
+
+    private void toggleStar() {
+        FavoriteLocation selected = favList.getSelectionModel().getSelectedItem();
+        FavoriteLocationGroup selectedGroup = groupList.getSelectionModel().getSelectedItem();
+        if (selected == null || selectedGroup == null) return;
+
+        boolean currentlyStarred = "true".equals(selected.attributes.get("starred"));
+        boolean newStarred = !currentlyStarred;
+
+        if (client.setStarred(selectedGroup.name, selected.name, newStarred)) {
+            if (newStarred) {
+                selected.attributes.put("starred", "true");
+            } else {
+                selected.attributes.remove("starred");
+            }
+            favList.refresh();
+            changed = true;
+        }
+    }
+
+    private void pickGroupColor() {
+        FavoriteLocationGroup selected = groupList.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        ColorPicker colorPicker = new ColorPicker();
+        String currentColor = selected.attributes.get("color");
+        if (currentColor != null && currentColor.length() == 6) {
+            try {
+                colorPicker.setValue(Color.web("#" + currentColor));
+            } catch (Exception e) {
+                colorPicker.setValue(Color.TRANSPARENT);
+            }
+        } else {
+            colorPicker.setValue(Color.TRANSPARENT);
+        }
+
+        Dialog<javafx.scene.paint.Color> dialog = new Dialog<>();
+        dialog.setTitle("Pick Group Color");
+        dialog.setHeaderText("Choose a color for group '" + selected.name + "'");
+
+        Button clearBtn = new Button("Clear Color");
+        clearBtn.setOnAction(e -> {
+            dialog.setResult(Color.TRANSPARENT);
+            dialog.close();
+        });
+
+        VBox content = new VBox(uiScale.px(8), colorPicker, clearBtn);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(btn -> {
+            if (btn == ButtonType.OK) {
+                return colorPicker.getValue();
+            }
+            return null;
+        });
+
+        Optional<javafx.scene.paint.Color> result = dialog.showAndWait();
+        result.ifPresent(color -> {
+            String hex;
+            if (color.equals(Color.TRANSPARENT)) {
+                hex = "";
+            } else {
+                hex = String.format("%02X%02X%02X",
+                        (int)(color.getRed() * 255),
+                        (int)(color.getGreen() * 255),
+                        (int)(color.getBlue() * 255));
+            }
+            if (client.setGroupColor(selected.name, hex)) {
+                if (hex.isEmpty()) {
+                    selected.attributes.remove("color");
+                } else {
+                    selected.attributes.put("color", hex);
+                }
+                groupList.refresh();
+                changed = true;
             }
         });
     }

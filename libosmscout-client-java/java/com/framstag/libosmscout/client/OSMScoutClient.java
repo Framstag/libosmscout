@@ -430,6 +430,44 @@ public class OSMScoutClient {
      */
     public native boolean renameFavorite(String groupName, String oldName, String newName);
 
+    /**
+     * Set or clear the starred flag on a favorite.
+     *
+     * @param groupName group name
+     * @param favName   favorite name
+     * @param starred   true to star, false to unstar
+     * @return true if updated, false if group or fav not found
+     */
+    public native boolean setStarred(String groupName, String favName, boolean starred);
+
+    /**
+     * Check if a favorite is starred.
+     *
+     * @param groupName group name
+     * @param favName   favorite name
+     * @return true if starred, false otherwise
+     */
+    public native boolean isStarred(String groupName, String favName);
+
+    /**
+     * Set or clear the color of a group.
+     * Color is a 6-character hex RGB string (e.g. "FF5733").
+     * Pass empty string to clear.
+     *
+     * @param groupName group name
+     * @param color     6-char hex RGB string, or empty to clear
+     * @return true if set, false if group not found or invalid color
+     */
+    public native boolean setGroupColor(String groupName, String color);
+
+    /**
+     * Get the color of a group.
+     *
+     * @param groupName group name
+     * @return color string (6 hex chars) or empty if no color or group not found
+     */
+    public native String getGroupColor(String groupName);
+
     // ---- Map Download ----
 
     /** Manager for downloading maps from providers. Created lazily. */
