@@ -16,6 +16,7 @@ set(JAVA_SOURCES
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/DescriptionEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/FavoriteLocation.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/FavoriteLocationGroup.java
+  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/LaneTurn.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/LocationEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/MapDownloadListener.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/MapDownloadManager.java
