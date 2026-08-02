@@ -68,6 +68,7 @@ namespace osmscout {
 
     struct CairoNativeGlyph {
       std::string character;
+      CairoFont   font;
       double width;
       double height;
     };
@@ -83,7 +84,7 @@ namespace osmscout {
   private:
     CairoLabelLayouter labelLayouter;
 
-    using FontMap = std::unordered_map<size_t,CairoFont>;    //! Map type for mapping font sizes to font
+    using FontMap = std::unordered_map<double,CairoFont>;    //! Map type for mapping font sizes to font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
