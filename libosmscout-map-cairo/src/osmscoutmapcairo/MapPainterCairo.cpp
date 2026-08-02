@@ -296,13 +296,15 @@ namespace osmscout {
   }
 
   MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
-                                                      const MapParameter &parameter,
-                                                      double fontSize)
+                                                       const MapParameter &parameter,
+                                                       double fontSize)
   {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     FontMap::const_iterator f;
 
     fontSize = fontSize * projection.ConvertWidthToPixel(parameter.GetFontSize());
+
+    assert(fontSize > 0 && std::isfinite(fontSize));
 
     f = fonts.find(fontSize);
 
@@ -320,6 +322,8 @@ namespace osmscout {
     FontMap::const_iterator f;
 
     fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+
+    assert(fontSize > 0 && std::isfinite(fontSize));
 
     f=fonts.find(fontSize);
 
@@ -670,6 +674,17 @@ namespace osmscout {
       }
     }
     patternImages.clear();
+
+    for (const auto &entry : fonts) {
+      if (entry.second != nullptr) {
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+        pango_font_description_free(entry.second);
+#else
+        cairo_scaled_font_destroy(entry.second);
+#endif
+      }
+    }
+    fonts.clear();
   }
 
   void MapPainterCairo::BeforeDrawingCallback(const Projection& projection,
@@ -888,6 +903,7 @@ namespace osmscout {
       result.emplace_back();
 
       result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch,1));
+      result.back().glyph.font = label.font;
 
       cairo_text_extents_t  textExtents;
       cairo_scaled_font_text_extents(label.font,
@@ -925,6 +941,7 @@ namespace osmscout {
       cairo_translate(draw, glyph.position.GetX(), glyph.position.GetY());
       cairo_rotate(draw, glyph.angle);
 
+      cairo_set_scaled_font(draw, glyph.glyph.font);
       cairo_move_to(draw, 0, 0);
       cairo_show_text(draw,glyph.glyph.character.c_str());
       cairo_stroke(draw);
@@ -1011,6 +1028,7 @@ namespace osmscout {
         cairo_fill(draw);
       }
 #else
+      cairo_set_scaled_font(draw, layout.font);
       cairo_move_to(draw,
                     labelRectangle.x,
                     labelRectangle.y+layout.fontExtents.ascent);
@@ -1020,6 +1038,7 @@ namespace osmscout {
         cairo_stroke(draw);
       }
       else {
+        cairo_set_scaled_font(draw, layout.font);
         cairo_text_path(draw,label.text.c_str());
 
         cairo_set_source_rgba(draw,1,1,1,label.alpha);
@@ -1086,6 +1105,7 @@ namespace osmscout {
       cairo_stroke(draw);
 
 #else
+      cairo_set_scaled_font(draw, layout.font);
       cairo_move_to(draw,
                     labelRectangle.x,
                     labelRectangle.y+layout.fontExtents.ascent);
