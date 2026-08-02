@@ -34,6 +34,9 @@ public class LocationEntry {
     /** OSM type name of the referenced object (e.g. "building", "highway_residential"). */
     public String objectTypeName;
 
+    /** OSM name of the referenced object (e.g. "Aldi", "Hauptstraße"), or empty if unknown. */
+    public String name;
+
     /** File offset of the referenced object in the database. */
     public long objectFileOffset;
 
