@@ -75,13 +75,15 @@ public interface NavigationListener {
      * @param suggestedFrom first suggested lane, inclusive (0 when not suggested)
      * @param suggestedTo   last suggested lane, inclusive (0 when not suggested)
      * @param turn          turn to take as a string, or empty
+     * @param turns         per-lane turn indications, one element per lane; empty if unknown
      */
     default void onLaneUpdate(boolean oneway,
                               int count,
                               boolean suggested,
                               int suggestedFrom,
                               int suggestedTo,
-                              String turn) {
+                              String turn,
+                              LaneTurn[] turns) {
     }
 
     /**

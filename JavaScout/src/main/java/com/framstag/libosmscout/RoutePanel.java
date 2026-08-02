@@ -1,5 +1,6 @@
 package com.framstag.libosmscout;
 
+import com.framstag.libosmscout.client.LaneTurn;
 import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.OSMScoutClient;
 import com.framstag.libosmscout.client.RouteCallback;
@@ -27,6 +28,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
@@ -80,6 +82,13 @@ public class RoutePanel extends StackPane {
     // Navigation status display
     private final Label navigationStatusLabel;
     private boolean navigationActive = false;
+
+    // Lane guidance display
+    private final HBox laneContainer;
+    private static final String LANE_ARROW_FILL = "#4a90d9";
+    private static final String LANE_ARROW_OUTLINE = "#999";
+    private static final String LANE_SUGGESTED_FILL = "#4a90d9";
+    private static final String LANE_DIVIDER = "#ccc";
 
     // Reroute status
     private final Label rerouteStatusLabel;
@@ -410,6 +419,14 @@ public class RoutePanel extends StackPane {
         navigationStatusLabel.setVisible(false);
         navigationStatusLabel.setManaged(false);
 
+        // Lane guidance container (hidden by default)
+        laneContainer = new HBox(uiScale.px(2));
+        laneContainer.setAlignment(Pos.CENTER);
+        laneContainer.setPadding(uiScale.insets(4));
+        laneContainer.setVisible(false);
+        laneContainer.setManaged(false);
+        laneContainer.setStyle("-fx-background-color: rgba(255,255,255,0.8); -fx-background-radius: 4px;");
+
         // Reroute status label (hidden by default)
         rerouteStatusLabel = new Label("");
         rerouteStatusLabel.setWrapText(true);
@@ -421,7 +438,7 @@ public class RoutePanel extends StackPane {
         rerouteStatusLabel.setManaged(false);
 
         // Assemble panel (progressBox is an overlay child, not part of VBox)
-        routePanel.getChildren().addAll(titleBar, fieldsRow, vehicleRow, avoidRow, buttonRow, navigationStatusLabel, rerouteStatusLabel, instructionScroll);
+        routePanel.getChildren().addAll(titleBar, fieldsRow, vehicleRow, avoidRow, buttonRow, navigationStatusLabel, laneContainer, rerouteStatusLabel, instructionScroll);
 
         // Add to layout: routePanel (bottom-right), progressBox (centered overlay)
         getChildren().addAll(routePanel, progressBox);
@@ -845,6 +862,9 @@ public class RoutePanel extends StackPane {
         navigationStatusLabel.setManaged(active);
         if (!active) {
             navigationStatusLabel.setText("");
+            laneContainer.setVisible(false);
+            laneContainer.setManaged(false);
+            laneContainer.getChildren().clear();
         }
     }
 
@@ -892,17 +912,91 @@ public class RoutePanel extends StackPane {
     }
 
     public void updateLaneInfo(boolean oneway, int count, boolean suggested,
-                               int suggestedFrom, int suggestedTo, String turn) {
+                               int suggestedFrom, int suggestedTo, String turn,
+                               LaneTurn[] turns) {
         if (!navigationActive) return;
-        String text = navigationStatusLabel.getText();
-        StringBuilder sb = new StringBuilder(text).append("\nLanes: ").append(count);
-        if (suggested) {
-            sb.append(" (use ").append(suggestedFrom + 1).append("-").append(suggestedTo + 1).append(")");
+
+        if (count <= 0 || turns == null || turns.length == 0) {
+            laneContainer.setVisible(false);
+            laneContainer.setManaged(false);
+            return;
         }
-        if (!turn.isEmpty()) {
-            sb.append(" turn: ").append(turn);
+
+        laneContainer.getChildren().clear();
+        for (int i = 0; i < turns.length && i < count; i++) {
+            if (i > 0 && !oneway) {
+                // Add divider between lanes for two-way roads
+                SVGPath divider = new SVGPath();
+                divider.setContent("M0,0 L0,20");
+                divider.setStroke(Color.web(LANE_DIVIDER));
+                divider.setStrokeWidth(1);
+                laneContainer.getChildren().add(divider);
+            }
+
+            boolean isSuggested = suggested && i >= suggestedFrom && i <= suggestedTo;
+            SVGPath arrow = createLaneArrow(turns[i], isSuggested);
+            laneContainer.getChildren().add(arrow);
         }
-        navigationStatusLabel.setText(sb.toString());
+        laneContainer.setVisible(true);
+        laneContainer.setManaged(true);
+    }
+
+    /**
+     * Create an SVGPath for a lane arrow based on the turn direction.
+     */
+    private SVGPath createLaneArrow(LaneTurn turn, boolean suggested) {
+        SVGPath arrow = new SVGPath();
+        String fill = suggested ? LANE_SUGGESTED_FILL : LANE_ARROW_OUTLINE;
+        arrow.setFill(Color.web(fill));
+        arrow.setStroke(Color.web(LANE_ARROW_OUTLINE));
+        arrow.setStrokeWidth(0.5);
+
+        // SVG path data for each arrow type (20x20 viewport, pointing up)
+        switch (turn) {
+            case LEFT:
+                arrow.setContent("M10,2 L2,10 L6,10 L6,18 L14,18 L14,10 L18,10 Z");
+                break;
+            case SLIGHTLY_LEFT:
+                arrow.setContent("M10,2 L4,8 L7,10 L10,10 L10,18 L14,18 L14,10 L16,8 Z");
+                break;
+            case SHARP_LEFT:
+                arrow.setContent("M10,2 L2,10 L6,12 L10,12 L10,18 L14,18 L14,12 L16,10 Z");
+                break;
+            case RIGHT:
+                arrow.setContent("M10,2 L18,10 L14,10 L14,18 L6,18 L6,10 L2,10 Z");
+                break;
+            case SLIGHTLY_RIGHT:
+                arrow.setContent("M10,2 L16,8 L13,10 L10,10 L10,18 L6,18 L6,10 L4,8 Z");
+                break;
+            case SHARP_RIGHT:
+                arrow.setContent("M10,2 L18,10 L14,12 L10,12 L10,18 L6,18 L6,12 L4,10 Z");
+                break;
+            case LEFT_AND_STRAIGHT:
+                arrow.setContent("M10,2 L2,10 L6,10 L6,18 L10,18 L10,10 L14,10 L14,18 L18,18 L18,2 L14,2 L14,6 L10,6 L10,2 Z");
+                break;
+            case STRAIGHT_AND_RIGHT:
+                arrow.setContent("M10,2 L6,2 L6,6 L2,6 L2,10 L6,10 L6,18 L10,18 L10,10 L14,10 L18,10 L14,2 Z");
+                break;
+            case MERGE_TO_LEFT:
+                arrow.setContent("M14,2 L10,6 L12,6 L12,18 L8,18 L8,6 L10,6 L6,2 Z");
+                break;
+            case MERGE_TO_RIGHT:
+                arrow.setContent("M6,2 L10,6 L8,6 L8,18 L12,18 L12,6 L10,6 L14,2 Z");
+                break;
+            case STRAIGHT_AND_SLIGHTLY_LEFT:
+            case STRAIGHT_AND_SHARP_LEFT:
+            case STRAIGHT_AND_SLIGHTLY_RIGHT:
+            case STRAIGHT_AND_SHARP_RIGHT:
+            case LEFT_AND_RIGHT:
+            default:
+                // Straight arrow fallback
+                arrow.setContent("M10,2 L6,6 L8,6 L8,18 L12,18 L12,6 L14,6 Z");
+                break;
+        }
+
+        arrow.setScaleX(uiScale.px(1));
+        arrow.setScaleY(uiScale.px(1));
+        return arrow;
     }
 
     /**
