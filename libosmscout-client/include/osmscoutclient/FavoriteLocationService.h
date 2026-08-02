@@ -164,6 +164,50 @@ public:
                       const std::string &newName);
 
   /**
+   * Set or clear the starred flag on a favorite.
+   * Star is stored as attributes["starred"] = "true".
+   * Unsetting removes the key entirely.
+   *
+   * @param groupName  group name
+   * @param favName    favorite name
+   * @param starred    true to star, false to unstar
+   * @return true if updated, false if group or fav not found
+   */
+  bool SetStarred(const std::string &groupName,
+                  const std::string &favName,
+                  bool starred);
+
+  /**
+   * Check if a favorite is starred.
+   *
+   * @param groupName  group name
+   * @param favName    favorite name
+   * @return true if starred, false if not found or not starred
+   */
+  bool IsStarred(const std::string &groupName,
+                 const std::string &favName) const;
+
+  /**
+   * Set or clear the color of a group.
+   * Color is stored as attributes["color"] = "RRGGBB" (6 hex chars).
+   * Passing empty string clears the color.
+   *
+   * @param groupName  group name
+   * @param color      6-char hex RGB string, or empty to clear
+   * @return true if set, false if group not found or invalid color
+   */
+  bool SetGroupColor(const std::string &groupName,
+                     const std::string &color);
+
+  /**
+   * Get the color of a group.
+   *
+   * @param groupName  group name
+   * @return color string (6 hex chars) or empty if no color or group not found
+   */
+  std::string GetGroupColor(const std::string &groupName) const;
+
+  /**
    * Remove all groups and favorites from memory.
    * Used when rebuilding state from an external source.
    */

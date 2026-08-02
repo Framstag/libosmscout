@@ -21,6 +21,7 @@
 
 #include <osmscoutclient/json/json.hpp>
 
+#include <cctype>
 #include <fstream>
 #include <filesystem>
 #include <mutex>
@@ -307,6 +308,97 @@ bool FavoriteLocationService::RenameFavorite(const std::string &groupName,
 
   target->name = newName;
   return true;
+}
+
+bool FavoriteLocationService::SetStarred(const std::string &groupName,
+                                          const std::string &favName,
+                                          bool starred)
+{
+  std::unique_lock lock(mutex_);
+
+  auto git = groups_.find(groupName);
+  if (git == groups_.end()) {
+    return false;
+  }
+
+  for (auto &fav : git->second.favorites) {
+    if (fav.name == favName) {
+      if (starred) {
+        fav.attributes["starred"] = "true";
+      } else {
+        fav.attributes.erase("starred");
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool FavoriteLocationService::IsStarred(const std::string &groupName,
+                                         const std::string &favName) const
+{
+  std::shared_lock lock(mutex_);
+
+  auto git = groups_.find(groupName);
+  if (git == groups_.end()) {
+    return false;
+  }
+
+  for (const auto &fav : git->second.favorites) {
+    if (fav.name == favName) {
+      auto it = fav.attributes.find("starred");
+      return it != fav.attributes.end() && it->second == "true";
+    }
+  }
+
+  return false;
+}
+
+bool FavoriteLocationService::SetGroupColor(const std::string &groupName,
+                                              const std::string &color)
+{
+  std::unique_lock lock(mutex_);
+
+  auto git = groups_.find(groupName);
+  if (git == groups_.end()) {
+    return false;
+  }
+
+  if (color.empty()) {
+    git->second.attributes.erase("color");
+    return true;
+  }
+
+  // Validate: exactly 6 hex characters
+  if (color.length() != 6) {
+    return false;
+  }
+  for (char c : color) {
+    if (!std::isxdigit(static_cast<unsigned char>(c))) {
+      return false;
+    }
+  }
+
+  git->second.attributes["color"] = color;
+  return true;
+}
+
+std::string FavoriteLocationService::GetGroupColor(const std::string &groupName) const
+{
+  std::shared_lock lock(mutex_);
+
+  auto git = groups_.find(groupName);
+  if (git == groups_.end()) {
+    return std::string();
+  }
+
+  auto it = git->second.attributes.find("color");
+  if (it == git->second.attributes.end()) {
+    return std::string();
+  }
+
+  return it->second;
 }
 
 void FavoriteLocationService::ClearAll()

@@ -193,3 +193,128 @@ TEST_CASE("Concurrent reads do not crash")
 
     std::filesystem::remove(tmp, ec);
 }
+
+TEST_CASE("Star and unstar a favorite")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_star_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    osmscout::FavoriteLocationService service(tmp.string());
+    service.AddGroup("Work");
+
+    osmscout::FavLocation office;
+    office.name = "Office";
+    office.lat = 51.0;
+    office.lon = 10.0;
+    service.AddFavorite("Work", office);
+
+    // Star it
+    REQUIRE(service.SetStarred("Work", "Office", true));
+    REQUIRE(service.IsStarred("Work", "Office"));
+
+    // Check attribute stored
+    auto favs = service.GetFavorites("Work");
+    REQUIRE(favs[0].attributes["starred"] == "true");
+
+    // Unstar
+    REQUIRE(service.SetStarred("Work", "Office", false));
+    REQUIRE_FALSE(service.IsStarred("Work", "Office"));
+
+    // Key removed from attributes
+    favs = service.GetFavorites("Work");
+    REQUIRE(favs[0].attributes.find("starred") == favs[0].attributes.end());
+
+    // Non-existent group/fav
+    REQUIRE_FALSE(service.SetStarred("Missing", "X", true));
+    REQUIRE_FALSE(service.IsStarred("Missing", "X"));
+    REQUIRE_FALSE(service.SetStarred("Work", "Missing", true));
+    REQUIRE_FALSE(service.IsStarred("Work", "Missing"));
+
+    std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("Star persists across save and load")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_star_persist_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        service.AddGroup("Work");
+
+        osmscout::FavLocation office;
+        office.name = "Office";
+        office.lat = 51.0;
+        office.lon = 10.0;
+        service.AddFavorite("Work", office);
+        service.SetStarred("Work", "Office", true);
+        REQUIRE(service.Save());
+    }
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        REQUIRE(service.IsStarred("Work", "Office"));
+    }
+
+    std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("Set and get group color")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_color_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    osmscout::FavoriteLocationService service(tmp.string());
+    service.AddGroup("Work");
+
+    // Set valid color
+    REQUIRE(service.SetGroupColor("Work", "FF5733"));
+    REQUIRE(service.GetGroupColor("Work") == "FF5733");
+
+    // Check attribute stored
+    auto groups = service.GetGroups();
+    REQUIRE(groups[0].attributes["color"] == "FF5733");
+
+    // Clear color
+    REQUIRE(service.SetGroupColor("Work", ""));
+    REQUIRE(service.GetGroupColor("Work").empty());
+
+    // Key removed from attributes
+    groups = service.GetGroups();
+    REQUIRE(groups[0].attributes.find("color") == groups[0].attributes.end());
+
+    // Invalid colors rejected
+    REQUIRE_FALSE(service.SetGroupColor("Work", "XYZ"));
+    REQUIRE_FALSE(service.SetGroupColor("Work", "FF573"));   // 5 chars
+    REQUIRE_FALSE(service.SetGroupColor("Work", "FF57330")); // 7 chars
+
+    // Non-existent group
+    REQUIRE_FALSE(service.SetGroupColor("Missing", "FF5733"));
+    REQUIRE(service.GetGroupColor("Missing").empty());
+
+    std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("Group color persists across save and load")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_color_persist_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        service.AddGroup("Work");
+        service.SetGroupColor("Work", "00AAFF");
+        REQUIRE(service.Save());
+    }
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        REQUIRE(service.GetGroupColor("Work") == "00AAFF");
+    }
+
+    std::filesystem::remove(tmp, ec);
+}

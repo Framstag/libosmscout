@@ -3996,6 +3996,85 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renameFavorite(JNIEnv *env, 
   return ok ? JNI_TRUE : JNI_FALSE;
 }
 
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setStarred(JNIEnv *env, jobject self,
+                                                                jstring groupName, jstring favName,
+                                                                jboolean starred)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->favService == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+
+  bool ok = data->favService->SetStarred(groupCStr, favCStr, starred == JNI_TRUE);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_isStarred(JNIEnv *env, jobject self,
+                                                               jstring groupName, jstring favName)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->favService == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+
+  bool starred = data->favService->IsStarred(groupCStr, favCStr);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+
+  return starred ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setGroupColor(JNIEnv *env, jobject self,
+                                                                    jstring groupName, jstring color)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->favService == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *colorCStr = env->GetStringUTFChars(color, nullptr);
+
+  bool ok = data->favService->SetGroupColor(groupCStr, colorCStr);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(color, colorCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getGroupColor(JNIEnv *env, jobject self,
+                                                                   jstring groupName)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->favService == nullptr) {
+    return env->NewStringUTF("");
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+
+  std::string color = data->favService->GetGroupColor(groupCStr);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+
+  return env->NewStringUTF(color.c_str());
+}
+
 // --------------------------------------------------------------------------
 // OSMScoutClient::startNavigation(long routeHandle, NavigationListener)
 // --------------------------------------------------------------------------

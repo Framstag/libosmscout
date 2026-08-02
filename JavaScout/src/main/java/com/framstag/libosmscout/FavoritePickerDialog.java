@@ -12,6 +12,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -58,9 +60,25 @@ public class FavoritePickerDialog extends Stage {
                     setText(null);
                     setGraphic(null);
                 } else if (item instanceof FavoriteLocationGroup group) {
-                    setText(group.name + " (" + group.favorites.size() + ")");
+                    String colorStr = group.attributes.get("color");
+                    if (colorStr != null && colorStr.length() == 6) {
+                        Rectangle swatch = new Rectangle(12, 12);
+                        try {
+                            swatch.setFill(Color.web("#" + colorStr));
+                        } catch (Exception e) {
+                            swatch.setFill(Color.TRANSPARENT);
+                        }
+                        swatch.setStroke(Color.GRAY);
+                        swatch.setStrokeWidth(0.5);
+                        setGraphic(swatch);
+                        setText("  " + group.name + " (" + group.favorites.size() + ")");
+                    } else {
+                        setGraphic(null);
+                        setText(group.name + " (" + group.favorites.size() + ")");
+                    }
                 } else if (item instanceof FavoriteLocation fav) {
-                    setText(fav.name + "  (" + String.format(Locale.US, "%.4f", fav.lat) + ", " + String.format(Locale.US, "%.4f", fav.lon) + ")");
+                    String star = "true".equals(fav.attributes.get("starred")) ? "★ " : "";
+                    setText(star + fav.name + "  (" + String.format(Locale.US, "%.4f", fav.lat) + ", " + String.format(Locale.US, "%.4f", fav.lon) + ")");
                 }
             }
         });
