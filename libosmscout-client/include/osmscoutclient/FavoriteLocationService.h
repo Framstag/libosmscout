@@ -116,6 +116,16 @@ public:
   bool DeleteGroup(const std::string &name);
 
   /**
+   * Rename a group.
+   *
+   * @param oldName  current group name
+   * @param newName  new group name (must be unique)
+   * @return true if renamed, false if oldName not found or newName already exists
+   */
+  bool RenameGroup(const std::string &oldName,
+                   const std::string &newName);
+
+  /**
    * Return all favorites in a group.
    *
    * @param groupName  group name
@@ -152,6 +162,12 @@ public:
   bool RenameFavorite(const std::string &groupName,
                       const std::string &oldName,
                       const std::string &newName);
+
+  /**
+   * Remove all groups and favorites from memory.
+   * Used when rebuilding state from an external source.
+   */
+  void ClearAll();
 
 private:
   mutable std::shared_mutex mutex_;

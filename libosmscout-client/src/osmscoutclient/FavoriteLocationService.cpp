@@ -203,6 +203,28 @@ bool FavoriteLocationService::DeleteGroup(const std::string &name)
   return true;
 }
 
+bool FavoriteLocationService::RenameGroup(const std::string &oldName,
+                                          const std::string &newName)
+{
+  std::unique_lock lock(mutex_);
+
+  auto oldIt = groups_.find(oldName);
+  if (oldIt == groups_.end()) {
+    return false;
+  }
+
+  if (groups_.find(newName) != groups_.end()) {
+    return false;
+  }
+
+  // Extract the group node, rename it, and re-insert under new key
+  auto node = groups_.extract(oldIt);
+  node.key() = newName;
+  node.mapped().name = newName;
+  groups_.insert(std::move(node));
+  return true;
+}
+
 std::vector<FavLocation> FavoriteLocationService::GetFavorites(const std::string &groupName) const
 {
   std::shared_lock lock(mutex_);
@@ -285,6 +307,12 @@ bool FavoriteLocationService::RenameFavorite(const std::string &groupName,
 
   target->name = newName;
   return true;
+}
+
+void FavoriteLocationService::ClearAll()
+{
+  std::unique_lock lock(mutex_);
+  groups_.clear();
 }
 
 }
