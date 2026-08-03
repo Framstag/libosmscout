@@ -348,6 +348,9 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
     lastMessage.type=VoiceMessageStruct::Type::NoMessage;
     lastMessagePosition=Distance::Zero();
     vehicle=routeUpdateMessage->vehicle;
+    if (ttsMessageGenerator) {
+      ttsMessageGenerator->SetVehicle(vehicle);
+    }
     return result;
   }
 
@@ -389,7 +392,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
           std::vector<VoiceSample>{VoiceSample::GpsFound}));
     } else {
       assert(voiceType==NavigationVoiceType::TextToSpeech);
-      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(VoiceMessageStruct(VoiceMessageStruct::Type::GpsFound, Distance::Zero()),VoiceMessageStruct())) {
+      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(Distance::Zero(), VoiceMessageStruct(VoiceMessageStruct::Type::GpsFound, Distance::Zero()),VoiceMessageStruct())) {
         result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
           positionMessage->timestamp, std::move(*ttsMessage)));
       }
@@ -403,7 +406,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
           std::vector<VoiceSample>{VoiceSample::GpsLost}));
     } else {
       assert(voiceType==NavigationVoiceType::TextToSpeech);
-      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(VoiceMessageStruct(VoiceMessageStruct::Type::GpsLost, Distance::Zero()),VoiceMessageStruct())) {
+      if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(Distance::Zero(), VoiceMessageStruct(VoiceMessageStruct::Type::GpsLost, Distance::Zero()),VoiceMessageStruct())) {
         result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
           positionMessage->timestamp, std::move(*ttsMessage)));
       }
@@ -457,7 +460,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
           toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
       } else {
         assert(voiceType==NavigationVoiceType::TextToSpeech);
-        if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(callback.nextMessage, callback.thenMessage)) {
+        if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(distanceFromStart, callback.nextMessage, callback.thenMessage)) {
           result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
             positionMessage->timestamp, std::move(*ttsMessage)));
         }
@@ -479,7 +482,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
               toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
         } else {
           assert(voiceType==NavigationVoiceType::TextToSpeech);
-          if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(callback.nextMessage, callback.thenMessage)) {
+          if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(distanceFromStart, callback.nextMessage, callback.thenMessage)) {
             result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
               positionMessage->timestamp, std::move(*ttsMessage)));
           }

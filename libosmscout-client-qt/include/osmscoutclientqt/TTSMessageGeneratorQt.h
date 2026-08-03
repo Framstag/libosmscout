@@ -55,6 +55,8 @@ private:
   QString translationDir;
   //!< Translator dedicated to voice instructions, independent of the app UI language.
   std::unique_ptr<QTranslator> translator;
+  DistanceUnitSystem units{DistanceUnitSystem::Metrics};
+  Vehicle vehicle{vehicleCar};
 
 public:
   explicit TTSMessageGeneratorQt(const QString &translationDir);
@@ -62,7 +64,12 @@ public:
 
   bool SetLanguage(const std::string &language) override;
 
-  std::optional<std::string> GenerateMessage(const VoiceMessageStruct &message,
+  void SetUnits(DistanceUnitSystem units) override;
+
+  void SetVehicle(Vehicle vehicle) override;
+
+  std::optional<std::string> GenerateMessage(const Distance &distanceFromStart,
+                                             const VoiceMessageStruct &message,
                                              const VoiceMessageStruct &then) override;
 
 private:
@@ -75,8 +82,19 @@ private:
   /**
    * Build a translated phrase for a single maneuver. Returns an empty string
    * for messages that should not be spoken (NoMessage, Silent).
+   *
+   * @param shortRoundaboutMessage when true, the "At the roundabout" part of a
+   *        roundabout exit phrase is omitted (used when the roundabout is close
+   *        or for a following "then" maneuver).
    */
-  QString Phrase(const VoiceMessageStruct &message) const;
+  QString Phrase(const VoiceMessageStruct &message, bool shortRoundaboutMessage) const;
+
+  /**
+   * Build the translated distance announcement (e.g. "After 300 meters") for
+   * the given distance, using the same distance buckets as the Voice of Marble
+   * messages. Returns an empty string when no distance should be announced.
+   */
+  QString DistancePhrase(double distanceInUnits) const;
 };
 
 }

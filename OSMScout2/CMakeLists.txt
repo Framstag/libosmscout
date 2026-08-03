@@ -48,6 +48,7 @@ set(TRANSLATION_TS_FILES
 set(TRANSLATION_SOURCE_FILES
 	${SOURCE_FILES}
 	../libosmscout-client-qt/src/osmscoutclientqt/RouteDescriptionBuilder.cpp
+	../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp
 	)
 
 # See http://doc.qt.io/qt-5/cmake-manual.html

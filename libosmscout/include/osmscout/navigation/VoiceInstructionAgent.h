@@ -214,7 +214,30 @@ public:
    */
   virtual bool SetLanguage(const std::string &languageCode) = 0;
 
-  virtual std::optional<std::string> GenerateMessage(const VoiceMessageStruct &message, const VoiceMessageStruct &then) = 0;
+  /**
+   * Set the distance units used for the announced distances.
+   */
+  virtual void SetUnits(DistanceUnitSystem units) = 0;
+
+  /**
+   * Set the current vehicle.
+   */
+  virtual void SetVehicle(Vehicle vehicle) = 0;
+
+  /**
+   * Generate a spoken message for the given maneuver.
+   *
+   * @param distanceFromStart current position (distance from the route start).
+   *        Together with the maneuver distance it defines how far ahead the
+   *        maneuver is, which may be announced ("After 300 meters, ...") and
+   *        controls the wording (e.g. a short roundabout phrase when close).
+   * @param message the maneuver to announce
+   * @param then optional following maneuver, only announced when close enough
+   * @return the message text, or std::nullopt when there is nothing to say
+   */
+  virtual std::optional<std::string> GenerateMessage(const Distance &distanceFromStart,
+                                                     const VoiceMessageStruct &message,
+                                                     const VoiceMessageStruct &then) = 0;
 };
 
 using TTSMessageGeneratorRef = std::shared_ptr<TTSMessageGenerator>;
@@ -229,7 +252,17 @@ public:
     return false;
   };
 
-  std::optional<std::string> GenerateMessage([[maybe_unused]] const VoiceMessageStruct &message, [[maybe_unused]] const VoiceMessageStruct &then) override
+  void SetUnits([[maybe_unused]] DistanceUnitSystem units) override
+  {
+  };
+
+  void SetVehicle([[maybe_unused]] Vehicle vehicle) override
+  {
+  };
+
+  std::optional<std::string> GenerateMessage([[maybe_unused]] const Distance &distanceFromStart,
+                                             [[maybe_unused]] const VoiceMessageStruct &message,
+                                             [[maybe_unused]] const VoiceMessageStruct &then) override
   {
     return std::nullopt;
   }
@@ -264,7 +297,11 @@ private:
 public:
   VoiceInstructionAgent(DistanceUnitSystem units, TTSMessageGeneratorRef ttsMessageGenerator):
     units{units}, ttsMessageGenerator(ttsMessageGenerator)
-  {};
+  {
+    if (this->ttsMessageGenerator) {
+      this->ttsMessageGenerator->SetUnits(units);
+    }
+  };
 
   ~VoiceInstructionAgent() override = default;
 
