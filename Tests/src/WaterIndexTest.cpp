@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -190,3 +191,96 @@ TEST_CASE("Synthetize coastlines")
   REQUIRE((*it)->coast[1].GetCoord()==GeoCoord(0, 0));
   REQUIRE((*it)->coast[2].GetCoord()==GeoCoord(0, 0.5));
 }
+
+TEST_CASE("Merge chunked open coastline")
+{
+  WaterIndexProcessor processor;
+  SilentProgress progress;
+  std::list<WaterIndexProcessor::CoastRef> coastlines;
+
+  // build a long open polyline that would be split by BasemapImport
+  std::vector<Point> coords;
+  size_t             pointCount=1500;
+
+  for (size_t i=0; i<pointCount; i++) {
+    coords.emplace_back(0, GeoCoord(0.0, i*0.001));
+  }
+
+  // split into 1000 point chunks with one point overlap, like BasemapImport now does
+  size_t chunkSize=1000;
+  size_t start=0;
+  OSMId  id=0;
+
+  while (start<coords.size()) {
+    size_t end=std::min(start+chunkSize,coords.size());
+
+    std::vector<Point> chunk(coords.begin()+start,
+                             coords.begin()+end);
+
+    coastlines.push_back(MkCoastline(id++,
+                                     std::move(chunk),
+                                     WaterIndexProcessor::CoastState::water,
+                                     WaterIndexProcessor::CoastState::land));
+
+    if (end==coords.size()) {
+      break;
+    }
+
+    start=end-1;
+  }
+
+  processor.MergeCoastlines(progress, coastlines);
+  REQUIRE(coastlines.size()==1);
+  REQUIRE_FALSE(coastlines.front()->isArea);
+  REQUIRE(coastlines.front()->coast.size()==pointCount);
+}
+
+TEST_CASE("Merge chunked closed coastline to area")
+{
+  WaterIndexProcessor processor;
+  SilentProgress progress;
+  std::list<WaterIndexProcessor::CoastRef> coastlines;
+
+  // build a long closed ring that would be split by BasemapImport
+  std::vector<Point> coords;
+  size_t             pointCount=1500;
+  static const double pi=std::atan(1.0)*4.0;
+
+  for (size_t i=0; i<pointCount-1; i++) {
+    double angle=2.0*pi*i/(pointCount-1);
+    coords.emplace_back(0, GeoCoord(std::sin(angle), std::cos(angle)));
+  }
+
+  coords.emplace_back(coords.front());
+
+  // split into 1000 point chunks with one point overlap
+  size_t chunkSize=1000;
+  size_t start=0;
+  OSMId  id=0;
+
+  while (start<coords.size()) {
+    size_t end=std::min(start+chunkSize,coords.size());
+
+    std::vector<Point> chunk(coords.begin()+start,
+                             coords.begin()+end);
+
+    coastlines.push_back(MkCoastline(id++,
+                                     std::move(chunk),
+                                     WaterIndexProcessor::CoastState::water,
+                                     WaterIndexProcessor::CoastState::land));
+
+    if (end==coords.size()) {
+      break;
+    }
+
+    start=end-1;
+  }
+
+  processor.MergeCoastlines(progress, coastlines);
+  REQUIRE(coastlines.size()==1);
+  REQUIRE(coastlines.front()->isArea);
+  // duplicate closing point must be removed by the merge
+  REQUIRE(coastlines.front()->coast.size()==pointCount-1);
+}
+
+
