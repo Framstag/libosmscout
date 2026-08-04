@@ -1,0 +1,78 @@
+OSS
+// Minimal stylesheet for basemap rendering
+// Only includes types present in the basemap data
+
+CONST
+  COLOR waterColor               = #9acffd;
+  COLOR landColor                = #f1eee9;
+  COLOR unknownColor             = @waterColor;
+  COLOR countryBorderColor       = #888;
+  COLOR countryLabelColor        = #555;
+  COLOR placeLabelColor          = #333;
+  COLOR oceanLabelColor          = #6699cc;
+  COLOR capitalLabelColor        = #222;
+END
+
+STYLE
+  // Land/sea from water index
+  [MAG 0-6] {
+    [TYPE _tile_sea] AREA {color: @waterColor;}
+    [TYPE _tile_land] AREA {color: @landColor;}
+    [TYPE _tile_unknown] AREA {color: @unknownColor;}
+  }
+
+  // Country borders
+  [TYPE basemap_boundary_country] {
+    [MAG 0-3] {
+        WAY {color: alpha(@countryBorderColor, 0.15); displayWidth: 0.1mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.15); width: 0.1mm;}
+    }
+    [MAG 4-6] {
+        WAY {color: alpha(@countryBorderColor, 0.4); displayWidth: 0.15mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.4); width: 0.15mm;}
+    }
+  }
+
+  // Continents
+  [TYPE place_continent] {
+    [MAG 0-4] {
+        NODE.TEXT { label: Name.name; color: @placeLabelColor; size: 1.5; priority: 100; }
+    }
+  }
+
+  // Countries
+  [TYPE place_country] {
+    [MAG 2-6] {
+        NODE.TEXT { label: Name.name; color: @countryLabelColor; size: 1.2; priority: 90; }
+    }
+  }
+
+  // Capital cities
+  [TYPE place_capitalcity] {
+    [MAG 3-6] {
+        NODE.TEXT { label: Name.name; color: @capitalLabelColor; size: 1.0; priority: 80; }
+        NODE { symbol: "star"; symbolSize: 0.3mm; color: #c0392b; }
+    }
+  }
+
+  // Million cities
+  [TYPE place_millioncity] {
+    [MAG 4-6] {
+        NODE.TEXT { label: Name.name; color: @placeLabelColor; size: 0.9; priority: 70; }
+    }
+  }
+
+  // Oceans
+  [TYPE place_ocean] {
+    [MAG 0-4] {
+        NODE.TEXT { label: Name.name; color: @oceanLabelColor; size: 1.8; priority: 60; }
+    }
+  }
+
+  // Seas
+  [TYPE place_sea] {
+    [MAG 0-4] {
+        NODE.TEXT { label: Name.name; color: @oceanLabelColor; size: 1.4; priority: 50; }
+    }
+  }
+END
