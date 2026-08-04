@@ -40,14 +40,14 @@ public:
   bool downloadSuccess{true};
   std::set<std::string> downloadedUrls;
 
-  std::string Fetch(const std::string &url) override
+  std::string Fetch([[maybe_unused]] const std::string &url) override
   {
     return fetchResponse;
   }
 
   bool Download(const std::string &url,
                 const std::filesystem::path &dest,
-                osmscout::ProgressCallback progress) override
+                [[maybe_unused]] osmscout::ProgressCallback progress) override
   {
     downloadedUrls.insert(url);
     if (!downloadSuccess) {
