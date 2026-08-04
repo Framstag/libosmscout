@@ -1,6 +1,7 @@
 package com.framstag.libosmscout;
 
 import com.framstag.libosmscout.client.AvailableMapEntry;
+import com.framstag.libosmscout.client.BasemapManager;
 import com.framstag.libosmscout.client.MapDownloadListener;
 import com.framstag.libosmscout.client.MapDownloadManager;
 import com.framstag.libosmscout.client.MapProvider;
@@ -60,9 +61,27 @@ public class MapDownloadController implements Initializable {
     @FXML
     private ListView<String> installedList;
 
+    @FXML
+    private Label basemapStatusLabel;
+
+    @FXML
+    private Label basemapAvailableLabel;
+
+    @FXML
+    private Label basemapInstalledLabel;
+
+    @FXML
+    private ComboBox<BasemapManager.BasemapArchive> basemapVariantCombo;
+
+    @FXML
+    private Button basemapActionBtn;
+
     private OSMScoutClient client;
     private MapDownloadManager downloadManager;
     private Config config;
+    private BasemapManager basemapManager;
+    /** Tracks whether the basemap action button is in "probe" or "download" mode. */
+    private boolean basemapProbed = false;
     private final ObservableList<DownloadEntry> downloads = FXCollections.observableArrayList();
     /** Map from displayed map name to full directory path for deletion. */
     private final java.util.Map<String, String> installedPaths = new java.util.HashMap<>();
@@ -116,6 +135,51 @@ public class MapDownloadController implements Initializable {
         this.downloadManager = client.getMapDownloadManager();
         loadProviders();
         onRefreshInstalled();
+        initBasemap();
+    }
+
+    private void initBasemap() {
+        MapProvider provider = providerCombo.getSelectionModel().getSelectedItem();
+        if (provider == null) return;
+
+        java.nio.file.Path mapsDir = com.framstag.libosmscout.Config.getConfigDir().resolve("maps");
+        basemapManager = new BasemapManager(provider, mapsDir);
+
+        // Set up variant combo
+        basemapVariantCombo.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(BasemapManager.BasemapArchive item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getLabel());
+            }
+        });
+        basemapVariantCombo.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(BasemapManager.BasemapArchive item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getLabel());
+            }
+        });
+
+        updateBasemapStatus();
+    }
+
+    private void updateBasemapStatus() {
+        if (basemapManager == null) return;
+
+        boolean installed = basemapManager.isBasemapInstalled();
+        if (installed) {
+            BasemapManager.BasemapInfo info = basemapManager.getInstalledBasemapInfo();
+            basemapStatusLabel.setText("Installed");
+            basemapStatusLabel.setStyle("-fx-text-fill: green;");
+            basemapInstalledLabel.setText(info != null ? info.getSizeHuman() + " (" + info.getFileCount() + " files)" : "Yes");
+            basemapActionBtn.setText("Check for Updates");
+        } else {
+            basemapStatusLabel.setText("Not installed");
+            basemapStatusLabel.setStyle("-fx-text-fill: gray;");
+            basemapInstalledLabel.setText("None");
+            basemapActionBtn.setText("Check Server");
+        }
     }
 
     /**
@@ -385,6 +449,152 @@ public class MapDownloadController implements Initializable {
                 installedList.getItems().setAll(names);
             });
         }, "refresh-installed").start();
+    }
+
+    @FXML
+    private void onBasemapAction() {
+        if (basemapManager == null) return;
+
+        // If we've already probed, the button now says "Download Basemap" or "Update Basemap"
+        if (basemapProbed) {
+            System.err.println("[MapDownloadController] Basemap action: probe done, starting download");
+            onBasemapDownload();
+            return;
+        }
+
+        basemapActionBtn.setDisable(true);
+        basemapActionBtn.setText("Working...");
+        System.err.println("[MapDownloadController] Probing basemap server...");
+
+        new Thread(() -> {
+            try {
+                List<BasemapManager.BasemapArchive> available = basemapManager.fetchAvailableBasemaps();
+                Platform.runLater(() -> {
+                    if (available.isEmpty()) {
+                        System.err.println("[MapDownloadController] No basemap archives found on server");
+                        basemapAvailableLabel.setText("None found");
+                        basemapActionBtn.setDisable(false);
+                        basemapActionBtn.setText("Retry");
+                        return;
+                    }
+
+                    System.err.println("[MapDownloadController] Found " + available.size() + " basemap archives");
+                    // Show available archives
+                    StringBuilder sb = new StringBuilder();
+                    for (BasemapManager.BasemapArchive a : available) {
+                        if (sb.length() > 0) sb.append(", ");
+                        sb.append(a.getFileName()).append(" (").append(a.getSizeHuman()).append(")");
+                    }
+                    basemapAvailableLabel.setText(sb.toString());
+
+                    showVariantSelection(available);
+
+                    boolean installed = basemapManager.isBasemapInstalled();
+                    System.err.println("[MapDownloadController] Basemap installed: " + installed);
+                    if (installed) {
+                        boolean updateAvail = basemapManager.isUpdateAvailable();
+                        System.err.println("[MapDownloadController] Update available: " + updateAvail);
+                        if (updateAvail) {
+                            basemapActionBtn.setText("Update Basemap");
+                        } else {
+                            basemapAvailableLabel.setText(sb.toString() + " (up to date)");
+                            basemapActionBtn.setText("Reinstall Basemap");
+                        }
+                    } else {
+                        basemapActionBtn.setText("Download Basemap");
+                    }
+                    basemapActionBtn.setDisable(false);
+                    basemapProbed = true;
+                });
+            } catch (Exception e) {
+                System.err.println("[MapDownloadController] Basemap probe error: " + e.getMessage());
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    basemapAvailableLabel.setText("Error: " + e.getMessage());
+                    basemapActionBtn.setDisable(false);
+                    basemapActionBtn.setText("Retry");
+                });
+            }
+        }, "basemap-probe").start();
+    }
+
+    private void showVariantSelection(List<BasemapManager.BasemapArchive> available) {
+        if (available.size() > 1) {
+            basemapVariantCombo.getItems().setAll(available);
+            basemapVariantCombo.getSelectionModel().select(0);
+            basemapVariantCombo.setVisible(true);
+        } else {
+            basemapVariantCombo.setVisible(false);
+        }
+    }
+
+    @FXML
+    private void onBasemapDownload() {
+        if (basemapManager == null) return;
+
+        BasemapManager.BasemapArchive archive = basemapVariantCombo.getSelectionModel().getSelectedItem();
+        if (archive == null) {
+            System.err.println("[MapDownloadController] No archive selected in combo, fetching from server");
+            List<BasemapManager.BasemapArchive> available = basemapManager.fetchAvailableBasemaps();
+            if (available.isEmpty()) {
+                String msg = "No basemap archives available on server";
+                System.err.println("[MapDownloadController] " + msg);
+                showError(msg);
+                return;
+            }
+            archive = available.get(0);
+        }
+
+        System.err.println("[MapDownloadController] Starting basemap download: " + archive.getFileName()
+            + " (" + archive.getSizeHuman() + ")");
+        basemapActionBtn.setDisable(true);
+        basemapActionBtn.setText("Downloading...");
+
+        // Add to downloads table
+        DownloadEntry dlEntry = new DownloadEntry("World Basemap", basemapManager.getBasemapDirectory().toString());
+        dlEntry.setStatus("Starting");
+        downloads.add(dlEntry);
+
+        String handle = basemapManager.downloadBasemap(archive, new MapDownloadListener() {
+            private long lastUiUpdate;
+
+            @Override
+            public void onProgress(String mapName, long bytesDownloaded, long totalBytes) {
+                long now = System.currentTimeMillis();
+                if (now - lastUiUpdate < 250) return;
+                lastUiUpdate = now;
+                Platform.runLater(() -> dlEntry.setProgress(bytesDownloaded, totalBytes));
+            }
+
+            @Override
+            public void onComplete(String mapName, String targetDir) {
+                System.err.println("[MapDownloadController] Basemap download complete: " + targetDir);
+                Platform.runLater(() -> {
+                    dlEntry.setComplete();
+                    updateBasemapStatus();
+                    basemapActionBtn.setDisable(false);
+                    basemapActionBtn.setText("Check for Updates");
+                    onRefreshInstalled();
+
+                    // Trigger basemap reload in the C++ layer
+                    if (client != null) {
+                        System.err.println("[MapDownloadController] Triggering basemap reload: " + targetDir);
+                        client.openDatabase(targetDir);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String mapName, String errorMessage) {
+                System.err.println("[MapDownloadController] Basemap download error: " + errorMessage);
+                Platform.runLater(() -> {
+                    dlEntry.setError(errorMessage);
+                    basemapActionBtn.setDisable(false);
+                    basemapActionBtn.setText("Retry");
+                });
+            }
+        });
+        dlEntry.setHandle(handle);
     }
 
     private void showError(String message) {

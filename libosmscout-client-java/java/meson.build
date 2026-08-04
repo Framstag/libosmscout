@@ -1,5 +1,6 @@
 osmscoutclientjavaJniHeaders = javaModule.native_headers(
   'com/framstag/libosmscout/client/AvailableMapEntry.java',
+  'com/framstag/libosmscout/client/BasemapManager.java',
   'com/framstag/libosmscout/client/DescriptionEntry.java',
   'com/framstag/libosmscout/client/FavoriteLocation.java',
   'com/framstag/libosmscout/client/FavoriteLocationGroup.java',
@@ -31,6 +32,7 @@ osmscoutclientjavaJniIncDir = include_directories('.')
 osmscoutclientjavaJar = jar(
   'libosmscoutclientjava',
   'com/framstag/libosmscout/client/AvailableMapEntry.java',
+  'com/framstag/libosmscout/client/BasemapManager.java',
   'com/framstag/libosmscout/client/DescriptionEntry.java',
   'com/framstag/libosmscout/client/FavoriteLocation.java',
   'com/framstag/libosmscout/client/FavoriteLocationGroup.java',

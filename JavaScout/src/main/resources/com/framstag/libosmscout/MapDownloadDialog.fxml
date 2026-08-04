@@ -57,6 +57,33 @@
                     </HBox>
                 </VBox>
             </Tab>
+
+            <!-- Basemap tab -->
+            <Tab text="Basemap">
+                <VBox spacing="8">
+                    <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+                    <VBox spacing="4">
+                        <Label text="World Basemap" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+                        <Label text="A world-wide map with borders, country names, and coastlines." wrapText="true" />
+                    </VBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Status:" />
+                        <Label fx:id="basemapStatusLabel" text="Checking..." />
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Available:" />
+                        <Label fx:id="basemapAvailableLabel" text="-" />
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Installed:" />
+                        <Label fx:id="basemapInstalledLabel" text="-" />
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_RIGHT">
+                        <ComboBox fx:id="basemapVariantCombo" prefWidth="250" visible="false" />
+                        <Button fx:id="basemapActionBtn" text="Check Server" onAction="#onBasemapAction" />
+                    </HBox>
+                </VBox>
+            </Tab>
         </TabPane>
     </content>
 
