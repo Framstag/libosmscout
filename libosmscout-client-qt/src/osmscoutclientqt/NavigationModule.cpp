@@ -89,6 +89,11 @@ void NavigationModule::EnsureTTSEngine()
 #ifdef OSMSCOUT_HAVE_LIB_PIPER
     InitPlayer(); // TTS engine plays synthesized messages through the media player
     ttsEngine = new PiperTTSEngine(mediaPlayer, espeakDataDir);
+
+    connect(this, &NavigationModule::initVoiceRequested, ttsEngine, &TTSEngine::initVoice, Qt::QueuedConnection);
+    connect(this, &NavigationModule::prepareMessageRequested, ttsEngine, &TTSEngine::prepareMessage, Qt::QueuedConnection);
+    connect(this, &NavigationModule::playMessageRequested, ttsEngine, &TTSEngine::playMessage, Qt::QueuedConnection);
+
 #else
     // library was built without any TTS engine, keep ttsEngine unset
     log.Warn() << "No text-to-speech engine available (built without libpiper)";
@@ -98,11 +103,7 @@ void NavigationModule::EnsureTTSEngine()
 
   // (re)initialize the engine when the selected voice changed
   if (!ttsEngine->getVoice().isValid() || ttsEngine->getVoice().getDir() != voice.getDir()){
-    auto ttsVoice = voice;
-    TTSEngine *engine = ttsEngine;
-    QMetaObject::invokeMethod(engine, [engine, ttsVoice]() {
-      engine->initVoice(ttsVoice);
-    }, Qt::QueuedConnection);
+    emit(initVoiceRequested(voice));
   }
 }
 
@@ -178,11 +179,8 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       if (voice.isValid()) {
         EnsureTTSEngine();
         if (ttsEngine!=nullptr) {
-          TTSEngine *engine = ttsEngine;
           QString msg = QString::fromStdString(ttsPrepareMessage->message);
-          QMetaObject::invokeMethod(engine, [engine, msg]() {
-            engine->prepareMessage(msg);
-          }, Qt::QueuedConnection);
+          emit prepareMessageRequested(msg);
         }
       }
     } else if (auto ttsMessage = dynamic_cast<osmscout::TTSVoiceInstructionMessage*>(message.get());
@@ -191,11 +189,8 @@ void NavigationModule::ProcessMessages(const std::list<osmscout::NavigationMessa
       if (voice.isValid()) {
         EnsureTTSEngine();
         if (ttsEngine!=nullptr) {
-          TTSEngine *engine = ttsEngine;
           QString msg = QString::fromStdString(ttsMessage->message);
-          QMetaObject::invokeMethod(engine, [engine, msg]() {
-            engine->playMessage(msg);
-          }, Qt::QueuedConnection);
+          emit(playMessageRequested(msg));
         }
       }
     } else if (auto* laneMessage = dynamic_cast<osmscout::LaneAgent::LaneMessage*>(message.get());

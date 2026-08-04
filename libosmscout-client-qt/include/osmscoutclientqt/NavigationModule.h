@@ -86,6 +86,10 @@ signals:
 
   void laneUpdate(osmscout::LaneAgent::Lane lane);
 
+  void initVoiceRequested(const Voice &voice);
+  void prepareMessageRequested(QString message);
+  void playMessageRequested(QString message);
+
 public slots:
   void setupRoute(QtRouteData route,
                   osmscout::Vehicle vehicle);

@@ -54,6 +54,25 @@ protected:
   QThread         *thread; //!< engine background thread (owns itself, deleted on finish)
   VoiceCorePlayer *player; //!< audio player, not owned (lives in the creator thread)
 
+public slots:
+  /**
+   * Initialize the engine for the given voice.
+   * Runs asynchronously on the engine thread.
+   */
+  virtual void initVoice(const Voice &voice) = 0;
+
+  /**
+ * Synthesize the message to an audio file (cached in a temporary directory)
+ * without playing it. Runs asynchronously on the engine thread.
+ */
+  virtual void prepareMessage(QString message) = 0;
+
+  /**
+   * Prepare the message (when it is not cached yet) and play it right away.
+   * Runs asynchronously on the engine thread.
+   */
+  virtual void playMessage(QString message) = 0;
+
 public:
   /**
    * @param player audio player used to play synthesized messages.
@@ -68,25 +87,7 @@ public:
 
   ~TTSEngine() override;
 
-  /**
-   * Initialize the engine for the given voice.
-   * Runs asynchronously on the engine thread.
-   */
-  virtual void initVoice(const Voice &voice) = 0;
-
   virtual Voice getVoice() = 0;
-
-  /**
-   * Synthesize the message to an audio file (cached in a temporary directory)
-   * without playing it. Runs asynchronously on the engine thread.
-   */
-  virtual void prepareMessage(QString message) = 0;
-
-  /**
-   * Prepare the message (when it is not cached yet) and play it right away.
-   * Runs asynchronously on the engine thread.
-   */
-  virtual void playMessage(QString message) = 0;
 
 protected:
   /**
