@@ -32,6 +32,13 @@
     -fx-alignment: center-right;
 }
 
+/* Basemap status in status bar */
+.basemap-status {
+    -fx-text-fill: #8bc34a;
+    -fx-font-size: 12px;
+    -fx-padding: 0 8 0 0;
+}
+
 /* Search overlay */
 .search-overlay-button {
     -fx-font-size: 20px;

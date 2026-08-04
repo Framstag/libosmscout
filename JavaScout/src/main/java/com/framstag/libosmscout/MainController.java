@@ -1,5 +1,6 @@
 package com.framstag.libosmscout;
 
+import com.framstag.libosmscout.client.BasemapManager;
 import com.framstag.libosmscout.client.NavigationController;
 import com.framstag.libosmscout.client.NavigationListener;
 import com.framstag.libosmscout.client.NavigationPosition;
@@ -50,6 +51,8 @@ import javafx.geometry.Pos;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
@@ -83,6 +86,9 @@ public class MainController implements Initializable {
     private String databaseDirectory;
     private String stylesheetDirectory;
     private String iconDirectory;
+
+    @FXML
+    private Label basemapStatusBarLabel;
 
     private OSMScoutClient client;
     private MapRenderer renderer;
@@ -253,10 +259,22 @@ public class MainController implements Initializable {
                         builder.withIconDirectory(iconDirectoryForBuilder);
                     }
 
+                    // Check for installed basemap and pass to builder
+                    Path basemapPath = java.nio.file.Paths.get(databaseDirectory, "basemap");
+                    if (Files.isDirectory(basemapPath)) {
+                        builder.withBasemapLookupDirectory(basemapPath.toAbsolutePath().toString());
+                        Log.info("[MainController] basemap found at: " + basemapPath);
+                    }
+
                     client = builder.build();
                     if (client == null) {
                         Log.error("MainController: client already initialised");
                         return false;
+                    }
+
+                    // Update basemap status bar
+                    if (Files.isDirectory(basemapPath)) {
+                        Platform.runLater(() -> basemapStatusBarLabel.setText("Basemap: active"));
                     }
 
                     return true;

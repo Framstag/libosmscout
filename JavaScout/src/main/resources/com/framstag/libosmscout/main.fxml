@@ -27,6 +27,9 @@
             <Label fx:id="dbPathLabel"
                    text="No maps directory configured"
                    HBox.hgrow="ALWAYS" />
+            <Label fx:id="basemapStatusBarLabel"
+                   text=""
+                   styleClass="basemap-status" />
             <Label fx:id="coordLabel"
                    text="Lat: --  Lon: --"
                    styleClass="coord-label" />

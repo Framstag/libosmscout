@@ -703,8 +703,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   bool rendered = false;
 
   data->dbThread->RunSynchronousJob(
-    [&](const std::list<osmscout::DBInstanceRef> &databases) {
-      if (databases.empty()) {
+    [&](const std::list<osmscout::DBInstanceRef> &databases,
+        const osmscout::DBInstanceRef &basemapDatabase) {
+      if (databases.empty() && !basemapDatabase) {
         return;
       }
 
@@ -735,9 +736,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
       // Collect map data from all databases
       std::vector<osmscout::MapData> batch;
-      for (const auto &db : databases) {
+
+      // Helper lambda to load map data for one database
+      auto loadDbData = [&](const osmscout::DBInstanceRef &db) {
         if (!db->GetStyleConfig()) {
-          continue;
+          return;
         }
 
         osmscout::MapData mapData;
@@ -760,13 +763,61 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
         db->GetMapService()->AddTileDataToMapData(tiles, mapData);
 
         // Get ground tiles (sea/land)
+        // Basemap databases use baseMapTiles, regular databases use groundTiles.
+        // When a basemap is present, let it provide the global sea/land background;
+        // regional ground tiles would otherwise draw unknown/water over basemap land.
         if (params.GetRenderSeaLand()) {
-          db->GetMapService()->GetGroundTiles(projection,
-                                              mapData.groundTiles);
+          if (db->GetDatabase()->IsBasemap()) {
+            db->GetMapService()->GetGroundTiles(projection,
+                                                mapData.baseMapTiles);
+          } else if (!basemapDatabase) {
+            db->GetMapService()->GetGroundTiles(projection,
+                                                mapData.groundTiles);
+          }
         }
 
-        // Add route overlay + marker overlays to the LAST database's map data
-        osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
+        batch.emplace_back(std::move(mapData));
+      };
+
+      // Load regular databases first
+      for (const auto &db : databases) {
+        loadDbData(db);
+      }
+
+      // If no regular databases are loaded but a basemap is available,
+      // create a separate MapData entry for the basemap so it renders on its own.
+      if (batch.empty() && basemapDatabase && basemapDatabase->GetStyleConfig()) {
+        osmscout::MapData mapData;
+        mapData.styleConfig = basemapDatabase->GetStyleConfig();
+        mapData.basemap = basemapDatabase->GetDatabase()->IsBasemap();
+
+        if (params.GetRenderSeaLand()) {
+          basemapDatabase->GetMapService()->GetGroundTiles(projection,
+                                                              mapData.baseMapTiles);
+        }
+
+        batch.emplace_back(std::move(mapData));
+      }
+
+      // Load basemap ground tiles into the first database's baseMapTiles
+      // (rendered underneath regional maps when a regional map exists)
+      if (basemapDatabase && basemapDatabase->GetStyleConfig() && !batch.empty()) {
+        std::list<osmscout::GroundTile> baseTiles;
+        basemapDatabase->GetMapService()->GetGroundTiles(projection,
+                                                             baseTiles);
+        if (!baseTiles.empty()) {
+          batch.front().baseMapTiles.splice(batch.front().baseMapTiles.end(),
+                                            baseTiles);
+        }
+      }
+
+      // Add route overlay + marker overlays to the LAST database's map data
+      if (!batch.empty()) {
+        const osmscout::DBInstanceRef &lastDbInstance = databases.empty() ? basemapDatabase : databases.back();
+        osmscout::TypeConfigRef typeConfig;
+        if (lastDbInstance) {
+          typeConfig = lastDbInstance->GetDatabase()->GetTypeConfig();
+        }
         if (typeConfig) {
           auto addPoiNode = [&](const osmscout::GeoCoord &coord,
                                 const std::string &typeName) {
@@ -777,7 +828,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
             osmscout::NodeRef node = std::make_shared<osmscout::Node>();
             node->SetCoords(coord);
             node->SetType(type);
-            mapData.poiNodes.push_back(node);
+            batch.back().poiNodes.push_back(node);
           };
 
           if (hasRoute && !routePoints.empty()) {
@@ -788,7 +839,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
             osmscout::TypeInfoRef routeType = typeConfig->GetTypeInfo("_route");
             if (routeType) {
               routeWay->SetType(routeType);
-              mapData.poiWays.push_back(routeWay);
+              batch.back().poiWays.push_back(routeWay);
             }
 
             // Create start/end marker nodes
@@ -821,12 +872,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
             osmscout::TypeInfoRef trackType = typeConfig->GetTypeInfo("_track");
             if (trackType) {
               trackWay->SetType(trackType);
-              mapData.poiWays.push_back(trackWay);
+              batch.back().poiWays.push_back(trackWay);
             }
           }
         }
-
-        batch.emplace_back(std::move(mapData));
       }
 
       if (batch.empty()) {

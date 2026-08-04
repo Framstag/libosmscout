@@ -12,6 +12,7 @@ find_package(Java COMPONENTS Development REQUIRED)
 set(JAVA_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/java)
 set(JAVA_SOURCES
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/AvailableMapEntry.java
+  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/BasemapManager.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/CurrentRoadInfo.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/DescriptionEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/FavoriteLocation.java
@@ -99,6 +100,13 @@ target_link_libraries(osmscout_client_java
     OSMScout::Client
     ${JNI_LIBRARIES}
 )
+
+if(TARGET OSMScout::GPX)
+  target_link_libraries(osmscout_client_java
+    PRIVATE
+      OSMScout::GPX
+  )
+endif()
 
 if(TARGET OSMScout::MapCairo)
   target_link_libraries(osmscout_client_java
