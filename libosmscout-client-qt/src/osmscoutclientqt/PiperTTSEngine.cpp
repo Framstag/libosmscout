@@ -91,8 +91,7 @@ bool WriteWav(const QString &path, const std::vector<int16_t> &samples, int samp
 
 } // namespace
 
-PiperTTSEngine::PiperTTSEngine(VoiceCorePlayer *player, const QString &espeakDataDir):
-  TTSEngine(player),
+PiperTTSEngine::PiperTTSEngine(const QString &espeakDataDir):
   espeakDataPath(espeakDataDir)
 {
   // directory for synthesized WAV files, in the per-application cache
@@ -278,16 +277,9 @@ void PiperTTSEngine::playMessage(QString message)
     return;
   }
 
-  QUrl url = QUrl::fromLocalFile(path);
-  // the player lives in another thread (the navigation thread); marshal the
-  // playback calls onto its thread
-  VoiceCorePlayer *p = player;
-  QMetaObject::invokeMethod(p, [p, url]() {
-    p->clearQueue();
-    p->addToQueue(url);
-    p->setCurrentIndex(0);
-    p->play();
-  }, Qt::QueuedConnection);
+  QList<QUrl> urls;
+  urls << QUrl::fromLocalFile(path);
+  emit playAudioFilesRequest(urls);
 }
 
 }

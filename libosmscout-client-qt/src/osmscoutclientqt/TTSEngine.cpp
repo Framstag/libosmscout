@@ -24,10 +24,9 @@
 
 namespace osmscout {
 
-TTSEngine::TTSEngine(VoiceCorePlayer *player):
+TTSEngine::TTSEngine():
   QObject(nullptr), // no parent, we move the engine to its own thread
-  thread(OSMScoutQt::GetInstance().makeThread("TTSEngine")),
-  player(player)
+  thread(OSMScoutQt::GetInstance().makeThread("TTSEngine"))
 {
   // the engine (with all its operations) lives in its own background thread
   moveToThread(thread);

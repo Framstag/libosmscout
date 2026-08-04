@@ -79,6 +79,25 @@ void NavigationModule::InitPlayer()
   }
 }
 
+void NavigationModule::playAudio(const QList<QUrl> &audioFiles)
+{
+  if (thread!=QThread::currentThread()){
+    qWarning() << "Audio message played from incorrect thread;" << thread << "!=" << QThread::currentThread();
+  }
+  if (mediaPlayer==nullptr){
+    InitPlayer();
+  }
+  assert(mediaPlayer);
+
+  mediaPlayer->clearQueue();
+  for (auto const &audioFile : audioFiles){
+    qDebug() << "Adding to playlist:" << audioFile;
+    mediaPlayer->addToQueue(audioFile);
+  }
+  mediaPlayer->setCurrentIndex(0);
+  mediaPlayer->play();
+}
+
 void NavigationModule::EnsureTTSEngine()
 {
   if (thread!=QThread::currentThread()){
@@ -87,12 +106,13 @@ void NavigationModule::EnsureTTSEngine()
 
   if (ttsEngine==nullptr){
 #ifdef OSMSCOUT_HAVE_LIB_PIPER
-    InitPlayer(); // TTS engine plays synthesized messages through the media player
-    ttsEngine = new PiperTTSEngine(mediaPlayer, espeakDataDir);
+    InitPlayer();
+    ttsEngine = new PiperTTSEngine(espeakDataDir);
 
     connect(this, &NavigationModule::initVoiceRequested, ttsEngine, &TTSEngine::initVoice, Qt::QueuedConnection);
     connect(this, &NavigationModule::prepareMessageRequested, ttsEngine, &TTSEngine::prepareMessage, Qt::QueuedConnection);
     connect(this, &NavigationModule::playMessageRequested, ttsEngine, &TTSEngine::playMessage, Qt::QueuedConnection);
+    connect(ttsEngine, &TTSEngine::playAudioFilesRequest, this, &NavigationModule::playAudio, Qt::QueuedConnection);
 
 #else
     // library was built without any TTS engine, keep ttsEngine unset
@@ -407,16 +427,12 @@ void NavigationModule::playerStateChanged(VoicePlayer::PlaybackState state)
       !nextMessage.empty() &&
       state == VoicePlayer::StoppedState) {
 
-    mediaPlayer->clearQueue();
-
+    QList<QUrl> urls;
     for (const auto& sample : nextMessage){
       auto sampleUrl = QUrl::fromLocalFile(voice.getDir().filePath(sampleFile(sample)));
-      qDebug() << "Adding to playlist:" << sampleUrl;
-      mediaPlayer->addToQueue(sampleUrl);
+      urls.append(sampleUrl);
     }
-    nextMessage.clear();
-    mediaPlayer->setCurrentIndex(0);
-    mediaPlayer->play();
+    playAudio(urls);
   }
 }
 

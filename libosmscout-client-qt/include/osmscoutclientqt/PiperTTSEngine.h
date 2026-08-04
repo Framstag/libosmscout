@@ -57,7 +57,7 @@ public:
    * @param player audio player used to play synthesized messages.
    * @param espeakDataDir path to the espeak-ng data directory required by Piper.
    */
-  PiperTTSEngine(VoiceCorePlayer *player, const QString &espeakDataDir);
+  explicit PiperTTSEngine(const QString &espeakDataDir);
   ~PiperTTSEngine() override;
 
   void initVoice(const Voice &voice) override;

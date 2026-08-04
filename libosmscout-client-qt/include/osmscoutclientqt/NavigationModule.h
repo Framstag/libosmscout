@@ -109,6 +109,8 @@ public slots:
 
   void playerStateChanged(VoicePlayer::PlaybackState state);
 
+  void playAudio(const QList<QUrl> &audioFiles);
+
 public:
   NavigationModule(QThread *thread,
                    SettingsRef settings,

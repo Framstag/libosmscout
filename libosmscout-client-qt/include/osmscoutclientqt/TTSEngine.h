@@ -52,7 +52,6 @@ class OSMSCOUT_CLIENT_QT_API TTSEngine : public QObject {
 
 protected:
   QThread         *thread; //!< engine background thread (owns itself, deleted on finish)
-  VoiceCorePlayer *player; //!< audio player, not owned (lives in the creator thread)
 
 public slots:
   /**
@@ -73,12 +72,11 @@ public slots:
    */
   virtual void playMessage(QString message) = 0;
 
+signals:
+  void playAudioFilesRequest(const QList<QUrl> &audioFiles);
+
 public:
-  /**
-   * @param player audio player used to play synthesized messages.
-   *               It is not owned by the engine and has to outlive it.
-   */
-  explicit TTSEngine(VoiceCorePlayer *player);
+  TTSEngine();
 
   TTSEngine(const TTSEngine&) = delete;
   TTSEngine(TTSEngine&&) = delete;
