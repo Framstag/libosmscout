@@ -39,6 +39,7 @@ rules:
     - Before marking implementation complete, run the build and verify it compiles without errors
     - Before marking implementation complete, verify tests exist for all new/modified code and they pass
     - If build or tests fail, do NOT mark tasks complete — report failures and fix them first
+    - If build has warnings, do NOT mark tasks complete - report warnings and fix them first
     - Check all new/modified code against every document in guidelines/ — all conventions and rules defined there must be followed
     - Run linters and static analysis before marking complete (.clang-tidy, .uncrustify)
     - Update README or documentation if behavior changes
