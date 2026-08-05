@@ -69,7 +69,8 @@ public:
     LicenseRole = Qt::UserRole + 4,
     AuthorRole = Qt::UserRole + 5,
     DescriptionRole = Qt::UserRole + 6,
-    SelectedRole = Qt::UserRole + 7 // true when this voice is selected
+    SelectedRole = Qt::UserRole + 7, // true when this voice is selected
+    TypeRole = Qt::UserRole + 8, // VoiceOfMarble or Piper
   };
   Q_ENUM(Roles)
 
