@@ -38,10 +38,10 @@
 class CoastlineShapeFileVisitor : public osmscout::ShapeFileVisitor
 {
 private:
+  static constexpr size_t                            maxCoastlinePoints=1000;
+
   osmscout::Progress                                 &progress;
   uint32_t                                           coastlineCount;
-  bool                                               continuation;
-  std::vector<osmscout::GeoCoord>                    coordBuffer;
   osmscout::Id                                       currentId;
 public:
   std::list<osmscout::WaterIndexProcessor::CoastRef> coasts;
@@ -54,16 +54,11 @@ public:
     progress.SetAction("Scanning world coastline file '{}'",coastlineShapeFile);
 
     coastlineCount=0;
-    continuation=false;
     currentId=std::numeric_limits<osmscout::Id>::max();
   }
 
   ~CoastlineShapeFileVisitor() override
   {
-    if (continuation) {
-      progress.Error("Last element is not properly closed");
-    }
-
     progress.Info("Found {} coastline(s)",coastlineCount);
   }
 
@@ -79,8 +74,6 @@ public:
     // note that shapefile coastlines has reverse direction than OSM!
     coastline->left=osmscout::WaterIndexProcessor::CoastState::water;
     coastline->right=osmscout::WaterIndexProcessor::CoastState::land;
-    coastline->frontNodeId=coords.front().GetHash();
-    coastline->backNodeId=coords.back().GetHash();
 
     coastline->coast.reserve(coords.size());
 
@@ -88,9 +81,44 @@ public:
       coastline->coast.emplace_back(0,coord);
     }
 
+    // Use the same point id encoding that WaterIndexProcessor::MergeCoastlines uses,
+    // otherwise chain merging stops after the first join.
+    coastline->frontNodeId=coastline->coast.front().GetId();
+    coastline->backNodeId=coastline->coast.back().GetId();
+
     coasts.push_back(coastline);
 
     currentId--;
+  }
+
+  void AddCoastChunk(const std::vector<osmscout::GeoCoord>& coords,
+                     size_t start,
+                     size_t end)
+  {
+    if (end<=start+1) {
+      return;
+    }
+
+    AddCoast(std::vector<osmscout::GeoCoord>(coords.begin()+start,
+                                             coords.begin()+end));
+    coastlineCount++;
+  }
+
+  void AddLongCoast(const std::vector<osmscout::GeoCoord>& coords)
+  {
+    size_t start=0;
+
+    while (start<coords.size()) {
+      size_t end=std::min(start+maxCoastlinePoints,coords.size());
+
+      AddCoastChunk(coords,start,end);
+
+      if (end==coords.size()) {
+        break;
+      }
+
+      start=end-1;
+    }
   }
 
   void OnProgress(double current,
@@ -103,25 +131,17 @@ public:
                   const osmscout::GeoBox& /*boundingBox*/,
                   const std::vector<osmscout::GeoCoord>& coords) override
   {
-    if (continuation) {
-      if (coords.size()<1000 || coordBuffer.front()==coords.back()) {
-        coordBuffer.insert(coordBuffer.end(),coords.begin(),coords.end());
-        AddCoast(coordBuffer);
-        coastlineCount++;
-        continuation=false;
-      }
-      else {
-        coordBuffer.insert(coordBuffer.end(),coords.begin(),coords.end());
-      }
+    if (coords.empty()) {
+      return;
     }
-    else if (coords.size()<1000 || coords.front()==coords.back()) {
+
+    if (coords.size()<=maxCoastlinePoints) {
       AddCoast(coords);
       coastlineCount++;
+      return;
     }
-    else {
-      coordBuffer=coords;
-      continuation=true;
-    }
+
+    AddLongCoast(coords);
   }
 };
 
