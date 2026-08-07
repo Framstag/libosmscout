@@ -19,6 +19,7 @@
 
 #include <osmscoutclientqt/PiperTTSEngine.h>
 
+#include <osmscout/io/File.h>
 #include <osmscout/log/Logger.h>
 
 #include <QCryptographicHash>
@@ -167,8 +168,16 @@ void PiperTTSEngine::initVoice(const Voice &voice)
   QString configPath = modelPath + ".json";
 
   if (espeakDataPath.isEmpty()) {
-    log.Warn() << "PiperTTSEngine: espeak-ng data directory was not configured, "
-                  "synthesis is likely to fail (see the --espeak-data command line option)";
+    log.Error() << "PiperTTSEngine: espeak-ng data directory was not configured";
+    return;
+  }
+
+  // Exit if espeak data /phontab do not exist, as libpiper do not use espeakINITIALIZE_DONT_EXIT option,
+  // Piper is aborting process when this is not found!
+  if (auto phontabFile = AppendFileToDir(espeakDataPath.toStdString(), "phontab");
+      ExistsInFilesystem(phontabFile) == false) {
+    log.Error() << "espeak-ng data directory does not contain phontab file: " << phontabFile;
+    return;
   }
 
   synthesizer = piper_create(modelPath.toUtf8().constData(),
