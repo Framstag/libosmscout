@@ -392,145 +392,145 @@
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="91"/>
         <source>GPS signal found</source>
-        <translation type="unfinished"></translation>
+        <translation>Nalezen GPS signál</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="93"/>
         <source>GPS signal lost</source>
-        <translation type="unfinished"></translation>
+        <translation>Ztracen GPS signál</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="96"/>
         <source>You have reached your destination</source>
-        <translation type="unfinished"></translation>
+        <translation>Dorazili jste do cíle</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="99"/>
         <source>Turn sharply left</source>
-        <translation type="unfinished"></translation>
+        <translation>Zahněte ostře doleva</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="101"/>
         <source>Turn left</source>
-        <translation type="unfinished">Zahněte vlevo</translation>
+        <translation>Zahněte doleva</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="103"/>
         <source>Continue straight ahead</source>
-        <translation type="unfinished"></translation>
+        <translation>Pokračujte rovně</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="105"/>
         <source>Turn right</source>
-        <translation type="unfinished">Zahněte vpravo</translation>
+        <translation>Zahněte doprava</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="107"/>
         <source>Turn sharply right</source>
-        <translation type="unfinished"></translation>
+        <translation>Zahněte ostře doprava</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="110"/>
         <source>Leave the motorway</source>
-        <translation type="unfinished"></translation>
+        <translation>Sjeďte z dálnice</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="112"/>
         <source>Leave the motorway on the left</source>
-        <translation type="unfinished"></translation>
+        <translation>Sjeďte z dálenice vlevo</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="114"/>
         <source>Leave the motorway on the right</source>
-        <translation type="unfinished"></translation>
+        <translation>Sjeďte z dálnice vpravo</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="120"/>
         <source>Take the first exit</source>
-        <translation type="unfinished">Použijte první výjezd</translation>
+        <translation>Použijte první výjezd</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="121"/>
         <source>At the roundabout, take the first exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte prvním výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="124"/>
         <source>Take the second exit</source>
-        <translation type="unfinished">Použijte druhý výjezd</translation>
+        <translation>Vyjeďte druhým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="125"/>
         <source>At the roundabout, take the second exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte druhým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="128"/>
         <source>Take the third exit</source>
-        <translation type="unfinished">Použijte třetí výjezd</translation>
+        <translation>Vyjeďte třetím výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="129"/>
         <source>At the roundabout, take the third exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte třetím výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="132"/>
         <source>Take the fourth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyjeďte čtvrtým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="133"/>
         <source>At the roundabout, take the fourth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte čtvrtým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="136"/>
         <source>Take the fifth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyjeďte pátým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="137"/>
         <source>At the roundabout, take the fifth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte pátým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="140"/>
         <source>Take the sixth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyjeďte šestým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="141"/>
         <source>At the roundabout, take the sixth exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Na kruhovém objezdu, vyjeďte šestým výjezdem</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="177"/>
         <source>meters</source>
-        <translation type="unfinished">metrů</translation>
+        <translation>metrů</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="178"/>
         <source>yards</source>
-        <translation type="unfinished"></translation>
+        <translation>yardů</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="181"/>
         <source>After %1 %2</source>
         <extracomment>e.g. &quot;After 300 meters/yards&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Za %1 %2</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="226"/>
         <source>%1, %2</source>
         <extracomment>combine distance and maneuver, e.g. &quot;After 300 meters, turn left&quot;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1, %2</translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="237"/>
         <source>%1, then %2</source>
         <extracomment>%1 is the following maneuver, e.g. &quot;Turn left, then turn right&quot;.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>%1, poté %2</translation>
     </message>
 </context>
 <context>
