@@ -86,6 +86,7 @@ struct Arguments {
   QString iconDirectory="icons";
   QString translationDir;
   QString basemapDirectory;
+  QString espeakDataDir;
 };
 
 int main(int argc, char* argv[])
@@ -158,6 +159,13 @@ int main(int argc, char* argv[])
                     "Directory with basemap",
                     false);
 
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.espeakDataDir=QString::fromStdString(value);
+                      }),
+                      "espeak-data",
+                      "Directory with espeak-ng data (used by Piper text-to-speech)",
+                      false);
+
   argParser.AddPositional(osmscout::CmdLineStringOption([&args](const std::string& value) {
                             args.databaseDirectory=QString::fromStdString(value);
                           }),
@@ -229,6 +237,8 @@ int main(int argc, char* argv[])
     .AddOnlineTileProviders(":/resources/online-tile-providers.json")
     .AddMapProviders(":/resources/map-providers.json")
     .AddVoiceProviders(":/resources/voice-providers.json")
+    .WithNavigationTranslationDir(translationDir)
+    .WithEspeakDataDir(args.espeakDataDir)
     .WithUserAgent("OSMScout2DemoApp", "v?");
 
   if (!builder.Init()){

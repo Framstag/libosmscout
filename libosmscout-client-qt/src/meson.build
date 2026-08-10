@@ -52,5 +52,12 @@ osmscoutclientqtSrc = [
             'src/osmscoutclientqt/VoicePlayer.cpp',
             'src/osmscoutclientqt/AvailableVoicesModel.cpp',
             'src/osmscoutclientqt/InstalledVoicesModel.cpp',
+            'src/osmscoutclientqt/TTSMessageGeneratorQt.cpp',
+            'src/osmscoutclientqt/TTSEngine.cpp',
           ]
+
+# Piper TTS engine is optional, build it only when libpiper is available
+if piperDep.found()
+  osmscoutclientqtSrc += ['src/osmscoutclientqt/PiperTTSEngine.cpp']
+endif
 

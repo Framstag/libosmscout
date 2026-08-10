@@ -35,11 +35,15 @@ namespace osmscout {
 
 /**
  * List model with voices available by configured providers (see Settings::GetVoiceProviders).
- * Every voice provider have to expose list of voices by json. Json format exammple:
+ * Every voice provider have to expose list of voices by json. Two voice types are
+ * supported, distinguished by the "type" property.
+ *
+ * "VoiceOfMarble" - pre-recorded ogg sample pack. Json format example:
  *
  * <pre>
  * [
  *  {
+ *    "type": "VoiceOfMarble",
  *    "lang": "American English",
  *    "gender": "female",
  *    "name": "Alex",
@@ -47,7 +51,26 @@ namespace osmscout {
  *    "dir": "American English - Alex (female)",
  *    "author": "Alex Spehr",
  *    "description": "American English speaker"
- *  } 
+ *  }
+ * ]
+ * </pre>
+ *
+ * "Piper" - Piper TTS voice (onnx model + json config). "dir" is the server
+ * directory, "model" and "metadata" are server-relative paths. Json format
+ * example:
+ *
+ * <pre>
+ * [
+ *  {
+ *    "type": "Piper",
+ *    "dir": "Piper/ar/ar_JO/kareem/medium",
+ *    "metadata": "Piper/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx.json",
+ *    "model": "Piper/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx",
+ *    "license": "MIT",
+ *    "lang_code": "ar_JO",
+ *    "lang": "Arabic (Jordan)",
+ *    "name": "kareem"
+ *  }
  * ]
  * </pre>
  *
@@ -81,7 +104,9 @@ public:
     DirectoryRole = Qt::UserRole + 4,
     AuthorRole = Qt::UserRole + 5,
     DescriptionRole = Qt::UserRole + 6,
-    StateRole = Qt::UserRole + 7
+    StateRole = Qt::UserRole + 7,
+    TypeRole = Qt::UserRole + 8,
+    LangCodeRole = Qt::UserRole + 9
   };
   Q_ENUM(Roles)
 

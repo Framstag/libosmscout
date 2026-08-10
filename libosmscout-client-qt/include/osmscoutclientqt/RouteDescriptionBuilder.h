@@ -63,9 +63,9 @@ public:
     Duration timestampPrevious;
 
   public:
-    Callback(QList<RouteStep> &routeSteps,
-             const Distance &stopAfter = Distance::Lowest(),
-             bool skipInformative=false);
+    explicit Callback(QList<RouteStep> &routeSteps,
+                      const Distance &stopAfter = Distance::Lowest(),
+                      bool skipInformative=false);
 
     ~Callback() override = default;
 

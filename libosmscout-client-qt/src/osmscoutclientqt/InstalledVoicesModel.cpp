@@ -107,6 +107,8 @@ QVariant InstalledVoicesModel::data(const QModelIndex &index, int role) const
     case SelectedRole:
       return (voiceDir.isEmpty() && !voice.isValid()) ||
              (voiceDir == voice.getDir().absolutePath());
+    case TypeRole:
+      return voice.getType();
     default:
       break;
   }
@@ -161,6 +163,7 @@ QHash<int, QByteArray> InstalledVoicesModel::roleNames() const
   roles[GenderRole]="gender";
   roles[ValidRole]="valid";
   roles[SelectedRole]="selected";
+  roles[TypeRole]="type";
 
   return roles;
 }

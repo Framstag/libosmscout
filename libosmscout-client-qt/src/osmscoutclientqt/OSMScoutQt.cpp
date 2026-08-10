@@ -82,7 +82,7 @@ OSMScoutQtBuilder::~OSMScoutQtBuilder()
 {
 }
 
-bool OSMScoutQtBuilder::Init()
+  bool OSMScoutQtBuilder::Init()
 {
   if (osmScoutInstance!=nullptr){
     return false;
@@ -158,6 +158,10 @@ bool OSMScoutQtBuilder::Init()
   // setup voice
   settings->SetVoiceLookupDirectory(voiceLookupDirectory.toStdString());
 
+  if (navigationTranslationDir.isEmpty()) {
+    navigationTranslationDir = QStandardPaths::locate(QStandardPaths::AppLocalDataLocation, "translations", QStandardPaths::LocateDirectory);
+  }
+
   std::vector<std::filesystem::path> paths;
   for (const auto &dir: mapLookupDirectories) {
     paths.push_back(dir.toStdString());
@@ -183,7 +187,9 @@ bool OSMScoutQtBuilder::Init()
                                   glPowerOfTwoTexture,
                                   pixelRatio,
                                   userAgent,
-                                  customPoiTypes);
+                                  customPoiTypes,
+                                  navigationTranslationDir,
+                                  espeakDataDir);
 
   return true;
 }
@@ -237,6 +243,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<MapProvider>("MapProvider");
   qRegisterMetaType<QmlRoutingProfileRef>("QmlRoutingProfileRef");
   qRegisterMetaType<VoicePlayer::PlaybackState>("VoicePlayer::PlaybackState");
+  qRegisterMetaType<Voice>("Voice");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -299,7 +306,9 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        GLPowerOfTwoTexture glPowerOfTwoTexture,
                        const PixelRatioSetup &pixelRatio,
                        QString userAgent,
-                       QStringList customPoiTypes):
+                       QStringList customPoiTypes,
+                       const QString &navigationTranslationDir,
+                       const QString &espeakDataDir):
         settings(settings),
         mapManager(mapManager),
         iconDirectory(iconDirectory),
@@ -309,7 +318,9 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
         glPowerOfTwoTexture(glPowerOfTwoTexture),
         pixelRatio(pixelRatio),
         userAgent(userAgent),
-        liveBackgroundThreads(0)
+        liveBackgroundThreads(0),
+        navigationTranslationDir(navigationTranslationDir),
+        espeakDataDir(espeakDataDir)
 {
 
   std::vector<std::string> customPoiTypeVector;
@@ -484,7 +495,7 @@ NavigationModule* OSMScoutQt::MakeNavigation()
 {
   QThread *thread=makeThread("Navigation");
 
-  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread);
+  NavigationModule *navigation=new NavigationModule(thread,settings,dbThread,navigationTranslationDir,espeakDataDir);
   navigation->moveToThread(thread);
   thread->start();
   return navigation;
@@ -508,5 +519,10 @@ size_t OSMScoutQt::GetOnlineTileCacheSize() const
 QString OSMScoutQt::GetIconDirectory() const
 {
   return iconDirectory;
+}
+
+QString OSMScoutQt::GetNavigationTranslationDir() const
+{
+  return navigationTranslationDir;
 }
 }

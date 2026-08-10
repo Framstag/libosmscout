@@ -169,6 +169,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutclientqt => osmscout.location",
     "osmscoutclientqt => osmscout.routing",
     "osmscoutclientqt => osmscout.navigation",
+    "osmscoutclientqt => osmscout.io",
     "osmscoutclientqt => osmscout",
     "osmscoutclientqt => osmscoutmap",
     "osmscoutclientqt => osmscoutmapqt",

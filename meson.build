@@ -105,6 +105,58 @@ catch2MainDep = dependency('catch2-with-main', version: '>=3.0.0', required: fal
 # Optional
 marisaDep = dependency('marisa', required : false)
 
+# Piper TTS (libpiper). Upstream ships neither a pkg-config nor a CMake config
+# file, so locate the library (and the onnxruntime it depends on) and the header
+# manually. Honour the PIPER_ROOT / PIPER_HOME environment variables plus a few
+# common install locations (e.g. /opt/piper).
+piperDep = dependency('', required: false)
+if get_option('enablePiper')
+  fs = import('fs')
+
+  # Default install prefixes to probe, in addition to the user-provided piperRoot.
+  # The Unix-style paths are only meaningful (and only absolute) on non-Windows
+  # systems; on Windows they would be rejected as search directories.
+  piperRoots = [get_option('piperRoot')]
+  if host_machine.system() != 'windows'
+    piperRoots += ['/opt/piper', '/usr/local']
+  endif
+
+  piperSearchDirs = []
+  piperIncCandidates = []
+  foreach root : piperRoots
+    if root != '' and fs.is_absolute(root)
+      piperSearchDirs += [root, root / 'lib', root / 'lib64']
+      piperIncCandidates += [root / 'include', root]
+    endif
+  endforeach
+
+  piperLib = compiler.find_library('piper', dirs: piperSearchDirs, required: false)
+  # libpiper is linked against onnxruntime, which upstream ships alongside it but
+  # which is usually not on the default library search path.
+  onnxLib = compiler.find_library('onnxruntime', dirs: piperSearchDirs, required: false)
+
+  piperIncArgs = []
+  piperHeaderFound = compiler.has_header('piper.h', required: false)
+  if not piperHeaderFound
+    foreach incDir : piperIncCandidates
+      if not piperHeaderFound and fs.is_file(incDir / 'piper.h')
+        piperIncArgs = ['-I' + incDir]
+        piperHeaderFound = true
+      endif
+    endforeach
+  endif
+
+  if piperLib.found() and piperHeaderFound
+    piperLibs = [piperLib]
+    if onnxLib.found()
+      piperLibs += onnxLib
+    endif
+    piperDep = declare_dependency(dependencies: piperLibs,
+                                  compile_args: piperIncArgs)
+  endif
+endif
+
+
 # Import
 zlibDep = dependency('zlib', required : false, fallback: ['zlib','zlib_dep'])
 lzmaDep = dependency('liblzma', required : false, fallback: ['liblzma','lzma_dep'])
@@ -518,6 +570,11 @@ summary({
   'OpenMP support': openmpDep.found(),
   'C++17 execution support': stdExecutionAvailable,
   }, section: 'C++ Compiler')
+
+summary({
+  'Piper TTS (libpiper)': piperDep.found(),
+  }, section: 'Optional dependencies')
+
 
 summary({
   'Meson backend': meson.backend(),

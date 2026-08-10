@@ -25,6 +25,7 @@
 #include <osmscoutclientqt/PersistentCookieJar.h>
 
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -63,12 +64,18 @@ void VoiceDownloadJob::start()
 
   started=true;
   QJsonObject metadata;
+  metadata["type"] = voice.getType();
   metadata["lang"] = voice.getLang();
   metadata["gender"] = voice.getGender();
   metadata["name"] = voice.getName();
   metadata["license"] = voice.getLicense();
   metadata["author"] = voice.getAuthor();
   metadata["description"] = voice.getDescription();
+  if (voice.isPiper()) {
+    metadata["lang_code"] = voice.getLangCode();
+    // store the local model file name (basename of the server-side model path)
+    metadata["model"] = QFileInfo(voice.getModel()).fileName();
+  }
 
   QJsonDocument doc(metadata);
   QFile metadataFile(target.filePath(MapDirectory::FileMetadata));
@@ -82,8 +89,18 @@ void VoiceDownloadJob::start()
     return;
   }
 
-  DownloadJob::start(QString::fromStdString(voice.getProvider().getUri()) + "/" + voice.getDirectory(),
-                     Voice::files());
+  QString uri = QString::fromStdString(voice.getProvider().getUri());
+  if (voice.isPiper()) {
+    // Piper: download the onnx model and its json config from the server
+    // directory (voice.getDirectory()).
+    QStringList fileNames;
+    fileNames << QFileInfo(voice.getModel()).fileName()
+              << QFileInfo(voice.getMetadataPath()).fileName();
+    DownloadJob::start(uri + "/" + voice.getDirectory(), fileNames);
+  } else {
+    DownloadJob::start(uri + "/" + voice.getDirectory(),
+                       Voice::marbleFiles());
+  }
 }
 
 VoiceManager::VoiceManager()
@@ -169,9 +186,14 @@ bool VoiceManager::isDownloading(const AvailableVoice &voice) const
 
 void VoiceManager::download(const AvailableVoice &voice)
 {
+  // Piper: derive a unique local directory from the (unique) lang code and name.
+  QString localDir = voice.isPiper()
+      ? (voice.getLangCode() + "-" + voice.getName())
+      : voice.getDirectory();
+
   auto* job=new VoiceDownloadJob(&webCtrl,
       voice,
-      lookupDir + QDir::separator() + voice.getDirectory(),
+      lookupDir + QDir::separator() + localDir,
       /*replaceExisting*/ true);
 
   connect(job, &VoiceDownloadJob::finished, this, &VoiceManager::onJobFinished);

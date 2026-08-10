@@ -75,6 +75,10 @@ private:
 
   QString voiceLookupDirectory;
 
+  QString navigationTranslationDir;
+
+  QString espeakDataDir;
+
   QString styleSheetDirectory;
   bool styleSheetDirectoryConfigured{false};
 
@@ -203,6 +207,19 @@ public:
     return *this;
   }
 
+  inline OSMScoutQtBuilder& WithNavigationTranslationDir(const QString &navigationTranslationDir){
+    this->navigationTranslationDir=navigationTranslationDir;
+    return *this;
+  }
+
+  /**
+   * Directory with espeak-ng data, used by the Piper text-to-speech engine.
+   */
+  inline OSMScoutQtBuilder& WithEspeakDataDir(const QString &espeakDataDir){
+    this->espeakDataDir=espeakDataDir;
+    return *this;
+  }
+
   bool Init();
 };
 
@@ -268,6 +285,8 @@ private:
   PixelRatioSetup     pixelRatio;
   QString             userAgent;
   std::atomic_int     liveBackgroundThreads;
+  QString             navigationTranslationDir;
+  QString             espeakDataDir;
 
   std::mutex          mutex;
   MapDownloaderRef    mapDownloader; // created lazy, guarded by mutex
@@ -284,7 +303,9 @@ private:
              GLPowerOfTwoTexture glPowerOfTwoTexture,
              const PixelRatioSetup &pixelRatio,
              QString userAgent,
-             QStringList customPoiTypes);
+             QStringList customPoiTypes,
+             const QString &navigationTranslationDir,
+             const QString &espeakDataDir);
 
 public slots:
   void threadFinished();
@@ -304,7 +325,7 @@ public:
    *         service, SLOT(init()));
    * thread->start();
    *
-   * Service should stop thread in own destructor: QThread::stop()
+   * Service should stop thread in own destructor: QThread::quit()
    *
    * @param name
    * @return thread
@@ -346,6 +367,7 @@ public:
   QString GetCacheLocation() const;
   size_t  GetOnlineTileCacheSize() const;
   QString GetIconDirectory() const;
+  QString GetNavigationTranslationDir() const;
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

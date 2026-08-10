@@ -358,6 +358,13 @@ find_package(Doxygen QUIET)
 set(Matlab_FIND_COMPONENTS MX_LIBRARY)
 find_package(MATLAB QUIET)
 
+option(OSMSCOUT_BUILD_WITH_PIPER "Enable Piper TTS (libpiper) support if available" ON)
+if(OSMSCOUT_BUILD_WITH_PIPER)
+  find_package(Piper QUIET)
+endif()
+target_exists(Piper::Piper HAVE_LIB_PIPER)
+set(OSMSCOUT_HAVE_LIB_PIPER ${HAVE_LIB_PIPER})
+
 find_package(Gperftools QUIET)
 set(HAVE_LIB_GPERFTOOLS ${GPERFTOOLS_FOUND})
 if(GPERFTOOLS_FOUND)

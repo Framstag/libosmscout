@@ -52,6 +52,7 @@ public:
     QString iconDirectory="icons";
     QString translationDir;
     QString basemapDir;
+    QString espeakDataDir;
   };
 
 public:

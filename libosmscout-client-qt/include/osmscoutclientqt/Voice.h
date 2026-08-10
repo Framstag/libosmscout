@@ -28,12 +28,24 @@
 
 namespace osmscout {
 
+/**
+ * Type of the "Voice of Marble" voice packs, made of pre-recorded ogg samples.
+ */
+constexpr char const *VoiceTypeVoiceOfMarble = "VoiceOfMarble";
+
+/**
+ * Type of Piper TTS voices, made of an onnx model and its json config.
+ */
+constexpr char const *VoiceTypePiper = "Piper";
+
 class OSMSCOUT_CLIENT_QT_API AvailableVoice : public QObject {
   Q_OBJECT
 
   Q_PROPERTY(bool valid READ isValid() CONSTANT)
 
+  Q_PROPERTY(QString type READ getType() CONSTANT)
   Q_PROPERTY(QString lang READ getLang() CONSTANT)
+  Q_PROPERTY(QString langCode READ getLangCode() CONSTANT)
   Q_PROPERTY(QString gender READ getGender() CONSTANT)
   Q_PROPERTY(QString name READ getName() CONSTANT)
   Q_PROPERTY(QString license READ getLicense() CONSTANT)
@@ -46,7 +58,9 @@ private:
 
   VoiceProvider provider;
 
+  QString type;
   QString lang;
+  QString langCode;
   QString gender;
   QString name;
   QString license;
@@ -54,17 +68,25 @@ private:
   QString author;
   QString description;
 
+  // Piper specific: server-relative paths to the model and its json config
+  QString model;
+  QString metadataPath;
+
 public:
   AvailableVoice() = default;
 
   AvailableVoice(const VoiceProvider &provider,
+                 const QString &type,
                  const QString &lang,
+                 const QString &langCode,
                  const QString &gender,
                  const QString &name,
                  const QString &license,
                  const QString &directory,
                  const QString &author,
-                 const QString &description);
+                 const QString &description,
+                 const QString &model,
+                 const QString &metadataPath);
 
   AvailableVoice(const AvailableVoice& o);
 
@@ -75,9 +97,21 @@ public:
     return provider;
   }
 
+  QString getType() const
+  {
+    return type;
+  }
+  bool isPiper() const
+  {
+    return type == VoiceTypePiper;
+  }
   QString getLang() const
   {
     return lang;
+  }
+  QString getLangCode() const
+  {
+    return langCode;
   }
   QString getGender() const
   {
@@ -102,6 +136,14 @@ public:
   QString getDescription() const
   {
     return description;
+  }
+  QString getModel() const
+  {
+    return model;
+  }
+  QString getMetadataPath() const
+  {
+    return metadataPath;
   }
 
   bool isValid() const
@@ -133,9 +175,24 @@ public:
     return dir;
   }
 
+  QString getType() const
+  {
+    return type;
+  }
+
+  bool isPiper() const
+  {
+    return type == VoiceTypePiper;
+  }
+
   QString getLang() const
   {
     return lang;
+  }
+
+  QString getLangCode() const
+  {
+    return langCode;
   }
 
   QString getGender() const
@@ -163,6 +220,14 @@ public:
     return description;
   }
 
+  /**
+   * Local file name of the Piper onnx model (empty for other types).
+   */
+  QString getModelFile() const
+  {
+    return modelFile;
+  }
+
   bool isValid() const
   {
     return valid;
@@ -170,19 +235,31 @@ public:
 
   bool deleteVoice();
 
-  static QStringList files();
+  /**
+   * List of files owned by this voice (depends on its type), relative to its
+   * directory. Used for validation and removal.
+   */
+  QStringList files() const;
+
+  /**
+   * Mandatory files of a "Voice of Marble" ogg sample pack.
+   */
+  static QStringList marbleFiles();
 
 private:
   QDir dir;
   bool valid{false};
   bool metadata{false};
 
+  QString type;
   QString lang;
+  QString langCode;
   QString gender;
   QString name;
   QString license;
   QString author;
   QString description;
+  QString modelFile;
 };
 
 }

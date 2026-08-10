@@ -36,7 +36,7 @@ endforeach
                              osmscoutclientqtSrc,
                              include_directories: [osmscoutclientqtIncDir, osmscoutclientIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
                              cpp_args: cppArgs,
-                             dependencies: [mathDep, threadDep, qtClientDep],
+                             dependencies: [mathDep, threadDep, qtClientDep, piperDep],
                              link_with: [osmscout, osmscoutmap, osmscoutmapqt, osmscoutclient],
                              version: libraryVersion,
                              install: true)
