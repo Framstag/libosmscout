@@ -17,7 +17,6 @@ MapDialog {
     label: "Voice Downloader"
     fullscreen: parent.width<500 || parent.height<600
 
-
     AvailableVoicesModel {
         id: availableVoices
     }
@@ -34,8 +33,9 @@ MapDialog {
             width: parent.width
             Layout.minimumWidth: Math.min(voiceDownloadDialog.width * 0.8, 500)
 
-            text: "Voice samples were created as part of <a href=\"https://community.kde.org/Marble/VoiceOfMarble\">VoiceOfMarble</a> project. " +
-                  "Licensed under terms of <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">CC BY-SA 3.0</a> license."
+            text: "Voice samples were created as part of <a href=\"https://community.kde.org/Marble/VoiceOfMarble\">VoiceOfMarble</a> project.<br />" +
+                  "Licensed under terms of <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">CC BY-SA 3.0</a> license.<br />" +
+                  "Piper models are (mostly) copied from <a href=\"https://huggingface.co/rhasspy/piper-voices\">HuggingFace, piper-voices</a>."
             onLinkActivated: Qt.openUrlExternally(link)
 
             font.pixelSize: Theme.textFontSize
@@ -69,6 +69,11 @@ MapDialog {
                 }
             }
 
+            TableViewColumn {
+                role: "type"
+                title: "Type"
+                width: 80
+            }
             TableViewColumn {
                 role: "lang"
                 title: "Language"
