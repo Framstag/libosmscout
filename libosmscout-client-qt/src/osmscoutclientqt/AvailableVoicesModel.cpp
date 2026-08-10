@@ -28,6 +28,7 @@
 #include <QStandardPaths>
 
 #include <algorithm>
+#include <QTranslator>
 
 namespace osmscout {
 
@@ -129,6 +130,10 @@ void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetwor
   }else{
     QByteArray downloadedData = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(downloadedData);
+
+    QString navigationTranslationDir=OSMScoutQt::GetInstance().GetNavigationTranslationDir();
+    QMap<QString,bool> langAvailable;
+
     for (const QJsonValueRef ref: doc.array()){
       if (!ref.isObject())
         continue;
@@ -160,6 +165,23 @@ void AvailableVoicesModel::listDownloaded(const VoiceProvider &provider, QNetwor
 
           qWarning() << "Invalid Piper item:" << obj;
           continue;
+        }
+
+        // do not offer Piper languages for which we cannot load the translations
+        // as TTSMessageGeneratorQt would not be able to use them
+        if (langAvailable.contains(langCode.toString())){
+          if (!langAvailable[langCode.toString()]){
+            continue;
+          }
+        } else{
+          QTranslator translator;
+          if (translator.load(langCode.toString(), navigationTranslationDir)) {
+            langAvailable[langCode.toString()] = true;
+          } else {
+            langAvailable[langCode.toString()] = false;
+            qWarning() << "Failed to load translator for language " << langCode.toString() << ", skipping Piper voice " << name.toString();
+            continue;
+          }
         }
 
         items.append(new AvailableVoice(

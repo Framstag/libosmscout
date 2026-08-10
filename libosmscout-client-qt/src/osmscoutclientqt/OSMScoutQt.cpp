@@ -520,4 +520,9 @@ QString OSMScoutQt::GetIconDirectory() const
 {
   return iconDirectory;
 }
+
+QString OSMScoutQt::GetNavigationTranslationDir() const
+{
+  return navigationTranslationDir;
+}
 }
