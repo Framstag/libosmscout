@@ -1,0 +1,161 @@
+OSS
+
+  //
+  // Landuse
+  //
+
+  CONST
+    IF daylight {
+      COLOR allotmentsColor          = #c8b084;
+    }
+    ELSE {
+      COLOR allotmentsColor          = darken(#c8b084,0.5);
+    }
+
+    COLOR brownFieldColor            = #b6b592;//#ebd7fe;
+    COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
+
+    COLOR cemeteryColor              = #a9caae;
+    COLOR commercialColor            = #efc8c8;
+    COLOR constructionColor          = #9d9d6c;
+
+    COLOR farmlandColor              = #ead8bd;
+    COLOR farmyardColor              = #dcbe92;
+
+    COLOR greenFieldColor            = #dcdcc8;
+
+    IF daylight {
+      COLOR landFillColor            = #b6b591;
+    }
+    ELSE {
+      COLOR landFillColor            = darken(#b6b591, 0.5);
+    }
+
+    COLOR quarryColor                = #b3b3b3;
+    COLOR recreationColor            = #bce2ca;
+
+    IF daylight {
+      COLOR residentialColor         = #ebebeb;
+    }
+    ELSE {
+      COLOR residentialColor         = darken(#ebebeb, 0.5);
+    }
+    COLOR residentialLabelColor      = darken(@residentialColor, 0.5);
+
+    COLOR retailColor                = #feeaea;
+    COLOR retailLabelColor           = darken(@retailColor, 0.5);
+
+    COLOR vineyardColor              = #b3e2a8;
+
+  STYLE
+    IF daylight {
+      [MAG region-] {
+        [TYPE landuse_farmland] AREA { color: @farmlandColor; }
+        [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
+        [TYPE landuse_industrial] AREA { color: @industrialColor; }
+        [TYPE landuse_landfill] AREA { color: @landFillColor; }
+        [TYPE landuse_quarry] AREA { color: @quarryColor; }
+        [TYPE landuse_reservoir] AREA { color: @waterColor; }
+        [TYPE landuse_residential] AREA { color: @residentialColor; }
+        [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
+      }
+
+      [MAG city-] {
+        [TYPE landuse_basin] {
+          AREA { color: @waterColor;}
+          AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        }
+
+        [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
+        [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
+        [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
+        [TYPE landuse_railway] AREA { color: #dcdcc8; }
+        [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
+        [TYPE landuse_cemetery_sea] AREA { color: @cemeteryColor; }
+        [TYPE landuse_garages] AREA { color: #dfddce; }
+        [TYPE landuse_greenhouse_horticulture] AREA { color: @farmlandColor; }
+        [TYPE landuse_piste] AREA { color: #dde3ec; }
+        [TYPE landuse_salt_pond] AREA { color: @waterColor; }
+      }
+
+      [MAG suburb-] {
+        [TYPE landuse_commercial] AREA { color: @commercialColor; }
+        [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
+        [TYPE landuse_construction] AREA { color: @constructionColor; }
+        [TYPE landuse_retail] {
+          AREA { color: @retailColor;}
+          AREA.BORDER { color: #c5a0a0; width: 0.1mm; }
+        }
+      }
+
+      [MAG close-] {
+        [TYPE landuse_grass] AREA { color: @grassColor; }
+
+        [TYPE landuse_orchard,
+              landuse_meadow,
+              landuse_village_green] AREA { color: #cfeca8; }
+      }
+
+      // Labels
+      [MAG suburb-] {
+        [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
+        [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
+        [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
+      }
+
+      [MAG close-] {
+        [TYPE landuse_farmland,
+              landuse_farmyard,
+              landuse_quarry,
+              landuse_landfill,
+              landuse_basin,
+              landuse_reservoir,
+              landuse_vineyard,
+              landuse_grass,
+              landuse_greenfield,
+              landuse_orchard,
+              landuse_cemetery,
+              landuse_commercial,
+              landuse_meadow,
+              landuse_recreation_ground] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+
+        [TYPE landuse_industrial,
+              landuse_allotments] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+
+        [TYPE landuse_cemetery_sea,
+              landuse_garages,
+              landuse_greenhouse_horticulture,
+              landuse_piste,
+              landuse_salt_pond] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+
+        [TYPE landuse_farmland,
+              landuse_farmyard,
+              landuse_quarry,
+              landuse_landfill,
+              landuse_basin,
+              landuse_reservoir,
+              landuse_vineyard,
+              landuse_grass,
+              landuse_greenfield,
+              landuse_orchard,
+              landuse_cemetery,
+              landuse_commercial,
+              landuse_meadow,
+              landuse_recreation_ground,
+              landuse_military,
+              landuse_allotments,
+              landuse_construction,
+              landuse_industrial,
+              landuse_residential,
+              landuse_retail,
+              landuse_village_green,
+              landuse_piste] NODE.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+      }
+
+      [MAG veryClose-] {
+        [TYPE landuse_railway,
+              landuse_construction,
+              landuse_village_green] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse; color: @labelColor; autoSize: true; }
+      }
+    }
+END

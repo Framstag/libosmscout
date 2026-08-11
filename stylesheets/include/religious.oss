@@ -10,6 +10,14 @@ OSS
     COLOR religiousBuildingColor        = #bfbfbf;
     COLOR religiousBuildingBorderColor  = darken(@religiousBuildingColor, 0.3);
 
+  SYMBOL christian_church_cross
+    RECTANGLE 0.5,-2 0.5 x 2 {
+      AREA { color: #000000; }   // vertical bar
+    }
+    RECTANGLE 0,-1.5 1.5 x 0.5 {
+      AREA { color: #000000; } // horizontal bar
+    }
+
   STYLE
     IF _building {
       [MAG @specialBuildingMag-] {

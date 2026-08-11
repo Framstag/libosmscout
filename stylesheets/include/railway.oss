@@ -29,6 +29,19 @@ CONST
       AREA { color: @railwaySymbolColor; }
     }
 
+  SYMBOL railway_crossing
+    POLYGON -0.7,-0.7 0.7,0.7 { AREA.BORDER { color: @railwaySymbolColor; width: 0.15mm; } }
+    POLYGON -0.7,0.7 0.7,-0.7 { AREA.BORDER { color: @railwaySymbolColor; width: 0.15mm; } }
+
+  SYMBOL railway_level_crossing
+    RECTANGLE -0.7,-0.7 1.4 x 1.4 { AREA.BORDER { color: @railwaySymbolColor; width: 0.12mm; } }
+    POLYGON -0.7,-0.7 0.7,0.7 { AREA.BORDER { color: @railwaySymbolColor; width: 0.12mm; } }
+    POLYGON -0.7,0.7 0.7,-0.7 { AREA.BORDER { color: @railwaySymbolColor; width: 0.12mm; } }
+
+  SYMBOL railway_turntable
+    CIRCLE 0,0 0.8 { AREA.BORDER { color: @railwaySymbolColor; width: 0.12mm; } }
+    POLYGON -0.8,0 0.8,0 { AREA.BORDER { color: @railwaySymbolColor; width: 0.12mm; } }
+
 STYLE
 
  IF _railway {
@@ -44,6 +57,11 @@ STYLE
 
    [MAG close-] {
      [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+
+     [TYPE railway_abandoned] WAY {color: #b3b3b3; dash: 3,3; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
+     [TYPE railway_monorail] WAY {color: #939393; displayWidth: 0.2mm; width: 3m;}
+
+     [TYPE railway_turntable] AREA { color: #c0c0c0; }
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 2.5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
@@ -87,6 +105,10 @@ STYLE
    [MAG veryClose-] {
      [TYPE railway_halt] NODE.ICON { symbol: railway_halt;}
      [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
+
+     [TYPE railway_crossing] NODE.ICON { symbol: railway_crossing;}
+     [TYPE railway_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
+     [TYPE railway_turntable] NODE.ICON { symbol: railway_turntable;}
    }
 
    // Labels

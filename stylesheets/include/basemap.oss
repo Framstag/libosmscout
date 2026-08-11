@@ -25,6 +25,8 @@ OSS
 CONST
 
 STYLE
+  // Country boundaries: world/continent level
+  // basemap_boundary_country is always rendered (basemap type)
   [TYPE basemap_boundary_country] {
     [MAG 2-3] {
         WAY {color: alpha(@countryBorderColor, 0.1); displayWidth: 0.1mm;}
@@ -33,6 +35,122 @@ STYLE
     [MAG continent-stateOver] {
         WAY {color: alpha(@countryBorderColor, 0.3); displayWidth: 0.1mm;}
         AREA.BORDER { color: alpha(@countryBorderColor, 0.3); width: 0.1mm;}
+    }
+  }
+
+  IF boundary {
+    [TYPE boundary_country] {
+      [MAG 2-3] {
+          WAY {color: alpha(@countryBorderColor, 0.1); displayWidth: 0.1mm;}
+          AREA.BORDER { color: alpha(@countryBorderColor, 0.1); width: 0.1mm;}
+      }
+      [MAG continent-stateOver] {
+          WAY {color: alpha(@countryBorderColor, 0.3); displayWidth: 0.1mm;}
+          AREA.BORDER { color: alpha(@countryBorderColor, 0.3); width: 0.1mm;}
+      }
+    }
+
+    // State boundaries: from state level
+    [TYPE boundary_state] {
+      [MAG state-] {
+        WAY {color: alpha(@countryBorderColor, 0.2); displayWidth: 0.08mm;}
+      }
+      [MAG county-] {
+        WAY {color: alpha(@countryBorderColor, 0.3); displayWidth: 0.1mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.3); width: 0.1mm;}
+      }
+    }
+
+    // County boundaries: from county level
+    [TYPE boundary_county] {
+      [MAG county-] {
+        WAY {color: alpha(@countryBorderColor, 0.15); displayWidth: 0.06mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.15); width: 0.06mm;}
+      }
+      [MAG detail-] {
+        WAY {color: alpha(@countryBorderColor, 0.25); displayWidth: 0.08mm;}
+      }
+    }
+
+    // Municipality boundaries (admin_level 8): from close level
+    [TYPE boundary_municipality] {
+      [MAG close-] {
+        WAY {color: alpha(@countryBorderColor, 0.15); displayWidth: 0.05mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.15); width: 0.05mm;}
+      }
+    }
+
+    // Administrative boundaries (levels 3,5,7,9,11): from closer level
+    [TYPE boundary_administrative] {
+      [MAG closer-] {
+        WAY {color: alpha(@countryBorderColor, 0.15); displayWidth: 0.05mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.15); width: 0.05mm;}
+      }
+    }
+
+    // Suburb boundaries (admin_level 10): from veryClose level
+    [TYPE boundary_suburb] {
+      [MAG veryClose-] {
+        WAY {color: alpha(@countryBorderColor, 0.15); displayWidth: 0.05mm;}
+        AREA.BORDER { color: alpha(@countryBorderColor, 0.15); width: 0.05mm;}
+      }
+    }
+  }
+
+  // Boundary labels: always rendered (independent of boundary flag)
+  // Boundaries are usually WAY objects (open border lines) => WAY.TEXT,
+  // closed boundary relations are areas => AREA.TEXT
+  [MAG continent-] {
+    [TYPE basemap_boundary_country,
+          boundary_country] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+  [MAG state-] {
+    [TYPE boundary_state] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+  [MAG county-] {
+    [TYPE boundary_county] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+  [MAG close-] {
+    [TYPE boundary_municipality] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+  [MAG closer-] {
+    [TYPE boundary_administrative] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+  [MAG veryClose-] {
+    [TYPE boundary_suburb] {
+      WAY.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; }
+      AREA.TEXT { label: Name.name; priority: 20; color: @countryBorderColor; autoSize: true;}
+    }
+  }
+
+  IF _leisure {
+    [TYPE boundary_protected_area] {
+      [MAG county-]{
+        AREA.BORDER#dashed { color: @natureReserveBorderColor; width: 0.3mm; dash: 6,6; displayOffset: -0.5mm; }
+        AREA.BORDER#solid { color: lighten(@natureReserveBorderColor, 0.3); width: 1.0mm; }
+      }
+      [MAG county-detail]{
+        AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
+      }
+      // Semiransparent overlay just for low zoom
+      [MAG county-proximity]{
+        AREA { color: @natureReserveColor;}
+      }
     }
   }
 END

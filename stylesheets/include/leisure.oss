@@ -1,0 +1,125 @@
+OSS
+
+  //
+  // Leisure
+  //
+
+  CONST
+    COLOR pitchColor                 = #90d3b9;
+    COLOR pitchBorderColor           = #b0b0b0;
+    COLOR pitchLabelColor            = darken(@pitchColor,0.5);
+
+    COLOR playgroundColor            = #affdbb;
+    COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
+
+  SYMBOL leisure_slipway
+    POLYGON -0.9,0.4 0.9,-0.6 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    POLYGON -0.9,-0.3 0.9,-0.3 0.5,0.2 -0.5,0.2 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+
+  STYLE
+    IF _leisure {
+      [MAG county-] {
+        [TYPE leisure_pitch,
+              leisure_fitness_station] {
+          AREA { color: @pitchColor;}
+          AREA.BORDER { color: @pitchBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE leisure_water_park] {
+          AREA { color: #f1eee8;}
+          AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        }
+
+        [TYPE leisure_park] AREA { color: #c6f0cf; }
+        [TYPE leisure_common] AREA { color: #bde3cb; }
+
+        [TYPE leisure_marina,
+              leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
+
+        [TYPE leisure_marina,
+              leisure_fishing] AREA { color: #b5d6f180; }
+
+        [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
+      }
+
+      [MAG veryClose-] {
+        [TYPE leisure_slipway] {
+          NODE.ICON { symbol: leisure_slipway; }
+          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
+        }
+
+        [TYPE leisure_track,
+              leisure_nature_reserve,
+              leisure_playground,
+              leisure_garden,
+              leisure_common,
+              leisure_ice_rink] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioLeisure; size: 0.9; }
+      }
+
+      [MAG city-] {
+        // Semiransparent overlay
+        [TYPE leisure_nature_reserve] {
+          AREA { color: @natureReserveColor;}
+          AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
+          AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
+        }
+        [TYPE leisure_swimming_pool] {
+          AREA { color: #74daff;}
+        }
+      }
+
+      [MAG cityOver-] {
+        [TYPE leisure_golf_course] AREA { color: #c7f1a3; }
+      }
+
+      [MAG detail-] {
+        [TYPE leisure_track] AREA { color: #7fdac2; }
+      }
+
+      [MAG close-] {
+        [TYPE leisure_playground] {
+          AREA { color: @playgroundColor;}
+          AREA.BORDER { color: @playgroundBorderColor; width: 0.1mm;}
+        }
+        [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "garden"; patternMinMag: detail;}
+      }
+
+      // Labels
+
+      [MAG close-] {
+        [TYPE leisure_sports_centre,
+              leisure_golf_course,
+              leisure_stadium,
+              leisure_track,
+              leisure_water_park,
+              leisure_marina,
+              leisure_fishing,
+              leisure_park,
+              leisure_playground,
+              leisure_garden,
+              leisure_common,
+              leisure_ice_rink] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+      }
+    }
+
+    [MAG @specialBuildingMag-] {
+      [TYPE leisure_stadium] AREA { color: #33cb98; }
+    }
+
+    IF _building {
+      [MAG @buildingMag-] {
+        [TYPE leisure_sports_centre,
+              leisure_building] {
+          AREA { color: @buildingColor;}
+          AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
+        }
+      }
+
+      [MAG @labelBuildingMag-] {
+        [TYPE leisure_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; color: @buildingLabelColor; }
+
+        [TYPE leisure_pitch,
+              leisure_fitness_station] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @pitchLabelColor; size: 0.9;}
+      }
+    }
+END

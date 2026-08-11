@@ -1,0 +1,20 @@
+OSS
+
+  //
+  // Sport
+  //
+
+  STYLE
+    IF _building {
+      [MAG @buildingMag-] {
+        [TYPE sport_building] {
+          AREA { color: #b89c9c;}
+          AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        }
+      }
+
+      [MAG @labelBuildingMag-] {
+        [TYPE sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; color: @buildingLabelColor; }
+      }
+    }
+END

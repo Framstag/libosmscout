@@ -1915,6 +1915,18 @@ TYPES
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
 
+  TYPE boundary_municipality
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="8") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="8")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
+  TYPE boundary_suburb
+    = WAY AREA ("boundary"=="administrative" AND "admin_level"=="10") OR
+      RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="10")
+      {Name, NameAlt, AdminLevel}
+      MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+
   TYPE boundary_administrative
     = WAY AREA ("boundary"=="administrative") OR
       RELATION ("type"=="boundary" AND "boundary"=="administrative")

@@ -1,0 +1,167 @@
+OSS
+
+  //
+  // Natural
+  //
+
+  CONST
+    COLOR bareRockColor              = #eee5dc; // light beige rock color
+    COLOR beachColor                 = #eecc55;
+    COLOR caveColor                  = #6b4423; // cave entrance icon (dark brown)
+    COLOR cliffColor                 = #999999; // cliff line/label grey
+    COLOR fellColor                  = #f9f9f9;
+    COLOR glacierColor               = #ddecec;
+    COLOR heathColor                 = #ffffc0;
+    COLOR marshColor                 = #efe8ff;
+    COLOR mudColor                   = #cbb19a4d; // semi-transparent mud brown
+    COLOR sandColor                  = #f5e9c6; // light sand yellow
+    COLOR screeColor                 = #eee5dc; // light grey-beige scree
+    COLOR scrubColor                 = #b5e2b5;
+    COLOR wetlandColor               = #bdd8d8;
+
+    IF daylight {
+      COLOR woodColor                = #aed1a0;
+    }
+    ELSE {
+      COLOR woodColor                = darken(#aed1a0, 0.5);
+    }
+    COLOR woodLabelColor             = darken(@woodColor, 0.5);
+
+    COLOR peakSymbolColor            = #9c5e29;
+    COLOR peakLabelColor             = #9c5329;
+
+    COLOR volcanoSymbolColor         = #dd2427;
+    COLOR volcanoLabelColor          = #90181a;
+
+  SYMBOL natural_spring
+    CIRCLE 0,0 1.0 {
+      AREA.BORDER {color: @waterLabelColor; width: 0.2mm; }
+    }
+    CIRCLE 0,0 0.3 {
+      AREA {color: @waterLabelColor; }
+    }
+
+  SYMBOL natural_cave_entrance
+    POLYGON -1,1 1,1 1,0.2 0.5,-0.6 0,-0.8 -0.5,-0.6 -1,0.2 {
+      AREA { color: @caveColor; }
+    }
+
+  SYMBOL natural_peak
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @peakSymbolColor; }
+    }
+
+  SYMBOL natural_volcano
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @volcanoSymbolColor; }
+    }
+
+  STYLE
+    IF _natural {
+      [MAG state-] {
+        [TYPE natural_glacier] AREA { color: @glacierColor; }
+        [TYPE natural_grassland] AREA { color: @grassColor; }
+        [TYPE natural_fell] AREA { color: @fellColor; }
+        [TYPE natural_heath] AREA { color: @heathColor; }
+        [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
+        [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
+        [TYPE natural_water] AREA { color: @waterColor; }
+        [TYPE natural_land] AREA { color: @landColor; }
+        [TYPE natural_bare_rock] AREA { color: @bareRockColor; }
+        [TYPE natural_mud] AREA { color: @mudColor; }
+        [TYPE natural_sand] AREA { color: @sandColor; }
+        [TYPE natural_scree] AREA { color: @screeColor; }
+      }
+
+      [MAG city-] {
+        [TYPE natural_beach] AREA { color: @beachColor; }
+        [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
+      }
+
+      [MAG detail-] {
+        [TYPE natural_glacier,
+              natural_fell,
+              natural_grassland,
+              natural_heath,
+              natural_scrub,
+              natural_wetland,
+              natural_wetland_marsh,
+              natural_wetland_tidalflat,
+              natural_beach,
+              natural_land,
+              natural_bare_rock,
+              natural_mud,
+              natural_sand,
+              natural_scree] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural;  color: @labelColor; autoSize: true;}
+
+        [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
+
+        [TYPE natural_bare_rock,
+              natural_scree,
+              natural_beach,
+              natural_fell,
+              natural_glacier,
+              natural_heath,
+              natural_land,
+              natural_scrub,
+              natural_cliff] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioNatural; size: 0.9; }
+
+        [TYPE natural_water,
+              natural_wetland,
+              natural_wetland_marsh,
+              natural_wetland_tidalflat] NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
+
+        [TYPE natural_cliff] AREA { color: lighten(@cliffColor, 0.3); }
+        [TYPE natural_cave_entrance] AREA { color: @caveColor; }
+
+        [TYPE natural_bay] {
+          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; autoSize: true; }
+          AREA.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; autoSize: true; }
+        }
+
+        [TYPE natural_cliff] {
+          WAY { color: @cliffColor; displayWidth: 0.2mm; dash: 4, 2; }
+          WAY.TEXT { label: Name.name; color: @cliffColor; priority: @labelPrioNatural; }
+        }
+
+        [TYPE natural_peak] {
+          NODE.TEXT#peakName { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+          NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+        }
+        [TYPE natural_volcano] {
+          NODE.TEXT#volcanoName { label: IName; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 1; }
+          NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 2;}
+        }
+      }
+
+      [MAG veryClose-] {
+        [TYPE natural_spring] {
+          NODE.ICON { symbol: natural_spring; }
+          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioSpring; size: 0.9; }
+        }
+
+        [TYPE natural_cave_entrance] {
+          NODE.ICON { symbol: natural_cave_entrance; }
+          NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioNatural; size: 0.9; }
+        }
+      }
+
+      [MAG city-] {
+        [TYPE natural_peak] NODE.ICON { symbol: natural_peak; }
+        [TYPE natural_volcano] NODE.ICON { symbol: natural_volcano; }
+      }
+    }
+
+    IF wood {
+      [MAG stateOver-] {
+        [TYPE wood] AREA { color: @woodColor; }
+      }
+
+      [MAG detail-] {
+        [TYPE wood] {
+          AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
+          NODE.TEXT { label: Name.name ; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+        }
+      }
+    }
+END

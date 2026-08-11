@@ -21,7 +21,8 @@ OSS
              historic_monument,
              historic_memorial,
              historic_ruins,
-             historic_wreck] AREA { color: @historicColor; }
+             historic_wreck,
+             historic_manor] AREA { color: @historicColor; }
     }
 
     IF _building {
@@ -81,5 +82,9 @@ OSS
           priority: @labelPrioHistoric;}
         NODE.ICON { symbol: historic; }
       }
+    }
+    [MAG close-] {
+      [TYPE historic_ruins,
+            historic_archaeological_site] WAY { color: @historicBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
 END

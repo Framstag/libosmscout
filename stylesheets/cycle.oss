@@ -17,6 +17,7 @@ FLAG
   daylight          = true;
   waterway          = true;
   wood              = true;
+  boundary          = false;
   elevationContours = true;
 
   IF daylight {
@@ -174,6 +175,7 @@ CONST
   }
 
   COLOR beachColor                 = #eecc55;
+  COLOR caveColor                  = #6b4423; // cave entrance icon (dark brown)
 
   COLOR brownFieldColor            = #b6b592;
   COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
@@ -287,20 +289,12 @@ CONST
   COLOR trunkShieldColor           = @trunkAltColor;
   COLOR primaryShieldColor         = @primaryColor;
 
-  COLOR viaFerrataEasyColor        = darken(#fdac44, 0.4);
-  COLOR viaFerrataModerateColor    = #fdac44;
-  COLOR viaFerrataDifficultColor   = #ec4044;
-  COLOR viaFerrataExtremeColor     = #ff0000;
-
   // Buildings
   COLOR buildingColor              = #d9d9d9;
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
 
   // Travel
-  COLOR onewayArrowColor           = #00000028;
-
-  COLOR busSymbolColor             = #7885b0;
 
   // Leisure
 
@@ -324,7 +318,6 @@ CONST
     COLOR amenityColor             = darken(#f0f0d8, 0.5);
     COLOR amenityBuildingColor     = darken(#d9b8b8, 0.5);
   }
-  COLOR amenitySymbolColor         = darken(@amenityColor, 0.4);
   COLOR amenityLabelColor          = darken(@amenityBuildingColor, 0.5);
   COLOR amenityBuildingBorderColor = darken(@amenityBuildingColor, 0.3);
 
@@ -339,23 +332,33 @@ CONST
   COLOR parkingBorderColor         = darken(@parkingColor, 0.3);
   COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
 
-  COLOR hospitalSymbolColor        = #da0092;
   COLOR hospitalColor              = darken(@amenityColor, 0.1);
   COLOR hospitalBorderColor        = darken(@hospitalColor, 0.3);
   COLOR hospitalBuildingColor      = darken(@amenityBuildingColor, 0.1);
   COLOR hospitalBuildingBorderColor = darken(@hospitalBuildingColor, 0.3);
 
-  COLOR pharmacySymbolColor        = #da0092;
-
   COLOR postColor                  = #e8f000;
-  COLOR postSymbolColor            = #e8f000;
   COLOR postBuildingColor          = #d2d900;
   COLOR postBuildingBorderColor    = darken(@postBuildingColor, 0.3);
   COLOR postLabelColor             = darken(@postColor, 0.5);
 
   COLOR wallColor                  = #663e1b;
 
-MODULE "include/symbols"
+  SYMBOL natural_peak
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @peakSymbolColor; }
+    }
+
+  SYMBOL natural_volcano
+    POLYGON -0.75,0 0.75,0 0.0,-1.5 {
+      AREA { color: @volcanoSymbolColor; }
+    }
+
+  SYMBOL stream_arrow
+    POLYGON 0,0.5 1,0 0,-0.5 {
+      AREA { color: @waterLabelColor; }
+    }
+
 MODULE "include/land_sea"
 
 MODULE "include/place"

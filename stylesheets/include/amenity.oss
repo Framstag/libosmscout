@@ -1,0 +1,129 @@
+OSS
+
+  //
+  // Amenity
+  //
+
+  CONST
+    IF daylight {
+      COLOR amenityBuildingColor     = #d9b8b8;
+    }
+    ELSE {
+      COLOR amenityBuildingColor     = darken(#d9b8b8, 0.5);
+    }
+    COLOR amenityLabelColor          = darken(@amenityBuildingColor, 0.5);
+    COLOR amenityBuildingBorderColor = darken(@amenityBuildingColor, 0.3);
+
+    COLOR hospitalBuildingColor      = darken(@amenityBuildingColor, 0.1);
+    COLOR hospitalBuildingBorderColor = darken(@hospitalBuildingColor, 0.3);
+
+    COLOR postBuildingColor          = #d2d900;
+    COLOR postBuildingBorderColor    = darken(@postBuildingColor, 0.3);
+    COLOR postLabelColor             = darken(@postColor, 0.5);
+
+    IF daylight {
+      COLOR parkingBuildingColor     = #c4c393;
+    }
+    ELSE {
+      COLOR parkingBuildingColor       = darken(#c4c393, 0.5);
+    }
+    COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
+
+  STYLE
+    [MAG @specialBuildingMag-] {
+      [TYPE amenity_hospital_building] {
+        AREA { color: @hospitalBuildingColor;}
+        AREA.BORDER { color: @hospitalBuildingBorderColor; width: 0.1mm; }
+      }
+    }
+
+    IF _building {
+      [MAG @buildingMag-] {
+        // Amenity buildings
+
+        [TYPE amenity_post_office_building] {
+          AREA { color: @postBuildingColor; }
+          AREA.BORDER { color: @postBuildingBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE amenity_building,
+              amenity_bank_building,
+              amenity_cafe_building,
+              amenity_fast_food_building,
+              amenity_fuel_building,
+              amenity_kindergarten_building,
+              amenity_library_building,
+              amenity_restaurant_building,
+              amenity_pub_building,
+              amenity_bar_building,
+              amenity_school_building] {
+          AREA { color: @amenityBuildingColor; }
+          AREA.BORDER { color: @amenityBuildingBorderColor; width: 0.1mm;}
+        }
+
+        [TYPE amenity_parking_building] {
+          AREA { color: @parkingBuildingColor; }
+          AREA.BORDER { color: @parkingBuildingBorderColor; width: 0.1mm; }
+        }
+      }
+
+      [MAG @labelBuildingMag-] {
+        [TYPE amenity_school_building,
+              amenity_school] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
+
+        [TYPE amenity,
+              amenity_building,
+              amenity_bank_building,
+              amenity_bank,
+              amenity_cafe_building,
+              amenity_cafe,
+              amenity_fast_food_building,
+              amenity_fast_food,
+              amenity_fuel,
+              amenity_fuel_building,
+              amenity_kindergarten_building,
+              amenity_kindergarten,
+              amenity_restaurant_building,
+              amenity_restaurant,
+              amenity_pub_building,
+              amenity_pub,
+              amenity_bar_building,
+              amenity_bar,
+              amenity_school_building,
+              amenity_school,
+              amenity_taxi,
+              amenity_bus_station,
+              amenity_bicycle_parking,
+              amenity_toilets,
+              amenity_waste_disposal,
+              amenity_shelter,
+              amenity_atm] {
+          NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
+          AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
+        }
+
+        [TYPE amenity_charging_station] {
+          NODE.TEXT {label: Operator.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
+        }
+
+        [TYPE amenity_pharmacy] NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 0.9; priority: @labelPrioMajorBuilding;}
+
+        [TYPE amenity_post_office,
+              amenity_post_office_building] {
+          NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9;  priority: @labelPrioSpecialBuilding;}
+          AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9;  priority: @labelPrioSpecialBuilding;}
+        }
+
+        [TYPE amenity_parking,
+              amenity_parking_building] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #4bb2da; size: 0.9; priority: @labelPrioMajorBuilding; }
+      }
+    }
+
+    [MAG @labelSpecialBuildingMag-] {
+      [TYPE amenity_hospital_building,
+            amenity_hospital] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
+      }
+    }
+END

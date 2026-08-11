@@ -1,7 +1,7 @@
 OSS
 
 STYLE
-  [MAG world-] {
+  [MAG 0-] {
     [TYPE _tile_sea] AREA {color: @waterColor;}
     //[TYPE _tile_coast] AREA {color: /*@coastColor;*/@waterColor;}
     [TYPE _tile_land] AREA {color: @landColor;}
