@@ -14,8 +14,15 @@ if [ -n "${JAVA_LIBRARY_PATH:-}" ]; then
     NATIVE_PATH="$JAVA_LIBRARY_PATH"
 else
     for dir in "$PROJECT_DIR/build" "$PROJECT_DIR/build-meson" "$PROJECT_DIR/build-release" "$PROJECT_DIR/debug"; do
+        # CMake layout: libosmscout-client-java/libosmscout_client_java.so
+        candidate="$dir/libosmscout-client-java"
+        if [ -f "$candidate/libosmscout_client_java.so" ]; then
+            NATIVE_PATH="$candidate"
+            break
+        fi
+        # Meson layout: libosmscout-client-java/src/libosmscout_client_java.so
         candidate="$dir/libosmscout-client-java/src"
-        if [ -d "$candidate" ]; then
+        if [ -f "$candidate/libosmscout_client_java.so" ]; then
             NATIVE_PATH="$candidate"
             break
         fi
