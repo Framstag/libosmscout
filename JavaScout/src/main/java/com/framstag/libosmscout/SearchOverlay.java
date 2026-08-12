@@ -177,7 +177,10 @@ public class SearchOverlay extends StackPane {
         cancelButton.setPrefHeight(controlHeight);
         cancelButton.setMaxHeight(controlHeight);
         cancelButton.setStyle("-fx-font-size: " + uiScale.baseFontSize() + "px;");
-        cancelButton.setOnAction(e -> collapse());
+        cancelButton.setOnAction(e -> {
+            client.cancelSearch();
+            collapse();
+        });
 
         searchBar.getChildren().addAll(searchField, clearButton, cancelButton);
 
@@ -545,13 +548,17 @@ public class SearchOverlay extends StackPane {
         Task<List<LocationEntry>> searchTask = new Task<>() {
             @Override
             protected List<LocationEntry> call() {
-                LocationEntry[] results = client.searchLocations(query, DEFAULT_LIMIT);
+                // Scope the search to the current map region (OSMScout2 parity);
+                // falls back to the whole database when no region is resolvable.
+                String defaultRegion = client.getRegion(mapCenterLat, mapCenterLon);
+                LocationEntry[] results = client.searchLocations(query, DEFAULT_LIMIT, defaultRegion, false);
                 if (results == null) {
                     return List.of();
                 }
-                return Arrays.stream(results)
-                        .sorted(new LocationEntryComparator(mapCenterLat, mapCenterLon))
+                List<LocationEntry> sorted = Arrays.stream(results)
+                        .sorted(LocationSearchRanker.comparator(query, mapCenterLat, mapCenterLon))
                         .collect(Collectors.toList());
+                return LocationSearchRanker.deduplicate(sorted, mapCenterLat, mapCenterLon);
             }
         };
 
@@ -695,60 +702,5 @@ public class SearchOverlay extends StackPane {
             searchField.setPrefWidth(uiScale.px(350));
         }
     }
-
-    /**
-     * Comparator for sorting search results by relevance.
-     */
-    private static class LocationEntryComparator implements Comparator<LocationEntry> {
-
-        private final double centerLat;
-        private final double centerLon;
-
-        LocationEntryComparator(double centerLat, double centerLon) {
-            this.centerLat = centerLat;
-            this.centerLon = centerLon;
-        }
-
-        @Override
-        public int compare(LocationEntry a, LocationEntry b) {
-            // Primary: match quality (match > candidate)
-            boolean aMatch = "match".equals(a.matchQuality);
-            boolean bMatch = "match".equals(b.matchQuality);
-            if (aMatch != bMatch) {
-                return aMatch ? -1 : 1;
-            }
-            // Secondary: relevance rank
-            double rankA = computeRank(a);
-            double rankB = computeRank(b);
-            return Double.compare(rankB, rankA);
-        }
-
-        private double computeRank(LocationEntry entry) {
-            double typeRank = switch (entry.objectType != null ? entry.objectType : "") {
-                case "boundary_country" -> 1.0;
-                case "boundary_state" -> 0.93;
-                case "boundary_administrative", "place_town" -> 0.9;
-                case "highway_residential", "address" -> 0.8;
-                case "railway_station", "railway_tram_stop",
-                     "railway_subway_entrance", "highway_bus_stop" -> 0.7;
-                default -> 0.5;
-            };
-
-            double distance = haversine(centerLat, centerLon, entry.lat, entry.lon);
-            double distanceRank = 1.0 / Math.log((distance / 1000.0) + Math.E);
-
-            return typeRank * distanceRank;
-        }
-
-        private static double haversine(double lat1, double lon1,
-                                         double lat2, double lon2) {
-            double dLat = Math.toRadians(lat2 - lat1);
-            double dLon = Math.toRadians(lon2 - lon1);
-            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                     + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                     * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return 6371000 * c;
-        }
-    }
 }
+

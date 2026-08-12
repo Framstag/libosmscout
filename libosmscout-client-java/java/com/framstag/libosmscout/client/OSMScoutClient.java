@@ -66,14 +66,49 @@ public class OSMScoutClient {
      * Search for locations matching a free-text query.
      * <p>
      * Uses the core {@code LocationService::SearchForLocationByString()} to find
-     * admin regions, locations, POIs, and addresses matching the query.
+     * admin regions, locations, POIs, and addresses matching the query, and the
+     * text search index for free-text hits on named objects.
      * Results are sorted by relevance (type priority, distance, match quality).
      *
      * @param query free-text search string (e.g. "Berlin", "Dortmund Hbf")
      * @param limit maximum number of results to return
      * @return array of matching LocationEntry objects, or empty array if none found
      */
-    public native LocationEntry[] searchLocations(String query, int limit);
+    public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion, boolean cancel);
+
+    /**
+     * Search for locations matching a free-text query without region context.
+     * <p>
+     * Convenience overload of
+     * {@link #searchLocations(String, int, String, boolean)}.
+     *
+     * @param query free-text search string
+     * @param limit maximum number of results to return
+     * @return array of matching LocationEntry objects, or empty array if none found
+     */
+    public LocationEntry[] searchLocations(String query, int limit) {
+        return searchLocations(query, limit, null, false);
+    }
+
+    /**
+     * Cancel the currently running location search, if any.
+     * <p>
+     * A new search cancels the previously running one automatically; this
+     * method allows explicit cancellation (e.g. from a cancel button).
+     */
+    public native void cancelSearch();
+
+    /**
+     * Get the name of the admin region containing the given coordinate.
+     * <p>
+     * Reverse lookup via {@code LocationDescriptionService::ReverseLookupRegion}.
+     * Used to scope location searches to the current map region.
+     *
+     * @param lat latitude in degrees
+     * @param lon longitude in degrees
+     * @return admin region name, or null if no region found
+     */
+    public native String getRegion(double lat, double lon);
 
     /**
      * Get a structured description of the most reasonable visible object
