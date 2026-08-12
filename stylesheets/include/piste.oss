@@ -1,0 +1,43 @@
+OSS
+
+  //
+  // Piste (winter sports downhill slopes)
+  //
+
+  CONST
+    UINT labelPrioPiste               = 25;
+
+  STYLE
+    [MAG city-] {
+      [TYPE piste_downhill_easy]{
+        WAY {color: #5050ff; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #5050ff80; }
+        AREA.BORDER { color: #5050ff; width: 0.3mm; }
+      }
+      [TYPE piste_downhill_intermediate]{
+        WAY {color: #ff5050; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #ff505080; }
+        AREA.BORDER { color: #ff5050; width: 0.3mm; }
+      }
+      [TYPE piste_downhill_advanced]{
+        WAY {color: #606060; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #60606080; }
+        AREA.BORDER { color: #606060; width: 0.3mm; }
+      }
+    }
+
+    [MAG close-]{
+      [TYPE piste_downhill_easy]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #3030ff; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #3030ff; }
+      }
+      [TYPE piste_downhill_intermediate]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #ff3030; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #ff3030; }
+      }
+      [TYPE piste_downhill_advanced]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #505050; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #505050; }
+      }
+    }
+END

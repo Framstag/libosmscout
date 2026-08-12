@@ -1,0 +1,33 @@
+OSS
+
+  //
+  // Aerialway
+  //
+
+  CONST
+    COLOR airwayColor               = #bb75d9;
+    COLOR airwaySymbolColor         = @airwayColor;
+    COLOR airwayLabelColor          = darken(#bb75d9, 0.5);
+
+  STYLE
+    [MAG close-] {
+      [TYPE aerialway_gondola]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#gondola {color: #101010; dash: 1,15; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      }
+      [TYPE aerialway_chair_lift]{
+        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
+        WAY#chair {color: #101010; dash: 0.3,5; joinCap: square; endCap: square; displayWidth: 0.1mm; width: 4m;}
+      }
+      [TYPE aerialway_drag_lift]{
+        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      }
+    }
+
+    [MAG @labelPathsMag-] {
+      [TYPE aerialway_gondola,
+            aerialway_chair_lift,
+            aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
+    }
+END

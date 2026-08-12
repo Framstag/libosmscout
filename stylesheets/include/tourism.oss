@@ -10,9 +10,19 @@ OSS
     COLOR tourismBuildingBorderColor = darken(@tourismColor, 0.3);
     COLOR tourismLabelColor          = darken(@tourismColor, 0.7);
 
+    COLOR viewpointSymbolColor       = #b8662d; // viewpoint marker (orange-brown)
+
   SYMBOL tourism
     RECTANGLE 0,0 1 x 1 {
       AREA {color: @tourismSymbolColor; }
+    }
+
+  SYMBOL tourism_viewpoint
+    POLYGON -0.9,-0.6 0.9,-0.6 0,0.9 {
+      AREA { color: @viewpointSymbolColor; }
+    }
+    POLYGON -0.4,-0.6 0.4,-0.6 0,-0.1 {
+      AREA { color: lighten(@viewpointSymbolColor, 0.4); }
     }
 
   STYLE
@@ -81,8 +91,19 @@ OSS
             tourism_information,
             tourism_motel,
             tourism_museum,
-            tourism_picnic_site] {
+            tourism_picnic_site,
+            tourism_aquarium] {
         AREA { color: @tourismColor; }
       }
+    }
+
+    [MAG detail-] {
+      [TYPE tourism_viewpoint] {
+        NODE.ICON { symbol: tourism_viewpoint; priority: @labelPrioSpecialBuilding; }
+        NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @tourismLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding; }
+      }
+    }
+    [MAG close-] {
+      [TYPE tourism_artwork] WAY { color: @tourismBuildingBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
 END

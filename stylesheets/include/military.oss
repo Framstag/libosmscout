@@ -8,6 +8,9 @@ OSS
     COLOR militaryColor              = #fe989822;
     COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
 
+  SYMBOL military
+    POLYGON -0.7,-0.5 0.7,-0.5 0,0.7 { AREA.BORDER { color: #fe9898; width: 0.15mm; } }
+
   STYLE
     [MAG proximity-] {
       // Semiransparent overlay
@@ -47,5 +50,13 @@ OSS
             military_range,
             military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
 
+    }
+    [MAG veryClose-] {
+      [TYPE military_danger_area,
+            military_range,
+            landuse_military] {
+        NODE.ICON { symbol: military; }
+        NODE.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; size: 0.9; }
+      }
     }
 END

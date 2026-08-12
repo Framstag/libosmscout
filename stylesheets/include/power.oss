@@ -1,0 +1,21 @@
+OSS
+
+  //
+  // Power
+  //
+
+  STYLE
+    IF _building {
+      [MAG @buildingMag-] {
+        [TYPE power_sub_station] AREA { color: #bca9a9; }
+      }
+
+      [MAG @labelBuildingMag-] {
+        [TYPE power_sub_station,
+              power_generator] {
+          NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
+          AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
+        }
+      }
+    }
+END

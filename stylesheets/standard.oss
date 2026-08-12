@@ -17,6 +17,7 @@ FLAG
   daylight          = true;
   waterway          = true;
   wood              = true;
+  boundary          = false;
   elevationContours = true;
 
   IF daylight {
@@ -156,73 +157,9 @@ CONST
   COLOR minorContourColor          = #aaaaaa;
 
   // Landuse, water
-  IF daylight {
-    COLOR allotmentsColor          = #c8b084;
-  }
-  ELSE {
-    COLOR allotmentsColor          = darken(#c8b084,0.5);
-  }
-
-  COLOR beachColor                 = #eecc55;
-
-  COLOR brownFieldColor            = #b6b592;//#ebd7fe;
-  COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
-
-  COLOR cemeteryColor              = #a9caae;
-  COLOR commercialColor            = #efc8c8;
-  COLOR constructionColor          = #9d9d6c;
-
-  COLOR farmlandColor              = #ead8bd;
-  COLOR farmyardColor              = #dcbe92;
-  COLOR fellColor                  = #f9f9f9;
-
-  IF daylight {
-    COLOR woodColor                = #aed1a0;
-  }
-  ELSE {
-    COLOR woodColor                = darken(#aed1a0, 0.5);
-  }
-  COLOR woodLabelColor             = darken(@woodColor, 0.5);
-
-  COLOR glacierColor               = #ddecec;
   COLOR grassColor                 = #cfeca8;
-  COLOR greenFieldColor            = #dcdcc8;
-  COLOR heathColor                 = #ffffc0;
   COLOR industrialColor            = #dfd1d6;
   COLOR damColor                   = #b2a7ab;
-
-  IF daylight {
-    COLOR landFillColor            = #b6b591;
-  }
-  ELSE {
-    COLOR landFillColor            = darken(#b6b591, 0.5);
-  }
-
-  COLOR marshColor                 = #efe8ff;
-
-  COLOR quarryColor                = #b3b3b3;
-  COLOR recreationColor            = #bce2ca;
-
-  IF daylight {
-    COLOR residentialColor         = #ebebeb;
-  }
-  ELSE {
-    COLOR residentialColor         = darken(#ebebeb, 0.5);
-  }
-  COLOR residentialLabelColor      = darken(@residentialColor, 0.5);
-
-  COLOR retailColor                = #feeaea;
-  COLOR retailLabelColor           = darken(@retailColor, 0.5);
-
-  COLOR scrubColor                 = #b5e2b5;
-  COLOR vineyardColor              = #b3e2a8;
-  COLOR wetlandColor               = #bdd8d8;
-
-  COLOR peakSymbolColor            = #9c5e29;
-  COLOR peakLabelColor             = #9c5329;
-
-  COLOR volcanoSymbolColor         = #dd2427;
-  COLOR volcanoLabelColor          = #90181a;
 
   // Ways
   COLOR bridgeColor                = #000000; // black
@@ -267,20 +204,12 @@ CONST
   COLOR trunkShieldColor           = @trunkColor;
   COLOR primaryShieldColor         = @primaryColor;
 
-  COLOR viaFerrataEasyColor        = darken(#fdac44, 0.4);
-  COLOR viaFerrataModerateColor    = #fdac44;
-  COLOR viaFerrataDifficultColor   = #ec4044;
-  COLOR viaFerrataExtremeColor     = #ff0000;
-
   // Buildings
   COLOR buildingColor              = #d9d9d9;
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
 
   // Travel
-  COLOR onewayArrowColor           = #00000028;
-
-  COLOR busSymbolColor             = #7885b0;
 
   // Leisure
 
@@ -288,54 +217,29 @@ CONST
   COLOR natureReserveLabelColor    = #566f4bb0;
   COLOR natureReserveBorderColor   = #82a77180;
 
-  COLOR playgroundColor            = #affdbb;
-  COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
-
-  COLOR pitchColor                 = #90d3b9;
-  COLOR pitchBorderColor           = #b0b0b0;
-  COLOR pitchLabelColor            = darken(@pitchColor,0.5);
-
   // Amenity
   IF daylight {
     COLOR amenityColor             = #f0f0d8;
-    COLOR amenityBuildingColor     = #d9b8b8;
   }
   ELSE {
     COLOR amenityColor             = darken(#f0f0d8, 0.5);
-    COLOR amenityBuildingColor     = darken(#d9b8b8, 0.5);
   }
-  COLOR amenitySymbolColor         = darken(@amenityColor, 0.4);
-  COLOR amenityLabelColor          = darken(@amenityBuildingColor, 0.5);
-  COLOR amenityBuildingBorderColor = darken(@amenityBuildingColor, 0.3);
 
   IF daylight {
     COLOR parkingColor             = #f6eeb6;
-    COLOR parkingBuildingColor     = #c4c393;
   }
   ELSE {
     COLOR parkingColor             = darken(#f6eeb6, 0.5);
-    COLOR parkingBuildingColor       = darken(#c4c393, 0.5);
   }
   COLOR parkingBorderColor         = darken(@parkingColor, 0.3);
-  COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
 
-  COLOR hospitalSymbolColor        = #da0092;
   COLOR hospitalColor              = darken(@amenityColor, 0.1);
   COLOR hospitalBorderColor        = darken(@hospitalColor, 0.3);
-  COLOR hospitalBuildingColor      = darken(@amenityBuildingColor, 0.1);
-  COLOR hospitalBuildingBorderColor = darken(@hospitalBuildingColor, 0.3);
-
-  COLOR pharmacySymbolColor        = #da0092;
 
   COLOR postColor                  = #e8f000;
-  COLOR postSymbolColor            = #e8f000;
-  COLOR postBuildingColor          = #d2d900;
-  COLOR postBuildingBorderColor    = darken(@postBuildingColor, 0.3);
-  COLOR postLabelColor             = darken(@postColor, 0.5);
 
   COLOR wallColor                  = #663e1b;
 
-MODULE "include/symbols"
 MODULE "include/route"
 MODULE "include/land_sea"
 
@@ -354,6 +258,15 @@ MODULE "include/office"
 MODULE "include/religious"
 MODULE "include/shop"
 MODULE "include/tourism"
+
+MODULE "include/natural"
+MODULE "include/waterway"
+MODULE "include/landuse"
+MODULE "include/leisure"
+MODULE "include/aerialway"
+MODULE "include/amenity"
+MODULE "include/sport"
+MODULE "include/power"
 
 
 STYLE
@@ -404,421 +317,13 @@ STYLE
     }
   }
 
-  // -------------------------------------------------------
-  //
-  // natural_* (without coastline)
-  //
-
-  IF _natural {
-    [MAG state-] {
-      [TYPE natural_glacier] AREA { color: @glacierColor; }
-      [TYPE natural_grassland] AREA { color: @grassColor; }
-      [TYPE natural_fell] AREA { color: @fellColor; }
-      [TYPE natural_heath] AREA { color: @heathColor; }
-      [TYPE natural_wetland_marsh] AREA { color: @marshColor; }
-      [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
-      [TYPE natural_water] AREA { color: @waterColor; }
-      [TYPE natural_land] AREA { color: @landColor; }
-    }
-
-    [MAG city-] {
-      [TYPE natural_beach] AREA { color: @beachColor; }
-      [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
-    }
-
-    [MAG detail-] {
-      [TYPE natural_glacier,
-            natural_fell,
-            natural_grassland,
-            natural_heath,
-            natural_scrub,
-            natural_wetland,
-            natural_wetland_marsh,
-            natural_wetland_tidalflat,
-            natural_beach,
-            natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural;  color: @labelColor; autoSize: true;}
-
-      [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
-
-      [TYPE natural_peak] {
-        NODE.TEXT#peakName { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
-        NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
-      }
-      [TYPE natural_volcano] {
-        NODE.TEXT#volcanoName { label: IName; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 1; }
-        NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 2;}
-      }
-    }
-
-    [MAG veryClose-] {
-      [TYPE natural_spring] {
-        NODE.ICON { symbol: natural_spring; }
-        NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioSpring; size: 0.9; }
-      }
-    }
-
-    [MAG city-] {
-      [TYPE natural_peak] NODE.ICON { symbol: natural_peak; }
-      [TYPE natural_volcano] NODE.ICON { symbol: natural_volcano; }
-    }
-  }
-
-  IF wood {
-    [MAG stateOver-] {
-      [TYPE wood] AREA { color: @woodColor; }
-    }
-
-    [MAG detail-] {
-      [TYPE wood] {
-        AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @woodLabelColor; autoSize: true;}
-      }
-    }
-  }
-
-  // -------------------------------------------------------
-  //
-  // waterway_*
-  //
-
-  IF waterway {
-    [MAG proximity-] {
-      [TYPE waterway_river,
-            waterway_canal] {
-        [SIZE 15m 0.25mm:3px<] {
-          WAY {color: @waterColor; width: 15m;}
-
-          [FEATURE Tunnel] {
-            WAY#ldash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: -7.5m; priority: 1; }
-            WAY#rdash {color: @waterColor; dash: 3,3; displayWidth: 0.3mm; offset: 7.5m; priority: 1;}
-
-            WAY {color: #f2f6f6; width: 15m;}
-          }
-        }
-
-        [SIZE 15m <0.25mm:3px] {
-          WAY {color: @waterColor; displayWidth: 0.25mm; }
-
-          [FEATURE Tunnel] {
-            WAY {color: #ff000000;}
-          }
-        }
-
-        AREA { color: @waterColor;}
-      }
-
-    }
-
-    [MAG suburb-] {
-      [TYPE waterway_dock,
-            waterway_riverbank] AREA { color: @waterColor; }
-
-      [TYPE waterway_stream] {
-        [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
-        [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
-
-        [FEATURE Tunnel] {
-          WAY { dash: 0.4,4;}
-        }
-      }
-    }
-
-    [MAG detail-] {
-      [TYPE waterway_drain,
-            waterway_ditch] {
-        [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
-        [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
-
-        AREA { color: @waterColor;}
-      }
-      [TYPE waterway_weir,
-            waterway_waterfall] {
-        WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
-
-        AREA { color: lighten(@waterColor, 0.3);}
-      }
-    }
-
-    [MAG closer-] {
-          [TYPE waterway_weir] {
-            NODE.ICON { symbol: waterway_weir;}
-          }
-          [TYPE waterway_waterfall] {
-            NODE.ICON { symbol: waterway_waterfall;}
-          }
-    }
-
-    // Labels
-
-    [MAG proximity-] {
-      [TYPE waterway_dock] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor; autoSize: true;}
-    }
-
-    [MAG veryClose-] {
-      [TYPE waterway_stream,
-            waterway_drain,
-            waterway_ditch,
-            waterway_weir,
-            waterway_waterfall,
-            waterway_river,
-            waterway_canal]
-        WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
-
-      [TYPE waterway_weir,
-            waterway_waterfall]
-        NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
-
-      [TYPE waterway_stream,
-            waterway_river,
-            waterway_canal]
-        WAY.SYMBOL {symbol: stream_arrow; symbolSpace: 50mm;}
-
-      [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}
-    }
-  }
-
- // -------------------------------------------------------
- //
- // Landuse
- //
-
- IF daylight {
-   [MAG region-] {
-     [TYPE landuse_farmland] AREA { color: @farmlandColor; }
-     [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
-     [TYPE landuse_industrial] AREA { color: @industrialColor; }
-     [TYPE landuse_landfill] AREA { color: @landFillColor; }
-     [TYPE landuse_quarry] AREA { color: @quarryColor; }
-     [TYPE landuse_reservoir] AREA { color: @waterColor; }
-     [TYPE landuse_residential] AREA { color: @residentialColor; }
-     [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
-   }
-
-   [MAG city-] {
-     [TYPE landuse_basin] {
-       AREA { color: @waterColor;}
-       AREA.BORDER { color: #887b7b; width: 0.1mm; }
-     }
-
-     [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
-     [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
-     [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
-     [TYPE landuse_railway] AREA { color: #dcdcc8; }
-     [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
-   }
-
-   [MAG suburb-] {
-     [TYPE landuse_commercial] AREA { color: @commercialColor; }
-     [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
-     [TYPE landuse_construction] AREA { color: @constructionColor; }
-     [TYPE landuse_retail] {
-       AREA { color: @retailColor;}
-       AREA.BORDER { color: #c5a0a0; width: 0.1mm; }
-     }
-   }
-
-   [MAG close-] {
-     [TYPE landuse_grass] AREA { color: @grassColor; }
-
-     [TYPE landuse_orchard,
-           landuse_meadow,
-           landuse_village_green] AREA { color: #cfeca8; }
-   }
-
-   // Labels
-   [MAG suburb-] {
-     [TYPE landuse_brownfield] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @brownFieldLabelColor; autoSize: true;}
-     [TYPE landuse_residential] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @residentialLabelColor; autoSize: true;}
-     [TYPE landuse_retail] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @retailLabelColor; autoSize: true;}
-   }
-
-   [MAG close-] {
-     [TYPE landuse_farmland,
-           landuse_farmyard,
-           landuse_quarry,
-           landuse_landfill,
-           landuse_basin,
-           landuse_reservoir,
-           landuse_vineyard,
-           landuse_grass,
-           landuse_greenfield,
-           landuse_orchard,
-           landuse_cemetery,
-           landuse_commercial,
-           landuse_meadow,
-           landuse_recreation_ground] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
-
-     [TYPE landuse_industrial,
-           landuse_allotments] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
-   }
-
-   [MAG veryClose-] {
-     [TYPE landuse_railway,
-           landuse_construction,
-           landuse_village_green] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse; color: @labelColor; autoSize: true; }
-   }
- }
-
- // -------------------------------------------------------
- //
- // Leisure
- //
-
- IF _leisure {
-   [MAG county-] {
-     [TYPE leisure_pitch,
-           leisure_fitness_station] {
-       AREA { color: @pitchColor;}
-       AREA.BORDER { color: @pitchBorderColor; width: 0.1mm; }
-     }
-
-     [TYPE leisure_water_park] {
-       AREA { color: #f1eee8;}
-       AREA.BORDER { color: #887b7b; width: 0.1mm; }
-     }
-
-     [TYPE leisure_park] AREA { color: #c6f0cf; }
-     [TYPE leisure_common] AREA { color: #bde3cb; }
-
-     [TYPE leisure_marina,
-           leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
-
-     [TYPE leisure_marina,
-           leisure_fishing] AREA { color: #b5d6f180; }
-
-     [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
-   }
-
-   [TYPE boundary_protected_area] {
-     [MAG stateOver-]{
-       AREA.BORDER#dashed { color: @natureReserveBorderColor; width: 0.3mm; dash: 6,6; displayOffset: -0.5mm; }
-       AREA.BORDER#solid { color: lighten(@natureReserveBorderColor, 0.3); width: 1.0mm; }
-     }
-     [MAG stateOver-detail]{
-       AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
-     }
-     // Semiransparent overlay just for low zoom
-     [MAG stateOver-proximity]{
-       AREA { color: @natureReserveColor;}
-     }
-   }
-
-   [MAG city-] {
-     // Semiransparent overlay
-     [TYPE leisure_nature_reserve] {
-       AREA { color: @natureReserveColor;}
-       AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
-       AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
-     }
-     [TYPE leisure_swimming_pool] {
-       AREA { color: #74daff;}
-     }
-   }
-
-   [MAG cityOver-] {
-     [TYPE leisure_golf_course] AREA { color: #c7f1a3; }
-   }
-
-   [MAG detail-] {
-     [TYPE leisure_track] AREA { color: #7fdac2; }
-   }
-
-   [MAG close-] {
-     [TYPE leisure_playground] {
-       AREA { color: @playgroundColor;}
-       AREA.BORDER { color: @playgroundBorderColor; width: 0.1mm;}
-     }
-     [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "garden"; patternMinMag: detail;}
-   }
-
-   // Labels
-
-   [MAG close-] {
-     [TYPE leisure_sports_centre,
-           leisure_golf_course,
-           leisure_stadium,
-           leisure_track,
-           leisure_water_park,
-           leisure_marina,
-           leisure_fishing,
-           leisure_park,
-           leisure_playground,
-           leisure_garden,
-           leisure_common,
-           leisure_ice_rink] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
-   }
- }
-
-// Aerialways
-[MAG close-] {
-     [TYPE aerialway_gondola]{
-        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
-        WAY#gondola {color: #101010; dash: 1,15; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
-     }
-     [TYPE aerialway_chair_lift]{
-        WAY {color: #606060; displayWidth: 0.05mm; width: 1m;}
-        WAY#chair {color: #101010; dash: 0.3,5; joinCap: square; endCap: square; displayWidth: 0.1mm; width: 4m;}
-     }
-     [TYPE aerialway_drag_lift]{
-        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
-        WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
-     }
-}
-
  // Buildings
- [MAG @specialBuildingMag-] {
-   [TYPE amenity_hospital_building] {
-     AREA { color: @hospitalBuildingColor;}
-     AREA.BORDER { color: @hospitalBuildingBorderColor; width: 0.1mm; }
-   }
-
-   [TYPE leisure_stadium] AREA { color: #33cb98; }
- }
 
  IF _building {
    [MAG @buildingMag-] {
      [TYPE landuse_farmyard_building] {
        AREA { color: #bcbcbc;}
        AREA.BORDER { color: #887b7b; width: 0.1mm; }
-     }
-
-     [TYPE power_sub_station] AREA { color: #bca9a9; }
-
-     [TYPE sport_building] {
-       AREA { color: #b89c9c;}
-       AREA.BORDER { color: #887b7b; width: 0.1mm; }
-     }
-
-     [TYPE leisure_sports_centre,
-           leisure_building] {
-       AREA { color: @buildingColor;}
-       AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
-     }
-
-     // Amenity buildings
-
-     [TYPE amenity_post_office_building] {
-       AREA { color: @postBuildingColor; }
-       AREA.BORDER { color: @postBuildingBorderColor; width: 0.1mm; }
-     }
-
-     [TYPE amenity_building,
-           amenity_bank_building,
-           amenity_cafe_building,
-           amenity_fast_food_building,
-           amenity_fuel_building,
-           amenity_kindergarten_building,
-           amenity_library_building,
-           amenity_restaurant_building,
-           amenity_pub_building,
-           amenity_bar_building,
-           amenity_school_building] {
-       AREA { color: @amenityBuildingColor; }
-       AREA.BORDER { color: @amenityBuildingBorderColor; width: 0.1mm;}
-     }
-
-     [TYPE amenity_parking_building] {
-       AREA { color: @parkingBuildingColor; }
-       AREA.BORDER { color: @parkingBuildingBorderColor; width: 0.1mm; }
      }
 
      [TYPE building] {
@@ -836,14 +341,6 @@ STYLE
 
  // Labels
 
- [MAG @labelSpecialBuildingMag-] {
-   [TYPE amenity_hospital_building,
-         amenity_hospital] {
-     NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
-     AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
-   }
- }
-
  IF _building {
    [MAG @labelBuildingMag-] {
      [FEATURE Address] {
@@ -855,62 +352,7 @@ STYLE
        AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
      }
 
-     [TYPE leisure_building,
-           sport_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; color: @buildingLabelColor; }
-
-     [TYPE leisure_pitch,
-           leisure_fitness_station] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @pitchLabelColor; size: 0.9;}
-
-     [TYPE amenity_school_building,
-           amenity_school] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
-
      [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @buildingLabelColor; }
-
-     [TYPE power_sub_station,
-           power_generator] {
-       NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
-       AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
-     }
-
-     [TYPE amenity,
-           amenity_building,
-           amenity_bank_building,
-           amenity_bank,
-           amenity_cafe_building,
-           amenity_cafe,
-           amenity_fast_food_building,
-           amenity_fast_food,
-           amenity_fuel,
-           amenity_fuel_building,
-           amenity_kindergarten_building,
-           amenity_kindergarten,
-           amenity_restaurant_building,
-           amenity_restaurant,
-           amenity_pub_building,
-           amenity_pub,
-           amenity_bar_building,
-           amenity_bar,
-           amenity_school_building,
-           amenity_school,
-           amenity_taxi] {
-       NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
-       AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
-     }
-
-     [TYPE amenity_charging_station] {
-       NODE.TEXT {label: Operator.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
-     }
-
-     [TYPE amenity_pharmacy] NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 0.9; priority: @labelPrioMajorBuilding;}
-
-     [TYPE amenity_post_office,
-           amenity_post_office_building] {
-       NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9;  priority: @labelPrioSpecialBuilding;}
-       AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9;  priority: @labelPrioSpecialBuilding;}
-     }
-
-     [TYPE amenity_parking,
-           amenity_parking_building] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #4bb2da; size: 0.9; priority: @labelPrioMajorBuilding; }
    }
  }
 
