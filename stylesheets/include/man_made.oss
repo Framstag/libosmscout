@@ -38,8 +38,17 @@ CONST
     }
 
   SYMBOL amenity_parking
-    CIRCLE 0,0 1.5 {
-      AREA {color: #4bb2da; }
+    // Parking sign: blue rectangular box with white "P" (negative y = up)
+    // RECTANGLE (x,y,w,h) = top-left corner at (x,y)
+    RECTANGLE -1.1,-1.3 2.2 x 2.6 {
+      AREA { color: #4bb2da; }
+      AREA.BORDER { color: darken(#4bb2da, 0.3); width: 0.1mm; }
+    }
+    RECTANGLE -0.75,-1.0 0.35 x 2.0 {
+      AREA { color: #ffffff; }
+    }
+    CIRCLE 0.15,-0.3 0.6 {
+      AREA.BORDER { color: #ffffff; width: 0.35mm; }
     }
 
   SYMBOL amenity_post_box
