@@ -381,6 +381,22 @@ if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME MapPainterSkiaTest SOURCES src/MapPainterSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
 endif()
 
+#---- TextMetricsTest
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  osmscout_test_project(NAME TextMetricsTest SOURCES src/TextMetricsTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- TextMetricsReferenceTest
+if(HAVE_LIB_FREETYPE)
+  osmscout_test_project(NAME TextMetricsReferenceTest SOURCES src/TextMetricsReferenceTest.cpp TARGET OSMScout::OSMScout Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include)
+  target_compile_definitions(TextMetricsReferenceTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf")
+endif()
+
+#---- TextMetricsQtTest
+if(${OSMSCOUT_BUILD_MAP_QT})
+  osmscout_test_project(NAME TextMetricsQtTest SOURCES src/TextMetricsQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain)
+endif()
+
 #---- SymbolRendererSkiaTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME SymbolRendererSkiaTest SOURCES src/SymbolRendererSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)

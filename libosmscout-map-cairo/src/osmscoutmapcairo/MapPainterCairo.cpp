@@ -980,6 +980,17 @@ namespace osmscout {
 
 #endif
 
+  TextMetrics MapPainterCairo::MeasureText(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const std::string& text,
+                                           double fontSize)
+  {
+    return MeasureLabel(Layout(projection, parameter, text, fontSize, 0, false, false),
+                        [this](const CairoNativeGlyph& glyph) {
+                          return GlyphBoundingBox(glyph);
+                        });
+  }
+
   void MapPainterCairo::DrawLabel(const Projection &/*projection*/,
                                   const MapParameter &/*parameter*/,
                                   const ScreenVectorRectangle &labelRectangle,

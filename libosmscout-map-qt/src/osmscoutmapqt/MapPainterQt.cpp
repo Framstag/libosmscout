@@ -86,7 +86,7 @@ namespace osmscout {
                              const MapParameter& parameter,
                              IconStyle& style)
   {
-    if (style.GetIconId()==0) {
+    if (style.GetIconName().empty()) {
       return false;
     }
 
@@ -707,7 +707,6 @@ namespace osmscout {
     else {
       QVector<qreal> dashes;
 
-      dashes << 0 << 0; // skip butt?
       for (size_t i=0; i<dash.size(); i++) {
         dashes << dash[i];
       }
@@ -1090,7 +1089,36 @@ namespace osmscout {
         result.push_back(std::move(glyph));
       }
     }
+
+    // QTextLayout glyph positions are relative to the layout origin, which
+    // includes the first line's leading offset. The label contract requires
+    // positions relative to the label baseline origin, so subtract the first
+    // line's baseline y from all positions.
+    if (!result.empty()) {
+      double baselineY = result.front().position.GetY();
+      for (const auto& glyph : result) {
+        if (glyph.position.GetY() < baselineY) {
+          baselineY = glyph.position.GetY();
+        }
+      }
+      for (auto& glyph : result) {
+        glyph.position = Vertex2D(glyph.position.GetX(),
+                                  glyph.position.GetY() - baselineY);
+      }
+    }
+
     return result;
+  }
+
+  TextMetrics MapPainterQt::MeasureText(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const std::string& text,
+                                        double fontSize)
+  {
+    return MeasureLabel(Layout(projection, parameter, text, fontSize, 0, false, false),
+                        [this](const QGlyphRun& glyph) {
+                          return GlyphBoundingBox(glyph);
+                        });
   }
 
 }

@@ -3,4 +3,8 @@
 
 #cmakedefine OSMSCOUT_HAVE_SKIA_SVG
 
+#cmakedefine HAVE_SKIA_FONTMGR_DIRECTWRITE
+#cmakedefine HAVE_SKIA_FONTMGR_GDI
+#cmakedefine HAVE_SKIA_FONTMGR_FONTCONFIG
+
 #endif

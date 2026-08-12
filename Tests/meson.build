@@ -772,6 +772,41 @@ if buildMapSkia
                install_dir: testInstallDir)
 
   test('Check MapPainterSkia compilation', MapPainterSkiaTest)
+
+  TextMetricsTest = executable('TextMetricsTest',
+               'src/TextMetricsTest.cpp',
+               include_directories: [testIncDir, osmscoutmapskiaIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, skiaDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapskia],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetrics compilation', TextMetricsTest)
+endif
+
+if ftDep.found()
+  TextMetricsReferenceTest = executable('TextMetricsReferenceTest',
+               'src/TextMetricsReferenceTest.cpp',
+               include_directories: [testIncDir, include_directories('../Demos/include')],
+               dependencies: [mathDep, openmpDep, catch2MainDep, ftDep],
+               link_with: [osmscout],
+               cpp_args: ['-DTEXT_METRICS_FONT_PATH="' + meson.source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetricsReference compilation', TextMetricsReferenceTest)
+endif
+
+if buildMapQt
+  TextMetricsQtTest = executable('TextMetricsQtTest',
+               'src/TextMetricsQtTest.cpp',
+               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, qtMapDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetricsQt compilation', TextMetricsQtTest)
 endif
 
 
