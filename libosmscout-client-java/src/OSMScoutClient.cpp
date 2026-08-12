@@ -26,6 +26,8 @@
 #include <thread>
 #include <vector>
 
+#include <osmscout/lib/CoreFeatures.h>
+
 #include <osmscout/async/Breaker.h>
 #include <osmscout/async/CancelableFuture.h>
 #include <osmscoutclient/DBInstance.h>
@@ -49,7 +51,9 @@
 #include <osmscout/util/StringMatcher.h>
 
 #include <osmscout/db/Database.h>
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
 #include <osmscout/db/TextSearchIndex.h>
+#endif
 #include <osmscout/feature/NameFeature.h>
 
 #include <osmscout/description/DescriptionService.h>
@@ -91,6 +95,7 @@ namespace {
   std::mutex           g_searchMutex;
   osmscout::BreakerRef g_currentBreaker;
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
   // A fully resolved free-text search hit (name, coordinates, type) ready to
   // be serialized into a Java LocationEntry.
   struct FreeTextEntry {
@@ -166,6 +171,7 @@ namespace {
     entry.objectTypeName = entry.objectType;
     return true;
   }
+#endif
 
   // Parse a query like "51.5, 7.4" / "51.5 7.4" / "51.5;7.4" as a coordinate.
   // Returns false if the text is not a valid lat/lon pair.
@@ -2114,8 +2120,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
   }
 
   std::vector<osmscout::LocationSearchResult::Entry> results;
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
   std::vector<FreeTextEntry> freeTextEntries;
   std::set<osmscout::FileOffset> seenOffsets;
+#endif
   bool limitReached = false;
 
   data->dbThread->RunSynchronousJob(
@@ -2127,7 +2135,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
       }
 
       const auto limitReachedTotal = [&]() {
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
         return results.size() + freeTextEntries.size() >= static_cast<size_t>(limit);
+#else
+        return results.size() >= static_cast<size_t>(limit);
+#endif
       };
 
       for (const auto &db : databases) {
@@ -2178,6 +2190,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
           }
         }
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
         // Free-text search over the text index (optional; index may be missing)
         osmscout::TextSearchIndex textSearch;
         if (!textSearch.Load(db->path)) {
@@ -2213,6 +2226,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
             }
           }
         }
+#endif
 
         if (limitReachedTotal()) {
           break;
@@ -2221,6 +2235,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
     }
   );
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
   // Record offsets of structured results so free-text hits of the same object
   // are not returned twice.
   for (const auto &entry : results) {
@@ -2245,13 +2260,18 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
                        return seenOffsets.count(static_cast<osmscout::FileOffset>(e.objectFileOffset)) != 0;
                      }),
       freeTextEntries.end());
+#endif
 
   // Truncate to limit: structured results first, free-text fills the rest
   if (results.size() >= static_cast<size_t>(limit)) {
     results.resize(static_cast<size_t>(limit));
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
     freeTextEntries.clear();
+#endif
   } else {
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
     freeTextEntries.resize(static_cast<size_t>(limit) - results.size());
+#endif
   }
 
   // Build Java LocationEntry[]
@@ -2278,7 +2298,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
 
-  jsize count = static_cast<jsize>((hasCoordinate ? 1 : 0) + results.size() + freeTextEntries.size());
+  jsize count = static_cast<jsize>((hasCoordinate ? 1 : 0) + results.size()
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+                                  + freeTextEntries.size()
+#endif
+                                  );
   jobjectArray resultArray = env->NewObjectArray(count, entryCls, nullptr);
   if (resultArray == nullptr) {
     return nullptr;
@@ -2472,6 +2496,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
     env->DeleteLocalRef(jEntry);
   }
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
   // Free-text search hits (POIs, named objects via the text index)
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
@@ -2495,6 +2520,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations(JNIEnv *env,
     env->SetObjectArrayElement(resultArray, idx++, jEntry);
     env->DeleteLocalRef(jEntry);
   }
+#endif
 
   return resultArray;
 }
