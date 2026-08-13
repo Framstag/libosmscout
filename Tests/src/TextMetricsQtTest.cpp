@@ -54,8 +54,11 @@ namespace {
 
 TEST_CASE("Qt MeasureText glyph positions are relative to label origin", "[TextMetricsQt]")
 {
-  // Run headless; the test does not need a windowing system
+#if !defined(_WIN32)
+  // Run headless on Unix; the test does not need a windowing system.
+  // On Windows the default platform plugin is used (runs in a desktop session).
   qputenv("QT_QPA_PLATFORM", "offscreen");
+#endif
 
   int argc = 1;
   char arg0[] = "TextMetricsQtTest";
