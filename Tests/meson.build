@@ -790,7 +790,7 @@ if ftDep.found()
                include_directories: [testIncDir, include_directories('../Demos/include')],
                dependencies: [mathDep, openmpDep, catch2MainDep, ftDep],
                link_with: [osmscout],
-               cpp_args: ['-DTEXT_METRICS_FONT_PATH="' + meson.source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
+               cpp_args: ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
                install: true,
                install_dir: testInstallDir)
 

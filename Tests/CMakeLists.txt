@@ -389,7 +389,7 @@ endif()
 #---- TextMetricsReferenceTest
 if(HAVE_LIB_FREETYPE)
   osmscout_test_project(NAME TextMetricsReferenceTest SOURCES src/TextMetricsReferenceTest.cpp TARGET OSMScout::OSMScout Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include)
-  target_compile_definitions(TextMetricsReferenceTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf")
+  target_compile_definitions(TextMetricsReferenceTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
 endif()
 
 #---- TextMetricsQtTest

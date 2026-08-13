@@ -20,12 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <cmath>
 #include <string>
 #include <vector>
+
+#if defined(HAVE_LIB_FREETYPE)
+  #include <ft2build.h>
+  #include FT_FREETYPE_H
+#endif
 
 namespace TextMetricsAll {
 
@@ -69,6 +71,7 @@ namespace TextMetricsAll {
    * Measure the per-glyph ink bounding boxes of the given text with FreeType.
    * The pixel size is set from fontSize * fontSizeParam * dpi / 25.4,
    * matching the backends' font size conversion.
+   * Only available when the build has FreeType (HAVE_LIB_FREETYPE).
    *
    * @param fontFile path to a font file loadable by FreeType
    * @param text UTF-8 text to measure
@@ -79,6 +82,8 @@ namespace TextMetricsAll {
    * @param error error description on failure
    * @return true on success, false on failure
    */
+#if defined(HAVE_LIB_FREETYPE)
+
   inline bool MeasureReference(const std::string& fontFile,
                                const std::string& text,
                                double fontSize,
@@ -184,6 +189,8 @@ namespace TextMetricsAll {
 
     return true;
   }
+
+#endif // HAVE_LIB_FREETYPE
 }
 
 #endif //DEMO_LIBOSMSCOUT_TEXTMETRICSALL_H

@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QPixmap>
+#include <QtGlobal>
 
 #include <osmscout/projection/MercatorProjection.h>
 #include <osmscoutmap/MapParameter.h>
@@ -53,6 +54,9 @@ namespace {
 
 TEST_CASE("Qt MeasureText glyph positions are relative to label origin", "[TextMetricsQt]")
 {
+  // Run headless; the test does not need a windowing system
+  qputenv("QT_QPA_PLATFORM", "offscreen");
+
   int argc = 1;
   char arg0[] = "TextMetricsQtTest";
   char* argv[1] = {arg0};

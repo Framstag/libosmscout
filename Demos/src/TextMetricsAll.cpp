@@ -47,7 +47,13 @@
 #endif
 
 #if defined(HAVE_OSMSCOUT_MAP_CAIRO)
-  #include <cairo/cairo.h>
+  #if defined(__WIN32__) || defined(WIN32)
+    #include <cairo.h>
+  #elif defined(__APPLE__) && __APPLE__
+    #include <cairo.h>
+  #else
+    #include <cairo/cairo.h>
+  #endif
   #include <osmscoutmapcairo/MapPainterCairo.h>
 #endif
 
@@ -70,8 +76,10 @@
   #include <core/SkSurface.h>
   #include <core/SkTypeface.h>
   #include <encode/SkPngEncoder.h>
-  #include <ports/SkFontMgr_fontconfig.h>
-  #include <ports/SkFontScanner_FreeType.h>
+  #if defined(__linux__)
+    #include <ports/SkFontMgr_fontconfig.h>
+    #include <ports/SkFontScanner_FreeType.h>
+  #endif
 #endif
 
 #if defined(HAVE_OSMSCOUT_MAP_SVG)
@@ -324,9 +332,11 @@ int main(int argc, char* argv[])
   // Pixel size shared by all backends and the reference
   double px = TextMetricsAll::ReferencePixelSize(args.fontSize, args.fontSizeParam, args.dpi);
 
-  // FreeType reference measurement
+  // FreeType reference measurement (only when FreeType is compiled in)
   TextMetricsAll::ReferenceMetrics reference;
-  std::string                      error;
+
+#if defined(HAVE_LIB_FREETYPE)
+  std::string error;
 
   if (!TextMetricsAll::MeasureReference(args.fontName,
                                         args.text,
@@ -339,6 +349,7 @@ int main(int argc, char* argv[])
 
     return 1;
   }
+#endif
 
   std::cout << "TextMetricsAll: measuring \"" << args.text << "\"" << std::endl
             << "  font: " << args.fontName << std::endl
@@ -346,6 +357,7 @@ int main(int argc, char* argv[])
             << " fontSizeParam=" << args.fontSizeParam << " dpi=" << args.dpi << ")" << std::endl
             << "  output directory: " << args.output << std::endl;
 
+#if defined(HAVE_LIB_FREETYPE)
   std::cout << "  Reference (FreeType): label width=" << reference.width
             << " height=" << reference.height << std::endl;
   for (size_t i = 0; i < reference.glyphs.size(); ++i) {
@@ -356,6 +368,10 @@ int main(int argc, char* argv[])
               << glyph.width << ", " << glyph.height << ")"
               << " advance=" << glyph.advance << std::endl;
   }
+#else
+  std::cout << "  Reference (FreeType): unavailable (not compiled in)" << std::endl;
+
+#endif
 
   osmscout::MercatorProjection projection;
 
@@ -623,12 +639,15 @@ int main(int argc, char* argv[])
       PrintBackendMetrics("Skia", metrics, reference);
 
       // Draw text natively (drawString uses the baseline)
-      sk_sp<SkFontMgr>  fontMgr = SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType());
       sk_sp<SkTypeface> typeface;
+
+#if defined(__linux__)
+      sk_sp<SkFontMgr> fontMgr = SkFontMgr_New_FontConfig(nullptr, SkFontScanner_Make_FreeType());
 
       if (fontMgr) {
         typeface = fontMgr->legacyMakeTypeface(args.fontName.c_str(), SkFontStyle::Normal());
       }
+#endif
       if (!typeface) {
         typeface = SkTypeface::MakeEmpty();
       }

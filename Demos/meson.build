@@ -297,6 +297,7 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapSkia
 
   if ftDep.found()
     textMetricsAllDep += ftDep
+    textMetricsAllDef += ['-DHAVE_LIB_FREETYPE']
   endif
 
   if buildMapAgg
