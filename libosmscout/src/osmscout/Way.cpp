@@ -26,6 +26,10 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/Exception.h>
+
+#include <string>
+
 namespace osmscout {
 
   bool Way::GetCenter(GeoCoord& center) const
@@ -78,6 +82,15 @@ namespace osmscout {
     fileOffset=scanner.GetPos();
 
     TypeId typeId=scanner.ReadTypeId(typeConfig.GetWayTypeIdBytes());
+
+    // Validate before GetWayTypeInfo(): a stale or inconsistent search index
+    // can reference an offset whose type id is out of range, and the assert in
+    // GetWayTypeInfo() would abort the process. Throw instead so DataFile<N>::
+    // ReadData() reports the read as failed and the entry can be skipped.
+    if (typeId>typeConfig.GetWayTypes().size()) {
+      throw IOException(scanner.GetFilename(),
+                        "Invalid way type id " + std::to_string(typeId));
+    }
 
     TypeInfoRef type=typeConfig.GetWayTypeInfo(typeId);
 
