@@ -228,6 +228,11 @@ namespace osmscout {
     MapPainterQt();
     ~MapPainterQt() override;
 
+    TextMetrics MeasureText(const Projection& projection,
+                            const MapParameter& parameter,
+                            const std::string& text,
+                            double fontSize) override;
+
     void DrawGroundTiles(const Projection& projection,
                          const MapParameter& parameter,
                          const std::list<GroundTile>& groundTiles,

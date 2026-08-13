@@ -210,6 +210,11 @@ namespace osmscout {
     MapPainterAgg();
     ~MapPainterAgg() override;
 
+    TextMetrics MeasureText(const Projection& projection,
+                            const MapParameter& parameter,
+                            const std::string& text,
+                            double fontSize) override;
+
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
                  const std::vector<MapData>& data,

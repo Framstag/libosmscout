@@ -23,6 +23,7 @@
 #include <list>
 #include <string>
 #include <optional>
+#include <vector>
 
 #include <osmscoutmap/MapImportExport.h>
 
@@ -59,6 +60,25 @@
 #include <osmscoutmap/MapParameter.h>
 
 namespace osmscout {
+
+  /**
+   * Result of a text measurement: label dimensions and per-glyph
+   * bounding boxes, relative to the label origin and the glyph base
+   * point respectively.
+   */
+  struct OSMSCOUT_MAP_API TextMetrics
+  {
+    double width{0.0};  //!< Label width in pixel
+    double height{0.0}; //!< Label height in pixel
+
+    struct Glyph
+    {
+      Vertex2D position;         //!< Position relative to label origin
+      ScreenVectorRectangle box; //!< Bounding box relative to glyph base point
+    };
+
+    std::vector<Glyph> glyphs;   //!< One entry per character
+  };
 
   enum RenderSteps : size_t
   {
@@ -533,6 +553,31 @@ namespace osmscout {
     {
       return width/projection.GetPixelSize();
     }
+
+    /**
+     * Build text metrics from a layouted label and a per-glyph bounding box
+     * function. Shared by all backends' MeasureText() implementations:
+     * the backends only differ in the concrete label type returned by their
+     * Layout() and the signature of their GlyphBoundingBox().
+     */
+    template<class LabelT, class GlyphBoxFn>
+    TextMetrics MeasureLabel(const std::shared_ptr<LabelT>& label,
+                             GlyphBoxFn boxFn) const
+    {
+      TextMetrics metrics;
+
+      metrics.width = label->width;
+      metrics.height = label->height;
+
+      for (const auto& glyph : label->ToGlyphs()) {
+        TextMetrics::Glyph entry;
+        entry.position = glyph.position;
+        entry.box = boxFn(glyph.glyph);
+        metrics.glyphs.push_back(entry);
+      }
+
+      return metrics;
+    }
     //@}
 
     const std::list<WayData>& GetWayData() const
@@ -721,6 +766,16 @@ namespace osmscout {
     bool Draw(const Projection& projection,
               const MapParameter& parameter,
               const std::vector<MapData>& data);
+
+    /**
+     * Measure the label dimensions and per-glyph bounding boxes for the
+     * given text, font and font size. The default implementation returns
+     * empty metrics; backends that support measurement override it.
+     */
+    virtual TextMetrics MeasureText(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const std::string& text,
+                                    double fontSize);
   };
 
   /**

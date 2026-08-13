@@ -10,18 +10,6 @@ set(SOURCE_FILES
     src/osmscoutmapskia/SymbolRendererSkia.cpp
 )
 
-osmscout_library_project(
-	NAME OSMScoutMapSkia
-	ALIAS MapSkia
-	OUTPUT_NAME "osmscout_map_skia"
-	SOURCE ${SOURCE_FILES}
-	HEADER ${HEADER_FILES}
-	INCLUDEDIR "osmscoutmapskia"
-	INCLUDES ${SKIA_INCLUDE_DIRS}
-	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapskia/MapSkiaFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map Skia::skia
-)
-
 # Detect which Skia font manager is available
 include(CheckCXXSourceCompiles)
 
@@ -79,6 +67,18 @@ endif()
 unset(_skia_check_libs)
 unset(CMAKE_REQUIRED_INCLUDES)
 unset(CMAKE_REQUIRED_LIBRARIES)
+
+osmscout_library_project(
+	NAME OSMScoutMapSkia
+	ALIAS MapSkia
+	OUTPUT_NAME "osmscout_map_skia"
+	SOURCE ${SOURCE_FILES}
+	HEADER ${HEADER_FILES}
+	INCLUDEDIR "osmscoutmapskia"
+	INCLUDES ${SKIA_INCLUDE_DIRS}
+	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapskia/MapSkiaFeatures.h.cmake
+	TARGET OSMScout::OSMScout OSMScout::Map Skia::skia
+)
 
 # Find fontconfig for Skia font manager
 find_package(PkgConfig QUIET)

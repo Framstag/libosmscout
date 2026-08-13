@@ -273,6 +273,17 @@ namespace osmscout {
   }
 #endif
 
+  TextMetrics MapPainterSVG::MeasureText(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const std::string& text,
+                                        double fontSize)
+  {
+    return MeasureLabel(Layout(projection, parameter, text, fontSize, 0, false, false),
+                        [this](const NativeGlyph& glyph) {
+                          return GlyphBoundingBox(glyph);
+                        });
+  }
+
   void MapPainterSVG::DrawLabel(const Projection &projection,
                                 const MapParameter &parameter,
                                 const ScreenVectorRectangle &labelRectangle,

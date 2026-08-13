@@ -285,6 +285,70 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapOpenGL o
     install_dir: demoInstallDir)
 endif
 
+# ---- TextMetricsAll
+if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapSkia
+
+  textMetricsAllSrc = ['src/TextMetricsAll.cpp']
+  textMetricsAllDep = [mathDep, openmpDep]
+  textMetricsAllLink = [osmscout, osmscoutmap]
+  textMetricsAllIncDirs = []
+  textMetricsAllDef = []
+  textMetricsAllNeedPng = false
+
+  if ftDep.found()
+    textMetricsAllDep += ftDep
+    textMetricsAllDef += ['-DHAVE_LIB_FREETYPE']
+  endif
+
+  if buildMapAgg
+    textMetricsAllLink += osmscoutmapagg
+    textMetricsAllIncDirs += [osmscoutmapaggIncDir]
+    textMetricsAllDef += ['-DHAVE_OSMSCOUT_MAP_AGG']
+    textMetricsAllNeedPng = true
+  endif
+
+  if buildMapCairo
+    textMetricsAllLink += osmscoutmapcairo
+    textMetricsAllIncDirs += [osmscoutmapcairoIncDir]
+    textMetricsAllDep += [cairoDep, pangocairoDep]
+    textMetricsAllDef += ['-DHAVE_OSMSCOUT_MAP_CAIRO']
+  endif
+
+  if buildMapQt
+    textMetricsAllLink += osmscoutmapqt
+    textMetricsAllIncDirs += [osmscoutmapqtIncDir]
+    textMetricsAllDep += qtMapDep
+    textMetricsAllDef += ['-DHAVE_OSMSCOUT_MAP_QT']
+  endif
+
+  if buildMapSVG
+    textMetricsAllLink += osmscoutmapsvg
+    textMetricsAllIncDirs += [osmscoutmapsvgIncDir]
+    textMetricsAllDep += pangoDep
+    textMetricsAllDef += ['-DHAVE_OSMSCOUT_MAP_SVG']
+  endif
+
+  if buildMapSkia
+    textMetricsAllLink += osmscoutmapskia
+    textMetricsAllIncDirs += [osmscoutmapskiaIncDir]
+    textMetricsAllDep += [skiaDep]
+    textMetricsAllDef += ['-DHAVE_OSMSCOUT_MAP_SKIA']
+  endif
+
+  if textMetricsAllNeedPng
+    textMetricsAllDep += pngDep
+  endif
+
+  TextMetricsAll = executable('TextMetricsAll',
+    textMetricsAllSrc,
+    cpp_args: textMetricsAllDef + ['-fPIC'],
+    include_directories: [osmscoutIncDir, demoIncDir, osmscoutmapIncDir] + textMetricsAllIncDirs,
+    dependencies: textMetricsAllDep,
+    link_with: textMetricsAllLink,
+    install: true,
+    install_dir: demoInstallDir)
+endif
+
 Srtm = executable('Srtm',
                   'src/Srtm.cpp',
                   include_directories: [osmscoutIncDir],

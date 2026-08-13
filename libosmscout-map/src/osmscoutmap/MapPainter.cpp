@@ -227,6 +227,15 @@ constexpr bool debugGroundTiles = false;
     log.Debug() << "MapPainter::~MapPainter()";
   }
 
+  TextMetrics MapPainter::MeasureText(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const std::string& text,
+                                      double fontSize)
+  {
+    // Default implementation: no measurement support.
+    return TextMetrics{};
+  }
+
   bool MapPainter::IsVisibleArea(const Projection& projection,
                                  const GeoBox& boundingBox,
                                  double pixelOffset) const

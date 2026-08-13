@@ -375,5 +375,59 @@ else()
   message("Skip DrawMapAll demo, no map rendering backends available.")
 endif()
 
+#---- TextMetricsAll
+# Collect available backends for the text metrics comparison tool
+set(TEXTMETRICSALL_SOURCES src/TextMetricsAll.cpp)
+set(TEXTMETRICSALL_TARGETS OSMScout::OSMScout OSMScout::Map)
+set(TEXTMETRICSALL_DEFS)
+set(TEXTMETRICSALL_NEEDS_PNG OFF)
+
+# FreeType reference measurement
+if(HAVE_LIB_FREETYPE)
+  list(APPEND TEXTMETRICSALL_TARGETS Freetype::Freetype)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_LIB_FREETYPE)
+endif()
+
+# AGG
+if(${OSMSCOUT_BUILD_MAP_AGG})
+  list(APPEND TEXTMETRICSALL_TARGETS OSMScout::MapAGG)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_OSMSCOUT_MAP_AGG)
+  set(TEXTMETRICSALL_NEEDS_PNG ON)
+endif()
+
+# Cairo
+if(${OSMSCOUT_BUILD_MAP_CAIRO})
+  list(APPEND TEXTMETRICSALL_TARGETS OSMScout::MapCairo)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_OSMSCOUT_MAP_CAIRO)
+endif()
+
+# Qt
+if(${OSMSCOUT_BUILD_MAP_QT})
+  list(APPEND TEXTMETRICSALL_TARGETS OSMScout::MapQt Qt::Widgets)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_OSMSCOUT_MAP_QT)
+endif()
+
+# SVG
+if(${OSMSCOUT_BUILD_MAP_SVG})
+  list(APPEND TEXTMETRICSALL_TARGETS OSMScout::MapSVG)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_OSMSCOUT_MAP_SVG)
+endif()
+
+# Skia
+if(${OSMSCOUT_BUILD_MAP_SKIA})
+  list(APPEND TEXTMETRICSALL_TARGETS OSMScout::MapSkia)
+  list(APPEND TEXTMETRICSALL_DEFS HAVE_OSMSCOUT_MAP_SKIA)
+endif()
+
+if(TEXTMETRICSALL_TARGETS)
+  osmscout_demo_project(NAME TextMetricsAll SOURCES ${TEXTMETRICSALL_SOURCES} TARGET ${TEXTMETRICSALL_TARGETS})
+  target_compile_definitions(TextMetricsAll PRIVATE ${TEXTMETRICSALL_DEFS})
+  if(TEXTMETRICSALL_NEEDS_PNG)
+    target_link_libraries(TextMetricsAll PNG::PNG)
+  endif()
+else()
+  message("Skip TextMetricsAll demo, no map rendering backends available.")
+endif()
+
 #---- Srtm
 osmscout_demo_project(NAME Srtm SOURCES src/Srtm.cpp TARGET OSMScout::OSMScout)

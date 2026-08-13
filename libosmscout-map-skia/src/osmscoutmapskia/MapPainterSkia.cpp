@@ -1247,4 +1247,15 @@ namespace osmscout {
                   startStep,
                   endStep);
   }
+
+  TextMetrics MapPainterSkia::MeasureText(const Projection& projection,
+                                          const MapParameter& parameter,
+                                          const std::string& text,
+                                          double fontSize)
+  {
+    return MeasureLabel(Layout(projection, parameter, text, fontSize, 0, false, false),
+                        [this](const SkiaNativeGlyph& glyph) {
+                          return GlyphBoundingBox(glyph);
+                        });
+  }
 }
