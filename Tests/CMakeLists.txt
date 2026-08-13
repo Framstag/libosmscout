@@ -393,27 +393,11 @@ if(HAVE_LIB_FREETYPE)
 endif()
 
 #---- TextMetricsQtTest
+# Skipped under CMake (project convention for Qt tests): the Windows loader
+# cannot find the Qt DLLs in all CMake CI setups (MSYS: 0xc0000135). The
+# test runs under meson, which handles Qt DLL paths itself.
 if(${OSMSCOUT_BUILD_MAP_QT})
-  osmscout_test_project(NAME TextMetricsQtTest SOURCES src/TextMetricsQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain)
-  if(WIN32 AND TARGET Qt::windeployqt)
-    # Deploy the Qt DLLs and plugins next to the test executable so the
-    # Windows loader finds them at runtime (Qt bin dir is not on the test
-    # PATH in all CI setups). windeployqt scans the exe's imports but does
-    # not recurse into non-Qt DLLs, so Qt modules used only by libosmscout
-    # libraries (e.g. Qt::Svg used by OSMScoutMapQt) must be copied explicitly.
-    set(_qt_copy_dlls "")
-    foreach(_qt_lib Core Gui Svg Widgets)
-      if(TARGET Qt${QT_VERSION_MAJOR}::${_qt_lib})
-        list(APPEND _qt_copy_dlls $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::${_qt_lib}>)
-      endif()
-    endforeach()
-    if(_qt_copy_dlls)
-      add_custom_command(TARGET TextMetricsQtTest POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_qt_copy_dlls} $<TARGET_FILE_DIR:TextMetricsQtTest>)
-    endif()
-    add_custom_command(TARGET TextMetricsQtTest POST_BUILD
-      COMMAND Qt::windeployqt --no-translations "$<TARGET_FILE_DIR:TextMetricsQtTest>/$<TARGET_FILE_NAME:TextMetricsQtTest>")
-  endif()
+  osmscout_test_project(NAME TextMetricsQtTest SOURCES src/TextMetricsQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain SKIPTEST)
 endif()
 
 #---- SymbolRendererSkiaTest
