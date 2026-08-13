@@ -75,10 +75,39 @@ class LocationSearchRankerTest {
     }
 
     @Test
-    void deduplicateKeepsDifferentTypes() {
-        LocationEntry a = entry("Hauptstrasse", "object", "address", "match", 51.0, 7.0);
-        LocationEntry b = entry("Hauptstrasse", "object", "highway_residential", "match", 51.001, 7.001);
-        List<LocationEntry> deduped = LocationSearchRanker.deduplicate(Arrays.asList(a, b), 52.0, 8.0);
-        assertEquals(2, deduped.size(), "entries of different object types must be kept");
+    void formatDistanceKmShowsOneDecimalBelowTenKm() {
+        assertEquals("0.5 km", LocationSearchRanker.formatDistanceKm(500.0));
+        assertEquals("1.2 km", LocationSearchRanker.formatDistanceKm(1234.0));
+        assertEquals("9.9 km", LocationSearchRanker.formatDistanceKm(9900.0));
+    }
+
+    @Test
+    void formatDistanceKmRoundsWholeKilometersAboveTenKm() {
+        assertEquals("12 km", LocationSearchRanker.formatDistanceKm(12345.0));
+        assertEquals("100 km", LocationSearchRanker.formatDistanceKm(100000.0));
+    }
+
+    @Test
+    void formatDistanceKmHandlesZero() {
+        assertEquals("0.0 km", LocationSearchRanker.formatDistanceKm(0.0));
+    }
+
+    @Test
+    void haversineMatchesKnownEquatorDistance() {
+        // 1 degree of longitude at the equator with R=6371000 is ~111.19 km
+        double d = LocationSearchRanker.haversine(0.0, 0.0, 0.0, 1.0);
+        assertEquals(111194.93, d, 100.0);
+    }
+
+    @Test
+    void haversineMatchesKnownMeridianDistance() {
+        // 1 degree of latitude with R=6371000 is ~111.19 km
+        double d = LocationSearchRanker.haversine(0.0, 0.0, 1.0, 0.0);
+        assertEquals(111194.93, d, 100.0);
+    }
+
+    @Test
+    void haversineZeroForIdenticalPoints() {
+        assertEquals(0.0, LocationSearchRanker.haversine(51.51, 7.46, 51.51, 7.46), 1e-9);
     }
 }

@@ -101,6 +101,7 @@ target_link_libraries(osmscout_client_java
     OSMScout::Map
     OSMScout::Client
     ${JNI_LIBRARIES}
+    log
 )
 
 if(TARGET OSMScout::GPX)

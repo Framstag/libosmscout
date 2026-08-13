@@ -18,6 +18,8 @@ public class OSMScoutClientBuilder {
     private String[] mapLookupDirectories;
     /** Screen physical DPI. */
     private double physicalDpi;
+    /** Base font size in millimeters. */
+    private double fontSizeMm = 2.5;
     /** Measurement system: "metrics" or "imperial". */
     private String units;
     /** Directory containing .oss stylesheet files. */
@@ -72,6 +74,17 @@ public class OSMScoutClientBuilder {
      */
     public OSMScoutClientBuilder withPhysicalDpi(double physicalDpi) {
         this.physicalDpi = physicalDpi;
+        return this;
+    }
+
+    /**
+     * Set base font size in millimeters.
+     *
+     * @param fontSizeMm font size in mm (default 4.5)
+     * @return this builder for chaining
+     */
+    public OSMScoutClientBuilder withFontSizeMm(double fontSizeMm) {
+        this.fontSizeMm = fontSizeMm;
         return this;
     }
 

@@ -53,10 +53,10 @@ STYLE
       [TYPE _route_end]   NODE.ICON { symbol: route_end;   }
     }
 
-    // Favorite and search-selection markers are rendered a bit larger and only
-    // from detail zoom upward to stay readable on busy maps. A high numeric
-    // priority places them above typical POI icons (railway/amenity/shop).
-    [MAG detail-] {
+    // Favorite and search-selection markers are rendered a bit larger and stay
+    // visible from city zoom upward (the AA map starts at city zoom — keeping
+    // them at [MAG detail-] would fall back to the default grey node marker).
+    [MAG city-] {
       [TYPE _favorite]        NODE.ICON { symbol: favorite_marker; priority: 200; }
       [TYPE _search_selected] NODE.ICON { symbol: search_marker; priority: 250; }
     }

@@ -50,37 +50,57 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
   if (gpsUpdateMsg &&
       gpsUpdateMsg->horizontalAccuracy < Meters(100)){
 
-    if (lastPosition &&
-        (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
+    // --- Prefer GPS-reported speed over position-difference computation ---
+    // GPS speed (m/s) is more accurate, especially at low speeds and when
+    // updates are infrequent. Fall back to position-diff only when GPS
+    // does not provide a speed value (currentSpeed < 0).
+    if (gpsUpdateMsg->currentSpeed >= 0.0) {
+      double speed = gpsUpdateMsg->currentSpeed * 3.6; // m/s → km/h
+      // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
+      if (speed > 200.0) {
+        speed = -1.0;
+      }
+      result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp, speed));
 
-      // GPS gap > 10s means signal was lost (tunnel, dropout).
-      // Reset FIFO to avoid computing bogus speed from the position jump.
-      auto gap = gpsUpdateMsg->timestamp - lastPosition.time;
-      if (gap > seconds(10)) {
+      // Clear FIFO when stationary so position-diff fallback (if ever used)
+      // does not linger on old movement segments.
+      if (gpsUpdateMsg->currentSpeed < 0.5) {
         segmentFifo.clear();
       }
+    } else {
+      // Fallback: compute speed from position differences
+      if (lastPosition &&
+          (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
 
-      segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
-                             gpsUpdateMsg->timestamp-lastPosition.time});
-      Timestamp::duration fifoDuration{Timestamp::duration::zero()};
-      Distance fifoDistance;
-      for (const auto &s:segmentFifo){
-        fifoDuration+=s.duration;
-        fifoDistance+=s.distance;
-      }
-      auto sec=duration_cast<duration<double>>(fifoDuration);
-      if (sec.count()>0){
-        double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
-        // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
-        if (speed > 200.0) {
-          speed = -1.0;
+        // GPS gap > 10s means signal was lost (tunnel, dropout).
+        // Reset FIFO to avoid computing bogus speed from the position jump.
+        auto gap = gpsUpdateMsg->timestamp - lastPosition.time;
+        if (gap > seconds(10)) {
+          segmentFifo.clear();
         }
-        result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
-      }
-      // pop fifo
-      while (!segmentFifo.empty() && fifoDuration>seconds(3)){
-        fifoDuration-=segmentFifo.front().duration;
-        segmentFifo.pop_front();
+
+        segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
+                               gpsUpdateMsg->timestamp-lastPosition.time});
+        Timestamp::duration fifoDuration{Timestamp::duration::zero()};
+        Distance fifoDistance;
+        for (const auto &s:segmentFifo){
+          fifoDuration+=s.duration;
+          fifoDistance+=s.distance;
+        }
+        auto sec=duration_cast<duration<double>>(fifoDuration);
+        if (sec.count()>0){
+          double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
+          // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
+          if (speed > 200.0) {
+            speed = -1.0;
+          }
+          result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
+        }
+        // pop fifo
+        while (!segmentFifo.empty() && fifoDuration>seconds(3)){
+          fifoDuration-=segmentFifo.front().duration;
+          segmentFifo.pop_front();
+        }
       }
     }
     lastPosition={gpsUpdateMsg->currentPosition, gpsUpdateMsg->timestamp};

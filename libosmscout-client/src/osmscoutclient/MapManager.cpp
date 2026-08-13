@@ -21,6 +21,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <algorithm>
+
 namespace osmscout {
 
 MapManager::MapManager(const std::vector<std::filesystem::path> &databaseLookupDirs):
@@ -36,7 +38,7 @@ CancelableFuture<bool> MapManager::LookupDatabases()
   return Async<bool>([this](Breaker&) -> bool{
 
     osmscout::log.Info() << "Lookup databases";
-    std::unique_lock<std::mutex> lock;
+    std::unique_lock<std::mutex> lock(lookupMutex);
 
     databaseDirectories.clear();
     std::set<std::filesystem::path> uniqPaths;
@@ -102,23 +104,45 @@ CancelableFuture<bool> MapManager::LookupDatabases()
 
 void MapManager::AddLookupDirectory(const std::filesystem::path &dir)
 {
+  bool alreadyRegistered = false;
   {
     std::unique_lock<std::mutex> lock(lookupMutex);
     // Avoid duplicates
     for (const auto &existing : databaseLookupDirs) {
       if (std::filesystem::equivalent(existing, dir)) {
-        return;
+        alreadyRegistered = true;
+        break;
       }
     }
-    databaseLookupDirs.push_back(dir);
+    if (!alreadyRegistered) {
+      databaseLookupDirs.push_back(dir);
+    }
   }
+  // Always re-scan, even when the directory was already registered:
+  // a re-downloaded map in an existing directory must become visible
+  // (fix-download).
   LookupDatabases();
+}
+
+void MapManager::RemoveLookupDirectory(const std::filesystem::path &dir)
+{
+  {
+    std::unique_lock<std::mutex> lock(lookupMutex);
+    databaseLookupDirs.erase(
+        std::remove_if(databaseLookupDirs.begin(), databaseLookupDirs.end(),
+                       [&dir](const std::filesystem::path &existing) {
+                         std::error_code ec;
+                         return std::filesystem::equivalent(existing, dir, ec) ||
+                                existing == dir;
+                       }),
+        databaseLookupDirs.end());
+  }
 }
 
 CancelableFuture<bool> MapManager::DeleteOther(const std::vector<std::string> &mapPath, const std::filesystem::path &fsPath)
 {
   return Async<bool>([this, mapPath, fsPath](Breaker&) -> bool{
-    std::unique_lock<std::mutex> lock;
+    std::unique_lock<std::mutex> lock(lookupMutex);
 
     bool result = false;
     for (auto &mapDir:databaseDirectories) {
