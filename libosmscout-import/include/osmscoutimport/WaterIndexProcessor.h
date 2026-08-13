@@ -629,9 +629,6 @@ namespace osmscout {
     void FilterIntersectCoastlines(Progress& progress,
                                    std::vector<CoastlineDataRef> &transformedCoastlines);
 
-    void FilterEncapsulatedCoastlines(Progress& progress,
-                                      std::vector<CoastlineDataRef> &transformedCoastlines);
-
     void ComputeCoveredTiles(Progress& progress,
                            const StateMap& stateMap,
                            Data& data,
@@ -643,6 +640,25 @@ namespace osmscout {
     static bool CoastlineGeoSizeSorter(const CoastlineDataRef &a, const CoastlineDataRef &b);
 
 public:
+    /**
+     * Removes coastline areas ("islands") that are fully contained within a
+     * bigger coastline area and therefore redundant to render at the current
+     * zoom level.
+     *
+     * Every raw coastline is assigned a uniform left=land/right=water state
+     * at load time (see WaterIndexGenerator::LoadCoastlines), so left/right
+     * alone cannot tell a real island apart from an enclosed sea or lake
+     * whose ring happens to sit inside a landmass's outer ring (e.g. the
+     * Caspian Sea sitting inside the merged Africa-Europe-Asia coastline).
+     * IsWaterArea() is used to make that distinction from the ring's actual
+     * geometry before discarding anything.
+     *
+     * Exposed as public (rather than private) so it can be unit tested
+     * directly without needing a full Projection/StateMap setup.
+     */
+    void FilterEncapsulatedCoastlines(Progress& progress,
+                                      std::vector<CoastlineDataRef> &transformedCoastlines);
+
     /**
      * Merge short coastline ways to bigger one and create areas if possible.
      */

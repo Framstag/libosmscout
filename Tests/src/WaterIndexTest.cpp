@@ -283,4 +283,82 @@ TEST_CASE("Merge chunked closed coastline to area")
   REQUIRE(coastlines.front()->coast.size()==pointCount-1);
 }
 
+WaterIndexProcessor::CoastlineDataRef MkCoastlineData(Id id,
+                                                      std::vector<GeoCoord> points)
+{
+  auto coastline=std::make_shared<WaterIndexProcessor::CoastlineData>();
+
+  coastline->id=id;
+  coastline->isArea=true;
+  coastline->isCompletelyInCell=false;
+  coastline->points=std::move(points);
+  coastline->left=WaterIndexProcessor::CoastState::land;
+  coastline->right=WaterIndexProcessor::CoastState::water;
+
+  GetBoundingBox(coastline->points, coastline->boundingBox);
+
+  return coastline;
+}
+
+TEST_CASE("FilterEncapsulatedCoastlines removes a real island encapsulated in a bigger island")
+{
+  WaterIndexProcessor processor;
+  SilentProgress progress;
+
+  // "continent" - a counter-clockwise square ring, as a landmass/island is
+  // digitised under the natural=coastline convention (sea on the way's
+  // right, land on its left; walking with land as the interior is CCW).
+  // Verified by hand: shoelace sum over (lon,lat) points (0,0)->(10,0)->
+  // (10,10)->(0,10) is +200, i.e. counter-clockwise.
+  auto continent=MkCoastlineData(1, {
+    GeoCoord(0,0), GeoCoord(0,10), GeoCoord(10,10), GeoCoord(10,0), GeoCoord(0,0)
+  });
+
+  // A small ring with the *same* CCW winding, fully nested inside the
+  // continent - a redundant island that should still be filtered out.
+  auto island=MkCoastlineData(2, {
+    GeoCoord(1,1), GeoCoord(1,2), GeoCoord(2,2), GeoCoord(2,1), GeoCoord(1,1)
+  });
+
+  std::vector<WaterIndexProcessor::CoastlineDataRef> coastlines{continent, island};
+
+  processor.FilterEncapsulatedCoastlines(progress, coastlines);
+
+  REQUIRE(coastlines.size()==1);
+  REQUIRE(coastlines[0]->id==1);
+}
+
+TEST_CASE("FilterEncapsulatedCoastlines keeps an enclosed sea encapsulated in a landmass")
+{
+  WaterIndexProcessor processor;
+  SilentProgress progress;
+
+  // Same "continent" ring as above (CCW, land interior).
+  auto continent=MkCoastlineData(1, {
+    GeoCoord(0,0), GeoCoord(0,10), GeoCoord(10,10), GeoCoord(10,0), GeoCoord(0,0)
+  });
+
+  // A smaller ring with the *opposite* (clockwise) winding, fully nested
+  // inside the continent - an enclosed sea like the Caspian Sea, digitised
+  // the same way a mapper would trace any shoreline (land on the left,
+  // water on the right) but around a body of water instead of a landmass.
+  // Verified by hand: shoelace sum over (lon,lat) points (3,3)->(3,7)->
+  // (7,7)->(7,3) is -32, i.e. clockwise.
+  //
+  // This must NOT be treated as a redundant island and removed - this is
+  // the Caspian Sea bug reproduction. It currently FAILS because
+  // FilterEncapsulatedCoastlines only checks left==CoastState::land, which
+  // is true for both rings (it's a hardcoded constant, not derived from
+  // geometry) and does not yet consult the ring's actual winding.
+  auto sea=MkCoastlineData(2, {
+    GeoCoord(3,3), GeoCoord(7,3), GeoCoord(7,7), GeoCoord(3,7), GeoCoord(3,3)
+  });
+
+  std::vector<WaterIndexProcessor::CoastlineDataRef> coastlines{continent, sea};
+
+  processor.FilterEncapsulatedCoastlines(progress, coastlines);
+
+  REQUIRE(coastlines.size()==2);
+}
+
 
