@@ -806,7 +806,11 @@ if buildMapQt
                install: true,
                install_dir: testInstallDir)
 
-  test('Check TextMetricsQt compilation', TextMetricsQtTest)
+  # Qt DLLs are not on the test PATH under Windows (loader error 0xc0000135),
+  # matching the CMake SKIPTEST convention. The test runs on other platforms.
+  if host_machine.system() != 'windows'
+    test('Check TextMetricsQt compilation', TextMetricsQtTest)
+  endif
 endif
 
 

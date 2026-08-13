@@ -395,7 +395,7 @@ endif()
 #---- TextMetricsQtTest
 # Skipped under CMake (project convention for Qt tests): the Windows loader
 # cannot find the Qt DLLs in all CMake CI setups (MSYS: 0xc0000135). The
-# test runs under meson, which handles Qt DLL paths itself.
+# meson build registers the test on non-Windows hosts only.
 if(${OSMSCOUT_BUILD_MAP_QT})
   osmscout_test_project(NAME TextMetricsQtTest SOURCES src/TextMetricsQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain SKIPTEST)
 endif()
