@@ -395,19 +395,12 @@ endif()
 #---- TextMetricsQtTest
 if(${OSMSCOUT_BUILD_MAP_QT})
   osmscout_test_project(NAME TextMetricsQtTest SOURCES src/TextMetricsQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain)
-  if(WIN32)
-    # Copy the Qt DLLs next to the test executable so the Windows loader
-    # finds them at runtime (Qt bin dir is not on the test PATH in all CI setups)
-    set(_qt_copy_dlls "")
-    foreach(_qt_lib Core Gui Widgets)
-      if(TARGET Qt${QT_VERSION_MAJOR}::${_qt_lib})
-        list(APPEND _qt_copy_dlls $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::${_qt_lib}>)
-      endif()
-    endforeach()
-    if(_qt_copy_dlls)
-      add_custom_command(TARGET TextMetricsQtTest POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_qt_copy_dlls} $<TARGET_FILE_DIR:TextMetricsQtTest>)
-    endif()
+  if(WIN32 AND TARGET Qt::windeployqt)
+    # Deploy the Qt DLLs and plugins next to the test executable so the
+    # Windows loader finds them at runtime (Qt bin dir is not on the test
+    # PATH in all CI setups)
+    add_custom_command(TARGET TextMetricsQtTest POST_BUILD
+      COMMAND Qt::windeployqt --no-translations "$<TARGET_FILE_DIR:TextMetricsQtTest>/$<TARGET_FILE_NAME:TextMetricsQtTest>")
   endif()
 endif()
 
