@@ -60,6 +60,23 @@ public final class LocationSearchRanker {
         return result;
     }
 
+    /**
+     * Format a distance in meters as a kilometer string for display.
+     * <p>
+     * Sub-10 km distances keep one decimal place so nearby results are
+     * distinguishable; larger distances round to whole kilometers.
+     *
+     * @param meters distance in meters
+     * @return formatted value with "km" unit suffix, e.g. "0.5 km" or "12 km"
+     */
+    public static String formatDistanceKm(double meters) {
+        double km = meters / 1000.0;
+        if (km < 10.0) {
+            return String.format(Locale.ROOT, "%.1f km", km);
+        }
+        return String.format(Locale.ROOT, "%.0f km", km);
+    }
+
     public static double haversine(double lat1, double lon1,
                                    double lat2, double lon2) {
         double dLat = Math.toRadians(lat2 - lat1);

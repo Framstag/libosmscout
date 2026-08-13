@@ -63,6 +63,12 @@ public class OSMScoutClient {
                                int magnification);
 
     /**
+     * Sentinel for "no default admin region" — pass to
+     * {@link #searchLocations(String, int, long)} for an unconstrained search.
+     */
+    public static final long NO_ADMIN_REGION = 0L;
+
+    /**
      * Search for locations matching a free-text query.
      * <p>
      * Uses the core {@code LocationService::SearchForLocationByString()} to find
@@ -72,6 +78,27 @@ public class OSMScoutClient {
      *
      * @param query free-text search string (e.g. "Berlin", "Dortmund Hbf")
      * @param limit maximum number of results to return
+     * @param adminRegionHandle handle of a resolved admin region (see
+     *        {@link #resolveAdminRegion(double, double)}) used as default region
+     *        fallback for incomplete queries, or {@link #NO_ADMIN_REGION} for an
+     *        unconstrained search
+     * @return array of matching LocationEntry objects, or empty array if none found
+     */
+    public native LocationEntry[] searchLocations(String query, int limit, long adminRegionHandle);
+
+    /**
+     * Search for locations matching a free-text query with a region-name
+     * default region and optional cancellation.
+     * <p>
+     * Uses the core {@code LocationService::SearchForLocationByString()} to find
+     * admin regions, locations, POIs, and addresses matching the query, and the
+     * text search index for free-text hits on named objects. Region scoping and
+     * cancellation mirror OSMScout2 behaviour.
+     *
+     * @param query free-text search string (e.g. "Berlin", "Dortmund Hbf")
+     * @param limit maximum number of results to return
+     * @param defaultRegion name of the admin region to scope the search to, or null
+     * @param cancel cancel the currently running search first
      * @return array of matching LocationEntry objects, or empty array if none found
      */
     public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion, boolean cancel);
@@ -111,6 +138,36 @@ public class OSMScoutClient {
     public native String getRegion(double lat, double lon);
 
     /**
+     * Resolve the admin region containing the given coordinate.
+     * <p>
+     * Walks the location index region hierarchy and returns an opaque handle to
+     * the deepest admin region whose boundary contains the coordinate, or 0 if
+     * no region is found (or the database is not initialised). The returned
+     * handle SHALL be released with {@link #releaseAdminRegion(long)} when no
+     * longer needed.
+     *
+     * @param lat latitude in degrees
+     * @param lon longitude in degrees
+     * @return opaque admin region handle, or 0 if none found
+     */
+    public native long resolveAdminRegion(double lat, double lon);
+
+    /**
+     * Release a previously resolved admin region handle.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     */
+    public native void releaseAdminRegion(long handle);
+
+    /**
+     * Get the name of a previously resolved admin region.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionName(long handle);
+
+    /**
      * Get a structured description of the most reasonable visible object
      * at the given geographic coordinate.
      * <p>
@@ -120,9 +177,26 @@ public class OSMScoutClient {
      *
      * @param lat latitude in degrees
      * @param lon longitude in degrees
+     * @param magnification current map magnification (zoom level)
      * @return ObjectDescription with entries, or empty description if no object found
      */
-    public native ObjectDescription getDescription(double lat, double lon);
+    public native ObjectDescription getDescription(double lat, double lon, int magnification);
+
+    /**
+     * Get the bounding box of the most reasonable visible object
+     * at the given geographic coordinate.
+     * <p>
+     * Queries objects in a small bounding box around the coordinate,
+     * ranks them by (has description data, visible at zoom, proximity),
+     * and returns the bounding box of the best match.
+     *
+     * @param lat latitude in degrees
+     * @param lon longitude in degrees
+     * @param magnification current map magnification (zoom level)
+     * @return double[]{minLat, maxLat, minLon, maxLon} for area/way objects,
+     *         or null if the best match is a node or no object found
+     */
+    public native double[] getObjectBoundingBox(double lat, double lon, int magnification);
 
     /**
      * Calculate a route between two coordinates asynchronously with a routing profile.
@@ -374,6 +448,19 @@ public class OSMScoutClient {
     }
 
     /**
+     * Set or hide the GPS location marker that is drawn on top of the map during
+     * the next render. The marker is rendered in the same native pass as the map,
+     * so it always uses the exact same projection and cannot drift relative to the
+     * road. Call with {@code Double.NaN} for latitude to hide the marker.
+     *
+     * @param lat     marker latitude in degrees, or NaN to hide
+     * @param lon     marker longitude in degrees
+     * @param bearing marker bearing in degrees, 0 = north, clockwise, or -1 if unknown
+     * @param accuracy horizontal accuracy in meters, or -1/NaN if unknown
+     */
+    public native void setGpsMarker(double lat, double lon, double bearing, double accuracy);
+
+    /**
      * Project a geographic coordinate to screen pixels for the given map view.
      *
      * @param width      viewport width in pixels
@@ -434,6 +521,15 @@ public class OSMScoutClient {
      * @return true if deleted, false if not found
      */
     public native boolean deleteGroup(String name);
+
+    /**
+     * Rename a group.
+     *
+     * @param oldName current group name
+     * @param newName new group name (must be unique)
+     * @return true if renamed, false if oldName not found or newName already exists
+     */
+    public native boolean renameGroup(String oldName, String newName);
 
     /**
      * Add a favorite to a group.

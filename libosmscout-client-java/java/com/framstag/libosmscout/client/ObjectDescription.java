@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Structured description of an OSM map object (Node, Way, or Area).
  * <p>
- * Returned by {@link OSMScoutClient#getDescription(double, double)}.
+ * Returned by {@link OSMScoutClient#getDescription(double, double, int)}.
  * Contains a list of {@link DescriptionEntry} instances that together
  * form a structured view of the object's properties, organised by
  * section/subsection, plus the geographic coordinates of the object.

@@ -200,10 +200,23 @@ public class SearchOverlay extends StackPane {
                     VBox box = new VBox(uiScale.px(2));
                     box.setPadding(new Insets(uiScale.px(4), uiScale.px(6), uiScale.px(4), uiScale.px(6)));
 
-                    // Line 1: match quality + label + address + postal area + region
+                    // Line 1: match quality + label + address + postal area + region,
+                    // with the distance to the map center right-aligned
                     String line1 = buildLine1(item);
+                    HBox line1Box = new HBox(uiScale.px(6));
+                    line1Box.setAlignment(Pos.CENTER_LEFT);
+
                     Label label1 = new Label(line1);
                     label1.getStyleClass().add("search-result-line1");
+                    label1.setMaxWidth(Double.MAX_VALUE);
+                    HBox.setHgrow(label1, Priority.ALWAYS);
+
+                    double distanceMeters = LocationSearchRanker.haversine(
+                            mapCenterLat, mapCenterLon, item.lat, item.lon);
+                    Label distanceLabel = new Label(LocationSearchRanker.formatDistanceKm(distanceMeters));
+                    distanceLabel.getStyleClass().add("search-result-distance");
+
+                    line1Box.getChildren().addAll(label1, distanceLabel);
 
                     // Line 2: admin region hierarchy
                     String line2 = "";
@@ -222,7 +235,7 @@ public class SearchOverlay extends StackPane {
                     Label label3 = new Label(line3);
                     label3.getStyleClass().add("search-result-line3");
 
-                    box.getChildren().addAll(label1, label2, label3);
+                    box.getChildren().addAll(line1Box, label2, label3);
                     setGraphic(box);
                 }
             }

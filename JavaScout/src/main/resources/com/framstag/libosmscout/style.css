@@ -156,6 +156,11 @@
     -fx-font-family: monospace;
 }
 
+.search-result-distance {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+}
+
 .search-clear-button {
     -fx-background-color: transparent;
     -fx-text-fill: #999;
