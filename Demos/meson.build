@@ -29,10 +29,15 @@ if marisaDep.found()
                           install_dir: demoInstallDir)
 endif
 
+LocationLookupDeps = [mathDep, openmpDep]
+if marisaDep.found()
+  LocationLookupDeps += marisaDep
+endif
+
 LocationLookup = executable('LocationLookup',
                             'src/LocationLookup.cpp',
                             include_directories: [osmscoutIncDir],
-                            dependencies: [mathDep, openmpDep],
+                            dependencies: LocationLookupDeps,
                             link_with: [osmscout],
                             install: true,
                             install_dir: demoInstallDir)

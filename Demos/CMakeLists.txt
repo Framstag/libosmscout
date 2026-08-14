@@ -12,7 +12,11 @@ endif()
 osmscout_demo_project(NAME LocationDescription SOURCES src/LocationDescription.cpp TARGET OSMScout::OSMScout)
 
 #---- LocationLookup
-osmscout_demo_project(NAME LocationLookup SOURCES src/LocationLookup.cpp TARGET OSMScout::OSMScout)
+if(MARISA_FOUND)
+	osmscout_demo_project(NAME LocationLookup SOURCES src/LocationLookup.cpp TARGET OSMScout::OSMScout INCLUDES ${MARISA_INCLUDE_DIRS})
+else()
+	osmscout_demo_project(NAME LocationLookup SOURCES src/LocationLookup.cpp TARGET OSMScout::OSMScout)
+endif()
 
 #---- LocationLookupForm
 osmscout_demo_project(NAME LocationLookupForm SOURCES src/LocationLookupForm.cpp TARGET OSMScout::OSMScout)
