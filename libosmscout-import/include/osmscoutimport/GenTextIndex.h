@@ -20,6 +20,8 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+#include <fstream>
+
 #include <marisa.h>
 
 #include <osmscout/OSMScoutTypes.h>
@@ -34,6 +36,11 @@ namespace osmscout
   class TextIndexGenerator CLASS_FINAL : public ImportModule
   {
   public:
+    static const char* const FILENAME_TEXT_POI_TXT;
+    static const char* const FILENAME_TEXT_LOC_TXT;
+    static const char* const FILENAME_TEXT_REGION_TXT;
+    static const char* const FILENAME_TEXT_OTHER_TXT;
+
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;
 
@@ -70,7 +77,9 @@ namespace osmscout
                    uint8_t offsetSizeBytes,
                    FileOffset offset,
                    const RefType& reftype,
+                   const std::string& typeName,
                    marisa::Keyset *keyset,
+                   std::ostream& debugStream,
                    ImportParameter::TextIndexVariant variant) const;
 
     // keysets used to store text data and generate tries
@@ -78,6 +87,12 @@ namespace osmscout
     marisa::Keyset  keysetLocation;
     marisa::Keyset  keysetRegion;
     marisa::Keyset  keysetOther;
+
+    // debug streams used to dump the content of the keysets
+    std::ofstream   debugStreamPoi;
+    std::ofstream   debugStreamLocation;
+    std::ofstream   debugStreamRegion;
+    std::ofstream   debugStreamOther;
   };
 }
 

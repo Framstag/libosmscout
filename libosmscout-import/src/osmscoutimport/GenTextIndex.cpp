@@ -44,10 +44,18 @@
 
 #include <osmscoutimport/GenTextIndex.h>
 
+#include <fstream>
+#include <locale>
+
 #include <marisa.h>
 
 namespace osmscout
 {
+  const char* const TextIndexGenerator::FILENAME_TEXT_POI_TXT="textpoi.txt";
+  const char* const TextIndexGenerator::FILENAME_TEXT_LOC_TXT="textloc.txt";
+  const char* const TextIndexGenerator::FILENAME_TEXT_REGION_TXT="textregion.txt";
+  const char* const TextIndexGenerator::FILENAME_TEXT_OTHER_TXT="textother.txt";
+
   void TextIndexGenerator::GetDescription(const ImportParameter& /*parameter*/,
                                           ImportModuleDescription& description) const
   {
@@ -62,6 +70,30 @@ namespace osmscout
     description.AddProvidedOptionalFile(TextSearchIndex::TEXT_LOC_DAT);
     description.AddProvidedOptionalFile(TextSearchIndex::TEXT_REGION_DAT);
     description.AddProvidedOptionalFile(TextSearchIndex::TEXT_OTHER_DAT);
+
+    description.AddProvidedAnalysisFile(FILENAME_TEXT_POI_TXT);
+    description.AddProvidedAnalysisFile(FILENAME_TEXT_LOC_TXT);
+    description.AddProvidedAnalysisFile(FILENAME_TEXT_REGION_TXT);
+    description.AddProvidedAnalysisFile(FILENAME_TEXT_OTHER_TXT);
+  }
+
+  static bool OpenDebugStream(std::ofstream& stream,
+                              const ImportParameter& parameter,
+                              const char* filename,
+                              Progress& progress)
+  {
+    stream.imbue(std::locale::classic());
+    stream.open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                filename),
+                std::ios::out|std::ios::trunc);
+
+    if (!stream.is_open()) {
+      progress.Error("Cannot open '"+std::string(filename)+"'");
+
+      return false;
+    }
+
+    return true;
   }
 
   bool TextIndexGenerator::Import(const TypeConfigRef& typeConfig,
@@ -74,6 +106,26 @@ namespace osmscout
                                                    progress);
 
     progress.Info("Using "+std::to_string(offsetSizeBytes)+"-byte offsets");
+
+    // open debug streams for dumping the content of the keysets
+    if (!OpenDebugStream(debugStreamPoi,
+                         parameter,
+                         FILENAME_TEXT_POI_TXT,
+                         progress) ||
+        !OpenDebugStream(debugStreamLocation,
+                         parameter,
+                         FILENAME_TEXT_LOC_TXT,
+                         progress) ||
+        !OpenDebugStream(debugStreamRegion,
+                         parameter,
+                         FILENAME_TEXT_REGION_TXT,
+                         progress) ||
+        !OpenDebugStream(debugStreamOther,
+                         parameter,
+                         FILENAME_TEXT_OTHER_TXT,
+                         progress)) {
+      return false;
+    }
 
     // add node text data
     if(!this->AddNodeTextToKeysets(parameter,
@@ -245,18 +297,23 @@ namespace osmscout
           // in the right keyset
           TypeInfoRef    typeInfo=node.GetType();
           marisa::Keyset *keyset;
+          std::ostream   *debugStream;
 
           if(typeInfo->GetIndexAsPOI()) {
             keyset = &keysetPoi;
+            debugStream = &debugStreamPoi;
           }
           else if(typeInfo->GetIndexAsLocation()) {
             keyset = &keysetLocation;
+            debugStream = &debugStreamLocation;
           }
           else if(typeInfo->GetIndexAsRegion()) {
             keyset = &keysetRegion;
+            debugStream = &debugStreamRegion;
           }
           else {
             keyset = &keysetOther;
+            debugStream = &debugStreamOther;
           }
 
           if(nameValue!=nullptr) {
@@ -264,7 +321,9 @@ namespace osmscout
                       offsetSizeBytes,
                       node.GetFileOffset(),
                       refNode,
+                      typeInfo->GetName(),
                       keyset,
+                      *debugStream,
                       parameter.GetTextIndexVariant());
           }
           if(nameAltValue!=nullptr) {
@@ -272,7 +331,9 @@ namespace osmscout
                       offsetSizeBytes,
                       node.GetFileOffset(),
                       refNode,
+                      typeInfo->GetName(),
                       keyset,
+                      *debugStream,
                       parameter.GetTextIndexVariant());
           }
         }
@@ -339,18 +400,23 @@ namespace osmscout
         // in the right keyset
         TypeInfoRef    typeInfo=way.GetType();
         marisa::Keyset *keyset;
+        std::ostream   *debugStream;
 
         if(typeInfo->GetIndexAsPOI()) {
           keyset = &keysetPoi;
+          debugStream = &debugStreamPoi;
         }
         else if(typeInfo->GetIndexAsLocation()) {
           keyset = &keysetLocation;
+          debugStream = &debugStreamLocation;
         }
         else if(typeInfo->GetIndexAsRegion()) {
           keyset = &keysetRegion;
+          debugStream = &debugStreamRegion;
         }
         else {
           keyset = &keysetOther;
+          debugStream = &debugStreamOther;
         }
 
         if(nameValue!=nullptr) {
@@ -358,7 +424,9 @@ namespace osmscout
                     offsetSizeBytes,
                     way.GetFileOffset(),
                     refWay,
+                    typeInfo->GetName(),
                     keyset,
+                    *debugStream,
                     parameter.GetTextIndexVariant());
         }
 
@@ -367,7 +435,9 @@ namespace osmscout
                     offsetSizeBytes,
                     way.GetFileOffset(),
                     refWay,
+                    typeInfo->GetName(),
                     keyset,
+                    *debugStream,
                     parameter.GetTextIndexVariant());
         }
 
@@ -376,7 +446,9 @@ namespace osmscout
                     offsetSizeBytes,
                     way.GetFileOffset(),
                     refWay,
+                    typeInfo->GetName(),
                     keyset,
+                    *debugStream,
                     parameter.GetTextIndexVariant());
         }
       }
@@ -436,18 +508,23 @@ namespace osmscout
 
           TypeInfoRef    areaTypeInfo=area.rings[r].GetType();
           marisa::Keyset *keyset;
+          std::ostream   *debugStream;
 
           if(areaTypeInfo->GetIndexAsPOI()) {
             keyset = &keysetPoi;
+            debugStream = &debugStreamPoi;
           }
           else if(areaTypeInfo->GetIndexAsLocation()) {
             keyset = &keysetLocation;
+            debugStream = &debugStreamLocation;
           }
           else if(areaTypeInfo->GetIndexAsRegion()) {
             keyset = &keysetRegion;
+            debugStream = &debugStreamRegion;
           }
           else {
             keyset = &keysetOther;
+            debugStream = &debugStreamOther;
           }
 
           if (nameValue!=nullptr) {
@@ -455,7 +532,9 @@ namespace osmscout
                       offsetSizeBytes,
                       area.GetFileOffset(),
                       refArea,
+                      areaTypeInfo->GetName(),
                       keyset,
+                      *debugStream,
                       parameter.GetTextIndexVariant());
           }
           if (nameAltValue!=nullptr) {
@@ -463,7 +542,9 @@ namespace osmscout
                       offsetSizeBytes,
                       area.GetFileOffset(),
                       refArea,
+                      areaTypeInfo->GetName(),
                       keyset,
+                      *debugStream,
                       parameter.GetTextIndexVariant());
           }
         }
@@ -545,7 +626,9 @@ namespace osmscout
                                      uint8_t offsetSizeBytes,
                                      FileOffset offset,
                                      const RefType& reftype,
+                                     const std::string& typeName,
                                      marisa::Keyset *keyset,
+                                     std::ostream& debugStream,
                                      ImportParameter::TextIndexVariant variant) const
   {
     std::string textNorm = UTF8NormForLookup(text);
@@ -581,6 +664,13 @@ namespace osmscout
         return false;
       }
     }
+
+    // dump the entry to the debug stream
+    debugStream << text
+                << " " << ObjectFileRef(offset,reftype).GetTypeName()
+                << " " << typeName
+                << " " << offset
+                << std::endl;
 
     return true;
   }
