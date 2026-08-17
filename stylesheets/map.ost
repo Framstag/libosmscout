@@ -1293,6 +1293,298 @@ TYPES
   //
   // Shops
   //
+  // Granular food/beverage shop types (values from the OSM Key:shop wiki,
+  // "Food, beverages" group). Each has a _building variant for areas that
+  // carry a building tag, following the amenity pattern. The generic
+  // shop_building/shop types below catch all remaining shop values.
+
+  TYPE shop_alcohol_building
+    = AREA ("shop"=="alcohol" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_alcohol
+    = NODE AREA ("shop"=="alcohol")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_bakery_building
+    = AREA ("shop"=="bakery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_bakery
+    = NODE AREA ("shop"=="bakery")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_beverages_building
+    = AREA ("shop"=="beverages" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_beverages
+    = NODE AREA ("shop"=="beverages")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_butcher_building
+    = AREA ("shop"=="butcher" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_butcher
+    = NODE AREA ("shop"=="butcher")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_cheese_building
+    = AREA ("shop"=="cheese" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_cheese
+    = NODE AREA ("shop"=="cheese")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_chocolate_building
+    = AREA ("shop"=="chocolate" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_chocolate
+    = NODE AREA ("shop"=="chocolate")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_coffee_building
+    = AREA ("shop"=="coffee" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_coffee
+    = NODE AREA ("shop"=="coffee")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_confectionery_building
+    = AREA ("shop"=="confectionery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_confectionery
+    = NODE AREA ("shop"=="confectionery")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_convenience_building
+    = AREA ("shop"=="convenience" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_convenience
+    = NODE AREA ("shop"=="convenience")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_dairy_building
+    = AREA ("shop"=="dairy" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_dairy
+    = NODE AREA ("shop"=="dairy")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_deli_building
+    = AREA ("shop"=="deli" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_deli
+    = NODE AREA ("shop"=="deli")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_farm_building
+    = AREA ("shop"=="farm" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_farm
+    = NODE AREA ("shop"=="farm")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_food_building
+    = AREA ("shop"=="food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_food
+    = NODE AREA ("shop"=="food")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_frozen_food_building
+    = AREA ("shop"=="frozen_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_frozen_food
+    = NODE AREA ("shop"=="frozen_food")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_greengrocer_building
+    = AREA ("shop"=="greengrocer" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_greengrocer
+    = NODE AREA ("shop"=="greengrocer")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_grocery_building
+    = AREA ("shop"=="grocery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_grocery
+    = NODE AREA ("shop"=="grocery")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_health_food_building
+    = AREA ("shop"=="health_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_health_food
+    = NODE AREA ("shop"=="health_food")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_ice_cream_building
+    = AREA ("shop"=="ice_cream" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_ice_cream
+    = NODE AREA ("shop"=="ice_cream")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_pastry_building
+    = AREA ("shop"=="pastry" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_pastry
+    = NODE AREA ("shop"=="pastry")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_seafood_building
+    = AREA ("shop"=="seafood" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_seafood
+    = NODE AREA ("shop"=="seafood")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_spices_building
+    = AREA ("shop"=="spices" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_spices
+    = NODE AREA ("shop"=="spices")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_supermarket_building
+    = AREA ("shop"=="supermarket" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_supermarket
+    = NODE AREA ("shop"=="supermarket")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_tea_building
+    = AREA ("shop"=="tea" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_tea
+    = NODE AREA ("shop"=="tea")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
+
+  TYPE shop_wine_building
+    = AREA ("shop"=="wine" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, building, routingPOI
+
+  TYPE shop_wine
+    = NODE AREA ("shop"=="wine")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP shop, routingPOI
 
   TYPE shop_building
     = AREA (EXISTS "shop" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
