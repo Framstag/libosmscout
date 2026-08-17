@@ -660,7 +660,7 @@ public:
                                       std::vector<CoastlineDataRef> &transformedCoastlines);
 
     /**
-     * Returns true if the closed ring described by `points` encloses water
+     * Returns true if the closed ring described by `coastline` encloses water
      * (an inland sea or lake) rather than land (an island or continent).
      *
      * natural=coastline convention keeps the sea on the right of the way in
@@ -670,10 +670,11 @@ public:
      * sea) is a clockwise traversal instead. See AreaIsClockwise() in
      * Geometry.h.
      *
-     * `points` may or may not include an explicit closing point
-     * (points.front()==points.back()); both forms are handled correctly.
+     * `coastline.points` may or may not include an explicit closing point
+     * (coastline.points.front()==coastline.points.back()); both forms
+     * are handled correctly.
      */
-    static bool IsWaterArea(const std::vector<GeoCoord>& points);
+    static bool IsWaterArea(const CoastlineData& coastline);
 
     /**
      * Merge short coastline ways to bigger one and create areas if possible.

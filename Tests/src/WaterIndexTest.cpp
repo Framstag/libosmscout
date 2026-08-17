@@ -367,23 +367,31 @@ TEST_CASE("IsWaterArea detects ring orientation, including with a duplicated clo
   // duplicated at the end exactly as TransformCoastlines stores it. The
   // extreme (minimum-latitude) point of this ring is index 0, which is
   // exactly the degenerate case IsWaterArea must handle correctly.
-  std::vector<GeoCoord> land{
+  WaterIndexProcessor::CoastlineData land;
+  land.left = WaterIndexProcessor::CoastState::land;
+  land.right = WaterIndexProcessor::CoastState::water;
+  land.points = {
     GeoCoord(0,0), GeoCoord(0,10), GeoCoord(10,10), GeoCoord(10,0), GeoCoord(0,0)
   };
   REQUIRE_FALSE(WaterIndexProcessor::IsWaterArea(land));
 
   // Clockwise square (water interior), also with a duplicated closing point.
-  std::vector<GeoCoord> sea{
+  WaterIndexProcessor::CoastlineData sea;
+  sea.left = WaterIndexProcessor::CoastState::land;
+  sea.right = WaterIndexProcessor::CoastState::water;
+  sea.points = {
     GeoCoord(3,3), GeoCoord(7,3), GeoCoord(7,7), GeoCoord(3,7), GeoCoord(3,3)
   };
   REQUIRE(WaterIndexProcessor::IsWaterArea(sea));
 
   // Same rings without the duplicated closing point must give the same
   // answer.
-  std::vector<GeoCoord> landNoDup{land.begin(),land.end()-1};
+  auto landNoDup = land;
+  landNoDup.points = {land.points.begin(),land.points.end()-1};
   REQUIRE_FALSE(WaterIndexProcessor::IsWaterArea(landNoDup));
 
-  std::vector<GeoCoord> seaNoDup{sea.begin(),sea.end()-1};
+  auto seaNoDup = sea;
+  seaNoDup.points = {sea.points.begin(),sea.points.end()-1};
   REQUIRE(WaterIndexProcessor::IsWaterArea(seaNoDup));
 }
 
