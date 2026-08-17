@@ -99,6 +99,53 @@ public class OSMScoutClient {
     public native void cancelSearch();
 
     /**
+     * Search for POIs of the given OSM types within a radius around a coordinate.
+     * <p>
+     * Resolves the type names against the loaded databases' type configs and
+     * calls the native POI service ({@code POIService::GetPOIsInRadius}).
+     * Results are sorted by distance from the search center (nearest first).
+     *
+     * @param typeNames    OSM type names (e.g. "tourism_hotel", "shop")
+     * @param lat          center latitude in degrees
+     * @param lon          center longitude in degrees
+     * @param radiusMeters search radius in meters
+     * @param limit        maximum number of results to return
+     * @return array of matching PoiEntry objects, or empty array if none found
+     */
+    public native PoiEntry[] searchPOIsByTypes(String[] typeNames,
+                                               double lat,
+                                               double lon,
+                                               double radiusMeters,
+                                               int limit);
+
+    /**
+     * Search for POIs of the given category within a radius around a coordinate.
+     * <p>
+     * Resolves the category to its hardcoded OSM type names via
+     * {@link PoiCategories} and delegates to
+     * {@link #searchPOIsByTypes(String[], double, double, double, int)}.
+     *
+     * @param category     category id (see {@link PoiCategories#HOTELS},
+     *                     {@link PoiCategories#RESTAURANTS}, {@link PoiCategories#GROCERY})
+     * @param lat          center latitude in degrees
+     * @param lon          center longitude in degrees
+     * @param radiusMeters search radius in meters
+     * @param limit        maximum number of results to return
+     * @return array of matching PoiEntry objects, or empty array if none found
+     */
+    public PoiEntry[] searchPOIs(String category,
+                                 double lat,
+                                 double lon,
+                                 double radiusMeters,
+                                 int limit) {
+        String[] typeNames = PoiCategories.getTypeNames(category);
+        if (typeNames == null || typeNames.length == 0 || radiusMeters <= 0) {
+            return new PoiEntry[0];
+        }
+        return searchPOIsByTypes(typeNames, lat, lon, radiusMeters, limit);
+    }
+
+    /**
      * Get the name of the admin region containing the given coordinate.
      * <p>
      * Reverse lookup via {@code LocationDescriptionService::ReverseLookupRegion}.

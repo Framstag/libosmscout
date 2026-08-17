@@ -29,6 +29,8 @@ set(JAVA_SOURCES
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/ObjectDescription.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/OSMScoutClient.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/OSMScoutClientBuilder.java
+  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/PoiCategories.java
+  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/PoiEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteCallback.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteInstruction.java

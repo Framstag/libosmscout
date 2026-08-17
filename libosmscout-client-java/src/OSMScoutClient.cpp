@@ -24,6 +24,7 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
@@ -55,6 +56,10 @@
 #include <osmscout/db/TextSearchIndex.h>
 #endif
 #include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/OperatorFeature.h>
+#include <osmscout/feature/RefFeature.h>
+
+#include <osmscout/poi/POIService.h>
 
 #include <osmscout/description/DescriptionService.h>
 #include <osmscout/location/LocationDescriptionService.h>
@@ -3292,10 +3297,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             }
 
             std::vector<osmscout::RoutingProfileRef> profiles;
-            if (!dbsForPost.empty()) {
-              auto tc = dbsForPost.front()->GetTypeConfig();
+            profiles.reserve(dbsForPost.size());
+            for (const auto& db : dbsForPost) {
+              auto tc = db->GetTypeConfig();
               if (tc) {
                 profiles.push_back(CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved));
+              } else {
+                // keep index alignment with dbsForPost; a database without type
+                // config would have failed routing service open already
+                profiles.push_back(nullptr);
               }
             }
 
@@ -3846,8 +3856,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             }
 
             std::vector<osmscout::RoutingProfileRef> profiles;
-            if (!dbsForPost.empty()) {
-              auto tc = dbsForPost.front()->GetTypeConfig();
+            profiles.reserve(dbsForPost.size());
+            for (const auto& db : dbsForPost) {
+              auto tc = db->GetTypeConfig();
               if (tc) {
                 auto postProfile = std::make_shared<osmscout::FastestPathRoutingProfile>(tc);
                 std::map<std::string,double> postSpeedMap;
@@ -3872,6 +3883,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 postSpeedMap["highway_service"]=30.0;
                 postProfile->ParametrizeForCar(*tc, postSpeedMap, 120.0);
                 profiles.push_back(postProfile);
+              } else {
+                // keep index alignment with dbsForPost; a database without type
+                // config would have failed routing service open already
+                profiles.push_back(nullptr);
               }
             }
 
@@ -5068,4 +5083,240 @@ Java_com_framstag_libosmscout_client_MapDownloadManager_nativeDeleteMap(
   }
 
   return result ? JNI_TRUE : JNI_FALSE;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::searchPOIsByTypes(String[] typeNames, double lat, double lon,
+//                                   double radiusMeters, int limit)
+// --------------------------------------------------------------------------
+
+namespace {
+  // A single POI search result ready to be serialized into a Java PoiEntry.
+  struct PoiEntry {
+    std::string label;
+    std::string objectType;
+    double      lat{0.0};
+    double      lon{0.0};
+    double      distance{0.0};
+  };
+
+  // Fill a PoiEntry from a node/way/area object. The label falls back from
+  // the name feature to the operator and ref features (same as POILookupModule).
+  template<class T>
+  bool BuildPoiEntry(const T& obj, const osmscout::GeoCoord& center, PoiEntry& entry)
+  {
+    if (!obj) {
+      return false;
+    }
+
+    entry.objectType = obj->GetType()->GetName();
+
+    const osmscout::FeatureValueBuffer& features = obj->GetFeatureValueBuffer();
+    if (const auto* name = features.findValue<osmscout::NameFeatureValue>(); name != nullptr) {
+      entry.label = name->GetLabel(osmscout::Locale(), 0);
+    } else if (const auto* op = features.findValue<osmscout::OperatorFeatureValue>(); op != nullptr) {
+      entry.label = op->GetLabel(osmscout::Locale(), 0);
+    } else if (const auto* ref = features.findValue<osmscout::RefFeatureValue>(); ref != nullptr) {
+      entry.label = ref->GetLabel(osmscout::Locale(), 0);
+    }
+
+    osmscout::GeoCoord coord;
+    if constexpr (std::is_same_v<T, osmscout::NodeRef>) {
+      coord = obj->GetCoords();
+    } else {
+      coord = obj->GetBoundingBox().GetCenter();
+    }
+
+    entry.lat = coord.GetLat();
+    entry.lon = coord.GetLon();
+    entry.distance = center.GetDistance(coord).AsMeter();
+    return true;
+  }
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *env, jobject self,
+                                                                      jobjectArray typeNamesJArray,
+                                                                      jdouble lat, jdouble lon,
+                                                                      jdouble radiusMeters, jint limit)
+{
+  jclass entryCls = env->FindClass("com/framstag/libosmscout/client/PoiEntry");
+  if (entryCls == nullptr) {
+    return nullptr;
+  }
+
+  auto emptyResult = [&]() -> jobjectArray {
+    return env->NewObjectArray(0, entryCls, nullptr);
+  };
+
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return emptyResult();
+  }
+
+  if (typeNamesJArray == nullptr || radiusMeters <= 0.0 || limit <= 0) {
+    return emptyResult();
+  }
+
+  std::vector<std::string> typeNames;
+  jsize typeCount = env->GetArrayLength(typeNamesJArray);
+  for (jsize i = 0; i < typeCount; i++) {
+    jstring typeJStr = (jstring)env->GetObjectArrayElement(typeNamesJArray, i);
+    if (typeJStr == nullptr) {
+      continue;
+    }
+    const char *typeCStr = env->GetStringUTFChars(typeJStr, nullptr);
+    if (typeCStr != nullptr) {
+      typeNames.emplace_back(typeCStr);
+      env->ReleaseStringUTFChars(typeJStr, typeCStr);
+    }
+    env->DeleteLocalRef(typeJStr);
+  }
+
+  if (typeNames.empty()) {
+    return emptyResult();
+  }
+
+  // A new search cancels the previously running search (same as searchLocations)
+  {
+    std::lock_guard<std::mutex> guard(g_searchMutex);
+    if (g_currentBreaker) {
+      g_currentBreaker->Break();
+      g_currentBreaker = nullptr;
+    }
+    g_currentBreaker = std::make_shared<osmscout::ThreadedBreaker>();
+  }
+
+  std::vector<PoiEntry> entries;
+  const osmscout::GeoCoord center(lat, lon);
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef>& databases) {
+      osmscout::BreakerRef breaker;
+      {
+        std::lock_guard<std::mutex> guard(g_searchMutex);
+        breaker = g_currentBreaker;
+      }
+
+      for (const auto& db : databases) {
+        if (breaker && breaker->IsAborted()) {
+          break;
+        }
+        // The basemap is a low-zoom background map; it is not searched.
+        if (IsBasemapDatabase(db)) {
+          continue;
+        }
+
+        auto database = db->GetDatabase();
+        if (!database) {
+          continue;
+        }
+        auto typeConfig = database->GetTypeConfig();
+        if (!typeConfig) {
+          continue;
+        }
+
+        osmscout::TypeInfoSet nodeTypes;
+        osmscout::TypeInfoSet wayTypes;
+        osmscout::TypeInfoSet areaTypes;
+
+        for (const auto& typeName : typeNames) {
+          osmscout::TypeInfoRef typeInfo = typeConfig->GetTypeInfo(typeName);
+          if (!typeInfo) {
+            osmscout::log.Warn() << "There is no type " << typeName
+                                 << " in database " << db->path;
+            continue;
+          }
+          if (typeInfo->CanBeArea()) {
+            areaTypes.Set(typeInfo);
+          }
+          if (typeInfo->CanBeWay()) {
+            wayTypes.Set(typeInfo);
+          }
+          if (typeInfo->CanBeNode()) {
+            nodeTypes.Set(typeInfo);
+          }
+        }
+
+        if (nodeTypes.Empty() && wayTypes.Empty() && areaTypes.Empty()) {
+          continue;
+        }
+
+        std::vector<osmscout::NodeRef> nodes;
+        std::vector<osmscout::WayRef> ways;
+        std::vector<osmscout::AreaRef> areas;
+
+        try {
+          osmscout::POIService poiService(database);
+          poiService.GetPOIsInRadius(center,
+                                     osmscout::Distance::Of<osmscout::Meter>(radiusMeters),
+                                     nodeTypes, nodes,
+                                     wayTypes, ways,
+                                     areaTypes, areas);
+        } catch (const std::exception& e) {
+          osmscout::log.Error() << "Failed to load POIs in radius: " << e.what();
+          continue;
+        }
+
+        for (const auto& area : areas) {
+          PoiEntry entry;
+          if (BuildPoiEntry(area, center, entry)) {
+            entries.push_back(std::move(entry));
+          }
+        }
+        for (const auto& way : ways) {
+          PoiEntry entry;
+          if (BuildPoiEntry(way, center, entry)) {
+            entries.push_back(std::move(entry));
+          }
+        }
+        for (const auto& node : nodes) {
+          PoiEntry entry;
+          if (BuildPoiEntry(node, center, entry)) {
+            entries.push_back(std::move(entry));
+          }
+        }
+
+        if (static_cast<int>(entries.size()) >= limit) {
+          break;
+        }
+      }
+    });
+
+  // Nearest first
+  std::sort(entries.begin(), entries.end(),
+            [](const PoiEntry& a, const PoiEntry& b) { return a.distance < b.distance; });
+
+  if (entries.size() > static_cast<size_t>(limit)) {
+    entries.resize(static_cast<size_t>(limit));
+  }
+
+  jmethodID entryCtor = env->GetMethodID(entryCls, "<init>", "()V");
+  if (entryCtor == nullptr) {
+    return nullptr;
+  }
+  jfieldID labelField = env->GetFieldID(entryCls, "label", "Ljava/lang/String;");
+  jfieldID objectTypeField = env->GetFieldID(entryCls, "objectType", "Ljava/lang/String;");
+  jfieldID latField = env->GetFieldID(entryCls, "lat", "D");
+  jfieldID lonField = env->GetFieldID(entryCls, "lon", "D");
+  jfieldID distanceField = env->GetFieldID(entryCls, "distance", "D");
+
+  jobjectArray resultArray = env->NewObjectArray(static_cast<jsize>(entries.size()), entryCls, nullptr);
+  if (resultArray == nullptr) {
+    return nullptr;
+  }
+
+  for (jsize i = 0; i < static_cast<jsize>(entries.size()); i++) {
+    const PoiEntry& entry = entries[static_cast<size_t>(i)];
+    jobject jEntry = env->NewObject(entryCls, entryCtor);
+    env->SetObjectField(jEntry, labelField, env->NewStringUTF(entry.label.c_str()));
+    env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
+    env->SetDoubleField(jEntry, latField, entry.lat);
+    env->SetDoubleField(jEntry, lonField, entry.lon);
+    env->SetDoubleField(jEntry, distanceField, entry.distance);
+    env->SetObjectArrayElement(resultArray, i, jEntry);
+    env->DeleteLocalRef(jEntry);
+  }
+
+  return resultArray;
 }
