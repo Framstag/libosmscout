@@ -1292,6 +1292,30 @@ constexpr bool debugTiling = false;
         transformedCoastlines.end());
   }
 
+  bool WaterIndexProcessor::IsWaterArea(const CoastlineData& c)
+  {
+    assert(c.left==CoastState::land);
+    assert(c.right==CoastState::water);
+    if (c.points.size()<4) {
+      return false;
+    }
+
+    // AreaIsClockwise() picks the vertex with the minimum latitude and
+    // inspects its two neighbours to determine winding. CoastlineData
+    // rings store an explicit duplicated closing point (points.front()==
+    // points.back(), added by TransformCoastlines); if that shared point
+    // happens to be the minimum-latitude one, one of its "neighbours" is a
+    // zero-length duplicate of itself and the orientation test degenerates
+    // to a meaningless answer. Strip the duplicate first to avoid this.
+    if (c.points.front()==c.points.back()) {
+      std::vector<GeoCoord> ring(c.points.begin(),c.points.end()-1);
+
+      return AreaIsClockwise(ring);
+    }
+
+    return AreaIsClockwise(c.points);
+  }
+
   void WaterIndexProcessor::FilterEncapsulatedCoastlines(Progress& progress,
                                                          std::vector<CoastlineDataRef> &transformedCoastlines){
 
@@ -1346,7 +1370,7 @@ constexpr bool debugTiling = false;
       for (size_t index=0; index<transformedCoastlines.size(); index++) {
         CoastlineDataRef coastline = transformedCoastlines[index];
 
-        if (coastline && coastline->isArea) {
+        if (coastline && coastline->isArea && !IsWaterArea(*coastline)) {
           if (landBox.Intersects(coastline->boundingBox, false) &&
               IsAreaCompletelyInArea(coastline->points, land)){
             progress.Warning("Island " + std::to_string(coastline->id) + " is encapsulated in land");
@@ -1369,7 +1393,8 @@ constexpr bool debugTiling = false;
         CoastlineDataRef b = transformedCoastlines[bi];
         assert(ai!=bi);
 
-        if (a && b && a->isArea && b->isArea && b->left == CoastState::land) {
+        if (a && b && a->isArea && b->isArea && b->left == CoastState::land &&
+            !IsWaterArea(*b)) {
           if (a->boundingBox.Intersects(b->boundingBox, false) &&
               IsAreaCompletelyInArea(b->points, a->points)){
             progress.Warning("Island " + std::to_string(b->id) + " is encapsulated in island " + std::to_string(a->id));
