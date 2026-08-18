@@ -762,6 +762,18 @@ else
                install_dir: testInstallDir)
 endif
 
+if buildMapCairo
+#  MapPainterRouteTest = executable('MapPainterRouteTest',
+#               'src/MapPainterRouteTest.cpp',
+#               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
+#               dependencies: [mathDep, openmpDep, catch2MainDep, pangocairoDep],
+#               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+#               install: true,
+#               install_dir: testInstallDir)
+
+#  test('Check MapPainterRoute compilation', MapPainterRouteTest)
+endif
+
 if buildMapSkia
   MapPainterSkiaTest = executable('MapPainterSkiaTest',
                'src/MapPainterSkiaTest.cpp',
