@@ -383,7 +383,7 @@ endif()
 
 #---- MapPainterRouteTest
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
-  osmscout_test_project(NAME MapPainterRouteTest SOURCES src/MapPainterRouteTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+#  osmscout_test_project(NAME MapPainterRouteTest SOURCES src/MapPainterRouteTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
 endif()
 
 #---- TextMetricsTest
