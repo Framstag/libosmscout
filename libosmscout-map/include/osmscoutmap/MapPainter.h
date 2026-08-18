@@ -125,6 +125,14 @@ namespace osmscout {
     using StepMethod = void (MapPainter::*)(const Projection &, const MapParameter &, const std::vector<MapData>&);
 
   public:
+    /**
+     * Suggested layer value for overlay ways that must be drawn above all map
+     * ways (OSM layer values are typically -5..5). Callers set this value via
+     * the layer feature (LayerFeatureValue) on the way; the renderer is generic
+     * and just honors the layer of each way.
+     */
+    static constexpr int8_t routeLayer = 100;
+
     class OSMSCOUT_MAP_API DatabaseCacheEntry
     {
     public:

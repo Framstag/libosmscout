@@ -764,6 +764,10 @@
 
     TypeInfoRef route=std::make_shared<TypeInfo>("_route");
     route->SetInternal().CanBeWay(true);
+    // The layer feature allows apps to stack the active route above all map ways
+    // (bridges, tunnels) by setting a layer value on the route way. The renderer
+    // stays generic: it just honors the layer of each way.
+    route->AddFeature(featureLayer);
     RegisterType(route);
 
     //

@@ -38,6 +38,7 @@
 #include <osmscoutclient/Settings.h>
 
 #include <osmscoutmap/MapData.h>
+#include <osmscoutmap/MapPainter.h>
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapService.h>
 
@@ -56,6 +57,7 @@
 #include <osmscout/db/TextSearchIndex.h>
 #endif
 #include <osmscout/feature/NameFeature.h>
+#include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
@@ -977,6 +979,20 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
             osmscout::TypeInfoRef routeType = typeConfig->GetTypeInfo("_route");
             if (routeType) {
               routeWay->SetType(routeType);
+
+              // Stack the active route above all map ways (bridges, tunnels):
+              // set the layer feature value on the route way. The renderer is
+              // generic and just honors the layer of each way.
+              osmscout::FeatureValueBuffer routeFeatures;
+              routeFeatures.SetType(routeType);
+              size_t featureIndex;
+              if (routeType->GetFeature(osmscout::LayerFeature::NAME,
+                                        featureIndex)) {
+                auto* value=static_cast<osmscout::LayerFeatureValue*>(routeFeatures.AllocateValue(featureIndex));
+                value->SetLayer(osmscout::MapPainter::routeLayer);
+              }
+              routeWay->SetFeatures(routeFeatures);
+
               batch.back().poiWays.push_back(routeWay);
             }
 

@@ -35,6 +35,9 @@ SYMBOL search_marker
 
 STYLE
   [MAG world-] {
+    // Active route: white casing + red fill so it is visible on any road color,
+    // including red primary roads. The outline is drawn first (lower priority).
+    [TYPE _route] WAY#outline { color: #ffffff; displayWidth: 2.2mm; width: 8m; priority: 99; }
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100; }
 
     // Imported GPX track. Rendered as a thinner blue polyline so it is
