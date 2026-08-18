@@ -176,6 +176,11 @@ CONST
 
   COLOR beachColor                 = #eecc55;
   COLOR caveColor                  = #6b4423; // cave entrance icon (dark brown)
+  COLOR bareRockColor              = #eee5dc; // light beige rock color
+  COLOR cliffColor                 = #999999; // cliff line/label grey
+  COLOR mudColor                   = #cbb19a4d; // semi-transparent mud brown
+  COLOR sandColor                  = #f5e9c6; // light sand yellow
+  COLOR screeColor                 = #eee5dc; // light grey-beige scree
 
   COLOR brownFieldColor            = #b6b592;
   COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
@@ -440,6 +445,16 @@ STYLE
       [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
       [TYPE natural_water] AREA { color: @waterColor; }
       [TYPE natural_land] AREA { color: @landColor; }
+      [TYPE natural_rock, natural_blockfield, natural_arch, natural_blowhole] AREA { color: @bareRockColor; }
+      [TYPE natural_reef, natural_shoal, natural_strait] AREA { color: @waterColor; }
+      [TYPE natural_waterfall] AREA { color: @waterColor; }
+      [TYPE natural_isthmus, natural_peninsula] AREA { color: @landColor; }
+      [TYPE natural_shrubbery] AREA { color: @scrubColor; }
+      [TYPE natural_moor, natural_tundra] AREA { color: @fellColor; }
+      [TYPE natural_crevasse] AREA { color: @glacierColor; }
+      [TYPE natural_dune] AREA { color: @sandColor; }
+      [TYPE natural_sinkhole] AREA { color: @mudColor; }
+      [TYPE natural_tree_group] AREA { color: @woodColor; }
     }
 
     [MAG city-] {
@@ -457,9 +472,24 @@ STYLE
             natural_wetland_marsh,
             natural_wetland_tidalflat,
             natural_beach,
-            natural_land] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
+            natural_land,
+            natural_rock,
+            natural_blockfield,
+            natural_arch,
+            natural_blowhole,
+            natural_isthmus,
+            natural_peninsula,
+            natural_shrubbery,
+            natural_moor,
+            natural_tundra,
+            natural_crevasse,
+            natural_dune,
+            natural_sinkhole,
+            natural_tree_group] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; autoSize: true;}
 
       [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
+      [TYPE natural_reef, natural_shoal, natural_strait] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
+      [TYPE natural_waterfall] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
 
       [TYPE natural_peak] {
         NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
@@ -468,6 +498,14 @@ STYLE
       [TYPE natural_volcano] {
         NODE.TEXT#volcanoName { label: IName; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 1; }
         NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 2;}
+      }
+      [TYPE natural_hill] {
+        NODE.TEXT#hillName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+        NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+      }
+      [TYPE natural_saddle] {
+        NODE.TEXT#saddleName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+        NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
       }
     }
 

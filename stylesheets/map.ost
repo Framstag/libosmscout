@@ -797,6 +797,159 @@ TYPES
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
 
+  TYPE natural_tree_row
+    = WAY ("natural"=="tree_row")
+      {Name, NameAlt}
+
+  TYPE natural_shrub
+    = NODE ("natural"=="shrub")
+      {Name, NameAlt}
+
+  TYPE natural_shrubbery
+    = AREA ("natural"=="shrubbery")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_tree_group
+    = NODE AREA ("natural"=="tree_group")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_tree_stump
+    = NODE ("natural"=="tree_stump")
+      {Name, NameAlt}
+
+  TYPE natural_moor
+    = NODE AREA ("natural"=="moor")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE natural_tundra
+    = NODE AREA ("natural"=="tundra")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE natural_coastline
+    = WAY ("natural"=="coastline")
+      {Name, NameAlt}
+
+  TYPE natural_reef
+    = AREA ("natural"=="reef")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_shoal
+    = NODE AREA ("natural"=="shoal")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_strait
+    = NODE AREA ("natural"=="strait")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_isthmus
+    = NODE AREA ("natural"=="isthmus")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_peninsula
+    = NODE AREA ("natural"=="peninsula")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_cape
+    = NODE ("natural"=="cape")
+      {Name, NameAlt}
+
+  TYPE natural_blowhole
+    = NODE AREA ("natural"=="blowhole")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_hot_spring
+    = NODE ("natural"=="hot_spring")
+      {Name, NameAlt}
+
+  TYPE natural_geyser
+    = NODE ("natural"=="geyser")
+      {Name, NameAlt}
+
+  TYPE natural_waterfall
+    = NODE WAY AREA ("natural"=="waterfall")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_arch
+    = NODE WAY AREA ("natural"=="arch")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_arete
+    = WAY ("natural"=="arete")
+      {Name, NameAlt}
+
+  TYPE natural_blockfield
+    = AREA ("natural"=="blockfield")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_crevasse
+    = WAY AREA ("natural"=="crevasse")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_dune
+    = NODE WAY AREA ("natural"=="dune")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_earth_bank
+    = WAY ("natural"=="earth_bank")
+      {Name, NameAlt}
+
+  TYPE natural_fumarole
+    = NODE ("natural"=="fumarole")
+      {Name, NameAlt}
+
+  TYPE natural_gorge
+    = WAY ("natural"=="gorge")
+      {Name, NameAlt}
+
+  TYPE natural_gully
+    = WAY ("natural"=="gully")
+      {Name, NameAlt}
+
+  TYPE natural_hill
+    = NODE ("natural"=="hill")
+      {Name, NameAlt, Ele}
+
+  TYPE natural_ridge
+    = WAY ("natural"=="ridge")
+      {Name, NameAlt}
+
+  TYPE natural_rock
+    = NODE AREA ("natural"=="rock")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_saddle
+    = NODE ("natural"=="saddle")
+      {Name, NameAlt, Ele}
+
+  TYPE natural_sinkhole
+    = NODE AREA ("natural"=="sinkhole")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE natural_stone
+    = NODE ("natural"=="stone")
+      {Name, NameAlt}
+
+  TYPE natural_valley
+    = NODE WAY ("natural"=="valley")
+      {Name, NameAlt}
+
   //
   // Man made
   //
