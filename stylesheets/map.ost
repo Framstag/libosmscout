@@ -990,6 +990,12 @@ TYPES
     = NODE ("amenity"=="drinking_water" OR ("amenity"=="fountain" AND "drinking_water"=="yes"))
       GROUP amenity
 
+  TYPE amenity_doctors
+    = NODE AREA ("amenity"=="doctors")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
   TYPE amenity_ev_charging
     IGNORE // No visualisation yet
     = NODE ("amenity"=="ev_charging")
@@ -1091,6 +1097,12 @@ TYPES
   TYPE amenity_pharmacy
     = NODE AREA ("amenity"=="pharmacy" OR "shop"=="pharmacy")
       {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_police
+    = NODE AREA ("amenity"=="police")
+      {Name, NameAlt, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 

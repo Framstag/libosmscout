@@ -227,10 +227,10 @@ constexpr bool debugGroundTiles = false;
     log.Debug() << "MapPainter::~MapPainter()";
   }
 
-  TextMetrics MapPainter::MeasureText(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const std::string& text,
-                                      double fontSize)
+  TextMetrics MapPainter::MeasureText([[maybe_unused]] const Projection& projection,
+                                      [[maybe_unused]] const MapParameter& parameter,
+                                      [[maybe_unused]] const std::string& text,
+                                      [[maybe_unused]] double fontSize)
   {
     // Default implementation: no measurement support.
     return TextMetrics{};
