@@ -70,10 +70,117 @@ class PoiCategoriesTest {
     @Test
     void categoryTypesContainsAllCategories() {
         Map<String, String[]> all = PoiCategories.getCategoryTypes();
-        assertEquals(3, all.size());
+        assertEquals(14, all.size());
         assertTrue(all.containsKey(PoiCategories.HOTELS));
         assertTrue(all.containsKey(PoiCategories.RESTAURANTS));
         assertTrue(all.containsKey(PoiCategories.GROCERY));
+        assertTrue(all.containsKey(PoiCategories.VIEWPOINT));
+        assertTrue(all.containsKey(PoiCategories.MUSEUM));
+        assertTrue(all.containsKey(PoiCategories.FUEL));
+        assertTrue(all.containsKey(PoiCategories.CHARGING_STATION));
+        assertTrue(all.containsKey(PoiCategories.ATM));
+        assertTrue(all.containsKey(PoiCategories.TOURISM));
+        assertTrue(all.containsKey(PoiCategories.PARKING));
+        assertTrue(all.containsKey(PoiCategories.POLICE));
+        assertTrue(all.containsKey(PoiCategories.HOSPITAL));
+        assertTrue(all.containsKey(PoiCategories.DOCTORS));
+        assertTrue(all.containsKey(PoiCategories.PUBLIC_TRANSPORT));
+    }
+
+    @Test
+    void viewpointMapsToViewpointTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.VIEWPOINT);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("tourism_viewpoint"));
+    }
+
+    @Test
+    void museumMapsToMuseumTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.MUSEUM);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("tourism_museum"));
+        assertTrue(Arrays.asList(types).contains("tourism_museum_building"));
+    }
+
+    @Test
+    void fuelMapsToFuelTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.FUEL);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_fuel"));
+        assertTrue(Arrays.asList(types).contains("amenity_fuel_building"));
+    }
+
+    @Test
+    void chargingStationMapsToChargingStationType() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.CHARGING_STATION);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_charging_station"));
+        assertFalse(Arrays.asList(types).contains("amenity_ev_charging"),
+            "amenity_ev_charging is IGNOREd in map.ost and not searchable");
+    }
+
+    @Test
+    void atmMapsToAtmType() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.ATM);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_atm"));
+    }
+
+    @Test
+    void tourismMapsToTourismTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.TOURISM);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("tourism_attraction"));
+        assertTrue(Arrays.asList(types).contains("tourism_viewpoint"));
+        assertTrue(Arrays.asList(types).contains("tourism_information"));
+        assertFalse(Arrays.asList(types).contains("tourism_hotel"),
+            "hotels belong to the hotels category, not the tourism umbrella");
+    }
+
+    @Test
+    void parkingMapsToParkingTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.PARKING);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_parking"));
+        assertTrue(Arrays.asList(types).contains("amenity_bicycle_parking"));
+        assertFalse(Arrays.asList(types).contains("amenity_parking_entrance"),
+            "amenity_parking_entrance is IGNOREd in map.ost and not searchable");
+        assertFalse(Arrays.asList(types).contains("amenity_parking_space"),
+            "amenity_parking_space is IGNOREd in map.ost and not searchable");
+    }
+
+    @Test
+    void policeMapsToPoliceType() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.POLICE);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_police"));
+    }
+
+    @Test
+    void hospitalMapsToHospitalTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.HOSPITAL);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_hospital"));
+        assertTrue(Arrays.asList(types).contains("amenity_hospital_building"));
+    }
+
+    @Test
+    void doctorsMapsToDoctorsType() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.DOCTORS);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("amenity_doctors"));
+    }
+
+    @Test
+    void publicTransportMapsToPublicTransportTypes() {
+        String[] types = PoiCategories.getTypeNames(PoiCategories.PUBLIC_TRANSPORT);
+        assertNotNull(types);
+        assertTrue(Arrays.asList(types).contains("railway_station"));
+        assertTrue(Arrays.asList(types).contains("railway_halt"));
+        assertTrue(Arrays.asList(types).contains("railway_tram_stop"));
+        assertTrue(Arrays.asList(types).contains("amenity_bus_station"));
+        assertTrue(Arrays.asList(types).contains("public_transport_platform"));
+        assertTrue(Arrays.asList(types).contains("railway_subway_entrance"));
     }
 
     @Test

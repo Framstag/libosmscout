@@ -48,10 +48,21 @@ public class PoiSearchOverlayTest {
         PoiSearchOverlay overlay = createOverlay();
         ComboBox<String> combo = (ComboBox<String>) getField(overlay, "categoryCombo");
 
-        assertEquals(3, combo.getItems().size());
+        assertEquals(14, combo.getItems().size());
         assertTrue(combo.getItems().contains("Hotels"));
         assertTrue(combo.getItems().contains("Restaurants"));
         assertTrue(combo.getItems().contains("Grocery store"));
+        assertTrue(combo.getItems().contains("Viewpoint"));
+        assertTrue(combo.getItems().contains("Museum"));
+        assertTrue(combo.getItems().contains("Gas station"));
+        assertTrue(combo.getItems().contains("Charging station"));
+        assertTrue(combo.getItems().contains("ATM"));
+        assertTrue(combo.getItems().contains("Tourism"));
+        assertTrue(combo.getItems().contains("Parking"));
+        assertTrue(combo.getItems().contains("Police station"));
+        assertTrue(combo.getItems().contains("Hospital"));
+        assertTrue(combo.getItems().contains("Doctors office"));
+        assertTrue(combo.getItems().contains("Public transport"));
         assertEquals(0, combo.getSelectionModel().getSelectedIndex(),
             "first category should be preselected");
     }

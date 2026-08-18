@@ -50,6 +50,17 @@ public class PoiSearchOverlay extends StackPane {
             {"Hotels", PoiCategories.HOTELS},
             {"Restaurants", PoiCategories.RESTAURANTS},
             {"Grocery store", PoiCategories.GROCERY},
+            {"Viewpoint", PoiCategories.VIEWPOINT},
+            {"Museum", PoiCategories.MUSEUM},
+            {"Gas station", PoiCategories.FUEL},
+            {"Charging station", PoiCategories.CHARGING_STATION},
+            {"ATM", PoiCategories.ATM},
+            {"Tourism", PoiCategories.TOURISM},
+            {"Parking", PoiCategories.PARKING},
+            {"Police station", PoiCategories.POLICE},
+            {"Hospital", PoiCategories.HOSPITAL},
+            {"Doctors office", PoiCategories.DOCTORS},
+            {"Public transport", PoiCategories.PUBLIC_TRANSPORT},
     };
 
     /** Long-press timeout on result entries (same default as map long-press). */
