@@ -89,4 +89,43 @@ class ObjectDescriptionTest {
         assertEquals("B", desc.getEntries().get(1).labelKey);
         assertEquals("C", desc.getEntries().get(2).labelKey);
     }
+
+    @Test
+    void testObjectIdentityFields() {
+        DescriptionEntry entry = new DescriptionEntry();
+        entry.sectionKey = "General";
+        entry.labelKey = "Type";
+        entry.value = "building";
+
+        ObjectDescription desc = new ObjectDescription(
+            List.of(entry), 51.5, 7.4, "area", "building", 123456789L);
+
+        assertEquals(51.5, desc.getObjectLat());
+        assertEquals(7.4, desc.getObjectLon());
+        assertEquals("area", desc.getObjectRefType());
+        assertEquals("building", desc.getObjectTypeName());
+        assertEquals(123456789L, desc.getObjectFileOffset());
+    }
+
+    @Test
+    void testLegacyConstructorsDefaultIdentity() {
+        DescriptionEntry entry = new DescriptionEntry();
+        entry.sectionKey = "General";
+        entry.labelKey = "Type";
+        entry.value = "building";
+
+        ObjectDescription desc = new ObjectDescription(List.of(entry));
+        assertNull(desc.getObjectRefType());
+        assertNull(desc.getObjectTypeName());
+        assertEquals(0L, desc.getObjectFileOffset());
+        assertTrue(Double.isNaN(desc.getObjectLat()));
+        assertTrue(Double.isNaN(desc.getObjectLon()));
+
+        ObjectDescription desc2 = new ObjectDescription(List.of(entry), 51.5, 7.4);
+        assertEquals(51.5, desc2.getObjectLat());
+        assertEquals(7.4, desc2.getObjectLon());
+        assertNull(desc2.getObjectRefType());
+        assertNull(desc2.getObjectTypeName());
+        assertEquals(0L, desc2.getObjectFileOffset());
+    }
 }

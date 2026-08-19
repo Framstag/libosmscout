@@ -1,8 +1,4 @@
-## Purpose
-
-Describe the behavior of the long-press description feature in JavaScout. On mouse long press, the system finds the most reasonable visible object at the pressed coordinate, retrieves a structured description via `DescriptionService`, and displays it in a dynamic overlay dialog.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Long press triggers object description lookup
 
@@ -56,59 +52,6 @@ The system SHALL detect mouse long press on the map canvas and gather all reason
 - **THEN** the system SHALL NOT trigger a description lookup
 - **WHEN** the user presses and holds for 1000ms
 - **THEN** the system SHALL trigger a description lookup
-
-### Requirement: Description overlay dialog
-
-The system SHALL display the object description in a dynamic overlay dialog that adapts to the `ObjectDescription` structure.
-
-#### Scenario: Dialog shows description sections
-- **GIVEN** an `ObjectDescription` with entries in sections "General", "Location", "Contact"
-- **WHEN** the description dialog opens
-- **THEN** the dialog SHALL display "General" as a section header
-- **AND** the dialog SHALL display "Location" as a section header
-- **AND** the dialog SHALL display "Contact" as a section header
-- **AND** each section SHALL contain its label/value pairs indented below the header
-
-#### Scenario: Dialog shows subsections
-- **GIVEN** an `ObjectDescription` with entries having subsection "Lanes" under section "Way"
-- **WHEN** the description dialog opens
-- **THEN** the dialog SHALL display "Lanes" as a subsection header indented under "Way"
-- **AND** label/value pairs under "Lanes" SHALL be further indented
-
-#### Scenario: Dialog shows indexed subsections
-- **GIVEN** an `ObjectDescription` with multiple entries having the same subsection key but different index values
-- **WHEN** the description dialog opens
-- **THEN** the dialog SHALL display the subsection header once
-- **AND** SHALL group entries with the same index together
-- **AND** SHALL repeat the subsection header for each new index value
-
-#### Scenario: Fullscreen on small screen
-- **GIVEN** the window width is less than 600px
-- **WHEN** the description dialog opens
-- **THEN** the dialog SHALL fill the entire window
-- **AND** the content area SHALL be scrollable
-
-#### Scenario: Centered overlay on desktop
-- **GIVEN** the window width is 600px or greater
-- **WHEN** the description dialog opens
-- **THEN** the dialog SHALL appear as a centered overlay
-- **AND** SHALL NOT fill the entire window
-
-#### Scenario: Close dialog by clicking outside
-- **GIVEN** the description dialog is open
-- **WHEN** the user clicks outside the dialog content area
-- **THEN** the dialog SHALL close with a fade animation
-
-#### Scenario: Close dialog by Escape key
-- **GIVEN** the description dialog is open
-- **WHEN** the user presses the Escape key
-- **THEN** the dialog SHALL close
-
-#### Scenario: Scrolling long descriptions
-- **GIVEN** the description content exceeds the available window height
-- **WHEN** the dialog is open
-- **THEN** the content area SHALL be scrollable
-- **AND** a scroll indicator SHALL be visible
 
 ### Requirement: JNI bridge for DescriptionService
 

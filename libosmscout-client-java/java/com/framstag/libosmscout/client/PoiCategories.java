@@ -55,11 +55,14 @@ public final class PoiCategories {
     /** Category id for public transport stops and stations. */
     public static final String PUBLIC_TRANSPORT = "public_transport";
 
+    /** Map from category id to the OSM types that belong to it. */
     private static final Map<String, String[]> CATEGORY_TYPES = createCategoryTypes();
 
+    /** Private constructor to prevent instantiation of the utility class. */
     private PoiCategories() {
     }
 
+    /** Build the category id → OSM types mapping. */
     private static Map<String, String[]> createCategoryTypes() {
         Map<String, String[]> map = new LinkedHashMap<>();
         map.put(HOTELS, new String[]{
