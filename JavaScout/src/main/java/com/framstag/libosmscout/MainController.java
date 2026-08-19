@@ -54,6 +54,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
@@ -1806,19 +1807,36 @@ public class MainController implements Initializable {
             return;
         }
 
-        Task<ObjectDescription> descTask = new Task<>() {
+        Task<List<ObjectDescription>> descTask = new Task<>() {
             @Override
-            protected ObjectDescription call() {
-                return client.getDescription(lat, lon);
+            protected List<ObjectDescription> call() {
+                int mag = renderer != null ? renderer.getMagnification() : 18;
+                return client.getDescriptionCandidates(lat, lon, mag);
             }
         };
 
         descTask.setOnSucceeded(e -> {
-            ObjectDescription desc = descTask.getValue();
-            if (desc == null || desc.getEntries().isEmpty()) {
+            List<ObjectDescription> candidates = descTask.getValue();
+            if (candidates == null || candidates.isEmpty()) {
+                // No reasonable candidate — show "No description available"
+                showDescriptionOverlay(new ObjectDescription(List.of()));
                 return;
             }
-            showDescriptionOverlay(desc);
+            if (candidates.size() == 1) {
+                // Single candidate — show details directly
+                showDescriptionOverlay(candidates.get(0));
+                return;
+            }
+            // Multiple candidates — let the user choose
+            try {
+                CandidatePickerOverlay picker = new CandidatePickerOverlay(
+                    uiScale, candidates, this::showDescriptionOverlay);
+                mapPanel.getChildren().add(picker);
+                picker.open();
+            } catch (Throwable t) {
+                Log.error("[MainController] candidate picker failed: " + t);
+                t.printStackTrace();
+            }
         });
 
         descTask.setOnFailed(e -> {

@@ -1,5 +1,7 @@
 package com.framstag.libosmscout.client;
 
+import java.util.List;
+
 /**
  * Client object for libosmscout.
  *
@@ -70,8 +72,10 @@ public class OSMScoutClient {
      * text search index for free-text hits on named objects.
      * Results are sorted by relevance (type priority, distance, match quality).
      *
-     * @param query free-text search string (e.g. "Berlin", "Dortmund Hbf")
-     * @param limit maximum number of results to return
+     * @param query         free-text search string (e.g. "Berlin", "Dortmund Hbf")
+     * @param limit         maximum number of results to return
+     * @param defaultRegion optional region name to scope the search, or null
+     * @param cancel        if true, cancel any in-progress search and return empty
      * @return array of matching LocationEntry objects, or empty array if none found
      */
     public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion, boolean cancel);
@@ -170,6 +174,23 @@ public class OSMScoutClient {
      * @return ObjectDescription with entries, or empty description if no object found
      */
     public native ObjectDescription getDescription(double lat, double lon);
+
+    /**
+     * Get a list of structured descriptions of all reasonable visible objects
+     * at the given geographic coordinate.
+     * <p>
+     * Queries objects in a small bounding box around the coordinate, ranks
+     * them by (has description data, visible at the given magnification,
+     * proximity), and returns one {@link ObjectDescription} per ranked
+     * candidate, each carrying its object identity (ref type, type name,
+     * file offset).
+     *
+     * @param lat          latitude in degrees
+     * @param lon          longitude in degrees
+     * @param magnification current map magnification (0 = world, higher = more zoomed in)
+     * @return ranked list of candidate descriptions, or empty list if no object found
+     */
+    public native List<ObjectDescription> getDescriptionCandidates(double lat, double lon, int magnification);
 
     /**
      * Calculate a route between two coordinates asynchronously with a routing profile.
