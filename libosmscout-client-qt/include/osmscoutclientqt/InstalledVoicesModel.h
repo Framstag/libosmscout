@@ -28,10 +28,15 @@
 
 #include <QAbstractListModel>
 #include <QList>
+#include <QUrl>
+
+#include <memory>
 
 namespace osmscout {
 
 class VoiceCorePlayer;
+class TTSEngine;
+class TTSMessageGeneratorQt;
 
 /**
  * Model providing access to currently installed voices on device
@@ -52,9 +57,15 @@ private:
 signals:
   void voiceChanged(const QString);
 
+  // Piper TTS engine runs asynchronously on its own thread, these signals are
+  // used to invoke it (via queued connections) from playTTSSample().
+  void initTTSVoiceRequested(const Voice &voice);
+  void playTTSMessageRequested(QString message);
+
 public slots:
   void update();
   void onVoiceChanged(const QString&);
+  void playTTSAudio(const QList<QUrl> &audioFiles);
 
 public:
   InstalledVoicesModel();
@@ -81,6 +92,18 @@ public:
 
   Q_INVOKABLE void select(const QModelIndex &index);
   Q_INVOKABLE void playSample(const QModelIndex &index, const QStringList &sample);
+
+  /**
+   * Play a synthesized voice sample for a Piper TTS voice at the given index.
+   * Unlike playSample() (which plays pre-recorded "Voice of Marble" ogg
+   * files), this synthesizes a short, representative navigation message using
+   * TTSMessageGeneratorQt and PiperTTSEngine. It is a no-op for non-Piper (or
+   * invalid) voices, or when the library was built without libpiper support.
+   */
+  Q_INVOKABLE void playTTSSample(const QModelIndex &index);
+private:
+  void EnsureTTSEngine();
+
 private:
   QString voiceDir;
   QList<Voice> voices;
@@ -89,6 +112,12 @@ private:
 
   // we setup QObject parents, objects are cleaned after Module destruction
   VoiceCorePlayer *mediaPlayer{nullptr};
+
+  // Piper TTS sample playback: the engine lives in its own background
+  // thread (see TTSEngine), created lazily on first use.
+  TTSEngine *ttsEngine{nullptr};
+  std::shared_ptr<TTSMessageGeneratorQt> ttsMessageGenerator;
+  QString ttsMessageLanguage; // language currently loaded into ttsMessageGenerator
 };
 }
 #endif //OSMSCOUT_CLIENT_QT_INSTALLEDVOICESMODEL_H

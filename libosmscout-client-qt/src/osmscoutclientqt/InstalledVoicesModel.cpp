@@ -20,8 +20,23 @@
 #include <osmscoutclientqt/InstalledVoicesModel.h>
 #include <osmscoutclientqt/OSMScoutQt.h>
 #include <osmscoutclientqt/VoicePlayer.h>
+#include <osmscoutclientqt/ClientQtFeatures.h>
+#include <osmscoutclientqt/TTSEngine.h>
+#include <osmscoutclientqt/TTSMessageGeneratorQt.h>
+#ifdef OSMSCOUT_HAVE_LIB_PIPER
+#include <osmscoutclientqt/PiperTTSEngine.h>
+#endif
+
+#include <osmscout/navigation/VoiceInstructionAgent.h>
+#include <osmscout/util/Locale.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
+#include <QRandomGenerator>
+#endif
 
 #include <algorithm>
+#include <array>
+#include <utility>
 
 namespace osmscout {
 
@@ -42,7 +57,13 @@ InstalledVoicesModel::InstalledVoicesModel()
 }
 
 InstalledVoicesModel::~InstalledVoicesModel()
-{}
+{
+  if (ttsEngine != nullptr) {
+    // engine lives in its own thread, delete it there
+    ttsEngine->deleteLater();
+    ttsEngine = nullptr;
+  }
+}
 
 namespace {
 bool voiceItemLessThan(const Voice &i1, const Voice &i2)
@@ -153,6 +174,95 @@ void InstalledVoicesModel::playSample(const QModelIndex &index, const QStringLis
 
   mediaPlayer->setCurrentIndex(0);
   mediaPlayer->play();
+}
+
+void InstalledVoicesModel::EnsureTTSEngine()
+{
+#ifdef OSMSCOUT_HAVE_LIB_PIPER
+  if (ttsEngine==nullptr){
+    ttsEngine = new PiperTTSEngine(OSMScoutQt::GetInstance().GetEspeakDataDir());
+
+    // ttsEngine lives in its own background thread, invoke it asynchronously
+    connect(this, &InstalledVoicesModel::initTTSVoiceRequested,
+            ttsEngine, &TTSEngine::initVoice, Qt::QueuedConnection);
+    connect(this, &InstalledVoicesModel::playTTSMessageRequested,
+            ttsEngine, &TTSEngine::playMessage, Qt::QueuedConnection);
+    connect(ttsEngine, &TTSEngine::playAudioFilesRequest,
+            this, &InstalledVoicesModel::playTTSAudio, Qt::QueuedConnection);
+  }
+#endif
+}
+
+void InstalledVoicesModel::playTTSAudio(const QList<QUrl> &audioFiles)
+{
+  if (mediaPlayer==nullptr){
+    mediaPlayer = new VoiceCorePlayer(this);
+  }
+
+  mediaPlayer->clearQueue();
+  for (const auto &audioFile : audioFiles){
+    qDebug() << "Adding to playlist:" << audioFile;
+    mediaPlayer->addToQueue(audioFile);
+  }
+  mediaPlayer->setCurrentIndex(0);
+  mediaPlayer->play();
+}
+
+void InstalledVoicesModel::playTTSSample([[maybe_unused]] const QModelIndex &index)
+{
+#ifdef OSMSCOUT_HAVE_LIB_PIPER
+  if (index.row() < 0 || index.row() >= voices.size()){
+    return;
+  }
+  auto voice=voices.at(index.row());
+  if (!voice.isValid() || !voice.isPiper() || !voice.getDir().exists()){
+    return;
+  }
+
+  EnsureTTSEngine();
+  assert(ttsEngine!=nullptr);
+
+  if (ttsMessageGenerator==nullptr){
+    ttsMessageGenerator = std::make_shared<TTSMessageGeneratorQt>(OSMScoutQt::GetInstance().GetNavigationTranslationDir());
+  }
+  if (ttsMessageLanguage != voice.getLangCode()){
+    ttsMessageGenerator->SetLanguage(voice.getLangCode().toStdString());
+    ttsMessageLanguage = voice.getLangCode();
+  }
+  ttsMessageGenerator->SetUnits(Locale::ByEnvironmentSafe().GetDistanceUnits());
+
+  if (ttsEngine->getVoice().getDir() != voice.getDir()){
+    emit initTTSVoiceRequested(voice);
+  }
+
+  // A handful of representative maneuver combinations, in the same spirit as
+  // the "Voice of Marble" sample sets used above for pre-recorded voices.
+  using Type = VoiceMessageStruct::Type;
+  static const std::array<std::pair<VoiceMessageStruct, VoiceMessageStruct>, 5> samples{{
+    {VoiceMessageStruct(Type::TurnRight, Meters(500)), VoiceMessageStruct()},
+    {VoiceMessageStruct(Type::LeaveRbExit3, Meters(50)), VoiceMessageStruct(Type::StraightOn, Meters(100))},
+    {VoiceMessageStruct(Type::LeaveMotorwayRight, Meters(800)), VoiceMessageStruct()},
+    {VoiceMessageStruct(Type::TurnLeft, Meters(300)), VoiceMessageStruct()},
+    {VoiceMessageStruct(Type::LeaveMotorwayLeft, Meters(1500)), VoiceMessageStruct()}
+  }};
+
+  size_t sampleIndex;
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0) /* For compatibility with QT 5.6 */
+  sampleIndex = qrand() % samples.size();
+#else
+  sampleIndex = QRandomGenerator::global()->bounded(int(samples.size()));
+#endif
+
+  const auto &sample = samples[sampleIndex];
+  auto text = ttsMessageGenerator->GenerateMessage(Meters(0), sample.first, sample.second);
+  if (!text.has_value()){
+    return;
+  }
+
+  emit playTTSMessageRequested(QString::fromStdString(*text));
+#else
+  qWarning() << "Piper TTS support not built, cannot play synthesized sample";
+#endif
 }
 QHash<int, QByteArray> InstalledVoicesModel::roleNames() const
 {

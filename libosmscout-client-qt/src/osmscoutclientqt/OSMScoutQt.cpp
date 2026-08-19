@@ -525,4 +525,9 @@ QString OSMScoutQt::GetNavigationTranslationDir() const
 {
   return navigationTranslationDir;
 }
+
+QString OSMScoutQt::GetEspeakDataDir() const
+{
+  return espeakDataDir;
+}
 }
