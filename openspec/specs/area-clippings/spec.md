@@ -1,6 +1,8 @@
 # Area Clippings
 
-**Purpose:** The Skia backend supports `AreaData::clippings` (interior holes) using the even-odd fill rule.
+## Purpose
+
+The Skia backend supports `AreaData::clippings` (interior holes) using the even-odd fill rule.
 
 ## Requirements
 

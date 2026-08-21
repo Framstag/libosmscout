@@ -1,6 +1,8 @@
 # Label Rendering
 
-**Purpose:** The Skia backend renders text labels in three styles: normal (solid text), emphasize (outline effect), and shield (background rectangle with border).
+## Purpose
+
+The Skia backend renders text labels in three styles: normal (solid text), emphasize (outline effect), and shield (background rectangle with border).
 
 ## Requirements
 

@@ -1,6 +1,8 @@
 # Line Alpha Transparency
 
-**Purpose:** The Skia backend uses `SkColorSetARGB` (or equivalent) throughout to preserve the alpha channel from the `Color` object in all drawing operations.
+## Purpose
+
+The Skia backend uses `SkColorSetARGB` (or equivalent) throughout to preserve the alpha channel from the `Color` object in all drawing operations.
 
 ## Requirements
 

@@ -197,34 +197,13 @@ public class SearchOverlay extends StackPane {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    VBox box = new VBox(uiScale.px(2));
-                    box.setPadding(new Insets(uiScale.px(4), uiScale.px(6), uiScale.px(4), uiScale.px(6)));
-
-                    // Line 1: match quality + label + address + postal area + region,
-                    // with the distance to the map center right-aligned
                     String line1 = buildLine1(item);
-                    HBox line1Box = new HBox(uiScale.px(6));
-                    line1Box.setAlignment(Pos.CENTER_LEFT);
-
-                    Label label1 = new Label(line1);
-                    label1.getStyleClass().add("search-result-line1");
-                    label1.setMaxWidth(Double.MAX_VALUE);
-                    HBox.setHgrow(label1, Priority.ALWAYS);
-
-                    double distanceMeters = LocationSearchRanker.haversine(
-                            mapCenterLat, mapCenterLon, item.lat, item.lon);
-                    Label distanceLabel = new Label(LocationSearchRanker.formatDistanceKm(distanceMeters));
-                    distanceLabel.getStyleClass().add("search-result-distance");
-
-                    line1Box.getChildren().addAll(label1, distanceLabel);
 
                     // Line 2: admin region hierarchy
                     String line2 = "";
                     if (item.adminRegionHierarchy != null && !item.adminRegionHierarchy.isEmpty()) {
                         line2 = "   \u2192 " + item.adminRegionHierarchy;
                     }
-                    Label label2 = new Label(line2);
-                    label2.getStyleClass().add("search-result-line2");
 
                     // Line 3: object type + offset
                     String line3 = "";
@@ -232,11 +211,11 @@ public class SearchOverlay extends StackPane {
                         String refType = item.type != null ? item.type : "object";
                         line3 = "   - " + refType + " " + item.objectFileOffset + " " + item.objectTypeName;
                     }
-                    Label label3 = new Label(line3);
-                    label3.getStyleClass().add("search-result-line3");
 
-                    box.getChildren().addAll(line1Box, label2, label3);
-                    setGraphic(box);
+                    double distanceMeters = LocationSearchRanker.haversine(
+                            mapCenterLat, mapCenterLon, item.lat, item.lon);
+                    String distanceKm = LocationSearchRanker.formatDistanceKm(distanceMeters);
+                    setGraphic(SearchResultCell.create(uiScale, line1, line2, line3, distanceKm));
                 }
             }
         });

@@ -39,11 +39,16 @@ JavaScout SHALL render the computed route through the existing Cairo map renderi
 
 ### Requirement: Route type definitions in stylesheet
 
-The `_route`, `_route_start`, and `_route_end` types SHALL be defined in `stylesheets/map.ost` with appropriate rendering styles in `stylesheets/include/route.oss`.
+The `_route` type is registered at runtime in `TypeConfig::Initialize`; `_route_start` and `_route_end` are registered at runtime by the clients (JNI `withCustomPoiType`, Qt `AddCustomPoiType`). Rendering styles for all three SHALL be defined in `stylesheets/include/route.oss`.
 
 #### Scenario: Route polyline has visible style
 - **WHEN** a route is rendered
-- **THEN** the `_route` WAY style from `route.oss` is applied (red color, 1.5mm display width)
+- **THEN** the `_route` WAY style from `route.oss` is applied as a cased line: a white outline with a red fill
+- **AND** the cased line is visible on top of red primary roads
+
+#### Scenario: Route start and end markers render
+- **WHEN** a route is rendered
+- **THEN** the `_route_start` and `_route_end` NODE.ICON styles from `route.oss` are applied at the route endpoints
 
 ### Requirement: Route instructions are presented as web-like cards
 After a route is calculated, JavaScout SHALL display turn-by-turn instructions in a scrollable, web-like card list.

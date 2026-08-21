@@ -71,6 +71,16 @@ OSS
         [TYPE natural_mud] AREA { color: @mudColor; }
         [TYPE natural_sand] AREA { color: @sandColor; }
         [TYPE natural_scree] AREA { color: @screeColor; }
+        [TYPE natural_rock, natural_blockfield, natural_arch, natural_blowhole] AREA { color: @bareRockColor; }
+        [TYPE natural_reef, natural_shoal, natural_strait] AREA { color: @waterColor; }
+        [TYPE natural_waterfall] AREA { color: @waterColor; }
+        [TYPE natural_isthmus, natural_peninsula] AREA { color: @landColor; }
+        [TYPE natural_shrubbery] AREA { color: @scrubColor; }
+        [TYPE natural_moor, natural_tundra] AREA { color: @fellColor; }
+        [TYPE natural_crevasse] AREA { color: @glacierColor; }
+        [TYPE natural_dune] AREA { color: @sandColor; }
+        [TYPE natural_sinkhole] AREA { color: @mudColor; }
+        [TYPE natural_tree_group] AREA { color: @woodColor; }
       }
 
       [MAG city-] {
@@ -92,9 +102,24 @@ OSS
               natural_bare_rock,
               natural_mud,
               natural_sand,
-              natural_scree] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural;  color: @labelColor; autoSize: true;}
+              natural_scree,
+              natural_rock,
+              natural_blockfield,
+              natural_arch,
+              natural_blowhole,
+              natural_isthmus,
+              natural_peninsula,
+              natural_shrubbery,
+              natural_moor,
+              natural_tundra,
+              natural_crevasse,
+              natural_dune,
+              natural_sinkhole,
+              natural_tree_group] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural;  color: @labelColor; autoSize: true;}
 
         [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
+        [TYPE natural_reef, natural_shoal, natural_strait] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
+        [TYPE natural_waterfall] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
 
         [TYPE natural_bare_rock,
               natural_scree,
@@ -104,12 +129,32 @@ OSS
               natural_heath,
               natural_land,
               natural_scrub,
-              natural_cliff] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioNatural; size: 0.9; }
+              natural_cliff,
+              natural_rock,
+              natural_stone,
+              natural_cape,
+              natural_fumarole,
+              natural_blowhole,
+              natural_isthmus,
+              natural_peninsula,
+              natural_shrub,
+              natural_tree_stump,
+              natural_tree_group,
+              natural_moor,
+              natural_tundra,
+              natural_arch,
+              natural_dune,
+              natural_sinkhole] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioNatural; size: 0.9; }
 
         [TYPE natural_water,
               natural_wetland,
               natural_wetland_marsh,
-              natural_wetland_tidalflat] NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
+              natural_wetland_tidalflat,
+              natural_hot_spring,
+              natural_geyser,
+              natural_shoal,
+              natural_strait,
+              natural_waterfall] NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
 
         [TYPE natural_cliff] AREA { color: lighten(@cliffColor, 0.3); }
         [TYPE natural_cave_entrance] AREA { color: @caveColor; }
@@ -124,6 +169,16 @@ OSS
           WAY.TEXT { label: Name.name; color: @cliffColor; priority: @labelPrioNatural; }
         }
 
+        // natural_coastline intentionally has no rendering rule: coastline ways are
+        // handled separately by the water/land index and coastline baseline, not as a
+        // regular way type — see stylesheets/map.ost.
+        [TYPE natural_waterfall] WAY { color: @waterLabelColor; displayWidth: 0.2mm; }
+        [TYPE natural_ridge, natural_arete, natural_gorge, natural_gully, natural_earth_bank, natural_valley] WAY { color: @cliffColor; displayWidth: 0.2mm; dash: 4, 2; }
+        [TYPE natural_tree_row] WAY { color: @woodLabelColor; displayWidth: 0.2mm; }
+        [TYPE natural_crevasse] WAY { color: @glacierColor; displayWidth: 0.2mm; }
+        [TYPE natural_dune] WAY { color: @sandColor; displayWidth: 0.2mm; }
+        [TYPE natural_arch] WAY { color: @cliffColor; displayWidth: 0.2mm; }
+
         [TYPE natural_peak] {
           NODE.TEXT#peakName { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
           NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
@@ -131,6 +186,14 @@ OSS
         [TYPE natural_volcano] {
           NODE.TEXT#volcanoName { label: IName; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 1; }
           NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @volcanoLabelColor; priority: @labelPrioVolcano; size: 0.9; position: 2;}
+        }
+        [TYPE natural_hill] {
+          NODE.TEXT#hillName { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+          NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
+        }
+        [TYPE natural_saddle] {
+          NODE.TEXT#saddleName { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }
+          NODE.TEXT#ele { label: Ele.inLocaleUnit; style: emphasize; emphasizeColor: @emphasizeColor; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 2;}
         }
       }
 

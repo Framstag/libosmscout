@@ -77,6 +77,10 @@ OSS
 
       }
 
+      [MAG state-] {
+        [TYPE waterway_waterfall] AREA { color: @waterColor; }
+      }
+
       [MAG suburb-] {
         [TYPE waterway_dock,
               waterway_riverbank] AREA { color: @waterColor; }
@@ -105,6 +109,11 @@ OSS
 
           AREA { color: lighten(@waterColor, 0.3);}
         }
+        [TYPE waterway_waterfall] {
+          AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true; }
+          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
+        }
+
         [TYPE waterway_boatyard] AREA { color: #d3cec4; }
       }
 

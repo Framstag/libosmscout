@@ -4,13 +4,9 @@ on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
@@ -24,6 +20,12 @@ jobs:
         run:  copy vcpkg_medium.json vcpkg.json
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
+      # Prepare MSVC dev environment (cl.exe, INCLUDE, LIB) so the Ninja generator
+      # picks MSVC instead of the MinGW toolchain found in the runner PATH.
+      - name: Prepare MSVC
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
         # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
       - name: Restore from cache and install vcpkg
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
@@ -44,38 +46,38 @@ jobs:
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
-        run: cmake -G "Ninja" -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.26100.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
+        run: cmake -G "Ninja" -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DOSMSCOUT_BUILD_DOC_API=OFF -DCMAKE_SYSTEM_VERSION=10.0.26100.0 -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -Wno-dev ..
         working-directory: build
       - name: Build project
         run: cmake --build build
       - name: Create distribution directory
         run:  mkdir dist
       - name: Collect libosmscout
-        run: copy /Y build\libosmscout\Debug\*.dll dist
+        run: copy /Y build\libosmscout\*.dll dist
         shell: cmd
       - name: Collect libosmscout-import
-        run: copy /Y build\libosmscout-import\Debug\*.dll dist
+        run: copy /Y build\libosmscout-import\*.dll dist
         shell: cmd
       - name: Collect libosmscout-map
-        run: copy /Y build\libosmscout-map\Debug\*.dll dist
+        run: copy /Y build\libosmscout-map\*.dll dist
         shell: cmd
 #      - name: Collect libosmscout-map-cairo
 #        run: copy /Y build\libosmscout-map-cairo\Debug\*.dll dist
 #        shell: cmd
       - name: Collect libosmscout-map-directx
-        run: copy /Y build\libosmscout-map-directx\Debug\*.dll dist
+        run: copy /Y build\libosmscout-map-directx\*.dll dist
         shell: cmd
       - name: Collect libosmscout-map-gdi
-        run: copy /Y build\libosmscout-map-gdi\Debug\*.dll dist
+        run: copy /Y build\libosmscout-map-gdi\*.dll dist
         shell: cmd
       - name: Collect libosmscout-map-svg
-        run: copy /Y build\libosmscout-map-svg\Debug\*.dll dist
+        run: copy /Y build\libosmscout-map-svg\*.dll dist
         shell: cmd
       - name: Collect Import
-        run: copy /Y build\Import\Debug\*.exe dist
+        run: copy /Y build\Import\*.exe dist
         shell: cmd
       - name: Collect Demos
-        run: copy /Y build\Demos\Debug\*.exe dist
+        run: copy /Y build\Demos\*.exe dist
         shell: cmd
       - name: Upload distribution archive
         uses: actions/upload-artifact@v7

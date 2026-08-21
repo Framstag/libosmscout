@@ -1,6 +1,8 @@
 # Label Registration
 
-**Purpose:** The Skia backend implements `RegisterRegularLabel()` and `RegisterContourLabel()` to register labels with the `labelLayouter` for layout and overlap resolution.
+## Purpose
+
+The Skia backend implements `RegisterRegularLabel()` and `RegisterContourLabel()` to register labels with the `labelLayouter` for layout and overlap resolution.
 
 ## Requirements
 

@@ -6,10 +6,12 @@ import java.util.List;
 /**
  * Structured description of an OSM map object (Node, Way, or Area).
  * <p>
- * Returned by {@link OSMScoutClient#getDescription(double, double, int)}.
+ * Returned by {@link OSMScoutClient#getDescription(double, double)},
+ * {@link OSMScoutClient#getDescription(double, double, int)} and
+ * {@link OSMScoutClient#getDescriptionCandidates(double, double, int)}.
  * Contains a list of {@link DescriptionEntry} instances that together
  * form a structured view of the object's properties, organised by
- * section/subsection, plus the geographic coordinates of the object.
+ * section/subsection, plus the geographic coordinates and identity of the object.
  * <p>
  * The structure mirrors the C++ {@code osmscout::ObjectDescription} class.
  */
@@ -23,6 +25,15 @@ public class ObjectDescription {
 
     /** Longitude of the described object, or NaN if unknown. */
     private final double objectLon;
+
+    /** Ref type of the described object: "node", "way", "area", or null. */
+    private final String objectRefType;
+
+    /** OSM type name of the described object (e.g. "building"), or null. */
+    private final String objectTypeName;
+
+    /** File offset of the described object in the database. */
+    private final long objectFileOffset;
 
     /**
      * Construct an ObjectDescription with the given entries and no object location.
@@ -41,9 +52,28 @@ public class ObjectDescription {
      * @param objectLon longitude of the described object
      */
     public ObjectDescription(List<DescriptionEntry> entries, double objectLat, double objectLon) {
+        this(entries, objectLat, objectLon, null, null, 0);
+    }
+
+    /**
+     * Construct an ObjectDescription with the given entries, object location,
+     * and object identity.
+     *
+     * @param entries         list of description entries, may be empty
+     * @param objectLat       latitude of the described object
+     * @param objectLon       longitude of the described object
+     * @param objectRefType   ref type of the described object ("node", "way", "area")
+     * @param objectTypeName  OSM type name of the described object
+     * @param objectFileOffset file offset of the described object in the database
+     */
+    public ObjectDescription(List<DescriptionEntry> entries, double objectLat, double objectLon,
+                             String objectRefType, String objectTypeName, long objectFileOffset) {
         this.entries = entries != null ? entries : List.of();
         this.objectLat = objectLat;
         this.objectLon = objectLon;
+        this.objectRefType = objectRefType;
+        this.objectTypeName = objectTypeName;
+        this.objectFileOffset = objectFileOffset;
     }
 
     /**
@@ -73,5 +103,32 @@ public class ObjectDescription {
      */
     public double getObjectLon() {
         return objectLon;
+    }
+
+    /**
+     * Return the ref type of the described object.
+     *
+     * @return "node", "way", "area", or null if unknown
+     */
+    public String getObjectRefType() {
+        return objectRefType;
+    }
+
+    /**
+     * Return the OSM type name of the described object.
+     *
+     * @return type name (e.g. "building"), or null if unknown
+     */
+    public String getObjectTypeName() {
+        return objectTypeName;
+    }
+
+    /**
+     * Return the file offset of the described object in the database.
+     *
+     * @return file offset, or 0 if unknown
+     */
+    public long getObjectFileOffset() {
+        return objectFileOffset;
     }
 }

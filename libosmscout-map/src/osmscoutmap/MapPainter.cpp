@@ -227,10 +227,10 @@ constexpr bool debugGroundTiles = false;
     log.Debug() << "MapPainter::~MapPainter()";
   }
 
-  TextMetrics MapPainter::MeasureText(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const std::string& text,
-                                      double fontSize)
+  TextMetrics MapPainter::MeasureText([[maybe_unused]] const Projection& projection,
+                                      [[maybe_unused]] const MapParameter& parameter,
+                                      [[maybe_unused]] const std::string& text,
+                                      [[maybe_unused]] double fontSize)
   {
     // Default implementation: no measurement support.
     return TextMetrics{};
@@ -1763,9 +1763,6 @@ constexpr bool debugGroundTiles = false;
     // Data structure for holding temporary data about route
     struct RouteData
     {
-      LineStyleRef                lineStyle;       //!< Line style
-      Color                       color;           //!< Color of route
-      double                      lineWidth;
       std::list<RouteSegmentData> transSegments;   //!< Transformation buffer segments
     };
 
@@ -1804,7 +1801,7 @@ constexpr bool debugGroundTiles = false;
       if (lineStyles.empty()){
         continue;
       }
-      LineStyleRef lineStyle=lineStyles.front(); // slots for routes are not supported yet
+      LineStyleRef lineStyle=lineStyles.front(); // primary style, used for offset/sidecar decisions
       assert(lineStyle);
 
       PathTextStyleRef routeTextStyle=styleConfig->GetRoutePathTextStyle(route->GetFeatureValueBuffer(),
@@ -1817,29 +1814,33 @@ constexpr bool debugGroundTiles = false;
       RouteData routeTmp;
       auto FlushRouteData = [&](){
         if (!routeTmp.transSegments.empty()) {
-          routeTmp.lineStyle=lineStyle;
-          routeTmp.lineWidth=lineWidth;
-          routeTmp.color=color;
-
+          const auto& routeBuffer=route->GetFeatureValueBuffer();
+          int8_t routeLayer=CalculateLineLayer(dbIndex, routeBuffer);
           size_t size=routeTmp.transSegments.size();
-          size_t i=0;
-          for (const auto &segment : routeTmp.transSegments) {
-            assert(segment.transStart < segment.transEnd);
 
-            WayData segmentWay;
+          for (const auto& style : lineStyles) {
+            Color styleColor=CalculateLineColor(dbIndex, routeBuffer, *style);
+            double styleWidth=CalculateLineWith(dbIndex, projection, routeBuffer, *style);
 
-            segmentWay.dbIndex=dbIndex;
-            segmentWay.buffer=&(route->GetFeatureValueBuffer());
-            segmentWay.layer=0;
-            segmentWay.lineStyle=lineStyle;
-            segmentWay.color=color;
-            segmentWay.wayPriority=lineStyle->GetPriority();
-            segmentWay.coordRange=CoordBufferRange(coordBuffer,segment.transStart,segment.transEnd);
-            segmentWay.lineWidth=lineWidth;
-            segmentWay.startIsClosed=(i==0);
-            segmentWay.endIsClosed=(i==size-1);
-            wayData.push_back(segmentWay);
-            i++;
+            size_t i=0;
+            for (const auto &segment : routeTmp.transSegments) {
+              assert(segment.transStart < segment.transEnd);
+
+              WayData segmentWay;
+
+              segmentWay.dbIndex=dbIndex;
+              segmentWay.buffer=&routeBuffer;
+              segmentWay.layer=routeLayer;
+              segmentWay.lineStyle=style;
+              segmentWay.color=styleColor;
+              segmentWay.wayPriority=style->GetPriority();
+              segmentWay.coordRange=CoordBufferRange(coordBuffer,segment.transStart,segment.transEnd);
+              segmentWay.lineWidth=styleWidth;
+              segmentWay.startIsClosed=(i==0);
+              segmentWay.endIsClosed=(i==size-1);
+              wayData.push_back(segmentWay);
+              i++;
+            }
           }
 
           routeTmp = RouteData();

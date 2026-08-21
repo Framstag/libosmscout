@@ -8,7 +8,9 @@ package com.framstag.libosmscout.client;
  * label/value pair.
  * <p>
  * Returned as part of {@link ObjectDescription} from
- * {@link OSMScoutClient#getDescription(double, double, int)}.
+ * {@link OSMScoutClient#getDescription(double, double)},
+ * {@link OSMScoutClient#getDescription(double, double, int)} and
+ * {@link OSMScoutClient#getDescriptionCandidates(double, double, int)}.
  */
 public class DescriptionEntry {
 

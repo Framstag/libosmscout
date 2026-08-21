@@ -11,6 +11,7 @@ import com.framstag.libosmscout.client.TrackPoint;
 import com.framstag.libosmscout.client.LaneTurn;
 import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.ObjectDescription;
+import com.framstag.libosmscout.client.PoiEntry;
 import com.framstag.libosmscout.client.RouteInstruction;
 import com.framstag.libosmscout.client.RouteCallback;
 import com.framstag.libosmscout.client.RouteEntry;
@@ -53,8 +54,10 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 
 /**
  * Main controller for the JavaScout FXML layout.
@@ -94,6 +97,7 @@ public class MainController implements Initializable {
     private MapRenderer renderer;
     private MapInteractionHandler interactionHandler;
     private SearchOverlay searchOverlay;
+    private PoiSearchOverlay poiSearchOverlay;
     private RoutePanel routePanel;
     private Config config;
 
@@ -350,6 +354,7 @@ public class MainController implements Initializable {
 
                 // Create overlays that need client
                 createSearchOverlay();
+                createPoiSearchOverlay();
                 createRoutePanel();
 
                 // Initial render
@@ -450,6 +455,41 @@ public class MainController implements Initializable {
             renderer.setSearchSelected(entry.lat, entry.lon);
         } else {
             renderer.clearSearchSelected();
+        }
+    }
+
+    private void createPoiSearchOverlay() {
+        poiSearchOverlay = new PoiSearchOverlay(client, uiScale,
+            () -> renderer != null ? renderer.getLatitude() : MapRenderer.DEFAULT_LATITUDE,
+            () -> renderer != null ? renderer.getLongitude() : MapRenderer.DEFAULT_LONGITUDE,
+            this::onPoiNavigate,
+            this::showPoiDescription);
+        mapPanel.getChildren().add(poiSearchOverlay);
+    }
+
+    private void onPoiNavigate(PoiEntry entry) {
+        if (renderer == null) {
+            return;
+        }
+        renderer.requestRenderPreserveRoute(entry.lat, entry.lon, renderer.getMagnification());
+        renderer.setSearchSelected(entry.lat, entry.lon);
+    }
+
+    private void showPoiDescription(ObjectDescription desc) {
+        if (desc == null || desc.getEntries().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Details");
+            alert.setHeaderText(null);
+            alert.setContentText("No description available");
+            alert.show();
+        } else {
+            showDescriptionOverlay(desc);
+        }
+    }
+
+    private void openPoiSearch() {
+        if (poiSearchOverlay != null) {
+            poiSearchOverlay.open();
         }
     }
 
@@ -880,13 +920,16 @@ public class MainController implements Initializable {
         MenuItem importTrackItem = new MenuItem("Import GPX Track…");
         importTrackItem.setOnAction(e -> importGpxTrack());
 
+        MenuItem poiSearchItem = new MenuItem("Search POIs…");
+        poiSearchItem.setOnAction(e -> openPoiSearch());
+
         MenuItem liveGpsItem = new MenuItem("Simulate GPS Fix…");
         liveGpsItem.setOnAction(e -> openLiveGpsDialog());
 
         MenuItem downloadMapsItem = new MenuItem("Download Maps…");
         downloadMapsItem.setOnAction(e -> onDownloadMaps());
 
-        mainMenu.getItems().addAll(favoritesItem, importTrackItem, liveGpsItem, downloadMapsItem);
+        mainMenu.getItems().addAll(favoritesItem, importTrackItem, poiSearchItem, liveGpsItem, downloadMapsItem);
 
         menuButton.setOnAction(e -> {
             if (mainMenu.isShowing()) {
@@ -1764,19 +1807,36 @@ public class MainController implements Initializable {
             return;
         }
 
-        Task<ObjectDescription> descTask = new Task<>() {
+        Task<List<ObjectDescription>> descTask = new Task<>() {
             @Override
-            protected ObjectDescription call() {
-                return client.getDescription(lat, lon, renderer.getMagnification());
+            protected List<ObjectDescription> call() {
+                int mag = renderer != null ? renderer.getMagnification() : 18;
+                return client.getDescriptionCandidates(lat, lon, mag);
             }
         };
 
         descTask.setOnSucceeded(e -> {
-            ObjectDescription desc = descTask.getValue();
-            if (desc == null || desc.getEntries().isEmpty()) {
+            List<ObjectDescription> candidates = descTask.getValue();
+            if (candidates == null || candidates.isEmpty()) {
+                // No reasonable candidate — show "No description available"
+                showDescriptionOverlay(new ObjectDescription(List.of()));
                 return;
             }
-            showDescriptionOverlay(desc);
+            if (candidates.size() == 1) {
+                // Single candidate — show details directly
+                showDescriptionOverlay(candidates.get(0));
+                return;
+            }
+            // Multiple candidates — let the user choose
+            try {
+                CandidatePickerOverlay picker = new CandidatePickerOverlay(
+                    uiScale, candidates, this::showDescriptionOverlay);
+                mapPanel.getChildren().add(picker);
+                picker.open();
+            } catch (Throwable t) {
+                Log.error("[MainController] candidate picker failed: " + t);
+                t.printStackTrace();
+            }
         });
 
         descTask.setOnFailed(e -> {

@@ -19,6 +19,10 @@
 
 #include <osmscout/Node.h>
 
+#include <osmscout/util/Exception.h>
+
+#include <string>
+
 namespace osmscout {
 
   void Node::SetType(const TypeInfoRef& type)
@@ -47,6 +51,15 @@ namespace osmscout {
     fileOffset=scanner.GetPos();
 
     TypeId typeId=scanner.ReadTypeId(typeConfig.GetNodeTypeIdBytes());
+
+    // Validate before GetNodeTypeInfo(): a stale or inconsistent search index
+    // can reference an offset whose type id is out of range, and the assert in
+    // GetNodeTypeInfo() would abort the process. Throw instead so DataFile<N>::
+    // ReadData() reports the read as failed and the entry can be skipped.
+    if (typeId>typeConfig.GetNodeTypes().size()) {
+      throw IOException(scanner.GetFilename(),
+                        "Invalid node type id " + std::to_string(typeId));
+    }
 
     featureValueBuffer.SetType(typeConfig.GetNodeTypeInfo(typeId));
 

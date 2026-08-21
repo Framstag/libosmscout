@@ -1,6 +1,8 @@
 # Line Gap Color
 
-**Purpose:** When a `LineStyle` has dashes and a visible `gapColor`, the Skia backend renders a solid line in the gap color behind the dashed line. The base class `MapPainter::DrawWay()` calls `DrawPath()` twice — first with the gap color (solid dash), then with the line color (dashed dash). The backend renders each call correctly.
+## Purpose
+
+When a `LineStyle` has dashes and a visible `gapColor`, the Skia backend renders a solid line in the gap color behind the dashed line. The base class `MapPainter::DrawWay()` calls `DrawPath()` twice — first with the gap color (solid dash), then with the line color (dashed dash). The backend renders each call correctly.
 
 ## Requirements
 

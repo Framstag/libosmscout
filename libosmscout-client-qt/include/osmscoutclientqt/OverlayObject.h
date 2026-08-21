@@ -29,6 +29,7 @@
 #include <osmscout/Area.h>
 #include <osmscout/Node.h>
 #include <osmscout/util/GeoBox.h>
+#include <osmscoutmap/MapPainter.h>
 #include <osmscoutclientqt/ClientQtImportExport.h>
 #include <osmscoutclientqt/LocationEntry.h>
 
@@ -58,7 +59,7 @@ protected:
   std::vector<osmscout::Point>        nodes;
   mutable std::vector<SegmentGeoBox>  segmentsBoxes;
   mutable osmscout::GeoBox            box;
-  int8_t                              layer{std::numeric_limits<int8_t>::max()};
+  int8_t                              layer{osmscout::MapPainter::routeLayer};
   QString                             name;
   QString                             color;
   mutable QMutex                      lock;

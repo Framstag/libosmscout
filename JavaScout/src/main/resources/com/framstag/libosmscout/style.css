@@ -161,6 +161,16 @@
     -fx-text-fill: #888;
 }
 
+.search-trigger-button {
+    -fx-background-color: #4a7dbb;
+    -fx-text-fill: #fff;
+    -fx-background-radius: 3px;
+}
+
+.search-trigger-button:hover {
+    -fx-background-color: #3d6aa3;
+}
+
 .search-clear-button {
     -fx-background-color: transparent;
     -fx-text-fill: #999;

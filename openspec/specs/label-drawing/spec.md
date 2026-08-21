@@ -1,6 +1,8 @@
 # Label Drawing
 
-**Purpose:** The Skia backend implements `DrawLabels()` to drive the label layouter pipeline: layout, draw, and reset.
+## Purpose
+
+The Skia backend implements `DrawLabels()` to drive the label layouter pipeline: layout, draw, and reset.
 
 ## Requirements
 

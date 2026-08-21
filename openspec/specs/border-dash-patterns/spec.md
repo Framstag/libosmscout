@@ -1,6 +1,8 @@
 # Border Dash Patterns
 
-**Purpose:** The Skia backend applies dash patterns from `BorderStyle::GetDash()` when drawing area borders in `DrawArea()`.
+## Purpose
+
+The Skia backend applies dash patterns from `BorderStyle::GetDash()` when drawing area borders in `DrawArea()`.
 
 ## Requirements
 
