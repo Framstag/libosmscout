@@ -156,6 +156,9 @@ void PiperTTSEngine::initVoice(const Voice &voice)
 
   if (!voice.isValid() || !voice.isPiper()) {
     log.Warn() << "PiperTTSEngine: voice is not a valid Piper voice";
+    emit error(tr("The selected voice is not a valid Piper voice."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return;
   }
 
@@ -168,6 +171,9 @@ void PiperTTSEngine::initVoice(const Voice &voice)
 
   if (espeakDataPath.isEmpty()) {
     log.Error() << "PiperTTSEngine: espeak-ng data directory was not configured";
+    emit error(tr("The espeak-ng data directory was not configured."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return;
   }
 
@@ -176,6 +182,9 @@ void PiperTTSEngine::initVoice(const Voice &voice)
   if (auto phontabFile = AppendFileToDir(espeakDataPath.toStdString(), "phontab");
       ExistsInFilesystem(phontabFile) == false) {
     log.Error() << "espeak-ng data directory does not contain phontab file: " << phontabFile;
+    emit error(tr("The espeak-ng data directory does not contain the required data files."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return;
   }
 
@@ -184,8 +193,13 @@ void PiperTTSEngine::initVoice(const Voice &voice)
                              espeakDataPath.toUtf8().constData());
   if (synthesizer == nullptr) {
     log.Error() << "PiperTTSEngine: failed to load Piper voice model " << modelPath.toStdString();
+    emit error(tr("Failed to load the voice model \"%1\".").arg(voice.getName()));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
   } else {
     log.Debug() << "PiperTTSEngine: loaded Piper voice model " << modelPath.toStdString();
+    state = TTSEngineState::Idle;
+    emit stateChange(state);
   }
 }
 
@@ -224,12 +238,23 @@ QString PiperTTSEngine::prepare(const QString &message)
 
   if (synthesizer == nullptr) {
     log.Warn() << "PiperTTSEngine: no voice loaded, cannot synthesize message";
+    emit error(tr("No voice is loaded, cannot synthesize the message."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return {};
   }
+
+  // actual synthesis is about to start, this may take a while for the first
+  // message of a voice (model warm-up), let the UI know
+  state = TTSEngineState::Synthesizing;
+  emit stateChange(state);
 
   piper_synthesize_options options = piper_default_synthesize_options(synthesizer);
   if (piper_synthesize_start(synthesizer, message.toUtf8().constData(), &options) != PIPER_OK) {
     log.Error() << "PiperTTSEngine: failed to start synthesis for \"" << message.toStdString() << "\"";
+    emit error(tr("Failed to start voice synthesis."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return {};
   }
 
@@ -253,15 +278,23 @@ QString PiperTTSEngine::prepare(const QString &message)
 
   if (rc < 0) {
     log.Error() << "PiperTTSEngine: synthesis failed for \"" << message.toStdString() << "\"";
+    emit error(tr("Voice synthesis failed."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return {};
   }
 
   if (!WriteWav(path, samples, sampleRate)) {
     log.Error() << "PiperTTSEngine: failed to write WAV file " << path.toStdString();
+    emit error(tr("Failed to write the synthesized audio file."));
+    state = TTSEngineState::Error;
+    emit stateChange(state);
     return {};
   }
 
   cache.insert(message, path);
+  state = TTSEngineState::Idle;
+  emit stateChange(state);
   return path;
 }
 

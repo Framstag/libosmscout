@@ -189,8 +189,45 @@ void InstalledVoicesModel::EnsureTTSEngine()
             ttsEngine, &TTSEngine::playMessage, Qt::QueuedConnection);
     connect(ttsEngine, &TTSEngine::playAudioFilesRequest,
             this, &InstalledVoicesModel::playTTSAudio, Qt::QueuedConnection);
+    connect(ttsEngine, &TTSEngine::stateChange,
+            this, &InstalledVoicesModel::onTTSStateChange, Qt::QueuedConnection);
+    connect(ttsEngine, &TTSEngine::error,
+            this, &InstalledVoicesModel::onTTSError, Qt::QueuedConnection);
   }
 #endif
+}
+
+void InstalledVoicesModel::onTTSStateChange(osmscout::TTSEngineState state)
+{
+  ttsState = state;
+  if (state != TTSEngineState::Error) {
+    // keep the last error message around while in the Error state, clear it
+    // once the engine recovers
+    ttsErrorMessage.clear();
+  }
+  emit ttsStateChanged();
+}
+
+void InstalledVoicesModel::onTTSError(const QString &message)
+{
+  ttsErrorMessage = message;
+  // note: the accompanying stateChange(Error) signal (emitted right after
+  // this one by the engine) triggers the ttsStateChanged() notification
+}
+
+QString InstalledVoicesModel::getTTSStateText() const
+{
+  switch (ttsState) {
+    case TTSEngineState::Synthesizing:
+      return tr("Synthesizing voice sample…");
+    case TTSEngineState::Error:
+      return ttsErrorMessage.isEmpty()
+        ? tr("Voice synthesis failed")
+        : tr("Voice synthesis failed: %1").arg(ttsErrorMessage);
+    case TTSEngineState::Idle:
+    default:
+      return tr("Ready");
+  }
 }
 
 void InstalledVoicesModel::playTTSAudio(const QList<QUrl> &audioFiles)
