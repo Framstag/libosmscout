@@ -663,7 +663,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDatabaseBoundingBox(
 
   osmscout::DatabaseParameter parameter;
   osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(parameter);
-  if (!database->Open(fsPath)) {
+  if (!database->Open(fsPath.string())) {
     osmscout::log.Warn() << "getDatabaseBoundingBox: failed to open " << fsPath.string();
     return nullptr;
   }
