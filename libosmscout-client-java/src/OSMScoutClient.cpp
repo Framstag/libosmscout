@@ -232,8 +232,6 @@ namespace {
 #include <cairo.h>
 #endif
 
-#include <android/log.h>
-
 #include <jni.h>
 
 #if __has_include(<osmscoutgpx/GPXFeatures.h>)
@@ -945,8 +943,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
   double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
   // Verbose render logging disabled; re-enable only when debugging native renderer
-  // __android_log_print(ANDROID_LOG_DEBUG, "OSMScoutClient", "render: dpi=%.1f width=%d height=%d mag=%d",
-  //                     dpi, width, height, mag);
+  // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
+  //                      << " height=" << height << " mag=" << mag;
 
   // Extract route overlay data if provided
   std::vector<osmscout::Point> routePoints;
