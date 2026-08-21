@@ -447,7 +447,6 @@ STYLE
       [TYPE natural_land] AREA { color: @landColor; }
       [TYPE natural_rock, natural_blockfield, natural_arch, natural_blowhole] AREA { color: @bareRockColor; }
       [TYPE natural_reef, natural_shoal, natural_strait] AREA { color: @waterColor; }
-      [TYPE natural_waterfall] AREA { color: @waterColor; }
       [TYPE natural_isthmus, natural_peninsula] AREA { color: @landColor; }
       [TYPE natural_shrubbery] AREA { color: @scrubColor; }
       [TYPE natural_moor, natural_tundra] AREA { color: @fellColor; }
@@ -489,7 +488,6 @@ STYLE
 
       [TYPE natural_water] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
       [TYPE natural_reef, natural_shoal, natural_strait] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
-      [TYPE natural_waterfall] AREA.TEXT { label: Name.name ; priority: @labelPrioNatural; color: @waterLabelColor; autoSize: true;}
 
       [TYPE natural_peak] {
         NODE.TEXT#peakName { label: Name.name; style: emphasize; color: @peakLabelColor; priority: @labelPrioPeak; size: 0.9; position: 1; }

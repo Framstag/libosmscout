@@ -77,9 +77,16 @@ The import-time stylesheet SHALL define feature types for the following `natural
 | `natural=blowhole` | `natural_blowhole` | node, area |
 | `natural=hot_spring` | `natural_hot_spring` | node |
 | `natural=geyser` | `natural_geyser` | node |
-| `natural=waterfall` | `natural_waterfall` | node, way, area |
 
 `natural=coastline` SHALL NOT be defined as an import-time type: coastline ways are handled by the separate water/land index and coastline baseline pipeline, not by regular type-based import.
+
+`natural=waterfall` SHALL NOT be defined as a dedicated `natural_waterfall` import-time type: the tag is deprecated by OSM and is merged into the existing `waterway_waterfall` type, so a single type definition handles both `waterway=waterfall` and `natural=waterfall`.
+
+#### Scenario: Coastline type exists in type config
+- **GIVEN** a database imported with the type definitions
+- **WHEN** the database `TypeConfig` is queried for `natural_coastline`
+- **THEN** the type SHALL NOT exist
+- **AND** ways tagged `natural=coastline` SHALL NOT be importable as a regular natural way type
 
 #### Scenario: Reef type exists in type config
 - **GIVEN** a database imported with the type definitions
@@ -138,14 +145,13 @@ The import-time stylesheet SHALL define feature types for the following `natural
 #### Scenario: Waterfall type exists in type config
 - **GIVEN** a database imported with the type definitions
 - **WHEN** the database `TypeConfig` is queried for `natural_waterfall`
-- **THEN** the type SHALL exist
-- **AND** nodes, ways, and areas tagged `natural=waterfall` SHALL be importable as that type
-
-#### Scenario: Coastline type exists in type config
-- **GIVEN** a database imported with the type definitions
-- **WHEN** the database `TypeConfig` is queried for `natural_coastline`
 - **THEN** the type SHALL NOT exist
-- **AND** ways tagged `natural=coastline` SHALL NOT be importable as a regular natural way type
+- **AND** nodes, ways, and areas tagged `natural=waterfall` SHALL be importable as `waterway_waterfall` instead
+
+#### Scenario: Natural waterfall objects import as merged waterway type
+- **GIVEN** a database imported with the type definitions
+- **WHEN** a node, way, or area tagged `natural=waterfall` is imported
+- **THEN** the object SHALL be importable as the `waterway_waterfall` type
 
 ### Requirement: Geological natural types
 
