@@ -234,6 +234,23 @@ namespace {
 
 #include <jni.h>
 
+// --------------------------------------------------------------------------
+// Portable thread-attach helper
+//
+// Host JDK jni.h and Android NDK jni.h disagree on AttachCurrentThread's
+// first parameter type (void** vs JNIEnv**). The ABI is identical; route the
+// call through a casted member-function pointer so this file compiles against
+// both headers without any platform conditional.
+// --------------------------------------------------------------------------
+namespace {
+jint AttachCurrentThread(JNIEnv **env, JavaVM *jvm)
+{
+  using AttachCurrentThreadFn = jint (JavaVM::*)(JNIEnv **, void *);
+  AttachCurrentThreadFn fn = reinterpret_cast<AttachCurrentThreadFn>(&JavaVM::AttachCurrentThread);
+  return (jvm->*fn)(env, nullptr);
+}
+}
+
 #if __has_include(<osmscoutgpx/GPXFeatures.h>)
 #include <osmscoutgpx/GPXFeatures.h>
 #endif
@@ -1864,7 +1881,7 @@ public:
       bool attachedByUs = false;
       if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED ||
           env == nullptr) {
-        if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) == JNI_OK) {
+        if (AttachCurrentThread(&env, jvm) == JNI_OK) {
           attachedByUs = true;
         } else {
           env = nullptr;
@@ -1987,7 +2004,7 @@ private:
   void Run()
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       osmscout::log.Error() << "NavigationController: failed to attach thread to JVM";
       return;
     }
@@ -2043,7 +2060,7 @@ private:
   void DispatchMessage(const osmscout::NavigationMessageRef &message)
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       return;
     }
 
@@ -3852,7 +3869,7 @@ public:
                 const osmscout::Distance &overallDistance) override
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       return;
     }
 
@@ -4137,7 +4154,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
      vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
+      if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }
@@ -4635,7 +4652,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
+      if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }
