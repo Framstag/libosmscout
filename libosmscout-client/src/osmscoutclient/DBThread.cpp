@@ -175,11 +175,6 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
     }
     WriteLock locker(latch);
 
-    if (basemapDatabase) {
-      basemapDatabase->Close();
-      basemapDatabase=nullptr;
-    }
-
     for (const auto& db:databases){
       db->Close();
     }
@@ -265,36 +260,24 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
       }
     }
 
-    if (!basemapLookupDirectory.empty()) {
-      DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
-
-      if (database->Open(basemapLookupDirectory, true)) {
-        osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
-
-        osmscout::StyleConfigRef styleConfig;
-        if (typeConfig) {
-          registerCustomPoiTypes(typeConfig);
-          styleConfig=makeStyleConfig(typeConfig);
-        }
-        else {
-          log.Warn() << "TypeConfig invalid!";
-          styleConfig=nullptr;
-        }
-
-        log.Debug() << "Basemap found and loaded from '" << basemapLookupDirectory << "'...";
-        basemapDatabase=std::make_shared<DBInstance>(basemapLookupDirectory,
-                                                     database,
-                                                     std::make_shared<osmscout::LocationService>(database),
-                                                     std::make_shared<osmscout::LocationDescriptionService>(database),
-                                                     std::make_shared<osmscout::MapService>(database),
-                                                     styleConfig);
-      }
-      else {
-        log.Warn() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
-      }
-    }
+    LoadBasemap();
 
     for (auto &databaseDirectory:databaseDirectories){
+      // The basemap directory is loaded separately as an overlay database
+      // (basemapDatabase, see above); it must never also be loaded as a
+      // regular database — that would pull the full world tile data into
+      // every render and can exhaust memory at low zoom levels (bad_alloc).
+      if (!basemapLookupDirectory.empty()) {
+        std::error_code ec;
+        auto dd = std::filesystem::weakly_canonical(databaseDirectory, ec);
+        auto bm = std::filesystem::weakly_canonical(basemapLookupDirectory, ec);
+        if (!ec && dd == bm) {
+          log.Debug() << "Skipping basemap directory as regular database: "
+                      << databaseDirectory.string();
+          continue;
+        }
+      }
+
       osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
       osmscout::StyleConfigRef styleConfig;
       if (database->Open(databaseDirectory.string())) {
@@ -564,5 +547,51 @@ void DBThread::RunSynchronousJob(SynchronousDBJob2 job)
     return;
   }
   job(databases, basemapDatabase);
+}
+
+void DBThread::LoadBasemap()
+{
+  if (basemapDatabase) {
+    basemapDatabase->Close();
+    basemapDatabase=nullptr;
+  }
+
+  if (!basemapLookupDirectory.empty()) {
+    DatabaseRef database = std::make_shared<osmscout::Database>(databaseParameter);
+
+    if (database->Open(basemapLookupDirectory, true)) {
+      osmscout::TypeConfigRef typeConfig=database->GetTypeConfig();
+
+      osmscout::StyleConfigRef styleConfig;
+      if (typeConfig) {
+        registerCustomPoiTypes(typeConfig);
+        styleConfig=makeStyleConfig(typeConfig);
+      }
+      else {
+        log.Warn() << "TypeConfig invalid!";
+        styleConfig=nullptr;
+      }
+
+      log.Debug() << "Basemap loaded from '" << basemapLookupDirectory << "'...";
+      basemapDatabase=std::make_shared<DBInstance>(basemapLookupDirectory,
+                                                   database,
+                                                   std::make_shared<osmscout::LocationService>(database),
+                                                   std::make_shared<osmscout::LocationDescriptionService>(database),
+                                                   std::make_shared<osmscout::MapService>(database),
+                                                   styleConfig);
+    }
+    else {
+      log.Warn() << "Cannot open basemap db '" << basemapLookupDirectory << "'!";
+    }
+  }
+}
+
+void DBThread::ReloadBasemap()
+{
+  Async<bool>([this](const Breaker& /*breaker*/) {
+    WriteLock locker(latch);
+    LoadBasemap();
+    return true;
+  });
 }
 }

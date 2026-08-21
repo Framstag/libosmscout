@@ -70,9 +70,15 @@ public:
    */
   void AddLookupDirectory(const std::filesystem::path &dir);
 
+  /**
+   * Remove a directory from the lookup path and trigger a database rescan.
+   * Does not delete any files. Thread-safe.
+   */
+  void RemoveLookupDirectory(const std::filesystem::path &dir);
+
   std::vector<MapDirectory> GetDatabaseDirectories() const
   {
-    std::unique_lock<std::mutex> lock;
+    std::unique_lock<std::mutex> lock(lookupMutex);
     return databaseDirectories;
   }
 

@@ -194,6 +194,11 @@ protected:
 
   StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
 
+  /**
+   * Load basemap database, write lock needs to be hold
+   */
+  void LoadBasemap();
+
 public:
   DBThread(const std::string &basemapLookupDirectory,
            const std::string &iconDirectory,
@@ -283,6 +288,15 @@ public:
    */
   void RunSynchronousJob(SynchronousDBJob job);
   void RunSynchronousJob(SynchronousDBJob2 job);
+
+  /**
+   * Reload the basemap database from the configured lookup directory.
+   *
+   * Closes the current basemap (if any) and re-opens it, picking up
+   * basemap downloads, updates, or deletions while the app is running.
+   * Runs asynchronously on the DBThread worker.
+   */
+  void ReloadBasemap();
 
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);

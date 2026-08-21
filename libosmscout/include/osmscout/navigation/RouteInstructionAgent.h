@@ -80,12 +80,6 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // we don't have route description yet
     return result;
   }
-  if (positionMessage->position.state != PositionAgent::PositionState::OnRoute &&
-      positionMessage->position.state != PositionAgent::PositionState::EstimateInTunnel) {
-    // what route instruction we should show?
-    return result;
-  }
-
   RouteInstructionBuilder builder;
 
   Timestamp now = positionMessage->timestamp;
@@ -93,26 +87,37 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     instructions=builder.GenerateRouteInstructions(positionMessage->position.routeNode,
                                                    positionMessage->route->Nodes().end());
     result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
+
+    // Emit first next-route instruction immediately on route change,
+    // regardless of position state (handles cold-start GPS where
+    // position may be OffRoute initially)
+    RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
+                                                                            positionMessage->route->Nodes().end(),
+                                                                            positionMessage->position.coord);
+    result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
-  // remove instructions behind our back (pop from the front of the list)
-  bool updated=false;
-  while (!instructions.empty() &&
-         positionMessage->position.routeNode != positionMessage->route->Nodes().end() &&
-         instructions.front().GetDistance() <= positionMessage->position.routeNode->GetDistance()){
+  if (positionMessage->position.state == PositionAgent::PositionState::OnRoute ||
+      positionMessage->position.state == PositionAgent::PositionState::EstimateInTunnel) {
+    // remove instructions behind our back (pop from the front of the list)
+    bool updated=false;
+    while (!instructions.empty() &&
+           positionMessage->position.routeNode != positionMessage->route->Nodes().end() &&
+           instructions.front().GetDistance() <= positionMessage->position.routeNode->GetDistance()){
 
-    instructions.pop_front();
-    updated=true;
-  }
-  if (updated){
-    result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
-  }
+      instructions.pop_front();
+      updated=true;
+    }
+    if (updated){
+      result.push_back(std::make_shared<RouteInstructionsMessage<RouteInstruction>>(now,instructions));
+    }
 
-  // next route instruction
-  RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
-                                                                          positionMessage->route->Nodes().end(),
-                                                                          positionMessage->position.coord);
-  result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
+    // next route instruction
+    RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
+                                                                            positionMessage->route->Nodes().end(),
+                                                                            positionMessage->position.coord);
+    result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
+  }
 
   prevRoute=positionMessage->route;
 
