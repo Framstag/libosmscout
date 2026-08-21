@@ -2778,7 +2778,13 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
           for (const auto &entry : areaResults.GetAreaResults()) {
             const auto &area = entry.GetArea();
             osmscout::GeoBox box = area->GetBoundingBox();
-            double size = box.GetWidth() * box.GetHeight();
+            // Convert the bounding box from degrees to square meters at the
+            // box center (degrees are not a uniform metric).
+            const double metersPerDegLat = 111320.0;
+            const double metersPerDegLon =
+                metersPerDegLat * std::cos(box.GetCenter().GetLat() * M_PI / 180.0);
+            double size = box.GetWidth() * metersPerDegLon
+                          * box.GetHeight() * metersPerDegLat;
             candidates.push_back({area->GetFeatureValueBuffer(),
                                   entry.GetDistance(), 0, entry.IsInArea(), size,
                                   osmscout::ObjectDescription(), false, false, false, false,
@@ -2829,15 +2835,22 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
         }
 
         // Distance threshold (meters) for "very close" — ways/nodes within
-        // this distance beat any containing area.
+        // this distance are strong candidates.
         static const double VERY_CLOSE_METERS = 5.0;
         static const osmscout::Distance VERY_CLOSE =
             osmscout::Distance::Of<osmscout::Meter>(VERY_CLOSE_METERS);
 
-        // Areas larger than this (sq meters) are considered "large" —
-        // they won't get the contains bonus over nearby ways/nodes.
+        // Areas larger than this (sq meters) are considered "small" — only
+        // they get the contains bonus over nearby ways/nodes.
         // ~100m x 100m = buildings and small plots.
         static const double MAX_SMALL_AREA_SIZE = 10000.0;
+
+        // Areas larger than this (sq meters) are background polygons
+        // (administrative boundaries, regions, large landuse blocks). They
+        // contain every point inside them and would otherwise crowd out the
+        // local objects the user actually long-pressed (e.g. a building).
+        // ~500m x 500m.
+        static const double MAX_BACKGROUND_AREA_SIZE = 250000.0;
 
         // Approximate ground resolution at the given magnification
         // (Web Mercator: world circumference / (256 px * 2^mag) at the equator).
@@ -2858,25 +2871,24 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
         }
 
         // Strict weak ordering: true if `a` ranks better than `b`.
-        // Mirrors the previous single-best ranking:
-        // (1) has description data, (2) visible at the zoom, (3) very close
-        // way/node, (4) small area contains the point, (5) type rank,
-        // (6) proximity.
+        // (1) has description data, (2) small area containing the click point
+        // (the object the user actually pressed), (3) very close way/node,
+        // (4) visible at the zoom, (5) type rank, (6) proximity.
         auto isBetter = [](const Candidate &a, const Candidate &b) {
           if (a.hasData != b.hasData) {
             return a.hasData;
-          }
-          if (a.visible != b.visible) {
-            return a.visible;
-          }
-          if (a.veryClose != b.veryClose) {
-            return a.veryClose;
           }
           if (a.effectiveContains != b.effectiveContains) {
             return a.effectiveContains;
           }
           if (a.effectiveContains && b.effectiveContains && a.areaSize != b.areaSize) {
             return a.areaSize < b.areaSize;
+          }
+          if (a.veryClose != b.veryClose) {
+            return a.veryClose;
+          }
+          if (a.visible != b.visible) {
+            return a.visible;
           }
           if (a.typeRank != b.typeRank) {
             return a.typeRank < b.typeRank;
@@ -2886,10 +2898,24 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
 
         std::stable_sort(candidates.begin(), candidates.end(), isBetter);
 
-        // Keep only candidates with description data
+        // Keep only candidates with description data. Huge background areas
+        // (administrative boundaries, regions) are dropped when there is at
+        // least one local candidate — the user pressed a building, not the
+        // state it is in. They still appear when nothing else is nearby.
+        bool hasLocal = false;
+        for (const auto &c : candidates) {
+          if (c.hasData && !(c.typeRank == 0 && c.areaSize > MAX_BACKGROUND_AREA_SIZE)) {
+            hasLocal = true;
+            break;
+          }
+        }
+
         std::vector<RankedDescriptionCandidate> items;
         for (const auto &c : candidates) {
           if (!c.hasData) {
+            continue;
+          }
+          if (hasLocal && c.typeRank == 0 && c.areaSize > MAX_BACKGROUND_AREA_SIZE) {
             continue;
           }
           items.push_back({c.description, c.refType, c.typeName, c.fileOffset});
