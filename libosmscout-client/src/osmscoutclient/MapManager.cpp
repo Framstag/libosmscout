@@ -139,6 +139,7 @@ void MapManager::RemoveLookupDirectory(const std::filesystem::path &dir)
   }
   // Always re-scan, so that maps from the removed directory disappear from
   // the database list and the databaseListChanged signal is emitted.
+  LookupDatabases();
 }
 
 CancelableFuture<bool> MapManager::DeleteOther(const std::vector<std::string> &mapPath, const std::filesystem::path &fsPath)
