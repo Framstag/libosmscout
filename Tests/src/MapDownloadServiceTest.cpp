@@ -27,9 +27,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <set>
+#include <thread>
 
 namespace {
 
@@ -361,6 +364,74 @@ TEST_CASE("MapDownloadService::RegisterMapDirectory adds lookup directory")
 
   auto dirs = fx.mapManager->GetLookupDirectories();
   REQUIRE(std::find(dirs.begin(), dirs.end(), tmpDir) != dirs.end());
+
+  std::filesystem::remove_all(tmpDir, ec);
+}
+
+// --------------------------------------------------------------------------
+// MapManager lookup directory tests
+// --------------------------------------------------------------------------
+
+TEST_CASE("MapManager::RemoveLookupDirectory triggers database rescan")
+{
+  std::error_code ec;
+  std::filesystem::path tmpDir = std::filesystem::temp_directory_path(ec) / "osmscout-test-remove-lookup";
+  std::filesystem::remove_all(tmpDir, ec);
+  std::filesystem::create_directories(tmpDir, ec);
+
+  // Create a valid map directory (all mandatory files present)
+  for (const auto &f : osmscout::MapDirectory::MandatoryFiles()) {
+    std::ofstream out(tmpDir / f);
+    out.close();
+  }
+
+  auto mapManager = std::make_shared<osmscout::MapManager>(
+      std::vector<std::filesystem::path>{});
+
+  // Record databaseListChanged emissions
+  std::mutex signalMutex;
+  std::vector<std::vector<std::filesystem::path>> emissions;
+  osmscout::Slot<std::vector<std::filesystem::path>> listChangedSlot(
+      [&](const std::vector<std::filesystem::path> &dirs) {
+        std::unique_lock<std::mutex> lock(signalMutex);
+        emissions.push_back(dirs);
+      });
+  mapManager->databaseListChanged.Connect(listChangedSlot);
+
+  // Add lookup dir: maps in it must become visible
+  mapManager->AddLookupDirectory(tmpDir);
+
+  auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (std::chrono::steady_clock::now() < deadline) {
+    if (!mapManager->GetDatabaseDirectories().empty()) {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
+  auto dirs = mapManager->GetDatabaseDirectories();
+  REQUIRE(dirs.size() == 1);
+  REQUIRE(std::filesystem::weakly_canonical(dirs[0].GetDir()) ==
+          std::filesystem::weakly_canonical(tmpDir));
+
+  // Remove lookup dir: maps in it must disappear and databaseListChanged
+  // must be emitted without the removed directory
+  mapManager->RemoveLookupDirectory(tmpDir);
+
+  deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (std::chrono::steady_clock::now() < deadline) {
+    if (mapManager->GetDatabaseDirectories().empty()) {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
+  REQUIRE(mapManager->GetDatabaseDirectories().empty());
+  REQUIRE(mapManager->GetLookupDirectories().empty());
+
+  std::unique_lock<std::mutex> lock(signalMutex);
+  REQUIRE_FALSE(emissions.empty());
+  REQUIRE(emissions.back().empty());
 
   std::filesystem::remove_all(tmpDir, ec);
 }
