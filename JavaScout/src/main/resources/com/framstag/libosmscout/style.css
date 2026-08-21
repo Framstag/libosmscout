@@ -156,6 +156,11 @@
     -fx-font-family: monospace;
 }
 
+.search-result-distance {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+}
+
 .search-trigger-button {
     -fx-background-color: #4a7dbb;
     -fx-text-fill: #fff;
