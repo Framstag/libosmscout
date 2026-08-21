@@ -101,8 +101,15 @@ target_link_libraries(osmscout_client_java
     OSMScout::Map
     OSMScout::Client
     ${JNI_LIBRARIES}
-    log
 )
+
+if(ANDROID)
+  # liblog exists only on Android; skip on host (Linux CI) builds
+  target_link_libraries(osmscout_client_java
+    PRIVATE
+      log
+  )
+endif()
 
 if(TARGET OSMScout::GPX)
   target_link_libraries(osmscout_client_java

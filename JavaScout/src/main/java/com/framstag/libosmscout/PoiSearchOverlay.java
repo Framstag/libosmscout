@@ -409,7 +409,7 @@ public class PoiSearchOverlay extends StackPane {
         Task<ObjectDescription> descTask = new Task<>() {
             @Override
             protected ObjectDescription call() {
-                return client.getDescription(entry.lat, entry.lon);
+                return client.getDescription(entry.lat, entry.lon, 18);
             }
         };
 

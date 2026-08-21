@@ -357,7 +357,7 @@ static jclass g_RouteEntryClass = nullptr;
 // Caches class references on the main thread (correct classloader).
 // --------------------------------------------------------------------------
 
-extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 {
   JNIEnv *env;
   if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -654,7 +654,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDatabaseBoundingBox(
 
   osmscout::DatabaseParameter parameter;
   osmscout::DatabaseRef database = std::make_shared<osmscout::Database>(parameter);
-  if (!database->Open(fsPath)) {
+  if (!database->Open(fsPath.string())) {
     osmscout::log.Warn() << "getDatabaseBoundingBox: failed to open " << fsPath.string();
     return nullptr;
   }
@@ -3382,20 +3382,6 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
           int64_t fileOffset;       // file offset of the object in the database
         };
         std::vector<Candidate> candidates;
-
-        // Helper: compute visibility score for a type at given magnification
-        auto visibilityAtZoom = [magnification](const osmscout::TypeInfoRef& type) -> int {
-          if (!type) return 1;
-          // Types with optimizeLowZoom are meant for low zoom rendering.
-          // At high zoom they're less relevant; at low zoom they're good.
-          // Types without the flag are general-purpose or high-zoom detail.
-          if (type->IsInternal()) return 0;
-          if (type->GetOptimizeLowZoom()) {
-            return (magnification <= 12) ? 2 : 1;
-          } else {
-            return (magnification >= 8) ? 2 : 1;
-          }
-        };
 
         // Query areas first (most important)
         try {
