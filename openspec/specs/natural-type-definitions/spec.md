@@ -68,7 +68,6 @@ The import-time stylesheet SHALL define feature types for the following `natural
 
 | OSM tag | Type name | Elements |
 |---------|-----------|----------|
-| `natural=coastline` | `natural_coastline` | way |
 | `natural=reef` | `natural_reef` | area |
 | `natural=shoal` | `natural_shoal` | node, area |
 | `natural=strait` | `natural_strait` | node, area |
@@ -80,11 +79,7 @@ The import-time stylesheet SHALL define feature types for the following `natural
 | `natural=geyser` | `natural_geyser` | node |
 | `natural=waterfall` | `natural_waterfall` | node, way, area |
 
-#### Scenario: Coastline type exists in type config
-- **GIVEN** a database imported with the type definitions
-- **WHEN** the database `TypeConfig` is queried for `natural_coastline`
-- **THEN** the type SHALL exist
-- **AND** ways tagged `natural=coastline` SHALL be importable as that type
+`natural=coastline` SHALL NOT be defined as an import-time type: coastline ways are handled by the separate water/land index and coastline baseline pipeline, not by regular type-based import.
 
 #### Scenario: Reef type exists in type config
 - **GIVEN** a database imported with the type definitions
@@ -145,6 +140,12 @@ The import-time stylesheet SHALL define feature types for the following `natural
 - **WHEN** the database `TypeConfig` is queried for `natural_waterfall`
 - **THEN** the type SHALL exist
 - **AND** nodes, ways, and areas tagged `natural=waterfall` SHALL be importable as that type
+
+#### Scenario: Coastline type exists in type config
+- **GIVEN** a database imported with the type definitions
+- **WHEN** the database `TypeConfig` is queried for `natural_coastline`
+- **THEN** the type SHALL NOT exist
+- **AND** ways tagged `natural=coastline` SHALL NOT be importable as a regular natural way type
 
 ### Requirement: Geological natural types
 
@@ -290,7 +291,7 @@ The rendering stylesheets SHALL define rendering rules for all newly added natur
 
 #### Scenario: New natural way types are rendered
 - **GIVEN** a rendering stylesheet that includes the natural rendering module
-- **WHEN** a map is rendered containing ways of the new way-capable natural types (`natural_tree_row`, `natural_coastline`, `natural_arch`, `natural_arete`, `natural_crevasse`, `natural_dune`, `natural_earth_bank`, `natural_gorge`, `natural_gully`, `natural_ridge`, `natural_valley`)
+- **WHEN** a map is rendered containing ways of the new way-capable natural types (`natural_tree_row`, `natural_arch`, `natural_arete`, `natural_crevasse`, `natural_dune`, `natural_earth_bank`, `natural_gorge`, `natural_gully`, `natural_ridge`, `natural_valley`)
 - **THEN** the ways SHALL be drawn as lines
 
 #### Scenario: New natural node types are rendered
