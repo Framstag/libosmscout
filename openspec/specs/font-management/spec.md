@@ -1,6 +1,8 @@
 # Font Management
 
-**Purpose:** The Skia backend loads and caches `SkTypeface` instances keyed by font name. `GetFontHeight()` returns the actual font height from font metrics instead of a hardcoded value.
+## Purpose
+
+The Skia backend loads and caches `SkTypeface` instances keyed by font name. `GetFontHeight()` returns the actual font height from font metrics instead of a hardcoded value.
 
 ## Requirements
 

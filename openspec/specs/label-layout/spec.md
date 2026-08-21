@@ -1,6 +1,8 @@
 # Label Layout
 
-**Purpose:** The Skia backend implements `Layout()` to measure text extents using `SkFont::measureText()` and `SkFontMetrics`, returning a `SkiaLabel` with correct width, height, and text content.
+## Purpose
+
+The Skia backend implements `Layout()` to measure text extents using `SkFont::measureText()` and `SkFontMetrics`, returning a `SkiaLabel` with correct width, height, and text content.
 
 ## Requirements
 

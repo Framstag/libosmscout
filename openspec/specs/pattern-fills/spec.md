@@ -1,6 +1,8 @@
 # Pattern Fills
 
-**Purpose:** The Skia backend implements `DrawFillStyle()` to support pattern fills for areas. Pattern images (PNG) are loaded, cached, and applied as repeating shaders.
+## Purpose
+
+The Skia backend implements `DrawFillStyle()` to support pattern fills for areas. Pattern images (PNG) are loaded, cached, and applied as repeating shaders.
 
 ## Requirements
 
