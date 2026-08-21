@@ -829,10 +829,10 @@ TYPES
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
 
-  TYPE natural_coastline
-    = WAY ("natural"=="coastline")
-      {Name, NameAlt}
-
+  // natural_coastline is deliberately NOT defined as a regular import type:
+  // coastline ways are handled separately by the water/land tile index
+  // (GenWaterIndex) and the coastline baseline computation, so they must
+  // not be imported as a normal way type at this point (see PR #1769).
   TYPE natural_reef
     = AREA ("natural"=="reef")
       {Name, NameAlt}

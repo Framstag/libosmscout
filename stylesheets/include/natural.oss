@@ -169,7 +169,9 @@ OSS
           WAY.TEXT { label: Name.name; color: @cliffColor; priority: @labelPrioNatural; }
         }
 
-        [TYPE natural_coastline] WAY { color: @waterLabelColor; displayWidth: 0.2mm; }
+        // natural_coastline intentionally has no rendering rule: coastline ways are
+        // handled separately by the water/land index and coastline baseline, not as a
+        // regular way type — see stylesheets/map.ost.
         [TYPE natural_waterfall] WAY { color: @waterLabelColor; displayWidth: 0.2mm; }
         [TYPE natural_ridge, natural_arete, natural_gorge, natural_gully, natural_earth_bank, natural_valley] WAY { color: @cliffColor; displayWidth: 0.2mm; dash: 4, 2; }
         [TYPE natural_tree_row] WAY { color: @woodLabelColor; displayWidth: 0.2mm; }
