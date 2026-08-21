@@ -194,6 +194,11 @@ protected:
 
   StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
 
+  /**
+   * Load basemap database, write lock needs to be hold
+   */
+  void LoadBasemap();
+
 public:
   DBThread(const std::string &basemapLookupDirectory,
            const std::string &iconDirectory,

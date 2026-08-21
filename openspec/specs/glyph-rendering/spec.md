@@ -1,6 +1,8 @@
 # Glyph Rendering
 
-**Purpose:** The Skia backend implements `DrawGlyphs()` to render individual glyphs along a path. Each glyph has a position, rotation angle, and associated font.
+## Purpose
+
+The Skia backend implements `DrawGlyphs()` to render individual glyphs along a path. Each glyph has a position, rotation angle, and associated font.
 
 ## Requirements
 

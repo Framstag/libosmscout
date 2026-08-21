@@ -1,6 +1,8 @@
 # Border Gap Color
 
-**Purpose:** When a `BorderStyle` has dashes and a visible `gapColor`, the Skia backend renders a solid border in the gap color behind the dashed border.
+## Purpose
+
+When a `BorderStyle` has dashes and a visible `gapColor`, the Skia backend renders a solid border in the gap color behind the dashed border.
 
 ## Requirements
 

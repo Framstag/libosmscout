@@ -54,6 +54,6 @@ The system SHALL allow selecting which registered provider is active for fetchin
 - **WHEN** the active provider ID is changed
 - **THEN** the new ID SHALL be persisted and restored on next application start
 
-### Implementation Note
+## Implementation Note
 
 JavaScout currently hard-codes the default `karry.cz` provider in `MapDownloadController.loadProviders()` and stores only the provider name via `Config.setMapProvider()` / `Config.getMapProvider()`. Full provider registry loading from JSON is deferred.

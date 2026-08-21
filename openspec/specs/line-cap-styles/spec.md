@@ -1,6 +1,8 @@
 # Line Cap Styles
 
-**Purpose:** The Skia backend honors `LineStyle::CapStyle` values (`capButt`, `capRound`, `capSquare`) for both `joinCap` and `endCap` in `DrawPath()`.
+## Purpose
+
+The Skia backend honors `LineStyle::CapStyle` values (`capButt`, `capRound`, `capSquare`) for both `joinCap` and `endCap` in `DrawPath()`.
 
 ## Requirements
 
