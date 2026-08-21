@@ -1864,7 +1864,7 @@ public:
       bool attachedByUs = false;
       if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED ||
           env == nullptr) {
-        if (jvm->AttachCurrentThread(&env, nullptr) == JNI_OK) {
+        if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) == JNI_OK) {
           attachedByUs = true;
         } else {
           env = nullptr;
@@ -1987,7 +1987,7 @@ private:
   void Run()
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
       osmscout::log.Error() << "NavigationController: failed to attach thread to JVM";
       return;
     }
@@ -2043,7 +2043,7 @@ private:
   void DispatchMessage(const osmscout::NavigationMessageRef &message)
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
       return;
     }
 
@@ -3866,7 +3866,7 @@ public:
                 const osmscout::Distance &overallDistance) override
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
       return;
     }
 
@@ -4151,7 +4151,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
      vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(&threadEnv, nullptr) != JNI_OK) {
+      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }
@@ -4649,7 +4649,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(&threadEnv, nullptr) != JNI_OK) {
+      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }
