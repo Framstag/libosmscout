@@ -1,82 +1,6 @@
 OSS
 CONST
   COLOR amenitySymbolColor          = darken(@amenityColor, 0.4);
-  COLOR hospitalSymbolColor         = #da0092;
-  COLOR pharmacySymbolColor         = #da0092;
-  COLOR postSymbolColor             = #e8f000;
-
-  SYMBOL amenity
-    RECTANGLE 0,0 1 x 1 {
-      AREA {color: @amenitySymbolColor; }
-    }
-
-  SYMBOL amenity_hospital
-    CIRCLE 0,0 2.0 {
-      AREA.BORDER {color: @hospitalSymbolColor; width: 0.2mm; }
-    }
-    // Horizontal bar
-    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
-      AREA { color: @hospitalSymbolColor; }
-    }
-    // Vertical bar
-    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
-      AREA { color: @hospitalSymbolColor; }
-    }
-
-  SYMBOL amenity_pharmacy
-    // Box
-    RECTANGLE -1,-1 2 x 2 {
-      AREA.BORDER {color: @pharmacySymbolColor; width: 0.2mm; }
-    }
-    // Horizontal bar
-    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
-      AREA { color: @pharmacySymbolColor; }
-    }
-    // Vertical bar
-    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
-      AREA {color: @pharmacySymbolColor; }
-    }
-
-  SYMBOL amenity_parking
-    // Parking sign: blue rectangular box with white "P" (negative y = up)
-    // RECTANGLE (x,y,w,h) = top-left corner at (x,y)
-    RECTANGLE -1.1,-1.3 2.2 x 2.6 {
-      AREA { color: #4bb2da; }
-      AREA.BORDER { color: darken(#4bb2da, 0.3); width: 0.1mm; }
-    }
-    RECTANGLE -0.75,-1.0 0.35 x 2.0 {
-      AREA { color: #ffffff; }
-    }
-    CIRCLE 0.15,-0.3 0.6 {
-      AREA.BORDER { color: #ffffff; width: 0.35mm; }
-    }
-
-  SYMBOL amenity_post_box
-    RECTANGLE 0,0 1 x 1 {
-      AREA { color: @postSymbolColor; }
-    }
-
-  SYMBOL amenity_post_office
-    RECTANGLE 0,0 2 x 2 {
-      AREA { color: @postSymbolColor; }
-    }
-
-  SYMBOL amenity_drinking_water
-    CIRCLE 0,0 0.4 {
-      AREA {color: @waterLabelColor; }
-    }
-
-  SYMBOL amenity_bicycle_parking
-    CIRCLE 0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    CIRCLE -0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    POLYGON 0.5,0.3 -0.5,0.3 0.3,-0.4 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-
-  SYMBOL amenity_toilets
-    RECTANGLE -0.5,-0.6 1 x 1.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    CIRCLE 0,0 0.25 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-
-  SYMBOL amenity_shelter
-    POLYGON -0.9,0.3 0.9,0.3 0,-0.7 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
 
   SYMBOL man_made_wastewater_plant
     CIRCLE 0,0 0.7 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
@@ -90,24 +14,12 @@ CONST
   SYMBOL power_pole
     CIRCLE 0,0 0.25 { AREA { color: @amenitySymbolColor; } }
 
-  SYMBOL amenity_atm
-    RECTANGLE -0.7,-0.5 1.4 x 1.0 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    RECTANGLE -0.4,-0.2 0.8 x 0.4 { AREA { color: @amenitySymbolColor; } }
-
 STYLE
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, power, barrier
+ // power, barrier
  //
-
- [MAG city-] {
-   [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
- }
-
- [MAG detail-] {
-   [TYPE amenity_grave_yard] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.8;}
- }
 
  [MAG detail-] {
    [TYPE power_generator] AREA { color: #bca9a9; }
@@ -117,40 +29,9 @@ STYLE
      AREA.BORDER { color: darken(@industrialColor, 0.3); width: 0.1mm; }
    }
 
-   // Special amenities
-   [TYPE amenity_post_office] AREA { color: @postColor; }
-
-   [TYPE amenity_hospital] {
-     AREA { color: @hospitalColor;}
-     AREA.BORDER { color: @hospitalBorderColor; width: 0.1mm; }
-   }
-
-   [TYPE amenity_taxi] AREA { color: #d2d2d2; }
-
-   // (Major) Amenities without special color
-   [TYPE amenity,
-         amenity_bank,
-         amenity_bus_station,
-         amenity_cafe,
-         amenity_fast_food,
-         amenity_fuel,
-         amenity_kindergarten,
-         amenity_library,
-         amenity_restaurant,
-         amenity_school,
-         amenity_bicycle_parking,
-         amenity_bicycle_parking_building] {
-     AREA { color: @amenityColor; }
-   }
  }
 
  [MAG close-] {
-   // (Minor) Amenities without special color
-   [TYPE amenity_atm,
-         amenity_recycling] {
-     AREA { color: @amenityColor; }
-   }
-
    [TYPE power_line] WAY { color: #6f6f6f; displayWidth: 0.08mm; width: 4m; }
    [TYPE power_minor_line] WAY { color: #6f6f6f; displayWidth: 0.05mm; width: 2m; }
    [TYPE power_tower] NODE.ICON { symbol: power_tower; }
@@ -169,36 +50,6 @@ STYLE
  }
 
  [MAG closer-] {
-   [TYPE amenity_hospital,
-         amenity_hospital_building] {
-     AREA.ICON { symbol: amenity_hospital; name: hospital; }
-     NODE.ICON { symbol: amenity_hospital; name: hospital; }
-   }
-
-   [TYPE amenity_parking_building] {
-     NODE.ICON { symbol: amenity_parking; name: parking; }
-     AREA.ICON { symbol: amenity_parking; name: parking;}
-   }
-
-   [TYPE amenity_parking] {
-     NODE.ICON { symbol: amenity_parking; name: parking; }
-     AREA.ICON { symbol: amenity_parking; name: parking;}
-   }
-
-   [TYPE amenity_bus_station] {
-     NODE.ICON { name: bus_stop; }
-     AREA.ICON { name: bus_stop; }
-   }
-
-   [TYPE amenity_bicycle_parking] {
-     NODE.ICON { symbol: amenity_bicycle_parking; }
-     AREA.ICON { symbol: amenity_bicycle_parking; }
-   }
-
-   [TYPE amenity_parking] {
-     AREA { color: @parkingColor;}
-     AREA.BORDER { color: @parkingBorderColor; width: 0.1mm; }
-   }
 
    [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
@@ -225,42 +76,8 @@ STYLE
  }
 
  [MAG veryClose-] {
-   // Eating
-   [TYPE amenity_fast_food] NODE.ICON { name: fast_food; }
-   [TYPE amenity_restaurant] NODE.ICON { name: restaurant; }
-
-   // Health
-   [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy; name: pharmacy; }
-
-   // Logistic
-   [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
-   [TYPE amenity_post_office] NODE.ICON { symbol: amenity_post_office; }
-
-   [TYPE amenity_drinking_water] NODE.ICON { symbol: amenity_drinking_water; }
-
-   [TYPE amenity_toilets] NODE.ICON { symbol: amenity_toilets; }
-   [TYPE amenity_waste_disposal] NODE.ICON { name: waste_basket; }
-   [TYPE amenity_shelter] NODE.ICON { symbol: amenity_shelter; }
 
    [TYPE man_made_wastewater_plant] NODE.ICON { symbol: man_made_wastewater_plant; }
-
-   [TYPE amenity_atm] NODE.ICON { symbol: amenity_atm; }
-
-   [TYPE amenity_bicycle_parking] WAY { color: #666666; displayWidth: 0.1mm; dash: 1,1; }
-
-   // Amenities without special color
-   [TYPE amenity,
-         amenity_bank,
-         amenity_cafe,
-         amenity_fast_food,
-         amenity_fuel,
-         amenity_kindergarten,
-         amenity_library,
-         amenity_recycling,
-         amenity_restaurant,
-         amenity_school] {
-     NODE.ICON { symbol: amenity; }
-   }
 
    [TYPE barrier_fence] {
       WAY {color: #aaaaaa; displayWidth: 0.1mm;}

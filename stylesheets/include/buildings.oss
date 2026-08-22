@@ -1,0 +1,52 @@
+OSS
+
+  //
+  // Buildings (generic)
+  //
+  // Generic building styling shared by base style sheets.
+  // Uses CONST values and FLAGs defined in the including style sheet:
+  //   @buildingColor, @buildingBorderColor, @buildingLabelColor,
+  //   @buildingMag, @minorBuildingMag, @labelBuildingMag,
+  //   _building, _minorBuilding
+  //
+
+  STYLE
+
+    IF _building {
+      [MAG @buildingMag-] {
+        [TYPE landuse_farmyard_building] {
+          AREA { color: #bcbcbc;}
+          AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        }
+
+        [TYPE building] {
+          AREA { color: @buildingColor; }
+          AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
+    IF _minorBuilding {
+      [MAG @minorBuildingMag-] {
+        [TYPE building_garage] AREA { color: #bcbcbc; }
+      }
+    }
+
+    // Labels
+
+    IF _building {
+      [MAG @labelBuildingMag-] {
+        [FEATURE Address] {
+          NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }
+          AREA.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; /*autoSize: true;*/ }
+        }
+
+        [TYPE building] {
+          AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
+        }
+
+        [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @buildingLabelColor; }
+      }
+    }
+
+END

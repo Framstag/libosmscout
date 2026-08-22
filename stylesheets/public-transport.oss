@@ -327,45 +327,9 @@ STYLE
   //
   // buildings
   //
-  [TYPE landuse_farmyard_building,
-        leisure_building,
-        amenity_bank_building,
-        amenity_bicycle_parking_building,
-        amenity_cafe_building,
-        amenity_fast_food_building,
-        amenity_fuel_building,
-        amenity_hospital_building,
-        amenity_kindergarten_building,
-        amenity_library_building,
-        amenity_parking_building,
-        amenity_post_office_building,
-        amenity_restaurant_building,
-        amenity_pub_building,
-        amenity_bar_building,
-        amenity_school_building,
-        christian_church_building,
-        amenity_building,
-        tourism_attraction_building,
-        tourism_alpine_hut_building,
-        tourism_chalet_building,
-        tourism_guest_house_building,
-        tourism_hostel_building,
-        tourism_hotel_building,
-        tourism_information_building,
-        tourism_motel_building,
-        tourism_museum_building,
-        tourism_building,
-        historic_castle_building,
-        historic_manor_building,
-        historic_monument_building,
-        historic_memorial_building,
-        historic_ruins_building,
-        historic_building,
-        military_bunker_building,
-        sport_building,
-        building_garage,
-        building
-  ] { 
+  // Building types are selected via GROUP, so new *_building types
+  // added to map.ost (with GROUP building) need no changes here.
+  [GROUP building] {
     [MAG veryClose-] {
       AREA { color: #f0f0f0; }
       AREA.BORDER { color: #d0d0d0; width: 0.1mm;}

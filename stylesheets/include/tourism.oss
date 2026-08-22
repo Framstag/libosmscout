@@ -92,7 +92,12 @@ OSS
             tourism_motel,
             tourism_museum,
             tourism_picnic_site,
-            tourism_aquarium] {
+            tourism_aquarium,
+            tourism_apartment,
+            tourism_camp_pitch,
+            tourism_gallery,
+            tourism_trail_riding_station,
+            tourism_wilderness_hut] {
         AREA { color: @tourismColor; }
       }
     }

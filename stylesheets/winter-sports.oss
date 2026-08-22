@@ -274,6 +274,7 @@ MODULE "include/aerialway"
 MODULE "include/amenity"
 MODULE "include/sport"
 MODULE "include/power"
+MODULE "include/buildings"
 
 STYLE
 
@@ -320,59 +321,6 @@ STYLE
      [MAG stateOver-proximity]{
        AREA { color: @natureReserveColor;}
      }
-   }
- }
-
- // Buildings
- [MAG @specialBuildingMag-] {
-   [TYPE leisure_stadium] AREA { color: #33cb98; }
- }
-
- IF _building {
-   [MAG @buildingMag-] {
-     [TYPE landuse_farmyard_building] {
-        AREA { color: #bcbcbc; }
-        AREA.BORDER { color: #887b7b; width: 0.1mm; }
-     }
-
-     [TYPE leisure_sports_centre,
-           leisure_building] {
-           AREA { color: @buildingColor; }
-           AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
-     }
-
-     [TYPE building] {
-        AREA { color: @buildingColor; }
-        AREA.BORDER { color: @buildingBorderColor; width: 0.1mm; }
-     }
-   }
- }
-
- IF _minorBuilding {
-   [MAG @minorBuildingMag-] {
-     [TYPE building_garage] AREA { color: #bcbcbc; }
-   }
- }
-
- // Labels
-
- IF _building {
-   [MAG @labelBuildingMag-] {
-     [FEATURE Address] {
-       NODE.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }
-       AREA.TEXT#address { label: Address.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; position: 1; }
-     }
-
-     [TYPE building] {
-       AREA.TEXT#buildingName { label: Name.name; color: @buildingLabelColor; size: 0.7; priority: @labelPrioBuilding; }
-     }
-
-     [TYPE leisure_building] AREA.TEXT { label: Name.name; priority: @labelPrioSpecialBuilding; }
-
-     [TYPE leisure_pitch,
-           leisure_fitness_station] AREA.TEXT { label: Name.name; style: emphasize; color: @pitchLabelColor; size: 0.9;}
-
-     [TYPE landuse_farmyard_building] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; }
    }
  }
 
