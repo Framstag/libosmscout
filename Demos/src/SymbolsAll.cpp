@@ -585,8 +585,8 @@ int main(int argc, char* argv[])
 #if defined(HAVE_OSMSCOUT_MAP_CAIRO)
   if (renderCairo) {
     for (const auto& name : names) {
-      std::string path=std::filesystem::path(args.output) /
-                        (SanitizeFileName(name)+".png");
+      std::string path=(std::filesystem::path(args.output) /
+                        (SanitizeFileName(name)+".png")).string();
 
       if (RenderSymbolCairo(projection,*styleConfig->GetSymbol(name),path,args.size)) {
         std::cout << "  OK   " << path << std::endl;
@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
     }
 
     if (args.sheet) {
-      std::string path=std::filesystem::path(args.output) / "symbols.png";
+      std::string path=(std::filesystem::path(args.output) / "symbols.png").string();
 
       if (RenderSheetCairo(projection,*styleConfig,names,path,args.size)) {
         std::cout << "  OK   " << path << std::endl;
@@ -614,8 +614,8 @@ int main(int argc, char* argv[])
 #if defined(HAVE_OSMSCOUT_MAP_SVG)
   if (renderSvg) {
     for (const auto& name : names) {
-      std::string path = std::filesystem::path(args.output) /
-                         (SanitizeFileName(name)+".svg");
+      std::string path=(std::filesystem::path(args.output) /
+                        (SanitizeFileName(name)+".svg")).string();
 
       if (RenderSymbolSVG(projection,*styleConfig->GetSymbol(name),path,args.size)) {
         std::cout << "  OK   " << path << std::endl;
@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
     }
 
     if (args.sheet) {
-      std::string path=std::filesystem::path(args.output) / "symbols.svg";
+      std::string path=(std::filesystem::path(args.output) / "symbols.svg").string();
 
       if (RenderSheetSVG(projection,*styleConfig,names,path,args.size)) {
         std::cout << "  OK   " << path << std::endl;
