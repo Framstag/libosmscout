@@ -433,5 +433,29 @@ else()
   message("Skip TextMetricsAll demo, no map rendering backends available.")
 endif()
 
+#---- SymbolsAll
+set(SYMBOLSALL_SOURCES src/SymbolsAll.cpp)
+set(SYMBOLSALL_TARGETS OSMScout::OSMScout OSMScout::Map)
+set(SYMBOLSALL_DEFS)
+
+# Cairo
+if(${OSMSCOUT_BUILD_MAP_CAIRO})
+  list(APPEND SYMBOLSALL_TARGETS OSMScout::MapCairo)
+  list(APPEND SYMBOLSALL_DEFS HAVE_OSMSCOUT_MAP_CAIRO)
+endif()
+
+# SVG
+if(${OSMSCOUT_BUILD_MAP_SVG})
+  list(APPEND SYMBOLSALL_TARGETS OSMScout::MapSVG)
+  list(APPEND SYMBOLSALL_DEFS HAVE_OSMSCOUT_MAP_SVG)
+endif()
+
+if(SYMBOLSALL_TARGETS)
+  osmscout_demo_project(NAME SymbolsAll SOURCES ${SYMBOLSALL_SOURCES} TARGET ${SYMBOLSALL_TARGETS})
+  target_compile_definitions(SymbolsAll PRIVATE ${SYMBOLSALL_DEFS})
+else()
+  message("Skip SymbolsAll demo, no map rendering backends available.")
+endif()
+
 #---- Srtm
 osmscout_demo_project(NAME Srtm SOURCES src/Srtm.cpp TARGET OSMScout::OSMScout)

@@ -679,6 +679,11 @@ namespace osmscout {
     bool RegisterSymbol(const SymbolRef& symbol);
     const SymbolRef& GetSymbol(const std::string& name) const;
 
+    /**
+     * Returns the names of all registered symbols, sorted alphabetically
+     */
+    std::vector<std::string> GetSymbolNames() const;
+
     void Postprocess();
 
     TypeConfigRef GetTypeConfig() const;
