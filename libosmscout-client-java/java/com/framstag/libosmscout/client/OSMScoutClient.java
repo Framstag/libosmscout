@@ -97,10 +97,10 @@ public class OSMScoutClient {
      * text search index for free-text hits on named objects. Region scoping and
      * cancellation mirror OSMScout2 behaviour.
      *
-     * @param query free-text search string (e.g. "Berlin", "Dortmund Hbf")
-     * @param limit maximum number of results to return
-     * @param defaultRegion name of the admin region to scope the search to, or null
-     * @param cancel cancel the currently running search first
+     * @param query         free-text search string (e.g. "Berlin", "Dortmund Hbf")
+     * @param limit         maximum number of results to return
+     * @param defaultRegion optional region name to scope the search, or null
+     * @param cancel        if true, cancel any in-progress search and return empty
      * @return array of matching LocationEntry objects, or empty array if none found
      */
     public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion, boolean cancel);
@@ -512,6 +512,19 @@ public class OSMScoutClient {
                                       Double.NaN, Double.NaN,
                                       null, null);
     }
+
+    /**
+     * Set or hide the GPS location marker that is drawn on top of the map during
+     * the next render. The marker is rendered in the same native pass as the map,
+     * so it always uses the exact same projection and cannot drift relative to the
+     * road. Call with {@code Double.NaN} for latitude to hide the marker.
+     *
+     * @param lat     marker latitude in degrees, or NaN to hide
+     * @param lon     marker longitude in degrees
+     * @param bearing marker bearing in degrees, 0 = north, clockwise, or -1 if unknown
+     * @param accuracy horizontal accuracy in meters, or -1/NaN if unknown
+     */
+    public native void setGpsMarker(double lat, double lon, double bearing, double accuracy);
 
     /**
      * Project a geographic coordinate to screen pixels for the given map view.

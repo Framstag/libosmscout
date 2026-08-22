@@ -1,7 +1,10 @@
 package com.framstag.libosmscout;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
@@ -16,22 +19,39 @@ public final class SearchResultCell {
     }
 
     /**
-     * Create the 3-line search result cell.
+     * Create the 3-line search result cell with a right-aligned distance label
+     * on the primary line.
      *
-     * @param uiScale DPI-aware UI scale helper
-     * @param line1   primary line (label/name)
-     * @param line2   secondary line (e.g. admin hierarchy), may be null or empty
-     * @param line3   tertiary line (e.g. object type + offset), may be null or empty
+     * @param uiScale    DPI-aware UI scale helper
+     * @param line1      primary line (label/name)
+     * @param line2      secondary line (e.g. admin hierarchy), may be null or empty
+     * @param line3      tertiary line (e.g. object type + offset), may be null or empty
+     * @param distanceKm distance to display right-aligned, may be null to omit
      * @return cell VBox
      */
-    public static VBox create(UIScale uiScale, String line1, String line2, String line3) {
+    public static VBox create(UIScale uiScale, String line1, String line2, String line3, String distanceKm) {
         VBox box = new VBox(uiScale.px(2));
         box.setPadding(new Insets(uiScale.px(4), uiScale.px(6), uiScale.px(4), uiScale.px(6)));
 
-        Label label1 = new Label(line1 != null ? line1 : "");
-        label1.getStyleClass().add("search-result-line1");
+        if (distanceKm != null && !distanceKm.isEmpty()) {
+            HBox line1Box = new HBox(uiScale.px(6));
+            line1Box.setAlignment(Pos.CENTER_LEFT);
 
-        box.getChildren().add(label1);
+            Label label1 = new Label(line1 != null ? line1 : "");
+            label1.getStyleClass().add("search-result-line1");
+            label1.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(label1, Priority.ALWAYS);
+
+            Label distanceLabel = new Label(distanceKm);
+            distanceLabel.getStyleClass().add("search-result-distance");
+
+            line1Box.getChildren().addAll(label1, distanceLabel);
+            box.getChildren().add(line1Box);
+        } else {
+            Label label1 = new Label(line1 != null ? line1 : "");
+            label1.getStyleClass().add("search-result-line1");
+            box.getChildren().add(label1);
+        }
 
         if (line2 != null && !line2.isEmpty()) {
             Label label2 = new Label(line2);
@@ -46,5 +66,18 @@ public final class SearchResultCell {
         }
 
         return box;
+    }
+
+    /**
+     * Create the 3-line search result cell.
+     *
+     * @param uiScale DPI-aware UI scale helper
+     * @param line1   primary line (label/name)
+     * @param line2   secondary line (e.g. admin hierarchy), may be null or empty
+     * @param line3   tertiary line (e.g. object type + offset), may be null or empty
+     * @return cell VBox
+     */
+    public static VBox create(UIScale uiScale, String line1, String line2, String line3) {
+        return create(uiScale, line1, line2, line3, null);
     }
 }

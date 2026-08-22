@@ -368,6 +368,7 @@ public:
   size_t  GetOnlineTileCacheSize() const;
   QString GetIconDirectory() const;
   QString GetNavigationTranslationDir() const;
+  QString GetEspeakDataDir() const;
 
   static void RegisterQmlTypes(const char *uri="net.sf.libosmscout.map",
                                int versionMajor=1,

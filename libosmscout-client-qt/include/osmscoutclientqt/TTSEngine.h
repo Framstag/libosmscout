@@ -31,6 +31,21 @@ class QThread;
 
 namespace osmscout {
 
+Q_NAMESPACE
+
+/**
+ * \ingroup QtAPI
+ *
+ * State of a TTSEngine, useful for showing synthesis progress in the UI
+ * (initial synthesis of a message may take a noticeable amount of time).
+ */
+enum class TTSEngineState {
+  Idle,         //!< engine is idle, not synthesizing anything at the moment
+  Synthesizing, //!< engine is currently synthesizing a message
+  Error,        //!< the last operation failed (see TTSEngine::error signal for details)
+};
+Q_ENUM_NS(TTSEngineState)
+
 /**
  * \ingroup QtAPI
  *
@@ -49,9 +64,11 @@ namespace osmscout {
  */
 class OSMSCOUT_CLIENT_QT_API TTSEngine : public QObject {
   Q_OBJECT
+  Q_PROPERTY(osmscout::TTSEngineState state READ getState NOTIFY stateChange)
 
 protected:
   QThread         *thread; //!< engine background thread (owns itself, deleted on finish)
+  TTSEngineState   state{TTSEngineState::Idle};  //!< current state of the engine
 
 public slots:
   /**
@@ -75,6 +92,20 @@ public slots:
 signals:
   void playAudioFilesRequest(const QList<QUrl> &audioFiles);
 
+  /**
+   * Emitted when the engine encounters an error (e.g. synthesis or voice
+   * loading failure). @p message is a localized, human readable
+   * description suitable for direct display in the UI.
+   */
+  void error(const QString &message);
+
+  /**
+   * Emitted whenever the engine's state changes, e.g. when it starts or
+   * finishes synthesizing a message. Useful for showing synthesis progress
+   * in the UI, as the initial synthesis of a message may take a while.
+   */
+  void stateChange(osmscout::TTSEngineState state);
+
 public:
   TTSEngine();
 
@@ -84,6 +115,11 @@ public:
   TTSEngine& operator=(TTSEngine&&) = delete;
 
   ~TTSEngine() override;
+
+  TTSEngineState getState() const
+  {
+    return state;
+  }
 
   virtual Voice getVoice() = 0;
 
@@ -97,6 +133,8 @@ protected:
 };
 
 }
+
+Q_DECLARE_METATYPE(osmscout::TTSEngineState)
 
 #endif // OSMSCOUT_CLIENT_QT_TTSENGINE_H
 

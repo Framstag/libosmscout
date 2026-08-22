@@ -419,6 +419,15 @@ struct ClientData
   std::map<long, osmscout::RouteDescriptionRef> routeDescriptions;
   std::map<JavaNavigationController *, JavaNavigationControllerRef> navigationControllers;
 
+  // GPS marker state (drawn on top of the map in the same native render)
+  std::mutex gpsMarkerMutex;
+  bool gpsMarkerVisible{false};
+  bool gpsMarkerHasBearing{false};
+  double gpsMarkerLat{0.0};
+  double gpsMarkerLon{0.0};
+  double gpsMarkerBearing{0.0}; // radians, 0 = north
+  double gpsMarkerAccuracy{0.0}; // meters
+
   // Admin region handles for scoped search (resolveAdminRegion/searchLocations)
   std::mutex adminRegionMutex;
   long nextAdminRegionHandle{1};
@@ -739,6 +748,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobje
 }
 
 // --------------------------------------------------------------------------
+
 // OSMScoutClient::close()
 // --------------------------------------------------------------------------
 
@@ -1030,6 +1040,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     }
   }
 
+  // Read GPS marker state once before the render job
+  bool drawGpsMarker = false;
+  bool gpsMarkerHasBearing = false;
+  double gpsMarkerLat = 0.0;
+  double gpsMarkerLon = 0.0;
+  double gpsMarkerBearing = 0.0;
+  double gpsMarkerAccuracy = 0.0;
+  {
+    std::lock_guard<std::mutex> lock(data->gpsMarkerMutex);
+    drawGpsMarker = data->gpsMarkerVisible;
+    gpsMarkerHasBearing = data->gpsMarkerHasBearing;
+    if (drawGpsMarker) {
+      gpsMarkerLat = data->gpsMarkerLat;
+      gpsMarkerLon = data->gpsMarkerLon;
+      gpsMarkerBearing = data->gpsMarkerBearing;
+      gpsMarkerAccuracy = data->gpsMarkerAccuracy;
+    }
+  }
+
   // Pixel buffer for result
   size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
   std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
@@ -1264,9 +1293,87 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
         return;
       }
 
+      // Draw GPS marker on top of the map using the same projection
+      if (drawGpsMarker) {
+        osmscout::GeoCoord markerCoord(gpsMarkerLat, gpsMarkerLon);
+        osmscout::Vertex2D pixel;
+        if (markerCoord.IsValid() && projection.GeoToPixel(markerCoord, pixel)) {
+          const double x = pixel.GetX();
+          const double y = pixel.GetY();
+
+          // Sizes in Android dp, scaled by screen density.
+          const double density = dpi / 160.0;
+          const double arrowSize = 56.0 * density;
+          const double halfSize = arrowSize / 2.0;
+          const double shadowOffset = 2.0 * density;
+          const double strokeWidth = 2.0 * density;
+          const double minAccuracyRadius = 4.0 * density;
+          const double accuracyThreshold = 20.0 * density;
+
+          // Marker screen bearing: map is rotated by -bearing in follow mode, so
+          // the arrow must be drawn at (bearing + angle) to point up on screen.
+          // Both values are already in radians.
+          const double screenBearing = gpsMarkerHasBearing ? gpsMarkerBearing + angle : 0.0;
+
+          // Accuracy circle, sized by horizontal accuracy.
+          if (gpsMarkerAccuracy > 0.0) {
+            const double accuracyRadius = std::max(
+                gpsMarkerAccuracy * projection.GetMeterInPixel(),
+                minAccuracyRadius);
+            if (accuracyRadius >= accuracyThreshold) {
+              // 10% blue fill
+              cairo_set_source_rgba(cr, 0.290, 0.565, 0.851, 0.10);
+              cairo_arc(cr, x, y, accuracyRadius, 0.0, 2.0 * M_PI);
+              cairo_fill(cr);
+
+              // 40% blue border
+              cairo_set_source_rgba(cr, 0.290, 0.565, 0.851, 0.40);
+              cairo_set_line_width(cr, strokeWidth);
+              cairo_arc(cr, x, y, accuracyRadius, 0.0, 2.0 * M_PI);
+              cairo_stroke(cr);
+            }
+          }
+
+          // Direction arrow (compass style: long forward triangle + short tail).
+          // Always draw the arrow so the marker is visible even without a
+          // bearing (e.g. stationary GPS): without a bearing it points up.
+          {
+            // Compass arrow path centered at (0,0); tip points up (-Y) at zero rotation.
+            auto drawArrow = [&](double offsetX, double offsetY,
+                                 double r, double g, double b, double a) {
+              cairo_save(cr);
+              cairo_translate(cr, x + offsetX, y + offsetY);
+              cairo_rotate(cr, screenBearing);
+              cairo_set_source_rgba(cr, r, g, b, a);
+
+              cairo_new_path(cr);
+              // Forward triangle (wide, points up)
+              cairo_move_to(cr, 0.0, -halfSize);
+              cairo_line_to(cr, -halfSize * 0.45, 0.0);
+              cairo_line_to(cr, halfSize * 0.45, 0.0);
+              cairo_close_path(cr);
+              // Backward tail (narrow, points down)
+              cairo_move_to(cr, 0.0, halfSize * 0.25);
+              cairo_line_to(cr, -halfSize * 0.25, 0.0);
+              cairo_line_to(cr, halfSize * 0.25, 0.0);
+              cairo_close_path(cr);
+
+              cairo_fill(cr);
+              cairo_restore(cr);
+            };
+
+            // Drop shadow
+            drawArrow(shadowOffset, shadowOffset, 0.0, 0.0, 0.0, 0.25);
+            // Main arrow (solid blue #4A90D9)
+            drawArrow(0.0, 0.0, 0.290, 0.565, 0.851, 1.0);
+          }
+        }
+      }
+
       cairo_destroy(cr);
 
       // Flush surface so pixel data is valid for reading
+      // Mark dirty because we drew on it outside MapPainterCairo
       cairo_surface_mark_dirty(surface);
       cairo_surface_flush(surface);
 
@@ -1311,6 +1418,38 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                          reinterpret_cast<const jint *>(argbPixels.data()));
 
   return result;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setGpsMarker(double lat, double lon, double bearing, double accuracy)
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setGpsMarker(JNIEnv *env,
+                                                                   jobject self,
+                                                                   jdouble lat,
+                                                                   jdouble lon,
+                                                                   jdouble bearing,
+                                                                   jdouble accuracy)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+
+  std::lock_guard<std::mutex> lock(data->gpsMarkerMutex);
+  if (std::isnan(static_cast<double>(lat)) || std::isnan(static_cast<double>(lon))) {
+    data->gpsMarkerVisible = false;
+    data->gpsMarkerHasBearing = false;
+    data->gpsMarkerAccuracy = 0.0;
+  } else {
+    data->gpsMarkerVisible = true;
+    data->gpsMarkerLat = lat;
+    data->gpsMarkerLon = lon;
+    data->gpsMarkerHasBearing = !std::isnan(static_cast<double>(bearing)) && bearing >= 0.0;
+    data->gpsMarkerBearing = osmscout::DegToRad(bearing);
+    data->gpsMarkerAccuracy = std::max(0.0, static_cast<double>(accuracy));
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -3593,6 +3732,36 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription(JNIEnv *env, 
                                                                      jint magnification)
 {
   osmscout::log.Debug() << "[JNI] getDescription(" << lat << ", " << lon << ")";
+
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    osmscout::log.Warn() << "[JNI] getDescription: client data or dbThread is null";
+    return NewEmptyObjectDescription(env);
+  }
+
+  std::vector<RankedDescriptionCandidate> candidates =
+      CollectDescriptionCandidates(data, lat, lon, magnification);
+
+  if (candidates.empty()) {
+    osmscout::log.Debug() << "[JNI] no candidate found, returning empty description";
+    return NewEmptyObjectDescription(env);
+  }
+
+  const RankedDescriptionCandidate &best = candidates.front();
+  osmscout::log.Debug() << "[JNI] getDescription returning with "
+                        << best.description.GetEntries().size() << " entries";
+
+  return MarshalObjectDescription(env, best.description, best.refType,
+                                  best.typeName, best.fileOffset);
+}
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription__DDI(JNIEnv *env, jobject self,
+                                                                         jdouble lat, jdouble lon,
+                                                                         jint magnification)
+{
+  osmscout::log.Debug() << "[JNI] getDescription(" << lat << ", " << lon
+                        << ", mag=" << magnification << ")";
 
   ClientData *data = getClientData(env, self);
   if (data == nullptr || data->dbThread == nullptr) {

@@ -212,7 +212,10 @@ public class SearchOverlay extends StackPane {
                         line3 = "   - " + refType + " " + item.objectFileOffset + " " + item.objectTypeName;
                     }
 
-                    setGraphic(SearchResultCell.create(uiScale, line1, line2, line3));
+                    double distanceMeters = LocationSearchRanker.haversine(
+                            mapCenterLat, mapCenterLon, item.lat, item.lon);
+                    String distanceKm = LocationSearchRanker.formatDistanceKm(distanceMeters);
+                    setGraphic(SearchResultCell.create(uiScale, line1, line2, line3, distanceKm));
                 }
             }
         });

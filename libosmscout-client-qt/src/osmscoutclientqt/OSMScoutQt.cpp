@@ -244,6 +244,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QmlRoutingProfileRef>("QmlRoutingProfileRef");
   qRegisterMetaType<VoicePlayer::PlaybackState>("VoicePlayer::PlaybackState");
   qRegisterMetaType<Voice>("Voice");
+  qRegisterMetaType<osmscout::TTSEngineState>("TTSEngineState");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -524,5 +525,10 @@ QString OSMScoutQt::GetIconDirectory() const
 QString OSMScoutQt::GetNavigationTranslationDir() const
 {
   return navigationTranslationDir;
+}
+
+QString OSMScoutQt::GetEspeakDataDir() const
+{
+  return espeakDataDir;
 }
 }
