@@ -234,6 +234,23 @@ namespace {
 
 #include <jni.h>
 
+// --------------------------------------------------------------------------
+// Portable thread-attach helper
+//
+// Host JDK jni.h and Android NDK jni.h disagree on AttachCurrentThread's
+// first parameter type (void** vs JNIEnv**). The ABI is identical; route the
+// call through a casted member-function pointer so this file compiles against
+// both headers without any platform conditional.
+// --------------------------------------------------------------------------
+namespace {
+jint AttachCurrentThread(JNIEnv **env, JavaVM *jvm)
+{
+  using AttachCurrentThreadFn = jint (JavaVM::*)(JNIEnv **, void *);
+  AttachCurrentThreadFn fn = reinterpret_cast<AttachCurrentThreadFn>(&JavaVM::AttachCurrentThread);
+  return (jvm->*fn)(env, nullptr);
+}
+}
+
 #if __has_include(<osmscoutgpx/GPXFeatures.h>)
 #include <osmscoutgpx/GPXFeatures.h>
 #endif
@@ -357,7 +374,7 @@ static jclass g_RouteEntryClass = nullptr;
 // Caches class references on the main thread (correct classloader).
 // --------------------------------------------------------------------------
 
-extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 {
   JNIEnv *env;
   if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -710,6 +727,28 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setStyleSheetFlag(JNIEnv *en
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setMapDpi(double dpi)
+//
+// Overrides the physical DPI used for rendering. Each display (phone vs car
+// surface) has its own physical DPI; the client is built with the phone
+// metrics, so Android Auto must switch to the car surface DPI before its
+// first render (otherwise the map is scaled ~1.8x too zoomed on a 236-dpi
+// head unit). Mirrors Settings::SetMapDPI; the next render picks it up.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobject self, jdouble dpi)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->settings == nullptr || dpi <= 0.0) {
+    return;
+  }
+  osmscout::log.Debug() << "[JNI] setMapDpi(" << dpi << ")";
+  data->settings->SetMapDPI(dpi);
+}
+
+// --------------------------------------------------------------------------
+
 // OSMScoutClient::close()
 // --------------------------------------------------------------------------
 
@@ -930,6 +969,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   magnification.SetLevel(osmscout::MagnificationLevel(static_cast<uint32_t>(mag)));
 
   double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  // Verbose render logging disabled; re-enable only when debugging native renderer
+  // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
+  //                      << " height=" << height << " mag=" << mag;
 
   // Extract route overlay data if provided
   std::vector<osmscout::Point> routePoints;
@@ -1978,7 +2020,7 @@ public:
       bool attachedByUs = false;
       if (jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_EDETACHED ||
           env == nullptr) {
-        if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) == JNI_OK) {
+        if (AttachCurrentThread(&env, jvm) == JNI_OK) {
           attachedByUs = true;
         } else {
           env = nullptr;
@@ -2101,7 +2143,7 @@ private:
   void Run()
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       osmscout::log.Error() << "NavigationController: failed to attach thread to JVM";
       return;
     }
@@ -2157,7 +2199,7 @@ private:
   void DispatchMessage(const osmscout::NavigationMessageRef &message)
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       return;
     }
 
@@ -2422,6 +2464,59 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocations__Ljava_lang_
 }
 
 namespace {
+
+// Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
+// requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
+// (e.g. garbage read from a corrupt text index entry). Entries carrying such
+// data must be dropped before serialization instead of crashing the app.
+static bool IsValidUtf8(const std::string &s) {
+  const size_t n = s.size();
+  size_t i = 0;
+  while (i < n) {
+    const unsigned char c = static_cast<unsigned char>(s[i]);
+    if (c < 0x80) {
+      i++;
+      continue;
+    }
+    size_t extra;
+    if ((c & 0xE0) == 0xC0) {
+      if (c < 0xC2) return false; // overlong 2-byte sequence
+      extra = 1;
+    } else if ((c & 0xF0) == 0xE0) {
+      if (c == 0xE0) {
+        if (i + 1 >= n) return false;
+        if ((static_cast<unsigned char>(s[i + 1]) & 0xE0) == 0x80) return false; // overlong 3-byte
+      }
+      if (c == 0xED) {
+        if (i + 1 >= n) return false;
+        if (static_cast<unsigned char>(s[i + 1]) > 0x9F) return false; // UTF-16 surrogate
+      }
+      extra = 2;
+    } else if ((c & 0xF8) == 0xF0) {
+      if (c == 0xF0) {
+        if (i + 1 >= n) return false;
+        if (static_cast<unsigned char>(s[i + 1]) < 0x90) return false; // overlong 4-byte
+      }
+      if (c == 0xF4) {
+        if (i + 1 >= n) return false;
+        if (static_cast<unsigned char>(s[i + 1]) > 0x8F) return false; // beyond U+10FFFF
+      }
+      extra = 3;
+    } else {
+      return false; // stray continuation byte or invalid lead byte
+    }
+    if (i + extra >= n) {
+      return false; // truncated sequence
+    }
+    for (size_t k = 1; k <= extra; k++) {
+      if ((static_cast<unsigned char>(s[i + k]) & 0xC0) != 0x80) {
+        return false; // missing continuation byte
+      }
+    }
+    i += extra + 1;
+  }
+  return true;
+}
 
 jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                                jstring queryJStr, jint limit,
@@ -2807,12 +2902,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                                   + freeTextEntries.size()
 #endif
                                   );
-  jobjectArray resultArray = env->NewObjectArray(count, entryCls, nullptr);
-  if (resultArray == nullptr) {
-    return nullptr;
-  }
 
-  jsize idx = 0;
+  // Serialize entries, dropping any whose data is not valid UTF-8 (corrupt
+  // text index / database content would abort ART inside NewStringUTF).
+  std::vector<jobject> serializedEntries;
+  serializedEntries.reserve(static_cast<size_t>(count));
 
   // Coordinate result first (ranks above all object results, matching OSMScout2)
   if (hasCoordinate) {
@@ -2824,8 +2918,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF("match"));
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
-    env->SetObjectArrayElement(resultArray, idx++, jEntry);
-    env->DeleteLocalRef(jEntry);
+    serializedEntries.push_back(jEntry);
   }
 
   // Serialize structured results (defensively resolved); free-text hits follow
@@ -2833,7 +2926,6 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   for (jsize i = 0; i < structuredCount; i++) {
     const ResolvedEntry &resolvedEntry = resolvedEntries[static_cast<size_t>(i)];
     const auto &entry = *resolvedEntry.entry;
-    jobject jEntry = env->NewObject(entryCls, entryCtor);
 
     // label
     std::string label;
@@ -2848,11 +2940,9 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     } else if (entry.address) {
       label = entry.address->name;
     }
-    env->SetObjectField(jEntry, labelField, env->NewStringUTF(label.c_str()));
 
     // type
     std::string type = "object";
-    env->SetObjectField(jEntry, typeField, env->NewStringUTF(type.c_str()));
 
     // objectType
     std::string objectType;
@@ -2865,18 +2955,6 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     } else if (entry.address) {
       objectType = "address";
     }
-    env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(objectType.c_str()));
-
-    env->SetDoubleField(jEntry, latField, resolvedEntry.lat);
-    env->SetDoubleField(jEntry, lonField, resolvedEntry.lon);
-    env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
-    env->SetObjectField(jEntry, nameField, env->NewStringUTF(resolvedEntry.objectName.c_str()));
-    env->SetLongField(jEntry, objectFileOffsetField, resolvedEntry.objectFileOffset);
-
-    // refType
-    if (!resolvedEntry.refType.empty()) {
-      env->SetObjectField(jEntry, refTypeField, env->NewStringUTF(resolvedEntry.refType.c_str()));
-    }
 
     // match quality
     std::string matchQuality = "candidate";
@@ -2886,30 +2964,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         (entry.poi && entry.poiMatchQuality == osmscout::LocationSearchResult::match)) {
       matchQuality = "match";
     }
-    env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF(matchQuality.c_str()));
 
-    // region (admin region hierarchy) + postal area + admin region hierarchy path
+    // region (admin region hierarchy) + postal area
     std::vector<std::string> regionParts;
     if (entry.adminRegion) {
       regionParts.push_back(entry.adminRegion->name);
     }
     if (entry.postalArea) {
       regionParts.push_back(entry.postalArea->name);
-    }
-
-    jobjectArray regionArray = env->NewObjectArray(
-        static_cast<jsize>(regionParts.size()),
-        env->FindClass("java/lang/String"),
-        nullptr);
-    for (jsize r = 0; r < static_cast<jsize>(regionParts.size()); r++) {
-      env->SetObjectArrayElement(regionArray, r,
-                                 env->NewStringUTF(regionParts[static_cast<size_t>(r)].c_str()));
-    }
-    env->SetObjectField(jEntry, regionField, regionArray);
-
-    // postal area
-    if (entry.postalArea) {
-      env->SetObjectField(jEntry, postalAreaField, env->NewStringUTF(entry.postalArea->name.c_str()));
     }
 
     // admin region hierarchy (full path)
@@ -2938,16 +3000,69 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         parentOffset = it->second->parentRegionOffset;
       }
     }
-    env->SetObjectField(jEntry, adminRegionHierarchyField, env->NewStringUTF(hierarchyPath.c_str()));
 
-    env->SetObjectArrayElement(resultArray, idx++, jEntry);
-    env->DeleteLocalRef(jEntry);
+    // Validate every serialized string before touching JNI; drop the entry on
+    // invalid UTF-8 instead of aborting ART via NewStringUTF.
+    bool validRegion = true;
+    for (const auto &part : regionParts) {
+      if (!IsValidUtf8(part)) {
+        validRegion = false;
+        break;
+      }
+    }
+    if (!validRegion ||
+        !IsValidUtf8(label) || !IsValidUtf8(type) || !IsValidUtf8(objectType) ||
+        !IsValidUtf8(resolvedEntry.objectTypeName) || !IsValidUtf8(resolvedEntry.objectName) ||
+        !IsValidUtf8(resolvedEntry.refType) || !IsValidUtf8(matchQuality) ||
+        !IsValidUtf8(hierarchyPath)) {
+      continue;
+    }
+
+    jobject jEntry = env->NewObject(entryCls, entryCtor);
+    env->SetObjectField(jEntry, labelField, env->NewStringUTF(label.c_str()));
+    env->SetObjectField(jEntry, typeField, env->NewStringUTF(type.c_str()));
+    env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(objectType.c_str()));
+    env->SetDoubleField(jEntry, latField, resolvedEntry.lat);
+    env->SetDoubleField(jEntry, lonField, resolvedEntry.lon);
+    env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
+    env->SetObjectField(jEntry, nameField, env->NewStringUTF(resolvedEntry.objectName.c_str()));
+    env->SetLongField(jEntry, objectFileOffsetField, resolvedEntry.objectFileOffset);
+
+    // refType
+    if (!resolvedEntry.refType.empty()) {
+      env->SetObjectField(jEntry, refTypeField, env->NewStringUTF(resolvedEntry.refType.c_str()));
+    }
+
+    env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF(matchQuality.c_str()));
+
+    jobjectArray regionArray = env->NewObjectArray(
+        static_cast<jsize>(regionParts.size()),
+        env->FindClass("java/lang/String"),
+        nullptr);
+    for (jsize r = 0; r < static_cast<jsize>(regionParts.size()); r++) {
+      env->SetObjectArrayElement(regionArray, r,
+                                 env->NewStringUTF(regionParts[static_cast<size_t>(r)].c_str()));
+    }
+    env->SetObjectField(jEntry, regionField, regionArray);
+
+    // postal area
+    if (entry.postalArea) {
+      env->SetObjectField(jEntry, postalAreaField, env->NewStringUTF(entry.postalArea->name.c_str()));
+    }
+
+    env->SetObjectField(jEntry, adminRegionHierarchyField, env->NewStringUTF(hierarchyPath.c_str()));
+    serializedEntries.push_back(jEntry);
   }
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
   // Free-text search hits (POIs, named objects via the text index)
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
+    // Garbage string data from a corrupt text index — omit the entry.
+    if (!IsValidUtf8(entry.label) || !IsValidUtf8(entry.objectType) ||
+        !IsValidUtf8(entry.objectTypeName) || !IsValidUtf8(entry.refType)) {
+      continue;
+    }
     jobject jEntry = env->NewObject(entryCls, entryCtor);
 
     env->SetObjectField(jEntry, labelField, env->NewStringUTF(entry.label.c_str()));
@@ -2965,10 +3080,22 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
 
-    env->SetObjectArrayElement(resultArray, idx++, jEntry);
-    env->DeleteLocalRef(jEntry);
+    serializedEntries.push_back(jEntry);
   }
 #endif
+
+  jobjectArray resultArray = env->NewObjectArray(
+      static_cast<jsize>(serializedEntries.size()), entryCls, nullptr);
+  if (resultArray == nullptr) {
+    for (auto jEntry : serializedEntries) {
+      env->DeleteLocalRef(jEntry);
+    }
+    return nullptr;
+  }
+  for (size_t e = 0; e < serializedEntries.size(); e++) {
+    env->SetObjectArrayElement(resultArray, static_cast<jsize>(e), serializedEntries[e]);
+    env->DeleteLocalRef(serializedEntries[e]);
+  }
 
   return resultArray;
 }
@@ -3157,6 +3284,94 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getRegion(JNIEnv *env, jobje
 // --------------------------------------------------------------------------
 // OSMScoutClient::getDescription(double lat, double lon) and
 // OSMScoutClient::getDescriptionCandidates(double lat, double lon)
+// OSMScoutClient::getAddressAt(double lat, double lon)
+// --------------------------------------------------------------------------
+// Reverse-lookup the address (street + house number + admin region + postal
+// area) at the given coordinate via the location index, independent of the
+// object's own address tags. Returns String[]{street, houseNumber,
+// adminRegion, postalArea} or null when no address is indexed nearby.
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jobject self,
+                                                                 jdouble lat, jdouble lon)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return nullptr;
+  }
+
+  std::string street;
+  std::string houseNumber;
+  std::string adminRegion;
+  std::string postalArea;
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef> &databases) {
+      osmscout::GeoCoord coord(lat, lon);
+      for (const auto &db : databases) {
+        if (IsBasemapDatabase(db)) {
+          continue;
+        }
+        auto descriptionService = db->GetLocationDescriptionService();
+        if (!descriptionService) {
+          continue;
+        }
+        osmscout::LocationDescription description;
+        if (!descriptionService->DescribeLocationByAddress(coord, description)) {
+          continue;
+        }
+        auto atAddress = description.GetAtAddressDescription();
+        if (!atAddress) {
+          continue;
+        }
+        const osmscout::Place &place = atAddress->GetPlace();
+        if (place.GetAddress()) {
+          if (place.GetLocation()) {
+            street = place.GetLocation()->name;
+          }
+          houseNumber = place.GetAddress()->name;
+        }
+        if (place.GetAdminRegion()) {
+          adminRegion = place.GetAdminRegion()->name;
+        }
+        if (place.GetPostalArea()) {
+          postalArea = place.GetPostalArea()->name;
+        }
+        if (!street.empty() || !houseNumber.empty()) {
+          return;
+        }
+      }
+    }
+  );
+
+  if (street.empty() && houseNumber.empty() && adminRegion.empty() && postalArea.empty()) {
+    return nullptr;
+  }
+
+  const std::string parts[4] = {street, houseNumber, adminRegion, postalArea};
+  for (const auto &part : parts) {
+    if (!IsValidUtf8(part)) {
+      return nullptr;
+    }
+  }
+
+  jclass stringCls = env->FindClass("java/lang/String");
+  if (stringCls == nullptr) {
+    return nullptr;
+  }
+  jobjectArray result = env->NewObjectArray(4, stringCls, nullptr);
+  if (result == nullptr) {
+    return nullptr;
+  }
+  for (int i = 0; i < 4; i++) {
+    jobject jStr = env->NewStringUTF(parts[i].c_str());
+    env->SetObjectArrayElement(result, i, jStr);
+    env->DeleteLocalRef(jStr);
+  }
+  return result;
+}
+
+// --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 
 namespace {
@@ -3300,7 +3515,11 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
         osmscout::TypeInfoSet nodeTypes(typeConfig->GetNodeTypes());
         osmscout::TypeInfoSet wayTypes(typeConfig->GetWayTypes());
         osmscout::TypeInfoSet areaTypes(typeConfig->GetAreaTypes());
-        osmscout::Distance radius = osmscout::Distance::Of<osmscout::Meter>(50);
+        // Pick radius: generous (150 m) so a small screen→geo offset (dpi /
+        // rotation mismatch) still reaches the clicked building. Ranking later
+        // prefers the small area that CONTAINS the point, so a wider radius
+        // does not degrade the result for a correct pick.
+        osmscout::Distance radius = osmscout::Distance::Of<osmscout::Meter>(150);
 
         // Collect candidates with ranking metadata
         struct Candidate {
@@ -3508,8 +3727,9 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
 }  // namespace
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription__DD(JNIEnv *env, jobject self,
-                                                                        jdouble lat, jdouble lon)
+Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription(JNIEnv *env, jobject self,
+                                                                     jdouble lat, jdouble lon,
+                                                                     jint magnification)
 {
   osmscout::log.Debug() << "[JNI] getDescription(" << lat << ", " << lon << ")";
 
@@ -3520,7 +3740,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription__DD(JNIEnv *e
   }
 
   std::vector<RankedDescriptionCandidate> candidates =
-      CollectDescriptionCandidates(data, lat, lon, 18);  // street-level zoom: everything visible
+      CollectDescriptionCandidates(data, lat, lon, magnification);
 
   if (candidates.empty()) {
     osmscout::log.Debug() << "[JNI] no candidate found, returning empty description";
@@ -3844,7 +4064,7 @@ public:
                 const osmscout::Distance &overallDistance) override
   {
     JNIEnv *env;
-    if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr) != JNI_OK) {
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
       return;
     }
 
@@ -4129,7 +4349,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
      vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
+      if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }
@@ -4627,7 +4847,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr]() {
       JNIEnv *threadEnv;
-      if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&threadEnv), nullptr) != JNI_OK) {
+      if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
         return;
       }

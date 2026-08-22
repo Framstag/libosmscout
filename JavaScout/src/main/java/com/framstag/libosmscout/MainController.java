@@ -1235,7 +1235,8 @@ public class MainController implements Initializable {
         javafx.concurrent.Task<CurrentRoadInfo> task = new javafx.concurrent.Task<>() {
             @Override
             protected CurrentRoadInfo call() {
-                var desc = client.getDescription(lat, lon, renderer.getMagnification());
+                int mag = renderer != null ? renderer.getMagnification() : 18;
+                var desc = client.getDescription(lat, lon, mag);
                 if (desc == null) return null;
 
                 String ref = "";

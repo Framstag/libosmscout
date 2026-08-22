@@ -226,20 +226,6 @@ public class OSMScoutClient {
      *
      * @param lat latitude in degrees
      * @param lon longitude in degrees
-     * @return ObjectDescription with entries, or empty description if no object found
-     */
-    public native ObjectDescription getDescription(double lat, double lon);
-
-    /**
-     * Get a structured description of the most reasonable visible object
-     * at the given geographic coordinate.
-     * <p>
-     * Queries objects in a small bounding box around the coordinate,
-     * ranks them by (has description data, visible at zoom, proximity),
-     * and returns a structured {@link ObjectDescription} for the best match.
-     *
-     * @param lat latitude in degrees
-     * @param lon longitude in degrees
      * @param magnification current map magnification (zoom level)
      * @return ObjectDescription with entries, or empty description if no object found
      */
