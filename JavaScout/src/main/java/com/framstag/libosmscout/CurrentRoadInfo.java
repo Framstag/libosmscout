@@ -4,7 +4,7 @@ package com.framstag.libosmscout;
  * Information about the road at a given geographic coordinate.
  * <p>
  * Populated from {@link com.framstag.libosmscout.client.ObjectDescription}
- * entries returned by {@link com.framstag.libosmscout.client.OSMScoutClient#getDescription(double, double)}.
+ * entries returned by {@link com.framstag.libosmscout.client.OSMScoutClient#getDescription(double, double, int)}.
  */
 public class CurrentRoadInfo {
 
