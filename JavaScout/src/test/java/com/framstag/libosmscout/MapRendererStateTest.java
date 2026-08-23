@@ -123,6 +123,26 @@ public class MapRendererStateTest {
         }
     }
 
+    @Test
+    public void testNotifyStyleChangedBumpsEpochAndRequestsRender() throws Exception {
+        Canvas canvas = new Canvas(100, 100);
+        MapRenderer renderer = new MapRenderer(canvas, null);
+        try {
+            java.util.concurrent.atomic.AtomicLong epoch =
+                (java.util.concurrent.atomic.AtomicLong) getField(renderer, "epoch");
+            long epochBefore = epoch.get();
+
+            renderer.notifyStyleChanged();
+
+            assertEquals(epochBefore + 1, epoch.get(),
+                "notifyStyleChanged must bump the epoch to invalidate cached tiles");
+            assertNotNull(getField(renderer, "pendingRender"),
+                "notifyStyleChanged should schedule a render request");
+        } finally {
+            renderer.shutdown();
+        }
+    }
+
     private static Object getField(Object object, String name) throws Exception {
         Field field = MapRenderer.class.getDeclaredField(name);
         field.setAccessible(true);

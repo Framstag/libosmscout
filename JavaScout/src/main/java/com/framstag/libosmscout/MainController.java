@@ -29,6 +29,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -920,6 +921,9 @@ public class MainController implements Initializable {
         MenuItem importTrackItem = new MenuItem("Import GPX Track…");
         importTrackItem.setOnAction(e -> importGpxTrack());
 
+        MenuItem switchStyleItem = new MenuItem("Switch Style…");
+        switchStyleItem.setOnAction(e -> openStyleSwitcherDialog());
+
         MenuItem poiSearchItem = new MenuItem("Search POIs…");
         poiSearchItem.setOnAction(e -> openPoiSearch());
 
@@ -929,7 +933,7 @@ public class MainController implements Initializable {
         MenuItem downloadMapsItem = new MenuItem("Download Maps…");
         downloadMapsItem.setOnAction(e -> onDownloadMaps());
 
-        mainMenu.getItems().addAll(favoritesItem, importTrackItem, poiSearchItem, liveGpsItem, downloadMapsItem);
+        mainMenu.getItems().addAll(favoritesItem, importTrackItem, switchStyleItem, poiSearchItem, liveGpsItem, downloadMapsItem);
 
         menuButton.setOnAction(e -> {
             if (mainMenu.isShowing()) {
@@ -1867,6 +1871,60 @@ public class MainController implements Initializable {
         FavLocationDialog dialog = new FavLocationDialog(
             stage, client, favPath, uiScale, this::onFavoriteJumpTo, this::updateFavoriteMarkers);
         dialog.show();
+    }
+
+    private void openStyleSwitcherDialog() {
+        if (client == null || renderer == null) return;
+
+        List<String> styles = client.getAvailableStyleSheets();
+
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Switch Style");
+        dialog.setHeaderText("Select a map style");
+
+        ComboBox<String> styleCombo = new ComboBox<>();
+        styleCombo.getItems().setAll(styles);
+        styleCombo.setMaxWidth(Double.MAX_VALUE);
+        if (styles.isEmpty()) {
+            styleCombo.setPlaceholder(new Label("No styles available"));
+        }
+        if (!styles.isEmpty()) {
+            String active = client.getActiveStyleSheet();
+            if (active != null && active.endsWith(".oss")) {
+                active = active.substring(0, active.length() - 4);
+            }
+            if (active != null && styles.contains(active)) {
+                styleCombo.setValue(active);
+            } else {
+                styleCombo.setValue(styles.get(0));
+            }
+        }
+
+        ButtonType switchButton = new ButtonType("Switch", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(switchButton, ButtonType.CANCEL);
+        dialog.getDialogPane().setContent(styleCombo);
+
+        // Disable confirmation when no styles are available
+        Node switchNode = dialog.getDialogPane().lookupButton(switchButton);
+        switchNode.setDisable(styles.isEmpty());
+
+        dialog.setResultConverter(button -> button == switchButton ? styleCombo.getValue() : null);
+
+        dialog.showAndWait().ifPresent(style -> {
+            boolean ok = client.loadStyleSheet(style);
+            if (ok) {
+                // Full redraw with the new style: the cached front buffer was
+                // painted with the previous style, so a plain re-request would
+                // be served from the cache (sub-region blit) and never show
+                // the switch.
+                renderer.notifyStyleChanged();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR,
+                    "Could not load style \"" + style + "\". The previous style stays active.",
+                    ButtonType.OK);
+                alert.showAndWait();
+            }
+        });
     }
 
     private void onFavoriteJumpTo(LocationEntry entry) {

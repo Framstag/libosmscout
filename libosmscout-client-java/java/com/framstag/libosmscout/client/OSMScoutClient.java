@@ -1,5 +1,9 @@
 package com.framstag.libosmscout.client;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +47,79 @@ public class OSMScoutClient {
      * @return true if initialised, false otherwise
      */
     public native boolean isInitialized();
+
+    /**
+     * Returns the configured stylesheet directory.
+     *
+     * @return absolute or relative path to the directory containing {@code *.oss}
+     *         stylesheet files, or {@code "stylesheets"} when unset
+     */
+    public native String getStyleSheetDirectory();
+
+    /**
+     * Returns the currently active stylesheet file name.
+     *
+     * @return file name (e.g. {@code "standard.oss"}), or {@code "standard.oss"}
+     *         by default
+     */
+    public native String getActiveStyleSheet();
+
+    /**
+     * Switches the active map style by name and redraws with it.
+     * <p>
+     * The name is the stylesheet file name without the {@code .oss} extension
+     * (e.g. {@code "cycle"}). The stylesheet is loaded on the native database
+     * thread; this call blocks until the load has completed. When the load
+     * fails (unknown name, unreadable or unparsable file) the previously
+     * active style is restored and {@code false} is returned.
+     *
+     * @param name style name, or file name including {@code .oss}
+     * @return true if the style was loaded, false on failure
+     */
+    public native boolean loadStyleSheet(String name);
+
+    /**
+     * Enables or disables a stylesheet flag (e.g. {@code "daylight"}) and
+     * reloads the active stylesheet with the flag applied.
+     *
+     * @param key   flag name
+     * @param value flag state
+     */
+    public native void setStyleSheetFlag(String key, boolean value);
+
+    /**
+     * Returns the names of all available map styles.
+     * <p>
+     * Styles are derived from the top-level {@code *.oss} files in the
+     * stylesheet directory; the name is the file name without the {@code .oss}
+     * extension. The result is sorted alphabetically.
+     *
+     * @return sorted style names, or an empty list when no stylesheet files
+     *         exist or the directory cannot be read
+     */
+    public List<String> getAvailableStyleSheets() {
+        String directory = getStyleSheetDirectory();
+        if (directory == null || directory.isEmpty()) {
+            return List.of();
+        }
+        Path dir = Path.of(directory);
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        List<String> styles = new ArrayList<>();
+        try (var stream = Files.list(dir)) {
+            stream
+                .filter(Files::isRegularFile)
+                .map(p -> p.getFileName().toString())
+                .filter(name -> name.endsWith(".oss"))
+                .map(name -> name.substring(0, name.length() - 4))
+                .sorted()
+                .forEach(styles::add);
+        } catch (IOException e) {
+            return List.of();
+        }
+        return styles;
+    }
 
     /**
      * Render the current map view to an ARGB pixel array.
