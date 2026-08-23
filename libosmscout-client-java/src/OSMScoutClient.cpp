@@ -65,6 +65,7 @@
 #endif
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
@@ -3372,6 +3373,73 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jo
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::getMaxSpeedAt(double lat, double lon)
+// --------------------------------------------------------------------------
+// Look up the maximum allowed speed (km/h) of the road at the given
+// coordinate via the location index (nearest way). Returns NaN when no
+// speed limit is defined or no road is found.
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getMaxSpeedAt(JNIEnv *env, jobject self,
+                                                                 jdouble lat, jdouble lon)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return std::numeric_limits<jdouble>::quiet_NaN();
+  }
+
+  double maxSpeed = std::numeric_limits<double>::quiet_NaN();
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef> &databases) {
+      osmscout::GeoCoord coord(lat, lon);
+      for (const auto &db : databases) {
+        if (IsBasemapDatabase(db)) {
+          continue;
+        }
+        auto database = db->GetDatabase();
+        if (!database) {
+          continue;
+        }
+        auto typeConfig = database->GetTypeConfig();
+        if (!typeConfig) {
+          continue;
+        }
+        auto descriptionService = db->GetLocationDescriptionService();
+        if (!descriptionService) {
+          continue;
+        }
+        osmscout::LocationDescription description;
+        if (!descriptionService->DescribeLocationByWay(coord, description)) {
+          continue;
+        }
+        auto wayDescription = description.GetWayDescription();
+        if (!wayDescription) {
+          continue;
+        }
+        osmscout::ObjectFileRef wayRef = wayDescription->GetWay().GetObject();
+        if (wayRef.Valid() && wayRef.GetType() == osmscout::RefType::refWay) {
+          osmscout::WayRef way;
+          if (database->GetWayByOffset(wayRef.GetFileOffset(), way)) {
+            size_t maxSpeedIdx;
+            if (way->GetType()->GetFeature(osmscout::MaxSpeedFeature::NAME, maxSpeedIdx) &&
+                way->GetFeatureValueBuffer().HasFeature(maxSpeedIdx)) {
+              auto *val = way->GetFeatureValueBuffer().GetValue(maxSpeedIdx);
+              if (val) {
+                maxSpeed = static_cast<osmscout::MaxSpeedFeatureValue *>(val)->GetMaxSpeed();
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  );
+
+  return maxSpeed;
+}
+
+// --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 
 namespace {
@@ -4332,6 +4400,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
   // Create breaker for cancellation
   auto breaker = std::make_shared<osmscout::ThreadedBreaker>();
+  std::shared_ptr<std::thread> thread;
 
   {
     std::scoped_lock lock(data->routingMutex);
@@ -4341,10 +4410,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       data->routingThread->join();
     }
     data->breaker = breaker;
-  }
 
-  // Spawn background thread for routing
-  auto thread = std::make_shared<std::thread>(
+    // Spawn background thread for routing. Spawn + publish stay under the
+    // lock: concurrent route calculations (reroute storms) must never replace
+    // routingThread while the previous thread is still running — destroying a
+    // joinable std::thread calls std::terminate (SIGABRT).
+    thread = std::make_shared<std::thread>(
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
      vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
@@ -4354,7 +4425,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
         return;
       }
 
-      // Progress callback
+      // Any C++ exception escaping this thread function would call
+      // std::terminate and abort the process (SIGABRT) — surface route
+      // failures through the onError callback instead.
+      try {
+        // Progress callback
       auto progress = std::make_shared<JavaRoutingProgress>(jvm, callbackGlobal, cbMethods);
 
       bool success = false;
@@ -4752,11 +4827,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->DeleteGlobalRef(callbackGlobal);
       jvm->DetachCurrentThread();
+      } catch (const std::exception &e) {
+        osmscout::log.Error() << "routing thread exception: " << e.what();
+        if (cbMethods.onError) {
+          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
+                                    threadEnv->NewStringUTF(e.what()));
+        }
+        threadEnv->DeleteGlobalRef(callbackGlobal);
+        jvm->DetachCurrentThread();
+      } catch (...) {
+        osmscout::log.Error() << "routing thread unknown exception";
+        if (cbMethods.onError) {
+          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
+                                    threadEnv->NewStringUTF("Unknown route calculation error"));
+        }
+        threadEnv->DeleteGlobalRef(callbackGlobal);
+        jvm->DetachCurrentThread();
+      }
     }
   );
-
-  {
-    std::scoped_lock lock(data->routingMutex);
     data->routingThread = thread;
   }
 }
@@ -4831,6 +4920,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
   // Create breaker for cancellation
   auto breaker = std::make_shared<osmscout::ThreadedBreaker>();
+  std::shared_ptr<std::thread> thread;
 
   {
     std::scoped_lock lock(data->routingMutex);
@@ -4840,10 +4930,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       data->routingThread->join();
     }
     data->breaker = breaker;
-  }
 
-  // Spawn background thread for routing
-  auto thread = std::make_shared<std::thread>(
+    // Spawn background thread for routing. Spawn + publish stay under the
+    // lock: concurrent route calculations (reroute storms) must never replace
+    // routingThread while the previous thread is still running — destroying a
+    // joinable std::thread calls std::terminate (SIGABRT).
+    thread = std::make_shared<std::thread>(
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr]() {
       JNIEnv *threadEnv;
@@ -4852,7 +4944,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
         return;
       }
 
-      // Progress callback
+      // Any C++ exception escaping this thread function would call
+      // std::terminate and abort the process (SIGABRT) — surface route
+      // failures through the onError callback instead.
+      try {
+        // Progress callback
       auto progress = std::make_shared<JavaRoutingProgress>(jvm, callbackGlobal, cbMethods);
 
       bool success = false;
@@ -5334,11 +5430,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->DeleteGlobalRef(callbackGlobal);
       jvm->DetachCurrentThread();
+      } catch (const std::exception &e) {
+        osmscout::log.Error() << "routing thread exception: " << e.what();
+        if (cbMethods.onError) {
+          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
+                                    threadEnv->NewStringUTF(e.what()));
+        }
+        threadEnv->DeleteGlobalRef(callbackGlobal);
+        jvm->DetachCurrentThread();
+      } catch (...) {
+        osmscout::log.Error() << "routing thread unknown exception";
+        if (cbMethods.onError) {
+          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
+                                    threadEnv->NewStringUTF("Unknown route calculation error"));
+        }
+        threadEnv->DeleteGlobalRef(callbackGlobal);
+        jvm->DetachCurrentThread();
+      }
     }
   );
-
-  {
-    std::scoped_lock lock(data->routingMutex);
     data->routingThread = thread;
   }
 }
