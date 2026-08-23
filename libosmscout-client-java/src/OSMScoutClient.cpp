@@ -27,6 +27,7 @@
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
@@ -724,6 +725,126 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setStyleSheetFlag(JNIEnv *en
   // Reloads the style sheet with the flag on the DB thread; subsequent
   // renders use the new variant.
   data->dbThread->SetStyleFlag(key, value == JNI_TRUE);
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::getStyleSheetDirectory()
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getStyleSheetDirectory(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->settings == nullptr) {
+    return env->NewStringUTF("");
+  }
+
+  return env->NewStringUTF(data->settings->GetStyleSheetDirectory().c_str());
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::getActiveStyleSheet()
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getActiveStyleSheet(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->settings == nullptr) {
+    return env->NewStringUTF("");
+  }
+
+  return env->NewStringUTF(data->settings->GetStyleSheetFile().c_str());
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::loadStyleSheet(String name)
+// --------------------------------------------------------------------------
+//
+// Switches the active stylesheet by style name (file name without the ".oss"
+// extension). The choice is persisted in Settings and the stylesheet is loaded
+// on the DB thread with the currently enabled style flags. Returns true when
+// the load succeeded and false when the stylesheet does not exist or fails to
+// parse (in which case the previously active style is restored).
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, jobject self, jstring nameJStr)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->settings == nullptr || data->dbThread == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *nameCStr = env->GetStringUTFChars(nameJStr, nullptr);
+  if (nameCStr == nullptr) {
+    return JNI_FALSE;
+  }
+
+  std::string name(nameCStr);
+  env->ReleaseStringUTFChars(nameJStr, nameCStr);
+
+  // Reject empty or path-like names (no traversal, no directories).
+  if (name.empty() ||
+      name.find('/') != std::string::npos ||
+      name.find('\\') != std::string::npos ||
+      name == "." || name == "..") {
+    return JNI_FALSE;
+  }
+
+  // Accept both "cycle" and "cycle.oss" as input.
+  if (name.size() > 4 && name.compare(name.size() - 4, 4, ".oss") == 0) {
+    name = name.substr(0, name.size() - 4);
+  }
+
+  const std::string dir = data->settings->GetStyleSheetDirectory();
+  const std::string fileName = name + ".oss";
+  const std::string absoluteFile = dir + "/" + fileName;
+
+  if (!std::filesystem::exists(absoluteFile)) {
+    return JNI_FALSE;
+  }
+
+  const std::string previousFile = data->settings->GetStyleSheetFile();
+  const size_t previousErrorCount = data->dbThread->GetStyleErrors().size();
+
+  data->settings->SetStyleSheetFile(fileName);
+  // Keep the currently enabled style flags (e.g. "daylight") applied to the
+  // newly selected style, mirroring DBThread::SetStyleFlag behavior.
+  std::map<std::string, bool> flags = data->dbThread->GetStyleFlags();
+  std::unordered_map<std::string, bool> flagMap(flags.begin(), flags.end());
+
+  // Block until the load has completed on the DB thread so the result is
+  // reliable and the caller can redraw immediately with the new style.
+  try {
+    data->dbThread->LoadStyle(absoluteFile, flagMap).StdFuture().get();
+  } catch (const std::exception &e) {
+    // DB thread canceled or unavailable; treat as failed switch.
+    osmscout::log.Warn() << "Style switch aborted: " << e.what();
+    return JNI_FALSE;
+  }
+
+  if (data->dbThread->GetStyleErrors().size() > previousErrorCount) {
+    // The stylesheet failed to parse: restore the previous style and surface
+    // the failure to the caller. The stored file may be relative to the
+    // stylesheet directory or an absolute path from earlier configuration.
+    std::string previousAbsolute;
+    if (previousFile.empty()) {
+      previousAbsolute = dir + "/standard.oss";
+    } else if (previousFile.find('/') != std::string::npos) {
+      previousAbsolute = previousFile;
+    } else {
+      previousAbsolute = dir + "/" + previousFile;
+    }
+    data->settings->SetStyleSheetFile(previousFile);
+    try {
+      data->dbThread->LoadStyle(previousAbsolute, flagMap).StdFuture().get();
+    } catch (const std::exception &e) {
+      osmscout::log.Warn() << "Style restore aborted: " << e.what();
+    }
+    return JNI_FALSE;
+  }
+
+  return JNI_TRUE;
 }
 
 // --------------------------------------------------------------------------
