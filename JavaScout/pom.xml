@@ -68,6 +68,10 @@
                 <version>3.5.4</version>
                 <configuration>
                     <argLine>-Djava.library.path=${native.lib.dir}</argLine>
+                    <!-- The JNI library writes directly to the native stdout/stderr
+                         streams (e.g. map directory scans), which corrupts the
+                         surefire fork channel. Redirect output to per-test files. -->
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
 

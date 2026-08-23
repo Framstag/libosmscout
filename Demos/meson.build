@@ -354,6 +354,39 @@ if buildMapAgg or buildMapCairo or buildMapQt or buildMapSVG or buildMapSkia
     install_dir: demoInstallDir)
 endif
 
+# ---- SymbolsAll
+if buildMapCairo or buildMapSVG
+
+  symbolsAllSrc = ['src/SymbolsAll.cpp']
+  symbolsAllDep = [mathDep, openmpDep]
+  symbolsAllLink = [osmscout, osmscoutmap]
+  symbolsAllIncDirs = []
+  symbolsAllDef = []
+
+  if buildMapCairo
+    symbolsAllLink += osmscoutmapcairo
+    symbolsAllIncDirs += [osmscoutmapcairoIncDir]
+    symbolsAllDep += [cairoDep, pangocairoDep]
+    symbolsAllDef += ['-DHAVE_OSMSCOUT_MAP_CAIRO']
+  endif
+
+  if buildMapSVG
+    symbolsAllLink += osmscoutmapsvg
+    symbolsAllIncDirs += [osmscoutmapsvgIncDir]
+    symbolsAllDep += pangoDep
+    symbolsAllDef += ['-DHAVE_OSMSCOUT_MAP_SVG']
+  endif
+
+  SymbolsAll = executable('SymbolsAll',
+    symbolsAllSrc,
+    cpp_args: symbolsAllDef + ['-fPIC'],
+    include_directories: [osmscoutIncDir, demoIncDir, osmscoutmapIncDir] + symbolsAllIncDirs,
+    dependencies: symbolsAllDep,
+    link_with: symbolsAllLink,
+    install: true,
+    install_dir: demoInstallDir)
+endif
+
 Srtm = executable('Srtm',
                   'src/Srtm.cpp',
                   include_directories: [osmscoutIncDir],

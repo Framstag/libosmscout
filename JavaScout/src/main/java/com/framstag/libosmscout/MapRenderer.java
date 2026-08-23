@@ -178,6 +178,20 @@ public class MapRenderer {
         submitDebounced(lat, lon, mag, angle, oldLat, oldLon, oldMag, oldAngle, false);
     }
 
+    /**
+     * Invalidate the rendered tile cache and trigger a full redraw.
+     * <p>
+     * Called when the active stylesheet changes: the cached front buffer and
+     * tiles were painted with the previous style, so a plain re-request with
+     * unchanged coordinates would be served from the cache via sub-region
+     * blit and never show the new style.
+     */
+    public void notifyStyleChanged() {
+        epoch.incrementAndGet();
+        submitDebounced(currentLat, currentLon, currentMag, currentAngle,
+                         currentLat, currentLon, currentMag, currentAngle, true);
+    }
+
     public void setFavoriteLocations(com.framstag.libosmscout.client.FavoriteLocation[] favorites) {
         if (favorites == null || favorites.length == 0) {
             this.favoriteLats = null;

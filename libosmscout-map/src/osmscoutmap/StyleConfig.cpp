@@ -92,8 +92,8 @@ namespace osmscout {
   }
 
   StyleConstantWidth::StyleConstantWidth(double value, Unit unit)
-    : value(value),
-      unit(unit)
+  : value(value),
+    unit(unit)
   {
     // no code
   }
@@ -192,8 +192,7 @@ namespace osmscout {
                                        size_t flagIndex)
   : featureFilterIndex(featureFilterIndex),
     flagIndex(flagIndex)
-  {
-  }
+  {}
 
   StyleFilter& StyleFilter::SetTypes(const TypeInfoSet& types)
   {
@@ -248,15 +247,15 @@ namespace osmscout {
 
   bool StyleCriteria::operator==(const StyleCriteria& other) const
   {
-    return features==other.features     &&
-           oneway==other.oneway         &&
+    return features==other.features &&
+           oneway==other.oneway &&
            sizeCondition==other.sizeCondition;
   }
 
   bool StyleCriteria::operator!=(const StyleCriteria& other) const
   {
-    return features!=other.features     ||
-           oneway!=other.oneway         ||
+    return features!=other.features ||
+           oneway!=other.oneway ||
            sizeCondition!=other.sizeCondition;
   }
 
@@ -300,8 +299,8 @@ namespace osmscout {
   }
 
   StyleConfig::StyleConfig(const TypeConfigRef& typeConfig)
-   : typeConfig(typeConfig),
-     styleResolveContext(typeConfig)
+  : typeConfig(typeConfig),
+    styleResolveContext(typeConfig)
   {
     log.Debug() << "StyleConfig::StyleConfig()";
 
@@ -432,7 +431,7 @@ namespace osmscout {
   {
     StyleConstantRef result;
 
-    auto entry=constants.find(name);
+    auto             entry=constants.find(name);
 
     if (entry!=constants.end()) {
       result=entry->second;
@@ -466,8 +465,22 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
-  void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals,
+  std::vector<std::string> StyleConfig::GetSymbolNames() const
+  {
+    std::vector<std::string> names;
+
+    names.reserve(symbols.size());
+    for (const auto& entry : symbols) {
+      names.push_back(entry.first);
+    }
+
+    std::sort(names.begin(),names.end());
+
+    return names;
+  }
+
+  template<class S, class A>
+  void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A>>& conditionals,
                                  size_t& maxLevel)
   {
     for (const auto& conditional : conditionals) {
@@ -479,15 +492,15 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
+  template<class S, class A>
   void CalculateUsedTypes(const TypeConfig& typeConfig,
-                          const std::list<ConditionalStyle<S,A> >& conditionals,
+                          const std::list<ConditionalStyle<S,A>>& conditionals,
                           size_t maxLevel,
                           std::vector<TypeInfoSet>& typeSets)
   {
     for (size_t level=0;
-        level<maxLevel;
-        ++level) {
+         level<maxLevel;
+         ++level) {
       for (const auto& conditional : conditionals) {
         for (const auto& type : typeConfig.GetTypes()) {
           if (!conditional.filter.HasType(type)) {
@@ -509,11 +522,11 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
+  template<class S, class A>
   void SortInConditionals(const TypeConfig& typeConfig,
-                          const std::list<ConditionalStyle<S,A> >& conditionals,
+                          const std::list<ConditionalStyle<S,A>>& conditionals,
                           size_t maxLevel,
-                          std::vector<std::vector<std::list<StyleSelector<S,A> > > >& selectors)
+                          std::vector<std::vector<std::list<StyleSelector<S,A>>>>& selectors)
   {
     selectors.resize(typeConfig.GetTypeCount());
 
@@ -573,13 +586,13 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
+  template<class S, class A>
   void SortInConditionalsBySlot(const TypeConfig& typeConfig,
-                                const std::list<ConditionalStyle<S,A> >& conditionals,
+                                const std::list<ConditionalStyle<S,A>>& conditionals,
                                 size_t maxLevel,
-                                std::vector<std::vector<std::vector<std::list<StyleSelector<S,A> > > > >& selectors)
+                                std::vector<std::vector<std::vector<std::list<StyleSelector<S,A>>>>>& selectors)
   {
-    std::unordered_map<std::string,std::list<ConditionalStyle<S,A>> > styleBySlot;
+    std::unordered_map<std::string,std::list<ConditionalStyle<S,A>>> styleBySlot;
 
     for (auto& conditional : conditionals) {
       styleBySlot[conditional.style.style->GetSlot()].push_back(conditional);
@@ -588,6 +601,7 @@ namespace osmscout {
     selectors.resize(styleBySlot.size());
 
     size_t idx=0;
+
     for (const auto& entry : styleBySlot) {
       SortInConditionals(typeConfig,
                          entry.second,
@@ -636,16 +650,17 @@ namespace osmscout {
     nodeIconStyleConditionals.clear();
   }
 
-  template <class S, class A>
+  template<class S, class A>
   bool HasStyle(const std::vector<std::vector<std::list<StyleSelector<S,A>>>>& styleSelectors,
                 const size_t level)
   {
-    for (const auto &selectorsForType: styleSelectors){
+    for (const auto &selectorsForType: styleSelectors) {
       assert(!selectorsForType.empty());
-      if (!selectorsForType[std::min(level, selectorsForType.size() - 1)].empty()){
+      if (!selectorsForType[std::min(level, selectorsForType.size() - 1)].empty()) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -807,6 +822,7 @@ namespace osmscout {
   void StyleConfig::PostprocessRoutes()
   {
     size_t maxLevel=0;
+
     GetMaxLevelInConditionals(routeLineStyleConditionals,
                               maxLevel);
     GetMaxLevelInConditionals(routePathTextStyleConditionals,
@@ -960,7 +976,7 @@ namespace osmscout {
   }
 
   void StyleConfig::AddNodeIconStyle(const StyleFilter& filter,
-                                        IconPartialStyle& style)
+                                     IconPartialStyle& style)
   {
     IconConditionalStyle conditional(filter,style);
 
@@ -992,7 +1008,7 @@ namespace osmscout {
   }
 
   void StyleConfig::AddWayPathShieldStyle(const StyleFilter& filter,
-                                         PathShieldPartialStyle& style)
+                                          PathShieldPartialStyle& style)
   {
     PathShieldConditionalStyle conditional(filter,style);
 
@@ -1047,7 +1063,6 @@ namespace osmscout {
     areaBorderSymbolStyleConditionals.push_back(conditional);
   }
 
-
   void StyleConfig::AddRouteLineStyle(const StyleFilter& filter,
                                       LinePartialStyle& style)
   {
@@ -1100,9 +1115,9 @@ namespace osmscout {
    * Get the style data based on the given features of an object,
    * a given style (S) and its style attributes (A).
    */
-  template <class S, class A>
+  template<class S, class A>
   std::shared_ptr<S> GetFeatureStyle(const StyleResolveContext& context,
-                                     const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
+                                     const std::vector<std::list<StyleSelector<S,A>>>& styleSelectors,
                                      const FeatureValueBuffer& buffer,
                                      const Projection& projection)
   {
@@ -1248,7 +1263,7 @@ namespace osmscout {
                 lineStyles.end(),
                 [](const LineStyleRef& a, const LineStyleRef& b) -> bool {
                   return a->GetSlot()<b->GetSlot();
-      });
+                });
     }
   }
 
@@ -1297,12 +1312,12 @@ namespace osmscout {
                                                wayPathSymbolStyleSelector[buffer.GetType()->GetIndex()],
                                                buffer,
                                                projection);
+
       if (style) {
         symbolStyles.push_back(style);
       }
     }
   }
-
 
   PathTextStyleRef StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                                                     const Projection& projection) const
@@ -1315,10 +1330,12 @@ namespace osmscout {
 
   bool StyleConfig::HasWayPathTextStyle(const Projection& projection) const
   {
-    if (wayTextFlags.empty()){
+    if (wayTextFlags.empty()) {
       return false;
     }
+
     size_t level = projection.GetMagnification().GetLevel();
+
     return wayTextFlags[std::min(level, wayTextFlags.size()-1)];
   }
 
@@ -1342,10 +1359,12 @@ namespace osmscout {
 
   bool StyleConfig::HasWayPathShieldStyle(const Projection& projection) const
   {
-    if (wayShieldFlags.empty()){
+    if (wayShieldFlags.empty()) {
       return false;
     }
+
     size_t level = projection.GetMagnification().GetLevel();
+
     return wayShieldFlags[std::min(level, wayTextFlags.size()-1)];
   }
 
@@ -1606,13 +1625,14 @@ namespace osmscout {
                                 bool submodule,
                                 Log &log)
   {
-    oss::Scanner *scanner=new oss::Scanner((const unsigned char *)content.c_str(),
+    oss::Scanner *scanner=new oss::Scanner((const unsigned char*)content.c_str(),
                                            content.length());
     oss::Parser  *parser=new oss::Parser(scanner,
                                          filename,
                                          *this,
                                          colorPostprocessor,
                                          log);
+
     parser->Parse();
 
     bool success=!parser->errors->hasErrors;
@@ -1621,21 +1641,21 @@ namespace osmscout {
     warnings.clear();
 
     for (const auto& err : parser->errors->errors) {
-      switch(err.type) {
-        case oss::Errors::Err::Symbol:
-          errors.push_back(StyleError(StyleError::Symbol, err.line, err.column, err.text));
-          break;
-        case oss::Errors::Err::Error:
-          errors.push_back(StyleError(StyleError::Error, err.line, err.column, err.text));
-          break;
-        case oss::Errors::Err::Warning:
-          warnings.push_back(StyleError(StyleError::Warning, err.line, err.column, err.text));
-          break;
-        case oss::Errors::Err::Exception:
-          errors.push_back(StyleError(StyleError::Exception, err.line, err.column, err.text));
-          break;
-        default:
-          break;
+      switch (err.type) {
+      case oss::Errors::Err::Symbol:
+        errors.push_back(StyleError(StyleError::Symbol, err.line, err.column, err.text));
+        break;
+      case oss::Errors::Err::Error:
+        errors.push_back(StyleError(StyleError::Error, err.line, err.column, err.text));
+        break;
+      case oss::Errors::Err::Warning:
+        warnings.push_back(StyleError(StyleError::Warning, err.line, err.column, err.text));
+        break;
+      case oss::Errors::Err::Exception:
+        errors.push_back(StyleError(StyleError::Exception, err.line, err.column, err.text));
+        break;
+      default:
+        break;
       }
     }
 
@@ -1644,6 +1664,7 @@ namespace osmscout {
     if (!submodule) {
       Postprocess();
     }
+
     return success;
   }
 
@@ -1664,13 +1685,13 @@ namespace osmscout {
                          bool submodule,
                          Log &log)
   {
-    StopClock  timer;
-    bool       success=false;
+    StopClock                                 timer;
+    bool                                      success=false;
 
     log.Debug() << "Opening StyleConfig '" << styleFile << "'...";
 
     try {
-      FILE*      file;
+      FILE       * file;
       FileOffset fileSize;
 
       if (!submodule) {
@@ -1686,11 +1707,11 @@ namespace osmscout {
         return false;
       }
 
-      unsigned char* content=new unsigned char[fileSize];
+      unsigned char * content=new unsigned char[fileSize];
 
       if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
         log.Error() << "Cannot load file '" << styleFile << "'";
-        delete [] content;
+        delete[] content;
         fclose(file);
 
         return false;
@@ -1699,12 +1720,12 @@ namespace osmscout {
       fclose(file);
 
       success=LoadContent(styleFile,
-                          std::string((const char *)content,fileSize),
+                          std::string((const char*)content,fileSize),
                           colorPostprocessor,
                           submodule,
                           log);
 
-      delete [] content;
+      delete[] content;
 
       timer.Stop();
 

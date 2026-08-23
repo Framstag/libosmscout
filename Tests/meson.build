@@ -614,6 +614,20 @@ if buildMapSVG
   test('Check SymbolRenderer SVG backend', SymbolRendererSVGTest)
 endif
 
+StyleConfigSymbolsTest = executable('StyleConfigSymbolsTest',
+                               'src/StyleConfigSymbolsTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+styleConfigSymbolsEnv = environment()
+styleConfigSymbolsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],

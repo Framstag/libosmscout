@@ -357,6 +357,14 @@ else()
   message("Skip SymbolRendererSVG test, libosmscout-map-svg is missing.")
 endif()
 
+#---- StyleConfigSymbols
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME StyleConfigSymbolsTest SOURCES src/StyleConfigSymbolsTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(StyleConfigSymbolsTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip StyleConfigSymbols test, libosmscout-map is missing.")
+endif()
+
 #---- MercatorProjection
 osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjectionTest.cpp)
 
