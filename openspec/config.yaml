@@ -35,26 +35,28 @@ rules:
     - Each task should be completable in one session — if too big, split it
     - Group related tasks under numbered headings
 
+
+operations:
   apply:
-    - Before marking implementation complete, run the build and verify it compiles without errors
-    - Before marking implementation complete, verify tests exist for all new/modified code and they pass
-    - If build or tests fail, do NOT mark tasks complete — report failures and fix them first
-    - If build has warnings, do NOT mark tasks complete - report warnings and fix them first
-    - Check all new/modified code against every document in guidelines/ — all conventions and rules defined there must be followed
-    - Run linters and static analysis before marking complete (.clang-tidy, .uncrustify)
-    - Update README or documentation if behavior changes
-    - Update AGENTS.md and TODO.md if the change affects project structure, build, or roadmap
-    - Verify no regressions in unrelated areas
+    guidance:
+      - Before marking implementation complete, run the build and verify it compiles without errors
+      - Before marking implementation complete, verify tests exist for all new/modified code and they pass
+      - If build or tests fail, do NOT mark tasks complete — report failures and fix them first
+      - If build has warnings, do NOT mark tasks complete - report warnings and fix them first
+      - Check all new/modified code against every document in guidelines/ — all conventions and rules defined there must be followed
+      - Run linters and static analysis before marking complete (.clang-tidy, .uncrustify)
+      - Update README or documentation if behavior changes
+      - Update AGENTS.md and TODO.md if the change affects project structure, build, or roadmap
+      - Verify no regressions in unrelated areas
 
-validation:
-  - All spec scenarios must be traceable to a task
-  - All tasks must be traceable to a spec requirement
-  - No task references a deleted or renamed spec
-
-review:
-  - Build compiles without errors
-  - All existing tests still pass
-  - New unit tests exist for all new or modified code (unless testing is not feasible)
-  - Every new public API has documentation
-  - No hardcoded paths or magic numbers
-  - Error messages are user-actionable
+  archive:
+    guidance:
+      - All spec scenarios must be traceable to a task
+      - All tasks must be traceable to a spec requirement
+      - No task references a deleted or renamed spec
+      - Build compiles without errors
+      - All existing tests still pass
+      - New unit tests exist for all new or modified code (unless testing is not feasible)
+      - Every new public API has documentation
+      - No hardcoded paths or magic numbers
+      - Error messages are user-actionable
