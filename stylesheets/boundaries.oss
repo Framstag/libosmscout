@@ -14,13 +14,10 @@ OSS
       AREA {color: #ff000055; }
     }
 
-  STYLE
-   [TYPE _tile_sea] AREA {color: @waterColor;}
-   //[TYPE _tile_coast] AREA {color: @waterColor;}
-   [TYPE _tile_land] AREA {color: @landColor;}
-   //[TYPE _tile_unknown] AREA {color: @unknownColor;}
+  MODULE "include/land_sea"
 
-  [TYPE boundary_administrative] {
+  STYLE
+   [TYPE boundary_administrative] {
     AREA {color: #dddddd; }
     AREA.BORDER {color: #aaaaaa; width: 0.5mm;}
     AREA.TEXT { label: Name.name; style: emphasize; size: 1.5; priority: 6; }
