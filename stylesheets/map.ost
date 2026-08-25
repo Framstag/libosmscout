@@ -1030,7 +1030,7 @@ TYPES
       ADDRESS OPTIMIZE_LOW_ZOOM POI
 
   TYPE leisure_slipway
-    = NODE ("leisure"=="slipway")
+    = NODE WAY ("leisure"=="slipway")
       {Name, NameAlt}
 
   TYPE leisure_fishing
@@ -1072,6 +1072,173 @@ TYPES
     = NODE AREA ("leisure"=="ice_rink")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM
+
+  TYPE leisure_picnic_table
+    = NODE AREA ("leisure"=="picnic_table")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_outdoor_seating
+    = NODE AREA ("leisure"=="outdoor_seating")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_firepit
+    = NODE AREA ("leisure"=="firepit")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_dog_park
+    = NODE AREA ("leisure"=="dog_park")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_beach_resort
+    = NODE AREA ("leisure"=="beach_resort")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_recreation_ground
+    = NODE AREA ("leisure"=="recreation_ground")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_bathing_place
+    = NODE AREA ("leisure"=="bathing_place")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_swimming_area
+    = AREA ("leisure"=="swimming_area")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_resort
+    = NODE AREA ("leisure"=="resort")
+      {Name, NameAlt}
+      ADDRESS POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP routingPOI
+
+  TYPE leisure_summer_camp
+    = NODE AREA ("leisure"=="summer_camp")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_schoolyard
+    = NODE AREA ("leisure"=="schoolyard")
+      {Name, NameAlt}
+      POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+
+  TYPE leisure_fitness_centre
+    = NODE AREA ("leisure"=="fitness_centre")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_sports_hall
+    = NODE AREA ("leisure"=="sports_hall")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_bleachers
+    = AREA ("leisure"=="bleachers")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_miniature_golf
+    = NODE AREA ("leisure"=="miniature_golf")
+      {Name, NameAlt}
+      ADDRESS POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP routingPOI
+
+  TYPE leisure_bowling_alley
+    = NODE AREA ("leisure"=="bowling_alley")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_disc_golf_course
+    = NODE AREA ("leisure"=="disc_golf_course")
+      {Name, NameAlt}
+      ADDRESS POI OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP routingPOI
+
+  TYPE leisure_climbing
+    = NODE AREA ("leisure"=="climbing")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_horse_riding
+    = NODE AREA ("leisure"=="horse_riding")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_trampoline_park
+    = NODE AREA ("leisure"=="trampoline_park")
+      {Name, NameAlt}
+      ADDRESS POI MERGE_AREAS
+      GROUP routingPOI
+
+  TYPE leisure_dance
+    = NODE AREA ("leisure"=="dance")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_amusement_arcade
+    = NODE AREA ("leisure"=="amusement_arcade")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_adult_gaming_centre
+    = NODE AREA ("leisure"=="adult_gaming_centre")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_bandstand
+    = NODE AREA ("leisure"=="bandstand")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_escape_game
+    = NODE AREA ("leisure"=="escape_game")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_indoor_play
+    = NODE AREA ("leisure"=="indoor_play")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_hackerspace
+    = NODE AREA ("leisure"=="hackerspace")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_sauna
+    = NODE AREA ("leisure"=="sauna")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
+
+  TYPE leisure_hot_tub
+    = NODE AREA ("leisure"=="hot_tub")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE leisure_tanning_salon
+    = NODE AREA ("leisure"=="tanning_salon")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP routingPOI
 
   //
   // Amenity
@@ -4821,6 +4988,522 @@ TYPES
       {Name, NameAlt, ConstructionYear}
       ADDRESS POI
       GROUP historic
+
+  TYPE historic_aircraft
+    = NODE AREA ("historic"=="aircraft")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_anchor
+    = NODE ("historic"=="anchor")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_aqueduct
+    = WAY AREA ("historic"=="aqueduct")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_bomb_crater
+    = NODE AREA ("historic"=="bomb_crater")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_boundary_stone
+    = NODE ("historic"=="boundary_stone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_bullaun_stone
+    = NODE ("historic"=="bullaun_stone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_cannon
+    = NODE ("historic"=="cannon")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_caravanserai_building
+    = AREA ("historic"=="caravanserai" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_caravanserai
+    = NODE AREA ("historic"=="caravanserai")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_castle_wall
+    = WAY AREA ("historic"=="castle_wall")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_cattle_crush_building
+    = AREA ("historic"=="cattle_crush" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_cattle_crush
+    = NODE AREA ("historic"=="cattle_crush")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_cemetery
+    = NODE AREA ("historic"=="cemetery")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_chapel_building
+    = AREA ("historic"=="chapel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_chapel
+    = NODE AREA ("historic"=="chapel")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_charcoal_pile
+    = NODE AREA ("historic"=="charcoal_pile")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_church_building
+    = AREA ("historic"=="church" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_church
+    = NODE AREA ("historic"=="church")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_city_gate
+    = NODE AREA ("historic"=="city_gate")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_creamery_building
+    = AREA ("historic"=="creamery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_creamery
+    = NODE AREA ("historic"=="creamery")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_district
+    = NODE AREA ("historic"=="district")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_epigraph
+    = NODE WAY AREA ("historic"=="epigraph")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_farm_building
+    = AREA ("historic"=="farm" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_farm
+    = NODE AREA ("historic"=="farm")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_folly_building
+    = AREA ("historic"=="folly" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_folly
+    = NODE WAY AREA ("historic"=="folly")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_fort
+    = NODE AREA ("historic"=="fort")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_gallows
+    = NODE AREA ("historic"=="gallows")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_granary_building
+    = AREA ("historic"=="granary" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_granary
+    = NODE AREA ("historic"=="granary")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_high_cross
+    = NODE ("historic"=="high_cross")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_highwater_mark
+    = NODE ("historic"=="highwater_mark")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_hollow_way
+    = WAY ("historic"=="hollow_way")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_house_building
+    = AREA ("historic"=="house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_house
+    = NODE AREA ("historic"=="house")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_lavoir_building
+    = AREA ("historic"=="lavoir" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_lavoir
+    = NODE AREA ("historic"=="lavoir")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_lime_kiln
+    = NODE AREA ("historic"=="lime_kiln")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_locomotive
+    = NODE AREA ("historic"=="locomotive")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_machine
+    = NODE AREA ("historic"=="machine")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_milestone
+    = NODE ("historic"=="milestone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_millstone
+    = NODE ("historic"=="millstone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_mine
+    = NODE AREA ("historic"=="mine")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_mine_adit
+    = NODE AREA ("historic"=="mine_adit")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_mine_shaft
+    = NODE AREA ("historic"=="mine_shaft")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_minecart
+    = NODE AREA ("historic"=="minecart")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_monastery_building
+    = AREA ("historic"=="monastery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_monastery
+    = NODE AREA ("historic"=="monastery")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_mosque_building
+    = AREA ("historic"=="mosque" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_mosque
+    = NODE AREA ("historic"=="mosque")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_ogham_stone
+    = NODE ("historic"=="ogham_stone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_optical_telegraph_building
+    = AREA ("historic"=="optical_telegraph" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_optical_telegraph
+    = NODE AREA ("historic"=="optical_telegraph")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_pillory
+    = NODE ("historic"=="pillory")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_pound
+    = NODE AREA ("historic"=="pound")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_railway
+    = NODE WAY ("historic"=="railway")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_railway_car
+    = NODE AREA ("historic"=="railway_car")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_railway_station_building
+    = AREA ("historic"=="railway_station" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_railway_station
+    = NODE AREA ("historic"=="railway_station")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_road
+    = WAY ("historic"=="road")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_roman_road
+    = WAY ("historic"=="roman_road")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_round_tower_building
+    = AREA ("historic"=="round_tower" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_round_tower
+    = NODE AREA ("historic"=="round_tower")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_rune_stone
+    = NODE ("historic"=="rune_stone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_shieling_building
+    = AREA ("historic"=="shieling" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_shieling
+    = NODE AREA ("historic"=="shieling")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_ship
+    = NODE AREA ("historic"=="ship")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_smithy_building
+    = AREA ("historic"=="smithy" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_smithy
+    = NODE AREA ("historic"=="smithy")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_stecak
+    = NODE AREA ("historic"=="stećak")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_stone
+    = NODE ("historic"=="stone")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_tank
+    = NODE AREA ("historic"=="tank")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_temple_building
+    = AREA ("historic"=="temple" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_temple
+    = NODE AREA ("historic"=="temple")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_tomb
+    = NODE AREA ("historic"=="tomb")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_tower_building
+    = AREA ("historic"=="tower" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_tower
+    = NODE AREA ("historic"=="tower")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_tree_shrine
+    = NODE ("historic"=="tree_shrine")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_vehicle
+    = NODE AREA ("historic"=="vehicle")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_warehouse_building
+    = AREA ("historic"=="warehouse" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_warehouse
+    = NODE AREA ("historic"=="warehouse")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_watermill_building
+    = AREA ("historic"=="watermill" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, building, routingPOI
+
+  TYPE historic_watermill
+    = NODE AREA ("historic"=="watermill")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_wayside_cross
+    = NODE ("historic"=="wayside_cross")
+      {Name, NameAlt, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
+
+  TYPE historic_wayside_shrine
+    = NODE WAY AREA ("historic"=="wayside_shrine")
+      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, ConstructionYear}
+      ADDRESS POI
+      GROUP historic, routingPOI
 
   TYPE historic_building
     = AREA (EXISTS "historic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
