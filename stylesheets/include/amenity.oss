@@ -130,7 +130,7 @@ OSS
     COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
 
   SYMBOL amenity
-    RECTANGLE 0,0 1 x 1 {
+    RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @amenitySymbolColor; }
     }
 
@@ -149,15 +149,15 @@ OSS
 
   SYMBOL amenity_pharmacy
     // Box
-    RECTANGLE -1,-1 2 x 2 {
-      AREA.BORDER {color: @pharmacySymbolColor; width: 0.2mm; }
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 {
+      AREA.BORDER {color: @pharmacySymbolColor; width: 0.225mm; }
     }
     // Horizontal bar
-    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
+    RECTANGLE -0.844,-0.281 1.688 x 0.562 {
       AREA { color: @pharmacySymbolColor; }
     }
     // Vertical bar
-    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
+    RECTANGLE -0.281,-0.844 0.562 x 1.688 {
       AREA {color: @pharmacySymbolColor; }
     }
 
@@ -176,188 +176,194 @@ OSS
     }
 
   SYMBOL amenity_post_box
-    RECTANGLE 0,0 1 x 1 {
-      AREA { color: @postSymbolColor; }
-    }
+    // Mailbox
+    RECTANGLE -0.6,-0.4 1.2 x 0.8 { AREA.BORDER { color: @postSymbolColor; width: 0.15mm; } }
+    POLYGON -0.6,-0.4 0.6,-0.4 0.3,-0.7 -0.3,-0.7 { AREA.BORDER { color: @postSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.5,-0.25 1.0 x 0.1 { AREA { color: @postSymbolColor; } }
+    RECTANGLE 0.5,-0.95 0.1 x 0.4 { AREA { color: @postSymbolColor; } }
+    POLYGON 0.5,-0.95 0.75,-0.95 0.75,-0.75 0.5,-0.75 { AREA { color: @postSymbolColor; } }
 
   SYMBOL amenity_post_office
-    RECTANGLE 0,0 2 x 2 {
-      AREA { color: @postSymbolColor; }
-    }
+    // Envelope
+    RECTANGLE -0.7,-0.5 1.4 x 1.0 { AREA.BORDER { color: @postSymbolColor; width: 0.15mm; } }
+    POLYGON -0.7,-0.5 0.7,-0.5 0,0.1 { AREA.BORDER { color: @postSymbolColor; width: 0.15mm; } }
+    POLYGON -0.7,0.5 0.7,0.5 0,-0.1 { AREA.BORDER { color: @postSymbolColor; width: 0.15mm; } }
 
   SYMBOL amenity_drinking_water
-    CIRCLE 0,0 0.4 {
-      AREA {color: @waterLabelColor; }
-    }
+    // Faucet with drop
+    RECTANGLE -0.2,-0.7 0.4 x 0.5 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    RECTANGLE -0.2,-0.2 0.6 x 0.3 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    POLYGON 0.4,-0.2 0.4,0.15 0.2,0.15 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    CIRCLE 0.2,0.4 0.15 { AREA { color: @waterLabelColor; } }
 
   SYMBOL amenity_bicycle_parking
-    CIRCLE 0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    CIRCLE -0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    POLYGON 0.5,0.3 -0.5,0.3 0.3,-0.4 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    CIRCLE 0.721,0.433 0.404 { AREA.BORDER { color: @amenitySymbolColor; width: 0.173mm; } }
+    CIRCLE -0.721,0.433 0.404 { AREA.BORDER { color: @amenitySymbolColor; width: 0.173mm; } }
+    POLYGON 0.721,0.433 -0.721,0.433 0.433,-0.577 { AREA.BORDER { color: @amenitySymbolColor; width: 0.173mm; } }
 
   SYMBOL amenity_toilets
-    RECTANGLE -0.5,-0.6 1 x 1.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    CIRCLE 0,0 0.25 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    // Toilet
+    RECTANGLE -0.3,-0.9 0.6 x 0.4 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    POLYGON -0.5,-0.5 0.5,-0.5 0.4,0.2 -0.4,0.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE 0,0.2 0.4 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
 
   SYMBOL amenity_shelter
-    POLYGON -0.9,0.3 0.9,0.3 0,-0.7 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    POLYGON -1.125,0.375 1.125,0.375 0,-0.875 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
 
   SYMBOL amenity_atm
-    RECTANGLE -0.7,-0.5 1.4 x 1.0 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    RECTANGLE -0.4,-0.2 0.8 x 0.4 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -1.125,-0.804 2.25 x 1.607 { AREA.BORDER { color: @amenitySymbolColor; width: 0.193mm; } }
+    RECTANGLE -0.643,-0.321 1.286 x 0.643 { AREA { color: @amenitySymbolColor; } }
 
   SYMBOL amenity_fire_station
     // Red square with a white flame
-    RECTANGLE -1.0,-1.0 2.0 x 2.0 {
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 {
       AREA { color: @fireStationColor; }
-      AREA.BORDER { color: darken(@fireStationColor, 0.3); width: 0.1mm; }
+      AREA.BORDER { color: darken(@fireStationColor, 0.3); width: 0.113mm; }
     }
-    POLYGON 0,-0.7 -0.35,-0.1 -0.15,-0.1 -0.2,0.6 0.2,0.6 0.15,-0.1 0.35,-0.1 {
+    POLYGON 0,-0.787 -0.394,-0.113 -0.169,-0.113 -0.225,0.675 0.225,0.675 0.169,-0.113 0.394,-0.113 {
       AREA { color: #ffffff; }
     }
 
   SYMBOL amenity_telephone
-    // Handset
-    CIRCLE -0.55,0 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE 0.55,0 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    RECTANGLE -0.55,-0.12 1.1 x 0.24 { AREA { color: @amenitySymbolColor; } }
+    // Handset (held vertical)
+    POLYGON 0.35,-0.6 -0.35,-0.6 -0.35,-0.35 -0.15,-0.35 -0.15,0.35 -0.35,0.35 -0.35,0.6 0.35,0.6 0.35,0.35 0.15,0.35 0.15,-0.35 0.35,-0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
 
   SYMBOL amenity_fountain
     // Basin with water
-    CIRCLE 0,0 0.7 { AREA { color: @waterAmenityColor; } }
-    CIRCLE 0,0 0.7 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
-    CIRCLE 0,0 0.25 { AREA { color: #ffffff; } }
+    CIRCLE 0,0 1.125 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.161mm; } }
+    CIRCLE 0,0 0.402 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_cinema
     // Film strip with sprocket holes
-    RECTANGLE -0.9,-0.6 1.8 x 1.2 { AREA { color: @amenitySymbolColor; } }
-    RECTANGLE -0.7,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE -0.7,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE -0.3,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE -0.3,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE 0.1,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE 0.1,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE 0.5,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
-    RECTANGLE 0.5,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE -1.125,-0.75 2.25 x 1.5 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.875,-0.5 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE -0.875,0.275 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE -0.375,-0.5 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE -0.375,0.275 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE 0.125,-0.5 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE 0.125,0.275 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE 0.625,-0.5 0.225 x 0.225 { AREA { color: #ffffff; } }
+    RECTANGLE 0.625,0.275 0.225 x 0.225 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_theatre
     // Two drama masks under a curtain
-    POLYGON -0.9,-0.15 0.9,-0.15 0,-0.8 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE -0.45,0.3 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE 0.45,0.3 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    POLYGON -1.125,-0.188 1.125,-0.188 0,-1 { AREA.BORDER { color: @amenitySymbolColor; width: 0.188mm; } }
+    CIRCLE -0.562,0.375 0.438 { AREA.BORDER { color: @amenitySymbolColor; width: 0.188mm; } }
+    CIRCLE 0.562,0.375 0.438 { AREA.BORDER { color: @amenitySymbolColor; width: 0.188mm; } }
 
   SYMBOL amenity_townhall
     // Building with roof and clock
-    POLYGON -0.9,-0.3 0.9,-0.3 0,-0.9 { AREA { color: @amenitySymbolColor; } }
-    RECTANGLE -0.8,-0.3 1.6 x 1.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE 0,0.15 0.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    POLYGON -1.125,-0.375 1.125,-0.375 0,-1.125 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -1,-0.375 2 x 1.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.188mm; } }
+    CIRCLE 0,0.188 0.25 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
 
   SYMBOL amenity_marketplace
     // Market stall with awning
-    POLYGON -0.9,-0.1 0.9,-0.1 0.6,-0.55 -0.6,-0.55 { AREA { color: @marketColor; } }
-    RECTANGLE -0.25,-0.1 0.5 x 0.65 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    POLYGON -1.125,-0.125 1.125,-0.125 0.75,-0.688 -0.75,-0.688 { AREA { color: @marketColor; } }
+    RECTANGLE -0.312,-0.125 0.625 x 0.812 { AREA.BORDER { color: @amenitySymbolColor; width: 0.188mm; } }
 
   SYMBOL amenity_prison
     // Building with bars
-    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA { color: @civicColor; } }
-    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA.BORDER { color: darken(@civicColor, 0.3); width: 0.1mm; } }
-    RECTANGLE -0.55,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
-    RECTANGLE -0.2,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
-    RECTANGLE 0.15,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
-    RECTANGLE 0.5,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
+    RECTANGLE -1.125,-0.984 2.25 x 1.969 { AREA { color: @civicColor; } }
+    RECTANGLE -1.125,-0.984 2.25 x 1.969 { AREA.BORDER { color: darken(@civicColor, 0.3); width: 0.141mm; } }
+    RECTANGLE -0.773,-0.703 0.197 x 1.406 { AREA { color: #ffffff; } }
+    RECTANGLE -0.281,-0.703 0.197 x 1.406 { AREA { color: #ffffff; } }
+    RECTANGLE 0.211,-0.703 0.197 x 1.406 { AREA { color: #ffffff; } }
+    RECTANGLE 0.703,-0.703 0.197 x 1.406 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_bbq
     // Grill with legs
-    RECTANGLE -0.7,-0.2 1.4 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    RECTANGLE -0.5,-0.2 0.9 x 0.12 { AREA { color: @amenitySymbolColor; } }
-    RECTANGLE -0.35,0.3 0.1 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    RECTANGLE 0.25,0.3 0.1 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    RECTANGLE -1.05,-0.3 2.1 x 0.75 { AREA.BORDER { color: @amenitySymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.75,-0.3 1.35 x 0.18 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.525,0.45 0.15 x 0.75 { AREA.BORDER { color: @amenitySymbolColor; width: 0.18mm; } }
+    RECTANGLE 0.375,0.45 0.15 x 0.75 { AREA.BORDER { color: @amenitySymbolColor; width: 0.18mm; } }
 
   SYMBOL amenity_hunting_stand
     // Elevated platform on legs
-    RECTANGLE -0.7,-0.8 1.4 x 0.3 { AREA { color: @huntingStandColor; } }
-    RECTANGLE -0.6,-0.5 0.12 x 1.1 { AREA.BORDER { color: @huntingStandColor; width: 0.15mm; } }
-    RECTANGLE 0.48,-0.5 0.12 x 1.1 { AREA.BORDER { color: @huntingStandColor; width: 0.15mm; } }
+    RECTANGLE -1.05,-1.2 2.1 x 0.45 { AREA { color: @huntingStandColor; } }
+    RECTANGLE -0.9,-0.75 0.18 x 1.65 { AREA.BORDER { color: @huntingStandColor; width: 0.225mm; } }
+    RECTANGLE 0.72,-0.75 0.18 x 1.65 { AREA.BORDER { color: @huntingStandColor; width: 0.225mm; } }
 
   SYMBOL amenity_ice_cream
     // Ice cream cone
-    CIRCLE 0,-0.45 0.4 { AREA { color: @iceCreamColor; } }
-    POLYGON -0.4,-0.1 0.4,-0.1 0,0.85 { AREA { color: #d9a05b; } }
+    CIRCLE 0,-0.596 0.529 { AREA { color: @iceCreamColor; } }
+    POLYGON -0.529,-0.132 0.529,-0.132 0,1.125 { AREA { color: #d9a05b; } }
 
   SYMBOL amenity_car_wash
     // Car with wheels
-    RECTANGLE -0.8,-0.35 1.6 x 0.5 { AREA { color: @carWashColor; } }
-    RECTANGLE -0.45,-0.7 0.9 x 0.35 { AREA { color: @carWashColor; } }
-    CIRCLE -0.45,-0.1 0.22 { AREA { color: #ffffff; } }
-    CIRCLE 0.45,-0.1 0.22 { AREA { color: #ffffff; } }
+    RECTANGLE -1.125,-0.492 2.25 x 0.703 { AREA { color: @carWashColor; } }
+    RECTANGLE -0.633,-0.984 1.266 x 0.492 { AREA { color: @carWashColor; } }
+    CIRCLE -0.633,-0.141 0.309 { AREA { color: #ffffff; } }
+    CIRCLE 0.633,-0.141 0.309 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_parcel_locker
     // Locker with parcel slots
-    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA { color: @postSymbolColor; } }
-    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA.BORDER { color: darken(@postSymbolColor, 0.3); width: 0.1mm; } }
-    RECTANGLE -0.6,-0.55 1.2 x 0.45 { AREA { color: #ffffff; } }
-    RECTANGLE -0.6,0.1 1.2 x 0.45 { AREA { color: #ffffff; } }
+    RECTANGLE -1.125,-0.984 2.25 x 1.969 { AREA { color: @postSymbolColor; } }
+    RECTANGLE -1.125,-0.984 2.25 x 1.969 { AREA.BORDER { color: darken(@postSymbolColor, 0.3); width: 0.141mm; } }
+    RECTANGLE -0.844,-0.773 1.688 x 0.633 { AREA { color: #ffffff; } }
+    RECTANGLE -0.844,0.141 1.688 x 0.633 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_shower
     // Shower head with drops
-    RECTANGLE -0.1,-0.75 0.2 x 0.5 { AREA { color: @waterAmenityColor; } }
-    CIRCLE 0,-0.15 0.3 { AREA.BORDER { color: @waterAmenityColor; width: 0.15mm; } }
-    RECTANGLE -0.15,0.15 0.08 x 0.3 { AREA { color: @waterAmenityColor; } }
-    RECTANGLE -0.05,0.3 0.08 x 0.25 { AREA { color: @waterAmenityColor; } }
-    RECTANGLE 0.08,0.2 0.08 x 0.28 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -0.173,-1.298 0.346 x 0.865 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0,-0.26 0.519 { AREA.BORDER { color: @waterAmenityColor; width: 0.26mm; } }
+    RECTANGLE -0.26,0.26 0.138 x 0.519 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -0.087,0.519 0.138 x 0.433 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE 0.138,0.346 0.138 x 0.485 { AREA { color: @waterAmenityColor; } }
 
   SYMBOL amenity_public_bath
     // Bathtub
-    RECTANGLE -0.9,-0.35 1.8 x 0.7 { AREA { color: @waterAmenityColor; } }
-    RECTANGLE -0.9,-0.35 1.8 x 0.7 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
-    CIRCLE -0.75,0.1 0.14 { AREA { color: @waterAmenityColor; } }
-    CIRCLE 0.75,0.1 0.14 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -1.125,-0.438 2.25 x 0.875 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -1.125,-0.438 2.25 x 0.875 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.125mm; } }
+    CIRCLE -0.938,0.125 0.175 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0.938,0.125 0.175 { AREA { color: @waterAmenityColor; } }
 
   SYMBOL amenity_university
     // Graduation cap
-    POLYGON -0.8,-0.15 0.8,-0.15 0,-0.75 { AREA { color: @amenitySymbolColor; } }
-    RECTANGLE -0.75,-0.2 1.5 x 0.15 { AREA { color: @amenitySymbolColor; } }
-    RECTANGLE 0.55,-0.2 0.1 x 0.75 { AREA { color: @amenitySymbolColor; } }
-    CIRCLE 0.55,0.65 0.12 { AREA { color: @amenitySymbolColor; } }
+    POLYGON -1.125,-0.211 1.125,-0.211 0,-1.055 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -1.055,-0.281 2.109 x 0.211 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE 0.773,-0.281 0.141 x 1.055 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.773,0.914 0.169 { AREA { color: @amenitySymbolColor; } }
 
   SYMBOL amenity_motorcycle_parking
     // Motorcycle: wheels with body
-    CIRCLE -0.55,-0.1 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE 0.55,-0.1 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    POLYGON -0.55,-0.1 0.55,-0.1 0.3,-0.75 -0.2,-0.75 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE -0.745,-0.136 0.38 { AREA.BORDER { color: @amenitySymbolColor; width: 0.203mm; } }
+    CIRCLE 0.745,-0.136 0.38 { AREA.BORDER { color: @amenitySymbolColor; width: 0.203mm; } }
+    POLYGON -0.745,-0.136 0.745,-0.136 0.407,-1.017 -0.271,-1.017 { AREA { color: @amenitySymbolColor; } }
 
   SYMBOL amenity_nightclub
     // Music note
-    CIRCLE -0.2,0.4 0.3 { AREA { color: @entertainmentColor; } }
-    RECTANGLE -0.02,-0.55 0.18 x 1.0 { AREA { color: @entertainmentColor; } }
-    POLYGON 0.16,-0.55 0.7,-0.4 0.16,-0.1 { AREA { color: @entertainmentColor; } }
+    CIRCLE -0.36,0.72 0.54 { AREA { color: @entertainmentColor; } }
+    RECTANGLE -0.036,-0.99 0.324 x 1.8 { AREA { color: @entertainmentColor; } }
+    POLYGON 0.288,-0.99 1.26,-0.72 0.288,-0.18 { AREA { color: @entertainmentColor; } }
 
   SYMBOL amenity_community_centre
     // House with people
-    POLYGON -0.85,-0.2 0.85,-0.2 0,-0.85 { AREA { color: @socialColor; } }
-    RECTANGLE -0.85,-0.2 1.7 x 1.0 { AREA { color: @socialColor; } }
-    CIRCLE -0.35,0.55 0.2 { AREA { color: #ffffff; } }
-    CIRCLE 0.35,0.55 0.2 { AREA { color: #ffffff; } }
+    POLYGON -1.125,-0.265 1.125,-0.265 0,-1.125 { AREA { color: @socialColor; } }
+    RECTANGLE -1.125,-0.265 2.25 x 1.324 { AREA { color: @socialColor; } }
+    CIRCLE -0.463,0.728 0.265 { AREA { color: #ffffff; } }
+    CIRCLE 0.463,0.728 0.265 { AREA { color: #ffffff; } }
 
   SYMBOL amenity_veterinary
     // Paw print
-    CIRCLE 0,-0.15 0.35 { AREA { color: @amenitySymbolColor; } }
-    CIRCLE -0.55,0.3 0.18 { AREA { color: @amenitySymbolColor; } }
-    CIRCLE -0.2,0.55 0.18 { AREA { color: @amenitySymbolColor; } }
-    CIRCLE 0.2,0.55 0.18 { AREA { color: @amenitySymbolColor; } }
-    CIRCLE 0.55,0.3 0.18 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0,-0.231 0.539 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE -0.848,0.462 0.277 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE -0.308,0.848 0.277 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.308,0.848 0.277 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.848,0.462 0.277 { AREA { color: @amenitySymbolColor; } }
 
   SYMBOL amenity_boat_rental
     // Boat hull
-    POLYGON -0.85,-0.3 0.85,-0.3 0.55,0.5 -0.55,0.5 { AREA { color: @waterAmenityColor; } }
-    POLYGON -0.85,-0.3 0.85,-0.3 0.55,0.5 -0.55,0.5 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
+    POLYGON -1.125,-0.397 1.125,-0.397 0.728,0.662 -0.728,0.662 { AREA { color: @waterAmenityColor; } }
+    POLYGON -1.125,-0.397 1.125,-0.397 0.728,0.662 -0.728,0.662 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.132mm; } }
 
   SYMBOL amenity_biergarten
     // Beer mug
-    RECTANGLE -0.55,-0.7 1.1 x 1.2 { AREA { color: @beerGardenColor; } }
-    RECTANGLE -0.55,-0.7 1.1 x 1.2 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.1mm; } }
-    RECTANGLE -0.45,-0.6 0.9 x 0.3 { AREA { color: #ffffff; } }
-    RECTANGLE 0.55,-0.55 0.3 x 0.5 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.15mm; } }
+    RECTANGLE -0.798,-1.016 1.597 x 1.742 { AREA { color: @beerGardenColor; } }
+    RECTANGLE -0.798,-1.016 1.597 x 1.742 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.145mm; } }
+    RECTANGLE -0.653,-0.871 1.306 x 0.435 { AREA { color: #ffffff; } }
+    RECTANGLE 0.798,-0.798 0.435 x 0.726 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.218mm; } }
 
 
 

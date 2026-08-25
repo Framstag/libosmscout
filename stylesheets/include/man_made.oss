@@ -3,16 +3,16 @@ CONST
   COLOR amenitySymbolColor          = darken(@amenityColor, 0.4);
 
   SYMBOL man_made_wastewater_plant
-    CIRCLE 0,0 0.7 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
-    CIRCLE 0,0 0.3 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @amenitySymbolColor; width: 0.241mm; } }
+    CIRCLE 0,0 0.482 { AREA { color: @amenitySymbolColor; } }
 
   SYMBOL power_tower
-    CIRCLE 0,0 0.55 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    POLYGON -0.55,-0.55 0.55,0.55 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
-    POLYGON -0.55,0.55 0.55,-0.55 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @amenitySymbolColor; width: 0.245mm; } }
+    POLYGON -1.125,-1.125 1.125,1.125 { AREA.BORDER { color: @amenitySymbolColor; width: 0.245mm; } }
+    POLYGON -1.125,1.125 1.125,-1.125 { AREA.BORDER { color: @amenitySymbolColor; width: 0.245mm; } }
 
   SYMBOL power_pole
-    CIRCLE 0,0 0.25 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0,0 1.125 { AREA { color: @amenitySymbolColor; } }
 
 STYLE
  // -------------------------------------------------------

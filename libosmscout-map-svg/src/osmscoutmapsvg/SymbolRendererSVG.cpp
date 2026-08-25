@@ -65,12 +65,12 @@ void SymbolRendererSVG::SetFill(const FillStyleRef &fillStyle)
 }
 
 void SymbolRendererSVG::SetBorder(const BorderStyleRef &borderStyle,
-                                 double /*screenMmInPixel*/)
+                                 double screenMmInPixel)
 {
   if (borderStyle) {
     hasStroke = true;
     strokeColor = borderStyle->GetColor().ToHexString();
-    strokeWidth = borderStyle->GetWidth();
+    strokeWidth = borderStyle->GetWidth() * screenMmInPixel;
     strokeAlpha = !borderStyle->GetColor().IsSolid();
 
     if (!borderStyle->HasDashes()) {
@@ -86,7 +86,7 @@ void SymbolRendererSVG::SetBorder(const BorderStyleRef &borderStyle,
 
 void SymbolRendererSVG::DrawPolygon(const std::vector<Vertex2D> &polygonPixels)
 {
-  stream << "    <polyline";
+  stream << "    <polygon";
   WriteFillAndStroke();
   stream << std::endl;
   stream << "      points=\"";

@@ -11,7 +11,7 @@ OSS
     COLOR historicLabelColor  = darken(@historicColor, 0.5);
 
   SYMBOL historic
-    RECTANGLE 0,0 1 x 1 {
+    RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @historicSymbolColor; }
     }
 

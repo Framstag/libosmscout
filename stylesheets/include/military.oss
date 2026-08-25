@@ -9,7 +9,7 @@ OSS
     COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
 
   SYMBOL military
-    POLYGON -0.7,-0.5 0.7,-0.5 0,0.7 { AREA.BORDER { color: #fe9898; width: 0.15mm; } }
+    POLYGON -1.125,-0.804 1.125,-0.804 0,1.125 { AREA.BORDER { color: #fe9898; width: 0.241mm; } }
 
   STYLE
     [MAG proximity-] {

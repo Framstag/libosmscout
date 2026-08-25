@@ -13,8 +13,8 @@ OSS
     COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
 
   SYMBOL leisure_slipway
-    POLYGON -0.9,0.4 0.9,-0.6 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
-    POLYGON -0.9,-0.3 0.9,-0.3 0.5,0.2 -0.5,0.2 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    POLYGON -1.125,0.5 1.125,-0.75 { AREA.BORDER { color: @waterLabelColor; width: 0.188mm; } }
+    POLYGON -1.125,-0.375 1.125,-0.375 0.625,0.25 -0.625,0.25 { AREA.BORDER { color: @waterLabelColor; width: 0.188mm; } }
 
   STYLE
     IF _leisure {

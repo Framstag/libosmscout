@@ -11,11 +11,448 @@ OSS
     COLOR shopBorderColor            = darken(@shopColor, 0.3);
     COLOR shopLabelColor             = darken(@shopColor, 0.8);
 
+    // Per-category colors for granular shop types (values from the OSM
+    // Key:shop wiki, grouped by the wiki's category sections). All colors
+    // are derived from the base shop color to keep the palette coherent.
+    COLOR shopFoodColor              = @shopColor;
+    COLOR shopFoodBorderColor        = darken(@shopFoodColor, 0.3);
+    COLOR shopGeneralColor           = darken(@shopColor, 0.1);
+    COLOR shopGeneralBorderColor     = darken(@shopGeneralColor, 0.3);
+    COLOR shopClothingColor          = lighten(@shopColor, 0.1);
+    COLOR shopClothingBorderColor    = darken(@shopClothingColor, 0.3);
+    COLOR shopDiscountColor          = darken(@shopColor, 0.2);
+    COLOR shopDiscountBorderColor    = darken(@shopDiscountColor, 0.3);
+    COLOR shopHealthColor            = lighten(@shopColor, 0.2);
+    COLOR shopHealthBorderColor      = darken(@shopHealthColor, 0.3);
+    COLOR shopDIYColor               = darken(@shopColor, 0.15);
+    COLOR shopDIYBorderColor         = darken(@shopDIYColor, 0.3);
+    COLOR shopFurnitureColor         = lighten(@shopColor, 0.15);
+    COLOR shopFurnitureBorderColor   = darken(@shopFurnitureColor, 0.3);
+    COLOR shopElectronicsColor       = darken(@shopColor, 0.25);
+    COLOR shopElectronicsBorderColor = darken(@shopElectronicsColor, 0.3);
+    COLOR shopVehicleColor           = darken(@shopColor, 0.3);
+    COLOR shopVehicleBorderColor     = darken(@shopVehicleColor, 0.3);
+    COLOR shopArtColor               = lighten(@shopColor, 0.25);
+    COLOR shopArtBorderColor         = darken(@shopArtColor, 0.3);
+    COLOR shopStationeryColor        = lighten(@shopColor, 0.3);
+    COLOR shopStationeryBorderColor  = darken(@shopStationeryColor, 0.3);
+    COLOR shopOtherColor             = darken(@shopColor, 0.05);
+    COLOR shopOtherBorderColor       = darken(@shopOtherColor, 0.3);
+
   SYMBOL shop
-    RECTANGLE 0,0 1 x 1 {
+    RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @shopSymbolColor; }
     }
 
+  SYMBOL shop_supermarket
+    // Shopping cart
+    POLYGON -0.703,-0.703 0.703,-0.703 0.984,0.141 -0.984,0.141 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    RECTANGLE -0.844,-1.266 0.141 x 0.562 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.844,-1.266 0.633 x 0.141 { AREA { color: @shopSymbolColor; } }
+    CIRCLE -0.633,0.352 0.141 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    CIRCLE 0.633,0.352 0.141 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+
+  SYMBOL shop_bakery
+    // Bread loaf
+    POLYGON -1.125,-0.281 -0.703,-0.844 0.703,-0.844 1.125,-0.281 0.703,0.422 -0.703,0.422 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    RECTANGLE -0.562,-0.141 0.422 x 0.113 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.141,-0.352 0.422 x 0.113 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE 0.281,-0.562 0.422 x 0.113 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_butcher
+    // T-bone steak
+    RECTANGLE -1.125,-0.804 2.25 x 1.607 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    RECTANGLE -0.161,-0.643 0.321 x 1.286 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.723,-0.643 1.446 x 0.241 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_hairdresser
+    // Scissors
+    CIRCLE -0.692,0.519 0.433 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    CIRCLE 0.692,0.519 0.433 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    POLYGON -0.692,0.519 0.692,-0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.26mm; } }
+    POLYGON 0.692,0.519 -0.692,-0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.26mm; } }
+
+  SYMBOL shop_car
+    // Car
+    RECTANGLE -1.125,-0.141 2.25 x 0.703 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    POLYGON -0.562,-0.141 -0.281,-0.703 0.422,-0.703 0.703,-0.141 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    CIRCLE -0.633,0.492 0.253 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    CIRCLE 0.633,0.492 0.253 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+
+  SYMBOL shop_bicycle
+    // Bicycle
+    CIRCLE -0.675,0 0.45 { AREA.BORDER { color: @shopSymbolColor; width: 0.18mm; } }
+    CIRCLE 0.675,0 0.45 { AREA.BORDER { color: @shopSymbolColor; width: 0.18mm; } }
+    POLYGON -0.675,0 0.675,0 0.15,-0.75 { AREA.BORDER { color: @shopSymbolColor; width: 0.18mm; } }
+
+  SYMBOL shop_books
+    // Open book
+    POLYGON -1.125,0.562 -0.08,0.562 -0.08,-0.723 -1.125,-0.723 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    POLYGON 0.08,0.562 1.125,0.562 1.125,-0.723 0.08,-0.723 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    POLYGON -0.08,0.562 0.08,0.562 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    POLYGON -0.08,-0.723 0.08,-0.723 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+
+  SYMBOL shop_clothes
+    // T-shirt
+    POLYGON -0.25,-0.9 0,-0.8 0.25,-0.9 0.6,-0.72 1.1,-0.95 1.05,-0.35 0.45,-0.25 0.5,0.9 0,0.95 -0.5,0.9 -0.45,-0.25 -1.05,-0.35 -1.1,-0.95 -0.6,-0.72 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_jewelry
+    // Ring with diamond
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.45mm; } }
+    POLYGON 0,-0.45 0.45,0 0,0.45 -0.45,0 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_florist
+    // Flower
+    CIRCLE 0,0.756 0.369 { AREA.BORDER { color: @shopSymbolColor; width: 0.201mm; } }
+    CIRCLE 0,-0.756 0.369 { AREA.BORDER { color: @shopSymbolColor; width: 0.201mm; } }
+    CIRCLE 0.756,0 0.369 { AREA.BORDER { color: @shopSymbolColor; width: 0.201mm; } }
+    CIRCLE -0.756,0 0.369 { AREA.BORDER { color: @shopSymbolColor; width: 0.201mm; } }
+    CIRCLE 0,0 0.336 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_pet
+    // Paw print
+    CIRCLE 0,0.307 0.614 { AREA { color: @shopSymbolColor; } }
+    CIRCLE -0.716,-0.614 0.307 { AREA { color: @shopSymbolColor; } }
+    CIRCLE -0.245,-0.92 0.307 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.245,-0.92 0.307 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.716,-0.614 0.307 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_mobile_phone
+    // Smartphone
+    RECTANGLE -0.643,-1.125 1.286 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    RECTANGLE -0.482,-0.964 0.964 x 1.446 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.161,0.723 0.321 x 0.161 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+
+  SYMBOL shop_alcohol
+    // Bottle
+    RECTANGLE -0.543,-0.155 1.086 x 1.241 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+    RECTANGLE -0.233,-0.931 0.466 x 0.776 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+    RECTANGLE -0.31,-1.164 0.621 x 0.233 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.388,0.155 0.776 x 0.466 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_wine
+    // Wine glass
+    POLYGON -0.5,-0.5 0.5,-0.5 0,-0.1 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    POLYGON 0,-0.1 0,0.3 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.4,0.3 0.8 x 0.12 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+
+  SYMBOL shop_coffee
+    // Coffee cup
+    POLYGON -0.776,-0.621 0.776,-0.621 0.621,0.466 -0.621,0.466 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+    CIRCLE 0.853,0 0.31 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+    POLYGON -0.233,-0.853 -0.078,-1.086 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+    POLYGON 0.233,-0.853 0.388,-1.086 { AREA.BORDER { color: @shopSymbolColor; width: 0.186mm; } }
+
+  SYMBOL shop_tea
+    // Tea cup with saucer
+    POLYGON -0.818,-0.818 0.818,-0.818 0.614,0.205 -0.614,0.205 { AREA.BORDER { color: @shopSymbolColor; width: 0.245mm; } }
+    CIRCLE 0.92,-0.307 0.307 { AREA.BORDER { color: @shopSymbolColor; width: 0.245mm; } }
+    RECTANGLE -1.023,0.205 2.045 x 0.245 { AREA.BORDER { color: @shopSymbolColor; width: 0.245mm; } }
+
+  SYMBOL shop_ice_cream
+    // Ice cream cone
+    POLYGON -0.857,-0.857 0.857,-0.857 0,0.429 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+    CIRCLE 0,-0.75 0.643 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_gift
+    // Gift box
+    RECTANGLE -0.985,-0.657 1.971 x 1.478 { AREA.BORDER { color: @shopSymbolColor; width: 0.197mm; } }
+    RECTANGLE -1.068,-0.821 2.135 x 0.246 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.131,-0.821 0.263 x 1.642 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.985,-0.131 1.971 x 0.263 { AREA { color: @shopSymbolColor; } }
+    CIRCLE -0.411,-0.985 0.197 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.411,-0.985 0.197 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_optician
+    // Glasses
+    CIRCLE -0.438,0 0.375 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    CIRCLE 0.438,0 0.375 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    POLYGON -0.062,0 0.062,0 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    POLYGON -0.812,0 -1.125,-0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    POLYGON 0.812,0 1.125,-0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+
+  SYMBOL shop_gas
+    // Gas bottle
+    POLYGON -0.55,-0.35 -0.55,0.55 0.55,0.55 0.55,-0.35 0.3,-0.55 -0.3,-0.55 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.2,-0.8 0.4 x 0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.1,-0.95 0.2 x 0.15 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_tyres
+    // Tyre
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.469mm; } }
+    CIRCLE 0,0 0.562 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+
+  SYMBOL shop_motorcycle
+    // Motorcycle
+    CIRCLE -0.662,0.248 0.463 { AREA.BORDER { color: @shopSymbolColor; width: 0.199mm; } }
+    CIRCLE 0.662,0.248 0.463 { AREA.BORDER { color: @shopSymbolColor; width: 0.199mm; } }
+    POLYGON -0.662,0.248 0.165,-0.662 { AREA.BORDER { color: @shopSymbolColor; width: 0.199mm; } }
+    POLYGON 0.662,0.248 0.165,-0.662 { AREA.BORDER { color: @shopSymbolColor; width: 0.199mm; } }
+    POLYGON -0.248,-0.662 0.579,-0.662 { AREA.BORDER { color: @shopSymbolColor; width: 0.199mm; } }
+
+  SYMBOL shop_music
+    // Music note
+    CIRCLE -0.321,-0.161 0.289 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.193,-1.286 0.129 x 1.125 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.193,0.964 0.321,0.804 0.321,0.482 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_camera
+    // Camera
+    RECTANGLE -1.125,-0.482 2.25 x 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    CIRCLE 0,0 0.482 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    RECTANGLE 0.643,-0.321 0.321 x 0.241 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_art
+    // Picture frame
+    RECTANGLE -1.125,-0.964 2.25 x 1.929 { AREA.BORDER { color: @shopSymbolColor; width: 0.321mm; } }
+    RECTANGLE -0.804,-0.643 1.607 x 1.286 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_stationery
+    // Pencil
+    RECTANGLE -0.3,-0.6 0.6 x 1.1 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.3,0.5 0.3,0.5 0,0.85 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.3,-0.75 0.6 x 0.15 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_ticket
+    // Ticket
+    RECTANGLE -1.125,-0.643 2.25 x 1.286 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    RECTANGLE -0.804,-0.321 0.964 x 0.161 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.804,0.08 0.643 x 0.161 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_seafood
+    // Fish
+    POLYGON -0.865,-0 0.173,0.519 0.865,-0 0.173,-0.519 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    POLYGON -0.865,-0 -1.385,0.433 -1.385,-0.433 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    CIRCLE 0.519,-0.173 0.104 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_fishing
+    // Fish with hook
+    POLYGON -0.703,-0 0.141,0.422 0.703,-0 0.141,-0.422 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    POLYGON -0.703,-0 -1.125,0.352 -1.125,-0.352 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    CIRCLE 0.422,-0.141 0.084 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0.703,-0 0.984,-0 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+    CIRCLE 0.984,-0.211 0.141 { AREA.BORDER { color: @shopSymbolColor; width: 0.169mm; } }
+
+  SYMBOL shop_greengrocer
+    // Apple
+    CIRCLE 0,-0 0.964 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0,-0.857 0.107,-1.286 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+    POLYGON 0.107,-1.071 0.536,-0.857 0.429,-1.286 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_cheese
+    // Cheese wedge
+    POLYGON -1.125,-0.562 1.125,-0.562 0.375,0.75 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    CIRCLE -0.375,-0.188 0.15 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.188,0.094 0.112 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.562,-0.281 0.094 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_water
+    // Water droplet
+    POLYGON 0,-1.286 0.75,0.214 0.429,0.75 0,0.964 -0.429,0.75 -0.75,0.214 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_bed
+    // Bed
+    RECTANGLE -1.125,-0.482 2.25 x 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    RECTANGLE -0.964,-0.321 0.643 x 0.402 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.161,-0.321 1.125 x 0.804 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_security
+    // Shield
+    POLYGON 0,-1.227 -1.023,-0.818 -1.023,0.205 0,1.023 1.023,0.205 1.023,-0.818 { AREA.BORDER { color: @shopSymbolColor; width: 0.245mm; } }
+    POLYGON 0,-0.818 -0.614,-0.614 -0.614,0.102 0,0.716 0.614,0.102 0.614,-0.614 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_locksmith
+    // Key
+    CIRCLE -0.81,0 0.45 { AREA.BORDER { color: @shopSymbolColor; width: 0.216mm; } }
+    RECTANGLE -0.36,-0.144 1.08 x 0.288 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE 0.54,0.144 0.18 x 0.36 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE 0.81,0.144 0.18 x 0.27 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_candles
+    // Candle
+    RECTANGLE -0.36,-0.9 0.72 x 1.62 { AREA.BORDER { color: @shopSymbolColor; width: 0.216mm; } }
+    POLYGON 0,-0.9 0.27,-1.17 0,-1.53 -0.27,-1.17 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_pottery
+    // Vase
+    POLYGON -0.625,1.25 -1,-0 1,-0 0.625,1.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.3mm; } }
+    POLYGON -1,-0 -0.75,-1 0.75,-1 1,-0 { AREA.BORDER { color: @shopSymbolColor; width: 0.3mm; } }
+
+  SYMBOL shop_boat
+    // Sailboat
+    POLYGON -1.125,0.375 1.125,0.375 0.562,0.938 -0.562,0.938 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    POLYGON 0,0.375 0,-1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    POLYGON 0.094,-1.031 0.75,-0.281 0.094,0.281 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_estate_agent
+    // House
+    POLYGON -1.125,-0.188 1.125,-0.188 0,-1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.844,-0.188 1.688 x 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.188,-0.188 0.375 x 0.656 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_party
+    // Balloon
+    POLYGON 0,-0.8 -0.55,-0.15 -0.5,0.3 -0.25,0.45 0,0.5 0.25,0.45 0.5,0.3 0.55,-0.15 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.1,0.5 0.1,0.5 0,0.68 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0,0.68 0.12,1.0 { AREA.BORDER { color: @shopSymbolColor; width: 0.12mm; } }
+    POLYGON 0.12,1.0 0.3,1.2 { AREA.BORDER { color: @shopSymbolColor; width: 0.12mm; } }
+    CIRCLE -0.2,-0.35 0.12 { AREA { color: lighten(@shopSymbolColor, 0.4); } }
+
+  SYMBOL shop_laundry
+    // Washing machine
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    CIRCLE 0,-0 0.675 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    CIRCLE 0.675,-0.675 0.18 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_dry_cleaning
+    // Clothes hanger
+    CIRCLE 0,-0.964 0.214 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+    POLYGON 0,-0.75 0,-0.536 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+    POLYGON -1.071,-0.536 1.071,-0.536 0,-0 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+    POLYGON -0.429,-0.536 0.429,-0.536 { AREA.BORDER { color: @shopSymbolColor; width: 0.257mm; } }
+
+  SYMBOL shop_video
+    // Video camera
+    RECTANGLE -0.7,-0.35 1.3 x 0.7 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    CIRCLE -0.25,0 0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE 0.4,-0.55 0.2 x 0.2 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_games
+    // Dice
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    CIRCLE -0.45,-0.45 0.18 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0,0 0.18 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.45,0.45 0.18 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_newsagent
+    // Newspaper
+    RECTANGLE -0.938,-1.125 1.875 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.656,-0.75 1.312 x 0.15 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.656,-0.375 1.312 x 0.15 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.656,0 0.938 x 0.15 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.656,0.375 1.312 x 0.15 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_kiosk
+    // Kiosk stand
+    RECTANGLE -0.9,-0.675 1.8 x 1.575 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON -1.125,-0.675 1.125,-0.675 0.9,-1.125 -0.9,-1.125 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.9,0.225 1.8 x 0.225 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_travel_agency
+    // Globe
+    CIRCLE 0,0 0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    POLYGON -0.865,0 0.865,0 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    POLYGON 0,-0.865 0,0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    POLYGON 0,0.865 0,1.212 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    RECTANGLE -0.519,1.212 1.038 x 0.173 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_toys
+    // Toy block
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.3mm; } }
+    RECTANGLE -0.75,-0.75 1.5 x 1.5 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_electronics
+    // Television
+    RECTANGLE -1.125,-0.75 2.25 x 1.5 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.281,0.75 0.562 x 0.188 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.562,0.938 1.125 x 0.15 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_computer
+    // Computer monitor
+    RECTANGLE -1.125,-1.125 2.25 x 1.575 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    RECTANGLE -0.225,0.45 0.45 x 0.337 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.562,0.787 1.125 x 0.18 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_doors
+    // Door
+    RECTANGLE -0.75,-1.125 1.5 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    RECTANGLE -0.562,-0.938 1.125 x 0.75 { AREA.BORDER { color: @shopSymbolColor; width: 0.225mm; } }
+    CIRCLE 0.469,0.188 0.131 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_fireplace
+    // Flame
+    POLYGON 0,-1.286 0.643,0 0.429,0.643 0,0.964 -0.429,0.643 -0.643,0 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0,-0.643 0.321,0 0.214,0.429 0,0.643 -0.214,0.429 -0.321,0 { AREA { color: lighten(@shopSymbolColor, 0.4); } }
+
+  SYMBOL shop_charity
+    // Heart
+    CIRCLE -0.562,-0.225 0.562 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0.562,-0.225 0.562 { AREA { color: @shopSymbolColor; } }
+    POLYGON -1.125,-0.225 1.125,-0.225 0,1.125 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_surf
+    // Surfboard
+    RECTANGLE -0.321,-1.125 0.643 x 2.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+    POLYGON 0,-1.125 0,-0.804 { AREA.BORDER { color: @shopSymbolColor; width: 0.193mm; } }
+
+  SYMBOL shop_ski
+    // Skis
+    RECTANGLE -0.7,-0.5 1.2 x 0.2 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0.5,-0.5 0.7,-0.5 0.7,-0.75 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.2,-0.5 0.3 x 0.2 { AREA { color: lighten(@shopSymbolColor, 0.4); } }
+    RECTANGLE -0.7,0.3 1.2 x 0.2 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0.5,0.3 0.7,0.3 0.7,0.05 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.2,0.3 0.3 x 0.2 { AREA { color: lighten(@shopSymbolColor, 0.4); } }
+
+  SYMBOL shop_aviation
+    // Airplane
+    POLYGON -0.964,-0 1.125,-0 0.804,-0.193 -0.804,-0.193 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.161,-0.193 0.161,-0.193 0.482,-0.643 -0.161,-0.643 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.161,-0 -0.161,0.482 0.482,0.482 0.161,-0 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.964,-0.193 -1.125,-0.482 -0.804,-0.193 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_truck
+    // Truck
+    RECTANGLE 0.346,-0.346 0.692 x 0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    RECTANGLE -1.212,-0.346 1.558 x 0.865 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    CIRCLE -0.692,0.519 0.26 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    CIRCLE 0.173,0.519 0.26 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+    CIRCLE 0.779,0.519 0.26 { AREA.BORDER { color: @shopSymbolColor; width: 0.208mm; } }
+
+  SYMBOL shop_fuel
+    // Fuel pump
+    RECTANGLE -0.597,-0.996 1.195 x 1.792 { AREA.BORDER { color: @shopSymbolColor; width: 0.239mm; } }
+    RECTANGLE -0.398,-0.697 0.796 x 0.398 { AREA { color: @shopSymbolColor; } }
+    POLYGON 0.597,0.199 1.095,0.199 { AREA.BORDER { color: @shopSymbolColor; width: 0.239mm; } }
+    POLYGON 1.095,0.199 1.095,0.697 { AREA.BORDER { color: @shopSymbolColor; width: 0.239mm; } }
+    CIRCLE 1.095,0.796 0.159 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_confectionery
+    // Lollipop
+    CIRCLE 0,0 0.783 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0,0 0.489 { AREA.BORDER { color: lighten(@shopSymbolColor, 0.4); width: 0.235mm; } }
+    POLYGON 0,0.783 0,1.467 { AREA.BORDER { color: @shopSymbolColor; width: 0.235mm; } }
+
+  SYMBOL shop_chocolate
+    // Chocolate bar
+    RECTANGLE -1.125,-0.675 2.25 x 1.35 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON -1.125,0 1.125,0 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON 0,-0.675 0,0.675 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON -0.562,-0.675 -0.562,0.675 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON 0.562,-0.675 0.562,0.675 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+
+  SYMBOL shop_pastry
+    // Cake slice
+    POLYGON -1.125,-0.675 1.125,-0.675 0,0.675 { AREA.BORDER { color: @shopSymbolColor; width: 0.27mm; } }
+    POLYGON -1.125,-0.675 1.125,-0.675 0,-0.225 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_dairy
+    // Milk bottle
+    RECTANGLE -0.54,-0.18 1.08 x 1.26 { AREA.BORDER { color: @shopSymbolColor; width: 0.216mm; } }
+    RECTANGLE -0.27,-0.9 0.54 x 0.72 { AREA.BORDER { color: @shopSymbolColor; width: 0.216mm; } }
+    RECTANGLE -0.36,-1.17 0.72 x 0.27 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.36,0.18 0.72 x 0.54 { AREA { color: @shopSymbolColor; } }
+
+  SYMBOL shop_coin
+    // Coin
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @shopSymbolColor; width: 0.375mm; } }
+    CIRCLE 0,0 0.75 { AREA.BORDER { color: @shopSymbolColor; width: 0.3mm; } }
+
+  SYMBOL shop_lighting
+    // Light bulb
+    CIRCLE 0,0 0.9 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.2,0.75 0.4 x 0.25 { AREA { color: @shopSymbolColor; } }
+    POLYGON -0.25,0.3 -0.1,0.1 0.1,0.3 0.25,0.1 { AREA.BORDER { color: @shopSymbolColor; width: 0.12mm; } }
   STYLE
     IF _building {
       [MAG @buildingMag-] {
@@ -23,6 +460,247 @@ OSS
           AREA { color: @shopColor;}
           AREA.BORDER { color: @shopBorderColor; width: 0.1mm; }
         }
+
+        // Per-category area colors for granular shop types. These rules
+        // follow the generic rule above and thus override the base color
+        // for the listed types (last matching rule wins).
+
+        [TYPE shop_alcohol_building,
+              shop_bakery_building,
+              shop_beverages_building,
+              shop_brewing_supplies_building,
+              shop_butcher_building,
+              shop_cheese_building,
+              shop_chocolate_building,
+              shop_coffee_building,
+              shop_confectionery_building,
+              shop_convenience_building,
+              shop_dairy_building,
+              shop_deli_building,
+              shop_farm_building,
+              shop_food_building,
+              shop_frozen_food_building,
+              shop_greengrocer_building,
+              shop_grocery_building,
+              shop_health_food_building,
+              shop_ice_cream_building,
+              shop_nuts_building,
+              shop_pasta_building,
+              shop_pastry_building,
+              shop_seafood_building,
+              shop_spices_building,
+              shop_supermarket_building,
+              shop_tea_building,
+              shop_tortilla_building,
+              shop_water_building,
+              shop_wine_building] {
+          AREA { color: @shopFoodColor; }
+          AREA.BORDER { color: @shopFoodBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_department_store_building,
+              shop_general_building,
+              shop_kiosk_building,
+              shop_mall_building,
+              shop_wholesale_building] {
+          AREA { color: @shopGeneralColor; }
+          AREA.BORDER { color: @shopGeneralBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_baby_goods_building,
+              shop_bag_building,
+              shop_clothes_building,
+              shop_fabric_building,
+              shop_fashion_accessories_building,
+              shop_jewelry_building,
+              shop_leather_building,
+              shop_sewing_building,
+              shop_shoes_building,
+              shop_shoe_repair_building,
+              shop_tailor_building,
+              shop_watches_building,
+              shop_wool_building] {
+          AREA { color: @shopClothingColor; }
+          AREA.BORDER { color: @shopClothingBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_charity_building,
+              shop_second_hand_building,
+              shop_variety_store_building] {
+          AREA { color: @shopDiscountColor; }
+          AREA.BORDER { color: @shopDiscountBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_beauty_building,
+              shop_chemist_building,
+              shop_cosmetics_building,
+              shop_erotic_building,
+              shop_hairdresser_building,
+              shop_hairdresser_supply_building,
+              shop_hearing_aids_building,
+              shop_herbalist_building,
+              shop_massage_building,
+              shop_medical_supply_building,
+              shop_nutrition_supplements_building,
+              shop_optician_building,
+              shop_perfumery_building,
+              shop_piercing_building,
+              shop_tattoo_building] {
+          AREA { color: @shopHealthColor; }
+          AREA.BORDER { color: @shopHealthBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_agrarian_building,
+              shop_appliance_building,
+              shop_bathroom_furnishing_building,
+              shop_country_store_building,
+              shop_doityourself_building,
+              shop_electrical_building,
+              shop_energy_building,
+              shop_fireplace_building,
+              shop_florist_building,
+              shop_garden_centre_building,
+              shop_garden_furniture_building,
+              shop_gas_building,
+              shop_glaziery_building,
+              shop_groundskeeping_building,
+              shop_hardware_building,
+              shop_houseware_building,
+              shop_locksmith_building,
+              shop_paint_building,
+              shop_pottery_building,
+              shop_security_building,
+              shop_tool_hire_building,
+              shop_trade_building] {
+          AREA { color: @shopDIYColor; }
+          AREA.BORDER { color: @shopDIYBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_antiques_building,
+              shop_bed_building,
+              shop_candles_building,
+              shop_carpet_building,
+              shop_curtain_building,
+              shop_doors_building,
+              shop_flooring_building,
+              shop_furniture_building,
+              shop_household_linen_building,
+              shop_interior_decoration_building,
+              shop_kitchen_building,
+              shop_lighting_building,
+              shop_tiles_building,
+              shop_window_blind_building] {
+          AREA { color: @shopFurnitureColor; }
+          AREA.BORDER { color: @shopFurnitureBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_computer_building,
+              shop_electronics_building,
+              shop_hifi_building,
+              shop_mobile_phone_building,
+              shop_printer_ink_building,
+              shop_radiotechnics_building,
+              shop_telecommunication_building,
+              shop_vacuum_cleaner_building] {
+          AREA { color: @shopElectronicsColor; }
+          AREA.BORDER { color: @shopElectronicsBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_atv_building,
+              shop_aviation_building,
+              shop_bicycle_building,
+              shop_boat_building,
+              shop_car_building,
+              shop_car_parts_building,
+              shop_car_repair_building,
+              shop_caravan_building,
+              shop_fishing_building,
+              shop_fuel_building,
+              shop_golf_building,
+              shop_hunting_building,
+              shop_military_surplus_building,
+              shop_motorcycle_building,
+              shop_motorcycle_repair_building,
+              shop_outdoor_building,
+              shop_scooter_building,
+              shop_scuba_diving_building,
+              shop_ski_building,
+              shop_snowmobile_building,
+              shop_sports_building,
+              shop_surf_building,
+              shop_swimming_pool_building,
+              shop_trailer_building,
+              shop_truck_building,
+              shop_tyres_building] {
+          AREA { color: @shopVehicleColor; }
+          AREA.BORDER { color: @shopVehicleBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_art_building,
+              shop_camera_building,
+              shop_collector_building,
+              shop_craft_building,
+              shop_frame_building,
+              shop_games_building,
+              shop_model_building,
+              shop_music_building,
+              shop_musical_instrument_building,
+              shop_photo_building,
+              shop_trophy_building,
+              shop_video_building,
+              shop_video_games_building] {
+          AREA { color: @shopArtColor; }
+          AREA.BORDER { color: @shopArtBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_anime_building,
+              shop_books_building,
+              shop_gift_building,
+              shop_lottery_building,
+              shop_newsagent_building,
+              shop_stationery_building,
+              shop_ticket_building] {
+          AREA { color: @shopStationeryColor; }
+          AREA.BORDER { color: @shopStationeryBorderColor; width: 0.1mm; }
+        }
+
+        [TYPE shop_bookmaker_building,
+              shop_cannabis_building,
+              shop_copyshop_building,
+              shop_dry_cleaning_building,
+              shop_e_cigarette_building,
+              shop_funeral_directors_building,
+              shop_laundry_building,
+              shop_money_lender_building,
+              shop_outpost_building,
+              shop_party_building,
+              shop_pawnbroker_building,
+              shop_pest_control_building,
+              shop_pet_building,
+              shop_pet_grooming_building,
+              shop_pyrotechnics_building,
+              shop_religion_building,
+              shop_rental_building,
+              shop_storage_rental_building,
+              shop_tobacco_building,
+              shop_toys_building,
+              shop_travel_agency_building,
+              shop_vacant_building,
+              shop_vending_machine_building,
+              shop_weapons_building,
+              shop_repair_building,
+              shop_estate_agent_building,
+              shop_printing_building,
+              shop_building_materials_building,
+              shop_mobile_phone_accessories_building,
+              shop_power_tools_building,
+              shop_gold_buyer_building,
+              shop_honey_building,
+              shop_rice_building] {
+          AREA { color: @shopOtherColor; }
+          AREA.BORDER { color: @shopOtherBorderColor; width: 0.1mm; }
+        }
+
       }
     }
 
@@ -56,4 +734,335 @@ OSS
         NODE.ICON { symbol: shop; }
       }
     }
-END
+
+    [MAG closer-] {
+      [TYPE shop_supermarket, shop_supermarket_building] {
+        NODE.ICON { symbol: shop_supermarket; }
+        AREA.ICON { symbol: shop_supermarket; }
+      }
+
+      [TYPE shop_bakery, shop_bakery_building] {
+        NODE.ICON { symbol: shop_bakery; }
+        AREA.ICON { symbol: shop_bakery; }
+      }
+
+      [TYPE shop_butcher, shop_butcher_building] {
+        NODE.ICON { symbol: shop_butcher; }
+        AREA.ICON { symbol: shop_butcher; }
+      }
+
+      [TYPE shop_hairdresser, shop_hairdresser_building] {
+        NODE.ICON { symbol: shop_hairdresser; }
+        AREA.ICON { symbol: shop_hairdresser; }
+      }
+
+      [TYPE shop_car, shop_car_building] {
+        NODE.ICON { symbol: shop_car; }
+        AREA.ICON { symbol: shop_car; }
+      }
+
+      [TYPE shop_bicycle, shop_bicycle_building] {
+        NODE.ICON { symbol: shop_bicycle; }
+        AREA.ICON { symbol: shop_bicycle; }
+      }
+
+      [TYPE shop_books, shop_books_building] {
+        NODE.ICON { symbol: shop_books; }
+        AREA.ICON { symbol: shop_books; }
+      }
+
+      [TYPE shop_clothes, shop_clothes_building] {
+        NODE.ICON { symbol: shop_clothes; }
+        AREA.ICON { symbol: shop_clothes; }
+      }
+
+      [TYPE shop_jewelry, shop_jewelry_building] {
+        NODE.ICON { symbol: shop_jewelry; }
+        AREA.ICON { symbol: shop_jewelry; }
+      }
+
+      [TYPE shop_florist, shop_florist_building] {
+        NODE.ICON { symbol: shop_florist; }
+        AREA.ICON { symbol: shop_florist; }
+      }
+
+      [TYPE shop_pet, shop_pet_building,
+              shop_pet_grooming, shop_pet_grooming_building] {
+        NODE.ICON { symbol: shop_pet; }
+        AREA.ICON { symbol: shop_pet; }
+      }
+
+      [TYPE shop_mobile_phone, shop_mobile_phone_building,
+              shop_mobile_phone_accessories, shop_mobile_phone_accessories_building] {
+        NODE.ICON { symbol: shop_mobile_phone; }
+        AREA.ICON { symbol: shop_mobile_phone; }
+      }
+
+      [TYPE shop_alcohol, shop_alcohol_building,
+              shop_beverages, shop_beverages_building] {
+        NODE.ICON { symbol: shop_alcohol; }
+        AREA.ICON { symbol: shop_alcohol; }
+      }
+
+      [TYPE shop_wine, shop_wine_building] {
+        NODE.ICON { symbol: shop_wine; }
+        AREA.ICON { symbol: shop_wine; }
+      }
+
+      [TYPE shop_coffee, shop_coffee_building] {
+        NODE.ICON { symbol: shop_coffee; }
+        AREA.ICON { symbol: shop_coffee; }
+      }
+
+      [TYPE shop_tea, shop_tea_building] {
+        NODE.ICON { symbol: shop_tea; }
+        AREA.ICON { symbol: shop_tea; }
+      }
+
+      [TYPE shop_ice_cream, shop_ice_cream_building] {
+        NODE.ICON { symbol: shop_ice_cream; }
+        AREA.ICON { symbol: shop_ice_cream; }
+      }
+
+      [TYPE shop_gift, shop_gift_building] {
+        NODE.ICON { symbol: shop_gift; }
+        AREA.ICON { symbol: shop_gift; }
+      }
+
+      [TYPE shop_optician, shop_optician_building] {
+        NODE.ICON { symbol: shop_optician; }
+        AREA.ICON { symbol: shop_optician; }
+      }
+
+      [TYPE shop_gas, shop_gas_building] {
+        NODE.ICON { symbol: shop_gas; }
+        AREA.ICON { symbol: shop_gas; }
+      }
+
+      [TYPE shop_tyres, shop_tyres_building] {
+        NODE.ICON { symbol: shop_tyres; }
+        AREA.ICON { symbol: shop_tyres; }
+      }
+
+      [TYPE shop_motorcycle, shop_motorcycle_building] {
+        NODE.ICON { symbol: shop_motorcycle; }
+        AREA.ICON { symbol: shop_motorcycle; }
+      }
+
+      [TYPE shop_music, shop_music_building,
+              shop_musical_instrument, shop_musical_instrument_building] {
+        NODE.ICON { symbol: shop_music; }
+        AREA.ICON { symbol: shop_music; }
+      }
+
+      [TYPE shop_camera, shop_camera_building,
+              shop_photo, shop_photo_building] {
+        NODE.ICON { symbol: shop_camera; }
+        AREA.ICON { symbol: shop_camera; }
+      }
+
+      [TYPE shop_art, shop_art_building,
+              shop_frame, shop_frame_building] {
+        NODE.ICON { symbol: shop_art; }
+        AREA.ICON { symbol: shop_art; }
+      }
+
+      [TYPE shop_stationery, shop_stationery_building] {
+        NODE.ICON { symbol: shop_stationery; }
+        AREA.ICON { symbol: shop_stationery; }
+      }
+
+      [TYPE shop_ticket, shop_ticket_building] {
+        NODE.ICON { symbol: shop_ticket; }
+        AREA.ICON { symbol: shop_ticket; }
+      }
+
+      [TYPE shop_seafood, shop_seafood_building] {
+        NODE.ICON { symbol: shop_seafood; }
+        AREA.ICON { symbol: shop_seafood; }
+      }
+
+      [TYPE shop_fishing, shop_fishing_building] {
+        NODE.ICON { symbol: shop_fishing; }
+        AREA.ICON { symbol: shop_fishing; }
+      }
+
+      [TYPE shop_greengrocer, shop_greengrocer_building] {
+        NODE.ICON { symbol: shop_greengrocer; }
+        AREA.ICON { symbol: shop_greengrocer; }
+      }
+
+      [TYPE shop_cheese, shop_cheese_building] {
+        NODE.ICON { symbol: shop_cheese; }
+        AREA.ICON { symbol: shop_cheese; }
+      }
+
+      [TYPE shop_water, shop_water_building] {
+        NODE.ICON { symbol: shop_water; }
+        AREA.ICON { symbol: shop_water; }
+      }
+
+      [TYPE shop_bed, shop_bed_building] {
+        NODE.ICON { symbol: shop_bed; }
+        AREA.ICON { symbol: shop_bed; }
+      }
+
+      [TYPE shop_security, shop_security_building] {
+        NODE.ICON { symbol: shop_security; }
+        AREA.ICON { symbol: shop_security; }
+      }
+
+      [TYPE shop_locksmith, shop_locksmith_building] {
+        NODE.ICON { symbol: shop_locksmith; }
+        AREA.ICON { symbol: shop_locksmith; }
+      }
+
+      [TYPE shop_candles, shop_candles_building] {
+        NODE.ICON { symbol: shop_candles; }
+        AREA.ICON { symbol: shop_candles; }
+      }
+
+      [TYPE shop_pottery, shop_pottery_building] {
+        NODE.ICON { symbol: shop_pottery; }
+        AREA.ICON { symbol: shop_pottery; }
+      }
+
+      [TYPE shop_boat, shop_boat_building] {
+        NODE.ICON { symbol: shop_boat; }
+        AREA.ICON { symbol: shop_boat; }
+      }
+
+      [TYPE shop_estate_agent, shop_estate_agent_building] {
+        NODE.ICON { symbol: shop_estate_agent; }
+        AREA.ICON { symbol: shop_estate_agent; }
+      }
+
+      [TYPE shop_party, shop_party_building] {
+        NODE.ICON { symbol: shop_party; }
+        AREA.ICON { symbol: shop_party; }
+      }
+
+      [TYPE shop_laundry, shop_laundry_building] {
+        NODE.ICON { symbol: shop_laundry; }
+        AREA.ICON { symbol: shop_laundry; }
+      }
+
+      [TYPE shop_dry_cleaning, shop_dry_cleaning_building] {
+        NODE.ICON { symbol: shop_dry_cleaning; }
+        AREA.ICON { symbol: shop_dry_cleaning; }
+      }
+
+      [TYPE shop_video, shop_video_building,
+              shop_video_games, shop_video_games_building] {
+        NODE.ICON { symbol: shop_video; }
+        AREA.ICON { symbol: shop_video; }
+      }
+
+      [TYPE shop_games, shop_games_building] {
+        NODE.ICON { symbol: shop_games; }
+        AREA.ICON { symbol: shop_games; }
+      }
+
+      [TYPE shop_newsagent, shop_newsagent_building] {
+        NODE.ICON { symbol: shop_newsagent; }
+        AREA.ICON { symbol: shop_newsagent; }
+      }
+
+      [TYPE shop_kiosk, shop_kiosk_building] {
+        NODE.ICON { symbol: shop_kiosk; }
+        AREA.ICON { symbol: shop_kiosk; }
+      }
+
+      [TYPE shop_travel_agency, shop_travel_agency_building] {
+        NODE.ICON { symbol: shop_travel_agency; }
+        AREA.ICON { symbol: shop_travel_agency; }
+      }
+
+      [TYPE shop_toys, shop_toys_building] {
+        NODE.ICON { symbol: shop_toys; }
+        AREA.ICON { symbol: shop_toys; }
+      }
+
+      [TYPE shop_electronics, shop_electronics_building] {
+        NODE.ICON { symbol: shop_electronics; }
+        AREA.ICON { symbol: shop_electronics; }
+      }
+
+      [TYPE shop_computer, shop_computer_building] {
+        NODE.ICON { symbol: shop_computer; }
+        AREA.ICON { symbol: shop_computer; }
+      }
+
+      [TYPE shop_doors, shop_doors_building] {
+        NODE.ICON { symbol: shop_doors; }
+        AREA.ICON { symbol: shop_doors; }
+      }
+
+      [TYPE shop_fireplace, shop_fireplace_building] {
+        NODE.ICON { symbol: shop_fireplace; }
+        AREA.ICON { symbol: shop_fireplace; }
+      }
+
+      [TYPE shop_charity, shop_charity_building] {
+        NODE.ICON { symbol: shop_charity; }
+        AREA.ICON { symbol: shop_charity; }
+      }
+
+      [TYPE shop_surf, shop_surf_building] {
+        NODE.ICON { symbol: shop_surf; }
+        AREA.ICON { symbol: shop_surf; }
+      }
+
+      [TYPE shop_ski, shop_ski_building] {
+        NODE.ICON { symbol: shop_ski; }
+        AREA.ICON { symbol: shop_ski; }
+      }
+
+      [TYPE shop_aviation, shop_aviation_building] {
+        NODE.ICON { symbol: shop_aviation; }
+        AREA.ICON { symbol: shop_aviation; }
+      }
+
+      [TYPE shop_truck, shop_truck_building] {
+        NODE.ICON { symbol: shop_truck; }
+        AREA.ICON { symbol: shop_truck; }
+      }
+
+      [TYPE shop_fuel, shop_fuel_building] {
+        NODE.ICON { symbol: shop_fuel; }
+        AREA.ICON { symbol: shop_fuel; }
+      }
+
+      [TYPE shop_confectionery, shop_confectionery_building] {
+        NODE.ICON { symbol: shop_confectionery; }
+        AREA.ICON { symbol: shop_confectionery; }
+      }
+
+      [TYPE shop_chocolate, shop_chocolate_building] {
+        NODE.ICON { symbol: shop_chocolate; }
+        AREA.ICON { symbol: shop_chocolate; }
+      }
+
+      [TYPE shop_pastry, shop_pastry_building] {
+        NODE.ICON { symbol: shop_pastry; }
+        AREA.ICON { symbol: shop_pastry; }
+      }
+
+      [TYPE shop_dairy, shop_dairy_building] {
+        NODE.ICON { symbol: shop_dairy; }
+        AREA.ICON { symbol: shop_dairy; }
+      }
+
+      [TYPE shop_money_lender, shop_money_lender_building,
+              shop_pawnbroker, shop_pawnbroker_building,
+              shop_gold_buyer, shop_gold_buyer_building] {
+        NODE.ICON { symbol: shop_coin; }
+        AREA.ICON { symbol: shop_coin; }
+      }
+
+      [TYPE shop_lighting, shop_lighting_building] {
+        NODE.ICON { symbol: shop_lighting; }
+        AREA.ICON { symbol: shop_lighting; }
+      }
+
+    }END

@@ -20,8 +20,8 @@ OSS
   COLOR aerowaySymbolColor          = #6f6f6f;
 
   SYMBOL aeroway_gate
-    RECTANGLE -0.8,-0.5 1.6 x 1.0 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.15mm; } }
-    POLYGON -0.2,-0.5 -0.2,0.5 0.6,0 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE -1.125,-0.703 2.25 x 1.406 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.211mm; } }
+    POLYGON -0.281,-0.703 -0.281,0.703 0.844,0 { AREA { color: @aerowaySymbolColor; } }
 
   STYLE
     [MAG city-] {

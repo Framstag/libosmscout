@@ -11,7 +11,7 @@ OSS
     COLOR officeLabelColor           = darken(@officeColor, 0.8);
 
   SYMBOL office
-    RECTANGLE 0,0 1 x 1 {
+    RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @officeSymbolColor; }
     }
 
