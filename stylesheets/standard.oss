@@ -43,7 +43,7 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
-  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary

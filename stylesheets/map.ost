@@ -570,6 +570,23 @@ TYPES
     = WAY (("aerialway"=="drag_lift") OR ("aerialway"=="t-bar") OR ("aerialway"=="j-bar") OR ("aerialway"=="platter") OR ("aerialway"=="rope_tow") OR ("aerialway"=="magic_carpet"))
       {Name}
 
+  TYPE aerialway_zip_line
+    = WAY ("aerialway"=="zip_line")
+      {Name}
+
+  TYPE aerialway_goods
+    = WAY ("aerialway"=="goods")
+      {Name}
+
+  TYPE aerialway_station
+    = NODE AREA ("aerialway"=="station")
+      {Name, NameAlt}
+      POI
+      GROUP routingPOI
+
+  TYPE aerialway_pylon
+    = NODE ("aerialway"=="pylon")
+
   //
   // Winter sports
   //

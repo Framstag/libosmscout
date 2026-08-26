@@ -41,7 +41,7 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
-  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
@@ -596,6 +596,14 @@ STYLE
     [TYPE aerialway_drag_lift]{
        WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
        WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
+    [TYPE aerialway_zip_line]{
+       WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+       WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
+    [TYPE aerialway_goods]{
+       WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+       WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
     }
  }
 
