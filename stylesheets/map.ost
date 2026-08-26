@@ -433,6 +433,113 @@ TYPES
       {Bridge, Tunnel}
 
   //
+  // Additional railway values (https://wiki.openstreetmap.org/wiki/Key:railway)
+  //
+
+  TYPE railway_construction
+    = WAY ("railway"=="construction")
+      {Bridge, Tunnel, Width}
+
+  TYPE railway_proposed
+    = WAY ("railway"=="proposed")
+      {Bridge, Tunnel, Width}
+
+  TYPE railway_miniature
+    = WAY ("railway"=="miniature")
+      {Name, Bridge, Tunnel, Width}
+
+  TYPE railway_stop
+    = NODE ("railway"=="stop")
+
+  TYPE railway_tram_crossing
+    = NODE ("railway"=="tram_crossing")
+
+  TYPE railway_tram_level_crossing
+    = NODE ("railway"=="tram_level_crossing")
+
+  TYPE railway_train_station_entrance
+    = NODE ("railway"=="train_station_entrance")
+      {Name, NameAlt}
+
+  TYPE railway_service_station
+    = NODE AREA ("railway"=="service_station")
+      {Name, NameAlt}
+
+  TYPE railway_switch
+    = NODE ("railway"=="switch")
+
+  TYPE railway_signal
+    = NODE ("railway"=="signal")
+
+  TYPE railway_buffer_stop
+    = NODE ("railway"=="buffer_stop")
+
+  TYPE railway_milestone
+    = NODE ("railway"=="milestone")
+
+  TYPE railway_railway_crossing
+    = NODE ("railway"=="railway_crossing")
+
+  TYPE railway_derail
+    = NODE ("railway"=="derail")
+
+  TYPE railway_signal_box
+    = NODE AREA ("railway"=="signal_box")
+      {Name, NameAlt}
+
+  TYPE railway_junction
+    = NODE ("railway"=="junction")
+      {Name, NameAlt}
+
+  TYPE railway_yard
+    = NODE AREA ("railway"=="yard")
+      {Name, NameAlt}
+
+  TYPE railway_radio
+    = NODE ("railway"=="radio")
+
+  TYPE railway_vacancy_detection
+    = NODE ("railway"=="vacancy_detection")
+
+  TYPE railway_phone
+    = NODE ("railway"=="phone")
+
+  TYPE railway_spur_junction
+    = NODE ("railway"=="spur_junction")
+      {Name, NameAlt}
+
+  TYPE railway_rail_brake
+    = NODE ("railway"=="rail_brake")
+
+  TYPE railway_defect_detector
+    = NODE ("railway"=="defect_detector")
+
+  TYPE railway_power_supply
+    = NODE ("railway"=="power_supply")
+
+  TYPE railway_owner_change
+    = NODE ("railway"=="owner_change")
+
+  TYPE railway_crossover
+    = NODE ("railway"=="crossover")
+
+  TYPE railway_platform_marker
+    = NODE ("railway"=="platform_marker")
+
+  TYPE railway_loading_ramp
+    = NODE WAY AREA ("railway"=="loading_ramp")
+
+  TYPE railway_platform_edge
+    = WAY ("railway"=="platform_edge")
+
+  TYPE railway_workshop
+    = AREA ("railway"=="workshop")
+      {Name, NameAlt}
+
+  TYPE railway_ventilation_shaft
+    = NODE WAY ("railway"=="ventilation_shaft")
+
+  //
   // Other public transport (not railway or ferry_terminal)
   //
 
@@ -521,6 +628,60 @@ TYPES
     = NODE ("aeroway"=="gate")
       {Name, NameAlt}
       ADDRESS
+
+  TYPE aeroway_navigationaid
+    = NODE ("aeroway"=="navigationaid")
+
+  TYPE aeroway_windsock
+    = NODE ("aeroway"=="windsock")
+
+  TYPE aeroway_threshold
+    = NODE ("aeroway"=="threshold")
+
+  TYPE aeroway_aircraft_crossing
+    = NODE ("aeroway"=="aircraft_crossing")
+
+  TYPE aeroway_parking_position
+    = NODE WAY ("aeroway"=="parking_position")
+      {Ref}
+
+  TYPE aeroway_holding_position
+    = NODE WAY ("aeroway"=="holding_position")
+
+  TYPE aeroway_hangar
+    = AREA ("aeroway"=="hangar")
+      {Name, NameAlt}
+
+  TYPE aeroway_airstrip
+    = NODE AREA ("aeroway"=="airstrip")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE aeroway_tower
+    = NODE AREA ("aeroway"=="tower")
+
+  TYPE aeroway_heliport
+    = NODE AREA ("aeroway"=="heliport")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE aeroway_fuel
+    = NODE AREA ("aeroway"=="fuel")
+
+  TYPE aeroway_taxilane
+    = WAY ("aeroway"=="taxilane")
+      {Ref, Width} PIN_WAY
+
+  TYPE aeroway_jet_bridge
+    = WAY ("aeroway"=="jet_bridge")
+
+  TYPE aeroway_stopway
+    = WAY ("aeroway"=="stopway")
+      {Width}
+
+  TYPE aeroway_model_runway
+    = WAY ("aeroway"=="model_runway")
+      {Width}
 
   //
   // Landuses

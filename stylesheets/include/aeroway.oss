@@ -23,6 +23,67 @@ OSS
     RECTANGLE -1.125,-0.703 2.25 x 1.406 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.211mm; } }
     POLYGON -0.281,-0.703 -0.281,0.703 0.844,0 { AREA { color: @aerowaySymbolColor; } }
 
+  SYMBOL aeroway_windsock
+    // Pole
+    RECTANGLE -0.05,0.2 0.1 x 0.8 { AREA { color: @aerowaySymbolColor; } }
+    // Windsock cone
+    POLYGON -0.05,0.2 0.55,0.5 -0.05,0.8 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_heliport
+    // Circle with H
+    CIRCLE 0,0 0.9 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.211mm; } }
+    RECTANGLE -0.45,-0.6 0.3 x 1.2 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE 0.15,-0.6 0.3 x 1.2 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE -0.45,-0.15 0.9 x 0.3 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_fuel
+    // Fuel pump
+    RECTANGLE -0.597,-0.996 1.195 x 1.792 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.239mm; } }
+    RECTANGLE -0.398,-0.697 0.796 x 0.398 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON 0.597,0.199 1.095,0.199 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.239mm; } }
+    POLYGON 1.095,0.199 1.095,0.697 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.239mm; } }
+    CIRCLE 1.095,0.796 0.159 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_tower
+    // Control tower body
+    RECTANGLE -0.35,-1.0 0.7 x 1.5 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.211mm; } }
+    // Window band
+    RECTANGLE -0.25,-0.9 0.5 x 0.25 { AREA { color: @aerowaySymbolColor; } }
+    // Base
+    RECTANGLE -0.6,0.5 1.2 x 0.2 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_navigationaid
+    // Beacon with rays
+    CIRCLE 0,0 0.35 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON 0,-0.35 0.15,-0.8 -0.15,-0.8 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON 0,0.35 0.15,0.8 -0.15,0.8 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON -0.35,0 -0.8,0.15 -0.8,-0.15 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON 0.35,0 0.8,0.15 0.8,-0.15 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_aircraft_crossing
+    // Crossing X
+    POLYGON -0.7,-0.7 -0.3,-0.7 0.7,0.7 0.3,0.7 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON -0.7,0.7 -0.3,0.7 0.7,-0.7 0.3,-0.7 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_threshold
+    // Runway threshold: outline with bars
+    RECTANGLE -0.9,-0.45 1.8 x 0.9 { AREA.BORDER { color: @aerowaySymbolColor; width: 0.211mm; } }
+    RECTANGLE -0.6,-0.3 0.3 x 0.6 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE -0.15,-0.3 0.3 x 0.6 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE 0.3,-0.3 0.3 x 0.6 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_holding_position
+    // Holding position: two solid bars
+    RECTANGLE -0.9,-0.35 1.8 x 0.3 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE -0.9,0.05 1.8 x 0.3 { AREA { color: @aerowaySymbolColor; } }
+
+  SYMBOL aeroway_parking_position
+    // Aircraft outline (top-down)
+    RECTANGLE -0.5,-0.15 1.0 x 0.3 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON -0.1,-0.15 0.3,-0.15 0.5,-0.6 -0.1,-0.6 { AREA { color: @aerowaySymbolColor; } }
+    POLYGON -0.1,0.15 0.3,0.15 0.5,0.6 -0.1,0.6 { AREA { color: @aerowaySymbolColor; } }
+    RECTANGLE -0.5,-0.15 0.15 x 0.3 { AREA { color: @aerowaySymbolColor; } }
+
   STYLE
     [MAG city-] {
       [TYPE aeroway_aerodrome,
@@ -31,22 +92,41 @@ OSS
       [TYPE aeroway_terminal] AREA { color: @aerodromeTerminalColor; }
       [TYPE aeroway_runway] AREA { color: @aerodromeRunwayColor; }
       [TYPE aeroway_apron] AREA { color: @aerodromeApron; }
+
+      [TYPE aeroway_hangar,
+            aeroway_airstrip,
+            aeroway_heliport] AREA { color: @aerodromeColor; }
+
+      [TYPE aeroway_tower,
+            aeroway_fuel] AREA { color: @aerodromeTerminalColor; }
     }
 
     [MAG suburb-] {
       [TYPE aeroway_runway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 20m;}
       [TYPE aeroway_taxiway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.5mm; width: 15m;}
+      [TYPE aeroway_taxilane] WAY {color: @aerodromeRunwayColor; displayWidth: 0.4mm; width: 10m;}
+      [TYPE aeroway_stopway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.4mm; width: 20m;}
+      [TYPE aeroway_model_runway] WAY {color: @aerodromeRunwayColor; displayWidth: 0.3mm; width: 10m;}
+      [TYPE aeroway_jet_bridge] WAY {color: @aerodromeRunwayColor; displayWidth: 0.2mm; width: 3m;}
     }
 
     [MAG close-] {
       [TYPE aeroway_taxiway,
-            aeroway_runway] WAY.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioAeroway; }
+            aeroway_runway,
+            aeroway_taxilane,
+            aeroway_stopway,
+            aeroway_model_runway] WAY.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioAeroway; }
 
       [TYPE aeroway_aerodrome,
             aeroway_terminal,
             aeroway_helipad,
             aeroway_runway,
-            aeroway_apron] AREA.TEXT { label: Name.name; color: @labelColor; }
+            aeroway_apron,
+            aeroway_hangar,
+            aeroway_airstrip,
+            aeroway_heliport,
+            aeroway_tower,
+            aeroway_fuel] AREA.TEXT { label: Name.name; color: @labelColor; }
     }
 
     [MAG veryClose-] {
@@ -56,5 +136,34 @@ OSS
       }
 
       [TYPE aeroway_helipad] NODE.TEXT { label: Name.name; color: @labelColor; size: 0.9; priority: @labelPrioAeroway; }
+
+      [TYPE aeroway_navigationaid] NODE.ICON { symbol: aeroway_navigationaid; }
+      [TYPE aeroway_windsock] NODE.ICON { symbol: aeroway_windsock; }
+      [TYPE aeroway_threshold] NODE.ICON { symbol: aeroway_threshold; }
+      [TYPE aeroway_aircraft_crossing] NODE.ICON { symbol: aeroway_aircraft_crossing; }
+      [TYPE aeroway_holding_position] NODE.ICON { symbol: aeroway_holding_position; }
+      [TYPE aeroway_parking_position] NODE.ICON { symbol: aeroway_parking_position; }
+      [TYPE aeroway_tower] NODE.ICON { symbol: aeroway_tower; }
+      [TYPE aeroway_heliport] NODE.ICON { symbol: aeroway_heliport; }
+      [TYPE aeroway_fuel] NODE.ICON { symbol: aeroway_fuel; }
+
+      [TYPE aeroway_heliport,
+            aeroway_airstrip,
+            aeroway_tower,
+            aeroway_fuel] NODE.TEXT { label: Name.name; color: @labelColor; size: 0.9; priority: @labelPrioAeroway; }
+    }
+
+    IF _building {
+      [MAG @specialBuildingMag-] {
+        [TYPE aeroway_hangar,
+              aeroway_tower,
+              aeroway_fuel] AREA { color: @aerodromeTerminalColor; }
+      }
+
+      [MAG @labelSpecialBuildingMag-] {
+        [TYPE aeroway_hangar,
+              aeroway_tower,
+              aeroway_fuel] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; }
+      }
     }
 END

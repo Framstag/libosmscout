@@ -50,7 +50,8 @@ ORDER WAYS
   GROUP highway_motorway_link, highway_trunk_link, highway_primary_link, highway_secondary_link, highway_tertiary_link
   GROUP highway_unclassified, highway_road, highway_residential
   GROUP railway_rail,
-        aeroway_runway, aeroway_taxiway
+        aeroway_runway, aeroway_taxiway, aeroway_taxilane, aeroway_stopway,
+        aeroway_model_runway, aeroway_jet_bridge
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
         railway_narrow_gauge, railway_preserved

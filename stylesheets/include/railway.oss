@@ -10,9 +10,12 @@ CONST
     RECTANGLE 0,0 2.25 x 2.25 {
       AREA { color: @railwaySymbolColor; }
     }
+    CIRCLE 1.125,1.125 0.45 {
+      AREA { color: #ffffff; }
+    }
 
   SYMBOL railway_halt
-    RECTANGLE 0,0 2.25 x 2.25 {
+    RECTANGLE 0,0 1.5 x 1.5 {
       AREA { color: @railwaySymbolColor; }
     }
 
@@ -25,7 +28,7 @@ CONST
     }
 
   SYMBOL railway_tram_stop
-    RECTANGLE 0,0 2.25 x 2.25 {
+    CIRCLE 0,0 1.125 {
       AREA { color: @railwaySymbolColor; }
     }
 
@@ -41,6 +44,25 @@ CONST
   SYMBOL railway_turntable
     CIRCLE 0,0 1.125 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
     POLYGON -1.125,0 1.125,0 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+
+  SYMBOL railway_switch
+    POLYGON -1.125,0 0,0 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+    POLYGON 0,0 1.125,0.75 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+    POLYGON 0,0 1.125,-0.75 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+
+  SYMBOL railway_signal
+    RECTANGLE -0.1,0.1 0.2 x 1.0 { AREA { color: @railwaySymbolColor; } }
+    CIRCLE 0,-0.4 0.5 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+
+  SYMBOL railway_buffer_stop
+    RECTANGLE -0.15,-1.125 0.3 x 2.25 { AREA { color: @railwaySymbolColor; } }
+    RECTANGLE -1.125,-0.75 2.25 x 0.3 { AREA { color: @railwaySymbolColor; } }
+
+  SYMBOL railway_milestone
+    RECTANGLE -0.5,-0.5 1 x 1 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
+
+  SYMBOL railway_stop
+    CIRCLE 0,0 0.5 { AREA.BORDER { color: @railwaySymbolColor; width: 0.169mm; } }
 
 STYLE
 
@@ -65,12 +87,17 @@ STYLE
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 2.5m;}
      [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
-     [TYPE railway_narrow_gauge, railway_preserved] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_narrow_gauge, railway_preserved, railway_miniature] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
      [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
        WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
      }
+
+     [TYPE railway_construction] WAY {color: #939393; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+     [TYPE railway_proposed] WAY {color: #b3b3b3; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
+     [TYPE railway_platform_edge] WAY {color: #b3b3b3; displayWidth: 0.1mm; width: 1m;}
+     [TYPE railway_yard] AREA { color: #dcdcc8; }
    }
 
    [MAG closer-] {
@@ -78,6 +105,7 @@ STYLE
            railway_light_rail,
            railway_narrow_gauge,
            railway_preserved,
+           railway_miniature,
            railway_funicular
          SIZE 5m 0.25mm:3px<] {
        [FEATURE Tunnel] {
@@ -109,6 +137,16 @@ STYLE
      [TYPE railway_crossing] NODE.ICON { symbol: railway_crossing;}
      [TYPE railway_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
      [TYPE railway_turntable] NODE.ICON { symbol: railway_turntable;}
+
+     [TYPE railway_switch] NODE.ICON { symbol: railway_switch;}
+     [TYPE railway_signal] NODE.ICON { symbol: railway_signal;}
+     [TYPE railway_buffer_stop] NODE.ICON { symbol: railway_buffer_stop;}
+     [TYPE railway_milestone] NODE.ICON { symbol: railway_milestone;}
+     [TYPE railway_stop] NODE.ICON { symbol: railway_stop;}
+     [TYPE railway_tram_crossing] NODE.ICON { symbol: railway_crossing;}
+     [TYPE railway_tram_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
+     [TYPE railway_railway_crossing] NODE.ICON { symbol: railway_crossing;}
+     [TYPE railway_train_station_entrance] NODE.ICON { symbol: railway_subway_entrance;}
    }
 
    // Labels
@@ -124,6 +162,7 @@ STYLE
            railway_light_rail,
            railway_narrow_gauge,
            railway_preserved,
+           railway_miniature,
            railway_funicular,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
@@ -153,11 +192,11 @@ IF _building {
    }
 
    [MAG @specialBuildingMag-] {
-     [TYPE railway_station] AREA { color: @railwayStationColor; }
+     [TYPE railway_station, railway_workshop, railway_signal_box] AREA { color: @railwayStationColor; }
    }
 
    [MAG @labelSpecialBuildingMag-] {
-     [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor;}
+     [TYPE railway_station, railway_workshop, railway_signal_box] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor;}
    }
 }
 
