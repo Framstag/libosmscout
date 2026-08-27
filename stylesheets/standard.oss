@@ -59,8 +59,12 @@ ORDER WAYS
         highway_footway, highway_bridleway, highway_construction,
         leisure_track
   GROUP highway_steps, barrier_fence
-  GROUP waterway_weir, waterway_waterfall, route_ferry
-  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
+  GROUP waterway_weir, waterway_waterfall, waterway_rapids, waterway_sluice_gate,
+        waterway_floodgate, waterway_check_dam, waterway_floating_barrier,
+        waterway_flow_control, waterway_fish_pass, route_ferry
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream,
+        waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised,
+        waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway
 
 MODULE "include/land_sea_color"
 

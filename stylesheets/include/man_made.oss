@@ -1,6 +1,123 @@
 OSS
 CONST
   COLOR amenitySymbolColor          = darken(@amenityColor, 0.4);
+  COLOR barrierSymbolColor          = #555555;
+
+  SYMBOL barrier_kerb
+    // Low curb
+    RECTANGLE -1.2,-0.15 2.4 x 0.3 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_chain
+    // Posts
+    RECTANGLE -1.2,-0.5 0.2 x 1.0 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE 1.0,-0.5 0.2 x 1.0 { AREA { color: @barrierSymbolColor; } }
+    // Chain links
+    CIRCLE -0.6,0 0.12 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE -0.2,0 0.12 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0.2,0 0.12 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0.6,0 0.12 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_jersey_barrier
+    // Trapezoid block
+    POLYGON -1.2,0.3 1.2,0.3 0.9,-0.3 -0.9,-0.3 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_log
+    // Log
+    RECTANGLE -1.2,-0.25 2.4 x 0.5 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE -1.2,0 0.25 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 1.2,0 0.25 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_rope
+    // Posts
+    RECTANGLE -1.2,-0.5 0.2 x 1.0 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE 1.0,-0.5 0.2 x 1.0 { AREA { color: @barrierSymbolColor; } }
+    // Sagging rope
+    CIRCLE -0.5,0.15 0.1 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0,0.25 0.1 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0.5,0.15 0.1 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_avalanche_protection
+    // Fence rail
+    RECTANGLE -1.2,-0.15 2.4 x 0.2 { AREA { color: @barrierSymbolColor; } }
+    // Posts
+    RECTANGLE -0.8,0.1 0.15 x 0.6 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE 0.65,0.1 0.15 x 0.6 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_swing_gate
+    // Pivot
+    CIRCLE -1.0,0 0.15 { AREA { color: @barrierSymbolColor; } }
+    // Bar
+    RECTANGLE -0.85,-0.1 1.7 x 0.2 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_wicket_gate
+    // Fence posts
+    RECTANGLE -1.2,-0.4 0.2 x 0.8 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE 1.0,-0.4 0.2 x 0.8 { AREA { color: @barrierSymbolColor; } }
+    // Small gate
+    RECTANGLE -0.3,-0.3 0.6 x 0.6 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_kissing_gate
+    // Enclosure
+    RECTANGLE -0.9,-0.6 1.2 x 1.2 { AREA.BORDER { color: @barrierSymbolColor; width: 0.1mm; } }
+    // V-shaped gate
+    POLYGON 0.3,-0.6 0.9,0 0.3,0.6 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_height_restrictor
+    // Bar
+    RECTANGLE -1.2,-0.1 2.4 x 0.2 { AREA { color: @barrierSymbolColor; } }
+    // Height arrow
+    RECTANGLE -0.1,-0.5 0.2 x 0.4 { AREA { color: @barrierSymbolColor; } }
+    POLYGON 0,-0.5 -0.25,-0.7 0.25,-0.7 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_turnstile
+    // Center
+    CIRCLE 0,0 0.15 { AREA { color: @barrierSymbolColor; } }
+    // Rotating bars
+    RECTANGLE -0.9,-0.1 1.8 x 0.2 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_sliding_gate
+    // Gate
+    RECTANGLE -1.2,-0.3 1.6 x 0.6 { AREA { color: @barrierSymbolColor; } }
+    // Slide arrow
+    POLYGON 0.9,-0.5 0.6,-0.3 0.9,-0.1 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_hampshire_gate
+    // Posts
+    RECTANGLE -1.2,-0.3 0.2 x 0.6 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE 1.0,-0.3 0.2 x 0.6 { AREA { color: @barrierSymbolColor; } }
+    // Wire fence section
+    RECTANGLE -0.5,-0.2 1.0 x 0.1 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE -0.5,0.1 1.0 x 0.1 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_border_control
+    // Flag pole
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @barrierSymbolColor; } }
+    // Flag
+    POLYGON 0.1,-0.9 0.9,-0.7 0.1,-0.5 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_planter
+    // Box
+    RECTANGLE -0.8,0.1 1.6 x 0.5 { AREA { color: @barrierSymbolColor; } }
+    // Stem
+    RECTANGLE -0.1,-0.5 0.2 x 0.6 { AREA { color: @barrierSymbolColor; } }
+    // Foliage
+    CIRCLE 0,-0.6 0.3 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_debris
+    // Pile
+    CIRCLE -0.4,0.2 0.35 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0.1,0.25 0.3 { AREA { color: @barrierSymbolColor; } }
+    CIRCLE 0.5,0.15 0.25 { AREA { color: @barrierSymbolColor; } }
+
+  SYMBOL barrier_full_height_turnstile
+    // Cage
+    CIRCLE 0,0 0.9 { AREA.BORDER { color: @barrierSymbolColor; width: 0.1mm; } }
+    // Center
+    CIRCLE 0,0 0.15 { AREA { color: @barrierSymbolColor; } }
+    // Rotating bars
+    RECTANGLE -0.9,-0.1 1.8 x 0.2 { AREA { color: @barrierSymbolColor; } }
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @barrierSymbolColor; } }
 
   SYMBOL man_made_wastewater_plant
     CIRCLE 0,0 1.125 { AREA.BORDER { color: @amenitySymbolColor; width: 0.241mm; } }
@@ -13,6 +130,43 @@ CONST
 
   SYMBOL power_pole
     CIRCLE 0,0 1.125 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL power_catenary_mast
+    // Mast
+    RECTANGLE -0.15,-0.5 0.3 x 0.8 { AREA { color: @amenitySymbolColor; } }
+    // Cross-arm holding the contact wire
+    RECTANGLE -0.6,0.3 1.2 x 0.2 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL power_portal
+    // Left leg
+    RECTANGLE -0.7,-0.5 0.2 x 1.0 { AREA { color: @amenitySymbolColor; } }
+    // Right leg
+    RECTANGLE 0.5,-0.5 0.2 x 1.0 { AREA { color: @amenitySymbolColor; } }
+    // Crossarm
+    RECTANGLE -0.7,0.4 1.4 x 0.2 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL power_transformer
+    // Drum
+    RECTANGLE -0.6,-0.4 1.2 x 0.8 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0,0 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL power_switch
+    // Box
+    RECTANGLE -0.5,-0.35 1.0 x 0.7 { AREA { color: @amenitySymbolColor; } }
+    // Lever
+    POLYGON -0.1,-0.35 0.3,-0.6 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL power_plant
+    // Building
+    RECTANGLE -0.7,-0.3 1.4 x 0.6 { AREA { color: @amenitySymbolColor; } }
+    // Chimney
+    RECTANGLE 0.3,-0.6 0.25 x 0.4 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL power_heliostat
+    // Tilted mirror
+    POLYGON -0.6,0.1 0.6,-0.1 0.6,0.3 -0.6,0.5 { AREA { color: @amenitySymbolColor; } }
+    // Support
+    RECTANGLE -0.05,-0.5 0.1 x 0.5 { AREA { color: @amenitySymbolColor; } }
 
 STYLE
  // -------------------------------------------------------
@@ -34,8 +188,24 @@ STYLE
  [MAG close-] {
    [TYPE power_line] WAY { color: #6f6f6f; displayWidth: 0.08mm; width: 4m; }
    [TYPE power_minor_line] WAY { color: #6f6f6f; displayWidth: 0.05mm; width: 2m; }
+   [TYPE power_cable] WAY { color: #6f6f6f; displayWidth: 0.05mm; width: 2m; }
+   [TYPE power_circuit] WAY { color: #6f6f6f; displayWidth: 0.05mm; width: 2m; }
    [TYPE power_tower] NODE.ICON { symbol: power_tower; }
    [TYPE power_pole] NODE.ICON { symbol: power_pole; }
+   [TYPE power_catenary_mast] NODE.ICON { symbol: power_catenary_mast; }
+   [TYPE power_portal] NODE.ICON { symbol: power_portal; }
+   [TYPE power_transformer] NODE.ICON { symbol: power_transformer; }
+   [TYPE power_switch] NODE.ICON { symbol: power_switch; }
+   [TYPE power_plant] NODE.ICON { symbol: power_plant; }
+   [TYPE power_heliostat] NODE.ICON { symbol: power_heliostat; }
+   [TYPE power_catenary_portal,
+         power_terminal,
+         power_connection,
+         power_insulator,
+         power_compensator,
+         power_inverter,
+         power_switchgear,
+         power_converter] NODE.ICON { symbol: power_pole; }
 
    [TYPE man_made_pier] {
      [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
@@ -53,6 +223,8 @@ STYLE
 
    [TYPE barrier_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_retaining_wall] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
+   [TYPE barrier_kerb] WAY {color: lighten(@wallColor, 0.5); displayWidth: 0.12mm; width: 0.5m;}
+   [TYPE barrier_jersey_barrier] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
 
    [TYPE barrier_city_wall] WAY {color: @wallColor; displayWidth: 0.1mm; width: 0.5m;}
    [TYPE barrier_city_wall] WAY#decor {color: @wallColor;
@@ -83,6 +255,32 @@ STYLE
       WAY {color: #aaaaaa; displayWidth: 0.1mm;}
       AREA.BORDER {color: #aaaaaa; width: 0.1mm;}
    }
+
+   [TYPE barrier_guard_rail,
+         barrier_handrail,
+         barrier_log,
+         barrier_avalanche_protection] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+
+   [TYPE barrier_chain,
+         barrier_rope] WAY {color: #aaaaaa; displayWidth: 0.1mm; dash: 1,1;}
+
+   [TYPE barrier_kerb] NODE.ICON { symbol: barrier_kerb; }
+   [TYPE barrier_chain] NODE.ICON { symbol: barrier_chain; }
+   [TYPE barrier_jersey_barrier] NODE.ICON { symbol: barrier_jersey_barrier; }
+   [TYPE barrier_log] NODE.ICON { symbol: barrier_log; }
+   [TYPE barrier_rope] NODE.ICON { symbol: barrier_rope; }
+   [TYPE barrier_avalanche_protection] NODE.ICON { symbol: barrier_avalanche_protection; }
+   [TYPE barrier_swing_gate] NODE.ICON { symbol: barrier_swing_gate; }
+   [TYPE barrier_wicket_gate] NODE.ICON { symbol: barrier_wicket_gate; }
+   [TYPE barrier_kissing_gate] NODE.ICON { symbol: barrier_kissing_gate; }
+   [TYPE barrier_height_restrictor] NODE.ICON { symbol: barrier_height_restrictor; }
+   [TYPE barrier_turnstile] NODE.ICON { symbol: barrier_turnstile; }
+   [TYPE barrier_sliding_gate] NODE.ICON { symbol: barrier_sliding_gate; }
+   [TYPE barrier_hampshire_gate] NODE.ICON { symbol: barrier_hampshire_gate; }
+   [TYPE barrier_border_control] NODE.ICON { symbol: barrier_border_control; }
+   [TYPE barrier_planter] NODE.ICON { symbol: barrier_planter; }
+   [TYPE barrier_debris] NODE.ICON { symbol: barrier_debris; }
+   [TYPE barrier_full_height_turnstile] NODE.ICON { symbol: barrier_full_height_turnstile; }
  }
 
 END

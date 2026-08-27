@@ -8,7 +8,9 @@ ORDER WAYS
       aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP aeroway_runway, aeroway_taxiway
   GROUP route_ferry
-  GROUP waterway_river, waterway_canal
+  GROUP waterway_river, waterway_canal, waterway_flowline, waterway_tidal_channel,
+        waterway_drystream, waterway_pressurised, waterway_derelict_canal,
+        waterway_drainage_channel, waterway_link, waterway_fairway
   GROUP railway_subway
   GROUP highway_motorway, highway_motorway_link, highway_trunk, highway_trunk_link,
         highway_primary, highway_primary_link, highway_secondary, highway_secondary_link, 

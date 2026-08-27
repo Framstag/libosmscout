@@ -453,6 +453,31 @@ OSS
     CIRCLE 0,0 0.9 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
     RECTANGLE -0.2,0.75 0.4 x 0.25 { AREA { color: @shopSymbolColor; } }
     POLYGON -0.25,0.3 -0.1,0.1 0.1,0.3 0.25,0.1 { AREA.BORDER { color: @shopSymbolColor; width: 0.12mm; } }
+
+  SYMBOL shop_sports
+    // Soccer ball
+    CIRCLE 0,0 1.0 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    // Center pentagon
+    POLYGON 0,-0.32 0.30,-0.10 0.19,0.26 -0.19,0.26 -0.30,-0.10 { AREA { color: @shopSymbolColor; } }
+    // Seams from the pentagon corners to the rim
+    POLYGON 0,-0.32 0,-1.0 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+    POLYGON 0.30,-0.10 0.95,-0.32 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+    POLYGON 0.19,0.26 0.59,0.81 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+    POLYGON -0.19,0.26 -0.59,0.81 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+    POLYGON -0.30,-0.10 -0.95,-0.32 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+
+  SYMBOL shop_perfumery
+    // Perfume bottle with spray pump
+    POLYGON -0.6,0.2 0.6,0.2 0.85,1.0 -0.85,1.0 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.25,-0.35 0.5 x 0.55 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.1,-0.6 0.2 x 0.25 { AREA { color: @shopSymbolColor; } }
+    CIRCLE 0,-0.75 0.2 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.3,0.45 0.6 x 0.3 { AREA.BORDER { color: @shopSymbolColor; width: 0.1mm; } }
+
+  SYMBOL shop_shoes
+    // Shoe (side view, pointing right)
+    POLYGON -0.9,0.8 -0.9,0.35 -0.6,0.15 -0.35,0.4 -0.1,0.4 0.55,0.8 0.9,0.8 { AREA { color: @shopSymbolColor; } }
+    RECTANGLE -0.9,0.55 1.8 x 0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
   STYLE
     IF _building {
       [MAG @buildingMag-] {
@@ -1063,6 +1088,21 @@ OSS
       [TYPE shop_lighting, shop_lighting_building] {
         NODE.ICON { symbol: shop_lighting; }
         AREA.ICON { symbol: shop_lighting; }
+      }
+
+      [TYPE shop_sports, shop_sports_building] {
+        NODE.ICON { symbol: shop_sports; }
+        AREA.ICON { symbol: shop_sports; }
+      }
+
+      [TYPE shop_perfumery, shop_perfumery_building] {
+        NODE.ICON { symbol: shop_perfumery; }
+        AREA.ICON { symbol: shop_perfumery; }
+      }
+
+      [TYPE shop_shoes, shop_shoes_building] {
+        NODE.ICON { symbol: shop_shoes; }
+        AREA.ICON { symbol: shop_shoes; }
       }
 
     }END

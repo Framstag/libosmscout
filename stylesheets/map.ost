@@ -356,6 +356,112 @@ TYPES
       {Name, NameAlt, Width}
       IGNORESEALAND
 
+  TYPE waterway_flowline
+    = WAY ("waterway"=="flowline")
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
+
+  TYPE waterway_tidal_channel
+    = WAY ("waterway"=="tidal_channel")
+      {Name, NameAlt, Width, Tunnel}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
+
+  TYPE waterway_drystream
+    = WAY ("waterway"=="drystream")
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
+
+  TYPE waterway_pressurised
+    = WAY ("waterway"=="pressurised")
+      {Name, NameAlt, Width, Tunnel}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND PIN_WAY
+
+  TYPE waterway_derelict_canal
+    = WAY ("waterway"=="derelict_canal")
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
+
+  TYPE waterway_drainage_channel
+    = WAY ("waterway"=="drainage_channel")
+      {Name, NameAlt, Width}
+      OPTIMIZE_LOW_ZOOM IGNORESEALAND
+
+  TYPE waterway_link
+    = WAY ("waterway"=="link")
+      {Name, NameAlt, Width}
+      IGNORESEALAND PIN_WAY
+
+  TYPE waterway_fairway
+    = WAY ("waterway"=="fairway")
+      {Name, NameAlt, Width}
+      IGNORESEALAND PIN_WAY
+
+  TYPE waterway_fish_pass
+    = WAY ("waterway"=="fish_pass")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_fuel
+    = NODE AREA ("waterway"=="fuel")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE waterway_water_point
+    = NODE ("waterway"=="water_point")
+      {Name, NameAlt}
+      POI
+
+  TYPE waterway_sanitary_dump_station
+    = NODE AREA ("waterway"=="sanitary_dump_station")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE waterway_access_point
+    = NODE ("waterway"=="access_point")
+      {Name, NameAlt}
+      POI
+
+  TYPE waterway_milestone
+    = NODE ("waterway"=="milestone")
+      {Name, Ref}
+      POI
+
+  TYPE waterway_rapids
+    = NODE WAY AREA ("waterway"=="rapids")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_sluice_gate
+    = NODE WAY AREA ("waterway"=="sluice_gate")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_floodgate
+    = NODE WAY AREA ("waterway"=="floodgate")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_check_dam
+    = NODE WAY ("waterway"=="check_dam")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_floating_barrier
+    = NODE WAY ("waterway"=="floating_barrier")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_flow_control
+    = NODE WAY ("waterway"=="flow_control")
+      {Name, NameAlt, Width}
+      IGNORESEALAND
+
+  TYPE waterway_stream_end
+    = NODE ("waterway"=="stream_end")
+
+  TYPE waterway_soakhole
+    = NODE ("waterway"=="soakhole")
+
   //
   // Railways and assorted
   //
@@ -2456,21 +2562,21 @@ TYPES
       GROUP amenity
 
   // Religious
-  TYPE temple_building
+  TYPE religion_temple_building
     = AREA ("amenity"=="place_of_worship" AND
             "building"=="temple")
       {Name, NameAlt}
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE shrine_building
+  TYPE religion_shrine_building
     = AREA ("amenity"=="place_of_worship" AND
             "building"=="shrine")
       {Name, NameAlt}
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE christian_church_building
+  TYPE religion_christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
             "building"=="church")
@@ -2478,7 +2584,7 @@ TYPES
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE christian_cathedral_building
+  TYPE religion_christian_cathedral_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
             "building"=="cathedral")
@@ -2486,7 +2592,7 @@ TYPES
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE christian_chapel_building
+  TYPE religion_christian_chapel_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="christian" AND
             "building"=="chapel")
@@ -2494,14 +2600,216 @@ TYPES
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE christian_worship
+  TYPE religion_christian
     = NODE ("amenity"=="place_of_worship" AND
             "religion"=="christian")
       {Name, NameAlt}
       ADDRESS POI
       GROUP religious, routingPOI
 
-  TYPE jewish_synagogue_building
+  // Worship nodes per religion. Values from the OSM Key:religion wiki
+  // (all documented values), plus taginfo values with usage >= 0.09%.
+  // "none" is omitted as it is discouraged (irreligious use).
+  // All religions may be mapped on nodes and areas; areas are covered by
+  // the *_building types above and religion_building below.
+
+  TYPE religion_jewish
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="jewish")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_muslim
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="muslim")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_buddhist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="buddhist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_hindu
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="hindu")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_shinto
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="shinto")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_taoist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="taoist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_sikh
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="sikh")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_jain
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="jain")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_pagan
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="pagan")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_zoroastrian
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="zoroastrian")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_chinese_folk
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="chinese_folk")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_multifaith
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="multifaith")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_bahai
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="bahai")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_confucian
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="confucian")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_vietnamese_folk
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="vietnamese_folk")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_ancestor
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="ancestor")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_animist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="animist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_antoinist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="antoinist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_benzhu
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="benzhu")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_caodaism
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="caodaism")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_shamanic
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="shamanic")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_scientologist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="scientologist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_self_realization_fellowship
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="self-realization_fellowship")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_spiritualist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="spiritualist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_tenrikyo
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="tenrikyo")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_unitarian_universalist
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="unitarian_universalist")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_voodoo
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="voodoo")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_yazidi
+    = NODE ("amenity"=="place_of_worship" AND
+            "religion"=="yazidi")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP religious, routingPOI
+
+  TYPE religion_jewish_synagogue_building
     = AREA ("amenity"=="place_of_worship" AND
             "religion"=="jewish" AND
             "building"=="synagogue")
@@ -2509,15 +2817,15 @@ TYPES
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE muslim_mosque_building
+  TYPE religion_muslim_mosque_building
     = AREA ("amenity"=="place_of_worship" AND
-            "religion"=="muslin" AND
+            "religion"=="muslim" AND
             "building"=="mosque")
       {Name, NameAlt}
       ADDRESS POI
       GROUP religious, building, routingPOI
 
-  TYPE worship_building
+  TYPE religion_building
     = AREA ("amenity"=="place_of_worship" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
@@ -6669,7 +6977,55 @@ TYPES
     = NODE AREA ("power"=="generator")
       ADDRESS
 
-  // TODO: power_plant, see: http://wiki.openstreetmap.org/wiki/Tag:power%3Dplant
+  TYPE power_catenary_mast
+    = NODE ("power"=="catenary_mast")
+
+  TYPE power_portal
+    = NODE ("power"=="portal")
+
+  TYPE power_transformer
+    = NODE ("power"=="transformer")
+
+  TYPE power_switch
+    = NODE ("power"=="switch")
+
+  TYPE power_terminal
+    = NODE ("power"=="terminal")
+
+  TYPE power_insulator
+    = NODE ("power"=="insulator")
+
+  TYPE power_connection
+    = NODE ("power"=="connection")
+
+  TYPE power_catenary_portal
+    = NODE ("power"=="catenary_portal")
+
+  TYPE power_cable
+    = WAY ("power"=="cable")
+
+  TYPE power_circuit
+    = WAY ("power"=="circuit")
+
+  TYPE power_plant
+    = NODE AREA ("power"=="plant")
+      {Name, NameAlt}
+      ADDRESS
+
+  TYPE power_heliostat
+    = NODE AREA ("power"=="heliostat")
+
+  TYPE power_compensator
+    = NODE AREA ("power"=="compensator")
+
+  TYPE power_inverter
+    = NODE AREA ("power"=="inverter")
+
+  TYPE power_switchgear
+    = NODE AREA ("power"=="switchgear")
+
+  TYPE power_converter
+    = NODE AREA ("power"=="converter")
 
   //
   // Regions, locations, cities stuff
@@ -6843,6 +7199,38 @@ TYPES
     = WAY AREA ("barrier"=="city_wall" OR "historic"=="citywalls")
       {Name, NameAlt, Width}
 
+  TYPE barrier_kerb
+    = NODE WAY ("barrier"=="kerb")
+      IGNORESEALAND
+
+  TYPE barrier_guard_rail
+    = WAY ("barrier"=="guard_rail")
+      IGNORESEALAND
+
+  TYPE barrier_handrail
+    = WAY ("barrier"=="handrail")
+      IGNORESEALAND
+
+  TYPE barrier_chain
+    = NODE WAY ("barrier"=="chain")
+      IGNORESEALAND
+
+  TYPE barrier_jersey_barrier
+    = NODE WAY ("barrier"=="jersey_barrier")
+      IGNORESEALAND
+
+  TYPE barrier_log
+    = NODE WAY ("barrier"=="log")
+      IGNORESEALAND
+
+  TYPE barrier_rope
+    = NODE WAY ("barrier"=="rope")
+      IGNORESEALAND
+
+  TYPE barrier_avalanche_protection
+    = NODE WAY AREA ("barrier"=="avalanche_protection")
+      IGNORESEALAND
+
   TYPE barrier_bollard
     IGNORE
     = NODE WAY ("barrier"=="bollard")
@@ -6886,6 +7274,50 @@ TYPES
   TYPE barrier_kent_carriage_gate
     IGNORE
     = NODE ("barrier"=="kent_carriage_gate")
+
+  TYPE barrier_swing_gate
+    IGNORE
+    = NODE ("barrier"=="swing_gate")
+
+  TYPE barrier_wicket_gate
+    IGNORE
+    = NODE ("barrier"=="wicket_gate")
+
+  TYPE barrier_kissing_gate
+    IGNORE
+    = NODE ("barrier"=="kissing_gate")
+
+  TYPE barrier_height_restrictor
+    IGNORE
+    = NODE ("barrier"=="height_restrictor")
+
+  TYPE barrier_turnstile
+    IGNORE
+    = NODE ("barrier"=="turnstile")
+
+  TYPE barrier_sliding_gate
+    IGNORE
+    = NODE ("barrier"=="sliding_gate")
+
+  TYPE barrier_hampshire_gate
+    IGNORE
+    = NODE ("barrier"=="hampshire_gate")
+
+  TYPE barrier_border_control
+    IGNORE
+    = NODE ("barrier"=="border_control")
+
+  TYPE barrier_planter
+    IGNORE
+    = NODE ("barrier"=="planter")
+
+  TYPE barrier_debris
+    IGNORE
+    = NODE ("barrier"=="debris")
+
+  TYPE barrier_full_height_turnstile
+    IGNORE
+    = NODE ("barrier"=="full-height_turnstile")
 
   // Types we currently ignore
 
