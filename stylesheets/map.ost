@@ -5735,6 +5735,79 @@ TYPES
       {Name, NameAlt}
       ADDRESS
 
+  TYPE military_ammunition
+    = NODE AREA ("military"=="ammunition")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE military_base
+    = NODE AREA ("military"=="base")
+      {Name, NameAlt}
+      ADDRESS
+
+  TYPE military_cannon
+    = NODE ("military"=="cannon")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_checkpoint
+    = NODE ("military"=="checkpoint")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_cordon
+    = WAY ("military"=="cordon")
+      {Name, NameAlt}
+
+  TYPE military_embrasure
+    = NODE ("military"=="embrasure")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_nuclear_explosion_site
+    = NODE AREA ("military"=="nuclear_explosion_site")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE military_obstacle_course
+    = WAY AREA ("military"=="obstacle_course")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_office
+    = NODE AREA ("military"=="office")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP office, routingPOI
+
+  TYPE military_police
+    = NODE AREA ("military"=="police")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_radar
+    = NODE AREA ("military"=="radar")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_road
+    = WAY ("military"=="road")
+      {Name, NameAlt}
+
+  TYPE military_shelter
+    = WAY AREA ("military"=="shelter")
+      {Name, NameAlt}
+      POI
+
+  TYPE military_training_area
+    = AREA ("military"=="training_area")
+      {Name, NameAlt}
+      MERGE_AREAS
+
+  TYPE military_trench
+    = NODE WAY ("military"=="trench")
+      {Name, NameAlt}
+
   //
   // Sport
   // INFO: We expect that only the "node" variant will appear, since the area version should be
