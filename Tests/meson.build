@@ -499,6 +499,44 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
                                  dependencies: deps,
                                  link_with: links,
                                  install: true)
+
+    performanceTestDrivers = ['noop', 'none']
+
+    if buildMapCairo
+      performanceTestDrivers += 'cairo'
+    endif
+
+    if buildMapQt
+      performanceTestDrivers += 'Qt'
+    endif
+
+    if buildMapAgg
+      performanceTestDrivers += 'agg'
+    endif
+
+    if buildMapOpenGL and glfwDep.found() and ftDep.found()
+      performanceTestDrivers += 'opengl'
+    endif
+
+    if buildMapGDI
+      performanceTestDrivers += 'gdi'
+    endif
+
+    foreach driver : performanceTestDrivers
+      foreach stylesheet : stylesheets
+        test('PerformanceTest-'+driver+'-'+stylesheet,
+             PerformanceTest,
+             args : ['--debug',
+                     '--driver', driver,
+                     '--icons', meson.current_source_dir() + '/../libosmscout/data/icons/svg/standard',
+                     '--font', meson.current_source_dir() + '/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf',
+                     '--shaders', meson.current_source_dir() + '/../libosmscout-map-opengl/data/shaders',
+                     meson.current_source_dir() + '/data/testregion',
+                     meson.current_source_dir() + '/../stylesheets/' + stylesheet,
+                     '50.3806', '14.5418', '50.3806', '14.5418'],
+             timeout: 300)
+      endforeach
+    endforeach
   endif
 endif
 
