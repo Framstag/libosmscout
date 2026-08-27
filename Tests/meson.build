@@ -523,6 +523,11 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     endif
 
     foreach driver : performanceTestDrivers
+      testEnv = []
+      if driver == 'Qt'
+        # Qt tests need a platform plugin; offscreen works without X server (see AGENTS.md)
+        testEnv += 'QT_QPA_PLATFORM=offscreen'
+      endif
       foreach stylesheet : stylesheets
         test('PerformanceTest-'+driver+'-'+stylesheet,
              PerformanceTest,
@@ -534,6 +539,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
                      meson.current_source_dir() + '/data/testregion',
                      meson.current_source_dir() + '/../stylesheets/' + stylesheet,
                      '50.3806', '14.5418', '50.3806', '14.5418'],
+             env: testEnv,
              timeout: 300)
       endforeach
     endforeach
