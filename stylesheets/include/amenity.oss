@@ -5,6 +5,106 @@ OSS
   //
 
   CONST
+    COLOR hospitalSymbolColor         = #da0092;
+    COLOR pharmacySymbolColor         = #da0092;
+    COLOR postSymbolColor             = #e8f000;
+
+    // Base colors used by the amenity symbols and area fills below
+    IF daylight {
+      COLOR fireStationColor         = #ff6b6b;
+    }
+    ELSE {
+      COLOR fireStationColor         = darken(#ff6b6b, 0.5);
+    }
+
+    IF daylight {
+      COLOR entertainmentColor        = #dc9cdc;
+    }
+    ELSE {
+      COLOR entertainmentColor        = darken(#dc9cdc, 0.5);
+    }
+
+    IF daylight {
+      COLOR civicColor                = #c9c9c9;
+    }
+    ELSE {
+      COLOR civicColor                = darken(#c9c9c9, 0.5);
+    }
+
+    IF daylight {
+      COLOR socialColor               = #f2cdcd;
+    }
+    ELSE {
+      COLOR socialColor               = darken(#f2cdcd, 0.5);
+    }
+
+    IF daylight {
+      COLOR marketColor               = #f3c3c3;
+    }
+    ELSE {
+      COLOR marketColor               = darken(#f3c3c3, 0.5);
+    }
+
+    IF daylight {
+      COLOR iceCreamColor             = #f6a0bb;
+    }
+    ELSE {
+      COLOR iceCreamColor             = darken(#f6a0bb, 0.5);
+    }
+
+    IF daylight {
+      COLOR beerGardenColor           = #f2c78f;
+    }
+    ELSE {
+      COLOR beerGardenColor           = darken(#f2c78f, 0.5);
+    }
+
+    IF daylight {
+      COLOR carWashColor              = #a5cdf0;
+    }
+    ELSE {
+      COLOR carWashColor              = darken(#a5cdf0, 0.5);
+    }
+
+    COLOR waterAmenityColor           = @waterColor;
+
+    IF daylight {
+      COLOR huntingStandColor         = #a08f6f;
+    }
+    ELSE {
+      COLOR huntingStandColor         = darken(#a08f6f, 0.5);
+    }
+
+    COLOR fireStationBorderColor     = darken(@fireStationColor, 0.3);
+    COLOR fireStationLabelColor      = darken(@fireStationColor, 0.5);
+
+    COLOR entertainmentBorderColor    = darken(@entertainmentColor, 0.3);
+    COLOR entertainmentLabelColor     = darken(@entertainmentColor, 0.5);
+
+    COLOR civicBorderColor            = darken(@civicColor, 0.3);
+    COLOR civicLabelColor             = darken(@civicColor, 0.5);
+
+    COLOR socialBorderColor           = darken(@socialColor, 0.3);
+    COLOR socialLabelColor            = darken(@socialColor, 0.5);
+
+    COLOR marketBorderColor           = darken(@marketColor, 0.3);
+    COLOR marketLabelColor            = darken(@marketColor, 0.5);
+
+    COLOR iceCreamBorderColor         = darken(@iceCreamColor, 0.3);
+    COLOR iceCreamLabelColor          = darken(@iceCreamColor, 0.5);
+
+    COLOR beerGardenBorderColor       = darken(@beerGardenColor, 0.3);
+    COLOR beerGardenLabelColor        = darken(@beerGardenColor, 0.5);
+
+    COLOR carWashBorderColor          = darken(@carWashColor, 0.3);
+    COLOR carWashLabelColor           = darken(@carWashColor, 0.5);
+
+    COLOR waterAmenityBorderColor     = darken(@waterAmenityColor, 0.3);
+    COLOR waterAmenityLabelColor      = darken(@waterAmenityColor, 0.5);
+
+    COLOR huntingStandBorderColor     = darken(@huntingStandColor, 0.3);
+    COLOR huntingStandLabelColor      = darken(@huntingStandColor, 0.5);
+
     IF daylight {
       COLOR amenityBuildingColor     = #d9b8b8;
     }
@@ -29,11 +129,257 @@ OSS
     }
     COLOR parkingBuildingBorderColor = darken(@parkingBuildingColor, 0.3);
 
+  SYMBOL amenity
+    RECTANGLE 0,0 1 x 1 {
+      AREA {color: @amenitySymbolColor; }
+    }
+
+  SYMBOL amenity_hospital
+    CIRCLE 0,0 2.0 {
+      AREA.BORDER {color: @hospitalSymbolColor; width: 0.2mm; }
+    }
+    // Horizontal bar
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
+      AREA { color: @hospitalSymbolColor; }
+    }
+    // Vertical bar
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
+      AREA { color: @hospitalSymbolColor; }
+    }
+
+  SYMBOL amenity_pharmacy
+    // Box
+    RECTANGLE -1,-1 2 x 2 {
+      AREA.BORDER {color: @pharmacySymbolColor; width: 0.2mm; }
+    }
+    // Horizontal bar
+    RECTANGLE -0.75,-0.25 1.5 x 0.5 {
+      AREA { color: @pharmacySymbolColor; }
+    }
+    // Vertical bar
+    RECTANGLE -0.25,-0.75 0.5 x 1.5 {
+      AREA {color: @pharmacySymbolColor; }
+    }
+
+  SYMBOL amenity_parking
+    // Parking sign: blue rectangular box with white "P" (negative y = up)
+    // RECTANGLE (x,y,w,h) = top-left corner at (x,y)
+    RECTANGLE -1.1,-1.3 2.2 x 2.6 {
+      AREA { color: #4bb2da; }
+      AREA.BORDER { color: darken(#4bb2da, 0.3); width: 0.1mm; }
+    }
+    RECTANGLE -0.75,-1.0 0.35 x 2.0 {
+      AREA { color: #ffffff; }
+    }
+    CIRCLE 0.15,-0.3 0.6 {
+      AREA.BORDER { color: #ffffff; width: 0.35mm; }
+    }
+
+  SYMBOL amenity_post_box
+    RECTANGLE 0,0 1 x 1 {
+      AREA { color: @postSymbolColor; }
+    }
+
+  SYMBOL amenity_post_office
+    RECTANGLE 0,0 2 x 2 {
+      AREA { color: @postSymbolColor; }
+    }
+
+  SYMBOL amenity_drinking_water
+    CIRCLE 0,0 0.4 {
+      AREA {color: @waterLabelColor; }
+    }
+
+  SYMBOL amenity_bicycle_parking
+    CIRCLE 0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    CIRCLE -0.5,0.3 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    POLYGON 0.5,0.3 -0.5,0.3 0.3,-0.4 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+
+  SYMBOL amenity_toilets
+    RECTANGLE -0.5,-0.6 1 x 1.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    CIRCLE 0,0 0.25 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+
+  SYMBOL amenity_shelter
+    POLYGON -0.9,0.3 0.9,0.3 0,-0.7 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+
+  SYMBOL amenity_atm
+    RECTANGLE -0.7,-0.5 1.4 x 1.0 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    RECTANGLE -0.4,-0.2 0.8 x 0.4 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL amenity_fire_station
+    // Red square with a white flame
+    RECTANGLE -1.0,-1.0 2.0 x 2.0 {
+      AREA { color: @fireStationColor; }
+      AREA.BORDER { color: darken(@fireStationColor, 0.3); width: 0.1mm; }
+    }
+    POLYGON 0,-0.7 -0.35,-0.1 -0.15,-0.1 -0.2,0.6 0.2,0.6 0.15,-0.1 0.35,-0.1 {
+      AREA { color: #ffffff; }
+    }
+
+  SYMBOL amenity_telephone
+    // Handset
+    CIRCLE -0.55,0 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE 0.55,0 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.55,-0.12 1.1 x 0.24 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL amenity_fountain
+    // Basin with water
+    CIRCLE 0,0 0.7 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0,0 0.7 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
+    CIRCLE 0,0 0.25 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_cinema
+    // Film strip with sprocket holes
+    RECTANGLE -0.9,-0.6 1.8 x 1.2 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.7,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE -0.7,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE -0.3,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE -0.3,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE 0.1,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE 0.1,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE 0.5,-0.4 0.18 x 0.18 { AREA { color: #ffffff; } }
+    RECTANGLE 0.5,0.22 0.18 x 0.18 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_theatre
+    // Two drama masks under a curtain
+    POLYGON -0.9,-0.15 0.9,-0.15 0,-0.8 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE -0.45,0.3 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE 0.45,0.3 0.35 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+
+  SYMBOL amenity_townhall
+    // Building with roof and clock
+    POLYGON -0.9,-0.3 0.9,-0.3 0,-0.9 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.8,-0.3 1.6 x 1.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE 0,0.15 0.2 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+
+  SYMBOL amenity_marketplace
+    // Market stall with awning
+    POLYGON -0.9,-0.1 0.9,-0.1 0.6,-0.55 -0.6,-0.55 { AREA { color: @marketColor; } }
+    RECTANGLE -0.25,-0.1 0.5 x 0.65 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+
+  SYMBOL amenity_prison
+    // Building with bars
+    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA { color: @civicColor; } }
+    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA.BORDER { color: darken(@civicColor, 0.3); width: 0.1mm; } }
+    RECTANGLE -0.55,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
+    RECTANGLE -0.2,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
+    RECTANGLE 0.15,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
+    RECTANGLE 0.5,-0.5 0.14 x 1.0 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_bbq
+    // Grill with legs
+    RECTANGLE -0.7,-0.2 1.4 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.5,-0.2 0.9 x 0.12 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.35,0.3 0.1 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+    RECTANGLE 0.25,0.3 0.1 x 0.5 { AREA.BORDER { color: @amenitySymbolColor; width: 0.12mm; } }
+
+  SYMBOL amenity_hunting_stand
+    // Elevated platform on legs
+    RECTANGLE -0.7,-0.8 1.4 x 0.3 { AREA { color: @huntingStandColor; } }
+    RECTANGLE -0.6,-0.5 0.12 x 1.1 { AREA.BORDER { color: @huntingStandColor; width: 0.15mm; } }
+    RECTANGLE 0.48,-0.5 0.12 x 1.1 { AREA.BORDER { color: @huntingStandColor; width: 0.15mm; } }
+
+  SYMBOL amenity_ice_cream
+    // Ice cream cone
+    CIRCLE 0,-0.45 0.4 { AREA { color: @iceCreamColor; } }
+    POLYGON -0.4,-0.1 0.4,-0.1 0,0.85 { AREA { color: #d9a05b; } }
+
+  SYMBOL amenity_car_wash
+    // Car with wheels
+    RECTANGLE -0.8,-0.35 1.6 x 0.5 { AREA { color: @carWashColor; } }
+    RECTANGLE -0.45,-0.7 0.9 x 0.35 { AREA { color: @carWashColor; } }
+    CIRCLE -0.45,-0.1 0.22 { AREA { color: #ffffff; } }
+    CIRCLE 0.45,-0.1 0.22 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_parcel_locker
+    // Locker with parcel slots
+    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA { color: @postSymbolColor; } }
+    RECTANGLE -0.8,-0.7 1.6 x 1.4 { AREA.BORDER { color: darken(@postSymbolColor, 0.3); width: 0.1mm; } }
+    RECTANGLE -0.6,-0.55 1.2 x 0.45 { AREA { color: #ffffff; } }
+    RECTANGLE -0.6,0.1 1.2 x 0.45 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_shower
+    // Shower head with drops
+    RECTANGLE -0.1,-0.75 0.2 x 0.5 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0,-0.15 0.3 { AREA.BORDER { color: @waterAmenityColor; width: 0.15mm; } }
+    RECTANGLE -0.15,0.15 0.08 x 0.3 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -0.05,0.3 0.08 x 0.25 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE 0.08,0.2 0.08 x 0.28 { AREA { color: @waterAmenityColor; } }
+
+  SYMBOL amenity_public_bath
+    // Bathtub
+    RECTANGLE -0.9,-0.35 1.8 x 0.7 { AREA { color: @waterAmenityColor; } }
+    RECTANGLE -0.9,-0.35 1.8 x 0.7 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
+    CIRCLE -0.75,0.1 0.14 { AREA { color: @waterAmenityColor; } }
+    CIRCLE 0.75,0.1 0.14 { AREA { color: @waterAmenityColor; } }
+
+  SYMBOL amenity_university
+    // Graduation cap
+    POLYGON -0.8,-0.15 0.8,-0.15 0,-0.75 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE -0.75,-0.2 1.5 x 0.15 { AREA { color: @amenitySymbolColor; } }
+    RECTANGLE 0.55,-0.2 0.1 x 0.75 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.55,0.65 0.12 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL amenity_motorcycle_parking
+    // Motorcycle: wheels with body
+    CIRCLE -0.55,-0.1 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    CIRCLE 0.55,-0.1 0.28 { AREA.BORDER { color: @amenitySymbolColor; width: 0.15mm; } }
+    POLYGON -0.55,-0.1 0.55,-0.1 0.3,-0.75 -0.2,-0.75 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL amenity_nightclub
+    // Music note
+    CIRCLE -0.2,0.4 0.3 { AREA { color: @entertainmentColor; } }
+    RECTANGLE -0.02,-0.55 0.18 x 1.0 { AREA { color: @entertainmentColor; } }
+    POLYGON 0.16,-0.55 0.7,-0.4 0.16,-0.1 { AREA { color: @entertainmentColor; } }
+
+  SYMBOL amenity_community_centre
+    // House with people
+    POLYGON -0.85,-0.2 0.85,-0.2 0,-0.85 { AREA { color: @socialColor; } }
+    RECTANGLE -0.85,-0.2 1.7 x 1.0 { AREA { color: @socialColor; } }
+    CIRCLE -0.35,0.55 0.2 { AREA { color: #ffffff; } }
+    CIRCLE 0.35,0.55 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL amenity_veterinary
+    // Paw print
+    CIRCLE 0,-0.15 0.35 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE -0.55,0.3 0.18 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE -0.2,0.55 0.18 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.2,0.55 0.18 { AREA { color: @amenitySymbolColor; } }
+    CIRCLE 0.55,0.3 0.18 { AREA { color: @amenitySymbolColor; } }
+
+  SYMBOL amenity_boat_rental
+    // Boat hull
+    POLYGON -0.85,-0.3 0.85,-0.3 0.55,0.5 -0.55,0.5 { AREA { color: @waterAmenityColor; } }
+    POLYGON -0.85,-0.3 0.85,-0.3 0.55,0.5 -0.55,0.5 { AREA.BORDER { color: darken(@waterAmenityColor, 0.3); width: 0.1mm; } }
+
+  SYMBOL amenity_biergarten
+    // Beer mug
+    RECTANGLE -0.55,-0.7 1.1 x 1.2 { AREA { color: @beerGardenColor; } }
+    RECTANGLE -0.55,-0.7 1.1 x 1.2 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.1mm; } }
+    RECTANGLE -0.45,-0.6 0.9 x 0.3 { AREA { color: #ffffff; } }
+    RECTANGLE 0.55,-0.55 0.3 x 0.5 { AREA.BORDER { color: darken(@beerGardenColor, 0.3); width: 0.15mm; } }
+
+
+
   STYLE
     [MAG @specialBuildingMag-] {
       [TYPE amenity_hospital_building] {
         AREA { color: @hospitalBuildingColor;}
         AREA.BORDER { color: @hospitalBuildingBorderColor; width: 0.1mm; }
+      }
+
+      // Health related buildings
+      [TYPE amenity_clinic_building,
+            amenity_dentist_building,
+            amenity_veterinary_building,
+            amenity_health_post] {
+        AREA { color: @hospitalBuildingColor;}
+        AREA.BORDER { color: @hospitalBuildingBorderColor; width: 0.1mm; }
+      }
+
+      [TYPE amenity_fire_station_building] {
+        AREA { color: @fireStationColor;}
+        AREA.BORDER { color: @fireStationBorderColor; width: 0.1mm; }
       }
     }
 
@@ -41,7 +387,8 @@ OSS
       [MAG @buildingMag-] {
         // Amenity buildings
 
-        [TYPE amenity_post_office_building] {
+        [TYPE amenity_post_office_building,
+              amenity_post_depot_building] {
           AREA { color: @postBuildingColor; }
           AREA.BORDER { color: @postBuildingBorderColor; width: 0.1mm; }
         }
@@ -56,7 +403,37 @@ OSS
               amenity_restaurant_building,
               amenity_pub_building,
               amenity_bar_building,
-              amenity_school_building] {
+              amenity_school_building,
+              amenity_college_building,
+              amenity_university_building,
+              amenity_childcare_building,
+              amenity_music_school_building,
+              amenity_language_school_building,
+              amenity_prep_school_building,
+              amenity_driving_school_building,
+              amenity_research_institute_building,
+              amenity_dojo_building,
+              amenity_car_rental_building,
+              amenity_bureau_de_change_building,
+              amenity_social_facility_building,
+              amenity_arts_centre_building,
+              amenity_cinema_building,
+              amenity_theatre_building,
+              amenity_community_centre_building,
+              amenity_conference_centre_building,
+              amenity_events_venue_building,
+              amenity_nightclub_building,
+              amenity_casino_building,
+              amenity_social_centre_building,
+              amenity_townhall_building,
+              amenity_courthouse_building,
+              amenity_prison_building,
+              amenity_ranger_station_building,
+              amenity_crematorium_building,
+              amenity_funeral_hall_building,
+              amenity_monastery_building,
+              amenity_public_bath_building,
+              amenity_internet_cafe_building] {
           AREA { color: @amenityBuildingColor; }
           AREA.BORDER { color: @amenityBuildingBorderColor; width: 0.1mm;}
         }
@@ -69,7 +446,13 @@ OSS
 
       [MAG @labelBuildingMag-] {
         [TYPE amenity_school_building,
-              amenity_school] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
+              amenity_school,
+              amenity_college_building,
+              amenity_college,
+              amenity_university_building,
+              amenity_university,
+              amenity_childcare_building,
+              amenity_childcare] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #000000; size: 0.9; priority: @labelPrioMajorBuilding; }
 
         [TYPE amenity,
               amenity_building,
@@ -97,7 +480,88 @@ OSS
               amenity_toilets,
               amenity_waste_disposal,
               amenity_shelter,
-              amenity_atm] {
+              amenity_atm,
+              amenity_biergarten,
+              amenity_food_court,
+              amenity_ice_cream,
+              amenity_college,
+              amenity_college_building,
+              amenity_university,
+              amenity_university_building,
+              amenity_childcare,
+              amenity_childcare_building,
+              amenity_music_school,
+              amenity_music_school_building,
+              amenity_language_school,
+              amenity_language_school_building,
+              amenity_prep_school,
+              amenity_prep_school_building,
+              amenity_dancing_school,
+              amenity_driving_school,
+              amenity_driving_school_building,
+              amenity_training,
+              amenity_research_institute,
+              amenity_research_institute_building,
+              amenity_dojo,
+              amenity_dojo_building,
+              amenity_bicycle_rental,
+              amenity_bicycle_repair_station,
+              amenity_motorcycle_parking,
+              amenity_car_rental,
+              amenity_car_rental_building,
+              amenity_car_sharing,
+              amenity_car_wash,
+              amenity_vehicle_inspection,
+              amenity_weighbridge,
+              amenity_parcel_locker,
+              amenity_boat_rental,
+              amenity_boat_storage,
+              amenity_public_bookcase,
+              amenity_bureau_de_change,
+              amenity_bureau_de_change_building,
+              amenity_money_transfer,
+              amenity_mobile_money_agent,
+              amenity_social_facility,
+              amenity_social_facility_building,
+              amenity_arts_centre,
+              amenity_arts_centre_building,
+              amenity_community_centre,
+              amenity_community_centre_building,
+              amenity_conference_centre,
+              amenity_conference_centre_building,
+              amenity_events_venue,
+              amenity_events_venue_building,
+              amenity_social_centre,
+              amenity_social_centre_building,
+              amenity_studio,
+              amenity_marketplace,
+              amenity_townhall,
+              amenity_townhall_building,
+              amenity_courthouse,
+              amenity_courthouse_building,
+              amenity_ranger_station,
+              amenity_ranger_station_building,
+              amenity_post_depot,
+              amenity_post_depot_building,
+              amenity_crematorium,
+              amenity_crematorium_building,
+              amenity_funeral_hall,
+              amenity_funeral_hall_building,
+              amenity_monastery,
+              amenity_monastery_building,
+              amenity_public_bath,
+              amenity_public_bath_building,
+              amenity_telephone,
+              amenity_shower,
+              amenity_waste_transfer_station,
+              amenity_animal_shelter,
+              amenity_animal_boarding,
+              amenity_animal_breeding,
+              amenity_hunting_stand,
+              amenity_internet_cafe,
+              amenity_internet_cafe_building,
+              amenity_driver_training,
+              amenity_lavoir] {
           NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
           AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @amenityLabelColor; size: 0.9; priority: @labelPrioAmenity; }
         }
@@ -126,4 +590,442 @@ OSS
         AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
       }
     }
+
+    [MAG @labelSpecialBuildingMag-] {
+      [TYPE amenity_hospital_building,
+            amenity_hospital] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 1.0; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_clinic_building,
+            amenity_clinic,
+            amenity_dentist_building,
+            amenity_dentist,
+            amenity_veterinary_building,
+            amenity_veterinary,
+            amenity_health_post] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: #da0092; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_fire_station_building,
+            amenity_fire_station] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @fireStationLabelColor; size: 1.0; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @fireStationLabelColor; size: 1.0; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_cinema_building,
+            amenity_cinema,
+            amenity_theatre_building,
+            amenity_theatre,
+            amenity_arts_centre_building,
+            amenity_arts_centre,
+            amenity_nightclub_building,
+            amenity_nightclub,
+            amenity_casino_building,
+            amenity_casino,
+            amenity_gambling,
+            amenity_studio] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @entertainmentLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @entertainmentLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_townhall_building,
+            amenity_townhall,
+            amenity_courthouse_building,
+            amenity_courthouse,
+            amenity_prison_building,
+            amenity_prison] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @civicLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @civicLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_community_centre_building,
+            amenity_community_centre,
+            amenity_social_facility_building,
+            amenity_social_facility,
+            amenity_social_centre_building,
+            amenity_social_centre] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @socialLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @socialLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_post_depot_building,
+            amenity_post_depot,
+            amenity_parcel_locker] {
+        NODE.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @postLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_fountain,
+            amenity_shower,
+            amenity_public_bath_building,
+            amenity_public_bath] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @waterAmenityLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @waterAmenityLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_marketplace] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @marketLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @marketLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_ice_cream] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @iceCreamLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @iceCreamLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_biergarten] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @beerGardenLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @beerGardenLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_car_wash] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @carWashLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @carWashLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+
+      [TYPE amenity_hunting_stand] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @huntingStandLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @huntingStandLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+      }
+    }
+
+  [MAG city-] {
+    [TYPE amenity_grave_yard] AREA { color: #bde3cb; }
+  }
+
+  [MAG detail-] {
+    [TYPE amenity_grave_yard] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.8;}
+  }
+
+  [MAG detail-] {
+    // Special amenities
+    [TYPE amenity_post_office] AREA { color: @postColor; }
+
+    [TYPE amenity_hospital] {
+      AREA { color: @hospitalColor;}
+      AREA.BORDER { color: @hospitalBorderColor; width: 0.1mm; }
+    }
+
+    [TYPE amenity_taxi] AREA { color: #d2d2d2; }
+
+    // (Major) Amenities without special color
+   [TYPE amenity,
+         amenity_bank,
+         amenity_bus_station,
+         amenity_cafe,
+         amenity_fast_food,
+         amenity_fuel,
+         amenity_kindergarten,
+         amenity_library,
+         amenity_restaurant,
+         amenity_school,
+         amenity_bicycle_parking,
+         amenity_bicycle_parking_building,
+         amenity_biergarten,
+         amenity_food_court,
+         amenity_ice_cream,
+         amenity_college,
+         amenity_college_building,
+         amenity_university,
+         amenity_university_building,
+         amenity_childcare,
+         amenity_childcare_building,
+         amenity_music_school,
+         amenity_music_school_building,
+         amenity_language_school,
+         amenity_language_school_building,
+         amenity_prep_school,
+         amenity_prep_school_building,
+         amenity_dancing_school,
+         amenity_driving_school,
+         amenity_driving_school_building,
+         amenity_training,
+         amenity_research_institute,
+         amenity_research_institute_building,
+         amenity_dojo,
+         amenity_dojo_building,
+         amenity_bicycle_rental,
+         amenity_bicycle_repair_station,
+         amenity_motorcycle_parking,
+         amenity_car_rental,
+         amenity_car_rental_building,
+         amenity_car_sharing,
+         amenity_car_wash,
+         amenity_vehicle_inspection,
+         amenity_weighbridge,
+         amenity_parcel_locker,
+         amenity_boat_rental,
+         amenity_boat_storage,
+         amenity_public_bookcase,
+         amenity_bureau_de_change,
+         amenity_bureau_de_change_building,
+         amenity_money_transfer,
+         amenity_mobile_money_agent,
+         amenity_conference_centre,
+         amenity_conference_centre_building,
+         amenity_events_venue,
+         amenity_events_venue_building,
+         amenity_gambling,
+         amenity_studio,
+         amenity_ranger_station,
+         amenity_ranger_station_building,
+         amenity_crematorium,
+         amenity_crematorium_building,
+         amenity_funeral_hall,
+         amenity_funeral_hall_building,
+         amenity_internet_cafe,
+         amenity_internet_cafe_building,
+         amenity_driver_training,
+         amenity_lavoir,
+         amenity_waste_transfer_station,
+         amenity_animal_shelter,
+         amenity_animal_boarding,
+         amenity_animal_breeding] {
+     AREA { color: @amenityColor; }
+   }
+  }
+
+  [MAG close-] {
+    // (Minor) Amenities without special color
+    [TYPE amenity_atm,
+          amenity_recycling] {
+      AREA { color: @amenityColor; }
+    }
+  }
+
+    // Area fills for the special amenity types
+
+    [MAG detail-] {
+      [TYPE amenity_fire_station] AREA { color: @fireStationColor; }
+
+      // _building variants of the health types use @hospitalBuildingColor
+      // (see the @specialBuildingMag- rules above)
+      [TYPE amenity_clinic,
+            amenity_dentist,
+            amenity_veterinary,
+            amenity_health_post] AREA { color: @hospitalColor; }
+
+      [TYPE amenity_cinema,
+            amenity_cinema_building,
+            amenity_theatre,
+            amenity_theatre_building,
+            amenity_arts_centre,
+            amenity_arts_centre_building,
+            amenity_nightclub,
+            amenity_nightclub_building,
+            amenity_casino,
+            amenity_casino_building,
+            amenity_gambling,
+            amenity_studio] AREA { color: @entertainmentColor; }
+
+      [TYPE amenity_townhall,
+            amenity_townhall_building,
+            amenity_courthouse,
+            amenity_courthouse_building,
+            amenity_prison,
+            amenity_prison_building,
+            amenity_monastery,
+            amenity_monastery_building] AREA { color: @civicColor; }
+
+      [TYPE amenity_community_centre,
+            amenity_community_centre_building,
+            amenity_social_facility,
+            amenity_social_facility_building,
+            amenity_social_centre,
+            amenity_social_centre_building] AREA { color: @socialColor; }
+
+      [TYPE amenity_marketplace] AREA { color: @marketColor; }
+      [TYPE amenity_ice_cream] AREA { color: @iceCreamColor; }
+      [TYPE amenity_biergarten] AREA { color: @beerGardenColor; }
+      [TYPE amenity_car_wash] AREA { color: @carWashColor; }
+
+      [TYPE amenity_fountain,
+            amenity_shower,
+            amenity_public_bath,
+            amenity_public_bath_building] AREA { color: @waterAmenityColor; }
+
+      [TYPE amenity_hunting_stand] AREA { color: @huntingStandColor; }
+
+      [TYPE amenity_university,
+            amenity_university_building,
+            amenity_college,
+            amenity_college_building,
+            amenity_childcare,
+            amenity_childcare_building] AREA { color: @amenityColor; }
+    }
+
+  // Icons for amenity types (symbols defined above)
+
+  [MAG closer-] {
+    [TYPE amenity_hospital,
+          amenity_hospital_building] {
+      AREA.ICON { symbol: amenity_hospital; name: hospital; }
+      NODE.ICON { symbol: amenity_hospital; name: hospital; }
+    }
+
+    [TYPE amenity_parking_building] {
+      NODE.ICON { symbol: amenity_parking; name: parking; }
+      AREA.ICON { symbol: amenity_parking; name: parking;}
+    }
+
+    [TYPE amenity_parking] {
+      NODE.ICON { symbol: amenity_parking; name: parking; }
+      AREA.ICON { symbol: amenity_parking; name: parking;}
+    }
+
+    [TYPE amenity_bus_station] {
+      NODE.ICON { name: bus_stop; }
+      AREA.ICON { name: bus_stop; }
+    }
+
+    [TYPE amenity_bicycle_parking] {
+      NODE.ICON { symbol: amenity_bicycle_parking; }
+      AREA.ICON { symbol: amenity_bicycle_parking; }
+    }
+
+    [TYPE amenity_parking] {
+      AREA { color: @parkingColor;}
+      AREA.BORDER { color: @parkingBorderColor; width: 0.1mm; }
+    }
+  }
+
+  [MAG veryClose-] {
+    // Eating
+    [TYPE amenity_fast_food] NODE.ICON { name: fast_food; }
+    [TYPE amenity_restaurant] NODE.ICON { name: restaurant; }
+
+    // Health
+    [TYPE amenity_pharmacy] NODE.ICON { symbol: amenity_pharmacy; name: pharmacy; }
+
+    // Logistic
+    [TYPE amenity_post_box] NODE.ICON { symbol: amenity_post_box; }
+    [TYPE amenity_post_office] NODE.ICON { symbol: amenity_post_office; }
+
+    [TYPE amenity_drinking_water] NODE.ICON { symbol: amenity_drinking_water; }
+
+    [TYPE amenity_toilets] NODE.ICON { symbol: amenity_toilets; }
+    [TYPE amenity_waste_disposal] NODE.ICON { name: waste_basket; }
+    [TYPE amenity_shelter] NODE.ICON { symbol: amenity_shelter; }
+
+    [TYPE amenity_atm] NODE.ICON { symbol: amenity_atm; }
+
+    // Amenity icons
+    [TYPE amenity_fire_station] NODE.ICON { symbol: amenity_fire_station; }
+    [TYPE amenity_fire_station_building] AREA.ICON { symbol: amenity_fire_station; }
+
+    [TYPE amenity_telephone] NODE.ICON { symbol: amenity_telephone; }
+
+    [TYPE amenity_fountain] {
+      NODE.ICON { symbol: amenity_fountain; }
+      AREA.ICON { symbol: amenity_fountain; }
+    }
+
+    [TYPE amenity_cinema] NODE.ICON { symbol: amenity_cinema; }
+    [TYPE amenity_cinema_building] AREA.ICON { symbol: amenity_cinema; }
+    [TYPE amenity_theatre] NODE.ICON { symbol: amenity_theatre; }
+    [TYPE amenity_theatre_building] AREA.ICON { symbol: amenity_theatre; }
+    [TYPE amenity_nightclub] NODE.ICON { symbol: amenity_nightclub; }
+    [TYPE amenity_nightclub_building] AREA.ICON { symbol: amenity_nightclub; }
+    [TYPE amenity_music_school] NODE.ICON { symbol: amenity_nightclub; }
+    [TYPE amenity_music_school_building] AREA.ICON { symbol: amenity_nightclub; }
+
+    [TYPE amenity_townhall] NODE.ICON { symbol: amenity_townhall; }
+    [TYPE amenity_townhall_building] AREA.ICON { symbol: amenity_townhall; }
+    [TYPE amenity_marketplace] NODE.ICON { symbol: amenity_marketplace; }
+    [TYPE amenity_marketplace] AREA.ICON { symbol: amenity_marketplace; }
+    [TYPE amenity_prison] NODE.ICON { symbol: amenity_prison; }
+    [TYPE amenity_prison_building] AREA.ICON { symbol: amenity_prison; }
+
+    [TYPE amenity_bbq] NODE.ICON { symbol: amenity_bbq; }
+    [TYPE amenity_hunting_stand] NODE.ICON { symbol: amenity_hunting_stand; }
+    [TYPE amenity_ice_cream] NODE.ICON { symbol: amenity_ice_cream; }
+    [TYPE amenity_car_wash] NODE.ICON { symbol: amenity_car_wash; }
+    [TYPE amenity_car_rental] NODE.ICON { symbol: amenity_car_wash; }
+    [TYPE amenity_car_rental_building] AREA.ICON { symbol: amenity_car_wash; }
+    [TYPE amenity_car_sharing] NODE.ICON { symbol: amenity_car_wash; }
+
+    [TYPE amenity_parcel_locker] NODE.ICON { symbol: amenity_parcel_locker; }
+    [TYPE amenity_post_depot] NODE.ICON { symbol: amenity_post_office; }
+    [TYPE amenity_post_depot_building] AREA.ICON { symbol: amenity_post_office; }
+
+    [TYPE amenity_shower] NODE.ICON { symbol: amenity_shower; }
+    [TYPE amenity_public_bath] NODE.ICON { symbol: amenity_public_bath; }
+    [TYPE amenity_public_bath_building] AREA.ICON { symbol: amenity_public_bath; }
+
+    [TYPE amenity_university] NODE.ICON { symbol: amenity_university; }
+    [TYPE amenity_university_building] AREA.ICON { symbol: amenity_university; }
+    [TYPE amenity_college] NODE.ICON { symbol: amenity_university; }
+    [TYPE amenity_college_building] AREA.ICON { symbol: amenity_university; }
+
+    [TYPE amenity_motorcycle_parking] NODE.ICON { symbol: amenity_motorcycle_parking; }
+    [TYPE amenity_bicycle_rental] NODE.ICON { symbol: amenity_bicycle_parking; }
+
+    [TYPE amenity_community_centre] NODE.ICON { symbol: amenity_community_centre; }
+    [TYPE amenity_community_centre_building] AREA.ICON { symbol: amenity_community_centre; }
+
+    [TYPE amenity_veterinary] NODE.ICON { symbol: amenity_veterinary; }
+    [TYPE amenity_veterinary_building] AREA.ICON { symbol: amenity_veterinary; }
+    [TYPE amenity_clinic,
+          amenity_clinic_building,
+          amenity_dentist,
+          amenity_dentist_building,
+          amenity_health_post] NODE.ICON { symbol: amenity_hospital; }
+
+    [TYPE amenity_boat_rental] NODE.ICON { symbol: amenity_boat_rental; }
+    [TYPE amenity_boat_storage] NODE.ICON { symbol: amenity_boat_rental; }
+
+    [TYPE amenity_biergarten] NODE.ICON { symbol: amenity_biergarten; }
+
+    [TYPE amenity_bicycle_parking] WAY { color: #666666; displayWidth: 0.1mm; dash: 1,1; }
+
+    // Amenities without special color
+    [TYPE amenity,
+          amenity_bank,
+          amenity_cafe,
+          amenity_fast_food,
+          amenity_fuel,
+          amenity_kindergarten,
+          amenity_library,
+          amenity_recycling,
+          amenity_restaurant,
+          amenity_school,
+          amenity_food_court,
+          amenity_dancing_school,
+          amenity_driving_school,
+          amenity_training,
+          amenity_research_institute,
+          amenity_dojo,
+          amenity_bicycle_repair_station,
+          amenity_vehicle_inspection,
+          amenity_weighbridge,
+          amenity_public_bookcase,
+          amenity_bureau_de_change,
+          amenity_money_transfer,
+          amenity_mobile_money_agent,
+          amenity_social_facility,
+          amenity_social_centre,
+          amenity_conference_centre,
+          amenity_events_venue,
+          amenity_arts_centre,
+          amenity_gambling,
+          amenity_studio,
+          amenity_crematorium,
+          amenity_funeral_hall,
+          amenity_ranger_station,
+          amenity_internet_cafe,
+          amenity_driver_training,
+          amenity_lavoir,
+          amenity_waste_transfer_station,
+          amenity_animal_shelter,
+          amenity_animal_boarding,
+          amenity_animal_breeding,
+          amenity_monastery,
+          amenity_monastery_building] {
+      NODE.ICON { symbol: amenity; }
+    }
+  }
+
 END

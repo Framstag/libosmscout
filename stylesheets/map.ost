@@ -575,7 +575,7 @@ TYPES
   TYPE landuse_farmyard_building
     = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
-      GROUP landuse
+      GROUP landuse, building
 
   TYPE landuse_farmyard
     = AREA ("landuse"=="farmyard")
@@ -979,6 +979,7 @@ TYPES
       {Name, NameAlt}
      POI
      MERGE_AREAS
+      GROUP building
 
   TYPE leisure_sports_centre
     = NODE AREA ("leisure"=="sports_centre")
@@ -1105,7 +1106,7 @@ TYPES
       GROUP amenity, building
 
   TYPE amenity_bench
-    = NODE ("amenity"=="bench")
+    = NODE WAY ("amenity"=="bench") // NODE and WAY according to OSM wiki
       GROUP amenity
 
   TYPE amenity_brothel
@@ -1218,7 +1219,7 @@ TYPES
     = AREA ("amenity"=="library" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt, OpeningHours, Phone, Website}
       ADDRESS POI
-      GROUP amenity, routingPOI
+      GROUP amenity, building, routingPOI
 
   TYPE amenity_library
     = NODE AREA ("amenity"=="library")
@@ -1338,7 +1339,7 @@ TYPES
       GROUP amenity
 
   TYPE amenity_toilets
-    = NODE ("amenity"=="toilets")
+    = NODE AREA ("amenity"=="toilets") // NODE and AREA according to OSM wiki
       GROUP amenity
 
   TYPE amenity_vending_machine
@@ -1372,7 +1373,741 @@ TYPES
       GROUP amenity
 
   TYPE amenity_shelter
-    = NODE ("amenity"=="shelter")
+    = NODE AREA ("amenity"=="shelter") // NODE and AREA according to OSM wiki
+      GROUP amenity
+
+  //
+  // Additional amenity types (values from the OSM Key:amenity wiki and taginfo,
+  // usage >= 0.01%). Element types follow the corresponding OSM wiki tag pages.
+  //
+
+  // Sustenance
+
+  TYPE amenity_biergarten
+    = NODE AREA ("amenity"=="biergarten")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_food_court
+    = NODE AREA ("amenity"=="food_court")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_ice_cream
+    = NODE AREA ("amenity"=="ice_cream")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  // Education
+
+  TYPE amenity_college_building
+    = AREA ("amenity"=="college" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_college
+    = NODE AREA ("amenity"=="college")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_university_building
+    = AREA ("amenity"=="university" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_university
+    = NODE AREA ("amenity"=="university")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_childcare_building
+    = AREA ("amenity"=="childcare" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_childcare
+    = NODE AREA ("amenity"=="childcare")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_music_school_building
+    = AREA ("amenity"=="music_school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_music_school
+    = NODE AREA ("amenity"=="music_school")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_language_school_building
+    = AREA ("amenity"=="language_school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_language_school
+    = NODE AREA ("amenity"=="language_school")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_prep_school_building
+    = AREA ("amenity"=="prep_school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_prep_school
+    = NODE AREA ("amenity"=="prep_school")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_dancing_school
+    = NODE AREA ("amenity"=="dancing_school")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_driving_school_building
+    = AREA ("amenity"=="driving_school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_driving_school
+    = NODE AREA ("amenity"=="driving_school")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_training
+    = NODE AREA ("amenity"=="training")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_research_institute_building
+    = AREA ("amenity"=="research_institute" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_research_institute
+    = NODE AREA ("amenity"=="research_institute")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_dojo_building
+    = AREA ("amenity"=="dojo" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_dojo
+    = NODE AREA ("amenity"=="dojo")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  // Transportation
+
+  TYPE amenity_bicycle_rental
+    = NODE AREA ("amenity"=="bicycle_rental")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_bicycle_repair_station
+    = NODE AREA ("amenity"=="bicycle_repair_station")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_motorcycle_parking
+    = NODE AREA ("amenity"=="motorcycle_parking")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_car_rental_building
+    = AREA ("amenity"=="car_rental" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_car_rental
+    = NODE AREA ("amenity"=="car_rental")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_car_sharing
+    = NODE AREA ("amenity"=="car_sharing")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_car_wash
+    = NODE AREA ("amenity"=="car_wash")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_compressed_air
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="compressed_air")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_vacuum_cleaner
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="vacuum_cleaner")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_vehicle_inspection
+    = NODE AREA ("amenity"=="vehicle_inspection")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_weighbridge
+    = NODE AREA ("amenity"=="weighbridge")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_loading_dock
+    IGNORE // No visualisation yet
+    = NODE ("amenity"=="loading_dock")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_trolley_bay
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="trolley_bay")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_ticket_validator
+    IGNORE // No visualisation yet
+    = NODE WAY ("amenity"=="ticket_validator") // NODE and WAY according to OSM wiki
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_parcel_locker
+    = NODE AREA ("amenity"=="parcel_locker")
+      {Name, NameAlt, OpeningHours}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_boat_rental
+    = NODE AREA ("amenity"=="boat_rental")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_boat_storage
+    = NODE AREA ("amenity"=="boat_storage")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_public_bookcase
+    = NODE AREA ("amenity"=="public_bookcase")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_bbq
+    = NODE ("amenity"=="bbq")
+      {Name, NameAlt}
+      GROUP amenity
+
+  // Financial
+
+  TYPE amenity_bureau_de_change_building
+    = AREA ("amenity"=="bureau_de_change" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_bureau_de_change
+    = NODE AREA ("amenity"=="bureau_de_change")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_money_transfer
+    = NODE AREA ("amenity"=="money_transfer")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_mobile_money_agent
+    = NODE AREA ("amenity"=="mobile_money_agent")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_payment_terminal
+    IGNORE // No visualisation yet
+    = NODE ("amenity"=="payment_terminal")
+      {Name, NameAlt}
+      GROUP amenity
+
+  // Healthcare
+
+  TYPE amenity_clinic_building
+    = AREA ("amenity"=="clinic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_clinic
+    = NODE AREA ("amenity"=="clinic")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_dentist_building
+    = AREA ("amenity"=="dentist" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_dentist
+    = NODE AREA ("amenity"=="dentist")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_veterinary_building
+    = AREA ("amenity"=="veterinary" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_veterinary
+    = NODE AREA ("amenity"=="veterinary")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_health_post
+    = NODE AREA ("amenity"=="health_post")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_social_facility_building
+    = AREA ("amenity"=="social_facility" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_social_facility
+    = NODE AREA ("amenity"=="social_facility")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  // Entertainment, arts and culture
+
+  TYPE amenity_arts_centre_building
+    = AREA ("amenity"=="arts_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_arts_centre
+    = NODE AREA ("amenity"=="arts_centre")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_cinema_building
+    = AREA ("amenity"=="cinema" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_cinema
+    = NODE AREA ("amenity"=="cinema")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_theatre_building
+    = AREA ("amenity"=="theatre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_theatre
+    = NODE AREA ("amenity"=="theatre")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_community_centre_building
+    = AREA ("amenity"=="community_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_community_centre
+    = NODE AREA ("amenity"=="community_centre")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_conference_centre_building
+    = AREA ("amenity"=="conference_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_conference_centre
+    = NODE AREA ("amenity"=="conference_centre")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_events_venue_building
+    = AREA ("amenity"=="events_venue" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_events_venue
+    = NODE AREA ("amenity"=="events_venue")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_nightclub_building
+    = AREA ("amenity"=="nightclub" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_nightclub
+    = NODE AREA ("amenity"=="nightclub")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_casino_building
+    = AREA ("amenity"=="casino" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_casino
+    = NODE AREA ("amenity"=="casino")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_gambling
+    = NODE AREA ("amenity"=="gambling")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_social_centre_building
+    = AREA ("amenity"=="social_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_social_centre
+    = NODE AREA ("amenity"=="social_centre")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_studio
+    = NODE AREA ("amenity"=="studio")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_fountain
+    = NODE AREA ("amenity"=="fountain")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_marketplace
+    = NODE AREA ("amenity"=="marketplace")
+      {Name, NameAlt, OpeningHours}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  // Public service
+
+  TYPE amenity_townhall_building
+    = AREA ("amenity"=="townhall" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_townhall
+    = NODE AREA ("amenity"=="townhall")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_courthouse_building
+    = AREA ("amenity"=="courthouse" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_courthouse
+    = NODE AREA ("amenity"=="courthouse")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_fire_station_building
+    = AREA ("amenity"=="fire_station" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_fire_station
+    = NODE AREA ("amenity"=="fire_station")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_prison_building
+    = AREA ("amenity"=="prison" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_prison
+    = NODE AREA ("amenity"=="prison")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_ranger_station_building
+    = AREA ("amenity"=="ranger_station" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_ranger_station
+    = NODE AREA ("amenity"=="ranger_station")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_post_depot_building
+    = AREA ("amenity"=="post_depot" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_post_depot
+    = NODE AREA ("amenity"=="post_depot")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_crematorium_building
+    = AREA ("amenity"=="crematorium" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_crematorium
+    = NODE AREA ("amenity"=="crematorium")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_funeral_hall_building
+    = AREA ("amenity"=="funeral_hall" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_funeral_hall
+    = NODE AREA ("amenity"=="funeral_hall")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_monastery_building
+    = AREA ("amenity"=="monastery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_monastery
+    = NODE AREA ("amenity"=="monastery")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_public_bath_building
+    = AREA ("amenity"=="public_bath" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_public_bath
+    = NODE AREA ("amenity"=="public_bath")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  // Facilities
+
+  TYPE amenity_telephone
+    = NODE ("amenity"=="telephone")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_shower
+    = NODE AREA ("amenity"=="shower")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_letter_box
+    IGNORE // No visualisation yet
+    = NODE ("amenity"=="letter_box")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_lounger
+    IGNORE // Too many for mobile?
+    = NODE ("amenity"=="lounger")
+      GROUP amenity
+
+  TYPE amenity_chair
+    IGNORE // Too many for mobile?
+    = NODE ("amenity"=="chair")
+      GROUP amenity
+
+  TYPE amenity_table
+    IGNORE // Too many for mobile?
+    = NODE ("amenity"=="table")
+      GROUP amenity
+
+  TYPE amenity_dressing_room
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="dressing_room")
+      GROUP amenity
+
+  TYPE amenity_smoking_area
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="smoking_area")
+      GROUP amenity
+
+  TYPE amenity_reception_desk
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="reception_desk")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_sanitary_dump_station
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="sanitary_dump_station")
+      GROUP amenity
+
+  // Waste management
+
+  TYPE amenity_waste_transfer_station
+    = NODE AREA ("amenity"=="waste_transfer_station")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_waste_dump_site
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="waste_dump_site")
+      GROUP amenity
+
+  // Animals and outdoor
+
+  TYPE amenity_animal_shelter
+    = NODE AREA ("amenity"=="animal_shelter")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_animal_boarding
+    = NODE AREA ("amenity"=="animal_boarding")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_animal_breeding
+    = NODE AREA ("amenity"=="animal_breeding")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_feeding_place
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="feeding_place")
+      GROUP amenity
+
+  TYPE amenity_game_feeding
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="game_feeding")
+      GROUP amenity
+
+  TYPE amenity_hunting_stand
+    = NODE AREA ("amenity"=="hunting_stand")
+      {Name, NameAlt}
+      GROUP amenity
+
+  // Others
+
+  TYPE amenity_internet_cafe_building
+    = AREA ("amenity"=="internet_cafe" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, building, routingPOI
+
+  TYPE amenity_internet_cafe
+    = NODE AREA ("amenity"=="internet_cafe")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_driver_training
+    = NODE AREA ("amenity"=="driver_training")
+      {Name, NameAlt, Phone, Website}
+      ADDRESS POI
+      GROUP amenity, routingPOI
+
+  TYPE amenity_lavoir
+    = NODE AREA ("amenity"=="lavoir")
+      {Name, NameAlt}
+      GROUP amenity
+
+  TYPE amenity_love_hotel
+    IGNORE // No visualisation yet
+    = NODE AREA ("amenity"=="love_hotel")
+      {Name, NameAlt}
       GROUP amenity
 
   // Religious
@@ -1381,14 +2116,14 @@ TYPES
             "building"=="temple")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE shrine_building
     = AREA ("amenity"=="place_of_worship" AND
             "building"=="shrine")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE christian_church_building
     = AREA ("amenity"=="place_of_worship" AND
@@ -1396,7 +2131,7 @@ TYPES
             "building"=="church")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE christian_cathedral_building
     = AREA ("amenity"=="place_of_worship" AND
@@ -1404,7 +2139,7 @@ TYPES
             "building"=="cathedral")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE christian_chapel_building
     = AREA ("amenity"=="place_of_worship" AND
@@ -1412,7 +2147,7 @@ TYPES
             "building"=="chapel")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE christian_worship
     = NODE ("amenity"=="place_of_worship" AND
@@ -1427,7 +2162,7 @@ TYPES
             "building"=="synagogue")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE muslim_mosque_building
     = AREA ("amenity"=="place_of_worship" AND
@@ -1435,13 +2170,13 @@ TYPES
             "building"=="mosque")
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   TYPE worship_building
     = AREA ("amenity"=="place_of_worship" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS POI
-      GROUP religious, routingPOI
+      GROUP religious, building, routingPOI
 
   // Everything else is just an 'amenity' for now
   TYPE amenity_building
@@ -1820,6 +2555,18 @@ TYPES
       ADDRESS POI
       GROUP tourism
 
+  TYPE tourism_camp_pitch
+    = NODE AREA ("tourism"=="camp_pitch")
+      {Name, NameAlt}
+      ADDRESS POI
+      GROUP tourism, routingPOI
+
+  TYPE tourism_trail_riding_station
+    = NODE AREA ("tourism"=="trail_riding_station")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP tourism, routingPOI
+
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
       {Name, NameAlt, OpeningHours, Phone, Website}
@@ -1851,6 +2598,30 @@ TYPES
 
   TYPE tourism_alpine_hut
     = NODE AREA ("tourism"=="alpine_hut")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP tourism
+
+  TYPE tourism_apartment_building
+    = AREA ("tourism"=="apartment" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP tourism, building, routingPOI
+
+  TYPE tourism_apartment
+    = NODE AREA ("tourism"=="apartment")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP tourism, routingPOI
+
+  TYPE tourism_wilderness_hut_building
+    = AREA ("tourism"=="wilderness_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP tourism, building
+
+  TYPE tourism_wilderness_hut
+    = NODE AREA ("tourism"=="wilderness_hut")
       {Name, NameAlt, OpeningHours, Phone, Website}
       ADDRESS
       GROUP tourism
@@ -1928,6 +2699,18 @@ TYPES
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP tourism, routingPOI
+
+  TYPE tourism_gallery_building
+    = AREA ("tourism"=="gallery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS POI
+      GROUP tourism, building, routingPOI
+
+  TYPE tourism_gallery
+    = NODE AREA ("tourism"=="gallery")
       {Name, NameAlt, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
@@ -2069,6 +2852,7 @@ TYPES
     = NODE AREA ("military"=="bunker" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
+      GROUP building
 
   TYPE military_bunker
     = NODE AREA ("military"=="bunker")
@@ -2106,6 +2890,7 @@ TYPES
     = AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
+      GROUP building
 
   TYPE sport_9pin
     = NODE AREA ("sport"=="9pin")
@@ -2480,11 +3265,13 @@ TYPES
 
   TYPE building_garage
     = AREA ("building"=="garage")
+      GROUP building
 
   TYPE building
     = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
       {Name, NameAlt}
       ADDRESS
+      GROUP building
 
   // Addresses
   TYPE address

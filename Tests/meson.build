@@ -499,6 +499,52 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
                                  dependencies: deps,
                                  link_with: links,
                                  install: true)
+
+    performanceTestDrivers = ['noop', 'none']
+
+    if buildMapCairo
+      performanceTestDrivers += 'cairo'
+    endif
+
+    if buildMapQt
+      performanceTestDrivers += 'Qt'
+    endif
+
+    if buildMapAgg
+      performanceTestDrivers += 'agg'
+    endif
+
+    if buildMapOpenGL and glfwDep.found() and ftDep.found() and host_machine.system() != 'darwin'
+      # macOS CI runners cannot create an OpenGL context (NSGL); the CMake osx
+      # workflow excludes these tests via ctest regex, meson has no exclude mechanism
+      performanceTestDrivers += 'opengl'
+    endif
+
+    if buildMapGDI
+      performanceTestDrivers += 'gdi'
+    endif
+
+    foreach driver : performanceTestDrivers
+      testEnv = []
+      if driver == 'Qt'
+        # Qt tests need a platform plugin; offscreen works without X server (see AGENTS.md)
+        testEnv += 'QT_QPA_PLATFORM=offscreen'
+      endif
+      foreach stylesheet : stylesheets
+        test('PerformanceTest-'+driver+'-'+stylesheet,
+             PerformanceTest,
+             args : ['--debug',
+                     '--driver', driver,
+                     '--icons', meson.current_source_dir() + '/../libosmscout/data/icons/svg/standard',
+                     '--font', meson.current_source_dir() + '/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf',
+                     '--shaders', meson.current_source_dir() + '/../libosmscout-map-opengl/data/shaders',
+                     meson.current_source_dir() + '/data/testregion',
+                     meson.current_source_dir() + '/../stylesheets/' + stylesheet,
+                     '50.3806', '14.5418', '50.3806', '14.5418'],
+             env: testEnv,
+             timeout: 300)
+      endforeach
+    endforeach
   endif
 endif
 

@@ -273,7 +273,7 @@ if(${OSMSCOUT_BUILD_MAP})
 	if(${OSMSCOUT_BUILD_MAP_GDI})
 		target_link_libraries(PerformanceTest OSMScout::MapGDI)
 		set(HAVE_LIB_OSMSCOUTMAPGDI 1)
-		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} dgi)
+		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} gdi)
 	endif()
 
 	option(PERF_TEST_GPERFTOOLS_USAGE "Enable Gperftools in Performance test" ${GPERFTOOLS_USAGE})
@@ -300,6 +300,7 @@ if(${OSMSCOUT_BUILD_MAP})
 				--driver ${DRIVER}
 				--icons "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout/data/icons/svg/standard"
 				--font "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
+				--shaders "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout-map-opengl/data/shaders"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../Tests/data/testregion"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET}"
 				50.3806 14.5418 50.3806 14.5418)
