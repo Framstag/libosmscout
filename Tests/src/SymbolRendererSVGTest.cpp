@@ -125,6 +125,19 @@ TEST_CASE("SetBorder converts border width from mm to pixels")
   REQUIRE(output.find("stroke-width=\"1\"") != std::string::npos);
 }
 
+TEST_CASE("SetBorder converts mm width to pixels via screenMmInPixel")
+{
+  std::ostringstream stream;
+  TestSymbolRenderer renderer(stream);
+
+  renderer.SetFill(FillStyleRef());
+  renderer.SetBorder(CreateBorder(Color::BLUE, 2.0), 3.0);
+  renderer.DrawRect(5.0, 5.0, 20.0, 20.0);
+
+  std::string output = stream.str();
+  REQUIRE(output.find("stroke-width=\"6\"") != std::string::npos);
+}
+
 TEST_CASE("SetBorder with null style emits stroke=\"none\"")
 {
   std::ostringstream stream;

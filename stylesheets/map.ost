@@ -4841,7 +4841,614 @@ TYPES
 
   //
   // Office
+  // See https://wiki.openstreetmap.org/wiki/Key:office
   //
+  // Additional office types (values from the OSM Key:office wiki and taginfo,
+  // usage >= 0.05%). Element types follow the corresponding OSM wiki tag pages
+  // (all NODE and AREA). Each has a _building variant for areas that carry a
+  // building tag, following the shop/amenity pattern. The generic
+  // office_building/office types below catch all remaining office values.
+
+
+  TYPE office_accountant_building
+    = AREA ("office"=="accountant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_accountant
+    = NODE AREA ("office"=="accountant")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_advertising_agency_building
+    = AREA ("office"=="advertising_agency" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_advertising_agency
+    = NODE AREA ("office"=="advertising_agency")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_architect_building
+    = AREA ("office"=="architect" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_architect
+    = NODE AREA ("office"=="architect")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_association_building
+    = AREA ("office"=="association" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_association
+    = NODE AREA ("office"=="association")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_charity_building
+    = AREA ("office"=="charity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_charity
+    = NODE AREA ("office"=="charity")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_company_building
+    = AREA ("office"=="company" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_company
+    = NODE AREA ("office"=="company")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_construction_company_building
+    = AREA ("office"=="construction_company" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_construction_company
+    = NODE AREA ("office"=="construction_company")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_consulting_building
+    = AREA ("office"=="consulting" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_consulting
+    = NODE AREA ("office"=="consulting")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_cooperative_building
+    = AREA ("office"=="cooperative" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_cooperative
+    = NODE AREA ("office"=="cooperative")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_courier_building
+    = AREA ("office"=="courier" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_courier
+    = NODE AREA ("office"=="courier")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_coworking_building
+    = AREA ("office"=="coworking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_coworking
+    = NODE AREA ("office"=="coworking")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_diplomatic_building
+    = AREA ("office"=="diplomatic" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_diplomatic
+    = NODE AREA ("office"=="diplomatic")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_educational_institution_building
+    = AREA ("office"=="educational_institution" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_educational_institution
+    = NODE AREA ("office"=="educational_institution")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_employment_agency_building
+    = AREA ("office"=="employment_agency" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_employment_agency
+    = NODE AREA ("office"=="employment_agency")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_energy_supplier_building
+    = AREA ("office"=="energy_supplier" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_energy_supplier
+    = NODE AREA ("office"=="energy_supplier")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_engineer_building
+    = AREA ("office"=="engineer" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_engineer
+    = NODE AREA ("office"=="engineer")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_estate_agent_building
+    = AREA ("office"=="estate_agent" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_estate_agent
+    = NODE AREA ("office"=="estate_agent")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_financial_building
+    = AREA ("office"=="financial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_financial
+    = NODE AREA ("office"=="financial")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_financial_advisor_building
+    = AREA ("office"=="financial_advisor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_financial_advisor
+    = NODE AREA ("office"=="financial_advisor")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_forestry_building
+    = AREA ("office"=="forestry" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_forestry
+    = NODE AREA ("office"=="forestry")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_foundation_building
+    = AREA ("office"=="foundation" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_foundation
+    = NODE AREA ("office"=="foundation")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_government_building
+    = AREA ("office"=="government" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_government
+    = NODE AREA ("office"=="government")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_graphic_design_building
+    = AREA ("office"=="graphic_design" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_graphic_design
+    = NODE AREA ("office"=="graphic_design")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_guide_building
+    = AREA ("office"=="guide" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_guide
+    = NODE AREA ("office"=="guide")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_insurance_building
+    = AREA ("office"=="insurance" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_insurance
+    = NODE AREA ("office"=="insurance")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_it_building
+    = AREA ("office"=="it" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_it
+    = NODE AREA ("office"=="it")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_lawyer_building
+    = AREA ("office"=="lawyer" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_lawyer
+    = NODE AREA ("office"=="lawyer")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_logistics_building
+    = AREA ("office"=="logistics" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_logistics
+    = NODE AREA ("office"=="logistics")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_moving_company_building
+    = AREA ("office"=="moving_company" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_moving_company
+    = NODE AREA ("office"=="moving_company")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_newspaper_building
+    = AREA ("office"=="newspaper" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_newspaper
+    = NODE AREA ("office"=="newspaper")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_ngo_building
+    = AREA ("office"=="ngo" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_ngo
+    = NODE AREA ("office"=="ngo")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_notary_building
+    = AREA ("office"=="notary" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_notary
+    = NODE AREA ("office"=="notary")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_physician_building
+    = AREA ("office"=="physician" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_physician
+    = NODE AREA ("office"=="physician")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_political_party_building
+    = AREA ("office"=="political_party" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_political_party
+    = NODE AREA ("office"=="political_party")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_property_management_building
+    = AREA ("office"=="property_management" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_property_management
+    = NODE AREA ("office"=="property_management")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_publisher_building
+    = AREA ("office"=="publisher" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_publisher
+    = NODE AREA ("office"=="publisher")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_quango_building
+    = AREA ("office"=="quango" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_quango
+    = NODE AREA ("office"=="quango")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_religion_building
+    = AREA ("office"=="religion" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_religion
+    = NODE AREA ("office"=="religion")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_research_building
+    = AREA ("office"=="research" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_research
+    = NODE AREA ("office"=="research")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_security_building
+    = AREA ("office"=="security" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_security
+    = NODE AREA ("office"=="security")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_surveyor_building
+    = AREA ("office"=="surveyor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_surveyor
+    = NODE AREA ("office"=="surveyor")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_tax_advisor_building
+    = AREA ("office"=="tax_advisor" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_tax_advisor
+    = NODE AREA ("office"=="tax_advisor")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_telecommunication_building
+    = AREA ("office"=="telecommunication" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_telecommunication
+    = NODE AREA ("office"=="telecommunication")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_therapist_building
+    = AREA ("office"=="therapist" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_therapist
+    = NODE AREA ("office"=="therapist")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_translator_building
+    = AREA ("office"=="translator" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_translator
+    = NODE AREA ("office"=="translator")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_transport_building
+    = AREA ("office"=="transport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_transport
+    = NODE AREA ("office"=="transport")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_travel_agent_building
+    = AREA ("office"=="travel_agent" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_travel_agent
+    = NODE AREA ("office"=="travel_agent")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_union_building
+    = AREA ("office"=="union" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_union
+    = NODE AREA ("office"=="union")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_university_building
+    = AREA ("office"=="university" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_university
+    = NODE AREA ("office"=="university")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
+
+  TYPE office_water_utility_building
+    = AREA ("office"=="water_utility" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, building, routingPOI
+
+  TYPE office_water_utility
+    = NODE AREA ("office"=="water_utility")
+      {Name, NameAlt, OpeningHours, Phone, Website}
+      ADDRESS
+      GROUP office, routingPOI
 
   TYPE office_building
     = AREA (EXISTS "office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))

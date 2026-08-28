@@ -2,6 +2,7 @@ OSS
 
   //
   // Office
+  // See https://wiki.openstreetmap.org/wiki/Key:office
   //
 
   CONST
@@ -14,6 +15,190 @@ OSS
     RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @officeSymbolColor; }
     }
+
+  // Distinct symbols for the most important office types (by taginfo usage).
+  // All symbols use the office color family; shapes differentiate the types.
+
+  SYMBOL office_government
+    // Classical government building: pediment, columns, base
+    POLYGON -0.9,-0.9 0.9,-0.9 0,-0.3 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.7,-0.3 1.4 x 1.0 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.5,-0.1 0.2 x 0.8 { AREA { color: #ffffff; } }
+    RECTANGLE -0.1,-0.1 0.2 x 0.8 { AREA { color: #ffffff; } }
+    RECTANGLE 0.3,-0.1 0.2 x 0.8 { AREA { color: #ffffff; } }
+    RECTANGLE -0.7,0.7 1.4 x 0.15 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_estate_agent
+    // House: roof, body, door
+    POLYGON -0.9,0.0 0.9,0.0 0,-0.8 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.7,0.0 1.4 x 0.9 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.15,0.3 0.3 x 0.6 { AREA { color: #ffffff; } }
+
+  SYMBOL office_insurance
+    // Umbrella: canopy, handle with hook
+    POLYGON -0.9,-0.3 0.9,-0.3 0,-0.9 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.05,0.1 0.1 x 0.7 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.05,0.8 0.25,0.8 0.1,0.6 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_lawyer
+    // Scales of justice
+    POLYGON -0.8,-0.7 0.8,-0.7 0,-1.0 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.05,-0.7 0.1 x 1.3 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.4,0.6 0.8 x 0.15 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.8,-0.5 -0.4,-0.5 -0.6,-0.1 { AREA { color: @officeSymbolColor; } }
+    POLYGON 0.4,-0.5 0.8,-0.5 0.6,-0.1 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_educational_institution
+    // Graduation cap with tassel
+    POLYGON -0.9,-0.4 0.9,-0.4 0,-0.8 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.5,-0.4 1.0 x 0.15 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 0.45,-0.4 0.06 x 0.45 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0.48,0.1 0.08 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_telecommunication
+    // Signal bars
+    RECTANGLE -0.7,0.0 0.3 x 0.6 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.3,-0.2 0.3 x 0.8 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 0.1,-0.4 0.3 x 1.0 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 0.5,-0.6 0.3 x 1.2 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_it
+    // Computer monitor on stand
+    RECTANGLE -0.7,-0.6 1.4 x 1.0 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.15,0.4 0.3 x 0.2 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.4,0.6 0.8 x 0.1 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_accountant
+    // Calculator: body, display, buttons
+    RECTANGLE -0.6,-0.8 1.2 x 1.6 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.45,-0.6 0.9 x 0.3 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.45,0.0 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.1,0.0 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 0.25,0.0 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.45,0.35 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.1,0.35 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 0.25,0.35 0.25 x 0.25 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_diplomatic
+    // Flag on pole
+    RECTANGLE -0.6,-0.8 0.1 x 1.6 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.5,-0.8 1.0 x 0.6 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_employment_agency
+    // Briefcase
+    RECTANGLE -0.2,-0.5 0.4 x 0.3 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.7,-0.2 1.4 x 1.0 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+
+  SYMBOL office_research
+    // Erlenmeyer flask with liquid
+    RECTANGLE -0.15,-0.8 0.3 x 0.35 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.5,-0.45 0.5,-0.45 0.3,0.5 -0.3,0.5 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.45,-0.1 0.45,-0.1 0.3,0.5 -0.3,0.5 { AREA { color: lighten(@officeSymbolColor, 0.5); } }
+
+  SYMBOL office_architect
+    // Drafting compass
+    CIRCLE 0,0 0.7 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    POLYGON -0.1,-0.8 0.1,-0.8 -0.5,0.4 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.1,-0.8 0.1,-0.8 0.5,0.4 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_tax_advisor
+    // Percent sign
+    CIRCLE -0.4,-0.4 0.25 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0.4,0.4 0.25 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.55,0.45 -0.35,0.45 0.55,-0.45 0.35,-0.45 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_financial
+    // Stack of coins
+    CIRCLE -0.3,0.1 0.4 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0,0.1 0.4 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0.3,0.1 0.4 { AREA { color: @officeSymbolColor; } }
+    CIRCLE -0.3,0.1 0.2 { AREA { color: #ffffff; } }
+    CIRCLE 0,0.1 0.2 { AREA { color: #ffffff; } }
+    CIRCLE 0.3,0.1 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL office_logistics
+    // Box with lid
+    RECTANGLE -0.6,-0.6 1.2 x 1.2 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    POLYGON -0.6,-0.6 0.6,-0.6 0,-0.2 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.05,-0.6 0.1 x 1.2 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_advertising_agency
+    // Megaphone
+    POLYGON -0.8,-0.4 -0.2,-0.6 -0.2,0.6 -0.8,0.4 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.8,-0.1 0.3 x 0.2 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_notary
+    // Document with seal
+    RECTANGLE -0.6,-0.7 1.2 x 1.4 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.4,-0.5 0.8 x 0.15 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.4,-0.2 0.8 x 0.15 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0.3,0.35 0.25 { AREA.BORDER { color: @officeSymbolColor; width: 0.12mm; } }
+
+  SYMBOL office_energy_supplier
+    // Lightning bolt
+    POLYGON 0.15,-0.9 -0.4,0.1 0.0,0.1 -0.15,0.9 0.4,-0.1 0.0,-0.1 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_security
+    // Shield
+    POLYGON -0.5,-0.8 0.5,-0.8 0.5,0.1 0,0.7 -0.5,0.1 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.3,-0.6 0.3,-0.6 0.3,0.0 0,0.4 -0.3,0.0 { AREA { color: #ffffff; } }
+
+  SYMBOL office_newspaper
+    // Newspaper with text lines
+    RECTANGLE -0.6,-0.8 1.2 x 1.6 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.45,-0.6 0.9 x 0.2 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.45,-0.3 0.9 x 0.1 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.45,-0.1 0.9 x 0.1 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.45,0.1 0.9 x 0.1 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_water_utility
+    // Water drop
+    POLYGON -0.3,-0.8 0.3,-0.8 0.5,0.0 0,0.7 -0.5,0.0 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_construction_company
+    // Crane
+    RECTANGLE -0.1,-0.8 0.2 x 1.6 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.1,-0.8 1.4 x 0.15 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE 1.2,-0.65 0.1 x 0.3 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_forestry
+    // Tree
+    POLYGON -0.6,-0.2 0.6,-0.2 0,-0.9 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.1,0.2 0.2 x 0.6 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_charity
+    // Heart
+    CIRCLE -0.3,-0.2 0.35 { AREA { color: @officeSymbolColor; } }
+    CIRCLE 0.3,-0.2 0.35 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.6,0.0 0.6,0.0 0,0.7 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_physician
+    // Medical cross
+    RECTANGLE -0.15,-0.6 0.3 x 1.2 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.6,-0.15 1.2 x 0.3 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_publisher
+    // Book with spine
+    RECTANGLE -0.6,-0.7 1.2 x 1.4 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.1,-0.7 0.2 x 1.4 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_translator
+    // Speech bubble
+    RECTANGLE -0.7,-0.5 1.4 x 0.9 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.3,0.4 -0.1,0.4 -0.4,0.8 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.5,-0.2 1.0 x 0.15 { AREA { color: #ffffff; } }
+    RECTANGLE -0.5,0.05 0.7 x 0.15 { AREA { color: #ffffff; } }
+
+  SYMBOL office_courier
+    // Package with cross straps
+    RECTANGLE -0.6,-0.6 1.2 x 1.2 { AREA.BORDER { color: @officeSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.05,-0.6 0.1 x 1.2 { AREA { color: @officeSymbolColor; } }
+    RECTANGLE -0.6,-0.05 1.2 x 0.1 { AREA { color: @officeSymbolColor; } }
+
+  SYMBOL office_travel_agent
+    // Paper plane with folded lower half
+    POLYGON -0.9,-0.3 0.9,0 -0.9,0.3 { AREA { color: @officeSymbolColor; } }
+    POLYGON -0.9,0 0.9,0 -0.9,0.3 { AREA { color: lighten(@officeSymbolColor, 0.5); } }
 
   STYLE
     IF _building {
@@ -52,6 +237,191 @@ OSS
     [MAG veryClose-] {
       [GROUP office] {
         NODE.ICON { symbol: office; }
+      }
+    }
+
+    // Distinct icons for the most important office types (by taginfo usage).
+    // These override the generic office icon at closer zoom.
+
+    [MAG closer-] {
+      [TYPE office_government,
+            office_government_building] {
+        NODE.ICON { symbol: office_government; }
+        AREA.ICON { symbol: office_government; }
+      }
+
+      [TYPE office_estate_agent,
+            office_estate_agent_building] {
+        NODE.ICON { symbol: office_estate_agent; }
+        AREA.ICON { symbol: office_estate_agent; }
+      }
+
+      [TYPE office_insurance,
+            office_insurance_building] {
+        NODE.ICON { symbol: office_insurance; }
+        AREA.ICON { symbol: office_insurance; }
+      }
+
+      [TYPE office_lawyer,
+            office_lawyer_building] {
+        NODE.ICON { symbol: office_lawyer; }
+        AREA.ICON { symbol: office_lawyer; }
+      }
+
+      [TYPE office_educational_institution,
+            office_educational_institution_building] {
+        NODE.ICON { symbol: office_educational_institution; }
+        AREA.ICON { symbol: office_educational_institution; }
+      }
+
+      [TYPE office_telecommunication,
+            office_telecommunication_building] {
+        NODE.ICON { symbol: office_telecommunication; }
+        AREA.ICON { symbol: office_telecommunication; }
+      }
+
+      [TYPE office_it,
+            office_it_building] {
+        NODE.ICON { symbol: office_it; }
+        AREA.ICON { symbol: office_it; }
+      }
+
+      [TYPE office_accountant,
+            office_accountant_building] {
+        NODE.ICON { symbol: office_accountant; }
+        AREA.ICON { symbol: office_accountant; }
+      }
+
+      [TYPE office_diplomatic,
+            office_diplomatic_building] {
+        NODE.ICON { symbol: office_diplomatic; }
+        AREA.ICON { symbol: office_diplomatic; }
+      }
+
+      [TYPE office_employment_agency,
+            office_employment_agency_building] {
+        NODE.ICON { symbol: office_employment_agency; }
+        AREA.ICON { symbol: office_employment_agency; }
+      }
+
+      [TYPE office_research,
+            office_research_building] {
+        NODE.ICON { symbol: office_research; }
+        AREA.ICON { symbol: office_research; }
+      }
+
+      [TYPE office_architect,
+            office_architect_building] {
+        NODE.ICON { symbol: office_architect; }
+        AREA.ICON { symbol: office_architect; }
+      }
+
+      [TYPE office_tax_advisor,
+            office_tax_advisor_building] {
+        NODE.ICON { symbol: office_tax_advisor; }
+        AREA.ICON { symbol: office_tax_advisor; }
+      }
+
+      [TYPE office_financial,
+            office_financial_building] {
+        NODE.ICON { symbol: office_financial; }
+        AREA.ICON { symbol: office_financial; }
+      }
+
+      [TYPE office_logistics,
+            office_logistics_building] {
+        NODE.ICON { symbol: office_logistics; }
+        AREA.ICON { symbol: office_logistics; }
+      }
+
+      [TYPE office_advertising_agency,
+            office_advertising_agency_building] {
+        NODE.ICON { symbol: office_advertising_agency; }
+        AREA.ICON { symbol: office_advertising_agency; }
+      }
+
+      [TYPE office_notary,
+            office_notary_building] {
+        NODE.ICON { symbol: office_notary; }
+        AREA.ICON { symbol: office_notary; }
+      }
+
+      [TYPE office_energy_supplier,
+            office_energy_supplier_building] {
+        NODE.ICON { symbol: office_energy_supplier; }
+        AREA.ICON { symbol: office_energy_supplier; }
+      }
+
+      [TYPE office_security,
+            office_security_building] {
+        NODE.ICON { symbol: office_security; }
+        AREA.ICON { symbol: office_security; }
+      }
+
+      [TYPE office_newspaper,
+            office_newspaper_building] {
+        NODE.ICON { symbol: office_newspaper; }
+        AREA.ICON { symbol: office_newspaper; }
+      }
+
+      [TYPE office_water_utility,
+            office_water_utility_building] {
+        NODE.ICON { symbol: office_water_utility; }
+        AREA.ICON { symbol: office_water_utility; }
+      }
+
+      [TYPE office_construction_company,
+            office_construction_company_building] {
+        NODE.ICON { symbol: office_construction_company; }
+        AREA.ICON { symbol: office_construction_company; }
+      }
+
+      [TYPE office_forestry,
+            office_forestry_building] {
+        NODE.ICON { symbol: office_forestry; }
+        AREA.ICON { symbol: office_forestry; }
+      }
+
+      [TYPE office_charity,
+            office_charity_building] {
+        NODE.ICON { symbol: office_charity; }
+        AREA.ICON { symbol: office_charity; }
+      }
+
+      [TYPE office_physician,
+            office_physician_building] {
+        NODE.ICON { symbol: office_physician; }
+        AREA.ICON { symbol: office_physician; }
+      }
+
+      [TYPE office_university,
+            office_university_building] {
+        NODE.ICON { symbol: office_educational_institution; }
+        AREA.ICON { symbol: office_educational_institution; }
+      }
+
+      [TYPE office_publisher,
+            office_publisher_building] {
+        NODE.ICON { symbol: office_publisher; }
+        AREA.ICON { symbol: office_publisher; }
+      }
+
+      [TYPE office_translator,
+            office_translator_building] {
+        NODE.ICON { symbol: office_translator; }
+        AREA.ICON { symbol: office_translator; }
+      }
+
+      [TYPE office_courier,
+            office_courier_building] {
+        NODE.ICON { symbol: office_courier; }
+        AREA.ICON { symbol: office_courier; }
+      }
+
+      [TYPE office_travel_agent,
+            office_travel_agent_building] {
+        NODE.ICON { symbol: office_travel_agent; }
+        AREA.ICON { symbol: office_travel_agent; }
       }
     }
 END
