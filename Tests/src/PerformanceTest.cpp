@@ -94,6 +94,11 @@ struct Arguments {
   // TODO: Use some way to find a valid font on the system (Agg display a ton of messages otherwise)
   std::string font{"/usr/share/fonts/TTF/DejaVuSans.ttf"};
   std::list<std::string> icons;
+#if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
+  std::string shaders{SHADER_INSTALL_DIR};
+#else
+  std::string shaders;
+#endif
   double dpi{96};
   size_t drawRepeat{1};
   size_t loadRepeat{1};
@@ -370,7 +375,8 @@ public:
                             size_t tileHeight,
                             size_t dpi,
                             const osmscout::StyleConfigRef& styleConfig,
-                            const osmscout::MapParameter &drawParameter):
+                            const osmscout::MapParameter &drawParameter,
+                            const std::string &shaderDir):
     styleConfig{styleConfig}
   {
     // Create the offscreen renderer
@@ -402,7 +408,7 @@ public:
                                                     tileHeight,
                                                     dpi,
                                                     drawParameter.GetFontName(),
-                                                    SHADER_INSTALL_DIR,
+                                                    shaderDir,
                                                     drawParameter);
 
     if (!openglMapPainter->IsInitialized()) {
@@ -574,7 +580,7 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
     std::cout << "Using driver 'OpenGL'..." << std::endl;
 #if defined(HAVE_LIB_OSMSCOUTMAPOPENGL)
     try{
-      return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig, drawParameter);
+      return std::make_shared<PerformanceTestBackendOGL>(args.TileWidth(), args.TileHeight(), args.dpi, styleConfig, drawParameter, args.shaders);
     } catch (const std::runtime_error &e){
       std::cerr << e.what() << std::endl;
       return nullptr;
@@ -727,6 +733,12 @@ int main(int argc, char* argv[])
                       }),
                       "font",
                       "Used font, default: " + args.font,
+                      false);
+  argParser.AddOption(osmscout::CmdLineStringOption([&args](const std::string& value) {
+                        args.shaders=value;
+                      }),
+                      "shaders",
+                      "Path to shaders (default: " + args.shaders + ")",
                       false);
 
 #if defined(PERF_TEST_GPERFTOOLS_USAGE)
