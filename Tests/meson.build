@@ -514,7 +514,9 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
       performanceTestDrivers += 'agg'
     endif
 
-    if buildMapOpenGL and glfwDep.found() and ftDep.found()
+    if buildMapOpenGL and glfwDep.found() and ftDep.found() and host_machine.system() != 'darwin'
+      # macOS CI runners cannot create an OpenGL context (NSGL); the CMake osx
+      # workflow excludes these tests via ctest regex, meson has no exclude mechanism
       performanceTestDrivers += 'opengl'
     endif
 
