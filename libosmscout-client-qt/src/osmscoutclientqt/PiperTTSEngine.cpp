@@ -148,6 +148,9 @@ void PiperTTSEngine::cleanCache()
 
 void PiperTTSEngine::initVoice(const Voice &voice)
 {
+  state = TTSEngineState::Initializing;
+  emit stateChange(state);
+
   this->voice = voice;
   // synthesized messages of a previous voice are no longer valid
   cache.clear();
