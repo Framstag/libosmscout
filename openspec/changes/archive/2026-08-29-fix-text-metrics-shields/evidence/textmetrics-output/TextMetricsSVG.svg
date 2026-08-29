@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200">
+  <rect width="100%" height="100%" fill="white"/>
+  <text x="50" y="100" font-family="LiberationSans-Regular" font-size="30.2362" fill="black">Musterstraße 12</text>
+  <rect x="52.2676" y="77.959" width="20.7422" height="22.041" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="76.9648" y="84.1572" width="12.6094" height="16.5381" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="93.0273" y="83.7041" width="12.8516" height="16.9912" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="107.423" y="79.8037" width="7.25781" height="20.8916" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="116.209" y="83.7041" width="14.3018" height="16.9912" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="134.086" y="83.7041" width="7.62012" height="16.2959" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="143.027" y="83.7041" width="12.8516" height="16.9912" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="157.423" y="79.8037" width="7.25781" height="20.8916" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="167.086" y="83.7041" width="7.62012" height="16.2959" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="176.27" y="83.7041" width="14.9072" height="16.9912" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="194.116" y="77.959" width="14.665" height="22.6455" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="211.209" y="83.7041" width="14.3018" height="16.9912" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="227" y="100" width="0" height="0" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="238.084" y="78.1406" width="7.4082" height="21.8594" fill="none" stroke="red" stroke-width="1"/>
+  <rect x="253.027" y="78.1406" width="14.4238" height="21.8291" fill="none" stroke="red" stroke-width="1"/>
+</svg>

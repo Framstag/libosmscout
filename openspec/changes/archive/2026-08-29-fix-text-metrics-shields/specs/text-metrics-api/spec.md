@@ -1,34 +1,4 @@
-# Text Metrics API
-
-## Purpose
-
-Provide a public measurement API on the map painter base class so external tools can obtain label dimensions and per-glyph bounding boxes for a given text, font, and font size, consistently across all rendering backends.
-
-## Requirements
-
-### Requirement: Measure text metrics
-
-The map painter base class SHALL expose a public method that, given a text, a font name, a font size, and rendering parameters, returns the label dimensions and the per-glyph bounding boxes for that text.
-
-#### Scenario: Measurement returns label dimensions
-- **GIVEN** a painter instance and a non-empty text with a valid font and font size
-- **WHEN** the measurement method is called
-- **THEN** it SHALL return a label width and height greater than zero
-
-#### Scenario: Measurement returns one entry per glyph
-- **GIVEN** a painter instance and a text with N characters
-- **WHEN** the measurement method is called
-- **THEN** it SHALL return exactly N glyph entries, one per character
-
-#### Scenario: Glyph box is relative to glyph base point
-- **GIVEN** a painter instance and a text
-- **WHEN** the measurement method is called
-- **THEN** each glyph entry SHALL include a bounding box whose coordinates are relative to the glyph's base point (the left baseline origin)
-
-#### Scenario: Glyph position is relative to label origin
-- **GIVEN** a painter instance and a text
-- **WHEN** the measurement method is called
-- **THEN** each glyph entry SHALL include a position relative to the label origin
+## MODIFIED Requirements
 
 ### Requirement: Consistent measurement across backends
 
@@ -63,6 +33,8 @@ The per-glyph bounding box returned by the measurement method SHALL enclose the 
 - **GIVEN** a painter instance and a text containing glyphs with different ink sizes (e.g. a hyphen and a capital letter with same font)
 - **WHEN** the measurement method is called
 - **THEN** the returned bounding boxes of different glyphs SHALL NOT be identical
+
+## ADDED Requirements
 
 ### Requirement: Label dimensions describe the drawn text extents
 
