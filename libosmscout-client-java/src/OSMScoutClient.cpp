@@ -948,7 +948,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jint mag,
+                                                                             jdouble mag,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1037,7 +1037,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::render(int width, int height, double lat, double lon, double angle, int mag)
+// OSMScoutClient::render(int width, int height, double lat, double lon, double angle, double mag)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1045,7 +1045,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jint mag)
+                                                           jdouble mag)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
       env, self, width, height, lat, lon, angle, mag, nullptr, nullptr, nullptr, nullptr,
@@ -1056,7 +1056,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, int mag, double[] routeLats, double[] routeLons,
+//                                         double angle, double mag, double[] routeLats, double[] routeLons,
 //                                         double[] favoriteLats, double[] favoriteLons,
 //                                         double searchSelLat, double searchSelLon)
 // --------------------------------------------------------------------------
@@ -1066,7 +1066,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jint mag,
+                                                                             jdouble mag,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1092,7 +1092,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   }
 
   osmscout::Magnification magnification;
-  magnification.SetLevel(osmscout::MagnificationLevel(static_cast<uint32_t>(mag)));
+  // Fractional magnification (double scale factor, 2^z) is supported natively;
+  // the tile/feature lookups derive their level internally as floor(log2(mag)).
+  magnification.SetMagnification(std::max(1.0, mag));
 
   double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
   // Verbose render logging disabled; re-enable only when debugging native renderer
@@ -1580,7 +1582,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setGpsMarker(JNIEnv *env,
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::projectToPixel(int width, int height, double centerLat,
-//                                 double centerLon, int mag, double dpi,
+//                                 double centerLon, double mag, double dpi,
 //                                 double angle, double lat, double lon)
 // --------------------------------------------------------------------------
 
@@ -1591,7 +1593,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
                                                                    jint height,
                                                                    jdouble centerLat,
                                                                    jdouble centerLon,
-                                                                   jint mag,
+                                                                   jdouble mag,
                                                                    jdouble dpi,
                                                                    jdouble angle,
                                                                    jdouble lat,
@@ -1604,7 +1606,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
   }
 
   osmscout::Magnification magnification;
-  magnification.SetLevel(osmscout::MagnificationLevel(static_cast<uint32_t>(mag)));
+  magnification.SetMagnification(std::max(1.0, mag));
 
   osmscout::MercatorProjection projection;
   if (!projection.Set(center, angle, magnification, static_cast<double>(dpi),
