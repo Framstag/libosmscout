@@ -56,6 +56,8 @@
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
 
+#include "admin_region_hierarchy.h"
+
 #include <osmscout/util/StringMatcher.h>
 
 #include <osmscout/feature/NameFeature.h>
@@ -118,6 +120,7 @@ namespace {
   // A fully resolved free-text search hit (name, coordinates, type) ready to
   // be serialized into a Java LocationEntry.
   struct FreeTextEntry {
+    osmscout::DBInstanceRef db;  //!< database that produced the hit (dedup is per-database)
     std::string label;
     std::string objectType;
     std::string objectTypeName;
@@ -144,6 +147,7 @@ namespace {
     }
 
     osmscout::NameFeatureValueReader nameReader(*typeConfig);
+    entry.db = db;
     entry.objectFileOffset = static_cast<long long>(ref.GetFileOffset());
 
     if (ref.GetType() == osmscout::RefType::refNode) {
@@ -2606,6 +2610,17 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchLocationByForm(
 
 namespace {
 
+// A search result together with the database instance that produced it.
+// FileOffset values are only meaningful inside the producing database's own
+// files; multi-map installs share numeric offset ranges, so keeping the
+// database with the entry lets serialization resolve the object reference and
+// the admin region hierarchy strictly within that database (see
+// fix-cross-db-region-hierarchy).
+struct ResultWithDb {
+  osmscout::LocationSearchResult::Entry entry;
+  osmscout::DBInstanceRef              db;
+};
+
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -2665,7 +2680,7 @@ static bool IsValidUtf8(const std::string &s) {
 // search (searchLocationByForm); free-text hits are appended by the caller.
 std::vector<jobject> SerializeStructuredEntries(
     JNIEnv *env, ClientData *data,
-    const std::vector<osmscout::LocationSearchResult::Entry> &results,
+    const std::vector<ResultWithDb> &results,
     bool hasCoordinate, const std::string &query,
     double coordLat, double coordLon)
 {
@@ -2701,6 +2716,7 @@ std::vector<jobject> SerializeStructuredEntries(
   struct ResolvedEntry
   {
     const osmscout::LocationSearchResult::Entry *entry;
+    osmscout::DBInstanceRef db;
     double lat;
     double lon;
     std::string objectTypeName;
@@ -2712,7 +2728,11 @@ std::vector<jobject> SerializeStructuredEntries(
   std::vector<ResolvedEntry> resolvedEntries;
   resolvedEntries.reserve(results.size());
 
-  for (const auto &entry : results) {
+  for (const auto &result : results) {
+    const auto &entry = result.entry;
+    // The database that produced this entry; the only valid context for its
+    // file offsets.
+    const auto &owningDb = result.db;
     double lat = 0.0, lon = 0.0;
     std::string objectTypeName;
     std::string objectName;
@@ -2744,9 +2764,16 @@ std::vector<jobject> SerializeStructuredEntries(
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
-          for (const auto &db : databases) {
-            auto database = db->GetDatabase();
-            if (objRef.GetType() == osmscout::RefType::refNode) {
+          // Resolve the object only against the database that produced the
+          // entry. FileOffsets are per-database: reading the same offset in
+          // another loaded database would yield a different (foreign) object
+          // (see fix-cross-db-region-hierarchy).
+          (void)databases;
+          auto database = owningDb->GetDatabase();
+          if (!database) {
+            return;
+          }
+          if (objRef.GetType() == osmscout::RefType::refNode) {
               osmscout::NodeRef node;
               if (database->GetNodeByOffset(objRef.GetFileOffset(), node)) {
                 lat = node->GetCoords().GetLat();
@@ -2798,7 +2825,6 @@ std::vector<jobject> SerializeStructuredEntries(
                 resolved = true;
               }
             }
-          }
         }
       );
     }
@@ -2814,7 +2840,7 @@ std::vector<jobject> SerializeStructuredEntries(
       continue;
     }
 
-    ResolvedEntry resolvedEntry{&entry, lat, lon, objectTypeName, objectName, objectFileOffset, refType};
+    ResolvedEntry resolvedEntry{&entry, owningDb, lat, lon, objectTypeName, objectName, objectFileOffset, refType};
     resolvedEntries.push_back(resolvedEntry);
   }
 
@@ -2891,31 +2917,28 @@ std::vector<jobject> SerializeStructuredEntries(
       regionParts.push_back(entry.postalArea->name);
     }
 
-    // admin region hierarchy (full path)
+    // admin region hierarchy (full path). Resolved exclusively against the
+    // database that produced this entry: ResolveAdminRegionHierachie reads
+    // the region index at absolute file offsets, which are per-database.
+    // Merging results from every loaded database into one map keyed by raw
+    // offset lets coinciding offsets across databases leak foreign region
+    // names into the path (see fix-cross-db-region-hierarchy).
     std::string hierarchyPath;
     if (entry.adminRegion) {
       std::map<osmscout::FileOffset, osmscout::AdminRegionRef> adminRegionMap;
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
-          for (const auto &db : databases) {
-            if (IsBasemapDatabase(db)) {
-              continue;
-            }
-            auto locationService = db->GetLocationService();
-            if (locationService) {
-              locationService->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
-            }
+          (void)databases;
+          if (IsBasemapDatabase(resolvedEntry.db)) {
+            return;
+          }
+          auto locationService = resolvedEntry.db->GetLocationService();
+          if (locationService) {
+            locationService->ResolveAdminRegionHierachie(entry.adminRegion, adminRegionMap);
           }
         }
       );
-      hierarchyPath = entry.adminRegion->name;
-      osmscout::FileOffset parentOffset = entry.adminRegion->parentRegionOffset;
-      while (parentOffset != 0) {
-        auto it = adminRegionMap.find(parentOffset);
-        if (it == adminRegionMap.end()) break;
-        hierarchyPath += "/" + it->second->name;
-        parentOffset = it->second->parentRegionOffset;
-      }
+      hierarchyPath = naviveylin::BuildAdminRegionHierarchyPath(entry.adminRegion, adminRegionMap);
     }
 
     // Validate every serialized string before touching JNI; drop the entry on
@@ -3029,7 +3052,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
     return nullptr;
   }
 
-  std::vector<osmscout::LocationSearchResult::Entry> results;
+  std::vector<ResultWithDb> results;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -3054,7 +3077,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         osmscout::LocationSearchResult searchResult;
         if (locationService->SearchForLocationByForm(param, searchResult)) {
           for (const auto &entry : searchResult.results) {
-            results.push_back(entry);
+            results.push_back(ResultWithDb{entry, db});
           }
         }
       }
@@ -3140,10 +3163,12 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     }
   }
 
-  std::vector<osmscout::LocationSearchResult::Entry> results;
+  std::vector<ResultWithDb> results;
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
   std::vector<FreeTextEntry> freeTextEntries;
-  std::set<osmscout::FileOffset> seenOffsets;
+  // Free-text dedup is per database: the same raw file offset in two
+  // different databases denotes two different objects.
+  std::map<osmscout::DBInstanceRef, std::set<osmscout::FileOffset>> seenOffsets;
 #endif
   bool limitReached = false;
 
@@ -3219,7 +3244,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         osmscout::LocationSearchResult searchResult;
         if (locationService->SearchForLocationByString(param, searchResult)) {
           for (const auto &entry : searchResult.results) {
-            results.push_back(entry);
+            results.push_back(ResultWithDb{entry, db});
           }
           if (searchResult.limitReached) {
             limitReached = true;
@@ -3251,10 +3276,10 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               if (limitReachedTotal()) {
                 break;
               }
-              if (seenOffsets.count(fref.GetFileOffset()) != 0) {
+              if (seenOffsets[db].count(fref.GetFileOffset()) != 0) {
                 continue;
               }
-              seenOffsets.insert(fref.GetFileOffset());
+              seenOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
               if (BuildFreeTextEntry(db, fref, e.first, entry)) {
                 freeTextEntries.push_back(entry);
@@ -3272,10 +3297,12 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   );
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-  // Record offsets of structured results so free-text hits of the same object
-  // are not returned twice.
-  for (const auto &entry : results) {
+  // Record per-database offsets of structured results so free-text hits of the
+  // same object are not returned twice. Dedup is per database: the same raw
+  // file offset in two different databases denotes two different objects.
+  for (const auto &result : results) {
     osmscout::ObjectFileRef ref;
+    const auto &entry = result.entry;
     if (entry.address) {
       ref = entry.address->object;
     } else if (entry.poi) {
@@ -3286,14 +3313,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       ref = entry.adminRegion->object;
     }
     if (ref.Valid()) {
-      seenOffsets.insert(ref.GetFileOffset());
+      seenOffsets[result.db].insert(ref.GetFileOffset());
     }
   }
-  // Drop free-text hits that duplicate structured results.
+  // Drop free-text hits that duplicate structured results within the same
+  // database.
   freeTextEntries.erase(
       std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
                      [&](const FreeTextEntry &e) {
-                       return seenOffsets.count(static_cast<osmscout::FileOffset>(e.objectFileOffset)) != 0;
+                       return seenOffsets[e.db].count(static_cast<osmscout::FileOffset>(e.objectFileOffset)) != 0;
                      }),
       freeTextEntries.end());
 #endif
