@@ -26,23 +26,17 @@ jobs:
         uses: bus1/cabuild/action/msdevshell@v1
         with:
           architecture: x64
-        # Restore from cache the previously built ports. If cache-miss, download and build vcpkg (aka "bootstrap vcpkg").
-      - name: Restore from cache and install vcpkg
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
+        # run-vcpkg sets VCPKG_BINARY_SOURCES=clear;x-gha,readwrite by default, so vcpkg stores each
+        # built package in the GitHub Actions cache under its ABI-hash key and restores matching
+        # packages before building. This self-heals after runner image/toolchain updates.
+      - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11.6
         with:
           runVcpkgInstall: false
+          doNotCache: false
           vcpkgJsonGlob: 'vcpkg.json'
           vcpkgGitCommitId: 55fab67aea1027f7179ae6b5c54a5ba9091c16aa # Source from 29.12.2025 (should be something like https://github.com/microsoft/vcpkg/releases/tag/2025.12.12)
-      - name: Cache vcpkg binary archives
-        uses: actions/cache@v6
-        with:
-          path: ${{ env.VCPKG_ROOT }}/archives
-          key: ${{ runner.os }}-vcpkg-archives-${{ hashFiles('vcpkg.json') }}
-      - name: Configure vcpkg to use binary cache
-        run: |
-          echo "VCPKG_BINARY_SOURCES=clear;files,${{ env.VCPKG_ROOT }}/archives,readwrite" >> $env:GITHUB_ENV
-        shell: pwsh
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
