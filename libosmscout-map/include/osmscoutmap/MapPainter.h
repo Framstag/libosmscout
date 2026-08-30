@@ -541,6 +541,42 @@ namespace osmscout {
 
   protected:
     /**
+     * Shared shield label geometry: the label text is expected to occupy
+     * exactly the label rectangle passed to DrawLabel(); the border is drawn
+     * `ShieldBorderInset` pixels away from the text and the background
+     * rectangle surrounds the border with `ShieldBackgroundGap` pixels of
+     * clearance (covering the 1 pixel border stroke). All backends use the
+     * same values, so shields are drawn identically across backends.
+     */
+    static constexpr double ShieldBorderInset=2.0;
+    static constexpr double ShieldBackgroundClearance=1.0;
+
+    /**
+     * Geometry (background and border rectangle) of a shield around the given
+     * label rectangle, identical for all backends.
+     */
+    struct ShieldGeometry
+    {
+      ScreenVectorRectangle background; //!< the filled background rectangle
+      ScreenVectorRectangle border;     //!< the border rectangle (1px stroke)
+    };
+
+    ShieldGeometry GetShieldGeometry(const ScreenVectorRectangle& labelRectangle) const
+    {
+      ScreenVectorRectangle border(labelRectangle.x-ShieldBorderInset,
+                                   labelRectangle.y-ShieldBorderInset,
+                                   labelRectangle.width+2*ShieldBorderInset,
+                                   labelRectangle.height+2*ShieldBorderInset);
+
+      ScreenVectorRectangle background(border.x-ShieldBackgroundClearance,
+                                       border.y-ShieldBackgroundClearance,
+                                       border.width+2*ShieldBackgroundClearance,
+                                       border.height+2*ShieldBackgroundClearance);
+
+      return ShieldGeometry{background,border};
+    }
+
+    /**
        Useful global helper functions.
      */
     //@{

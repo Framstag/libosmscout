@@ -69,8 +69,10 @@ namespace osmscout {
     struct CairoNativeGlyph {
       std::string character;
       CairoFont   font;
-      double width;
-      double height;
+      double width;    //!< ink width of the glyph
+      double height;   //!< ink height of the glyph
+      double xBearing; //!< x_distance from the glyph base point to the left edge of the ink
+      double yBearing; //!< vertical distance from the glyph base point (baseline) to the top edge of the ink
     };
     //static constexpr double AverageCharacterWidth = 0.75;
 #endif

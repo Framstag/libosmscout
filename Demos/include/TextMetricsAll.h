@@ -190,6 +190,49 @@ namespace TextMetricsAll {
     return true;
   }
 
+  /**
+   * Get the family name stored inside the given font file (FreeType face
+   * family_name). Needed by backends that resolve fonts by family name via
+   * fontconfig (Cairo backend): the font file name is not the family name,
+   * and asking for a guessed name silently substitutes another font on
+   * systems without that family installed.
+   *
+   * Only available when the build has FreeType (HAVE_LIB_FREETYPE).
+   *
+   * @param fontFile path to a font file loadable by FreeType
+   * @param family the family name from the font file
+   * @param error error description on failure
+   * @return true on success, false on failure
+   */
+  inline bool ReferenceFontFamily(const std::string& fontFile,
+                                  std::string& family,
+                                  std::string& error)
+  {
+    FT_Library library;
+
+    if (FT_Init_FreeType(&library) != 0) {
+      error = "Cannot initialize FreeType";
+
+      return false;
+    }
+
+    FT_Face face;
+
+    if (FT_New_Face(library, fontFile.c_str(), 0, &face) != 0) {
+      error = "Cannot load font face: " + fontFile;
+      FT_Done_FreeType(library);
+
+      return false;
+    }
+
+    family = face->family_name;
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
+
+    return true;
+  }
+
 #endif // HAVE_LIB_FREETYPE
 }
 

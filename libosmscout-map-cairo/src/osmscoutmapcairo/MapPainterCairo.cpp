@@ -812,9 +812,11 @@ namespace osmscout {
 
     PangoRectangle extends;
 
+    // request the ink rectangle (first rectangle parameter): the logical rect is
+    // derived from font metrics and would overstate the visual extents of the label
     pango_layout_get_pixel_extents(label->label.get(),
-                                   nullptr,
-                                   &extends);
+                                   &extends,
+                                   nullptr);
 
     label->text=text;
     label->fontSize=fontSize;
@@ -828,7 +830,13 @@ namespace osmscout {
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
-    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+    // request the ink rectangle (first rectangle parameter), not the logical rect:
+    // the logical rect is a constant per font (ascent/descent) and would make every
+    // glyph report the same bounding box
+    pango_font_get_glyph_extents(glyph.font.get(),
+                                 glyph.glyphString->glyphs[0].glyph,
+                                 &extends,
+                                 nullptr);
 
     return ScreenVectorRectangle((double)(extends.x) / (double)PANGO_SCALE,
                                  (double)(extends.y) / (double)PANGO_SCALE,
@@ -887,8 +895,9 @@ namespace osmscout {
 
   ScreenVectorRectangle MapPainterCairo::GlyphBoundingBox(const CairoNativeGlyph &glyph) const
   {
-    return ScreenVectorRectangle(0,
-                                 glyph.height * -1,
+    // ink bounding box relative to the glyph base point (left baseline origin)
+    return ScreenVectorRectangle(glyph.xBearing,
+                                 glyph.yBearing,
                                  glyph.width,
                                  glyph.height);
   }
@@ -911,11 +920,13 @@ namespace osmscout {
                                      &textExtents);
 
       result.back().glyph.width = textExtents.width;
-      result.back().glyph.height = label.fontExtents.height;
+      result.back().glyph.height = textExtents.height;
+      result.back().glyph.xBearing = textExtents.x_bearing;
+      result.back().glyph.yBearing = textExtents.y_bearing;
 
       result.back().position=Vertex2D(horizontalOffset,0);
 
-      horizontalOffset += result.back().glyph.width;
+      horizontalOffset += textExtents.x_advance;
     }
 
     return result;
@@ -972,8 +983,10 @@ namespace osmscout {
                                    &(label->label.textExtents));
     label->text=text;
     label->fontSize=fontSize;
+    // label dimensions describe the ink extents of the drawn text (unlike the
+    // font box from fontExtents, which is text independent)
     label->width=label->label.textExtents.width;
-    label->height=label->label.fontExtents.height;
+    label->height=label->label.textExtents.height;
 
     return label;
   }
@@ -1009,13 +1022,14 @@ namespace osmscout {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
       PangoRectangle extends;
 
+      // ink extents: offset of the drawn text within the layout
       pango_layout_get_pixel_extents(layout.get(),
-                                     nullptr,
-                                     &extends);
+                                     &extends,
+                                     nullptr);
 
       cairo_move_to(draw,
                     labelRectangle.x - extends.x,
-                    labelRectangle.y);
+                    labelRectangle.y - extends.y);
 
       if (style->GetStyle() == TextStyle::normal) {
         pango_cairo_show_layout(draw,
@@ -1039,10 +1053,13 @@ namespace osmscout {
         cairo_fill(draw);
       }
 #else
+      // draw so that the ink of the text starts exactly at the label rectangle
+      // origin: convert ink bearings (relative to the baseline start point) into
+      // a pen position at the baseline
       cairo_set_scaled_font(draw, layout.font);
       cairo_move_to(draw,
-                    labelRectangle.x,
-                    labelRectangle.y+layout.fontExtents.ascent);
+                    labelRectangle.x - layout.textExtents.x_bearing,
+                    labelRectangle.y - layout.textExtents.y_bearing);
 
       if (style->GetStyle()==TextStyle::normal) {
         cairo_show_text(draw,label.text.c_str());
@@ -1068,6 +1085,10 @@ namespace osmscout {
 
       cairo_set_dash(draw,nullptr,0,0);
       cairo_set_line_width(draw,1);
+
+      // shared shield geometry, identical in all backends
+      ShieldGeometry shield=GetShieldGeometry(labelRectangle);
+
       cairo_set_source_rgba(draw,
                             style->GetBgColor().GetR(),
                             style->GetBgColor().GetG(),
@@ -1075,10 +1096,10 @@ namespace osmscout {
                             style->GetBgColor().GetA());
 
       cairo_rectangle(draw,
-                      labelRectangle.x-2,
-                      labelRectangle.y,
-                      labelRectangle.width+3,
-                      labelRectangle.height+1);
+                      shield.background.x,
+                      shield.background.y,
+                      shield.background.width,
+                      shield.background.height);
       cairo_fill(draw);
 
       cairo_set_source_rgba(draw,
@@ -1088,10 +1109,10 @@ namespace osmscout {
                             style->GetBorderColor().GetA());
 
       cairo_rectangle(draw,
-                      labelRectangle.x +0,
-                      labelRectangle.y +2,
-                      labelRectangle.width +3-4,
-                      labelRectangle.height +1-4);
+                      shield.border.x,
+                      shield.border.y,
+                      shield.border.width,
+                      shield.border.height);
       cairo_stroke(draw);
 
       cairo_set_source_rgba(draw,
@@ -1103,13 +1124,14 @@ namespace osmscout {
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
       PangoRectangle extends;
 
+      // ink extents: offset of the drawn text within the layout
       pango_layout_get_pixel_extents(layout.get(),
-                                     nullptr,
-                                     &extends);
+                                     &extends,
+                                     nullptr);
 
       cairo_move_to(draw,
                     labelRectangle.x - extends.x,
-                    labelRectangle.y);
+                    labelRectangle.y - extends.y);
 
       pango_cairo_show_layout(draw,
                               layout.get());
@@ -1117,9 +1139,10 @@ namespace osmscout {
 
 #else
       cairo_set_scaled_font(draw, layout.font);
+      // see text style branch above: place the ink at the label rectangle origin
       cairo_move_to(draw,
-                    labelRectangle.x,
-                    labelRectangle.y+layout.fontExtents.ascent);
+                    labelRectangle.x - layout.textExtents.x_bearing,
+                    labelRectangle.y - layout.textExtents.y_bearing);
 
       cairo_show_text(draw,label.text.c_str());
       cairo_stroke(draw);
