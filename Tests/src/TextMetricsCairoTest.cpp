@@ -168,27 +168,41 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   FcPatternDestroy(pattern);
 #endif
 
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && PANGO_VERSION >= PANGO_VERSION_CHECK(1,56,0)
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && defined(PANGO_VERSION_CHECK) && PANGO_VERSION_CHECK(1,56,0)
   // Register the font file directly with the Pango font map. This is the
   // backend-independent way (since Pango 1.56) to load a font from a file:
   // fontconfig application font on Unix, DirectWrite on Windows. Without
   // this, systems without the font installed silently substitute another
   // font and the measurement comparison fails.
+  //
+  // The CoreText font map (default on macOS) does not support loading font
+  // files; there the font must be installed system-wide (see CI setup) and
+  // the measurement comparison below is the actual check.
   {
-    GError *pangoError=nullptr;
+    PangoFontMap *fontMap=pango_cairo_font_map_get_default();
 
-    bool fontAdded=pango_font_map_add_font_file(PANGO_FONT_MAP(pango_cairo_font_map_get_default()),
-                                                TEXT_METRICS_FONT_PATH,
-                                                &pangoError);
+#if defined(PANGO_TYPE_CAIRO_CORE_TEXT_FONT_MAP)
+    bool isCoreText=PANGO_IS_CAIRO_CORE_TEXT_FONT_MAP(fontMap);
+#else
+    bool isCoreText=false;
+#endif
 
-    if (pangoError!=nullptr) {
-      INFO("Cannot add font \"" << TEXT_METRICS_FONT_PATH << "\" to the Pango font map: "
-           << pangoError->message);
+    if (!isCoreText) {
+      GError *pangoError=nullptr;
 
-      g_error_free(pangoError);
+      bool fontAdded=pango_font_map_add_font_file(fontMap,
+                                                  TEXT_METRICS_FONT_PATH,
+                                                  &pangoError);
+
+      if (pangoError!=nullptr) {
+        INFO("Cannot add font \"" << TEXT_METRICS_FONT_PATH << "\" to the Pango font map: "
+             << pangoError->message);
+
+        g_error_free(pangoError);
+      }
+
+      REQUIRE(fontAdded);
     }
-
-    REQUIRE(fontAdded);
   }
 #endif
 
