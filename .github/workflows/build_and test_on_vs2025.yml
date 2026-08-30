@@ -9,15 +9,14 @@ on:
       - master
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: write
-  packages: write
-
 jobs:
   build_cmake:
     name: cmake
     runs-on: windows-2025
+    permissions:
+      contents: read
+      actions: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -46,6 +45,8 @@ jobs:
       # NuGet.config (outside the repo checkout) and the runner is destroyed after the job.
       - name: Configure NuGet source for vcpkg binary cache
         shell: pwsh
+        env:
+          NUGET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $nuget = $(${{ github.workspace }}/vcpkg/vcpkg.exe fetch nuget)
           & $nuget sources add `
@@ -54,8 +55,8 @@ jobs:
             -StorePasswordInClearText `
             -Name GitHubPackages `
             -UserName "Framstag" `
-            -Password "${{ secrets.GITHUB_TOKEN }}"
-          & $nuget setapikey "${{ secrets.GITHUB_TOKEN }}" `
+            -Password "$env:NUGET_TOKEN"
+          & $nuget setapikey "$env:NUGET_TOKEN" `
             -ConfigFile "$env:APPDATA\NuGet\NuGet.Config" `
             -Source "https://nuget.pkg.github.com/Framstag/index.json"
       # Override run-vcpkg's default VCPKG_BINARY_SOURCES (x-gha was removed from vcpkg-tool)
