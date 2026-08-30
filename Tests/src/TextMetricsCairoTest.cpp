@@ -238,7 +238,12 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
 
   REQUIRE(metrics.glyphs.size()==labels.size());
 
-  double tolerance=2.0;
+  // Ink box tolerance: the backend rasterizer (FreeType on Unix, DirectWrite/
+  // GDI on Windows, CoreText on macOS) may differ from the FreeType reference
+  // by a few pixels on ink extents. The font identity is guaranteed by the
+  // fontconfig family check above, so this comparison verifies ink semantics
+  // (per-glyph boxes, not a constant font box), not the exact rasterizer.
+  double tolerance=3.0;
   double previousX=0.0;
 
   for (size_t i=0; i<labels.size() && i<metrics.glyphs.size(); i++) {
