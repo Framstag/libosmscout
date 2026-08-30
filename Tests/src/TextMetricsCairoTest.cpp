@@ -110,8 +110,58 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   // Make the bundled font file visible to fontconfig so that fontconfig
   // (and thus the Pango/cairo font resolution) can find the exact font even
   // if the font is not installed system-wide
-  REQUIRE(FcConfigAppFontAddFile(nullptr,
-                                 reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH)));
+  bool appFontAdded=FcConfigAppFontAddFile(nullptr,
+                                           reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+
+  if (!appFontAdded) {
+    INFO("Cannot register font \"" << TEXT_METRICS_FONT_PATH << "\" as fontconfig application font");
+  }
+
+  // Verify that fontconfig resolves the family to a Liberation Sans font.
+  // Otherwise the metrics below are measured with a substituted font (e.g.
+  // Arial/Helvetica, which is metric-compatible with Liberation Sans except
+  // for a few glyphs like "\u00df") and the comparison fails confusingly.
+  FcPattern *pattern=FcPatternCreate();
+
+  REQUIRE(pattern!=nullptr);
+
+  FcPatternAddString(pattern,
+                     FC_FAMILY,
+                     reinterpret_cast<const FcChar8*>(fontFamily.c_str()));
+
+  FcConfigSubstitute(nullptr,
+                     pattern,
+                     FcMatchPattern);
+  FcDefaultSubstitute(pattern);
+
+  FcResult  matchResult=FcResultNoMatch;
+  FcPattern *match=FcFontMatch(nullptr,
+                               pattern,
+                               &matchResult);
+
+  REQUIRE(match!=nullptr);
+
+  FcChar8 *resolvedFamily=nullptr;
+  FcChar8 *resolvedFile=nullptr;
+
+  FcPatternGetString(match,
+                     FC_FAMILY,
+                     0,
+                     &resolvedFamily);
+  FcPatternGetString(match,
+                     FC_FILE,
+                     0,
+                     &resolvedFile);
+
+  INFO("fontconfig resolved \"" << fontFamily << "\" to \""
+       << (resolvedFamily!=nullptr ? std::string(reinterpret_cast<char*>(resolvedFamily)) : std::string("?"))
+       << "\" (" << (resolvedFile!=nullptr ? std::string(reinterpret_cast<char*>(resolvedFile)) : std::string("?")) << ")");
+
+  REQUIRE(resolvedFamily!=nullptr);
+  REQUIRE(fontFamily==reinterpret_cast<const char*>(resolvedFamily));
+
+  FcPatternDestroy(match);
+  FcPatternDestroy(pattern);
 #endif
 
   cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
