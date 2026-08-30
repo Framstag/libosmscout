@@ -23,7 +23,11 @@
 #include <cmath>
 #include <string>
 
-#include <cairo/cairo.h>
+#if defined(__WIN32__) || defined(WIN32) || (defined(__APPLE__) && __APPLE__)
+  #include <cairo.h>
+#else
+  #include <cairo/cairo.h>
+#endif
 
 #include <QApplication>
 #include <QImage>
