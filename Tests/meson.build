@@ -894,12 +894,21 @@ if ftDep.found()
 endif
 
 if ftDep.found() and buildMapCairo
+  textMetricsCairoDeps = [mathDep, openmpDep, catch2MainDep, ftDep, pangocairoDep]
+  textMetricsCairoArgs = ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+  # register the test font file as fontconfig application font (see test source)
+  if fontconfigDep.found()
+    textMetricsCairoDeps += fontconfigDep
+    textMetricsCairoArgs += '-DHAVE_LIB_FONTCONFIG'
+  endif
+
   TextMetricsCairoTest = executable('TextMetricsCairoTest',
                'src/TextMetricsCairoTest.cpp',
                include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir, include_directories('../Demos/include')],
-               dependencies: [mathDep, openmpDep, catch2MainDep, ftDep, pangocairoDep],
+               dependencies: textMetricsCairoDeps,
                link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
-               cpp_args: ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
+               cpp_args: textMetricsCairoArgs,
                install: true,
                install_dir: testInstallDir)
 

@@ -23,6 +23,10 @@
 #include <filesystem>
 #include <string>
 
+#if defined(HAVE_LIB_FONTCONFIG)
+  #include <fontconfig/fontconfig.h>
+#endif
+
 #include <cairo/cairo.h>
 
 #include <osmscout/projection/MercatorProjection.h>
@@ -38,18 +42,6 @@
 
 namespace {
 
-  std::string FontFileFamilyName(const std::string& fontPath)
-  {
-    std::string base=std::filesystem::path(fontPath).filename().string();
-    size_t      dot=base.find_last_of('.');
-
-    if (dot!=std::string::npos) {
-      base=base.substr(0, dot);
-    }
-
-    return base;
-  }
-
   osmscout::MercatorProjection CreateProjection()
   {
     osmscout::MercatorProjection projection;
@@ -64,13 +56,14 @@ namespace {
     return projection;
   }
 
-  osmscout::MapParameter CreateParameter()
+  osmscout::MapParameter CreateParameter(const std::string& fontFamily)
   {
     osmscout::MapParameter parameter;
 
     parameter.SetFontSize(10.0);
-    // measure with the same font that the FreeType reference loads from file
-    parameter.SetFontName(FontFileFamilyName(TEXT_METRICS_FONT_PATH));
+    // measure with the same font that the FreeType reference loads from file;
+    // the family name is the name stored inside the font file, not its file name
+    parameter.SetFontName(fontFamily);
 
     return parameter;
   }
@@ -98,6 +91,25 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   REQUIRE(error.empty());
   REQUIRE_FALSE(reference.glyphs.empty());
 
+  // Resolve the family name stored inside the font file. The cairo backend
+  // resolves fonts by family name through fontconfig; asking for the file
+  // name (which is not a family name) silently substitutes another font on
+  // systems without the font installed.
+  std::string fontFamily;
+
+  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
+                                              fontFamily,
+                                              error));
+  REQUIRE(error.empty());
+
+#if defined(HAVE_LIB_FONTCONFIG)
+  // Make the bundled font file visible to fontconfig so that fontconfig
+  // (and thus the Pango/cairo font resolution) can find the exact font even
+  // if the font is not installed system-wide
+  REQUIRE(FcConfigAppFontAddFile(nullptr,
+                                 reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH)));
+#endif
+
   cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
                                                        800,
                                                        480);
@@ -115,12 +127,12 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
 
   // DrawMap sets the internal cairo context used by Layout()/MeasureText()
   painter.DrawMap(CreateProjection(),
-                  CreateParameter(),
+                  CreateParameter(fontFamily),
                   {},
                   cr);
 
   auto metrics=painter.MeasureText(CreateProjection(),
-                                   CreateParameter(),
+                                   CreateParameter(fontFamily),
                                    "Musterstraße",
                                    1.0);
 

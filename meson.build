@@ -211,6 +211,7 @@ endif
 cairoDep = dependency('cairo', required : false)
 pangoDep = dependency('pango', required : false)
 pangocairoDep = dependency('pangocairo', required : false)
+fontconfigDep = dependency('fontconfig', required : false)
 pangoft2Dep = dependency('pangoft2', required : false)
 pngDep = dependency('libpng', required: false, fallback: ['libpng','libpng_dep'])
 gobjectDep = dependency('gobject-2.0',required: false)

@@ -32,6 +32,7 @@ jobs:
               libxml2-dev
               libprotobuf-dev protobuf-compiler
               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+              fonts-liberation
               libmarisa-dev
               xvfb"
       - name: Configure build project
@@ -165,6 +166,7 @@ jobs:
                catch2
                libxml2-dev
                libprotobuf-dev protobuf-compiler
+               fonts-liberation
                libmarisa-dev
                libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
                xvfb"

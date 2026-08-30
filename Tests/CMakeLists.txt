@@ -414,6 +414,17 @@ endif()
 if(HAVE_LIB_FREETYPE AND ${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME TextMetricsCairoTest SOURCES src/TextMetricsCairoTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include ${CAIRO_INCLUDE_DIRS})
   target_compile_definitions(TextMetricsCairoTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
+
+  # Optional direct fontconfig usage: the test registers the bundled font
+  # file as a fontconfig application font so that the fontconfig-based
+  # font resolution of the cairo backend finds the exact font even on
+  # systems without the font installed system-wide
+  find_package(Fontconfig QUIET)
+  if(TARGET Fontconfig::Fontconfig)
+    # must stay plain: osmscout_test_project links via the plain signature
+    target_link_libraries(TextMetricsCairoTest Fontconfig::Fontconfig)
+    target_compile_definitions(TextMetricsCairoTest PRIVATE HAVE_LIB_FONTCONFIG)
+  endif()
 endif()
 
 #---- TextMetricsCrossBackendTest: cross-backend (Cairo/Qt/Skia) dimensions + glyph offsets
