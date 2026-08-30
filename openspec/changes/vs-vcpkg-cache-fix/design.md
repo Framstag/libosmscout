@@ -63,7 +63,7 @@ Set `doNotCache: false` on the `lukka/run-vcpkg` step so the vcpkg tool clone (~
 
 ## Migration Plan
 
-1. Edit `.github/workflows/build_and test_on_vs2025.yml`: add `permissions: packages: write`; remove the `Cache vcpkg binary archives` step and the old `Configure vcpkg to use binary cache` override; add the NuGet source registration step and the NuGet `VCPKG_BINARY_SOURCES` override; add `doNotCache: false` to the run-vcpkg step. Add `NuGet.config` to `.gitignore`.
+1. Edit `.github/workflows/build_and test_on_vs2025.yml`: add `permissions: packages: write` (plus `contents: read` and `actions: write`) on the `build_cmake` job; remove the `Cache vcpkg binary archives` step and the old `Configure vcpkg to use binary cache` override; add the NuGet source registration step and the NuGet `VCPKG_BINARY_SOURCES` override; add `doNotCache: false` to the run-vcpkg step. Add `NuGet.config` to `.gitignore`.
 2. Push to a branch, run the workflow: first run rebuilds all packages and pushes them to the GitHub Packages feed.
 3. Re-run: verify "Restored N package(s)" with N > 0 and the configure step drops from ~60 min to ~2 min.
 4. Rollback: revert the workflow edit; the old `actions/cache` entry remains until evicted, and feed packages can be deleted from GitHub Packages.
