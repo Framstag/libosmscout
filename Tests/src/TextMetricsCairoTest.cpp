@@ -21,6 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <filesystem>
+#include <cstring>
 #include <string>
 
 #if defined(HAVE_LIB_FONTCONFIG)
@@ -181,11 +182,12 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   {
     PangoFontMap *fontMap=pango_cairo_font_map_get_default();
 
-#if defined(PANGO_TYPE_CAIRO_CORE_TEXT_FONT_MAP)
-    bool isCoreText=PANGO_IS_CAIRO_CORE_TEXT_FONT_MAP(fontMap);
-#else
-    bool isCoreText=false;
-#endif
+    // The CoreText font map (default on macOS) does not support loading font
+    // files; there the font must be installed system-wide (see CI setup) and
+    // the measurement comparison below is the actual check. The font map
+    // type is not exposed through a public header, so detect it at runtime.
+    const char *fontMapType=G_OBJECT_TYPE_NAME(fontMap);
+    bool        isCoreText=strstr(fontMapType, "CoreText")!=nullptr;
 
     if (!isCoreText) {
       GError *pangoError=nullptr;
