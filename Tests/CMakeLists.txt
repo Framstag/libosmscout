@@ -185,6 +185,13 @@ else()
 	message("Skip ScreenMask test, libosmscout-map is missing.")
 endif()
 
+#---- LabelLayouter
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME LabelLayouterTest SOURCES src/LabelLayouterTest.cpp TARGET OSMScout::Map)
+else()
+	message("Skip LabelLayouter test, libosmscout-map is missing.")
+endif()
+
 #---- StringUtils
 osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 

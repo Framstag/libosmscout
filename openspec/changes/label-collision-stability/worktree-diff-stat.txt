@@ -1,0 +1,12 @@
+ AGENTS.md                                          |   1 +
+ OSMScout2/qml/main.qml                             |  27 +++
+ Tests/CMakeLists.txt                               |   7 +
+ Tests/meson.build                                  |  10 +
+ .../include/osmscoutclientqt/MapWidget.h           |   1 +
+ .../src/osmscoutclientqt/MapRenderer.cpp           |  15 +-
+ .../src/osmscoutclientqt/MapWidget.cpp             |  18 ++
+ .../src/osmscoutclientqt/PlaneMapRenderer.cpp      |  44 ++++
+ .../include/osmscoutmap/LabelLayouter.h            | 241 +++++++++++++++++++--
+ libosmscout-map/include/osmscoutmap/MapPainter.h   |  17 ++
+ libosmscout-map/src/osmscoutmap/MapPainter.cpp     |  68 +++++-
+ 11 files changed, 427 insertions(+), 22 deletions(-)
