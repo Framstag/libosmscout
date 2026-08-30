@@ -27,6 +27,10 @@
   #include <fontconfig/fontconfig.h>
 #endif
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+  #include <pango/pango.h>
+#endif
+
 #if defined(__WIN32__) || defined(WIN32) || (defined(__APPLE__) && __APPLE__)
   #include <cairo.h>
 #else
@@ -162,6 +166,30 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
 
   FcPatternDestroy(match);
   FcPatternDestroy(pattern);
+#endif
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && PANGO_VERSION >= PANGO_VERSION_CHECK(1,56,0)
+  // Register the font file directly with the Pango font map. This is the
+  // backend-independent way (since Pango 1.56) to load a font from a file:
+  // fontconfig application font on Unix, DirectWrite on Windows. Without
+  // this, systems without the font installed silently substitute another
+  // font and the measurement comparison fails.
+  {
+    GError *pangoError=nullptr;
+
+    bool fontAdded=pango_font_map_add_font_file(PANGO_FONT_MAP(pango_cairo_font_map_get_default()),
+                                                TEXT_METRICS_FONT_PATH,
+                                                &pangoError);
+
+    if (pangoError!=nullptr) {
+      INFO("Cannot add font \"" << TEXT_METRICS_FONT_PATH << "\" to the Pango font map: "
+           << pangoError->message);
+
+      g_error_free(pangoError);
+    }
+
+    REQUIRE(fontAdded);
+  }
 #endif
 
   cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
