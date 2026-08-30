@@ -146,6 +146,8 @@ GitHub Actions in `.github/workflows/`:
 | `release.yml` / `release_latest.yml` | Release automation |
 | `webpage.yml` | Website build |
 
+Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
+
 ## Code Conventions
 
 ### Language & Standards
