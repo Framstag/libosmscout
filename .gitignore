@@ -54,6 +54,10 @@
 # AI
 /.pi
 
+# NuGet (runner-local vcpkg binary cache config; never commit)
+/NuGet.config
+/nuget.config
+
 # User-specific
 /CMakeUserPresets.json
 /mise.toml

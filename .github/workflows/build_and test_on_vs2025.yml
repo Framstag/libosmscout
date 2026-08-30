@@ -9,6 +9,11 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: write
+  packages: write
+
 jobs:
   build_cmake:
     name: cmake
@@ -27,9 +32,6 @@ jobs:
         with:
           architecture: x64
         # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
-        # run-vcpkg sets VCPKG_BINARY_SOURCES=clear;x-gha,readwrite by default, so vcpkg stores each
-        # built package in the GitHub Actions cache under its ABI-hash key and restores matching
-        # packages before building. This self-heals after runner image/toolchain updates.
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11.6
         with:
@@ -37,6 +39,32 @@ jobs:
           doNotCache: false
           vcpkgJsonGlob: 'vcpkg.json'
           vcpkgGitCommitId: 55fab67aea1027f7179ae6b5c54a5ba9091c16aa # Source from 29.12.2025 (should be something like https://github.com/microsoft/vcpkg/releases/tag/2025.12.12)
+      # vcpkg binary cache: built packages are stored as NuGet packages in the GitHub Packages
+      # feed (nuget.pkg.github.com). Each package is versioned by its ABI hash, so a runner
+      # image/toolchain update produces new versions and the cache self-heals; manifest changes
+      # only rebuild the affected ports. The GITHUB_TOKEN is written to the runner-local
+      # NuGet.config (outside the repo checkout) and the runner is destroyed after the job.
+      - name: Configure NuGet source for vcpkg binary cache
+        shell: pwsh
+        run: |
+          $nuget = $(${{ github.workspace }}/vcpkg/vcpkg.exe fetch nuget)
+          & $nuget sources add `
+            -ConfigFile "$env:APPDATA\NuGet\NuGet.Config" `
+            -Source "https://nuget.pkg.github.com/Framstag/index.json" `
+            -StorePasswordInClearText `
+            -Name GitHubPackages `
+            -UserName "Framstag" `
+            -Password "${{ secrets.GITHUB_TOKEN }}"
+          & $nuget setapikey "${{ secrets.GITHUB_TOKEN }}" `
+            -ConfigFile "$env:APPDATA\NuGet\NuGet.Config" `
+            -Source "https://nuget.pkg.github.com/Framstag/index.json"
+      # Override run-vcpkg's default VCPKG_BINARY_SOURCES (x-gha was removed from vcpkg-tool)
+      # and point vcpkg's binary cache at the GitHub Packages NuGet feed.
+      - name: Configure vcpkg binary cache
+        shell: pwsh
+        run: |
+          echo "VCPKG_BINARY_SOURCES=clear;nuget,https://nuget.pkg.github.com/Framstag/index.json,readwrite" >> $env:GITHUB_ENV
+          echo "VCPKG_NUGET_REPOSITORY=https://nuget.pkg.github.com/Framstag/index.json" >> $env:GITHUB_ENV
       - name: Create build directory
         run:  mkdir build
       - name: Configure build project
