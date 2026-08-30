@@ -26,6 +26,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include <core/SkCanvas.h>
 #include <core/SkFont.h>
@@ -49,6 +50,8 @@ namespace osmscout {
       std::string character; //!< UTF-8 character string
       double      width;     //!< Glyph advance width in pixels
       double      height;    //!< Glyph height in pixels (full font height)
+      double      xMin;      //!< Glyph ink left edge, relative to the baseline start
+      double      xMax;      //!< Glyph ink right edge, relative to the baseline start
       double      yMin;      //!< Glyph bounding box top (fAscent), negative above baseline
       double      yMax;      //!< Glyph bounding box bottom, positive below baseline
       double      fontSize;  //!< Font size in pixels for this glyph
@@ -57,6 +60,19 @@ namespace osmscout {
       std::string text;           //!< The label text
       double      fontSize;       //!< Font size used
       sk_sp<SkTypeface> typeface; //!< Typeface used for this label
+
+      /**
+       * Draw point (baseline start) of one text line, relative to the label
+       * origin. The label origin is the top-left corner of the ink of the
+       * text, so drawing at the label rectangle origin puts the ink exactly
+       * into the rectangle.
+       */
+      struct LinePlacement {
+        double x{0}; //!< x of the baseline start, relative to the label origin
+        double y{0}; //!< y of the baseline, relative to the label origin
+      };
+
+      std::vector<LinePlacement> linePositions; //!< one entry per text line
     };
     using SkiaLabel = Label<SkiaNativeGlyph, SkiaNativeLabel>;
     using SkiaGlyph = Glyph<SkiaNativeGlyph>;

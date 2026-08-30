@@ -1,0 +1,93 @@
+TextMetricsAll: measuring "Musterstraße 12"
+  font: /usr/share/fonts/liberation/LiberationSans-Regular.ttf
+  pixel size: 30.2362 px (fontSize=4 fontSizeParam=2 dpi=96)
+  output directory: textmetrics-output
+  Reference (FreeType): label width=219 height=35
+    glyph 0: box=(2, -21, 21, 21) advance=25
+    glyph 1: box=(1, -16, 14, 16) advance=17
+    glyph 2: box=(0, -16, 14, 16) advance=15
+    glyph 3: box=(0, -20, 9, 20) advance=8
+    glyph 4: box=(1, -16, 15, 16) advance=17
+    glyph 5: box=(2, -16, 8, 16) advance=10
+    glyph 6: box=(0, -16, 14, 16) advance=15
+    glyph 7: box=(0, -20, 9, 20) advance=8
+    glyph 8: box=(2, -16, 8, 16) advance=10
+    glyph 9: box=(1, -16, 16, 16) advance=17
+    glyph 10: box=(2, -22, 16, 22) advance=18
+    glyph 11: box=(1, -16, 15, 16) advance=17
+    glyph 12: box=(0, -0, 0, 0) advance=8
+    glyph 13: box=(2, -21, 14, 21) advance=17
+    glyph 14: box=(1, -21, 15, 21) advance=17
+AGG backend: unavailable (not compiled in)
+Cairo backend...
+  Cairo: label width=216 height=23
+    glyph 0: pos=(0, 0) box=(2, -22, 21, 22) diff=(0, -1, 0, 1)
+    glyph 1: pos=(25, 0) box=(1, -16, 14, 17) diff=(0, 0, 0, 1)
+    glyph 2: pos=(42, 0) box=(1, -16, 13, 16) diff=(1, 0, -1, 0)
+    glyph 3: pos=(57, 0) box=(0, -21, 8, 21) diff=(0, -1, -1, 1)
+    glyph 4: pos=(65, 0) box=(1, -16, 15, 16) diff=(0, 0, 0, 0)
+    glyph 5: pos=(82, 0) box=(2, -17, 8, 17) diff=(0, -1, 0, 1)
+    glyph 6: pos=(92, 0) box=(1, -16, 13, 16) diff=(1, 0, -1, 0)
+    glyph 7: pos=(107, 0) box=(0, -21, 8, 21) diff=(0, -1, -1, 1)
+    glyph 8: pos=(115, 0) box=(2, -17, 8, 17) diff=(0, -1, 0, 1)
+    glyph 9: pos=(125, 0) box=(1, -16, 16, 16) diff=(0, 0, 0, 0)
+    glyph 10: pos=(142, 0) box=(2, -22, 15, 22) diff=(0, 0, -1, 0)
+    glyph 11: pos=(160, 0) box=(1, -16, 15, 16) diff=(0, 0, 0, 0)
+    glyph 12: pos=(177, 0) box=(0, 0, 0, 0) diff=(0, 0, 0, 0)
+    glyph 13: pos=(185, 0) box=(3, -22, 8, 22) diff=(1, -1, -6, 1)
+    glyph 14: pos=(202, 0) box=(1, -22, 15, 22) diff=(0, -1, 0, 1)
+  OK: textmetrics-output/TextMetricsCairo.png
+Qt backend...
+  Qt: label width=216.281 height=22
+    glyph 0: pos=(-2, 0) box=(2, -22, 26, 22) diff=(0, -1, 5, 1)
+    glyph 1: pos=(22.9844, 0) box=(2, -16, 16, 16) diff=(1, 0, 2, 0)
+    glyph 2: pos=(39.6562, 0) box=(1, -16, 15, 16) diff=(1, 0, 1, 0)
+    glyph 3: pos=(54.3125, 0) box=(2, -21, 9, 21) diff=(2, -1, 0, 1)
+    glyph 4: pos=(62.3125, 0) box=(2, -16, 16, 16) diff=(1, 0, 1, 0)
+    glyph 5: pos=(78.9844, 0) box=(2, -17, 12, 17) diff=(0, -1, 4, 1)
+    glyph 6: pos=(88.9062, 0) box=(1, -16, 15, 16) diff=(1, 0, 1, 0)
+    glyph 7: pos=(103.562, 0) box=(2, -21, 9, 21) diff=(2, -1, 0, 1)
+    glyph 8: pos=(111.656, 0) box=(2, -17, 12, 17) diff=(0, -1, 4, 1)
+    glyph 9: pos=(121.188, 0) box=(1, -16, 17, 16) diff=(0, 0, 1, 0)
+    glyph 10: pos=(137.734, 0) box=(2, -22, 18, 22) diff=(0, 0, 2, 0)
+    glyph 11: pos=(155.609, 0) box=(2, -16, 16, 16) diff=(1, 0, 1, 0)
+    glyph 12: pos=(172.281, 0) box=(0, 0, 0, 0) diff=(0, 0, 0, 0)
+    glyph 13: pos=(180.609, 0) box=(6, -22, 10, 22) diff=(4, -1, -4, 1)
+    glyph 14: pos=(197.281, 0) box=(1, -21, 18, 21) diff=(0, 0, 3, 0)
+  OK: textmetrics-output/TextMetricsQt.png
+Skia backend...
+  Skia: label width=216 height=23
+    glyph 0: pos=(0, 0) box=(2, -22, 21, 22) diff=(0, -1, 0, 1)
+    glyph 1: pos=(25, 0) box=(1, -16, 14, 17) diff=(0, 0, 0, 1)
+    glyph 2: pos=(42, 0) box=(1, -16, 13, 16) diff=(1, 0, -1, 0)
+    glyph 3: pos=(57, 0) box=(0, -21, 8, 21) diff=(0, -1, -1, 1)
+    glyph 4: pos=(65, 0) box=(1, -16, 15, 16) diff=(0, 0, 0, 0)
+    glyph 5: pos=(82, 0) box=(2, -17, 8, 17) diff=(0, -1, 0, 1)
+    glyph 6: pos=(92, 0) box=(1, -16, 13, 16) diff=(1, 0, -1, 0)
+    glyph 7: pos=(107, 0) box=(0, -21, 8, 21) diff=(0, -1, -1, 1)
+    glyph 8: pos=(115, 0) box=(2, -17, 8, 17) diff=(0, -1, 0, 1)
+    glyph 9: pos=(125, 0) box=(1, -16, 16, 16) diff=(0, 0, 0, 0)
+    glyph 10: pos=(142, 0) box=(2, -22, 15, 22) diff=(0, 0, -1, 0)
+    glyph 11: pos=(160, 0) box=(1, -16, 15, 16) diff=(0, 0, 0, 0)
+    glyph 12: pos=(177, 0) box=(0, 0, 0, 0) diff=(0, 0, 0, 0)
+    glyph 13: pos=(185, 0) box=(3, -22, 8, 22) diff=(1, -1, -6, 1)
+    glyph 14: pos=(202, 0) box=(1, -22, 15, 22) diff=(0, -1, 0, 1)
+  OK: textmetrics-output/TextMetricsSkia.png
+SVG backend...
+  SVG: label width=216 height=23
+    glyph 0: pos=(0, 0) box=(2.26758, -22.041, 20.7422, 22.041) diff=(0.267578, -1.04102, -0.257812, 1.04102)
+    glyph 1: pos=(25, 0) box=(1.96484, -15.8428, 12.6094, 16.5381) diff=(0.964844, 0.157227, -1.39062, 0.538086)
+    glyph 2: pos=(42, 0) box=(1.02734, -16.2959, 12.8516, 16.9912) diff=(1.02734, -0.295898, -1.14844, 0.991211)
+    glyph 3: pos=(57, 0) box=(0.422852, -20.1963, 7.25781, 20.8916) diff=(0.422852, -0.196289, -1.74219, 0.891602)
+    glyph 4: pos=(65, 0) box=(1.20898, -16.2959, 14.3018, 16.9912) diff=(0.208984, -0.295898, -0.698242, 0.991211)
+    glyph 5: pos=(82, 0) box=(2.08594, -16.2959, 7.62012, 16.2959) diff=(0.0859375, -0.295898, -0.379883, 0.295898)
+    glyph 6: pos=(92, 0) box=(1.02734, -16.2959, 12.8516, 16.9912) diff=(1.02734, -0.295898, -1.14844, 0.991211)
+    glyph 7: pos=(107, 0) box=(0.422852, -20.1963, 7.25781, 20.8916) diff=(0.422852, -0.196289, -1.74219, 0.891602)
+    glyph 8: pos=(115, 0) box=(2.08594, -16.2959, 7.62012, 16.2959) diff=(0.0859375, -0.295898, -0.379883, 0.295898)
+    glyph 9: pos=(125, 0) box=(1.26953, -16.2959, 14.9072, 16.9912) diff=(0.269531, -0.295898, -1.09277, 0.991211)
+    glyph 10: pos=(142, 0) box=(2.11621, -22.041, 14.665, 22.6455) diff=(0.116211, -0.0410156, -1.33496, 0.645508)
+    glyph 11: pos=(160, 0) box=(1.20898, -16.2959, 14.3018, 16.9912) diff=(0.208984, -0.295898, -0.698242, 0.991211)
+    glyph 12: pos=(177, 0) box=(0, 0, 0, 0) diff=(0, 0, 0, 0)
+    glyph 13: pos=(185, 0) box=(3.08398, -21.8594, 7.4082, 21.8594) diff=(1.08398, -0.859375, -6.5918, 0.859375)
+    glyph 14: pos=(202, 0) box=(1.02734, -21.8594, 14.4238, 21.8291) diff=(0.0273438, -0.859375, -0.576172, 0.829102)
+  OK: textmetrics-output/TextMetricsSVG.svg

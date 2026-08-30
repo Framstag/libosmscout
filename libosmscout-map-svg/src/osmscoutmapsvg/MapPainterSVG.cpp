@@ -125,9 +125,11 @@ namespace osmscout {
 
     PangoRectangle extends;
 
+    // request the ink rectangle (first rectangle parameter): the logical rect is
+    // derived from font metrics and would overstate the visual extents of the label
     pango_layout_get_pixel_extents(label->label.get(),
-                                   nullptr,
-                                   &extends);
+                                   &extends,
+                                   nullptr);
 
     label->text=text;
     label->fontSize=fontSize;
@@ -141,7 +143,13 @@ namespace osmscout {
   {
     assert(glyph.glyphString->num_glyphs == 1);
     PangoRectangle extends;
-    pango_font_get_glyph_extents(glyph.font.get(), glyph.glyphString->glyphs[0].glyph, nullptr, &extends);
+    // request the ink rectangle (first rectangle parameter), not the logical rect:
+    // the logical rect is a constant per font (ascent/descent) and would make every
+    // glyph report the same bounding box
+    pango_font_get_glyph_extents(glyph.font.get(),
+                                 glyph.glyphString->glyphs[0].glyph,
+                                 &extends,
+                                 nullptr);
 
     return ScreenVectorRectangle((double)(extends.x) / (double)PANGO_SCALE,
                            (double)(extends.y) / (double)PANGO_SCALE,
@@ -313,22 +321,25 @@ namespace osmscout {
     else if (const ShieldStyle* style = dynamic_cast<const ShieldStyle*>(label.style.get());
              style != nullptr) {
 
+      // shared shield geometry, identical in all backends
+      ShieldGeometry shield=GetShieldGeometry(labelRectangle);
+
       // Shield background
       stream << "    <rect";
-      stream << " x=\"" << labelRectangle.x -2 << "\"";
-      stream << " y=\"" << labelRectangle.y -0 << "\"";
-      stream << " width=\"" << labelRectangle.width +4 << "\"";
-      stream << " height=\"" << labelRectangle.height +1 << "\"";
+      stream << " x=\"" << shield.background.x << "\"";
+      stream << " y=\"" << shield.background.y << "\"";
+      stream << " width=\"" << shield.background.width << "\"";
+      stream << " height=\"" << shield.background.height << "\"";
       stream << " fill=\"" << GetColorValue(style->GetBgColor()) << "\"";
       stream << " stroke=\"none\"";
       stream <<  "/>" << std::endl;
 
       // Shield inner border
       stream << "    <rect";
-      stream << " x=\"" << labelRectangle.x +0 << "\"";
-      stream << " y=\"" << labelRectangle.y +2 << "\"";
-      stream << " width=\"" << labelRectangle.width +4-4 << "\"";
-      stream << " height=\"" << labelRectangle.height +1-4 << "\"";
+      stream << " x=\"" << shield.border.x << "\"";
+      stream << " y=\"" << shield.border.y << "\"";
+      stream << " width=\"" << shield.border.width << "\"";
+      stream << " height=\"" << shield.border.height << "\"";
       stream << " fill=\"none\"";
       stream << " stroke=\"" << GetColorValue(style->GetBorderColor()) << "\"";
       stream << " stroke-width=\"1\"";
