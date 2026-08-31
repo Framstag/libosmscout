@@ -263,6 +263,7 @@ include order, comments, formatting, header guards, templates, and error handlin
 - **Tests**: `Tests/` for unit tests, `libosmscout-test/` for test utilities
 
 ### Common Patterns
+- After any code change, run the `verify-build-and-tests` skill (build both CMake `build/` and Meson `debug/`, evaluate exit codes, report diagnostics; use `--with-tests` for full test suites). Do not mark work complete with build errors or warnings.
 - No DI framework — objects are constructed manually
 - Most classes accept `osmscout::TypeConfigRef` for type information
 - File I/O uses custom scanner/writer classes in `osmscout::io`

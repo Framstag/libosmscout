@@ -621,6 +621,16 @@ ScreenMaskTest = executable('ScreenMaskTest',
 
 test('Check ScreenMask functionality', ScreenMaskTest)
 
+LabelLayouterTest = executable('LabelLayouterTest',
+                       'src/LabelLayouterTest.cpp',
+                       include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                       dependencies: [mathDep, openmpDep, catch2MainDep],
+                       link_with: [osmscoutmap, osmscout],
+                       install: true,
+                       install_dir: testInstallDir)
+
+test('Check LabelLayouter functionality', LabelLayouterTest)
+
 SignalTest = executable('SignalTest',
                     'src/SignalTest.cpp',
                     include_directories: [testIncDir, osmscoutIncDir],

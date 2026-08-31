@@ -218,11 +218,35 @@ constexpr bool debugLabelLayouter = false;
   };
 
   template <class NativeGlyph, class NativeLabel>
-  static bool LabelInstanceSorter(const LabelInstance<NativeGlyph, NativeLabel> &a,
-                                  const LabelInstance<NativeGlyph, NativeLabel> &b)
+  class LabelInstanceSorter CLASS_FINAL
   {
-    return a.priority < b.priority;
-  }
+  public:
+    explicit LabelInstanceSorter(const std::set<ObjectFileRef> &visibleRefs)
+      : visibleRefs(visibleRefs)
+    {
+    }
+
+    bool operator()(const LabelInstance<NativeGlyph, NativeLabel> &a,
+                    const LabelInstance<NativeGlyph, NativeLabel> &b) const
+    {
+      // Labels that were already visible in the previous layout round claim
+      // their space first. This makes the visibility of labels stable against
+      // growth of the candidate set (e.g. when the render bounding box of the
+      // previous asynchronous rendering differs from the current one). Within
+      // the two groups the ordering is the (priority,basemap,ref) tuple.
+      const bool aWasVisible=visibleRefs.count(a.priority.ref)>0;
+      const bool bWasVisible=visibleRefs.count(b.priority.ref)>0;
+
+      if (aWasVisible!=bWasVisible) {
+        return aWasVisible;
+      }
+
+      return a.priority < b.priority;
+    }
+
+  private:
+    const std::set<ObjectFileRef> &visibleRefs;
+  };
 
   template <class NativeGlyph>
   static bool ContourLabelSorter(const ContourLabel<NativeGlyph> &a,
@@ -271,6 +295,20 @@ constexpr bool debugLabelLayouter = false;
     explicit LabelLayouter(TextLayouter *textLayouter):
         textLayouter(textLayouter)
     {};
+    /**
+     * Temporary diagnostics for label stability investigation: enabled by
+     * the environment variable OSMSCOUT_DEBUG_LABEL_HYSTERESIS. For
+     * every layout round that loses a label that was visible in the
+     * previous round, the reason is reported: not registered anymore
+     * (candidate/data churn) or hidden by collision despite previously
+     * visible (resolution churn).
+     */
+    static bool IsHysteresisDebug()
+    {
+      static const bool enabled=std::getenv("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")!=nullptr;
+
+      return enabled;
+    }
 
     void SetViewport(const ScreenVectorRectangle& v)
     {
@@ -287,6 +325,14 @@ constexpr bool debugLabelLayouter = false;
       layoutViewport.y = visibleViewport.y - overlap;
     }
 
+    /**
+     * Clears all registered labels and layout results of the current
+     * draw. The previous-round visibility state is intentionally kept:
+     * it provides stable label visibility when the candidate set
+     * changes between draw calls (rendering of shifted bounding boxes,
+     * asynchronous tile loading). The state is refreshed by every
+     * Layout() call.
+     */
     void Reset()
     {
       contourLabelInstances.clear();
@@ -323,10 +369,17 @@ constexpr bool debugLabelLayouter = false;
       ScreenMask labelCanvas;
       ScreenMask overlayCanvas;
 
+      const std::set<ObjectFileRef> &visibleRefs;
+      const std::set<ObjectFileRef> &visibleContourRefs;
+
       LayoutJob(const ScreenVectorRectangle &layoutViewport,
                 const Projection& projection,
-                const MapParameter& parameter):
+                const MapParameter& parameter,
+                const std::set<ObjectFileRef> &visibleRefs,
+                const std::set<ObjectFileRef> &visibleContourRefs):
               layoutViewport(layoutViewport),
+              visibleRefs(visibleRefs),
+              visibleContourRefs(visibleContourRefs),
               iconPadding(projection.ConvertWidthToPixel(parameter.GetIconPadding())),
               labelPadding(projection.ConvertWidthToPixel(parameter.GetLabelPadding())),
               shieldLabelPadding(projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding())),
@@ -356,7 +409,7 @@ constexpr bool debugLabelLayouter = false;
         // sort labels by priority and position (to be deterministic)
         std::stable_sort(allSortedLabels.begin(),
                          allSortedLabels.end(),
-                         LabelInstanceSorter<NativeGlyph, NativeLabel>);
+                         LabelInstanceSorter<NativeGlyph, NativeLabel>(visibleRefs));
         std::stable_sort(allSortedContourLabels.begin(),
                          allSortedContourLabels.end(),
                          ContourLabelSorter<NativeGlyph>);
@@ -391,8 +444,11 @@ constexpr bool debugLabelLayouter = false;
         return &labelCanvas;
       }
 
+      static constexpr int hysteresisTolerancePx=2;
+
       void ProcessLabelInstance(const LabelInstanceType &currentLabel,
-                                std::vector<LabelInstanceType> &labelInstances)
+                                std::vector<LabelInstanceType> &labelInstances,
+                                bool hysteresisTolerance)
 
       {
         size_t elementCount = currentLabel.elements.size();       // Number of elements in label
@@ -448,6 +504,26 @@ constexpr bool debugLabelLayouter = false;
 
           bool collision = canvas->HasCollision(mask);
 
+          if (collision && hysteresisTolerance && hysteresisTolerancePx>0) {
+            // Previously visible labels must not flip their visibility due to
+            // the +-1px jitter of the rasterized mask rectangles (integer
+            // truncation of fractional positions) while the map slides.
+            // Ignore collisions that disappear when the rectangle is shrunk
+            // by a small tolerance. Real overlaps survive the shrink and are
+            // resolved by priority as usual.
+            ScreenPixelRectangle shrunkRectangle{rectangle.x+hysteresisTolerancePx,
+                                                 rectangle.y+hysteresisTolerancePx,
+                                                 rectangle.width-2*hysteresisTolerancePx,
+                                                 rectangle.height-2*hysteresisTolerancePx};
+
+            if (shrunkRectangle.width>0 && shrunkRectangle.height>0) {
+              ScreenRectMask shrunkMask(layoutViewport.width,
+                                        shrunkRectangle);
+
+              collision=canvas->HasCollision(shrunkMask);
+            }
+          }
+
           if (!collision) {
             visibleElements.push_back(element);
             canvases[eli]=canvas;
@@ -476,7 +552,8 @@ constexpr bool debugLabelLayouter = false;
       }
 
       void ProcessLabelContourLabel(const ContourLabelType &currentContourLabel,
-                                    std::vector<ContourLabelType> &contourLabelInstances)
+                                    std::vector<ContourLabelType> &contourLabelInstances,
+                                    bool hysteresisTolerance)
       {
         int glyphCnt=currentContourLabel.glyphs.size();
 
@@ -500,6 +577,24 @@ constexpr bool debugLabelLayouter = false;
                                    rect);
 
           if (labelCanvas.HasCollision(masks[gi])) {
+            if (hysteresisTolerance && hysteresisTolerancePx>0) {
+              // single-pixel rasterization jitter of previously visible
+              // path labels must not toggle their visibility
+              ScreenPixelRectangle shrunkRectangle{rect.x+hysteresisTolerancePx,
+                                                   rect.y+hysteresisTolerancePx,
+                                                   rect.width-2*hysteresisTolerancePx,
+                                                   rect.height-2*hysteresisTolerancePx};
+
+              if (shrunkRectangle.width>0 && shrunkRectangle.height>0) {
+                ScreenRectMask shrunkMask(layoutViewport.width,
+                                          shrunkRectangle);
+
+                if (!labelCanvas.HasCollision(shrunkMask)) {
+                  continue; // jitter only, tolerate
+                }
+              }
+            }
+
             collision=true;
             break;
           }
@@ -529,18 +624,41 @@ constexpr bool debugLabelLayouter = false;
         auto labelIter = allSortedLabels.begin();
         auto contourLabelIter = allSortedContourLabels.begin();
 
-        // While both lists are not completely processed...
-        //   Process first all contour labels of a priority and then all normal labels of the same priority
+        // Phase 0: labels that were visible in the previous round claim
+        // their space first, with hysteresis tolerance. They must not be
+        // displaced by contour label claims or by new candidates in order
+        // to keep the visible set stable while the map slides.
+        while (labelIter != allSortedLabels.end() &&
+               visibleRefs.count(labelIter->priority.ref)>0) {
+          ProcessLabelInstance(*labelIter,
+                               labelInstances,
+                               /*hysteresisTolerance*/ true);
+          labelIter++;
+        }
+
+        // Phase 1: contour labels of ways that were visible in the previous
+        // round (with hysteresis tolerance): street names must not flip
+        // because of the rasterization jitter of their glyphs.
+        while (contourLabelIter != allSortedContourLabels.end() &&
+               visibleContourRefs.count(contourLabelIter->priority.ref)>0) {
+          ProcessLabelContourLabel(*contourLabelIter,
+                                   contourLabelInstances,
+                                   /*hysteresisTolerance*/ true);
+          contourLabelIter++;
+        }
+
+        // Phase 2: the remaining contour labels and the remaining regular
+        // labels (new candidates), merged by priority...
 
         while (labelIter != allSortedLabels.end() &&
            contourLabelIter != allSortedContourLabels.end()) {
 
           if (contourLabelIter->priority<=labelIter->priority) {
-            ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances);
+            ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances, false);
             contourLabelIter++;
           }
           else {
-            ProcessLabelInstance(*labelIter, labelInstances);
+            ProcessLabelInstance(*labelIter, labelInstances, false);
             labelIter++;
           }
 
@@ -549,12 +667,12 @@ constexpr bool debugLabelLayouter = false;
         // Process all the rest... (there should only be one of the two lists left)
 
         while (contourLabelIter != allSortedContourLabels.end()) {
-          ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances);
+          ProcessLabelContourLabel(*contourLabelIter, contourLabelInstances, false);
           contourLabelIter++;
         }
 
         while (labelIter != allSortedLabels.end()) {
-          ProcessLabelInstance(*labelIter, labelInstances);
+          ProcessLabelInstance(*labelIter, labelInstances, false);
           labelIter++;
         }
       }
@@ -564,10 +682,101 @@ constexpr bool debugLabelLayouter = false;
                 const MapParameter& parameter)
     {
       // compute collisions, hide some labels
-      LayoutJob job(layoutViewport, projection, parameter);
+      LayoutJob job(layoutViewport, projection, parameter, lastVisibleRefs, lastVisibleContourRefs);
       job.Swap(labelInstances, contourLabelInstances);
       job.SortLabels();
       job.ProcessLabels(labelInstances, contourLabelInstances);
+
+      // refresh the previous-round visibility state: it defines which
+      // labels claim their space first in the next round. This must run
+      // for every layout, independent of the diagnostics.
+      std::set<ObjectFileRef> registeredRefs;
+      const size_t allSortedContourLabelCount=job.allSortedContourLabels.size();
+
+      for (const LabelInstanceType &instance : job.allSortedLabels) {
+        registeredRefs.insert(instance.priority.ref);
+      }
+
+      for (const LabelInstanceType &instance : labelInstances) {
+        registeredRefs.insert(instance.priority.ref);
+      }
+
+      if (IsHysteresisDebug()) {
+        std::vector<ObjectFileRef> hiddenByCollision;
+        std::vector<ObjectFileRef> notRegistered;
+        size_t keptVisible=0;
+
+        for (const ObjectFileRef &ref : lastVisibleRefs) {
+          if (registeredRefs.count(ref)>0) {
+            bool isVisible=std::any_of(labelInstances.begin(),labelInstances.end(),[ref](const LabelInstanceType &instance) {
+              return instance.priority.ref==ref;
+            });
+
+            if (isVisible) {
+              keptVisible++;
+            }
+            else {
+              hiddenByCollision.push_back(ref);
+            }
+          }
+          else {
+            notRegistered.push_back(ref);
+          }
+        }
+
+        std::set<ObjectFileRef> placedContourRefs;
+
+        for (const ContourLabelType &cLabel : contourLabelInstances) {
+          placedContourRefs.insert(cLabel.priority.ref);
+        }
+
+        size_t lostContours=0;
+
+        for (const ObjectFileRef &ref : lastVisibleContourRefs) {
+          if (placedContourRefs.count(ref)==0) {
+            lostContours++;
+          }
+        }
+
+        if (!hiddenByCollision.empty() || !notRegistered.empty() ||
+            lostContours>0) {
+          std::cout << "[LabelHysteresis] viewport=" << layoutViewport.width << "x"
+                    << layoutViewport.height << "+" << layoutViewport.x << "+"
+                    << layoutViewport.y << " registered=" << registeredRefs.size()
+                    << " visible=" << labelInstances.size()
+                    << " prevVisible=" << lastVisibleRefs.size()
+                    << " kept=" << keptVisible
+                    << " hiddenByCollision=" << hiddenByCollision.size()
+                    << " notRegistered=" << notRegistered.size()
+                    << " contoursRegistered=" << allSortedContourLabelCount
+                    << " prevVisibleContours=" << lastVisibleContourRefs.size()
+                    << " lostContours=" << lostContours
+                    << std::endl;
+
+          for (const ObjectFileRef &ref : hiddenByCollision) {
+            std::cout << "[LabelHysteresis]   hidden-by-collision: "
+                      << ref.GetName();
+            std::cout << std::endl;
+          }
+
+          for (const ObjectFileRef &ref : notRegistered) {
+            std::cout << "[LabelHysteresis]   not-registered (candidate/data churn): "
+                      << ref.GetName() << std::endl;
+          }
+        }
+      }
+
+      lastVisibleRefs.clear();
+
+      for (const LabelInstanceType &instance : labelInstances) {
+        lastVisibleRefs.insert(instance.priority.ref);
+      }
+
+      lastVisibleContourRefs.clear();
+
+      for (const ContourLabelType &cLabel : contourLabelInstances) {
+        lastVisibleContourRefs.insert(cLabel.priority.ref);
+      }
     }
 
     template<class Painter>
@@ -932,6 +1141,8 @@ constexpr bool debugLabelLayouter = false;
     TextLayouter *textLayouter;
     std::vector<ContourLabelType> contourLabelInstances;
     std::vector<LabelInstanceType> labelInstances;
+    std::set<ObjectFileRef> lastVisibleRefs; //!< refs of the labels visible in the previous round
+    std::set<ObjectFileRef> lastVisibleContourRefs; //!< refs of the ways with visible path labels in the previous round
     ScreenVectorRectangle visibleViewport{0,0,0,0};
     ScreenVectorRectangle layoutViewport{0,0,0,0};
     uint32_t layoutOverlap=0; // overlap [pixels] used for label layouting
