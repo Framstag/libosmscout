@@ -11,9 +11,575 @@ OSS
     COLOR historicLabelColor  = darken(@historicColor, 0.5);
 
   SYMBOL historic
-    RECTANGLE 0,0 1 x 1 {
+    RECTANGLE 0,0 2.25 x 2.25 {
       AREA {color: @historicSymbolColor; }
     }
+
+  SYMBOL historic_castle
+    // Tower
+    RECTANGLE -0.45,-0.85 0.9 x 1.0 { AREA { color: @historicSymbolColor; } }
+    // Merlons
+    RECTANGLE -0.45,-1.0 0.25 x 0.25 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.1,-1.0 0.2 x 0.25 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.2,-1.0 0.25 x 0.25 { AREA { color: @historicSymbolColor; } }
+    // Gate
+    RECTANGLE -0.15,-0.1 0.3 x 0.25 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_fort
+    // Bastion star
+    POLYGON 0,-1.0 0.35,-0.35 1.0,0 0.35,0.35 0,1.0 -0.35,0.35 -1.0,0 -0.35,-0.35 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_church
+    // Building
+    RECTANGLE -0.5,0.0 1.0 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.6,0.0 0.6,0.0 0,-0.5 { AREA { color: @historicSymbolColor; } }
+    // Cross
+    RECTANGLE -0.05,-0.85 0.1 x 0.35 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.2,-0.7 0.4 x 0.1 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_chapel
+    // Small building
+    RECTANGLE -0.4,0.0 0.8 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.5,0.0 0.5,0.0 0,-0.4 { AREA { color: @historicSymbolColor; } }
+    // Cross
+    RECTANGLE -0.04,-0.7 0.08 x 0.3 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.16,-0.6 0.32 x 0.08 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_monastery
+    // Building
+    RECTANGLE -0.6,0.0 1.2 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.7,0.0 0.7,0.0 0,-0.45 { AREA { color: @historicSymbolColor; } }
+    // Cross
+    RECTANGLE -0.05,-0.8 0.1 x 0.35 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.2,-0.65 0.4 x 0.1 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_mosque
+    // Dome
+    POLYGON -0.45,-0.5 0.45,-0.5 0,-1.0 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.5,-0.5 1.0 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Minaret
+    RECTANGLE 0.55,-0.9 0.2 x 0.9 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.5,-0.9 0.8,-0.9 0.65,-1.0 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_temple
+    // Pediment
+    POLYGON -0.7,-0.3 0.7,-0.3 0,-0.8 { AREA { color: @historicSymbolColor; } }
+    // Columns
+    RECTANGLE -0.5,-0.3 0.15 x 0.7 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.075,-0.3 0.15 x 0.7 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.35,-0.3 0.15 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.6,0.4 1.2 x 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_tower
+    // Tower
+    RECTANGLE -0.35,-0.6 0.7 x 1.1 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.45,-0.6 0.45,-0.6 0,-1.0 { AREA { color: @historicSymbolColor; } }
+    // Door
+    RECTANGLE -0.12,0.3 0.24 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_round_tower
+    // Round tower
+    CIRCLE 0,-0.1 0.45 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.5,-0.1 0.5,-0.1 0,-0.8 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_city_gate
+    // Pillars
+    RECTANGLE -0.6,-0.5 0.5 x 1.0 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.1,-0.5 0.5 x 1.0 { AREA { color: @historicSymbolColor; } }
+    // Lintel
+    RECTANGLE -0.6,-0.8 1.2 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Opening
+    RECTANGLE -0.35,-0.5 0.7 x 0.5 { AREA { color: #ffffff; } }
+    POLYGON -0.35,-0.5 0.35,-0.5 0,-0.8 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_castle_wall
+    // Wall
+    RECTANGLE -1.0,-0.3 2.0 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Merlons
+    RECTANGLE -1.0,-0.5 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.5,-0.5 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.0,-0.5 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.5,-0.5 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.7,-0.5 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_ruins
+    // Broken wall fragments
+    POLYGON -0.9,0.3 -0.3,0.3 -0.3,-0.5 -0.6,-0.5 -0.6,-0.1 -0.9,-0.1 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.1,0.3 0.7,0.3 0.7,-0.3 0.4,-0.3 0.4,0.0 0.1,0.0 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_archaeological_site
+    // Column
+    RECTANGLE -0.12,-0.4 0.24 x 0.9 { AREA { color: @historicSymbolColor; } }
+    // Capital
+    RECTANGLE -0.25,-0.5 0.5 x 0.1 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.25,0.5 0.5 x 0.1 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_battlefield
+    // Crossed swords
+    POLYGON -0.8,-0.8 0.6,0.6 0.4,0.8 -1.0,-0.6 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.8,-0.8 -0.6,0.6 -0.4,0.8 1.0,-0.6 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_wreck
+    // Hull
+    POLYGON -0.9,0.2 0.9,0.2 0.5,0.6 -0.5,0.6 { AREA { color: @historicSymbolColor; } }
+    // Broken mast
+    RECTANGLE -0.1,-0.6 0.12 x 0.8 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_ship
+    // Hull
+    POLYGON -0.9,0.3 0.9,0.3 0.6,0.7 -0.6,0.7 { AREA { color: @historicSymbolColor; } }
+    // Mast
+    RECTANGLE -0.05,-0.5 0.1 x 0.8 { AREA { color: @historicSymbolColor; } }
+    // Sail
+    POLYGON -0.05,-0.5 0.45,-0.3 -0.05,-0.1 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_aircraft
+    // Fuselage
+    RECTANGLE -0.5,-0.15 1.0 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Wings
+    POLYGON -0.1,-0.15 0.3,-0.15 0.5,-0.6 -0.1,-0.6 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.1,0.15 0.3,0.15 0.5,0.6 -0.1,0.6 { AREA { color: @historicSymbolColor; } }
+    // Tail
+    RECTANGLE -0.5,-0.15 0.15 x 0.3 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.5,-0.15 -0.35,-0.15 -0.5,-0.5 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_locomotive
+    // Body
+    RECTANGLE -0.7,-0.1 1.2 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Cab
+    RECTANGLE -0.7,-0.4 0.4 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Chimney
+    RECTANGLE 0.3,-0.5 0.15 x 0.4 { AREA { color: @historicSymbolColor; } }
+    // Wheels
+    CIRCLE -0.45,0.4 0.15 { AREA { color: @historicSymbolColor; } }
+    CIRCLE -0.1,0.4 0.15 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0.3,0.4 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_railway_car
+    // Car body
+    RECTANGLE -0.8,-0.2 1.6 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Wheels
+    CIRCLE -0.5,0.3 0.12 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0.5,0.3 0.12 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_tank
+    // Hull
+    RECTANGLE -0.7,-0.1 1.4 x 0.4 { AREA { color: @historicSymbolColor; } }
+    // Turret
+    RECTANGLE -0.2,-0.4 0.5 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Barrel
+    RECTANGLE 0.3,-0.35 0.6 x 0.1 { AREA { color: @historicSymbolColor; } }
+    // Tracks
+    RECTANGLE -0.7,0.3 1.4 x 0.25 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_vehicle
+    // Body
+    RECTANGLE -0.7,-0.2 1.4 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Cabin
+    RECTANGLE -0.5,-0.2 0.4 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Wheels
+    CIRCLE -0.4,0.3 0.15 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0.4,0.3 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_cannon
+    // Barrel
+    RECTANGLE -0.6,-0.25 1.0 x 0.2 { AREA { color: @historicSymbolColor; } }
+    // Muzzle
+    RECTANGLE 0.4,-0.3 0.2 x 0.4 { AREA { color: @historicSymbolColor; } }
+    // Wheel
+    CIRCLE -0.5,0.15 0.3 { AREA { color: @historicSymbolColor; } }
+    CIRCLE -0.5,0.15 0.12 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_anchor
+    // Ring
+    CIRCLE 0,-0.8 0.15 { AREA.BORDER { color: @historicSymbolColor; width: 0.1mm; } }
+    // Shank
+    RECTANGLE -0.06,-0.65 0.12 x 0.9 { AREA { color: @historicSymbolColor; } }
+    // Crossbar
+    RECTANGLE -0.5,-0.1 1.0 x 0.12 { AREA { color: @historicSymbolColor; } }
+    // Flukes
+    POLYGON -0.5,-0.1 -0.2,-0.1 -0.35,0.3 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.5,-0.1 0.2,-0.1 0.35,0.3 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_stone
+    // Standing stone
+    POLYGON -0.5,-0.5 0.5,-0.5 0.4,0.5 -0.4,0.5 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_milestone
+    POLYGON -0.4,-0.6 0.4,-0.6 0.3,0.5 -0.3,0.5 { AREA { color: @historicSymbolColor; } }
+    // Number
+    RECTANGLE -0.15,-0.1 0.3 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_boundary_stone
+    POLYGON -0.45,-0.5 0.45,-0.5 0.35,0.5 -0.35,0.5 { AREA { color: @historicSymbolColor; } }
+    // Marks
+    RECTANGLE -0.2,-0.3 0.4 x 0.1 { AREA { color: #ffffff; } }
+    RECTANGLE -0.2,0.1 0.4 x 0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_rune_stone
+    POLYGON -0.45,-0.6 0.45,-0.6 0.35,0.5 -0.35,0.5 { AREA { color: @historicSymbolColor; } }
+    // Runes
+    RECTANGLE -0.25,-0.3 0.1 x 0.5 { AREA { color: #ffffff; } }
+    RECTANGLE -0.05,-0.3 0.1 x 0.5 { AREA { color: #ffffff; } }
+    RECTANGLE 0.15,-0.3 0.1 x 0.5 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_ogham_stone
+    POLYGON -0.45,-0.6 0.45,-0.6 0.35,0.5 -0.35,0.5 { AREA { color: @historicSymbolColor; } }
+    // Ogham lines
+    RECTANGLE -0.3,-0.4 0.6 x 0.08 { AREA { color: #ffffff; } }
+    RECTANGLE -0.3,-0.2 0.6 x 0.08 { AREA { color: #ffffff; } }
+    RECTANGLE -0.3,0.0 0.6 x 0.08 { AREA { color: #ffffff; } }
+    RECTANGLE -0.3,0.2 0.6 x 0.08 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_bullaun_stone
+    POLYGON -0.5,-0.4 0.5,-0.4 0.4,0.5 -0.4,0.5 { AREA { color: @historicSymbolColor; } }
+    // Hole
+    CIRCLE 0,-0.05 0.15 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_millstone
+    CIRCLE 0,0 0.6 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0,0 0.15 { AREA { color: #ffffff; } }
+    // Grooves
+    RECTANGLE -0.5,-0.1 1.0 x 0.08 { AREA { color: #ffffff; } }
+    RECTANGLE -0.1,-0.5 0.08 x 1.0 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_high_cross
+    // Tall cross
+    RECTANGLE -0.1,-1.0 0.2 x 1.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.5,-0.7 1.0 x 0.2 { AREA { color: @historicSymbolColor; } }
+    // Ring
+    CIRCLE 0,-0.7 0.3 { AREA.BORDER { color: @historicSymbolColor; width: 0.1mm; } }
+
+  SYMBOL historic_wayside_cross
+    RECTANGLE -0.08,-0.9 0.16 x 1.4 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.4,-0.5 0.8 x 0.16 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_wayside_shrine
+    // Shrine box
+    RECTANGLE -0.35,-0.2 0.7 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.45,-0.2 0.45,-0.2 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Niche
+    RECTANGLE -0.15,0.1 0.3 x 0.4 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_tree_shrine
+    // Tree
+    POLYGON 0,-0.9 0.5,-0.3 -0.5,-0.3 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.08,-0.3 0.16 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Shrine at base
+    RECTANGLE -0.3,0.2 0.6 x 0.3 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_pillory
+    // Posts
+    RECTANGLE -0.4,-0.5 0.15 x 1.0 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.25,-0.5 0.15 x 1.0 { AREA { color: @historicSymbolColor; } }
+    // Crossbar
+    RECTANGLE -0.4,-0.2 0.8 x 0.15 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.5,0.5 1.0 x 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_gallows
+    // Posts
+    RECTANGLE -0.35,-0.9 0.15 x 1.4 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.2,-0.9 0.15 x 1.4 { AREA { color: @historicSymbolColor; } }
+    // Top beam
+    RECTANGLE -0.35,-0.9 0.7 x 0.15 { AREA { color: @historicSymbolColor; } }
+    // Noose
+    RECTANGLE -0.1,-0.3 0.1 x 0.4 { AREA { color: @historicSymbolColor; } }
+    CIRCLE -0.05,0.1 0.12 { AREA.BORDER { color: @historicSymbolColor; width: 0.08mm; } }
+
+  SYMBOL historic_mine
+    // Arch entrance
+    RECTANGLE -0.5,-0.3 0.4 x 0.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.1,-0.3 0.4 x 0.6 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.5,-0.3 0.5,-0.3 0,-0.7 { AREA { color: @historicSymbolColor; } }
+    // Opening
+    RECTANGLE -0.3,0.0 0.6 x 0.3 { AREA { color: #ffffff; } }
+    POLYGON -0.3,-0.3 0.3,-0.3 0,-0.6 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_mine_shaft
+    // Headframe
+    RECTANGLE -0.3,-0.8 0.6 x 0.9 { AREA { color: @historicSymbolColor; } }
+    // Wheel
+    CIRCLE 0,-0.5 0.2 { AREA.BORDER { color: @historicSymbolColor; width: 0.1mm; } }
+    // Shaft
+    RECTANGLE -0.2,0.1 0.4 x 0.4 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_mine_adit
+    // Arch
+    RECTANGLE -0.5,-0.2 0.4 x 0.5 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.1,-0.2 0.4 x 0.5 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.5,-0.2 0.5,-0.2 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Opening
+    RECTANGLE -0.3,0.1 0.6 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_minecart
+    // Cart
+    RECTANGLE -0.5,-0.3 1.0 x 0.4 { AREA { color: @historicSymbolColor; } }
+    // Wheels
+    CIRCLE -0.3,0.1 0.15 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0.3,0.1 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_charcoal_pile
+    // Mound
+    POLYGON -0.8,0.2 0.8,0.2 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Smoke
+    CIRCLE 0,-0.7 0.1 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0.1,-0.85 0.08 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_lime_kiln
+    // Kiln
+    RECTANGLE -0.4,-0.4 0.8 x 0.8 { AREA { color: @historicSymbolColor; } }
+    // Chimney
+    RECTANGLE -0.1,-0.8 0.2 x 0.4 { AREA { color: @historicSymbolColor; } }
+    // Opening
+    RECTANGLE -0.2,0.1 0.4 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_bomb_crater
+    // Crater rings
+    CIRCLE 0,0 0.6 { AREA.BORDER { color: @historicSymbolColor; width: 0.12mm; } }
+    CIRCLE 0,0 0.35 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0,0 0.15 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_aqueduct
+    // Pillars
+    RECTANGLE -0.9,-0.3 0.3 x 0.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.3,-0.3 0.3 x 0.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.3,-0.3 0.3 x 0.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.9,-0.3 0.3 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Top
+    RECTANGLE -0.9,-0.5 2.1 x 0.2 { AREA { color: @historicSymbolColor; } }
+    // Water channel
+    RECTANGLE -0.9,-0.7 2.1 x 0.2 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_hollow_way
+    // Banks
+    POLYGON -0.9,-0.5 -0.3,-0.5 -0.3,0.5 -0.9,0.5 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.9,-0.5 0.3,-0.5 0.3,0.5 0.9,0.5 { AREA { color: @historicSymbolColor; } }
+    // Path
+    RECTANGLE -0.3,-0.5 0.6 x 1.0 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_road
+    // Road
+    RECTANGLE -0.35,-0.9 0.7 x 1.8 { AREA { color: @historicSymbolColor; } }
+    // Center line
+    RECTANGLE -0.05,-0.9 0.1 x 1.8 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_roman_road
+    // Road
+    RECTANGLE -0.4,-0.9 0.8 x 1.8 { AREA { color: @historicSymbolColor; } }
+    // Stones
+    RECTANGLE -0.3,-0.6 0.2 x 0.15 { AREA { color: #ffffff; } }
+    RECTANGLE 0.1,-0.3 0.2 x 0.15 { AREA { color: #ffffff; } }
+    RECTANGLE -0.2,0.2 0.2 x 0.15 { AREA { color: #ffffff; } }
+    RECTANGLE 0.1,0.5 0.2 x 0.15 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_railway
+    // Rails
+    RECTANGLE -0.35,-0.9 0.15 x 1.8 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.2,-0.9 0.15 x 1.8 { AREA { color: @historicSymbolColor; } }
+    // Ties
+    RECTANGLE -0.45,-0.7 0.9 x 0.12 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.45,-0.3 0.9 x 0.12 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.45,0.1 0.9 x 0.12 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.45,0.5 0.9 x 0.12 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_epigraph
+    // Tablet
+    RECTANGLE -0.6,-0.5 1.2 x 1.0 { AREA { color: @historicSymbolColor; } }
+    // Inscription lines
+    RECTANGLE -0.4,-0.3 0.8 x 0.1 { AREA { color: #ffffff; } }
+    RECTANGLE -0.4,-0.1 0.8 x 0.1 { AREA { color: #ffffff; } }
+    RECTANGLE -0.4,0.1 0.8 x 0.1 { AREA { color: #ffffff; } }
+    RECTANGLE -0.4,0.3 0.8 x 0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_machine
+    // Gear
+    CIRCLE 0,0 0.5 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0,0 0.2 { AREA { color: #ffffff; } }
+    // Teeth
+    RECTANGLE -0.12,-0.7 0.24 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.12,0.5 0.24 x 0.2 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.7,-0.12 0.2 x 0.24 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.5,-0.12 0.2 x 0.24 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_smithy
+    // Anvil top
+    RECTANGLE -0.5,-0.2 1.0 x 0.25 { AREA { color: @historicSymbolColor; } }
+    // Horn
+    POLYGON 0.5,-0.2 0.8,-0.2 0.9,-0.05 0.5,-0.05 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.3,0.05 0.6 x 0.3 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_watermill
+    // Building
+    RECTANGLE -0.5,-0.3 1.0 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.6,-0.3 0.6,-0.3 0,-0.7 { AREA { color: @historicSymbolColor; } }
+    // Water wheel
+    CIRCLE 0.55,0.1 0.3 { AREA.BORDER { color: @historicSymbolColor; width: 0.1mm; } }
+    CIRCLE 0.55,0.1 0.08 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_lavoir
+    // Basin
+    RECTANGLE -0.7,-0.3 1.4 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Water
+    RECTANGLE -0.6,-0.2 1.2 x 0.4 { AREA { color: #ffffff; } }
+    // Washboard
+    POLYGON -0.6,-0.2 -0.3,-0.2 -0.3,-0.5 -0.6,-0.5 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_caravanserai
+    // Building
+    RECTANGLE -0.6,-0.2 1.2 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.7,-0.2 0.7,-0.2 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Gate
+    RECTANGLE -0.15,0.1 0.3 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_cattle_crush
+    // Fence
+    RECTANGLE -0.7,-0.4 0.15 x 0.8 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.55,-0.4 0.15 x 0.8 { AREA { color: @historicSymbolColor; } }
+    // Bars
+    RECTANGLE -0.7,-0.3 1.4 x 0.1 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.7,0.0 1.4 x 0.1 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.7,0.3 1.4 x 0.1 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_pound
+    // Enclosure
+    RECTANGLE -0.6,-0.5 1.2 x 1.0 { AREA.BORDER { color: @historicSymbolColor; width: 0.12mm; } }
+    // Gate
+    RECTANGLE -0.15,0.3 0.3 x 0.2 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_shieling
+    // Hut
+    RECTANGLE -0.5,0.0 1.0 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.6,0.0 0.6,0.0 0,-0.5 { AREA { color: @historicSymbolColor; } }
+    // Door
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_optical_telegraph
+    // Mast
+    RECTANGLE -0.08,-0.9 0.16 x 1.4 { AREA { color: @historicSymbolColor; } }
+    // Arms
+    RECTANGLE -0.6,-0.5 1.2 x 0.12 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.4,-0.2 0.8 x 0.12 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_stecak
+    // Tombstone slab
+    RECTANGLE -0.5,-0.4 1.0 x 0.9 { AREA { color: @historicSymbolColor; } }
+    CIRCLE 0,-0.4 0.5 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_tomb
+    // Tomb
+    RECTANGLE -0.6,-0.3 1.2 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Cross
+    RECTANGLE -0.06,-0.7 0.12 x 0.4 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.25,-0.55 0.5 x 0.12 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_cemetery
+    // Gravestones
+    RECTANGLE -0.6,-0.4 0.25 x 0.5 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.15,-0.4 0.25 x 0.5 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.3,-0.4 0.25 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Ground
+    RECTANGLE -0.7,0.1 1.4 x 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_monument
+    // Obelisk
+    POLYGON -0.3,-0.9 0.3,-0.9 0.15,0.4 -0.15,0.4 { AREA { color: @historicSymbolColor; } }
+    // Base
+    RECTANGLE -0.4,0.4 0.8 x 0.2 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_memorial
+    // Plinth
+    RECTANGLE -0.4,0.2 0.8 x 0.3 { AREA { color: @historicSymbolColor; } }
+    // Column
+    RECTANGLE -0.15,-0.5 0.3 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Statue
+    CIRCLE 0,-0.6 0.15 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_manor
+    // House
+    RECTANGLE -0.6,-0.2 1.2 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.7,-0.2 0.7,-0.2 0,-0.7 { AREA { color: @historicSymbolColor; } }
+    // Door
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: #ffffff; } }
+    // Windows
+    RECTANGLE -0.45,0.0 0.2 x 0.2 { AREA { color: #ffffff; } }
+    RECTANGLE 0.25,0.0 0.2 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_house
+    RECTANGLE -0.5,-0.1 1.0 x 0.6 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.6,-0.1 0.6,-0.1 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_farm
+    // Barn
+    RECTANGLE -0.6,-0.1 1.2 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.7,-0.1 0.7,-0.1 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Door
+    RECTANGLE -0.15,0.2 0.3 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_granary
+    // Granary (raised)
+    RECTANGLE -0.5,-0.3 1.0 x 0.5 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.6,-0.3 0.6,-0.3 0,-0.7 { AREA { color: @historicSymbolColor; } }
+    // Stilts
+    RECTANGLE -0.4,0.2 0.15 x 0.3 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE 0.25,0.2 0.15 x 0.3 { AREA { color: @historicSymbolColor; } }
+
+  SYMBOL historic_warehouse
+    // Warehouse
+    RECTANGLE -0.6,-0.2 1.2 x 0.7 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    RECTANGLE -0.6,-0.35 1.2 x 0.15 { AREA { color: @historicSymbolColor; } }
+    // Door
+    RECTANGLE -0.15,0.2 0.3 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_creamery
+    RECTANGLE -0.5,-0.1 1.0 x 0.6 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.6,-0.1 0.6,-0.1 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Chimney
+    RECTANGLE 0.3,-0.5 0.15 x 0.4 { AREA { color: @historicSymbolColor; } }
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_railway_station
+    // Building
+    RECTANGLE -0.6,-0.1 1.2 x 0.6 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.7,-0.1 0.7,-0.1 0,-0.6 { AREA { color: @historicSymbolColor; } }
+    // Clock
+    CIRCLE 0.35,-0.35 0.15 { AREA.BORDER { color: @historicSymbolColor; width: 0.08mm; } }
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_folly
+    // Folly tower
+    RECTANGLE -0.3,-0.5 0.6 x 1.0 { AREA { color: @historicSymbolColor; } }
+    // Roof
+    POLYGON -0.4,-0.5 0.4,-0.5 0,-0.9 { AREA { color: @historicSymbolColor; } }
+    // Window
+    CIRCLE 0,-0.1 0.12 { AREA { color: #ffffff; } }
+
+  SYMBOL historic_highwater_mark
+    // Water line
+    RECTANGLE -0.8,-0.2 1.6 x 0.15 { AREA { color: @historicSymbolColor; } }
+    // Waves
+    POLYGON -0.8,0.05 -0.5,0.05 -0.65,-0.15 { AREA { color: @historicSymbolColor; } }
+    POLYGON -0.3,0.05 0.0,0.05 -0.15,-0.15 { AREA { color: @historicSymbolColor; } }
+    POLYGON 0.2,0.05 0.5,0.05 0.35,-0.15 { AREA { color: @historicSymbolColor; } }
 
   STYLE
     [MAG detail-] {
@@ -22,7 +588,54 @@ OSS
              historic_memorial,
              historic_ruins,
              historic_wreck,
-             historic_manor] AREA { color: @historicColor; }
+             historic_manor,
+             historic_aircraft,
+             historic_aqueduct,
+             historic_bomb_crater,
+             historic_caravanserai,
+             historic_castle_wall,
+             historic_cattle_crush,
+             historic_cemetery,
+             historic_chapel,
+             historic_charcoal_pile,
+             historic_church,
+             historic_city_gate,
+             historic_creamery,
+             historic_district,
+             historic_epigraph,
+             historic_farm,
+             historic_folly,
+             historic_fort,
+             historic_gallows,
+             historic_granary,
+             historic_house,
+             historic_lavoir,
+             historic_lime_kiln,
+             historic_locomotive,
+             historic_machine,
+             historic_mine,
+             historic_mine_adit,
+             historic_mine_shaft,
+             historic_minecart,
+             historic_monastery,
+             historic_mosque,
+             historic_optical_telegraph,
+             historic_pound,
+             historic_railway_car,
+             historic_railway_station,
+             historic_round_tower,
+             historic_shieling,
+             historic_ship,
+             historic_smithy,
+             historic_stecak,
+             historic_tank,
+             historic_temple,
+             historic_tomb,
+             historic_tower,
+             historic_vehicle,
+             historic_warehouse,
+             historic_watermill,
+             historic_wayside_shrine] AREA { color: @historicColor; }
     }
 
     IF _building {
@@ -51,7 +664,72 @@ OSS
            historic_monument,
            historic_memorial,
            historic_ruins,
-           historic_wreck] {
+           historic_wreck,
+           historic_aircraft,
+           historic_anchor,
+           historic_aqueduct,
+           historic_bomb_crater,
+           historic_boundary_stone,
+           historic_bullaun_stone,
+           historic_cannon,
+           historic_caravanserai,
+           historic_castle_wall,
+           historic_cattle_crush,
+           historic_cemetery,
+           historic_chapel,
+           historic_charcoal_pile,
+           historic_church,
+           historic_city_gate,
+           historic_creamery,
+           historic_district,
+           historic_epigraph,
+           historic_farm,
+           historic_folly,
+           historic_fort,
+           historic_gallows,
+           historic_granary,
+           historic_high_cross,
+           historic_highwater_mark,
+           historic_hollow_way,
+           historic_house,
+           historic_lavoir,
+           historic_lime_kiln,
+           historic_locomotive,
+           historic_machine,
+           historic_milestone,
+           historic_millstone,
+           historic_mine,
+           historic_mine_adit,
+           historic_mine_shaft,
+           historic_minecart,
+           historic_monastery,
+           historic_mosque,
+           historic_ogham_stone,
+           historic_optical_telegraph,
+           historic_pillory,
+           historic_pound,
+           historic_railway,
+           historic_railway_car,
+           historic_railway_station,
+           historic_road,
+           historic_roman_road,
+           historic_round_tower,
+           historic_rune_stone,
+           historic_shieling,
+           historic_ship,
+           historic_smithy,
+           historic_stecak,
+           historic_stone,
+           historic_tank,
+           historic_temple,
+           historic_tomb,
+           historic_tower,
+           historic_tree_shrine,
+           historic_vehicle,
+           historic_warehouse,
+           historic_watermill,
+           historic_wayside_cross,
+           historic_wayside_shrine] {
        NODE.TEXT {
          label: Name.name;
          style: emphasize;
@@ -72,6 +750,78 @@ OSS
     }
 
     [MAG veryClose-] {
+      [TYPE historic_castle] { NODE.ICON { symbol: historic_castle; } }
+      [TYPE historic_fort] { NODE.ICON { symbol: historic_fort; } }
+      [TYPE historic_church] { NODE.ICON { symbol: historic_church; } }
+      [TYPE historic_chapel] { NODE.ICON { symbol: historic_chapel; } }
+      [TYPE historic_monastery] { NODE.ICON { symbol: historic_monastery; } }
+      [TYPE historic_mosque] { NODE.ICON { symbol: historic_mosque; } }
+      [TYPE historic_temple] { NODE.ICON { symbol: historic_temple; } }
+      [TYPE historic_tower] { NODE.ICON { symbol: historic_tower; } }
+      [TYPE historic_round_tower] { NODE.ICON { symbol: historic_round_tower; } }
+      [TYPE historic_city_gate] { NODE.ICON { symbol: historic_city_gate; } }
+      [TYPE historic_castle_wall] { NODE.ICON { symbol: historic_castle_wall; } }
+      [TYPE historic_ruins] { NODE.ICON { symbol: historic_ruins; } }
+      [TYPE historic_archaeological_site] { NODE.ICON { symbol: historic_archaeological_site; } }
+      [TYPE historic_battlefield] { NODE.ICON { symbol: historic_battlefield; } }
+      [TYPE historic_wreck] { NODE.ICON { symbol: historic_wreck; } }
+      [TYPE historic_ship] { NODE.ICON { symbol: historic_ship; } }
+      [TYPE historic_aircraft] { NODE.ICON { symbol: historic_aircraft; } }
+      [TYPE historic_locomotive] { NODE.ICON { symbol: historic_locomotive; } }
+      [TYPE historic_railway_car] { NODE.ICON { symbol: historic_railway_car; } }
+      [TYPE historic_tank] { NODE.ICON { symbol: historic_tank; } }
+      [TYPE historic_vehicle] { NODE.ICON { symbol: historic_vehicle; } }
+      [TYPE historic_cannon] { NODE.ICON { symbol: historic_cannon; } }
+      [TYPE historic_anchor] { NODE.ICON { symbol: historic_anchor; } }
+      [TYPE historic_stone] { NODE.ICON { symbol: historic_stone; } }
+      [TYPE historic_milestone] { NODE.ICON { symbol: historic_milestone; } }
+      [TYPE historic_boundary_stone] { NODE.ICON { symbol: historic_boundary_stone; } }
+      [TYPE historic_rune_stone] { NODE.ICON { symbol: historic_rune_stone; } }
+      [TYPE historic_ogham_stone] { NODE.ICON { symbol: historic_ogham_stone; } }
+      [TYPE historic_bullaun_stone] { NODE.ICON { symbol: historic_bullaun_stone; } }
+      [TYPE historic_millstone] { NODE.ICON { symbol: historic_millstone; } }
+      [TYPE historic_high_cross] { NODE.ICON { symbol: historic_high_cross; } }
+      [TYPE historic_wayside_cross] { NODE.ICON { symbol: historic_wayside_cross; } }
+      [TYPE historic_wayside_shrine] { NODE.ICON { symbol: historic_wayside_shrine; } }
+      [TYPE historic_tree_shrine] { NODE.ICON { symbol: historic_tree_shrine; } }
+      [TYPE historic_pillory] { NODE.ICON { symbol: historic_pillory; } }
+      [TYPE historic_gallows] { NODE.ICON { symbol: historic_gallows; } }
+      [TYPE historic_mine] { NODE.ICON { symbol: historic_mine; } }
+      [TYPE historic_mine_shaft] { NODE.ICON { symbol: historic_mine_shaft; } }
+      [TYPE historic_mine_adit] { NODE.ICON { symbol: historic_mine_adit; } }
+      [TYPE historic_minecart] { NODE.ICON { symbol: historic_minecart; } }
+      [TYPE historic_charcoal_pile] { NODE.ICON { symbol: historic_charcoal_pile; } }
+      [TYPE historic_lime_kiln] { NODE.ICON { symbol: historic_lime_kiln; } }
+      [TYPE historic_bomb_crater] { NODE.ICON { symbol: historic_bomb_crater; } }
+      [TYPE historic_aqueduct] { NODE.ICON { symbol: historic_aqueduct; } }
+      [TYPE historic_hollow_way] { NODE.ICON { symbol: historic_hollow_way; } }
+      [TYPE historic_road] { NODE.ICON { symbol: historic_road; } }
+      [TYPE historic_roman_road] { NODE.ICON { symbol: historic_roman_road; } }
+      [TYPE historic_railway] { NODE.ICON { symbol: historic_railway; } }
+      [TYPE historic_epigraph] { NODE.ICON { symbol: historic_epigraph; } }
+      [TYPE historic_machine] { NODE.ICON { symbol: historic_machine; } }
+      [TYPE historic_smithy] { NODE.ICON { symbol: historic_smithy; } }
+      [TYPE historic_watermill] { NODE.ICON { symbol: historic_watermill; } }
+      [TYPE historic_lavoir] { NODE.ICON { symbol: historic_lavoir; } }
+      [TYPE historic_caravanserai] { NODE.ICON { symbol: historic_caravanserai; } }
+      [TYPE historic_cattle_crush] { NODE.ICON { symbol: historic_cattle_crush; } }
+      [TYPE historic_pound] { NODE.ICON { symbol: historic_pound; } }
+      [TYPE historic_shieling] { NODE.ICON { symbol: historic_shieling; } }
+      [TYPE historic_optical_telegraph] { NODE.ICON { symbol: historic_optical_telegraph; } }
+      [TYPE historic_stecak] { NODE.ICON { symbol: historic_stecak; } }
+      [TYPE historic_tomb] { NODE.ICON { symbol: historic_tomb; } }
+      [TYPE historic_cemetery] { NODE.ICON { symbol: historic_cemetery; } }
+      [TYPE historic_monument] { NODE.ICON { symbol: historic_monument; } }
+      [TYPE historic_memorial] { NODE.ICON { symbol: historic_memorial; } }
+      [TYPE historic_manor] { NODE.ICON { symbol: historic_manor; } }
+      [TYPE historic_house] { NODE.ICON { symbol: historic_house; } }
+      [TYPE historic_farm] { NODE.ICON { symbol: historic_farm; } }
+      [TYPE historic_granary] { NODE.ICON { symbol: historic_granary; } }
+      [TYPE historic_warehouse] { NODE.ICON { symbol: historic_warehouse; } }
+      [TYPE historic_creamery] { NODE.ICON { symbol: historic_creamery; } }
+      [TYPE historic_railway_station] { NODE.ICON { symbol: historic_railway_station; } }
+      [TYPE historic_folly] { NODE.ICON { symbol: historic_folly; } }
+      [TYPE historic_highwater_mark] { NODE.ICON { symbol: historic_highwater_mark; } }
       [GROUP historic] {
         NODE.TEXT {
           label: Name.name;
@@ -85,6 +835,15 @@ OSS
     }
     [MAG close-] {
       [TYPE historic_ruins,
-            historic_archaeological_site] WAY { color: @historicBorderColor; displayWidth: 0.1mm; dash: 2,2; }
+            historic_archaeological_site,
+            historic_aqueduct,
+            historic_castle_wall,
+            historic_epigraph,
+            historic_folly,
+            historic_hollow_way,
+            historic_railway,
+            historic_road,
+            historic_roman_road,
+            historic_wayside_shrine] WAY { color: @historicBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
 END

@@ -9,6 +9,20 @@ OSS
     COLOR airwaySymbolColor         = @airwayColor;
     COLOR airwayLabelColor          = darken(#bb75d9, 0.5);
 
+  SYMBOL aerialway_station
+    RECTANGLE 0,0 2.25 x 2.25 {
+      AREA { color: @airwaySymbolColor; }
+    }
+    CIRCLE 1.125,1.125 0.45 {
+      AREA { color: #ffffff; }
+    }
+
+  SYMBOL aerialway_pylon
+    // Mast
+    RECTANGLE -0.15,-0.5 0.3 x 0.8 { AREA { color: @airwaySymbolColor; } }
+    // Cross-arm holding the cable
+    RECTANGLE -0.6,0.3 1.2 x 0.2 { AREA { color: @airwaySymbolColor; } }
+
   STYLE
     [MAG close-] {
       [TYPE aerialway_gondola]{
@@ -23,11 +37,29 @@ OSS
         WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
         WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
       }
+      [TYPE aerialway_zip_line]{
+        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      }
+      [TYPE aerialway_goods]{
+        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      }
+      [TYPE aerialway_station] {
+        NODE.ICON { symbol: aerialway_station; }
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @airwayLabelColor; priority: @labelPrioRailwayStation; }
+      }
+    }
+
+    [MAG veryClose-] {
+      [TYPE aerialway_pylon] NODE.ICON { symbol: aerialway_pylon; }
     }
 
     [MAG @labelPathsMag-] {
       [TYPE aerialway_gondola,
             aerialway_chair_lift,
-            aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
+            aerialway_drag_lift,
+            aerialway_zip_line,
+            aerialway_goods] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
     }
 END

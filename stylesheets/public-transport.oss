@@ -5,10 +5,12 @@ ORDER WAYS
   GROUP railway_rail, railway_tram, railway_light_rail, 
       railway_narrow_gauge, railway_preserved, 
       railway_funicular,
-      aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+      aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP aeroway_runway, aeroway_taxiway
   GROUP route_ferry
-  GROUP waterway_river, waterway_canal
+  GROUP waterway_river, waterway_canal, waterway_flowline, waterway_tidal_channel,
+        waterway_drystream, waterway_pressurised, waterway_derelict_canal,
+        waterway_drainage_channel, waterway_link, waterway_fairway
   GROUP railway_subway
   GROUP highway_motorway, highway_motorway_link, highway_trunk, highway_trunk_link,
         highway_primary, highway_primary_link, highway_secondary, highway_secondary_link, 
@@ -129,11 +131,21 @@ STYLE
       WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
       WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
     }
+    [TYPE aerialway_zip_line]{
+      WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+      WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
+    [TYPE aerialway_goods]{
+      WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+      WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
   }
   [MAG close-] {
    [TYPE aerialway_gondola,
          aerialway_chair_lift,
-         aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: #000000; displayOffset: 2.5mm;}
+         aerialway_drag_lift,
+         aerialway_zip_line,
+         aerialway_goods] WAY.TEXT { label: Name.name; size: 1.0; color: #000000; displayOffset: 2.5mm;}
   }
 
   // -------------------------------------------------------

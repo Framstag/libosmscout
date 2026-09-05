@@ -18,8 +18,11 @@ CONST
   COLOR turnSymbolOutlineColor     = #a0a0a080;
 
   SYMBOL highway_turning_cycle
-    CIRCLE 0,0 0.55 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
-    POLYGON -0.4,0 0.4,0 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    // U-turn arrow
+    POLYGON -0.35,0.4 -0.35,-0.2 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON -0.35,-0.2 0.35,-0.2 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON 0.35,-0.2 0.35,0.4 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON 0.35,0.4 0.15,0.4 0.35,0.6 { AREA { color: @wayLabelColor; } }
 
   SYMBOL oneway_arrow
     POLYGON 0,0.5 1,0 0,-0.5 {
@@ -67,22 +70,23 @@ CONST
     }
 
   SYMBOL amenity_charging_station
-    RECTANGLE -1,-1 2 x 2 {
-      AREA { color: #0000ff; }
-    }
-    CIRCLE 0,0 0.8 {
-      AREA {color: #ffffff; }
-    }
+    // Lightning bolt in circle
+    CIRCLE 0,0 1.0 { AREA.BORDER { color: #0000ff; width: 0.15mm; } }
+    POLYGON 0.2,-0.55 -0.3,0.1 0.05,0.1 -0.2,0.55 0.3,-0.1 -0.05,-0.1 { AREA { color: #0000ff; } }
 
   SYMBOL highway_bus_stop
-    CIRCLE 0,0 1.5 {
-      AREA {color: @busSymbolColor; }
-    }
+    // Bus
+    RECTANGLE -0.8,-0.3 1.6 x 0.6 { AREA.BORDER { color: @busSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.7,-0.2 0.5 x 0.25 { AREA { color: @busSymbolColor; } }
+    RECTANGLE -0.1,-0.2 0.5 x 0.25 { AREA { color: @busSymbolColor; } }
+    RECTANGLE 0.5,-0.2 0.2 x 0.25 { AREA { color: @busSymbolColor; } }
+    CIRCLE -0.5,0.3 0.15 { AREA { color: @busSymbolColor; } }
+    CIRCLE 0.3,0.3 0.15 { AREA { color: @busSymbolColor; } }
 
   SYMBOL ferry_terminal
-    RECTANGLE 0,0 1 x 1 {
-      AREA { color: #30307080; }
-    }
+    // Ferry boat
+    POLYGON -0.8,0.3 0.8,0.3 0.5,0.65 -0.5,0.65 { AREA.BORDER { color: #303070; width: 0.15mm; } }
+    RECTANGLE -0.3,0.0 0.6 x 0.3 { AREA { color: #303070; } }
 
   SYMBOL GROUND mini_roundabout
     CIRCLE 0,0 3 {
@@ -679,7 +683,13 @@ STYLE
  // Special objects
 
  [MAG veryClose-] {
-   [TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp; }
+
+   IF daylight {
+     // TODO
+   }
+   ELSE {
+     [TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp; }
+   }
 
    [TYPE highway_turning_cycle] {
      NODE.ICON { symbol: highway_turning_cycle; }

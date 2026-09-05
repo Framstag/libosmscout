@@ -12,9 +12,274 @@ OSS
     COLOR playgroundColor            = #affdbb;
     COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
 
+    COLOR leisureSymbolColor         = #2e7d32;
+    COLOR leisureWaterSymbolColor    = @waterLabelColor;
+
   SYMBOL leisure_slipway
-    POLYGON -0.9,0.4 0.9,-0.6 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
-    POLYGON -0.9,-0.3 0.9,-0.3 0.5,0.2 -0.5,0.2 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    POLYGON -1.125,0.5 1.125,-0.75 { AREA.BORDER { color: @waterLabelColor; width: 0.188mm; } }
+    POLYGON -1.125,-0.375 1.125,-0.375 0.625,0.25 -0.625,0.25 { AREA.BORDER { color: @waterLabelColor; width: 0.188mm; } }
+
+  SYMBOL leisure_picnic_table
+    // Table top
+    RECTANGLE -0.9,-0.35 1.8 x 0.25 { AREA { color: @leisureSymbolColor; } }
+    // Legs
+    RECTANGLE -0.65,0.1 0.15 x 0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.5,0.1 0.15 x 0.5 { AREA { color: @leisureSymbolColor; } }
+    // Benches
+    RECTANGLE -1.15,0.15 0.35 x 0.15 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.8,0.15 0.35 x 0.15 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_outdoor_seating
+    // Table
+    RECTANGLE -0.7,-0.1 1.4 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.1,0.1 0.2 x 0.4 { AREA { color: @leisureSymbolColor; } }
+    // Umbrella
+    POLYGON -0.9,-0.1 0.9,-0.1 0,-0.9 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.05,-0.1 0.1 x 0.2 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_firepit
+    // Fire ring
+    CIRCLE 0,0 0.75 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    // Flame
+    POLYGON 0,-0.55 0.35,0 0,0.45 -0.35,0 { AREA { color: @leisureSymbolColor; } }
+    POLYGON 0,-0.3 0.15,0.05 0,0.25 -0.15,0.05 { AREA { color: #ffffff; } }
+
+  SYMBOL leisure_dog_park
+    // Paw pad
+    CIRCLE 0,0.25 0.4 { AREA { color: @leisureSymbolColor; } }
+    // Toes
+    CIRCLE -0.55,-0.3 0.18 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE -0.2,-0.5 0.18 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0.2,-0.5 0.18 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0.55,-0.3 0.18 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_beach_resort
+    // Canopy
+    POLYGON -0.95,-0.15 0.95,-0.15 0,-0.85 { AREA { color: @leisureSymbolColor; } }
+    POLYGON -0.95,-0.15 0.95,-0.15 0,-0.85 { AREA.BORDER { color: #ffffff; width: 0.1mm; } }
+    // Pole
+    RECTANGLE -0.05,-0.15 0.1 x 0.7 { AREA { color: @leisureSymbolColor; } }
+    // Ground
+    RECTANGLE -0.9,0.55 1.8 x 0.12 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_recreation_ground
+    CIRCLE 0,0 0.7 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    CIRCLE 0,0 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.7,-0.05 1.4 x 0.1 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.05,-0.7 0.1 x 1.4 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_bathing_place
+    POLYGON -0.9,-0.4 -0.6,-0.4 -0.4,-0.6 -0.1,-0.4 0.2,-0.6 0.5,-0.4 0.9,-0.4 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+    POLYGON -0.9,0 -0.6,0 -0.4,-0.2 -0.1,0 0.2,-0.2 0.5,0 0.9,0 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+    POLYGON -0.9,0.4 -0.6,0.4 -0.4,0.2 -0.1,0.4 0.2,0.2 0.5,0.4 0.9,0.4 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+
+  SYMBOL leisure_swimming_area
+    POLYGON -0.9,-0.3 -0.6,-0.3 -0.4,-0.5 -0.1,-0.3 0.2,-0.5 0.5,-0.3 0.9,-0.3 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+    POLYGON -0.9,0.1 -0.6,0.1 -0.4,-0.1 -0.1,0.1 0.2,-0.1 0.5,0.1 0.9,0.1 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+    POLYGON -0.9,0.5 -0.6,0.5 -0.4,0.3 -0.1,0.5 0.2,0.3 0.5,0.5 0.9,0.5 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+
+  SYMBOL leisure_resort
+    // Building
+    RECTANGLE -0.8,0.1 1.6 x 0.7 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    // Umbrella
+    POLYGON -0.5,-0.5 0.5,-0.5 0,-1.0 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.05,-0.5 0.1 x 0.6 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_summer_camp
+    // Tent
+    POLYGON -0.9,0.7 0.9,0.7 0,-0.7 { AREA { color: @leisureSymbolColor; } }
+    POLYGON -0.9,0.7 0.9,0.7 0,-0.7 { AREA.BORDER { color: #ffffff; width: 0.1mm; } }
+    // Entrance
+    RECTANGLE -0.15,0.2 0.3 x 0.5 { AREA { color: #ffffff; } }
+
+  SYMBOL leisure_schoolyard
+    RECTANGLE -0.8,-0.6 1.6 x 1.2 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.6,-0.4 0.35 x 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE 0.25,-0.4 0.35 x 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.6,0.15 0.35 x 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE 0.25,0.15 0.35 x 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.15,0.1 0.3 x 0.5 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_fitness_centre
+    // Dumbbell
+    RECTANGLE -0.95,-0.2 0.3 x 0.4 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.65,-0.2 0.3 x 0.4 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.65,-0.1 1.3 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.65,-0.25 0.2 x 0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.45,-0.25 0.2 x 0.5 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_sports_hall
+    // Hall with roof
+    RECTANGLE -0.8,-0.6 1.6 x 1.2 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    POLYGON -0.8,-0.6 0.8,-0.6 0.6,-0.9 -0.6,-0.9 { AREA { color: @leisureSymbolColor; } }
+    // Ball
+    CIRCLE 0,0.05 0.35 { AREA.BORDER { color: @leisureSymbolColor; width: 0.12mm; } }
+    RECTANGLE -0.35,-0.05 0.7 x 0.1 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.05,-0.4 0.1 x 0.7 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_bleachers
+    // Tiered steps
+    POLYGON -0.9,0.5 -0.9,-0.4 0.9,0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.9,-0.4 1.8 x 0.12 { AREA { color: #ffffff; } }
+    RECTANGLE -0.9,-0.1 1.8 x 0.12 { AREA { color: #ffffff; } }
+    RECTANGLE -0.9,0.2 1.8 x 0.12 { AREA { color: #ffffff; } }
+
+  SYMBOL leisure_miniature_golf
+    // Flag
+    RECTANGLE -0.05,-0.8 0.1 x 1.1 { AREA { color: @leisureSymbolColor; } }
+    POLYGON -0.05,-0.8 0.65,-0.65 -0.05,-0.5 { AREA { color: @leisureSymbolColor; } }
+    // Ball
+    CIRCLE 0.55,0.45 0.25 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_bowling_alley
+    // Pin
+    POLYGON 0,-0.7 0.2,-0.5 0.25,0.1 0,0.35 -0.25,0.1 -0.2,-0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.1,-0.7 0.2 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    // Ball
+    CIRCLE -0.6,0.45 0.28 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_disc_golf_course
+    // Pole
+    RECTANGLE -0.05,-0.8 0.1 x 1.0 { AREA { color: @leisureSymbolColor; } }
+    // Basket
+    CIRCLE 0,0.2 0.45 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.45,-0.05 0.9 x 0.1 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.45,0.35 0.9 x 0.1 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.05,0.2 0.1 x 0.45 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_climbing
+    // Wall
+    RECTANGLE -0.7,-0.7 1.4 x 1.4 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    // Climber: head
+    CIRCLE 0.1,-0.3 0.2 { AREA { color: @leisureSymbolColor; } }
+    // Climber: body
+    RECTANGLE 0.0,-0.1 0.2 x 0.45 { AREA { color: @leisureSymbolColor; } }
+    // Climber: arms reaching up to holds
+    POLYGON 0.0,-0.08 -0.45,-0.35 -0.3,-0.5 0.1,-0.2 { AREA { color: @leisureSymbolColor; } }
+    POLYGON 0.2,-0.08 0.65,-0.35 0.5,-0.5 0.1,-0.2 { AREA { color: @leisureSymbolColor; } }
+    // Climber: legs
+    RECTANGLE 0.0,0.35 0.14 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.22,0.35 0.14 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    // Holds
+    CIRCLE -0.5,-0.5 0.1 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0.6,-0.5 0.1 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE -0.5,0.5 0.1 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0.6,0.5 0.1 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_horse_riding
+    // Body
+    RECTANGLE -0.4,-0.1 0.8 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    // Neck
+    RECTANGLE -0.3,-0.35 0.25 x 0.25 { AREA { color: @leisureSymbolColor; } }
+    // Head
+    RECTANGLE -0.3,-0.6 0.25 x 0.25 { AREA { color: @leisureSymbolColor; } }
+    // Muzzle (at bottom of head)
+    RECTANGLE -0.6,-0.4 0.3 x 0.12 { AREA { color: @leisureSymbolColor; } }
+    // Ear
+    POLYGON -0.25,-0.6 -0.15,-0.75 -0.05,-0.6 { AREA { color: @leisureSymbolColor; } }
+    // Legs
+    RECTANGLE -0.35,0.25 0.14 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.1,0.25 0.14 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.15,0.25 0.14 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.4,0.25 0.14 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    // Tail
+    POLYGON 0.4,-0.05 0.65,-0.25 0.65,0.15 0.4,0.2 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_trampoline_park
+    // Frame
+    RECTANGLE -0.8,-0.35 1.6 x 0.7 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.7,-0.25 1.4 x 0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.6,-0.15 1.2 x 0.3 { AREA { color: #ffffff; } }
+    // Legs
+    RECTANGLE -0.7,0.35 0.15 x 0.4 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.55,0.35 0.15 x 0.4 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_dance
+    // Two music notes
+    CIRCLE 0.3,0.35 0.25 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.4,-0.55 0.1 x 0.9 { AREA { color: @leisureSymbolColor; } }
+    POLYGON 0.4,-0.55 0.75,-0.45 0.4,-0.3 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE -0.35,0.35 0.25 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.25,-0.55 0.1 x 0.9 { AREA { color: @leisureSymbolColor; } }
+    POLYGON -0.25,-0.55 0.1,-0.45 -0.25,-0.3 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_amusement_arcade
+    // Joystick
+    RECTANGLE -0.7,-0.4 1.4 x 0.35 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.1,-0.9 0.2 x 0.55 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0,0.95 0.28 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE -0.45,0.15 0.12 { AREA { color: #ffffff; } }
+    CIRCLE 0.45,0.15 0.12 { AREA { color: #ffffff; } }
+
+  SYMBOL leisure_adult_gaming_centre
+    // Slot machine
+    RECTANGLE -0.6,-0.7 1.2 x 1.4 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.45,-0.55 0.9 x 0.5 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.45,0.1 0.9 x 0.3 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE 0.45,-0.7 0.1 x 0.3 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_bandstand
+    // Stage
+    RECTANGLE -0.8,0.3 1.6 x 0.25 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.6,0.55 0.15 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.45,0.55 0.15 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    // Music note
+    CIRCLE 0,0.05 0.25 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.1,-0.5 0.1 x 0.55 { AREA { color: @leisureSymbolColor; } }
+    POLYGON 0.1,-0.5 0.45,-0.4 0.1,-0.25 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_escape_game
+    // Puzzle piece
+    POLYGON -0.6,-0.6 0.6,-0.6 0.6,0.6 -0.6,0.6 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    CIRCLE 0,0.6 0.25 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0,-0.6 0.25 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE 0.6,0 0.25 { AREA { color: @leisureSymbolColor; } }
+    CIRCLE -0.6,0 0.25 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_indoor_play
+    // Toy blocks
+    RECTANGLE -0.75,-0.55 0.6 x 0.6 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.15,-0.55 0.6 x 0.6 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.3,0.05 0.6 x 0.6 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.6,-0.4 0.3 x 0.3 { AREA { color: #ffffff; } }
+    RECTANGLE 0.3,0.2 0.3 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL leisure_hackerspace
+    // Circuit chip
+    RECTANGLE -0.5,-0.5 1.0 x 1.0 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.3,-0.3 0.6 x 0.6 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.1,-0.7 0.2 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.1,0.5 0.2 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.7,-0.1 0.2 x 0.2 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.5,-0.1 0.2 x 0.2 { AREA { color: @leisureSymbolColor; } }
+
+  SYMBOL leisure_sauna
+    // Steam room
+    RECTANGLE -0.6,-0.6 1.2 x 1.2 { AREA.BORDER { color: @leisureSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.4,-0.4 0.8 x 0.8 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    CIRCLE -0.2,0.1 0.15 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    CIRCLE 0.1,0.1 0.15 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+    CIRCLE 0.3,0.1 0.15 { AREA.BORDER { color: @leisureSymbolColor; width: 0.1mm; } }
+
+  SYMBOL leisure_hot_tub
+    // Tub with bubbles
+    CIRCLE 0,0 0.7 { AREA.BORDER { color: @leisureWaterSymbolColor; width: 0.15mm; } }
+    CIRCLE -0.3,-0.1 0.15 { AREA { color: @leisureWaterSymbolColor; } }
+    CIRCLE 0.05,-0.15 0.15 { AREA { color: @leisureWaterSymbolColor; } }
+    CIRCLE 0.3,-0.05 0.15 { AREA { color: @leisureWaterSymbolColor; } }
+    CIRCLE -0.1,0.2 0.15 { AREA { color: @leisureWaterSymbolColor; } }
+
+  SYMBOL leisure_tanning_salon
+    // Sun
+    CIRCLE 0,0 0.4 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.08,-0.85 0.16 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.08,0.55 0.16 x 0.3 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.85,-0.08 0.3 x 0.16 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.55,-0.08 0.3 x 0.16 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.6,-0.6 0.16 x 0.16 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.44,-0.6 0.16 x 0.16 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE -0.6,0.44 0.16 x 0.16 { AREA { color: @leisureSymbolColor; } }
+    RECTANGLE 0.44,0.44 0.16 x 0.16 { AREA { color: @leisureSymbolColor; } }
 
   STYLE
     IF _leisure {
@@ -30,8 +295,12 @@ OSS
           AREA.BORDER { color: #887b7b; width: 0.1mm; }
         }
 
-        [TYPE leisure_park] AREA { color: #c6f0cf; }
+        [TYPE leisure_park,
+              leisure_dog_park,
+              leisure_recreation_ground] AREA { color: #c6f0cf; }
         [TYPE leisure_common] AREA { color: #bde3cb; }
+
+        [TYPE leisure_beach_resort] AREA { color: @sandColor; }
 
         [TYPE leisure_marina,
               leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
@@ -39,7 +308,9 @@ OSS
         [TYPE leisure_marina,
               leisure_fishing] AREA { color: #b5d6f180; }
 
-        [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
+        [TYPE leisure_ice_rink,
+              leisure_swimming_area,
+              leisure_bathing_place] AREA { color: #b5d6f1; }
       }
 
       [MAG veryClose-] {
@@ -48,12 +319,71 @@ OSS
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
         }
 
+        [TYPE leisure_picnic_table] NODE.ICON { symbol: leisure_picnic_table; }
+        [TYPE leisure_outdoor_seating] NODE.ICON { symbol: leisure_outdoor_seating; }
+        [TYPE leisure_firepit] NODE.ICON { symbol: leisure_firepit; }
+        [TYPE leisure_dog_park] NODE.ICON { symbol: leisure_dog_park; }
+        [TYPE leisure_beach_resort] NODE.ICON { symbol: leisure_beach_resort; }
+        [TYPE leisure_recreation_ground] NODE.ICON { symbol: leisure_recreation_ground; }
+        [TYPE leisure_bathing_place] NODE.ICON { symbol: leisure_bathing_place; }
+        [TYPE leisure_resort] NODE.ICON { symbol: leisure_resort; }
+        [TYPE leisure_summer_camp] NODE.ICON { symbol: leisure_summer_camp; }
+        [TYPE leisure_schoolyard] NODE.ICON { symbol: leisure_schoolyard; }
+        [TYPE leisure_fitness_centre] NODE.ICON { symbol: leisure_fitness_centre; }
+        [TYPE leisure_sports_hall] NODE.ICON { symbol: leisure_sports_hall; }
+        [TYPE leisure_miniature_golf] NODE.ICON { symbol: leisure_miniature_golf; }
+        [TYPE leisure_bowling_alley] NODE.ICON { symbol: leisure_bowling_alley; }
+        [TYPE leisure_disc_golf_course] NODE.ICON { symbol: leisure_disc_golf_course; }
+        [TYPE leisure_climbing] NODE.ICON { symbol: leisure_climbing; }
+        [TYPE leisure_horse_riding] NODE.ICON { symbol: leisure_horse_riding; }
+        [TYPE leisure_trampoline_park] NODE.ICON { symbol: leisure_trampoline_park; }
+        [TYPE leisure_dance] NODE.ICON { symbol: leisure_dance; }
+        [TYPE leisure_amusement_arcade] NODE.ICON { symbol: leisure_amusement_arcade; }
+        [TYPE leisure_adult_gaming_centre] NODE.ICON { symbol: leisure_adult_gaming_centre; }
+        [TYPE leisure_bandstand] NODE.ICON { symbol: leisure_bandstand; }
+        [TYPE leisure_escape_game] NODE.ICON { symbol: leisure_escape_game; }
+        [TYPE leisure_indoor_play] NODE.ICON { symbol: leisure_indoor_play; }
+        [TYPE leisure_hackerspace] NODE.ICON { symbol: leisure_hackerspace; }
+        [TYPE leisure_sauna] NODE.ICON { symbol: leisure_sauna; }
+        [TYPE leisure_hot_tub] NODE.ICON { symbol: leisure_hot_tub; }
+        [TYPE leisure_tanning_salon] NODE.ICON { symbol: leisure_tanning_salon; }
+
         [TYPE leisure_track,
               leisure_nature_reserve,
               leisure_playground,
               leisure_garden,
               leisure_common,
-              leisure_ice_rink] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioLeisure; size: 0.9; }
+              leisure_ice_rink,
+              leisure_picnic_table,
+              leisure_outdoor_seating,
+              leisure_firepit,
+              leisure_dog_park,
+              leisure_beach_resort,
+              leisure_recreation_ground,
+              leisure_bathing_place,
+              leisure_swimming_area,
+              leisure_resort,
+              leisure_summer_camp,
+              leisure_schoolyard,
+              leisure_fitness_centre,
+              leisure_sports_hall,
+              leisure_bleachers,
+              leisure_miniature_golf,
+              leisure_bowling_alley,
+              leisure_disc_golf_course,
+              leisure_climbing,
+              leisure_horse_riding,
+              leisure_trampoline_park,
+              leisure_dance,
+              leisure_amusement_arcade,
+              leisure_adult_gaming_centre,
+              leisure_bandstand,
+              leisure_escape_game,
+              leisure_indoor_play,
+              leisure_hackerspace,
+              leisure_sauna,
+              leisure_hot_tub,
+              leisure_tanning_salon] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioLeisure; size: 0.9; }
       }
 
       [MAG city-] {
@@ -63,13 +393,16 @@ OSS
           AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
           AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
         }
-        [TYPE leisure_swimming_pool] {
+        [TYPE leisure_swimming_pool,
+              leisure_hot_tub] {
           AREA { color: #74daff;}
         }
       }
 
       [MAG cityOver-] {
-        [TYPE leisure_golf_course] AREA { color: #c7f1a3; }
+        [TYPE leisure_golf_course,
+              leisure_disc_golf_course,
+              leisure_miniature_golf] AREA { color: #c7f1a3; }
       }
 
       [MAG detail-] {
@@ -82,6 +415,32 @@ OSS
           AREA.BORDER { color: @playgroundBorderColor; width: 0.1mm;}
         }
         [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "garden"; patternMinMag: detail;}
+
+        [TYPE leisure_fitness_centre,
+              leisure_sports_hall,
+              leisure_bleachers,
+              leisure_bowling_alley,
+              leisure_climbing,
+              leisure_horse_riding,
+              leisure_trampoline_park,
+              leisure_dance,
+              leisure_amusement_arcade,
+              leisure_adult_gaming_centre,
+              leisure_bandstand,
+              leisure_escape_game,
+              leisure_indoor_play,
+              leisure_hackerspace,
+              leisure_sauna,
+              leisure_tanning_salon,
+              leisure_resort,
+              leisure_summer_camp,
+              leisure_schoolyard,
+              leisure_picnic_table,
+              leisure_outdoor_seating,
+              leisure_firepit] {
+          AREA { color: #f1eee8;}
+          AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        }
       }
 
       // Labels
@@ -98,7 +457,37 @@ OSS
               leisure_playground,
               leisure_garden,
               leisure_common,
-              leisure_ice_rink] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+              leisure_ice_rink,
+              leisure_picnic_table,
+              leisure_outdoor_seating,
+              leisure_firepit,
+              leisure_dog_park,
+              leisure_beach_resort,
+              leisure_recreation_ground,
+              leisure_bathing_place,
+              leisure_swimming_area,
+              leisure_resort,
+              leisure_summer_camp,
+              leisure_schoolyard,
+              leisure_fitness_centre,
+              leisure_sports_hall,
+              leisure_bleachers,
+              leisure_miniature_golf,
+              leisure_bowling_alley,
+              leisure_disc_golf_course,
+              leisure_climbing,
+              leisure_horse_riding,
+              leisure_trampoline_park,
+              leisure_dance,
+              leisure_amusement_arcade,
+              leisure_adult_gaming_centre,
+              leisure_bandstand,
+              leisure_escape_game,
+              leisure_indoor_play,
+              leisure_hackerspace,
+              leisure_sauna,
+              leisure_hot_tub,
+              leisure_tanning_salon] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
       }
     }
 

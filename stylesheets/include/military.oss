@@ -6,10 +6,57 @@ OSS
 
   CONST
     COLOR militaryColor              = #fe989822;
+    COLOR militaryBorderColor        = #fe9898;
     COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
 
   SYMBOL military
-    POLYGON -0.7,-0.5 0.7,-0.5 0,0.7 { AREA.BORDER { color: #fe9898; width: 0.15mm; } }
+    POLYGON -1.125,-0.804 1.125,-0.804 0,1.125 { AREA.BORDER { color: #fe9898; width: 0.241mm; } }
+
+  SYMBOL military_checkpoint
+    // Barrier gate
+    RECTANGLE -0.9,-0.15 1.8 x 0.3 { AREA { color: @militaryBorderColor; } }
+    // Post
+    RECTANGLE -0.05,-0.9 0.1 x 1.8 { AREA { color: @militaryBorderColor; } }
+    // Base
+    RECTANGLE -0.3,0.6 0.6 x 0.2 { AREA { color: @militaryBorderColor; } }
+
+  SYMBOL military_cannon
+    // Barrel
+    RECTANGLE -0.6,-0.25 1.0 x 0.2 { AREA { color: @militaryBorderColor; } }
+    // Muzzle
+    RECTANGLE 0.4,-0.3 0.2 x 0.4 { AREA { color: @militaryBorderColor; } }
+    // Wheel
+    CIRCLE -0.5,0.15 0.3 { AREA { color: @militaryBorderColor; } }
+    CIRCLE -0.5,0.15 0.12 { AREA { color: #ffffff; } }
+
+  SYMBOL military_radar
+    // Mast
+    RECTANGLE -0.05,-0.6 0.1 x 1.2 { AREA { color: @militaryBorderColor; } }
+    // Dish
+    POLYGON -0.6,-0.6 0.6,-0.6 0,-0.1 { AREA { color: @militaryBorderColor; } }
+    // Base
+    RECTANGLE -0.3,0.6 0.6 x 0.15 { AREA { color: @militaryBorderColor; } }
+
+  SYMBOL military_embrasure
+    // Wall
+    RECTANGLE -0.9,-0.5 1.8 x 1.0 { AREA.BORDER { color: @militaryBorderColor; width: 0.15mm; } }
+    // Opening
+    RECTANGLE -0.3,-0.35 0.6 x 0.7 { AREA { color: @militaryBorderColor; } }
+
+  SYMBOL military_shelter
+    // Roof
+    POLYGON -0.9,0.3 0.9,0.3 0,-0.7 { AREA { color: @militaryBorderColor; } }
+    // Entrance
+    RECTANGLE -0.2,0.3 0.4 x 0.4 { AREA { color: #ffffff; } }
+
+  SYMBOL military_police
+    // Star
+    POLYGON 0,-1.0 0.3,-0.3 1.0,-0.3 0.45,0.2 0.65,0.9 0,0.45 -0.65,0.9 -0.45,0.2 -1.0,-0.3 -0.3,-0.3 { AREA { color: @militaryBorderColor; } }
+
+  SYMBOL military_trench
+    // Zigzag trench line
+    POLYGON -1.0,-0.3 -0.5,0.3 0,0.3 0.5,-0.3 1.0,-0.3 { AREA.BORDER { color: @militaryBorderColor; width: 0.15mm; } }
+    POLYGON -1.0,0.3 -0.5,-0.3 0,-0.3 0.5,0.3 1.0,0.3 { AREA.BORDER { color: @militaryBorderColor; width: 0.15mm; } }
 
   STYLE
     [MAG proximity-] {
@@ -22,9 +69,13 @@ OSS
 
     [MAG city-] {
       [TYPE military_airfield,
+            military_ammunition,
+            military_base,
             military_danger_area,
+            military_nuclear_explosion_site,
             military_range,
-            military_naval_base] AREA { color: #f59897; }
+            military_naval_base,
+            military_training_area] AREA { color: #f59897; }
     }
 
     [MAG suburb-] {
@@ -46,17 +97,42 @@ OSS
 
     [MAG close-] {
       [TYPE military_airfield,
+            military_ammunition,
+            military_base,
             military_danger_area,
+            military_nuclear_explosion_site,
             military_range,
-            military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+            military_naval_base,
+            military_training_area] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
 
+      [TYPE military_trench,
+            military_cordon,
+            military_road,
+            military_shelter] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
+
+    [MAG detail-] {
+      [TYPE military_obstacle_course] AREA { color: @militaryColor; }
+      [TYPE military_obstacle_course] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
+    }
+
     [MAG veryClose-] {
       [TYPE military_danger_area,
             military_range,
+            military_training_area,
+            military_nuclear_explosion_site,
+            military_ammunition,
             landuse_military] {
         NODE.ICON { symbol: military; }
         NODE.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; size: 0.9; }
       }
+
+      [TYPE military_checkpoint] NODE.ICON { symbol: military_checkpoint; }
+      [TYPE military_cannon] NODE.ICON { symbol: military_cannon; }
+      [TYPE military_radar] NODE.ICON { symbol: military_radar; }
+      [TYPE military_embrasure] NODE.ICON { symbol: military_embrasure; }
+      [TYPE military_shelter] NODE.ICON { symbol: military_shelter; }
+      [TYPE military_police] NODE.ICON { symbol: military_police; }
+      [TYPE military_trench] NODE.ICON { symbol: military_trench; }
     }
 END

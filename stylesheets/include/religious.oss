@@ -10,7 +10,7 @@ OSS
     COLOR religiousBuildingColor        = #bfbfbf;
     COLOR religiousBuildingBorderColor  = darken(@religiousBuildingColor, 0.3);
 
-  SYMBOL christian_church_cross
+  SYMBOL religion_christian_church_cross
     RECTANGLE 0.5,-2 0.5 x 2 {
       AREA { color: #000000; }   // vertical bar
     }
@@ -18,17 +18,135 @@ OSS
       AREA { color: #000000; } // horizontal bar
     }
 
+  SYMBOL religion_jewish_star_of_david
+    // Star of David: two overlapping triangles
+    POLYGON 0,-1.15 -1.0,0.575 1.0,0.575 {
+      AREA { color: #000000; }
+    }
+    POLYGON 0,1.15 -1.0,-0.575 1.0,-0.575 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_muslim_crescent
+    // Crescent moon with star, following the OSM Carto muslim icon:
+    // outer arc is the left half of a circle, inner boundary bulges right
+    // (thick at top and bottom, thin in the middle, opening to the right)
+    POLYGON -0.0,1.0 -0.259,0.966 -0.5,0.866 -0.707,0.707 -0.866,0.5
+            -0.966,0.259 -1.0,-0.0 -0.966,-0.259 -0.866,-0.5 -0.707,-0.707
+            -0.5,-0.866 -0.259,-0.966 0.0,-1.0 0.19,-0.987 0.376,-0.947
+            0.55,-0.881 0.705,-0.788 0.833,-0.667 0.749,-0.715 0.649,-0.76
+            0.541,-0.798 0.434,-0.824 0.333,-0.833 0.081,-0.788 -0.146,-0.664
+            -0.331,-0.48 -0.455,-0.252 -0.5,-0.0 -0.455,0.252 -0.331,0.48
+            -0.146,0.664 0.081,0.788 0.333,0.833 0.434,0.824 0.541,0.798
+            0.649,0.76 0.749,0.715 0.833,0.667 0.705,0.788 0.55,0.881
+            0.376,0.947 0.19,0.987 0.0,1.0 {
+      AREA { color: #000000; }
+    }
+    // Five pointed star in the opening, top right
+    POLYGON 0.75,-0.5 0.583,-0.167 0.167,-0.167 0.5,0.083 0.333,0.5
+            0.75,0.25 1.167,0.5 1.0,0.083 1.333,-0.167 0.917,-0.167 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_buddhist_dharma_wheel
+    // Wheel rim
+    CIRCLE 0,0 1.0 {
+      AREA.BORDER { color: #000000; width: 0.15mm; }
+    }
+    // Eight spokes
+    POLYGON 0.2,-0.06 0.9,-0.06 0.9,0.06 0.2,0.06 {
+      AREA { color: #000000; }
+    }
+    POLYGON -0.2,-0.06 -0.9,-0.06 -0.9,0.06 -0.2,0.06 {
+      AREA { color: #000000; }
+    }
+    POLYGON -0.06,0.2 -0.06,0.9 0.06,0.9 0.06,0.2 {
+      AREA { color: #000000; }
+    }
+    POLYGON -0.06,-0.2 -0.06,-0.9 0.06,-0.9 0.06,-0.2 {
+      AREA { color: #000000; }
+    }
+    POLYGON 0.099,0.183 0.594,0.678 0.678,0.594 0.183,0.099 {
+      AREA { color: #000000; }
+    }
+    POLYGON -0.099,-0.183 -0.594,-0.678 -0.678,-0.594 -0.183,-0.099 {
+      AREA { color: #000000; }
+    }
+    POLYGON -0.099,0.183 -0.594,0.678 -0.678,0.594 -0.183,0.099 {
+      AREA { color: #000000; }
+    }
+    POLYGON 0.183,-0.099 0.678,-0.594 0.594,-0.678 0.099,-0.183 {
+      AREA { color: #000000; }
+    }
+    // Hub
+    CIRCLE 0,0 0.15 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_taoist_yin_yang
+    // Outer circle
+    CIRCLE 0,0 1.0 {
+      AREA.BORDER { color: #000000; width: 0.15mm; }
+    }
+    // Black half with S-curve
+    POLYGON 0,1 0.25,0.933 0.433,0.75 0.5,0.5 0.433,0.25 0.25,0.067
+            0,0 -0.25,-0.067 -0.433,-0.25 -0.5,-0.5 -0.433,-0.75 -0.25,-0.933
+            0,-1 -0.5,-0.866 -0.866,-0.5 -1,0 -0.866,0.5 -0.5,0.866 {
+      AREA { color: #000000; }
+    }
+    // White dot in the black part
+    CIRCLE 0,0.5 0.15 {
+      AREA { color: #ffffff; }
+    }
+    // Black dot in the white part
+    CIRCLE 0,-0.5 0.15 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_shinto_torii
+    // Two pillars
+    RECTANGLE -0.8,-0.9 0.2 x 1.8 {
+      AREA { color: #000000; }
+    }
+    RECTANGLE 0.6,-0.9 0.2 x 1.8 {
+      AREA { color: #000000; }
+    }
+    // Upper crossbar (kasagi) with upturned ends
+    POLYGON -1.0,-0.3 -1.0,-0.55 -0.55,-0.4 0,-0.35 0.55,-0.4 1.0,-0.55 1.0,-0.3 {
+      AREA { color: #000000; }
+    }
+    // Lower crossbar (nuki)
+    RECTANGLE -0.9,0.2 1.8 x 0.15 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_pagan_pentagram
+    // Five pointed star
+    POLYGON 0,-1.0 0.235,-0.324 0.951,-0.309 0.380,0.124 0.588,0.809
+            0,0.4 -0.588,0.809 -0.380,0.124 -0.951,-0.309 -0.235,-0.324 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL religion_place_of_worship
+    // Generic place of worship: building with roof
+    RECTANGLE -0.8,-0.8 1.6 x 1.2 {
+      AREA { color: #000000; }
+    }
+    POLYGON -1.0,-0.8 0,-1.3 1.0,-0.8 {
+      AREA { color: #000000; }
+    }
+
   STYLE
     IF _building {
       [MAG @specialBuildingMag-] {
-        [TYPE temple_building,
-              shrine_building,
-              christian_cathedral_building,
-              christian_church_building,
-              christian_chapel_building,
-              jewish_synagogue_building,
-              muslim_mosque_building,
-              worship_building] {
+        [TYPE religion_temple_building,
+              religion_shrine_building,
+              religion_christian_cathedral_building,
+              religion_christian_church_building,
+              religion_christian_chapel_building,
+              religion_jewish_synagogue_building,
+              religion_muslim_mosque_building,
+              religion_building] {
           AREA {
            color: @religiousBuildingColor;
           }
@@ -40,14 +158,14 @@ OSS
       }
 
       [MAG @labelSpecialBuildingMag-] {
-        [TYPE temple_building,
-              shrine_building,
-              christian_cathedral_building,
-              christian_church_building,
-              christian_chapel_building,
-              jewish_synagogue_building,
-              muslim_mosque_building,
-              worship_building] {
+        [TYPE religion_temple_building,
+              religion_shrine_building,
+              religion_christian_cathedral_building,
+              religion_christian_church_building,
+              religion_christian_chapel_building,
+              religion_jewish_synagogue_building,
+              religion_muslim_mosque_building,
+              religion_building] {
           AREA.TEXT {
             label: Name.name;
             style: emphasize;
@@ -57,20 +175,76 @@ OSS
             priority: @labelPrioSpecialBuilding;}
         }
 
-        [TYPE christian_cathedral_building,
-              christian_church_building,
-              christian_chapel_building] {
+        [TYPE religion_christian_cathedral_building,
+              religion_christian_church_building,
+              religion_christian_chapel_building] {
           AREA.ICON {
-            symbol: christian_church_cross;
+            symbol: religion_christian_church_cross;
           }
         }
       }
     }
 
     [MAG veryClose-] {
-      [TYPE christian_worship] {
+      [TYPE religion_christian] {
         NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: christian_church_cross; }
+        NODE.ICON {symbol: religion_christian_church_cross; }
+      }
+
+      [TYPE religion_jewish] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_jewish_star_of_david; }
+      }
+
+      [TYPE religion_muslim] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_muslim_crescent; }
+      }
+
+      [TYPE religion_buddhist] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_buddhist_dharma_wheel; }
+      }
+
+      [TYPE religion_taoist] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_taoist_yin_yang; }
+      }
+
+      [TYPE religion_shinto] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_shinto_torii; }
+      }
+
+      [TYPE religion_pagan] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_pagan_pentagram; }
+      }
+
+      [TYPE religion_hindu,
+            religion_sikh,
+            religion_jain,
+            religion_zoroastrian,
+            religion_chinese_folk,
+            religion_multifaith,
+            religion_bahai,
+            religion_confucian,
+            religion_vietnamese_folk,
+            religion_ancestor,
+            religion_animist,
+            religion_antoinist,
+            religion_benzhu,
+            religion_caodaism,
+            religion_shamanic,
+            religion_scientologist,
+            religion_self_realization_fellowship,
+            religion_spiritualist,
+            religion_tenrikyo,
+            religion_unitarian_universalist,
+            religion_voodoo,
+            religion_yazidi] {
+        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        NODE.ICON {symbol: religion_place_of_worship; }
       }
     }
 END

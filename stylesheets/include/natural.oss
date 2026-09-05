@@ -34,15 +34,15 @@ OSS
     COLOR volcanoLabelColor          = #90181a;
 
   SYMBOL natural_spring
-    CIRCLE 0,0 1.0 {
-      AREA.BORDER {color: @waterLabelColor; width: 0.2mm; }
+    CIRCLE 0,0 1.125 {
+      AREA.BORDER {color: @waterLabelColor; width: 0.225mm; }
     }
-    CIRCLE 0,0 0.3 {
+    CIRCLE 0,0 0.337 {
       AREA {color: @waterLabelColor; }
     }
 
   SYMBOL natural_cave_entrance
-    POLYGON -1,1 1,1 1,0.2 0.5,-0.6 0,-0.8 -0.5,-0.6 -1,0.2 {
+    POLYGON -1.125,1.125 1.125,1.125 1.125,0.225 0.562,-0.675 0,-0.9 -0.562,-0.675 -1.125,0.225 {
       AREA { color: @caveColor; }
     }
 

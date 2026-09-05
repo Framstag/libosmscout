@@ -99,6 +99,7 @@ void SymbolRendererQt::DrawPolygon(const std::vector<Vertex2D> &polygonPixels)
       path.lineTo(pixel->GetX(), pixel->GetY());
     }
   }
+  path.closeSubpath();
   painter->drawPath(path);
 }
 

@@ -43,14 +43,15 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
-  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
   GROUP highway_motorway_link, highway_trunk_link, highway_primary_link, highway_secondary_link, highway_tertiary_link
   GROUP highway_unclassified, highway_road, highway_residential
   GROUP railway_rail,
-        aeroway_runway, aeroway_taxiway
+        aeroway_runway, aeroway_taxiway, aeroway_taxilane, aeroway_stopway,
+        aeroway_model_runway, aeroway_jet_bridge
   GROUP highway_living_street, highway_service, highway_bus_guideway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
         railway_narrow_gauge, railway_preserved
@@ -58,8 +59,12 @@ ORDER WAYS
         highway_footway, highway_bridleway, highway_construction,
         leisure_track
   GROUP highway_steps, barrier_fence
-  GROUP waterway_weir, waterway_waterfall, route_ferry
-  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
+  GROUP waterway_weir, waterway_waterfall, waterway_rapids, waterway_sluice_gate,
+        waterway_floodgate, waterway_check_dam, waterway_floating_barrier,
+        waterway_flow_control, waterway_fish_pass, route_ferry
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream,
+        waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised,
+        waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway
 
 MODULE "include/land_sea_color"
 
