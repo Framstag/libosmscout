@@ -289,6 +289,77 @@ TYPES
     IGNORE // No visualisation yet
     = NODE ("highway"=="traffic_signals")
 
+  TYPE highway_crossing
+    = NODE ("highway"=="crossing")
+
+  TYPE highway_turning_circle
+    = NODE ("highway"=="turning_circle")
+
+  TYPE highway_stop
+    = NODE ("highway"=="stop")
+
+  TYPE highway_give_way
+    = NODE ("highway"=="give_way")
+
+  TYPE highway_turning_loop
+    = NODE ("highway"=="turning_loop")
+
+  TYPE highway_passing_place
+    = NODE ("highway"=="passing_place")
+
+  TYPE highway_emergency_access_point
+    = NODE ("highway"=="emergency_access_point")
+      {Ref}
+
+  TYPE highway_elevator
+    = NODE WAY ("highway"=="elevator")
+      {Name, NameAlt}
+      PATH[FOOT]
+
+  TYPE highway_rest_area
+    = NODE AREA ("highway"=="rest_area")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE highway_traffic_mirror
+    = NODE ("highway"=="traffic_mirror")
+
+  TYPE highway_emergency_bay
+    = NODE WAY ("highway"=="emergency_bay")
+
+  TYPE highway_trailhead
+    = NODE ("highway"=="trailhead")
+      {Name, NameAlt}
+      POI
+
+  TYPE highway_traffic_sign
+    = NODE ("highway"=="traffic_sign")
+
+  TYPE highway_toll_gantry
+    = NODE ("highway"=="toll_gantry")
+
+  TYPE highway_priority
+    = NODE ("highway"=="priority")
+
+  TYPE highway_speed_display
+    = NODE ("highway"=="speed_display")
+
+  TYPE highway_ladder
+    = NODE WAY ("highway"=="ladder")
+      PATH[FOOT]
+
+  TYPE highway_hitchhiking
+    = NODE ("highway"=="hitchhiking")
+      {Name, NameAlt}
+      POI
+
+  TYPE highway_cyclist_waiting_aid
+    = NODE ("highway"=="cyclist_waiting_aid")
+
+  TYPE highway_platform
+    = NODE ("highway"=="platform")
+      {Name, NameAlt}
+
   //
   // Waterways and assorted
   //
@@ -709,6 +780,109 @@ TYPES
     = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="advanced")
       {Name}
 
+  TYPE piste_downhill_novice
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="novice")
+      {Name}
+
+  TYPE piste_downhill_expert
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="expert")
+      {Name}
+
+  TYPE piste_downhill_freeride
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="freeride")
+      {Name}
+
+  TYPE piste_downhill_extreme
+    = WAY AREA ("piste:type"=="downhill" AND "piste:difficulty"=="extreme")
+      {Name}
+
+  TYPE piste_downhill
+    = WAY AREA ("piste:type"=="downhill")
+      {Name}
+
+  TYPE piste_nordic
+    = WAY ("piste:type"=="nordic")
+      {Name}
+
+  TYPE piste_skitour
+    = WAY AREA ("piste:type"=="skitour")
+      {Name}
+
+  TYPE piste_hike
+    = WAY ("piste:type"=="hike")
+      {Name}
+
+  TYPE piste_sled
+    = WAY AREA ("piste:type"=="sled")
+      {Name}
+
+  TYPE piste_sleigh
+    = WAY AREA ("piste:type"=="sleigh")
+      {Name}
+
+  TYPE piste_ice_skate
+    = WAY AREA ("piste:type"=="ice_skate")
+      {Name}
+
+  TYPE piste_snow_park
+    = NODE AREA ("piste:type"=="snow_park")
+      {Name}
+      POI
+
+  TYPE piste_playground
+    = NODE AREA ("piste:type"=="playground")
+      {Name}
+      POI
+
+  TYPE piste_ski_jump
+    = WAY AREA ("piste:type"=="ski_jump")
+      {Name}
+
+  TYPE piste_fatbike
+    = WAY ("piste:type"=="fatbike")
+      {Name}
+
+  TYPE piste_snowkite
+    = NODE AREA ("piste:type"=="snowkite")
+      {Name}
+      POI
+
+  TYPE piste_snowmobile
+    = WAY ("piste:type"=="snowmobile")
+      {Name}
+
+  TYPE piste_halfpipe
+    = WAY AREA ("man_made"=="piste:halfpipe")
+      {Name}
+
+  TYPE piste_connection
+    = WAY AREA ("piste:type"=="connection")
+      {Name}
+
+  TYPE piste_snowshoe
+    = WAY AREA ("piste:type"=="snowshoe")
+      {Name}
+
+  TYPE piste_nordic_hike
+    = WAY (("piste:type"=="nordic;hike") OR ("piste:type"=="hike;nordic"))
+      {Name}
+
+  TYPE piste_hike_fatbike
+    = WAY (("piste:type"=="hike;fatbike") OR ("piste:type"=="fatbike;hike"))
+      {Name}
+
+  TYPE piste_hike_snowshoe
+    = WAY ("piste:type"=="hike;snowshoe")
+      {Name}
+
+  TYPE piste_nordic_hike_snowshoe
+    = WAY ("piste:type"=="nordic;hike;snowshoe")
+      {Name}
+
+  TYPE piste_nordic_fatbike
+    = WAY ("piste:type"=="nordic;fatbike")
+      {Name}
+
   //
   // Water transport
   //
@@ -816,6 +990,24 @@ TYPES
       MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_animal_keeping
+    = AREA ("landuse"=="animal_keeping")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_apiary
+    = AREA ("landuse"=="apiary")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_aquaculture
+    = NODE AREA ("landuse"=="aquaculture")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_basin
     = NODE AREA ("landuse"=="basin")
       {Name, NameAlt}
@@ -850,6 +1042,24 @@ TYPES
       {Name, NameAlt} MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_culture
+    = AREA ("landuse"=="culture")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_education
+    = NODE AREA ("landuse"=="education")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_fairground
+    = NODE AREA ("landuse"=="fairground")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_farmland
     = AREA ("landuse"=="farmland")
       {Name, NameAlt}
@@ -864,6 +1074,18 @@ TYPES
   TYPE landuse_farmyard
     = AREA ("landuse"=="farmyard")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_flowerbed
+    = AREA ("landuse"=="flowerbed")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_forestry
+    = AREA ("landuse"=="forestry")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
 
   TYPE wood
@@ -888,9 +1110,27 @@ TYPES
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_greenery
+    = AREA ("landuse"=="greenery")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_greenhouse_horticulture
     = AREA ("landuse"=="greenhouse_horticulture")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_healthcare
+    = AREA ("landuse"=="healthcare")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_highway
+    = AREA ("landuse"=="highway")
+      {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
 
   TYPE landuse_industrial
@@ -899,8 +1139,20 @@ TYPES
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_institutional
+    = NODE AREA ("landuse"=="institutional")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_landfill
     = NODE AREA ("landuse"=="landfill")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_logging
+    = AREA ("landuse"=="logging")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
       GROUP landuse
@@ -921,9 +1173,21 @@ TYPES
       {Name, NameAlt} MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_peat_cutting
+    = AREA ("landuse"=="peat_cutting")
+      {Name, NameAlt}
+      OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_piste
     = NODE AREA ("landuse"=="piste")
       {Name, NameAlt} MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_plant_nursery
+    = AREA ("landuse"=="plant_nursery")
+      {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
 
   TYPE landuse_quarry
@@ -941,6 +1205,12 @@ TYPES
     = NODE AREA ("landuse"=="recreation_ground")
       {Name, NameAlt}
       OPTIMIZE_LOW_ZOOM MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_religious
+    = NODE AREA ("landuse"=="religious")
+      {Name, NameAlt}
+      MERGE_AREAS
       GROUP landuse
 
   TYPE landuse_reservoir
@@ -966,6 +1236,18 @@ TYPES
       MERGE_AREAS
       GROUP landuse
 
+  TYPE landuse_static_caravan
+    = NODE AREA ("landuse"=="static_caravan")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_tree_pit
+    = AREA ("landuse"=="tree_pit")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
   TYPE landuse_village_green
     = NODE AREA ("landuse"=="village_green")
       {Name, NameAlt}
@@ -974,6 +1256,12 @@ TYPES
 
   TYPE landuse_vineyard
     = AREA ("landuse"=="vineyard")
+      {Name, NameAlt}
+      MERGE_AREAS
+      GROUP landuse
+
+  TYPE landuse_winter_sports
+    = NODE AREA ("landuse"=="winter_sports")
       {Name, NameAlt}
       MERGE_AREAS
       GROUP landuse
@@ -1253,6 +1541,293 @@ TYPES
     = NODE AREA ("man_made"=="wastewater_plant")
       {Name, NameAlt}
       MERGE_AREAS
+
+  TYPE man_made_storage_tank
+    = NODE AREA ("man_made"=="storage_tank")
+      {Name, NameAlt}
+      POI
+      MERGE_AREAS
+
+  TYPE man_made_cutline
+    = WAY ("man_made"=="cutline")
+
+  TYPE man_made_surveillance
+    = NODE ("man_made"=="surveillance")
+
+  TYPE man_made_manhole
+    = NODE ("man_made"=="manhole")
+
+  TYPE man_made_mast
+    = NODE ("man_made"=="mast")
+
+  TYPE man_made_tower
+    = NODE AREA ("man_made"=="tower")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_utility_pole
+    = NODE ("man_made"=="utility_pole")
+
+  TYPE man_made_survey_point
+    = NODE ("man_made"=="survey_point")
+
+  TYPE man_made_pipeline
+    = WAY ("man_made"=="pipeline")
+
+  TYPE man_made_water_well
+    = NODE AREA ("man_made"=="water_well")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_silo
+    = NODE AREA ("man_made"=="silo")
+      {Name, NameAlt}
+      POI
+      MERGE_AREAS
+
+  TYPE man_made_embankment
+    = WAY ("man_made"=="embankment")
+
+  TYPE man_made_petroleum_well
+    = NODE ("man_made"=="petroleum_well")
+
+  TYPE man_made_street_cabinet
+    = NODE AREA ("man_made"=="street_cabinet")
+
+  TYPE man_made_works
+    = NODE AREA ("man_made"=="works")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE man_made_flagpole
+    = NODE ("man_made"=="flagpole")
+
+  TYPE man_made_water_tower
+    = NODE AREA ("man_made"=="water_tower")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_chimney
+    = NODE ("man_made"=="chimney")
+
+  TYPE man_made_clearcut
+    = AREA ("man_made"=="clearcut")
+      MERGE_AREAS
+
+  TYPE man_made_water_tap
+    = NODE AREA ("man_made"=="water_tap")
+
+  TYPE man_made_bunker_silo
+    = NODE AREA ("man_made"=="bunker_silo")
+      {Name, NameAlt}
+      POI
+      MERGE_AREAS
+
+  TYPE man_made_breakwater
+    = WAY AREA ("man_made"=="breakwater")
+      MERGE_AREAS
+
+  TYPE man_made_monitoring_station
+    = NODE AREA ("man_made"=="monitoring_station")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_reservoir_covered
+    = NODE AREA ("man_made"=="reservoir_covered")
+      {Name, NameAlt}
+      POI
+      MERGE_AREAS
+
+  TYPE man_made_beehive
+    = NODE ("man_made"=="beehive")
+
+  TYPE man_made_heap
+    = NODE AREA ("man_made"=="heap")
+      MERGE_AREAS
+
+  TYPE man_made_groyne
+    = WAY AREA ("man_made"=="groyne")
+      MERGE_AREAS
+
+  TYPE man_made_antenna
+    = NODE WAY AREA ("man_made"=="antenna")
+
+  TYPE man_made_planter
+    = NODE AREA ("man_made"=="planter")
+
+  TYPE man_made_water_works
+    = NODE AREA ("man_made"=="water_works")
+      {Name, NameAlt}
+      ADDRESS POI
+
+  TYPE man_made_charge_point
+    = NODE ("man_made"=="charge_point")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_cross
+    = NODE ("man_made"=="cross")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_pumping_station
+    = NODE AREA ("man_made"=="pumping_station")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_dyke
+    = WAY AREA ("man_made"=="dyke")
+      MERGE_AREAS
+
+  TYPE man_made_gantry
+    = NODE WAY ("man_made"=="gantry")
+
+  TYPE man_made_kiln
+    = NODE AREA ("man_made"=="kiln")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_courtyard
+    = NODE AREA ("man_made"=="courtyard")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_goods_conveyor
+    = WAY ("man_made"=="goods_conveyor")
+
+  TYPE man_made_adit
+    = NODE ("man_made"=="adit")
+
+  TYPE man_made_crane
+    = NODE AREA ("man_made"=="crane")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_gasometer
+    = NODE AREA ("man_made"=="gasometer")
+      {Name, NameAlt}
+      POI
+      MERGE_AREAS
+
+  TYPE man_made_advertising
+    = NODE WAY ("man_made"=="advertising")
+
+  TYPE man_made_mineshaft
+    = NODE AREA ("man_made"=="mineshaft")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_avalanche_protection
+    = NODE WAY AREA ("man_made"=="avalanche_protection")
+
+  TYPE man_made_lighthouse
+    = NODE ("man_made"=="lighthouse")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_watermill
+    = NODE AREA ("man_made"=="watermill")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_cairn
+    = NODE AREA ("man_made"=="cairn")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_ceremonial_gate
+    = NODE WAY AREA ("man_made"=="ceremonial_gate")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_windmill
+    = NODE AREA ("man_made"=="windmill")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_snow_cannon
+    = NODE ("man_made"=="snow_cannon")
+
+  TYPE man_made_flare
+    = NODE ("man_made"=="flare")
+
+  TYPE man_made_clarifier
+    = NODE AREA ("man_made"=="clarifier")
+
+  TYPE man_made_dolphin
+    = NODE AREA ("man_made"=="dolphin")
+
+  TYPE man_made_beacon
+    = NODE ("man_made"=="beacon")
+
+  TYPE man_made_satellite_dish
+    = NODE AREA ("man_made"=="satellite_dish")
+
+  TYPE man_made_tunnel
+    = AREA ("man_made"=="tunnel")
+      MERGE_AREAS
+
+  TYPE man_made_quay
+    = WAY AREA ("man_made"=="quay")
+      MERGE_AREAS
+
+  TYPE man_made_cooling
+    = WAY ("man_made"=="cooling")
+
+  TYPE man_made_stupa
+    = NODE AREA ("man_made"=="stupa")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_telephone_box
+    = NODE ("man_made"=="telephone_box")
+
+  TYPE man_made_geoglyph
+    = NODE WAY AREA ("man_made"=="geoglyph")
+
+  TYPE man_made_spoil_heap
+    = AREA ("man_made"=="spoil_heap")
+      MERGE_AREAS
+
+  TYPE man_made_snow_fence
+    = WAY ("man_made"=="snow_fence")
+
+  TYPE man_made_communications_tower
+    = NODE AREA ("man_made"=="communications_tower")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_tailings_pond
+    = AREA ("man_made"=="tailings_pond")
+      MERGE_AREAS
+
+  TYPE man_made_oil_gas_separator
+    = NODE ("man_made"=="oil_gas_separator")
+
+  TYPE man_made_bioswale
+    = NODE AREA ("man_made"=="bioswale")
+
+  TYPE man_made_buoy
+    = NODE ("man_made"=="buoy")
+
+  TYPE man_made_fuel_pump
+    = NODE ("man_made"=="fuel_pump")
+
+  TYPE man_made_carpet_hanger
+    = NODE ("man_made"=="carpet_hanger")
+
+  TYPE man_made_column
+    = NODE AREA ("man_made"=="column")
+      {Name, NameAlt}
+      POI
+
+  TYPE man_made_telescope
+    = NODE AREA ("man_made"=="telescope")
+
+  TYPE man_made_windpump
+    = NODE AREA ("man_made"=="windpump")
+      {Name, NameAlt}
+      POI
 
   //
   // Leisure
@@ -7093,6 +7668,26 @@ TYPES
     = NODE AREA ("place"=="county")
       {Name, NameAlt, IsIn}
 
+  TYPE place_province
+    = NODE ("place"=="province")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_district
+    = NODE ("place"=="district")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_subdistrict
+    = NODE ("place"=="subdistrict")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_municipality
+    = NODE RELATION ("place"=="municipality")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
   TYPE place_capitalcity
     = NODE AREA ("place"=="city" AND EXISTS "capital" AND "capital"=="yes")
       {Name, NameAlt, IsIn}
@@ -7133,13 +7728,58 @@ TYPES
       {Name, NameAlt, IsIn}
       ADMIN_REGION
 
+  TYPE place_isolated_dwelling
+    = NODE AREA RELATION ("place"=="isolated_dwelling")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
+  TYPE place_farm
+    = NODE AREA ("place"=="farm")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_allotments
+    = NODE AREA ("place"=="allotments")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
   TYPE place_suburb
     = NODE AREA ("place"=="suburb")
       {Name, NameAlt, IsIn}
       ADMIN_REGION
 
+  TYPE place_borough
+    = NODE AREA RELATION ("place"=="borough")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
+  TYPE place_quarter
+    = NODE AREA RELATION ("place"=="quarter")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
+  TYPE place_neighbourhood
+    = NODE AREA RELATION ("place"=="neighbourhood")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
+  TYPE place_city_block
+    = NODE AREA ("place"=="city_block")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_plot
+    = NODE AREA RELATION ("place"=="plot")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
   TYPE place_locality
     = NODE AREA ("place"=="locality")
+      {Name, NameAlt, IsIn}
+      POI
+
+  TYPE place_square
+    = NODE AREA ("place"=="square")
       {Name, NameAlt, IsIn}
       POI
 
@@ -7150,6 +7790,24 @@ TYPES
   TYPE place_islet
     = NODE AREA ("place"=="islet")
       {Name, NameAlt, IsIn}
+
+  TYPE place_archipelago
+    = AREA RELATION ("place"=="archipelago")
+      {Name, NameAlt}
+      MULTIPOLYGON
+
+  TYPE place_polder
+    = NODE AREA ("place"=="polder")
+      {Name, NameAlt, IsIn}
+
+  TYPE place_sea
+    = NODE AREA ("place"=="sea")
+      {Name, NameAlt}
+      IGNORESEALAND
+
+  TYPE place_ocean
+    = NODE ("place"=="ocean")
+      {Name, NameAlt}
 
   //
   // Buildings

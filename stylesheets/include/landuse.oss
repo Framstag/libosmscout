@@ -47,6 +47,21 @@ OSS
 
     COLOR vineyardColor              = #b3e2a8;
 
+    COLOR animalKeepingColor          = #dce8c8;
+    COLOR apiaryColor                 = #dce8c8;
+    COLOR aquacultureColor            = #b1d8f0;
+    COLOR cultureColor                = #f3e8c8;
+    COLOR educationColor              = #f3e8c8;
+    COLOR fairgroundColor             = #d8d2c8;
+    COLOR flowerbedColor              = #e8a9c0;
+    COLOR greeneryColor               = #c8e6c8;
+    COLOR healthcareColor             = #f3e8c8;
+    COLOR highwayColor                = #dcdcdc;
+    COLOR institutionalColor          = #d8d2c8;
+    COLOR loggingColor                = #d6c9a8;
+    COLOR staticCaravanColor          = #def6c0;
+    COLOR treePitColor                = #c8e6c8;
+
   STYLE
     IF daylight {
       [MAG region-] {
@@ -58,6 +73,10 @@ OSS
         [TYPE landuse_reservoir] AREA { color: @waterColor; }
         [TYPE landuse_residential] AREA { color: @residentialColor; }
         [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
+        [TYPE landuse_aquaculture] AREA { color: @aquacultureColor; pattern: "landuse_aquaculture"; patternMinMag: cityOver; }
+        [TYPE landuse_forestry] AREA { color: @woodColor; pattern: "landuse_forest"; patternMinMag: cityOver; }
+        [TYPE landuse_logging] AREA { color: @loggingColor; pattern: "landuse_logging"; patternMinMag: cityOver; }
+        [TYPE landuse_peat_cutting] AREA { color: @quarryColor; pattern: "landuse_peat_cutting"; patternMinMag: cityOver; }
       }
 
       [MAG city-] {
@@ -70,12 +89,18 @@ OSS
         [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
         [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
         [TYPE landuse_railway] AREA { color: #dcdcc8; }
-        [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
+        [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "landuse_cemetery"; patternMinMag: detail; }
         [TYPE landuse_cemetery_sea] AREA { color: @cemeteryColor; }
         [TYPE landuse_garages] AREA { color: #dfddce; }
         [TYPE landuse_greenhouse_horticulture] AREA { color: @farmlandColor; }
         [TYPE landuse_piste] AREA { color: #dde3ec; }
         [TYPE landuse_salt_pond] AREA { color: @waterColor; }
+        [TYPE landuse_animal_keeping] AREA { color: @animalKeepingColor; pattern: "landuse_animal_keeping"; patternMinMag: detail; }
+        [TYPE landuse_apiary] AREA { color: @apiaryColor; pattern: "landuse_apiary"; patternMinMag: detail; }
+        [TYPE landuse_highway] AREA { color: @highwayColor; pattern: "landuse_highway"; patternMinMag: cityOver; }
+        [TYPE landuse_plant_nursery] AREA { color: @vineyardColor; pattern: "landuse_garden"; patternMinMag: detail; }
+        [TYPE landuse_static_caravan] AREA { color: @staticCaravanColor; pattern: "landuse_static_caravan"; patternMinMag: detail; }
+        [TYPE landuse_winter_sports] AREA { color: #dde3ec; pattern: "landuse_winter_sports"; patternMinMag: detail; }
       }
 
       [MAG suburb-] {
@@ -86,7 +111,12 @@ OSS
           AREA { color: @retailColor;}
           AREA.BORDER { color: #c5a0a0; width: 0.1mm; }
         }
-      }
+        [TYPE landuse_culture] AREA { color: @cultureColor; pattern: "landuse_culture"; patternMinMag: detail; }
+        [TYPE landuse_education] AREA { color: @educationColor; pattern: "landuse_education"; patternMinMag: detail; }
+        [TYPE landuse_fairground] AREA { color: @fairgroundColor; pattern: "landuse_fairground"; patternMinMag: detail; }
+        [TYPE landuse_healthcare] AREA { color: @healthcareColor; pattern: "landuse_healthcare"; patternMinMag: detail; }
+        [TYPE landuse_institutional] AREA { color: @institutionalColor; pattern: "landuse_institutional"; patternMinMag: detail; }
+        [TYPE landuse_religious] AREA { color: @religiousColor; pattern: "landuse_religious"; patternMinMag: detail; }      }
 
       [MAG close-] {
         [TYPE landuse_grass] AREA { color: @grassColor; }
@@ -94,6 +124,10 @@ OSS
         [TYPE landuse_orchard,
               landuse_meadow,
               landuse_village_green] AREA { color: #cfeca8; }
+
+        [TYPE landuse_flowerbed] AREA { color: @flowerbedColor; pattern: "landuse_garden"; patternMinMag: detail; }
+        [TYPE landuse_greenery] AREA { color: @greeneryColor; pattern: "landuse_greenery"; patternMinMag: detail; }
+        [TYPE landuse_tree_pit] AREA { color: @treePitColor; pattern: "landuse_forest"; patternMinMag: detail; }
       }
 
       // Labels
@@ -128,6 +162,26 @@ OSS
               landuse_piste,
               landuse_salt_pond] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
 
+        [TYPE landuse_animal_keeping,
+              landuse_apiary,
+              landuse_aquaculture,
+              landuse_culture,
+              landuse_education,
+              landuse_fairground,
+              landuse_flowerbed,
+              landuse_forestry,
+              landuse_greenery,
+              landuse_healthcare,
+              landuse_highway,
+              landuse_institutional,
+              landuse_logging,
+              landuse_peat_cutting,
+              landuse_plant_nursery,
+              landuse_religious,
+              landuse_static_caravan,
+              landuse_tree_pit,
+              landuse_winter_sports] AREA.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+
         [TYPE landuse_farmland,
               landuse_farmyard,
               landuse_quarry,
@@ -150,12 +204,23 @@ OSS
               landuse_retail,
               landuse_village_green,
               landuse_piste] NODE.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
+
+        [TYPE landuse_aquaculture,
+              landuse_education,
+              landuse_fairground,
+              landuse_institutional,
+              landuse_religious,
+              landuse_static_caravan,
+              landuse_winter_sports] NODE.TEXT { label: Name.name; priority: @labelPrioLanduse; color: @labelColor; autoSize: true;}
       }
 
       [MAG veryClose-] {
         [TYPE landuse_railway,
               landuse_construction,
               landuse_village_green] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse; color: @labelColor; autoSize: true; }
+
+        [TYPE landuse_flowerbed,
+              landuse_tree_pit] AREA.TEXT { label: Name.name;  priority: @labelPrioLanduse; color: @labelColor; autoSize: true; }
       }
     }
 END

@@ -6,9 +6,30 @@ OSS
 
   CONST
     UINT labelPrioPiste               = 25;
+    COLOR pisteLabelColor             = #404040;
+
+  SYMBOL piste_snow_park
+    RECTANGLE -1.125,-1.125 2.25 x 2.25 { AREA.BORDER { color: @pisteLabelColor; width: 0.241mm; } }
+    POLYGON -0.75,0.375 0,0.375 0,-0.75 { AREA { color: @pisteLabelColor; } }
+
+  SYMBOL piste_playground
+    CIRCLE 0,-0.75 0.5 { AREA { color: @pisteLabelColor; } }                        // head
+    POLYGON -0.375,-0.25 0.375,-0.25 0.375,0.375 -0.375,0.375 { AREA { color: @pisteLabelColor; } }  // body
+    POLYGON -0.5,-0.25 -0.75,0.375 { AREA.BORDER { color: @pisteLabelColor; width: 0.241mm; } }     // left ski pole
+    POLYGON 0.5,-0.25 0.75,0.375 { AREA.BORDER { color: @pisteLabelColor; width: 0.241mm; } }       // right ski pole
+    POLYGON -0.75,0.375 0.75,0.375 { AREA.BORDER { color: @pisteLabelColor; width: 0.3mm; } }       // ski
+
+  SYMBOL piste_snowkite
+    POLYGON 0,-1.125 0.75,0 0,1.125 -0.75,0 { AREA.BORDER { color: @pisteLabelColor; width: 0.241mm; } }
+    POLYGON 0,-0.375 0.375,0 0,0.375 -0.375,0 { AREA { color: @pisteLabelColor; } }
 
   STYLE
     [MAG city-] {
+      [TYPE piste_downhill_novice]{
+        WAY {color: #26a626; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #26a62680; }
+        AREA.BORDER { color: #26a626; width: 0.3mm; }
+      }
       [TYPE piste_downhill_easy]{
         WAY {color: #5050ff; displayWidth: 0.5mm; width: 20m;}
         AREA {color: #5050ff80; }
@@ -24,9 +45,112 @@ OSS
         AREA {color: #60606080; }
         AREA.BORDER { color: #606060; width: 0.3mm; }
       }
+      [TYPE piste_downhill_expert]{
+        WAY {color: #ffbb2d; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #ffbb2d80; }
+        AREA.BORDER { color: #ffbb2d; width: 0.3mm; }
+      }
+      [TYPE piste_downhill_freeride]{
+        WAY {color: #e1c90b; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #e1c90b80; }
+        AREA.BORDER { color: #e1c90b; width: 0.3mm; }
+      }
+      [TYPE piste_downhill_extreme]{
+        WAY {color: #262121; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #26212180; }
+        AREA.BORDER { color: #262121; width: 0.3mm; }
+      }
+      [TYPE piste_downhill]{
+        WAY {color: #808080; displayWidth: 0.5mm; width: 20m;}
+        AREA {color: #80808080; }
+        AREA.BORDER { color: #808080; width: 0.3mm; }
+      }
+      [TYPE piste_nordic]{
+        WAY {color: #298db2; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_skitour]{
+        WAY {color: #c42c1c; displayWidth: 0.3mm; width: 10m; dash: 0.5,2;}
+        AREA {color: #c42c1c40; }
+        AREA.BORDER { color: #c42c1c; width: 0.2mm; dash: 0.5,2; }
+      }
+      [TYPE piste_hike]{
+        WAY {color: #e88193; displayWidth: 0.3mm; width: 10m; dash: 0.5,2;}
+      }
+      [TYPE piste_sled]{
+        WAY {color: #baff3a; displayWidth: 0.3mm; width: 10m;}
+        AREA {color: #baff3a40; }
+        AREA.BORDER { color: #baff3a; width: 0.2mm; }
+      }
+      [TYPE piste_sleigh]{
+        WAY {color: #8f54d8; displayWidth: 0.3mm; width: 10m;}
+        AREA {color: #8f54d840; }
+        AREA.BORDER { color: #8f54d8; width: 0.2mm; }
+      }
+      [TYPE piste_ice_skate]{
+        WAY {color: #6fc4d0; displayWidth: 0.3mm; width: 10m;}
+        AREA {color: #6fc4d040; }
+        AREA.BORDER { color: #6fc4d0; width: 0.2mm; }
+      }
+      [TYPE piste_snow_park]{
+        AREA {color: #0f6dd340; }
+        AREA.BORDER { color: #0f6dd3; width: 0.2mm; }
+      }
+      [TYPE piste_playground]{
+        AREA {color: #a6e05b40; }
+        AREA.BORDER { color: #a6e05b; width: 0.2mm; }
+      }
+      [TYPE piste_ski_jump]{
+        WAY {color: #655abe; displayWidth: 0.3mm; width: 10m;}
+        AREA {color: #655abe40; }
+        AREA.BORDER { color: #655abe; width: 0.2mm; }
+      }
+      [TYPE piste_fatbike]{
+        WAY {color: #7359e6; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_snowkite]{
+        AREA {color: #1a9ccc40; }
+        AREA.BORDER { color: #1a9ccc; width: 0.2mm; }
+      }
+      [TYPE piste_snowmobile]{
+        WAY {color: #7a7a7a; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_halfpipe]{
+        WAY {color: #1e90ff; displayWidth: 0.3mm; width: 10m;}
+        AREA {color: #1e90ff40; }
+        AREA.BORDER { color: #1e90ff; width: 0.2mm; }
+      }
+      [TYPE piste_connection]{
+        WAY {color: #373737; displayWidth: 0.2mm; width: 5m; dash: 0.5,2;}
+        AREA {color: #37373740; }
+        AREA.BORDER { color: #373737; width: 0.2mm; dash: 0.5,2; }
+      }
+      [TYPE piste_snowshoe]{
+        WAY {color: #d87093; displayWidth: 0.3mm; width: 10m; dash: 0.5,2;}
+        AREA {color: #d8709340; }
+        AREA.BORDER { color: #d87093; width: 0.2mm; dash: 0.5,2; }
+      }
+      [TYPE piste_nordic_hike]{
+        WAY {color: #298db2; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_hike_fatbike]{
+        WAY {color: #e88193; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_hike_snowshoe]{
+        WAY {color: #e88193; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_nordic_hike_snowshoe]{
+        WAY {color: #298db2; displayWidth: 0.3mm; width: 10m;}
+      }
+      [TYPE piste_nordic_fatbike]{
+        WAY {color: #298db2; displayWidth: 0.3mm; width: 10m;}
+      }
     }
 
     [MAG close-]{
+      [TYPE piste_downhill_novice]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #26a626; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #26a626; }
+      }
       [TYPE piste_downhill_easy]{
         WAY.TEXT { label: Name.name; size: 1.0; color: #3030ff; displayOffset: 2.5mm; priority: @labelPrioPiste; }
         AREA.TEXT { label: Name.name; size: 1.0; color: #3030ff; }
@@ -38,6 +162,89 @@ OSS
       [TYPE piste_downhill_advanced]{
         WAY.TEXT { label: Name.name; size: 1.0; color: #505050; displayOffset: 2.5mm; priority: @labelPrioPiste; }
         AREA.TEXT { label: Name.name; size: 1.0; color: #505050; }
+      }
+      [TYPE piste_downhill_expert]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #a68000; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #a68000; }
+      }
+      [TYPE piste_downhill_freeride]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #a68000; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #a68000; }
+      }
+      [TYPE piste_downhill_extreme]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #303030; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #303030; }
+      }
+      [TYPE piste_downhill]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #606060; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #606060; }
+      }
+      [TYPE piste_nordic,
+            piste_nordic_hike,
+            piste_nordic_hike_snowshoe,
+            piste_nordic_fatbike]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #298db2; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+      }
+      [TYPE piste_skitour]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #c42c1c; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #c42c1c; }
+      }
+      [TYPE piste_hike,
+            piste_hike_fatbike,
+            piste_hike_snowshoe]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #e88193; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+      }
+      [TYPE piste_sled]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #568400; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #568400; }
+      }
+      [TYPE piste_sleigh]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #8f54d8; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #8f54d8; }
+      }
+      [TYPE piste_ice_skate]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #1a9ccc; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #1a9ccc; }
+      }
+      [TYPE piste_snow_park]{
+        NODE.ICON { symbol: piste_snow_park; }
+        AREA.ICON { symbol: piste_snow_park; }
+        NODE.TEXT { label: Name.name; size: 1.0; color: #005cc0; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #005cc0; }
+      }
+      [TYPE piste_playground]{
+        NODE.ICON { symbol: piste_playground; }
+        AREA.ICON { symbol: piste_playground; }
+        NODE.TEXT { label: Name.name; size: 1.0; color: #6cad1a; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #6cad1a; }
+      }
+      [TYPE piste_ski_jump]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #655abe; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #655abe; }
+      }
+      [TYPE piste_fatbike]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #7359e6; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+      }
+      [TYPE piste_snowkite]{
+        NODE.ICON { symbol: piste_snowkite; }
+        AREA.ICON { symbol: piste_snowkite; }
+        NODE.TEXT { label: Name.name; size: 1.0; color: #1a9ccc; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #1a9ccc; }
+      }
+      [TYPE piste_snowmobile]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #606060; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+      }
+      [TYPE piste_halfpipe]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #1e90ff; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #1e90ff; }
+      }
+      [TYPE piste_connection]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #373737; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #373737; }
+      }
+      [TYPE piste_snowshoe]{
+        WAY.TEXT { label: Name.name; size: 1.0; color: #d87093; displayOffset: 2.5mm; priority: @labelPrioPiste; }
+        AREA.TEXT { label: Name.name; size: 1.0; color: #d87093; }
       }
     }
 END

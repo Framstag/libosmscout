@@ -449,7 +449,7 @@ STYLE
      [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
      [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
      [TYPE landuse_railway] AREA { color: #dcdcc8; }
-     [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
+     [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "landuse_cemetery"; patternMinMag: detail; }
    }
 
    [MAG detail-] {

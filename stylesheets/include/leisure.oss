@@ -414,7 +414,7 @@ OSS
           AREA { color: @playgroundColor;}
           AREA.BORDER { color: @playgroundBorderColor; width: 0.1mm;}
         }
-        [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "garden"; patternMinMag: detail;}
+        [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "leisure_garden"; patternMinMag: detail;}
 
         [TYPE leisure_fitness_centre,
               leisure_sports_hall,

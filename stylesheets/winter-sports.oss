@@ -62,7 +62,11 @@ ORDER WAYS
   GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream,
         waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised,
         waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway
-  GROUP piste_downhill_easy, piste_downhill_intermediate, piste_downhill_advanced
+  GROUP piste_downhill_novice, piste_downhill_easy, piste_downhill_intermediate, piste_downhill_advanced,
+        piste_downhill_expert, piste_downhill_freeride, piste_downhill_extreme, piste_downhill,
+        piste_nordic, piste_skitour, piste_hike, piste_sled, piste_sleigh, piste_ice_skate,
+        piste_ski_jump, piste_fatbike, piste_snowmobile, piste_halfpipe, piste_connection, piste_snowshoe,
+        piste_nordic_hike, piste_hike_fatbike, piste_hike_snowshoe, piste_nordic_hike_snowshoe, piste_nordic_fatbike
   GROUP elevation_contour_major, elevation_contour_medium, elevation_contour_minor
 
 CONST

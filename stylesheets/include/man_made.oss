@@ -2,6 +2,7 @@ OSS
 CONST
   COLOR amenitySymbolColor          = darken(@amenityColor, 0.4);
   COLOR barrierSymbolColor          = #555555;
+  COLOR manMadeSymbolColor         = #555555;
 
   SYMBOL barrier_kerb
     // Low curb
@@ -168,6 +169,344 @@ CONST
     // Support
     RECTANGLE -0.05,-0.5 0.1 x 0.5 { AREA { color: @amenitySymbolColor; } }
 
+  SYMBOL man_made_tower
+    // Tower
+    RECTANGLE -0.35,-0.6 0.7 x 1.1 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.45,-0.6 0.45,-0.6 0,-1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Door
+    RECTANGLE -0.12,0.3 0.24 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_communications_tower
+    // Lattice tower
+    POLYGON -0.3,0.9 0.3,0.9 0,-0.9 { AREA { color: @manMadeSymbolColor; } }
+    // Crossbars
+    RECTANGLE -0.3,0.5 0.6 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.2,0.0 0.4 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.1,-0.5 0.2 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    // Antenna
+    RECTANGLE -0.05,-1.1 0.1 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_mast
+    // Mast
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    // Crossbars
+    RECTANGLE -0.5,-0.5 1.0 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.4,-0.1 0.8 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_water_tower
+    // Legs
+    RECTANGLE -0.5,-0.2 0.15 x 0.9 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE 0.35,-0.2 0.15 x 0.9 { AREA { color: @manMadeSymbolColor; } }
+    // Tank
+    RECTANGLE -0.6,-0.4 1.2 x 0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.7,-0.4 0.7,-0.4 0,-0.8 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_lighthouse
+    // Tower
+    RECTANGLE -0.3,-0.5 0.6 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Lantern
+    RECTANGLE -0.4,-0.6 0.8 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.45,-0.6 0.45,-0.6 0,-0.9 { AREA { color: @manMadeSymbolColor; } }
+    // Light rays
+    POLYGON 0.4,-0.5 0.9,-0.7 0.9,-0.3 { AREA { color: @manMadeSymbolColor; } }
+    POLYGON -0.4,-0.5 -0.9,-0.7 -0.9,-0.3 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_windmill
+    // Building
+    RECTANGLE -0.4,-0.3 0.8 x 0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.5,-0.3 0.5,-0.3 0,-0.7 { AREA { color: @manMadeSymbolColor; } }
+    // Sails
+    RECTANGLE -0.05,-0.9 0.1 x 1.2 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.6,-0.05 1.2 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_watermill
+    // Building
+    RECTANGLE -0.5,-0.3 1.0 x 0.7 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.6,-0.3 0.6,-0.3 0,-0.7 { AREA { color: @manMadeSymbolColor; } }
+    // Water wheel
+    CIRCLE 0.55,0.1 0.3 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+    CIRCLE 0.55,0.1 0.08 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_windpump
+    // Tower
+    POLYGON -0.2,0.8 0.2,0.8 0,-0.2 { AREA { color: @manMadeSymbolColor; } }
+    // Fan
+    CIRCLE 0,-0.2 0.35 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.3,-0.2 0.6 x 0.08 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.08,-0.4 0.08 x 0.4 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_cross
+    // Cross
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.5,-0.5 1.0 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_cairn
+    // Stone pile
+    POLYGON -0.5,0.4 0.5,0.4 0,-0.4 { AREA { color: @manMadeSymbolColor; } }
+    POLYGON -0.3,0.1 0.3,0.1 0,-0.5 { AREA { color: lighten(@manMadeSymbolColor, 0.3); } }
+
+  SYMBOL man_made_column
+    // Column
+    RECTANGLE -0.15,-0.5 0.3 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Capital
+    RECTANGLE -0.25,-0.6 0.5 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    // Base
+    RECTANGLE -0.25,0.5 0.5 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_stupa
+    // Dome
+    CIRCLE 0,-0.1 0.5 { AREA { color: @manMadeSymbolColor; } }
+    // Base
+    RECTANGLE -0.6,0.3 1.2 x 0.15 { AREA { color: @manMadeSymbolColor; } }
+    // Spire
+    RECTANGLE -0.05,-0.7 0.1 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    POLYGON -0.05,-0.7 0.05,-0.7 0,-0.9 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_ceremonial_gate
+    // Pillars
+    RECTANGLE -0.6,-0.5 0.4 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE 0.2,-0.5 0.4 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Lintel
+    RECTANGLE -0.7,-0.8 1.4 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.8,-0.8 0.8,-0.8 0,-1.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_chimney
+    // Chimney
+    RECTANGLE -0.2,-0.9 0.4 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    // Smoke
+    CIRCLE 0,-0.9 0.15 { AREA { color: #aaaaaa; } }
+    CIRCLE 0.1,-1.1 0.2 { AREA { color: #aaaaaa; } }
+
+  SYMBOL man_made_flare
+    // Stack
+    RECTANGLE -0.15,-0.8 0.3 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Flame
+    POLYGON 0,-0.9 -0.2,-0.6 0.2,-0.6 { AREA { color: #ff6600; } }
+
+  SYMBOL man_made_crane
+    // Mast
+    RECTANGLE -0.1,-0.8 0.2 x 1.6 { AREA { color: @manMadeSymbolColor; } }
+    // Jib
+    RECTANGLE -0.1,-0.8 1.2 x 0.15 { AREA { color: @manMadeSymbolColor; } }
+    // Counterweight
+    RECTANGLE -0.5,-0.65 0.3 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Hook
+    RECTANGLE 0.9,-0.5 0.1 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_gasometer
+    // Gas holder
+    RECTANGLE -0.6,-0.5 1.2 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Top
+    POLYGON -0.7,-0.5 0.7,-0.5 0,-0.7 { AREA { color: @manMadeSymbolColor; } }
+    // Lattice lines
+    RECTANGLE -0.6,-0.3 1.2 x 0.05 { AREA { color: #ffffff; } }
+    RECTANGLE -0.6,0.0 1.2 x 0.05 { AREA { color: #ffffff; } }
+    RECTANGLE -0.6,0.3 1.2 x 0.05 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_storage_tank
+    // Tank
+    RECTANGLE -0.6,-0.4 1.2 x 0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Dome top
+    POLYGON -0.6,-0.4 0.6,-0.4 0,-0.7 { AREA { color: @manMadeSymbolColor; } }
+    // Highlight
+    RECTANGLE -0.4,-0.3 0.2 x 0.6 { AREA { color: lighten(@manMadeSymbolColor, 0.4); } }
+
+  SYMBOL man_made_silo
+    // Silo
+    RECTANGLE -0.35,-0.6 0.7 x 1.2 { AREA { color: @manMadeSymbolColor; } }
+    // Dome top
+    POLYGON -0.35,-0.6 0.35,-0.6 0,-0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Highlight
+    RECTANGLE -0.2,-0.5 0.15 x 1.0 { AREA { color: lighten(@manMadeSymbolColor, 0.4); } }
+
+  SYMBOL man_made_flagpole
+    // Pole
+    RECTANGLE -0.05,-0.9 0.1 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    // Flag
+    POLYGON 0.05,-0.9 0.7,-0.75 0.05,-0.6 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_beacon
+    // Beacon
+    RECTANGLE -0.2,-0.6 0.4 x 1.2 { AREA { color: @manMadeSymbolColor; } }
+    // Light
+    CIRCLE 0,-0.7 0.2 { AREA { color: #ff6600; } }
+
+  SYMBOL man_made_buoy
+    // Buoy
+    CIRCLE 0,0 0.4 { AREA { color: @manMadeSymbolColor; } }
+    // Top light
+    RECTANGLE -0.05,-0.5 0.1 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+    CIRCLE 0,-0.6 0.12 { AREA { color: #ff6600; } }
+
+  SYMBOL man_made_dolphin
+    // Mooring post
+    RECTANGLE -0.2,-0.5 0.4 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Cap
+    RECTANGLE -0.3,-0.6 0.6 x 0.15 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_antenna
+    // Antenna
+    RECTANGLE -0.1,-0.9 0.2 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    // Elements
+    RECTANGLE -0.5,-0.6 1.0 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.4,-0.2 0.8 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.3,0.2 0.6 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_satellite_dish
+    // Dish
+    CIRCLE 0,0 0.5 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+    // Feed horn
+    RECTANGLE -0.05,-0.05 0.1 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    // Support
+    RECTANGLE -0.05,0.4 0.1 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_utility_pole
+    // Pole
+    RECTANGLE -0.08,-0.9 0.16 x 1.8 { AREA { color: @manMadeSymbolColor; } }
+    // Crossarm
+    RECTANGLE -0.5,-0.6 1.0 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_manhole
+    // Manhole cover
+    CIRCLE 0,0 0.4 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+    RECTANGLE -0.3,0 0.6 x 0.08 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE 0,-0.3 0.08 x 0.6 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_survey_point
+    // Survey point
+    POLYGON 0,-0.5 0.5,0.3 -0.5,0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Center dot
+    CIRCLE 0,0.05 0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_surveillance
+    // Camera
+    RECTANGLE -0.5,-0.2 1.0 x 0.4 { AREA { color: @manMadeSymbolColor; } }
+    // Lens
+    CIRCLE 0.35,0 0.12 { AREA { color: #ffffff; } }
+    // Mount
+    RECTANGLE -0.1,0.2 0.2 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_water_tap
+    // Pipe
+    RECTANGLE -0.5,-0.1 1.0 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+    // Spout
+    RECTANGLE 0.3,0.1 0.2 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Valve
+    CIRCLE -0.3,0 0.15 { AREA { color: @manMadeSymbolColor; } }
+    // Water drop
+    CIRCLE 0.4,0.6 0.12 { AREA { color: #4a90d9; } }
+
+  SYMBOL man_made_water_well
+    // Well
+    RECTANGLE -0.4,-0.3 0.8 x 0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.5,-0.3 0.5,-0.3 0,-0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Opening
+    RECTANGLE -0.2,0.0 0.4 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_petroleum_well
+    // Pump jack
+    POLYGON -0.5,0.3 0.5,0.3 0.5,0.1 -0.5,0.1 { AREA { color: @manMadeSymbolColor; } }
+    // Arm
+    RECTANGLE -0.1,-0.5 0.2 x 0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Head
+    RECTANGLE -0.3,-0.6 0.6 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_mineshaft
+    // Headframe
+    RECTANGLE -0.4,-0.5 0.8 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.4,0.4 0.8 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE -0.4,-0.5 0.1 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE 0.3,-0.5 0.1 x 1.0 { AREA { color: @manMadeSymbolColor; } }
+    // Wheel
+    CIRCLE 0,0.2 0.2 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+
+  SYMBOL man_made_charge_point
+    // Charging station
+    RECTANGLE -0.3,-0.4 0.6 x 0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Plug
+    RECTANGLE -0.1,-0.6 0.2 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+    // Cable
+    RECTANGLE -0.05,-0.4 0.1 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Lightning bolt
+    POLYGON 0.05,-0.2 0.2,-0.2 0.05,0.1 0.2,0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_beehive
+    // Hive
+    RECTANGLE -0.4,-0.3 0.8 x 0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Roof
+    POLYGON -0.5,-0.3 0.5,-0.3 0,-0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Entrance
+    RECTANGLE -0.15,0.2 0.3 x 0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_telescope
+    // Telescope
+    RECTANGLE -0.5,-0.1 1.0 x 0.2 { AREA { color: @manMadeSymbolColor; } }
+    // Mount
+    RECTANGLE -0.1,0.1 0.2 x 0.4 { AREA { color: @manMadeSymbolColor; } }
+    // Base
+    RECTANGLE -0.3,0.5 0.6 x 0.1 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_works
+    // Factory building
+    RECTANGLE -0.7,-0.2 1.4 x 0.5 { AREA { color: @manMadeSymbolColor; } }
+    // Chimney
+    RECTANGLE 0.3,-0.5 0.2 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Windows
+    RECTANGLE -0.5,0.0 0.2 x 0.2 { AREA { color: #ffffff; } }
+    RECTANGLE -0.1,0.0 0.2 x 0.2 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_kiln
+    // Kiln
+    CIRCLE 0,0 0.5 { AREA { color: @manMadeSymbolColor; } }
+    // Opening
+    RECTANGLE -0.2,0.1 0.4 x 0.3 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_street_cabinet
+    // Cabinet
+    RECTANGLE -0.35,-0.4 0.7 x 0.8 { AREA { color: @manMadeSymbolColor; } }
+    // Door line
+    RECTANGLE -0.25,-0.3 0.5 x 0.6 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.05mm; } }
+
+  SYMBOL man_made_snow_cannon
+    // Cannon
+    RECTANGLE -0.5,-0.2 1.0 x 0.3 { AREA { color: @manMadeSymbolColor; } }
+    // Nozzle
+    RECTANGLE 0.4,-0.3 0.2 x 0.15 { AREA { color: @manMadeSymbolColor; } }
+    // Snow
+    CIRCLE 0.6,-0.5 0.15 { AREA { color: #ffffff; } }
+    CIRCLE 0.75,-0.4 0.1 { AREA { color: #ffffff; } }
+
+  SYMBOL man_made_telephone_box
+    // Booth
+    RECTANGLE -0.6,-0.7 1.2 x 1.4 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.1mm; } }
+    // Roof
+    POLYGON -0.7,-0.7 0.7,-0.7 0,-0.95 { AREA { color: @manMadeSymbolColor; } }
+    // Handset
+    POLYGON 0.3,-0.2 -0.3,-0.2 -0.3,-0.05 -0.12,-0.05 -0.12,0.25 -0.3,0.25 -0.3,0.4 0.3,0.4 0.3,0.25 0.12,0.25 0.12,-0.05 0.3,-0.05 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_fuel_pump
+    // Fuel pump
+    RECTANGLE -0.597,-0.996 1.195 x 1.792 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.239mm; } }
+    RECTANGLE -0.398,-0.697 0.796 x 0.398 { AREA { color: @manMadeSymbolColor; } }
+    POLYGON 0.597,0.199 1.095,0.199 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.239mm; } }
+    POLYGON 1.095,0.199 1.095,0.697 { AREA.BORDER { color: @manMadeSymbolColor; width: 0.239mm; } }
+    CIRCLE 1.095,0.796 0.159 { AREA { color: @manMadeSymbolColor; } }
+
+  SYMBOL man_made_adit
+    // Arch
+    RECTANGLE -0.5,-0.2 0.4 x 0.5 { AREA { color: @manMadeSymbolColor; } }
+    RECTANGLE 0.1,-0.2 0.4 x 0.5 { AREA { color: @manMadeSymbolColor; } }
+    POLYGON -0.5,-0.2 0.5,-0.2 0,-0.6 { AREA { color: @manMadeSymbolColor; } }
+    // Opening
+    RECTANGLE -0.3,0.1 0.6 x 0.2 { AREA { color: #ffffff; } }
+
 STYLE
  // -------------------------------------------------------
  //
@@ -181,6 +520,63 @@ STYLE
    [TYPE man_made_wastewater_plant] {
      AREA { color: @industrialColor; }
      AREA.BORDER { color: darken(@industrialColor, 0.3); width: 0.1mm; }
+   }
+
+   [TYPE man_made_works,
+         man_made_water_works,
+         man_made_pumping_station,
+         man_made_monitoring_station] {
+     AREA { color: @industrialColor; }
+     AREA.BORDER { color: darken(@industrialColor, 0.3); width: 0.1mm; }
+   }
+
+   [TYPE man_made_storage_tank,
+         man_made_silo,
+         man_made_bunker_silo,
+         man_made_gasometer,
+         man_made_reservoir_covered] {
+     AREA { color: lighten(@industrialColor, 0.2); }
+     AREA.BORDER { color: darken(@industrialColor, 0.3); width: 0.1mm; }
+   }
+
+   [TYPE man_made_clearcut] {
+     AREA { color: #d9d0c0; }
+     AREA.BORDER { color: #b0a890; width: 0.1mm; }
+   }
+
+   [TYPE man_made_heap,
+         man_made_spoil_heap,
+         man_made_tailings_pond] {
+     AREA { color: #d8cbb8; }
+     AREA.BORDER { color: #b0a080; width: 0.1mm; }
+   }
+
+   [TYPE man_made_breakwater,
+         man_made_groyne,
+         man_made_dyke,
+         man_made_quay] {
+     AREA { color: #ffffff; }
+     AREA.BORDER { color: #c0c0c0; width: 0.1mm; }
+   }
+
+   [TYPE man_made_courtyard] {
+     AREA { color: #f0f0e8; }
+     AREA.BORDER { color: #c8c8c0; width: 0.1mm; }
+   }
+
+   [TYPE man_made_bioswale] {
+     AREA { color: #c8e0c0; }
+     AREA.BORDER { color: #90b080; width: 0.1mm; }
+   }
+
+   [TYPE man_made_tunnel] {
+     AREA { color: #d0d0d0; }
+     AREA.BORDER { color: #909090; width: 0.1mm; }
+   }
+
+   [TYPE man_made_clarifier] {
+     AREA { color: #c8d8e0; }
+     AREA.BORDER { color: #90a8b8; width: 0.1mm; }
    }
 
  }
@@ -212,6 +608,26 @@ STYLE
      [SIZE 5m <0.1mm:3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
      AREA { color: #ffffff; }
    }
+
+   [TYPE man_made_breakwater,
+         man_made_groyne,
+         man_made_quay] {
+     [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
+     [SIZE 5m <0.1mm:3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
+   }
+
+   [TYPE man_made_dyke] {
+     [SIZE 5m 0.1mm:3px<] WAY {color: @damColor; width: 5.0m;}
+     [SIZE 5m <0.1mm:3px] WAY {color: @damColor; displayWidth: 0.1mm;}
+   }
+
+   [TYPE man_made_cutline] WAY {color: #b0a890; displayWidth: 0.05mm; width: 1m; dash: 2,2;}
+   [TYPE man_made_pipeline] WAY {color: #6f6f6f; displayWidth: 0.05mm; width: 2m; dash: 4,2;}
+   [TYPE man_made_goods_conveyor] WAY {color: #6f6f6f; displayWidth: 0.08mm; width: 3m;}
+   [TYPE man_made_cooling] WAY {color: #6f6f6f; displayWidth: 0.08mm; width: 3m;}
+   [TYPE man_made_snow_fence] WAY {color: #aaaaaa; displayWidth: 0.1mm;}
+   [TYPE man_made_embankment] WAY {color: #8a7a6a; displayWidth: 0.1mm; width: 3m;}
+   [TYPE man_made_advertising] WAY {color: #6f6f6f; displayWidth: 0.05mm; width: 1m;}
 
    [TYPE waterway_dam] {
      AREA { color: @damColor; }
@@ -250,6 +666,59 @@ STYLE
  [MAG veryClose-] {
 
    [TYPE man_made_wastewater_plant] NODE.ICON { symbol: man_made_wastewater_plant; }
+
+   [TYPE man_made_tower] NODE.ICON { symbol: man_made_tower; }
+   [TYPE man_made_communications_tower] NODE.ICON { symbol: man_made_communications_tower; }
+   [TYPE man_made_mast] NODE.ICON { symbol: man_made_mast; }
+   [TYPE man_made_water_tower] NODE.ICON { symbol: man_made_water_tower; }
+   [TYPE man_made_lighthouse] NODE.ICON { symbol: man_made_lighthouse; }
+   [TYPE man_made_windmill] NODE.ICON { symbol: man_made_windmill; }
+   [TYPE man_made_watermill] NODE.ICON { symbol: man_made_watermill; }
+   [TYPE man_made_windpump] NODE.ICON { symbol: man_made_windpump; }
+   [TYPE man_made_cross] NODE.ICON { symbol: man_made_cross; }
+   [TYPE man_made_cairn] NODE.ICON { symbol: man_made_cairn; }
+   [TYPE man_made_column] NODE.ICON { symbol: man_made_column; }
+   [TYPE man_made_stupa] NODE.ICON { symbol: man_made_stupa; }
+   [TYPE man_made_ceremonial_gate] NODE.ICON { symbol: man_made_ceremonial_gate; }
+   [TYPE man_made_chimney] NODE.ICON { symbol: man_made_chimney; }
+   [TYPE man_made_flare] NODE.ICON { symbol: man_made_flare; }
+   [TYPE man_made_crane] NODE.ICON { symbol: man_made_crane; }
+   [TYPE man_made_gasometer] NODE.ICON { symbol: man_made_gasometer; }
+   [TYPE man_made_storage_tank] NODE.ICON { symbol: man_made_storage_tank; }
+   [TYPE man_made_silo,
+         man_made_bunker_silo] NODE.ICON { symbol: man_made_silo; }
+   [TYPE man_made_flagpole] NODE.ICON { symbol: man_made_flagpole; }
+   [TYPE man_made_beacon] NODE.ICON { symbol: man_made_beacon; }
+   [TYPE man_made_buoy] NODE.ICON { symbol: man_made_buoy; }
+   [TYPE man_made_dolphin] NODE.ICON { symbol: man_made_dolphin; }
+   [TYPE man_made_antenna] NODE.ICON { symbol: man_made_antenna; }
+   [TYPE man_made_satellite_dish] NODE.ICON { symbol: man_made_satellite_dish; }
+   [TYPE man_made_utility_pole] NODE.ICON { symbol: man_made_utility_pole; }
+   [TYPE man_made_manhole] NODE.ICON { symbol: man_made_manhole; }
+   [TYPE man_made_survey_point] NODE.ICON { symbol: man_made_survey_point; }
+   [TYPE man_made_surveillance] NODE.ICON { symbol: man_made_surveillance; }
+   [TYPE man_made_telephone_box] NODE.ICON { symbol: man_made_telephone_box; }
+   [TYPE man_made_fuel_pump] NODE.ICON { symbol: man_made_fuel_pump; }
+   [TYPE man_made_water_tap] NODE.ICON { symbol: man_made_water_tap; }
+   [TYPE man_made_water_well] NODE.ICON { symbol: man_made_water_well; }
+   [TYPE man_made_petroleum_well] NODE.ICON { symbol: man_made_petroleum_well; }
+   [TYPE man_made_mineshaft] NODE.ICON { symbol: man_made_mineshaft; }
+   [TYPE man_made_adit] NODE.ICON { symbol: man_made_adit; }
+   [TYPE man_made_charge_point] NODE.ICON { symbol: man_made_charge_point; }
+   [TYPE man_made_beehive] NODE.ICON { symbol: man_made_beehive; }
+   [TYPE man_made_telescope] NODE.ICON { symbol: man_made_telescope; }
+   [TYPE man_made_works,
+         man_made_water_works,
+         man_made_pumping_station,
+         man_made_monitoring_station] NODE.ICON { symbol: man_made_works; }
+   [TYPE man_made_kiln] NODE.ICON { symbol: man_made_kiln; }
+   [TYPE man_made_street_cabinet] NODE.ICON { symbol: man_made_street_cabinet; }
+   [TYPE man_made_planter] NODE.ICON { symbol: barrier_planter; }
+   [TYPE man_made_avalanche_protection] NODE.ICON { symbol: barrier_avalanche_protection; }
+   [TYPE man_made_snow_cannon] NODE.ICON { symbol: man_made_snow_cannon; }
+   [TYPE man_made_oil_gas_separator] NODE.ICON { symbol: man_made_storage_tank; }
+   [TYPE man_made_gantry] NODE.ICON { symbol: man_made_communications_tower; }
+   [TYPE man_made_advertising] NODE.ICON { symbol: man_made_works; }
 
    [TYPE barrier_fence] {
       WAY {color: #aaaaaa; displayWidth: 0.1mm;}

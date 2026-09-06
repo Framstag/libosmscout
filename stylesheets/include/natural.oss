@@ -85,7 +85,7 @@ OSS
 
       [MAG city-] {
         [TYPE natural_beach] AREA { color: @beachColor; }
-        [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
+        [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "natural_scrub"; patternMinMag: cityOver; }
       }
 
       [MAG detail-] {
