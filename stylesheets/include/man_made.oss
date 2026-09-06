@@ -2,7 +2,7 @@ OSS
 CONST
   COLOR amenitySymbolColor          = darken(@amenityColor, 0.4);
   COLOR barrierSymbolColor          = #555555;
-  COLOR manMadeSymbolColor         = #555555;
+  COLOR manMadeSymbolColor         = @barrierSymbolColor;
 
   SYMBOL barrier_kerb
     // Low curb

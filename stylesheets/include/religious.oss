@@ -5,9 +5,19 @@ OSS
   //
 
   CONST
-    COLOR religiousColor                = #cccccc;
+    IF daylight {
+      COLOR religiousColor                = #cccccc;
+    }
+    ELSE {
+      COLOR religiousColor                = darken(#cccccc, 0.5);
+    }
     COLOR religiousLabelColor           = darken(@religiousColor, 0.5);
-    COLOR religiousBuildingColor        = #bfbfbf;
+    IF daylight {
+      COLOR religiousBuildingColor        = #bfbfbf;
+    }
+    ELSE {
+      COLOR religiousBuildingColor        = darken(#bfbfbf, 0.5);
+    }
     COLOR religiousBuildingBorderColor  = darken(@religiousBuildingColor, 0.3);
 
   SYMBOL religion_christian_church_cross

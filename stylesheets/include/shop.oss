@@ -6,7 +6,12 @@ OSS
   //
 
   CONST
-    COLOR shopColor                  = #d9bb98;
+    IF daylight {
+      COLOR shopColor                  = #d9bb98;
+    }
+    ELSE {
+      COLOR shopColor                  = darken(#d9bb98, 0.5);
+    }
     COLOR shopSymbolColor            = darken(@shopColor, 0.2);
     COLOR shopBorderColor            = darken(@shopColor, 0.3);
     COLOR shopLabelColor             = darken(@shopColor, 0.8);
@@ -479,9 +484,18 @@ OSS
     POLYGON -0.9,0.8 -0.9,0.35 -0.6,0.15 -0.35,0.4 -0.1,0.4 0.55,0.8 0.9,0.8 { AREA { color: @shopSymbolColor; } }
     RECTANGLE -0.9,0.55 1.8 x 0.25 { AREA.BORDER { color: @shopSymbolColor; width: 0.15mm; } }
   STYLE
+    IF _shop {
+      [MAG @buildingMag-] {
+        [GROUP shop] {
+          AREA { color: @shopColor;}
+          AREA.BORDER { color: @shopBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
     IF _building {
       [MAG @buildingMag-] {
-        [GROUP shop, building] {
+        [GROUP building] {
           AREA { color: @shopColor;}
           AREA.BORDER { color: @shopBorderColor; width: 0.1mm; }
         }

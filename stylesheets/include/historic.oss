@@ -5,7 +5,12 @@ OSS
   //
 
   CONST
-    COLOR historicColor       = #b6845a;
+    IF daylight {
+      COLOR historicColor       = #b6845a;
+    }
+    ELSE {
+      COLOR historicColor       = darken(#b6845a, 0.5);
+    }
     COLOR historicSymbolColor = darken(@historicColor, 0.2);
     COLOR historicBorderColor = darken(@historicColor, 0.3);
     COLOR historicLabelColor  = darken(@historicColor, 0.5);
@@ -582,65 +587,76 @@ OSS
     POLYGON 0.2,0.05 0.5,0.05 0.35,-0.15 { AREA { color: @historicSymbolColor; } }
 
   STYLE
-    [MAG detail-] {
-       [TYPE historic_castle,
-             historic_monument,
-             historic_memorial,
-             historic_ruins,
-             historic_wreck,
-             historic_manor,
-             historic_aircraft,
-             historic_aqueduct,
-             historic_bomb_crater,
-             historic_caravanserai,
-             historic_castle_wall,
-             historic_cattle_crush,
-             historic_cemetery,
-             historic_chapel,
-             historic_charcoal_pile,
-             historic_church,
-             historic_city_gate,
-             historic_creamery,
-             historic_district,
-             historic_epigraph,
-             historic_farm,
-             historic_folly,
-             historic_fort,
-             historic_gallows,
-             historic_granary,
-             historic_house,
-             historic_lavoir,
-             historic_lime_kiln,
-             historic_locomotive,
-             historic_machine,
-             historic_mine,
-             historic_mine_adit,
-             historic_mine_shaft,
-             historic_minecart,
-             historic_monastery,
-             historic_mosque,
-             historic_optical_telegraph,
-             historic_pound,
-             historic_railway_car,
-             historic_railway_station,
-             historic_round_tower,
-             historic_shieling,
-             historic_ship,
-             historic_smithy,
-             historic_stecak,
-             historic_tank,
-             historic_temple,
-             historic_tomb,
-             historic_tower,
-             historic_vehicle,
-             historic_warehouse,
-             historic_watermill,
-             historic_wayside_shrine] AREA { color: @historicColor; }
+    IF _historic {
+      [MAG detail-] {
+         [TYPE historic_castle,
+               historic_monument,
+               historic_memorial,
+               historic_ruins,
+               historic_wreck,
+               historic_manor,
+               historic_aircraft,
+               historic_aqueduct,
+               historic_bomb_crater,
+               historic_caravanserai,
+               historic_castle_wall,
+               historic_cattle_crush,
+               historic_cemetery,
+               historic_chapel,
+               historic_charcoal_pile,
+               historic_church,
+               historic_city_gate,
+               historic_creamery,
+               historic_district,
+               historic_epigraph,
+               historic_farm,
+               historic_folly,
+               historic_fort,
+               historic_gallows,
+               historic_granary,
+               historic_house,
+               historic_lavoir,
+               historic_lime_kiln,
+               historic_locomotive,
+               historic_machine,
+               historic_mine,
+               historic_mine_adit,
+               historic_mine_shaft,
+               historic_minecart,
+               historic_monastery,
+               historic_mosque,
+               historic_optical_telegraph,
+               historic_pound,
+               historic_railway_car,
+               historic_railway_station,
+               historic_round_tower,
+               historic_shieling,
+               historic_ship,
+               historic_smithy,
+               historic_stecak,
+               historic_tank,
+               historic_temple,
+               historic_tomb,
+               historic_tower,
+               historic_vehicle,
+               historic_warehouse,
+               historic_watermill,
+               historic_wayside_shrine] AREA { color: @historicColor; }
+      }
+    }
+
+    IF _historic {
+      [MAG @buildingMag-] {
+        [GROUP historic] {
+          AREA { color: @historicColor;}
+          AREA.BORDER { color: @historicBorderColor; width: 0.1mm; }
+        }
+      }
     }
 
     IF _building {
       [MAG @buildingMag-] {
-        [GROUP historic, building] {
+        [GROUP building] {
           AREA { color: @historicColor;}
           AREA.BORDER { color: @historicBorderColor; width: 0.1mm; }
         }

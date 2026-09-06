@@ -6,7 +6,7 @@ OSS
 
   CONST
     COLOR hospitalSymbolColor         = #da0092;
-    COLOR pharmacySymbolColor         = #da0092;
+    COLOR pharmacySymbolColor         = @hospitalSymbolColor;
     COLOR postSymbolColor             = #e8f000;
 
     // Base colors used by the amenity symbols and area fills below

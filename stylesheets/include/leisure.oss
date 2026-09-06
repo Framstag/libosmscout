@@ -5,11 +5,26 @@ OSS
   //
 
   CONST
-    COLOR pitchColor                 = #90d3b9;
-    COLOR pitchBorderColor           = #b0b0b0;
+    IF daylight {
+      COLOR pitchColor                 = #90d3b9;
+    }
+    ELSE {
+      COLOR pitchColor                 = darken(#90d3b9, 0.5);
+    }
+    IF daylight {
+      COLOR pitchBorderColor           = #b0b0b0;
+    }
+    ELSE {
+      COLOR pitchBorderColor           = darken(#b0b0b0, 0.5);
+    }
     COLOR pitchLabelColor            = darken(@pitchColor,0.5);
 
-    COLOR playgroundColor            = #affdbb;
+    IF daylight {
+      COLOR playgroundColor            = #affdbb;
+    }
+    ELSE {
+      COLOR playgroundColor            = darken(#affdbb, 0.5);
+    }
     COLOR playgroundBorderColor      = darken(@playgroundColor, 0.3);
 
     COLOR leisureSymbolColor         = #2e7d32;

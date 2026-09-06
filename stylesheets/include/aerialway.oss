@@ -5,9 +5,14 @@ OSS
   //
 
   CONST
-    COLOR airwayColor               = #bb75d9;
+    IF daylight {
+      COLOR airwayColor               = #bb75d9;
+    }
+    ELSE {
+      COLOR airwayColor               = darken(#bb75d9, 0.5);
+    }
     COLOR airwaySymbolColor         = @airwayColor;
-    COLOR airwayLabelColor          = darken(#bb75d9, 0.5);
+    COLOR airwayLabelColor          = darken(@airwayColor, 0.5);
 
   SYMBOL aerialway_station
     RECTANGLE 0,0 2.25 x 2.25 {

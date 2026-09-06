@@ -7688,6 +7688,16 @@ TYPES
       {Name, NameAlt, IsIn}
       MULTIPOLYGON ADMIN_REGION
 
+  TYPE place_cadastral_community
+    = NODE AREA ("place"=="cadastral_community")
+      {Name, NameAlt, IsIn}
+      ADMIN_REGION
+
+  TYPE place_subcounty
+    = NODE AREA RELATION ("place"=="subcounty")
+      {Name, NameAlt, IsIn}
+      MULTIPOLYGON ADMIN_REGION
+
   TYPE place_capitalcity
     = NODE AREA ("place"=="city" AND EXISTS "capital" AND "capital"=="yes")
       {Name, NameAlt, IsIn}
@@ -7772,6 +7782,11 @@ TYPES
     = NODE AREA RELATION ("place"=="plot")
       {Name, NameAlt, IsIn}
       MULTIPOLYGON ADMIN_REGION
+
+  TYPE place_building_complex
+    = NODE AREA RELATION ("place"=="building_complex")
+      {Name, NameAlt}
+      MULTIPOLYGON
 
   TYPE place_locality
     = NODE AREA ("place"=="locality")

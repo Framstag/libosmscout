@@ -5,7 +5,12 @@ OSS
   //
 
   CONST
-    COLOR tourismColor               = #c8c8db;
+    IF daylight {
+      COLOR tourismColor               = #c8c8db;
+    }
+    ELSE {
+      COLOR tourismColor               = darken(#c8c8db, 0.5);
+    }
     COLOR tourismSymbolColor         = darken(@tourismColor, 0.2);
     COLOR tourismBuildingBorderColor = darken(@tourismColor, 0.3);
     COLOR tourismLabelColor          = darken(@tourismColor, 0.7);
@@ -28,9 +33,18 @@ OSS
   STYLE
     // General
 
+    IF _tourism {
+      [MAG @buildingMag-] {
+        [GROUP tourism] {
+          AREA { color: @tourismColor; }
+          AREA.BORDER { color: @tourismBuildingBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
     IF _building {
       [MAG @buildingMag-] {
-        [GROUP tourism, building] {
+        [GROUP building] {
           AREA { color: @tourismColor; }
           AREA.BORDER { color: @tourismBuildingBorderColor; width: 0.1mm; }
         }
@@ -69,36 +83,38 @@ OSS
 
     // Special, make them appear earlier
 
-    [MAG city-] {
-      [TYPE tourism_theme_park,
-            tourism_zoo,
-            historic_archaeological_site,
-            historic_battlefield] {
-        AREA { color: @tourismColor; }
+    IF _tourism {
+      [MAG city-] {
+        [TYPE tourism_theme_park,
+              tourism_zoo,
+              historic_archaeological_site,
+              historic_battlefield] {
+          AREA { color: @tourismColor; }
+        }
       }
-    }
 
-    [MAG detail-] {
-      [TYPE tourism_alpine_hut,
-            tourism_camp_site,
-            tourism_caravan_site,
-            tourism_attraction,
-            tourism_artwork,
-            tourism_chalet,
-            tourism_guest_house,
-            tourism_hostel,
-            tourism_hotel,
-            tourism_information,
-            tourism_motel,
-            tourism_museum,
-            tourism_picnic_site,
-            tourism_aquarium,
-            tourism_apartment,
-            tourism_camp_pitch,
-            tourism_gallery,
-            tourism_trail_riding_station,
-            tourism_wilderness_hut] {
-        AREA { color: @tourismColor; }
+      [MAG detail-] {
+        [TYPE tourism_alpine_hut,
+              tourism_camp_site,
+              tourism_caravan_site,
+              tourism_attraction,
+              tourism_artwork,
+              tourism_chalet,
+              tourism_guest_house,
+              tourism_hostel,
+              tourism_hotel,
+              tourism_information,
+              tourism_motel,
+              tourism_museum,
+              tourism_picnic_site,
+              tourism_aquarium,
+              tourism_apartment,
+              tourism_camp_pitch,
+              tourism_gallery,
+              tourism_trail_riding_station,
+              tourism_wilderness_hut] {
+          AREA { color: @tourismColor; }
+        }
       }
     }
 

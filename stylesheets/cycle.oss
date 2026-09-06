@@ -26,13 +26,23 @@ FLAG
     _leisure        = true;
     _building       = true;
     _minorBuilding  = true;
+    _shop           = true;
+    _tourism        = true;
+    _historic       = true;
+    _office         = true;
+    _landuse        = true;
   }
   ELSE {
     _natural        = false;
-    _railway        = false;
+    _railway        = true;
     _leisure        = false;
-    _building       = false;
-    _minorBuilding  = false;
+    _building       = true;
+    _minorBuilding  = true;
+    _shop           = false;
+    _tourism        = false;
+    _historic       = false;
+    _office         = false;
+    _landuse        = false;
   }
 
 ORDER WAYS
@@ -271,9 +281,21 @@ CONST
   COLOR primaryShieldColor         = @primaryColor;
 
   // Buildings
-  COLOR buildingColor              = #d9d9d9;
+  IF daylight {
+    COLOR buildingColor              = #d9d9d9;
+  }
+  ELSE {
+    COLOR buildingColor              = darken(#d9d9d9, 0.5);
+  }
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
+
+  IF daylight {
+    COLOR minorBuildingColor         = #bcbcbc;
+  }
+  ELSE {
+    COLOR minorBuildingColor         = darken(#bcbcbc, 0.5);
+  }
 
   // Travel
 

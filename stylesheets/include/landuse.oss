@@ -12,18 +12,6 @@ OSS
       COLOR allotmentsColor          = darken(#c8b084,0.5);
     }
 
-    COLOR brownFieldColor            = #b6b592;//#ebd7fe;
-    COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
-
-    COLOR cemeteryColor              = #a9caae;
-    COLOR commercialColor            = #efc8c8;
-    COLOR constructionColor          = #9d9d6c;
-
-    COLOR farmlandColor              = #ead8bd;
-    COLOR farmyardColor              = #dcbe92;
-
-    COLOR greenFieldColor            = #dcdcc8;
-
     IF daylight {
       COLOR landFillColor            = #b6b591;
     }
@@ -31,9 +19,62 @@ OSS
       COLOR landFillColor            = darken(#b6b591, 0.5);
     }
 
-    COLOR quarryColor                = #b3b3b3;
-    COLOR recreationColor            = #bce2ca;
+    IF daylight {
+      COLOR brownFieldColor            = #b6b592;//#ebd7fe;
+      COLOR cemeteryColor              = #a9caae;
+      COLOR commercialColor            = #efc8c8;
+      COLOR constructionColor          = #9d9d6c;
+      COLOR farmlandColor              = #ead8bd;
+      COLOR farmyardColor              = #dcbe92;
+      COLOR greenFieldColor            = #dcdcc8;
+      COLOR quarryColor                = #b3b3b3;
+      COLOR recreationColor            = #bce2ca;
+      COLOR retailColor                = #feeaea;
+      COLOR vineyardColor              = #b3e2a8;
+      COLOR animalKeepingColor          = #dce8c8;
+      COLOR apiaryColor                 = @animalKeepingColor;
+      COLOR aquacultureColor            = #b1d8f0;
+      COLOR cultureColor                = #f3e8c8;
+      COLOR educationColor              = @cultureColor;
+      COLOR fairgroundColor             = #d8d2c8;
+      COLOR flowerbedColor              = #e8a9c0;
+      COLOR greeneryColor               = #c8e6c8;
+      COLOR healthcareColor             = @cultureColor;
+      COLOR highwayColor                = #dcdcdc;
+      COLOR institutionalColor          = @fairgroundColor;
+      COLOR loggingColor                = #d6c9a8;
+      COLOR staticCaravanColor          = #def6c0;
+      COLOR treePitColor                = @greeneryColor;
+    }
+    ELSE {
+      COLOR brownFieldColor            = darken(#b6b592, 0.5);
+      COLOR cemeteryColor              = darken(#a9caae, 0.5);
+      COLOR commercialColor            = darken(#efc8c8, 0.5);
+      COLOR constructionColor          = darken(#9d9d6c, 0.5);
+      COLOR farmlandColor              = darken(#ead8bd, 0.5);
+      COLOR farmyardColor              = darken(#dcbe92, 0.5);
+      COLOR greenFieldColor            = darken(#dcdcc8, 0.5);
+      COLOR quarryColor                = darken(#b3b3b3, 0.5);
+      COLOR recreationColor            = darken(#bce2ca, 0.5);
+      COLOR retailColor                = darken(#feeaea, 0.5);
+      COLOR vineyardColor              = darken(#b3e2a8, 0.5);
+      COLOR animalKeepingColor          = darken(#dce8c8, 0.5);
+      COLOR apiaryColor                 = @animalKeepingColor;
+      COLOR aquacultureColor            = darken(#b1d8f0, 0.5);
+      COLOR cultureColor                = darken(#f3e8c8, 0.5);
+      COLOR educationColor              = @cultureColor;
+      COLOR fairgroundColor             = darken(#d8d2c8, 0.5);
+      COLOR flowerbedColor              = darken(#e8a9c0, 0.5);
+      COLOR greeneryColor               = darken(#c8e6c8, 0.5);
+      COLOR healthcareColor             = @cultureColor;
+      COLOR highwayColor                = darken(#dcdcdc, 0.5);
+      COLOR institutionalColor          = @fairgroundColor;
+      COLOR loggingColor                = darken(#d6c9a8, 0.5);
+      COLOR staticCaravanColor          = darken(#def6c0, 0.5);
+      COLOR treePitColor                = @greeneryColor;
+    }
 
+    COLOR brownFieldLabelColor       = darken(@brownFieldColor, 0.5);
     IF daylight {
       COLOR residentialColor         = #ebebeb;
     }
@@ -41,29 +82,10 @@ OSS
       COLOR residentialColor         = darken(#ebebeb, 0.5);
     }
     COLOR residentialLabelColor      = darken(@residentialColor, 0.5);
-
-    COLOR retailColor                = #feeaea;
     COLOR retailLabelColor           = darken(@retailColor, 0.5);
 
-    COLOR vineyardColor              = #b3e2a8;
-
-    COLOR animalKeepingColor          = #dce8c8;
-    COLOR apiaryColor                 = #dce8c8;
-    COLOR aquacultureColor            = #b1d8f0;
-    COLOR cultureColor                = #f3e8c8;
-    COLOR educationColor              = #f3e8c8;
-    COLOR fairgroundColor             = #d8d2c8;
-    COLOR flowerbedColor              = #e8a9c0;
-    COLOR greeneryColor               = #c8e6c8;
-    COLOR healthcareColor             = #f3e8c8;
-    COLOR highwayColor                = #dcdcdc;
-    COLOR institutionalColor          = #d8d2c8;
-    COLOR loggingColor                = #d6c9a8;
-    COLOR staticCaravanColor          = #def6c0;
-    COLOR treePitColor                = #c8e6c8;
-
   STYLE
-    IF daylight {
+    IF _landuse {
       [MAG region-] {
         [TYPE landuse_farmland] AREA { color: @farmlandColor; }
         [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }

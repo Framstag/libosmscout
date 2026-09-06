@@ -6,7 +6,12 @@ OSS
   //
 
   CONST
-    COLOR officeColor                = #9090ff;
+    IF daylight {
+      COLOR officeColor                = #9090ff;
+    }
+    ELSE {
+      COLOR officeColor                = darken(#9090ff, 0.5);
+    }
     COLOR officeSymbolColor          = darken(@officeColor, 0.2);
     COLOR officeBorderColor          = darken(@officeColor, 0.3);
     COLOR officeLabelColor           = darken(@officeColor, 0.8);
@@ -201,9 +206,18 @@ OSS
     POLYGON -0.9,0 0.9,0 -0.9,0.3 { AREA { color: lighten(@officeSymbolColor, 0.5); } }
 
   STYLE
+    IF _office {
+      [MAG @buildingMag-] {
+        [GROUP office] {
+          AREA { color: @officeColor;}
+          AREA.BORDER { color: @officeBorderColor; width: 0.1mm; }
+        }
+      }
+    }
+
     IF _building {
       [MAG @buildingMag-] {
-        [GROUP office, building] {
+        [GROUP building] {
           AREA { color: @officeColor;}
           AREA.BORDER { color: @officeBorderColor; width: 0.1mm; }
         }

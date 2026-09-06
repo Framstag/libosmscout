@@ -1,10 +1,26 @@
 OSS
 
 CONST
-  COLOR railwayColor               = #bb75d9;
+  IF daylight {
+    COLOR railwayColor               = #bb75d9;
+  }
+  ELSE {
+    COLOR railwayColor               = darken(#bb75d9, 0.5);
+  }
   COLOR railwaySymbolColor         = @railwayColor;
   COLOR railwayLabelColor          = darken(@railwayColor, 0.5);
   COLOR railwayStationColor        = @railwayColor;
+
+  IF daylight {
+    COLOR railwayTrackColor          = #939393;
+    COLOR railwayTrackOutlineColor   = #b3b3b3;
+    COLOR railwayTrackThinColor      = #777777;
+  }
+  ELSE {
+    COLOR railwayTrackColor          = darken(#939393, 0.5);
+    COLOR railwayTrackOutlineColor   = darken(#b3b3b3, 0.5);
+    COLOR railwayTrackThinColor      = darken(#777777, 0.5);
+  }
 
   SYMBOL railway_station
     RECTANGLE 0,0 2.25 x 2.25 {
@@ -70,33 +86,33 @@ STYLE
    [MAG suburb-] {
      [TYPE railway_rail] {
        [SIZE 3m 0.3mm:3px<] {
-         WAY#outline { color: #b3b3b3; width: 3m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
-         WAY {color: #939393; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 3m;}
+         WAY#outline { color: @railwayTrackOutlineColor; width: 3m; displayWidth: 0.5mm; priority: -1; joinCap: butt; endCap: butt; }
+         WAY {color: @railwayTrackColor; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; width: 3m;}
        }
-       [SIZE 3m <0.3mm:3px] WAY {color: #777777; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.3mm;}
+       [SIZE 3m <0.3mm:3px] WAY {color: @railwayTrackThinColor; dash: 3,3; joinCap: butt; endCap: butt; gapColor: #ffffff; displayWidth: 0.3mm;}
      }
    }
 
    [MAG close-] {
-     [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+     [TYPE railway_disused] WAY {color: @railwayTrackColor; dash: 1.5,1.5; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
 
-     [TYPE railway_abandoned] WAY {color: #b3b3b3; dash: 3,3; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
-     [TYPE railway_monorail] WAY {color: #939393; displayWidth: 0.2mm; width: 3m;}
+     [TYPE railway_abandoned] WAY {color: @railwayTrackOutlineColor; dash: 3,3; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
+     [TYPE railway_monorail] WAY {color: @railwayTrackColor; displayWidth: 0.2mm; width: 3m;}
 
      [TYPE railway_turntable] AREA { color: #c0c0c0; }
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 2.5m;}
-     [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
-     [TYPE railway_narrow_gauge, railway_preserved, railway_miniature] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
-     [TYPE railway_funicular] WAY {color: #b3b3b3; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_light_rail] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.25mm; width: 5m;}
+     [TYPE railway_narrow_gauge, railway_preserved, railway_miniature] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.20mm; width: 4m;}
+     [TYPE railway_funicular] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
-       WAY {color: #b3b3b3; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
+       WAY {color: @railwayTrackOutlineColor; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
      }
 
-     [TYPE railway_construction] WAY {color: #939393; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
-     [TYPE railway_proposed] WAY {color: #b3b3b3; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
-     [TYPE railway_platform_edge] WAY {color: #b3b3b3; displayWidth: 0.1mm; width: 1m;}
+     [TYPE railway_construction] WAY {color: @railwayTrackColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+     [TYPE railway_proposed] WAY {color: @railwayTrackOutlineColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
+     [TYPE railway_platform_edge] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.1mm; width: 1m;}
      [TYPE railway_yard] AREA { color: #dcdcc8; }
    }
 

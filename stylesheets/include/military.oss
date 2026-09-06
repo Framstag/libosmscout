@@ -5,8 +5,14 @@ OSS
   //
 
   CONST
-    COLOR militaryColor              = #fe989822;
-    COLOR militaryBorderColor        = #fe9898;
+    IF daylight {
+      COLOR militaryColor              = #fe989822;
+      COLOR militaryBorderColor        = #fe9898;
+    }
+    ELSE {
+      COLOR militaryColor              = darken(#fe989822, 0.5);
+      COLOR militaryBorderColor        = darken(#fe9898, 0.5);
+    }
     COLOR militaryLabelColor         = darken(@militaryColor, 0.5);
 
   SYMBOL military

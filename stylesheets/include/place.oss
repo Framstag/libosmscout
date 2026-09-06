@@ -225,6 +225,8 @@ STYLE
     [TYPE place_district] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
     [TYPE place_subdistrict] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
     [TYPE place_municipality] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    [TYPE place_cadastral_community] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    [TYPE place_subcounty] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
   }
 
   // City names are rendered up to city level and then disappear again
@@ -310,6 +312,7 @@ STYLE
     [TYPE place_locality,
           place_square,
           place_city_block,
-          place_plot] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
+          place_plot,
+          place_building_complex] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
   }
 END
