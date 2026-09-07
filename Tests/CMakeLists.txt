@@ -24,7 +24,7 @@ osmscout_test_project(NAME ByteTest SOURCES src/ByteTest.cpp)
 osmscout_test_project(NAME CachePerformanceTest SOURCES src/CachePerformanceTest.cpp COMMAND --size 1000)
 
 #---- TypeResolutionPerformance
-osmscout_test_project(NAME TypeResolutionPerformanceTest SOURCES src/TypeResolutionPerformanceTest.cpp)
+osmscout_test_project(NAME TypeResolutionPerformanceTest SOURCES src/TypeResolutionPerformanceTest.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost")
 
 #---- TypeResolution
 osmscout_test_project(NAME TypeResolutionTest SOURCES src/TypeResolutionTest.cpp)

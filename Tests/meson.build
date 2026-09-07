@@ -41,6 +41,9 @@ TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              install: true,
              install_dir: testInstallDir)
 
+test('Check type resolution performance', TypeResolutionPerformanceTest,
+     args: [meson.current_source_dir() + '/../stylesheets/map.ost'])
+
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
              include_directories: [osmscoutIncDir],
