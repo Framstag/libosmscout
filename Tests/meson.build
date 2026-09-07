@@ -22,6 +22,25 @@ AccessParseTest =  executable('AccessParseTest',
 
 test('Check parsing of access rights', AccessParseTest)
 
+TypeResolutionTest =  executable('TypeResolutionTest',
+             'src/TypeResolutionTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type resolution', TypeResolutionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
+             'src/TypeResolutionPerformanceTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
              include_directories: [osmscoutIncDir],
