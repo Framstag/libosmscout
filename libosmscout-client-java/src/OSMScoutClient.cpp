@@ -677,6 +677,31 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_reloadBasemap(JNIEnv *env, j
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setBasemapLookupDirectory(String directory)
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setBasemapLookupDirectory(JNIEnv *env, jobject self, jstring directoryJStr)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return;
+  }
+
+  const char *directoryCStr = env->GetStringUTFChars(directoryJStr, nullptr);
+  if (directoryCStr == nullptr) {
+    return;
+  }
+  std::string directory(directoryCStr);
+  env->ReleaseStringUTFChars(directoryJStr, directoryCStr);
+
+  // Update the basemap lookup directory at runtime and reload the basemap,
+  // so a basemap downloaded or removed while the app runs takes effect
+  // without a restart. An empty string unloads any installed basemap.
+  data->dbThread->SetBasemapLookupDirectory(directory);
+}
+
+// --------------------------------------------------------------------------
 // OSMScoutClient::getDatabaseBoundingBox(String path)
 // --------------------------------------------------------------------------
 

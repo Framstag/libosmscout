@@ -298,6 +298,16 @@ public:
    */
   void ReloadBasemap();
 
+  /**
+   * Set the basemap lookup directory at runtime and reload the basemap.
+   *
+   * Pass an empty string to unload any installed basemap. Replaces the
+   * directory configured at construction, so a basemap downloaded or
+   * removed while the app runs takes effect without a restart. Runs
+   * asynchronously on the DBThread worker.
+   */
+  CancelableFuture<bool> SetBasemapLookupDirectory(const std::string &basemapLookupDirectory);
+
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);
   CancelableFuture<bool> OnMapDPIChange(double dpi);

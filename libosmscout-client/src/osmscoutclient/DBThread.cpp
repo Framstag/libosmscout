@@ -594,4 +594,14 @@ void DBThread::ReloadBasemap()
     return true;
   });
 }
+
+CancelableFuture<bool> DBThread::SetBasemapLookupDirectory(const std::string &basemapLookupDirectory)
+{
+  return Async<bool>([this, basemapLookupDirectory](const Breaker& /*breaker*/) {
+    WriteLock locker(latch);
+    this->basemapLookupDirectory = basemapLookupDirectory;
+    LoadBasemap();
+    return true;
+  });
+}
 }
