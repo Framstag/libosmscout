@@ -59,6 +59,8 @@
 #include <osmscout/location/LocationDescriptionService.h>
 
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
 #include "search_scope.h"
@@ -4096,6 +4098,31 @@ double SegmentBearingDeg(const osmscout::GeoCoord &a, const osmscout::GeoCoord &
   return deg;
 }
 
+// Whether a way is a drivable road (the street a vehicle can be on). Uses the
+// way's access feature when present (car access bits), else falls back to the
+// type name: only highway_* types that are not explicitly non-drivable
+// (footways, paths, cycleways, steps, pedestrian zones, ...) qualify.
+bool IsDrivableWay(const osmscout::Way &way,
+                   const osmscout::AccessFeatureValueReader &accessReader)
+{
+  osmscout::AccessFeatureValue *accessValue = accessReader.GetValue(way.GetFeatureValueBuffer());
+  if (accessValue != nullptr) {
+    return accessValue->CanRouteCar();
+  }
+  const std::string typeName = way.GetType()->GetName();
+  if (typeName.rfind("highway_", 0) != 0) {
+    return false;
+  }
+  static const std::set<std::string> nonDrivable = {
+      "highway_footway", "highway_path", "highway_cycleway", "highway_steps",
+      "highway_pedestrian", "highway_bridleway", "highway_construction",
+      "highway_bus_stop", "highway_crossing", "highway_platform",
+      "highway_rest_area", "highway_services", "highway_street_lamp",
+      "highway_traffic_signals", "highway_escape", "highway_raceway",
+      "highway_proposed"};
+  return nonDrivable.find(typeName) == nonDrivable.end();
+}
+
 }  // namespace
 
 extern "C" JNIEXPORT jobject JNICALL
@@ -4138,6 +4165,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getRoadAt(JNIEnv *env, jobje
         if (!typeConfig) {
           continue;
         }
+        osmscout::AccessFeatureValueReader accessReader(*typeConfig);
         osmscout::TypeInfoSet wayTypes(typeConfig->GetWayTypes());
         osmscout::Distance radius = osmscout::Distance::Of<osmscout::Meter>(50);
         try {
@@ -4145,6 +4173,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getRoadAt(JNIEnv *env, jobje
           for (const auto &entry : wayResults.GetWayResults()) {
             const auto &way = entry.GetWay();
             if (!way || way->nodes.size() < 2) {
+              continue;
+            }
+            // Only drivable roads: the street the vehicle is actually on.
+            // Walls, railways, footways, etc. must never win the ranking.
+            if (!IsDrivableWay(*way, accessReader)) {
               continue;
             }
             // Nearest point on the way + the direction of the segment there.
