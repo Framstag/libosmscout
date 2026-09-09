@@ -1764,7 +1764,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.positionClsGlobal = env->NewGlobalRef(positionCls);
     methods.positionCtor = env->GetMethodID(
         positionCls, "<init>",
-        "(Lcom/framstag/libosmscout/client/NavigationState;DDDDLjava/lang/String;Ljava/lang/String;)V");
+        "(Lcom/framstag/libosmscout/client/NavigationState;DDDDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass stateCls = env->FindClass("com/framstag/libosmscout/client/NavigationState");
@@ -2507,10 +2507,11 @@ private:
     }
 
     // Resolved way from the route (or the nearest routable object off-route):
-    // expose its name and ref so the UI can show the street the vehicle is
-    // actually on without an area search (spec: current-road-info).
+    // expose its name, ref and type so the UI can show the street the vehicle
+    // is actually on without an area search (spec: current-road-info).
     std::string wayName;
     std::string wayRef;
+    std::string wayType;
     const auto &position = positionMessage->position;
     if (position.way && position.typeConfig) {
       osmscout::NameFeatureValueReader nameReader(*position.typeConfig);
@@ -2521,10 +2522,12 @@ private:
       if (auto val = refReader.GetValue(position.way->GetFeatureValueBuffer())) {
         wayRef = val->GetRef();
       }
+      wayType = position.way->GetType()->GetName();
     }
 
     jstring wayNameJ = env->NewStringUTF(wayName.c_str());
     jstring wayRefJ = env->NewStringUTF(wayRef.c_str());
+    jstring wayTypeJ = env->NewStringUTF(wayType.c_str());
 
     jobject positionObj = env->NewObject(
         static_cast<jclass>(methods.positionClsGlobal), methods.positionCtor,
@@ -2534,13 +2537,15 @@ private:
         bearing,
         -1.0,
         wayNameJ,
-        wayRefJ);
+        wayRefJ,
+        wayTypeJ);
 
     env->CallVoidMethod(listenerGlobal, methods.onPositionEstimate, positionObj);
     env->DeleteLocalRef(positionObj);
     env->DeleteLocalRef(stateObj);
     env->DeleteLocalRef(wayNameJ);
     env->DeleteLocalRef(wayRefJ);
+    env->DeleteLocalRef(wayTypeJ);
   }
 
   jobject CreateJavaRouteInstruction(JNIEnv *env, const JavaRouteInstruction &instr)

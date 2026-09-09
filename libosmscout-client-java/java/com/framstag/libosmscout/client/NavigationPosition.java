@@ -26,6 +26,9 @@ public class NavigationPosition {
     /** Ref tag of the resolved way the vehicle is on (e.g. "B 1"), or empty if unknown. */
     public final String wayRef;
 
+    /** OSM type name of the resolved way (e.g. "highway_residential"), or empty if unknown. */
+    public final String wayType;
+
     /**
      * Create a navigation position estimate.
      *
@@ -36,6 +39,7 @@ public class NavigationPosition {
      * @param accuracy  horizontal accuracy in meters, or negative
      * @param wayName   name of the resolved way, or empty
      * @param wayRef    ref tag of the resolved way, or empty
+     * @param wayType   OSM type name of the resolved way, or empty
      */
     public NavigationPosition(NavigationState state,
                               double lat,
@@ -43,7 +47,8 @@ public class NavigationPosition {
                               double bearing,
                               double accuracy,
                               String wayName,
-                              String wayRef) {
+                              String wayRef,
+                              String wayType) {
         this.state = state;
         this.lat = lat;
         this.lon = lon;
@@ -51,6 +56,7 @@ public class NavigationPosition {
         this.accuracy = accuracy;
         this.wayName = wayName != null ? wayName : "";
         this.wayRef = wayRef != null ? wayRef : "";
+        this.wayType = wayType != null ? wayType : "";
     }
 
     /**
@@ -67,6 +73,6 @@ public class NavigationPosition {
                               double lon,
                               double bearing,
                               double accuracy) {
-        this(state, lat, lon, bearing, accuracy, "", "");
+        this(state, lat, lon, bearing, accuracy, "", "", "");
     }
 }
