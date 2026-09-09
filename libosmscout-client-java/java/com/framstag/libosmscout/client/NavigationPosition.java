@@ -20,8 +20,41 @@ public class NavigationPosition {
     /** Horizontal accuracy in meters, or negative if unknown. */
     public final double accuracy;
 
+    /** Name of the resolved way the vehicle is on (route way on-route, nearest routable way off-route), or empty if unknown. */
+    public final String wayName;
+
+    /** Ref tag of the resolved way the vehicle is on (e.g. "B 1"), or empty if unknown. */
+    public final String wayRef;
+
     /**
      * Create a navigation position estimate.
+     *
+     * @param state     navigation state
+     * @param lat       estimated latitude in degrees
+     * @param lon       estimated longitude in degrees
+     * @param bearing   estimated bearing in degrees, or NaN
+     * @param accuracy  horizontal accuracy in meters, or negative
+     * @param wayName   name of the resolved way, or empty
+     * @param wayRef    ref tag of the resolved way, or empty
+     */
+    public NavigationPosition(NavigationState state,
+                              double lat,
+                              double lon,
+                              double bearing,
+                              double accuracy,
+                              String wayName,
+                              String wayRef) {
+        this.state = state;
+        this.lat = lat;
+        this.lon = lon;
+        this.bearing = bearing;
+        this.accuracy = accuracy;
+        this.wayName = wayName != null ? wayName : "";
+        this.wayRef = wayRef != null ? wayRef : "";
+    }
+
+    /**
+     * Create a navigation position estimate without way info.
      *
      * @param state     navigation state
      * @param lat       estimated latitude in degrees
@@ -34,10 +67,6 @@ public class NavigationPosition {
                               double lon,
                               double bearing,
                               double accuracy) {
-        this.state = state;
-        this.lat = lat;
-        this.lon = lon;
-        this.bearing = bearing;
-        this.accuracy = accuracy;
+        this(state, lat, lon, bearing, accuracy, "", "");
     }
 }

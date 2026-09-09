@@ -53,6 +53,8 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
+#include <osmscout/util/Geometry.h>
+
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
 
@@ -1762,7 +1764,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.positionClsGlobal = env->NewGlobalRef(positionCls);
     methods.positionCtor = env->GetMethodID(
         positionCls, "<init>",
-        "(Lcom/framstag/libosmscout/client/NavigationState;DDDD)V");
+        "(Lcom/framstag/libosmscout/client/NavigationState;DDDDLjava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass stateCls = env->FindClass("com/framstag/libosmscout/client/NavigationState");
@@ -2504,17 +2506,41 @@ private:
       bearing = lastBearing->AsDegrees();
     }
 
+    // Resolved way from the route (or the nearest routable object off-route):
+    // expose its name and ref so the UI can show the street the vehicle is
+    // actually on without an area search (spec: current-road-info).
+    std::string wayName;
+    std::string wayRef;
+    const auto &position = positionMessage->position;
+    if (position.way && position.typeConfig) {
+      osmscout::NameFeatureValueReader nameReader(*position.typeConfig);
+      if (auto val = nameReader.GetValue(position.way->GetFeatureValueBuffer())) {
+        wayName = val->GetName();
+      }
+      osmscout::RefFeatureValueReader refReader(*position.typeConfig);
+      if (auto val = refReader.GetValue(position.way->GetFeatureValueBuffer())) {
+        wayRef = val->GetRef();
+      }
+    }
+
+    jstring wayNameJ = env->NewStringUTF(wayName.c_str());
+    jstring wayRefJ = env->NewStringUTF(wayRef.c_str());
+
     jobject positionObj = env->NewObject(
         static_cast<jclass>(methods.positionClsGlobal), methods.positionCtor,
         stateObj,
-        positionMessage->position.coord.GetLat(),
-        positionMessage->position.coord.GetLon(),
+        position.coord.GetLat(),
+        position.coord.GetLon(),
         bearing,
-        -1.0);
+        -1.0,
+        wayNameJ,
+        wayRefJ);
 
     env->CallVoidMethod(listenerGlobal, methods.onPositionEstimate, positionObj);
     env->DeleteLocalRef(positionObj);
     env->DeleteLocalRef(stateObj);
+    env->DeleteLocalRef(wayNameJ);
+    env->DeleteLocalRef(wayRefJ);
   }
 
   jobject CreateJavaRouteInstruction(JNIEnv *env, const JavaRouteInstruction &instr)
@@ -4037,6 +4063,176 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getMaxSpeedAt(JNIEnv *env, j
   );
 
   return maxSpeed;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::getRoadAt(double lat, double lon, double bearing)
+// --------------------------------------------------------------------------
+// Bearing-aware road lookup for free-driving / off-route display (spec:
+// road-lookup-bearing). Loads ways in a radius around the coordinate, finds
+// the nearest point on each way and the way's direction there, and ranks by
+// (bearing match when a bearing is given, then distance) so the street the
+// vehicle is actually driving on wins over a nearer side street. Returns a
+// RoadInfo (name, ref, type, max speed) or null when no way is found.
+
+namespace {
+
+// Bearing (degrees, 0..360) of the segment from a to b (equirectangular).
+double SegmentBearingDeg(const osmscout::GeoCoord &a, const osmscout::GeoCoord &b)
+{
+  const double dLat = (b.GetLat() - a.GetLat()) * M_PI / 180.0;
+  const double dLon = (b.GetLon() - a.GetLon()) * M_PI / 180.0;
+  const double midLat = (a.GetLat() + b.GetLat()) / 2.0 * M_PI / 180.0;
+  const double x = dLon * std::cos(midLat);
+  double deg = std::atan2(x, dLat) * 180.0 / M_PI;
+  if (deg < 0.0) {
+    deg += 360.0;
+  }
+  return deg;
+}
+
+}  // namespace
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getRoadAt(JNIEnv *env, jobject self,
+                                                             jdouble lat, jdouble lon,
+                                                             jdouble bearing)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return nullptr;
+  }
+
+  struct RoadCandidate {
+    osmscout::WayRef way;
+    osmscout::TypeConfigRef typeConfig;
+    double distanceDeg;    // distance from coord to the nearest point on the way
+    double angleDiffDeg;   // |normalized(wayBearing - bearing)| in 0..180, NaN when bearing invalid
+  };
+
+  std::vector<RoadCandidate> candidates;
+  osmscout::GeoCoord coord(lat, lon);
+  const bool bearingValid = !std::isnan(bearing);
+  const double bearingNorm = bearingValid ? std::fmod(std::fmod(bearing, 360.0) + 360.0, 360.0) : 0.0;
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef> &databases) {
+      for (const auto &db : databases) {
+        if (IsBasemapDatabase(db)) {
+          continue;
+        }
+        osmscout::GeoBox dbBox = db->GetDBGeoBox();
+        if (!dbBox.Includes(coord)) {
+          continue;
+        }
+        auto database = db->GetDatabase();
+        if (!database) {
+          continue;
+        }
+        auto typeConfig = database->GetTypeConfig();
+        if (!typeConfig) {
+          continue;
+        }
+        osmscout::TypeInfoSet wayTypes(typeConfig->GetWayTypes());
+        osmscout::Distance radius = osmscout::Distance::Of<osmscout::Meter>(50);
+        try {
+          auto wayResults = database->LoadWaysInRadius(coord, wayTypes, radius);
+          for (const auto &entry : wayResults.GetWayResults()) {
+            const auto &way = entry.GetWay();
+            if (!way || way->nodes.size() < 2) {
+              continue;
+            }
+            // Nearest point on the way + the direction of the segment there.
+            double bestDist = std::numeric_limits<double>::max();
+            double segBearingDeg = std::numeric_limits<double>::quiet_NaN();
+            for (size_t i = 1; i < way->nodes.size(); i++) {
+              osmscout::GeoCoord p{0, 0};
+              double d = osmscout::CalculateDistancePointToLineSegment(
+                  coord, way->nodes[i - 1].GetCoord(), way->nodes[i].GetCoord(), p);
+              if (d < bestDist) {
+                bestDist = d;
+                segBearingDeg = SegmentBearingDeg(way->nodes[i - 1].GetCoord(),
+                                                  way->nodes[i].GetCoord());
+              }
+            }
+            RoadCandidate c;
+            c.way = way;
+            c.typeConfig = typeConfig;
+            c.distanceDeg = bestDist;
+            if (bearingValid && !std::isnan(segBearingDeg)) {
+              double diff = std::fabs(segBearingDeg - bearingNorm);
+              if (diff > 180.0) {
+                diff = 360.0 - diff;
+              }
+              c.angleDiffDeg = diff;
+            } else {
+              c.angleDiffDeg = std::numeric_limits<double>::quiet_NaN();
+            }
+            candidates.push_back(std::move(c));
+          }
+        } catch (const std::exception &e) {
+          osmscout::log.Warn() << "[JNI] getRoadAt LoadWaysInRadius exception: " << e.what();
+        }
+      }
+    }
+  );
+
+  if (candidates.empty()) {
+    return nullptr;
+  }
+
+  // Rank: bearing match (<= 45 deg) first, then distance.
+  static const double BEARING_MATCH_DEG = 45.0;
+  auto isBetter = [&](const RoadCandidate &a, const RoadCandidate &b) {
+    const bool aMatch = bearingValid && !std::isnan(a.angleDiffDeg) &&
+                        a.angleDiffDeg <= BEARING_MATCH_DEG;
+    const bool bMatch = bearingValid && !std::isnan(b.angleDiffDeg) &&
+                        b.angleDiffDeg <= BEARING_MATCH_DEG;
+    if (aMatch != bMatch) {
+      return aMatch;
+    }
+    return a.distanceDeg < b.distanceDeg;
+  };
+  const RoadCandidate &best = *std::min_element(candidates.begin(), candidates.end(), isBetter);
+
+  // Read name, ref, max speed from the winning way.
+  std::string name;
+  std::string ref;
+  double maxSpeed = std::numeric_limits<double>::quiet_NaN();
+  osmscout::NameFeatureValueReader nameReader(*best.typeConfig);
+  if (auto val = nameReader.GetValue(best.way->GetFeatureValueBuffer())) {
+    name = val->GetName();
+  }
+  osmscout::RefFeatureValueReader refReader(*best.typeConfig);
+  if (auto val = refReader.GetValue(best.way->GetFeatureValueBuffer())) {
+    ref = val->GetRef();
+  }
+  size_t maxSpeedIdx;
+  if (best.way->GetType()->GetFeature(osmscout::MaxSpeedFeature::NAME, maxSpeedIdx) &&
+      best.way->GetFeatureValueBuffer().HasFeature(maxSpeedIdx)) {
+    auto *val = best.way->GetFeatureValueBuffer().GetValue(maxSpeedIdx);
+    if (val) {
+      maxSpeed = static_cast<osmscout::MaxSpeedFeatureValue *>(val)->GetMaxSpeed();
+    }
+  }
+
+  jclass roadInfoCls = env->FindClass("com/framstag/libosmscout/client/RoadInfo");
+  if (roadInfoCls == nullptr) {
+    return nullptr;
+  }
+  jmethodID roadInfoCtor = env->GetMethodID(roadInfoCls, "<init>",
+                                            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;D)V");
+  if (roadInfoCtor == nullptr) {
+    return nullptr;
+  }
+  jstring nameJ = env->NewStringUTF(name.c_str());
+  jstring refJ = env->NewStringUTF(ref.c_str());
+  jstring typeJ = env->NewStringUTF(best.way->GetType()->GetName().c_str());
+  jobject result = env->NewObject(roadInfoCls, roadInfoCtor, nameJ, refJ, typeJ, maxSpeed);
+  env->DeleteLocalRef(nameJ);
+  env->DeleteLocalRef(refJ);
+  env->DeleteLocalRef(typeJ);
+  return result;
 }
 
 // --------------------------------------------------------------------------
