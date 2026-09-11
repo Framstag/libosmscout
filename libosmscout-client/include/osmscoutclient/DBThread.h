@@ -141,6 +141,7 @@ public:
 private:
   MapManagerRef                      mapManager;
   std::string                        basemapLookupDirectory;
+  std::string                        basemapStyleFilename; // absolute path; empty = use main style
   SettingsRef                        settings;
 
   double                             mapDpi;
@@ -192,7 +193,9 @@ protected:
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
 
-  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
+  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig,
+                                  bool suppressWarnings=false,
+                                  const std::string &styleFilename="") const;
 
   /**
    * Load basemap database, write lock needs to be hold
@@ -204,7 +207,8 @@ public:
            const std::string &iconDirectory,
            SettingsRef settings,
            MapManagerRef mapManager,
-           const std::vector<std::string> &customPoiTypes);
+           const std::vector<std::string> &customPoiTypes,
+           const std::string &basemapStyleFilename="");
 
   ~DBThread() override;
 

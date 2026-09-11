@@ -429,6 +429,7 @@ struct ClientData
   osmscout::FavoriteLocationService *favService;     //!< Favorite location service (owned)
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  size_t tileDataCacheSize{0};                        //!< Tile data cache capacity (0 = library default)
   std::vector<std::filesystem::path> knownPaths;     //!< Known map paths
 
   // Routing state
@@ -508,6 +509,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   jfieldID fontSizeField = env->GetFieldID(builderCls, "fontSizeMm", "D");
   jfieldID unitsField = env->GetFieldID(builderCls, "units", "Ljava/lang/String;");
   jfieldID styleDirField = env->GetFieldID(builderCls, "stylesheetDirectory", "Ljava/lang/String;");
+  jfieldID basemapStyleField = env->GetFieldID(builderCls, "basemapStyleSheet", "Ljava/lang/String;");
   jfieldID customPoiField = env->GetFieldID(builderCls, "customPoiTypes", "[Ljava/lang/String;");
   jfieldID mapsDirField = env->GetFieldID(builderCls, "mapsDirectory", "Ljava/lang/String;");
 
@@ -518,6 +520,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   jdouble fontSizeMm = env->GetDoubleField(self, fontSizeField);
   jstring unitsJStr = (jstring)env->GetObjectField(self, unitsField);
   jstring styleDirJStr = (jstring)env->GetObjectField(self, styleDirField);
+  jstring basemapStyleJStr = (jstring)env->GetObjectField(self, basemapStyleField);
   jobjectArray customPoiArray = (jobjectArray)env->GetObjectField(self, customPoiField);
 
   const char *basemapCStr = basemapJStr ? env->GetStringUTFChars(basemapJStr, nullptr) : "";
@@ -528,6 +531,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   std::string basemapDir(basemapCStr);
   std::string iconDir(iconCStr);
   std::string units(unitsCStr);
+  std::string styleDir = styleDirCStr ? styleDirCStr : "";
 
   if (basemapJStr) env->ReleaseStringUTFChars(basemapJStr, basemapCStr);
   if (iconJStr) env->ReleaseStringUTFChars(iconJStr, iconCStr);
@@ -578,6 +582,31 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
     env->ReleaseStringUTFChars(styleDirJStr, styleDirCStr);
   }
 
+  // Resolve the basemap stylesheet (name without ".oss") against the
+  // stylesheet directory. Same validation as loadStyleSheet: reject empty,
+  // path-like, or "."/".." names. When unset or unresolvable, DBThread falls
+  // back to the main style for the basemap.
+  std::string basemapStyleFilename;
+  if (basemapStyleJStr) {
+    const char *basemapStyleCStr = env->GetStringUTFChars(basemapStyleJStr, nullptr);
+    if (basemapStyleCStr) {
+      std::string name(basemapStyleCStr);
+      env->ReleaseStringUTFChars(basemapStyleJStr, basemapStyleCStr);
+      if (!name.empty() &&
+          name.find('/') == std::string::npos &&
+          name.find('\\') == std::string::npos &&
+          name != "." && name != "..") {
+        if (name.size() > 4 && name.compare(name.size() - 4, 4, ".oss") == 0) {
+          name = name.substr(0, name.size() - 4);
+        }
+        if (!styleDir.empty()) {
+          basemapStyleFilename = styleDir + "/" + name + ".oss";
+        }
+      }
+    }
+    env->DeleteLocalRef(basemapStyleJStr);
+  }
+
   clientData->settings = std::make_shared<osmscout::Settings>(storage, dpi, units);
 
   // MapManager
@@ -589,7 +618,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
     iconDir,
     clientData->settings,
     clientData->mapManager,
-    customPoiTypes
+    customPoiTypes,
+    basemapStyleFilename
   );
 
   // Paths explicitly opened via openDatabase() are tracked separately.
@@ -913,6 +943,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobje
   }
   osmscout::log.Debug() << "[JNI] setMapDpi(" << dpi << ")";
   data->settings->SetMapDPI(dpi);
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setNativeDataCacheSize(int cacheSize)
+//
+// Configures the capacity of libosmscout's per-database tile data caches
+// (regional databases and basemap). The value is stored and applied to every
+// open database's MapService before tile data is loaded for the next render,
+// so it also covers databases that open asynchronously after this call
+// (basemap reload, map scan). Idempotent; <= 0 keeps the library default.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEnv *env, jobject self, jint cacheSize)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+  data->tileDataCacheSize = (cacheSize > 0) ? static_cast<size_t>(cacheSize) : 0;
+  osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
 }
 
 // --------------------------------------------------------------------------
@@ -1311,6 +1362,26 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
         batch.emplace_back(std::move(mapData));
       };
+
+      // Configure the tile data cache capacity of every open database
+      // before any data loads (idempotent; also covers databases that opened
+      // asynchronously since the last render — map scan, basemap reload).
+      if (data->tileDataCacheSize > 0) {
+        for (const auto &db : databases) {
+          if (db && db->GetMapService()) {
+            db->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+          }
+        }
+        if (basemapDatabase && basemapDatabase->GetMapService()) {
+          basemapDatabase->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+        }
+        osmscout::log.Debug() << "[JNI] render: applied tile data cache size "
+                              << data->tileDataCacheSize
+                              << " to " << databases.size() << " db(s)"
+                              << (basemapDatabase && basemapDatabase->GetMapService()
+                                      ? " + basemap"
+                                      : "");
+      }
 
       // Load regular databases first
       for (const auto &db : databases) {
