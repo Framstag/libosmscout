@@ -35,10 +35,12 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
                    const std::string &iconDirectory,
                    SettingsRef settings,
                    MapManagerRef mapManager,
-                   const std::vector<std::string> &customPoiTypes)
+                   const std::vector<std::string> &customPoiTypes,
+                   const std::string &basemapStyleFilename)
   : AsyncWorker("DBThread"),
     mapManager(mapManager),
     basemapLookupDirectory(basemapLookupDirectory),
+    basemapStyleFilename(basemapStyleFilename),
     settings(settings),
     mapDpi(-1),
     iconDirectory(iconDirectory),
@@ -340,7 +342,9 @@ void DBThread::registerCustomPoiTypes(osmscout::TypeConfigRef typeConfig) const
   }
 }
 
-StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings) const
+StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig,
+                                         bool suppressWarnings,
+                                         const std::string &styleFilename) const
 {
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
@@ -354,8 +358,12 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppress
     log.Warn(false);
   }
 
-  if (!styleConfig->Load(stylesheetFilename, nullptr, false, log)) {
-    log.Warn() << "Cannot load style sheet '" << stylesheetFilename << "'!";
+  // The basemap database has its own type config (basemap.ost) with only a
+  // few types; use its dedicated stylesheet when configured, else the main one.
+  std::string file = styleFilename.empty() ? stylesheetFilename : styleFilename;
+
+  if (!styleConfig->Load(file, nullptr, false, log)) {
+    log.Warn() << "Cannot load style sheet '" << file << "'!";
     styleConfig=nullptr;
   }
 
@@ -447,8 +455,15 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
     log.Debug() << "Loading style done";
   }
   if (basemapDatabase) {
-    log.Debug() << "Loading style " << file << " for database " << basemapDatabase->path << "...";
-    basemapDatabase->LoadStyle(file, stylesheetFlags, styleErrors);
+    // The basemap database has its own type config (basemap.ost) with only a
+    // few types; load its dedicated stylesheet (e.g. basemap-render.oss) so
+    // the main style's unknown-type warnings do not apply. Falls back to the
+    // main style when no basemap style is configured.
+    std::string basemapFile = basemapStyleFilename.empty()
+      ? file
+      : basemapStyleFilename + suffix;
+    log.Debug() << "Loading style " << basemapFile << " for database " << basemapDatabase->path << "...";
+    basemapDatabase->LoadStyle(basemapFile, stylesheetFlags, styleErrors);
     log.Debug() << "Loading style done";
   }
   if (prevErrs || (!styleErrors.empty())){
@@ -565,7 +580,7 @@ void DBThread::LoadBasemap()
       osmscout::StyleConfigRef styleConfig;
       if (typeConfig) {
         registerCustomPoiTypes(typeConfig);
-        styleConfig=makeStyleConfig(typeConfig);
+        styleConfig=makeStyleConfig(typeConfig, false, basemapStyleFilename);
       }
       else {
         log.Warn() << "TypeConfig invalid!";
