@@ -102,7 +102,11 @@ namespace osmscout {
   {
     bool   hasFill=false;
     bool   hasBorder=false;
-    double borderWidth=borderStyle->GetWidth() * screenMmInPixel;
+    double borderWidth=0.0;
+
+    if (borderStyle) {
+      borderWidth=borderStyle->GetWidth() * screenMmInPixel;
+    }
 
     if (fillStyle) {
       if (fillStyle->HasPattern()) {

@@ -6,7 +6,7 @@ The Cairo symbol renderer already implements the corrected behaviors on master �
 
 - New capability spec `cairo-symbol-renderer` documenting the observable behavior contract of `SymbolRendererCairo`: border width conversion from mm to pixels, closed polygon outlines, fill and stroke emission, dash scaling.
 - New Catch2 unit test suite `SymbolRendererCairoTest` verifying the contract against rendered output (pixel-sampled assertions on a Cairo image surface), registered in both CMake and Meson.
-- No production code change expected; if the tests surface a discrepancy between implementation and documented contract, the discrepancy is resolved in this change.
+- The tests surfaced a crash bug: `EndPrimitive()` dereferenced the border style without a null check, crashing on borderless symbols. This is fixed by guarding the computation; production change is limited to that guard.
 
 ## Capabilities
 
@@ -23,5 +23,5 @@ None.
 - `Tests/src/SymbolRendererCairoTest.cpp` — new test suite (new file)
 - `Tests/CMakeLists.txt` — register `SymbolRendererCairoTest` (pattern: `TextMetricsCairoTest`, `MapPainterRouteTest` link `OSMScout::MapCairo`)
 - `Tests/meson.build` — register the test for the Meson build
-- `libosmscout-map-cairo/src/osmscoutmapcairo/SymbolRendererCairo.cpp` — reference only; no production change expected
-- No changes to renderers, stylesheets, or public APIs
+- `libosmscout-map-cairo/src/osmscoutmapcairo/SymbolRendererCairo.cpp` — guard `EndPrimitive()` against a null border style (crash found by the new tests)
+- No changes to stylesheets or public APIs

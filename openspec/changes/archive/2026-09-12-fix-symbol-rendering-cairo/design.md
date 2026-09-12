@@ -9,7 +9,7 @@ See proposal.md — Why. `SymbolRendererCairo` (libosmscout-map-cairo) already c
 - Register in both CMake and Meson
 
 **Non-Goals:**
-- No production code change to `SymbolRendererCairo` unless a test exposes a discrepancy
+- No further production code change beyond the null-border crash guard (see D4)
 - No golden-image comparison infrastructure
 - No pattern-fill coverage (warns "Pattern is not supported for symbols"; covered by the SymbolsAll tool work on the types branch)
 
@@ -53,6 +53,12 @@ Diagram (render + verify flow):
 | fill, background |                        +----------------------+
 +------------------+
 ```
+
+### D4: Guard `EndPrimitive()` against a null border style
+The first test run exposed a crash: `EndPrimitive()` computed `borderStyle->GetWidth() * screenMmInPixel` before the null check, so every borderless symbol (a legitimate case, e.g. fill-only primitives) crashed the Cairo backend. The border width is now computed inside the existing `if (borderStyle)` guard; semantics unchanged otherwise.
+
+- **Alternative A (chosen):** move the computation under the existing guard. Minimal diff, identical behavior for all non-null cases.
+- **Alternative B:** early-return in `EndPrimitive()` when both styles are null. Equivalent outcome but larger behavioral surface (skips dash reset state).
 
 ## Risks / Trade-offs
 
