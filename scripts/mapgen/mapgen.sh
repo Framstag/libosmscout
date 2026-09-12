@@ -43,9 +43,10 @@ SCHEMA_VERSION="${MAPGEN_SCHEMA_VERSION:-1}"
 # resolve to absolute paths so subshells that change directory stay correct
 resolve_dir()
 {
-  case "$1" in
-    /*) echo "$1" ;;
-    *) echo "$(pwd)/$1" ;;
+  local path="$1"
+  case "$path" in
+    /*) echo "$path" ;;
+    *) echo "$(pwd)/$path" ;;
   esac
 }
 
@@ -74,8 +75,8 @@ now_epoch() { date +%s; }
 
 validate_config()
 {
-  [ -f "$IMPORTS_FILE" ] || die "imports manifest not found: $IMPORTS_FILE"
-  [ -f "$NAMES_FILE" ] || die "region index not found: $NAMES_FILE"
+  [[ -f "$IMPORTS_FILE" ]] || die "imports manifest not found: $IMPORTS_FILE"
+  [[ -f "$NAMES_FILE" ]] || die "region index not found: $NAMES_FILE"
 
   jq -e ".schema == $SCHEMA_VERSION" "$IMPORTS_FILE" >/dev/null \
     || die "imports manifest schema not supported (expected $SCHEMA_VERSION)"
@@ -84,7 +85,7 @@ validate_config()
 
   local duplicates
   duplicates=$(jq -r '[.imports[].id] | length - (unique | length)' "$IMPORTS_FILE")
-  [ "$duplicates" = "0" ] || die "imports manifest contains duplicate ids"
+  [[ "$duplicates" = "0" ]] || die "imports manifest contains duplicate ids"
 
   local manifest_ids leaf_ids
   manifest_ids=$(jq -r '.imports[].id' "$IMPORTS_FILE" | sort)
@@ -98,8 +99,8 @@ validate_config()
   missing_in_manifest=$(comm -23 <(printf '%s\n' "$leaf_ids") <(printf '%s\n' "$manifest_ids"))
   missing_in_index=$(comm -23 <(printf '%s\n' "$manifest_ids") <(printf '%s\n' "$leaf_ids"))
 
-  [ -z "$missing_in_manifest" ] || die "region index leaves missing from imports manifest: $(echo $missing_in_manifest)"
-  [ -z "$missing_in_index" ] || die "imports manifest ids missing from region index: $(echo $missing_in_index)"
+  [[ -z "$missing_in_manifest" ]] || die "region index leaves missing from imports manifest: $(echo $missing_in_manifest)"
+  [[ -z "$missing_in_index" ]] || die "imports manifest ids missing from region index: $(echo $missing_in_index)"
 }
 
 # --- per-id settings -----------------------------------------------------
@@ -144,7 +145,7 @@ read_last_checked()
   local id="$1" f
   f=$(check_state_file "$id")
 
-  if [ -f "$f" ]; then
+  if [[ -f "$f" ]]; then
     jq -r '.lastCheckedAt // 0' "$f"
   else
     echo 0
@@ -183,12 +184,12 @@ process_import()
   url=$(url_for "$id")
   path=$(region_path "$id")
 
-  [ -n "$path" ] || die "no region index path for id '$id'"
+  [[ -n "$path" ]] || die "no region index path for id '$id'"
 
   now=$(now_epoch)
   last_checked=$(read_last_checked "$id")
 
-  if [ $((now - last_checked)) -lt $((refresh * 86400)) ]; then
+  if [[ $((now - last_checked)) -lt $((refresh * 86400)) ]]; then
     log "$id: not due (last checked $last_checked, refresh $refresh days)"
     return 0
   fi
@@ -200,17 +201,17 @@ process_import()
     return 1
   fi
 
-  [ -n "$published_hash" ] || { error "$id: empty published hash"; return 1; }
+  [[ -n "$published_hash" ]] || { error "$id: empty published hash"; return 1; }
 
   write_check_state "$id" "$now" "$published_hash"
 
   newest=$(newest_db_json "$path")
   previous_md5=""
-  if [ -n "$newest" ]; then
+  if [[ -n "$newest" ]]; then
     previous_md5=$(jq -r '.source.md5 // ""' "$newest")
   fi
 
-  if [ -n "$previous_md5" ] && [ "$previous_md5" = "$published_hash" ]; then
+  if [[ -n "$previous_md5" ]] && [[ "$previous_md5" = "$published_hash" ]]; then
     log "$id: source unchanged"
     return 0
   fi
@@ -263,7 +264,7 @@ process_import()
 
   mkdir -p "$(dirname "$target")"
 
-  if [ -d "$target" ]; then
+  if [[ -d "$target" ]]; then
     mv "$target" "$staging/v$version.old"
   fi
   mv "$new_dir" "$target"
@@ -271,21 +272,21 @@ process_import()
 
   log "$id: placed at $path/v$version"
 
-  if [ "$history" -gt 0 ]; then
+  if [[ "$history" -gt 0 ]]; then
     kept=$(ls -d "$PUBLIC_DIR/$path"/v* 2>/dev/null | sort -V | head -n -"$history" || true)
   else
     kept=$(ls -d "$PUBLIC_DIR/$path"/v* 2>/dev/null || true)
   fi
 
   pruned=""
-  if [ -n "$kept" ]; then
+  if [[ -n "$kept" ]]; then
     pruned=$(basename -a $kept 2>/dev/null | tr '\n' ' ' | sed 's/ $//')
     log "$id: pruning $pruned"
     rm -rf $kept
   fi
 
   changed=true
-  if [ -n "$previous_md5" ] && [ "$previous_md5" = "$published_hash" ]; then
+  if [[ -n "$previous_md5" ]] && [[ "$previous_md5" = "$published_hash" ]]; then
     changed=false
   fi
 
@@ -328,7 +329,7 @@ main()
     fi
   done
 
-  if [ "$failed" = "1" ]; then
+  if [[ "$failed" = "1" ]]; then
     error "one or more imports failed"
     exit 1
   fi

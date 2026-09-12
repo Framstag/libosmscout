@@ -20,19 +20,32 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cmath>
+#include <limits>
 #include <sstream>
 
 #include <JsonWriter.h>
 
+namespace {
+
+  // Writes one JSON object whose content is produced by the given fill
+  // callback and returns the serialized text.
+  template<class F>
+  std::string WriteObject(F fill)
+  {
+    std::ostringstream   out;
+    osmscout::JsonWriter writer(out);
+
+    writer.BeginObject();
+    fill(writer);
+    writer.EndObject();
+
+    return out.str();
+  }
+}
+
 TEST_CASE("JsonWriter writes empty object", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter&){}) == "{}");
 }
 
 TEST_CASE("JsonWriter writes empty array", "[JsonWriter]")
@@ -48,144 +61,94 @@ TEST_CASE("JsonWriter writes empty array", "[JsonWriter]")
 
 TEST_CASE("JsonWriter writes object with string value", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("name");
-  writer.Value("value");
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"name\": \"value\"\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("name");
+    writer.Value("value");
+  })=="{\n  \"name\": \"value\"\n}");
 }
 
 TEST_CASE("JsonWriter writes multiple keys with comma separation", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("a");
-  writer.Value(static_cast<int64_t>(1));
-  writer.Key("b");
-  writer.Value(static_cast<int64_t>(2));
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"a\": 1,\n  \"b\": 2\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("a");
+    writer.Value(static_cast<int64_t>(1));
+    writer.Key("b");
+    writer.Value(static_cast<int64_t>(2));
+  })=="{\n  \"a\": 1,\n  \"b\": 2\n}");
 }
 
 TEST_CASE("JsonWriter escapes quotes and backslashes", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("path");
-  writer.Value("a\"b\\c");
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"path\": \"a\\\"b\\\\c\"\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("path");
+    writer.Value("a\"b\\c");
+  })=="{\n  \"path\": \"a\\\"b\\\\c\"\n}");
 }
 
 TEST_CASE("JsonWriter escapes control characters", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("text");
-  writer.Value(std::string("a\nb\tc\rd\be\ff\x01g"));
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"text\": \"a\\nb\\tc\\rd\\be\\ff\\u0001g\"\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("text");
+    writer.Value(std::string("a\nb\tc\rd\be\ff\x01g"));
+  })=="{\n  \"text\": \"a\\nb\\tc\\rd\\be\\ff\\u0001g\"\n}");
 }
 
 TEST_CASE("JsonWriter passes through non-ASCII UTF-8", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("name");
-  writer.Value("München");
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"name\": \"München\"\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("name");
+    writer.Value("München");
+  })=="{\n  \"name\": \"München\"\n}");
 }
 
 TEST_CASE("JsonWriter writes nested structures", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("outer");
-  writer.BeginObject();
-  writer.Key("list");
-  writer.BeginArray();
-  writer.Value(static_cast<int64_t>(1));
-  writer.Value(static_cast<int64_t>(2));
-  writer.EndArray();
-  writer.EndObject();
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"outer\": {\n    \"list\": [\n      1,\n      2\n    ]\n  }\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("outer");
+    writer.BeginObject();
+    writer.Key("list");
+    writer.BeginArray();
+    writer.Value(static_cast<int64_t>(1));
+    writer.Value(static_cast<int64_t>(2));
+    writer.EndArray();
+    writer.EndObject();
+  })=="{\n  \"outer\": {\n    \"list\": [\n      1,\n      2\n    ]\n  }\n}");
 }
 
 TEST_CASE("JsonWriter writes unsigned values", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("size");
-  writer.Value(static_cast<uint64_t>(18446744073709551615ULL));
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"size\": 18446744073709551615\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("size");
+    writer.Value(static_cast<uint64_t>(18446744073709551615ULL));
+  })=="{\n  \"size\": 18446744073709551615\n}");
 }
 
 TEST_CASE("JsonWriter writes doubles with full precision", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("value");
-  writer.Value(0.1);
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"value\": 0.10000000000000001\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("value");
+    writer.Value(0.1);
+  })=="{\n  \"value\": 0.10000000000000001\n}");
 }
 
 TEST_CASE("JsonWriter writes non-finite doubles as null", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("nan");
-  writer.Value(std::nan(""));
-  writer.Key("inf");
-  writer.Value(std::numeric_limits<double>::infinity());
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"nan\": null,\n  \"inf\": null\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("nan");
+    writer.Value(std::nan(""));
+    writer.Key("inf");
+    writer.Value(std::numeric_limits<double>::infinity());
+  })=="{\n  \"nan\": null,\n  \"inf\": null\n}");
 }
 
 TEST_CASE("JsonWriter writes booleans and null", "[JsonWriter]")
 {
-  std::ostringstream   out;
-  osmscout::JsonWriter writer(out);
-
-  writer.BeginObject();
-  writer.Key("yes");
-  writer.Value(true);
-  writer.Key("no");
-  writer.Value(false);
-  writer.Key("nothing");
-  writer.Null();
-  writer.EndObject();
-
-  REQUIRE(out.str()=="{\n  \"yes\": true,\n  \"no\": false,\n  \"nothing\": null\n}");
+  REQUIRE(WriteObject([](osmscout::JsonWriter& writer){
+    writer.Key("yes");
+    writer.Value(true);
+    writer.Key("no");
+    writer.Value(false);
+    writer.Key("nothing");
+    writer.Null();
+  })=="{\n  \"yes\": true,\n  \"no\": false,\n  \"nothing\": null\n}");
 }

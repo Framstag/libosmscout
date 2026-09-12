@@ -24,8 +24,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake g++ make pkg-config \
-    libxml2-dev libprotobuf-dev protobuf-compiler \
-    zlib1g-dev liblzma-dev libmarisa-dev libtbb-dev \
+    liblzma-dev libmarisa-dev libprotobuf-dev \
+    libtbb-dev libxml2-dev protobuf-compiler zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -59,8 +59,9 @@ FROM ubuntu:noble AS runtime
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl jq ca-certificates \
-    libxml2 libzstd1 zlib1g libprotobuf32 liblzma5 libmarisa0 libtbb12 libgomp1 \
+    ca-certificates curl jq \
+    libgomp1 liblzma5 libmarisa0 libprotobuf32 \
+    libtbb12 libxml2 libzstd1 zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /src/build/Import/Import /usr/local/bin/Import
@@ -71,12 +72,8 @@ RUN ln -s libosmscout.so.1.1.1 /usr/local/lib/libosmscout.so.1 \
  && ln -s libosmscout.so.1.1.1 /usr/local/lib/libosmscout.so \
  && ln -s libosmscout_import.so.1.1.1 /usr/local/lib/libosmscout_import.so.1 \
  && ln -s libosmscout_import.so.1.1.1 /usr/local/lib/libosmscout_import.so \
- && ldconfig
-
-# system runtime libraries are provided by the ubuntu:noble base image; the
-# osmscout libraries were copied above. Verify that every dependency of the
-# Import binary resolves — fail loudly instead of shipping a broken binary.
-RUN ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}' \
+ && ldconfig \
+ && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}' \
  && ldd /usr/local/bin/Import | grep "=> /" | awk '{print $3}' | sort -u | wc -l
 
 COPY stylesheets/map.ost /usr/local/share/osmscout/map.ost
