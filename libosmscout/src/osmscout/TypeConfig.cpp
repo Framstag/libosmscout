@@ -961,6 +961,8 @@
 
     types.push_back(typeInfo);
 
+    BuildTypeResolutionIndex(typeInfo);
+
     if (!typeInfo->GetIgnore() &&
         !typeInfo->IsInternal() &&
         (typeInfo->CanBeNode() ||
@@ -1023,30 +1025,180 @@
     return {};
   }
 
+  void TypeConfig::BuildTypeResolutionIndex(const TypeInfoRef& typeInfo)
+  {
+    auto addEntries=[this](std::unordered_map<TagId,std::vector<TypeConditionEntry>>& index,
+                           std::vector<TypeConditionEntry>& fallback,
+                           const std::vector<TagId>& keys,
+                           bool guaranteed,
+                           const TypeConditionEntry& entry) {
+      // Guard the condition is reachable through one of its primary tags. A
+      // condition that may match without any of its tags being present (e.g.
+      // containing negation) goes to the fallback list and is always evaluated.
+      if (guaranteed &&
+          !keys.empty()) {
+        for (const auto& key : keys) {
+          index[key].push_back(entry);
+        }
+      }
+      else {
+        fallback.push_back(entry);
+      }
+    };
+
+    size_t typeIndex=typeInfo->GetIndex();
+    size_t conditionIndex=0;
+
+    for (const auto& cond : typeInfo->GetConditions()) {
+      std::vector<TagId> keys;
+      bool               guaranteed=false;
+
+      cond.condition->CollectTagKeys(keys,
+                                     guaranteed);
+
+      // Remove duplicate keys (e.g. from OR conditions with branches sharing a tag)
+      for (size_t i=0; i<keys.size(); i++) {
+        for (size_t j=i+1; j<keys.size();) {
+          if (keys[j]==keys[i]) {
+            keys.erase(keys.begin()+j);
+          }
+          else {
+            j++;
+          }
+        }
+      }
+
+      TypeConditionEntry entry{typeInfo,
+                               cond.condition,
+                               cond.types,
+                               typeIndex,
+                               conditionIndex};
+
+      if ((cond.types & TypeInfo::typeNode)!=0) {
+        addEntries(nodeTypeIndex,
+                   nodeFallbackConditions,
+                   keys,
+                   guaranteed,
+                   entry);
+      }
+
+      if ((cond.types & (TypeInfo::typeWay|TypeInfo::typeArea))!=0) {
+        addEntries(wayAreaTypeIndex,
+                   wayAreaFallbackConditions,
+                   keys,
+                   guaranteed,
+                   entry);
+      }
+
+      if ((cond.types & TypeInfo::typeRelation)!=0) {
+        addEntries(relationTypeIndex,
+                   relationFallbackConditions,
+                   keys,
+                   guaranteed,
+                   entry);
+      }
+
+      conditionIndex++;
+    }
+  }
+
+  const TypeConfig::TypeConditionEntry* TypeConfig::FindFirstMatch(const std::vector<const std::vector<TypeConditionEntry>*>& streams,
+                                                                   unsigned char requiredTypes,
+                                                                   const TagMap& tagMap) const
+  {
+    std::vector<size_t> positions(streams.size(),0);
+
+    while (true) {
+      const TypeConditionEntry* best=PickNextHead(streams,requiredTypes,positions);
+
+      if (!best) {
+        return nullptr;
+      }
+
+      // The same condition may be listed in more than one stream (e.g. an OR
+      // condition discriminated by several tags, or once in the index and once
+      // in the fallback). Advance all streams past the current best entry so it
+      // is evaluated only once.
+      for (size_t s=0; s<streams.size(); s++) {
+        const auto& entries=*streams[s];
+
+        while (positions[s]<entries.size() &&
+               entries[positions[s]].typeIndex==best->typeIndex &&
+               entries[positions[s]].conditionIndex==best->conditionIndex) {
+          positions[s]++;
+        }
+      }
+
+      if (best->condition->Evaluate(tagMap)) {
+        return best;
+      }
+    }
+  }
+
+  const TypeConfig::TypeConditionEntry* TypeConfig::PickNextHead(const std::vector<const std::vector<TypeConditionEntry>*>& streams,
+                                                                 unsigned char requiredTypes,
+                                                                 std::vector<size_t>& positions) const
+  {
+    const TypeConditionEntry* best=nullptr;
+
+    for (size_t s=0; s<streams.size(); s++) {
+      const auto& entries=*streams[s];
+
+      // Permanently skip entries that are not applicable to the requested
+      // geometry kind.
+      while (positions[s]<entries.size() &&
+             requiredTypes!=0 &&
+             (entries[positions[s]].types & requiredTypes)==0) {
+        positions[s]++;
+      }
+
+      if (positions[s]>=entries.size()) {
+        continue;
+      }
+
+      const auto& entry=entries[positions[s]];
+
+      if (!best) {
+        best=&entry;
+      }
+      else if (entry.typeIndex<best->typeIndex ||
+               (entry.typeIndex==best->typeIndex &&
+                entry.conditionIndex<best->conditionIndex)) {
+        best=&entry;
+      }
+    }
+
+    return best;
+  }
+
   TypeInfoRef TypeConfig::GetNodeType(const TagMap& tagMap) const
   {
     if (tagMap.empty()) {
       return typeInfoIgnore;
     }
 
-    for (const auto &type : types) {
-      if (!type->HasConditions() ||
-          !type->CanBeNode()) {
-        continue;
-      }
+    std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-      for (const auto &cond : type->GetConditions()) {
-        if ((cond.types & TypeInfo::typeNode)==0) {
-          continue;
-        }
+    streams.reserve(tagMap.size()+1);
 
-        if (cond.condition->Evaluate(tagMap)) {
-          return type;
-        }
+    for (const auto& tagEntry : tagMap) {
+      auto index=nodeTypeIndex.find(tagEntry.first);
+
+      if (index!=nodeTypeIndex.end() &&
+          !index->second.empty()) {
+        streams.push_back(&index->second);
       }
     }
 
-    return typeInfoIgnore;
+    if (!nodeFallbackConditions.empty()) {
+      streams.push_back(&nodeFallbackConditions);
+    }
+
+    const TypeConditionEntry* match=FindFirstMatch(streams,
+                                                   0,
+                                                   tagMap);
+
+    return match ? match->type : typeInfoIgnore;
   }
 
   bool TypeConfig::GetWayAreaType(const TagMap& tagMap,
@@ -1060,39 +1212,40 @@
       return false;
     }
 
-    for (const auto& type : types) {
-      if (!((type->CanBeWay() ||
-             type->CanBeArea()) &&
-             type->HasConditions())) {
-        continue;
-      }
+    std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-      for (const auto& cond : type->GetConditions()) {
-        if (!((cond.types & TypeInfo::typeWay)!=0 ||
-              (cond.types & TypeInfo::typeArea)!=0)) {
-          continue;
-        }
+    streams.reserve(tagMap.size()+1);
 
-        if (cond.condition->Evaluate(tagMap)) {
-          if (wayType==typeInfoIgnore &&
-              (cond.types & TypeInfo::typeWay)!=0) {
-            wayType=type;
-          }
+    for (const auto& tagEntry : tagMap) {
+      auto index=wayAreaTypeIndex.find(tagEntry.first);
 
-          if (areaType==typeInfoIgnore &&
-              (cond.types & TypeInfo::typeArea)!=0) {
-            areaType=type;
-          }
-
-          if (wayType!=typeInfoIgnore ||
-              areaType!=typeInfoIgnore) {
-            return true;
-          }
-        }
+      if (index!=wayAreaTypeIndex.end() &&
+          !index->second.empty()) {
+        streams.push_back(&index->second);
       }
     }
 
-    return false;
+    if (!wayAreaFallbackConditions.empty()) {
+      streams.push_back(&wayAreaFallbackConditions);
+    }
+
+    const TypeConditionEntry* match=FindFirstMatch(streams,
+                                                   0,
+                                                   tagMap);
+
+    if (!match) {
+      return false;
+    }
+
+    if ((match->types & TypeInfo::typeWay)!=0) {
+      wayType=match->type;
+    }
+
+    if ((match->types & TypeInfo::typeArea)!=0) {
+      areaType=match->type;
+    }
+
+    return true;
   }
 
   TypeInfoRef TypeConfig::GetRelationType(const TagMap& tagMap) const
@@ -1105,43 +1258,54 @@
 
     if (relationType!=tagMap.end() &&
         relationType->second=="multipolygon") {
-      for (const auto& type : types) {
-        if (!type->HasConditions() ||
-            !type->CanBeArea()) {
-          continue;
-        }
+      // Multipolygon relations are resolved by scanning area conditions
+      std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-        for (const auto &cond : type->GetConditions()) {
-          if ((cond.types & TypeInfo::typeArea)==0) {
-            continue;
-          }
+      streams.reserve(tagMap.size()+1);
 
-          if (cond.condition->Evaluate(tagMap)) {
-            return type;
-          }
+      for (const auto& tagEntry : tagMap) {
+        auto index=wayAreaTypeIndex.find(tagEntry.first);
+
+        if (index!=wayAreaTypeIndex.end() &&
+            !index->second.empty()) {
+          streams.push_back(&index->second);
         }
       }
+
+      if (!wayAreaFallbackConditions.empty()) {
+        streams.push_back(&wayAreaFallbackConditions);
+      }
+
+      const TypeConditionEntry* match=FindFirstMatch(streams,
+                                                     TypeInfo::typeArea,
+                                                     tagMap);
+
+      return match ? match->type : typeInfoIgnore;
     }
     else {
-      for (const auto& type : types) {
-        if (!type->HasConditions() ||
-            !type->CanBeRelation()) {
-          continue;
-        }
+      std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-        for (const auto &cond : type->GetConditions()) {
-          if ((cond.types & TypeInfo::typeRelation)==0) {
-            continue;
-          }
+      streams.reserve(tagMap.size()+1);
 
-          if (cond.condition->Evaluate(tagMap)) {
-            return type;
-          }
+      for (const auto& tagEntry : tagMap) {
+        auto index=relationTypeIndex.find(tagEntry.first);
+
+        if (index!=relationTypeIndex.end() &&
+            !index->second.empty()) {
+          streams.push_back(&index->second);
         }
       }
-    }
 
-    return typeInfoIgnore;
+      if (!relationFallbackConditions.empty()) {
+        streams.push_back(&relationFallbackConditions);
+      }
+
+      const TypeConditionEntry* match=FindFirstMatch(streams,
+                                                     0,
+                                                     tagMap);
+
+      return match ? match->type : typeInfoIgnore;
+    }
   }
 
   /**

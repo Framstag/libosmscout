@@ -69,6 +69,79 @@ namespace osmscout {
     }
   }
 
+  void TagBoolCondition::CollectTagKeys(std::vector<TagId>& keys,
+                                        bool& guaranteed) const
+  {
+    switch (type) {
+    case boolAnd:
+      // An AND condition can only be true if all children are true. The tags of
+      // the first child that is guaranteed to require its tags are therefore also
+      // required by the whole condition. Negated children (and children without
+      // any keys) are skipped, since they do not guarantee any tag to be present.
+      for (const auto& condition : conditions) {
+        std::vector<TagId> childKeys;
+        bool               childGuaranteed=false;
+
+        condition->CollectTagKeys(childKeys,
+                                  childGuaranteed);
+
+        if (childGuaranteed &&
+            !childKeys.empty()) {
+          keys.swap(childKeys);
+          guaranteed=true;
+          return;
+        }
+      }
+
+      // No guaranteed child found, use the keys of the first child that
+      // contributes any tags at all (the condition is not guaranteed then).
+      for (const auto& condition : conditions) {
+        std::vector<TagId> childKeys;
+        bool               childGuaranteed=false;
+
+        condition->CollectTagKeys(childKeys,
+                                  childGuaranteed);
+
+        if (!childKeys.empty()) {
+          keys.swap(childKeys);
+          guaranteed=childGuaranteed;
+          return;
+        }
+      }
+
+      // Only negated children or empty conditions
+      keys.clear();
+      guaranteed=false;
+      break;
+    case boolOr:
+      // An OR condition can be true via any branch, so the union of all branch
+      // keys is required (at least one branch's tags must be present). It is only
+      // guaranteed if every branch is guaranteed.
+      keys.clear();
+      guaranteed=true;
+
+      for (const auto& condition : conditions) {
+        std::vector<TagId> childKeys;
+        bool               childGuaranteed=false;
+
+        condition->CollectTagKeys(childKeys,
+                                  childGuaranteed);
+
+        keys.insert(keys.end(),
+                    childKeys.begin(),
+                    childKeys.end());
+
+        guaranteed=guaranteed && childGuaranteed;
+      }
+      break;
+    default:
+      assert(false);
+      keys.clear();
+      guaranteed=false;
+      break;
+    }
+  }
+
   TagExistsCondition::TagExistsCondition(TagId tag)
   : tag(tag)
   {
