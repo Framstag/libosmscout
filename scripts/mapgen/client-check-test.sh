@@ -25,11 +25,12 @@ trap 'rm -rf "$TMP"' EXIT
 
 # MSYS/git-bash paths (e.g. /tmp/...) are not understood by a native
 # Windows python3. Convert with cygpath when available so python opens
-# exactly the files bash just wrote.
+# exactly the files bash just wrote. -m (mixed mode) yields forward
+# slashes so the path stays valid inside python string literals.
 python_path()
 {
   if command -v cygpath >/dev/null 2>&1; then
-    cygpath -w "$1"
+    cygpath -m "$1"
   else
     printf '%s' "$1"
   fi

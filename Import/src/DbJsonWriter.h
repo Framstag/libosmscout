@@ -44,16 +44,16 @@ namespace osmscout {
   struct DbJsonData
   {
     std::string                  generatedAt;       //!< ISO 8601 UTC timestamp
-    uint32_t                     typeConfigVersion; //!< FILE_FORMAT_VERSION of the database
+    uint32_t                     typeConfigVersion=0; //!< FILE_FORMAT_VERSION of the database
     std::string                  sourceUrl;         //!< source download URL, may be empty
     std::string                  sourceMd5;         //!< source integrity hash, may be empty
     std::string                  toolVersion;       //!< import tool version
-    size_t                       startStep;        //!< first executed import step
-    size_t                       endStep;          //!< last executed import step
-    double                       durationSeconds;  //!< import run duration
+    size_t                       startStep=0;       //!< first executed import step
+    size_t                       endStep=0;         //!< last executed import step
+    double                       durationSeconds=0.0;//!< import run duration
     GeoBox                       boundingBox;      //!< bounding box of the imported data
     std::vector<DbJsonFileEntry> files;            //!< output file inventory
-    size_t                       typeCount;        //!< number of defined types
+    size_t                       typeCount=0;      //!< number of defined types
   };
 
   /**
