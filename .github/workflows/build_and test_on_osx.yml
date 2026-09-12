@@ -23,7 +23,7 @@ jobs:
       - name: Install build tool
         run: brew install meson ninja
       - name: Install dependencies
-        run: brew install openjdk catch2 protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm libpng pkgconfig
+        run: brew install openjdk catch2 protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm libpng pkgconfig jq
       - name: Install Liberation fonts (needed by text metrics tests)
         run: brew install --cask font-liberation
       - name: Configure build project
@@ -44,7 +44,7 @@ jobs:
       - name: Install build tool
         run:  brew install cmake ninja
       - name: Install dependencies
-        run: brew install openjdk catch2 protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm libpng pkgconfig
+        run: brew install openjdk catch2 protobuf protobuf-c qt@5 cairo libxml2 gettext pango glfw glew glm libpng pkgconfig jq
       - name: Install Liberation fonts (needed by text metrics tests)
         run: brew install --cask font-liberation
       - name: Configure build project

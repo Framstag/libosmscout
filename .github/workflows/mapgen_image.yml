@@ -54,8 +54,12 @@ jobs:
 
       - name: Smoke test (single pass, refresh gate, no network)
         run: |
-          mkdir -p /tmp/mapgen-repo/private/admin
+          mkdir -p /tmp/mapgen-repo/private/admin /tmp/mapgen-work
           echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo/private/admin/berlin_check.json
+          # The container runs as uid 1000 while host-mounted volumes are
+          # owned by the runner user; grant ownership here or the mapgen
+          # pass cannot create private/staging or write to /work.
+          sudo chown -R 1000:1000 /tmp/mapgen-repo /tmp/mapgen-work /tmp/mapgen-config
           docker run --rm --read-only \
             -v /tmp/mapgen-config:/config:ro \
             -v /tmp/mapgen-work:/work \

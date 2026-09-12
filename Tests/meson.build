@@ -801,7 +801,11 @@ if buildImport
 
   test('Check db.json writer', DbJsonWriterTest)
 
-  test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  if host_machine.system() != 'windows'
+    # The contract script needs a POSIX shell, python3 and cygpath support;
+    # Windows (cmd/msvc) runners cannot execute it.
+    test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  endif
 endif
 
 WorkQueueTest = executable('WorkQueueTest',

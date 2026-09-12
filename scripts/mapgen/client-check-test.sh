@@ -13,8 +13,27 @@
 
 set -euo pipefail
 
+command -v jq >/dev/null 2>&1 \
+  || { echo "client-check-test.sh: jq not found" >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 \
+  || { echo "client-check-test.sh: python3 not found" >&2; exit 1; }
+
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
+
+# --- path helpers ------------------------------------------------------
+
+# MSYS/git-bash paths (e.g. /tmp/...) are not understood by a native
+# Windows python3. Convert with cygpath when available so python opens
+# exactly the files bash just wrote.
+python_path()
+{
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$1"
+  else
+    printf '%s' "$1"
+  fi
+}
 
 PROBE_LOG="$TMP/probes.log"
 : > "$PROBE_LOG"
@@ -26,8 +45,9 @@ make_db_json()
   local dir="$1" version="$2" generated_at="$3"
   mkdir -p "$dir"
   printf 'map.lib!' > "$dir/map.lib"
-  local crc
-  crc=$(python3 -c "import zlib; print(zlib.crc32(open('$dir/map.lib','rb').read()) & 0xffffffff)")
+  local pd crc
+  pd=$(python_path "$dir")
+  crc=$(python3 -c "import zlib; print(zlib.crc32(open('$pd/map.lib','rb').read()) & 0xffffffff)")
   cat > "$dir/db.json" <<EOF
 {
   "schema": 1,
@@ -139,7 +159,7 @@ echo "ok: client with newer-only server data probes only its own version"
 REPO4="$TMP/repo4"
 make_db_json "$REPO4/berlin/v27" 27 "2026-09-07T10:00:00Z"
 printf 'corrupt!' > "$REPO4/berlin/v27/map.lib"
-if python3 - "$REPO4/berlin/v27" <<'EOF'
+if python3 - "$(python_path "$REPO4/berlin/v27")" <<'EOF'
 import json, sys, zlib
 d = json.load(open(sys.argv[1] + "/db.json"))
 for name, meta in d["output"]["files"].items():
@@ -157,7 +177,7 @@ echo "ok: corrupt downloaded file rejected by checksum verification"
 # 9. intact file passes verification
 REPO5="$TMP/repo5"
 make_db_json "$REPO5/berlin/v27" 27 "2026-09-07T10:00:00Z"
-if ! python3 - "$REPO5/berlin/v27" <<'EOF'
+if ! python3 - "$(python_path "$REPO5/berlin/v27")" <<'EOF'
 import json, sys, zlib
 d = json.load(open(sys.argv[1] + "/db.json"))
 for name, meta in d["output"]["files"].items():
