@@ -88,6 +88,7 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/WidthFeature.h)
 
 set(HEADER_FILES_IO
+        include/osmscout/io/Crc32.h
         include/osmscout/io/DataFile.h
         include/osmscout/io/File.h
         include/osmscout/io/FileScanner.h
@@ -218,6 +219,7 @@ set(HEADER_FILES_UTIL
 set(SOURCE_FILES
     src/osmscout/log/Logger.cpp
     src/osmscout/log/LoggerImpl.cpp
+    src/osmscout/io/Crc32.cpp
     src/osmscout/io/File.cpp
     src/osmscout/io/FileScanner.cpp
     src/osmscout/io/FileWriter.cpp

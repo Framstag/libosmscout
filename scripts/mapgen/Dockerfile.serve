@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+#
+# serve image: read-only static web server for the public part of the map
+# repository. The repository volume is mounted at /repository (read-only);
+# the served root is /repository/public. The private part is outside the
+# served root and therefore never reachable. No authentication.
+#
+# Build:
+#   docker build -f scripts/mapgen/Dockerfile.serve -t osmscout-mapserve:<version> .
+#
+# Run (with the mapgen image, see docker-compose.yml):
+#   docker run --rm -p 8080:80 \
+#     -v /repository:/repository:ro osmscout-mapserve:<version>
+
+FROM nginx:1.27-alpine
+
+# nginx master still needs to bind 80; workers drop to the nginx user.
+COPY scripts/mapgen/nginx-serve.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

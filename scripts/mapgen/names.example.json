@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "regions": [
+    {
+      "id": "europe",
+      "names": {
+        "en": "Europe",
+        "de": "Europa",
+        "fr": "Europe"
+      },
+      "children": [
+        {
+          "id": "germany",
+          "names": {
+            "en": "Germany",
+            "de": "Deutschland",
+            "fr": "Allemagne"
+          },
+          "children": [
+            {
+              "id": "berlin",
+              "names": {"en": "Berlin", "de": "Berlin"}
+            },
+            {
+              "id": "dortmund",
+              "names": {"en": "Dortmund", "de": "Dortmund"}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
