@@ -1,0 +1,15 @@
+# heavy local artifacts — not needed for any Docker build context
+maps/
+build/
+build-*/
+debug/
+tmp/
+symbols-out/
+c/
+include-patch/
+vcpkg_installed/
+
+# the Dockerfile is read separately by docker build -f; keeping it out of
+# the context prevents every Dockerfile edit from invalidating COPY layers
+Dockerfile
+scripts/mapgen/Dockerfile

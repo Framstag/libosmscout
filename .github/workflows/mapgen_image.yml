@@ -1,0 +1,114 @@
+name: Mapgen image
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'scripts/mapgen/**'
+      - 'Import/**'
+      - 'libosmscout-import/**'
+      - 'libosmscout/**'
+      - 'stylesheets/map.ost'
+  push:
+    branches:
+      - master
+    paths:
+      - 'scripts/mapgen/**'
+      - 'Import/**'
+      - 'libosmscout-import/**'
+      - 'libosmscout/**'
+      - 'stylesheets/map.ost'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build mapgen image and smoke test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build image
+        run: docker build -f scripts/mapgen/Dockerfile -t osmscout-mapgen:test .
+
+      - name: Verify non-root user
+        run: |
+          test "$(docker run --rm --entrypoint id osmscout-mapgen:test -u)" = "1000"
+
+      - name: Smoke test (config check)
+        run: |
+          mkdir -p /tmp/mapgen-config
+          cat > /tmp/mapgen-config/imports.json <<'EOF'
+          {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
+          EOF
+          mkdir -p /tmp/mapgen-repo/public
+          cat > /tmp/mapgen-repo/public/names.json <<'EOF'
+          {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
+          EOF
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test --check-config
+
+      - name: Smoke test (single pass, refresh gate, no network)
+        run: |
+          mkdir -p /tmp/mapgen-repo/private/admin /tmp/mapgen-work
+          echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo/private/admin/berlin_check.json
+          # The container runs as uid 1000 while host-mounted volumes are
+          # owned by the runner user; grant ownership here or the mapgen
+          # pass cannot create private/staging or write to /work.
+          sudo chown -R 1000:1000 /tmp/mapgen-repo /tmp/mapgen-work /tmp/mapgen-config
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+
+  compose:
+    name: Compose smoke (mapgen + serve)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build images
+        run: docker compose -f scripts/mapgen/docker-compose.yml build
+
+      - name: Prepare config and seed repository volume
+        run: |
+          mkdir -p scripts/mapgen/config /tmp/mapgen-seed/public/europe/germany/berlin/v9
+          cat > scripts/mapgen/config/imports.json <<'EOF'
+          {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
+          EOF
+          cat > /tmp/mapgen-seed/public/names.json <<'EOF'
+          {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
+          EOF
+          cat > /tmp/mapgen-seed/public/europe/germany/berlin/v9/db.json <<'EOF'
+          {"schema":1,"typeConfigVersion":9,"generatedAt":"2026-01-01T00:00:00Z","output":{"files":{"map.lib":{"size":1,"crc32":2363233923}}}}
+          EOF
+          printf 'x' > /tmp/mapgen-seed/public/europe/germany/berlin/v9/map.lib
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+            -v /tmp/mapgen-seed:/seed:ro --entrypoint sh mapgen -c \
+            'mkdir -p /repository /work && cp -r /seed/public /repository/ && chown -R 1000:1000 /repository /work'
+
+      - name: Start web server and verify HTTP behavior
+        run: |
+          docker compose -f scripts/mapgen/docker-compose.yml up -d serve
+          sleep 3
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/names.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/germany/berlin/v9/db.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/germany/berlin/v9/map.lib)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/private/admin/x)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/staging/x)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/)" = "404"
+
+      - name: Config check and refresh-gated pass via mapgen container
+        run: |
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen --check-config
+          echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-seed/check.json
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+            -v /tmp/mapgen-seed:/seed:ro --entrypoint sh mapgen -c \
+            'mkdir -p /repository/private/admin && cp /seed/check.json /repository/private/admin/berlin_check.json && chown -R 1000:1000 /repository'
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen

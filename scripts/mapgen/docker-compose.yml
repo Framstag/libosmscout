@@ -1,0 +1,57 @@
+# Orchestrates the map repository pipeline:
+#
+#   mapgen  — regeneration container (writer, one pass per start)
+#   serve   — read-only static web server (reader, long-running)
+#
+# Both share one repository volume. The mapgen container places databases
+# into <volume>/public/; the web server serves exactly that directory and
+# can never see the private part (outside the served root).
+#
+# Usage:
+#   docker compose -f scripts/mapgen/docker-compose.yml up -d
+#     -> runs one mapgen pass, starts the web server on localhost:8080
+#   docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen
+#     -> runs another pass (refresh-gated) without touching the server
+#
+# Before the first run, place imports.json in scripts/mapgen/config/ and
+# seed the repository volumes with the region index and correct ownership:
+#   docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+#     -v <host-dir-with-names.json>:/seed:ro --entrypoint sh mapgen -c \
+#     'mkdir -p /repository /work && cp /seed/names.json /repository/public/ \
+#      && chown -R 1000:1000 /repository /work'
+# (Docker creates fresh named volumes as root; the mapgen container runs
+# as uid 1000, so ownership must be granted once.)
+
+services:
+  mapgen:
+    build:
+      context: ../..
+      dockerfile: scripts/mapgen/Dockerfile
+    image: osmscout-mapgen:local
+    # one pass per start; do not auto-restart the generator
+    restart: "no"
+    read_only: true
+    volumes:
+      - osmscout-maps:/repository
+      - osmscout-work:/work
+      - type: bind
+        source: ./config
+        target: /config
+        read_only: true
+
+  serve:
+    build:
+      context: ../..
+      dockerfile: scripts/mapgen/Dockerfile.serve
+    image: osmscout-mapserve:local
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - osmscout-maps:/repository:ro
+    depends_on:
+      - mapgen
+
+volumes:
+  osmscout-maps:
+  osmscout-work:

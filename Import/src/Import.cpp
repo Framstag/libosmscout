@@ -20,6 +20,8 @@
 #include <cstring>
 #include <cstdio>
 
+#include <chrono>
+#include <ctime>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -29,10 +31,19 @@
 
 #include <osmscout/cli/CmdLineParsing.h>
 #include <osmscout/util/String.h>
+#include <osmscout/util/Time.h>
 
+#include <osmscout/db/BoundingBoxDataFile.h>
 #include <osmscout/io/File.h>
+#include <osmscout/TypeConfig.h>
 
 #include <osmscoutimport/Import.h>
+
+#include "DbJsonWriter.h"
+
+#ifndef OSMSCOUT_IMPORT_VERSION
+#define OSMSCOUT_IMPORT_VERSION "unknown"
+#endif
 
 static std::string VehicleMaskToString(osmscout::VehicleMask vehicleMask)
 {
@@ -86,6 +97,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -e <number>                          set final processing step" << std::endl;
   std::cout << " --typefile <*.ost>                   path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+  std::cout << " --source-url <url>                    source download URL recorded in db.json metadata" << std::endl;
+  std::cout << " --source-md5 <hash>                   source integrity hash recorded in db.json metadata" << std::endl;
   std::cout << std::endl;
   std::cout << " --bounding-polygon <*.poly>          optional polygon file containing the bounding polygon of the import area" << std::endl;
   std::cout << std::endl;
@@ -419,6 +432,80 @@ bool DumpDataSize(const osmscout::ImportParameter& parameter,
   return true;
 }
 
+static std::string FormatIso8601Utc(const std::chrono::system_clock::time_point& timePoint)
+{
+  std::time_t time=std::chrono::system_clock::to_time_t(timePoint);
+  std::tm     utc;
+
+#ifdef _WIN32
+  gmtime_s(&utc,&time);
+#else
+  gmtime_r(&time,&utc);
+#endif
+
+  char buffer[32];
+
+  std::strftime(buffer,sizeof(buffer),"%Y-%m-%dT%H:%M:%SZ",&utc);
+
+  return std::string(buffer);
+}
+
+static bool WriteDbJsonFile(const osmscout::ImportParameter& parameter,
+                            const osmscout::Importer& importer,
+                            const std::string& sourceUrl,
+                            const std::string& sourceMd5,
+                            double durationSeconds,
+                            osmscout::Progress& progress)
+{
+  osmscout::DbJsonData data;
+
+  data.generatedAt=FormatIso8601Utc(std::chrono::system_clock::now());
+  data.typeConfigVersion=osmscout::FILE_FORMAT_VERSION;
+  data.sourceUrl=sourceUrl;
+  data.sourceMd5=sourceMd5;
+  data.toolVersion=OSMSCOUT_IMPORT_VERSION;
+  data.startStep=parameter.GetStartStep();
+  data.endStep=parameter.GetEndStep();
+  data.durationSeconds=durationSeconds;
+
+  osmscout::BoundingBoxDataFile boundingBoxDataFile;
+
+  if (boundingBoxDataFile.Load(parameter.GetDestinationDirectory())) {
+    data.boundingBox=boundingBoxDataFile.GetBoundingBox();
+  }
+
+  std::vector<std::string> fileNames;
+
+  for (const auto& filename : importer.GetProvidedFiles()) {
+    fileNames.push_back(filename);
+  }
+
+  for (const auto& filename : importer.GetProvidedOptionalFiles()) {
+    fileNames.push_back(filename);
+  }
+
+  if (!osmscout::BuildDbJsonInventory(parameter.GetDestinationDirectory(),
+                                      fileNames,
+                                      data.files)) {
+    progress.Error("Error while building db.json file inventory");
+    return false;
+  }
+
+  osmscout::TypeConfig typeConfig;
+
+  if (typeConfig.LoadFromOSTFile(parameter.GetTypefile())) {
+    data.typeCount=typeConfig.GetTypes().size();
+  }
+
+  if (!osmscout::WriteDbJson(parameter.GetDestinationDirectory(),
+                             data)) {
+    progress.Error("Error while writing db.json");
+    return false;
+  }
+
+  return true;
+}
+
 static void DeleteFilesIgnoreError(const osmscout::ImportParameter& parameter,
                                    const std::list<std::string>& filenames,
                                    osmscout::Progress& progress)
@@ -444,6 +531,8 @@ int main(int argc, char* argv[])
   bool                         firstRouterOption=true;
 
   std::list<std::string>       mapfiles;
+  std::string                  sourceUrl;
+  std::string                  sourceMd5;
 
   osmscout::VehicleMask        defaultVehicleMask=osmscout::vehicleBicycle|osmscout::vehicleFoot|osmscout::vehicleCar;
   bool                         deleteTemporaries=false;
@@ -538,6 +627,28 @@ int main(int argc, char* argv[])
                                         i,
                                         destinationDirectory)) {
         parameter.SetDestinationDirectory(destinationDirectory);
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--source-url")==0) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        sourceUrl)) {
+        // no code
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--source-md5")==0) {
+      if (osmscout::ParseStringArgument(argc,
+                                        argv,
+                                        i,
+                                        sourceMd5)) {
+        // no code
       }
       else {
         parameterError=true;
@@ -1099,7 +1210,10 @@ int main(int argc, char* argv[])
   try {
     osmscout::Importer importer(parameter);
 
-    bool result=importer.Import(progress);
+    auto  startTime=std::chrono::steady_clock::now();
+    bool  result=importer.Import(progress);
+    auto  endTime=std::chrono::steady_clock::now();
+    double             durationSeconds=osmscout::DurationAsSeconds(endTime-startTime);
 
     progress.SetStep("Summary");
 
@@ -1115,6 +1229,17 @@ int main(int argc, char* argv[])
                         progress)) {
         progress.Error("Error while retrieving data size");
       }
+
+      if (!WriteDbJsonFile(parameter,
+                           importer,
+                           sourceUrl,
+                           sourceMd5,
+                           durationSeconds,
+                           progress)) {
+        progress.Error("Error while writing db.json metadata");
+        exitCode=1;
+      }
+
       progress.Info("Import OK!");
     }
     else {
