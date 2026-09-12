@@ -664,7 +664,7 @@ if buildMapCairo
   SymbolRendererCairoTest = executable('SymbolRendererCairoTest',
                                'src/SymbolRendererCairoTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
-                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               dependencies: [mathDep, openmpDep, catch2MainDep, cairoDep],
                                link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
                                install: true,
                                install_dir: testInstallDir)
