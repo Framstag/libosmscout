@@ -187,6 +187,7 @@ libosmscout/
 ## C++ Coding Style
 
 See [CodeStyles.md](guidelines/CodeStyles.md) for full guide derived from actual code.
+See [FileFormatVersion.md](guidelines/FileFormatVersion.md) for when a type config / database file format version bump is required.
 Covers naming, indentation, braces, classes, methods, pointers, enums,
 include order, comments, formatting, header guards, templates, and error handling.
 ## Architecture Overview
