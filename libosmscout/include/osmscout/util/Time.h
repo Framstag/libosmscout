@@ -30,13 +30,14 @@ namespace osmscout {
 
   using HourDuration = std::chrono::duration<double, std::ratio<3600>>;
 
-  inline double DurationAsSeconds(Duration duration)
+  template<class Rep, class Period>
+  inline double DurationAsSeconds(std::chrono::duration<Rep, Period> duration)
   {
-    return std::chrono::duration_cast<std::chrono::duration<double>>(
-        duration).count();
+    return std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
   }
 
-  inline double DurationAsHours(Duration duration)
+  template<class Rep, class Period>
+  inline double DurationAsHours(std::chrono::duration<Rep, Period> duration)
   {
     return std::chrono::duration_cast<HourDuration>(duration).count();
   }

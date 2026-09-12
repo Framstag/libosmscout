@@ -789,6 +789,35 @@ if buildImport
                install_dir: testInstallDir)
 
   test('Check water index import code', WaterIndexTest)
+
+  JsonWriterTest = executable('JsonWriterTest',
+               ['src/JsonWriterTest.cpp',
+                '../Import/src/JsonWriter.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check JSON writer', JsonWriterTest)
+
+  DbJsonWriterTest = executable('DbJsonWriterTest',
+               ['src/DbJsonWriterTest.cpp',
+                '../Import/src/JsonWriter.cpp',
+                '../Import/src/DbJsonWriter.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check db.json writer', DbJsonWriterTest)
+
+  if host_machine.system() != 'windows'
+    # The contract script needs a POSIX shell, python3 and cygpath support;
+    # Windows (cmd/msvc) runners cannot execute it.
+    test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  endif
 endif
 
 WorkQueueTest = executable('WorkQueueTest',

@@ -136,6 +136,7 @@ osmscoutSrc = [
             'src/osmscout/location/LocationService.cpp',
             'src/osmscout/location/LocationDescriptionService.cpp',
             'src/osmscout/poi/POIService.cpp',
+            'src/osmscout/io/Crc32.cpp',
             'src/osmscout/io/File.cpp',
             'src/osmscout/io/FileScanner.cpp',
             'src/osmscout/io/FileWriter.cpp',
