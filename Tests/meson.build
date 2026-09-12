@@ -660,6 +660,18 @@ if buildMapSVG
   test('Check SymbolRenderer SVG backend', SymbolRendererSVGTest)
 endif
 
+if buildMapCairo
+  SymbolRendererCairoTest = executable('SymbolRendererCairoTest',
+                               'src/SymbolRendererCairoTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep, cairoDep],
+                               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+                               install: true,
+                               install_dir: testInstallDir)
+
+  test('Check SymbolRenderer Cairo backend', SymbolRendererCairoTest)
+endif
+
 StyleConfigSymbolsTest = executable('StyleConfigSymbolsTest',
                                'src/StyleConfigSymbolsTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],

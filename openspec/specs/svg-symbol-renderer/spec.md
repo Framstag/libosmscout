@@ -23,23 +23,41 @@ The system SHALL emit `fill` attribute on SVG elements based on the provided `Fi
 - **THEN** the resulting SVG element SHALL contain `fill="#ff0000"`
 
 ### Requirement: SetBorder emits stroke attributes
-The system SHALL emit `stroke` and `stroke-width` attributes on SVG elements based on the provided `BorderStyle`.
+The system SHALL emit `stroke` and `stroke-width` attributes on SVG elements based on the provided `BorderStyle`. The `stroke-width` SHALL be the border width in mm converted to the SVG pixel coordinate space via the `screenMmInPixel` factor passed to `SetBorder()`.
 
 #### Scenario: Border style converted to SVG stroke
 - **GIVEN** a `BorderStyle` with color `#000000` and width `1.0`
-- **WHEN** `SetBorder()` is applied before drawing a primitive
+- **WHEN** `SetBorder()` is applied with `screenMmInPixel = 1.0` before drawing a primitive
 - **THEN** the resulting SVG element SHALL contain `stroke="#000000"` and `stroke-width="1.0"`
+
+#### Scenario: Border width converted from mm to pixels
+- **GIVEN** a `BorderStyle` with width `0.5`
+- **WHEN** `SetBorder()` is applied with `screenMmInPixel = 2.0` before drawing a primitive
+- **THEN** the resulting SVG element SHALL contain `stroke-width="1.0"`
+
+### Requirement: Dashed borders emit a scaled dash pattern
+The system SHALL render dashed borders on SVG symbols with a dash pattern scaled to the converted border width, and SHALL emit no dash pattern for solid borders.
+
+#### Scenario: Dashed border emits scaled dash array
+- **GIVEN** a `BorderStyle` with width `1.0` and dash values `{2.0, 2.0}`
+- **WHEN** `SetBorder()` is applied with `screenMmInPixel = 2.0` before drawing a primitive
+- **THEN** the resulting SVG element SHALL contain `stroke-width="2"` and a dash array whose values equal the dash values scaled by the converted width, i.e. `stroke-dasharray="4 4"`
+
+#### Scenario: Solid border emits no dash array
+- **GIVEN** a `BorderStyle` without dashes and a visible width
+- **WHEN** `SetBorder()` is applied before drawing a primitive
+- **THEN** the resulting SVG element SHALL NOT contain a `stroke-dasharray` attribute
 
 ### Requirement: DrawPrimitives outputs SVG shapes
 The system SHALL output SVG elements with fill and stroke attributes for each primitive type:
-- `DrawPolygon()` → `<polyline>` with `points` attribute
+- `DrawPolygon()` → `<polygon>` with `points` attribute (closed shape, so stroked outlines include the closing segment)
 - `DrawRect()` → `<rect>` with `x`/`y`/`width`/`height` attributes
 - `DrawCircle()` → `<circle>` with `cx`/`cy`/`r` attributes
 
-#### Scenario: Polygon primitive emits polyline
+#### Scenario: Polygon primitive emits polygon
 - **GIVEN** a polygon primitive with vertices `(0,0)`, `(10,0)`, `(10,10)`
 - **WHEN** `DrawPolygon()` is called
-- **THEN** the output SHALL contain a `<polyline>` element with a `points` attribute listing the vertices
+- **THEN** the output SHALL contain a `<polygon>` element with a `points` attribute listing the vertices
 
 #### Scenario: Rectangle primitive emits rect
 - **GIVEN** a rectangle primitive at `(5,5)` with width `20` and height `10`

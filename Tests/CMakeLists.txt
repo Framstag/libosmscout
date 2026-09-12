@@ -456,3 +456,10 @@ if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME SVGIconSkiaTest SOURCES src/SVGIconSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
 endif()
 
+#---- SymbolRendererCairoTest
+if(${OSMSCOUT_BUILD_MAP_CAIRO} AND TARGET OSMScout::Map AND TARGET OSMScout::MapCairo)
+  osmscout_test_project(NAME SymbolRendererCairoTest SOURCES src/SymbolRendererCairoTest.cpp TARGET OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+else()
+  message("Skip SymbolRendererCairo test, libosmscout-map-cairo is missing.")
+endif()
+
