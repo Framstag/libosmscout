@@ -294,6 +294,16 @@ public class OSMScoutClient {
     public native String getAdminRegionName(long handle);
 
     /**
+     * Get the name of the search scope region for a previously resolved admin
+     * region: the parent region when sibling expansion applies (see
+     * {@link #searchLocations(String, int, long)}), else the region itself.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return scope region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionScopeName(long handle);
+
+    /**
      * Get a structured description of the most reasonable visible object
      * at the given geographic coordinate.
      * <p>
@@ -340,6 +350,20 @@ public class OSMScoutClient {
      * @return ranked list of candidate descriptions, or empty list if no object found
      */
     public native List<ObjectDescription> getDescriptionCandidates(double lat, double lon, int magnification);
+
+    /**
+     * Bearing-aware road lookup: resolve the road the vehicle is actually
+     * driving on at the given coordinate, preferring ways whose direction
+     * at the nearest point matches the vehicle bearing over nearer ways
+     * with a mismatched direction (e.g. a side street).
+     *
+     * @param lat     latitude in degrees
+     * @param lon     longitude in degrees
+     * @param bearing vehicle bearing in degrees, or NaN when unknown
+     * @return the resolved road (name, ref, type, max speed), or null when
+     *         no way is found within the lookup radius
+     */
+    public native RoadInfo getRoadAt(double lat, double lon, double bearing);
 
     /**
      * Calculate a route between two coordinates asynchronously with a routing profile.

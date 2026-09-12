@@ -79,8 +79,16 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
           segmentFifo.clear();
         }
 
-        segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
-                               gpsUpdateMsg->timestamp-lastPosition.time});
+        // Standstill guard: GPS position jitter while the vehicle is stationary
+        // (typically 0.5-2 m per 1 s segment) must not be reported as speed.
+        // Segments below the displacement floor contribute zero distance, so
+        // drift-derived speed collapses to 0; real movement >= 2 m/s still
+        // computes normally (spec: gps-speed-priority).
+        Distance segmentDistance = GetEllipsoidalDistance(lastPosition.coord, gpsUpdateMsg->currentPosition);
+        if (segmentDistance.AsMeter() < 2.0) {
+          segmentDistance = Distance::Zero();
+        }
+        segmentFifo.push_back({segmentDistance, gpsUpdateMsg->timestamp-lastPosition.time});
         Timestamp::duration fifoDuration{Timestamp::duration::zero()};
         Distance fifoDistance;
         for (const auto &s:segmentFifo){

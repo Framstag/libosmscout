@@ -406,17 +406,17 @@ TYPES
 
   TYPE railway_station
     = NODE AREA ("railway"=="station")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
       ADDRESS POI
       GROUP routingPOI
 
   TYPE railway_halt
     = NODE ("railway"=="halt")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
 
   TYPE railway_tram_stop
     = NODE ("railway"=="tram_stop" OR (("tram" IN ["yes", "true", "1"]) AND ("public_transport" IN ["platform", "stop_position"])))
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
 
   TYPE railway_crossing
     = NODE ("railway"=="crossing")
@@ -426,7 +426,7 @@ TYPES
 
   TYPE railway_subway_entrance
     = NODE ("railway"=="subway_entrance")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
 
   TYPE railway_turntable
     = NODE AREA ("railway"=="turntable")
@@ -444,7 +444,7 @@ TYPES
      = WAY AREA ("public_transport"=="platform" OR
                  "railway"=="platform" OR
                  "highway"=="platform")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
       PATH[FOOT]
 
   //
@@ -1080,29 +1080,29 @@ TYPES
   // These are currently special-cased in the style file
   TYPE amenity_atm
     = NODE AREA ("amenity"=="atm")
-      {Name, NameAlt, OpeningHours}
+      {Name, NameAlt, Operator, Brand, OpeningHours}
       GROUP amenity
 
   TYPE amenity_bank_building
     = AREA ("amenity"=="bank" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       POI
       GROUP amenity, building
 
   TYPE amenity_bank
     = NODE AREA ("amenity"=="bank")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
   TYPE amenity_bicycle_parking_building
     = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours}
+      {Name, NameAlt, Operator, Brand, OpeningHours}
       GROUP amenity, building
 
   TYPE amenity_bicycle_parking
     = NODE WAY AREA ("amenity"=="bicycle_parking")
-      {Name, NameAlt, Width}
+      {Name, NameAlt, Operator, Brand, Width}
       GROUP amenity, building
 
   TYPE amenity_bench
@@ -1116,7 +1116,7 @@ TYPES
 
   TYPE amenity_bus_station
     = NODE AREA ("amenity"=="bus_station")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
       GROUP amenity
 
   TYPE amenity_cafe_building
@@ -1147,7 +1147,7 @@ TYPES
 
   TYPE amenity_doctors
     = NODE AREA ("amenity"=="doctors")
-      {Name, NameAlt, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
@@ -1158,25 +1158,25 @@ TYPES
 
   TYPE amenity_fast_food_building
     = AREA ("amenity"=="fast_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
   TYPE amenity_fast_food
     = NODE AREA ("amenity"=="fast_food")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
   TYPE amenity_fuel_building
     = AREA ("amenity"=="fuel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
   TYPE amenity_fuel
     = NODE ("amenity"=="fuel")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
@@ -1193,13 +1193,13 @@ TYPES
 
   TYPE amenity_hospital_building
     = AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Phone, Website}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
   TYPE amenity_hospital
     = NODE AREA ("amenity"=="hospital")
-      {Name, NameAlt, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
@@ -1229,7 +1229,7 @@ TYPES
 
   TYPE amenity_parking_building
     = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, Fee, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Fee, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
@@ -1245,7 +1245,7 @@ TYPES
 
   TYPE amenity_parking
     = NODE AREA ("amenity"=="parking")
-      {Name, NameAlt, Fee, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Fee, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity
 
@@ -1257,7 +1257,7 @@ TYPES
 
   TYPE amenity_police
     = NODE AREA ("amenity"=="police")
-      {Name, NameAlt, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
@@ -1284,13 +1284,13 @@ TYPES
 
   TYPE amenity_restaurant_building
     = AREA ("amenity"=="restaurant" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, building, routingPOI
 
   TYPE amenity_restaurant
     = NODE AREA ("amenity"=="restaurant")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP amenity, routingPOI
 
@@ -2201,289 +2201,289 @@ TYPES
 
   TYPE shop_alcohol_building
     = AREA ("shop"=="alcohol" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_alcohol
     = NODE AREA ("shop"=="alcohol")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_bakery_building
     = AREA ("shop"=="bakery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_bakery
     = NODE AREA ("shop"=="bakery")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_beverages_building
     = AREA ("shop"=="beverages" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_beverages
     = NODE AREA ("shop"=="beverages")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_butcher_building
     = AREA ("shop"=="butcher" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_butcher
     = NODE AREA ("shop"=="butcher")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_cheese_building
     = AREA ("shop"=="cheese" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_cheese
     = NODE AREA ("shop"=="cheese")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_chocolate_building
     = AREA ("shop"=="chocolate" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_chocolate
     = NODE AREA ("shop"=="chocolate")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_coffee_building
     = AREA ("shop"=="coffee" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_coffee
     = NODE AREA ("shop"=="coffee")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_confectionery_building
     = AREA ("shop"=="confectionery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_confectionery
     = NODE AREA ("shop"=="confectionery")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_convenience_building
     = AREA ("shop"=="convenience" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_convenience
     = NODE AREA ("shop"=="convenience")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_dairy_building
     = AREA ("shop"=="dairy" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_dairy
     = NODE AREA ("shop"=="dairy")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_deli_building
     = AREA ("shop"=="deli" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_deli
     = NODE AREA ("shop"=="deli")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_farm_building
     = AREA ("shop"=="farm" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_farm
     = NODE AREA ("shop"=="farm")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_food_building
     = AREA ("shop"=="food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_food
     = NODE AREA ("shop"=="food")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_frozen_food_building
     = AREA ("shop"=="frozen_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_frozen_food
     = NODE AREA ("shop"=="frozen_food")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_greengrocer_building
     = AREA ("shop"=="greengrocer" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_greengrocer
     = NODE AREA ("shop"=="greengrocer")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_grocery_building
     = AREA ("shop"=="grocery" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_grocery
     = NODE AREA ("shop"=="grocery")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_health_food_building
     = AREA ("shop"=="health_food" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_health_food
     = NODE AREA ("shop"=="health_food")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_ice_cream_building
     = AREA ("shop"=="ice_cream" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_ice_cream
     = NODE AREA ("shop"=="ice_cream")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_pastry_building
     = AREA ("shop"=="pastry" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_pastry
     = NODE AREA ("shop"=="pastry")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_seafood_building
     = AREA ("shop"=="seafood" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_seafood
     = NODE AREA ("shop"=="seafood")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_spices_building
     = AREA ("shop"=="spices" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_spices
     = NODE AREA ("shop"=="spices")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_supermarket_building
     = AREA ("shop"=="supermarket" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_supermarket
     = NODE AREA ("shop"=="supermarket")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_tea_building
     = AREA ("shop"=="tea" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_tea
     = NODE AREA ("shop"=="tea")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
   TYPE shop_wine_building
     = AREA ("shop"=="wine" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, building, routingPOI
 
   TYPE shop_wine
     = NODE AREA ("shop"=="wine")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP shop, routingPOI
 
@@ -2521,37 +2521,37 @@ TYPES
 
   TYPE tourism_aquarium
     = NODE AREA ("tourism"=="aquarium")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_attraction_building
     = NODE AREA ("tourism"=="attraction" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building, routingPOI
 
   TYPE tourism_attraction
     = NODE AREA ("tourism"=="attraction")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_artwork
     = NODE WAY AREA ("tourism"=="artwork")
-      {Name, NameAlt, Width, Grade, Bridge, Tunnel, Roundabout, Phone, Website}
+      {Name, NameAlt, Operator, Brand, Width, Grade, Bridge, Tunnel, Roundabout, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_camp_site
     = NODE AREA ("tourism"=="camp_site")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_caravan_site
     = NODE AREA ("tourism"=="caravan_site")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism
 
@@ -2569,36 +2569,36 @@ TYPES
 
   TYPE tourism_picnic_site
     = NODE AREA ("tourism"=="picnic_site")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism
 
   TYPE tourism_theme_park
     = NODE AREA ("tourism"=="theme_park")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_viewpoint
     = NODE ("tourism"=="viewpoint")
-      {Name, NameAlt}
+      {Name, NameAlt, Operator, Brand}
       GROUP tourism
 
   TYPE tourism_zoo
     = NODE AREA ("tourism"=="zoo")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_alpine_hut_building
     = AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS
       GROUP tourism, building
 
   TYPE tourism_alpine_hut
     = NODE AREA ("tourism"=="alpine_hut")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS
       GROUP tourism
 
@@ -2628,25 +2628,25 @@ TYPES
 
   TYPE tourism_chalet_building
     = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building
 
   TYPE tourism_chalet
     = NODE AREA ("tourism"=="chalet")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism
 
   TYPE tourism_guest_house_building
     = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building
 
   TYPE tourism_guest_house
     = NODE AREA ("tourism"=="guest_house")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism
 
@@ -2657,49 +2657,49 @@ TYPES
 
   TYPE tourism_hostel_building
     = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building, routingPOI
 
   TYPE tourism_hostel
     = NODE AREA ("tourism"=="hostel")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_hotel_building
     = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building, routingPOI
 
   TYPE tourism_hotel
     = NODE AREA ("tourism"=="hotel")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
   TYPE tourism_information_building
     = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt,OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building
 
   TYPE tourism_information
     = NODE AREA ("tourism"=="information")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism
 
   TYPE tourism_motel_building
     = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building, routingPOI
 
   TYPE tourism_motel
     = NODE AREA ("tourism"=="motel")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
@@ -2717,13 +2717,13 @@ TYPES
 
   TYPE tourism_museum_building
     = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, building, routingPOI
 
   TYPE tourism_museum
     = NODE AREA ("tourism"=="museum")
-      {Name, NameAlt, OpeningHours, Phone, Website}
+      {Name, NameAlt, Operator, Brand, OpeningHours, Phone, Website}
       ADDRESS POI
       GROUP tourism, routingPOI
 
