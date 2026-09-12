@@ -688,7 +688,7 @@ int main(int argc, char* argv[])
       std::string    path = args.output + "/TextMetricsSkia.png";
 
       if (image && image->peekPixels(&pixmap)) {
-        sk_sp<SkData> png = SkPngEncoder::Encode(pixmap, SkPngEncoder::Options{});
+        sk_sp<SkData> png = SkPngEncoder::Encode(pixmap, SkPngEncoder::Options {});
 
         if (png) {
           FILE * fp = fopen(path.c_str(), "wb");

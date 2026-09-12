@@ -54,6 +54,8 @@ class OSMSCOUT_CLIENT_QT_API InstalledVoicesModel : public QAbstractListModel {
   //!< progress in the UI as the initial synthesis may take some time.
   Q_PROPERTY(QString ttsStateText READ getTTSStateText NOTIFY ttsStateChanged)
 
+  Q_PROPERTY(TTSEngine::TTSEngineState ttsState READ getTTSState NOTIFY ttsStateChanged)
+
 private:
   Slot<std::string> voiceDirSlot{
     [this](const std::string &dir){ onVoiceChanged(QString::fromStdString(dir)); }
@@ -76,7 +78,7 @@ public slots:
   void playTTSAudio(const QList<QUrl> &audioFiles);
 
 private slots:
-  void onTTSStateChange(osmscout::TTSEngineState state);
+  void onTTSStateChange(TTSEngine::TTSEngineState state);
   void onTTSError(const QString &message);
 
 public:
@@ -121,6 +123,11 @@ public:
    */
   QString getTTSStateText() const;
 
+  TTSEngine::TTSEngineState getTTSState() const
+  {
+    return ttsState;
+  }
+
 private:
   void EnsureTTSEngine();
 
@@ -140,7 +147,7 @@ private:
   QString ttsMessageLanguage; // language currently loaded into ttsMessageGenerator
 
   // state of ttsEngine, mirrored here to expose it as a Qt property
-  TTSEngineState ttsState{TTSEngineState::Idle};
+  TTSEngine::TTSEngineState ttsState{TTSEngine::TTSEngineState::Idle};
   QString ttsErrorMessage; // last error reported by ttsEngine (not localized)
 };
 }

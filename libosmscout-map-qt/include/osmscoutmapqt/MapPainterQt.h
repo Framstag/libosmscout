@@ -124,6 +124,13 @@ namespace osmscout {
                     const osmscout::PathTextStyleRef style,
                     const std::vector<osmscout::Glyph<QGlyphRun>> &glyphs);
 
+    QtLabelLayouter& GetLayouter();
+
+  protected:
+    /**
+     * Layout the given text into the label type of this backend. Protected:
+     * also used by derived test/painter helpers, not part of the draw API.
+     */
     std::shared_ptr<QtLabel> Layout(const Projection& projection,
                                     const MapParameter& parameter,
                                     const std::string& text,
@@ -131,8 +138,6 @@ namespace osmscout {
                                     double objectWidth,
                                     bool enableWrapping = false,
                                     bool contourLabel = false);
-
-    QtLabelLayouter& GetLayouter();
 
     void DrawRectangle(int x, int y,
                        int width, int height,

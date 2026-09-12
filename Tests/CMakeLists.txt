@@ -273,7 +273,7 @@ if(${OSMSCOUT_BUILD_MAP})
 	if(${OSMSCOUT_BUILD_MAP_GDI})
 		target_link_libraries(PerformanceTest OSMScout::MapGDI)
 		set(HAVE_LIB_OSMSCOUTMAPGDI 1)
-		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} dgi)
+		set(PERFORMANCE_TEST_DRIVERS ${PERFORMANCE_TEST_DRIVERS} gdi)
 	endif()
 
 	option(PERF_TEST_GPERFTOOLS_USAGE "Enable Gperftools in Performance test" ${GPERFTOOLS_USAGE})
@@ -300,6 +300,7 @@ if(${OSMSCOUT_BUILD_MAP})
 				--driver ${DRIVER}
 				--icons "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout/data/icons/svg/standard"
 				--font "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
+				--shaders "${CMAKE_CURRENT_SOURCE_DIR}/../libosmscout-map-opengl/data/shaders"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../Tests/data/testregion"
 				"${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/${STYLESHEET}"
 				50.3806 14.5418 50.3806 14.5418)
@@ -394,9 +395,41 @@ if(${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME MapPainterRouteTest SOURCES src/MapPainterRouteTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
 endif()
 
+#---- MapPainterShieldTest
+if(${OSMSCOUT_BUILD_MAP_CAIRO})
+  osmscout_test_project(NAME MapPainterShieldTest SOURCES src/MapPainterShieldTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+endif()
+
+#---- MapPainterShieldQtTest (Qt DLL loader issue under Windows CMake CI: SKIPTEST, like TextMetricsQtTest)
+if(${OSMSCOUT_BUILD_MAP_QT})
+  osmscout_test_project(NAME MapPainterShieldQtTest SOURCES src/MapPainterShieldQtTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets Catch2::Catch2WithMain SKIPTEST)
+endif()
+
 #---- TextMetricsTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME TextMetricsTest SOURCES src/TextMetricsTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- TextMetricsCairoTest: cross-backend check Cairo (Pango) vs FreeType reference
+if(HAVE_LIB_FREETYPE AND ${OSMSCOUT_BUILD_MAP_CAIRO})
+  osmscout_test_project(NAME TextMetricsCairoTest SOURCES src/TextMetricsCairoTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include ${CAIRO_INCLUDE_DIRS})
+  target_compile_definitions(TextMetricsCairoTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
+
+  # Optional direct fontconfig usage: the test registers the bundled font
+  # file as a fontconfig application font so that the fontconfig-based
+  # font resolution of the cairo backend finds the exact font even on
+  # systems without the font installed system-wide
+  find_package(Fontconfig QUIET)
+  if(TARGET Fontconfig::Fontconfig)
+    # must stay plain: osmscout_test_project links via the plain signature
+    target_link_libraries(TextMetricsCairoTest Fontconfig::Fontconfig)
+    target_compile_definitions(TextMetricsCairoTest PRIVATE HAVE_LIB_FONTCONFIG)
+  endif()
+endif()
+
+#---- TextMetricsCrossBackendTest: cross-backend (Cairo/Qt/Skia) dimensions + glyph offsets
+if(${OSMSCOUT_BUILD_MAP_CAIRO} AND ${OSMSCOUT_BUILD_MAP_QT} AND ${OSMSCOUT_BUILD_MAP_SKIA})
+  osmscout_test_project(NAME TextMetricsCrossBackendTest SOURCES src/TextMetricsCrossBackendTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo OSMScout::MapQt OSMScout::MapSkia Qt::Widgets Catch2::Catch2WithMain SKIPTEST)
 endif()
 
 #---- TextMetricsReferenceTest
@@ -421,5 +454,12 @@ endif()
 #---- SVGIconSkiaTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME SVGIconSkiaTest SOURCES src/SVGIconSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- SymbolRendererCairoTest
+if(${OSMSCOUT_BUILD_MAP_CAIRO} AND TARGET OSMScout::Map AND TARGET OSMScout::MapCairo)
+  osmscout_test_project(NAME SymbolRendererCairoTest SOURCES src/SymbolRendererCairoTest.cpp TARGET OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+else()
+  message("Skip SymbolRendererCairo test, libosmscout-map-cairo is missing.")
 endif()
 

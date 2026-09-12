@@ -244,7 +244,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qRegisterMetaType<QmlRoutingProfileRef>("QmlRoutingProfileRef");
   qRegisterMetaType<VoicePlayer::PlaybackState>("VoicePlayer::PlaybackState");
   qRegisterMetaType<Voice>("Voice");
-  qRegisterMetaType<osmscout::TTSEngineState>("TTSEngineState");
+  qRegisterMetaType<TTSEngine::TTSEngineState>("TTSEngine::TTSEngineState");
 
   // register osmscout types for usage in QML
   qmlRegisterType<AvailableMapsModel>(uri, versionMajor, versionMinor, "AvailableMapsModel");
@@ -273,6 +273,7 @@ void OSMScoutQt::RegisterQmlTypes(const char *uri,
   qmlRegisterType<InstalledVoicesModel>(uri, versionMajor, versionMinor, "InstalledVoicesModel");
   qmlRegisterType<SunriseSunset>(uri, versionMajor, versionMinor, "SunriseSunset");
   qmlRegisterType<OpeningHoursModel>(uri, versionMajor, versionMinor, "OpeningHoursModel");
+  qmlRegisterUncreatableType<TTSEngine>(uri, versionMajor, versionMinor, "TTSEngine", "abstract base, enums only");
 }
 
 OSMScoutQtBuilder OSMScoutQt::NewInstance()

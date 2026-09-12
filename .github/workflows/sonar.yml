@@ -42,7 +42,7 @@ jobs:
               qtdeclarative5-dev libqt5svg5-dev qtlocation5-dev qtpositioning5-dev qttools5-dev-tools
               qttools5-dev qtmultimedia5-dev
               libglm-dev libglew-dev libglut-dev
-              libmarisa-dev"
+              fonts-liberation libmarisa-dev"
       - name: Configure build project
         run:  meson setup --buildtype debugoptimized -Db_coverage=true --unity on debug
         env:

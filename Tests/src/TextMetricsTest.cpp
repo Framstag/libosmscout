@@ -17,7 +17,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+
+#include <algorithm>
+#include <limits>
+#include <string>
 
 #include <osmscout/projection/MercatorProjection.h>
 #include <osmscoutmap/MapParameter.h>
@@ -85,13 +90,65 @@ TEST_CASE("MeasureText glyph box is relative to glyph base point", "[TextMetrics
   REQUIRE_FALSE(metrics.glyphs.empty());
 
   for (const auto& glyph : metrics.glyphs) {
-    // Box x is relative to the glyph base point (left baseline origin)
-    REQUIRE(glyph.box.x == 0.0);
+    // Box x is the ink bearing relative to the glyph base point: ink may start
+    // slightly right of the base point, but never far from it
+    REQUIRE(glyph.box.x >= -1.0);
     // Ink extends above the baseline, so box top is negative
     REQUIRE(glyph.box.y <= 0.0);
     REQUIRE(glyph.box.width > 0.0);
     REQUIRE(glyph.box.height > 0.0);
   }
+}
+
+TEST_CASE("MeasureText glyph boxes differ between glyphs with different ink", "[TextMetrics]")
+{
+  osmscout::MapPainterSkia painter;
+  auto                     projection = CreateProjection();
+  auto                     parameter = CreateParameter();
+
+  // a full-height glyph and a small glyph: their boxes must not be identical
+  const std::string text = "i";
+  auto              metrics = painter.MeasureText(projection, parameter, text, 1.0);
+  auto              metricsHel = painter.MeasureText(projection, parameter, "H", 1.0);
+
+  REQUIRE(metrics.glyphs.size() == 1);
+  REQUIRE(metricsHel.glyphs.size() == 1);
+
+  // the narrow glyph with small ink must not report the same constant
+  // font-level box as a wide glyph (would indicate font-box metrics)
+  REQUIRE_FALSE(metrics.glyphs[0].box.width == metricsHel.glyphs[0].box.width);
+}
+
+TEST_CASE("MeasureText label dimensions equal the union of the glyph boxes", "[TextMetrics]")
+{
+  osmscout::MapPainterSkia painter;
+  auto                     projection = CreateProjection();
+  auto                     parameter = CreateParameter();
+
+  const std::string        text = "Hello World";
+  auto                     metrics = painter.MeasureText(projection, parameter, text, 1.0);
+
+  REQUIRE(metrics.glyphs.size() == text.length());
+
+  double minX = std::numeric_limits<double>::max();
+  double maxX = std::numeric_limits<double>::lowest();
+  double minY = std::numeric_limits<double>::max();
+  double maxY = std::numeric_limits<double>::lowest();
+
+  for (const auto& glyph : metrics.glyphs) {
+    double x1 = glyph.position.GetX() + glyph.box.x;
+    double y1 = glyph.position.GetY() + glyph.box.y;
+    double x2 = x1 + glyph.box.width;
+    double y2 = y1 + glyph.box.height;
+
+    minX = std::min(minX, x1);
+    minY = std::min(minY, y1);
+    maxX = std::max(maxX, x2);
+    maxY = std::max(maxY, y2);
+  }
+
+  REQUIRE(metrics.width == Catch::Approx(maxX-minX).margin(1.0));
+  REQUIRE(metrics.height == Catch::Approx(maxY-minY).margin(1.0));
 }
 
 TEST_CASE("MeasureText glyph positions are relative to label origin", "[TextMetrics]")

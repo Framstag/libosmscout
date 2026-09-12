@@ -197,10 +197,10 @@ void InstalledVoicesModel::EnsureTTSEngine()
 #endif
 }
 
-void InstalledVoicesModel::onTTSStateChange(osmscout::TTSEngineState state)
+void InstalledVoicesModel::onTTSStateChange(TTSEngine::TTSEngineState state)
 {
   ttsState = state;
-  if (state != TTSEngineState::Error) {
+  if (state != TTSEngine::TTSEngineState::Error) {
     // keep the last error message around while in the Error state, clear it
     // once the engine recovers
     ttsErrorMessage.clear();
@@ -218,13 +218,15 @@ void InstalledVoicesModel::onTTSError(const QString &message)
 QString InstalledVoicesModel::getTTSStateText() const
 {
   switch (ttsState) {
-    case TTSEngineState::Synthesizing:
-      return tr("Synthesizing voice sample…");
-    case TTSEngineState::Error:
+  case TTSEngine::TTSEngineState::Initializing:
+    return tr("Initializing");
+  case TTSEngine::TTSEngineState::Synthesizing:
+    return tr("Synthesizing voice sample");
+  case TTSEngine::TTSEngineState::Error:
       return ttsErrorMessage.isEmpty()
         ? tr("Voice synthesis failed")
         : tr("Voice synthesis failed: %1").arg(ttsErrorMessage);
-    case TTSEngineState::Idle:
+    case TTSEngine::TTSEngineState::Idle:
     default:
       return tr("Ready");
   }

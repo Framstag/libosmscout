@@ -31,21 +31,6 @@ class QThread;
 
 namespace osmscout {
 
-Q_NAMESPACE
-
-/**
- * \ingroup QtAPI
- *
- * State of a TTSEngine, useful for showing synthesis progress in the UI
- * (initial synthesis of a message may take a noticeable amount of time).
- */
-enum class TTSEngineState {
-  Idle,         //!< engine is idle, not synthesizing anything at the moment
-  Synthesizing, //!< engine is currently synthesizing a message
-  Error,        //!< the last operation failed (see TTSEngine::error signal for details)
-};
-Q_ENUM_NS(TTSEngineState)
-
 /**
  * \ingroup QtAPI
  *
@@ -64,7 +49,20 @@ Q_ENUM_NS(TTSEngineState)
  */
 class OSMSCOUT_CLIENT_QT_API TTSEngine : public QObject {
   Q_OBJECT
-  Q_PROPERTY(osmscout::TTSEngineState state READ getState NOTIFY stateChange)
+  Q_PROPERTY(TTSEngineState state READ getState NOTIFY stateChange)
+
+public:
+  /**
+   * State of a TTSEngine, useful for showing synthesis progress in the UI
+   * (initial synthesis of a message may take a noticeable amount of time).
+   */
+  enum class TTSEngineState {
+    Idle,         //!< engine is idle, not synthesizing anything at the moment
+    Initializing, //!< engine is initializing the voice (e.g. loading a model)
+    Synthesizing, //!< engine is currently synthesizing a message
+    Error,        //!< the last operation failed (see TTSEngine::error signal for details)
+  };
+  Q_ENUM(TTSEngineState);
 
 protected:
   QThread         *thread; //!< engine background thread (owns itself, deleted on finish)
@@ -104,7 +102,7 @@ signals:
    * finishes synthesizing a message. Useful for showing synthesis progress
    * in the UI, as the initial synthesis of a message may take a while.
    */
-  void stateChange(osmscout::TTSEngineState state);
+  void stateChange(TTSEngineState state);
 
 public:
   TTSEngine();
@@ -133,8 +131,6 @@ protected:
 };
 
 }
-
-Q_DECLARE_METATYPE(osmscout::TTSEngineState)
 
 #endif // OSMSCOUT_CLIENT_QT_TTSENGINE_H
 

@@ -357,17 +357,25 @@ namespace osmscout {
     else if (const auto *style = dynamic_cast<const ShieldStyle*>(label.style.get());
              style != nullptr) {
 
-      QPointF marginMove(-5,-5);
-      QSizeF marginResize(10,10);
-
       QColor     textColor=QColor::fromRgbF(style->GetTextColor().GetR(),
                                             style->GetTextColor().GetG(),
                                             style->GetTextColor().GetB(),
                                             style->GetTextColor().GetA());
 
+      painter->setPen(Qt::NoPen);
+      painter->setBrush(Qt::NoBrush);
+
+      // shared shield geometry, identical in all backends
+      ShieldGeometry shield=GetShieldGeometry(ScreenVectorRectangle(rect.x(),
+                                                                    rect.y(),
+                                                                    rect.width(),
+                                                                    rect.height()));
+
       // Shield background
-      painter->fillRect(QRectF(rect.topLeft() + marginMove,
-                               rect.size() + QSizeF(1,1) + marginResize),
+      painter->fillRect(QRectF(shield.background.x,
+                               shield.background.y,
+                               shield.background.width,
+                               shield.background.height),
                         QBrush(QColor::fromRgbF(style->GetBgColor().GetR(),
                                                 style->GetBgColor().GetG(),
                                                 style->GetBgColor().GetB(),
@@ -380,8 +388,10 @@ namespace osmscout {
                                        style->GetBorderColor().GetA()));
       painter->setBrush(Qt::NoBrush);
 
-      painter->drawRect(QRectF(rect.topLeft() + QPointF(2,2) + marginMove,
-                               rect.size() + QSizeF(1-4,1-4) + marginResize));
+      painter->drawRect(QRectF(shield.border.x,
+                               shield.border.y,
+                               shield.border.width,
+                               shield.border.height));
 
       painter->setPen(QPen(textColor,1.0));
       textLayout.draw(painter,
@@ -455,8 +465,35 @@ namespace osmscout {
       line.setPosition(QPointF((width-line.naturalTextWidth())/2,line.position().y()));
     }
 
-    label->width=width;
-    label->height=height;
+    // The label dimensions must describe the ink of the drawn text, not the
+    // font box: compute the union of the per-glyph ink boxes (relative to the
+    // layout origin) and shift the lines so that the ink starts at the label
+    // origin. DrawLabel can then draw at the label rectangle origin directly.
+    QRectF inkRect;
+    for (const QGlyphRun &glyphRun : label->label.glyphRuns()) {
+      const QRawFont &rawFont=glyphRun.rawFont();
+
+      for (int i=0; i<glyphRun.glyphIndexes().size(); i++) {
+        QRectF box=rawFont.boundingRect(glyphRun.glyphIndexes().at(i)).translated(glyphRun.positions().at(i));
+
+        inkRect = inkRect.isNull() ? box : inkRect.united(box);
+      }
+    }
+
+    if (!inkRect.isNull()) {
+      for (int i=0; i<label->label.lineCount(); i++) {
+        QTextLine line = label->label.lineAt(i);
+
+        line.setPosition(line.position() - QPointF(inkRect.left(), inkRect.top()));
+      }
+
+      label->width=inkRect.width();
+      label->height=inkRect.height();
+    }
+    else {
+      label->width=width;
+      label->height=height;
+    }
     label->fontSize=fontSize;
     label->text=text;
 

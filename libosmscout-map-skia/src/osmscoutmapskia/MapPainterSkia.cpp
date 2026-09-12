@@ -75,6 +75,8 @@
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
+#include <numeric>
+
 #include <osmscout/log/Logger.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
@@ -599,9 +601,19 @@ namespace osmscout {
       SkFont font(typeface, static_cast<SkScalar>(layout.fontSize));
       font.setSubpixel(true);
 
-      SkFontMetrics metrics;
-      font.getMetrics(&metrics);
-      double lineHeight = metrics.fDescent - metrics.fAscent;
+      // per-line draw points: the label origin is the top-left corner of the
+      // ink and each placement already includes the ink correction and the
+      // horizontal line centering; fall back to the old pen point if no
+      // placements were stored
+      auto linePlacement=[&](size_t lineIndex) -> std::pair<float,float> {
+        if (lineIndex < layout.linePositions.size()) {
+          return {static_cast<float>(labelRectangle.x + layout.linePositions[lineIndex].x),
+                  static_cast<float>(labelRectangle.y + layout.linePositions[lineIndex].y)};
+        }
+
+        return {static_cast<float>(labelRectangle.x),
+                static_cast<float>(labelRectangle.y + layout.fontSize)};
+      };
 
       if (style->GetStyle() == TextStyle::normal) {
         SkPaint textPaint;
@@ -612,20 +624,13 @@ namespace osmscout {
             static_cast<uint8_t>(g * 255),
             static_cast<uint8_t>(b * 255)));
 
-        float y = static_cast<SkScalar>(labelRectangle.y + layout.fontSize);
-        for (const auto& line : lines) {
+        for (size_t i=0; i<lines.size(); i++) {
+          const auto& line=lines[i];
+
           if (!line.empty()) {
-            double lineWidth = font.measureText(line.c_str(), line.length(),
-                                                SkTextEncoding::kUTF8);
-            float x = static_cast<SkScalar>(labelRectangle.x
-                      + (labelRectangle.width - lineWidth) / 2.0);
-            draw->drawString(line.c_str(),
-                             x,
-                             y,
-                             font,
-                             textPaint);
+            auto [penX, penY]=linePlacement(i);
+            draw->drawString(line.c_str(), penX, penY, font, textPaint);
           }
-          y += static_cast<SkScalar>(lineHeight);
         }
       }
       else /* emphasize */ {
@@ -649,23 +654,21 @@ namespace osmscout {
             static_cast<uint8_t>(g * 255),
             static_cast<uint8_t>(b * 255)));
 
-        float y = static_cast<SkScalar>(labelRectangle.y + layout.fontSize);
-        for (const auto& line : lines) {
+        for (size_t i=0; i<lines.size(); i++) {
+          const auto& line=lines[i];
+
           if (!line.empty()) {
-            double lineWidth = font.measureText(line.c_str(), line.length(),
-                                                SkTextEncoding::kUTF8);
-            float x = static_cast<SkScalar>(labelRectangle.x
-                      + (labelRectangle.width - lineWidth) / 2.0);
+            auto [penX, penY]=linePlacement(i);
+
             // Draw outline by offsetting text 1px in each direction
-            draw->drawString(line.c_str(), x - 1, y, font, outlinePaint);
-            draw->drawString(line.c_str(), x + 1, y, font, outlinePaint);
-            draw->drawString(line.c_str(), x, y - 1, font, outlinePaint);
-            draw->drawString(line.c_str(), x, y + 1, font, outlinePaint);
+            draw->drawString(line.c_str(), penX - 1, penY, font, outlinePaint);
+            draw->drawString(line.c_str(), penX + 1, penY, font, outlinePaint);
+            draw->drawString(line.c_str(), penX, penY - 1, font, outlinePaint);
+            draw->drawString(line.c_str(), penX, penY + 1, font, outlinePaint);
 
             // Draw text on top
-            draw->drawString(line.c_str(), x, y, font, textPaint);
+            draw->drawString(line.c_str(), penX, penY, font, textPaint);
           }
-          y += static_cast<SkScalar>(lineHeight);
         }
       }
     }
@@ -678,7 +681,9 @@ namespace osmscout {
       SkFont font(typeface, static_cast<SkScalar>(layout.fontSize));
       font.setSubpixel(true);
 
-      // Shield background
+      // Shield background and border, shared geometry identical in all backends
+      ShieldGeometry shield=GetShieldGeometry(labelRectangle);
+
       SkPaint bgPaint;
       bgPaint.setAntiAlias(true);
       bgPaint.setStyle(SkPaint::kFill_Style);
@@ -688,10 +693,10 @@ namespace osmscout {
           static_cast<uint8_t>(style->GetBgColor().GetG() * 255),
           static_cast<uint8_t>(style->GetBgColor().GetB() * 255)));
       draw->drawRect(SkRect::MakeXYWH(
-          static_cast<SkScalar>(labelRectangle.x - 2),
-          static_cast<SkScalar>(labelRectangle.y),
-          static_cast<SkScalar>(labelRectangle.width + 3),
-          static_cast<SkScalar>(labelRectangle.height + 1)),
+          static_cast<SkScalar>(shield.background.x),
+          static_cast<SkScalar>(shield.background.y),
+          static_cast<SkScalar>(shield.background.width),
+          static_cast<SkScalar>(shield.background.height)),
           bgPaint);
 
       // Shield border
@@ -705,10 +710,10 @@ namespace osmscout {
           static_cast<uint8_t>(style->GetBorderColor().GetB() * 255)));
       borderPaint.setStrokeWidth(1.0f);
       draw->drawRect(SkRect::MakeXYWH(
-          static_cast<SkScalar>(labelRectangle.x),
-          static_cast<SkScalar>(labelRectangle.y + 2),
-          static_cast<SkScalar>(labelRectangle.width + 3 - 4),
-          static_cast<SkScalar>(labelRectangle.height + 1 - 4)),
+          static_cast<SkScalar>(shield.border.x),
+          static_cast<SkScalar>(shield.border.y),
+          static_cast<SkScalar>(shield.border.width),
+          static_cast<SkScalar>(shield.border.height)),
           borderPaint);
 
       // Shield text
@@ -720,8 +725,14 @@ namespace osmscout {
           static_cast<uint8_t>(style->GetTextColor().GetG() * 255),
           static_cast<uint8_t>(style->GetTextColor().GetB() * 255)));
       draw->drawString(layout.text.c_str(),
-                       static_cast<SkScalar>(labelRectangle.x),
-                       static_cast<SkScalar>(labelRectangle.y + layout.fontSize),
+                       static_cast<SkScalar>(labelRectangle.x +
+                                             (layout.linePositions.empty()
+                                              ? 0.0
+                                              : layout.linePositions.front().x)),
+                       static_cast<SkScalar>(labelRectangle.y +
+                                             (layout.linePositions.empty()
+                                              ? layout.fontSize
+                                              : layout.linePositions.front().y)),
                        font,
                        textPaint);
     }
@@ -768,9 +779,10 @@ namespace osmscout {
 
   osmscout::ScreenVectorRectangle MapPainterSkia::GlyphBoundingBox(const SkiaNativeGlyph &glyph) const
   {
-    return ScreenVectorRectangle(0,
+    // ink bounding box relative to the glyph base point (left baseline origin)
+    return ScreenVectorRectangle(glyph.xMin,
                                  glyph.yMin,
-                                 glyph.width,
+                                 glyph.xMax - glyph.xMin,
                                  glyph.yMax - glyph.yMin);
   }
 
@@ -792,7 +804,7 @@ namespace osmscout {
 
     SkFontMetrics metrics;
     font.getMetrics(&metrics);
-    double fontHeight = metrics.fDescent - metrics.fAscent;
+    double lineHeight = metrics.fDescent - metrics.fAscent;
 
     double proposedWidth = -1;
     if (enableWrapping) {
@@ -804,6 +816,8 @@ namespace osmscout {
                                             objectWidth,
                                             text.length());
     }
+
+    std::vector<std::string> lines;
 
     if (enableWrapping && proposedWidth > 0) {
       // Word wrapping: split on spaces, measure each line
@@ -823,12 +837,7 @@ namespace osmscout {
         words.push_back(current);
       }
 
-      std::string wrapped;
       std::string line;
-      double lineWidth = 0;
-      double totalWidth = 0;
-      double totalHeight = fontHeight;
-
       for (const auto& word : words) {
         std::string testLine = line.empty() ? word : line + " " + word;
         double testWidth = font.measureText(testLine.c_str(), testLine.length(),
@@ -836,29 +845,126 @@ namespace osmscout {
 
         if (!line.empty() && testWidth > proposedWidth) {
           // Flush current line
-          wrapped += line + "\n";
-          totalWidth = std::max(totalWidth, lineWidth);
-          totalHeight += fontHeight;
+          lines.push_back(line);
           line = word;
-          lineWidth = font.measureText(word.c_str(), word.length(), SkTextEncoding::kUTF8);
         } else {
           line = testLine;
-          lineWidth = testWidth;
         }
       }
       if (!line.empty()) {
-        wrapped += line;
-        totalWidth = std::max(totalWidth, lineWidth);
+        lines.push_back(line);
       }
 
-      label->text = wrapped;
-      label->width = totalWidth;
-      label->height = totalHeight;
+      label->text = std::accumulate(lines.begin(), lines.end(), std::string(),
+                                    [](const std::string& a, const std::string& b) {
+                                      return a.empty() ? b : a + "\n" + b;
+                                    });
     } else {
-      double textWidth = font.measureText(text.c_str(), text.length(), SkTextEncoding::kUTF8);
+      lines.push_back(text);
       label->text = text;
-      label->width = textWidth;
-      label->height = fontHeight;
+    }
+
+    // The label dimensions must describe the ink of the drawn text, not the
+    // font box: measure the ink bounds of every line and derive the label size
+    // and the per-line baseline positions from them. The label origin is the
+    // top-left corner of the ink.
+    double labelWidth=0;
+    double labelHeight=0;
+    double firstLineBaseline=0;
+    bool haveInk=false;
+
+    std::vector<SkRect> lineInk;
+    lineInk.reserve(lines.size());
+
+    // ink bounds of one line of text, relative to the line's baseline start
+    auto lineInkBounds=[&font](const std::string& line) -> SkRect {
+      if (line.empty()) {
+        return SkRect::MakeEmpty();
+      }
+
+      size_t glyphCount=font.countText(line.c_str(), line.length(), SkTextEncoding::kUTF8);
+
+      if (glyphCount==0) {
+        return SkRect::MakeEmpty();
+      }
+
+      std::vector<SkGlyphID> glyphIds(glyphCount);
+      std::vector<SkRect>    glyphRects(glyphCount);
+
+      font.textToGlyphs(line.c_str(), line.length(), SkTextEncoding::kUTF8,
+                        SkSpan<SkGlyphID>(glyphIds.data(), glyphIds.size()));
+      font.getBounds(SkSpan<const SkGlyphID>(glyphIds.data(), glyphIds.size()),
+                     SkSpan<SkRect>(glyphRects.data(), glyphRects.size()),
+                     nullptr);
+
+      // glyph bounds are relative to the glyph origin: translate each glyph by
+      // the accumulated horizontal advance to get line-relative bounds
+      std::vector<SkScalar> advances(glyphCount);
+
+      font.getWidths(SkSpan<const SkGlyphID>(glyphIds.data(), glyphIds.size()),
+                     SkSpan<SkScalar>(advances.data(), advances.size()));
+
+      SkRect bounds=SkRect::MakeEmpty();
+      double x=0;
+
+      for (size_t g=0; g<glyphCount; g++) {
+        SkRect translated=glyphRects[g].makeOffset(static_cast<SkScalar>(x), 0);
+
+        bounds.join(translated);
+        x+=advances[g];
+      }
+
+      return bounds;
+    };
+
+    for (size_t i=0; i<lines.size(); i++) {
+      const std::string& line=lines[i];
+
+      SkRect bounds=lineInkBounds(line);
+
+      lineInk.push_back(bounds);
+
+      if (!haveInk && bounds.width()>0) {
+        // anchor the first line with ink at the top of the label:
+        // its baseline is at -top relative to the label origin
+        firstLineBaseline=-bounds.top();
+        haveInk=true;
+      }
+
+      labelWidth=std::max(labelWidth, static_cast<double>(bounds.width()));
+    }
+
+    if (haveInk) {
+      label->label.linePositions.reserve(lines.size());
+
+      for (size_t i=0; i<lines.size(); i++) {
+        double baseline=firstLineBaseline+static_cast<double>(i)*lineHeight;
+        const SkRect& bounds=lineInk[i];
+
+        if (bounds.width()>0) {
+          labelHeight=std::max(labelHeight, baseline+static_cast<double>(bounds.bottom()));
+        }
+
+        label->label.linePositions.push_back({
+          (labelWidth-static_cast<double>(bounds.width()))/2.0-static_cast<double>(bounds.left()),
+          baseline
+        });
+      }
+
+      label->width = std::max(labelWidth, 0.0);
+      label->height = std::max(labelHeight, 0.0);
+    }
+    else {
+      // no ink (e.g. whitespace only): fall back to advance width and font box
+      label->label.linePositions.reserve(lines.size());
+
+      for (size_t i=0; i<lines.size(); i++) {
+        label->label.linePositions.push_back({0.0,
+                                              static_cast<double>(i)*lineHeight});
+      }
+
+      label->width = font.measureText(text.c_str(), text.length(), SkTextEncoding::kUTF8);
+      label->height = lineHeight;
     }
 
     label->fontSize = size;
@@ -935,9 +1041,13 @@ namespace osmscout {
         font.getBounds(SkSpan<const SkGlyphID>(&glyphID, 1),
                        SkSpan<SkRect>(&glyphBounds, 1),
                        nullptr);
+        result.back().glyph.xMin = glyphBounds.fLeft;
+        result.back().glyph.xMax = glyphBounds.fRight;
         result.back().glyph.yMin = glyphBounds.fTop;
         result.back().glyph.yMax = glyphBounds.fBottom;
       } else {
+        result.back().glyph.xMin = 0;
+        result.back().glyph.xMax = result.back().glyph.width;
         result.back().glyph.yMin = metrics.fAscent;
         result.back().glyph.yMax = metrics.fAscent + fontHeight;
       }

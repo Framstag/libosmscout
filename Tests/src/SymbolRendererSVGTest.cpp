@@ -151,6 +151,37 @@ TEST_CASE("SetBorder with null style emits stroke=\"none\"")
   REQUIRE(output.find("stroke=\"none\"") != std::string::npos);
 }
 
+TEST_CASE("SetBorder with dashes emits scaled dash array")
+{
+  std::ostringstream stream;
+  TestSymbolRenderer renderer(stream);
+
+  auto border = CreateBorder(Color::BLUE, 1.0);
+  border->SetDashes({2.0, 2.0});
+
+  renderer.SetFill(FillStyleRef());
+  renderer.SetBorder(border, 2.0);
+  renderer.DrawRect(5.0, 5.0, 20.0, 20.0);
+
+  std::string output = stream.str();
+  // dash values 2.0 scaled by converted border width 2 px/mm -> 4 4
+  REQUIRE(output.find("stroke-width=\"2\"") != std::string::npos);
+  REQUIRE(output.find("stroke-dasharray=\"4 4\"") != std::string::npos);
+}
+
+TEST_CASE("SetBorder without dashes emits no dash array")
+{
+  std::ostringstream stream;
+  TestSymbolRenderer renderer(stream);
+
+  renderer.SetFill(FillStyleRef());
+  renderer.SetBorder(CreateBorder(Color::BLUE, 1.0), 1.0);
+  renderer.DrawRect(5.0, 5.0, 20.0, 20.0);
+
+  std::string output = stream.str();
+  REQUIRE(output.find("stroke-dasharray") == std::string::npos);
+}
+
 TEST_CASE("DrawRect outputs rect element with attributes")
 {
   std::ostringstream stream;

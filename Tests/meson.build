@@ -499,6 +499,52 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
                                  dependencies: deps,
                                  link_with: links,
                                  install: true)
+
+    performanceTestDrivers = ['noop', 'none']
+
+    if buildMapCairo
+      performanceTestDrivers += 'cairo'
+    endif
+
+    if buildMapQt
+      performanceTestDrivers += 'Qt'
+    endif
+
+    if buildMapAgg
+      performanceTestDrivers += 'agg'
+    endif
+
+    if buildMapOpenGL and glfwDep.found() and ftDep.found() and host_machine.system() != 'darwin'
+      # macOS CI runners cannot create an OpenGL context (NSGL); the CMake osx
+      # workflow excludes these tests via ctest regex, meson has no exclude mechanism
+      performanceTestDrivers += 'opengl'
+    endif
+
+    if buildMapGDI
+      performanceTestDrivers += 'gdi'
+    endif
+
+    foreach driver : performanceTestDrivers
+      testEnv = []
+      if driver == 'Qt'
+        # Qt tests need a platform plugin; offscreen works without X server (see AGENTS.md)
+        testEnv += 'QT_QPA_PLATFORM=offscreen'
+      endif
+      foreach stylesheet : stylesheets
+        test('PerformanceTest-'+driver+'-'+stylesheet,
+             PerformanceTest,
+             args : ['--debug',
+                     '--driver', driver,
+                     '--icons', meson.current_source_dir() + '/../libosmscout/data/icons/svg/standard',
+                     '--font', meson.current_source_dir() + '/../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf',
+                     '--shaders', meson.current_source_dir() + '/../libosmscout-map-opengl/data/shaders',
+                     meson.current_source_dir() + '/data/testregion',
+                     meson.current_source_dir() + '/../stylesheets/' + stylesheet,
+                     '50.3806', '14.5418', '50.3806', '14.5418'],
+             env: testEnv,
+             timeout: 300)
+      endforeach
+    endforeach
   endif
 endif
 
@@ -612,6 +658,18 @@ if buildMapSVG
                                install_dir: testInstallDir)
 
   test('Check SymbolRenderer SVG backend', SymbolRendererSVGTest)
+endif
+
+if buildMapCairo
+  SymbolRendererCairoTest = executable('SymbolRendererCairoTest',
+                               'src/SymbolRendererCairoTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep, cairoDep],
+                               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+                               install: true,
+                               install_dir: testInstallDir)
+
+  test('Check SymbolRenderer Cairo backend', SymbolRendererCairoTest)
 endif
 
 StyleConfigSymbolsTest = executable('StyleConfigSymbolsTest',
@@ -786,6 +844,30 @@ if buildMapCairo
                install_dir: testInstallDir)
 
   test('Check MapPainterRoute compilation', MapPainterRouteTest)
+
+  MapPainterShieldTest = executable('MapPainterShieldTest',
+               'src/MapPainterShieldTest.cpp',
+               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, pangocairoDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check MapPainterShield compilation', MapPainterShieldTest)
+endif
+
+if buildMapQt
+  MapPainterShieldQtTest = executable('MapPainterShieldQtTest',
+               'src/MapPainterShieldQtTest.cpp',
+               include_directories: [testIncDir, osmscoutmapqtIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, qtMapDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapqt],
+               install: true,
+               install_dir: testInstallDir)
+
+  if host_machine.system() != 'windows'
+    test('Check MapPainterShieldQt compilation', MapPainterShieldQtTest)
+  endif
 endif
 
 if buildMapSkia
@@ -816,11 +898,47 @@ if ftDep.found()
                include_directories: [testIncDir, include_directories('../Demos/include')],
                dependencies: [mathDep, openmpDep, catch2MainDep, ftDep],
                link_with: [osmscout],
-               cpp_args: ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
+               cpp_args: ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"'],
                install: true,
                install_dir: testInstallDir)
 
   test('Check TextMetricsReference compilation', TextMetricsReferenceTest)
+endif
+
+if ftDep.found() and buildMapCairo
+  textMetricsCairoDeps = [mathDep, openmpDep, catch2MainDep, ftDep, pangocairoDep]
+  textMetricsCairoArgs = ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+  # register the test font file as fontconfig application font (see test source)
+  if fontconfigDep.found()
+    textMetricsCairoDeps += fontconfigDep
+    textMetricsCairoArgs += '-DHAVE_LIB_FONTCONFIG'
+  endif
+
+  TextMetricsCairoTest = executable('TextMetricsCairoTest',
+               'src/TextMetricsCairoTest.cpp',
+               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir, include_directories('../Demos/include')],
+               dependencies: textMetricsCairoDeps,
+               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+               cpp_args: textMetricsCairoArgs,
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetricsCairo compilation', TextMetricsCairoTest)
+endif
+
+if buildMapCairo and buildMapQt and buildMapSkia
+  TextMetricsCrossBackendTest = executable('TextMetricsCrossBackendTest',
+               'src/TextMetricsCrossBackendTest.cpp',
+               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapqtIncDir, osmscoutmapskiaIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, qtMapDep, skiaDep, pangocairoDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapcairo, osmscoutmapqt, osmscoutmapskia],
+               install: true,
+               install_dir: testInstallDir)
+
+  if host_machine.system() != 'windows'
+    test('Check TextMetricsCrossBackend compilation', TextMetricsCrossBackendTest)
+  endif
 endif
 
 if buildMapQt
