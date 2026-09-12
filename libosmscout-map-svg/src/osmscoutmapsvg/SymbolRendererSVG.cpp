@@ -19,6 +19,8 @@
 
 #include <osmscoutmapsvg/SymbolRendererSVG.h>
 
+#include <sstream>
+
 #include <osmscout/util/Color.h>
 
 namespace osmscout {
@@ -47,6 +49,9 @@ void SymbolRendererSVG::WriteFillAndStroke()
       // alpha handled via opacity attribute below
     }
     stream << " stroke-width=\"" << strokeWidth << "\"";
+    if (!strokeDashArray.empty()) {
+      stream << " stroke-dasharray=\"" << strokeDashArray << "\"";
+    }
   }
   else {
     stream << " stroke=\"none\"";
@@ -73,11 +78,23 @@ void SymbolRendererSVG::SetBorder(const BorderStyleRef &borderStyle,
     strokeWidth = borderStyle->GetWidth() * screenMmInPixel;
     strokeAlpha = !borderStyle->GetColor().IsSolid();
 
-    if (!borderStyle->HasDashes()) {
-      // solid line, round cap
+    strokeDashArray.clear();
+
+    if (borderStyle->HasDashes()) {
+      std::ostringstream pattern;
+
+      for (size_t i=0;
+           i<borderStyle->GetDash().size();
+           ++i) {
+        if (i>0) {
+          pattern << " ";
+        }
+
+        pattern << borderStyle->GetDash()[i] * strokeWidth;
+      }
+
+      strokeDashArray=pattern.str();
     }
-    // Note: SVG dashpattern would be set here but SymbolRenderer
-    // interface doesn't pass cap/dash info via SetBorder alone
   }
   else {
     hasStroke = false;

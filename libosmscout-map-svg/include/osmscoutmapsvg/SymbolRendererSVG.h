@@ -46,6 +46,7 @@ private:
   std::string strokeColor;
   double      strokeWidth;
   bool        strokeAlpha;
+  std::string strokeDashArray;
 
   void WriteFillAndStroke();
 
