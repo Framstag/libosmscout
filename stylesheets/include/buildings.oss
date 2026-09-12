@@ -5,7 +5,7 @@ OSS
   //
   // Generic building styling shared by base style sheets.
   // Uses CONST values and FLAGs defined in the including style sheet:
-  //   @buildingColor, @buildingBorderColor, @buildingLabelColor,
+  //   @buildingColor, @buildingBorderColor, @buildingLabelColor, @minorBuildingColor,
   //   @buildingMag, @minorBuildingMag, @labelBuildingMag,
   //   _building, _minorBuilding
   //
@@ -15,7 +15,7 @@ OSS
     IF _building {
       [MAG @buildingMag-] {
         [TYPE landuse_farmyard_building] {
-          AREA { color: #bcbcbc;}
+          AREA { color: @minorBuildingColor;}
           AREA.BORDER { color: #887b7b; width: 0.1mm; }
         }
 
@@ -28,7 +28,7 @@ OSS
 
     IF _minorBuilding {
       [MAG @minorBuildingMag-] {
-        [TYPE building_garage] AREA { color: #bcbcbc; }
+        [TYPE building_garage] AREA { color: @minorBuildingColor; }
       }
     }
 

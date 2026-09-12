@@ -1,0 +1,30 @@
+# Tasks: type-historic
+
+## 1. Type definitions in map.ost
+
+- [x] 1.1 Add the 14 node-only TYPE definitions (`historic_anchor`, `historic_boundary_stone`, `historic_bullaun_stone`, `historic_cannon`, `historic_high_cross`, `historic_highwater_mark`, `historic_milestone`, `historic_millstone`, `historic_ogham_stone`, `historic_pillory`, `historic_rune_stone`, `historic_stone`, `historic_tree_shrine`, `historic_wayside_cross`) to the historic section of `stylesheets/map.ost` (spec: Node-only historic types) and verify each type line reads `= NODE ("historic"=="...")` and each type name is unique in the file
+- [x] 1.2 Add the 42 NODE AREA TYPE definitions (`historic_aircraft`, `historic_bomb_crater`, `historic_caravanserai`, `historic_cattle_crush`, `historic_cemetery`, `historic_chapel`, `historic_charcoal_pile`, `historic_church`, `historic_city_gate`, `historic_creamery`, `historic_district`, `historic_farm`, `historic_fort`, `historic_gallows`, `historic_granary`, `historic_house`, `historic_lavoir`, `historic_lime_kiln`, `historic_locomotive`, `historic_machine`, `historic_mine`, `historic_mine_adit`, `historic_mine_shaft`, `historic_minecart`, `historic_monastery`, `historic_mosque`, `historic_optical_telegraph`, `historic_pound`, `historic_railway_car`, `historic_railway_station`, `historic_round_tower`, `historic_shieling`, `historic_ship`, `historic_smithy`, `historic_stecak`, `historic_tank`, `historic_temple`, `historic_tomb`, `historic_tower`, `historic_vehicle`, `historic_warehouse`, `historic_watermill`) to the historic section of `stylesheets/map.ost` (spec: Node-area historic types) and verify each type line reads `= NODE AREA ("historic"=="...")` and each type name is unique in the file
+- [x] 1.3 Add the 9 way-related TYPE definitions (`historic_aqueduct` WAY AREA, `historic_castle_wall` WAY AREA, `historic_hollow_way` WAY, `historic_road` WAY, `historic_roman_road` WAY, `historic_railway` NODE WAY, `historic_epigraph` NODE WAY AREA, `historic_folly` NODE WAY AREA, `historic_wayside_shrine` NODE WAY AREA) to the historic section of `stylesheets/map.ost` (spec: Way and way-area historic types) and verify each type line reads `= <elements> ("historic"=="...")` matching the spec table
+- [x] 1.4 Add the 21 AREA-only `_building` variant TYPE definitions (`historic_caravanserai_building`, `historic_cattle_crush_building`, `historic_chapel_building`, `historic_church_building`, `historic_creamery_building`, `historic_farm_building`, `historic_folly_building`, `historic_granary_building`, `historic_house_building`, `historic_lavoir_building`, `historic_monastery_building`, `historic_mosque_building`, `historic_optical_telegraph_building`, `historic_railway_station_building`, `historic_round_tower_building`, `historic_shieling_building`, `historic_smithy_building`, `historic_temple_building`, `historic_tower_building`, `historic_warehouse_building`, `historic_watermill_building`) to the historic section of `stylesheets/map.ost` (spec: Building variant types) and verify each matches `= AREA ("historic"=="..." AND EXISTS "building" AND !("building" IN ["no","false","0"]))` and is defined immediately before its base type
+- [x] 1.5 Verify no TYPE definitions were added for discouraged/undocumented values (`historic=heritage`, `wayside_chapel`, `coat_of_arms`, and values with taginfo usage < 150) by grepping `stylesheets/map.ost` for the corresponding type names (spec: Discouraged and undocumented historic values)
+- [x] 1.6 Verify all new types carry `ADDRESS POI` and `GROUP historic, routingPOI` (or `GROUP historic, building, routingPOI` for `_building` variants) and that all new types are defined before the generic `historic_building` and `historic` catch-alls (design D3, D4)
+
+## 2. Style definitions in historic.oss
+
+- [x] 2.1 Add the 47 area-capable new types to the `[MAG detail-]` AREA fill block in `stylesheets/include/historic.oss` (spec: Area rendering for new historic types) and verify the rules reference `@historicColor`
+- [x] 2.2 Add the new types to the label blocks in `stylesheets/include/historic.oss` (spec: Area rendering for new historic types) and verify each new type appears in at least one label rule
+- [x] 2.3 Add the 9 way-capable types to the `[MAG close-]` dashed WAY rule in `stylesheets/include/historic.oss` (spec: Area rendering for new historic types) and verify the rule uses `dash: 2,2`
+- [x] 2.4 Verify `_building` variants are covered by the existing `[GROUP historic, building]` area and label rules without new rules (design D5)
+
+## 3. Symbols in historic.oss
+
+- [x] 3.1 Define a `SYMBOL` block for each node-capable historic type with an obvious pictogram (72 symbols) in `stylesheets/include/historic.oss` (spec: Node icon rendering for new historic types) and verify each symbol uses only `RECTANGLE`/`POLYGON`/`CIRCLE` primitives with `@historicSymbolColor` fill
+- [x] 3.2 Add per-type `NODE.ICON { symbol: historic_<type>; }` rules in the `[MAG veryClose-]` block before the generic `[GROUP historic]` fallback in `stylesheets/include/historic.oss` (spec: Node icon rendering for new historic types) and verify each defined symbol is referenced by exactly one `NODE.ICON` rule
+- [x] 3.3 Verify types without a dedicated symbol (`historic_district`, `_building` variants) have no per-type `NODE.ICON` rule and fall back to the generic `historic` symbol (spec: Node icon rendering for new historic types)
+
+## 4. Verification
+
+- [x] 4.1 Verify the stylesheets parse by running `OSTAndOSSTest --warning-as-error stylesheets/map.ost stylesheets/standard.oss` (and `cycle.oss`, `winter-sports.oss`) and confirming no historic type/style parse errors
+- [x] 4.2 Verify the Import tool parses `map.ost` by running `Import --typefile stylesheets/map.ost` on a small test OSM extract and confirming no type errors
+- [x] 4.3 Verify existing style tests still pass (`cd build && ctest -R "CheckStyleSheet"`)
+- [x] 4.4 Render the new symbols with `SymbolsAll --stylesheet stylesheets/standard.oss` and verify all 72 symbols render without clipping and the contact sheet shows distinct pictograms

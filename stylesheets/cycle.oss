@@ -26,13 +26,23 @@ FLAG
     _leisure        = true;
     _building       = true;
     _minorBuilding  = true;
+    _shop           = true;
+    _tourism        = true;
+    _historic       = true;
+    _office         = true;
+    _landuse        = true;
   }
   ELSE {
     _natural        = false;
-    _railway        = false;
+    _railway        = true;
     _leisure        = false;
-    _building       = false;
-    _minorBuilding  = false;
+    _building       = true;
+    _minorBuilding  = true;
+    _shop           = false;
+    _tourism        = false;
+    _historic       = false;
+    _office         = false;
+    _landuse        = false;
   }
 
 ORDER WAYS
@@ -41,7 +51,7 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
-  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
@@ -56,8 +66,12 @@ ORDER WAYS
         highway_footway, highway_bridleway, highway_construction,
         leisure_track
   GROUP highway_steps, barrier_fence
-  GROUP waterway_weir, route_ferry
-  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
+  GROUP waterway_weir, waterway_rapids, waterway_sluice_gate, waterway_floodgate,
+        waterway_check_dam, waterway_floating_barrier, waterway_flow_control,
+        waterway_fish_pass, route_ferry
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream,
+        waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised,
+        waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway
   GROUP elevation_contour_major, elevation_contour_medium, elevation_contour_minor
 
 CONST
@@ -267,9 +281,21 @@ CONST
   COLOR primaryShieldColor         = @primaryColor;
 
   // Buildings
-  COLOR buildingColor              = #d9d9d9;
+  IF daylight {
+    COLOR buildingColor              = #d9d9d9;
+  }
+  ELSE {
+    COLOR buildingColor              = darken(#d9d9d9, 0.5);
+  }
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
+
+  IF daylight {
+    COLOR minorBuildingColor         = #bcbcbc;
+  }
+  ELSE {
+    COLOR minorBuildingColor         = darken(#bcbcbc, 0.5);
+  }
 
   // Travel
 
@@ -445,7 +471,7 @@ STYLE
      [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
      [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
      [TYPE landuse_railway] AREA { color: #dcdcc8; }
-     [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
+     [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "landuse_cemetery"; patternMinMag: detail; }
    }
 
    [MAG detail-] {
@@ -596,6 +622,14 @@ STYLE
     [TYPE aerialway_drag_lift]{
        WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
        WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
+    [TYPE aerialway_zip_line]{
+       WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+       WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
+    }
+    [TYPE aerialway_goods]{
+       WAY {color: #202020; displayWidth: 0.04mm; width: 0.5m;}
+       WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.15mm; width: 4m;}
     }
  }
 

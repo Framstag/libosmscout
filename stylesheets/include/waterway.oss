@@ -5,48 +5,78 @@ OSS
   //
 
   SYMBOL stream_arrow
-    POLYGON 0,0.5 1,0 0,-0.5 {
+    POLYGON 0,0.75 1.5,0 0,-0.75 {
       AREA { color: @waterLabelColor; }
     }
 
   SYMBOL waterway_waterfall
-    RECTANGLE 0,0 1.75 x 0.5 {
+    RECTANGLE 0,0 1.969 x 0.562 {
       AREA { color: darken(@waterColor, 0.4); }
     }
-    POLYGON 1.75,0.5 2.0,1 {
-      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    POLYGON 1.969,0.562 2.25,1.125 {
+      AREA.BORDER { width: 0.281mm; color: darken(@waterColor, 0.2);  }
     }
-    POLYGON 1.25,0.5 1.5,1 {
-      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    POLYGON 1.406,0.562 1.688,1.125 {
+      AREA.BORDER { width: 0.281mm; color: darken(@waterColor, 0.2);  }
     }
-    POLYGON 0.75,0.5 1,1 {
-      AREA.BORDER { width: 0.25mm; color: darken(@waterColor, 0.2);  }
+    POLYGON 0.844,0.562 1.125,1.125 {
+      AREA.BORDER { width: 0.281mm; color: darken(@waterColor, 0.2);  }
     }
 
   SYMBOL waterway_weir
-    RECTANGLE 0,0 2 x 0.5 {
+    RECTANGLE 0,0 2.25 x 0.562 {
       AREA { color: darken(@waterColor, 0.4); }
     }
-    CIRCLE 0.25,0.8 0.25 {
+    CIRCLE 0.281,0.9 0.281 {
       AREA {color: darken(@waterColor, 0.2); }
     }
-    CIRCLE 1,0.8 0.25 {
+    CIRCLE 1.125,0.9 0.281 {
       AREA {color: darken(@waterColor, 0.2); }
     }
-    CIRCLE 1.75,0.8 0.25 {
+    CIRCLE 1.969,0.9 0.281 {
       AREA {color: darken(@waterColor, 0.2); }
     }
 
   SYMBOL waterway_lock_gate
-    CIRCLE 0,0 0.7 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
-    POLYGON -0.7,0 0.7,0 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    POLYGON -1.125,0 1.125,0 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
 
   SYMBOL waterway_turning_point
-    CIRCLE 0,0 0.6 { AREA.BORDER { color: @waterLabelColor; width: 0.15mm; } }
-    POLYGON 0.6,0 0.2,0.2 0.2,-0.2 { AREA { color: @waterLabelColor; } }
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @waterLabelColor; width: 0.281mm; } }
+    POLYGON 1.125,0 0.375,0.375 0.375,-0.375 { AREA { color: @waterLabelColor; } }
 
   SYMBOL waterway_boatyard
-    POLYGON -0.9,-0.2 0.9,-0.2 0.6,0.3 -0.6,0.3 { AREA { color: @waterLabelColor; } }
+    POLYGON -1.125,-0.25 1.125,-0.25 0.75,0.375 -0.75,0.375 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_access_point
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    POLYGON 0,-0.75 0.75,0.375 -0.75,0.375 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_soakhole
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    POLYGON 0,-0.75 0.75,0.375 -0.75,0.375 { AREA { color: @waterLabelColor; } }
+    RECTANGLE -0.75,0.375 1.5 x 0.1875 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_water_point
+    POLYGON 0,-0.75 0.75,0.375 -0.75,0.375 { AREA { color: @waterLabelColor; } }
+    CIRCLE 0,0.375 0.375 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_milestone
+    RECTANGLE -0.375,-0.75 0.75 x 1.5 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    CIRCLE 0,0 0.281 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_stream_end
+    CIRCLE 0,0 1.125 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    CIRCLE 0,0 0.375 { AREA { color: @waterLabelColor; } }
+
+  SYMBOL waterway_fuel
+    RECTANGLE -0.5,-1.125 1.0 x 1.5 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    RECTANGLE -0.25,-0.375 0.5 x 0.75 { AREA { color: @waterLabelColor; } }
+    POLYGON 0.5,-0.75 1.125,-0.75 1.125,0.375 0.5,0.375 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+
+  SYMBOL waterway_sanitary_dump_station
+    RECTANGLE -0.75,-0.75 1.5 x 1.5 { AREA.BORDER { color: @waterLabelColor; width: 0.241mm; } }
+    CIRCLE 0,0 0.375 { AREA { color: @waterLabelColor; } }
 
   STYLE
     IF waterway {
@@ -85,7 +115,10 @@ OSS
         [TYPE waterway_dock,
               waterway_riverbank] AREA { color: @waterColor; }
 
-        [TYPE waterway_stream] {
+        [TYPE waterway_stream,
+              waterway_flowline,
+              waterway_tidal_channel,
+              waterway_drystream] {
           [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
           [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
 
@@ -97,14 +130,26 @@ OSS
 
       [MAG detail-] {
         [TYPE waterway_drain,
-              waterway_ditch] {
+              waterway_ditch,
+              waterway_link,
+              waterway_pressurised,
+              waterway_fairway,
+              waterway_drainage_channel,
+              waterway_derelict_canal] {
           [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
           [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
 
           AREA { color: @waterColor;}
         }
         [TYPE waterway_weir,
-              waterway_waterfall] {
+              waterway_waterfall,
+              waterway_fish_pass,
+              waterway_rapids,
+              waterway_sluice_gate,
+              waterway_floodgate,
+              waterway_check_dam,
+              waterway_floating_barrier,
+              waterway_flow_control] {
           WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
 
           AREA { color: lighten(@waterColor, 0.3);}
@@ -114,7 +159,9 @@ OSS
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
         }
 
-        [TYPE waterway_boatyard] AREA { color: #d3cec4; }
+        [TYPE waterway_boatyard,
+              waterway_fuel,
+              waterway_sanitary_dump_station] AREA { color: #d3cec4; }
       }
 
       [MAG closer-] {
@@ -134,6 +181,29 @@ OSS
               NODE.ICON { symbol: waterway_boatyard;}
               AREA.ICON { symbol: waterway_boatyard;}
             }
+            [TYPE waterway_access_point] {
+              NODE.ICON { symbol: waterway_access_point;}
+            }
+            [TYPE waterway_soakhole] {
+              NODE.ICON { symbol: waterway_soakhole;}
+            }
+            [TYPE waterway_water_point] {
+              NODE.ICON { symbol: waterway_water_point;}
+            }
+            [TYPE waterway_milestone] {
+              NODE.ICON { symbol: waterway_milestone;}
+            }
+            [TYPE waterway_stream_end] {
+              NODE.ICON { symbol: waterway_stream_end;}
+            }
+            [TYPE waterway_fuel] {
+              NODE.ICON { symbol: waterway_fuel;}
+              AREA.ICON { symbol: waterway_fuel;}
+            }
+            [TYPE waterway_sanitary_dump_station] {
+              NODE.ICON { symbol: waterway_sanitary_dump_station;}
+              AREA.ICON { symbol: waterway_sanitary_dump_station;}
+            }
       }
 
       // Labels
@@ -149,20 +219,55 @@ OSS
               waterway_weir,
               waterway_waterfall,
               waterway_river,
-              waterway_canal]
+              waterway_canal,
+              waterway_flowline,
+              waterway_tidal_channel,
+              waterway_drystream,
+              waterway_pressurised,
+              waterway_derelict_canal,
+              waterway_drainage_channel,
+              waterway_link,
+              waterway_fairway,
+              waterway_fish_pass,
+              waterway_rapids,
+              waterway_sluice_gate,
+              waterway_floodgate,
+              waterway_check_dam,
+              waterway_floating_barrier,
+              waterway_flow_control]
           WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
         [TYPE waterway_weir,
-              waterway_waterfall]
+              waterway_waterfall,
+              waterway_rapids,
+              waterway_sluice_gate,
+              waterway_floodgate,
+              waterway_check_dam,
+              waterway_floating_barrier,
+              waterway_flow_control]
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
-        [TYPE waterway_boatyard]
+        [TYPE waterway_boatyard,
+              waterway_fuel,
+              waterway_sanitary_dump_station]
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
-        [TYPE waterway_boatyard] AREA.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
+        [TYPE waterway_boatyard,
+              waterway_fuel,
+              waterway_sanitary_dump_station] AREA.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
+
+        [TYPE waterway_access_point,
+              waterway_water_point,
+              waterway_milestone,
+              waterway_stream_end,
+              waterway_soakhole]
+          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
         [TYPE waterway_stream,
               waterway_river,
-              waterway_canal]
+              waterway_canal,
+              waterway_flowline,
+              waterway_tidal_channel,
+              waterway_drystream]
           WAY.SYMBOL {symbol: stream_arrow; symbolSpace: 50mm;}
 
         [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}

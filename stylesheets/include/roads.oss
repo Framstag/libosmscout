@@ -1,7 +1,12 @@
 OSS
 
 CONST
-  COLOR busstopColor               = #bb75d9;
+  IF daylight {
+    COLOR busstopColor               = #bb75d9;
+  }
+  ELSE {
+    COLOR busstopColor               = darken(#bb75d9, 0.5);
+  }
   COLOR busstopSymbolColor         = @busstopColor;
   COLOR busstopLabelColor          = darken(@busstopColor, 0.5);
 
@@ -18,8 +23,11 @@ CONST
   COLOR turnSymbolOutlineColor     = #a0a0a080;
 
   SYMBOL highway_turning_cycle
-    CIRCLE 0,0 0.55 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
-    POLYGON -0.4,0 0.4,0 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    // U-turn arrow
+    POLYGON -0.35,0.4 -0.35,-0.2 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON -0.35,-0.2 0.35,-0.2 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON 0.35,-0.2 0.35,0.4 { AREA.BORDER { color: @wayLabelColor; width: 0.12mm; } }
+    POLYGON 0.35,0.4 0.15,0.4 0.35,0.6 { AREA { color: @wayLabelColor; } }
 
   SYMBOL oneway_arrow
     POLYGON 0,0.5 1,0 0,-0.5 {
@@ -67,22 +75,23 @@ CONST
     }
 
   SYMBOL amenity_charging_station
-    RECTANGLE -1,-1 2 x 2 {
-      AREA { color: #0000ff; }
-    }
-    CIRCLE 0,0 0.8 {
-      AREA {color: #ffffff; }
-    }
+    // Lightning bolt in circle
+    CIRCLE 0,0 1.0 { AREA.BORDER { color: #0000ff; width: 0.15mm; } }
+    POLYGON 0.2,-0.55 -0.3,0.1 0.05,0.1 -0.2,0.55 0.3,-0.1 -0.05,-0.1 { AREA { color: #0000ff; } }
 
   SYMBOL highway_bus_stop
-    CIRCLE 0,0 1.5 {
-      AREA {color: @busSymbolColor; }
-    }
+    // Bus
+    RECTANGLE -0.8,-0.3 1.6 x 0.6 { AREA.BORDER { color: @busSymbolColor; width: 0.15mm; } }
+    RECTANGLE -0.7,-0.2 0.5 x 0.25 { AREA { color: @busSymbolColor; } }
+    RECTANGLE -0.1,-0.2 0.5 x 0.25 { AREA { color: @busSymbolColor; } }
+    RECTANGLE 0.5,-0.2 0.2 x 0.25 { AREA { color: @busSymbolColor; } }
+    CIRCLE -0.5,0.3 0.15 { AREA { color: @busSymbolColor; } }
+    CIRCLE 0.3,0.3 0.15 { AREA { color: @busSymbolColor; } }
 
   SYMBOL ferry_terminal
-    RECTANGLE 0,0 1 x 1 {
-      AREA { color: #30307080; }
-    }
+    // Ferry boat
+    POLYGON -0.8,0.3 0.8,0.3 0.5,0.65 -0.5,0.65 { AREA.BORDER { color: #303070; width: 0.15mm; } }
+    RECTANGLE -0.3,0.0 0.6 x 0.3 { AREA { color: #303070; } }
 
   SYMBOL GROUND mini_roundabout
     CIRCLE 0,0 3 {
@@ -95,8 +104,156 @@ CONST
     }
 
   SYMBOL GROUND highway_street_lamp
+    // Street lamp, light on (night)
     CIRCLE 0,0 20 {
       AREA {color: #f5fb5b44; }
+    }
+
+  SYMBOL highway_street_lamp_off
+    // Street lamp, light off (daylight)
+    RECTANGLE -0.05,0.0 0.1 x 0.5 { AREA { color: #000000; } }
+    CIRCLE 0,-0.15 0.15 {
+      AREA { color: #c0c0c0; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_stop
+    // Stop sign (octagon)
+    POLYGON 0.5,0.207 0.207,0.5 -0.207,0.5 -0.5,0.207 -0.5,-0.207 -0.207,-0.5 0.207,-0.5 0.5,-0.207 {
+      AREA { color: #ff0000; }
+      AREA.BORDER { color: #ffffff; width: 0.1mm; }
+    }
+
+  SYMBOL highway_give_way
+    // Give way / yield sign (inverted triangle, point down)
+    POLYGON 0,0.5 0.5,-0.4 -0.5,-0.4 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #ff0000; width: 0.15mm; }
+    }
+
+  SYMBOL highway_crossing
+    // Zebra crossing
+    RECTANGLE -0.5,-0.35 1.0 x 0.7 { AREA { color: #000000; } }
+    RECTANGLE -0.4,-0.35 0.2 x 0.7 { AREA { color: #ffffff; } }
+    RECTANGLE 0.0,-0.35 0.2 x 0.7 { AREA { color: #ffffff; } }
+    RECTANGLE 0.4,-0.35 0.2 x 0.7 { AREA { color: #ffffff; } }
+
+  SYMBOL highway_turning_circle
+    // Turning circle
+    CIRCLE 0,0 0.5 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_turning_loop
+    // Turning loop with non-traversable island
+    CIRCLE 0,0 0.5 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+    CIRCLE 0,0 0.15 {
+      AREA { color: #000000; }
+    }
+
+  SYMBOL highway_passing_place
+    // Passing place
+    RECTANGLE -0.5,-0.2 1.0 x 0.4 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_priority
+    // Priority road sign (diamond)
+    POLYGON 0,0.5 0.5,0 0,-0.5 -0.5,0 {
+      AREA { color: #fef271; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_elevator
+    // Elevator with up/down arrows
+    RECTANGLE -0.4,-0.5 0.8 x 1.0 {
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+    POLYGON 0,0.3 -0.15,0.05 0.15,0.05 { AREA { color: #000000; } }
+    POLYGON 0,-0.3 -0.15,-0.05 0.15,-0.05 { AREA { color: #000000; } }
+
+  SYMBOL highway_emergency_access_point
+    // Emergency access point (cross)
+    RECTANGLE -0.15,-0.5 0.3 x 1.0 { AREA { color: #ff0000; } }
+    RECTANGLE -0.5,-0.15 1.0 x 0.3 { AREA { color: #ff0000; } }
+
+  SYMBOL highway_trailhead
+    // Trailhead signpost
+    RECTANGLE -0.05,-0.5 0.1 x 0.6 { AREA { color: #8b4513; } }
+    POLYGON -0.3,-0.5 0.3,-0.5 0,-0.8 { AREA { color: #8b4513; } }
+
+  SYMBOL highway_rest_area
+    // Rest area (tree in box)
+    RECTANGLE -0.5,-0.4 1.0 x 0.8 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #0000ff; width: 0.1mm; }
+    }
+    CIRCLE 0,0 0.2 { AREA { color: #00a000; } }
+
+  SYMBOL highway_toll_gantry
+    // Toll gantry
+    RECTANGLE -0.5,-0.1 1.0 x 0.2 { AREA { color: #000000; } }
+    RECTANGLE -0.05,-0.5 0.1 x 0.4 { AREA { color: #000000; } }
+    RECTANGLE -0.05,0.1 0.1 x 0.4 { AREA { color: #000000; } }
+
+  SYMBOL highway_traffic_mirror
+    // Traffic mirror (mirror on pole)
+    RECTANGLE -0.05,0.0 0.1 x 0.5 { AREA { color: #000000; } }
+    CIRCLE 0,-0.1 0.3 {
+      AREA { color: #c0c0c0; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_speed_display
+    // Speed display
+    RECTANGLE -0.4,-0.3 0.8 x 0.6 {
+      AREA { color: #000000; }
+      AREA.BORDER { color: #ffff00; width: 0.1mm; }
+    }
+
+  SYMBOL highway_ladder
+    // Ladder
+    RECTANGLE -0.2,-0.5 0.1 x 1.0 { AREA { color: #000000; } }
+    RECTANGLE 0.1,-0.5 0.1 x 1.0 { AREA { color: #000000; } }
+    RECTANGLE -0.2,-0.4 0.4 x 0.1 { AREA { color: #000000; } }
+    RECTANGLE -0.2,-0.1 0.4 x 0.1 { AREA { color: #000000; } }
+    RECTANGLE -0.2,0.2 0.4 x 0.1 { AREA { color: #000000; } }
+
+  SYMBOL highway_hitchhiking
+    // Hitchhiking (person)
+    CIRCLE 0,0.3 0.12 { AREA { color: #0000ff; } }
+    POLYGON -0.15,0.2 -0.15,-0.1 0.15,-0.1 0.15,0.2 { AREA { color: #0000ff; } }
+
+  SYMBOL highway_cyclist_waiting_aid
+    // Cyclist footrest (bar on pole)
+    RECTANGLE -0.05,0.1 0.1 x 0.4 { AREA { color: #000000; } }
+    RECTANGLE -0.3,-0.1 0.6 x 0.2 { AREA { color: #000000; } }
+
+  SYMBOL highway_emergency_bay
+    // Emergency bay
+    RECTANGLE -0.5,-0.2 1.0 x 0.4 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #0000ff; width: 0.1mm; }
+    }
+
+  SYMBOL highway_traffic_sign
+    // Traffic sign on pole (sign on top)
+    RECTANGLE -0.05,-0.2 0.1 x 0.7 { AREA { color: #000000; } }
+    RECTANGLE -0.3,-0.6 0.6 x 0.4 {
+      AREA { color: #ffffff; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
+    }
+
+  SYMBOL highway_platform
+    // Platform
+    RECTANGLE -0.5,-0.15 1.0 x 0.3 {
+      AREA { color: #c0c0c0; }
+      AREA.BORDER { color: #000000; width: 0.1mm; }
     }
 
   SYMBOL turn_forward_left
@@ -340,6 +497,16 @@ STYLE
    }
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
+
+   [TYPE highway_busway] WAY {color: #90570c; displayWidth: 0.1mm; }
+
+   [TYPE highway_raceway] WAY {color: #808080; displayWidth: 0.1mm; }
+
+   [TYPE highway_escape] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
+
+   [TYPE highway_proposed] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m; dash: 2,2;}
+
+   [TYPE highway_corridor] WAY {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.2mm; }
 
    [TYPE highway_motorway, highway_motorway_link SIZE @motorwayWidth 0.45mm:3px<] {
      [FEATURE Tunnel] {
@@ -626,7 +793,7 @@ STYLE
 
  [MAG close-] {
    [TYPE highway_services] NODE.TEXT {label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
+   [TYPE highway_construction, highway_proposed] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
  }
 
  [MAG veryClose-] {
@@ -648,6 +815,9 @@ STYLE
    [TYPE highway_pedestrian] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioOtherWays; }
 
    [TYPE highway_bus_guideway,
+         highway_busway,
+         highway_raceway,
+         highway_corridor,
          highway_path,
          highway_cycleway,
          highway_footway,
@@ -666,7 +836,8 @@ STYLE
 
    [TYPE highway_pedestrian,
          highway_services,
-         highway_footway] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
+         highway_footway,
+         highway_rest_area] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
 
  }
 
@@ -679,12 +850,39 @@ STYLE
  // Special objects
 
  [MAG veryClose-] {
-   [TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp; }
+
+   IF daylight {
+     [TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp_off; }
+   }
+   ELSE {
+     [TYPE highway_street_lamp] NODE.ICON { symbol: highway_street_lamp; }
+   }
 
    [TYPE highway_turning_cycle] {
      NODE.ICON { symbol: highway_turning_cycle; }
      NODE.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8; priority: @labelPrioHighway; }
    }
+
+   [TYPE highway_stop] NODE.ICON { symbol: highway_stop; }
+   [TYPE highway_give_way] NODE.ICON { symbol: highway_give_way; }
+   [TYPE highway_crossing] NODE.ICON { symbol: highway_crossing; }
+   [TYPE highway_turning_circle] NODE.ICON { symbol: highway_turning_circle; }
+   [TYPE highway_turning_loop] NODE.ICON { symbol: highway_turning_loop; }
+   [TYPE highway_passing_place] NODE.ICON { symbol: highway_passing_place; }
+   [TYPE highway_priority] NODE.ICON { symbol: highway_priority; }
+   [TYPE highway_elevator] NODE.ICON { symbol: highway_elevator; }
+   [TYPE highway_emergency_access_point] NODE.ICON { symbol: highway_emergency_access_point; }
+   [TYPE highway_trailhead] NODE.ICON { symbol: highway_trailhead; }
+   [TYPE highway_rest_area] NODE.ICON { symbol: highway_rest_area; }
+   [TYPE highway_toll_gantry] NODE.ICON { symbol: highway_toll_gantry; }
+   [TYPE highway_traffic_mirror] NODE.ICON { symbol: highway_traffic_mirror; }
+   [TYPE highway_speed_display] NODE.ICON { symbol: highway_speed_display; }
+   [TYPE highway_ladder] NODE.ICON { symbol: highway_ladder; }
+   [TYPE highway_hitchhiking] NODE.ICON { symbol: highway_hitchhiking; }
+   [TYPE highway_cyclist_waiting_aid] NODE.ICON { symbol: highway_cyclist_waiting_aid; }
+   [TYPE highway_emergency_bay] NODE.ICON { symbol: highway_emergency_bay; }
+   [TYPE highway_traffic_sign] NODE.ICON { symbol: highway_traffic_sign; }
+   [TYPE highway_platform] NODE.ICON { symbol: highway_platform; }
  }
 
  [MAG detail-] {

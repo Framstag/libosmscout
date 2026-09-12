@@ -35,7 +35,6 @@ rules:
     - Each task should be completable in one session — if too big, split it
     - Group related tasks under numbered headings
 
-
 operations:
   apply:
     guidance:
@@ -48,6 +47,8 @@ operations:
       - Update README or documentation if behavior changes
       - Update AGENTS.md and TODO.md if the change affects project structure, build, or roadmap
       - Verify no regressions in unrelated areas
+      - Any problems you detect during implementation that are not initiated by this change, have to be documented in a TODO.md for later processing in other changes.
+      - Suggest at the end the implementation of skills for repetitive work you have done
 
   archive:
     guidance:
