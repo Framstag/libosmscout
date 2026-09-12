@@ -314,6 +314,23 @@ namespace osmscout {
     std::vector<DatabaseCacheEntry> databaseCache;
 
     /**
+     * Stable label anchors for areas: the label anchor of an area is
+     * computed once (from the - potentially at the canvas edge clipped -
+     * area geometry) and then kept stable in map space while the map is
+     * panned. Without this cache the anchor of areas that reach over
+     * multiple tiles moves with the visibility of the tile pieces and
+     * labels flicker while sliding the map. The cache is cleared when
+     * the magnification level changes.
+     */
+    struct AreaAnchorEntry {
+      GeoCoord coord;
+    };
+    static constexpr size_t MaxAreaAnchorCacheSize=4096;
+    size_t            areaAnchorMagnificationLevel{0};
+    bool              areaAnchorCacheValid{false};
+    std::map<size_t,std::map<ObjectFileRef,AreaAnchorEntry>> areaAnchorCache;
+
+    /**
       Presets, precalculations and similar
      */
     //@{

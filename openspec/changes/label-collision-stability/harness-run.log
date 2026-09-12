@@ -1,0 +1,2579 @@
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+[PlaneMapRenderer] diagnostics ACTIVE (renderer lib with tile gate, jitter tolerance, contour stickiness)
+46,13 Warning: Unknown type '_track'
+52,13 Warning: Unknown type '_route_start'
+53,13 Warning: Unknown type '_route_end'
+60,13 Warning: Unknown type '_favorite'
+61,13 Warning: Unknown type '_search_selected'
+30,9 Warning: Unknown type 'basemap_boundary_country'
+104,11 Warning: Unknown type 'basemap_boundary_country'
+81,9 Warning: Unknown type 'place_ocean'
+82,9 Warning: Unknown type 'place_sea'
+83,9 Warning: Unknown type 'place_sea'
+132,9 Warning: Unknown type 'place_ocean'
+138,9 Warning: Unknown type 'place_sea'
+76,15 Warning: Unknown type 'natural_waterfall'
+122,15 Warning: Unknown type 'natural_waterfall'
+157,15 Warning: Unknown type 'natural_waterfall'
+175,15 Warning: Unknown type 'natural_waterfall'
+[PlaneMapRenderer] first render with partial data (tiles=1)
+[PlaneMapRenderer] render: tiles=6 centers=51.51440 N 7.46497 E
+Data: 0+0 4571 1006
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Draw: [51.51276 N 7.46339 E - 51.51604 N 7.46655 E] 205313x/17 480x800 100.00000 DPI
+Bounding box hit rate for file nodes.dat is only 6% (62/962)
+Bounding box hit rate for file nodes.dat is only 8% (86/982)
+Draw areas: 124 (pcs) 0.004 (s)
+Bounding box hit rate for file nodes.dat is only 4% (92/1856)
+Bounding box hit rate for file nodes.dat is only 5% (107/1897)
+Bounding box hit rate for file nodes.dat is only 8% (81/958)
+Bounding box hit rate for file nodes.dat is only 9% (92/995)
+Draw ways: 78 (pcs) 0.003 (s)
+Loaded icon 'parking' from "libosmscout/data/icons/svg/standard/parking.svg"
+Draw area labels: 124 (pcs) 0.003(s)
+[PlaneMapRenderer] swap enter: image=480x800 center=51.51440 N 7.46497 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=6 centers=51.51440 N 7.46497 E
+Data: 520+0 4571 1006
+Database 0:
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Draw: [51.51276 N 7.46339 E - 51.51604 N 7.46655 E] 205313x/17 480x800 100.00000 DPI
+Draw areas: 124 (pcs) 0.004 (s)
+Draw ways: 78 (pcs) 0.003 (s)
+Loaded icon 'restaurant' from "libosmscout/data/icons/svg/standard/restaurant.svg"
+Loaded icon 'fast_food' from "libosmscout/data/icons/svg/standard/fast_food.svg"
+Loaded icon 'pharmacy' from "libosmscout/data/icons/svg/standard/pharmacy.svg"
+Prepare node labels: 0.004(s)
+[PlaneMapRenderer] swap enter: image=480x800 center=51.51440 N 7.46497 E mag=17 epoch=1
+Bounding box hit rate for file nodes.dat is only 9% (94/1008)
+Bounding box hit rate for file nodes.dat is only 6% (68/990)
+Bounding box hit rate for file nodes.dat is only 9% (93/955)
+Bounding box hit rate for file nodes.dat is only 11% (115/960)
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46494 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46257 E - 51.51686 N 7.46731 E] 205313x/17 720x1200 100.00000 DPI
+Loaded pattern 'scrub' from "libosmscout/data/icons/svg/standard/scrub.svg"
+Loaded pattern 'garden' from "libosmscout/data/icons/svg/standard/garden.svg"
+Draw areas: 354 (pcs) 0.012 (s)
+Draw ways: 251 (pcs) 0.011 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Draw area labels: 354 (pcs) 0.002(s)
+Loaded icon 'bus_stop' from "libosmscout/data/icons/svg/standard/bus_stop.svg"
+Prepare node labels: 0.007(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1056 visible=852 prevVisible=413 kept=378 hiddenByCollision=35 notRegistered=0 contoursRegistered=73 prevVisibleContours=31 lostContours=13
+[LabelHysteresis]   hidden-by-collision: Node 27606322
+[LabelHysteresis]   hidden-by-collision: Node 27616132
+[LabelHysteresis]   hidden-by-collision: Node 27617167
+[LabelHysteresis]   hidden-by-collision: Node 27617765
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 27624629
+[LabelHysteresis]   hidden-by-collision: Node 27625226
+[LabelHysteresis]   hidden-by-collision: Node 27626073
+[LabelHysteresis]   hidden-by-collision: Node 27626174
+[LabelHysteresis]   hidden-by-collision: Node 27627369
+[LabelHysteresis]   hidden-by-collision: Node 27627415
+[LabelHysteresis]   hidden-by-collision: Node 28041260
+[LabelHysteresis]   hidden-by-collision: Node 28041839
+[LabelHysteresis]   hidden-by-collision: Node 28052617
+[LabelHysteresis]   hidden-by-collision: Node 28052714
+[LabelHysteresis]   hidden-by-collision: Node 28055020
+[LabelHysteresis]   hidden-by-collision: Area 127323274
+[LabelHysteresis]   hidden-by-collision: Area 127323324
+[LabelHysteresis]   hidden-by-collision: Area 127323988
+[LabelHysteresis]   hidden-by-collision: Area 127324018
+[LabelHysteresis]   hidden-by-collision: Area 127324042
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[LabelHysteresis]   hidden-by-collision: Area 127329606
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127330225
+[LabelHysteresis]   hidden-by-collision: Area 127434892
+[LabelHysteresis]   hidden-by-collision: Area 127435091
+[LabelHysteresis]   hidden-by-collision: Area 127442978
+[LabelHysteresis]   hidden-by-collision: Area 127443007
+[LabelHysteresis]   hidden-by-collision: Area 127443496
+[LabelHysteresis]   hidden-by-collision: Area 127443515
+[LabelHysteresis]   hidden-by-collision: Area 127443715
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46494 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46491 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46254 E - 51.51686 N 7.46728 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 355 (pcs) 0.016 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=849 prevVisible=706 kept=689 hiddenByCollision=17 notRegistered=0 contoursRegistered=73 prevVisibleContours=43 lostContours=10
+[LabelHysteresis]   hidden-by-collision: Node 27594360
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28050448
+[LabelHysteresis]   hidden-by-collision: Node 28060102
+[LabelHysteresis]   hidden-by-collision: Node 28061279
+[LabelHysteresis]   hidden-by-collision: Node 28061292
+[LabelHysteresis]   hidden-by-collision: Node 28062260
+[LabelHysteresis]   hidden-by-collision: Area 127318552
+[LabelHysteresis]   hidden-by-collision: Area 127319531
+[LabelHysteresis]   hidden-by-collision: Area 127324873
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329826
+[LabelHysteresis]   hidden-by-collision: Area 127435361
+[LabelHysteresis]   hidden-by-collision: Area 127435443
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46491 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46488 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46251 E - 51.51686 N 7.46725 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 353 (pcs) 0.012 (s)
+Draw ways: 250 (pcs) 0.009 (s)
+Draw way contour labels: 94 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=855 prevVisible=703 kept=697 hiddenByCollision=5 notRegistered=1 contoursRegistered=72 prevVisibleContours=34 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27625058
+[LabelHysteresis]   hidden-by-collision: Node 27625948
+[LabelHysteresis]   hidden-by-collision: Node 28052150
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127444821
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46488 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46485 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46248 E - 51.51686 N 7.46722 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 349 (pcs) 0.012 (s)
+Draw ways: 248 (pcs) 0.009 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1052 visible=851 prevVisible=709 kept=704 hiddenByCollision=4 notRegistered=1 contoursRegistered=73 prevVisibleContours=33 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Node 28061652
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328971
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46485 E mag=17 epoch=1
+Bounding box hit rate for file nodes.dat is only 2% (22/922)
+Bounding box hit rate for file nodes.dat is only 8% (80/961)
+Bounding box hit rate for file nodes.dat is only 4% (80/1860)
+Bounding box hit rate for file nodes.dat is only 6% (62/946)
+Bounding box hit rate for file nodes.dat is only 5% (56/965)
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46482 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46245 E - 51.51686 N 7.46719 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 348 (pcs) 0.011 (s)
+Draw ways: 245 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1350 visible=1112 prevVisible=705 kept=700 hiddenByCollision=2 notRegistered=3 contoursRegistered=73 prevVisibleContours=33 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27614991
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329647
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447536
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448579
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46482 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46479 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46242 E - 51.51686 N 7.46716 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 345 (pcs) 0.013 (s)
+Draw ways: 245 (pcs) 0.011 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1348 visible=1103 prevVisible=966 kept=952 hiddenByCollision=13 notRegistered=1 contoursRegistered=75 prevVisibleContours=31 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27614336
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28040990
+[LabelHysteresis]   hidden-by-collision: Node 28041852
+[LabelHysteresis]   hidden-by-collision: Node 28047836
+[LabelHysteresis]   hidden-by-collision: Area 127329164
+[LabelHysteresis]   hidden-by-collision: Area 127329263
+[LabelHysteresis]   hidden-by-collision: Area 127433547
+[LabelHysteresis]   hidden-by-collision: Area 127436008
+[LabelHysteresis]   hidden-by-collision: Area 127447892
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448045
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46479 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46476 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46239 E - 51.51686 N 7.46713 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 344 (pcs) 0.015 (s)
+Draw ways: 243 (pcs) 0.008 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1348 visible=1106 prevVisible=957 kept=948 hiddenByCollision=9 notRegistered=0 contoursRegistered=75 prevVisibleContours=35 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614060
+[LabelHysteresis]   hidden-by-collision: Node 27614189
+[LabelHysteresis]   hidden-by-collision: Node 28039881
+[LabelHysteresis]   hidden-by-collision: Node 28047797
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28062260
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127436078
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46476 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46473 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46236 E - 51.51686 N 7.46710 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 341 (pcs) 0.011 (s)
+Draw ways: 244 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1345 visible=1101 prevVisible=960 kept=947 hiddenByCollision=11 notRegistered=2 contoursRegistered=74 prevVisibleContours=33 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27623153
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[LabelHysteresis]   hidden-by-collision: Area 127329209
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127324507
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127444518
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46473 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46470 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46233 E - 51.51686 N 7.46707 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 333 (pcs) 0.011 (s)
+Draw ways: 244 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1341 visible=1104 prevVisible=955 kept=945 hiddenByCollision=7 notRegistered=3 contoursRegistered=73 prevVisibleContours=32 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27611077
+[LabelHysteresis]   hidden-by-collision: Node 27611090
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   hidden-by-collision: Area 127436564
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328895
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127442816
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447190
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46470 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46467 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46230 E - 51.51686 N 7.46704 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 335 (pcs) 0.019 (s)
+Draw ways: 245 (pcs) 0.016 (s)
+Draw way contour labels: 90 (pcs) 0.001(s)
+Draw area labels: 335 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1104 prevVisible=958 kept=950 hiddenByCollision=8 notRegistered=0 contoursRegistered=73 prevVisibleContours=32 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28041355
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127442911
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46467 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46464 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46227 E - 51.51686 N 7.46701 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 337 (pcs) 0.022 (s)
+Draw ways: 247 (pcs) 0.018 (s)
+Draw way contour labels: 90 (pcs) 0.001(s)
+Draw area labels: 337 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1098 prevVisible=958 kept=946 hiddenByCollision=12 notRegistered=0 contoursRegistered=73 prevVisibleContours=35 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608405
+[LabelHysteresis]   hidden-by-collision: Node 27614049
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28047012
+[LabelHysteresis]   hidden-by-collision: Node 28062024
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46464 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46461 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46224 E - 51.51686 N 7.46698 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 336 (pcs) 0.023 (s)
+Draw ways: 241 (pcs) 0.013 (s)
+Draw way contour labels: 86 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1100 prevVisible=952 kept=941 hiddenByCollision=10 notRegistered=1 contoursRegistered=71 prevVisibleContours=33 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27605353
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Node 28062275
+[LabelHysteresis]   hidden-by-collision: Area 127320089
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127441363
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46461 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46458 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46221 E - 51.51686 N 7.46695 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.027 (s)
+Draw ways: 235 (pcs) 0.013 (s)
+Draw way contour labels: 84 (pcs) 0.001(s)
+Draw area labels: 339 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1106 prevVisible=954 kept=950 hiddenByCollision=4 notRegistered=0 contoursRegistered=69 prevVisibleContours=32 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614819
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27625205
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46458 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46455 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46218 E - 51.51686 N 7.46692 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 338 (pcs) 0.024 (s)
+Draw ways: 233 (pcs) 0.016 (s)
+Draw way contour labels: 82 (pcs) 0.001(s)
+Draw area labels: 338 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1345 visible=1102 prevVisible=960 kept=952 hiddenByCollision=8 notRegistered=0 contoursRegistered=67 prevVisibleContours=29 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   hidden-by-collision: Area 127433902
+[LabelHysteresis]   hidden-by-collision: Area 127439824
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46455 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46452 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46215 E - 51.51686 N 7.46689 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.029 (s)
+Draw ways: 233 (pcs) 0.018 (s)
+Draw way contour labels: 81 (pcs) 0.002(s)
+Draw area labels: 339 (pcs) 0.002(s)
+Prepare node labels: 0.010(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1099 prevVisible=956 kept=942 hiddenByCollision=14 notRegistered=0 contoursRegistered=66 prevVisibleContours=28 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27603500
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28041308
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127323451
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127453009
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46452 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46449 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46212 E - 51.51686 N 7.46686 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.043 (s)
+Draw ways: 235 (pcs) 0.021 (s)
+Draw way contour labels: 81 (pcs) 0.001(s)
+Draw area labels: 339 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1105 prevVisible=953 kept=943 hiddenByCollision=10 notRegistered=0 contoursRegistered=66 prevVisibleContours=29 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27603397
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28047787
+[LabelHysteresis]   hidden-by-collision: Node 28047826
+[LabelHysteresis]   hidden-by-collision: Node 28054797
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46449 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46446 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46209 E - 51.51686 N 7.46683 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.034 (s)
+Draw ways: 238 (pcs) 0.020 (s)
+Draw way contour labels: 80 (pcs) 0.001(s)
+Draw area labels: 339 (pcs) 0.001(s)
+Prepare node labels: 0.008(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1109 prevVisible=959 kept=955 hiddenByCollision=4 notRegistered=0 contoursRegistered=65 prevVisibleContours=28 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 28040128
+[LabelHysteresis]   hidden-by-collision: Node 28052150
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46446 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46443 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46206 E - 51.51686 N 7.46680 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 338 (pcs) 0.037 (s)
+Draw ways: 238 (pcs) 0.023 (s)
+Draw way contour labels: 76 (pcs) 0.001(s)
+Draw area labels: 338 (pcs) 0.001(s)
+Prepare node labels: 0.007(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1106 prevVisible=963 kept=956 hiddenByCollision=6 notRegistered=1 contoursRegistered=62 prevVisibleContours=27 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27592284
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27610918
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329209
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46443 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46440 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46203 E - 51.51686 N 7.46677 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 336 (pcs) 0.034 (s)
+Draw ways: 239 (pcs) 0.022 (s)
+Draw way contour labels: 76 (pcs) 0.002(s)
+Draw area labels: 336 (pcs) 0.002(s)
+Prepare node labels: 0.007(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1104 prevVisible=960 kept=952 hiddenByCollision=6 notRegistered=2 contoursRegistered=62 prevVisibleContours=26 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27614991
+[LabelHysteresis]   hidden-by-collision: Node 28038981
+[LabelHysteresis]   hidden-by-collision: Node 28039321
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329164
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127443650
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46440 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46557 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46320 E - 51.51686 N 7.46794 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 353 (pcs) 0.030 (s)
+Draw ways: 259 (pcs) 0.018 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Draw area labels: 353 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=848 prevVisible=959 kept=673 hiddenByCollision=14 notRegistered=272 contoursRegistered=76 prevVisibleContours=27 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27601152
+[LabelHysteresis]   hidden-by-collision: Node 27608045
+[LabelHysteresis]   hidden-by-collision: Node 27617765
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27624629
+[LabelHysteresis]   hidden-by-collision: Node 27625226
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 27627369
+[LabelHysteresis]   hidden-by-collision: Node 28052714
+[LabelHysteresis]   hidden-by-collision: Node 28061422
+[LabelHysteresis]   hidden-by-collision: Node 28062238
+[LabelHysteresis]   hidden-by-collision: Node 28062566
+[LabelHysteresis]   hidden-by-collision: Node 28062600
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591177
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591186
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591196
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591206
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591365
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591404
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591414
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591433
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591460
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591485
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591495
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591507
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591544
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591584
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591697
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591803
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27591909
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27592015
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27592121
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27592236
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27592275
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602572
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602606
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602616
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602654
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602690
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602728
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602846
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602858
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602899
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602936
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27602984
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603007
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603049
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603100
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603142
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603179
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603225
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603256
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603292
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603305
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603409
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603512
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603586
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603598
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603610
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603622
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603638
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603726
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603757
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603789
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603825
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603861
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603880
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603934
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27603972
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604006
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604026
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604042
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604082
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604121
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604162
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604180
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604218
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604276
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604314
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604346
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604365
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604384
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604458
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604507
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604535
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604573
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604730
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604769
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604916
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27604929
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605035
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605070
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605093
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605122
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605287
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605331
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27605363
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27608866
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27608940
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609027
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609067
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609095
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609229
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609310
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609329
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609342
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609421
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609447
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609477
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609588
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609670
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609703
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609746
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609781
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609791
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609801
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609813
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609825
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609837
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609849
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609859
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609871
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609893
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609922
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27609943
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610044
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610139
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610218
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610264
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610274
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610287
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610300
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610352
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610365
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610397
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610406
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610418
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610428
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610450
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610463
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610486
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610499
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610521
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610558
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610605
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610642
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610735
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610745
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610755
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610879
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610892
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610905
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27610958
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611077
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611090
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611119
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611242
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611297
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611370
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611417
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611461
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611500
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611528
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611576
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611587
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611729
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611792
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611804
+[LabelHysteresis]   not-registered (candidate/data churn): Node 27611823
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038472
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038482
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038492
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038608
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038618
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038628
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038714
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038724
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038737
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038752
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038789
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038854
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038869
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28038953
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039031
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039059
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039089
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039148
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039161
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039221
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039269
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039362
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039523
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039545
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039567
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039637
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039767
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28039891
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040027
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040052
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040080
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040167
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040258
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040329
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040341
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040360
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040468
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040487
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040526
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040555
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040574
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040602
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040769
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040822
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040839
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040941
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28040970
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045353
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045363
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045373
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045385
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045586
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045598
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045766
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045776
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045788
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045832
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045844
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045856
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28045875
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046028
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046169
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046352
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046362
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046444
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046548
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046560
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046597
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046620
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046639
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046924
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046934
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28046991
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047012
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047042
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047083
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047093
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047117
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047127
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047137
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047166
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047185
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047236
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047245
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047280
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047299
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047318
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047346
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047405
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047520
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047654
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047691
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047737
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047826
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047836
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28047994
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28048071
+[LabelHysteresis]   not-registered (candidate/data churn): Node 28048121
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127316726
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127317467
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127317549
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127321653
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127322195
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127322291
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127433589
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127433704
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127433902
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127435554
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127435859
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127436078
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127436888
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127438410
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127439129
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127439824
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127439929
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127452235
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46557 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46554 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46317 E - 51.51686 N 7.46791 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 353 (pcs) 0.034 (s)
+Draw ways: 259 (pcs) 0.021 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Draw area labels: 353 (pcs) 0.001(s)
+Prepare node labels: 0.013(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=849 prevVisible=702 kept=696 hiddenByCollision=6 notRegistered=0 contoursRegistered=76 prevVisibleContours=40 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27600773
+[LabelHysteresis]   hidden-by-collision: Node 28060977
+[LabelHysteresis]   hidden-by-collision: Node 28061193
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   hidden-by-collision: Area 127330119
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46554 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46551 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46314 E - 51.51686 N 7.46788 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 355 (pcs) 0.033 (s)
+Draw ways: 257 (pcs) 0.019 (s)
+Draw way contour labels: 97 (pcs) 0.002(s)
+Draw area labels: 355 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=851 prevVisible=703 kept=699 hiddenByCollision=4 notRegistered=0 contoursRegistered=76 prevVisibleContours=41 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Area 127328926
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46551 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46548 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46311 E - 51.51686 N 7.46785 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 357 (pcs) 0.028 (s)
+Draw ways: 254 (pcs) 0.020 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Draw area labels: 357 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=838 prevVisible=705 kept=687 hiddenByCollision=17 notRegistered=1 contoursRegistered=74 prevVisibleContours=42 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27614049
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 27626118
+[LabelHysteresis]   hidden-by-collision: Node 28042741
+[LabelHysteresis]   hidden-by-collision: Node 28049566
+[LabelHysteresis]   hidden-by-collision: Node 28049623
+[LabelHysteresis]   hidden-by-collision: Node 28062024
+[LabelHysteresis]   hidden-by-collision: Area 127330119
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127324815
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46548 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46545 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46308 E - 51.51686 N 7.46782 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 358 (pcs) 0.026 (s)
+Draw ways: 248 (pcs) 0.022 (s)
+Draw way contour labels: 93 (pcs) 0.002(s)
+Draw area labels: 358 (pcs) 0.003(s)
+Prepare node labels: 0.013(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1058 visible=850 prevVisible=692 kept=686 hiddenByCollision=6 notRegistered=0 contoursRegistered=72 prevVisibleContours=38 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Area 127320089
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46545 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46542 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46305 E - 51.51686 N 7.46779 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 354 (pcs) 0.031 (s)
+Draw ways: 244 (pcs) 0.019 (s)
+Draw way contour labels: 91 (pcs) 0.002(s)
+Draw area labels: 354 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1054 visible=848 prevVisible=704 kept=696 hiddenByCollision=6 notRegistered=2 contoursRegistered=71 prevVisibleContours=36 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27618005
+[LabelHysteresis]   hidden-by-collision: Node 27625205
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127448106
+[LabelHysteresis]   hidden-by-collision: Area 127448579
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329328
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127330588
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46542 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46539 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46302 E - 51.51686 N 7.46776 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 354 (pcs) 0.031 (s)
+Draw ways: 244 (pcs) 0.019 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Draw area labels: 354 (pcs) 0.001(s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=845 prevVisible=702 kept=692 hiddenByCollision=10 notRegistered=0 contoursRegistered=71 prevVisibleContours=36 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Node 28052150
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46539 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46536 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46299 E - 51.51686 N 7.46773 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 352 (pcs) 0.025 (s)
+Draw ways: 244 (pcs) 0.016 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Draw area labels: 352 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=843 prevVisible=699 kept=687 hiddenByCollision=12 notRegistered=0 contoursRegistered=72 prevVisibleContours=34 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127453009
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46536 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46533 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46296 E - 51.51686 N 7.46770 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 352 (pcs) 0.024 (s)
+Draw ways: 245 (pcs) 0.016 (s)
+Draw way contour labels: 92 (pcs) 0.002(s)
+Draw area labels: 352 (pcs) 0.002(s)
+Prepare node labels: 0.007(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=843 prevVisible=697 kept=687 hiddenByCollision=10 notRegistered=0 contoursRegistered=72 prevVisibleContours=36 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28050448
+[LabelHysteresis]   hidden-by-collision: Node 28054797
+[LabelHysteresis]   hidden-by-collision: Node 28061292
+[LabelHysteresis]   hidden-by-collision: Node 28062260
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[LabelHysteresis]   hidden-by-collision: Area 127329826
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46533 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46530 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46293 E - 51.51686 N 7.46767 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 351 (pcs) 0.018 (s)
+Draw ways: 247 (pcs) 0.012 (s)
+Draw way contour labels: 93 (pcs) 0.001(s)
+Draw area labels: 351 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=854 prevVisible=697 kept=696 hiddenByCollision=1 notRegistered=0 contoursRegistered=73 prevVisibleContours=36 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Area 127323217
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46530 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46527 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46290 E - 51.51686 N 7.46764 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 350 (pcs) 0.017 (s)
+Draw ways: 249 (pcs) 0.010 (s)
+Draw way contour labels: 93 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1054 visible=850 prevVisible=708 kept=702 hiddenByCollision=5 notRegistered=1 contoursRegistered=73 prevVisibleContours=37 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Node 28061652
+[LabelHysteresis]   hidden-by-collision: Area 127330119
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127327304
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46527 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46524 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46287 E - 51.51686 N 7.46761 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 348 (pcs) 0.014 (s)
+Draw ways: 250 (pcs) 0.010 (s)
+Draw way contour labels: 94 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1052 visible=849 prevVisible=704 kept=698 hiddenByCollision=5 notRegistered=1 contoursRegistered=73 prevVisibleContours=36 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27614991
+[LabelHysteresis]   hidden-by-collision: Node 28062287
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127443496
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127330206
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46524 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46521 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46284 E - 51.51686 N 7.46758 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 352 (pcs) 0.012 (s)
+Draw ways: 253 (pcs) 0.008 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1054 visible=844 prevVisible=703 kept=694 hiddenByCollision=9 notRegistered=0 contoursRegistered=72 prevVisibleContours=34 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Area 127329164
+[LabelHysteresis]   hidden-by-collision: Area 127329263
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127447892
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46521 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46518 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46281 E - 51.51686 N 7.46755 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 355 (pcs) 0.012 (s)
+Draw ways: 255 (pcs) 0.010 (s)
+Draw way contour labels: 97 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1056 visible=851 prevVisible=698 kept=692 hiddenByCollision=5 notRegistered=1 contoursRegistered=72 prevVisibleContours=38 lostContours=8
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 28042939
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28062260
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448225
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46518 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46515 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46278 E - 51.51686 N 7.46752 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 354 (pcs) 0.021 (s)
+Draw ways: 256 (pcs) 0.012 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Draw area labels: 354 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=848 prevVisible=705 kept=699 hiddenByCollision=5 notRegistered=1 contoursRegistered=74 prevVisibleContours=31 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[LabelHysteresis]   hidden-by-collision: Area 127329209
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448106
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46515 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46512 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46275 E - 51.51686 N 7.46749 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 354 (pcs) 0.018 (s)
+Draw ways: 254 (pcs) 0.012 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Draw area labels: 354 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1056 visible=852 prevVisible=702 kept=700 hiddenByCollision=2 notRegistered=0 contoursRegistered=74 prevVisibleContours=35 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46512 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46509 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46272 E - 51.51686 N 7.46746 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 353 (pcs) 0.016 (s)
+Draw ways: 252 (pcs) 0.010 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1056 visible=847 prevVisible=706 kept=698 hiddenByCollision=8 notRegistered=0 contoursRegistered=74 prevVisibleContours=35 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27618005
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127328926
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46509 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46506 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46269 E - 51.51686 N 7.46743 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 351 (pcs) 0.013 (s)
+Draw ways: 252 (pcs) 0.009 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1053 visible=837 prevVisible=701 kept=687 hiddenByCollision=12 notRegistered=2 contoursRegistered=74 prevVisibleContours=38 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27614049
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28049566
+[LabelHysteresis]   hidden-by-collision: Node 28049623
+[LabelHysteresis]   hidden-by-collision: Node 28062024
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329884
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127330162
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46506 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46503 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46266 E - 51.51686 N 7.46740 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 351 (pcs) 0.012 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Draw way contour labels: 98 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1053 visible=841 prevVisible=691 kept=684 hiddenByCollision=7 notRegistered=0 contoursRegistered=74 prevVisibleContours=34 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Area 127320089
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46503 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46500 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46263 E - 51.51686 N 7.46737 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 349 (pcs) 0.013 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Draw way contour labels: 97 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1052 visible=843 prevVisible=695 kept=689 hiddenByCollision=5 notRegistered=1 contoursRegistered=73 prevVisibleContours=36 lostContours=6
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27618005
+[LabelHysteresis]   hidden-by-collision: Node 27625205
+[LabelHysteresis]   hidden-by-collision: Area 127448579
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329030
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46500 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46497 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46260 E - 51.51686 N 7.46734 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 349 (pcs) 0.015 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1053 visible=842 prevVisible=697 kept=689 hiddenByCollision=7 notRegistered=1 contoursRegistered=73 prevVisibleContours=32 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127442428
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46497 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46494 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46257 E - 51.51686 N 7.46731 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 354 (pcs) 0.012 (s)
+Draw ways: 251 (pcs) 0.008 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1056 visible=843 prevVisible=696 kept=684 hiddenByCollision=12 notRegistered=0 contoursRegistered=73 prevVisibleContours=33 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127453009
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46494 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46491 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46254 E - 51.51686 N 7.46728 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 355 (pcs) 0.013 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Draw way contour labels: 95 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1057 visible=845 prevVisible=697 kept=686 hiddenByCollision=11 notRegistered=0 contoursRegistered=73 prevVisibleContours=34 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28050448
+[LabelHysteresis]   hidden-by-collision: Node 28054797
+[LabelHysteresis]   hidden-by-collision: Node 28061292
+[LabelHysteresis]   hidden-by-collision: Node 28062275
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329826
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46491 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46488 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46251 E - 51.51686 N 7.46725 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 353 (pcs) 0.012 (s)
+Draw ways: 250 (pcs) 0.008 (s)
+Draw way contour labels: 94 (pcs) 0.001(s)
+Prepare node labels: 0.003(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1055 visible=853 prevVisible=699 kept=695 hiddenByCollision=3 notRegistered=1 contoursRegistered=72 prevVisibleContours=34 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127442816
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127444821
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46488 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=10 centers=51.51440 N 7.46485 E
+Data: 890+0 4571 1231
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46248 E - 51.51686 N 7.46722 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 349 (pcs) 0.013 (s)
+Draw ways: 248 (pcs) 0.009 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1052 visible=849 prevVisible=707 kept=702 hiddenByCollision=4 notRegistered=1 contoursRegistered=73 prevVisibleContours=33 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Node 28061652
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328971
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46485 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46482 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46245 E - 51.51686 N 7.46719 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 348 (pcs) 0.013 (s)
+Draw ways: 245 (pcs) 0.008 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1350 visible=1110 prevVisible=703 kept=698 hiddenByCollision=2 notRegistered=3 contoursRegistered=73 prevVisibleContours=33 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27614991
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329647
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447536
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448579
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46482 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46479 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46242 E - 51.51686 N 7.46716 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 345 (pcs) 0.012 (s)
+Draw ways: 245 (pcs) 0.009 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1348 visible=1102 prevVisible=964 kept=951 hiddenByCollision=12 notRegistered=1 contoursRegistered=75 prevVisibleContours=31 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27614336
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28041852
+[LabelHysteresis]   hidden-by-collision: Node 28047836
+[LabelHysteresis]   hidden-by-collision: Area 127329164
+[LabelHysteresis]   hidden-by-collision: Area 127329263
+[LabelHysteresis]   hidden-by-collision: Area 127433547
+[LabelHysteresis]   hidden-by-collision: Area 127436008
+[LabelHysteresis]   hidden-by-collision: Area 127447892
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448045
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46479 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46476 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46239 E - 51.51686 N 7.46713 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 344 (pcs) 0.014 (s)
+Draw ways: 243 (pcs) 0.011 (s)
+Draw way contour labels: 92 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1348 visible=1105 prevVisible=956 kept=947 hiddenByCollision=9 notRegistered=0 contoursRegistered=75 prevVisibleContours=35 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614060
+[LabelHysteresis]   hidden-by-collision: Node 27614189
+[LabelHysteresis]   hidden-by-collision: Node 28039881
+[LabelHysteresis]   hidden-by-collision: Node 28047797
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28062260
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127436078
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46476 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46473 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46236 E - 51.51686 N 7.46710 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 341 (pcs) 0.014 (s)
+Draw ways: 244 (pcs) 0.009 (s)
+Draw way contour labels: 91 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1345 visible=1100 prevVisible=959 kept=946 hiddenByCollision=11 notRegistered=2 contoursRegistered=74 prevVisibleContours=33 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27623153
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[LabelHysteresis]   hidden-by-collision: Area 127329209
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127324507
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127444518
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46473 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46470 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46233 E - 51.51686 N 7.46707 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 333 (pcs) 0.013 (s)
+Draw ways: 244 (pcs) 0.009 (s)
+Draw way contour labels: 90 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1341 visible=1104 prevVisible=954 kept=945 hiddenByCollision=6 notRegistered=3 contoursRegistered=73 prevVisibleContours=32 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27611077
+[LabelHysteresis]   hidden-by-collision: Node 27611090
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328895
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127442816
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447190
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46470 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46467 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46230 E - 51.51686 N 7.46704 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 335 (pcs) 0.013 (s)
+Draw ways: 245 (pcs) 0.008 (s)
+Draw way contour labels: 90 (pcs) 0.001(s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1105 prevVisible=958 kept=951 hiddenByCollision=7 notRegistered=0 contoursRegistered=73 prevVisibleContours=32 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28041355
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46467 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46464 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46227 E - 51.51686 N 7.46701 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 337 (pcs) 0.016 (s)
+Draw ways: 247 (pcs) 0.010 (s)
+Draw way contour labels: 90 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1099 prevVisible=959 kept=947 hiddenByCollision=12 notRegistered=0 contoursRegistered=73 prevVisibleContours=35 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27614049
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28047012
+[LabelHysteresis]   hidden-by-collision: Node 28062024
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46464 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46461 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46224 E - 51.51686 N 7.46698 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 336 (pcs) 0.015 (s)
+Draw ways: 241 (pcs) 0.009 (s)
+Draw way contour labels: 86 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1101 prevVisible=953 kept=942 hiddenByCollision=10 notRegistered=1 contoursRegistered=71 prevVisibleContours=33 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27605353
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Node 28062275
+[LabelHysteresis]   hidden-by-collision: Area 127320089
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127441363
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46461 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46458 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46221 E - 51.51686 N 7.46695 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.015 (s)
+Draw ways: 235 (pcs) 0.010 (s)
+Draw way contour labels: 84 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1108 prevVisible=955 kept=952 hiddenByCollision=3 notRegistered=0 contoursRegistered=69 prevVisibleContours=32 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27625205
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46458 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46455 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46218 E - 51.51686 N 7.46692 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 338 (pcs) 0.013 (s)
+Draw ways: 233 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1345 visible=1104 prevVisible=962 kept=954 hiddenByCollision=8 notRegistered=0 contoursRegistered=67 prevVisibleContours=29 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   hidden-by-collision: Area 127433902
+[LabelHysteresis]   hidden-by-collision: Area 127439824
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46455 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46452 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46215 E - 51.51686 N 7.46689 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.013 (s)
+Draw ways: 233 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1101 prevVisible=958 kept=944 hiddenByCollision=14 notRegistered=0 contoursRegistered=66 prevVisibleContours=28 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27603500
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28041308
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127323451
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127453009
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46452 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46449 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46212 E - 51.51686 N 7.46686 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.012 (s)
+Draw ways: 235 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1107 prevVisible=955 kept=945 hiddenByCollision=10 notRegistered=0 contoursRegistered=66 prevVisibleContours=29 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27603397
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625387
+[LabelHysteresis]   hidden-by-collision: Node 28047787
+[LabelHysteresis]   hidden-by-collision: Node 28047826
+[LabelHysteresis]   hidden-by-collision: Node 28054797
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46449 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46446 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46209 E - 51.51686 N 7.46683 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 339 (pcs) 0.012 (s)
+Draw ways: 238 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1111 prevVisible=961 kept=957 hiddenByCollision=4 notRegistered=0 contoursRegistered=65 prevVisibleContours=28 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 28040128
+[LabelHysteresis]   hidden-by-collision: Node 28052150
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46446 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46443 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46206 E - 51.51686 N 7.46680 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 338 (pcs) 0.012 (s)
+Draw ways: 238 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1346 visible=1107 prevVisible=965 kept=958 hiddenByCollision=6 notRegistered=1 contoursRegistered=62 prevVisibleContours=27 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27592284
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27610918
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329209
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46443 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46440 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46203 E - 51.51686 N 7.46677 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 336 (pcs) 0.013 (s)
+Draw ways: 239 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1105 prevVisible=961 kept=953 hiddenByCollision=6 notRegistered=2 contoursRegistered=62 prevVisibleContours=26 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27614991
+[LabelHysteresis]   hidden-by-collision: Node 28038981
+[LabelHysteresis]   hidden-by-collision: Node 28039321
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329164
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127443650
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46440 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46437 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46200 E - 51.51686 N 7.46674 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 334 (pcs) 0.014 (s)
+Draw ways: 237 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1344 visible=1109 prevVisible=960 kept=958 hiddenByCollision=2 notRegistered=0 contoursRegistered=61 prevVisibleContours=27 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27614336
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46437 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46434 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46197 E - 51.51686 N 7.46671 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 333 (pcs) 0.019 (s)
+Draw ways: 232 (pcs) 0.009 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1107 prevVisible=964 kept=960 hiddenByCollision=3 notRegistered=1 contoursRegistered=61 prevVisibleContours=29 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614060
+[LabelHysteresis]   hidden-by-collision: Node 27614189
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127442545
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46434 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46431 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46194 E - 51.51686 N 7.46668 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 333 (pcs) 0.017 (s)
+Draw ways: 230 (pcs) 0.010 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1101 prevVisible=962 kept=950 hiddenByCollision=12 notRegistered=0 contoursRegistered=59 prevVisibleContours=27 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27611077
+[LabelHysteresis]   hidden-by-collision: Node 27611090
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27623153
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 27625885
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46431 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46428 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46191 E - 51.51686 N 7.46665 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 334 (pcs) 0.017 (s)
+Draw ways: 227 (pcs) 0.009 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1111 prevVisible=956 kept=950 hiddenByCollision=6 notRegistered=0 contoursRegistered=56 prevVisibleContours=23 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27610892
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46428 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46425 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46188 E - 51.51686 N 7.46662 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 330 (pcs) 0.013 (s)
+Draw ways: 226 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1343 visible=1111 prevVisible=966 kept=959 hiddenByCollision=7 notRegistered=0 contoursRegistered=55 prevVisibleContours=23 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28041355
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46425 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46422 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46185 E - 51.51686 N 7.46659 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 329 (pcs) 0.015 (s)
+Draw ways: 229 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1342 visible=1103 prevVisible=966 kept=953 hiddenByCollision=12 notRegistered=1 contoursRegistered=56 prevVisibleContours=25 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27610745
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28047012
+[LabelHysteresis]   hidden-by-collision: Node 28062024
+[LabelHysteresis]   hidden-by-collision: Area 127329304
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328331
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46422 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46419 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46182 E - 51.51686 N 7.46656 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 327 (pcs) 0.014 (s)
+Draw ways: 231 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1341 visible=1106 prevVisible=958 kept=950 hiddenByCollision=8 notRegistered=0 contoursRegistered=56 prevVisibleContours=25 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Area 127320089
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46419 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46416 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46179 E - 51.51686 N 7.46653 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 326 (pcs) 0.012 (s)
+Draw ways: 232 (pcs) 0.009 (s)
+Draw way contour labels: 71 (pcs) 0.001(s)
+Draw area labels: 326 (pcs) 0.001(s)
+Prepare node labels: 0.007(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1109 prevVisible=961 kept=955 hiddenByCollision=6 notRegistered=0 contoursRegistered=56 prevVisibleContours=25 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27610735
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623184
+[LabelHysteresis]   hidden-by-collision: Node 27623622
+[LabelHysteresis]   hidden-by-collision: Node 27625205
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46416 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46413 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46176 E - 51.51686 N 7.46650 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.015 (s)
+Draw ways: 236 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1338 visible=1104 prevVisible=964 kept=952 hiddenByCollision=11 notRegistered=1 contoursRegistered=57 prevVisibleContours=24 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27610486
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127329851
+[LabelHysteresis]   hidden-by-collision: Area 127439824
+[LabelHysteresis]   hidden-by-collision: Area 127439881
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447707
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46413 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46410 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46173 E - 51.51686 N 7.46647 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 321 (pcs) 0.012 (s)
+Draw ways: 241 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1337 visible=1097 prevVisible=959 kept=942 hiddenByCollision=17 notRegistered=0 contoursRegistered=56 prevVisibleContours=23 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28038752
+[LabelHysteresis]   hidden-by-collision: Node 28041308
+[LabelHysteresis]   hidden-by-collision: Node 28051670
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28051967
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127323451
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   hidden-by-collision: Area 127453009
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46410 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46407 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46170 E - 51.51686 N 7.46644 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 321 (pcs) 0.014 (s)
+Draw ways: 251 (pcs) 0.009 (s)
+Prepare node labels: 0.006(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1337 visible=1111 prevVisible=952 kept=946 hiddenByCollision=6 notRegistered=0 contoursRegistered=60 prevVisibleContours=23 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 28061292
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46407 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46404 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46167 E - 51.51686 N 7.46641 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 322 (pcs) 0.011 (s)
+Draw ways: 250 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1338 visible=1116 prevVisible=966 kept=964 hiddenByCollision=2 notRegistered=0 contoursRegistered=61 prevVisibleContours=21 lostContours=0
+[LabelHysteresis]   hidden-by-collision: Node 27625058
+[LabelHysteresis]   hidden-by-collision: Area 127329489
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46404 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46401 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46164 E - 51.51686 N 7.46638 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 320 (pcs) 0.011 (s)
+Draw ways: 254 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1336 visible=1113 prevVisible=971 kept=965 hiddenByCollision=4 notRegistered=2 contoursRegistered=61 prevVisibleContours=25 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27610450
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329263
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127441125
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46401 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46398 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46161 E - 51.51686 N 7.46635 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 320 (pcs) 0.012 (s)
+Draw ways: 256 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1336 visible=1111 prevVisible=968 kept=959 hiddenByCollision=8 notRegistered=1 contoursRegistered=61 prevVisibleContours=23 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27626118
+[LabelHysteresis]   hidden-by-collision: Node 27626816
+[LabelHysteresis]   hidden-by-collision: Node 28038981
+[LabelHysteresis]   hidden-by-collision: Node 28039321
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127436525
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329851
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46398 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46395 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46158 E - 51.51686 N 7.46632 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 321 (pcs) 0.014 (s)
+Draw ways: 259 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1338 visible=1119 prevVisible=966 kept=961 hiddenByCollision=5 notRegistered=0 contoursRegistered=61 prevVisibleContours=22 lostContours=0
+[LabelHysteresis]   hidden-by-collision: Node 27614336
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28040487
+[LabelHysteresis]   hidden-by-collision: Node 28053237
+[LabelHysteresis]   hidden-by-collision: Area 127436231
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46395 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46392 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46155 E - 51.51686 N 7.46629 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 322 (pcs) 0.016 (s)
+Draw ways: 256 (pcs) 0.012 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1338 visible=1117 prevVisible=974 kept=967 hiddenByCollision=7 notRegistered=0 contoursRegistered=61 prevVisibleContours=26 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27614060
+[LabelHysteresis]   hidden-by-collision: Node 27614189
+[LabelHysteresis]   hidden-by-collision: Node 28040128
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127435859
+[LabelHysteresis]   hidden-by-collision: Area 127435902
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46392 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46389 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46152 E - 51.51686 N 7.46626 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 324 (pcs) 0.012 (s)
+Draw ways: 256 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1113 prevVisible=972 kept=959 hiddenByCollision=13 notRegistered=0 contoursRegistered=61 prevVisibleContours=25 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27611077
+[LabelHysteresis]   hidden-by-collision: Node 27611090
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27615226
+[LabelHysteresis]   hidden-by-collision: Node 27623153
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 27625885
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46389 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46386 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46149 E - 51.51686 N 7.46623 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 324 (pcs) 0.011 (s)
+Draw ways: 260 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1117 prevVisible=968 kept=959 hiddenByCollision=9 notRegistered=0 contoursRegistered=61 prevVisibleContours=21 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27610879
+[LabelHysteresis]   hidden-by-collision: Node 27610905
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127323347
+[LabelHysteresis]   hidden-by-collision: Area 127323948
+[LabelHysteresis]   hidden-by-collision: Area 127436146
+[LabelHysteresis]   hidden-by-collision: Area 127448508
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46386 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46383 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46146 E - 51.51686 N 7.46620 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.012 (s)
+Draw ways: 262 (pcs) 0.009 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1114 prevVisible=972 kept=959 hiddenByCollision=12 notRegistered=1 contoursRegistered=62 prevVisibleContours=24 lostContours=0
+[LabelHysteresis]   hidden-by-collision: Node 27618214
+[LabelHysteresis]   hidden-by-collision: Node 27618236
+[LabelHysteresis]   hidden-by-collision: Node 27618730
+[LabelHysteresis]   hidden-by-collision: Node 27619314
+[LabelHysteresis]   hidden-by-collision: Node 27619323
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28038714
+[LabelHysteresis]   hidden-by-collision: Node 28041355
+[LabelHysteresis]   hidden-by-collision: Node 28045832
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127442934
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447572
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46383 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46380 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46143 E - 51.51686 N 7.46617 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.012 (s)
+Draw ways: 262 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1119 prevVisible=969 kept=961 hiddenByCollision=8 notRegistered=0 contoursRegistered=62 prevVisibleContours=27 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27594626
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27600307
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[LabelHysteresis]   hidden-by-collision: Area 127457619
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46380 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46377 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46140 E - 51.51686 N 7.46614 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 325 (pcs) 0.013 (s)
+Draw ways: 263 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1342 visible=1120 prevVisible=974 kept=963 hiddenByCollision=11 notRegistered=0 contoursRegistered=62 prevVisibleContours=26 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27605070
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27616155
+[LabelHysteresis]   hidden-by-collision: Node 27616184
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28042939
+[LabelHysteresis]   hidden-by-collision: Node 28049234
+[LabelHysteresis]   hidden-by-collision: Node 28051588
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127436888
+[LabelHysteresis]   hidden-by-collision: Area 127448537
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46377 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46374 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46137 E - 51.51686 N 7.46611 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 322 (pcs) 0.012 (s)
+Draw ways: 265 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1339 visible=1122 prevVisible=975 kept=965 hiddenByCollision=8 notRegistered=2 contoursRegistered=63 prevVisibleContours=24 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27592121
+[LabelHysteresis]   hidden-by-collision: Node 27611242
+[LabelHysteresis]   hidden-by-collision: Node 27611370
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27613991
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623184
+[LabelHysteresis]   hidden-by-collision: Node 27623622
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127328615
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127442934
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46374 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46371 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46134 E - 51.51686 N 7.46608 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.011 (s)
+Draw ways: 267 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1117 prevVisible=977 kept=962 hiddenByCollision=14 notRegistered=1 contoursRegistered=64 prevVisibleContours=27 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27591697
+[LabelHysteresis]   hidden-by-collision: Node 27591803
+[LabelHysteresis]   hidden-by-collision: Node 27591909
+[LabelHysteresis]   hidden-by-collision: Node 27592015
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28050855
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Node 28055132
+[LabelHysteresis]   hidden-by-collision: Area 127319281
+[LabelHysteresis]   hidden-by-collision: Area 127322291
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[LabelHysteresis]   hidden-by-collision: Area 127439824
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127325413
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46371 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46368 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46131 E - 51.51686 N 7.46605 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.011 (s)
+Draw ways: 267 (pcs) 0.008 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1341 visible=1117 prevVisible=972 kept=955 hiddenByCollision=16 notRegistered=1 contoursRegistered=64 prevVisibleContours=27 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27611823
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28038482
+[LabelHysteresis]   hidden-by-collision: Node 28041308
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28051967
+[LabelHysteresis]   hidden-by-collision: Node 28061834
+[LabelHysteresis]   hidden-by-collision: Node 28062080
+[LabelHysteresis]   hidden-by-collision: Area 127318915
+[LabelHysteresis]   hidden-by-collision: Area 127319002
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127319052
+[LabelHysteresis]   hidden-by-collision: Area 127323451
+[LabelHysteresis]   hidden-by-collision: Area 127329462
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127456979
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46368 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46365 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46128 E - 51.51686 N 7.46602 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 323 (pcs) 0.014 (s)
+Draw ways: 267 (pcs) 0.010 (s)
+Draw way contour labels: 78 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1340 visible=1133 prevVisible=972 kept=962 hiddenByCollision=8 notRegistered=2 contoursRegistered=64 prevVisibleContours=28 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27610521
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27623850
+[LabelHysteresis]   hidden-by-collision: Area 127318895
+[LabelHysteresis]   hidden-by-collision: Area 127437758
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447892
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448508
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46365 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46362 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46125 E - 51.51686 N 7.46599 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 321 (pcs) 0.013 (s)
+Draw ways: 271 (pcs) 0.010 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1339 visible=1141 prevVisible=988 kept=986 hiddenByCollision=2 notRegistered=0 contoursRegistered=64 prevVisibleContours=26 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 28043169
+[LabelHysteresis]   hidden-by-collision: Node 28045776
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46362 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46359 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46122 E - 51.51686 N 7.46596 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 317 (pcs) 0.014 (s)
+Draw ways: 271 (pcs) 0.010 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1338 visible=1140 prevVisible=996 kept=990 hiddenByCollision=6 notRegistered=0 contoursRegistered=62 prevVisibleContours=28 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27606899
+[LabelHysteresis]   hidden-by-collision: Node 27608288
+[LabelHysteresis]   hidden-by-collision: Node 27609588
+[LabelHysteresis]   hidden-by-collision: Node 27615954
+[LabelHysteresis]   hidden-by-collision: Node 28043828
+[LabelHysteresis]   hidden-by-collision: Area 127329670
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46359 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46356 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46119 E - 51.51686 N 7.46593 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 313 (pcs) 0.014 (s)
+Draw ways: 270 (pcs) 0.012 (s)
+Draw way contour labels: 74 (pcs) 0.001(s)
+Draw area labels: 313 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1337 visible=1144 prevVisible=995 kept=991 hiddenByCollision=4 notRegistered=0 contoursRegistered=60 prevVisibleContours=27 lostContours=6
+[LabelHysteresis]   hidden-by-collision: Node 27614745
+[LabelHysteresis]   hidden-by-collision: Node 27626118
+[LabelHysteresis]   hidden-by-collision: Node 27626816
+[LabelHysteresis]   hidden-by-collision: Area 127436525
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46356 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46353 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46116 E - 51.51686 N 7.46590 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 314 (pcs) 0.016 (s)
+Draw ways: 270 (pcs) 0.010 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1336 visible=1147 prevVisible=999 kept=991 hiddenByCollision=7 notRegistered=1 contoursRegistered=60 prevVisibleContours=23 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27614336
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28040487
+[LabelHysteresis]   hidden-by-collision: Node 28053237
+[LabelHysteresis]   hidden-by-collision: Node 28054032
+[LabelHysteresis]   hidden-by-collision: Node 28060967
+[LabelHysteresis]   hidden-by-collision: Area 127436231
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127448537
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46353 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46350 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46113 E - 51.51686 N 7.46587 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 314 (pcs) 0.016 (s)
+Draw ways: 272 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1337 visible=1152 prevVisible=1002 kept=997 hiddenByCollision=5 notRegistered=0 contoursRegistered=60 prevVisibleContours=27 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27614060
+[LabelHysteresis]   hidden-by-collision: Node 27614189
+[LabelHysteresis]   hidden-by-collision: Node 28040128
+[LabelHysteresis]   hidden-by-collision: Area 127435859
+[LabelHysteresis]   hidden-by-collision: Area 127435902
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46350 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46347 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46110 E - 51.51686 N 7.46584 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 311 (pcs) 0.012 (s)
+Draw ways: 273 (pcs) 0.009 (s)
+Draw way contour labels: 74 (pcs) 0.001(s)
+Draw area labels: 311 (pcs) 0.001(s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1335 visible=1150 prevVisible=1007 kept=996 hiddenByCollision=9 notRegistered=2 contoursRegistered=60 prevVisibleContours=25 lostContours=5
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Node 27615226
+[LabelHysteresis]   hidden-by-collision: Node 27623153
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 27625691
+[LabelHysteresis]   hidden-by-collision: Node 27625712
+[LabelHysteresis]   hidden-by-collision: Node 27625885
+[LabelHysteresis]   hidden-by-collision: Node 28039472
+[LabelHysteresis]   hidden-by-collision: Node 28059175
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329462
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127457619
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46347 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46344 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46107 E - 51.51686 N 7.46581 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 310 (pcs) 0.015 (s)
+Draw ways: 272 (pcs) 0.012 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1334 visible=1151 prevVisible=1005 kept=996 hiddenByCollision=9 notRegistered=0 contoursRegistered=60 prevVisibleContours=22 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27610428
+[LabelHysteresis]   hidden-by-collision: Node 27610879
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 27623862
+[LabelHysteresis]   hidden-by-collision: Node 28038737
+[LabelHysteresis]   hidden-by-collision: Area 127319022
+[LabelHysteresis]   hidden-by-collision: Area 127323347
+[LabelHysteresis]   hidden-by-collision: Area 127323948
+[LabelHysteresis]   hidden-by-collision: Area 127436146
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46344 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46341 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46104 E - 51.51686 N 7.46578 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 309 (pcs) 0.013 (s)
+Draw ways: 273 (pcs) 0.013 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1334 visible=1153 prevVisible=1006 kept=997 hiddenByCollision=9 notRegistered=0 contoursRegistered=60 prevVisibleContours=25 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27610264
+[LabelHysteresis]   hidden-by-collision: Node 27618214
+[LabelHysteresis]   hidden-by-collision: Node 27618236
+[LabelHysteresis]   hidden-by-collision: Node 27623217
+[LabelHysteresis]   hidden-by-collision: Node 28041355
+[LabelHysteresis]   hidden-by-collision: Node 28045586
+[LabelHysteresis]   hidden-by-collision: Node 28050833
+[LabelHysteresis]   hidden-by-collision: Node 28050917
+[LabelHysteresis]   hidden-by-collision: Area 127321765
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46341 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46338 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46101 E - 51.51686 N 7.46575 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 307 (pcs) 0.016 (s)
+Draw ways: 272 (pcs) 0.010 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1333 visible=1156 prevVisible=1008 kept=1004 hiddenByCollision=4 notRegistered=0 contoursRegistered=58 prevVisibleContours=27 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27608475
+[LabelHysteresis]   hidden-by-collision: Node 27614349
+[LabelHysteresis]   hidden-by-collision: Node 28038618
+[LabelHysteresis]   hidden-by-collision: Area 127435467
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46338 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46335 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46098 E - 51.51686 N 7.46572 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 306 (pcs) 0.013 (s)
+Draw ways: 272 (pcs) 0.011 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1333 visible=1145 prevVisible=1011 kept=995 hiddenByCollision=15 notRegistered=1 contoursRegistered=58 prevVisibleContours=26 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27605070
+[LabelHysteresis]   hidden-by-collision: Node 27613483
+[LabelHysteresis]   hidden-by-collision: Node 27625610
+[LabelHysteresis]   hidden-by-collision: Node 28040574
+[LabelHysteresis]   hidden-by-collision: Node 28042939
+[LabelHysteresis]   hidden-by-collision: Node 28045856
+[LabelHysteresis]   hidden-by-collision: Node 28045875
+[LabelHysteresis]   hidden-by-collision: Node 28047236
+[LabelHysteresis]   hidden-by-collision: Node 28047280
+[LabelHysteresis]   hidden-by-collision: Node 28047299
+[LabelHysteresis]   hidden-by-collision: Node 28047318
+[LabelHysteresis]   hidden-by-collision: Node 28051588
+[LabelHysteresis]   hidden-by-collision: Area 127435327
+[LabelHysteresis]   hidden-by-collision: Area 127436888
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127329429
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46335 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46332 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46095 E - 51.51686 N 7.46569 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 305 (pcs) 0.011 (s)
+Draw ways: 273 (pcs) 0.009 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1333 visible=1149 prevVisible=1000 kept=989 hiddenByCollision=11 notRegistered=0 contoursRegistered=59 prevVisibleContours=24 lostContours=3
+[LabelHysteresis]   hidden-by-collision: Node 27611242
+[LabelHysteresis]   hidden-by-collision: Node 27611370
+[LabelHysteresis]   hidden-by-collision: Node 27613451
+[LabelHysteresis]   hidden-by-collision: Node 27613991
+[LabelHysteresis]   hidden-by-collision: Node 27614968
+[LabelHysteresis]   hidden-by-collision: Node 27623184
+[LabelHysteresis]   hidden-by-collision: Node 27623622
+[LabelHysteresis]   hidden-by-collision: Node 28038714
+[LabelHysteresis]   hidden-by-collision: Node 28045353
+[LabelHysteresis]   hidden-by-collision: Node 28047117
+[LabelHysteresis]   hidden-by-collision: Node 28047127
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46332 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46329 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46092 E - 51.51686 N 7.46566 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 300 (pcs) 0.011 (s)
+Draw ways: 270 (pcs) 0.010 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1331 visible=1157 prevVisible=1004 kept=996 hiddenByCollision=7 notRegistered=1 contoursRegistered=58 prevVisibleContours=25 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27614882
+[LabelHysteresis]   hidden-by-collision: Node 27618298
+[LabelHysteresis]   hidden-by-collision: Node 28047137
+[LabelHysteresis]   hidden-by-collision: Node 28053787
+[LabelHysteresis]   hidden-by-collision: Node 28053900
+[LabelHysteresis]   hidden-by-collision: Area 127322291
+[LabelHysteresis]   hidden-by-collision: Area 127439824
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127443631
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46329 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46326 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46089 E - 51.51686 N 7.46563 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 301 (pcs) 0.011 (s)
+Draw ways: 271 (pcs) 0.010 (s)
+Prepare node labels: 0.005(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1332 visible=1162 prevVisible=1012 kept=1006 hiddenByCollision=6 notRegistered=0 contoursRegistered=59 prevVisibleContours=25 lostContours=2
+[LabelHysteresis]   hidden-by-collision: Node 27611823
+[LabelHysteresis]   hidden-by-collision: Node 27623696
+[LabelHysteresis]   hidden-by-collision: Node 27623739
+[LabelHysteresis]   hidden-by-collision: Node 28041308
+[LabelHysteresis]   hidden-by-collision: Node 28051845
+[LabelHysteresis]   hidden-by-collision: Node 28051967
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46326 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46323 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46086 E - 51.51686 N 7.46560 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 300 (pcs) 0.013 (s)
+Draw ways: 276 (pcs) 0.011 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1330 visible=1164 prevVisible=1017 kept=1010 hiddenByCollision=5 notRegistered=2 contoursRegistered=60 prevVisibleContours=25 lostContours=4
+[LabelHysteresis]   hidden-by-collision: Node 27600194
+[LabelHysteresis]   hidden-by-collision: Node 27600275
+[LabelHysteresis]   hidden-by-collision: Node 27611461
+[LabelHysteresis]   hidden-by-collision: Node 27613878
+[LabelHysteresis]   hidden-by-collision: Area 127437758
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447953
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127447974
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46323 E mag=17 epoch=1
+[PlaneMapRenderer] render: tiles=15 centers=51.51440 N 7.46320 E
+Data: 1190+0 4571 1519
+Database 0:
+Type : boundary_protected_area has 49478 coords (performance limit: 20000)
+Type : boundary_administrative has 106965 coords (performance limit: 20000)
+Type : boundary_county has 119333 coords (performance limit: 20000)
+Type : boundary_state has 41103 coords (performance limit: 20000)
+Draw: [51.51194 N 7.46083 E - 51.51686 N 7.46557 E] 205313x/17 720x1200 100.00000 DPI
+Draw areas: 298 (pcs) 0.012 (s)
+Draw ways: 277 (pcs) 0.010 (s)
+Prepare node labels: 0.004(s)
+[LabelHysteresis] viewport=956x1436+-118+-118 registered=1328 visible=1166 prevVisible=1019 kept=1015 hiddenByCollision=3 notRegistered=1 contoursRegistered=60 prevVisibleContours=23 lostContours=1
+[LabelHysteresis]   hidden-by-collision: Node 27615379
+[LabelHysteresis]   hidden-by-collision: Node 28043169
+[LabelHysteresis]   hidden-by-collision: Area 127443036
+[LabelHysteresis]   not-registered (candidate/data churn): Area 127325242
+[PlaneMapRenderer] swap enter: image=720x1200 center=51.51440 N 7.46320 E mag=17 epoch=1
+[PanHarness] done
+Some resources still acquired by other components

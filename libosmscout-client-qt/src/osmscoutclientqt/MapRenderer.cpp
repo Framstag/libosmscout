@@ -384,8 +384,19 @@ void DBRenderJob::Run(const DBInstanceRef& basemapDatabase,
     }
   }
 
-  // draw databases
-  success &= mapPainter->DrawMap(renderProjection,
+    // draw databases
+    if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+      size_t tileCnt=0;
+
+      for (const auto &dbTiles : tiles) {
+        tileCnt+=dbTiles.size();
+      }
+
+      osmscout::log.Warn() << "[PlaneMapRenderer] render: tiles=" << tileCnt
+                           << " centers=" << renderProjection.GetCenter().GetDisplayText();
+    }
+
+    success &= mapPainter->DrawMap(renderProjection,
                                  *drawParameter,
                                  batch,
                                  p);

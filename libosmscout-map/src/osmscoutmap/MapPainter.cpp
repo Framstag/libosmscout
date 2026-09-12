@@ -572,14 +572,72 @@ constexpr bool debugGroundTiles = false;
     projection.BoundingBoxToPixel(areaData.boundingBox,
                                   areaScreenBox);
 
-    Vertex2D areaCenter;
+    // resolve the area label anchor. The clip-state dependent fallback
+    // (center of the area bounding box of the potentially clipped
+    // pieces) moves with every change of the visible tiles and makes
+    // labels flicker while the map is sliding. To keep the label
+    // position stable the anchor is kept in map space per area and
+    // magnification level (the anchor was computed with the same
+    // fallback on the round the area appeared first during this
+    // session).
+    if (!areaAnchorCacheValid ||
+        areaAnchorMagnificationLevel!=projection.GetMagnification().GetLevel()) {
+      areaAnchorCache.clear();
+      areaAnchorMagnificationLevel=projection.GetMagnification().GetLevel();
+      areaAnchorCacheValid=true;
+    }
 
-    if (areaData.center.has_value()){
-      projection.GeoToPixel(areaData.center.value(),
-                            areaCenter);
+    GeoCoord areaAnchor;
+
+    if (areaData.center.has_value()) {
+      areaAnchor=areaData.center.value();
     }
     else {
-      areaCenter=areaScreenBox.GetCenter();
+      areaAnchor=areaData.boundingBox.GetCenter();
+    }
+
+    auto &anchorCache=areaAnchorCache[areaData.dbIndex];
+    auto anchorIter=anchorCache.find(areaData.ref);
+
+    if (anchorIter!=anchorCache.end()) {
+      areaAnchor=anchorIter->second.coord;
+    }
+    else {
+      if (anchorCache.size()>MaxAreaAnchorCacheSize) {
+        anchorCache.clear();
+      }
+
+      anchorCache[areaData.ref]=AreaAnchorEntry{areaAnchor};
+    }
+
+    Vertex2D areaCenter;
+
+    projection.GeoToPixel(areaAnchor,
+                          areaCenter);
+
+    // TEMP diagnostics: log jumps of the resolved area label anchor of
+    // areas with a stable style center; their pixel position follows
+    // GeoToPixel and must move smoothly while panning.
+    {
+      static const bool debugAnchors=std::getenv("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")!=nullptr;
+      static std::map<size_t,std::map<ObjectFileRef,Vertex2D>> lastAnchorPixel;
+
+      if (debugAnchors && areaData.center.has_value()) {
+        auto &lastPix=lastAnchorPixel[areaData.dbIndex][areaData.ref];
+
+        if (lastPix.x!=0.0 || lastPix.y!=0.0) {
+          double dx=lastPix.x-areaCenter.x;
+          double dy=lastPix.y-areaCenter.y;
+
+          if (fabs(dx)>0.5 || fabs(dy)>0.5) {
+            osmscout::log.Warn() << "[AnchorJump] ref=" << areaData.ref.GetName()
+                                 << " d=(" << dx << "," << dy << ")"
+                                 << " at " << areaCenter.x << "," << areaCenter.y;
+          }
+        }
+
+        lastPix=areaCenter;
+      }
     }
 
     LayoutPointLabels(styleConfig,
