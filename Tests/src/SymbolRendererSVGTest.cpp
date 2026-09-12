@@ -112,6 +112,32 @@ TEST_CASE("SetBorder emits stroke and stroke-width")
   REQUIRE(output.find("stroke-width=\"2\"") != std::string::npos);
 }
 
+TEST_CASE("SetBorder converts border width from mm to pixels")
+{
+  std::ostringstream stream;
+  TestSymbolRenderer renderer(stream);
+
+  renderer.SetFill(FillStyleRef());
+  renderer.SetBorder(CreateBorder(Color::BLUE, 0.5), 2.0);
+  renderer.DrawRect(5.0, 5.0, 20.0, 20.0);
+
+  std::string output = stream.str();
+  REQUIRE(output.find("stroke-width=\"1\"") != std::string::npos);
+}
+
+TEST_CASE("SetBorder converts mm width to pixels via screenMmInPixel")
+{
+  std::ostringstream stream;
+  TestSymbolRenderer renderer(stream);
+
+  renderer.SetFill(FillStyleRef());
+  renderer.SetBorder(CreateBorder(Color::BLUE, 2.0), 3.0);
+  renderer.DrawRect(5.0, 5.0, 20.0, 20.0);
+
+  std::string output = stream.str();
+  REQUIRE(output.find("stroke-width=\"6\"") != std::string::npos);
+}
+
 TEST_CASE("SetBorder with null style emits stroke=\"none\"")
 {
   std::ostringstream stream;
@@ -160,7 +186,7 @@ TEST_CASE("DrawCircle outputs circle element with attributes")
   REQUIRE(output.find("/>") != std::string::npos);
 }
 
-TEST_CASE("DrawPolygon outputs polyline element with points")
+TEST_CASE("DrawPolygon outputs polygon element with points")
 {
   std::ostringstream stream;
   TestSymbolRenderer renderer(stream);
@@ -176,7 +202,7 @@ TEST_CASE("DrawPolygon outputs polyline element with points")
   renderer.DrawPolygon(polygon);
 
   std::string output = stream.str();
-  REQUIRE(output.find("<polyline") != std::string::npos);
+  REQUIRE(output.find("<polygon") != std::string::npos);
   REQUIRE(output.find("points=") != std::string::npos);
   REQUIRE(output.find("0,0") != std::string::npos);
   REQUIRE(output.find("10,10") != std::string::npos);
@@ -202,7 +228,7 @@ TEST_CASE("Render with polygon primitive")
   renderer.Render(projection, symbol, Vertex2D(100.0, 100.0));
 
   std::string output = stream.str();
-  REQUIRE(output.find("<polyline") != std::string::npos);
+  REQUIRE(output.find("<polygon") != std::string::npos);
   REQUIRE(output.find("fill=\"#ff0000\"") != std::string::npos);
   REQUIRE(output.find("stroke=\"#000000\"") != std::string::npos);
 }
