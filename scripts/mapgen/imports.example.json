@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "history": 3,
+  "refresh": 7,
+  "imports": [
+    {
+      "id": "berlin",
+      "url": "https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"
+    },
+    {
+      "id": "dortmund",
+      "url": "https://download.geofabrik.de/europe/germany/nordrhein-westfalen/dortmund-latest.osm.pbf",
+      "history": 5,
+      "refresh": 1
+    }
+  ]
+}

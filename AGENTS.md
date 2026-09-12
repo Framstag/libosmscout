@@ -47,9 +47,9 @@ Each directory is a standalone CMake/Meson subproject:
 | `DumpData/` | Data debug/dump tool |
 | `Java/` | Java examples (location lookup, routing, renderer, open db) |
 | `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions |
-| `Documentation/` | Build guides, style syntax docs, notes per platform |
+| `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, db.json metadata, regeneration script, container, client update check) |
 | `setup/` | (empty — reserved for dev setup scripts) |
-| `scripts/` | cppcheck.sh, etc. |
+| `scripts/` | cppcheck.sh, etc.; `mapgen/` holds the map regeneration script, example configs, nginx example, client-check test harness, and the mapgen Dockerfile |
 | `ci/` | Docker build configs |
 | `packaging/` | Platform packaging |
 | `webpage/` | Project website source |
@@ -187,6 +187,7 @@ libosmscout/
 ## C++ Coding Style
 
 See [CodeStyles.md](guidelines/CodeStyles.md) for full guide derived from actual code.
+See [FileFormatVersion.md](guidelines/FileFormatVersion.md) for when a type config / database file format version bump is required.
 Covers naming, indentation, braces, classes, methods, pointers, enums,
 include order, comments, formatting, header guards, templates, and error handling.
 ## Architecture Overview
@@ -228,7 +229,7 @@ include order, comments, formatting, header guards, templates, and error handlin
 | `db/` | Database I/O — type registry, tile storage, area/way/node indexes |
 | `routing/` | Routing algorithm, data structures, cost functions |
 | `location/` | Location lookup, reverse geocoding, address search |
-| `io/` | Low-level file I/O — MD5, CRC, file readers/writers, compression |
+| `io/` | Low-level file I/O — file readers/writers, compression, CRC-32 checksums (`osmscout::Crc32`, `osmscout::ComputeFileCrc32`) |
 | `util/` | Geometry (GeoCoord, Pixel, Point), projections, math helpers |
 | `feature/` | OSM feature definitions mapped to rendering |
 | `system/` | Platform abstractions (clock, thread, memory mapped files) |
