@@ -223,6 +223,10 @@ process_import()
     return 1
   fi
 
+  # The download service (e.g. Geofabrik) publishes an md5 sidecar file;
+  # md5 is used here for download integrity only, not for security, and
+  # no stronger provider hash exists. See sonar-project.properties
+  # (shell:S4790) for the justification.
   if ! (cd "$WORK_DIR" && printf '%s  %s\n' "$published_hash" "$pbf" | md5sum -c - >/dev/null 2>&1); then
     error "$id: downloaded source failed verification"
     return 1

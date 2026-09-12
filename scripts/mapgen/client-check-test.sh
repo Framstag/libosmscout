@@ -63,6 +63,24 @@ make_db_json()
 EOF
 }
 
+# --- file verification ------------------------------------------------------
+
+# verify_inventory <db-dir>
+#   exits 0 if every file listed in db.json matches its recorded size and
+#   crc32, else non-zero.
+verify_inventory()
+{
+  python3 - "$(python_path "$1")" <<'EOF'
+import json, sys, zlib
+d = json.load(open(sys.argv[1] + "/db.json"))
+for name, meta in d["output"]["files"].items():
+    data = open(sys.argv[1] + "/" + name, "rb").read()
+    if len(data) != meta["size"] or (zlib.crc32(data) & 0xffffffff) != meta["crc32"]:
+        sys.exit(1)
+sys.exit(0)
+EOF
+}
+
 # --- client simulation ----------------------------------------------------
 #
 # client_check <repo> <client_version> <local_generated_at|empty>
@@ -160,16 +178,7 @@ echo "ok: client with newer-only server data probes only its own version"
 REPO4="$TMP/repo4"
 make_db_json "$REPO4/berlin/v27" 27 "2026-09-07T10:00:00Z"
 printf 'corrupt!' > "$REPO4/berlin/v27/map.lib"
-if python3 - "$(python_path "$REPO4/berlin/v27")" <<'EOF'
-import json, sys, zlib
-d = json.load(open(sys.argv[1] + "/db.json"))
-for name, meta in d["output"]["files"].items():
-    data = open(sys.argv[1] + "/" + name, "rb").read()
-    if len(data) != meta["size"] or (zlib.crc32(data) & 0xffffffff) != meta["crc32"]:
-        sys.exit(1)
-sys.exit(0)
-EOF
-then
+if verify_inventory "$REPO4/berlin/v27"; then
   echo "FAIL: corrupt file passed verification" >&2
   exit 1
 fi
@@ -178,16 +187,7 @@ echo "ok: corrupt downloaded file rejected by checksum verification"
 # 9. intact file passes verification
 REPO5="$TMP/repo5"
 make_db_json "$REPO5/berlin/v27" 27 "2026-09-07T10:00:00Z"
-if ! python3 - "$(python_path "$REPO5/berlin/v27")" <<'EOF'
-import json, sys, zlib
-d = json.load(open(sys.argv[1] + "/db.json"))
-for name, meta in d["output"]["files"].items():
-    data = open(sys.argv[1] + "/" + name, "rb").read()
-    if len(data) != meta["size"] or (zlib.crc32(data) & 0xffffffff) != meta["crc32"]:
-        sys.exit(1)
-sys.exit(0)
-EOF
-then
+if ! verify_inventory "$REPO5/berlin/v27"; then
   echo "FAIL: intact file failed verification" >&2
   exit 1
 fi
