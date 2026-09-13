@@ -32,6 +32,9 @@
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
   #include <pango/pangoft2.h>
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+  #include <ft2build.h>
+  #include FT_FREETYPE_H
 #endif
 
 #include <osmscoutmapsvg/MapSVGImportExport.h>
@@ -60,14 +63,55 @@ namespace osmscout {
     FontMap                          fonts;            //! Cached scaled font
 
 #else
+
   public:
-    using NativeLabel = std::wstring;
-    struct NativeGlyph {
+    struct NativeGlyph
+    {
       std::string character;
-      double width;
-      double height;
+      double      width{0.0};   //!< Ink box width
+      double      height{0.0};  //!< Ink box height
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+      double      xBearing{0.0}; //!< Ink box left edge, relative to the glyph base point
+      double      yBearing{0.0}; //!< Ink box top edge (y grows downwards), relative to the glyph base point
+      double      advance{0.0};  //!< Horizontal advance
+#endif
     };
+
+    /**
+     * Layouted label of a build without pango: the text plus the FreeType face
+     * its metrics were measured with. The face is owned by the painter's face
+     * cache and stays valid for the lifetime of the painter.
+     */
+    struct NativeLabel
+    {
+      std::wstring wstr;
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+      FT_Face      face{nullptr};
+#endif
+
+      NativeLabel() = default;
+
+      explicit NativeLabel(const std::wstring& text)
+        : wstr(text)
+      {
+        // no code
+      }
+    };
+
+    /**
+     * Fallback advance factor (fraction of the font size) used if the build has
+     * neither pango nor FreeType, or if no font file can be resolved for the
+     * configured font name.
+     */
     static constexpr double AverageCharacterWidth = 0.75;
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+  private:
+    using FontFaceMap = std::map<std::pair<std::string,size_t>,FT_Face>;
+
+    FT_Library  ftLibrary{nullptr}; //!< FreeType library, nullptr if initialization failed
+    FontFaceMap fontFaces;          //!< Cached faces by font file and pixel size
+#endif
 #endif
 
   public:
@@ -119,7 +163,26 @@ namespace osmscout {
     PangoFontDescription* GetFont(const Projection& projection,
                                   const MapParameter& parameter,
                                   double fontSize);
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
 
+    /**
+     * Resolve the configured font name to a font file: the name is interpreted
+     * as a font file first (the convention of the FreeType based backends),
+     * otherwise the family name is resolved through fontconfig if available.
+     *
+     * @return path to a font file or an empty string if it cannot be resolved
+     */
+    static std::string ResolveFontFile(const std::string& fontName);
+
+    /**
+     * Get the FreeType face for the given font size, loading and caching it on
+     * demand.
+     *
+     * @return the face or nullptr if no font file could be resolved/loaded
+     */
+    FT_Face GetFontFace(const Projection& projection,
+                        const MapParameter& parameter,
+                        double fontSize);
 #endif
 
     void SetupFillAndStroke(const FillStyleRef &fillStyle,
