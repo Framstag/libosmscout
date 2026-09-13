@@ -93,12 +93,20 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // position may be OffRoute initially)
     RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
                                                                             positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord);
+                                                                            positionMessage->position.coord,
+                                                                            positionMessage->position.abscissa);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
   if (positionMessage->position.state == PositionAgent::PositionState::OnRoute ||
-      positionMessage->position.state == PositionAgent::PositionState::EstimateInTunnel) {
+      positionMessage->position.state == PositionAgent::PositionState::EstimateInTunnel ||
+      positionMessage->position.state == PositionAgent::PositionState::NoGpsSignal ||
+      positionMessage->position.state == PositionAgent::PositionState::OffRoute) {
+    // Emit live next instructions for every published position (all states
+    // except Uninitialised): with PositionAgent keeping the last route node on
+    // search failure, step distances stay computable while off-route or
+    // without a fresh fix, so the UI never freezes on a stale value
+    // (supersedes emitting only in OnRoute/EstimateInTunnel).
     // remove instructions behind our back (pop from the front of the list)
     bool updated=false;
     while (!instructions.empty() &&
@@ -115,7 +123,8 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // next route instruction
     RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
                                                                             positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord);
+                                                                            positionMessage->position.coord,
+                                                                            positionMessage->position.abscissa);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
