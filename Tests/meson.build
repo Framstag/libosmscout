@@ -696,6 +696,16 @@ MapPainterFrameBuffersTest = executable('MapPainterFrameBuffersTest',
 
 test('Check MapPainterFrameBuffers compilation', MapPainterFrameBuffersTest)
 
+MapPainterAreaPreparationTest = executable('MapPainterAreaPreparationTest',
+                               'src/MapPainterAreaPreparationTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterAreaPreparation compilation', MapPainterAreaPreparationTest)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],
