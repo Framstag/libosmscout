@@ -67,6 +67,13 @@ namespace osmscout {
       GeoCoord coord;
       std::list<RouteDescription::Node>::const_iterator routeNode; // last passed node on the route
 
+      // Fraction of the current route segment (routeNode -> routeNode+1)
+      // where the snapped position lies, as computed by SearchClosestSegment.
+      // Lets consumers compute true along-route progress instead of a
+      // straight-line distance from the segment-start node (which breaks
+      // step-distance math on curves and with cross-track GPS error).
+      double abscissa{0.0};
+
       // resolved object
       DatabaseId databaseId;
       TypeConfigRef typeConfig;
