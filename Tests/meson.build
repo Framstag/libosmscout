@@ -686,6 +686,16 @@ styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
 
+MapPainterFrameBuffersTest = executable('MapPainterFrameBuffersTest',
+                               'src/MapPainterFrameBuffersTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterFrameBuffers compilation', MapPainterFrameBuffersTest)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],
@@ -954,6 +964,28 @@ if ftDep.found() and buildMapCairo
                install_dir: testInstallDir)
 
   test('Check TextMetricsCairo compilation', TextMetricsCairoTest)
+endif
+
+if ftDep.found() and buildMapSVG
+  textMetricsSVGDeps = [mathDep, openmpDep, catch2MainDep, ftDep, pangoft2Dep]
+  textMetricsSVGArgs = ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+  # register the test font file as fontconfig application font (see test source)
+  if fontconfigDep.found()
+    textMetricsSVGDeps += fontconfigDep
+    textMetricsSVGArgs += '-DHAVE_LIB_FONTCONFIG'
+  endif
+
+  TextMetricsSVGTest = executable('TextMetricsSVGTest',
+               'src/TextMetricsSVGTest.cpp',
+               include_directories: [testIncDir, osmscoutmapsvgIncDir, osmscoutmapIncDir, osmscoutIncDir, include_directories('../Demos/include')],
+               dependencies: textMetricsSVGDeps,
+               link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
+               cpp_args: textMetricsSVGArgs,
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetricsSVG compilation', TextMetricsSVGTest)
 endif
 
 if buildMapCairo and buildMapQt and buildMapSkia
