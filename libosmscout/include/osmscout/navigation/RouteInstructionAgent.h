@@ -93,8 +93,7 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // position may be OffRoute initially)
     RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
                                                                             positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord,
-                                                                            positionMessage->position.abscissa);
+                                                                            positionMessage->position.coord);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
@@ -123,8 +122,7 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // next route instruction
     RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
                                                                             positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord,
-                                                                            positionMessage->position.abscissa);
+                                                                            positionMessage->position.coord);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
