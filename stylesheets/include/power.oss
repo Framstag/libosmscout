@@ -7,12 +7,24 @@ OSS
   STYLE
     IF _building {
       [MAG @buildingMag-] {
-        [TYPE power_sub_station] AREA { color: #bca9a9; }
+        [TYPE power_sub_station,
+              power_plant,
+              power_heliostat,
+              power_compensator,
+              power_inverter,
+              power_switchgear,
+              power_converter] AREA { color: #bca9a9; }
       }
 
       [MAG @labelBuildingMag-] {
         [TYPE power_sub_station,
-              power_generator] {
+              power_generator,
+              power_plant,
+              power_heliostat,
+              power_compensator,
+              power_inverter,
+              power_switchgear,
+              power_converter] {
           NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
           AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @labelColor; size: 0.9;  priority: @labelPrioMajorBuilding;}
         }

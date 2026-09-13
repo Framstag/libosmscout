@@ -87,3 +87,51 @@ TEST_CASE("StyleConfig returns empty symbol list for stylesheet without symbols"
   REQUIRE(styleConfig.Load(oss.string()));
   REQUIRE(styleConfig.GetSymbolNames().empty());
 }
+
+TEST_CASE("StyleConfig enumerates patterns of a stylesheet", "[StyleConfig]")
+{
+  std::filesystem::path tmp=std::filesystem::path(GetEnv("TESTS_TMP_DIR",
+                                                         std::filesystem::temp_directory_path().string()));
+  std::filesystem::path oss=tmp / "StyleConfigPatterns.oss";
+
+  {
+    std::ofstream file(oss);
+
+    file << "OSS" << std::endl;
+    file << "  STYLE" << std::endl;
+    file << "    [MAG close-] {" << std::endl;
+    file << "      [TYPE landuse_apiary] AREA { color: #dce8c8; pattern: \"landuse_apiary\"; patternMinMag: detail; }" << std::endl;
+    file << "      [TYPE landuse_forestry] AREA { color: #aed1a0; pattern: \"landuse_forest\"; patternMinMag: cityOver; }" << std::endl;
+    file << "    }" << std::endl;
+    file << "END" << std::endl;
+  }
+
+  osmscout::StyleConfig styleConfig(LoadTypeConfig());
+
+  REQUIRE(styleConfig.Load(oss.string()));
+
+  std::vector<std::string> names=styleConfig.GetPatternNames();
+
+  REQUIRE(names.size()==2);
+  REQUIRE(names==std::vector<std::string>({"landuse_apiary",
+                                           "landuse_forest"}));
+}
+
+TEST_CASE("StyleConfig returns empty pattern list for stylesheet without patterns", "[StyleConfig]")
+{
+  std::filesystem::path tmp=std::filesystem::path(GetEnv("TESTS_TMP_DIR",
+                                                         std::filesystem::temp_directory_path().string()));
+  std::filesystem::path oss=tmp / "StyleConfigPatternsEmpty.oss";
+
+  {
+    std::ofstream file(oss);
+
+    file << "OSS" << std::endl;
+    file << "END" << std::endl;
+  }
+
+  osmscout::StyleConfig styleConfig(LoadTypeConfig());
+
+  REQUIRE(styleConfig.Load(oss.string()));
+  REQUIRE(styleConfig.GetPatternNames().empty());
+}

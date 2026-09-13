@@ -26,13 +26,23 @@ FLAG
     _leisure         = true;
     _building        = true;
     _minorBuilding   = true;
+    _shop            = true;
+    _tourism         = true;
+    _historic        = true;
+    _office          = true;
+    _landuse         = true;
   }
   ELSE {
     _natural         = false;
-    _railway         = false;
+    _railway         = true;
     _leisure         = false;
-    _building        = false;
-    _minorBuilding   = false;
+    _building        = true;
+    _minorBuilding   = true;
+    _shop            = false;
+    _tourism         = false;
+    _historic        = false;
+    _office          = false;
+    _landuse         = false;
   }
 
   routes            = false; // routes are still a bit experimental and disrupting on standard stylesheet
@@ -43,23 +53,29 @@ ORDER WAYS
   GROUP highway_motorway_trunk
   GROUP highway_motorway_primary
   GROUP highway_trunk
-  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift
+  GROUP aerialway_gondola, aerialway_chair_lift, aerialway_drag_lift, aerialway_zip_line, aerialway_goods
   GROUP highway_primary
   GROUP highway_secondary
   GROUP highway_tertiary
   GROUP highway_motorway_link, highway_trunk_link, highway_primary_link, highway_secondary_link, highway_tertiary_link
   GROUP highway_unclassified, highway_road, highway_residential
   GROUP railway_rail,
-        aeroway_runway, aeroway_taxiway
-  GROUP highway_living_street, highway_service, highway_bus_guideway,
+        aeroway_runway, aeroway_taxiway, aeroway_taxilane, aeroway_stopway,
+        aeroway_model_runway, aeroway_jet_bridge
+  GROUP highway_living_street, highway_service, highway_bus_guideway, highway_busway,
         railway_tram, railway_light_rail, railway_subway, public_transport_platform,
         railway_narrow_gauge, railway_preserved
   GROUP highway_track, highway_pedestrian, highway_path, highway_cycleway,
-        highway_footway, highway_bridleway, highway_construction,
+        highway_footway, highway_bridleway, highway_construction, highway_proposed,
+        highway_escape, highway_raceway, highway_corridor,
         leisure_track
   GROUP highway_steps, barrier_fence
-  GROUP waterway_weir, waterway_waterfall, route_ferry
-  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream
+  GROUP waterway_weir, waterway_waterfall, waterway_rapids, waterway_sluice_gate,
+        waterway_floodgate, waterway_check_dam, waterway_floating_barrier,
+        waterway_flow_control, waterway_fish_pass, route_ferry
+  GROUP waterway_river, waterway_canal, waterway_drain, waterway_ditch, waterway_stream,
+        waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised,
+        waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway
 
 MODULE "include/land_sea_color"
 
@@ -152,18 +168,37 @@ CONST
   COLOR countryBorderColor         = #ff0000;
 
   // Contour
-  COLOR majorContourColor          = #9f9f9f;
-  COLOR mediumContourColor         = #a5a5a5;
-  COLOR minorContourColor          = #aaaaaa;
+  IF daylight {
+    COLOR majorContourColor          = #9f9f9f;
+    COLOR mediumContourColor         = #a5a5a5;
+    COLOR minorContourColor          = #aaaaaa;
+  }
+  ELSE {
+    COLOR majorContourColor          = darken(#9f9f9f, 0.5);
+    COLOR mediumContourColor         = darken(#a5a5a5, 0.5);
+    COLOR minorContourColor          = darken(#aaaaaa, 0.5);
+  }
 
   // Landuse, water
-  COLOR grassColor                 = #cfeca8;
-  COLOR industrialColor            = #dfd1d6;
-  COLOR damColor                   = #b2a7ab;
+  IF daylight {
+    COLOR grassColor                 = #cfeca8;
+    COLOR industrialColor            = #dfd1d6;
+    COLOR damColor                   = #b2a7ab;
+  }
+  ELSE {
+    COLOR grassColor                 = darken(#cfeca8, 0.5);
+    COLOR industrialColor            = darken(#dfd1d6, 0.5);
+    COLOR damColor                   = darken(#b2a7ab, 0.5);
+  }
 
   // Ways
   COLOR bridgeColor                = #000000; // black
-  COLOR cyclewayColor              = #ec47c7;
+  IF daylight {
+    COLOR cyclewayColor              = #ec47c7;
+  }
+  ELSE {
+    COLOR cyclewayColor              = darken(#ec47c7, 0.5);
+  }
 
   IF daylight {
     COLOR motorwayColor            = #4440ec; // dark blue
@@ -196,8 +231,14 @@ CONST
   COLOR thinMotorwayColor          = lighten(@motorwayColor,0.3);
   COLOR thinTrunkColor             = lighten(@trunkColor,0.3);
   COLOR thinPrimaryColor           = lighten(@primaryColor,0.3);
-  COLOR thinSecondaryColor         = #fdd654;
-  COLOR thinTertiaryColor          = #fefe73;
+  IF daylight {
+    COLOR thinSecondaryColor         = #fdd654;
+    COLOR thinTertiaryColor          = #fefe73;
+  }
+  ELSE {
+    COLOR thinSecondaryColor         = darken(#fdd654, 0.5);
+    COLOR thinTertiaryColor          = darken(#fefe73, 0.5);
+  }
 
   COLOR motorwayShieldColor        = @motorwayColor;
   COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
@@ -205,17 +246,36 @@ CONST
   COLOR primaryShieldColor         = @primaryColor;
 
   // Buildings
-  COLOR buildingColor              = #d9d9d9;
+  IF daylight {
+    COLOR buildingColor              = #d9d9d9;
+  }
+  ELSE {
+    COLOR buildingColor              = darken(#d9d9d9, 0.5);
+  }
   COLOR buildingBorderColor        = darken(@buildingColor, 0.3);
   COLOR buildingLabelColor         = darken(@buildingColor, 0.5);
+
+  IF daylight {
+    COLOR minorBuildingColor         = #bcbcbc;
+  }
+  ELSE {
+    COLOR minorBuildingColor         = darken(#bcbcbc, 0.5);
+  }
 
   // Travel
 
   // Leisure
 
-  COLOR natureReserveColor         = #abde9622;
-  COLOR natureReserveLabelColor    = #566f4bb0;
-  COLOR natureReserveBorderColor   = #82a77180;
+  IF daylight {
+    COLOR natureReserveColor         = #abde9622;
+    COLOR natureReserveLabelColor    = #566f4bb0;
+    COLOR natureReserveBorderColor   = #82a77180;
+  }
+  ELSE {
+    COLOR natureReserveColor         = darken(#abde9622, 0.5);
+    COLOR natureReserveLabelColor    = darken(#566f4bb0, 0.5);
+    COLOR natureReserveBorderColor   = darken(#82a77180, 0.5);
+  }
 
   // Amenity
   IF daylight {
@@ -236,7 +296,12 @@ CONST
   COLOR hospitalColor              = darken(@amenityColor, 0.1);
   COLOR hospitalBorderColor        = darken(@hospitalColor, 0.3);
 
-  COLOR postColor                  = #e8f000;
+  IF daylight {
+    COLOR postColor                  = #e8f000;
+  }
+  ELSE {
+    COLOR postColor                  = darken(#e8f000, 0.5);
+  }
 
   COLOR wallColor                  = #663e1b;
 

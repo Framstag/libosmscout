@@ -479,6 +479,23 @@ namespace osmscout {
     return names;
   }
 
+  std::vector<std::string> StyleConfig::GetPatternNames() const
+  {
+    std::set<std::string> names;
+
+    for (const auto& typeSelector : areaFillStyleSelectors) {
+      for (const auto& levelSelector : typeSelector) {
+        for (const auto& selector : levelSelector) {
+          if (!selector.style->GetPatternName().empty()) {
+            names.insert(selector.style->GetPatternName());
+          }
+        }
+      }
+    }
+
+    return std::vector<std::string>(names.begin(),names.end());
+  }
+
   template<class S, class A>
   void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A>>& conditionals,
                                  size_t& maxLevel)

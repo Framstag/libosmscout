@@ -137,6 +137,46 @@ TYPES
         en: "service"
         de: "Erschließungsweg"
 
+  TYPE highway_busway
+    = WAY ("highway"=="busway")
+      {Name, NameAlt, Ref}
+      PATH LOCATION PIN_WAY
+      DESC
+        en: "busway"
+        de: "Busfahrbahn"
+
+  TYPE highway_raceway
+    = WAY ("highway"=="raceway")
+      {Name, NameAlt}
+      PATH[CAR] LOCATION PIN_WAY
+      DESC
+        en: "raceway"
+        de: "Rennstrecke"
+
+  TYPE highway_escape
+    = WAY ("highway"=="escape")
+      {Name, NameAlt}
+      PIN_WAY
+      DESC
+        en: "escape lane"
+        de: "Notbremsweg"
+
+  TYPE highway_proposed
+    = WAY ("highway"=="proposed")
+      {Name, NameAlt, Ref}
+      PIN_WAY
+      DESC
+        en: "proposed road"
+        de: "geplante Straße"
+
+  TYPE highway_corridor
+    = WAY ("highway"=="corridor")
+      {Name, NameAlt}
+      PATH[FOOT] PIN_WAY
+      DESC
+        en: "corridor"
+        de: "Flur"
+
   TYPE highway_milestone
     = NODE ("highway"=="milestone")
       {HighwayMilestone}

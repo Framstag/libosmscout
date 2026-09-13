@@ -7,7 +7,7 @@ CONST
   COLOR favoriteMarkerColor  = #ff8800;
   COLOR favoriteBorderColor  = #ffffff;
   COLOR searchMarkerColor    = #ff00ff;
-  COLOR searchBorderColor    = #ffffff;
+  COLOR searchBorderColor    = @favoriteBorderColor;
   COLOR trackColor           = #0088ff;
 SYMBOL route_start
   CIRCLE 0,0 0.9 {
