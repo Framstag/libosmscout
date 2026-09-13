@@ -17,10 +17,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <atomic>
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <limits>
+#include <new>
 #include <tuple>
 
 #include <config.h>
@@ -203,8 +206,14 @@ struct LevelStats
 
   std::vector<Stats> drawLevelStats;
 
+  // Number of heap allocations per render step
+  std::vector<size_t> drawLevelAllocCount;
+
   double             allocMax=0.0;
   double             allocSum=0.0;
+
+  // Number of heap allocations performed while drawing
+  size_t drawAllocCount=0;
 
   size_t             nodeCount=0;
   size_t             wayCount=0;
@@ -216,6 +225,7 @@ struct LevelStats
   : level(level)
   {
     drawLevelStats.resize(osmscout::RenderSteps::LastStep-osmscout::RenderSteps::FirstStep+1);
+    drawLevelAllocCount.resize(osmscout::RenderSteps::LastStep-osmscout::RenderSteps::FirstStep+1);
   }
 };
 
@@ -233,6 +243,89 @@ std::string formatAlloc(double size)
     std::ostringstream buff;
     buff << std::setprecision(6) << size << units;
     return buff.str();
+}
+
+namespace {
+
+  /**
+   * Counts every heap allocation of the process. The difference between two
+   * calls measures the allocation volume of the code in between, which is the
+   * property that tells whether rendering allocates per object or reuses its
+   * buffers. Aligned allocations are not counted.
+   */
+  std::atomic<size_t> allocationCounter{0};
+
+}
+
+void* operator new(std::size_t size)
+{
+  allocationCounter.fetch_add(1,std::memory_order_relaxed);
+
+  void* memory=std::malloc(size);
+
+  if (memory==nullptr) {
+    throw std::bad_alloc();
+  }
+
+  return memory;
+}
+
+void* operator new[](std::size_t size)
+{
+  return ::operator new(size);
+}
+
+void* operator new(std::size_t size,
+                   const std::nothrow_t&) noexcept
+{
+  allocationCounter.fetch_add(1,std::memory_order_relaxed);
+
+  return std::malloc(size);
+}
+
+void* operator new[](std::size_t size,
+                     const std::nothrow_t& tag) noexcept
+{
+  return ::operator new(size,tag);
+}
+
+void operator delete(void* memory) noexcept
+{
+  std::free(memory);
+}
+
+void operator delete[](void* memory) noexcept
+{
+  std::free(memory);
+}
+
+void operator delete(void* memory,
+                     std::size_t /*size*/) noexcept
+{
+  std::free(memory);
+}
+
+void operator delete[](void* memory,
+                       std::size_t /*size*/) noexcept
+{
+  std::free(memory);
+}
+
+void operator delete(void* memory,
+                     const std::nothrow_t&) noexcept
+{
+  std::free(memory);
+}
+
+void operator delete[](void* memory,
+                       const std::nothrow_t&) noexcept
+{
+  std::free(memory);
+}
+
+size_t GetAllocationCount()
+{
+  return allocationCounter.load(std::memory_order_relaxed);
 }
 
 class PerformanceTestBackend {
@@ -953,19 +1046,30 @@ int main(int argc, char* argv[])
       for (size_t repetition=1; repetition <= args.drawRepeat; repetition++) {
         osmscout::StopClock drawTimer;
 
+        size_t              allocationsBefore=GetAllocationCount();
+
         for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
           osmscout::StopClock stepTimer;
+
+          size_t              stepAllocBefore=GetAllocationCount();
 
           backend->DrawMap(projection,
                            drawParameter,
                            data,
                            (osmscout::RenderSteps)step);
 
+          size_t stepAllocAfter=GetAllocationCount();
+
           stepTimer.Stop();
 
           stats.drawLevelStats[step].AddEvent(stepTimer.GetMilliseconds());
+          stats.drawLevelAllocCount[step]+=stepAllocAfter-stepAllocBefore;
         }
         drawTimer.Stop();
+
+        size_t allocationsAfter=GetAllocationCount();
+
+        stats.drawAllocCount+=allocationsAfter-allocationsBefore;
 
         stats.drawStats.AddEvent(drawTimer.GetMilliseconds());
       }
@@ -1012,11 +1116,21 @@ int main(int argc, char* argv[])
     std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.dbStats.GetAverageTime() << " ";
     std::cout << "max: " << std::fixed << std::setprecision(2) << stats.dbStats.GetMaxTime() << " " << std::endl;
 
+    std::cout << " Draw allocs: ";
+    std::cout << "total: " << stats.drawAllocCount << " ";
+    std::cout << "avg: " << stats.drawAllocCount / (stats.tileCount * args.drawRepeat) << std::endl;
+
     std::cout << " Map        : ";
     std::cout << "total: " << std::fixed << std::setprecision(2) << stats.drawStats.GetTotalTime() << " ";
     std::cout << "min: " << std::fixed << std::setprecision(2) << stats.drawStats.GetMinTime() << " ";
     std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawStats.GetAverageTime() << " ";
     std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawStats.GetMaxTime() << std::endl;
+
+    size_t allocTotal=0;
+
+    for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
+      allocTotal+=stats.drawLevelAllocCount[step];
+    }
 
     for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
       std::cout << "               #" << step << " ";
@@ -1024,7 +1138,13 @@ int main(int argc, char* argv[])
       std::cout << "total: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetTotalTime() << " ";
       std::cout << "min: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMinTime() << " ";
       std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetAverageTime() << " ";
-      std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMaxTime() << std::endl;
+      std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMaxTime() << " ";
+      std::cout << "allocs: " << stats.drawLevelAllocCount[step] << " ";
+      if (allocTotal>0) {
+        std::cout << "(" << std::fixed << std::setprecision(0) << 100.0*stats.drawLevelAllocCount[step]/allocTotal <<
+        "%)";
+      }
+      std::cout << std::endl;
     }
   }
 
