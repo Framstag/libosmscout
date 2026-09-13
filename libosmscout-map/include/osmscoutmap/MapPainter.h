@@ -292,11 +292,15 @@ namespace osmscout {
     std::vector<AreaData>           areaData;        //!< Internal processing store for area rendering
     std::vector<WayData>            wayData;         //!< Internal processing store for way rendering
     std::vector<WayPathData>        wayPathData;
-    std::list<RouteLabelData>    routeLabelData;
+    std::list<RouteLabelData>       routeLabelData;
 
-    std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
-    std::vector<LineStyleRef>    lineStyles;         //!< Temporary storage for StyleConfig return value
+    std::vector<TextStyleRef>       textStyles;      //!< Temporary storage for StyleConfig return value
+    std::vector<LineStyleRef>       lineStyles;      //!< Temporary storage for StyleConfig return value
     std::vector<PathSymbolStyleRef> symbolStyles;    //!< Temporary storage for StyleConfig return value
+    std::vector<BorderStyleRef>     borderStyles;    //!< Temporary storage for StyleConfig return value
+
+    std::vector<CoordBufferRange>   ringCoordRanges; //!< Reused coordinate ranges of the rings of the area currently prepared
+    std::vector<Point>              ringNodes;       //!< Reused node store for a ring that is stored as segments
 
     /**                           L
      Precalculations
@@ -369,11 +373,24 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const Way& way);
 
+    /**
+     * Transform the geometry of one ring of the area currently prepared and store the
+     * resulting coordinate range in the reused ring coordinate range store.
+     *
+     * Only rings that take part in the frame are transformed: a ring whose styling and
+     * visibility have been checked and rejected is never transformed, and a ring that is
+     * needed as clipping region of a drawn ring is transformed when that ring is prepared.
+     */
+    void TransformAreaRing(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Area::Ring& ring,
+                           size_t index);
+
     bool PrepareAreaRing(size_t dbIndex,
                          const StyleConfig& styleConfig,
                          const Projection& projection,
                          const MapParameter& parameter,
-                         const std::vector<CoordBufferRange>& coordRanges,
+                         std::vector<CoordBufferRange>& coordRanges,
                          const Area& area,
                          const Area::Ring& ring,
                          size_t i,
