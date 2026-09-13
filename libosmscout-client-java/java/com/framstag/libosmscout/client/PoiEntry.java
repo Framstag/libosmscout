@@ -10,6 +10,12 @@ public class PoiEntry {
     /** Display label for the POI (e.g. "Hotel Central"), or empty if unnamed. */
     public String label;
 
+    /** Operator of the POI (e.g. "Sparkasse"), or null if not available. */
+    public String operator;
+
+    /** Consumer-facing brand of the POI (e.g. "Shell"), or null if not available. */
+    public String brand;
+
     /** OSM object type (e.g. "tourism_hotel", "amenity_restaurant", "shop"). */
     public String objectType;
 

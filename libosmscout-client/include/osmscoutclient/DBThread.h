@@ -141,6 +141,7 @@ public:
 private:
   MapManagerRef                      mapManager;
   std::string                        basemapLookupDirectory;
+  std::string                        basemapStyleFilename; // absolute path; empty = use main style
   SettingsRef                        settings;
 
   double                             mapDpi;
@@ -192,7 +193,9 @@ protected:
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
 
-  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
+  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig,
+                                  bool suppressWarnings=false,
+                                  const std::string &styleFilename="") const;
 
   /**
    * Load basemap database, write lock needs to be hold
@@ -204,7 +207,8 @@ public:
            const std::string &iconDirectory,
            SettingsRef settings,
            MapManagerRef mapManager,
-           const std::vector<std::string> &customPoiTypes);
+           const std::vector<std::string> &customPoiTypes,
+           const std::string &basemapStyleFilename="");
 
   ~DBThread() override;
 
@@ -297,6 +301,16 @@ public:
    * Runs asynchronously on the DBThread worker.
    */
   void ReloadBasemap();
+
+  /**
+   * Set the basemap lookup directory at runtime and reload the basemap.
+   *
+   * Pass an empty string to unload any installed basemap. Replaces the
+   * directory configured at construction, so a basemap downloaded or
+   * removed while the app runs takes effect without a restart. Runs
+   * asynchronously on the DBThread worker.
+   */
+  CancelableFuture<bool> SetBasemapLookupDirectory(const std::string &basemapLookupDirectory);
 
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);

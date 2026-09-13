@@ -14,6 +14,9 @@ public class RouteInstruction {
     /** Distance to the next manoeuvre in meters. */
     public final double distanceTo;
 
+    /** Time for this segment in seconds (per-step time, 0 if unknown). */
+    public final double timeTo;
+
     /** Type of turn at the next manoeuvre. */
     public final TurnType turnType;
 
@@ -54,14 +57,15 @@ public class RouteInstruction {
                             String streetName,
                             String description,
                             String shortDescription) {
-        this(distanceTo, turnType, streetName, description, shortDescription,
+        this(distanceTo, 0.0, turnType, streetName, description, shortDescription,
              0.0, TurnType.STRAIGHT_ON, "", "");
     }
 
     /**
-     * Full constructor including optional "next next" hint.
+     * Full constructor including per-step time and optional "next next" hint.
      *
      * @param distanceTo              distance to next manoeuvre in meters
+     * @param timeTo                  time for this segment in seconds (0 if unknown)
      * @param turnType                type of turn
      * @param streetName              street to turn into (may be empty)
      * @param description             human-readable description
@@ -72,6 +76,7 @@ public class RouteInstruction {
      * @param nextNextShortDescription short description of following manoeuvre
      */
     public RouteInstruction(double distanceTo,
+                            double timeTo,
                             TurnType turnType,
                             String streetName,
                             String description,
@@ -81,6 +86,7 @@ public class RouteInstruction {
                             String nextNextDescription,
                             String nextNextShortDescription) {
         this.distanceTo = distanceTo;
+        this.timeTo = timeTo;
         this.turnType = turnType;
         this.streetName = streetName != null ? streetName : "";
         this.description = description != null ? description : "";
@@ -104,6 +110,7 @@ public class RouteInstruction {
     public String toString() {
         return "RouteInstruction{"
             + "distanceTo=" + distanceTo
+            + ", timeTo=" + timeTo
             + ", turnType=" + turnType
             + ", streetName='" + streetName + '\''
             + ", description='" + description + '\''
