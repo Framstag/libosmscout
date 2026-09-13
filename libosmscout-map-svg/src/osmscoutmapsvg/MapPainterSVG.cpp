@@ -19,16 +19,23 @@
 
 #include <osmscoutmapsvg/MapPainterSVG.h>
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
+
+#if !defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
+  #include <fontconfig/fontconfig.h>
+#endif
 
 #include <osmscout/system/Assert.h>
 #include <osmscoutmapsvg/SymbolRendererSVG.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/io/File.h>
+#include <osmscout/log/Logger.h>
 
 #include <osmscout/util/String.h>
 #include <osmscout/util/Base64.h>
@@ -52,6 +59,12 @@ namespace osmscout {
     pangoFontMap=pango_ft2_font_map_new();
     pango_context_set_font_map(pangoContext,
                                pangoFontMap);
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+    if (FT_Init_FreeType(&ftLibrary)!=0) {
+      ftLibrary=nullptr;
+
+      log.Warn() << "Cannot initialize FreeType, text metrics are approximated";
+    }
 #endif
   }
 
@@ -64,6 +77,19 @@ namespace osmscout {
       if (entry->second!=nullptr) {
         pango_font_description_free(entry->second);
       }
+    }
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+    for (const auto& entry : fontFaces) {
+      if (entry.second!=nullptr) {
+        FT_Done_Face(entry.second);
+      }
+    }
+
+    fontFaces.clear();
+
+    if (ftLibrary!=nullptr) {
+      FT_Done_FreeType(ftLibrary);
+      ftLibrary=nullptr;
     }
 #endif
   }
@@ -236,30 +262,196 @@ namespace osmscout {
 
 #else
 
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+
+  std::string MapPainterSVG::ResolveFontFile(const std::string& fontName)
+  {
+    if (fontName.empty()) {
+      return "";
+    }
+
+    // The FreeType based backends (AGG, OpenGL) configure a font file as font
+    // name, so a name pointing at an existing file wins
+    if (ExistsInFilesystem(fontName)) {
+      return fontName;
+    }
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
+    // Otherwise resolve the family name through fontconfig, the same font
+    // resolution the Pango and cairo text stacks use
+    if (!FcInit()) {
+      log.Warn() << "Cannot initialize fontconfig, font '" << fontName << "' cannot be resolved";
+
+      return "";
+    }
+
+    FcPattern* pattern=FcPatternCreate();
+
+    if (pattern==nullptr) {
+      return "";
+    }
+
+    FcPatternAddString(pattern,
+                       FC_FAMILY,
+                       reinterpret_cast<const FcChar8*>(fontName.c_str()));
+    FcConfigSubstitute(nullptr,
+                       pattern,
+                       FcMatchPattern);
+    FcDefaultSubstitute(pattern);
+
+    FcResult   matchResult=FcResultNoMatch;
+    FcPattern* match=FcFontMatch(nullptr,
+                                 pattern,
+                                 &matchResult);
+
+    std::string file;
+
+    if (match!=nullptr) {
+      FcChar8* resolvedFile=nullptr;
+
+      if (FcPatternGetString(match,
+                             FC_FILE,
+                             0,
+                             &resolvedFile)==FcResultMatch &&
+          resolvedFile!=nullptr) {
+        file=reinterpret_cast<const char*>(resolvedFile);
+      }
+
+      FcPatternDestroy(match);
+    }
+
+    FcPatternDestroy(pattern);
+
+    return file;
+#else
+
+    return "";
+#endif
+  }
+
+  FT_Face MapPainterSVG::GetFontFace(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     double fontSize)
+  {
+    if (ftLibrary==nullptr) {
+      return nullptr;
+    }
+
+    double pixelSize=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
+
+    if (!(pixelSize>0.0) || !std::isfinite(pixelSize)) {
+      return nullptr;
+    }
+
+    size_t key=static_cast<size_t>(std::lround(pixelSize));
+
+    if (key<1) {
+      key=1;
+    }
+
+    std::string file=ResolveFontFile(parameter.GetFontName());
+
+    if (file.empty()) {
+      return nullptr;
+    }
+
+    auto entry=fontFaces.find(std::make_pair(file,key));
+
+    if (entry!=fontFaces.end()) {
+      return entry->second;
+    }
+
+    FT_Face face=nullptr;
+
+    if (FT_New_Face(ftLibrary,file.c_str(),0,&face)!=0) {
+      log.Warn() << "Cannot load font file '" << file << "' with FreeType";
+
+      return nullptr;
+    }
+
+    if (FT_Set_Pixel_Sizes(face,static_cast<FT_UInt>(key),static_cast<FT_UInt>(key))!=0) {
+      log.Warn() << "Cannot set pixel size " << key << " for font file '" << file << "'";
+
+      FT_Done_Face(face);
+
+      return nullptr;
+    }
+
+    return fontFaces.insert(std::make_pair(std::make_pair(file,key),face)).first->second;
+  }
+
+#endif // OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE
+
   template<>
   std::vector<Glyph<MapPainterSVG::NativeGlyph>> MapPainterSVG::SvgLabel::ToGlyphs() const
   {
     std::vector<Glyph<MapPainterSVG::NativeGlyph>> result;
     double horizontalOffset = 0;
-    for (size_t ch = 0; ch < label.length(); ch++){
+
+    for (size_t ch = 0; ch < label.wstr.length(); ch++) {
       result.emplace_back();
 
-      result.back().glyph.character = WStringToUTF8String(label.substr(ch,1));
+      result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch,1));
 
       result.back().position=Vertex2D(horizontalOffset,
                                       0.0);
 
-      horizontalOffset += (double)(height * MapPainterSVG::AverageCharacterWidth);
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+      if (label.face==nullptr) {
+        // No font file: keep the character count based approximation
+        result.back().glyph.width=height * MapPainterSVG::AverageCharacterWidth;
+        result.back().glyph.height=height;
+        horizontalOffset += height * MapPainterSVG::AverageCharacterWidth;
+
+        continue;
+      }
+
+      FT_UInt glyphIndex=FT_Get_Char_Index(label.face,
+                                           static_cast<FT_ULong>(label.wstr[ch]));
+
+      if (glyphIndex==0) {
+        // Missing glyph: fall back to the .notdef glyph if available
+        glyphIndex=FT_Get_Char_Index(label.face,0);
+      }
+
+      if (FT_Load_Glyph(label.face,glyphIndex,FT_LOAD_DEFAULT)!=0) {
+        continue;
+      }
+
+      // 26.6 fixed point, /64. FreeType is y-up, screen is y-down.
+      result.back().glyph.xBearing=static_cast<double>(label.face->glyph->metrics.horiBearingX)/64.0;
+      result.back().glyph.yBearing=-static_cast<double>(label.face->glyph->metrics.horiBearingY)/64.0;
+      result.back().glyph.width=static_cast<double>(label.face->glyph->metrics.width)/64.0;
+      result.back().glyph.height=static_cast<double>(label.face->glyph->metrics.height)/64.0;
+      result.back().glyph.advance=static_cast<double>(label.face->glyph->advance.x)/64.0;
+
+      horizontalOffset += result.back().glyph.advance;
+#else
+      // Character count based approximation: no glyph metrics are available
+      result.back().glyph.width=height * MapPainterSVG::AverageCharacterWidth;
+      result.back().glyph.height=height;
+
+      horizontalOffset += result.back().glyph.width;
+#endif
     }
+
     return result;
   }
 
   ScreenVectorRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
+    // ink bounding box relative to the glyph base point (left baseline origin)
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+    return ScreenVectorRectangle(glyph.xBearing,
+                                 glyph.yBearing,
+                                 glyph.width,
+                                 glyph.height);
+#else
     return ScreenVectorRectangle(0.0,
-                                 (double)(glyph.height * -1),
-                                 (double)glyph.width,
-                                 (double)glyph.height);
+                                 -glyph.height,
+                                 glyph.width,
+                                 glyph.height);
+#endif
   }
 
   std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
@@ -270,15 +462,102 @@ namespace osmscout {
                                                                  bool /*enableWrapping*/,
                                                                  bool /*contourLabel*/)
   {
+    double pixelSize=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
+
     auto label = std::make_shared<MapPainterSVG::SvgLabel>(UTF8StringToWString(text));
 
     label->text=text;
     label->fontSize=fontSize;
-    label->height=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
-    label->width=label->label.length() * label->height * AverageCharacterWidth;
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+    FT_Face face=GetFontFace(projection,parameter,fontSize);
+
+    label->label.face=face;
+
+    if (face==nullptr) {
+      // Without a font file no glyph metrics are available: approximate the
+      // metrics instead of failing the whole rendering
+      log.Warn() << "No font file for font '" << parameter.GetFontName()
+                 << "' available, approximating text metrics";
+
+      label->height=pixelSize;
+      label->width=static_cast<double>(label->label.wstr.length())*pixelSize*AverageCharacterWidth;
+
+      return label;
+    }
+
+    double penX=0.0;
+    double inkMinX=0.0;
+    double inkMaxX=0.0;
+    double inkMinY=0.0;
+    double inkMaxY=0.0;
+    bool   hasInk=false;
+
+    for (size_t ch=0; ch<label->label.wstr.length(); ch++) {
+      FT_UInt glyphIndex=FT_Get_Char_Index(face,
+                                           static_cast<FT_ULong>(label->label.wstr[ch]));
+
+      if (glyphIndex==0) {
+        // Missing glyph: fall back to the .notdef glyph if available
+        glyphIndex=FT_Get_Char_Index(face,0);
+      }
+
+      if (FT_Load_Glyph(face,glyphIndex,FT_LOAD_DEFAULT)!=0) {
+        continue;
+      }
+
+      double advance=static_cast<double>(face->glyph->advance.x)/64.0;
+      double xBearing=static_cast<double>(face->glyph->metrics.horiBearingX)/64.0;
+      double yBearing=-static_cast<double>(face->glyph->metrics.horiBearingY)/64.0;
+      double glyphWidth=static_cast<double>(face->glyph->metrics.width)/64.0;
+      double glyphHeight=static_cast<double>(face->glyph->metrics.height)/64.0;
+
+      // ink box of the glyph, relative to the label origin
+      double x1=penX+xBearing;
+      double y1=yBearing;
+      double x2=x1+glyphWidth;
+      double y2=y1+glyphHeight;
+
+      if (!hasInk) {
+        inkMinX=x1;
+        inkMaxX=x2;
+        inkMinY=y1;
+        inkMaxY=y2;
+        hasInk=true;
+      }
+      else {
+        inkMinX=std::min(inkMinX,x1);
+        inkMaxX=std::max(inkMaxX,x2);
+        inkMinY=std::min(inkMinY,y1);
+        inkMaxY=std::max(inkMaxY,y2);
+      }
+
+      penX+=advance;
+    }
+
+    if (!hasInk) {
+      label->height=pixelSize;
+      label->width=static_cast<double>(label->label.wstr.length())*pixelSize*AverageCharacterWidth;
+
+      return label;
+    }
+
+    // The label rectangle is the union of the per-glyph ink boxes, like the
+    // Pango path and the text-metrics-api contract require
+    label->width=inkMaxX-inkMinX;
+    label->height=inkMaxY-inkMinY;
+#else
+    // Neither pango nor FreeType: approximate the metrics with the character
+    // count based fallback instead of failing the whole rendering
+    log.Warn() << "SVG backend built without pango and FreeType, approximating text metrics";
+
+    label->height=pixelSize;
+    label->width=static_cast<double>(label->label.wstr.length())*pixelSize*AverageCharacterWidth;
+#endif
 
     return label;
   }
+
 #endif
 
   TextMetrics MapPainterSVG::MeasureText(const Projection& projection,

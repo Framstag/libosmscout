@@ -245,6 +245,7 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmapqt => osmscoutmap",
 
     "osmscoutmapsvg => osmscout.system",
+    "osmscoutmapsvg => osmscout.log",
     "osmscoutmapsvg => osmscout.util",
     "osmscoutmapsvg => osmscout.io",
     "osmscoutmapsvg => osmscoutmap",

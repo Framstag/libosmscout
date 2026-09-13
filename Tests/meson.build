@@ -956,6 +956,28 @@ if ftDep.found() and buildMapCairo
   test('Check TextMetricsCairo compilation', TextMetricsCairoTest)
 endif
 
+if ftDep.found() and buildMapSVG
+  textMetricsSVGDeps = [mathDep, openmpDep, catch2MainDep, ftDep, pangoft2Dep]
+  textMetricsSVGArgs = ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+  # register the test font file as fontconfig application font (see test source)
+  if fontconfigDep.found()
+    textMetricsSVGDeps += fontconfigDep
+    textMetricsSVGArgs += '-DHAVE_LIB_FONTCONFIG'
+  endif
+
+  TextMetricsSVGTest = executable('TextMetricsSVGTest',
+               'src/TextMetricsSVGTest.cpp',
+               include_directories: [testIncDir, osmscoutmapsvgIncDir, osmscoutmapIncDir, osmscoutIncDir, include_directories('../Demos/include')],
+               dependencies: textMetricsSVGDeps,
+               link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
+               cpp_args: textMetricsSVGArgs,
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check TextMetricsSVG compilation', TextMetricsSVGTest)
+endif
+
 if buildMapCairo and buildMapQt and buildMapSkia
   TextMetricsCrossBackendTest = executable('TextMetricsCrossBackendTest',
                'src/TextMetricsCrossBackendTest.cpp',

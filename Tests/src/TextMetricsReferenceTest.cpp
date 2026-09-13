@@ -91,3 +91,30 @@ TEST_CASE("Reference measures one glyph per character", "[TextMetricsReference]"
   REQUIRE(metrics.glyphs.size() == 5);
   REQUIRE(metrics.width > 0.0);
 }
+
+TEST_CASE("Reference label height is the ink height of the rendered glyphs", "[TextMetricsReference]")
+{
+  TextMetricsAll::ReferenceMetrics metrics;
+  std::string                      error;
+
+  // 30.2362 px (fontSize=4, fontSizeParam=2, dpi=96): the scenario the backends
+  // are compared in
+  bool                             ok = TextMetricsAll::MeasureReference(TEXT_METRICS_FONT_PATH,
+                                                                         "Musterstra\u00dfe 12",
+                                                                         4.0,
+                                                                         2.0,
+                                                                         96.0,
+                                                                         metrics,
+                                                                         error);
+
+  REQUIRE(ok);
+  REQUIRE(error.empty());
+
+  // ink height: union of the glyph ink boxes (baseline to the topmost ink),
+  // not the font box (face->size->metrics.height, ~35 px at this size)
+  REQUIRE(metrics.height == Catch::Approx(22.0).margin(1.0));
+  REQUIRE(metrics.height < 30.0);
+
+  // must still agree with the label height the backends report (23 px)
+  REQUIRE(metrics.height == Catch::Approx(23.0).margin(1.0));
+}
