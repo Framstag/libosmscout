@@ -74,6 +74,27 @@
 #include <osmscout/util/Tiling.h>
 
 /*
+ * The allocation counter replaces the global operator new/delete. The sanitizer
+ * runtimes provide their own versions of them (libclang_rt.msan_cxx defines
+ * operator new/delete, for example), which would collide at link time, so the
+ * counter is disabled whenever a sanitizer is active. Define
+ * PERF_TEST_NO_ALLOCATION_COUNTER to disable it explicitly.
+ */
+#if defined(PERF_TEST_NO_ALLOCATION_COUNTER)
+#define PERF_TEST_HAVE_ALLOCATION_COUNTER 0
+#elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
+#define PERF_TEST_HAVE_ALLOCATION_COUNTER 0
+#elif defined(__has_feature)
+#if __has_feature(memory_sanitizer) || __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
+#define PERF_TEST_HAVE_ALLOCATION_COUNTER 0
+#else
+#define PERF_TEST_HAVE_ALLOCATION_COUNTER 1
+#endif
+#else
+#define PERF_TEST_HAVE_ALLOCATION_COUNTER 1
+#endif
+
+/*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory), drawing the "Ruhrgebiet":
 
@@ -245,6 +266,8 @@ std::string formatAlloc(double size)
     return buff.str();
 }
 
+#if PERF_TEST_HAVE_ALLOCATION_COUNTER
+
 namespace {
 
   /**
@@ -327,6 +350,19 @@ size_t GetAllocationCount()
 {
   return allocationCounter.load(std::memory_order_relaxed);
 }
+
+#else
+
+/**
+ * Without the counting allocator there is no allocation metric to report: the
+ * counter stays at zero and the report omits the allocation numbers.
+ */
+size_t GetAllocationCount()
+{
+  return 0;
+}
+
+#endif
 
 class PerformanceTestBackend {
 public:
@@ -1116,9 +1152,11 @@ int main(int argc, char* argv[])
     std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.dbStats.GetAverageTime() << " ";
     std::cout << "max: " << std::fixed << std::setprecision(2) << stats.dbStats.GetMaxTime() << " " << std::endl;
 
+#if PERF_TEST_HAVE_ALLOCATION_COUNTER
     std::cout << " Draw allocs: ";
     std::cout << "total: " << stats.drawAllocCount << " ";
     std::cout << "avg: " << stats.drawAllocCount / (stats.tileCount * args.drawRepeat) << std::endl;
+#endif
 
     std::cout << " Map        : ";
     std::cout << "total: " << std::fixed << std::setprecision(2) << stats.drawStats.GetTotalTime() << " ";
@@ -1126,11 +1164,13 @@ int main(int argc, char* argv[])
     std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawStats.GetAverageTime() << " ";
     std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawStats.GetMaxTime() << std::endl;
 
+#if PERF_TEST_HAVE_ALLOCATION_COUNTER
     size_t allocTotal=0;
 
     for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
       allocTotal+=stats.drawLevelAllocCount[step];
     }
+#endif
 
     for (size_t step=osmscout::RenderSteps::FirstStep; step<=osmscout::RenderSteps::LastStep; ++step) {
       std::cout << "               #" << step << " ";
@@ -1139,11 +1179,13 @@ int main(int argc, char* argv[])
       std::cout << "min: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMinTime() << " ";
       std::cout << "avg: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetAverageTime() << " ";
       std::cout << "max: " << std::fixed << std::setprecision(2) << stats.drawLevelStats[step].GetMaxTime() << " ";
+#if PERF_TEST_HAVE_ALLOCATION_COUNTER
       std::cout << "allocs: " << stats.drawLevelAllocCount[step] << " ";
       if (allocTotal>0) {
         std::cout << "(" << std::fixed << std::setprecision(0) << 100.0*stats.drawLevelAllocCount[step]/allocTotal <<
         "%)";
       }
+#endif
       std::cout << std::endl;
     }
   }

@@ -265,6 +265,45 @@ also 38-40 % of the draw time, and the ring transform happens before the visibil
 test in `PrepareAreaRing`, so invisible or unstyled areas are transformed and
 allocated for and discarded afterwards.
 
+## Sanitizer compatibility of the allocation counter (CI follow-up)
+
+The first push of this branch failed the `Sanitize` workflow, job `clang memory
+sanitizer` (run 34761987671) at link time:
+
+```
+FAILED: Tests/PerformanceTest-1.1.1
+ld: unity_0_cxx.cxx.o: in function `operator new(unsigned long)`:
+multiple definition of `operator new(unsigned long)`;
+/usr/lib/llvm-21/lib/clang/21/lib/linux/libclang_rt.msan_cxx-x86_64.a(msan_new_delete.cpp.o):
+first defined here
+```
+
+The counting `operator new`/`operator delete` added to the harness replaces the global
+operators, and the MemorySanitizer C++ runtime (`libclang_rt.msan_cxx`) defines its own
+versions of them. Fix: `PERF_TEST_HAVE_ALLOCATION_COUNTER` is computed from the sanitizer
+feature macros, and the overrides plus the counter are compiled only when no sanitizer is
+active (`__SANITIZE_ADDRESS__`, `__SANITIZE_THREAD__`,
+`__has_feature(memory_sanitizer|address_sanitizer|thread_sanitizer)`);
+`PERF_TEST_NO_ALLOCATION_COUNTER` disables it explicitly. In a build without the counter
+`GetAllocationCount()` returns 0 and the report omits the allocation lines instead of
+printing zeros.
+
+Verified with `-fsyntax-only` and a `#error` probe on the same condition:
+
+| compiler/flags | `PERF_TEST_HAVE_ALLOCATION_COUNTER` |
+|----------------|-------------------------------------|
+| `g++ -std=c++20` | 1 (metric available) |
+| `clang++ -std=c++20` | 1 (metric available) |
+| `clang++ -fsanitize=memory` | 0 (the failing CI job) |
+| `clang++ -fsanitize=address` | 0 |
+| `g++ -fsanitize=address` | 0 |
+| `g++ -fsanitize=thread` | 0 |
+
+Both paths were also built and run locally: with the counter the report prints
+`Draw allocs: total: 269505 avg: 53901`; with `PERF_TEST_NO_ALLOCATION_COUNTER` the target
+builds without warnings and the allocation lines are absent, and `ctest` passes 116/116 in
+both configurations.
+
 ## 4.5 Re-measurement against the baseline
 
 Same command and fixed view as 1.1. The allocation count is deterministic (identical in
