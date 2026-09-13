@@ -245,14 +245,14 @@ namespace osmscout {
       std::list<CoordBufferRange> clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
-    using WayPathDataIt=std::list<WayPathData>::iterator;
+    using WayPathDataIndex=size_t;
 
     /**
      * Data structure for holding temporary data route labels
      */
     struct OSMSCOUT_MAP_API RouteLabelData
     {
-      WayPathDataIt wayData;
+      WayPathDataIndex                                 wayData;
       std::map<PathTextStyleRef,std::set<std::string>> labels;
     };
 
@@ -289,9 +289,9 @@ namespace osmscout {
     std::vector<StepMethod>      stepMethods;        //!< Jump table render step methods
     double                       errorTolerancePixel;
 
-    std::list<AreaData>          areaData;           //!< Internal processing list for area rendering
-    std::list<WayData>           wayData;            //!< Internal processing list for way rendering
-    std::list<WayPathData>       wayPathData;
+    std::vector<AreaData>           areaData;        //!< Internal processing store for area rendering
+    std::vector<WayData>            wayData;         //!< Internal processing store for way rendering
+    std::vector<WayPathData>        wayPathData;
     std::list<RouteLabelData>    routeLabelData;
 
     std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
@@ -624,12 +624,18 @@ namespace osmscout {
     }
     //@}
 
-    const std::list<WayData>& GetWayData() const
+    /**
+     * Return the prepared ways of the current frame in draw order.
+     */
+    const std::vector<WayData>& GetWayData() const
     {
       return wayData;
     }
 
-    const std::list<AreaData>& GetAreaData() const
+    /**
+     * Return the prepared areas of the current frame in draw order.
+     */
+    const std::vector<AreaData>& GetAreaData() const
     {
       return areaData;
     }

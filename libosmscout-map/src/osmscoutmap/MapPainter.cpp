@@ -1284,6 +1284,15 @@ constexpr bool debugGroundTiles = false;
   {
     areaData.clear();
 
+    size_t areaCount=0;
+    for (const auto& mapData : data) {
+      areaCount+=mapData.areas.size()+mapData.poiAreas.size();
+    }
+
+    // An area prepares one entry per drawn ring, so this is a lower bound that
+    // avoids the first growth steps of the store
+    areaData.reserve(areaData.size()+areaCount);
+
     for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
       const auto& mapData = data[dbIndex];
       //Areas
@@ -1670,6 +1679,19 @@ constexpr bool debugGroundTiles = false;
     wayPathData.clear();
     routeLabelData.clear();
 
+    size_t wayCount=0;
+    for (const auto& mapData : data) {
+      wayCount+=mapData.ways.size()+mapData.poiWays.size();
+    }
+
+    // A way prepares one entry per drawn line style, so this is a lower bound that
+    // avoids the first growth steps of the store
+    wayData.reserve(wayData.size()+wayCount);
+
+    // A route can add prepared way paths while it is processed, so the prepared
+    // way paths are referenced by index instead of by iterator
+    wayPathData.reserve(wayPathData.size()+wayCount);
+
     assert(data.size() == databaseCache.size());
     for (size_t dbIndex = 0; dbIndex < data.size(); ++dbIndex) {
       const auto& mapData = data[dbIndex];
@@ -1768,7 +1790,7 @@ constexpr bool debugGroundTiles = false;
 
     struct WayRoutes
     {
-      WayPathDataIt wayData;
+      WayPathDataIndex                                 wayData;
       std::set<Color> colors; // collapse "sidecar" routes with same color
       double rightSideCarPos=0;
       double leftSideCarPos=0;
@@ -1781,11 +1803,12 @@ constexpr bool debugGroundTiles = false;
                                                     projection.ConvertWidthToPixel(parameter.GetSidecarMinDistanceMM())));
 
     std::map<FileOffset,WayRoutes> wayDataMap;
-    for (auto it=wayPathData.begin(); it != wayPathData.end(); ++it){
-      auto &wayRoute=wayDataMap[it->ref];
-      wayRoute.wayData=it;
-      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+sidecarOffset;
-      wayRoute.leftSideCarPos=wayRoute.rightSideCarPos*-1;
+    for (size_t i=0; i<wayPathData.size(); i++){
+      const auto & pathData=wayPathData[i];
+      auto       &wayRoute=wayDataMap[pathData.ref];
+      wayRoute.wayData=i;
+      wayRoute.rightSideCarPos=(pathData.mainSlotWidth/2)+sidecarOffset;
+      wayRoute.leftSideCarPos=wayRoute.rightSideCarPos* -1;
     }
 
     for (const auto &route:data.routes){
@@ -1880,7 +1903,7 @@ constexpr bool debugGroundTiles = false;
               wayPathData.push_back(pathData);
 
               auto &wayRoute=wayDataMap[member.way];
-              wayRoute.wayData=std::prev(wayPathData.end());
+              wayRoute.wayData=wayPathData.size()-1;
               wayRoute.rightSideCarPos=0;
               wayRoute.leftSideCarPos=0;
               memberWay=wayDataMap.find(member.way);
@@ -1902,7 +1925,7 @@ constexpr bool debugGroundTiles = false;
           }
 
           // collapse colors
-          const auto& pathData=memberWay->second.wayData;
+          const auto & pathData=wayPathData[memberWay->second.wayData];
           if (memberWay->second.colors.contains(color)){
             FlushRouteData();
             continue;
@@ -1931,11 +1954,11 @@ constexpr bool debugGroundTiles = false;
           size_t transEnd;
 
           if (lineOffset==0) {
-            transStart=pathData->coordRange.GetStart();
-            transEnd=pathData->coordRange.GetEnd();
+            transStart=pathData.coordRange.GetStart();
+            transEnd=pathData.coordRange.GetEnd();
           }
           else {
-            CoordBufferRange range=coordBuffer.GenerateParallelWay(pathData->coordRange,
+            CoordBufferRange range=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                                     lineOffset);
 
             transStart=range.GetStart();
@@ -2093,8 +2116,11 @@ constexpr bool debugGroundTiles = false;
                                       const MapParameter& parameter,
                                       const std::vector<MapData>& data)
   {
-    wayData.sort();
-    areaData.sort(AreaSorter);
+    std::stable_sort(wayData.begin(),
+                     wayData.end());
+    std::stable_sort(areaData.begin(),
+                     areaData.end(),
+                     AreaSorter);
 
     // Optional callback after preprocessing data
     AfterPreprocessingCallback(projection,
@@ -2677,7 +2703,7 @@ constexpr bool debugGroundTiles = false;
 
         if (DrawWayContourLabel(projection,
                                 parameter,
-                                *(routeLabel.wayData),
+                                wayPathData[routeLabel.wayData],
                                 labelEntry.first,
                                 labels.str())) {
           ++drawnCount;
