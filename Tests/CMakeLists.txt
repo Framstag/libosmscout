@@ -439,6 +439,23 @@ if(${OSMSCOUT_BUILD_MAP_CAIRO} AND ${OSMSCOUT_BUILD_MAP_QT} AND ${OSMSCOUT_BUILD
   osmscout_test_project(NAME TextMetricsCrossBackendTest SOURCES src/TextMetricsCrossBackendTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo OSMScout::MapQt OSMScout::MapSkia Qt::Widgets Catch2::Catch2WithMain SKIPTEST)
 endif()
 
+#---- TextMetricsSVGTest: SVG text metrics (pango and pango-less stack) vs the pango baseline
+if(HAVE_LIB_FREETYPE AND ${OSMSCOUT_BUILD_MAP_SVG})
+  osmscout_test_project(NAME TextMetricsSVGTest SOURCES src/TextMetricsSVGTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSVG Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include)
+  target_compile_definitions(TextMetricsSVGTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
+
+  # Optional direct fontconfig usage: the test registers the bundled font
+  # file as a fontconfig application font, so that the font resolution of both
+  # text stacks (fontconfig for the pango-less stack, pangoft2 for pango)
+  # finds the exact font even without the font installed system-wide
+  find_package(Fontconfig QUIET)
+  if(TARGET Fontconfig::Fontconfig)
+    # must stay plain: osmscout_test_project links via the plain signature
+    target_link_libraries(TextMetricsSVGTest Fontconfig::Fontconfig)
+    target_compile_definitions(TextMetricsSVGTest PRIVATE HAVE_LIB_FONTCONFIG)
+  endif()
+endif()
+
 #---- TextMetricsReferenceTest
 if(HAVE_LIB_FREETYPE)
   osmscout_test_project(NAME TextMetricsReferenceTest SOURCES src/TextMetricsReferenceTest.cpp TARGET OSMScout::OSMScout Catch2::Catch2WithMain Freetype::Freetype INCLUDES ${PROJECT_SOURCE_DIR}/Demos/include)

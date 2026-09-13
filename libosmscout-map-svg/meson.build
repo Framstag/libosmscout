@@ -17,7 +17,7 @@ osmscoutmapsvg = library('osmscout_map_svg',
                          osmscoutmapsvgSrc,
                          include_directories: [osmscoutmapsvgIncDir, osmscoutmapIncDir, osmscoutIncDir],
                          cpp_args: cppArgs,
-                         dependencies: [mathDep, threadDep, pangoft2Dep],
+                         dependencies: [mathDep, threadDep, pangoft2Dep, fontconfigDep, ftDep],
                          link_with: [osmscoutmap, osmscout],
                          version: libraryVersion,
                          install: true)

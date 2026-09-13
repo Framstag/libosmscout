@@ -9,6 +9,16 @@ set(SOURCE_FILES
     src/osmscoutmapsvg/SymbolRendererSVG.cpp
 )
 
+# The pango-less variant of the backend measures text with FreeType directly
+if(NOT TARGET Freetype::Freetype)
+    message(SEND_ERROR "freetype2 is required for the SVG map drawing backend")
+endif()
+
+# Font family names are resolved to font files with fontconfig where available;
+# without it the configured font name has to be a font file
+find_package(Fontconfig QUIET)
+set(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG ${Fontconfig_FOUND})
+
 osmscout_library_project(
 	NAME OSMScoutMapSVG
 	ALIAS MapSVG
@@ -17,7 +27,7 @@ osmscout_library_project(
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutmapsvg
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapsvg/MapSVGFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map
+	TARGET OSMScout::OSMScout OSMScout::Map Freetype::Freetype
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)
@@ -38,4 +48,8 @@ if(PANGOFT2_FOUND)
   if(TARGET harfbuzz::harfbuzz)
       target_link_libraries(OSMScoutMapSVG harfbuzz::harfbuzz)
   endif()
+endif()
+
+if(TARGET Fontconfig::Fontconfig)
+  target_link_libraries(OSMScoutMapSVG Fontconfig::Fontconfig)
 endif()
