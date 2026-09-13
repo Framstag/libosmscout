@@ -1935,6 +1935,36 @@ public:
   JavaRouteInstruction GenerateNextRouteInstruction(
       osmscout::RouteDescription::NodeIterator previous,
       osmscout::RouteDescription::NodeIterator last,
+      const osmscout::GeoCoord &coord) const
+  {
+    // 3-arg overload matching upstream's RouteInstructionAgent call style.
+    // Approximate the PositionAgent's abscissa (fraction of the segment
+    // routeNode -> routeNode+1) from the coordinate: straight-line distance
+    // ratio, gated so the fix lies within the segment span, clamped to
+    // [0,1]. Falls back to abscissa 0 (straight-line travelled) otherwise.
+    if (previous == last) {
+      return JavaRouteInstruction{};
+    }
+    double abscissa = 0.0;
+    auto nextNode = previous;
+    ++nextNode;
+    if (nextNode != last) {
+      double segmentLen = osmscout::GetEllipsoidalDistance(
+          previous->GetLocation(), nextNode->GetLocation()).AsMeter();
+      double d1 = osmscout::GetEllipsoidalDistance(
+          previous->GetLocation(), coord).AsMeter();
+      double d2 = osmscout::GetEllipsoidalDistance(
+          nextNode->GetLocation(), coord).AsMeter();
+      if (segmentLen > 0.0 && d1 <= segmentLen && d2 <= segmentLen) {
+        abscissa = std::clamp(1.0 - d2 / segmentLen, 0.0, 1.0);
+      }
+    }
+    return GenerateNextRouteInstruction(previous, last, coord, abscissa);
+  }
+
+  JavaRouteInstruction GenerateNextRouteInstruction(
+      osmscout::RouteDescription::NodeIterator previous,
+      osmscout::RouteDescription::NodeIterator last,
       const osmscout::GeoCoord &coord,
       double abscissa) const
   {
