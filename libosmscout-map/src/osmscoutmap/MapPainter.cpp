@@ -1086,29 +1086,72 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
+  void MapPainter::TransformAreaRing(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const Area::Ring& ring,
+                                     size_t index)
+  {
+    if (ring.segments.size() <= 1) {
+      ringCoordRanges[index]=TransformArea(ring.nodes,
+                                           transBuffer,
+                                           coordBuffer,
+                                           projection,
+                                           parameter.GetOptimizeAreaNodes(),
+                                           errorTolerancePixel);
+
+      return;
+    }
+
+    // A ring stored as segments is transformed as one polygon, dropping the parts
+    // that are outside of the current view
+    ringNodes.clear();
+
+    for (const auto &segment:ring.segments) {
+      if (projection.GetDimensions().Intersects(segment.bbox, false)) {
+        // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
+        ringNodes.insert(ringNodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
+      }
+      else {
+        ringNodes.push_back(ring.nodes[segment.from]);
+        ringNodes.push_back(ring.nodes[segment.to-1]);
+      }
+    }
+
+    ringCoordRanges[index]=TransformArea(ringNodes,
+                                         transBuffer,
+                                         coordBuffer,
+                                         projection,
+                                         parameter.GetOptimizeAreaNodes(),
+                                         errorTolerancePixel);
+  }
+
   bool MapPainter::PrepareAreaRing(size_t dbIndex,
                                    const StyleConfig& styleConfig,
                                    const Projection& projection,
                                    const MapParameter& parameter,
-                                   const std::vector<CoordBufferRange>& coordRanges,
+                                   std::vector<CoordBufferRange>& coordRanges,
                                    const Area& area,
                                    const Area::Ring& ring,
                                    size_t i,
                                    const TypeInfoRef& type)
   {
+    // The master ring does not have any nodes, so we skip it.
+    // Rings with less than 3 nodes should be skipped, too (no area)
+    bool hasGeometry=!ring.IsMaster() && ring.nodes.size() >= 3;
+
     if (type->GetIgnore()) {
       // clipping inner ring, we will not render it, but still go deeper,
-      // there may be nested outer rings
+      // there may be nested outer rings. Its geometry was already transformed
+      // in PrepareArea, because the ring it clips is prepared before it is visited.
       return true;
     }
 
-    if (!coordRanges[i].IsValid()) {
-      return false; // ring was skipped or reduced to single point
+    if (!hasGeometry) {
+      return false; // ring was skipped
     }
 
-    FillStyleRef                fillStyle;
-    std::vector<BorderStyleRef> borderStyles;
-    BorderStyleRef              borderStyle;
+    FillStyleRef   fillStyle;
+    BorderStyleRef borderStyle;
 
     fillStyle=styleConfig.GetAreaFillStyle(type,
                                            ring.GetFeatureValueBuffer(),
@@ -1127,7 +1170,7 @@ constexpr bool debugGroundTiles = false;
                                     borderStyles);
 
     if (!fillStyle && borderStyles.empty()) {
-      // Nothing to draw
+      // Nothing to draw, so there is no need to transform the ring
       return false;
     }
 
@@ -1141,29 +1184,47 @@ constexpr bool debugGroundTiles = false;
       ++borderStyleIndex;
     }
 
+    double borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
+
+    if (!IsVisibleArea(projection,
+                       ring.GetBoundingBox(),
+                       borderWidth/2.0)) {
+      // Outside of the current view, so there is no need to transform the ring
+      return false;
+    }
+
+    // The ring takes part in the frame, so it is transformed now. This is the only
+    // place where the geometry of a drawn ring is transformed.
+    TransformAreaRing(projection,
+                      parameter,
+                      ring,
+                      i);
+
     AreaData a;
-    double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
     a.boundingBox=ring.GetBoundingBox();
     a.isOuter=ring.IsOuter();
-
-    if (!IsVisibleArea(projection,
-                       a.boundingBox,
-                       borderWidth/2.0)) {
-      return false;
-    }
 
     // Collect possible clippings. We only take into account inner rings of the next level
     // that do not have a type and thus act as a clipping region. If a inner ring has a type,
     // we currently assume that it does not have alpha and paints over its region and clipping is
     // not required.
-    area.VisitClippingRings(i, [&a, &coordRanges](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
-      if (type->GetIgnore() && coordRanges[j].IsValid()) {
-        a.clippings.push_back(coordRanges[j]);
-      }
+    struct ClippingContext
+    {
+      AreaData                           *areaData;
+      const std::vector<CoordBufferRange>*coordRanges;
+    };
 
-      return true;
-    });
+    ClippingContext clippingContext{.areaData=&a,.coordRanges=&coordRanges};
+
+    area.VisitClippingRings(i,
+                            [&clippingContext](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
+                              if (type->GetIgnore() && clippingContext.coordRanges->at(j).IsValid()) {
+                                clippingContext.areaData->clippings.push_back(clippingContext.coordRanges->at(j));
+                              }
+
+                              return true;
+                            });
 
     a.dbIndex=dbIndex;
     a.ref=area.GetObjectFileRef();
@@ -1221,61 +1282,64 @@ constexpr bool debugGroundTiles = false;
                                const MapParameter& parameter,
                                const AreaRef &area)
   {
-    std::vector<CoordBufferRange> td(area->rings.size()); // Polygon information for each ring
+    // One coordinate range per ring of this area, invalid until the geometry of that ring
+    // is actually transformed. The store is reused across the areas of the frame and only
+    // grows to the ring count of the largest area seen so far, so preparing an area does
+    // not allocate per loaded area.
+    ringCoordRanges.assign(area->rings.size(),
+                           CoordBufferRange());
 
+    // Inner rings without a type are not drawn, but the ring they clip needs their
+    // coordinate range as clipping region. The ring visit is breadth first by nesting
+    // depth, so a clipping ring is visited after the ring it clips; its geometry is
+    // therefore transformed here, up front.
     for (size_t i=0; i<area->rings.size(); i++) {
-      const Area::Ring &ring = area->rings[i];
-      // The master ring does not have any nodes, so we skip it
-      // Rings with less than 3 nodes should be skipped, too (no area)
+      const Area::Ring &ring=area->rings[i];
+
       if (ring.IsMaster() || ring.nodes.size() < 3) {
-        // td is initialized to empty by default
         continue;
       }
 
-      if (ring.segments.size() <= 1){
-        td[i]=TransformArea(ring.nodes,
-                            transBuffer,
-                            coordBuffer,
-                            projection,
-                            parameter.GetOptimizeAreaNodes(),
-                            errorTolerancePixel);
-      }
-      else {
-        std::vector<Point> nodes;
-
-        for (const auto &segment:ring.segments){
-          if (projection.GetDimensions().Intersects(segment.bbox, false)){
-            // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
-            nodes.insert(nodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
-          }
-          else {
-            nodes.push_back(ring.nodes[segment.from]);
-            nodes.push_back(ring.nodes[segment.to-1]);
-          }
-        }
-
-        td[i]=TransformArea(nodes,
-                            transBuffer,
-                            coordBuffer,
-                            projection,
-                            parameter.GetOptimizeAreaNodes(),
-                            errorTolerancePixel);
+      if (area->GetRingType(ring)->GetIgnore()) {
+        TransformAreaRing(projection,
+                          parameter,
+                          ring,
+                          i);
       }
     }
 
-    area->VisitRings([this,&styleConfig,&projection,&parameter,&td,&area, &dbIndex](size_t i,
-                         const Area::Ring& ring,
-                         const TypeInfoRef& type)->bool {
-      return PrepareAreaRing(dbIndex,
-                             styleConfig,
-                             projection,
-                             parameter,
-                             td,
-                             *area,
-                             ring,
-                             i,
-                             type);
-    });
+    // The context makes the visitor capture a single pointer, so the closure fits into
+    // the small buffer of std::function and the ring visit does not allocate per area.
+    struct RingContext
+    {
+      MapPainter        *painter;
+      const StyleConfig *styleConfig;
+      const Projection  *projection;
+      const MapParameter*parameter;
+      const Area        *area;
+      size_t            dbIndex;
+    };
+
+    RingContext context{.painter=this,
+                        .styleConfig=&styleConfig,
+                        .projection=&projection,
+                        .parameter=&parameter,
+                        .area=area.get(),
+                        .dbIndex=dbIndex};
+
+    area->VisitRings([&context](size_t i,
+                                const Area::Ring& ring,
+                                const TypeInfoRef& type)->bool {
+                       return context.painter->PrepareAreaRing(context.dbIndex,
+                                                               *context.styleConfig,
+                                                               *context.projection,
+                                                               *context.parameter,
+                                                               context.painter->ringCoordRanges,
+                                                               *context.area,
+                                                               ring,
+                                                               i,
+                                                               type);
+                     });
   }
 
   void MapPainter::ProcessAreas(const Projection& projection,

@@ -419,6 +419,13 @@ else()
   message("Skip MapPainterFrameBuffers test, libosmscout-map is missing.")
 endif()
 
+#---- MapPainterAreaPreparationTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterAreaPreparationTest SOURCES src/MapPainterAreaPreparationTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterAreaPreparation test, libosmscout-map is missing.")
+endif()
+
 #---- TextMetricsTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME TextMetricsTest SOURCES src/TextMetricsTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
