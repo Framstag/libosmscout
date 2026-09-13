@@ -32,7 +32,7 @@
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
   #include <pango/pangoft2.h>
-#else
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
   #include <ft2build.h>
   #include FT_FREETYPE_H
 #endif
@@ -68,11 +68,13 @@ namespace osmscout {
     struct NativeGlyph
     {
       std::string character;
+      double      width{0.0};   //!< Ink box width
+      double      height{0.0};  //!< Ink box height
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
       double      xBearing{0.0}; //!< Ink box left edge, relative to the glyph base point
       double      yBearing{0.0}; //!< Ink box top edge (y grows downwards), relative to the glyph base point
-      double      width{0.0};    //!< Ink box width
-      double      height{0.0};   //!< Ink box height
       double      advance{0.0};  //!< Horizontal advance
+#endif
     };
 
     /**
@@ -83,7 +85,9 @@ namespace osmscout {
     struct NativeLabel
     {
       std::wstring wstr;
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
       FT_Face      face{nullptr};
+#endif
 
       NativeLabel() = default;
 
@@ -95,16 +99,19 @@ namespace osmscout {
     };
 
     /**
-     * Fallback advance factor (fraction of the font size) used only if no font
-     * file can be resolved for the configured font name.
+     * Fallback advance factor (fraction of the font size) used if the build has
+     * neither pango nor FreeType, or if no font file can be resolved for the
+     * configured font name.
      */
     static constexpr double AverageCharacterWidth = 0.75;
 
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
   private:
     using FontFaceMap = std::map<std::pair<std::string,size_t>,FT_Face>;
 
     FT_Library  ftLibrary{nullptr}; //!< FreeType library, nullptr if initialization failed
     FontFaceMap fontFaces;          //!< Cached faces by font file and pixel size
+#endif
 #endif
 
   public:
@@ -156,7 +163,7 @@ namespace osmscout {
     PangoFontDescription* GetFont(const Projection& projection,
                                   const MapParameter& parameter,
                                   double fontSize);
-#else
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
 
     /**
      * Resolve the configured font name to a font file: the name is interpreted

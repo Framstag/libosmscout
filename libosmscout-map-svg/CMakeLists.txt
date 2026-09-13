@@ -9,9 +9,16 @@ set(SOURCE_FILES
     src/osmscoutmapsvg/SymbolRendererSVG.cpp
 )
 
-# The pango-less variant of the backend measures text with FreeType directly
-if(NOT TARGET Freetype::Freetype)
-    message(SEND_ERROR "freetype2 is required for the SVG map drawing backend")
+# The pango-less variant of the backend measures text with FreeType directly;
+# without FreeType it falls back to an approximation (see MapPainterSVG.cpp)
+set(OSMSCOUT_MAP_SVG_TARGETS OSMScout::OSMScout OSMScout::Map)
+
+if(TARGET Freetype::Freetype)
+    set(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE TRUE)
+    list(APPEND OSMSCOUT_MAP_SVG_TARGETS Freetype::Freetype)
+else()
+    set(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE FALSE)
+    message(STATUS "freetype2 not found, the SVG backend without pango approximates text metrics")
 endif()
 
 # Font family names are resolved to font files with fontconfig where available;
@@ -27,7 +34,7 @@ osmscout_library_project(
 	HEADER ${HEADER_FILES}
 	INCLUDEDIR osmscoutmapsvg
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmapsvg/MapSVGFeatures.h.cmake
-	TARGET OSMScout::OSMScout OSMScout::Map Freetype::Freetype
+	TARGET ${OSMSCOUT_MAP_SVG_TARGETS}
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)

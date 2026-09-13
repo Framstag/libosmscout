@@ -26,7 +26,7 @@
 #include <limits>
 #include <list>
 
-#if !defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
+#if !defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
   #include <fontconfig/fontconfig.h>
 #endif
 
@@ -59,7 +59,7 @@ namespace osmscout {
     pangoFontMap=pango_ft2_font_map_new();
     pango_context_set_font_map(pangoContext,
                                pangoFontMap);
-#else
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
     if (FT_Init_FreeType(&ftLibrary)!=0) {
       ftLibrary=nullptr;
 
@@ -78,7 +78,7 @@ namespace osmscout {
         pango_font_description_free(entry->second);
       }
     }
-#else
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
     for (const auto& entry : fontFaces) {
       if (entry.second!=nullptr) {
         FT_Done_Face(entry.second);
@@ -262,6 +262,8 @@ namespace osmscout {
 
 #else
 
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+
   std::string MapPainterSVG::ResolveFontFile(const std::string& fontName)
   {
     if (fontName.empty()) {
@@ -378,6 +380,8 @@ namespace osmscout {
     return fontFaces.insert(std::make_pair(std::make_pair(file,key),face)).first->second;
   }
 
+#endif // OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE
+
   template<>
   std::vector<Glyph<MapPainterSVG::NativeGlyph>> MapPainterSVG::SvgLabel::ToGlyphs() const
   {
@@ -392,8 +396,11 @@ namespace osmscout {
       result.back().position=Vertex2D(horizontalOffset,
                                       0.0);
 
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
       if (label.face==nullptr) {
         // No font file: keep the character count based approximation
+        result.back().glyph.width=height * MapPainterSVG::AverageCharacterWidth;
+        result.back().glyph.height=height;
         horizontalOffset += height * MapPainterSVG::AverageCharacterWidth;
 
         continue;
@@ -419,6 +426,13 @@ namespace osmscout {
       result.back().glyph.advance=static_cast<double>(label.face->glyph->advance.x)/64.0;
 
       horizontalOffset += result.back().glyph.advance;
+#else
+      // Character count based approximation: no glyph metrics are available
+      result.back().glyph.width=height * MapPainterSVG::AverageCharacterWidth;
+      result.back().glyph.height=height;
+
+      horizontalOffset += result.back().glyph.width;
+#endif
     }
 
     return result;
@@ -427,10 +441,17 @@ namespace osmscout {
   ScreenVectorRectangle MapPainterSVG::GlyphBoundingBox(const NativeGlyph &glyph) const
   {
     // ink bounding box relative to the glyph base point (left baseline origin)
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
     return ScreenVectorRectangle(glyph.xBearing,
                                  glyph.yBearing,
                                  glyph.width,
                                  glyph.height);
+#else
+    return ScreenVectorRectangle(0.0,
+                                 -glyph.height,
+                                 glyph.width,
+                                 glyph.height);
+#endif
   }
 
   std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
@@ -442,12 +463,15 @@ namespace osmscout {
                                                                  bool /*contourLabel*/)
   {
     double pixelSize=projection.ConvertWidthToPixel(fontSize*parameter.GetFontSize());
-    FT_Face face=GetFontFace(projection,parameter,fontSize);
 
     auto label = std::make_shared<MapPainterSVG::SvgLabel>(UTF8StringToWString(text));
 
     label->text=text;
     label->fontSize=fontSize;
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE)
+    FT_Face face=GetFontFace(projection,parameter,fontSize);
+
     label->label.face=face;
 
     if (face==nullptr) {
@@ -522,6 +546,14 @@ namespace osmscout {
     // Pango path and the text-metrics-api contract require
     label->width=inkMaxX-inkMinX;
     label->height=inkMaxY-inkMinY;
+#else
+    // Neither pango nor FreeType: approximate the metrics with the character
+    // count based fallback instead of failing the whole rendering
+    log.Warn() << "SVG backend built without pango and FreeType, approximating text metrics";
+
+    label->height=pixelSize;
+    label->width=static_cast<double>(label->label.wstr.length())*pixelSize*AverageCharacterWidth;
+#endif
 
     return label;
   }

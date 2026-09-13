@@ -153,18 +153,27 @@ TEST_CASE("SVG measurement matches the FreeType reference", "[TextMetricsSVG]")
   REQUIRE(error.empty());
 
 #if defined(HAVE_LIB_FONTCONFIG)
-  bool appFontAdded=FcConfigAppFontAddFile(nullptr,
-                                           reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+  // fontconfig resolves the family name stored in the font file for both text
+  // stacks, so the backend measures with the exact font of the reference
+  const std::string fontName=fontFamily;
+
+  bool              appFontAdded=FcConfigAppFontAddFile(nullptr,
+                                                        reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
 
   if (!appFontAdded) {
     INFO("Cannot register font \"" << TEXT_METRICS_FONT_PATH << "\" as fontconfig application font");
   }
+#else
+  // Without fontconfig the pango-less text stack expects a font file as font
+  // name (the convention of the FreeType based backends)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
+
 #endif
 
   osmscout::MapPainterSVG painter;
 
   auto                    metrics=painter.MeasureText(CreateProjection(),
-                                                      CreateParameter(fontFamily),
+                                                      CreateParameter(fontName),
                                                       ScenarioText,
                                                       ScenarioFontSize);
 
@@ -220,6 +229,11 @@ TEST_CASE("SVG label dimensions match the pango baseline", "[TextMetricsSVG]")
 #if defined(HAVE_LIB_FONTCONFIG)
   FcConfigAppFontAddFile(nullptr,
                          reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+
+  const std::string fontName=fontFamily;
+
+#else
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 #endif
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
@@ -232,7 +246,7 @@ TEST_CASE("SVG label dimensions match the pango baseline", "[TextMetricsSVG]")
   osmscout::MapPainterSVG painter;
 
   auto                    metrics=painter.MeasureText(CreateProjection(),
-                                                      CreateParameter(fontFamily),
+                                                      CreateParameter(fontName),
                                                       ScenarioText,
                                                       ScenarioFontSize);
 

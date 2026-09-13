@@ -6,6 +6,11 @@
 #cmakedefine OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO
 #endif
 
+#ifndef OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE
+/* freetype found, used to measure text without pango */
+#cmakedefine OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE
+#endif
+
 #ifndef OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG
 /* fontconfig found, used to resolve font family names without pango */
 #cmakedefine OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG
