@@ -83,6 +83,15 @@ namespace osmscout {
                                 RenderSteps startStep,
                                 RenderSteps endStep){
         cg = paintCG;
+
+        // CoreText measures with the font resolved from the font name and the font size
+        // scaled by the projection, so that state is the measurement environment of the label
+        // layouter
+        labelLayouter.SetMeasurementEnvironment(BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                           parameter.GetFontSize(),
+                                                                           projection.GetDPI(),
+                                                                           projection.GetMagnification().GetLevel()));
+
         return Draw(projection,
                     parameter,
                     data,

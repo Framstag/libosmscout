@@ -102,6 +102,15 @@ namespace osmscout {
                  const MapParameter& parameter,
                  double fontSize);
 
+    /**
+     * Return the environment the label measurements of this painter depend on: the state that
+     * is not an argument of the label layouter's Layout() call - the resolved font, the
+     * resolution of the projection and the font settings of the current drawing target. The
+     * label layouter drops its remembered measurements when the environment changes.
+     */
+    std::string GetMeasurementEnvironment(const Projection& projection,
+                                          const MapParameter& parameter) const;
+
     void SetLineAttributes(const Color& color,
                            double width,
                            const std::vector<double>& dash);
