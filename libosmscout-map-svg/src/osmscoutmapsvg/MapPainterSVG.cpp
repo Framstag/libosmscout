@@ -1290,6 +1290,14 @@ namespace osmscout {
     bool                        result=true;
 
     this->stream.rdbuf(stream.rdbuf());
+
+    // The SVG backend measures with the font resolved from the font name, scaled by the font
+    // size and the projection, so that state is the measurement environment of the layouter
+    labelLayouter.SetMeasurementEnvironment(BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                        parameter.GetFontSize(),
+                                                                        projection.GetDPI(),
+                                                                        projection.GetMagnification().GetLevel()));
+
     //typeConfig=styleConfig->GetTypeConfig();
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());

@@ -53,6 +53,13 @@ namespace osmscout {
   public:
     explicit LabelPath(double minSegmentLength=5);
     virtual ~LabelPath();
+
+    /**
+     * Drop all points, so that the path can be rebuilt for the next path label. The buffers of
+     * the segments are reused.
+     */
+    void Clear();
+
     void AddPoint(const Vertex2D& point);
     double GetLength() const {
       return length+endDistance;

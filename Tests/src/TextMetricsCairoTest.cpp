@@ -76,6 +76,20 @@ namespace {
 
     return parameter;
   }
+
+  osmscout::MercatorProjection CreateProjectionForDpi(double dpi)
+  {
+    osmscout::MercatorProjection projection;
+
+    projection.Set(osmscout::GeoCoord(50.107252570499767, 14.459053009732296),
+                   0.0,
+                   osmscout::Magnification(osmscout::Magnification::magClose),
+                   dpi,
+                   800,
+                   480);
+
+    return projection;
+  }
 } // namespace
 
 /**
@@ -264,4 +278,66 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
 
   cairo_destroy(cr);
   cairo_surface_destroy(surface);
+}
+
+/**
+ * The Cairo backend scales the requested font size by the resolution of the projection, so its
+ * measurement depends on the projection and on its drawing target. That is why the painter
+ * reports both as the measurement environment of the label layouter
+ * (`MapPainterCairo::GetMeasurementEnvironment`), and why a change of either has to invalidate
+ * the measurements the layouter remembers.
+ */
+TEST_CASE("Cairo measurement depends on the resolution of the projection", "[TextMetricsCairo]")
+{
+  std::string fontFamily;
+  std::string error;
+
+  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
+                                              fontFamily,
+                                              error));
+  REQUIRE(error.empty());
+
+#if defined(HAVE_LIB_FONTCONFIG)
+  FcConfigAppFontAddFile(nullptr,
+                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+#endif
+
+  osmscout::MapParameter       parameter=CreateParameter(fontFamily);
+
+  osmscout::MercatorProjection projection96=CreateProjectionForDpi(96.0);
+  osmscout::MercatorProjection projection192=CreateProjectionForDpi(192.0);
+
+  cairo_surface_t              *surface96=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,800,480);
+  cairo_surface_t              *surface192=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,800,480);
+
+  REQUIRE(surface96!=nullptr);
+  REQUIRE(surface192!=nullptr);
+
+  cairo_t *context96=cairo_create(surface96);
+  cairo_t *context192=cairo_create(surface192);
+
+  REQUIRE(context96!=nullptr);
+  REQUIRE(context192!=nullptr);
+
+  osmscout::MapPainterCairo painter96;
+  osmscout::MapPainterCairo painter192;
+
+  // DrawMap installs the drawing target and the measurement environment of the frame
+  painter96.DrawMap(projection96, parameter, {}, context96);
+  painter192.DrawMap(projection192, parameter, {}, context192);
+
+  osmscout::TextMetrics metrics96=painter96.MeasureText(projection96, parameter, "Muster", 10.0);
+  osmscout::TextMetrics metrics192=painter192.MeasureText(projection192, parameter, "Muster", 10.0);
+
+  REQUIRE(metrics96.width>0.0);
+  REQUIRE(metrics192.width>0.0);
+
+  // Twice the resolution means twice the size of the drawn text, so a remembered measurement
+  // of one environment must not be served in the other
+  REQUIRE(metrics192.width>metrics96.width*1.5);
+
+  cairo_destroy(context96);
+  cairo_destroy(context192);
+  cairo_surface_destroy(surface96);
+  cairo_surface_destroy(surface192);
 }
