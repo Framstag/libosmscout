@@ -258,6 +258,30 @@ namespace {
   };
 
   /**
+   * Nodes of an axis parallel rectangle of the given extent around the given center.
+   */
+  std::vector<osmscout::Point> MakeRectangleNodes(const osmscout::GeoCoord& center,
+                                                  const Extent& extent)
+  {
+    std::vector<osmscout::Point> nodes;
+
+    nodes.push_back(osmscout::Point(1,
+                                    osmscout::GeoCoord(center.GetLat()-extent.halfLat,
+                                                       center.GetLon()-extent.halfLon)));
+    nodes.push_back(osmscout::Point(2,
+                                    osmscout::GeoCoord(center.GetLat()-extent.halfLat,
+                                                       center.GetLon()+extent.halfLon)));
+    nodes.push_back(osmscout::Point(3,
+                                    osmscout::GeoCoord(center.GetLat()+extent.halfLat,
+                                                       center.GetLon()+extent.halfLon)));
+    nodes.push_back(osmscout::Point(4,
+                                    osmscout::GeoCoord(center.GetLat()+extent.halfLat,
+                                                       center.GetLon()-extent.halfLon)));
+
+    return nodes;
+  }
+
+  /**
    * Area with one outer ring that is an axis parallel rectangle of the given extent around the
    * given center.
    */
@@ -271,20 +295,7 @@ namespace {
 
     ring.MarkAsOuterRing();
     ring.SetType(type);
-
-    ring.nodes.push_back(osmscout::Point(1,
-                                         osmscout::GeoCoord(center.GetLat()-extent.halfLat,
-                                                            center.GetLon()-extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(2,
-                                         osmscout::GeoCoord(center.GetLat()-extent.halfLat,
-                                                            center.GetLon()+extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(3,
-                                         osmscout::GeoCoord(center.GetLat()+extent.halfLat,
-                                                            center.GetLon()+extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(4,
-                                         osmscout::GeoCoord(center.GetLat()+extent.halfLat,
-                                                            center.GetLon()-extent.halfLon)));
-
+    ring.nodes=MakeRectangleNodes(center,extent);
     ring.center=center;
 
     area->rings.push_back(ring);
@@ -306,19 +317,7 @@ namespace {
     // Level 2, i.e. an inner ring of the top level outer ring
     ring.SetRing(2);
     ring.SetType(clippingType);
-
-    ring.nodes.push_back(osmscout::Point(1,
-                                         osmscout::GeoCoord(center.GetLat()-extent.halfLat,
-                                                            center.GetLon()-extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(2,
-                                         osmscout::GeoCoord(center.GetLat()-extent.halfLat,
-                                                            center.GetLon()+extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(3,
-                                         osmscout::GeoCoord(center.GetLat()+extent.halfLat,
-                                                            center.GetLon()+extent.halfLon)));
-    ring.nodes.push_back(osmscout::Point(4,
-                                         osmscout::GeoCoord(center.GetLat()+extent.halfLat,
-                                                            center.GetLon()-extent.halfLon)));
+    ring.nodes=MakeRectangleNodes(center,extent);
 
     area->rings.push_back(ring);
   }
@@ -386,27 +385,51 @@ namespace {
   }
 
   /**
-   * Degrees of longitude that correspond to the given number of pixels, measured from the
-   * projection itself. The projection center is the middle of the screen box.
+   * Pixels per degree at the center of the projection, one value per axis, measured from the
+   * projection itself.
+   */
+  struct PixelScale
+  {
+    double lon=0.0; //!< pixels per degree of longitude
+    double lat=0.0; //!< pixels per degree of latitude
+  };
+
+  PixelScale MeasurePixelScale(const osmscout::MercatorProjection& projection)
+  {
+    constexpr double   probeDeltaDegrees=0.001;
+
+    osmscout::Vertex2D center{};
+    osmscout::Vertex2D east{};
+    osmscout::Vertex2D north{};
+
+    REQUIRE(projection.GeoToPixel(projection.GetCenter(),center));
+    REQUIRE(projection.GeoToPixel(osmscout::GeoCoord(projection.GetCenter().GetLat(),
+                                                     projection.GetCenter().GetLon()+probeDeltaDegrees),
+                                  east));
+    REQUIRE(projection.GeoToPixel(osmscout::GeoCoord(projection.GetCenter().GetLat()+probeDeltaDegrees,
+                                                     projection.GetCenter().GetLon()),
+                                  north));
+
+    PixelScale scale;
+
+    scale.lon=(east.GetX()-center.GetX())/probeDeltaDegrees;
+    // Screen y grows southwards, so the more northern probe is above the center
+    scale.lat=(center.GetY()-north.GetY())/probeDeltaDegrees;
+
+    REQUIRE(scale.lon>0.0);
+    REQUIRE(scale.lat>0.0);
+
+    return scale;
+  }
+
+  /**
+   * Degrees of longitude that correspond to the given number of pixels. The projection center is the
+   * middle of the screen box.
    */
   double DegreesLonForPixels(const osmscout::MercatorProjection& projection,
                              double pixels)
   {
-    constexpr double   probeDeltaDegrees=0.001;
-
-    osmscout::Vertex2D a{};
-    osmscout::Vertex2D b{};
-
-    REQUIRE(projection.GeoToPixel(projection.GetCenter(),a));
-    REQUIRE(projection.GeoToPixel(osmscout::GeoCoord(projection.GetCenter().GetLat(),
-                                                     projection.GetCenter().GetLon()+probeDeltaDegrees),
-                                  b));
-
-    double pixelsPerDegree=(b.GetX()-a.GetX())/probeDeltaDegrees;
-
-    REQUIRE(pixelsPerDegree>0.0);
-
-    return pixels/pixelsPerDegree;
+    return pixels/MeasurePixelScale(projection).lon;
   }
 
   /**
@@ -415,22 +438,7 @@ namespace {
   double DegreesLatForPixels(const osmscout::MercatorProjection& projection,
                              double pixels)
   {
-    constexpr double   probeDeltaDegrees=0.001;
-
-    osmscout::Vertex2D a{};
-    osmscout::Vertex2D b{};
-
-    REQUIRE(projection.GeoToPixel(projection.GetCenter(),a));
-    REQUIRE(projection.GeoToPixel(osmscout::GeoCoord(projection.GetCenter().GetLat()+probeDeltaDegrees,
-                                                     projection.GetCenter().GetLon()),
-                                  b));
-
-    // Screen y grows southwards, so a more northern probe is above the center
-    double pixelsPerDegree=(a.GetY()-b.GetY())/probeDeltaDegrees;
-
-    REQUIRE(pixelsPerDegree>0.0);
-
-    return pixels/pixelsPerDegree;
+    return pixels/MeasurePixelScale(projection).lat;
   }
 
   /**
@@ -459,6 +467,36 @@ namespace {
     REQUIRE(viewportWidth>0.0);
 
     return projection.GetCenter().GetLon()+(2.0*viewportWidth)+(0.001*viewportWidth*(double)index);
+  }
+
+  /**
+   * Load the given number of areas well outside the view of the given projection.
+   */
+  void AddOutsideAreas(osmscout::MapData& data,
+                       const osmscout::TypeInfoRef& type,
+                       const osmscout::MercatorProjection& projection,
+                       const osmscout::GeoCoord& center,
+                       const Extent& extent,
+                       size_t count)
+  {
+    for (size_t i=0; i<count; i++) {
+      data.areas.push_back(MakeArea(type,
+                                    {center.GetLat(),OutsideLon(projection,i)},
+                                    extent));
+    }
+  }
+
+  /**
+   * Load one way inside the view, so that a frame has ways to prepare as well.
+   */
+  void AddVisibleWay(osmscout::MapData& data,
+                     const osmscout::TypeInfoRef& type,
+                     const osmscout::GeoCoord& center,
+                     const Extent& extent)
+  {
+    data.ways.push_back(MakeWay(type,
+                                {center.GetLat()-(0.5*extent.halfLat),center.GetLon()-(0.5*extent.halfLon)},
+                                {center.GetLat()+(0.5*extent.halfLat),center.GetLon()+(0.5*extent.halfLon)}));
   }
 
   /**
@@ -632,12 +670,12 @@ TEST_CASE("Areas outside the view are not prepared ring by ring","[MapPainterAre
                                 projection.GetCenter(),
                                 extent));
 
-  for (size_t i=0; i<outsideCount; i++) {
-    data.areas.push_back(MakeArea(types.styledAreaType,
-                                  {projection.GetCenter().GetLat(),
-                                   OutsideLon(projection,i)},
-                                  extent));
-  }
+  AddOutsideAreas(data,
+                  types.styledAreaType,
+                  projection,
+                  projection.GetCenter(),
+                  extent,
+                  outsideCount);
 
   Render(painter,projection,parameter,data);
 
@@ -705,18 +743,14 @@ TEST_CASE("Prepared entries and clipping geometry do not depend on the loaded ar
                                                    extent));
 
                      // A way inside the view, so the frame prepares ways as well
-                     data.ways.push_back(MakeWay(types.wayType,
-                                                 {center.GetLat()-(0.5*extent.halfLat),
-                                                  center.GetLon()-(0.5*extent.halfLon)},
-                                                 {center.GetLat()+(0.5*extent.halfLat),
-                                                  center.GetLon()+(0.5*extent.halfLon)}));
+                     AddVisibleWay(data,types.wayType,center,extent);
 
-                     for (size_t i=0; i<outsideCount; i++) {
-                       data.areas.push_back(MakeArea(types.styledAreaType,
-                                                     {center.GetLat(),
-                                                      OutsideLon(projection,i)},
-                                                     extent));
-                     }
+                     AddOutsideAreas(data,
+                                     types.styledAreaType,
+                                     projection,
+                                     center,
+                                     extent,
+                                     outsideCount);
 
                      Render(painter,projection,parameter,data);
 
@@ -780,18 +814,14 @@ TEST_CASE("Prepared entries and clipping geometry do not depend on the loaded ar
     auto             data=MakeData(styleConfig);
     RecordingPainter painter;
 
-    data.ways.push_back(MakeWay(types.wayType,
-                                {center.GetLat()-(0.5*extent.halfLat),
-                                 center.GetLon()-(0.5*extent.halfLon)},
-                                {center.GetLat()+(0.5*extent.halfLat),
-                                 center.GetLon()+(0.5*extent.halfLon)}));
+    AddVisibleWay(data,types.wayType,center,extent);
 
-    for (size_t i=0; i<128; i++) {
-      data.areas.push_back(MakeArea(types.styledAreaType,
-                                    {center.GetLat(),
-                                     OutsideLon(projection,i)},
-                                    extent));
-    }
+    AddOutsideAreas(data,
+                    types.styledAreaType,
+                    projection,
+                    center,
+                    extent,
+                    128);
 
     Render(painter,projection,parameter,data);
 
