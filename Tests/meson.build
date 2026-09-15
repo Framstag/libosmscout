@@ -706,6 +706,16 @@ MapPainterAreaPreparationTest = executable('MapPainterAreaPreparationTest',
 
 test('Check MapPainterAreaPreparation compilation', MapPainterAreaPreparationTest)
 
+MapPainterAreaVisibilityCullTest = executable('MapPainterAreaVisibilityCullTest',
+                               'src/MapPainterAreaVisibilityCullTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterAreaVisibilityCull compilation', MapPainterAreaVisibilityCullTest)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],

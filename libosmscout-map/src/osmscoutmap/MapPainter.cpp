@@ -1186,6 +1186,12 @@ constexpr bool debugGroundTiles = false;
 
     double borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
+    // The early decision of ProcessAreas rejects an area that no ring of it could keep visible. It
+    // therefore has to extend an area at least as far as this per-ring decision extends a ring. Both
+    // tolerances are half of a border width of the same style sheet, so the invariant below cannot be
+    // violated by a style sheet - only by a logic error in deriving the bound.
+    assert(borderWidth<=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification()));
+
     if (!IsVisibleArea(projection,
                        ring.GetBoundingBox(),
                        borderWidth/2.0)) {
@@ -1359,10 +1365,26 @@ constexpr bool debugGroundTiles = false;
 
     for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
       const auto& mapData = data[dbIndex];
+      const auto& styleConfig=*mapData.styleConfig;
+
+      // An area is only prepared ring by ring if it can contribute to the frame at all. The tolerance
+      // is half of the widest area border style the style sheet can resolve at this level, which is
+      // the same expression the per-ring visibility decision uses for one border style, so a rejected
+      // area cannot have a ring that decision would keep.
+      constexpr double borderWidthToTolerance=0.5;
+      double           earlyOffset=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification())*
+                                    borderWidthToTolerance;
+
       //Areas
       for (const auto& area : mapData.areas) {
+        if (!IsVisibleArea(projection,
+                           area->GetBoundingBox(),
+                           earlyOffset)) {
+          continue;
+        }
+
         PrepareArea(dbIndex,
-                    *mapData.styleConfig,
+                    styleConfig,
                     projection,
                     parameter,
                     area);
@@ -1370,8 +1392,14 @@ constexpr bool debugGroundTiles = false;
 
       // POI Areas
       for (const auto& area : mapData.poiAreas) {
+        if (!IsVisibleArea(projection,
+                           area->GetBoundingBox(),
+                           earlyOffset)) {
+          continue;
+        }
+
         PrepareArea(dbIndex,
-                    *mapData.styleConfig,
+                    styleConfig,
                     projection,
                     parameter,
                     area);
