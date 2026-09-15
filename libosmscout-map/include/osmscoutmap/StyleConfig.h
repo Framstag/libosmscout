@@ -624,6 +624,12 @@ namespace osmscout {
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
     PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
 
+    /**
+     * Maximum width of the area border styles that can be resolved at each magnification level, in
+     * millimetres, indexed by level. Filled by PostprocessAreas().
+     */
+    std::vector<double> maxAreaBorderWidthMM;
+
   public:
     std::vector<TypeInfoSet>                   areaTypeSets;
 
@@ -798,6 +804,21 @@ namespace osmscout {
                              const FeatureValueBuffer& buffer,
                              const Projection& projection,
                              std::vector<BorderStyleRef>& borderStyles) const;
+
+    /**
+     * Returns the maximum width of the border styles that can be resolved for areas at the given
+     * magnification level, in millimetres.
+     *
+     * No area border style that GetAreaBorderStyles() can resolve at this level is wider than this
+     * value. The painter uses it as the tolerance of its early visibility decision: an area that is
+     * not visible even when enlarged by half of this width cannot be visible through any of the
+     * border styles of any of its rings. The value is derived from the loaded style sheet and is
+     * therefore DPI independent; the caller converts it to pixels with the projection of the frame.
+     *
+     * @param magnification the magnification to query
+     * @return the maximum area border width in millimetres, 0.0 if the style sheet declares no area border
+     */
+    double GetMaxAreaBorderWidthMM(const Magnification& magnification) const;
 
     bool HasAreaTextStyles(const TypeInfoRef& type,
                            const Magnification& magnification) const;
