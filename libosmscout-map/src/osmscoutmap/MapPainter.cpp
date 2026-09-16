@@ -41,6 +41,13 @@ constexpr bool debugGroundTiles = true;
 constexpr bool debugGroundTiles = false;
 #endif
 
+  /**
+   * The `width` feature of an object stores a width in meters in a byte (see
+   * WidthFeatureValue), so this is the widest width a data carried width value can
+   * contribute to the width of a line style.
+   */
+  constexpr double maxWidthFeatureWidth=255.0;
+
   static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
                                           double gridSizeHoriz,
                                           double gridSizeVert)
@@ -290,6 +297,73 @@ constexpr bool debugGroundTiles = false;
     return width;
   }
 
+  void MapPainter::UpdateVisibilityBounds(const Projection& projection)
+  {
+    for (auto& entry : databaseCache) {
+      entry.visibilityBounds=entry.styleConfig->GetVisibilityBounds(projection.GetMagnification());
+
+      const VisibilityBounds& bounds=entry.visibilityBounds;
+
+      entry.wayReachPixel=0.0;
+
+      // A line style is the sum of the widths of its matching partial styles, and its width
+      // is either the width of the style or the width of the object (see CalculateLineWith).
+      // The width feature stores a width in a byte, so its value range bounds the width an
+      // object can contribute.
+      if (bounds.maxWayLineWidth>0.0) {
+        entry.wayReachPixel+=GetProjectedWidth(projection,
+                                               std::max(bounds.maxWayLineWidth,
+                                                        maxWidthFeatureWidth));
+      }
+
+      entry.wayReachPixel+=projection.ConvertWidthToPixel(bounds.maxWayDisplayWidth);
+
+      // A point object draws its icon, its symbol or both at its position, so the widest of
+      // them is the reach of the object itself; the extent of its labels is added where the
+      // labels are built, because a label extent depends on its text.
+      entry.pointReachPixel=std::max(bounds.maxIconWidth,
+                                     bounds.maxIconHeight);
+
+      for (const auto& symbol : bounds.symbols) {
+        entry.pointReachPixel=std::max(entry.pointReachPixel,
+                                       std::max(symbol->GetWidth(projection)+symbol->GetMaxBorderWidth(projection),
+                                                symbol->GetHeight(projection)+symbol->GetMaxBorderWidth(projection)));
+      }
+    }
+  }
+
+  bool MapPainter::IsPointVisible(const Projection& projection,
+                                  const Vertex2D& screenPos,
+                                  double reachPixel) const
+  {
+    ScreenVectorRectangle element(screenPos.GetX()-reachPixel,
+                                  screenPos.GetY()-reachPixel,
+                                  2.0*reachPixel,
+                                  2.0*reachPixel);
+
+    ScreenVectorRectangle viewport(0.0,
+                                   0.0,
+                                   projection.GetWidth(),
+                                   projection.GetHeight());
+
+    return element.Intersects(viewport);
+  }
+
+  bool MapPainter::CanWayBeVisible(size_t dbIndex,
+                                   const Projection& projection,
+                                   const Way& way,
+                                   double additionalOffsetPixel) const
+  {
+    assert(dbIndex<databaseCache.size());
+
+    double pixelOffset=databaseCache[dbIndex].wayReachPixel/2.0+
+                       additionalOffsetPixel;
+
+    return IsVisibleWay(projection,
+                        way.GetBoundingBox(),
+                        pixelOffset);
+  }
+
   void MapPainter::StyleSheetChanged([[maybe_unused]] const Projection& projection,
                                      [[maybe_unused]] const MapParameter& parameter,
                                      [[maybe_unused]] const std::vector<MapData>& data)
@@ -386,7 +460,8 @@ constexpr bool debugGroundTiles = false;
                                      const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
                                      const Vertex2D& screenPos,
-                                     const ScreenBox& objectBox)
+                                     const ScreenBox& objectBox,
+                                     double objectReachPixel)
   {
     std::vector<LabelData> labelLayoutData;
 
@@ -484,6 +559,32 @@ constexpr bool debugGroundTiles = false;
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
+    // Early decision: an object whose icon, symbol and labels cannot reach the view is not
+    // registered, so its label elements are neither stored, nor measured, nor laid out for
+    // overlaps. The extent of a label is set by its text, so the decision is taken here, where
+    // the text of the elements is known. The elements of an object are stacked at its position,
+    // so the sum of their extents bounds the distance the object can reach beyond it.
+    double fontSizePixel=projection.ConvertWidthToPixel(parameter.GetFontSize());
+    double elementExtent=0.0;
+
+    for (const auto& data : labelLayoutData) {
+      if (data.type==LabelData::Type::Text) {
+        elementExtent+=2.0*GetLabelExtentBound(data.text.size(),
+                                               CountLabelWords(data.text),
+                                               data.fontSize*fontSizePixel);
+      }
+      else {
+        elementExtent+=std::max(data.iconWidth,data.iconHeight);
+      }
+    }
+
+    if (!IsPointVisible(projection,
+                        screenPos,
+                        std::max(objectReachPixel,elementExtent)+
+                        GetLabelLayoutMarginPixel(projection,parameter))) {
+      return;
+    }
+
     RegisterRegularLabel(projection,
                          parameter,
                          basemap,
@@ -535,6 +636,7 @@ constexpr bool debugGroundTiles = false;
                   projection,
                   parameter,
                   basemap,
+                  databaseCache[dbIndex].pointReachPixel,
                   node);
     }
 
@@ -543,6 +645,7 @@ constexpr bool debugGroundTiles = false;
                   projection,
                   parameter,
                   basemap,
+                  databaseCache[dbIndex].pointReachPixel,
                   node);
     }
   }
@@ -591,7 +694,8 @@ constexpr bool debugGroundTiles = false;
                       iconStyle,
                       textStyles,
                       areaCenter,
-                      areaScreenBox);
+                      areaScreenBox,
+                      databaseCache[areaData.dbIndex].pointReachPixel);
   }
 
   bool MapPainter::DrawAreaBorderLabel(const Projection& projection,
@@ -707,19 +811,33 @@ constexpr bool debugGroundTiles = false;
                                const Projection& projection,
                                const MapParameter& parameter,
                                bool basemap,
+                               double objectReachPixel,
                                const NodeRef& node)
   {
+    Vertex2D screenPos;
+
+    projection.GeoToPixel(node->GetCoords(),
+                          screenPos);
+
+    // Fast path: an object of a type that has no label style at this level draws only its icon
+    // or symbol, whose reach is known from the style sheet, so it can be rejected here, before
+    // any style of it is resolved. An object whose type has label styles cannot be decided here:
+    // the extent of its labels is set by their text, which only the resolved styles produce.
+    if (!styleConfig.HasNodeTextStyles(node->GetType(),
+                                       projection.GetMagnification()) &&
+        !IsPointVisible(projection,
+                        screenPos,
+                        objectReachPixel+
+                        GetLabelLayoutMarginPixel(projection,parameter))) {
+      return;
+    }
+
     IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                                         projection);
 
     styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                  projection,
                                  textStyles);
-
-    Vertex2D screenPos;
-
-    projection.GeoToPixel(node->GetCoords(),
-                          screenPos);
 
     LayoutPointLabels(styleConfig,
                       projection,
@@ -730,7 +848,8 @@ constexpr bool debugGroundTiles = false;
                       iconStyle,
                       textStyles,
                       screenPos,
-                      ScreenBox::EMPTY);
+                      ScreenBox::EMPTY,
+                      objectReachPixel);
   }
 
   void MapPainter::DrawWay(const Projection& projection,
@@ -903,6 +1022,23 @@ constexpr bool debugGroundTiles = false;
                                                               way.GetFeatureValueBuffer());
 
     if (shieldLabel.empty()) {
+      return false;
+    }
+
+    // The label of a shield is placed relative to the way and can reach into the view even
+    // when the way itself cannot, so the decision has to leave room for the label and for the
+    // shield geometry drawn around it. The label text and its style are known here, before the
+    // grid positions are built and before the label is registered.
+    double shieldFontSizePixel=shieldStyle->GetShieldStyle()->GetSize()*
+                               projection.ConvertWidthToPixel(parameter.GetFontSize());
+    double shieldLabelExtent=GetLabelExtentBound(shieldLabel.size(),
+                                                 CountLabelWords(shieldLabel),
+                                                 shieldFontSizePixel);
+
+    if (!IsVisibleWay(projection,
+                      way.GetBoundingBox(),
+                      shieldLabelExtent+ShieldBorderInset+ShieldBackgroundClearance+
+                      GetLabelLayoutMarginPixel(projection,parameter))) {
       return false;
     }
 
@@ -1578,6 +1714,13 @@ constexpr bool debugGroundTiles = false;
     FileOffset ref=way.GetFileOffset();
     const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
 
+    if (!CanWayBeVisible(dbIndex,
+                         projection,
+                         way,
+                         /* additionalOffsetPixel */ 0.0)) {
+      return;
+    }
+
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
                                  lineStyles);
@@ -2163,6 +2306,8 @@ constexpr bool debugGroundTiles = false;
     if (styleSheetShanged) {
       StyleSheetChanged(projection, parameter, data);
     }
+
+    UpdateVisibilityBounds(projection);
   }
 
   void MapPainter::DumpStatistics(const Projection& projection,
