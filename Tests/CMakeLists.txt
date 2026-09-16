@@ -23,6 +23,13 @@ osmscout_test_project(NAME ByteTest SOURCES src/ByteTest.cpp)
 #---- CachePerformance
 osmscout_test_project(NAME CachePerformanceTest SOURCES src/CachePerformanceTest.cpp COMMAND --size 1000)
 
+#---- TypeResolutionPerformance
+osmscout_test_project(NAME TypeResolutionPerformanceTest SOURCES src/TypeResolutionPerformanceTest.cpp COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/map.ost")
+
+#---- TypeResolution
+osmscout_test_project(NAME TypeResolutionTest SOURCES src/TypeResolutionTest.cpp)
+set_tests_properties(TypeResolutionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- CalculateResolution
 osmscout_test_project(NAME CalculateResolutionTest SOURCES src/CalculateResolutionTest.cpp)
 
