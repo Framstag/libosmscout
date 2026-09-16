@@ -169,7 +169,8 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   FcPatternDestroy(pattern);
 #endif
 
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && defined(PANGO_VERSION_CHECK) && PANGO_VERSION_CHECK(1,56,0)
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && defined(PANGO_VERSION_CHECK)
+#if PANGO_VERSION_CHECK(1,56,0)
   // Register the font file directly with the Pango font map. This is the
   // backend-independent way (since Pango 1.56) to load a font from a file:
   // fontconfig application font on Unix, DirectWrite on Windows. Without
@@ -206,6 +207,7 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
       REQUIRE(fontAdded);
     }
   }
+#endif
 #endif
 
   cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
