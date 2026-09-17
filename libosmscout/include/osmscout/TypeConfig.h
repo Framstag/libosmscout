@@ -1076,6 +1076,38 @@ namespace osmscout {
 
     std::unordered_map<std::string,TypeInfoRef> nameToTypeMap;
 
+    /**
+     * Entry in the type resolution dispatch index.
+     *
+     * Holds everything needed to evaluate a single type condition out of the
+     * global type-definition order: the type it belongs to, the condition itself,
+     * the geometry mask of the condition and the position of type and condition
+     * in the type definition. Entries are kept sorted by (typeIndex, conditionIndex)
+     * to preserve the evaluation order of the linear scan.
+     */
+    struct TypeConditionEntry
+    {
+      TypeInfoRef     type;             //!< Type the condition belongs to
+      TagConditionRef condition;        //!< The condition to evaluate
+      unsigned char   types;            //!< Geometry mask of the condition (typeNode, typeWay, typeArea, typeRelation)
+      size_t          typeIndex;        //!< Index of the type in the type definition
+      size_t          conditionIndex;   //!< Index of the condition within the type
+    };
+
+    // Type resolution dispatch index, one per geometry kind. Maps a tag id to the
+    // list of conditions that are primarily discriminated by that tag. The lists are
+    // sorted by (typeIndex, conditionIndex).
+    std::unordered_map<TagId,std::vector<TypeConditionEntry>> nodeTypeIndex;
+    std::unordered_map<TagId,std::vector<TypeConditionEntry>> wayAreaTypeIndex;
+    std::unordered_map<TagId,std::vector<TypeConditionEntry>> relationTypeIndex;
+
+    // Conditions that may match even if none of their discriminated tags is present
+    // (e.g. conditions containing negation). They have to be evaluated for every
+    // object. Kept sorted by (typeIndex, conditionIndex).
+    std::vector<TypeConditionEntry> nodeFallbackConditions;
+    std::vector<TypeConditionEntry> wayAreaFallbackConditions;
+    std::vector<TypeConditionEntry> relationFallbackConditions;
+
     // Features
 
     std::vector<FeatureRef>                     features;
@@ -1391,6 +1423,40 @@ namespace osmscout {
     bool StoreToDataFile(const std::string& directory) const;
 
     //@}
+
+  private:
+    friend struct TypeResolutionIndexTestAccess; //!< Test access to the dispatch index (Tests/src/TypeResolutionTest.cpp)
+
+    /**
+     * Builds the dispatch index entries for the conditions of the given type.
+     */
+    void BuildTypeResolutionIndex(const TypeInfoRef& typeInfo);
+
+    /**
+     * Returns the first matching condition entry evaluating the given entry
+     * streams in (typeIndex, conditionIndex) order, or nullptr if no condition
+     * matches. Each stream is a sorted list of entries (a dispatch index key list
+     * or a fallback list).
+     *
+     * @param streams
+     *    Sorted lists of candidate entries, each sorted by (typeIndex, conditionIndex)
+     * @param requiredTypes
+     *    If non-zero, only entries whose geometry mask intersects this mask are considered
+     * @param tagMap
+     *    Tags of the object to resolve
+     */
+    const TypeConditionEntry* FindFirstMatch(const std::vector<const std::vector<TypeConditionEntry>*>& streams,
+                                             unsigned char requiredTypes,
+                                             const TagMap& tagMap) const;
+
+    /**
+     * Returns the head of the entry stream with the smallest position in the
+     * type definition, skipping entries without the required geometry mask.
+     * Advances the stream positions past permanently ineligible entries.
+     */
+    const TypeConditionEntry* PickNextHead(const std::vector<const std::vector<TypeConditionEntry>*>& streams,
+                                           unsigned char requiredTypes,
+                                           std::vector<size_t>& positions) const;
   };
 
 
