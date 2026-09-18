@@ -361,6 +361,7 @@ namespace osmscout {
     areaBorderTextStyleSelectors.clear();
     areaBorderSymbolStyleSelectors.clear();
     areaTypeSets.clear();
+    maxAreaBorderWidthMM.clear();
 
     routeTypeSets.clear();
     routeLineStyleSelectors.clear();
@@ -760,6 +761,30 @@ namespace osmscout {
                              areaBorderStyleConditionals,
                              maxLevel,
                              areaBorderStyleSelectors);
+
+    // The painter's early visibility decision has to extend an area by at least as much as any per-ring
+    // visibility decision can, so collect the widest area border style per level. Iterating the built
+    // selectors rather than the conditionals guarantees that the bound covers exactly the styles the
+    // per-ring decision can read.
+    maxAreaBorderWidthMM.assign(maxLevel,0.0);
+
+    for (const auto& ruleSelectors : areaBorderStyleSelectors) {
+      for (const auto& typeSelectors : ruleSelectors) {
+        size_t levelCount=std::min(typeSelectors.size(),
+                                   maxLevel);
+
+        for (size_t level=0; level<levelCount; level++) {
+          double & maxWidth=maxAreaBorderWidthMM.at(level);
+
+          for (const auto& selector : typeSelectors.at(level)) {
+            if (selector.style &&
+                selector.style->GetWidth()>maxWidth) {
+              maxWidth=selector.style->GetWidth();
+            }
+          }
+        }
+      }
+    }
 
     SortInConditionalsBySlot(*typeConfig,
                              areaTextStyleConditionals,
@@ -1473,6 +1498,21 @@ namespace osmscout {
     size_t level = projection.GetMagnification().GetLevel();
 
     return wayShieldFlags[std::min(level, wayTextFlags.size()-1)];
+  }
+
+  double StyleConfig::GetMaxAreaBorderWidthMM(const Magnification& magnification) const
+  {
+    if (maxAreaBorderWidthMM.empty()) {
+      return 0.0;
+    }
+
+    size_t level=magnification.GetLevel();
+
+    if (level>=maxAreaBorderWidthMM.size()) {
+      level=maxAreaBorderWidthMM.size()-1;
+    }
+
+    return maxAreaBorderWidthMM.at(level);
   }
 
   FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
