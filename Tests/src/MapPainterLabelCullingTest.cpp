@@ -276,15 +276,15 @@ TEST_CASE("A label outside the view is not measured","[MapPainterLabelCulling]")
   auto                   data=MakeTextLabel("Hauptstrasse");
 
   // Far outside the bound the label layouter uses
-  osmscout::Vertex2D far(20.0*CanvasWidth,20.0*CanvasHeight);
+  osmscout::Vertex2D farOutside(20.0*CanvasWidth,20.0*CanvasHeight);
 
-  REQUIRE(!ReachBox(projection,parameter,{data},far).Intersects(VisibleViewport()));
+  REQUIRE(!ReachBox(projection,parameter,{data},farOutside).Intersects(VisibleViewport()));
 
   layouter.RegisterLabel(projection,
                          parameter,
                          false,
                          osmscout::ObjectFileRef(),
-                         far,
+                         farOutside,
                          data);
 
   REQUIRE(textLayouter.LayoutCalls()==0);
@@ -360,7 +360,7 @@ TEST_CASE("Icon and element list labels outside the view are not stored","[MapPa
 
   auto                   icon=MakeIconLabel(14.0,14.0);
 
-  osmscout::Vertex2D     far(20.0*CanvasWidth,CanvasHeight/2.0);
+  osmscout::Vertex2D     farOutside(20.0*CanvasWidth,CanvasHeight/2.0);
   osmscout::Vertex2D     inside(CanvasWidth/2.0,CanvasHeight/2.0);
 
   // An icon element far outside the view is not stored, an icon inside the view is
@@ -368,7 +368,7 @@ TEST_CASE("Icon and element list labels outside the view are not stored","[MapPa
                          parameter,
                          false,
                          osmscout::ObjectFileRef(),
-                         far,
+                         farOutside,
                          icon);
 
   REQUIRE(layouter.Labels().empty());
@@ -403,7 +403,7 @@ TEST_CASE("Icon and element list labels outside the view are not stored","[MapPa
                          parameter,
                          false,
                          osmscout::ObjectFileRef(),
-                         far,
+                         farOutside,
                          elements);
 
   REQUIRE(layouter.Labels().empty());
