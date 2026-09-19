@@ -738,6 +738,46 @@ MapPainterAreaVisibilityCullTest = executable('MapPainterAreaVisibilityCullTest'
 
 test('Check MapPainterAreaVisibilityCull compilation', MapPainterAreaVisibilityCullTest)
 
+StyleConfigVisibilityBoundsTest = executable('StyleConfigVisibilityBoundsTest',
+                               'src/StyleConfigVisibilityBoundsTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check StyleConfigVisibilityBounds compilation', StyleConfigVisibilityBoundsTest)
+
+MapPainterWayCullingTest = executable('MapPainterWayCullingTest',
+                               'src/MapPainterWayCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterWayCulling compilation', MapPainterWayCullingTest)
+
+MapPainterPointObjectCullingTest = executable('MapPainterPointObjectCullingTest',
+                               'src/MapPainterPointObjectCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterPointObjectCulling compilation', MapPainterPointObjectCullingTest)
+
+MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
+                               'src/MapPainterLabelCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],

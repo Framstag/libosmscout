@@ -440,6 +440,34 @@ else()
   message("Skip MapPainterAreaVisibilityCull test, libosmscout-map is missing.")
 endif()
 
+#---- StyleConfigVisibilityBoundsTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME StyleConfigVisibilityBoundsTest SOURCES src/StyleConfigVisibilityBoundsTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip StyleConfigVisibilityBounds test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterWayCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterWayCullingTest SOURCES src/MapPainterWayCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterWayCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterPointObjectCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterPointObjectCullingTest SOURCES src/MapPainterPointObjectCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterPointObjectCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterLabelCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterLabelCullingTest SOURCES src/MapPainterLabelCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterLabelCulling test, libosmscout-map is missing.")
+endif()
+
 #---- TextMetricsTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME TextMetricsTest SOURCES src/TextMetricsTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
