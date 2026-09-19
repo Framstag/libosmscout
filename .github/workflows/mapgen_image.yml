@@ -163,6 +163,67 @@ jobs:
           test "$(stat -c '%u:%g' /tmp/mapgen-repo-alt/private/staging)" = "1234:1234"
           echo "the pass wrote with the identity it was given"
 
+      - name: Smoke test (overlapping passes are skipped)
+        run: |
+          # A pass assumes it is the only writer of the repository, so a second
+          # one has to be refused while the first is running. Holding the lock
+          # with a sleeping container makes that deterministic.
+          docker run -d --name mapgen-lock-holder --read-only --user 1000:1000 \
+            -v /tmp/mapgen-work:/work \
+            --entrypoint sh osmscout-mapgen:test \
+            -c 'flock /work/mapgen.lock sleep 30'
+          sleep 2
+          out=$(docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test 2>&1)
+          echo "${out}"
+          docker rm -f mapgen-lock-holder >/dev/null
+          echo "${out}" | grep -q "another pass holds"
+
+      - name: Smoke test (scheduled mode)
+        run: |
+          # Second resolution, so the check does not wait a minute.
+          docker run -d --name mapgen-schedule-check --read-only \
+            -e MAPGEN_CRON='*/5 * * * * *' \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+          for _ in $(seq 1 30); do
+            if docker logs mapgen-schedule-check 2>&1 | grep -q '\[mapgen\] done'; then
+              break
+            fi
+            sleep 2
+          done
+          docker logs mapgen-schedule-check 2>&1 | tail -20
+          # the pass ran and the container is still up for the next occurrence
+          docker logs mapgen-schedule-check 2>&1 | grep -q '\[mapgen\] done'
+          docker inspect -f '{{.State.Running}}' mapgen-schedule-check | grep -q true
+          docker rm -f mapgen-schedule-check >/dev/null
+
+      - name: Smoke test (unusable schedule)
+        run: |
+          docker run -d --name mapgen-bad-schedule --read-only \
+            -e MAPGEN_CRON='not a cron expression' \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+          status=running
+          for _ in $(seq 1 15); do
+            status=$(docker inspect -f '{{.State.Status}}' mapgen-bad-schedule 2>/dev/null || echo gone)
+            [ "${status}" = "exited" ] && break
+            sleep 1
+          done
+          docker logs mapgen-bad-schedule 2>&1 | tail -10
+          code=$(docker inspect -f '{{.State.ExitCode}}' mapgen-bad-schedule)
+          docker rm -f mapgen-bad-schedule >/dev/null
+          test "${status}" = "exited"
+          test "${code}" != "0"
+          echo "the container refused the unusable schedule with exit ${code}"
+
   publish:
     name: Publish images
     runs-on: ubuntu-24.04

@@ -42,8 +42,12 @@ services:
     # identity the image itself uses. The serving container keeps its own
     # image's identity: it only reads the repository.
     user: "${PUID:-1000}:${PGID:-1000}"
-    # one pass per start; do not auto-restart the generator
-    restart: "no"
+    # One pass per start by default, then exit - an external scheduler triggers
+    # the next one. Set MAPGEN_CRON to a cron expression to let the container run
+    # the pass on that schedule instead, and MAPGEN_RESTART=unless-stopped with
+    # it, because a container that stays up has to come back after a crash.
+    # See Documentation/MapRepository.md, section 5.
+    restart: "${MAPGEN_RESTART:-no}"
     read_only: true
     volumes:
       - osmscout-maps:/repository

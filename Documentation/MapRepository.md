@@ -392,6 +392,37 @@ docker run --rm --read-only --user 1001:1001 \
 The serving container is not affected: it only reads the repository, and its own
 runtime directories belong to the user of its base image.
 
+#### Running it on a schedule
+
+With `MAPGEN_CRON` set, the container runs the pass on that schedule and stays up,
+so no external cron job or timer is needed:
+
+```yaml
+  mapgen:
+    environment:
+      MAPGEN_CRON: "0 */6 * * *"
+      TZ: Europe/Berlin
+    restart: unless-stopped
+```
+
+| point | behaviour |
+|-------|-----------|
+| expression | cron, five fields (`minute hour day-of-month month day-of-week`); a leading seconds field is accepted as well, which is handy for trying a schedule out |
+| time zone | the container's `TZ`; without it the expression is evaluated in UTC |
+| frequent schedules | every occurrence runs a pass, but only imports that are due are downloaded and imported, so a schedule that fires more often than the refresh gates costs a check, not an import |
+| overlapping passes | one pass at a time: an occurrence arriving while a pass runs is logged as skipped, and an externally triggered pass during a scheduled one is skipped the same way, since both take the lock in the work area |
+| logs | the passes log into the container log: `docker compose logs -f mapgen` |
+| an unusable expression | the container exits at start with the parser's error, instead of running nothing |
+| `MAPGEN_CRON` unset | one pass per start and exit, as before: `docker compose run --rm mapgen`, a host cron job or a systemd timer keep working |
+
+`restart: unless-stopped` belongs with `MAPGEN_CRON`: a container that stays up
+has to come back if it dies. The compose file takes that policy from
+`MAPGEN_RESTART`, and defaults it to `no` for the single-pass mode.
+
+Arguments always mean "run the pass once with these arguments", whatever is
+configured, so `docker compose run --rm mapgen --check-config` keeps checking
+the configuration and exits.
+
 ### Published images
 
 Every build of the images on the main branch publishes to GitHub Packages, so
