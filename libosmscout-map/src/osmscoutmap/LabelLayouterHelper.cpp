@@ -155,4 +155,65 @@ namespace osmscout {
 
     return false;
   }
+
+  /*
+   * Conservative factors of the label extent bound: a glyph advance is assumed to be at most
+   * maxLabelAdvanceFactor times the font size (an em box is 1.0 times the font size), and a
+   * line of a wrapped label is assumed to be at most maxLabelLineHeightFactor times the font
+   * size high.
+   */
+  constexpr double maxLabelAdvanceFactor=1.5;
+  constexpr double maxLabelLineHeightFactor=1.5;
+
+  size_t CountLabelWords(const std::string_view& text)
+  {
+    size_t words=0;
+    bool   inWord=false;
+
+    for (char c : text) {
+      bool space=c==' ' || c=='\t' || c=='\n' || c=='\r';
+
+      if (!space && !inWord) {
+        words++;
+      }
+
+      inWord=!space;
+    }
+
+    return words;
+  }
+
+  double GetLabelExtentBound(size_t characterCount,
+                             size_t wordCount,
+                             double fontSizePixel)
+  {
+    if (characterCount==0 || fontSizePixel<=0.0) {
+      return 0.0;
+    }
+
+    // Wrapping inserts a line break at a word boundary, so a label carries at most one line
+    // more than it has words. Both sides bound the label rectangle, the larger one bounds the
+    // extent, the half of it is the distance an anchor may lie outside the viewport.
+    double widthBound=static_cast<double>(characterCount)*fontSizePixel*maxLabelAdvanceFactor;
+    double heightBound=static_cast<double>(wordCount+1)*fontSizePixel*maxLabelLineHeightFactor;
+
+    return std::max(widthBound,heightBound)/2.0;
+  }
+
+  double GetMaxLabelPaddingPixel(const Projection& projection,
+                                 const MapParameter& parameter)
+  {
+    return std::max({projection.ConvertWidthToPixel(parameter.GetIconPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetContourLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())});
+  }
+
+  double GetLabelLayoutMarginPixel(const Projection& projection,
+                                   const MapParameter& parameter)
+  {
+    return projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap())+
+           GetMaxLabelPaddingPixel(projection,parameter);
+  }
 }

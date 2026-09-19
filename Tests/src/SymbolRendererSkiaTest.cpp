@@ -305,10 +305,10 @@ TEST_CASE("SymbolRendererSkia fills circle", "[SymbolRendererSkia]") {
   REQUIRE(SkColorGetB(center) == 255);
 
   // Far outside: white
-  SkColor far = bitmap.getColor(2, 2);
-  REQUIRE(SkColorGetR(far) == 255);
-  REQUIRE(SkColorGetG(far) == 255);
-  REQUIRE(SkColorGetB(far) == 255);
+  SkColor outside = bitmap.getColor(2, 2);
+  REQUIRE(SkColorGetR(outside) == 255);
+  REQUIRE(SkColorGetG(outside) == 255);
+  REQUIRE(SkColorGetB(outside) == 255);
 }
 
 // ---------------------------------------------------------------------------

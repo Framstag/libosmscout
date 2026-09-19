@@ -275,6 +275,7 @@ constexpr bool debugLabelLayouter = false;
     void SetViewport(const ScreenVectorRectangle& v)
     {
       visibleViewport = v;
+      layoutViewportValid=true;
       SetLayoutOverlap(layoutOverlap);
     }
 
@@ -291,12 +292,132 @@ constexpr bool debugLabelLayouter = false;
     {
       contourLabelInstances.clear();
       labelInstances.clear();
+
+      // The viewport belongs to the frame that has just been drawn: the labels of the next frame
+      // are registered before the drawing target of that frame reports its viewport, so they
+      // cannot be decided against a viewport until it has been set again
+      layoutViewportValid=false;
     }
 
     // Something is an overlay, if its alpha is <0.8
     static bool IsOverlay(const LabelData &labelData)
     {
       return labelData.alpha < 0.8;
+    }
+
+    /**
+     * Upper bound [pixels] of the distance the elements of a label can reach from the anchor
+     * position of that label: the measured rectangle of an element stays inside the anchor plus
+     * this distance, and the overlap canvases of the layout mark an element with the widest
+     * padding of the frame around that rectangle. A label that is farther away from the layout
+     * viewport than this bound can therefore be dropped before it is measured, without changing
+     * which labels the drawing path draws and which labels the layout suppresses.
+     *
+     * The bound is summed over the elements, because the elements of a label are stacked at its
+     * anchor, and it uses the conservative label extent bound of the label helper for text
+     * elements.
+     */
+    double LabelReach(const Projection& projection,
+                      const MapParameter& parameter,
+                      const std::vector<LabelData>& data) const
+    {
+      double fontSizePixel=projection.ConvertWidthToPixel(parameter.GetFontSize());
+      double reach=GetMaxLabelPaddingPixel(projection,
+                                           parameter);
+
+      for (const auto& d : data) {
+        if (d.type==LabelData::Type::Text) {
+          reach+=2.0*GetLabelExtentBound(d.text.size(),
+                                         CountLabelWords(d.text),
+                                         d.fontSize*fontSizePixel);
+        }
+        else {
+          reach+=std::max(d.iconWidth,d.iconHeight);
+        }
+      }
+
+      return reach;
+    }
+
+    /**
+     * Returns true when no element of the label can intersect the layout viewport and when the
+     * label cannot suppress a label inside it, i.e. when the label provably has no effect on the
+     * frame and does not have to be measured, stored or laid out.
+     */
+    bool CannotReachViewport(const Projection& projection,
+                             const MapParameter& parameter,
+                             const Vertex2D& point,
+                             const std::vector<LabelData>& data) const
+    {
+      // The frame's viewport is reported by the drawing target of the backend while the frame is
+      // drawn, i.e. after the labels of the first steps of the frame were registered. A label
+      // cannot be decided against the viewport of the previous frame, so it is kept until the
+      // viewport of the current frame is known.
+      if (!layoutViewportValid) {
+        return false;
+      }
+
+      double reach=LabelReach(projection,
+                              parameter,
+                              data);
+
+      ScreenVectorRectangle element(point.GetX()-reach,
+                                    point.GetY()-reach,
+                                    2.0*reach,
+                                    2.0*reach);
+
+      return !element.Intersects(layoutViewport);
+    }
+
+    bool CannotReachViewport(const Projection& projection,
+                             const MapParameter& parameter,
+                             const Vertex2D& point,
+                             const LabelData& data) const
+    {
+      return CannotReachViewport(projection,
+                                 parameter,
+                                 point,
+                                 std::vector<LabelData>{data});
+    }
+
+    /**
+     * Debug check of the conservative bound the early decision uses: the rectangle of every
+     * element a label built has to stay inside the anchor plus the reach of the label. If an
+     * element could leave that box, the early decision could drop a label that the drawing path
+     * of the label stage would draw, which would change the rendered output.
+     */
+    void AssertElementsInsideReach(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const Vertex2D& point,
+                                   const std::vector<LabelData>& data,
+                                   const LabelInstanceType& instance) const
+    {
+#ifdef NDEBUG
+      // The check only exists in builds with assertions
+      (void)projection;
+      (void)parameter;
+      (void)point;
+      (void)data;
+      (void)instance;
+#else
+      double reach=LabelReach(projection,
+                              parameter,
+                              data);
+
+      for (const auto& element : instance.elements) {
+        double width=element.labelData.type==LabelData::Type::Text ?
+                       element.label->width :
+                       element.labelData.iconWidth;
+        double height=element.labelData.type==LabelData::Type::Text ?
+                        element.label->height :
+                        element.labelData.iconHeight;
+
+        assert(element.x>=point.GetX()-reach);
+        assert(element.x+width<=point.GetX()+reach);
+        assert(element.y>=point.GetY()-reach);
+        assert(element.y+height<=point.GetY()+reach);
+      }
+#endif
     }
 
     /**
@@ -736,10 +857,18 @@ constexpr bool debugLabelLayouter = false;
                        const LabelData& data,
                        double objectWidth = 10.0)
     {
+      if (CannotReachViewport(projection,
+                              parameter,
+                              point,
+                              data)) {
+        return;
+      }
+
       LabelInstanceType instance;
 
-      instance.ref=ref;
-      instance.basemap=basemap;
+      // A label instance carries the object reference and the basemap flag as part of its
+      // priority, which is also how the element list overload below registers a label
+      instance.priority=LabelPriority(std::numeric_limits<size_t>::max(), basemap, ref);
 
       double offset=-1;
       ProcessLabel(projection,
@@ -749,6 +878,12 @@ constexpr bool debugLabelLayouter = false;
                    offset,
                    data,
                    objectWidth);
+
+      AssertElementsInsideReach(projection,
+                                parameter,
+                                point,
+                                std::vector<LabelData>{data},
+                                instance);
 
       labelInstances.push_back(instance);
     }
@@ -761,6 +896,13 @@ constexpr bool debugLabelLayouter = false;
                        const std::vector<LabelData>& data,
                        double objectWidth = 10.0)
     {
+      if (CannotReachViewport(projection,
+                              parameter,
+                              point,
+                              data)) {
+        return;
+      }
+
       LabelInstanceType instance;
 
       instance.priority=LabelPriority(std::numeric_limits<size_t>::max(), basemap, ref);
@@ -775,6 +917,12 @@ constexpr bool debugLabelLayouter = false;
                      d,
                      objectWidth);
       }
+
+      AssertElementsInsideReach(projection,
+                                parameter,
+                                point,
+                                data,
+                                instance);
 
       labelInstances.push_back(instance);
     }
@@ -934,6 +1082,7 @@ constexpr bool debugLabelLayouter = false;
     std::vector<LabelInstanceType> labelInstances;
     ScreenVectorRectangle visibleViewport{0,0,0,0};
     ScreenVectorRectangle layoutViewport{0,0,0,0};
+    bool                 layoutViewportValid=false; //!< true when the layout viewport belongs to the frame being prepared
     uint32_t layoutOverlap=0; // overlap [pixels] used for label layouting
   };
 
