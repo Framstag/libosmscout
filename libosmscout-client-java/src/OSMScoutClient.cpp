@@ -3641,6 +3641,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       const auto freeTextLimitReached = [&]() {
         return freeTextEntries.size() >= static_cast<size_t>(limit);
       };
+#else
+      // No text index in this build (marisa not found): there are no free-text
+      // candidates to budget, so the only source this loop can exhaust is the
+      // structured one — the condition the pre-change helper used here.
+      const auto freeTextLimitReached = [&]() {
+        return results.size() >= static_cast<size_t>(limit);
+      };
 #endif
 
       for (const auto &db : databases) {
