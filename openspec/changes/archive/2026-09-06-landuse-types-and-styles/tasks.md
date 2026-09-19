@@ -1,0 +1,29 @@
+## 1. Landuse Type Definitions
+
+- [x] 1.1 Add 19 new `landuse_*` types to `stylesheets/map.ost` in the landuse section, alphabetically ordered, with element types (NODE AREA vs AREA) per the OSM wiki per-tag pages: `landuse_animal_keeping`, `landuse_apiary`, `landuse_aquaculture`, `landuse_culture`, `landuse_education`, `landuse_fairground`, `landuse_flowerbed`, `landuse_forestry`, `landuse_greenery`, `landuse_healthcare`, `landuse_highway`, `landuse_institutional`, `landuse_logging`, `landuse_peat_cutting`, `landuse_plant_nursery`, `landuse_religious`, `landuse_static_caravan`, `landuse_tree_pit`, `landuse_winter_sports`. Verify: `OSTAndOSSTest stylesheets/map.ost stylesheets/standard.oss` reports OST OK (spec: Agricultural/Urban landuse types).
+- [x] 1.2 Verify no discouraged/deprecated/proposal values were added (`landuse_school`, `landuse_churchyard`, `landuse_harbour`, `landuse_traffic_island`, etc. absent). Verify: `grep -c "landuse_school\|landuse_churchyard\|landuse_harbour" stylesheets/map.ost` returns 0 (spec: Discouraged landuse values are not defined).
+
+## 2. Landuse Style Definitions
+
+- [x] 2.1 Add fill colors for the new types to the CONST block of `stylesheets/include/landuse.oss` (reusing `@religiousColor` from religious.oss, `@woodColor`, `@quarryColor`, `@vineyardColor` where types are similar). Verify: `OSTAndOSSTest` reports OSS OK (spec: Rendering rules for new landuse types).
+- [x] 2.2 Add AREA fill rules at the appropriate magnification levels: region- (aquaculture, forestry, logging, peat_cutting), city- (animal_keeping, apiary, highway, plant_nursery, static_caravan, winter_sports), suburb- (culture, education, fairground, healthcare, institutional, religious), close- (flowerbed, greenery, tree_pit). Verify: `OSTAndOSSTest --analyze` shows all new types with style, none in "without style" lists (spec: Rendering rules for new landuse types).
+- [x] 2.3 Add label rules: AREA.TEXT and NODE.TEXT for the new types at close magnification, tree_pit/flowerbed at veryClose. Verify: `OSTAndOSSTest --analyze` shows node types labeled (spec: New landuse node types are rendered).
+
+## 3. Pattern Fill Tiles
+
+- [x] 3.1 Author 15 new pattern tiles (SVG source + 14x14 PNG) in `libosmscout/data/icons/svg/standard/` and `libosmscout/data/icons/14x14/standard/`: apiary (bee), religious (building with spire, no cross), aquaculture (waves), logging (stump), peat_cutting (blocks), highway (road), static_caravan (caravan), winter_sports (snowflake), education (book), healthcare (medical cross), culture (star), institutional (columns building), fairground (tent), animal_keeping (paw), greenery (bush). Verify: tiles are 14x14 PNG, icon visible (pixel analysis), background matches area color (spec: Pattern fills for landuse types).
+- [x] 3.2 Fix `gardenpng` typo: rename to `garden.png`, then rename to `leisure_garden.png` (used by `leisure_garden`); rename `forest.png` → `landuse_forest.png`, `cemetery.png` → `landuse_cemetery.png`, `scrub.png` → `natural_scrub.png`; copy `garden.png` → `landuse_garden.png` for landuse users. Verify: all pattern names in stylesheets resolve to existing PNGs (spec: Pattern fills for landuse types).
+- [x] 3.3 Wire `pattern:` + `patternMinMag` into the area rules in `stylesheets/include/landuse.oss` for all 19 new types (cityOver for large rural/transport types, detail for urban/small types); update `cycle.oss` (`landuse_cemetery`), `leisure.oss` (`leisure_garden`), `natural.oss` (`natural_scrub`). Verify: `OSTAndOSSTest` OK for standard.oss and cycle.oss; all 7 `CheckStyleSheet` ctests pass (spec: Pattern fills for landuse types).
+
+## 4. SymbolsAll Pattern Rendering
+
+- [x] 4.1 Add public `GetPatternNames()` to `libosmscout-map/include/osmscoutmap/StyleConfig.h` + `libosmscout-map/src/osmscoutmap/StyleConfig.cpp`, scanning `areaFillStyleSelectors` for non-empty `GetPatternName()`, sorted. Verify: file compiles; method returns pattern names of a stylesheet with known patterns (spec: Pattern enumeration API).
+- [x] 4.2 Add `--pattern-path <dir>` option (repeatable) to `Demos/src/SymbolsAll.cpp` with default resolution `<stylesheet-dir>/../libosmscout/data/icons/14x14/standard`; warn (exit 0) if patterns exist but no path resolves. Verify: `--help` shows the option; run without `--pattern-path` from build dir resolves the default (spec: Pattern path resolution).
+- [x] 4.3 Implement `RenderPatternCairo` (load `<path>/<name>.png`, scale to canvas with `CAIRO_FILTER_NEAREST`, write `<name>.png`) and `RenderPatternSheetCairo` (`patterns.png` grid with labels); render patterns in the Cairo path; include pattern names in `--list` and the summary line. Verify: `SymbolsAll --stylesheet ../stylesheets/standard.oss --backend all --sheet` writes all 20 `landuse_*`/`leisure_garden`/`natural_scrub` PNGs + `patterns.png`, exit 0 (spec: Render pattern fills via Cairo backend; Pattern contact sheet; List pattern names).
+- [x] 4.4 Add unit tests to `Tests/src/StyleConfigSymbolsTest.cpp` covering pattern enumeration: a stylesheet with two known patterns returns exactly those two; a stylesheet without patterns returns an empty list. Verify: `ctest -R StyleConfigSymbols` passes (spec: Pattern enumeration API scenarios).
+
+## 5. Verification
+
+- [x] 5.1 Run `OSTAndOSSTest` against `map.ost` + all stylesheets (`standard.oss`, `cycle.oss`, `winter-sports.oss`, `railways.oss`, `motorways.oss`, `public-transport.oss`). Verify: all report OK (rule: stylesheets load without errors).
+- [x] 5.2 Run `ctest -R CheckStyleSheet` in the build directory. Verify: 7/7 pass (rule: existing tests still pass).
+- [x] 5.3 Run `SymbolsAll --stylesheet ../stylesheets/standard.oss --backend all --sheet` and visually scan the pattern output. Verify: all pattern tiles render with correct icons and colors (spec: Render pattern fills via Cairo backend).
