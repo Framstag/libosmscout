@@ -35,3 +35,18 @@ CMD []
 USER nginx
 
 EXPOSE 80
+
+# OCI metadata. The publishing pass of the image workflow overrides these with
+# the values of the revision it publishes (see .github/workflows/mapgen_image.yml).
+ARG OSMSCOUT_SOURCE="https://github.com/Framstag/libosmscout"
+ARG OSMSCOUT_REVISION="unknown"
+ARG OSMSCOUT_VERSION="unknown"
+ARG OSMSCOUT_CREATED="unknown"
+
+LABEL org.opencontainers.image.title="libosmscout map server" \
+      org.opencontainers.image.description="Read-only static web server for the public part of a map repository" \
+      org.opencontainers.image.source="${OSMSCOUT_SOURCE}" \
+      org.opencontainers.image.revision="${OSMSCOUT_REVISION}" \
+      org.opencontainers.image.version="${OSMSCOUT_VERSION}" \
+      org.opencontainers.image.created="${OSMSCOUT_CREATED}" \
+      org.opencontainers.image.licenses="LGPL-2.1-or-later"

@@ -313,6 +313,8 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
 
 ## 5. The container image
 
+### Building it yourself
+
 `scripts/mapgen/Dockerfile` builds a two-stage image:
 
 - **build stage**: ubuntu:noble, minimized cmake Release build of the core
@@ -321,6 +323,14 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
 - **runtime stage**: ubuntu:noble, Import binary + its shared libraries
   (copied from the build stage, same distro), curl, jq, ca-certificates,
   the script, the bundled `map.ost`, non-root user `mapgen`.
+
+The image names no library version: the libraries are staged with their
+symlink chain by the build stage, so the version the image reports is the
+version it was built from. Ask it which one that is:
+
+```
+docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:<version> --tool-version
+```
 
 ```
 docker build -f scripts/mapgen/Dockerfile -t osmscout-mapgen:<version> .
@@ -338,12 +348,47 @@ docker run --rm --read-only \
 | `/repository`  | Repository volume: public/ served tree, private/ records + staging |
 | `/config` (ro)   | imports.json (region index lives in public/names.json) |
 
-The image tag should equal the libosmscout version; db.json records
-`import.version`, so tree drift from an older binary is visible.
+### Published images
 
-The CI workflow `.github/workflows/mapgen_image.yml` builds the image and
-smoke-tests it (non-root user, config check, single pass with the refresh
-gate pre-seeded so no network is needed).
+Releases publish both images to GitHub Packages, so an operator does not
+build anything:
+
+```
+docker pull ghcr.io/framstag/libosmscout/mapgen:<tag>
+docker pull ghcr.io/framstag/libosmscout/mapserve:<tag>
+```
+
+| Image                              | Contents                                  |
+|------------------------------------|-------------------------------------------|
+| `ghcr.io/framstag/libosmscout/mapgen`   | Regeneration container (this section) |
+| `ghcr.io/framstag/libosmscout/mapserve` | Read-only web server (see below)      |
+
+| Tag | Meaning |
+|-----|---------|
+| `<release version>` | One release, e.g. `2024.06.02.1`. Immutable and the tag to pin: never moved by a later release. It is the release tag with the leading `v` removed (`v2024.06.02.1` in the repository, `2024.06.02.1` in the registry). |
+| `<library version>` | The version the bundled import tool reports and that `db.json` records as `import.version`, e.g. `1.1.1`. It matches what this image would write into a database, so it is the tag to look for when you have a `db.json` in hand, but it moves when a later release bumps the library version. |
+| `latest` | The newest release. Never a snapshot or a development build. |
+
+A newly published package is private. Make each package public once in its
+settings (`https://github.com/orgs/Framstag/packages/container/mapgen/settings`
+and `.../mapserve/settings`) so that anonymous `docker pull` works. The
+workflow is the same either way; a private package only requires registry
+credentials when pulling.
+
+Only a real release publishes: pull requests, merges and the snapshot
+release that follows every merge to master publish nothing, and a manual
+run publishes exactly the tag it was given (never `latest`).
+
+### The CI workflow
+
+`.github/workflows/mapgen_image.yml` builds the image and smoke-tests it
+(non-root user, the version it reports, config check, single pass with the
+refresh gate pre-seeded so no network is needed). Publication depends on
+those checks and runs for a non-prerelease release, publishing the release
+version, the library version and `latest`. The library version is declared
+once per build system (`set(OSMSCOUT_LIBRARY_VERSION ...)` in
+`CMakeLists.txt`, `libraryVersion='...'` in `meson.build`); the workflow
+refuses to publish when they disagree.
 
 ### Serving the repository (web server image)
 
@@ -362,6 +407,19 @@ The compose file orchestrates both containers on one shared repository
 volume: `mapgen` (writer, one pass per start, refresh-gated) and `serve`
 (reader, long-running, port 8080). The web server serves regenerated
 slots immediately without restart. Contract: spec `web-server`.
+
+By default both services build from the local sources. To run the published
+images instead, name them and pull them first:
+
+```
+export MAPGEN_IMAGE=ghcr.io/framstag/libosmscout/mapgen:<tag>
+export MAPSERVE_IMAGE=ghcr.io/framstag/libosmscout/mapserve:<tag>
+docker compose -f scripts/mapgen/docker-compose.yml pull
+docker compose -f scripts/mapgen/docker-compose.yml up -d --no-build
+```
+
+Use the same `<tag>` for both images, and use the release version rather
+than `latest` when the repository has to be reproducible.
 
 ## 6. Client update check contract
 
