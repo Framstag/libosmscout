@@ -80,9 +80,13 @@ COPY stylesheets/map.ost /usr/local/share/osmscout/map.ost
 COPY scripts/mapgen/mapgen.sh /usr/local/bin/mapgen.sh
 
 RUN chmod +x /usr/local/bin/mapgen.sh \
- && useradd --system --uid 1000 --home-dir /work -o mapgen
+ && (getent group 1000 >/dev/null 2>&1 || groupadd --gid 1000 mapgen) \
+ && useradd --system --uid 1000 --gid 1000 --home-dir /work -o mapgen
 
 ENV MAPGEN_TYPEFILE=/usr/local/share/osmscout/map.ost
+# HOME points at the writable mount: a foreign uid has no entry in /etc/passwd,
+# so tools that look for a home directory would otherwise find none.
+ENV HOME=/work
 
 USER mapgen
 
