@@ -59,10 +59,27 @@ public class OSMScoutClient {
     /**
      * Returns the currently active stylesheet file name.
      *
+     * A stylesheet that failed to load is never reported as active: the last
+     * stylesheet that loaded successfully is returned, and the configured
+     * stylesheet only while nothing has loaded yet.
+     *
      * @return file name (e.g. {@code "standard.oss"}), or {@code "standard.oss"}
      *         by default
      */
     public native String getActiveStyleSheet();
+
+    /**
+     * Whether the last stylesheet load attempt succeeded.
+     *
+     * Covers every load path — the initial load, {@link #loadStyleSheet(String)},
+     * {@link #setStyleSheetFlag(String, boolean)}, the basemap stylesheet and a
+     * stylesheet refresh. When it returns {@code false} the previously active
+     * style is still in effect and the parse errors are available through the
+     * client's style error channel.
+     *
+     * @return true when the last stylesheet load succeeded
+     */
+    public native boolean wasLastStyleLoadSuccessful();
 
     /**
      * Switches the active map style by name and redraws with it.
@@ -292,6 +309,16 @@ public class OSMScoutClient {
      * @return region name, or null if the handle is unknown
      */
     public native String getAdminRegionName(long handle);
+
+    /**
+     * Get the name of the search scope region for a previously resolved admin
+     * region: the parent region when sibling expansion applies (see
+     * {@link #searchLocations(String, int, long)}), else the region itself.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return scope region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionScopeName(long handle);
 
     /**
      * Get a structured description of the most reasonable visible object
@@ -717,6 +744,21 @@ public class OSMScoutClient {
      * @return true if renamed, false if old not found or new name exists
      */
     public native boolean renameFavorite(String groupName, String oldName, String newName);
+
+    /**
+     * Move a favorite to another position within its group.
+     *
+     * The target index is 0-based and refers to the favorite list after the
+     * favorite has been removed from its current position; an index outside the
+     * list bounds is clamped to the first/last position, and a negative index
+     * means the first position.
+     *
+     * @param groupName group name
+     * @param favName   favorite name to move
+     * @param newIndex  0-based target position within the group
+     * @return true if moved (or already at that position), false if group or favorite not found
+     */
+    public native boolean moveFavorite(String groupName, String favName, int newIndex);
 
     /**
      * Set or clear the starred flag on a favorite.

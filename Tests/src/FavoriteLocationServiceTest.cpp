@@ -318,3 +318,157 @@ TEST_CASE("Group color persists across save and load")
 
     std::filesystem::remove(tmp, ec);
 }
+
+// Appends a favorite carrying only a name; coordinates are irrelevant for
+// ordering tests.
+static void AddNamedFavorite(osmscout::FavoriteLocationService &service,
+                            const std::string &groupName,
+                            const std::string &favName)
+{
+    osmscout::FavLocation fav;
+    fav.name = favName;
+    fav.lat = 1.0;
+    fav.lon = 2.0;
+    service.AddFavorite(groupName, fav);
+}
+
+// Renders a group's favorites as a comma separated list of names, so that the
+// full order can be asserted in one expression.
+static std::string FavoriteNames(const osmscout::FavoriteLocationService &service,
+                                 const std::string &groupName)
+{
+    std::string result;
+
+    for (const auto &fav : service.GetFavorites(groupName)) {
+        if (!result.empty()) {
+            result += ',';
+        }
+        result += fav.name;
+    }
+
+    return result;
+}
+
+TEST_CASE("Move favorite within a group")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_move_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    osmscout::FavoriteLocationService service(tmp.string());
+    service.AddGroup("Work");
+    AddNamedFavorite(service, "Work", "A");
+    AddNamedFavorite(service, "Work", "B");
+    AddNamedFavorite(service, "Work", "C");
+    AddNamedFavorite(service, "Work", "D");
+
+    REQUIRE(FavoriteNames(service, "Work") == "A,B,C,D");
+
+    // Move to the front
+    REQUIRE(service.MoveFavorite("Work", "D", 0));
+    REQUIRE(FavoriteNames(service, "Work") == "D,A,B,C");
+
+    // Move to the middle (index refers to the list after removal)
+    REQUIRE(service.MoveFavorite("Work", "D", 2));
+    REQUIRE(FavoriteNames(service, "Work") == "A,B,D,C");
+
+    // Move to the last position
+    REQUIRE(service.MoveFavorite("Work", "A", 3));
+    REQUIRE(FavoriteNames(service, "Work") == "B,D,C,A");
+
+    // Index beyond the end is clamped to the last position
+    REQUIRE(service.MoveFavorite("Work", "B", 100));
+    REQUIRE(FavoriteNames(service, "Work") == "D,C,A,B");
+
+    // Moving to the current position succeeds without changing anything
+    REQUIRE(service.MoveFavorite("Work", "D", 0));
+    REQUIRE(FavoriteNames(service, "Work") == "D,C,A,B");
+
+    // Unknown group / unknown favorite
+    REQUIRE_FALSE(service.MoveFavorite("Missing", "A", 0));
+    REQUIRE_FALSE(service.MoveFavorite("Work", "Missing", 0));
+    REQUIRE(FavoriteNames(service, "Work") == "D,C,A,B");
+
+    // A group with a single favorite: no-op that reports success
+    service.AddGroup("Single");
+    AddNamedFavorite(service, "Single", "Only");
+    REQUIRE(service.MoveFavorite("Single", "Only", 0));
+    REQUIRE(service.MoveFavorite("Single", "Only", 7));
+    REQUIRE(FavoriteNames(service, "Single") == "Only");
+
+    // An empty group has nothing to move
+    service.AddGroup("Empty");
+    REQUIRE_FALSE(service.MoveFavorite("Empty", "A", 0));
+
+    std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("Favorite order is per group and stable across other operations")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_order_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    osmscout::FavoriteLocationService service(tmp.string());
+    service.AddGroup("First");
+    service.AddGroup("Second");
+
+    for (const auto &group : {"First", "Second"}) {
+        AddNamedFavorite(service, group, "Home");
+        AddNamedFavorite(service, group, "Work");
+        AddNamedFavorite(service, group, "Gym");
+    }
+
+    // Same names in two groups: moving "Home" in the first group leaves the
+    // second group's order untouched.
+    REQUIRE(service.MoveFavorite("First", "Home", 2));
+    REQUIRE(FavoriteNames(service, "First") == "Work,Gym,Home");
+    REQUIRE(FavoriteNames(service, "Second") == "Home,Work,Gym");
+
+    // Adding appends at the end
+    AddNamedFavorite(service, "First", "New");
+    REQUIRE(FavoriteNames(service, "First") == "Work,Gym,Home,New");
+
+    // Deleting keeps the relative order of the remaining favorites
+    REQUIRE(service.DeleteFavorite("First", "Gym"));
+    REQUIRE(FavoriteNames(service, "First") == "Work,Home,New");
+
+    // Renaming keeps the position
+    REQUIRE(service.RenameFavorite("First", "Home", "Flat"));
+    REQUIRE(FavoriteNames(service, "First") == "Work,Flat,New");
+
+    // Starring keeps the position and does not disturb the order
+    REQUIRE(service.SetStarred("First", "Work", true));
+    REQUIRE(FavoriteNames(service, "First") == "Work,Flat,New");
+    REQUIRE(service.SetStarred("First", "Work", false));
+    REQUIRE(FavoriteNames(service, "First") == "Work,Flat,New");
+
+    std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("Favorite order persists across save and load")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_order_persist_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        service.AddGroup("Cities");
+        AddNamedFavorite(service, "Cities", "Berlin");
+        AddNamedFavorite(service, "Cities", "Paris");
+        AddNamedFavorite(service, "Cities", "Rome");
+
+        REQUIRE(service.MoveFavorite("Cities", "Rome", 0));
+        REQUIRE(service.MoveFavorite("Cities", "Paris", 2));
+        REQUIRE(FavoriteNames(service, "Cities") == "Rome,Berlin,Paris");
+        REQUIRE(service.Save());
+    }
+
+    {
+        osmscout::FavoriteLocationService service(tmp.string());
+        REQUIRE(FavoriteNames(service, "Cities") == "Rome,Berlin,Paris");
+    }
+
+    std::filesystem::remove(tmp, ec);
+}

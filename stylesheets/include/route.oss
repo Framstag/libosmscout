@@ -1,7 +1,21 @@
 OSS
 
 CONST
-  COLOR routeColor           = #ff000088;
+  // Active route colors, per presentation (the flag both surfaces push).
+  // Daylight: opaque violet with a dark violet casing — no road class of the
+  // daylight stylesheet uses a violet hue, and a dark casing stays visible on
+  // white residential roads where the former white casing disappeared.
+  // Dark presentation: unchanged red fill with a white casing.
+  // NOTE: hex literals must be lowercase — Color::FromHexString only accepts
+  // 0-9a-f and asserts on anything else.
+  IF daylight {
+    COLOR routeColor          = #7b1fa2;
+    COLOR routeCasingColor    = #311b92;
+  }
+  ELSE {
+    COLOR routeColor          = #ff000088;
+    COLOR routeCasingColor    = #ffffff;
+  }
   COLOR routeStartColor      = #00aa00;
   COLOR routeEndColor        = #ff0000;
   COLOR favoriteMarkerColor  = #ff8800;
@@ -35,9 +49,11 @@ SYMBOL search_marker
 
 STYLE
   [MAG world-] {
-    // Active route: white casing + red fill so it is visible on any road color,
-    // including red primary roads. The outline is drawn first (lower priority).
-    [TYPE _route] WAY#outline { color: #ffffff; displayWidth: 2.2mm; width: 8m; priority: 99; }
+    // Active route: a wide casing stroke under the fill so the route is
+    // bordered on both sides and visible on any road color. The outline is
+    // drawn first (lower priority). Colors come from the presentation branch
+    // in CONST above (daylight violet, dark presentation red + white).
+    [TYPE _route] WAY#outline { color: @routeCasingColor; displayWidth: 2.2mm; width: 8m; priority: 99; }
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100; }
 
     // Imported GPX track. Rendered as a thinner blue polyline so it is

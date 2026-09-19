@@ -1,8 +1,33 @@
+#include <string>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <osmscout/location/LocationService.h>
 
 extern osmscout::LocationServiceRef locationService;
+
+namespace {
+  /*
+   * Run one string search and return its result, asserting the invariants every
+   * matching section shares: the search succeeds and does not hit the candidate
+   * limit. The section asserts its own expectations on the returned result —
+   * one place for the boilerplate instead of a copy per section.
+   */
+  osmscout::LocationSearchResult SearchForString(const std::string& query,
+                                                 bool partialMatch=false)
+  {
+    osmscout::LocationStringSearchParameter parameter(query);
+
+    parameter.SetPartialMatch(partialMatch);
+
+    osmscout::LocationSearchResult result;
+
+    REQUIRE(locationService->SearchForLocationByString(parameter,result));
+    REQUIRE_FALSE(result.limitReached);
+
+    return result;
+  }
+}
 
 //
 // City search
@@ -246,5 +271,20 @@ TEST_CASE("String search for city, location and address")
     REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
     REQUIRE(result.results.front().address->name=="1");
     REQUIRE(result.results.front().addressMatchQuality==osmscout::LocationSearchResult::match);
+  }
+
+  /*
+   * A surplus postal-code token between the house number and the city used
+   * to zero out the result set (every token must be consumed). With partial
+   * match enabled the search falls back to the street-level candidate instead
+   * (fix-address-lookup-accuracy).
+   */
+  SECTION("Search for address with surplus postal token: 'Am Birkenbaum 1 44339 Dortmund' (partial fallback)")
+  {
+    auto result=SearchForString("Am Birkenbaum 1 44339 Dortmund",true);
+
+    REQUIRE_FALSE(result.results.empty());
+    REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+    REQUIRE(result.results.front().location->name=="Am Birkenbaum");
   }
 }
