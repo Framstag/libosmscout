@@ -250,6 +250,39 @@ jobs:
           test "${code}" != "0"
           echo "the container refused the unusable schedule with exit ${code}"
 
+      - name: Smoke test (an unseeded work area is reported)
+        run: |
+          # Docker creates a named volume owned by root while the container runs
+          # as its non-root identity, so a first run against a fresh volume has
+          # to be told what is wrong instead of failing at its first write.
+          mkdir -p /tmp/mapgen-unwritable-work
+          sudo chown root:root /tmp/mapgen-unwritable-work
+          sudo chmod 755 /tmp/mapgen-unwritable-work
+          status=0
+          out=$(docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-unwritable-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            -e MAPGEN_CRON='0 */6 * * *' \
+            osmscout-mapgen:test 2>&1) || status=$?
+          echo "${out}"
+          sudo rm -rf /tmp/mapgen-unwritable-work
+          test "${status}" != "0"
+          echo "${out}" | grep -q "the work area (/work) is not writable by uid"
+          echo "${out}" | grep -q "chown -R"
+
+      - name: Smoke test (a read-only run is not blocked by an unseeded area)
+        run: |
+          mkdir -p /tmp/mapgen-unwritable-work-ro
+          sudo chown root:root /tmp/mapgen-unwritable-work-ro
+          sudo chmod 755 /tmp/mapgen-unwritable-work-ro
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-unwritable-work-ro:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test --check-config
+          sudo rm -rf /tmp/mapgen-unwritable-work-ro
+
   publish:
     name: Publish images
     runs-on: ubuntu-24.04

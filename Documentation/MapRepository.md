@@ -393,6 +393,14 @@ docker run --rm --read-only --user 1001:1001 \
 The serving container is not affected: it only reads the repository, and its own
 runtime directories belong to the user of its base image.
 
+Both writable areas - `/work` and `/repository` - have to belong to the identity
+the pass runs as, in **both** modes: the single pass downloads into the work area
+and places databases in the repository, and the scheduled mode also generates its
+crontab in the work area. When an area does not, the container refuses to start
+and says which area failed, which uid and gid it is using, and the command that
+fixes the ownership - `chown` for a bind mount or for a volume Docker created as
+root, or `PUID`/`PGID` set to the ids that own the mount.
+
 #### Running it on a schedule
 
 With `MAPGEN_CRON` set, the container runs the pass on that schedule and stays up,
@@ -419,6 +427,12 @@ so no external cron job or timer is needed:
 `restart: unless-stopped` belongs with `MAPGEN_CRON`: a container that stays up
 has to come back if it dies. The compose file takes that policy from
 `MAPGEN_RESTART`, and defaults it to `no` for the single-pass mode.
+
+The ownership requirement of the mount table applies here as well, and it is the
+first thing a fresh deployment gets wrong: a named volume is created by Docker as
+root, so the scheduled container refuses to start, naming the area and the
+`chown` command, until `/work` and `/repository` belong to the identity the pass
+runs as.
 
 Arguments always mean "run the pass once with these arguments", whatever is
 configured, so `docker compose run --rm mapgen --check-config` keeps checking
