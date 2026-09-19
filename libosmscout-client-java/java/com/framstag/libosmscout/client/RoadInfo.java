@@ -37,7 +37,11 @@ public class RoadInfo {
         this.maxSpeedKmH = maxSpeedKmH;
     }
 
-    /** Whether any displayable identity (name or ref) is present. */
+    /**
+     * Whether any displayable identity (name or ref) is present.
+     *
+     * @return true when the road has a name or a ref, false when it has neither
+     */
     public boolean hasInfo() {
         return !name.isEmpty() || !ref.isEmpty();
     }
