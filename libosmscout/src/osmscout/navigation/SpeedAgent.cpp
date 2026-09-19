@@ -42,7 +42,7 @@ namespace osmscout {
     // walker, which is why the receiver's own speed, when it reports one, is still preferred.
     const Timestamp::duration stationaryWindow{std::chrono::seconds(5)};
     const Timestamp::duration stationaryMinHistory{std::chrono::seconds(4)};
-    constexpr double stationaryFloorMeters{3.0};
+    constexpr double          stationaryFloorMeters{3.0};
   }
 
 CurrentSpeedMessage::CurrentSpeedMessage(const Timestamp& timestamp,
