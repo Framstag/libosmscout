@@ -768,6 +768,21 @@ public class OSMScoutClient {
     public native boolean renameFavorite(String groupName, String oldName, String newName);
 
     /**
+     * Move a favorite to another position within its group.
+     *
+     * The target index is 0-based and refers to the favorite list after the
+     * favorite has been removed from its current position; an index outside the
+     * list bounds is clamped to the first/last position, and a negative index
+     * means the first position.
+     *
+     * @param groupName group name
+     * @param favName   favorite name to move
+     * @param newIndex  0-based target position within the group
+     * @return true if moved (or already at that position), false if group or favorite not found
+     */
+    public native boolean moveFavorite(String groupName, String favName, int newIndex);
+
+    /**
      * Set or clear the starred flag on a favorite.
      *
      * @param groupName group name
