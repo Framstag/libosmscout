@@ -252,7 +252,7 @@ timer, kubernetes CronJob); the script itself never schedules.
 | `MAPGEN_NAMES_FILE`    | `<public>/names.json` | Region index (served copy)            |
 | `MAPGEN_WORK_DIR`      | `/work`          | Transient work area                     |
 | `MAPGEN_IMPORT`        | `Import`         | Import tool binary                      |
-| `MAPGEN_TYPEFILE`      | `map.ost`        | Type definition file                    |
+| `MAPGEN_TYPEFILE`      | `map.ost`        | Type definition file; modules it names have to sit beside it |
 | `MAPGEN_SCHEMA_VERSION`| `1`              | Supported schema version                |
 
 ### Flow per import
@@ -322,7 +322,8 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
   disabled).
 - **runtime stage**: ubuntu:noble, Import binary + its shared libraries
   (copied from the build stage, same distro), curl, jq, ca-certificates,
-  the script, the bundled `map.ost`, non-root user `mapgen`.
+  the script, the bundled type definitions (`map.ost` plus the modules it
+  includes), non-root user `mapgen`.
 
 The image names no library version: the libraries are staged with their
 symlink chain by the build stage, so the version the image reports is the
