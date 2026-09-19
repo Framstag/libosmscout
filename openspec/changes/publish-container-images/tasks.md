@@ -42,18 +42,27 @@
 
 ## Verification status
 
-Tasks 4.1, 4.2, 4.4, 4.5, 4.6, 4.7, 5.1 and 5.2 are marked complete on local evidence plus inspection:
-both images were built and every smoke step was run against them, the library version cross-check and
-the tag computation were extracted from the workflow and executed for every input case (release with
-and without a leading `v`, manual run with a tag, manual run without a tag, manual run asking for
-`latest`, manual run with an invalid tag), the cross-check was run against mismatching declarations,
-and the orchestration was started with the default image names and with overridden ones. What still
-needs a runner: that a pull-request run publishes nothing and logs in to no registry, that a
-non-prerelease release publishes the release tag, the library version tag and `latest`, that a snapshot
-release skips the verification and publish jobs, that the concurrency group serializes runs, and that an
-anonymous pull works once the packages are public.
+Run evidence from the pull request (run `35447446842`): the `verify` job passed every step - the
+library version cross-check reported `1.1.1`, the image reported `1.1.1`, the non-root check, the config
+check and the refresh-gated single pass all succeeded - the compose smoke job passed, and the `publish`
+job was skipped, so nothing was pushed to the registry and no registry login ran. That confirms tasks
+4.1 and 4.2 and the pull-request half of 6.2 on a runner.
 
-Tasks 6.2, 6.3 and 6.4 stay open: they are runner- and release-side checks by definition (pull-request
-run plus manual dry run, the first release after merge, and the comparison of a published image's
-`--tool-version` with the tag and with a generated `db.json`), so they can only be completed after this
-change is merged and released.
+Tasks 4.1, 4.2, 4.4, 4.5, 4.6, 4.7, 5.1 and 5.2 are marked complete on that runner evidence plus local
+evidence and inspection: both images were built and every smoke step was run against them, the library
+version cross-check and the tag computation were extracted from the workflow and executed for every
+input case (release with and without a leading `v`, manual run with a tag, manual run without a tag,
+manual run asking for `latest`, manual run with an invalid tag), the cross-check was run against
+mismatching declarations, and the orchestration was started with the default image names and with
+overridden ones.
+
+Still outstanding on a runner: a `workflow_dispatch` dry run with publishing disabled (the other half
+of 6.2, which needs the workflow on the default branch), a non-prerelease release publishing the release
+tag, the library version tag and `latest` (4.4, 4.5, 6.3), a snapshot release skipping the verification
+and publish jobs (4.7), the concurrency group serializing runs (4.6), and an anonymous pull once the
+packages are public (5.1, 5.2).
+
+Tasks 6.2, 6.3 and 6.4 stay open: they are runner- and release-side checks by definition (a manual dry
+run in addition to the pull-request run, the first release after merge, and the comparison of a
+published image's `--tool-version` with the tag and with a generated `db.json`), so they can only be
+completed after this change is merged and released.
