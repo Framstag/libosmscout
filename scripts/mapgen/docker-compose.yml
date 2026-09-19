@@ -36,6 +36,12 @@ services:
       context: ../..
       dockerfile: scripts/mapgen/Dockerfile
     image: ${MAPGEN_IMAGE:-osmscout-mapgen:local}
+    # The identity the pass runs as. It decides who owns what the pass writes
+    # into the mounted areas, so a repository bind-mounted from a directory
+    # owned by the operator needs no ownership change. 1000/1000 is the
+    # identity the image itself uses. The serving container keeps its own
+    # image's identity: it only reads the repository.
+    user: "${PUID:-1000}:${PGID:-1000}"
     # one pass per start; do not auto-restart the generator
     restart: "no"
     read_only: true

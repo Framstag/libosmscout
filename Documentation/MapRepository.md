@@ -348,6 +348,50 @@ docker run --rm --read-only \
 | `/repository`  | Repository volume: public/ served tree, private/ records + staging |
 | `/config` (ro)   | imports.json (region index lives in public/names.json) |
 
+#### Which identity the pass runs as
+
+The pass writes into `/repository` and `/work`, so both have to be writable by
+the identity it runs as. The orchestration takes that identity from two
+environment variables:
+
+| variable | default | meaning |
+|----------|---------|---------|
+| `PUID`   | `1000`  | the uid the pass runs as, and the owner of everything it writes |
+| `PGID`   | `1000`  | the gid, same |
+
+`1000:1000` is also the identity the image itself uses (`id -u` and `id -g` of
+the `mapgen` user), so configuring nothing keeps the previous behaviour. A
+repository bind-mounted from a directory owned by your own account then needs
+no ownership change:
+
+```
+# .env next to the compose file, or exported in the shell
+PUID=1001
+PGID=1001
+docker compose -f scripts/mapgen/docker-compose.yml up -d
+```
+
+A named volume is created by Docker and therefore starts out owned by root;
+seed it once with the same ids (the default is shown):
+
+```
+docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+  --entrypoint sh mapgen -c 'chown -R ${PUID:-1000}:${PGID:-1000} /repository /work'
+```
+
+For a plain `docker run`, the equivalent of the two variables is `--user`:
+
+```
+docker run --rm --read-only --user 1001:1001 \
+  -v /var/lib/osmscout-mapgen:/work \
+  -v /repository:/repository \
+  -v /etc/os-maps:/config:ro \
+  ghcr.io/framstag/libosmscout/mapgen:latest
+```
+
+The serving container is not affected: it only reads the repository, and its own
+runtime directories belong to the user of its base image.
+
 ### Published images
 
 Every build of the images on the main branch publishes to GitHub Packages, so
