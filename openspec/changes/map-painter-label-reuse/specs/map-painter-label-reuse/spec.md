@@ -41,6 +41,13 @@ inputs, or a painter parameter the measurement depends on, changes.
 - **WHEN** that parameter changes between two frames
 - **THEN** the labels SHALL be measured for the new parameter and SHALL NOT be drawn with the measurements of the earlier parameter
 
+#### Scenario: A changed line wrapping parameter is measured again
+
+- **GIVEN** a label that has been measured while the painting parameters put one wrapping width, one minimum and one maximum line length and one wrap-to-area setting in force
+- **WHEN** the same label is measured again with a different value of one of those parameters
+- **THEN** the label SHALL be measured for the new parameter
+- **THEN** a later frame with unchanged parameters SHALL reuse that measurement
+
 #### Scenario: Reuse does not depend on a label having been drawn
 
 - **GIVEN** a label that has been measured for a frame in which it did not take part because it lost the overlap resolution or lay outside the viewport
@@ -71,6 +78,41 @@ label takes part in a later frame, instead of being derived again.
 - **WHEN** the same view is rendered again
 - **THEN** the glyphs of that path label SHALL NOT be derived again
 - **THEN** their positions along the path SHALL be identical to the previous frame
+
+#### Scenario: Glyph data does not outlive the measurement it was derived from
+
+- **GIVEN** a painter that has derived the glyph data of a label whose measurement it no longer remembers
+- **WHEN** a later frame draws a label whose text differs from that label
+- **THEN** the glyph data drawn for it SHALL be the glyph data of its own text
+
+### Requirement: The measurement cache is bounded, drops the least recently used measurement, and can be switched off
+
+The painter SHALL remember a bounded number of label measurements. When the bound is reached,
+the measurement that has not been used for the longest time SHALL be the one that a new
+measurement replaces. With the reuse of measurements switched off, the painter SHALL remember no
+measurement and SHALL retain no glyph data between frames.
+
+#### Scenario: The measurement cache stays within its bound
+
+- **GIVEN** a painter whose measurement cache is bounded
+- **WHEN** it measures more labels than the bound
+- **THEN** it SHALL remember at most as many measurements as the bound
+- **THEN** the measurements it still remembers SHALL be reused by the next frame
+
+#### Scenario: A measurement that is used again outlives one that is not
+
+- **GIVEN** a painter whose cache is full and holds a measurement that the current frame uses and one that it does not use
+- **WHEN** a label with a new measurement key is measured
+- **THEN** the measurement that is not used SHALL be the one that is dropped
+- **THEN** the measurement that is used SHALL be reused by the next frame
+
+#### Scenario: Reuse can be switched off
+
+- **GIVEN** a painter whose reuse of measurements is switched off
+- **WHEN** frames are rendered
+- **THEN** the painter SHALL remember no measurement and SHALL retain no glyph data between frames
+- **THEN** each frame SHALL measure its labels and derive their glyph data again
+- **THEN** the frame SHALL draw the labels as a painter that never saw them before
 
 ### Requirement: Label stage scratch storage is reused
 

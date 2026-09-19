@@ -158,3 +158,37 @@ Parent spec: all of `map-painter-label-reuse`.
 - [x] 8.7 Update `TODO.md`: close the label scratch-vector finding, record the remaining
   `DrawLabels` draw-path share as the symbol/text raster follow-up, and keep the `fonts` entry
   of 6.2. Verification: the entries reflect the current code and the measured numbers.
+
+## 9. Review fixes (PR review of 2026-09-16)
+
+The review of the pull request found three defects in the reuse introduced by this change. The
+following tasks fix them and extend the scenarios that cover them.
+
+Parent spec: "Label measurement is reused while its inputs are unchanged", "Per-glyph data is
+reused" and "The measurement cache is bounded, drops the least recently used measurement, and
+can be switched off".
+
+- [x] 9.1 Carry the line wrapping parameters (`LabelLineMinCharCount`, `LabelLineMaxCharCount`,
+  `LabelLineFitToArea`, `LabelLineFitToWidth`) in `LabelMeasurementKey`, because the backends
+  that wrap read them inside `Layout()` through `MapPainter::GetProposedLabelWidth`. Verification:
+  the new scenario "a changed line wrapping parameter is measured again" fails when the key does
+  not carry them.
+- [x] 9.2 Make the glyph data a member of the measurement entry (`LabelMeasurement::glyphs` with
+  its derivation flag) and drop the second, pointer-keyed table, so that glyph data cannot
+  outlive the label it was derived from. Verification: the new scenarios "a bound of 0 remembers
+  neither measurements nor glyph data" and "glyph data does not outlive the measurement it
+  belongs to" pass, and the frame's contour labels equal those of a fresh layouter.
+- [x] 9.3 Drop the least recently used measurement instead of the oldest measured one: keep the
+  order of use in a `std::list` whose position each entry knows, and splice an entry to the back
+  when it is used. Verification: the new scenario "a measurement that is used again outlives one
+  that is not" fails when the entry used again is not moved to the end of the order.
+- [x] 9.4 Let a bound of 0 mean what it documents: remember no measurement, hold the measurement
+  of the current step in one slot, and empty that slot in `Reset()` at the end of the frame.
+  Verification: the new "bound of 0" scenario asserts one measurement and one glyph derivation
+  per frame and no remembered glyph data.
+- [x] 9.5 Build the changed files without warnings, run the full test suite, and run Uncrustify
+  and clang-tidy on them. Verification: `cmake --build`, `ctest` (118 tests), `uncrustify` drift
+  of `LabelLayouter.h` at or below its pre-fix value and no drift in the test file, clang-tidy
+  without a new finding category. Evidence in `verification.md`, section 14.
+- [x] 9.6 Record the review outcome and the fix in `verification.md`. Verification: the review
+  comments of the pull request are answered by a scenario, a task and a piece of evidence.

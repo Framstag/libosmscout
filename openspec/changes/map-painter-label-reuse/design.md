@@ -118,6 +118,13 @@ covers what `Layout()` reads from the projection and parameters but does not rec
 argument: the font name and size, the DPI, the magnification, and the drawing target's font
 settings.
 
+The key additionally carries the four line wrapping parameters of `MapParameter`
+(`LabelLineMinCharCount`, `LabelLineMaxCharCount`, `LabelLineFitToArea`,
+`LabelLineFitToWidth`). They are no argument of `Layout()`, but the backends that wrap a label
+(Qt, Skia, iOS) ask `MapPainter::GetProposedLabelWidth` for the width they wrap with, and that
+call reads them, so a change of one of them changes the measurement. The layouter reads them
+from the `MapParameter` it is handed, so no backend has to report them.
+
 For Cairo the environment is derived from `parameter.GetFontName()`,
 `projection.GetDPI()`, the magnification and the target's
 `cairo_get_font_options` hash; `MapPainterCairo::DrawMap` (`:1389`) refreshes it together with
@@ -143,55 +150,69 @@ place per backend, `text-metrics-api` cross-backend tests compare reused measure
 fresh ones, and a unit test measures the same text at two DPI values and requires two
 measurements.
 
-### D3 - The measurement cache is bounded and cleared on environment change
+### D3 - The measurement cache is bounded, drops the least recently used measurement, and can be switched off
 
-The cache is bounded by a maximum entry count and evicts on overflow. It is implemented with
-the existing `osmscout::Cache` (`libosmscout/include/osmscout/util/Cache.h:57`) rather than a
-bare `unordered_map`, so eviction and statistics come from code the project already tests. The
-bound is a constant in the layouter (the label stage is internal state, so no new
-`MapParameter` setter is introduced) and the whole cache is dropped when the environment of
-D2 changes.
+The cache is an `unordered_map` from `LabelMeasurementKey` to `LabelMeasurement`, bounded by a
+maximum entry count (`defaultMeasurementCount`, 4096). A `std::list` of keys holds the order of
+use, each entry knows its position in it, and the layouter splices an entry to the back of the
+order when it is used and drops the entry at the front when a new measurement does not fit. The
+bound is a constant in the layouter (the label stage is internal state, so no new `MapParameter`
+setter is introduced), and the whole cache is dropped when the environment of D2 changes.
+
+A bound of 0 switches the reuse off: the layouter then remembers nothing and the measurement of
+the current step lives in a single slot that `Reset()` empties at the end of the frame.
 
 *Alternatives:*
 
-- **Unbounded `unordered_map`.** Pro: simplest, and the entries are also the glyph cache keys.
-  Con: a long session across a whole country accumulates a `PangoLayout` per distinct label;
-  the codebase's own caches are all bounded. Rejected.
+- **Unbounded `unordered_map`.** Pro: simplest. Con: a long session across a whole country
+  accumulates a `PangoLayout` per distinct label; the codebase's own caches are all bounded.
+  Rejected.
 - **Bounded per-frame cache (cleared after every frame).** Removes cross-frame reuse except
   within a frame, where nothing needs it. Rejected.
+- **First-in-first-out eviction (insertion order).** Pro: one container, no per-entry order
+  information. Con: a label that every frame uses is still dropped once the bound is reached, so
+  a working set that does not fit the bound thrashes; the order list and the hash lookup already
+  exist, so the least-recently-used order costs a `std::list::splice` per hit and nothing per
+  miss. Rejected: a frame that pans over a dense area pays the eviction of exactly the labels it
+  keeps using.
 - **New `MapParameter` option for the bound.** Pro: configurable. Con: a new public setter for
   an internal cache; the database caches use constructor defaults instead. Rejected for now;
   recorded as an open question.
 
 *Risk:* eviction can drop a measurement that the next frame needs again, turning a hit into a
 miss. Mitigation: the bound is chosen well above the label count of a typical view (measured
-label counts are in the hundreds per frame at z16), and eviction only costs what the current
-code always pays.
+label counts are in the hundreds per frame at z16), eviction only costs what the current code
+always pays, and the least-recently-used order keeps the labels a frame keeps using.
 
-### D4 - Per-glyph reuse is a layouter-side table keyed by the measured label
+### D4 - Per-glyph data is part of the measurement entry
 
-`LabelLayouter` keeps a table from the cached label (the `shared_ptr` it hands out of the
-measurement cache) to its `std::vector<Glyph<NativeGlyph>>`, and the contour label path at
-`LabelLayouter.h:802` reads through it instead of calling `ToGlyphs()` directly. Because the
-label pointer is stable while the measurement is cached, the glyph entry is stable too, and it
-is dropped with the measurement.
+`LabelLayouter::LabelMeasurement` holds the measured label together with the
+glyph data derived from it (`std::vector<Glyph<NativeGlyph>>` plus the flag that tells whether it
+has been derived). `MeasureLabel` returns a reference to the entry, `GetLabelGlyphs` derives the
+glyph data into it, and `LabelLayouter::RegisterContourLabel` reads it instead of calling
+`ToGlyphs()` directly. The glyph data therefore
+lives exactly as long as the label it was derived from and is dropped with it, with no second
+container and no second lookup, and a label that the layouter does not remember carries its glyph
+data with it only for its step of the frame.
 
 *Alternatives:*
 
+- **A second table from the label pointer to its glyph data** (the first implementation, and what
+the review found to be wrong). Pro: the measurement cache value can stay a bare `shared_ptr`.
+Con: the table is keyed by the address of a label that the measurement cache owns, so its
+correctness depends on that ownership - a layouter that does not remember measurements (bound 0)
+inserted an entry whose label died at the end of the frame, so the table grew without bound and
+a later label allocated at the same address was served the earlier label's glyphs. Rejected.
 - **Memoise inside each backend's label object** (`mutable` glyph vector in `CairoLabel` and
   its six peers), which would also speed up `MapPainter::MeasureLabel`. Pro: one change per
   backend covers every `ToGlyphs()` caller. Con: seven backend edits, a `mutable` cache inside
   a shared object (mutation visible to whoever else holds the `shared_ptr`), and thread-safety
-  questions the layouter-side table does not have. Rejected for this change; the measurement
+  questions the layouter-side entry does not have. Rejected for this change; the measurement
   API keeps working uncached (it is not a per-frame path).
 - **Change `ToGlyphs()` to return a `const` reference** so no copy is made. Pro: eliminates the
   vector copy as well. Con: changes a hook implemented by seven backends plus the templated
   callers, and it makes the hook contract weaker (the returned vector must outlive the call).
   Rejected as a larger API change than the requirement needs.
-
-*Risk:* the table is keyed by pointer, so a stale pointer would serve the wrong glyphs.
-Mitigation: the table is only filled from labels taken out of the measurement cache, and it is
-cleared exactly when the measurement cache is cleared.
 
 ### D5 - The frame-wide label state becomes reusable state of the layouter
 
@@ -315,8 +336,8 @@ frame 1                                     frame 2
   |     new canvases, zeroed                   |     same canvases, zeroed
   |                                           |
   +-- contour label on a way ----------------> +-- contour label on a way
-  |     ToGlyphs()  [per glyph allocs]         |     glyph table hit for the label
-  |     store glyphs under the label           |     no ToGlyphs(), no per-glyph allocs
+  |     ToGlyphs()  [per glyph allocs]         |     measurement entry of the label
+  |     store glyphs under the label           |     glyphs already in the entry: no ToGlyphs()
   |                                           |
   +-- draw resolved elements -----------------> +-- draw resolved elements
         same label set, same order                   identical output
@@ -329,11 +350,11 @@ the first registration of frame 2, and frame 2 behaves like frame 1.
 
 | risk | mitigation |
 |------|------------|
-| A backend's measurement input is missing from the environment key, so stale metrics are drawn | environment refreshed at frame start per backend; unit test measuring at two DPI values; `text-metrics-*` cross-backend tests keep comparing dimensions and glyph boxes |
+| A backend's measurement input is missing from the environment key, so stale metrics are drawn | environment refreshed at frame start per backend; the wrapping parameters a backend's `Layout()` reads through `GetProposedLabelWidth` are part of the key; unit test measuring at two DPI values, unit test changing a wrapping parameter; `text-metrics-*` cross-backend tests keep comparing dimensions and glyph boxes |
 | The environment token is refreshed per frame unconditionally, silently disabling reuse | a unit test asserts a second frame performs no measurement; the reuse must be visible in the test's counter |
 | Cache memory grows with the session | bounded cache (D3), cleared on environment change; a test asserts the bound is honoured |
 | Frame canvas reset misses pixels and suppresses labels | reset zeroes the whole bitmask, resizes on viewport change; two-frame test comparing placements against a fresh painter |
-| Glyph table keyed by pointer serves glyphs of a freed label | the table is filled only from measurement-cache labels and cleared with it; the contour path holds the `shared_ptr` it reads |
+| Glyph data outlives the label it was derived from | the glyph data is a member of the measurement entry, so it is dropped with the label; unit tests cover the disabled cache and the eviction of a measured label |
 | `ScreenRectMask` and `LabelPath` gain reset methods that other code misuses | both classes have dedicated test files that get cases for the new methods |
 | The draw path (`DrawLabels`) is untouched, so its symbol and text rendering cost stays | expected: the step's allocations were the layouter's resolution work (measured), so this change removes them; the remaining drawing cost is a frame-time item recorded as the symbol raster follow-up in `TODO.md` |
 | The key hashes the label text per registered label per frame | one hash plus one lookup per label replaces a shaping pass; the A/B measurement task checks the net effect |

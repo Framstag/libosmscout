@@ -312,6 +312,30 @@ namespace {
 
     return count;
   }
+
+  /**
+   * Require that two layouters draw the same contour labels, which is how the tests check that
+   * the glyph data of a frame is the one a fresh measurement of the frame's labels produces.
+   */
+  void RequireSameContourLabels(const TestLayouter& layouter,
+                                const TestLayouter& freshLayouter)
+  {
+    REQUIRE(freshLayouter.ContourLabels().size()==layouter.ContourLabels().size());
+
+    for (size_t i=0; i<layouter.ContourLabels().size(); i++) {
+      const auto & glyphs=layouter.ContourLabels()[i].glyphs;
+      const auto & freshGlyphs=freshLayouter.ContourLabels()[i].glyphs;
+
+      REQUIRE(glyphs.size()==freshGlyphs.size());
+
+      for (size_t g=0; g<glyphs.size(); g++) {
+        REQUIRE(glyphs[g].position.GetX()==freshGlyphs[g].position.GetX());
+        REQUIRE(glyphs[g].position.GetY()==freshGlyphs[g].position.GetY());
+        REQUIRE(glyphs[g].trWidth==freshGlyphs[g].trWidth);
+        REQUIRE(glyphs[g].trHeight==freshGlyphs[g].trHeight);
+      }
+    }
+  }
 }
 
 namespace osmscout {
@@ -857,4 +881,202 @@ TEST_CASE("The measurement cache stays within its bound","[MapPainterLabelReuse]
   REQUIRE(fake.measurementCount>=measurementsOfPreviousFrames+10-measurementsRemembered);
   REQUIRE(fake.measurementCount<=measurementsOfPreviousFrames+10);
   REQUIRE(layouter.GetMeasurementCount()<=4);
+}
+
+TEST_CASE("A measurement that is used again outlives the one that is not","[MapPainterLabelReuse]")
+{
+  FakeTextLayouter       fake;
+  TestLayouter           layouter(&fake,2);
+  auto                   projection=MakeProjection();
+  osmscout::MapParameter parameter;
+
+  layouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  layouter.SetLayoutOverlap(0);
+
+  auto registerA=[&]() {
+                    RegisterTextLabel(layouter,projection,parameter,"A",12.0,120.0,20.0,100.0);
+                  };
+  auto registerB=[&]() {
+                    RegisterTextLabel(layouter,projection,parameter,"B",12.0,120.0,50.0,100.0);
+                  };
+  auto registerC=[&]() {
+                    RegisterTextLabel(layouter,projection,parameter,"C",12.0,120.0,80.0,100.0);
+                  };
+
+  registerA();
+  registerB();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==2);
+  REQUIRE(layouter.GetMeasurementCount()==2);
+
+  // "A" is used again, so it becomes the most recently used measurement and "B", which has not
+  // been used for the longest time, is the one that the new measurement of "C" replaces
+  registerA();
+  registerC();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==3);
+
+  // "A" is still remembered, so this frame measures only the dropped "B" again
+  registerA();
+  registerB();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==4);
+}
+
+TEST_CASE("A changed line wrapping parameter is measured again","[MapPainterLabelReuse]")
+{
+  FakeTextLayouter       fake;
+  TestLayouter           layouter(&fake);
+  auto                   projection=MakeProjection();
+  osmscout::MapParameter parameter;
+
+  layouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  layouter.SetLayoutOverlap(0);
+
+  auto registerLabel=[&]() {
+                        RegisterTextLabel(layouter,projection,parameter,"Main Street",12.0,120.0,50,50);
+                      };
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==1);
+
+  // The width a wrapped label is laid out with is computed from these parameters by the
+  // backends, inside their Layout() implementation, so they are measurement inputs
+  parameter.SetLabelLineFitToWidth(400.0);
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==2);
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==2);
+
+  parameter.SetLabelLineFitToArea(false);
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==3);
+
+  parameter.SetLabelLineMinCharCount(7);
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==4);
+
+  parameter.SetLabelLineMaxCharCount(13);
+
+  registerLabel();
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(fake.measurementCount==5);
+}
+
+TEST_CASE("A bound of 0 remembers neither measurements nor glyph data","[MapPainterLabelReuse]")
+{
+  FakeTextLayouter       fake;
+  TestLayouter           layouter(&fake,0);
+  auto                   projection=MakeProjection();
+  osmscout::MapParameter parameter;
+
+  layouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  layouter.SetLayoutOverlap(0);
+
+  glyphDerivationCount=0;
+
+  RegisterPathLabel(layouter,projection,parameter,"Main Street",12.0);
+  layouter.Layout(projection,parameter);
+
+  REQUIRE(fake.measurementCount==1);
+  REQUIRE(layouter.GetMeasurementCount()==0);
+  REQUIRE(layouter.GetGlyphCount()==0);
+  REQUIRE(glyphDerivationCount==1);
+  REQUIRE(!layouter.ContourLabels().empty());
+
+  layouter.Reset();
+
+  // Nothing is remembered, so the next frame measures the label and derives its glyph data again.
+  // The glyph data of the frame before is dropped with the label it was derived from, so its key
+  // cannot be the address of a label that a later frame puts at the same place
+  RegisterPathLabel(layouter,projection,parameter,"Church Lane",12.0);
+  layouter.Layout(projection,parameter);
+
+  REQUIRE(fake.measurementCount==2);
+  REQUIRE(layouter.GetMeasurementCount()==0);
+  REQUIRE(layouter.GetGlyphCount()==0);
+  REQUIRE(glyphDerivationCount==2);
+
+  // The frame draws what a fresh layouter draws for its label
+  FakeTextLayouter freshFake;
+  TestLayouter     freshLayouter(&freshFake,0);
+
+  freshLayouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  freshLayouter.SetLayoutOverlap(0);
+
+  RegisterPathLabel(freshLayouter,projection,parameter,"Church Lane",12.0);
+  freshLayouter.Layout(projection,parameter);
+
+  RequireSameContourLabels(layouter,freshLayouter);
+}
+
+TEST_CASE("Glyph data does not outlive the measurement it belongs to","[MapPainterLabelReuse]")
+{
+  FakeTextLayouter       fake;
+  TestLayouter           layouter(&fake,2);
+  auto                   projection=MakeProjection();
+  osmscout::MapParameter parameter;
+
+  layouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  layouter.SetLayoutOverlap(0);
+
+  glyphDerivationCount=0;
+
+  RegisterPathLabel(layouter,projection,parameter,"Main Street",12.0);
+  RegisterPathLabel(layouter,projection,parameter,"Market",12.0);
+  layouter.Layout(projection,parameter);
+  layouter.Reset();
+
+  REQUIRE(layouter.GetMeasurementCount()==2);
+  REQUIRE(layouter.GetGlyphCount()==2);
+  REQUIRE(glyphDerivationCount==2);
+
+  // Two new labels replace the two remembered measurements, and their glyph data goes with them
+  RegisterPathLabel(layouter,projection,parameter,"Station",12.0);
+  RegisterPathLabel(layouter,projection,parameter,"Church Lane",12.0);
+  layouter.Layout(projection,parameter);
+
+  REQUIRE(layouter.GetMeasurementCount()==2);
+  REQUIRE(layouter.GetGlyphCount()==2);
+  REQUIRE(glyphDerivationCount==4);
+
+  // The glyph data of the frame is the one of the frame's labels
+  FakeTextLayouter freshFake;
+  TestLayouter     freshLayouter(&freshFake,2);
+
+  freshLayouter.SetViewport(osmscout::ScreenVectorRectangle(0,0,400,400));
+  freshLayouter.SetLayoutOverlap(0);
+
+  RegisterPathLabel(freshLayouter,projection,parameter,"Station",12.0);
+  RegisterPathLabel(freshLayouter,projection,parameter,"Church Lane",12.0);
+  freshLayouter.Layout(projection,parameter);
+
+  RequireSameContourLabels(layouter,freshLayouter);
 }

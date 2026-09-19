@@ -22,6 +22,7 @@
 
 #include <array>
 #include <cstddef>
+#include <iterator>
 #include <list>
 #include <memory>
 #include <set>
@@ -241,8 +242,14 @@ constexpr bool debugLabelLayouter = false;
   }
 
   /**
-   * Key of a label measurement: the arguments a backend's Layout() call receives. Two labels
-   * with the same key measure the same, so the second one can reuse the first measurement.
+   * Key of a label measurement: the arguments a backend's Layout() call receives and the
+   * parameters that backend's Layout() reads on top of them. Two labels with the same key
+   * measure the same, so the second one can reuse the first measurement.
+   *
+   * The parameters of the line wrapping (`LabelLineMinCharCount`, `LabelLineMaxCharCount`,
+   * `LabelLineFitToArea`, `LabelLineFitToWidth`) are no argument of Layout(), but the backends
+   * that wrap a label ask MapPainter::GetProposedLabelWidth for the width they wrap with, and
+   * that call reads them. A frame that sees them changed therefore measures again.
    */
   class LabelMeasurementKey
   {
@@ -252,6 +259,10 @@ constexpr bool debugLabelLayouter = false;
     double      objectWidth{0.0};
     bool        enableWrapping{false};
     bool        contourLabel{false};
+    size_t      labelLineMinCharCount{0};
+    size_t      labelLineMaxCharCount{0};
+    bool        labelLineFitToArea{false};
+    double      labelLineFitToWidth{0.0};
 
     bool operator==(const LabelMeasurementKey& other) const
     {
@@ -259,6 +270,10 @@ constexpr bool debugLabelLayouter = false;
              objectWidth==other.objectWidth &&
              enableWrapping==other.enableWrapping &&
              contourLabel==other.contourLabel &&
+             labelLineMinCharCount==other.labelLineMinCharCount &&
+             labelLineMaxCharCount==other.labelLineMaxCharCount &&
+             labelLineFitToArea==other.labelLineFitToArea &&
+             labelLineFitToWidth==other.labelLineFitToWidth &&
              text==other.text;
     }
   };
@@ -273,6 +288,10 @@ constexpr bool debugLabelLayouter = false;
       hash=hash*31u+std::hash<double>()(key.objectWidth);
       hash=hash*31u+std::hash<bool>()(key.enableWrapping);
       hash=hash*31u+std::hash<bool>()(key.contourLabel);
+      hash=hash*31u+std::hash<size_t>()(key.labelLineMinCharCount);
+      hash=hash*31u+std::hash<size_t>()(key.labelLineMaxCharCount);
+      hash=hash*31u+std::hash<bool>()(key.labelLineFitToArea);
+      hash=hash*31u+std::hash<double>()(key.labelLineFitToWidth);
 
       return hash;
     }
@@ -358,7 +377,6 @@ constexpr bool debugLabelLayouter = false;
 
       measurements.clear();
       measurementOrder.clear();
-      glyphs.clear();
       measurementEnvironment=environment;
     }
 
@@ -371,6 +389,10 @@ constexpr bool debugLabelLayouter = false;
       // are registered before the drawing target of that frame reports its viewport, so they
       // cannot be decided against a viewport until it has been set again
       layoutViewportValid=false;
+
+      // A layouter without a measurement cache holds the measurement of the frame that has just
+      // been drawn; the frame is over, so it is dropped with the rest of the frame's state
+      notRememberedMeasurement=LabelMeasurement();
     }
 
     // Something is an overlay, if its alpha is <0.8
@@ -937,13 +959,15 @@ constexpr bool debugLabelLayouter = false;
           instance.priority);
         // TODO: should we take style into account?
         // Qt allows to split text layout and style setup
-        element.label = MeasureLabel(projection,
-                                     parameter,
-                                     data.text,
-                                     data.fontSize,
-                                     objectWidth,
-                                     /*enable wrapping*/ true,
-                                     /*contour label*/ false);
+        LabelMeasurement & measurement=MeasureLabel(projection,
+                                                    parameter,
+                                                    data.text,
+                                                    data.fontSize,
+                                                    objectWidth,
+                                                    /*enable wrapping*/ true,
+                                                    /*contour label*/ false);
+
+        element.label = measurement.label;
         element.x = point.GetX() - element.label->width / 2;
         if (offset<0){
           element.y = point.GetY() - element.label->height / 2;
@@ -1043,19 +1067,21 @@ constexpr bool debugLabelLayouter = false;
                               const PathLabelData &labelData,
                               const LabelPath &labelPath)
     {
-      LabelPtr label=MeasureLabel(projection,
-                                  parameter,
-                                  labelData.text,
-                                  labelData.height,
-                                  /* object width */ 0.0,
-                                  /*enable wrapping*/ false,
-                                  /*contour label*/ true);
+      LabelMeasurement & measurement=MeasureLabel(projection,
+                                                  parameter,
+                                                  labelData.text,
+                                                  labelData.height,
+                                                  /* object width */ 0.0,
+                                                  /*enable wrapping*/ false,
+                                                  /*contour label*/ true);
+
+      LabelPtr label=measurement.label;
 
       // text should be rendered with 0x0 coordinate as left baseline
       // we want to move label a bit to the bottom, near to line center
       double                           textBaselineOffset = label->height * 0.25;
 
-      const std::vector<Glyph<NativeGlyph>> &glyphs = GetLabelGlyphs(label);
+      const std::vector<Glyph<NativeGlyph>> &glyphs = GetLabelGlyphs(measurement);
       double                           pathLength=labelPath.GetLength();
       ContourLabelPositioner           positioner;
       ContourLabelPositioner::Position position=positioner.calculatePositions(projection,
@@ -1200,28 +1226,71 @@ constexpr bool debugLabelLayouter = false;
       return maxMeasurementCount;
     }
 
+    /**
+     * Return the number of remembered measurements whose glyph data has been derived.
+     */
+    size_t GetGlyphCount() const
+    {
+      size_t count=0;
+
+      for (const auto& entry : measurements) {
+        if (entry.second.glyphsDerived) {
+          count++;
+        }
+      }
+
+      return count;
+    }
+
   private:
-    TextLayouter                                                             *textLayouter;
-    size_t                                                                   maxMeasurementCount;
+    /**
+     * A remembered label measurement: the layouted label and the glyph data derived from it.
+     *
+     * The glyph data is owned here, together with the label it was derived from. A label whose
+     * measurement is dropped therefore drops its glyph data as well, and no glyph data can
+     * outlive the label it was derived from.
+     */
+    struct LabelMeasurement
+    {
+      LabelPtr                                 label;
+      std::vector<Glyph<NativeGlyph>>          glyphs;
+      bool                                     glyphsDerived{false};
+      std::list<LabelMeasurementKey>::iterator order; //!< Position of the measurement in measurementOrder
+    };
 
-    std::string                                                              measurementEnvironment;
-    std::unordered_map<LabelMeasurementKey,LabelPtr,LabelMeasurementKeyHash> measurements;
-    std::list<LabelMeasurementKey>                                           measurementOrder;
-    std::unordered_map<const LabelType*,std::vector<Glyph<NativeGlyph>>>     glyphs;
+    using MeasurementOrder = std::list<LabelMeasurementKey>;
 
-    LayoutJob                                                                layoutJob; //!< Reused state of the frame's overlap resolution
+    using MeasurementIndex = std::unordered_map<LabelMeasurementKey,LabelMeasurement,LabelMeasurementKeyHash>;
+
+    TextLayouter     *textLayouter;
+    size_t           maxMeasurementCount;
+
+    std::string      measurementEnvironment;
+    MeasurementIndex measurements;
+    MeasurementOrder measurementOrder;
+    LayoutJob        layoutJob;                                                         //!< Reused state of the frame's overlap resolution
+
+    /**
+     * Measurement of a layouter that does not remember measurements (see maxMeasurementCount);
+     * it holds the measurement of the label that was measured last.
+     */
+    LabelMeasurement notRememberedMeasurement;
 
     /**
      * Measure a label, reusing the measurement of an earlier frame while the measurement
      * inputs and the measurement environment are unchanged.
+     *
+     * The returned reference stays valid until the measurement is dropped, which happens when
+     * the environment changes or when the measurement is the oldest one of a full cache. It is
+     * therefore only valid for the label stage's current step, not for the whole frame.
      */
-    LabelPtr MeasureLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const std::string& text,
-                          double fontSize,
-                          double objectWidth,
-                          bool enableWrapping,
-                          bool contourLabel)
+    LabelMeasurement& MeasureLabel(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const std::string& text,
+                                   double fontSize,
+                                   double objectWidth,
+                                   bool enableWrapping,
+                                   bool contourLabel)
     {
       LabelMeasurementKey key;
 
@@ -1230,59 +1299,76 @@ constexpr bool debugLabelLayouter = false;
       key.objectWidth=objectWidth;
       key.enableWrapping=enableWrapping;
       key.contourLabel=contourLabel;
-
-      auto entry=measurements.find(key);
-
-      if (entry!=measurements.end()) {
-        return entry->second;
-      }
-
-      LabelPtr label=textLayouter->Layout(projection,
-                                         parameter,
-                                         text,
-                                         fontSize,
-                                         objectWidth,
-                                         enableWrapping,
-                                         contourLabel);
+      key.labelLineMinCharCount=parameter.GetLabelLineMinCharCount();
+      key.labelLineMaxCharCount=parameter.GetLabelLineMaxCharCount();
+      key.labelLineFitToArea=parameter.GetLabelLineFitToArea();
+      key.labelLineFitToWidth=parameter.GetLabelLineFitToWidth();
 
       // A bound of 0 disables the reuse of measurements
       if (maxMeasurementCount>0) {
-        while (measurements.size()>=maxMeasurementCount &&
-               !measurementOrder.empty()) {
-          auto oldest=measurements.find(measurementOrder.front());
+        auto entry=measurements.find(key);
 
-          if (oldest!=measurements.end()) {
-            glyphs.erase(oldest->second.get());
-            measurements.erase(oldest);
-          }
+        if (entry!=measurements.end()) {
+          // The measurement has just been used, so it is the most recent one and the measurement
+          // at the front of the order is the one that has not been used for the longest time
+          measurementOrder.splice(measurementOrder.end(),
+                                  measurementOrder,
+                                  entry->second.order);
 
-          measurementOrder.pop_front();
+          return entry->second;
         }
-
-        measurementOrder.push_back(key);
-
-        measurements.emplace(std::move(key),
-                             label);
       }
 
-      return label;
+      LabelMeasurement measurement;
+
+      measurement.label=textLayouter->Layout(projection,
+                                             parameter,
+                                             text,
+                                             fontSize,
+                                             objectWidth,
+                                             enableWrapping,
+                                             contourLabel);
+
+      if (maxMeasurementCount==0) {
+        // The measurement is used by the caller and dropped afterwards, so it is not remembered
+        // and no glyph data is keyed on its label
+        notRememberedMeasurement=std::move(measurement);
+
+        return notRememberedMeasurement;
+      }
+
+      while (measurements.size()>=maxMeasurementCount &&
+             !measurementOrder.empty()) {
+        auto oldest=measurements.find(measurementOrder.front());
+
+        if (oldest!=measurements.end()) {
+          measurements.erase(oldest);
+        }
+
+        measurementOrder.pop_front();
+      }
+
+      measurementOrder.push_back(key);
+
+      auto inserted=measurements.emplace(std::move(key),
+                                         std::move(measurement));
+
+      inserted.first->second.order=std::prev(measurementOrder.end());
+
+      return inserted.first->second;
     }
 
     /**
-     * Return the glyph data of a measured label, deriving it once per measured label.
+     * Return the glyph data of a measured label, deriving it once per remembered measurement.
      */
-    const std::vector<Glyph<NativeGlyph>>& GetLabelGlyphs(const LabelPtr& label)
+    const std::vector<Glyph<NativeGlyph>>& GetLabelGlyphs(LabelMeasurement& measurement)
     {
-      auto entry=glyphs.find(label.get());
-
-      if (entry!=glyphs.end()) {
-        return entry->second;
+      if (!measurement.glyphsDerived) {
+        measurement.glyphs=measurement.label->ToGlyphs();
+        measurement.glyphsDerived=true;
       }
 
-      auto inserted=glyphs.emplace(label.get(),
-                                   label->ToGlyphs());
-
-      return inserted.first->second;
+      return measurement.glyphs;
     }
 
   private:
