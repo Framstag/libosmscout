@@ -11,9 +11,9 @@
 
 - [x] 2.1 Make the workflow publish on a commit to the main branch that changes an image input, and on a manual run that asks for it, while a pull request never publishes (spec `container-image-publishing`: publication follows the revision and requires verification). Verify: the job conditions and the path filter inspected against the spec scenarios, and a pull-request run on the runner published nothing
 - [x] 2.2 Derive the tags from the published source: the release version the source declares, `latest`, and a date and time stamp unique to the build; keep the build and the smoke checks as the gate, and report when the source declares no release version (spec `container-image-publishing`: the tags a publication carries). Verify: the tag step extracted from the workflow and run for a source with a declared version, for a source without one, and for a manual run, always emitting the stamp and never a duplicate tag
-- [ ] 2.3 Add the pruning job that keeps only the newest builds of each image and deletes older package versions (spec `container-image-publishing`: old builds are pruned). The first run failed with `get versions API failed. Package not found.` because the step named the package `mapgen`, while the package of `ghcr.io/framstag/libosmscout/mapgen` is named `libosmscout/mapgen` (the image path below the registry host); the names are corrected. Verify: after more publications than the retention count, the oldest stamp tags are gone, the newest kept ones are pullable, and `latest` and the release version tag still resolve to the newest publication
+- [ ] 2.3 Verify the deletion path of the pruning job ... (spec `container-image-publishing`: old builds are pruned). The step is green on the runner and its rule was read from the action's source (`actions/delete-package-versions@v5`, `src/delete.ts`: with `min-versions-to-keep` set it deletes `total - min-versions-to-keep`, and its `num-old-versions-to-delete` default of 1 is ignored), so the configured rule is "keep the newest 20, delete the excess". Nothing has been deleted yet, because only two versions existed at the time of the run. Verify: after more publications than the retention count - or after a run with a temporarily lowered `KEEP_BUILDS` - the oldest stamp tags are gone, the newest kept ones are pullable, and `latest` and the release version tag still resolve to the newest publication
 - [x] 2.4 Verify the first publication on the runner: the merge to the main branch published both images, `:latest` and one `:20260919T152843Z` build stamp each, and no version tag, because `meson.build` declares no release version (spec `container-image-publishing`: a merge on the main branch publishes; the tags a publication carries). Verify: run `35451614359`, jobs `Build mapgen image and smoke test` and `Compose smoke (mapgen + serve)` succeeded, `Publish images` pushed both images (its own failure came from the pruning step, task 2.3), and the pushed tags appear in the job log
-- [ ] 2.5 Make the publishing job green end to end on a merge: the pruning steps succeed and the run summary lists the published tags, the pinning advice and the package settings links (spec `container-image-publishing`: old builds are pruned; the tag semantics are documented). Verify: a merge that changes an image input produces a `Publish images` job whose every step concluded `success` and a run summary naming the tags
+- [x] 2.5 Verify the publishing job green end to end on a merge: run `35452801295` completed every step of the `Publish images` job with `success`, including both pruning steps and the run summary, and published `:latest` and `:20260919T160505Z` for both images (spec `container-image-publishing`: old builds are pruned; the tag semantics are documented). Verify: the run's job steps all concluded `success` and the publication carried the expected tag set
 - [x] 2.6 Update the action versions the runner deprecates: the image workflow now pins `actions/checkout@v7`, `docker/setup-buildx-action@v4`, `docker/login-action@v4` and `docker/build-push-action@v7`, whose released versions declare a Node 24 runtime, instead of the v6/v3/v3/v6 versions that declare Node 20 and made the runner print `Node 20 is being deprecated`. Verify: the action metadata of each pinned ref reports `using: node24` (checked against the releases `v7.0.1`, `v4.4.1`, `v4.6.0`, `v7.4.0`), and the workflow still parses, with every step script passing `bash -n`. `actions/delete-package-versions@v5` is the current release and still declares Node 20; its notice stays and is recorded in `TODO.md`
 
 ## 3. Version handling at release time
@@ -31,7 +31,7 @@
 ## 5. Verification
 
 - [x] 5.1 Validate the change artifacts (both specs). Verify: `openspec validate --change publish-container-images --strict` passes
-- [ ] 5.2 Pull a published image anonymously once the packages are public, and run it: the documented pull path works, the image completes a pass, and `--tool-version` prints the library version the run summary reported (spec `container-image-publishing`: anonymous pull, the orchestration runs published images)
+- [ ] 5.2 Verify a published image: an anonymous client reaches it (verified at the registry level for both packages: an anonymous pull token is granted, the tag list is readable and the `latest` manifest answers `200`) and it passes the smoke checks when it is pulled and run, with `--tool-version` printing the library version and `latest` and the newest build stamp resolving to the same digest (spec `container-image-publishing`: anonymous pull, the orchestration runs published images). What is still open is the pull-and-run half: no Docker daemon was reachable while this was recorded, so it was checked against the registry API instead of with `docker pull`
 - [ ] 5.3 Observe a pruning run on the runner after enough publications, and confirm a build stamp that fell out of the retention window is no longer pullable while `latest` and the release version tag are (spec `container-image-publishing`: old builds are pruned)
 
 ## Verification status
@@ -62,3 +62,21 @@ task 2.3/2.5), and the pinned actions `docker/setup-buildx-action@v3`, `docker/l
 being deprecated. This workflow is running with Node 24 by default.` (task 2.6). The two designs that were
 implemented and withdrawn are recorded in the design's decisions: a `release: published` trigger with a
 dispatch from `release.yml`, and a development library version with its own tag.
+
+Merged as PR #1806 (merge `a0efc80f5`): the pruning package names, the duplicated steps and the action
+versions. Its run `35452801295` shows the `Publish images` job green end to end - every step concluded
+`success`, including both pruning steps and the run summary - publishing `:latest` and
+`:20260919T160505Z` for both images, again without a version tag (task 2.5). The `Node 20 is being
+deprecated` notice is gone from the verify job and remains only for the two `delete-package-versions`
+steps, as recorded in `TODO.md`. The pruning steps resolve to `package-name: libosmscout/mapgen` and
+`min-versions-to-keep: 20`; the action's `num-old-versions-to-delete: 1` default is ignored while
+`min-versions-to-keep` is set, so the effective rule is "keep the newest 20, delete the excess". Nothing
+was deleted, because only two versions existed at that point (task 2.3's deletion path stays open).
+
+Anonymous access was checked at the registry level, because no Docker daemon was reachable (Rancher
+Desktop's socket disappeared mid-session): both packages grant an anonymous pull token, answer `200` for
+the `latest` manifest, and expose the tags `latest`, `20260919T152843Z` and `20260919T160505Z`, with
+`latest` and the newest stamp resolving to the same digest
+(`sha256:29823556fc171f99ed8b31cbbf183fee5c3eef76dfced83f9de738456d9e58f4`). Pulling and running the
+published image (the second half of task 5.2) therefore remains open, as does the version tag path
+(task 3.3), which needs a milestone that sets `version:` in `meson.build`.
