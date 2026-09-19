@@ -53,7 +53,7 @@ jobs:
       created: ${{ steps.versions.outputs.created }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read and cross-check the library version
         id: versions
@@ -80,10 +80,10 @@ jobs:
           echo "library version: ${cmake_version}"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: scripts/mapgen/Dockerfile
@@ -156,19 +156,9 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: Log in to the container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Runs after the checkout, before the login, only reads the source.
+      # Runs before the login: it only reads the source.
       - name: Read the release version
         id: release
         run: |
@@ -188,14 +178,14 @@ jobs:
           echo "release_version=${release_version}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to the container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Determine the image tags
         id: tags
@@ -236,7 +226,7 @@ jobs:
           echo "${mapserve_tags}"
 
       - name: Publish mapgen image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: scripts/mapgen/Dockerfile
@@ -252,7 +242,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=mapgen
 
       - name: Publish mapserve image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: scripts/mapgen/Dockerfile.serve
@@ -271,17 +261,21 @@ jobs:
       # package versions of each image survive, older ones - and with them their
       # build stamps - are deleted. `latest` and the release version tag always
       # point at the newest publication, which is never a candidate.
+      # The package name is the image path below the registry host, so it
+      # includes the repository: ghcr.io/framstag/libosmscout/mapgen is the
+      # package "libosmscout/mapgen". Naming it just "mapgen" fails with
+      # "Package not found".
       - name: Prune older mapgen builds
         uses: actions/delete-package-versions@v5
         with:
-          package-name: mapgen
+          package-name: libosmscout/mapgen
           package-type: container
           min-versions-to-keep: ${{ env.KEEP_BUILDS }}
 
       - name: Prune older mapserve builds
         uses: actions/delete-package-versions@v5
         with:
-          package-name: mapserve
+          package-name: libosmscout/mapserve
           package-type: container
           min-versions-to-keep: ${{ env.KEEP_BUILDS }}
 
@@ -320,7 +314,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Build images
         run: docker compose -f scripts/mapgen/docker-compose.yml build

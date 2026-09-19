@@ -11,8 +11,10 @@
 
 - [x] 2.1 Make the workflow publish on a commit to the main branch that changes an image input, and on a manual run that asks for it, while a pull request never publishes (spec `container-image-publishing`: publication follows the revision and requires verification). Verify: the job conditions and the path filter inspected against the spec scenarios, and a pull-request run on the runner published nothing
 - [x] 2.2 Derive the tags from the published source: the release version the source declares, `latest`, and a date and time stamp unique to the build; keep the build and the smoke checks as the gate, and report when the source declares no release version (spec `container-image-publishing`: the tags a publication carries). Verify: the tag step extracted from the workflow and run for a source with a declared version, for a source without one, and for a manual run, always emitting the stamp and never a duplicate tag
-- [ ] 2.3 Add the pruning job that keeps only the newest builds of each image and deletes older package versions (spec `container-image-publishing`: old builds are pruned). Verify: after more publications than the retention count, the oldest stamp tags are gone, the newest kept ones are pullable, and `latest` and the release version tag still resolve to the newest publication
-- [ ] 2.4 Verify the first publication on the runner: the next commit to the main branch that touches an image input publishes both images, the run summary lists the tags, and the packages appear (private until made public) (spec `container-image-publishing`: a merge on the main branch publishes)
+- [ ] 2.3 Add the pruning job that keeps only the newest builds of each image and deletes older package versions (spec `container-image-publishing`: old builds are pruned). The first run failed with `get versions API failed. Package not found.` because the step named the package `mapgen`, while the package of `ghcr.io/framstag/libosmscout/mapgen` is named `libosmscout/mapgen` (the image path below the registry host); the names are corrected. Verify: after more publications than the retention count, the oldest stamp tags are gone, the newest kept ones are pullable, and `latest` and the release version tag still resolve to the newest publication
+- [x] 2.4 Verify the first publication on the runner: the merge to the main branch published both images, `:latest` and one `:20260919T152843Z` build stamp each, and no version tag, because `meson.build` declares no release version (spec `container-image-publishing`: a merge on the main branch publishes; the tags a publication carries). Verify: run `35451614359`, jobs `Build mapgen image and smoke test` and `Compose smoke (mapgen + serve)` succeeded, `Publish images` pushed both images (its own failure came from the pruning step, task 2.3), and the pushed tags appear in the job log
+- [ ] 2.5 Make the publishing job green end to end on a merge: the pruning steps succeed and the run summary lists the published tags, the pinning advice and the package settings links (spec `container-image-publishing`: old builds are pruned; the tag semantics are documented). Verify: a merge that changes an image input produces a `Publish images` job whose every step concluded `success` and a run summary naming the tags
+- [x] 2.6 Update the action versions the runner deprecates: the image workflow now pins `actions/checkout@v7`, `docker/setup-buildx-action@v4`, `docker/login-action@v4` and `docker/build-push-action@v7`, whose released versions declare a Node 24 runtime, instead of the v6/v3/v3/v6 versions that declare Node 20 and made the runner print `Node 20 is being deprecated`. Verify: the action metadata of each pinned ref reports `using: node24` (checked against the releases `v7.0.1`, `v4.4.1`, `v4.6.0`, `v7.4.0`), and the workflow still parses, with every step script passing `bash -n`. `actions/delete-package-versions@v5` is the current release and still declares Node 20; its notice stays and is recorded in `TODO.md`
 
 ## 3. Version handling at release time
 
@@ -42,7 +44,21 @@ image reported `1.1.1`, the non-root check, the config check, the refresh-gated 
 smoke job), no registry login ran and nothing was published. The 120 of 120 test suite and the clean
 Import build were verified locally before that merge.
 
-Two designs were implemented and then withdrawn in this branch, both recorded in the design's decisions:
-a `release: published` trigger with a dispatch from `release.yml` (it exists to publish a tag set owned by
-a release, which the rolling model has no place for) and a development library version with its own tag
-(the stamp tag serves the same purpose - naming a concrete build - without a second moving version).
+Merged as PR #1805 (merge `bc4c67c40`): the rolling scheme. Its pull-request run published nothing, as
+designed. The merge then produced the **first publication** (run `35451614359`): the verify job succeeded,
+the compose smoke job succeeded, and the publish job pushed both images
+
+```
+ghcr.io/framstag/libosmscout/mapgen:latest     + :20260919T152843Z
+ghcr.io/framstag/libosmscout/mapserve:latest   + :20260919T152843Z
+```
+
+with no version tag, because `meson.build` still declares no release version - the run reported that, as
+designed (task 2.4). The same run exposed three defects, all addressed in the follow-up pull request:
+the publish job carried a duplicated login and buildx step, the pruning step named the package `mapgen`
+instead of `libosmscout/mapgen` and failed with `Package not found` (which made the run summary step skip,
+task 2.3/2.5), and the pinned actions `docker/setup-buildx-action@v3`, `docker/login-action@v3` and
+`docker/build-push-action@v6` declare a Node 20 runtime, which is what made the runner print `Node 20 is
+being deprecated. This workflow is running with Node 24 by default.` (task 2.6). The two designs that were
+implemented and withdrawn are recorded in the design's decisions: a `release: published` trigger with a
+dispatch from `release.yml`, and a development library version with its own tag.
