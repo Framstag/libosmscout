@@ -4,295 +4,217 @@
 
 See `proposal.md` - Why for motivation. Constraints that shape the approach:
 
-- The image build and its smoke checks already exist in `.github/workflows/mapgen_image.yml`: one
-  `build` job (`docker build` + non-root check + `--check-config` + a refresh-gated single pass) and
-  one `compose` job (local compose build + nginx HTTP checks). Neither has a `permissions:` block,
-  a registry login, or a push step.
-- Releases are produced by two workflows. `.github/workflows/release.yml` (manual, version input)
-  produces a real release; `.github/workflows/release_latest.yml` runs on **every** push to `master`
-  and produces a snapshot release. Observed through the GitHub API, the snapshot release carries the
-  moving tag `latest` and `prerelease=true`; real releases carry `v<chronver>` and
-  `prerelease=false`. `jreleaser.yml` sets `versionPattern: CHRONVER`, `release.github.overwrite: true`.
-- The version an image can be matched against is not currently meaningful: `Import/CMakeLists.txt:13`
-  defines `OSMSCOUT_IMPORT_VERSION` from `OSMSCOUT_LIBRARY_VERSION`, `Import/src/Import.cpp:466`
-  records it in `db.json`, and that value has been `1.1.1` at every release since before
-  `v2023.03.30.1` (`CMakeLists.txt:3` is unchanged across those tags). `meson.build:3` carries the
-  literal string `'latest'`.
-- `scripts/mapgen/Dockerfile` names the library files by a version literal
-  (`libosmscout.so.1.1.1`) and rebuilds the `.so` / `.so.1` symlink chain by hand, so the first
-  version bump breaks the image build.
-- `cmake/ProjectConfig.cmake:81-84` sets `VERSION ${OSMSCOUT_LIBRARY_VERSION}` and
-  `SOVERSION ${PROJECT_VERSION_MAJOR}`: a year-leading library version would change the soname from
-  `libosmscout.so.1` to `libosmscout.so.2024` and break downstream links every release.
+- The image build and its smoke checks already exist in `.github/workflows/mapgen_image.yml`: a `verify`
+  job (`docker build` + non-root check + `--check-config` + a refresh-gated single pass) and a `compose`
+  job (local compose build + nginx HTTP checks).
+- A version the images can be tagged with is declared in two places with different meanings:
+  `meson.build`'s project `version:` (today the literal string `'latest'`, set to the release version by
+  `release.yml` in its working tree only, and used to name the distribution archives) and the library
+  version in `set(OSMSCOUT_LIBRARY_VERSION ...)` / `libraryVersion='...'`, which is what the import tool
+  reports and what `db.json` records as `import.version`. `cmake/ProjectConfig.cmake:81-84` derives the
+  soname major from `project(libosmscout VERSION ...)`, so a date-shaped library version would change the
+  soname from `libosmscout.so.1` to `libosmscout.so.2026` and break downstream links.
+- `release.yml` creates the release with `JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, and GitHub
+  starts no workflow run for events caused by the default token, so a `release: published` trigger never
+  fires for it (observed: the release object exists, the trigger was on master, and
+  `gh run list --workflow mapgen_image.yml --event release` was empty).
+- Branch protection on `master` requires one approving review with `enforce_admins: false` and no bypass
+  list, so a workflow pushing with `GITHUB_TOKEN` cannot write to `master`; a human can.
+- `scripts/mapgen/Dockerfile` names the library files by a version literal (`libosmscout.so.1.1.1`) and
+  rebuilds the symlink chain by hand, so the first version bump breaks the image build.
 - The build context excludes heavy local artifacts but not `.git` (103 MB locally).
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Every released source revision has pullable images whose tags state which release and which library
-  version they are, without anyone building the repository.
-- The registry never receives an image that failed the existing smoke checks, and pull requests and
-  snapshot activity never move a tag.
-- The library version reported by artifacts identifies the release, and the image build definition is
-  free of version literals.
+- Every merge or direct commit on the main branch that can change the image content is pullable, without
+  anyone building the repository.
+- The tags are simple: the version the source declares, `latest`, and a per-build stamp the user can pin;
+  old builds are pruned automatically.
+- The version a database records identifies the release that produced it.
 
 **Non-Goals:**
 
 - Architectures other than `linux/amd64`.
-- Publishing images for unreleased commits as a supported, permanently available tag.
-- A commit identity inside the reported library version for unreleased builds (recorded in `TODO.md`).
-- Changing what the images contain, how they run, or their mounts - `mapgen-container` and
-  `web-server` keep their requirements.
+- Immutable release images, or any behaviour that distinguishes a release image from any other image. A
+  release is a version milestone: it changes the version later builds carry.
+- A commit identity inside the reported library version (recorded in `TODO.md`).
+- Changing what the images contain, how they run, or their mounts - `mapgen-container` and `web-server`
+  keep their requirements.
 - Signing (cosign/notation) beyond the build provenance attestations.
 
 ## Decisions
 
-### 1. Publication is triggered by the release event, not by tags or a workflow call
-
-Chosen: `on: release: types: [published]`, with the publish job skipped when
-`github.event.release.prerelease` is true, and the checkout pinned to
-`ref: ${{ github.event.release.tag_name }}`.
-
-- Alternative - `on: push: tags: ['v*']`: existing tags are inconsistent (`v2024.06.02.1`, `1.1.0`,
-  `v1.0.0`) and the snapshot release reuses the moving tag `latest`, so a tag filter cannot reliably
-  separate a release from a snapshot, and it would publish from whatever the tag points at even if
-  that is not the released revision.
-- Alternative - make the image workflow `workflow_call` and invoke it from `release.yml` and
-  `release_latest.yml`: explicit and it can carry the library version as an input, but it couples the
-  image build to both release workflows, needs two call sites kept in step, and delays publication
-  until after the release step in those workflows.
-- Rationale: the event fires exactly when a release becomes visible, `prerelease` is set by the
-  producer rather than inferred, and neither release workflow needs a call site - `release.yml` only
-  gains the library-version step it needs anyway (decision 3).
-- Risk handled explicitly: a workflow triggered by a release event checks out the default branch
-  unless a ref is given, which would publish the wrong source. The checkout therefore names the
-  release tag.
-- Not sufficient on its own: this repository's own releases are created with the default `GITHUB_TOKEN`,
-  and events caused by that token start no workflow runs, so the trigger never fires for them - see
-  decision 9, which dispatches the workflow explicitly while keeping this trigger for releases created
-  by hand.
-
-### 2. Verify in one job, publish in a second job that depends on it
+### 1. Verify in one job, publish in a second job that depends on it
 
 ```
-release published (prerelease=false)
+push to master (image inputs) | manual run with publishing
         |
         v
 +---------------------------+        +-----------------------------+
 | verify                    | needs  | publish                     |
-| checkout ref = tag_name   |------->| guard: versions consistent  |
-| buildx build --load       |        | buildx build --push         |
-|  cache-from/to type=gha   |        |  cache-from/to type=gha     |
-| smoke: uid == 1000        |        |  provenance + sbom          |
-| smoke: --check-config     |        |  metadata: source, revision,|
-| smoke: refresh-gated pass |        |            version, created |
-+---------------------------+        +--------------+--------------+
-                                                    v
-                              ghcr.io/framstag/libosmscout/mapgen:<tag>
-                              ghcr.io/framstag/libosmscout/mapserve:<tag>
+| checkout                  |------->| read the release version     |
+| read + cross-check the    |        | build the tags, log in       |
+|   library version         |        | buildx build --push          |
+| buildx build --load       |        | prune old builds             |
+| smoke: uid, --tool-version|        +--------------+--------------+
+| smoke: --check-config     |                       v
+| smoke: refresh-gated pass |     ghcr.io/framstag/libosmscout/mapgen:<tag>
++---------------------------+     ghcr.io/framstag/libosmscout/mapserve:<tag>
 ```
 
-- Alternative - one job: `buildx build --load`, run the smoke checks, then `docker push` the loaded
-  tags. No duplicate compilation, but `--load` and `--push` are mutually exclusive, so attestations
-  (provenance/SBOM) cannot be produced, and the tags exist before the checks have passed.
-- Alternative - push under a temporary tag, verify by pulling that tag, then promote with
-  `buildx imagetools create`. One compilation and attestations survive, but the registry briefly holds
-  an unverified tag that must be deleted afterwards, and promotion adds a failure mode of its own.
-- Rationale: the registry contract is "no unverified image is ever published", and the second build is
-  cheap because both jobs share `type=gha` cache scope `mapgen`: the compile of core + import library is
-  cached, only the runtime stage is re-executed.
+- Alternative - one job: `buildx build --load`, run the smoke checks, then `docker push` the loaded tags.
+  No duplicate compilation, but `--load` and `--push` are mutually exclusive, so attestations cannot be
+  produced, and the tags exist before the checks have passed.
+- Alternative - push under a temporary tag, verify by pulling it, then promote. One compilation and
+  attestations survive, but the registry briefly holds an unverified tag that must be deleted afterwards.
+- Rationale: "no unverified image is ever published" is the contract, and the second build is cheap
+  because both jobs share `type=gha` cache scope: the compile of the core and import libraries is cached
+  and only the runtime stage is re-executed.
 
-### 3. The library version is derived from the released source, with a consistency guard
+### 2. The rolling tag scheme
 
-The verification job reads the library version from the released source, cross-checks its two
-declarations against each other and passes the value to the publish job. The
-library version lives in two declarations - `set(OSMSCOUT_LIBRARY_VERSION ...)` in `CMakeLists.txt`
-(line 5, the value the image build compiles into `OSMSCOUT_IMPORT_VERSION` via
-`Import/CMakeLists.txt:13`) and `libraryVersion='...'` in `meson.build` (line 8, used by
-`Import/meson.build:6`) - and neither of them is `project(libosmscout VERSION ...)` or `version:`, which
-carry the project version that drives the soname major and the release version that names the
-distribution archives. The cross-check requires the two declarations to agree, so both build systems of
-the released revision report the same version; they agree today (`1.1.1`), so it is green on every path.
-It lives in the verification job rather than in the publish job because publication already depends on
-verification, so the check runs once, fails the run before any image is built or any tag exists, and the
-verified value is a job output the publish job consumes.
+Every publication carries, for each image:
 
-- Alternative - pass the library version as a `workflow_dispatch`/`workflow_call` input: explicit, but
-  it can disagree with what the image actually compiled in, and the release event cannot carry it.
-- Alternative - parse nothing and take the version from the tag name: the release tag is the
-  chronological version, which the spec deliberately keeps distinct from the library version.
-- Rationale: the tag must equal what the image reports (spec `release-library-version`), and the only
-  trustworthy source for "what the image reports" is the source the image is built from. The guard
-  turns a silent divergence between the two build systems into a failed publish.
-- Residual risk: the guard compares two build files, so a version that is wrong but identical in both
-  would still publish. The image itself is therefore interrogated too (decision 8): the verify job asks
-  the built image for the version it reports and compares it with the version it parsed from the source.
+| tag | meaning | moves? |
+|-----|---------|--------|
+| `<release version>` | the version the published source declares (`meson.build`'s project version), e.g. `2026.01.15.1` | yes, with every publication of that version - and the next milestone changes the value |
+| `latest` | the newest publication of any kind | yes |
+| `<UTC build stamp>` | e.g. `20260919T143512Z`, one per publication | no |
 
-### 4. Snapshots and non-release builds never publish; dispatch publishes explicitly
+The stamp is what makes a concrete build pullable: it is unique, it never moves, and it is the tag to pin
+when a deployment has to be reproducible. Old builds are pruned (decision 3), so a stamp remains pullable
+for a bounded number of publications - which the documentation states.
 
-The publish job runs for a non-prerelease release and for `workflow_dispatch` with an explicit
-`push` input plus tag; nothing else. `master` pushes and the snapshot release they create publish
-nothing, so `:latest` always means the newest real release. A dispatch run never sets `latest`; it
-publishes only the tags it was given, so the meaning of `latest` cannot be changed by hand.
+- Alternative - an immutable tag per release (`:<release version>` never moved by later builds): that is
+  the classic model, but it needs a release event that is known not to fire for this repository
+  (Context), or a dispatch from `release.yml`, and it makes every user wait for a release to get a current
+  image.
+- Alternative - a `sha-<short>` tag instead of a timestamp: equally immutable and cheaper to relate to a
+  commit, but less readable for a human who wants to know how old a build is, and the source revision is
+  in the image metadata and the provenance attestation anyway.
+- Alternative - also publish the library version as a tag: then a `db.json` in hand could find an image by
+  the version it records, but the tag would move with every milestone rather than with every build, so it
+  identifies a development period rather than a build; the stamp does the pinning job better.
+- Rationale: two moving tags for "what is current" and one immutable tag per build for "what I tested" is
+  the smallest set that serves both needs.
 
-- Alternative - automatic `:master` and `:sha-<short>` tags on every `master` push whose path filter
-  matches (`libosmscout/**` matches nearly every merge): always a fresh image, but permanent mutable
-  tags appear in the published package and every merge pays a full image build.
-- Alternative - publish snapshots under the snapshot release's version: the snapshot release is
-  recreated on every `master` push with `overwrite: true`, so its identity moves; a tag built from it
-  would not be reproducible.
-- Rationale: the tag set stays small and every tag is either immutable or has a documented meaning.
+### 3. Old builds are pruned by a job that runs after publication
 
-### 5. The compose orchestration takes the image names from the environment
+After a publication, a cleanup job deletes the oldest package versions of each image, keeping the newest
+ones up to a configured count (initial value: 20 per image, which is a few weeks of merges). The official
+`actions/delete-package-versions` action does this with `packages: write`, which the publishing job already
+needs, so no additional credential or script is involved. Deleting an old package version removes its
+stamp tag; `latest` and the release version tag always point at the newest publication, which is never a
+deletion candidate.
 
-`scripts/mapgen/docker-compose.yml` keeps `build:` and its `:local` names as defaults, but reads
-`MAPGEN_IMAGE` / `MAPSERVE_IMAGE` if set. Consuming published images is `docker compose pull` followed
-by `up --no-build` (or plain `up`, which pulls a missing image).
+Alternative considered: a scheduled cleanup workflow - rejected, because pruning right after publishing
+keeps the package bounded at all times without a second schedule to maintain.
 
-- Alternative - a second, standalone `docker-compose.published.yml`: explicit pinning without
-  environment variables, but both service definitions, volume names and ports are duplicated and will
-  drift from the base file.
-- Alternative - drop `build:` and always pull: simplest consumer story, but it breaks local
-  development and the `compose` smoke job in `mapgen_image.yml`, which builds both images.
-- Rationale: one file remains the single description of the orchestration, the existing smoke job keeps
-  working unchanged, and the published-image path needs no new file.
+### 4. What publishes: a main-branch commit and a manual run
 
-### 6. Library files are staged in the build stage instead of being named by a version
+The publish job runs for a `push` to the main branch whose path filter matched, and for `workflow_dispatch`
+with a `push` input. A pull request never publishes. There is no release-specific publication: the commit
+that sets a new release version is an ordinary main-branch commit, and it publishes like any other, so a
+release needs no dispatch, no release-event trigger, and no `actions: write`.
 
-The build stage copies `libosmscout.so*` and `libosmscout_import.so*` into `/stage/lib` with their
-symlink chain intact; the runtime stage does `COPY --from=build /stage/lib/ /usr/local/lib/`. The
-hand-written `ln -s` block disappears. `.dockerignore` gains `.git`.
+- Alternative (implemented first, then withdrawn as unnecessary) - a `release: published` trigger plus a
+  dispatch from `release.yml`: it exists to publish a tag set owned by a release, which this model does not
+  have.
+- Alternative - publish on tags, or only on releases: covered by the previous alternative.
+- Rationale: one path, one tag rule, no event semantics to depend on. The path filter stays, because a
+  commit that changes no image input cannot change the image content.
+
+### 5. Version handling: the release version is declared, the library version travels in a version bump
+
+The image tag comes from `meson.build`'s project `version:` (parsed by the workflow, with a build stamp as
+the only tag when the source declares no parseable version, which is the case while it still says
+`latest`). The library version stays a separate number for exactly the reason it was introduced: `db.json`
+records it, so two releases must not report the same value, and the soname major must not follow a date.
+
+Because branch protection prevents a workflow from pushing to the main branch with `GITHUB_TOKEN`, the
+version changes are made by a human, in a pull request, and `release.yml` asserts them instead of applying
+them:
+
+```
+1. PR   chore: release <version>, library <Y>     sets meson.build's version: and both library
+   |                                              version declarations; merging it publishes
+   v                                              :<version>, :latest and a build stamp
+2. release.yml  <version> <Y>                     asserts the revision declares both, builds the
+                                                  archives, creates the release and its tag
+```
+
+`release.yml` keeps its `version` and `library_version` inputs but no longer rewrites the library version
+in its working tree, so a revision that does not declare the version it is told to release fails the run
+instead of producing archives that disagree with the tag they came from.
+
+- Alternative - let `release.yml` commit the bump (the earlier design): fewer human steps, but it needs a
+  bypass entry for the Actions app or a PAT secret, and it makes the release workflow a writer of the main
+  branch.
+- Alternative - pass the released library version to the image build as a build argument: the image would
+  report a version its own source does not declare, so "building the released source reproduces the
+  reported version" would stop being true.
+- Residual: the version bump is a human step, so a revision can be released that declares an older
+  version; the assertion turns that into a failed run rather than a wrong tag, and until a milestone sets a
+  version the images carry `latest` and the build stamp only, which the run reports.
+
+### 6. The image build definition names no version, and the orchestration takes image names from the
+environment
+
+The build stage copies `libosmscout.so*` and `libosmscout_import.so*` into `/stage/lib` with their symlink
+chain intact and the runtime stage copies that directory, so the version lives only in the build system;
+`.dockerignore` keeps `.git` out of the context. Both Dockerfiles declare OCI metadata (`ARG`/`LABEL`),
+which the publishing job fills from the revision it publishes. `docker-compose.yml` reads `MAPGEN_IMAGE`
+and `MAPSERVE_IMAGE`, defaulting to the local build, so the published images can be run with `pull` and
+`up --no-build`.
 
 - Alternative - `ARG OSMSCOUT_VERSION` plus `COPY .../libosmscout.so.${OSMSCOUT_VERSION}`: keeps the
-  explicit file list, but reintroduces exactly the coupling this change removes, and the argument can
-  disagree with what was built.
-- Alternative - a glob directly in `COPY --from=build .../libosmscout.so* /usr/local/lib/`: one line,
-  but whether symlinks are copied as symlinks or dereferenced is easy to get wrong, and a missing file
-  does not fail the build.
-- Rationale: `cp -a` into `/stage/lib` fails loudly when a library is missing, preserves the
-  `.so -> .so.1 -> .so.1.1.1` chain that `ldconfig` and the `ldd` check depend on, and leaves the
-  version in exactly one place: the build system.
-
-### 7. Build and push with buildx and a shared cache
-
-Both jobs use `docker/build-push-action` with `load: true` in the verify job and `push: true` in the
-publish job, `cache-from`/`cache-to: type=gha,scope=<image>`, and `provenance: true` with `sbom: true`
-on the push. The tag list is computed by a shell step instead of by `docker/metadata-action`, and the
-OCI labels come from the Dockerfile's own `ARG`/`LABEL` declarations instead of being injected as
-buildx labels.
-
-- Alternative - `docker/metadata-action` for tags and labels: conventional, and it lower cases the
-owner name automatically, which a container registry requires and GitHub expressions cannot express.
-Rejected because this workflow can only be executed on a runner, so a shell step that can be extracted
-and run locally against every input case is worth more here than a third-party action whose label
-handling overlaps with the Dockerfile's own labels; the lower casing is one `tr` call, and the tag rules
-(three tags for a release, one for a manual run, `latest` never moved by hand) have to be expressed
-anyway.
-- Alternative - keep `docker build` in the verify job and add `docker push` afterwards: no cache
-  sharing between the verify and publish jobs (the compile would run twice at full cost), and
-  attestations are impossible with the docker image store.
-- Rationale: the compile dominates the build time, and cache sharing is what makes decision 2
-  affordable.
-
-### 8. The bundled import tool can be asked which version it reports
-
-`Import/src/Import.cpp` gains an option that prints `OSMSCOUT_IMPORT_VERSION` and exits, listed in the
-`--help` output next to the existing `--data-version`. The verify job uses it to assert that the built
-image reports the same version the publish job parsed from the source, and a unit test in `Tests/`
-covers the option.
-
-- Alternative - rely on the source alone (decision 3's guard only): no code change, but a tag can then
-  disagree with the image it was published for, and nothing an operator pulls can be interrogated.
-- Alternative - read the version out of a `db.json` produced by a real import in CI: end to end, but it
-  requires source data and a full import per build, which the current smoke job deliberately avoids by
-  pre-seeding the refresh gate.
-- Rationale: the version a released artifact reports is part of the contract (spec
-  `container-image-publishing`, `release-library-version`), and a query is the cheapest way to make that
-  contract checkable against the artifact rather than against the source of the artifact.
-
-### 9. The release workflow starts the publication explicitly
-
-`release.yml` dispatches `mapgen_image.yml` once the release has been created, on the released tag:
-
-```
-release.yml
-  |  sed versions -> meson dist -> JReleaser (GITHUB_TOKEN)
-  v
-GitHub release  v<version>            X  release: published does NOT fire for this token
-  |
-  |  gh workflow run mapgen_image.yml --ref v<version> -f push=true -f release=true -f tag=<version>
-  v                                                                   (workflow_dispatch is exempt)
-mapgen_image.yml  -> verify job -> publish job -> the release tag, the library version tag, latest
-```
-
-The image workflow gains a `release` input meaning "publish the release tag set": the given tag, the
-library version tag and `latest`. Without it a manual run publishes a single tag and never moves `latest`
-(decision 4). The `release: published` trigger stays, so a release created by hand in the UI publishes as
-well; a workflow-created release cannot fire it twice, because it never fires it at all.
-
-Why this was necessary, and how it was found: the release is created with
-`JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in both release workflows, and GitHub does not
-start workflow runs for events caused by the default token, to prevent recursion - `workflow_dispatch`
-and `repository_dispatch` are the documented exceptions. Evidence from the merge of this change: the
-snapshot release object exists with `created=2026-09-19T14:34:44Z`, the trigger is present on master,
-and `gh run list --workflow mapgen_image.yml --event release` is empty. So decision 1's event trigger
-alone would have published nothing for this repository's releases.
-
-- Alternative - make `mapgen_image.yml` reusable (`workflow_call`) and call it from `release.yml`, the
-  alternative decision 1 rejected: no dispatch plumbing and the version arrives as an input, but it is a
-  structural change with two call sites and it removes the event trigger's use for hand-made releases.
-- Alternative - give the JReleaser step a PAT or GitHub App token so that the release event fires:
-  fixes every release creation path without touching the image workflow, but adds a credential to store
-  and rotate, and a re-run of an existing release (which `overwrite: true` in `jreleaser.yml` turns into
-  an update rather than a creation) would still not publish.
-- Alternative - leave it manual: an operator dispatches the workflow with the release version after each
-  release. Rejected because the specification says a release publishes the images, and a forgotten step
-  leaves a release without artifacts.
-- Rationale: dispatching from the workflow that creates the release needs no new secret, stays inside
-  the existing verification gate, publishes on a re-run, and reuses the input surface the manual path
-  already has.
-- Detail: the dispatch names the *released tag* as its ref, so the images are built from the released
-  source even if master moves on in between. Residual: dispatching on a tag requires the workflow file
-  to be present in that tag's commit, which holds for every release cut after this change.
+  explicit file list but reintroduces the coupling this change removes, and the argument can disagree with
+  what was built.
+- Alternative - a second, standalone published compose file: explicit pinning without environment
+  variables, but it duplicates every service definition and will drift from the base file.
+- Rationale: one place knows the version (the build system), one file describes the orchestration.
 
 ## Risks / Trade-offs
 
-- First publication requires a one-time visibility change; until it is done the package is private and
-  anonymous pulls fail with 401 → documented next to the pull instructions, and the publish job prints
-  the package URL. The workflow itself is identical for a public and a private package.
-- The snapshot release fires on every `master` push, so the release-event workflow is triggered often →
-  the publish job is skipped by its `prerelease` condition and costs a skipped job only.
-- A release tag that is later moved or force-updated would leave published tags pointing at different
-  content than the tag does → releases are append-only by policy; nothing in this change makes it worse,
-  and the publish job's provenance attestation records the revision each tag was built from.
-- Two builds per release: if the cache is evicted, the publish job pays a full compile → cache scope is
-  pinned per image, and the verify job already warmed it moments earlier.
+- A version tag does not identify released source: later builds of the same version overwrite it. Pinning a
+  concrete build means using the stamp tag, which is what the documentation recommends → stated in
+  `Documentation/MapRepository.md` and in the spec's documentation scenario.
+- A pinned build is pruned eventually → the retention count is documented as the pullable lifetime of a
+  stamp, and keeping the newest 20 publications is generous for a deployment that picks a build and pins
+  it.
+- Every main-branch commit that touches an image input now pays for a publication in addition to the
+  build, and the registry also receives a new package version per publication → the `type=gha` cache makes
+  the second build mostly cache hits, and the pruning job bounds what accumulates.
+- The first publication needs a one-time visibility change (a new package is private) → documented next to
+  the pull instructions, and the publish job prints the package settings links.
+- Pruning deletes package versions with `packages: write`; if the token turns out to lack that ability for
+  deletions, the job reports the failure instead of publishing a broken state, and the fallback is a
+  dedicated cleanup workflow.
+- The version bump is a human step → the release assertion fails loudly, and a missing bump only means the
+  images carry `latest` and the stamp, reported in the run summary.
 - Attestation manifests turn the pushed artifact into an image index, which some older clients handle
   imperfectly → provenance and SBOM are each a single flag; if they cause trouble, drop `sbom` first.
-- The consistency guard fails a release whose two build files disagree → that is the intent; the
-  `release.yml` task sets both, so the guard is green from the first release after this change.
-- The library version tag moves whenever a release bumps the library version, so pinning `:<library
-  version>` is not reproducible across releases → `:<chronological version>` is the reproducible tag,
-  and the documentation states which tag is which.
-- Removing `.git` from the build context breaks any future build step that reads git history (nothing
-  does today) → noted in `TODO.md`-adjacent documentation of the image build.
+- `Import/src/Import.cpp` has 25 pre-existing uncrustify deviations and hundreds of clang-tidy findings;
+  the added option follows the file-local style and adds no new kind of finding.
+- Removing `.git` from the build context breaks any future build step that reads git history (nothing does
+  today) → recorded in `TODO.md`.
 - Only one architecture is published: an `arm64` consumer cannot pull → recorded in `TODO.md`.
 
 ## Migration Plan
 
-1. Merge the `release.yml` library-version step together with the workflow changes, so the guard has
-   consistent sources from the first release.
-2. Validate the whole path without creating a permanent tag: `workflow_dispatch` with `push` disabled
-   (build, smoke checks, tag computation and the guard all run; nothing is published).
-3. At the next release, the images appear under the chronological version, the library version and
-   `latest`. Then flip the two packages to public once and verify an anonymous `docker pull`.
-4. Rollback: the registry is additive - reverting the workflow file stops publication and leaves
-   existing tags intact. Tags can be deleted manually in the package settings; no consumer of the
-   repository is affected by a revert, because nothing in the pipeline reads the registry.
+1. Merge this change: the next main-branch commit that touches an image input publishes for the first time
+   and creates both packages (private).
+2. Flip both packages to public once, then verify an anonymous `docker pull` of `:latest` and of the newest
+   stamp.
+3. At the next release: merge the `chore: release <version>, library <Y>` pull request (which publishes the
+   new version tag), then run `release.yml` with the same two values.
+4. Rollback: the registry is additive - reverting the workflow stops publication and leaves existing tags
+   intact. The pruning job only ever deletes old builds, never `latest` or a version tag, and the workflow
+   can be disabled in the repository settings if it misbehaves.
 
 ## Open Questions
 
-None. Both questions raised during design are resolved: the import tool gains a version query
-(decision 8), and a `workflow_dispatch` run publishes only the tags it is given and never sets `latest`
-(decision 4).
+None that change the specs, the approach or the task list. The retention count is a value in the workflow
+and in the documentation, easy to change on its own.

@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-      # the image workflow is dispatched from here, see the last step
-      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -35,16 +33,17 @@ jobs:
       - name: Install meson and ninja via pip
         run:  "pip install meson ninja"
 
-      - name: Set version
+      - name: Verify the released versions
         run:  |
           VERSION=${{ github.event.inputs.version }}
           LIBRARY_VERSION=${{ github.event.inputs.library_version }}
 
-          # The library version is declared once per build system. It is what
-          # the import tool reports, what db.json records as import.version
-          # and what the published container images are tagged with; it stays
-          # three numeric components so the shared library major version does
-          # not move. See Documentation/MapRepository.md, section 5.
+          # The version changes travel in a pull request, because branch
+          # protection requires one and a workflow pushing with GITHUB_TOKEN
+          # cannot bypass it. This step therefore asserts instead of editing:
+          # the revision being released has to declare both versions, or the
+          # tag, the archives and the container images would disagree with each
+          # other. See Documentation/MapRepository.md, section 5.
           if ! echo "${LIBRARY_VERSION}" | grep -qE '^[0-9]+[.][0-9]+[.][0-9]+$'; then
             echo "library version '${LIBRARY_VERSION}' must have three numeric components (major.minor.patch)" >&2
             exit 1
@@ -53,31 +52,41 @@ jobs:
             echo "library version '${LIBRARY_VERSION}' must differ from the release version '${VERSION}'" >&2
             exit 1
           fi
-          PREVIOUS_LIBRARY_VERSION=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
-          if [ -z "${PREVIOUS_LIBRARY_VERSION}" ]; then
-            echo "could not read the current library version from CMakeLists.txt" >&2
-            exit 1
-          fi
-          if [ "${LIBRARY_VERSION}" = "${PREVIOUS_LIBRARY_VERSION}" ]; then
-            echo "library version '${LIBRARY_VERSION}' is unchanged from '${PREVIOUS_LIBRARY_VERSION}'; every release must establish its own library version" >&2
+
+          declared_release_version=$(sed -nE "s/^ *version: *'([^']*)',.*/\1/p" meson.build | head -1)
+          if [ "${declared_release_version}" != "${VERSION}" ]; then
+            echo "this revision declares release version '${declared_release_version}', not '${VERSION}': set it in meson.build first" >&2
             exit 1
           fi
 
-          # release version: names the release and the distribution archives
-          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}',/g" meson.build
+          declared_cmake=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
+          declared_meson=$(sed -nE "s/^libraryVersion='([^']*)'.*/\1/p" meson.build)
+          if [ -z "${declared_cmake}" ] || [ -z "${declared_meson}" ]; then
+            echo "cannot read the library version from CMakeLists.txt or meson.build" >&2
+            exit 1
+          fi
+          if [ "${declared_cmake}" != "${declared_meson}" ]; then
+            echo "library version mismatch: CMakeLists.txt declares '${declared_cmake}', meson.build declares '${declared_meson}'" >&2
+            exit 1
+          fi
+          if [ "${declared_cmake}" != "${LIBRARY_VERSION}" ]; then
+            echo "this revision declares library version '${declared_cmake}', not '${LIBRARY_VERSION}': merge a version bump first" >&2
+            exit 1
+          fi
 
-          # library version: declared in both build systems, kept in step, and
-          # the project version kept equal so the soname major follows it
-          sed -i -E "s/^project\(libosmscout VERSION [0-9]+[.][0-9]+[.][0-9]+/project(libosmscout VERSION ${LIBRARY_VERSION}/" CMakeLists.txt
-          sed -i -E "s/^set\(OSMSCOUT_LIBRARY_VERSION [^)]*\)/set(OSMSCOUT_LIBRARY_VERSION ${LIBRARY_VERSION})/" CMakeLists.txt
-          sed -i -E "s/^libraryVersion='[0-9a-z.-]*'/libraryVersion='${LIBRARY_VERSION}'/" meson.build
+          previous_tag=$(git tag --list 'v*' --sort=-creatordate | head -1 || true)
+          if [ -n "${previous_tag}" ]; then
+            previous_library_version=$(git show "${previous_tag}:CMakeLists.txt" | sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p')
+            if [ "${previous_library_version}" = "${LIBRARY_VERSION}" ]; then
+              echo "library version '${LIBRARY_VERSION}' is the one release ${previous_tag} already reports: bump it" >&2
+              exit 1
+            fi
+            echo "previous release ${previous_tag} reports library version ${previous_library_version}"
+          else
+            echo "no previous release tag found, skipping the consecutive-release check"
+          fi
 
-          grep -qE "^project\(libosmscout VERSION ${LIBRARY_VERSION} " CMakeLists.txt
-          grep -qE "^set\(OSMSCOUT_LIBRARY_VERSION ${LIBRARY_VERSION}\)" CMakeLists.txt
-          grep -qE "^libraryVersion='${LIBRARY_VERSION}'" meson.build
-          grep -qE "^        version: '${VERSION}'," meson.build
-
-          echo "release ${VERSION}, library version ${LIBRARY_VERSION}"
+          echo "releasing ${VERSION}, library version ${LIBRARY_VERSION}"
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback
@@ -99,39 +108,6 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ github.event.inputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish the container images for this release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.inputs.version }}
-        run: |
-          set -euo pipefail
-          # The release is created above with the default token, and GitHub does
-          # not start workflow runs for events caused by that token, so the
-          # release event never reaches the image workflow. workflow_dispatch is
-          # exempt from that rule, so the run is started explicitly - on the
-          # released tag, so the images are built from the released source even
-          # if master moves on meanwhile.
-          tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=20" \
-                  --jq "[.[] | select(.tag_name | endswith(\"${VERSION}\"))] | .[0].tag_name // empty")
-          if [ -z "${tag}" ]; then
-            # JReleaser's default tag naming, in case the lookup found nothing
-            tag="v${VERSION}"
-          fi
-          gh api "repos/${GITHUB_REPOSITORY}/commits/${tag}" --jq .sha > /dev/null
-          gh workflow run mapgen_image.yml \
-            --repo "${GITHUB_REPOSITORY}" \
-            --ref "${tag}" \
-            -f push=true \
-            -f release=true \
-            -f tag="${VERSION}"
-          {
-            echo "### Container images"
-            echo
-            echo "Dispatched the image workflow for \`${tag}\`: it publishes"
-            echo "\`${VERSION}\`, the library version and \`latest\` once its"
-            echo "build and smoke checks pass."
-          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: JReleaser upload output
         uses: actions/upload-artifact@v7

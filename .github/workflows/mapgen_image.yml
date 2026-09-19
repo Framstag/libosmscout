@@ -23,31 +23,18 @@ on:
       - 'stylesheets/map.ost'
       - '.dockerignore'
       - '.github/workflows/mapgen_image.yml'
-  release:
-    types:
-      - published
   workflow_dispatch:
     inputs:
       push:
-        description: 'Publish the images to the container registry'
+        description: 'Publish the images to the container registry (the tags come from the source)'
         type: boolean
         default: false
-      release:
-        description: 'Publish as a release (only with push): the release version below, the library version tag and latest'
-        type: boolean
-        default: false
-      tag:
-        description: 'Image tag to publish; for a release publish this is the release version and a leading v is stripped'
-        type: string
-        required: false
-        default: ''
 
 env:
   REGISTRY: ghcr.io
-  # Every job must build exactly the same revision: the release tag for a
-  # release event, the commit otherwise. Without this, a release event would
-  # build the default branch and publish images that do not match the release.
-  CHECKOUT_REF: ${{ github.event.release.tag_name || github.sha }}
+  # How many builds of each image to keep; older ones are pruned after a
+  # publication, so a build stamp stays pullable for this many publications.
+  KEEP_BUILDS: '20'
 
 # Runs for the same ref are serialized; a published tag is never moved by an
 # overlapping run.
@@ -59,9 +46,6 @@ jobs:
   verify:
     name: Build mapgen image and smoke test
     runs-on: ubuntu-24.04
-    # A snapshot release is published for every push to master. Those must not
-    # pay for an image build; only a real release reaches this job.
-    if: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
     permissions:
       contents: read
     outputs:
@@ -70,8 +54,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ env.CHECKOUT_REF }}
 
       - name: Read and cross-check the library version
         id: versions
@@ -163,11 +145,11 @@ jobs:
     name: Publish images
     runs-on: ubuntu-24.04
     needs: verify
-    # A non-prerelease release publishes the release tag, the library version tag
-    # and latest. A manual run publishes only the tag it was given and never
-    # moves latest. Snapshot releases publish nothing.
+    # A pull request never publishes; a commit on the main branch and a manual
+    # run do. There is no release-specific publication: the commit that sets a
+    # new release version publishes like any other.
     if: |
-      (github.event_name == 'release' && github.event.release.prerelease == false) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
       (github.event_name == 'workflow_dispatch' && inputs.push)
     permissions:
       contents: read
@@ -175,56 +157,63 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
         with:
-          ref: ${{ env.CHECKOUT_REF }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Runs after the checkout, before the login, only reads the source.
+      - name: Read the release version
+        id: release
+        run: |
+          set -euo pipefail
+          # The release version names the release and the distribution archives,
+          # and it is the version the images are tagged with. A milestone sets it
+          # in the tree (see Documentation/MapRepository.md, section 5); while it
+          # still holds the literal 'latest' the images carry only the build
+          # stamp and the latest tag.
+          declared=$(sed -nE "s/^ *version: *'([^']*)',.*/\1/p" meson.build | head -1)
+          release_version=""
+          if echo "${declared}" | grep -qE '^[0-9]+[.][0-9]+[.][0-9]+([.][0-9]+)?(-[A-Za-z0-9.-]+)?$'; then
+            release_version="${declared}"
+          else
+            echo "the source declares no release version ('${declared}'): publishing the latest tag and the build stamp only"
+          fi
+          echo "release_version=${release_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Determine the image tags
         id: tags
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          DISPATCH_TAG: ${{ inputs.tag }}
-          DISPATCH_RELEASE: ${{ inputs.release }}
-          LIBRARY_VERSION: ${{ needs.verify.outputs.library_version }}
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: |
           set -euo pipefail
           # A container registry requires a lower case name; GitHub expressions
           # cannot lower case, so the namespace is normalized here.
           namespace=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
-          if [ "${EVENT_NAME}" = "release" ]; then
-            release_version="${RELEASE_TAG#v}"
-            release_publish=true
+          # A stamp identifies this one publication: it never moves, so it is the
+          # tag to pin when a deployment has to be reproducible. It is pruned
+          # after KEEP_BUILDS publications, which the documentation states.
+          stamp=$(date -u +%Y%m%dT%H%M%SZ)
+          if [ -n "${RELEASE_VERSION}" ]; then
+            tags=$(printf '%s\n%s\n%s' "${RELEASE_VERSION}" "latest" "${stamp}")
           else
-            if [ -z "${DISPATCH_TAG}" ]; then
-              echo "publishing needs a tag: set the 'tag' input" >&2
-              exit 1
-            fi
-            release_publish="${DISPATCH_RELEASE}"
-            if [ "${release_publish}" = "true" ]; then
-              # a release publish names the release version the same way the
-              # release tag does: without the leading v
-              release_version="${DISPATCH_TAG#v}"
-            else
-              release_version="${DISPATCH_TAG}"
-            fi
-          fi
-          if [ "${release_version}" = "latest" ]; then
-            echo "'latest' is reserved for releases and is never set by a manual run" >&2
-            exit 1
-          fi
-          if ! echo "${release_version}" | grep -qE '^[A-Za-z0-9_][A-Za-z0-9._-]*$'; then
-            echo "invalid image tag '${release_version}'" >&2
-            exit 1
-          fi
-          if [ "${release_publish}" = "true" ]; then
-            # a release and its library version are separate schemes
-            if [ "${release_version}" = "${LIBRARY_VERSION}" ]; then
-              echo "release version '${release_version}' and library version '${LIBRARY_VERSION}' must differ" >&2
-              exit 1
-            fi
-            tags=$(printf '%s\n%s\n%s' "${release_version}" "${LIBRARY_VERSION}" "latest")
-          else
-            tags="${release_version}"
+            tags=$(printf '%s\n%s' "latest" "${stamp}")
           fi
           mapgen_tags=""
           mapserve_tags=""
@@ -240,20 +229,11 @@ jobs:
             echo "mapserve_tags<<TAGS"
             echo "${mapserve_tags}"
             echo "TAGS"
+            echo "stamp=${stamp}"
           } >> "$GITHUB_OUTPUT"
           echo "publishing:"
           echo "${mapgen_tags}"
           echo "${mapserve_tags}"
-
-      - name: Log in to the container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Publish mapgen image
         uses: docker/build-push-action@v6
@@ -264,7 +244,7 @@ jobs:
           tags: ${{ steps.tags.outputs.mapgen_tags }}
           build-args: |
             OSMSCOUT_REVISION=${{ github.sha }}
-            OSMSCOUT_VERSION=${{ needs.verify.outputs.library_version }}
+            OSMSCOUT_VERSION=${{ steps.release.outputs.release_version || needs.verify.outputs.library_version }}
             OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
           provenance: true
           sbom: true
@@ -280,14 +260,36 @@ jobs:
           tags: ${{ steps.tags.outputs.mapserve_tags }}
           build-args: |
             OSMSCOUT_REVISION=${{ github.sha }}
-            OSMSCOUT_VERSION=${{ needs.verify.outputs.library_version }}
+            OSMSCOUT_VERSION=${{ steps.release.outputs.release_version || needs.verify.outputs.library_version }}
             OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
           provenance: true
           sbom: true
           cache-from: type=gha,scope=mapserve
           cache-to: type=gha,mode=max,scope=mapserve
 
+      # Keeps the number of published builds bounded: the newest KEEP_BUILDS
+      # package versions of each image survive, older ones - and with them their
+      # build stamps - are deleted. `latest` and the release version tag always
+      # point at the newest publication, which is never a candidate.
+      - name: Prune older mapgen builds
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: mapgen
+          package-type: container
+          min-versions-to-keep: ${{ env.KEEP_BUILDS }}
+
+      - name: Prune older mapserve builds
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: mapserve
+          package-type: container
+          min-versions-to-keep: ${{ env.KEEP_BUILDS }}
+
       - name: Report the published packages
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+          STAMP: ${{ steps.tags.outputs.stamp }}
+          KEEP: ${{ env.KEEP_BUILDS }}
         run: |
           {
             echo "### Published images"
@@ -297,6 +299,14 @@ jobs:
             echo "${{ steps.tags.outputs.mapserve_tags }}"
             echo '```'
             echo
+            echo "Pin a build with \`${STAMP}\`. It stays pullable for the next ${KEEP} publications;"
+            echo "\`latest\` and the release version tag follow the newest publication."
+            echo
+            if [ -z "${RELEASE_VERSION}" ]; then
+              echo "The source declares no release version, so no version tag was published."
+              echo "Set one in \`meson.build\` when the next milestone is prepared."
+              echo
+            fi
             echo "A newly published package is private. Make it public once in its"
             echo "settings so that anonymous pulls work:"
             echo "- https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/mapgen/settings"
@@ -306,14 +316,11 @@ jobs:
   compose:
     name: Compose smoke (mapgen + serve)
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
     permissions:
       contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ env.CHECKOUT_REF }}
 
       - name: Build images
         run: docker compose -f scripts/mapgen/docker-compose.yml build
