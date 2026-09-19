@@ -1,8 +1,33 @@
+#include <string>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <osmscout/location/LocationService.h>
 
 extern osmscout::LocationServiceRef locationService;
+
+namespace {
+  /*
+   * Run one string search and return its result, asserting the invariants every
+   * matching section shares: the search succeeds and does not hit the candidate
+   * limit. The section asserts its own expectations on the returned result —
+   * one place for the boilerplate instead of a copy per section.
+   */
+  osmscout::LocationSearchResult SearchForString(const std::string& query,
+                                                 bool partialMatch=false)
+  {
+    osmscout::LocationStringSearchParameter parameter(query);
+
+    parameter.SetPartialMatch(partialMatch);
+
+    osmscout::LocationSearchResult result;
+
+    REQUIRE(locationService->SearchForLocationByString(parameter,result));
+    REQUIRE_FALSE(result.limitReached);
+
+    return result;
+  }
+}
 
 //
 // City search
@@ -256,15 +281,8 @@ TEST_CASE("String search for city, location and address")
    */
   SECTION("Search for address with surplus postal token: 'Am Birkenbaum 1 44339 Dortmund' (partial fallback)")
   {
-    osmscout::LocationStringSearchParameter parameter("Am Birkenbaum 1 44339 Dortmund");
-    parameter.SetPartialMatch(true);
-    osmscout::LocationSearchResult          result;
+    auto result=SearchForString("Am Birkenbaum 1 44339 Dortmund",true);
 
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
-
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
     REQUIRE_FALSE(result.results.empty());
     REQUIRE(result.results.front().adminRegion->name=="Dortmund");
     REQUIRE(result.results.front().location->name=="Am Birkenbaum");
