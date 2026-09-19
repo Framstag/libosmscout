@@ -102,7 +102,10 @@ COPY --from=build /stage/lib/ /usr/local/lib/
 RUN ldconfig \
  && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}'
 
-COPY stylesheets/map.ost /usr/local/share/osmscout/map.ost
+# The whole type definition set: the type file pulls in modules that are looked
+# up beside it, so shipping the file alone makes every import fail with
+# "Cannot load type configuration!".
+COPY stylesheets/*.ost /usr/local/share/osmscout/
 COPY scripts/mapgen/mapgen.sh /usr/local/bin/mapgen.sh
 COPY scripts/mapgen/mapgen-pass.sh /usr/local/bin/mapgen-pass.sh
 COPY scripts/mapgen/mapgen-entrypoint.sh /usr/local/bin/mapgen-entrypoint.sh

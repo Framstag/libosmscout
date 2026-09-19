@@ -96,6 +96,29 @@ jobs:
           cache-from: type=gha,scope=mapgen
           cache-to: type=gha,mode=max,scope=mapgen
 
+      - name: Smoke test (the bundled type configuration loads)
+        run: |
+          # The type file the image bundles pulls in modules that are looked up
+          # beside it; shipping the file alone made every import fail with
+          # "Cannot load type configuration!" at the first real run.
+          out=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test \
+            --typefile /usr/local/share/osmscout/map.ost 2>&1) || true
+          echo "${out}"
+          if echo "${out}" | grep -q "Cannot load"; then
+            echo "the bundled type configuration does not load" >&2
+            exit 1
+          fi
+          # every module the type file names has to be present, derived from the
+          # file itself so a new module is covered too
+          docker run --rm --entrypoint sh osmscout-mapgen:test -c '
+            set -e
+            modules=$(grep -oE "MODULE \"[^\"]+\"" /usr/local/share/osmscout/map.ost | sed "s/MODULE \"//; s/\"//")
+            test -n "${modules}"
+            for module in ${modules}; do
+              test -f "/usr/local/share/osmscout/${module}.ost" || { echo "missing module: ${module}" >&2; exit 1; }
+              echo "module present: ${module}"
+            done'
+
       - name: Verify the runtime identity
         run: |
           test "$(docker run --rm --entrypoint id osmscout-mapgen:test -u)" = "1000"
