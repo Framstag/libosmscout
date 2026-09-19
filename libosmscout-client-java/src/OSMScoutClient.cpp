@@ -6933,6 +6933,31 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renameFavorite(JNIEnv *env, 
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavorite(JNIEnv *env, jobject self,
+                                                                 jstring groupName, jstring favName,
+                                                                 jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->favService == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the
+  // group are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favService->MoveFavorite(groupCStr, favCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_setStarred(JNIEnv *env, jobject self,
                                                                 jstring groupName, jstring favName,
                                                                 jboolean starred)
