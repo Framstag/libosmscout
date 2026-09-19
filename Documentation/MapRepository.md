@@ -407,7 +407,7 @@ so no external cron job or timer is needed:
 
 | point | behaviour |
 |-------|-----------|
-| expression | cron, five fields (`minute hour day-of-month month day-of-week`); a leading seconds field is accepted as well, which is handy for trying a schedule out |
+| expression | cron, five fields (`minute hour day-of-month month day-of-week`), e.g. `0 */6 * * *`. Seven fields add seconds in front and a year at the end (`sec minute hour dom month dow year`), e.g. `*/5 * * * * * *` for every five seconds, which is handy for trying a schedule out. A six-field expression is **not** a five-field one with seconds: it keeps the minute-first order and adds a year, so `*/5 * * * * *` means every five minutes |
 | time zone | the container's `TZ`; without it the expression is evaluated in UTC |
 | frequent schedules | every occurrence runs a pass, but only imports that are due are downloaded and imported, so a schedule that fires more often than the refresh gates costs a check, not an import |
 | overlapping passes | one pass at a time: an occurrence arriving while a pass runs is logged as skipped, and an externally triggered pass during a scheduled one is skipped the same way, since both take the lock in the work area |

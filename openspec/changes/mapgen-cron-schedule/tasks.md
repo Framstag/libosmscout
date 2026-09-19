@@ -7,9 +7,9 @@
 
 ## 2. The image
 
-- [ ] 2.1 Install the scheduler in `scripts/mapgen/Dockerfile`: select the binary by `TARGETARCH`, verify it against the pinned checksum for that architecture, install it, and keep the non-root user and read-only root filesystem (spec `mapgen-container`: the scheduled mode needs no privileges). Verify: the image builds for `linux/amd64`, `docker run --rm --entrypoint supercronic osmscout-mapgen:test -version` reports the pinned version, and the checksum check fails the build when the pinned value is wrong
-- [ ] 2.2 Ship the two scripts and make the entry point script the image's entry point, keeping `MAPGEN_TYPEFILE` and the `mapgen` user (spec `mapgen-container`: entry point semantics). Verify: `docker run --rm --read-only ... osmscout-mapgen:test --check-config` still answers `config OK`, and with `MAPGEN_CRON` set the container's process is the scheduler
-- [ ] 2.3 Add `util-linux` explicitly to the runtime packages so `flock` is present (spec `mapgen-container`: overlapping passes are skipped). Verify: `docker run --rm --entrypoint sh osmscout-mapgen:test -c 'command -v flock'` prints a path
+- [x] 2.1 Install the scheduler in `scripts/mapgen/Dockerfile`: select the binary by `TARGETARCH`, verify it against the pinned checksum for that architecture, install it, and keep the non-root user and read-only root filesystem (spec `mapgen-container`: the scheduled mode needs no privileges). Verify: the image builds for `linux/amd64`, `docker run --rm --entrypoint supercronic osmscout-mapgen:test -version` reports the pinned version, and the checksum check fails the build when the pinned value is wrong
+- [x] 2.2 Ship the two scripts and make the entry point script the image's entry point, keeping `MAPGEN_TYPEFILE` and the `mapgen` user (spec `mapgen-container`: entry point semantics). Verify: `docker run --rm --read-only ... osmscout-mapgen:test --check-config` still answers `config OK`, and with `MAPGEN_CRON` set the container's process is the scheduler
+- [x] 2.3 Add `util-linux` explicitly to the runtime packages so `flock` is present (spec `mapgen-container`: overlapping passes are skipped). Verify: `docker run --rm --entrypoint sh osmscout-mapgen:test -c 'command -v flock'` prints a path
 
 ## 3. Compose and documentation
 
@@ -21,7 +21,8 @@
 
 - [ ] 4.1 Add a scheduled-mode smoke check with an expression that fires within seconds, asserting that a pass ran, that its output reached the container log, and that the container is still running afterwards (spec `mapgen-container`: the schedule runs the pass). Verify: on the runner the check passes, and it fails if the entry point ignores the variable
 - [ ] 4.2 Add a smoke check for an unusable expression, asserting a non-zero exit and no pass (spec `mapgen-container`: an unusable expression stops the start). Verify: on the runner the container stops with a failing status within a few seconds
-- [ ] 4.3 Keep the existing single-pass and config-check smoke checks unchanged and green, so the opt-in property is demonstrated rather than asserted (spec `mapgen-container`: one pass per start). Verify: on the runner those checks still pass in the same run as the scheduled-mode ones
+- [x] 4.3 Keep the existing single-pass and config-check smoke checks unchanged and green, so the opt-in property is demonstrated rather than asserted (spec `mapgen-container`: one pass per start). Verify: on the runner those checks still pass in the same run as the scheduled-mode ones
+- [x] 4.4 Fix the scheduled-mode check's expression after the first runner run: a six-field expression keeps the minute-first order and adds a year instead of a seconds field, so `*/5 * * * * *` meant "every five minutes" and the check waited in vain (run `35457238892`, step 12). The check now uses the seven-field form `*/5 * * * * * *`, and the documentation states the three field counts (`min hour dom month dow`; `min hour dom month dow year`; `sec min hour dom month dow year`) instead of implying that a leading seconds field works in a five-field-compatible way. Verify: the scheduled-mode check passes on a runner, and the documentation's field table matches what the check uses
 
 ## 5. Verification
 
@@ -38,7 +39,8 @@ restart policy renders `no` by default and the configured value with `MAPGEN_RES
 3.1), `openspec validate --strict` passes (task 5.1), and the workflow parses with every step script passing
 `bash -n`.
 
-Open, because this machine has no reachable Docker daemon (Rancher Desktop's socket disappeared earlier in
-the session): the image build with the scheduler and its checksum verification, the entry point as the
-container's entry point, `flock` being present, the three new smoke checks on a runner, the documentation
-commands, and the end-to-end check (tasks 2.1, 2.2, 2.3, 3.2, 4.1, 4.2, 4.3, 5.2).
+Merged as PR #1809 (merge `5e7ec3620`). Its first runner run (`35457238892`) built the image with the scheduler and verified the checksum, passed the identity, config-check, single-pass and lock checks, and then **failed** the scheduled-mode check: supercronic read the crontab and no pass ran within the 60 second wait. The cause was the expression, not the scheduler: a six-field expression is read as `minute hour day-of-month month day-of-week year` (seconds and year are the optional fields in the cronexpr parser supercronic uses), so `*/5 * * * * *` means every five minutes, and the check would have had to wait for a minute boundary. Because the verify job failed, that run published nothing (the publish job was skipped), so `latest` still does not carry the scheduler. Task 4.4 changes the check to the seven-field form and corrects the documentation.
+
+Verified on that run: the image builds with the scheduler and its pinned checksum (2.1), the entry point starts the scheduler as the container's process (2.2), `flock` is present and a pass whose lock is held is skipped while the holder is unaffected (1.1, 2.3), and the config-check and single-pass checks still pass alongside (4.3).
+
+Still open: the scheduled-mode and unusable-expression checks on a runner after the field fix (4.1, 4.2), the documentation commands (3.2) and the end-to-end check (5.2).

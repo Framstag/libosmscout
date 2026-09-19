@@ -184,9 +184,12 @@ jobs:
 
       - name: Smoke test (scheduled mode)
         run: |
-          # Second resolution, so the check does not wait a minute.
+          # The seven-field form carries the seconds field (seconds first, year
+          # last); a six-field expression keeps the minute-first order and adds
+          # a year instead, so it would mean "every five minutes" here and the
+          # check would wait in vain.
           docker run -d --name mapgen-schedule-check --read-only \
-            -e MAPGEN_CRON='*/5 * * * * *' \
+            -e MAPGEN_CRON='*/5 * * * * * *' \
             -v /tmp/mapgen-config:/config:ro \
             -v /tmp/mapgen-work:/work \
             -v /tmp/mapgen-repo:/repository \
