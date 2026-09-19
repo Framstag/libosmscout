@@ -164,6 +164,25 @@ public:
                       const std::string &newName);
 
   /**
+   * Move a favorite to another position within its group.
+   *
+   * The target index is 0-based and refers to the favorite list after the
+   * favorite has been removed from its current position. An index outside the
+   * list bounds is clamped to the first/last position, so moving a favorite to
+   * the front or to the end does not depend on the caller knowing the size.
+   * Moving a favorite to the position it already occupies succeeds without
+   * changing anything.
+   *
+   * @param groupName  group name
+   * @param favName    favorite name to move
+   * @param newIndex   0-based target position within the group
+   * @return true if moved (or already at that position), false if group or fav not found
+   */
+  bool MoveFavorite(const std::string &groupName,
+                    const std::string &favName,
+                    size_t newIndex);
+
+  /**
    * Set or clear the starred flag on a favorite.
    * Star is stored as attributes["starred"] = "true".
    * Unsetting removes the key entirely.
