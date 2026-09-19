@@ -54,6 +54,10 @@ PlaneMapRenderer::PlaneMapRenderer(QThread *thread,
 {
   pendingRenderingTimer.setSingleShot(true);
 
+  if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+    osmscout::log.Warn() << "[PlaneMapRenderer] diagnostics ACTIVE (renderer lib with tile gate, jitter tolerance, contour stickiness)";
+  }
+
   //
   // Make sure that we decouple caller and receiver if SLOT method acquire locks,
   // even if they are running in the same thread
@@ -107,6 +111,9 @@ void PlaneMapRenderer::FlushVisualCaches(const std::chrono::milliseconds &idleMs
     QMutexLocker finishedLocker(&finishedMutex);
     if (std::chrono::steady_clock::now() - finishedLastUsage > idleMs) {
       osmscout::log.Debug() << "Flush finished image";
+      if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+        osmscout::log.Warn() << "[PlaneMapRenderer] finished image flushed (idle cache flush)";
+      }
       finishedImage = nullptr;
     }
   }
@@ -324,9 +331,36 @@ void PlaneMapRenderer::DrawMap()
 {
   {
     QMutexLocker locker(&lock);
+
     if (loadJob==nullptr){
       return;
     }
+
+    if (!loadJob->IsFinished()){
+      {
+        QMutexLocker finishedLocker(&finishedMutex);
+        if (finishedImage!=nullptr) {
+          // Do not churn the finished image with a partially loaded tile
+          // set: rendering with incomplete data makes the visible label set
+          // flicker (candidates appear/disappear while tiles are loading).
+          // The next tile state change or the timer re-triggers rendering.
+          if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+            osmscout::log.Warn() << "[PlaneMapRenderer] skip render (tiles pending="
+                                 << loadJob->GetAllTiles().size() << " loaded, job epoch="
+                                 << currentEpoch << ")";
+          }
+          if (!pendingRenderingTimer.isActive()) {
+            pendingRenderingTimer.start(UPDATED_DATA_RENDERING_TIMEOUT);
+          }
+          return;
+        }
+        if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+          osmscout::log.Warn() << "[PlaneMapRenderer] first render with partial data (tiles="
+                               << loadJob->GetAllTiles().size() << ")";
+        }
+      }
+    }
+
     osmscout::log.Debug() << "DrawMap()";
     if (thread!=QThread::currentThread()){
       osmscout::log.Warn() << "Incorrect thread!";
@@ -436,6 +470,16 @@ void PlaneMapRenderer::DrawMap()
       osmscout::log.Error() << "*** Rendering of data has error or was interrupted";
       return;
     }
+
+    if (!qEnvironmentVariableIsEmpty("OSMSCOUT_DEBUG_LABEL_HYSTERESIS")) {
+      osmscout::log.Warn() << "[PlaneMapRenderer] swap enter: image="
+                           << (currentImage!=nullptr ? currentImage->width() : -1)
+                           << "x" << (currentImage!=nullptr ? currentImage->height() : -1)
+                           << " center=" << currentCoord.GetDisplayText()
+                           << " mag=" << currentMagnification.GetLevel()
+                           << " epoch=" << currentEpoch;
+    }
+
     {
       QMutexLocker finishedLocker(&finishedMutex);
       std::swap(currentImage,finishedImage);

@@ -120,6 +120,33 @@ Window {
             id: map
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            // TEMPORARY diagnostics: programmatic pan left/right to drive
+            // the label flicker reproduction (see change
+            // label-collision-stability). Remove after investigation.
+            Timer {
+                id: debugPanTimer
+                interval: 150
+                running: true
+                repeat: true
+                property double lon: 0
+                property int step: 0
+                Component.onCompleted: console.log("[debugPan] timer created, running=" + running)
+                onTriggered: {
+                    if (!map.databaseLoaded) {
+                        console.log("[debugPan] skip: database not loaded")
+                        return
+                    }
+                    step++
+                    var dir = (Math.floor((step-1)/10) % 2 === 0) ? -0.00025 : 0.00025
+                    if (step > 40) {
+                        dir = 0
+                        running = false
+                    }
+                    console.log("[debugPan] step " + step + " dir " + dir + " lat " + map.view.lat + " lon " + map.view.lon)
+                    map.debugPan(dir)
+                }
+            }
             focus: true
             renderingType: "plane" // or "tiled"
             interactiveIcons: true
