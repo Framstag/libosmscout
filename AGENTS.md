@@ -143,7 +143,7 @@ GitHub Actions in `.github/workflows/`:
 | `build_on_ubuntu_22_04_qt_android.yml` | Android NDK |
 | `sanitize_on_ubuntu_24_04.yml` | Sanitizer builds |
 | `sonar.yml` | SonarQube analysis |
-| `mapgen_image.yml` | Map repository container images — build, smoke test, publish to GitHub Packages on a release |
+| `mapgen_image.yml` | Map repository container images — build, smoke test, publish to GitHub Packages on main-branch commits, prune old builds |
 | `release.yml` / `release_latest.yml` | Release automation |
 | `webpage.yml` | Website build |
 

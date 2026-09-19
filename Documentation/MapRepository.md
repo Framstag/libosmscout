@@ -350,8 +350,8 @@ docker run --rm --read-only \
 
 ### Published images
 
-Releases publish both images to GitHub Packages, so an operator does not
-build anything:
+Every build of the images on the main branch publishes to GitHub Packages, so
+an operator does not build anything:
 
 ```
 docker pull ghcr.io/framstag/libosmscout/mapgen:<tag>
@@ -363,11 +363,32 @@ docker pull ghcr.io/framstag/libosmscout/mapserve:<tag>
 | `ghcr.io/framstag/libosmscout/mapgen`   | Regeneration container (this section) |
 | `ghcr.io/framstag/libosmscout/mapserve` | Read-only web server (see below)      |
 
-| Tag | Meaning |
-|-----|---------|
-| `<release version>` | One release, e.g. `2024.06.02.1`. Immutable and the tag to pin: never moved by a later release. It is the release tag with the leading `v` removed (`v2024.06.02.1` in the repository, `2024.06.02.1` in the registry). |
-| `<library version>` | The version the bundled import tool reports and that `db.json` records as `import.version`, e.g. `1.1.1`. It matches what this image would write into a database, so it is the tag to look for when you have a `db.json` in hand, but it moves when a later release bumps the library version. |
-| `latest` | The newest release. Never a snapshot or a development build. |
+| Tag | Meaning | Moves? |
+|-----|---------|--------|
+| `<release version>` | The version the source declares (`version:` in `meson.build`), e.g. `2026.01.15.1`. It is a milestone marker: every later build carries it too, until the next milestone changes the source. | yes, with every publication of that version |
+| `latest` | The newest publication, whatever version it carries. | yes |
+| `<build stamp>` | UTC date and time of one build, e.g. `20260919T143512Z`. **Pin this one** when a deployment has to be reproducible. | no |
+
+This is a rolling scheme: there is no separate release image. A release is a
+milestone that changes the version the following builds are tagged with, so
+the same commit that sets a new version is the commit that publishes the new
+version tag.
+
+Older builds are pruned automatically: the newest `KEEP_BUILDS` publications
+of each image (20 by default, see `.github/workflows/mapgen_image.yml`) stay
+pullable, older ones are deleted together with their build stamps. `latest`
+and the release version tag always point at the newest publication.
+
+```
+# what is current
+ghcr.io/framstag/libosmscout/mapgen:latest
+
+# the version the source declares
+ghcr.io/framstag/libosmscout/mapgen:2026.01.15.1
+
+# one concrete build, pinned, pullable for the next 20 publications
+ghcr.io/framstag/libosmscout/mapgen:20260919T143512Z
+```
 
 A newly published package is private. Make each package public once in its
 settings (`https://github.com/orgs/Framstag/packages/container/mapgen/settings`
@@ -375,20 +396,45 @@ and `.../mapserve/settings`) so that anonymous `docker pull` works. The
 workflow is the same either way; a private package only requires registry
 credentials when pulling.
 
-Only a real release publishes: pull requests, merges and the snapshot
-release that follows every merge to master publish nothing, and a manual
-run publishes exactly the tag it was given (never `latest`).
-
 ### The CI workflow
 
 `.github/workflows/mapgen_image.yml` builds the image and smoke-tests it
 (non-root user, the version it reports, config check, single pass with the
 refresh gate pre-seeded so no network is needed). Publication depends on
-those checks and runs for a non-prerelease release, publishing the release
-version, the library version and `latest`. The library version is declared
-once per build system (`set(OSMSCOUT_LIBRARY_VERSION ...)` in
-`CMakeLists.txt`, `libraryVersion='...'` in `meson.build`); the workflow
-refuses to publish when they disagree.
+those checks and happens for
+
+- a merge or direct commit to `master` that changes an input of the image
+  (`scripts/mapgen/**`, `Import/**`, `libosmscout-import/**`,
+  `libosmscout/**`, `stylesheets/map.ost`, `.dockerignore`, the workflow
+  itself) - a commit that changes none of them cannot change the image
+  content and publishes nothing, and
+- a manual run with publishing requested (`workflow_dispatch`).
+
+Pull requests never publish. After a publication the workflow prunes the
+older builds of both packages.
+
+### Preparing a release
+
+The version the images are tagged with and the version a database records are
+declared in the source, so they are set by a pull request, not by the release
+workflow:
+
+1. Merge a `chore: release <version>, library <Y>` pull request that sets
+   `version:` in `meson.build` (the release version) and the library version
+   in both build systems (`project(libosmscout VERSION ...)` and
+   `set(OSMSCOUT_LIBRARY_VERSION ...)` in `CMakeLists.txt`,
+   `libraryVersion='...'` in `meson.build`). Merging it publishes
+   `:<version>`, `:latest` and a build stamp.
+2. Run `.github/workflows/release.yml` with the same two values. It asserts
+   that the revision declares them, refuses a library version the previous
+   release already reports, builds the distribution archives and creates the
+   release and its `v<version>` tag. It publishes no image: that already
+   happened in step 1.
+
+The library version is what the import tool reports and what `db.json`
+records as `import.version`; it is deliberately not the release version, so
+that the soname major stays `1` and two releases never report the same
+version.
 
 ### Serving the repository (web server image)
 

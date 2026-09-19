@@ -1,68 +1,48 @@
 # Tasks
 
-## 1. Import tool version query
+## 1. Earlier work kept by this change
 
-- [x] 1.1 Add a `--tool-version` option to `Import/src/Import.cpp` that prints `OSMSCOUT_IMPORT_VERSION` and exits successfully, and list it in `DumpHelp` next to `--data-version` (spec `release-library-version`: release artifacts report the release's library version). A Catch2 unit test is not feasible for this contract: the value is a target-private compile definition of the `Import` tool and the query is a command-line option, so the contract is asserted against the built image in task 4.3 instead. Verify: `cmake --build build --target Import` then `./build/Import/Import --tool-version` prints the library version and exits 0, and `--help` lists the option
-- [x] 1.2 Verify the Import target compiles without warnings after the change (spec `release-library-version`). Verify: `cmake --build build --target Import` completes and the build output contains no new warning for `Import/src/Import.cpp`
-- [x] 1.3 Verify the existing test suite still passes after the change (spec `release-library-version`). Verify: `cd build && ctest -j 2 --output-on-failure` reports no failure
+- [x] 1.1 Add `--tool-version` to the import tool, so a published image can be asked which version it reports (spec `container-image-publishing`: an image reports the version it was built from). Verify: `./build/Import/Import --tool-version` prints the library version and exits 0, and `--help` lists the option. A Catch2 unit test is not feasible for a target-private compile definition behind a command-line option; the contract is asserted against the built image in task 2.2
+- [x] 1.2 Remove the version literal from the image: stage the libraries with their symlink chain in the build stage, drop the hand-written symlink block and the leftover debug output, add OCI metadata to both Dockerfiles, and keep the repository history out of the build context (spec `container-image-publishing`: no version literal in the build definition). Verify: both images build, `ldd` reports no missing library, the symlink chain is intact inside the image, the Dockerfile contains no version, all four OCI labels are present, and the build context drops from 107.97 MB to 58.17 MB
+- [x] 1.3 Let the orchestration take the image names from the environment (spec `container-image-publishing`: the orchestration runs published images, building locally remains possible). Verify: the default names still build and run locally, and overridden names are used by `docker compose up --no-build`
+- [x] 1.4 Verify the C++ change against the build and the test suite (spec `container-image-publishing`). Verify: `cmake --build build --target Import` compiles without new warnings and `ctest -j 2` reports 120 of 120 tests passing
 
-## 2. Release library version
+## 2. The publication workflow
 
-- [x] 2.1 Add a required `library_version` input to `.github/workflows/release.yml` and set it in the three declarations that carry the library version: `project(libosmscout VERSION ...)` and `set(OSMSCOUT_LIBRARY_VERSION ...)` in `CMakeLists.txt`, and `libraryVersion='...'` in `meson.build`; leave `meson.build`'s `version:` at the release version, which names the distribution archives (spec `release-library-version`: every release establishes its own library version, and the released source carries it). Reject a value that is not three numeric components and a value equal to the current library version, so no release can be cut without a bump. Verify: apply the workflow's version steps to a scratch copy of the tree, then `grep -nE 'OSMSCOUT_LIBRARY_VERSION|libraryVersion' CMakeLists.txt meson.build` shows the new library version in all three declarations while `meson.build`'s `version:` still carries the release version, and `cmake -B /tmp/vcheck` leaves `CMAKE_PROJECT_VERSION` equal to the library version in `/tmp/vcheck/CMakeCache.txt`
+- [x] 2.1 Make the workflow publish on a commit to the main branch that changes an image input, and on a manual run that asks for it, while a pull request never publishes (spec `container-image-publishing`: publication follows the revision and requires verification). Verify: the job conditions and the path filter inspected against the spec scenarios, and a pull-request run on the runner published nothing
+- [x] 2.2 Derive the tags from the published source: the release version the source declares, `latest`, and a date and time stamp unique to the build; keep the build and the smoke checks as the gate, and report when the source declares no release version (spec `container-image-publishing`: the tags a publication carries). Verify: the tag step extracted from the workflow and run for a source with a declared version, for a source without one, and for a manual run, always emitting the stamp and never a duplicate tag
+- [ ] 2.3 Add the pruning job that keeps only the newest builds of each image and deletes older package versions (spec `container-image-publishing`: old builds are pruned). Verify: after more publications than the retention count, the oldest stamp tags are gone, the newest kept ones are pullable, and `latest` and the release version tag still resolve to the newest publication
+- [ ] 2.4 Verify the first publication on the runner: the next commit to the main branch that touches an image input publishes both images, the run summary lists the tags, and the packages appear (private until made public) (spec `container-image-publishing`: a merge on the main branch publishes)
 
-## 3. Image build definition
+## 3. Version handling at release time
 
-- [x] 3.1 Remove the version literal from `scripts/mapgen/Dockerfile`: stage `libosmscout.so*` and `libosmscout_import.so*` into a fixed directory in the build stage, copy that directory in the runtime stage, and delete the hand-written `ln -s` block and the leftover `ldd ... | wc -l` debug line (spec `container-image-publishing`: no version literal in the build definition). Verify: `docker build -f scripts/mapgen/Dockerfile -t osmscout-mapgen:check .` succeeds, `docker run --rm --entrypoint sh osmscout-mapgen:check -c 'ldd /usr/local/bin/Import | grep "not found"'` prints nothing, and `grep -nE '[0-9]+\.[0-9]+\.[0-9]+' scripts/mapgen/Dockerfile` finds no library version
-- [x] 3.2 Add OCI metadata (source repository, revision, version, created) to both `scripts/mapgen/Dockerfile` and `scripts/mapgen/Dockerfile.serve` (spec `container-image-publishing`: the image names its provenance). Verify: `docker image inspect --format '{{json .Config.Labels}}'` on both built images lists all four labels
-- [x] 3.3 Add `.git` to `.dockerignore` (spec `container-image-publishing`; see design decision 6). Verify: both images still build and the context size reported by `docker build` is smaller than before the change
+- [x] 3.1 Turn the release workflow's version editing into an assertion: fail when the revision does not declare the release version and the library version the run is told to release, and stop rewriting the library version in the working tree (spec `release-library-version`: the released revision declares the released version; a revision that declares another version is not released). Verify: the step extracted from the workflow and run against a scratch copy passes when the revision declares both versions and fails, naming both, when either differs
+- [x] 3.2 Document the version bump procedure: the single `chore: release <version>, library <Y>` pull request, that merging it publishes the new version tag, and what the release run asserts (spec `release-library-version`: every release establishes its own library version). Verify: section 5 of `Documentation/MapRepository.md` names the pull request, what it sets, and the order of the bump, the merge and the release run
+- [ ] 3.3 Verify a release end to end on the next release: the version bump pull request is merged, its merge publishes the new version tag, the release run asserts both versions, and a database generated with the released image records the released library version (spec `release-library-version`: release artifacts report the release's library version)
 
-## 4. Publication workflow
+## 4. Documentation and findings
 
-- [x] 4.1 Switch the existing `build` job of `.github/workflows/mapgen_image.yml` to the buildx builder with a shared cache and explicitly computed image tags and build-argument labels, keeping all four existing smoke checks (spec `container-image-publishing`: nothing is published for unverified work; the image names its provenance). Verify: a pull-request run still performs the build, the non-root check, the config check and the gated pass, and the registry tag list is unchanged after it
-- [x] 4.2 Give the workflow `contents: read` and `packages: write` permissions and add the registry login to the publishing job only (spec `container-image-publishing`: both images are published under repository-derived names). Verify: the pull-request run log shows no login step and no push, and the publishing job's log shows the login against the registry
-- [x] 4.3 Assert in the verify job that the built image reports the version parsed from the source: read the library version from `CMakeLists.txt` and compare it with the output of the image's `--tool-version` from task 1.1 (spec `container-image-publishing`: the reported version is the built version). Verify: the check passes on the current tree, and fails when the parsed version and the built version are temporarily made to differ
-- [x] 4.4 Add the release trigger and the publishing job: trigger on `release: types: [published]`, `needs:` the verify job, skip when `github.event.release.prerelease` is true, check out the release tag, take the library version that the verification job read and cross-checked, and push the release tag, the library version tag and `latest` (spec `container-image-publishing`: tag set published for a release, nothing published for unreleased work). Verify: a `workflow_dispatch` dry run with publishing disabled shows the guard passing and the computed tag set for a non-prerelease release in the log, and no registry tag is created by it
-- [x] 4.5 Add the `workflow_dispatch` inputs for an explicit tag and for publishing, which never set `latest` (spec `container-image-publishing`: `latest` follows the newest release only; design decision 4). Verify: a dispatch run with publishing enabled creates exactly the given tag and leaves `latest` unchanged
-- [x] 4.6 Add a concurrency group to the workflow (spec `container-image-publishing`: tags of one release are never moved). Verify: two overlapping runs serialize, the second waiting for the first, and neither run's tag set is truncated
-- [x] 4.7 Verify that snapshot activity publishes nothing: push to a branch that triggers the snapshot release path, or dispatch the snapshot workflow for a scratch branch (spec `container-image-publishing`: snapshot activity publishes nothing). Verify: the publishing job is skipped in the run and the registry tag list is unchanged
+- [x] 4.1 Document the published names, the tag semantics including which tag pins a build and how long a pinned build lasts, and the one-time step that makes a package publicly pullable (spec `container-image-publishing`: the tag semantics are documented). Verify: section 5 of `Documentation/MapRepository.md` states each of those, and every command in it runs as written
+- [x] 4.2 Record the deferred findings in `TODO.md`: the reported library version carries no commit identity, only `linux/amd64` is published, the build context no longer contains `.git`, the retention count bounds how long a pinned build stays pullable, and the version bump is a human step (spec `container-image-publishing`, spec `release-library-version`). Verify: each entry names what it concerns, why it exists and what would close it
+- [x] 4.3 Update the CI/CD table in `AGENTS.md` for the image workflow (spec `container-image-publishing`: published images and their names). Verify: the row names the workflow and what it publishes
 
-## 5. Consumer path and documentation
+## 5. Verification
 
-- [x] 5.1 Make the image names in `scripts/mapgen/docker-compose.yml` overridable from the environment (`MAPGEN_IMAGE`, `MAPSERVE_IMAGE`) with the current local names as defaults (spec `container-image-publishing`: the orchestration runs published images, building locally remains possible). Verify: local `docker compose build` and `up` still work, and `MAPGEN_IMAGE=<published> docker compose pull && docker compose up --no-build` runs both containers from the pulled image as reported by `docker compose ps --format '{{.Image}}'`
-- [x] 5.2 Update section 5 of `Documentation/MapRepository.md` with the published registry names, the tag semantics (release tag, library version tag, `latest`), the pull command, the published-image path of the orchestration, and the one-time step that makes a package publicly pullable; correct the claim that the image tag equals the libosmscout version (spec `container-image-publishing`: a consumer runs the published images without building, the tag semantics are documented). Verify: every command in the section runs as written, and each `container-image-publishing` scenario about documentation, pull path and local build is addressed
-- [x] 5.3 Record the deferred findings in `TODO.md`: unreleased builds report a library version with no commit identity, only `linux/amd64` is published, and the build context no longer contains `.git` (spec `release-library-version`: library version compatibility; design Risks). Verify: each entry names the file or artifact it concerns and the reason it was deferred
-- [x] 5.4 Add `.github/workflows/mapgen_image.yml` to the CI/CD table of `AGENTS.md` with its trigger and what it publishes (spec `container-image-publishing`: published images and their names). Verify: the row names the workflow, its triggers and the published image names
-
-## 6. End-to-end verification
-
-- [x] 6.1 Validate the change artifacts (specs `container-image-publishing`, `release-library-version`). Verify: `openspec validate --change publish-container-images --strict` passes
-- [ ] 6.2 Verify the non-release path end to end (spec `container-image-publishing`: a pull request publishes nothing, a failing verification stops publication). Verify: a pull-request run performs the build, all smoke checks and the compose smoke job and publishes nothing, and a `workflow_dispatch` dry run with publishing disabled reports the tag set it would publish
-- [ ] 6.3 Verify the release path once, after merge (spec `container-image-publishing`: a release publishes all three tags, tags of one release resolve to the same content, `latest` follows the newest release). Verify: dispatch `release.yml` with the next version, then confirm both images carry the release tag, the library version tag and `latest`; the release tag and the library version tag resolve to the same image content; `latest` resolves to that content; then make both packages public and pull a tag anonymously
-- [ ] 6.4 Verify the reported version of a released artifact (spec `release-library-version`: generated database metadata carries the release's version; the published image tag matches the recorded version). Verify: pull the published regeneration image, run its `--tool-version`, and confirm the output equals the library version tag and the `import.version` recorded in a `db.json` generated by that release
+- [x] 5.1 Validate the change artifacts (both specs). Verify: `openspec validate --change publish-container-images --strict` passes
+- [ ] 5.2 Pull a published image anonymously once the packages are public, and run it: the documented pull path works, the image completes a pass, and `--tool-version` prints the library version the run summary reported (spec `container-image-publishing`: anonymous pull, the orchestration runs published images)
+- [ ] 5.3 Observe a pruning run on the runner after enough publications, and confirm a build stamp that fell out of the retention window is no longer pullable while `latest` and the release version tag are (spec `container-image-publishing`: old builds are pruned)
 
 ## Verification status
 
-Run evidence from the pull request (run `35447446842`): the `verify` job passed every step - the
-library version cross-check reported `1.1.1`, the image reported `1.1.1`, the non-root check, the config
-check and the refresh-gated single pass all succeeded - the compose smoke job passed, and the `publish`
-job was skipped, so nothing was pushed to the registry and no registry login ran. That confirms tasks
-4.1 and 4.2 and the pull-request half of 6.2 on a runner.
+Merged earlier as `publish-container-images` (PR #1804, merge `fe874d226`): the Import version query, the
+image build definition without a version literal, the OCI metadata, the `.dockerignore` entry, the compose
+image names, the first documentation pass, the `AGENTS.md` row and the `TODO.md` findings. Runner evidence
+from that pull request: every image check passed (the library version cross-check reported `1.1.1`, the
+image reported `1.1.1`, the non-root check, the config check, the refresh-gated single pass and the compose
+smoke job), no registry login ran and nothing was published. The 120 of 120 test suite and the clean
+Import build were verified locally before that merge.
 
-Tasks 4.1, 4.2, 4.4, 4.5, 4.6, 4.7, 5.1 and 5.2 are marked complete on that runner evidence plus local
-evidence and inspection: both images were built and every smoke step was run against them, the library
-version cross-check and the tag computation were extracted from the workflow and executed for every
-input case (release with and without a leading `v`, manual run with a tag, manual run without a tag,
-manual run asking for `latest`, manual run with an invalid tag), the cross-check was run against
-mismatching declarations, and the orchestration was started with the default image names and with
-overridden ones.
-
-Still outstanding on a runner: a `workflow_dispatch` dry run with publishing disabled (the other half
-of 6.2, which needs the workflow on the default branch), a non-prerelease release publishing the release
-tag, the library version tag and `latest` (4.4, 4.5, 6.3), a snapshot release skipping the verification
-and publish jobs (4.7), the concurrency group serializing runs (4.6), and an anonymous pull once the
-packages are public (5.1, 5.2).
-
-Tasks 6.2, 6.3 and 6.4 stay open: they are runner- and release-side checks by definition (a manual dry
-run in addition to the pull-request run, the first release after merge, and the comparison of a
-published image's `--tool-version` with the tag and with a generated `db.json`), so they can only be
-completed after this change is merged and released.
+Two designs were implemented and then withdrawn in this branch, both recorded in the design's decisions:
+a `release: published` trigger with a dispatch from `release.yml` (it exists to publish a tag set owned by
+a release, which the rolling model has no place for) and a development library version with its own tag
+(the stamp tag serves the same purpose - naming a concrete build - without a second moving version).
