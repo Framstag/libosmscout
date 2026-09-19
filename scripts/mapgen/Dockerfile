@@ -53,6 +53,12 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release \
     -DOSMSCOUT_BUILD_WEBPAGE=OFF \
     && cmake --build build --target Import -j"$(nproc)"
 
+# Stage the built libraries together with their symlink chain, so the runtime
+# stage copies them without naming a version anywhere: the library version
+# lives in the build system alone (CMakeLists.txt, meson.build).
+RUN mkdir -p /stage/lib \
+    && cp -a build/libosmscout/libosmscout.so* build/libosmscout-import/libosmscout_import.so* /stage/lib/
+
 # ---- runtime stage: Import binary + dependencies + script, non-root, read-only rootfs
 FROM ubuntu:noble AS runtime
 
@@ -65,16 +71,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /src/build/Import/Import /usr/local/bin/Import
-COPY --from=build /src/build/libosmscout/libosmscout.so.1.1.1 /usr/local/lib/
-COPY --from=build /src/build/libosmscout-import/libosmscout_import.so.1.1.1 /usr/local/lib/
+COPY --from=build /stage/lib/ /usr/local/lib/
 
-RUN ln -s libosmscout.so.1.1.1 /usr/local/lib/libosmscout.so.1 \
- && ln -s libosmscout.so.1.1.1 /usr/local/lib/libosmscout.so \
- && ln -s libosmscout_import.so.1.1.1 /usr/local/lib/libosmscout_import.so.1 \
- && ln -s libosmscout_import.so.1.1.1 /usr/local/lib/libosmscout_import.so \
- && ldconfig \
- && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}' \
- && ldd /usr/local/bin/Import | grep "=> /" | awk '{print $3}' | sort -u | wc -l
+RUN ldconfig \
+ && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}'
 
 COPY stylesheets/map.ost /usr/local/share/osmscout/map.ost
 COPY scripts/mapgen/mapgen.sh /usr/local/bin/mapgen.sh
@@ -87,3 +87,18 @@ ENV MAPGEN_TYPEFILE=/usr/local/share/osmscout/map.ost
 USER mapgen
 
 ENTRYPOINT ["/usr/local/bin/mapgen.sh"]
+
+# OCI metadata. The publishing pass of the image workflow overrides these with
+# the values of the revision it publishes (see .github/workflows/mapgen_image.yml).
+ARG OSMSCOUT_SOURCE="https://github.com/Framstag/libosmscout"
+ARG OSMSCOUT_REVISION="unknown"
+ARG OSMSCOUT_VERSION="unknown"
+ARG OSMSCOUT_CREATED="unknown"
+
+LABEL org.opencontainers.image.title="libosmscout mapgen" \
+      org.opencontainers.image.description="Regenerates OSM map databases into a map repository" \
+      org.opencontainers.image.source="${OSMSCOUT_SOURCE}" \
+      org.opencontainers.image.revision="${OSMSCOUT_REVISION}" \
+      org.opencontainers.image.version="${OSMSCOUT_VERSION}" \
+      org.opencontainers.image.created="${OSMSCOUT_CREATED}" \
+      org.opencontainers.image.licenses="LGPL-2.1-or-later"

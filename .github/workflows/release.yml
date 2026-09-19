@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version'
+        description: 'Release version (chronological, e.g. 2026.01.15.1); names the release and the distribution archives'
+        required: true
+      library_version:
+        description: 'Library version of this release (major.minor.patch, e.g. 1.2.0); must differ from the current one and from the release version'
         required: true
 
 env:
@@ -31,7 +34,46 @@ jobs:
       - name: Set version
         run:  |
           VERSION=${{ github.event.inputs.version }}
+          LIBRARY_VERSION=${{ github.event.inputs.library_version }}
+
+          # The library version is declared once per build system. It is what
+          # the import tool reports, what db.json records as import.version
+          # and what the published container images are tagged with; it stays
+          # three numeric components so the shared library major version does
+          # not move. See Documentation/MapRepository.md, section 5.
+          if ! echo "${LIBRARY_VERSION}" | grep -qE '^[0-9]+[.][0-9]+[.][0-9]+$'; then
+            echo "library version '${LIBRARY_VERSION}' must have three numeric components (major.minor.patch)" >&2
+            exit 1
+          fi
+          if [ "${LIBRARY_VERSION}" = "${VERSION}" ]; then
+            echo "library version '${LIBRARY_VERSION}' must differ from the release version '${VERSION}'" >&2
+            exit 1
+          fi
+          PREVIOUS_LIBRARY_VERSION=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
+          if [ -z "${PREVIOUS_LIBRARY_VERSION}" ]; then
+            echo "could not read the current library version from CMakeLists.txt" >&2
+            exit 1
+          fi
+          if [ "${LIBRARY_VERSION}" = "${PREVIOUS_LIBRARY_VERSION}" ]; then
+            echo "library version '${LIBRARY_VERSION}' is unchanged from '${PREVIOUS_LIBRARY_VERSION}'; every release must establish its own library version" >&2
+            exit 1
+          fi
+
+          # release version: names the release and the distribution archives
           sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}',/g" meson.build
+
+          # library version: declared in both build systems, kept in step, and
+          # the project version kept equal so the soname major follows it
+          sed -i -E "s/^project\(libosmscout VERSION [0-9]+[.][0-9]+[.][0-9]+/project(libosmscout VERSION ${LIBRARY_VERSION}/" CMakeLists.txt
+          sed -i -E "s/^set\(OSMSCOUT_LIBRARY_VERSION [^)]*\)/set(OSMSCOUT_LIBRARY_VERSION ${LIBRARY_VERSION})/" CMakeLists.txt
+          sed -i -E "s/^libraryVersion='[0-9a-z.-]*'/libraryVersion='${LIBRARY_VERSION}'/" meson.build
+
+          grep -qE "^project\(libosmscout VERSION ${LIBRARY_VERSION} " CMakeLists.txt
+          grep -qE "^set\(OSMSCOUT_LIBRARY_VERSION ${LIBRARY_VERSION}\)" CMakeLists.txt
+          grep -qE "^libraryVersion='${LIBRARY_VERSION}'" meson.build
+          grep -qE "^        version: '${VERSION}'," meson.build
+
+          echo "release ${VERSION}, library version ${LIBRARY_VERSION}"
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback

@@ -10,6 +10,8 @@ on:
       - 'libosmscout-import/**'
       - 'libosmscout/**'
       - 'stylesheets/map.ost'
+      - '.dockerignore'
+      - '.github/workflows/mapgen_image.yml'
   push:
     branches:
       - master
@@ -19,22 +21,109 @@ on:
       - 'libosmscout-import/**'
       - 'libosmscout/**'
       - 'stylesheets/map.ost'
+      - '.dockerignore'
+      - '.github/workflows/mapgen_image.yml'
+  release:
+    types:
+      - published
   workflow_dispatch:
+    inputs:
+      push:
+        description: 'Publish the images to the container registry'
+        type: boolean
+        default: false
+      tag:
+        description: 'Image tag to publish under; required when push is true, latest is reserved for releases'
+        type: string
+        required: false
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  # Every job must build exactly the same revision: the release tag for a
+  # release event, the commit otherwise. Without this, a release event would
+  # build the default branch and publish images that do not match the release.
+  CHECKOUT_REF: ${{ github.event.release.tag_name || github.sha }}
+
+# Runs for the same ref are serialized; a published tag is never moved by an
+# overlapping run.
+concurrency:
+  group: mapgen-image-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build:
+  verify:
     name: Build mapgen image and smoke test
     runs-on: ubuntu-24.04
+    # A snapshot release is published for every push to master. Those must not
+    # pay for an image build; only a real release reaches this job.
+    if: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+    permissions:
+      contents: read
+    outputs:
+      library_version: ${{ steps.versions.outputs.library_version }}
+      created: ${{ steps.versions.outputs.created }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+
+      - name: Read and cross-check the library version
+        id: versions
+        run: |
+          set -euo pipefail
+          # The library version is what the import tool reports, what db.json
+          # records as import.version and what the images are tagged with. It is
+          # declared once per build system, and both declarations must agree or
+          # the two build systems would report different versions.
+          cmake_version=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
+          meson_version=$(sed -nE "s/^libraryVersion='([^']*)'.*/\1/p" meson.build)
+          if [ -z "${cmake_version}" ] || [ -z "${meson_version}" ]; then
+            echo "cannot read the library version from CMakeLists.txt or meson.build" >&2
+            exit 1
+          fi
+          if [ "${cmake_version}" != "${meson_version}" ]; then
+            echo "library version mismatch: CMakeLists.txt declares '${cmake_version}', meson.build declares '${meson_version}'" >&2
+            exit 1
+          fi
+          {
+            echo "library_version=${cmake_version}"
+            echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
+          echo "library version: ${cmake_version}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build image
-        run: docker build -f scripts/mapgen/Dockerfile -t osmscout-mapgen:test .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile
+          load: true
+          tags: osmscout-mapgen:test
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ steps.versions.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ steps.versions.outputs.created }}
+          cache-from: type=gha,scope=mapgen
+          cache-to: type=gha,mode=max,scope=mapgen
 
       - name: Verify non-root user
         run: |
           test "$(docker run --rm --entrypoint id osmscout-mapgen:test -u)" = "1000"
+
+      - name: Verify the image reports the version it was built from
+        env:
+          LIBRARY_VERSION: ${{ steps.versions.outputs.library_version }}
+        run: |
+          reported=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test --tool-version)
+          if [ "${reported}" != "${LIBRARY_VERSION}" ]; then
+            echo "the image reports version '${reported}' but the source declares '${LIBRARY_VERSION}'" >&2
+            exit 1
+          fi
+          echo "the image reports library version ${reported}"
 
       - name: Smoke test (config check)
         run: |
@@ -66,12 +155,143 @@ jobs:
             -v /tmp/mapgen-repo:/repository \
             osmscout-mapgen:test
 
-  compose:
-    name: Compose smoke (mapgen + serve)
+  publish:
+    name: Publish images
     runs-on: ubuntu-24.04
+    needs: verify
+    # A non-prerelease release publishes the release tag, the library version tag
+    # and latest. A manual run publishes only the tag it was given and never
+    # moves latest. Snapshot releases publish nothing.
+    if: |
+      (github.event_name == 'release' && github.event.release.prerelease == false) ||
+      (github.event_name == 'workflow_dispatch' && inputs.push)
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+
+      - name: Determine the image tags
+        id: tags
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_TAG: ${{ inputs.tag }}
+          LIBRARY_VERSION: ${{ needs.verify.outputs.library_version }}
+        run: |
+          set -euo pipefail
+          # A container registry requires a lower case name; GitHub expressions
+          # cannot lower case, so the namespace is normalized here.
+          namespace=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          if [ "${EVENT_NAME}" = "release" ]; then
+            release_version="${RELEASE_TAG#v}"
+            tags=$(printf '%s\n%s\n%s' "${release_version}" "${LIBRARY_VERSION}" "latest")
+          else
+            if [ -z "${DISPATCH_TAG}" ]; then
+              echo "publishing needs a tag: set the 'tag' input" >&2
+              exit 1
+            fi
+            if [ "${DISPATCH_TAG}" = "latest" ]; then
+              echo "'latest' is reserved for releases and is never set by a manual run" >&2
+              exit 1
+            fi
+            if ! echo "${DISPATCH_TAG}" | grep -qE '^[A-Za-z0-9_][A-Za-z0-9._-]*$'; then
+              echo "invalid image tag '${DISPATCH_TAG}'" >&2
+              exit 1
+            fi
+            tags="${DISPATCH_TAG}"
+          fi
+          mapgen_tags=""
+          mapserve_tags=""
+          while IFS= read -r tag; do
+            [ -z "${tag}" ] && continue
+            mapgen_tags="${mapgen_tags}${REGISTRY}/${namespace}/mapgen:${tag}"$'\n'
+            mapserve_tags="${mapserve_tags}${REGISTRY}/${namespace}/mapserve:${tag}"$'\n'
+          done <<< "${tags}"
+          {
+            echo "mapgen_tags<<TAGS"
+            echo "${mapgen_tags}"
+            echo "TAGS"
+            echo "mapserve_tags<<TAGS"
+            echo "${mapserve_tags}"
+            echo "TAGS"
+          } >> "$GITHUB_OUTPUT"
+          echo "publishing:"
+          echo "${mapgen_tags}"
+          echo "${mapserve_tags}"
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Publish mapgen image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.mapgen_tags }}
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ needs.verify.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=mapgen
+          cache-to: type=gha,mode=max,scope=mapgen
+
+      - name: Publish mapserve image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile.serve
+          push: true
+          tags: ${{ steps.tags.outputs.mapserve_tags }}
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ needs.verify.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=mapserve
+          cache-to: type=gha,mode=max,scope=mapserve
+
+      - name: Report the published packages
+        run: |
+          {
+            echo "### Published images"
+            echo
+            echo '```'
+            echo "${{ steps.tags.outputs.mapgen_tags }}"
+            echo "${{ steps.tags.outputs.mapserve_tags }}"
+            echo '```'
+            echo
+            echo "A newly published package is private. Make it public once in its"
+            echo "settings so that anonymous pulls work:"
+            echo "- https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/mapgen/settings"
+            echo "- https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/mapserve/settings"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  compose:
+    name: Compose smoke (mapgen + serve)
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
 
       - name: Build images
         run: docker compose -f scripts/mapgen/docker-compose.yml build

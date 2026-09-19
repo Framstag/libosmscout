@@ -21,13 +21,21 @@
 #      && chown -R 1000:1000 /repository /work'
 # (Docker creates fresh named volumes as root; the mapgen container runs
 # as uid 1000, so ownership must be granted once.)
+#
+# Published images instead of a local build: set the image names to the
+# registry names and pull them first, so nothing is built:
+#   export MAPGEN_IMAGE=ghcr.io/framstag/libosmscout/mapgen:<tag>
+#   export MAPSERVE_IMAGE=ghcr.io/framstag/libosmscout/mapserve:<tag>
+#   docker compose -f scripts/mapgen/docker-compose.yml pull
+#   docker compose -f scripts/mapgen/docker-compose.yml up -d --no-build
+# See Documentation/MapRepository.md, section 5, for the tag semantics.
 
 services:
   mapgen:
     build:
       context: ../..
       dockerfile: scripts/mapgen/Dockerfile
-    image: osmscout-mapgen:local
+    image: ${MAPGEN_IMAGE:-osmscout-mapgen:local}
     # one pass per start; do not auto-restart the generator
     restart: "no"
     read_only: true
@@ -43,7 +51,7 @@ services:
     build:
       context: ../..
       dockerfile: scripts/mapgen/Dockerfile.serve
-    image: osmscout-mapserve:local
+    image: ${MAPSERVE_IMAGE:-osmscout-mapserve:local}
     restart: unless-stopped
     ports:
       - "8080:80"
