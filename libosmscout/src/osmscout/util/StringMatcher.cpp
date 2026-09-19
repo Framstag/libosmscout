@@ -54,7 +54,7 @@ namespace osmscout {
 
   StringMatcherTransliterate::StringMatcherTransliterate(const std::string& patternArg)
         : pattern(UTF8StringToUpper(patternArg)),
-          transliteratedPattern(UTF8Transliterate(pattern))
+          transliteratedPattern(UTF8StringToUpper(UTF8Transliterate(pattern)))
   {
   }
 
@@ -68,7 +68,12 @@ namespace osmscout {
         return noMatch;
       }
 
-      auto transliterated=UTF8Transliterate(transformedText);
+      // Transliteration can introduce characters whose case does not follow the
+      // case of the surrounding text: the sharp s transliterates to lower case
+      // "ss" while text and pattern are upper cased here, so both transliterated
+      // forms are compared case-normalized (otherwise "straße" would never match
+      // "strasse" and vice versa).
+      auto transliterated=UTF8StringToUpper(UTF8Transliterate(transformedText));
       pos=transliterated.find(transliteratedPattern);
 
       if (pos==std::string::npos) {
