@@ -59,10 +59,27 @@ public class OSMScoutClient {
     /**
      * Returns the currently active stylesheet file name.
      *
+     * A stylesheet that failed to load is never reported as active: the last
+     * stylesheet that loaded successfully is returned, and the configured
+     * stylesheet only while nothing has loaded yet.
+     *
      * @return file name (e.g. {@code "standard.oss"}), or {@code "standard.oss"}
      *         by default
      */
     public native String getActiveStyleSheet();
+
+    /**
+     * Whether the last stylesheet load attempt succeeded.
+     *
+     * Covers every load path — the initial load, {@link #loadStyleSheet(String)},
+     * {@link #setStyleSheetFlag(String, boolean)}, the basemap stylesheet and a
+     * stylesheet refresh. When it returns {@code false} the previously active
+     * style is still in effect and the parse errors are available through the
+     * client's style error channel.
+     *
+     * @return true when the last stylesheet load succeeded
+     */
+    public native boolean wasLastStyleLoadSuccessful();
 
     /**
      * Switches the active map style by name and redraws with it.

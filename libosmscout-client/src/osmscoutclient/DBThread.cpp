@@ -43,6 +43,7 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
     basemapStyleFilename(basemapStyleFilename),
     settings(settings),
     mapDpi(-1),
+    lastStyleLoadSucceeded(true),
     iconDirectory(iconDirectory),
     daylight(true),
     customPoiTypes(customPoiTypes)
@@ -288,10 +289,22 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         if (typeConfig) {
           registerCustomPoiTypes(typeConfig);
           styleConfig=makeStyleConfig(typeConfig);
+          // A stylesheet that failed to load never leaves the database without a
+          // style configuration: rendering would otherwise run without one.
+          if (!styleConfig) {
+            styleConfig=emptyStyleConfig;
+            lastStyleLoadSucceeded=false;
+            activeStyleSheetFilename.clear();
+          }
+          else {
+            activeStyleSheetFilename=stylesheetFilename;
+          }
         }
         else {
           log.Warn() << "TypeConfig invalid!";
-          styleConfig=nullptr;
+          styleConfig=emptyStyleConfig;
+          lastStyleLoadSucceeded=false;
+          activeStyleSheetFilename.clear();
         }
       }
       else {
@@ -449,9 +462,15 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
   bool prevErrs = !styleErrors.empty();
   styleErrors.clear();
   std::string file = stylesheetFilename+suffix;
+  bool succeeded=true;
   for (const auto& db: databases){
     log.Debug() << "Loading style " << file << " for database " << db->path << "...";
-    db->LoadStyle(file, stylesheetFlags, styleErrors);
+    // A rejected stylesheet never becomes the active style: the database keeps
+    // its previously installed configuration (the empty one when it never had
+    // one), so a render can never run without a style configuration.
+    if (!db->LoadStyle(file, stylesheetFlags, styleErrors, emptyStyleConfig)) {
+      succeeded=false;
+    }
     log.Debug() << "Loading style done";
   }
   if (basemapDatabase) {
@@ -463,10 +482,16 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
       ? file
       : basemapStyleFilename + suffix;
     log.Debug() << "Loading style " << basemapFile << " for database " << basemapDatabase->path << "...";
-    basemapDatabase->LoadStyle(basemapFile, stylesheetFlags, styleErrors);
+    if (!basemapDatabase->LoadStyle(basemapFile, stylesheetFlags, styleErrors, emptyStyleConfig)) {
+      succeeded=false;
+    }
     log.Debug() << "Loading style done";
   }
-  if (prevErrs || (!styleErrors.empty())){
+  lastStyleLoadSucceeded=succeeded && styleErrors.empty();
+  if (succeeded) {
+    activeStyleSheetFilename=file;
+  }
+  if (prevErrs || !styleErrors.empty() || !succeeded){
     log.Warn() << "Failed to load stylesheet" << file;
     styleErrorsChanged.Emit();
   }
@@ -581,10 +606,18 @@ void DBThread::LoadBasemap()
       if (typeConfig) {
         registerCustomPoiTypes(typeConfig);
         styleConfig=makeStyleConfig(typeConfig, false, basemapStyleFilename);
+        // Same rule as for the regular databases: a rejected basemap stylesheet
+        // keeps the map rendering, it only drops the basemap layer.
+        if (!styleConfig) {
+          styleConfig=emptyStyleConfig;
+          lastStyleLoadSucceeded=false;
+          log.Warn() << "Basemap stylesheet rejected, basemap layer is not drawn";
+        }
       }
       else {
         log.Warn() << "TypeConfig invalid!";
-        styleConfig=nullptr;
+        styleConfig=emptyStyleConfig;
+        lastStyleLoadSucceeded=false;
       }
 
       log.Debug() << "Basemap loaded from '" << basemapLookupDirectory << "'...";
