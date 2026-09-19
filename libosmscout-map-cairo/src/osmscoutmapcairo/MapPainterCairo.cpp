@@ -21,6 +21,8 @@
 
 #include <limits>
 #include <list>
+#include <sstream>
+#include <string>
 
 #include <osmscoutmapcairo/LoaderPNG.h>
 #include <osmscoutmapcairo/SymbolRendererCairo.h>
@@ -1377,6 +1379,58 @@ namespace osmscout {
     cairo_fill(draw);
   }
 
+  std::string MapPainterCairo::GetMeasurementEnvironment(const Projection& projection,
+                                                         const MapParameter& parameter) const
+  {
+    // The metrics of a measured label depend on the resolved font and on the resolution of the
+    // projection: GetFont scales the requested size by the font size and the projection. On the
+    // Pango path they additionally depend on the font options of the drawing target, because
+    // pango_cairo_create_layout() takes them from it.
+    std::string environment=BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                       parameter.GetFontSize(),
+                                                       projection.GetDPI(),
+                                                       projection.GetMagnification().GetLevel());
+
+    environment.reserve(256);
+
+
+    if (draw!=nullptr) {
+      cairo_font_options_t *options=cairo_font_options_create();
+
+      cairo_get_font_options(draw,
+                             options);
+
+      environment+=";antialias=";
+      environment+=std::to_string(static_cast<int>(cairo_font_options_get_antialias(options)));
+      environment+=";subpixel=";
+      environment+=std::to_string(static_cast<int>(cairo_font_options_get_subpixel_order(options)));
+      environment+=";hintStyle=";
+      environment+=std::to_string(static_cast<int>(cairo_font_options_get_hint_style(options)));
+      environment+=";hintMetrics=";
+      environment+=std::to_string(static_cast<int>(cairo_font_options_get_hint_metrics(options)));
+
+      cairo_font_options_destroy(options);
+
+      cairo_surface_t *target=cairo_get_target(draw);
+
+      if (target!=nullptr) {
+        double scaleX=1.0;
+        double scaleY=1.0;
+
+        cairo_surface_get_device_scale(target,
+                                       &scaleX,
+                                       &scaleY);
+
+        environment+=";deviceScale=";
+        environment+=std::to_string(scaleX);
+        environment+=",";
+        environment+=std::to_string(scaleY);
+      }
+    }
+
+    return environment;
+  }
+
   bool MapPainterCairo::DrawMap(const Projection& projection,
                                 const MapParameter& parameter,
                                 const std::vector<MapData>& data,
@@ -1387,6 +1441,9 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(mutex);
 
     this->draw=draw;
+
+    labelLayouter.SetMeasurementEnvironment(GetMeasurementEnvironment(projection,
+                                                                     parameter));
 
     minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/projection.GetDPI();
 
