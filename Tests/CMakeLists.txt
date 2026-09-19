@@ -186,6 +186,9 @@ osmscout_test_project(NAME GeoCoordParseTest SOURCES src/GeoCoordParseTest.cpp)
 #---- NumberSet
 osmscout_test_project(NAME NumberSetTest SOURCES src/NumberSetTest.cpp)
 
+#---- SpeedAgent
+osmscout_test_project(NAME SpeedAgentTest SOURCES src/SpeedAgentTest.cpp)
+
 #---- ScanConversion
 osmscout_test_project(NAME RoutePostprocessorTest SOURCES src/RoutePostprocessorTest.cpp)
 

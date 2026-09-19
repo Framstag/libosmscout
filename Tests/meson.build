@@ -429,6 +429,16 @@ NumberSetTest = executable('NumberSetTest',
 
 test('Check correctness of NumberSet class', NumberSetTest)
 
+SpeedAgentTest = executable('SpeedAgentTest',
+             'src/SpeedAgentTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check speed agent', SpeedAgentTest)
+
 OpeningHoursTest = executable('OpeningHoursTest',
              'src/OpeningHoursTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
