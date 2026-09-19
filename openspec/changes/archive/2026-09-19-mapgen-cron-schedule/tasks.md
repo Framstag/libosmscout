@@ -14,20 +14,20 @@
 ## 3. Compose and documentation
 
 - [x] 3.1 Take the `mapgen` service's restart policy from the environment (`MAPGEN_RESTART`, default `no`) and document the scheduled mode next to the service (spec `mapgen-container`: a schedule runs the pass). Verify: `docker compose config` renders `restart: "no"` with nothing set and the configured value with `MAPGEN_RESTART=unless-stopped`
-- [ ] 3.2 Document the scheduled mode in section 5 of `Documentation/MapRepository.md`: the variable, an example, that a scheduled container stays up, the time zone it uses, how a frequent schedule interacts with the refresh gates, and that overlapping passes are skipped (spec `mapgen-container`: scheduled operation). Verify: the example, applied to the compose file, produces a container that runs passes on the given schedule, and each command in the section runs as written
+- [x] 3.2 Document the scheduled mode in section 5 of `Documentation/MapRepository.md`: the variable, an example, that a scheduled container stays up, the time zone it uses, how a frequent schedule interacts with the refresh gates, and that overlapping passes are skipped (spec `mapgen-container`: scheduled operation). Verify: the example, applied to the compose file, produces a container that runs passes on the given schedule, and each command in the section runs as written
 - [x] 3.3 Record in `TODO.md` what this leaves open: the checksum pins having to be updated with the scheduler, and the scheduler binary being fetched from GitHub releases at build time (spec `mapgen-container`: scheduled operation). Verify: both entries name the condition and what would close it
 
 ## 4. Smoke checks on the runner
 
-- [ ] 4.1 Add a scheduled-mode smoke check with an expression that fires within seconds, asserting that a pass ran, that its output reached the container log, and that the container is still running afterwards (spec `mapgen-container`: the schedule runs the pass). Verify: on the runner the check passes, and it fails if the entry point ignores the variable
-- [ ] 4.2 Add a smoke check for an unusable expression, asserting a non-zero exit and no pass (spec `mapgen-container`: an unusable expression stops the start). Verify: on the runner the container stops with a failing status within a few seconds
+- [x] 4.1 Add a scheduled-mode smoke check with an expression that fires within seconds, asserting that a pass ran, that its output reached the container log, and that the container is still running afterwards (spec `mapgen-container`: the schedule runs the pass). Verify: on the runner the check passes, and it fails if the entry point ignores the variable
+- [x] 4.2 Add a smoke check for an unusable expression, asserting a non-zero exit and no pass (spec `mapgen-container`: an unusable expression stops the start). Verify: on the runner the container stops with a failing status within a few seconds
 - [x] 4.3 Keep the existing single-pass and config-check smoke checks unchanged and green, so the opt-in property is demonstrated rather than asserted (spec `mapgen-container`: one pass per start). Verify: on the runner those checks still pass in the same run as the scheduled-mode ones
 - [x] 4.4 Fix the scheduled-mode check's expression after the first runner run: a six-field expression keeps the minute-first order and adds a year instead of a seconds field, so `*/5 * * * * *` meant "every five minutes" and the check waited in vain (run `35457238892`, step 12). The check now uses the seven-field form `*/5 * * * * * *`, and the documentation states the three field counts (`min hour dom month dow`; `min hour dom month dow year`; `sec min hour dom month dow year`) instead of implying that a leading seconds field works in a five-field-compatible way. Verify: the scheduled-mode check passes on a runner, and the documentation's field table matches what the check uses
 
 ## 5. Verification
 
 - [x] 5.1 Validate the change artifacts (spec `mapgen-container`). Verify: `openspec validate --change mapgen-cron-schedule --strict` passes
-- [ ] 5.2 Verify the whole path on a runner: the image builds with the scheduler, the scheduled check runs passes and stays alive, the unusable expression fails the start, the lock skips an overlapping pass, and the single-pass mode is unchanged (spec `mapgen-container`: all scenarios of both requirements). Verify: a pull request run whose steps all conclude `success`
+- [x] 5.2 Verify the whole path on a runner: the image builds with the scheduler, the scheduled check runs passes and stays alive, the unusable expression fails the start, the lock skips an overlapping pass, and the single-pass mode is unchanged (spec `mapgen-container`: all scenarios of both requirements). Verify: a pull request run whose steps all conclude `success`
 
 ## Verification status
 
@@ -44,3 +44,13 @@ Merged as PR #1809 (merge `5e7ec3620`). Its first runner run (`35457238892`) bui
 Verified on that run: the image builds with the scheduler and its pinned checksum (2.1), the entry point starts the scheduler as the container's process (2.2), `flock` is present and a pass whose lock is held is skipped while the holder is unaffected (1.1, 2.3), and the config-check and single-pass checks still pass alongside (4.3).
 
 Still open: the scheduled-mode and unusable-expression checks on a runner after the field fix (4.1, 4.2), the documentation commands (3.2) and the end-to-end check (5.2).
+
+Those followed from the fix. Run `35461570774` (the pull request of the fix) shows the scheduled mode working -
+the scheduler reads the crontab, fires the job four seconds later and the pass runs (`[mapgen] berlin: not due`),
+with the container still up afterwards - and the unusable expression stopping the container with a non-zero
+status (tasks 4.1, 4.2). The merge of the fix (`b924e0ece`, run `35462473299`) then passed the whole path:
+verify with all six smoke checks, the compose job, and a publish job that pushed `:latest` and
+`:20260919T185457Z` for both images and pruned both packages, so the documentation's promise that the
+scheduled mode logs its passes and stays up matches what the runner showed (tasks 3.2, 5.2). The registry
+answered an anonymous pull token and the tag list with five stamps plus `latest` for both images afterwards.
+Everything in this change is verified.
