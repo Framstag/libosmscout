@@ -40,11 +40,8 @@
 
 #if defined(_WIN32)
   #include <windows.h>
-  // windows.h pulls in minwindef.h, which defines max, min, far and near as macros
   #undef max
   #undef min
-  #undef far
-  #undef near
 #endif
 
 namespace osmscout {
