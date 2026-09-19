@@ -310,6 +310,25 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
 - A failed import never places a database and never leaves partial state.
 - A missing db.json (e.g. after rollback to an older Import binary) is
   treated as "source changed": the next run imports once and recreates it.
+- A failing import stays due, so the next run retries it: the check state is
+  recorded when the source was found unchanged or the database was placed,
+  never for an attempt. Without that, a single failure would silently wait out
+  the whole `refresh` window.
+- A download is retried a few times within the same run, resumes an interrupted
+  transfer instead of starting over, abandons a transfer that stops delivering
+  data, and discards a download that fails verification rather than keeping it.
+  The tunables are `MAPGEN_CONNECT_TIMEOUT`, `MAPGEN_HASH_TIMEOUT`,
+  `MAPGEN_IDLE_TIMEOUT`, `MAPGEN_IDLE_SPEED_LIMIT`, `MAPGEN_DOWNLOAD_ATTEMPTS`
+  and `MAPGEN_DOWNLOAD_RETRY_WAIT`.
+- A source that a failed run left in the work area is reused if it still matches
+  the published hash, so a failed import does not cost the download again. A run
+  that placed the database removes the source and the import output, so the work
+  area does not grow with the number of runs.
+- A run interrupted while replacing the served database has that slot restored by
+  the next run, so the region index never advertises a database that is missing.
+- The script therefore needs no attention while it fails: it retries, recovers
+  and keeps the served tree consistent. What an operator still has to do is
+  notice: the only signals are the container log and the exit status.
 
 ## 5. The container image
 

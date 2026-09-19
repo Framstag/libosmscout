@@ -27,6 +27,9 @@
 #   MAPGEN_IMPORT       import tool binary (default: Import)
 #   MAPGEN_TYPEFILE     type definition file (default: map.ost)
 #   MAPGEN_SCHEMA_VERSION  supported schema version (default: 1)
+#   MAPGEN_CONNECT_TIMEOUT, MAPGEN_HASH_TIMEOUT, MAPGEN_IDLE_TIMEOUT,
+#   MAPGEN_IDLE_SPEED_LIMIT, MAPGEN_DOWNLOAD_ATTEMPTS, MAPGEN_DOWNLOAD_RETRY_WAIT
+#                       recovery of failing downloads (see below)
 #
 # Usage:
 #   mapgen.sh [--check-config] [--help]
@@ -39,6 +42,21 @@ WORK_DIR="${MAPGEN_WORK_DIR:-/work}"
 IMPORT_BIN="${MAPGEN_IMPORT:-Import}"
 TYPEFILE="${MAPGEN_TYPEFILE:-map.ost}"
 SCHEMA_VERSION="${MAPGEN_SCHEMA_VERSION:-1}"
+
+# Recovery of runs that fail on their own. The defaults suit a deployment that
+# wakes up on a schedule and is never watched:
+#   CONNECT_TIMEOUT    seconds to establish a connection
+#   HASH_TIMEOUT       total seconds for the small published-hash request
+#   IDLE_TIMEOUT       seconds without data after which a transfer is abandoned
+#   IDLE_SPEED_LIMIT   bytes per second that count as "no data" (curl --speed-limit)
+#   DOWNLOAD_ATTEMPTS  attempts of one source within a single run
+#   DOWNLOAD_RETRY_WAIT seconds between those attempts
+CONNECT_TIMEOUT="${MAPGEN_CONNECT_TIMEOUT:-20}"
+HASH_TIMEOUT="${MAPGEN_HASH_TIMEOUT:-120}"
+IDLE_TIMEOUT="${MAPGEN_IDLE_TIMEOUT:-60}"
+IDLE_SPEED_LIMIT="${MAPGEN_IDLE_SPEED_LIMIT:-1024}"
+DOWNLOAD_ATTEMPTS="${MAPGEN_DOWNLOAD_ATTEMPTS:-3}"
+DOWNLOAD_RETRY_WAIT="${MAPGEN_DOWNLOAD_RETRY_WAIT:-30}"
 
 # resolve to absolute paths so subshells that change directory stay correct
 resolve_dir()
@@ -170,14 +188,93 @@ newest_db_json()
     | sort -rn | head -1 | cut -d' ' -f2-
 }
 
+# --- downloads -----------------------------------------------------------
+
+# Fetch the hash the download service publishes beside the source. A few dozen
+# bytes, so a total timeout is the right tool here.
+fetch_published_hash()
+{
+  local url="$1"
+  curl -fsSL --connect-timeout "$CONNECT_TIMEOUT" --max-time "$HASH_TIMEOUT" "$url.md5" 2>/dev/null \
+    | awk '{print $1}'
+}
+
+# Download the source, recovering from what is recoverable on its own:
+#   - a stalled transfer ends through the idle timeout instead of holding the
+#     run (and the lock) forever
+#   - an interrupted download is resumed, so a 900 MB source does not start over
+#   - a service that cannot resume is detected (curl's range error) and the next
+#     attempt starts from scratch
+#   - a transient failure is retried a few times within the same run; an import
+#     is never retried this way, because it is expensive and usually fails for a
+#     reason that a retry cannot fix
+download_source()
+{
+  local url="$1" pbf="$2" attempt=0 rc=0
+
+  while [[ "$attempt" -lt "$DOWNLOAD_ATTEMPTS" ]]; do
+    attempt=$((attempt + 1))
+    rc=0
+
+    curl -fsSL --connect-timeout "$CONNECT_TIMEOUT" \
+      --speed-limit "$IDLE_SPEED_LIMIT" --speed-time "$IDLE_TIMEOUT" \
+      -C - -o "$pbf" "$url" || rc=$?
+
+    if [[ "$rc" = "0" ]]; then
+      return 0
+    fi
+
+    if [[ "$rc" = "33" ]]; then
+      # the service does not support byte ranges: resuming can never work, so
+      # start over rather than fail every attempt the same way
+      log "$url: service cannot resume, restarting the download"
+      rm -f "$pbf"
+    fi
+
+    if [[ "$attempt" -lt "$DOWNLOAD_ATTEMPTS" ]]; then
+      log "download attempt $attempt failed (curl status $rc), retrying"
+      sleep "$DOWNLOAD_RETRY_WAIT"
+    fi
+  done
+
+  return 1
+}
+
 # --- one import ----------------------------------------------------------
+
+# An earlier run can have been interrupted between moving the served database
+# aside and moving the new one in, which leaves that slot empty until a full
+# re-import succeeds - while the region index keeps advertising it. Close the gap
+# here instead: restore the previous database when the slot is missing, and drop
+# stale copies when the replacement did complete. A leftover .new directory is
+# rebuilt from the import output anyway.
+recover_staging()
+{
+  local id="$1" path="$2" old version target
+
+  for old in "$STAGING_DIR/$id"/v*.old; do
+    [[ -d "$old" ]] || continue
+    version=$(basename "$old" .old)
+    target="$PUBLIC_DIR/$path/$version"
+
+    if [[ -d "$target" ]]; then
+      rm -rf "$old"
+    else
+      mkdir -p "$PUBLIC_DIR/$path"
+      mv "$old" "$target"
+      log "$id: restored $path/$version after an interrupted replacement"
+    fi
+  done
+
+  rm -rf "$STAGING_DIR/$id"/v*.new 2>/dev/null || true
+}
 
 process_import()
 {
   local id="$1" global_refresh="$2" global_history="$3"
   local refresh history url path
   local now last_checked published_hash newest previous_md5
-  local pbf out_dir version target staging new_dir kept pruned changed
+  local pbf out_dir version target staging new_dir kept pruned changed generated_at
 
   refresh=$(refresh_for "$id" "$global_refresh")
   history=$(history_for "$id" "$global_history")
@@ -187,6 +284,12 @@ process_import()
   [[ -n "$path" ]] || die "no region index path for id '$id'"
 
   now=$(now_epoch)
+
+  # Before the refresh gate: a run that was interrupted while replacing the
+  # served database leaves the slot empty, and that gap has to be closed whether
+  # or not the import is due.
+  recover_staging "$id" "$path"
+
   last_checked=$(read_last_checked "$id")
 
   if [[ $((now - last_checked)) -lt $((refresh * 86400)) ]]; then
@@ -196,14 +299,17 @@ process_import()
 
   log "$id: checking for changes"
 
-  if ! published_hash=$(curl -fsSL "$url.md5" 2>/dev/null | awk '{print $1}'); then
+  if ! published_hash=$(fetch_published_hash "$url"); then
     error "$id: cannot fetch published hash from $url.md5"
     return 1
   fi
 
   [[ -n "$published_hash" ]] || { error "$id: empty published hash"; return 1; }
 
-  write_check_state "$id" "$now" "$published_hash"
+  # The check state is written when the decision for this import is complete -
+  # the source is unchanged, or the database is placed - never for an attempt.
+  # That is what makes a failed import due again on the next run instead of
+  # silent until the refresh window has passed.
 
   newest=$(newest_db_json "$path")
   previous_md5=""
@@ -213,14 +319,20 @@ process_import()
 
   if [[ -n "$previous_md5" ]] && [[ "$previous_md5" = "$published_hash" ]]; then
     log "$id: source unchanged"
+    write_check_state "$id" "$now" "$published_hash"
     return 0
   fi
 
   log "$id: source changed, downloading"
   pbf="$WORK_DIR/$id.${url##*.}"
 
-  if ! curl -fsSL "$url" -o "$pbf"; then
-    error "$id: download failed"
+  # A source that a previous run already downloaded and that still matches the
+  # published hash is reused: after a failed import that saves the whole
+  # download, and resuming a complete file would just be rejected by the service.
+  if [[ -f "$pbf" ]] && (cd "$WORK_DIR" && printf '%s  %s\n' "$published_hash" "$pbf" | md5sum -c - >/dev/null 2>&1); then
+    log "$id: reusing the verified source from the work area"
+  elif ! download_source "$url" "$pbf"; then
+    error "$id: download failed after $DOWNLOAD_ATTEMPTS attempts"
     return 1
   fi
 
@@ -229,7 +341,10 @@ process_import()
   # no stronger provider hash exists. See sonar-project.properties
   # (shell:S4790) for the justification.
   if ! (cd "$WORK_DIR" && printf '%s  %s\n' "$published_hash" "$pbf" | md5sum -c - >/dev/null 2>&1); then
-    error "$id: downloaded source failed verification"
+    # Resuming from an unverified partial is how corrupt data would reach an
+    # import, so the file goes and the next attempt downloads it again.
+    error "$id: downloaded source failed verification, discarding it"
+    rm -f "$pbf"
     return 1
   fi
 
@@ -249,6 +364,8 @@ process_import()
   [ -f "$out_dir/db.json" ] || { error "$id: import produced no db.json"; return 1; }
 
   version=$(jq -r '.typeConfigVersion' "$out_dir/db.json")
+  # read before the work area is cleaned up below
+  generated_at=$(jq -r '.generatedAt' "$out_dir/db.json")
 
   target="$PUBLIC_DIR/$path/v$version"
   staging="$STAGING_DIR/$id"
@@ -272,6 +389,17 @@ process_import()
 
   log "$id: placed at $path/v$version"
 
+  # The decision for this import is complete now, so the refresh gate may
+  # remember it - and only now: recording it earlier is what made a failed
+  # import wait out the whole refresh window before it was tried again.
+  write_check_state "$id" "$now" "$published_hash"
+
+  # A later run would download and import this again from scratch, so the work
+  # area does not have to keep the source or the import output. A failed import
+  # keeps them, because a later attempt can resume the source.
+  rm -rf "$out_dir"
+  rm -f "$pbf"
+
   if [[ "$history" -gt 0 ]]; then
     kept=$(ls -d "$PUBLIC_DIR/$path"/v* 2>/dev/null | sort -V | head -n -"$history" || true)
   else
@@ -293,7 +421,7 @@ process_import()
   mkdir -p "$ADMIN_DIR"
   jq -n --arg id "$id" \
      --argjson v "$version" \
-     --arg generatedAt "$(jq -r '.generatedAt' "$out_dir/db.json")" \
+     --arg generatedAt "$generated_at" \
      --arg placedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
      --arg path "$path" \
      --argjson history "$history" \
