@@ -232,14 +232,21 @@ section 1.1 come from uninstrumented runs.
 ## 2. Reused label measurements and glyphs
 
 Change: `LabelLayouter` remembers a label measurement per measurement key (text, font size,
-proposed width, wrapping, contour flag) up to `defaultMeasurementCount` (4096) entries, with
-FIFO eviction that drops the glyph entry of an evicted measurement with it. A backend sets the
-measurement environment it measures in once per frame (`SetMeasurementEnvironment`), and a
-change of that environment drops both stores. The Cairo backend derives its environment from
+proposed width, wrapping, contour flag, and the four line wrapping parameters of `MapParameter`
+that the backends read inside `Layout()` through `MapPainter::GetProposedLabelWidth`) up to
+`defaultMeasurementCount` (4096) entries. The least recently used measurement is the one that a
+new measurement replaces, and a measurement holds the glyph data derived from its label, so the
+glyph data is dropped with the measurement. A backend sets the measurement environment it
+measures in once per frame (`SetMeasurementEnvironment`), and a change of that environment drops
+the measurements. The Cairo backend derives its environment from
 the font name, the font size factor, the DPI, the magnification, the drawing target's font
 options and its device scale (`MapPainterCairo::GetMeasurementEnvironment`); Qt appends the
 DPI and the device pixel ratio of the painter device; Skia, SVG, AGG, GDI and DirectX use the
 shared `BuildMeasurementEnvironment` prefix (font name, font size factor, DPI, magnification).
+
+Section 14 records the review that found the three defects of the first implementation (an
+incomplete key, glyph data owned outside the measurement, and FIFO instead of LRU eviction) and
+the evidence of their fix.
 
 Evidence (fixed view, zoom 15, cairo, per frame, probe buckets of section 1.2):
 
@@ -587,4 +594,69 @@ these verifications rather than by inspection:
 
 The whole-suite check of section 4 is the one that was run directly after the implementation
 groups 2-5; the runs recorded in section 8 are the final ones of the change.
+
+## 14. Review fixes after the pull request review of 2026-09-16
+
+The pull request review (Karry, `CHANGES_REQUESTED`) raised three defects of the reuse
+implementation, all in `libosmscout-map/include/osmscoutmap/LabelLayouter.h`. Each was
+reproduced from the code, fixed, and covered by a scenario and a task (tasks 9.1-9.6).
+
+| review comment | defect | fix |
+|----------------|--------|-----|
+| `LabelLayouter.h:254` "the key is missing few parameters, that may affect layouting: LabelLineMinCharCount/MaxCharCount/FitToWidth/FitToArea" | `GetProposedLabelWidth` reads those four `MapParameter` values *inside* `Layout()` (Qt `MapPainterQt.cpp:431`, Skia `:814`, iOS `:383`), so a measurement of one frame was served for a different wrapping configuration | the four values are part of `LabelMeasurementKey`, filled from the `MapParameter` the layouter is handed |
+| `LabelLayouter.h:1134` "this insert is never flushed, when `maxMeasurementCount==0`" | the glyph table was keyed by the address of a label that only the measurement cache kept alive, so with reuse switched off it grew without bound *and* served the glyphs of an earlier label to a new label that the allocator placed at the same address | the glyph data is a member of the measurement entry (`LabelMeasurement::glyphs` with its derivation flag) and the pointer-keyed table is gone; a cache-less layouter keeps its measurement of the step in one slot that `Reset()` empties |
+| `LabelLayouter.h:1089` "when the entry is used, should not be moved to the front of `measurementOrder` to behave as LRU ?" | eviction followed the order of insertion, so a label that every frame used was still dropped once the bound was reached and a working set above the bound thrashed | the order list holds the order of use; a hit splices the entry to the back (`std::list::splice`, no allocation) and eviction takes the front |
+
+Evidence:
+
+- `Tests/src/MapPainterLabelReuseTest.cpp` gains four cases: "A measurement that is used again
+  outlives the one that is not" (LRU), "A changed line wrapping parameter is measured again"
+  (key), "A bound of 0 remembers neither measurements nor glyph data" and "Glyph data does not
+  outlive the measurement it belongs to" (ownership). The last two compare the frame's contour
+  labels with those of a fresh layouter, so the check does not depend on the allocator's
+  behaviour. `LabelLayouter::GetGlyphCount()` was added for the first of them.
+- Each fix was verified to be load bearing by reverting it and watching the new test fail:
+  removing the `splice` of the hit path makes "A measurement that is used again outlives the one
+  that is not" fail at its first frame-count assertion (`REQUIRE(fake.measurementCount==4)`),
+  and removing the four wrapping parameters from the key makes "A changed line wrapping parameter
+  is measured again" fail. Both runs restore the file afterwards.
+- `cmake --build build` (all configured targets) without a warning in the two changed files,
+  `ctest -j 4` with `QT_QPA_PLATFORM=offscreen`: 118/118 passed (was 118/118 before). The same
+  checks were repeated after the branch was rebased onto `master` (`9f799a819`, which merges the
+  pango and area-culling work): `cmake --build` without a warning in the changed files,
+  `ctest -j 4` 121/121 passed, `meson compile` of `MapPainterLabelReuseTest` and
+  `meson test "Check MapPainterLabelReuse compilation"` OK.
+- The rebase conflicted in `TODO.md`, `Tests/CMakeLists.txt`, `Tests/meson.build`,
+  `Tests/src/TextMetricsCairoTest.cpp` and `libosmscout-map/src/osmscoutmap/MapPainter.cpp`
+  (the last two merged automatically). The test registrations of both sides are kept in the two
+  build files, and `TODO.md` keeps the rewritten list of this branch plus the
+  `map-painter-area-visibility-cull` section that `master` added. Uncrustify drift after the
+  rebase is unchanged (273 lines for `LabelLayouter.h`, 0 for the test file).
+- Uncrustify (`uncrustify -c .uncrustify -l CPP`) drift, counted as the number of differing
+  lines: `LabelLayouter.h` 284 before the fix, 273 after it (the declaration block of the cache
+  members was aligned to the file's own style while it was edited);
+  `MapPainterLabelReuseTest.cpp` 0 before and 0 after.
+- clang-tidy (`-p build`) on the test file and on `MapPainter.cpp`: the added code reports the
+  categories the files already report (`cppcoreguidelines-avoid-magic-numbers`,
+  `readability-math-missing-parentheses` for the key hash); no new finding category.
+- A/B of the fixed view on this machine (the command of 1.1, uninstrumented, driver cairo, tile
+  drawn five times), with the fix and with the fix stashed:
+
+  | | draw allocations per frame | frame time avg | min | max |
+  |---|---|---|---|---|
+  | before the fix | 1740 | 29.93 ms | 25.35 | 44.53 |
+  | with the fix | 1738 | 28.27 ms | 25.21 | 34.80 |
+
+  The frame's allocation count is unchanged to within two allocations, i.e. the order list of
+  the cache adds no measurable allocation to a frame, and the frame time differs only within the
+  spread of the repeated measurements of one run.
+- Not re-run: the label placement dump of 1.3/8.6, because its probe
+  (`OSMSCOUT_LABEL_PROBE`, section 1.3's implementation notes) was a temporary instrument that is
+  not part of the tree, and the per-step allocation buckets of 1.2/2, which that probe produced.
+  What the dump checked is covered by the unit tests of this section: the frames compare their
+  resolved labels and their contour glyphs against those of a fresh layouter, so a frame that
+  draws a different label set, a different placement or different glyph data fails them. The
+  reuse counters of section 2 (`measurementMiss`, `glyphDerivation`) cannot change through the
+  fix: the hit path still performs no measurement and no glyph derivation, it reorders one list
+  node.
 
