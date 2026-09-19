@@ -32,8 +32,12 @@ on:
         description: 'Publish the images to the container registry'
         type: boolean
         default: false
+      release:
+        description: 'Publish as a release (only with push): the release version below, the library version tag and latest'
+        type: boolean
+        default: false
       tag:
-        description: 'Image tag to publish under; required when push is true, latest is reserved for releases'
+        description: 'Image tag to publish; for a release publish this is the release version and a leading v is stripped'
         type: string
         required: false
         default: ''
@@ -180,6 +184,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           DISPATCH_TAG: ${{ inputs.tag }}
+          DISPATCH_RELEASE: ${{ inputs.release }}
           LIBRARY_VERSION: ${{ needs.verify.outputs.library_version }}
         run: |
           set -euo pipefail
@@ -188,21 +193,38 @@ jobs:
           namespace=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
           if [ "${EVENT_NAME}" = "release" ]; then
             release_version="${RELEASE_TAG#v}"
-            tags=$(printf '%s\n%s\n%s' "${release_version}" "${LIBRARY_VERSION}" "latest")
+            release_publish=true
           else
             if [ -z "${DISPATCH_TAG}" ]; then
               echo "publishing needs a tag: set the 'tag' input" >&2
               exit 1
             fi
-            if [ "${DISPATCH_TAG}" = "latest" ]; then
-              echo "'latest' is reserved for releases and is never set by a manual run" >&2
+            release_publish="${DISPATCH_RELEASE}"
+            if [ "${release_publish}" = "true" ]; then
+              # a release publish names the release version the same way the
+              # release tag does: without the leading v
+              release_version="${DISPATCH_TAG#v}"
+            else
+              release_version="${DISPATCH_TAG}"
+            fi
+          fi
+          if [ "${release_version}" = "latest" ]; then
+            echo "'latest' is reserved for releases and is never set by a manual run" >&2
+            exit 1
+          fi
+          if ! echo "${release_version}" | grep -qE '^[A-Za-z0-9_][A-Za-z0-9._-]*$'; then
+            echo "invalid image tag '${release_version}'" >&2
+            exit 1
+          fi
+          if [ "${release_publish}" = "true" ]; then
+            # a release and its library version are separate schemes
+            if [ "${release_version}" = "${LIBRARY_VERSION}" ]; then
+              echo "release version '${release_version}' and library version '${LIBRARY_VERSION}' must differ" >&2
               exit 1
             fi
-            if ! echo "${DISPATCH_TAG}" | grep -qE '^[A-Za-z0-9_][A-Za-z0-9._-]*$'; then
-              echo "invalid image tag '${DISPATCH_TAG}'" >&2
-              exit 1
-            fi
-            tags="${DISPATCH_TAG}"
+            tags=$(printf '%s\n%s\n%s' "${release_version}" "${LIBRARY_VERSION}" "latest")
+          else
+            tags="${release_version}"
           fi
           mapgen_tags=""
           mapserve_tags=""

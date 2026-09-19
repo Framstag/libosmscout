@@ -384,11 +384,23 @@ run publishes exactly the tag it was given (never `latest`).
 `.github/workflows/mapgen_image.yml` builds the image and smoke-tests it
 (non-root user, the version it reports, config check, single pass with the
 refresh gate pre-seeded so no network is needed). Publication depends on
-those checks and runs for a non-prerelease release, publishing the release
-version, the library version and `latest`. The library version is declared
-once per build system (`set(OSMSCOUT_LIBRARY_VERSION ...)` in
-`CMakeLists.txt`, `libraryVersion='...'` in `meson.build`); the workflow
-refuses to publish when they disagree.
+those checks and is started in two ways:
+
+- `release.yml` dispatches this workflow for the tag it has just released.
+  GitHub starts no workflow run for events caused by the default
+  `GITHUB_TOKEN`, and the release is created with that token, so the release
+  event alone would never reach the image workflow. The dispatch names the
+  released tag as its ref, so the images are built from the released source
+  even if master moves on meanwhile.
+- a release created by hand in the GitHub UI triggers it through the
+  `release` event.
+
+Both publish the release version, the library version and `latest`. Nothing
+else publishes: a merge to master, a pull request and the snapshot release
+that follows every merge publish nothing, and a manual run publishes only
+the tag it is given. The library version is declared once per build system
+(`set(OSMSCOUT_LIBRARY_VERSION ...)` in `CMakeLists.txt`, `libraryVersion='...'`
+in `meson.build`); the workflow refuses to publish when they disagree.
 
 ### Serving the repository (web server image)
 

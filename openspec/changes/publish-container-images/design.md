@@ -68,6 +68,10 @@ Chosen: `on: release: types: [published]`, with the publish job skipped when
 - Risk handled explicitly: a workflow triggered by a release event checks out the default branch
   unless a ref is given, which would publish the wrong source. The checkout therefore names the
   release tag.
+- Not sufficient on its own: this repository's own releases are created with the default `GITHUB_TOKEN`,
+  and events caused by that token start no workflow runs, so the trigger never fires for them - see
+  decision 9, which dispatches the workflow explicitly while keeping this trigger for releases created
+  by hand.
 
 ### 2. Verify in one job, publish in a second job that depends on it
 
@@ -206,6 +210,51 @@ covers the option.
 - Rationale: the version a released artifact reports is part of the contract (spec
   `container-image-publishing`, `release-library-version`), and a query is the cheapest way to make that
   contract checkable against the artifact rather than against the source of the artifact.
+
+### 9. The release workflow starts the publication explicitly
+
+`release.yml` dispatches `mapgen_image.yml` once the release has been created, on the released tag:
+
+```
+release.yml
+  |  sed versions -> meson dist -> JReleaser (GITHUB_TOKEN)
+  v
+GitHub release  v<version>            X  release: published does NOT fire for this token
+  |
+  |  gh workflow run mapgen_image.yml --ref v<version> -f push=true -f release=true -f tag=<version>
+  v                                                                   (workflow_dispatch is exempt)
+mapgen_image.yml  -> verify job -> publish job -> the release tag, the library version tag, latest
+```
+
+The image workflow gains a `release` input meaning "publish the release tag set": the given tag, the
+library version tag and `latest`. Without it a manual run publishes a single tag and never moves `latest`
+(decision 4). The `release: published` trigger stays, so a release created by hand in the UI publishes as
+well; a workflow-created release cannot fire it twice, because it never fires it at all.
+
+Why this was necessary, and how it was found: the release is created with
+`JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in both release workflows, and GitHub does not
+start workflow runs for events caused by the default token, to prevent recursion - `workflow_dispatch`
+and `repository_dispatch` are the documented exceptions. Evidence from the merge of this change: the
+snapshot release object exists with `created=2026-09-19T14:34:44Z`, the trigger is present on master,
+and `gh run list --workflow mapgen_image.yml --event release` is empty. So decision 1's event trigger
+alone would have published nothing for this repository's releases.
+
+- Alternative - make `mapgen_image.yml` reusable (`workflow_call`) and call it from `release.yml`, the
+  alternative decision 1 rejected: no dispatch plumbing and the version arrives as an input, but it is a
+  structural change with two call sites and it removes the event trigger's use for hand-made releases.
+- Alternative - give the JReleaser step a PAT or GitHub App token so that the release event fires:
+  fixes every release creation path without touching the image workflow, but adds a credential to store
+  and rotate, and a re-run of an existing release (which `overwrite: true` in `jreleaser.yml` turns into
+  an update rather than a creation) would still not publish.
+- Alternative - leave it manual: an operator dispatches the workflow with the release version after each
+  release. Rejected because the specification says a release publishes the images, and a forgotten step
+  leaves a release without artifacts.
+- Rationale: dispatching from the workflow that creates the release needs no new secret, stays inside
+  the existing verification gate, publishes on a re-run, and reuses the input surface the manual path
+  already has.
+- Detail: the dispatch names the *released tag* as its ref, so the images are built from the released
+  source even if master moves on in between. Residual: dispatching on a tag requires the workflow file
+  to be present in that tag's commit, which holds for every release cut after this change.
 
 ## Risks / Trade-offs
 

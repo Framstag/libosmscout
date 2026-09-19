@@ -18,6 +18,10 @@ jobs:
   create_release:
     name: Create release
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      # the image workflow is dispatched from here, see the last step
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -95,6 +99,39 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ github.event.inputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish the container images for this release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          # The release is created above with the default token, and GitHub does
+          # not start workflow runs for events caused by that token, so the
+          # release event never reaches the image workflow. workflow_dispatch is
+          # exempt from that rule, so the run is started explicitly - on the
+          # released tag, so the images are built from the released source even
+          # if master moves on meanwhile.
+          tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=20" \
+                  --jq "[.[] | select(.tag_name | endswith(\"${VERSION}\"))] | .[0].tag_name // empty")
+          if [ -z "${tag}" ]; then
+            # JReleaser's default tag naming, in case the lookup found nothing
+            tag="v${VERSION}"
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${tag}" --jq .sha > /dev/null
+          gh workflow run mapgen_image.yml \
+            --repo "${GITHUB_REPOSITORY}" \
+            --ref "${tag}" \
+            -f push=true \
+            -f release=true \
+            -f tag="${VERSION}"
+          {
+            echo "### Container images"
+            echo
+            echo "Dispatched the image workflow for \`${tag}\`: it publishes"
+            echo "\`${VERSION}\`, the library version and \`latest\` once its"
+            echo "build and smoke checks pass."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: JReleaser upload output
         uses: actions/upload-artifact@v7
