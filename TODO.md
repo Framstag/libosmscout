@@ -59,3 +59,8 @@ Deferred findings of `publish-container-images`. Process in separate changes.
 Observations of `mapgen-runtime-identity`.
 
 - **A configured identity has no entry in the image's `/etc/passwd`**: the image's own user is `mapgen` (uid 1000, gid 1000), while `PUID`/`PGID` can name any identity, and a pass then runs without user information: `HOME` is pointed at the writable work area for that reason, and the CI smoke run performs a pass as uid/gid `1234` to show that the pass copes. If a tool turns out to need a passwd entry (locale or user lookups are the usual suspects), the options are to document that the identity has to exist in the image or to add a fallback that maps an unknown uid to the `mapgen` entry. The smoke run is what decides this, so the entry stays until it has passed on a runner.
+
+Conditions of `mapgen-cron-schedule`.
+
+- **The scheduler binary is fetched from GitHub releases at image build time**: `scripts/mapgen/Dockerfile` downloads supercronic (`SUPERCRONIC_VERSION`, v0.2.49) and verifies it against the checksum pinned for the architecture. A build without network access cannot fetch it, and the alternative - vendoring the 14 MB binary into the repository - trades that for a large binary in git. Closing it would need an internal mirror or the binary in the repository.
+- **The pinned checksums have to be updated with the scheduler**: the version and the two sha256 values (amd64 `a53ae236...`, arm64 `02aa0cb2...`) sit in one `case` block in the same Dockerfile, so an upgrade is a deliberate edit. Nothing checks that the pin matches upstream beyond the build failing if it does not; the arm64 asset is pinned but has never been built or run, because only `linux/amd64` images are published (see the entry above).

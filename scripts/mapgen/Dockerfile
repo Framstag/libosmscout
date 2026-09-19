@@ -12,6 +12,16 @@
 #     -v /etc/osm-maps:/config:ro \
 #     osmscout-mapgen:<version>
 #
+# Run (pass on a schedule, container stays up):
+#   docker run -d --read-only -e MAPGEN_CRON='0 */6 * * *' \
+#     -v /var/lib/osmscout-mapgen:/work \
+#     -v /repository:/repository \
+#     -v /etc/osm-maps:/config:ro \
+#     osmscout-mapgen:<version>
+#
+# Arguments run the pass once with those arguments whatever else is set, which
+# is how "--check-config" and an explicit single run work.
+#
 # Mounts:
 #   /work          transient: downloads, import intermediate data
 #   /repository  database repository (served tree + admin/ + staging/)
@@ -65,10 +75,26 @@ FROM ubuntu:noble AS runtime
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl jq \
+    ca-certificates curl jq util-linux \
     libgomp1 liblzma5 libmarisa0 libprotobuf32 \
     libtbb12 libxml2 libzstd1 zlib1g \
     && rm -rf /var/lib/apt/lists/*
+
+# The scheduler of the scheduled mode (see scripts/mapgen/mapgen-entrypoint.sh).
+# A static binary, chosen by target architecture and verified against the
+# checksum pinned for it: the distribution's cron daemon needs root and a
+# writable /var/spool/cron, which this image does not allow.
+ARG SUPERCRONIC_VERSION="v0.2.49"
+ARG TARGETARCH
+RUN case "${TARGETARCH:-amd64}" in \
+      amd64) asset="supercronic-linux-amd64"; sum="a53ae236602c7338aba3fbaff40bda6300eae3b9fedb8261eb06cfe3724430c1" ;; \
+      arm64) asset="supercronic-linux-arm64"; sum="02aa0cb229ba09050cba6638059dadb9eedc2276632ea43d6a57a2f8c1629dd5" ;; \
+      *) echo "unsupported architecture for the scheduler: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac \
+ && curl -fsSL -o /usr/local/bin/supercronic \
+      "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/${asset}" \
+ && echo "${sum}  /usr/local/bin/supercronic" | sha256sum -c - \
+ && chmod +x /usr/local/bin/supercronic
 
 COPY --from=build /src/build/Import/Import /usr/local/bin/Import
 COPY --from=build /stage/lib/ /usr/local/lib/
@@ -78,6 +104,10 @@ RUN ldconfig \
 
 COPY stylesheets/map.ost /usr/local/share/osmscout/map.ost
 COPY scripts/mapgen/mapgen.sh /usr/local/bin/mapgen.sh
+COPY scripts/mapgen/mapgen-pass.sh /usr/local/bin/mapgen-pass.sh
+COPY scripts/mapgen/mapgen-entrypoint.sh /usr/local/bin/mapgen-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/mapgen-pass.sh /usr/local/bin/mapgen-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/mapgen.sh \
  && (getent group 1000 >/dev/null 2>&1 || groupadd --gid 1000 mapgen) \
@@ -90,7 +120,7 @@ ENV HOME=/work
 
 USER mapgen
 
-ENTRYPOINT ["/usr/local/bin/mapgen.sh"]
+ENTRYPOINT ["/usr/local/bin/mapgen-entrypoint.sh"]
 
 # OCI metadata. The publishing pass of the image workflow overrides these with
 # the values of the revision it publishes (see .github/workflows/mapgen_image.yml).
