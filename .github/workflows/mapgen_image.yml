@@ -198,6 +198,9 @@ jobs:
         run: |
           mkdir -p /tmp/mapgen-repo/private/admin /tmp/mapgen-work
           echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo/private/admin/berlin_check.json
+          # The basemap is gated the same way: a state file that says the inputs
+          # were just checked keeps this run offline, like the regional gate.
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-repo/private/admin/basemap_check.json
           # The container runs as uid 1000 by default while host-mounted volumes
           # are owned by the runner user; grant ownership here or the mapgen
           # pass cannot create private/staging or write to /work.
@@ -216,8 +219,10 @@ jobs:
           # that identity.
           mkdir -p /tmp/mapgen-config-alt /tmp/mapgen-work-alt /tmp/mapgen-repo-alt/public /tmp/mapgen-repo-alt/private/admin
           cp /tmp/mapgen-config/imports.json /tmp/mapgen-config-alt/
+          cp /tmp/mapgen-config/basemap.json /tmp/mapgen-config-alt/
           cp /tmp/mapgen-repo/public/names.json /tmp/mapgen-repo-alt/public/
           echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo-alt/private/admin/berlin_check.json
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-repo-alt/private/admin/basemap_check.json
           sudo chown -R 1234:1234 /tmp/mapgen-config-alt /tmp/mapgen-work-alt /tmp/mapgen-repo-alt
           docker run --rm --read-only --user 1234:1234 \
             -v /tmp/mapgen-config-alt:/config:ro \
@@ -534,9 +539,12 @@ jobs:
 
       - name: Prepare config and seed repository volume
         run: |
-          mkdir -p scripts/mapgen/config /tmp/mapgen-seed/public/europe/germany/berlin/v9
+          mkdir -p scripts/mapgen/config /tmp/mapgen-seed/public/europe/germany/berlin/v9 /tmp/mapgen-seed/public/basemap/v27 /tmp/mapgen-seed/private/admin
           cat > scripts/mapgen/config/imports.json <<'EOF'
           {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
+          EOF
+          cat > scripts/mapgen/config/basemap.json <<'EOF'
+          {"schema":1,"refresh":7,"coastlinesRefresh":90,"history":2,"extract":"/config/planet_extract.osm.pbf"}
           EOF
           cat > /tmp/mapgen-seed/public/names.json <<'EOF'
           {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
@@ -545,9 +553,17 @@ jobs:
           {"schema":1,"typeConfigVersion":9,"generatedAt":"2026-01-01T00:00:00Z","output":{"files":{"map.lib":{"size":1,"crc32":2363233923}}}}
           EOF
           printf 'x' > /tmp/mapgen-seed/public/europe/germany/berlin/v9/map.lib
+          cat > /tmp/mapgen-seed/public/basemap/index.json <<'EOF'
+          {"schema":1,"versions":[{"typeConfigVersion":27,"changedAt":"2026-09-07T10:00:00Z"}]}
+          EOF
+          printf 'basemap-types' > /tmp/mapgen-seed/public/basemap/v27/types.dat
+          cat > /tmp/mapgen-seed/public/basemap/v27/db.json <<'EOF'
+          {"schema":1,"typeConfigVersion":27,"generatedAt":"2026-09-07T10:00:00Z","output":{"files":{"types.dat":{"size":13,"crc32":1}}}}
+          EOF
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-seed/private/admin/basemap_check.json
           docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
             -v /tmp/mapgen-seed:/seed:ro --entrypoint sh mapgen -c \
-            'mkdir -p /repository /work && cp -r /seed/public /repository/ && chown -R 1000:1000 /repository /work'
+            'mkdir -p /repository /work && cp -r /seed/public /repository/ && mkdir -p /repository/private/admin && cp /seed/private/admin/basemap_check.json /repository/private/admin/ && chown -R 1000:1000 /repository /work'
 
       - name: Start web server and verify HTTP behavior
         run: |
@@ -559,6 +575,16 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/private/admin/x)" = "404"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/staging/x)" = "404"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/)" = "404"
+          # The basemap manifest is what clients read; it is served as JSON, and
+          # the slot tree is served like any other database directory. Directory
+          # listings stay off, so the bare directory paths are refused.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/index.json)" = "200"
+          curl -sI http://localhost:8080/basemap/index.json | grep -qi "content-type: application/json"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/db.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/types.dat)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/)" = "404"
+          echo "the manifest and the basemap slot are served, listings stay off"
 
       - name: Config check and refresh-gated pass via mapgen container
         run: |
