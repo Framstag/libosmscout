@@ -19,14 +19,14 @@
 ## 4. Verification and documentation
 
 - [x] 4.1 Add a smoke check to `.github/workflows/mapgen_image.yml` that runs the script inside the image with a stub import tool and a local source, covering: a failed import stays due, a failed download is retried and stays due, a successful import places the database, records the state and cleans the work area, and an interrupted replacement is restored (spec `regen-script`: all scenarios of the modified and added requirements). Verify: on the runner the check passes, and it fails when the check state is written before the work or the retry is removed
-- [ ] 4.2 Keep the existing smoke checks green (spec `regen-script`: failure handling). Verify: the config check, the single pass, the identity, the scheduled-mode and the type-configuration checks all still pass in the same run
+- [x] 4.2 Keep the existing smoke checks green (spec `regen-script`: failure handling). Verify: the config check, the single pass, the identity, the scheduled-mode and the type-configuration checks all still pass in the same run
 - [x] 4.3 Update the failure-handling part of `Documentation/MapRepository.md`: what recovers by itself (retries, resume, discarded sources, rolled-back replacements, staying due) and what an operator still has to do, namely nothing but watch the exit status and the log. Verify: the section names each recovery and matches the behaviour the smoke check exercises
 - [x] 4.4 Record what this leaves open in `TODO.md` if anything does (spec `regen-script`: recovery from interrupted work). Verify: the entry, if any, names the condition and what would close it
 
 ## 5. Verification
 
 - [x] 5.1 Validate the change artifacts (spec `regen-script`). Verify: `openspec validate --change mapgen-failure-recovery --strict` passes
-- [ ] 5.2 Verify the whole path on a runner: the image builds, the recovery smoke check passes, and the other checks stay green (spec `regen-script`: all scenarios). Verify: a pull request run whose steps all conclude `success`
+- [x] 5.2 Verify the whole path on a runner: the image builds, the recovery smoke check passes, and the other checks stay green (spec `regen-script`: all scenarios). Verify: a pull request run whose steps all conclude `success`
 
 ## Verification status
 
@@ -72,8 +72,13 @@ container's `sh`, because the script uses bash syntax). That also makes it runna
 file was executed here against the real `mapgen.sh`, six cases, and passed - so what CI exercises is the artifact
 that was tested locally rather than a variant of it.
 
-Open, and to be observed on a runner: that the check passes inside the image, where it uses the image's `curl`,
-`jq`, `md5sum` and `bash` (task 5.2).
+### On the runner
+
+Run `35492719226` (head `4562babc8`): the `verify` job passed every step, including
+`Smoke test (recovery of failed runs)` inside the image, the compose job passed, and the publish job was skipped,
+as a pull request should. With the local run of the same script (six cases against the real `mapgen.sh`), every
+scenario of the modified and added requirements is verified - tasks 4.2 and 5.2 were the last, so this change is
+complete.
 
 Open, and to be observed on a runner: the image builds, the new recovery smoke check passes inside it, and the
 existing checks stay green (tasks 4.2, 5.2).
