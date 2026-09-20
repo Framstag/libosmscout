@@ -26,7 +26,7 @@
 
 #include <osmscout/io/Crc32.h>
 
-#include <DbJsonWriter.h>
+#include <osmscoutimport/DbJson.h>
 
 namespace {
 
@@ -180,8 +180,7 @@ TEST_CASE("WriteDbJson writes db.json atomically", "[DbJsonWriter]")
   std::filesystem::remove_all(tmp);
 }
 
-TEST_CASE("WriteDbJson omits source section when no source facts given", "[DbJsonWriter]")
-{
+TEST_CASE("WriteDbJson omits source section when no source facts given", "[DbJsonWriter]"){
   std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_nosource";
 
   std::filesystem::create_directories(tmp);
@@ -201,6 +200,301 @@ TEST_CASE("WriteDbJson omits source section when no source facts given", "[DbJso
   std::string content=ReadFile(tmp/"db.json");
 
   REQUIRE(content.find("\"source\"")==std::string::npos);
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("ReadDbJson reads back every value WriteDbJson wrote", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_roundtrip";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  osmscout::DbJsonData written;
+
+  written.generatedAt="2026-09-06T15:43:46Z";
+  written.typeConfigVersion=27;
+  written.sourceUrl="file:///config/planet_extract.osm.pbf";
+  written.sourceMd5="146f59bf3b42630f89572160de6260bb";
+  written.toolVersion="1.1.1";
+  written.startStep=0;
+  written.endStep=40;
+  written.durationSeconds=123.4;
+  written.boundingBox.Set(osmscout::GeoCoord(52.34,13.09),
+                          osmscout::GeoCoord(52.68,13.76));
+  written.files.push_back(osmscout::DbJsonFileEntry {"types.dat",12345678,0xA1B2C3D4U});
+  written.files.push_back(osmscout::DbJsonFileEntry {"water.idx",4096,0xDEADBEEFU});
+  written.typeCount=1527;
+
+  REQUIRE(osmscout::WriteDbJson(tmp.string(),
+                                written));
+
+  osmscout::DbJsonData read;
+
+  REQUIRE(osmscout::ReadDbJson(tmp.string(),
+                               read));
+
+  REQUIRE(read.generatedAt==written.generatedAt);
+  REQUIRE(read.typeConfigVersion==written.typeConfigVersion);
+  REQUIRE(read.sourceUrl==written.sourceUrl);
+  REQUIRE(read.sourceMd5==written.sourceMd5);
+  REQUIRE(read.toolVersion==written.toolVersion);
+  REQUIRE(read.startStep==written.startStep);
+  REQUIRE(read.endStep==written.endStep);
+  REQUIRE(read.durationSeconds==written.durationSeconds);
+  REQUIRE(read.boundingBox.GetMinLat()==written.boundingBox.GetMinLat());
+  REQUIRE(read.boundingBox.GetMinLon()==written.boundingBox.GetMinLon());
+  REQUIRE(read.boundingBox.GetMaxLat()==written.boundingBox.GetMaxLat());
+  REQUIRE(read.boundingBox.GetMaxLon()==written.boundingBox.GetMaxLon());
+  REQUIRE(read.typeCount==written.typeCount);
+
+  REQUIRE(read.files.size()==2);
+  REQUIRE(read.files[0].name=="types.dat");
+  REQUIRE(read.files[0].size==12345678);
+  REQUIRE(read.files[0].crc32==0xA1B2C3D4U);
+  REQUIRE(read.files[1].name=="water.idx");
+  REQUIRE(read.files[1].size==4096);
+  REQUIRE(read.files[1].crc32==0xDEADBEEFU);
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("ReadDbJson reports a missing metadata file", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_readmissing";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  osmscout::DbJsonData data;
+
+  REQUIRE_FALSE(osmscout::ReadDbJson(tmp.string(),
+                                     data));
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("ReadDbJson reports content that is not JSON", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_readmalformed";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  WriteFile(tmp/"db.json","{ this is not json");
+
+  osmscout::DbJsonData data;
+
+  REQUIRE_FALSE(osmscout::ReadDbJson(tmp.string(),
+                                     data));
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("ReadDbJson reports an unsupported schema version", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_readschema";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  WriteFile(tmp/"db.json",
+            "{\"schema\": 2, \"typeConfigVersion\": 27, \"generatedAt\": \"2026-09-06T15:43:46Z\","
+            " \"output\": {\"boundingBox\": {\"minLon\": 0.0, \"minLat\": 0.0, \"maxLon\": 1.0, \"maxLat\": 1.0},"
+            " \"files\": {}}}");
+
+  osmscout::DbJsonData data;
+
+  REQUIRE_FALSE(osmscout::ReadDbJson(tmp.string(),
+                                     data));
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("ReadDbJson reports metadata without an output section", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_readnooutput";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  WriteFile(tmp/"db.json",
+            "{\"schema\": 1, \"typeConfigVersion\": 27, \"generatedAt\": \"2026-09-06T15:43:46Z\"}");
+
+  osmscout::DbJsonData data;
+
+  REQUIRE_FALSE(osmscout::ReadDbJson(tmp.string(),
+                                     data));
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("AddDbJsonInventoryEntry adds a file to an existing inventory", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_addentry";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  osmscout::DbJsonData written;
+
+  written.generatedAt="2026-09-06T15:43:46Z";
+  written.typeConfigVersion=27;
+  written.sourceUrl="file:///config/planet_extract.osm.pbf";
+  written.sourceMd5="146f59bf3b42630f89572160de6260bb";
+  written.toolVersion="1.1.1";
+  written.boundingBox.Set(osmscout::GeoCoord(52.34,13.09),
+                          osmscout::GeoCoord(52.68,13.76));
+  written.files.push_back(osmscout::DbJsonFileEntry {"types.dat",12345678,0xA1B2C3D4U});
+  written.typeCount=1527;
+
+  REQUIRE(osmscout::WriteDbJson(tmp.string(),
+                                written));
+
+  WriteFile(tmp/"water.idx","water");
+
+  bool updated=false;
+
+  REQUIRE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                            "water.idx",
+                                            updated));
+  REQUIRE(updated);
+
+  osmscout::DbJsonData read;
+
+  REQUIRE(osmscout::ReadDbJson(tmp.string(),
+                               read));
+
+  // the file is part of the inventory now, with its own size and checksum
+  REQUIRE(read.files.size()==2);
+  REQUIRE(read.files[1].name=="water.idx");
+  REQUIRE(read.files[1].size==5);
+
+  uint32_t expectedCrc32=0;
+
+  REQUIRE(osmscout::ComputeFileCrc32((tmp/"water.idx").string(),
+                                     expectedCrc32));
+  REQUIRE(read.files[1].crc32==expectedCrc32);
+
+  // everything written before is still there
+  REQUIRE(read.generatedAt==written.generatedAt);
+  REQUIRE(read.typeConfigVersion==written.typeConfigVersion);
+  REQUIRE(read.sourceUrl==written.sourceUrl);
+  REQUIRE(read.sourceMd5==written.sourceMd5);
+  REQUIRE(read.toolVersion==written.toolVersion);
+  REQUIRE(read.boundingBox.GetMinLat()==written.boundingBox.GetMinLat());
+  REQUIRE(read.boundingBox.GetMaxLon()==written.boundingBox.GetMaxLon());
+  REQUIRE(read.typeCount==written.typeCount);
+  REQUIRE(read.files[0].name=="types.dat");
+  REQUIRE(read.files[0].size==12345678);
+  REQUIRE(read.files[0].crc32==0xA1B2C3D4U);
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("AddDbJsonInventoryEntry replaces a file that is already listed", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_addentrytwice";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  osmscout::DbJsonData written;
+
+  written.generatedAt="2026-09-06T15:43:46Z";
+  written.typeConfigVersion=27;
+  written.toolVersion="1.1.1";
+
+  REQUIRE(osmscout::WriteDbJson(tmp.string(),
+                                written));
+
+  WriteFile(tmp/"water.idx","water");
+
+  bool updated=false;
+
+  REQUIRE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                            "water.idx",
+                                            updated));
+  REQUIRE(updated);
+
+  REQUIRE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                            "water.idx",
+                                            updated));
+  REQUIRE(updated);
+
+  osmscout::DbJsonData read;
+
+  REQUIRE(osmscout::ReadDbJson(tmp.string(),
+                               read));
+  REQUIRE(read.files.size()==1);
+  REQUIRE(read.files[0].name=="water.idx");
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("AddDbJsonInventoryEntry does nothing without metadata", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_addentrynometadata";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  WriteFile(tmp/"water.idx","water");
+
+  bool updated=true;
+
+  REQUIRE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                            "water.idx",
+                                            updated));
+  REQUIRE_FALSE(updated);
+  REQUIRE_FALSE(std::filesystem::exists(tmp/"db.json"));
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("AddDbJsonInventoryEntry reports a file that does not exist", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_addentrymissingfile";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  osmscout::DbJsonData written;
+
+  written.generatedAt="2026-09-06T15:43:46Z";
+  written.typeConfigVersion=27;
+  written.toolVersion="1.1.1";
+
+  REQUIRE(osmscout::WriteDbJson(tmp.string(),
+                                written));
+
+  bool updated=false;
+
+  REQUIRE_FALSE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                                  "water.idx",
+                                                  updated));
+  REQUIRE_FALSE(updated);
+
+  std::filesystem::remove_all(tmp);
+}
+
+TEST_CASE("AddDbJsonInventoryEntry reports unreadable metadata", "[DbJsonWriter]")
+{
+  std::filesystem::path tmp=GetTempDir() / "DbJsonWriterTest_addentrybadmetadata";
+
+  std::filesystem::remove_all(tmp);
+  std::filesystem::create_directories(tmp);
+
+  WriteFile(tmp/"db.json","{ this is not json");
+  WriteFile(tmp/"water.idx","water");
+
+  bool updated=false;
+
+  REQUIRE_FALSE(osmscout::AddDbJsonInventoryEntry(tmp.string(),
+                                                  "water.idx",
+                                                  updated));
+  REQUIRE_FALSE(updated);
 
   std::filesystem::remove_all(tmp);
 }

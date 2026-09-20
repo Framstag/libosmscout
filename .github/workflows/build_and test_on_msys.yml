@@ -34,6 +34,7 @@ jobs:
                     mingw-w64-x86_64-catch
                     mingw-w64-x86_64-protobuf
                     mingw-w64-x86_64-libxml2
+                    mingw-w64-x86_64-nlohmann-json
                     mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm
@@ -67,6 +68,7 @@ jobs:
                     mingw-w64-x86_64-catch
                     mingw-w64-x86_64-protobuf
                     mingw-w64-x86_64-libxml2
+                    mingw-w64-x86_64-nlohmann-json
                     mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
                     mingw-w64-x86_64-qt5
                     mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-glm

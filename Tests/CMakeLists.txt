@@ -146,12 +146,14 @@ set_tests_properties(HeaderCheckTest PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE
 if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME WaterIndexTest SOURCES src/WaterIndexTest.cpp TARGET OSMScout::Import)
 
-	osmscout_test_project(NAME JsonWriterTest SOURCES src/JsonWriterTest.cpp ../Import/src/JsonWriter.cpp INCLUDES ../Import/src)
+	osmscout_test_project(NAME JsonWriterTest SOURCES src/JsonWriterTest.cpp TARGET OSMScout::Import)
 
-	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp ../Import/src/JsonWriter.cpp ../Import/src/DbJsonWriter.cpp INCLUDES ../Import/src)
+	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
+
+	add_test(NAME BasemapCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/basemap-check-test.sh)
 else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()

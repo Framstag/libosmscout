@@ -39,7 +39,7 @@
 
 #include <osmscoutimport/Import.h>
 
-#include "DbJsonWriter.h"
+#include <osmscoutimport/DbJson.h>
 
 #ifndef OSMSCOUT_IMPORT_VERSION
 #define OSMSCOUT_IMPORT_VERSION "unknown"

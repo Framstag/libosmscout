@@ -22,6 +22,8 @@ set(HEADER_FILES
     include/osmscoutimport/GenRouteDat.h
     include/osmscoutimport/GenRoute2Dat.h
     include/osmscoutimport/GenTypeDat.h
+    include/osmscoutimport/DbJson.h
+    include/osmscoutimport/JsonWriter.h
     include/osmscoutimport/GenWaterIndex.h
     include/osmscoutimport/GenWayAreaDat.h
     include/osmscoutimport/GenWayWayDat.h
@@ -73,6 +75,8 @@ set(SOURCE_FILES
     src/osmscoutimport/GenRouteDat.cpp
     src/osmscoutimport/GenRoute2Dat.cpp
     src/osmscoutimport/GenTypeDat.cpp
+    src/osmscoutimport/DbJson.cpp
+    src/osmscoutimport/JsonWriter.cpp
     src/osmscoutimport/GenWaterIndex.cpp
     src/osmscoutimport/GenWayAreaDat.cpp
     src/osmscoutimport/GenWayWayDat.cpp
@@ -100,6 +104,11 @@ set(SOURCE_FILES
 )
 
 set(EXCLUDE_HEADER)
+
+# The import library reads and writes the db.json database metadata, so it needs
+# a JSON implementation. nlohmann_json is required here, not at the top level,
+# so that configurations which do not build the import library do not need it.
+find_package(nlohmann_json REQUIRED)
 
 if(MARISA_FOUND)
     list(APPEND HEADER_FILES include/osmscoutimport/GenTextIndex.h)
@@ -139,6 +148,9 @@ osmscout_library_project(
 	TARGET OSMScout::OSMScout
 	SKIP_HEADER
 )
+
+# db.json database metadata (read and written by the Import tools)
+target_link_libraries(OSMScoutImport nlohmann_json::nlohmann_json)
 
 if(TARGET LibXml2::LibXml2)
 	target_link_libraries(OSMScoutImport LibXml2::LibXml2)
