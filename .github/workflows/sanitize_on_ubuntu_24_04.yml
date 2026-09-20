@@ -30,6 +30,7 @@ jobs:
         run: "sudo apt-get install -y
               catch2
               libxml2-dev
+              nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler
               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
               fonts-liberation
@@ -119,6 +120,12 @@ jobs:
               cmake --build . &&
               sudo cmake --install . &&
               sudo ldconfig -v > /dev/null"
+      # The import library reads and writes the db.json metadata, so it needs a
+      # JSON implementation. nlohmann_json is header-only: it is the one
+      # dependency this job may have, because there is no compiled library that
+      # would escape the memory instrumentation.
+      - name: Install the header-only JSON dependency
+        run: sudo apt-get install -y nlohmann-json3-dev
       # we do not install optional dependencies as memory sanitizer require all libraries to be instrumented
       - name: Configure build project
         run: "cmake -B build
@@ -165,6 +172,7 @@ jobs:
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
                libxml2-dev
+               nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler
                fonts-liberation
                libmarisa-dev

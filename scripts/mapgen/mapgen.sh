@@ -79,6 +79,10 @@ PRIVATE_DIR=$(resolve_dir "$PRIVATE_DIR")
 
 IMPORTS_FILE="$CONFIG_DIR/imports.json"
 NAMES_FILE=${MAPGEN_NAMES_FILE:-$PUBLIC_DIR/names.json}
+BASEMAP_FILE=${MAPGEN_BASEMAP_FILE:-$CONFIG_DIR/basemap.json}
+# The basemap step runs as its own script inside this pass and lock; it lives
+# next to this script by default so a checkout works as well as the image.
+BASEMAP_SCRIPT=${MAPGEN_BASEMAP_SCRIPT:-$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/mapgen-basemap.sh}
 
 ADMIN_DIR="$PRIVATE_DIR/admin"
 STAGING_DIR="$PRIVATE_DIR/staging"
@@ -119,6 +123,36 @@ validate_config()
 
   [[ -z "$missing_in_manifest" ]] || die "region index leaves missing from imports manifest: $(echo $missing_in_manifest)"
   [[ -z "$missing_in_index" ]] || die "imports manifest ids missing from region index: $(echo $missing_in_index)"
+}
+
+# --- basemap validation --------------------------------------------------
+
+# The basemap is not a region and cannot be expressed in the imports manifest,
+# so it is validated by the basemap step itself, before any download or import
+# of this pass happens.
+validate_basemap_config()
+{
+  [[ -x "$BASEMAP_SCRIPT" ]] || die "basemap step script not found or not executable: $BASEMAP_SCRIPT"
+
+  if ! MAPGEN_CONFIG_DIR="$CONFIG_DIR" \
+       MAPGEN_BASEMAP_FILE="$BASEMAP_FILE" \
+       "$BASEMAP_SCRIPT" --check-config >/dev/null; then
+    die "basemap configuration is not usable: $BASEMAP_FILE"
+  fi
+}
+
+# Runs the basemap step of this pass. Everything it needs is passed explicitly,
+# so it works with the same explicit configuration this pass received.
+run_basemap_step()
+{
+  MAPGEN_CONFIG_DIR="$CONFIG_DIR" \
+  MAPGEN_BASEMAP_FILE="$BASEMAP_FILE" \
+  MAPGEN_REPO_DIR="$REPO_DIR" \
+  MAPGEN_PUBLIC_DIR="$PUBLIC_DIR" \
+  MAPGEN_PRIVATE_DIR="$PRIVATE_DIR" \
+  MAPGEN_WORK_DIR="$WORK_DIR" \
+  MAPGEN_IMPORT="$IMPORT_BIN" \
+  "$BASEMAP_SCRIPT"
 }
 
 # --- per-id settings -----------------------------------------------------
@@ -443,6 +477,7 @@ main()
 
   mkdir -p "$PUBLIC_DIR"
   validate_config
+  validate_basemap_config
 
   global_refresh=$(jq -r '.refresh // 7' "$IMPORTS_FILE")
   global_history=$(jq -r '.history // 2' "$IMPORTS_FILE")
@@ -456,6 +491,14 @@ main()
       failed=1
     fi
   done
+
+  # The basemap step shares this pass and its lock. A basemap failure is a
+  # failure of the pass, but it neither undoes nor blocks the regional work
+  # that has already been done next to it.
+  if ! run_basemap_step; then
+    error "basemap step failed"
+    failed=1
+  fi
 
   if [[ "$failed" = "1" ]]; then
     error "one or more imports failed"
@@ -472,6 +515,7 @@ case "${1:-}" in
     ;;
   --check-config)
     validate_config
+    validate_basemap_config
     echo "config OK"
     exit 0
     ;;

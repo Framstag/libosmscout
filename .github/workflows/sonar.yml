@@ -36,6 +36,7 @@ jobs:
         run: "sudo apt-get install -y
               catch2
               libxml2-dev
+              nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler liblzma-dev
               libagg-dev
               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev

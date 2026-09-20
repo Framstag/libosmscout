@@ -13,8 +13,9 @@
 #   docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen
 #     -> runs another pass (refresh-gated) without touching the server
 #
-# Before the first run, place imports.json in scripts/mapgen/config/ and
-# seed the repository volumes with the region index and correct ownership:
+# Before the first run, place imports.json and basemap.json in
+# scripts/mapgen/config/ and seed the repository volumes with the region index
+# and correct ownership:
 #   docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
 #     -v <host-dir-with-names.json>:/seed:ro --entrypoint sh mapgen -c \
 #     'mkdir -p /repository /work && cp /seed/names.json /repository/public/ \

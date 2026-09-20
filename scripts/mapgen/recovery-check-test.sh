@@ -66,6 +66,18 @@ JSON
 {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"file://${SOURCE_DIR}/berlin.osm.pbf"}]}
 JSON
 
+  # The basemap configuration is required by a pass as well. This check is about
+  # the regional pipeline, so the basemap is given a state file that says its
+  # inputs were just checked: the step is then not due and stays out of the way,
+  # without an input or a network.
+  cat > "${CONFIG_DIR}/basemap.json" <<'JSON'
+{"schema":1,"refresh":7,"coastlinesRefresh":90,"history":2,"extract":"/config/planet_extract.osm.pbf"}
+JSON
+
+  mkdir -p "${REPO_DIR}/private/admin"
+  printf '{"lastCheckedAt":%s,"lastAdoptedAt":%s}\n' "$(date +%s)" "$(date +%s)" \
+    > "${REPO_DIR}/private/admin/basemap_check.json"
+
   head -c 4096 /dev/urandom > "${SOURCE_DIR}/berlin.osm.pbf"
   # The sidecar is the fixture the script compares against, so md5 here is the
   # data being tested, not a security decision (see the justification for

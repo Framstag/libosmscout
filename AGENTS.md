@@ -47,9 +47,9 @@ Each directory is a standalone CMake/Meson subproject:
 | `DumpData/` | Data debug/dump tool |
 | `Java/` | Java examples (location lookup, routing, renderer, open db) |
 | `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions |
-| `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, db.json metadata, regeneration script, container, client update check) |
+| `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, basemap configuration, db.json metadata, regeneration script including the basemap step, container, client update check) |
 | `setup/` | (empty — reserved for dev setup scripts) |
-| `scripts/` | cppcheck.sh, etc.; `mapgen/` holds the map regeneration script, example configs, nginx example, client-check test harness, and the mapgen Dockerfile |
+| `scripts/` | cppcheck.sh, etc.; `mapgen/` holds the map regeneration script (`mapgen.sh`), the basemap step (`mapgen-basemap.sh`), example configs (`imports.example.json`, `names.example.json`, `basemap.example.json`), nginx example, the client-check and basemap-check test harnesses, and the mapgen Dockerfile |
 | `ci/` | Docker build configs |
 | `packaging/` | Platform packaging |
 | `webpage/` | Project website source |
@@ -128,6 +128,7 @@ Notes:
 - **vcpkg**: Three profiles — `vcpkg_full.json`, `vcpkg_medium.json`, `vcpkg_minimum.json`
 - **Subprojects** (Meson): wraps in `subprojects/`
 - **System**: Standard OSM dependencies (libxml2, protobuf, libpng, zlib, etc.)
+- **`nlohmann_json`**: required by `libosmscout-import` (it reads and writes the `db.json` database metadata). The requirement lives in that library's build description, so configurations that turn the import library off (`OSMSCOUT_BUILD_IMPORT=OFF`, e.g. iOS, Android, JavaScout) do not need it. The MCPServer still finds it optionally.
 
 ## CI/CD
 

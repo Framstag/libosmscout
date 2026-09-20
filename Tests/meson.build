@@ -883,32 +883,36 @@ if buildImport
   test('Check water index import code', WaterIndexTest)
 
   JsonWriterTest = executable('JsonWriterTest',
-               ['src/JsonWriterTest.cpp',
-                '../Import/src/JsonWriter.cpp'],
-               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               ['src/JsonWriterTest.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
                dependencies: [mathDep, openmpDep, catch2MainDep],
-               link_with: [osmscout],
+               link_with: [osmscout, osmscoutimport],
                install: true,
                install_dir: testInstallDir)
 
   test('Check JSON writer', JsonWriterTest)
 
   DbJsonWriterTest = executable('DbJsonWriterTest',
-               ['src/DbJsonWriterTest.cpp',
-                '../Import/src/JsonWriter.cpp',
-                '../Import/src/DbJsonWriter.cpp'],
-               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               ['src/DbJsonWriterTest.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
                dependencies: [mathDep, openmpDep, catch2MainDep],
-               link_with: [osmscout],
+               link_with: [osmscout, osmscoutimport],
                install: true,
                install_dir: testInstallDir)
 
   test('Check db.json writer', DbJsonWriterTest)
 
   if host_machine.system() != 'windows'
-    # The contract script needs a POSIX shell, python3 and cygpath support;
-    # Windows (cmd/msvc) runners cannot execute it.
+    # The contract scripts need a POSIX shell, python3 and cygpath support;
+    # Windows (cmd/msvc) runners cannot execute them.
     test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  endif
+
+  if host_machine.system() == 'linux'
+    # The basemap step builds a GNU userland pipeline (md5sum, GNU coreutils);
+    # elsewhere the script reports itself as skipped. It runs in the image CI
+    # job as well, which is the environment the pipeline actually runs in.
+    test('Check basemap generation contract', find_program('../scripts/mapgen/basemap-check-test.sh'))
   endif
 endif
 
