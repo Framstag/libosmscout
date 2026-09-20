@@ -79,7 +79,6 @@
                         <Label fx:id="basemapInstalledLabel" text="-" />
                     </HBox>
                     <HBox spacing="8" alignment="CENTER_RIGHT">
-                        <ComboBox fx:id="basemapVariantCombo" prefWidth="250" visible="false" />
                         <Button fx:id="basemapActionBtn" text="Check Server" onAction="#onBasemapAction" />
                     </HBox>
                 </VBox>
