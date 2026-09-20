@@ -11,7 +11,10 @@
 # The real tools are not exercised here; that needs a planet export and world
 # coastline data.
 #
-# Requirements: bash, jq, curl, unzip, md5sum, and zip for the fixture archive.
+# Requirements: a GNU userland - bash, jq, curl, unzip, md5sum, and zip for the
+# fixture archive. The regeneration pipeline itself runs in a Linux container
+# and uses `md5sum` and POSIX/GNU tooling, so this test declares a platform
+# without it as skipped rather than failed.
 #
 # Usage:
 #   basemap-check-test.sh
@@ -20,6 +23,11 @@ set -u
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 BASEMAP_SCRIPT="$SCRIPT_DIR/mapgen-basemap.sh"
+
+if ! command -v md5sum >/dev/null; then
+  echo "basemap-check-test: skipped (the mapgen pipeline needs a GNU userland; md5sum is missing)"
+  exit 0
+fi
 
 command -v jq >/dev/null || { echo "basemap-check-test: jq is required" >&2; exit 1; }
 command -v curl >/dev/null || { echo "basemap-check-test: curl is required" >&2; exit 1; }

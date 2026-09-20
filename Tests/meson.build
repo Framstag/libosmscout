@@ -906,6 +906,12 @@ if buildImport
     # The contract scripts need a POSIX shell, python3 and cygpath support;
     # Windows (cmd/msvc) runners cannot execute them.
     test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  endif
+
+  if host_machine.system() == 'linux'
+    # The basemap step builds a GNU userland pipeline (md5sum, GNU coreutils);
+    # elsewhere the script reports itself as skipped. It runs in the image CI
+    # job as well, which is the environment the pipeline actually runs in.
     test('Check basemap generation contract', find_program('../scripts/mapgen/basemap-check-test.sh'))
   endif
 endif

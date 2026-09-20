@@ -153,7 +153,11 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
-	add_test(NAME BasemapCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/basemap-check-test.sh)
+	# The basemap step needs a GNU userland (md5sum, GNU coreutils); it reports
+	# itself as skipped where that is missing, so it is registered for Linux.
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+		add_test(NAME BasemapCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/basemap-check-test.sh)
+	endif()
 else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()
