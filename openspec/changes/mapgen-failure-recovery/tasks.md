@@ -47,22 +47,32 @@ the conditional consumed it, and `generatedAt` is read before the work area is c
 script, the workflow parses with all 21 step scripts passing `bash -n`, and `openspec validate --strict` passes
 (tasks 1.1 to 4.4, 5.1).
 
-### The recovery check's first runner run
+### The recovery check's first runner runs
 
-It failed, and the check was at fault, not the script: it piped the pass into `grep -q`, which leaves as soon as
-it matches and thereby closes the pipe, so the pass died of SIGPIPE right after printing the line the check was
-looking for - no import, no placement, and the next assertion (`the database was not placed`) failed. The local
-harness had captured the output into a variable, which is why the same scenarios passed there.
+It failed twice, and both times the check was at fault, not the script.
 
-Reproduced locally with the harness, side by side:
+**Piping the pass into `grep -q`.** `grep -q` leaves as soon as it matches and thereby closes the pipe, so the
+pass died of SIGPIPE right after printing the line the check was looking for - no import, no placement, and the
+next assertion (`the database was not placed`) failed. The local harness had captured the output into a
+variable, which is why the same scenarios passed there. Reproduced side by side:
 
 | form | result |
 |---|---|
 | `mapgen.sh \| grep -q "reusing the verified source"` | grep matched, the pass was killed, nothing placed |
 | `out=$(mapgen.sh); echo "$out" \| grep -q ...` | the database was placed and the run reported it |
 
-All three sites in the smoke check now capture first and grep the captured text, print the pass output when an
-assertion fails, and carry a comment saying why. The runner run has to confirm it (task 5.2).
+**Single quotes inside the container script.** The whole check was passed to the container as `sh -c '...'`,
+and the `jq` filter inside it used single quotes, which ended the outer quoting early: the filter arrived as
+`{lastCheckedAt:` and `jq` exited 3 with `syntax error, unexpected end of file (Unix shell quoting issues?)`.
+
+Both are gone because the check is no longer a shell string assembled in the workflow: it is
+`scripts/mapgen/recovery-check-test.sh`, which builds its own fixture in the writable work area and is run as a
+file (`docker run … --entrypoint sh <image> /check/recovery-check-test.sh`). That also makes it runnable outside
+the image - the same file was executed here against the real `mapgen.sh`, six cases, and passed - so what CI
+exercises is the artifact that was tested locally rather than a variant of it.
+
+Open, and to be observed on a runner: that the check passes inside the image, where it uses the image's `curl`,
+`jq`, `md5sum` and `bash` (task 5.2).
 
 Open, and to be observed on a runner: the image builds, the new recovery smoke check passes inside it, and the
 existing checks stay green (tasks 4.2, 5.2).

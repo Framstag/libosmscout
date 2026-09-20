@@ -57,6 +57,10 @@ Affected files and modules:
 - `.github/workflows/mapgen_image.yml` - a smoke check that exercises the failure paths inside the image with a
   stub import tool and a local source: a failed import stays due, a failed download stays due and is retried,
   a successful import places and cleans up and records the state, and an interrupted replacement is restored.
+  The check itself is `scripts/mapgen/recovery-check-test.sh`, a script so that it can be run outside the image
+  as well.
+- `scripts/mapgen/recovery-check-test.sh` (new) - the check above: it builds its own fixture in the writable
+  work area (a stub import tool, a source file with its hash sidecar) and asserts each recovery behaviour.
 - `Documentation/MapRepository.md` - the failure-handling part states what recovers automatically and what an
   operator still has to do.
 - `TODO.md` - anything this leaves open.

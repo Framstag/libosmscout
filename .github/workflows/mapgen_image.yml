@@ -285,82 +285,20 @@ jobs:
 
       - name: Smoke test (recovery of failed runs)
         run: |
-          # A deployment runs unattended, so a failed download or import has to
-          # recover by itself. The import tool is stubbed, so this check exercises
-          # both outcomes without any real source data: what is under test is the
-          # script's recovery, not the importer.
+          # The check runs inside the image and prepares its own fixture in the
+          # writable work area: the import tool is stubbed, so a failing and a
+          # successful import can both be produced without source data or network.
+          # It is a script of its own (scripts/mapgen/recovery-check-test.sh) so
+          # that it can be run outside the image as well - what CI exercises is the
+          # same file, not a shell string assembled here.
           t=/tmp/mapgen-recovery
           rm -rf "${t}"
-          mkdir -p "${t}/config" "${t}/source" "${t}/stubs" "${t}/repo/public" "${t}/repo/private" "${t}/work"
-          cat > "${t}/repo/public/names.json" <<'EOF'
-          {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
-          EOF
-          cat > "${t}/config/imports.json" <<'EOF'
-          {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"file:///source/berlin.osm.pbf"}]}
-          EOF
-          head -c 4096 /dev/urandom > "${t}/source/berlin.osm.pbf"
-          ( cd "${t}/source" && md5sum berlin.osm.pbf > berlin.osm.pbf.md5 )
-          cat > "${t}/stubs/import-fail" <<'EOF'
-          #!/bin/sh
-          echo "stub import: refusing to import" >&2
-          exit 1
-          EOF
-          cat > "${t}/stubs/import-ok" <<'EOF'
-          #!/bin/sh
-          dest=""
-          while [ $# -gt 0 ]; do
-            case "$1" in --destinationDirectory) dest="$2"; shift 2 ;; *) shift ;; esac
-          done
-          printf 'x' > "$dest/map.lib"
-          printf '{"typeConfigVersion":27,"generatedAt":"2026-01-01T00:00:00Z","output":{"files":{"map.lib":{"size":1,"crc32":1}}}}' > "$dest/db.json"
-          EOF
-          chmod +x "${t}/stubs/import-fail" "${t}/stubs/import-ok"
+          mkdir -p "${t}/work"
           sudo chown -R 1000:1000 "${t}"
-
           docker run --rm --read-only \
-            -v "${t}/config":/config:ro \
-            -v "${t}/source":/source:ro \
-            -v "${t}/stubs":/stubs:ro \
-            -v "${t}/repo":/repository \
             -v "${t}/work":/work \
-            -e MAPGEN_DOWNLOAD_ATTEMPTS=2 \
-            -e MAPGEN_DOWNLOAD_RETRY_WAIT=1 \
-            --entrypoint sh osmscout-mapgen:test -c '
-              set -e
-              check=/repository/private/admin/berlin_check.json
-              public=/repository/public/europe/germany/berlin/v27
-
-              # a failed import fails the run and does not record a completed check
-              if MAPGEN_IMPORT=/stubs/import-fail mapgen.sh; then
-                echo "a failing import must fail the run" >&2; exit 1
-              fi
-              test ! -f "${check}" || { echo "a failed import must not record the check state" >&2; exit 1; }
-              test -f /work/berlin.pbf || { echo "a failed import must keep the source for a retry" >&2; exit 1; }
-              # The output is captured rather than piped into grep -q: grep leaves
-              # as soon as it matches, which closes the pipe and kills the pass
-              # mid-run. That is how this check failed its first runner run.
-              out=$(MAPGEN_IMPORT=/stubs/import-fail mapgen.sh 2>&1) || true
-              echo "${out}" | grep -q "checking for changes" || { echo "a failed import must stay due"; echo "${out}"; exit 1; }
-
-              # the next run reuses that source, places the database, records the
-              # check and leaves the work area clean
-              out=$(MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1)
-              echo "${out}" | grep -q "reusing the verified source" || { echo "a kept source must be reused"; echo "${out}"; exit 1; }
-              test -f "${public}/map.lib" || { echo "the database was not placed" >&2; exit 1; }
-              test -f "${check}" || { echo "a completed import must record the check state" >&2; exit 1; }
-              test ! -e /work/berlin.pbf || { echo "a successful run must remove the source" >&2; exit 1; }
-              test ! -d /work/berlin-out || { echo "a successful run must remove the import output" >&2; exit 1; }
-
-              # an interrupted replacement is rolled back rather than left as a gap
-              mkdir -p /repository/private/staging/berlin
-              mv "${public}" /repository/private/staging/berlin/v27.old
-              jq -n --argjson t "$(date +%s)" \
-                '{lastCheckedAt: $t, lastSeenSourceMd5: ""}' > "${check}"
-              out=$(MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1)
-              echo "${out}" | grep -q "restored" || { echo "an interrupted replacement must be reported"; echo "${out}"; exit 1; }
-              test -f "${public}/map.lib" || { echo "an interrupted replacement must be restored" >&2; exit 1; }
-              test ! -d /repository/private/staging/berlin/v27.old || { echo "the restored copy must not stay in staging" >&2; exit 1; }
-              echo "recovery check OK"'
+            -v "${GITHUB_WORKSPACE}/scripts/mapgen/recovery-check-test.sh":/check/recovery-check-test.sh:ro \
+            --entrypoint sh osmscout-mapgen:test /check/recovery-check-test.sh
 
   publish:
     name: Publish images
