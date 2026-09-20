@@ -5,37 +5,42 @@ generated from OSM extracts, what metadata is produced, how the repository
 is laid out on the server, how the regeneration script and container work,
 and how clients detect updates.
 
-The pipeline is defined by the OpenSpec change `map-meta-structure`
-(`openspec/changes/map-meta-structure/`). The specs there are the normative
-contract; this document is the operational guide.
+The pipeline is defined by the OpenSpec changes `map-meta-structure`
+(`openspec/changes/map-meta-structure/`) for the regional databases and
+`mapgen-basemap-generation` (`openspec/changes/mapgen-basemap-generation/`)
+for the world basemap. The specs there are the normative contract; this
+document is the operational guide.
 
 ```
 +--------------------------------------------------------------+
 |  OVERVIEW                                                     |
 +--------------------------------------------------------------+
 |                                                              |
-|  imports.json (F1)   names.json (F2)                         |
-|  id -> download URL  id -> localized names + hierarchy       |
-|        |                    |                                |
-|        v                    v                                |
-|  +---------------------------------------+                   |
-|  |  mapgen.sh (regeneration script)      |                   |
-|  |  curl -> md5 verify -> Import ->      |                   |
-|  |  place -> prune -> records            |                   |
-|  +---------------------------------------+                   |
-|        |                                                    |
-|        v                                                    |
+|  imports.json (F1)   names.json (F2)   basemap.json (F4)  |
+|  id -> download URL  id -> names        planet + coastline |
+|        |                    |                 |          |
+|        v                    v                 v          |
+|  +-------------------------------------------------------+ |
+|  |  mapgen.sh (regeneration script)                      | |
+|  |  curl -> md5 verify -> Import ->                      | |
+|  |  place -> prune -> records                            | |
+|  |  mapgen-basemap.sh: Import + water index -> slot      | |
+|  +-------------------------------------------------------+ |
+|        |                                                   |
+|        v                                                   |
 |  /repository (repository volume)                          |
-|    public/  names.json, <region-index-path>/v<version>/*     |
-|    private/ admin/ (records), staging/ (atomic swap)          |
-|        |                                                    |
-|        v                                                    |
-|  client: GET names.json -> probe own version -> compare      |
-|          generatedAt -> download -> verify crc32             |
+|    public/  names.json, <region-index-path>/v<version>/*    |
+|             basemap/index.json, basemap/v<version>/*        |
+|    private/ admin/ (records), staging/ (atomic swap)        |
+|        |                                                   |
+|        v                                                   |
+|  client: GET names.json -> probe own version -> compare     |
+|          generatedAt -> download -> verify crc32            |
+|          GET basemap/index.json -> compare local metadata   |
 +--------------------------------------------------------------+
 ```
 
-## 1. The three data files
+## 1. The configuration and metadata files
 
 All files are JSON with a `schema` version field. Consumers refuse to
 process unknown schema versions.
@@ -176,6 +181,56 @@ Properties:
 - **Locale-independent**: numbers use `.` decimal separator and no
   thousands grouping regardless of the process locale.
 
+### 1.4 basemap.json (F4) — the basemap configuration
+
+Describes the world basemap: where its inputs come from and how often it may
+be checked and rebuilt. It is a separate file because the basemap is not a
+region: it has no entry in imports.json and none in names.json, and the
+region index must keep matching the imports manifest exactly.
+
+```json
+{
+  "schema": 1,
+  "refresh": 7,
+  "coastlinesRefresh": 90,
+  "history": 2,
+  "extract": "/config/planet_extract.osm.pbf",
+  "coastlines": {
+    "url": "https://osmdata.openstreetmap.de/download/coastlines-split-4326.zip"
+  },
+  "importOptions": {
+    "waterIndexMinMag": 6,
+    "waterIndexMaxMag": 6,
+    "lowZoomOptMaxMag": 6,
+    "areaNodeGridMag": 6,
+    "langOrder": "en,#",
+    "minIndexLevel": 4,
+    "maxIndexLevel": 10,
+    "maxWaterDistance": 2048
+  }
+}
+```
+
+| Field                | Meaning                                                        |
+|----------------------|----------------------------------------------------------------|
+| `schema`             | Format version                                                  |
+| `refresh`            | Days between checks of the basemap inputs                       |
+| `coastlinesRefresh`  | Days between adoptions of a newer coastline copy; must not be shorter than `refresh` |
+| `history`            | How many basemap versions the server keeps; `0` keeps all        |
+| `extract`            | Pre-filtered planet export, read from the configuration area    |
+| `coastlines.url`     | Coastline source; the image's default applies when absent        |
+| `coastlines.sha256`  | Optional checksum of the coastline archive, enforced when present |
+| `importOptions`      | Optional tuning passed to the import tools; unknown keys are rejected |
+
+The file is required: a pass without it stops before doing any work, because a
+missing file is easier to notice than a basemap that is silently absent. See
+`scripts/mapgen/basemap.example.json` for the annotated version.
+
+The planet export is an OSM extract filtered to what `stylesheets/basemap.ost`
+defines (coastlines, country boundaries, continents, cities, oceans, countries,
+seas); `basemap.ost` documents the filter. It is the input whose content
+decides whether a new basemap is built.
+
 ## 2. Server directory layout
 
 ```
@@ -189,12 +244,21 @@ Properties:
             db.json                  database metadata (F3)
             map.lib, *.dat, ...      database files
           v26/  ...                  older slots, kept per retention
+    basemap/
+      index.json                     availability manifest (versions + change times)
+      v27/                           the world basemap, same shape as a regional slot
+        db.json                      metadata, including the water index
+        types.dat, *.dat, water.idx  database files
+      v26/  ...                      older slots, kept per retention
   private/                           never served (outside served root)
     admin/
       berlin_v27_generation.json     per-slot run records
       berlin_check.json              check-cycle state
+      basemap_check.json             basemap input state (extract, coastline, adoption)
+      basemap_v27_generation.json    basemap placement records
     staging/
       berlin/v27.new/                staging for atomic replacement
+      basemap/v27.new/               staging for the basemap slot
 ```
 
 - The served root is `<repo>/public/`; point the webserver there. The
@@ -210,8 +274,13 @@ Properties:
   directory.
 - There is at most **one database per (import, type-config version)**.
   A new import of the same version replaces the slot.
+- The basemap is laid out like a regional database - `basemap/v<version>/`
+  with a db.json and the data files - plus `basemap/index.json`, the
+  availability manifest a client reads to learn which versions the server
+  offers. It is a database directory like any other, so the client downloads
+  it file by file and verifies it the same way.
 - The client-accessible surface is exactly: names.json, per-database
-  db.json, and database files.
+  db.json, database files, and the basemap manifest.
 
 ## 3. Integrity model
 
@@ -220,6 +289,7 @@ Two layers, each fit for its purpose:
 | Layer   | What it protects            | Mechanism                                        |
 |---------|-----------------------------|--------------------------------------------------|
 | Source  | authenticity of the extract | md5 sidecar published by the download service, verified by the script with `md5sum` |
+| Basemap coastline | a corrupt or truncated coastline archive | the unpack utility's CRC-32 per archive entry, plus an optional checksum configured per deployment (the upstream source publishes none) |
 | Outputs | torn copies, disk rot, buggy transfers | CRC-32 per file in db.json, computed by the Import tool |
 
 The CRC-32 is a self-implemented table-based IEEE 802.3 CRC-32
@@ -253,6 +323,12 @@ timer, kubernetes CronJob); the script itself never schedules.
 | `MAPGEN_WORK_DIR`      | `/work`          | Transient work area                     |
 | `MAPGEN_IMPORT`        | `Import`         | Import tool binary                      |
 | `MAPGEN_TYPEFILE`      | `map.ost`        | Type definition file; modules it names have to sit beside it |
+| `MAPGEN_BASEMAP_FILE`  | `<config>/basemap.json` | Basemap configuration (F4)           |
+| `MAPGEN_BASEMAP_SCRIPT`| next to `mapgen.sh` | The basemap step script               |
+| `MAPGEN_BASEMAP_IMPORT`| `BasemapImport`  | Water index tool of the basemap         |
+| `MAPGEN_BASEMAP_TYPEFILE` | `basemap.ost` | Basemap type definition file            |
+| `MAPGEN_COASTLINES_URL`| image value      | Default coastline source of the basemap |
+| `MAPGEN_UNZIP`         | `unzip`          | Unpack utility for the coastline archive |
 | `MAPGEN_SCHEMA_VERSION`| `1`              | Supported schema version                |
 
 ### Flow per import
@@ -277,12 +353,63 @@ due?  now - lastCheckedAt >= refresh*86400
              write private/admin/<id>_v<version>_generation.json
 ```
 
+### The basemap step
+
+After the regional loop, and inside the same pass and the same lock,
+`mapgen.sh` runs `mapgen-basemap.sh`. A basemap that fails is reported as a
+failure of the pass, but it neither undoes nor blocks the regional work that
+was already done next to it.
+
+```
+refresh elapsed?  now - lastCheckedAt >= refresh*86400
+  no  -> skip (no network activity, no hashing)
+  yes ->
+    hash the planet export
+    conditional GET of the coastline archive (If-Modified-Since, work-area copy reused)
+      verify the configured checksum when one is set
+      unpack (the unpack utility validates the archive's own checksums)
+    extract content unchanged and coastline unchanged         -> record check, done
+    coastline changed but adoption not due
+                                                             -> record check, keep serving
+    otherwise ->
+      Import --typefile basemap.ost <importOptions>           (output cached by extract hash)
+      BasemapImport --coastlines <unpacked .shp> <options>    (this owns water.idx)
+      check the produced file set a client requires
+      read typeConfigVersion and generatedAt from db.json
+      stage private/staging/basemap/v<version>.new
+      atomic swap into <repo>/public/basemap/v<version>
+      prune older basemap slots beyond history
+      write public/basemap/index.json (versions + change times)
+      write private/admin/basemap_v<version>_generation.json
+      record the served input hashes and the adoption time
+```
+
+Two cadences, because the upstream coastline data is regenerated about daily:
+`refresh` decides how often the inputs may be looked at, `coastlinesRefresh`
+decides how often a newer coastline copy may actually be adopted. Checking
+frequently therefore does not mean rebuilding frequently.
+
+The import output is cached in the work area under the hash of the planet
+export, so a pass that was triggered by new coastline data re-runs only the
+water index step. Only the output of the export that is currently served is
+kept: stale caches of earlier exports are removed after a successful placement,
+so the work area does not grow with the number of exports. With the basemap
+configured, the work area holds the coastline archives (the adopted one and the
+newest fetched one), their unpacked shape file, and that one import output -
+several gigabytes of transient data.
+
+The water index of a basemap comes from the world coastline
+data, not from the coastline ways of the export, so `BasemapImport` runs after
+the import and replaces the index the import wrote.
+
 ### Script-owned state (private/admin/)
 
 | File                          | Content                                        |
 |-------------------------------|------------------------------------------------|
 | `<id>_check.json`             | `lastCheckedAt` (epoch), `lastSeenSourceMd5`    |
 | `<id>_v<version>_generation.json` | placement time, server path, retention, pruned versions, source change result, run outcome |
+| `basemap_check.json`          | `lastCheckedAt`, `lastAdoptedAt`, `extractMd5`, `coastlinesMd5`, `coastlinesLastModified` |
+| `basemap_v<version>_generation.json` | placement time, generation time, pruned versions |
 
 The script derives its previous state from the server tree itself (the
 newest db.json's `source.md5`), so the admin records are documentary, not
@@ -337,12 +464,13 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
 `scripts/mapgen/Dockerfile` builds a two-stage image:
 
 - **build stage**: ubuntu:noble, minimized cmake Release build of the core
-  library, the import library, and the Import tool (all unneeded features
-  disabled).
-- **runtime stage**: ubuntu:noble, Import binary + its shared libraries
-  (copied from the build stage, same distro), curl, jq, ca-certificates,
-  the script, the bundled type definitions (`map.ost` plus the modules it
-  includes), non-root user `mapgen`.
+  library, the import library, the Import tool and the BasemapImport tool
+  (all unneeded features disabled).
+- **runtime stage**: ubuntu:noble, Import and BasemapImport binaries + their
+  shared libraries (copied from the build stage, same distro), curl, jq,
+  unzip, ca-certificates, the scripts, the bundled type definitions
+  (`map.ost` plus the modules it includes, and `basemap.ost`, which includes
+  none), non-root user `mapgen`.
 
 The image names no library version: the libraries are staged with their
 symlink chain by the build stage, so the version the image reports is the
@@ -366,7 +494,7 @@ docker run --rm --read-only \
 |------------------|-----------------------------------------------------|
 | `/work`          | Transient: downloads, import intermediate data      |
 | `/repository`  | Repository volume: public/ served tree, private/ records + staging |
-| `/config` (ro)   | imports.json (region index lives in public/names.json) |
+| `/config` (ro)   | imports.json + basemap.json (region index lives in public/names.json) |
 
 #### Which identity the pass runs as
 
@@ -609,6 +737,44 @@ The decision matrix is exercised by `scripts/mapgen/client-check-test.sh`
 applications is `Documentation/MapClientGuide.md` (endpoints, decision
 matrix, download and CRC-32 verification, worked examples).
 
+### The basemap follows the same contract
+
+The basemap is not a region, so the region index cannot name it. It has its own
+entry point and its own comparison base:
+
+```
+GET basemap/index.json                              -> which versions exist
+GET basemap/v<clientTypeConfigVersion>/db.json      -> metadata of one version
+GET basemap/v<clientTypeConfigVersion>/<file>       -> data files
+```
+
+| Server state                                   | Client outcome                     |
+|------------------------------------------------|------------------------------------|
+| manifest offers a version the client can read  | available for installation         |
+| manifest's version or change time is newer     | update available                   |
+| installed metadata matches the manifest        | up to date                         |
+| manifest missing, empty, or unparsable         | basemap unavailable, no error      |
+| manifest offers only versions too new to read  | basemap unavailable, no error      |
+
+Rules:
+
+- A client offers the newest version in the manifest that is not newer than the
+  database format version it reads. It never offers a version it cannot read.
+  Both the regional listing and the basemap probe use the same format version.
+- The client keeps the metadata of the version it downloaded next to the data
+  and compares `typeConfigVersion` and `changedAt` against the manifest, so it
+  needs no directory listing and no file name.
+- Every data file is verified against the checksum in that metadata before the
+  installation is registered; a mismatch discards the download and leaves the
+  previous installation usable.
+- The basemap is optional: none of the states above is reported as an error to
+  the user.
+
+The basemap behaviour is exercised by `scripts/mapgen/basemap-check-test.sh`
+(registered as a ctest test) on the generating side, and by
+`JavaScout/src/test/java/com/framstag/libosmscout/client/BasemapManagerTest.java`
+on the consuming side.
+
 ## 7. Operations
 
 ### Retention
@@ -617,7 +783,9 @@ matrix, download and CRC-32 verification, worked examples).
 versions of a database the server keeps per import. After each successful
 placement the oldest version slots beyond the retention depth are removed.
 This is the main disk-space knob: database files are large, and parallel
-type-config versions multiply them.
+type-config versions multiply them. The basemap has its own `history` in
+basemap.json and is pruned the same way; its slots are pruned before the
+manifest is rewritten, so the manifest never names a version that is gone.
 
 ### Refresh
 
@@ -625,6 +793,15 @@ type-config versions multiply them.
 between change checks per import. The check itself is a single small HTTP
 GET of the md5 sidecar; the full download and import happen only when the
 published hash differs from the last imported one.
+
+The basemap has two intervals in basemap.json: `refresh` for how often the
+planet export may be hashed and the coastline source asked (a conditional
+request, so an unchanged source transfers nothing), and `coastlinesRefresh`
+for how often a newer coastline copy may be adopted. The upstream coastline
+data changes about daily; the adoption interval is what keeps the basemap from
+being rebuilt that often. A pass inside `refresh` does no work for the basemap
+at all, and a pass that finds newer coastline data before adoption is due
+reports it and keeps serving the adopted copy.
 
 ### Publishing
 
@@ -659,18 +836,22 @@ recreated on the next import.
 | `libosmscout/include/osmscout/io/Crc32.h` | Public CRC-32 API (`osmscout::Crc32`, `osmscout::ComputeFileCrc32`) |
 | `libosmscout/src/osmscout/io/Crc32.cpp` | CRC-32 implementation (zlib-compatible)   |
 | `Import/src/Import.cpp`                | CLI args, emit step invocation            |
-| `Import/src/JsonWriter.{h,cpp}`         | Minimal write-only JSON writer            |
-| `Import/src/DbJsonWriter.{h,cpp}`       | db.json emission                          |
+| `libosmscout-import/include/osmscoutimport/JsonWriter.h` | Minimal write-only JSON writer |
+| `libosmscout-import/include/osmscoutimport/DbJson.h` | db.json read/write, file inventory |
+| `libosmscout-import/src/osmscoutimport/{JsonWriter,DbJson}.cpp` | their implementation |
 | `scripts/mapgen/mapgen.sh`              | Regeneration script                       |
+| `scripts/mapgen/mapgen-basemap.sh`      | Basemap step (inputs, production, placement, manifest) |
 | `scripts/mapgen/imports.example.json`  | Example F1                                |
 | `scripts/mapgen/names.example.json`    | Example F2                                |
+| `scripts/mapgen/basemap.example.json`  | Example F4                                |
 | `scripts/mapgen/nginx.example.conf`     | Example webserver config (deny rules)     |
 | `scripts/mapgen/Dockerfile.serve`       | Read-only static web server image          |
 | `scripts/mapgen/nginx-serve.conf`       | Served-root config for the web server      |
 | `scripts/mapgen/docker-compose.yml`     | Orchestrates mapgen + serve on one volume  |
 | `Documentation/MapClientGuide.md`       | Client integration guide                   |
 | `scripts/mapgen/client-check-test.sh`  | Client decision-matrix test harness       |
+| `scripts/mapgen/basemap-check-test.sh` | Basemap step contract test harness        |
 | `scripts/mapgen/Dockerfile`            | Container image                          |
 | `.github/workflows/mapgen_image.yml`   | Image build + smoke test CI job          |
 | `Tests/src/JsonWriterTest.cpp`         | JSON writer unit tests                   |
-| `Tests/src/DbJsonWriterTest.cpp`      | db.json + CRC-32 unit tests              |
+| `Tests/src/DbJsonWriterTest.cpp`      | db.json read/write + CRC-32 unit tests    |
