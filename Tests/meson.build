@@ -12,6 +12,16 @@ FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
 
 test('Check FavoriteLocationService', FavoriteLocationServiceTest)
 
+FavoriteStoreTest = executable('FavoriteStoreTest',
+             'src/FavoriteStoreTest.cpp',
+             include_directories: [testIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check FavoriteStore', FavoriteStoreTest)
+
 StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
              'src/StyleLoadResilienceTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
