@@ -336,11 +336,16 @@ jobs:
               fi
               test ! -f "${check}" || { echo "a failed import must not record the check state" >&2; exit 1; }
               test -f /work/berlin.pbf || { echo "a failed import must keep the source for a retry" >&2; exit 1; }
-              MAPGEN_IMPORT=/stubs/import-fail mapgen.sh 2>&1 | grep -q "checking for changes" || { echo "a failed import must stay due" >&2; exit 1; }
+              # The output is captured rather than piped into grep -q: grep leaves
+              # as soon as it matches, which closes the pipe and kills the pass
+              # mid-run. That is how this check failed its first runner run.
+              out=$(MAPGEN_IMPORT=/stubs/import-fail mapgen.sh 2>&1) || true
+              echo "${out}" | grep -q "checking for changes" || { echo "a failed import must stay due"; echo "${out}"; exit 1; }
 
               # the next run reuses that source, places the database, records the
               # check and leaves the work area clean
-              MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1 | grep -q "reusing the verified source" || { echo "a kept source must be reused" >&2; exit 1; }
+              out=$(MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1)
+              echo "${out}" | grep -q "reusing the verified source" || { echo "a kept source must be reused"; echo "${out}"; exit 1; }
               test -f "${public}/map.lib" || { echo "the database was not placed" >&2; exit 1; }
               test -f "${check}" || { echo "a completed import must record the check state" >&2; exit 1; }
               test ! -e /work/berlin.pbf || { echo "a successful run must remove the source" >&2; exit 1; }
@@ -351,7 +356,8 @@ jobs:
               mv "${public}" /repository/private/staging/berlin/v27.old
               jq -n --argjson t "$(date +%s)" \
                 '{lastCheckedAt: $t, lastSeenSourceMd5: ""}' > "${check}"
-              MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1 | grep -q "restored" || { echo "an interrupted replacement must be reported" >&2; exit 1; }
+              out=$(MAPGEN_IMPORT=/stubs/import-ok mapgen.sh 2>&1)
+              echo "${out}" | grep -q "restored" || { echo "an interrupted replacement must be reported"; echo "${out}"; exit 1; }
               test -f "${public}/map.lib" || { echo "an interrupted replacement must be restored" >&2; exit 1; }
               test ! -d /repository/private/staging/berlin/v27.old || { echo "the restored copy must not stay in staging" >&2; exit 1; }
               echo "recovery check OK"'

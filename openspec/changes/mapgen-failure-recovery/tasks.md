@@ -44,8 +44,25 @@ data. Six scenarios, all as specified:
 
 The two bug fixes found this way were covered by the same runs: the download's curl status is now captured before
 the conditional consumed it, and `generatedAt` is read before the work area is cleaned. `bash -n` passes on the
-script, the workflow parses with all 18 step scripts passing `bash -n`, and `openspec validate --strict` passes
+script, the workflow parses with all 21 step scripts passing `bash -n`, and `openspec validate --strict` passes
 (tasks 1.1 to 4.4, 5.1).
+
+### The recovery check's first runner run
+
+It failed, and the check was at fault, not the script: it piped the pass into `grep -q`, which leaves as soon as
+it matches and thereby closes the pipe, so the pass died of SIGPIPE right after printing the line the check was
+looking for - no import, no placement, and the next assertion (`the database was not placed`) failed. The local
+harness had captured the output into a variable, which is why the same scenarios passed there.
+
+Reproduced locally with the harness, side by side:
+
+| form | result |
+|---|---|
+| `mapgen.sh \| grep -q "reusing the verified source"` | grep matched, the pass was killed, nothing placed |
+| `out=$(mapgen.sh); echo "$out" \| grep -q ...` | the database was placed and the run reported it |
+
+All three sites in the smoke check now capture first and grep the captured text, print the pass output when an
+assertion fails, and carry a comment saying why. The runner run has to confirm it (task 5.2).
 
 Open, and to be observed on a runner: the image builds, the new recovery smoke check passes inside it, and the
 existing checks stay green (tasks 4.2, 5.2).
