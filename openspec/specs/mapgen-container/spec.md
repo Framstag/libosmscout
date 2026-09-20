@@ -128,3 +128,65 @@ pass came from the schedule or from an external trigger.
 - **GIVEN** the image's non-root user and a read-only root filesystem
 - **WHEN** the scheduled mode runs
 - **THEN** it starts and runs passes without writing outside the mounted areas and without root privileges
+
+### Requirement: An unwritable area is reported, not discovered later
+
+Before running the pass, in either mode, the image SHALL verify that the areas it has to write to - the
+transient work area and the database repository - are writable by the identity the process runs as. When an
+area is not writable, the image SHALL refuse to start and SHALL report the identity in use, the area that
+failed and how to give the area that ownership, instead of failing at the first write with the error of that
+write. A run whose arguments request a read-only operation, such as a configuration check, SHALL NOT be
+blocked by this check.
+
+#### Scenario: A work area owned by another identity
+
+- **GIVEN** a container started with a work area the process may not write to
+- **WHEN** it starts
+- **THEN** it SHALL stop with a status reporting the failure
+- **AND** the report SHALL name the work area, the uid and gid in use, and a command that gives the area
+  that ownership
+- **AND** no pass SHALL run
+
+#### Scenario: A repository owned by another identity
+
+- **GIVEN** a container started with a writable work area and a repository the process may not write to
+- **WHEN** it starts
+- **THEN** it SHALL stop with a status reporting the failure, naming the repository area in the same way
+
+#### Scenario: A read-only run is not blocked
+
+- **GIVEN** a container started with arguments that ask for a read-only operation
+- **WHEN** the areas are owned by another identity
+- **THEN** the operation SHALL be performed and its result reported, and the check SHALL NOT stop it
+
+#### Scenario: Writable areas start normally
+
+- **GIVEN** a container whose work area and repository are writable by the identity it runs as
+- **WHEN** it starts, in either mode
+- **THEN** it SHALL run as before, and the check SHALL leave no trace behind in the areas
+
+### Requirement: The bundled type configuration is complete and loads
+
+The image SHALL contain the type definition file it bundles together with every module that file includes, so
+that the bundled type file loads without an error. A set of type definitions supplied by the operator through
+the type file variable SHALL be treated the same way: the modules have to sit next to the type file, and a
+missing module SHALL be reported as a configuration failure rather than as an import failure.
+
+#### Scenario: The bundled type file loads
+
+- **GIVEN** the image as built
+- **WHEN** the import tool is run against the bundled type file
+- **THEN** it SHALL load the type configuration without reporting a module it cannot read
+
+#### Scenario: Every module is present
+
+- **GIVEN** the type file the image bundles
+- **WHEN** the modules it includes are looked up beside it
+- **THEN** each of them SHALL exist in the image
+
+#### Scenario: A missing module is a configuration failure
+
+- **GIVEN** a type file whose module cannot be read
+- **WHEN** an import starts
+- **THEN** the failure SHALL name the module and SHALL be reported as a type configuration failure, before
+  any object of the source is processed
