@@ -127,8 +127,12 @@ jobs:
         uses: bus1/cabuild/action/msdevshell@v1
         with:
           architecture: x64
+      # The import library reads and writes the db.json metadata and therefore
+      # needs nlohmann_json. This job installs no dependency itself, so the
+      # header-only fallback from subprojects/ is used for it (the default wrap
+      # mode; the dependency is a single header).
       - name: Configure build project
-        run:  meson setup --buildtype debugoptimized --wrap-mode nofallback --unity on -DenableXML=false -Dcpp_std=vc++latest build
+        run:  meson setup --buildtype debugoptimized --wrap-mode default --unity on -DenableXML=false -Dcpp_std=vc++latest build
       - name: Dump found dependencies
         run:  meson introspect --dependencies
         working-directory: build
