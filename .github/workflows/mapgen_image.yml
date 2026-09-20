@@ -184,15 +184,16 @@ jobs:
           # not a pass that silently serves no basemap.
           cp -a /tmp/mapgen-config /tmp/mapgen-config-nobasemap
           rm /tmp/mapgen-config-nobasemap/basemap.json
-          if docker run --rm --read-only \
+          if out=$(docker run --rm --read-only \
                -v /tmp/mapgen-config-nobasemap:/config:ro \
                -v /tmp/mapgen-work:/work \
                -v /tmp/mapgen-repo:/repository \
-               osmscout-mapgen:test --check-config 2>&1 | tee /tmp/mapgen-check-nobasemap.log; then
+               osmscout-mapgen:test --check-config 2>&1); then
             echo "a missing basemap configuration was accepted" >&2
             exit 1
           fi
-          grep -q "basemap configuration" /tmp/mapgen-check-nobasemap.log
+          echo "${out}"
+          echo "${out}" | grep -q "basemap configuration"
 
       - name: Smoke test (single pass, refresh gate, no network)
         run: |
