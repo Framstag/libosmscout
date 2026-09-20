@@ -67,9 +67,10 @@ and the `jq` filter inside it used single quotes, which ended the outer quoting 
 
 Both are gone because the check is no longer a shell string assembled in the workflow: it is
 `scripts/mapgen/recovery-check-test.sh`, which builds its own fixture in the writable work area and is run as a
-file (`docker run … --entrypoint sh <image> /check/recovery-check-test.sh`). That also makes it runnable outside
-the image - the same file was executed here against the real `mapgen.sh`, six cases, and passed - so what CI
-exercises is the artifact that was tested locally rather than a variant of it.
+file with bash (`docker run … --entrypoint bash <image> /check/recovery-check-test.sh` - bash rather than the
+container's `sh`, because the script uses bash syntax). That also makes it runnable outside the image - the same
+file was executed here against the real `mapgen.sh`, six cases, and passed - so what CI exercises is the artifact
+that was tested locally rather than a variant of it.
 
 Open, and to be observed on a runner: that the check passes inside the image, where it uses the image's `curl`,
 `jq`, `md5sum` and `bash` (task 5.2).
