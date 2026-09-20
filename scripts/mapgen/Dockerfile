@@ -25,7 +25,14 @@
 # Mounts:
 #   /work          transient: downloads, import intermediate data
 #   /repository  database repository (served tree + admin/ + staging/)
-#   /config        read-only: imports.json + names.json
+#   /config        read-only: imports.json + names.json + basemap.json
+#                  (names.json is read from the served root, see below)
+#
+# Environment of interest to a deployment:
+#   MAPGEN_TYPEFILE            regional type definitions (default: map.ost)
+#   MAPGEN_BASEMAP_TYPEFILE    basemap type definitions (default: basemap.ost)
+#   MAPGEN_COASTLINES_URL      default coastline source of the basemap; a
+#                              basemap.json may override it
 
 # ---- build stage: minimized cmake Release build of core + import + Import tool
 FROM ubuntu:noble AS build
@@ -35,7 +42,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake g++ make pkg-config \
     liblzma-dev libmarisa-dev libprotobuf-dev \
-    libtbb-dev libxml2-dev protobuf-compiler zlib1g-dev \
+    libtbb-dev libxml2-dev nlohmann-json3-dev protobuf-compiler zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -61,7 +68,7 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release \
     -DOSMSCOUT_BUILD_TOOL_STYLEEDITOR=OFF \
     -DOSMSCOUT_BUILD_DOC_API=OFF \
     -DOSMSCOUT_BUILD_WEBPAGE=OFF \
-    && cmake --build build --target Import -j"$(nproc)"
+    && cmake --build build --target Import BasemapImport -j"$(nproc)"
 
 # Stage the built libraries together with their symlink chain, so the runtime
 # stage copies them without naming a version anywhere: the library version
@@ -75,7 +82,7 @@ FROM ubuntu:noble AS runtime
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl jq util-linux \
+    ca-certificates curl jq unzip util-linux \
     libgomp1 liblzma5 libmarisa0 libprotobuf32 \
     libtbb12 libxml2 libzstd1 zlib1g \
     && rm -rf /var/lib/apt/lists/*
@@ -97,26 +104,38 @@ RUN case "${TARGETARCH:-amd64}" in \
  && chmod +x /usr/local/bin/supercronic
 
 COPY --from=build /src/build/Import/Import /usr/local/bin/Import
+COPY --from=build /src/build/BasemapImport/BasemapImport /usr/local/bin/BasemapImport
 COPY --from=build /stage/lib/ /usr/local/lib/
 
 RUN ldconfig \
- && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}'
+ && ldd /usr/local/bin/Import | awk '/not found/{print "missing:", $0; exit 1}' \
+ && ldd /usr/local/bin/BasemapImport | awk '/not found/{print "missing:", $0; exit 1}'
 
 # The whole type definition set: the type file pulls in modules that are looked
 # up beside it, so shipping the file alone makes every import fail with
 # "Cannot load type configuration!".
 COPY stylesheets/*.ost /usr/local/share/osmscout/
 COPY scripts/mapgen/mapgen.sh /usr/local/bin/mapgen.sh
+COPY scripts/mapgen/mapgen-basemap.sh /usr/local/bin/mapgen-basemap.sh
 COPY scripts/mapgen/mapgen-pass.sh /usr/local/bin/mapgen-pass.sh
 COPY scripts/mapgen/mapgen-entrypoint.sh /usr/local/bin/mapgen-entrypoint.sh
 
-RUN chmod +x /usr/local/bin/mapgen-pass.sh /usr/local/bin/mapgen-entrypoint.sh
+RUN chmod +x /usr/local/bin/mapgen-basemap.sh /usr/local/bin/mapgen-pass.sh /usr/local/bin/mapgen-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/mapgen.sh \
  && (getent group 1000 >/dev/null 2>&1 || groupadd --gid 1000 mapgen) \
  && useradd --system --uid 1000 --gid 1000 --home-dir /work -o mapgen
 
 ENV MAPGEN_TYPEFILE=/usr/local/share/osmscout/map.ost
+# The basemap type file is bundled as well; it includes no modules, so the file
+# itself is the complete set.
+ENV MAPGEN_BASEMAP_TYPEFILE=/usr/local/share/osmscout/basemap.ost
+# Default coastline source of the basemap. The upstream dataset is derived from
+# OpenStreetMap coastline data (ODbL) and is refreshed about daily; the pass
+# checks it with a conditional request and adopts a newer copy on the interval
+# configured in basemap.json. Overridable per deployment.
+ARG OSMSCOUT_COASTLINES_URL="https://osmdata.openstreetmap.de/download/coastlines-split-4326.zip"
+ENV MAPGEN_COASTLINES_URL=${OSMSCOUT_COASTLINES_URL}
 # HOME points at the writable mount: a foreign uid has no entry in /etc/passwd,
 # so tools that look for a home directory would otherwise find none.
 ENV HOME=/work

@@ -10,6 +10,8 @@ on:
       - 'libosmscout-import/**'
       - 'libosmscout/**'
       - 'stylesheets/map.ost'
+      - 'stylesheets/basemap.ost'
+      - 'BasemapImport/**'
       - '.dockerignore'
       - '.github/workflows/mapgen_image.yml'
   push:
@@ -21,6 +23,8 @@ on:
       - 'libosmscout-import/**'
       - 'libosmscout/**'
       - 'stylesheets/map.ost'
+      - 'stylesheets/basemap.ost'
+      - 'BasemapImport/**'
       - '.dockerignore'
       - '.github/workflows/mapgen_image.yml'
   workflow_dispatch:
@@ -119,6 +123,26 @@ jobs:
               echo "module present: ${module}"
             done'
 
+      - name: Smoke test (the basemap tooling and type configuration are present)
+        run: |
+          # The basemap needs its own import tool, its own type definitions (which
+          # include no modules, so the single file is the complete set) and the
+          # unpack utility for the coastline archive.
+          docker run --rm --entrypoint sh osmscout-mapgen:test -c '
+            set -e
+            test -x /usr/local/bin/BasemapImport || { echo "BasemapImport is missing" >&2; exit 1; }
+            test -f /usr/local/share/osmscout/basemap.ost || { echo "basemap.ost is missing" >&2; exit 1; }
+            command -v unzip >/dev/null || { echo "unzip is missing" >&2; exit 1; }
+            test -x /usr/local/bin/mapgen-basemap.sh || { echo "mapgen-basemap.sh is missing" >&2; exit 1; }
+            echo "basemap tooling present"'
+          out=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test \
+            --typefile /usr/local/share/osmscout/basemap.ost 2>&1) || true
+          echo "${out}"
+          if echo "${out}" | grep -q "Cannot load"; then
+            echo "the bundled basemap type configuration does not load" >&2
+            exit 1
+          fi
+
       - name: Verify the runtime identity
         run: |
           test "$(docker run --rm --entrypoint id osmscout-mapgen:test -u)" = "1000"
@@ -141,6 +165,9 @@ jobs:
           cat > /tmp/mapgen-config/imports.json <<'EOF'
           {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
           EOF
+          cat > /tmp/mapgen-config/basemap.json <<'EOF'
+          {"schema":1,"refresh":7,"coastlinesRefresh":90,"history":2,"extract":"/config/planet_extract.osm.pbf","importOptions":{"waterIndexMinMag":6,"waterIndexMaxMag":6}}
+          EOF
           mkdir -p /tmp/mapgen-repo/public
           cat > /tmp/mapgen-repo/public/names.json <<'EOF'
           {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
@@ -150,6 +177,22 @@ jobs:
             -v /tmp/mapgen-work:/work \
             -v /tmp/mapgen-repo:/repository \
             osmscout-mapgen:test --check-config
+
+      - name: Smoke test (the basemap configuration is required)
+        run: |
+          # A pass without a basemap configuration is a configuration failure,
+          # not a pass that silently serves no basemap.
+          cp -a /tmp/mapgen-config /tmp/mapgen-config-nobasemap
+          rm /tmp/mapgen-config-nobasemap/basemap.json
+          if docker run --rm --read-only \
+               -v /tmp/mapgen-config-nobasemap:/config:ro \
+               -v /tmp/mapgen-work:/work \
+               -v /tmp/mapgen-repo:/repository \
+               osmscout-mapgen:test --check-config 2>&1 | tee /tmp/mapgen-check-nobasemap.log; then
+            echo "a missing basemap configuration was accepted" >&2
+            exit 1
+          fi
+          grep -q "basemap configuration" /tmp/mapgen-check-nobasemap.log
 
       - name: Smoke test (single pass, refresh gate, no network)
         run: |
