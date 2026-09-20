@@ -125,16 +125,19 @@ source nor the import output behind, so the work area does not grow with the num
 keeps what a later attempt can resume or rebuild.
 
 #### Scenario: An interrupted replacement is rolled back
+
 - **GIVEN** a run that was killed between moving the served database aside and moving the new one in
 - **WHEN** the next run starts
 - **THEN** the previous database SHALL be served again, or the new one placed, and no other outcome SHALL be
   visible to a reader
 
 #### Scenario: A successful run leaves the work area clean
+
 - **WHEN** an import is imported and placed
 - **THEN** the downloaded source and the import output of that import SHALL be gone from the work area
 
 #### Scenario: A failed run keeps what a retry can use
+
 - **WHEN** an import failed after its source was downloaded
 - **THEN** the source SHALL remain for a later attempt to resume, and later runs SHALL NOT accumulate further
   copies of it

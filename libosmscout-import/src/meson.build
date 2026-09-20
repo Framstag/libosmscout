@@ -30,6 +30,8 @@ osmscoutimportSrc = [
             'src/osmscoutimport/GenRouteDat.cpp',
             'src/osmscoutimport/GenRoute2Dat.cpp',
             'src/osmscoutimport/GenTypeDat.cpp',
+            'src/osmscoutimport/DbJson.cpp',
+            'src/osmscoutimport/JsonWriter.cpp',
             'src/osmscoutimport/GenWaterIndex.cpp',
             'src/osmscoutimport/GenWayAreaDat.cpp',
             'src/osmscoutimport/GenWayWayDat.cpp',

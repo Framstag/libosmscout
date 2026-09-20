@@ -33,6 +33,8 @@ osmscoutimportHeader = [
             'osmscoutimport/GenRouteDat.h',
             'osmscoutimport/GenRoute2Dat.h',
             'osmscoutimport/GenTypeDat.h',
+            'osmscoutimport/DbJson.h',
+            'osmscoutimport/JsonWriter.h',
             'osmscoutimport/GenWaterIndex.h',
             'osmscoutimport/GenWayAreaDat.h',
             'osmscoutimport/GenWayWayDat.h',
