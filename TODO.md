@@ -64,3 +64,7 @@ Conditions of `mapgen-cron-schedule`.
 
 - **The scheduler binary is fetched from GitHub releases at image build time**: `scripts/mapgen/Dockerfile` downloads supercronic (`SUPERCRONIC_VERSION`, v0.2.49) and verifies it against the checksum pinned for the architecture. A build without network access cannot fetch it, and the alternative - vendoring the 14 MB binary into the repository - trades that for a large binary in git. Closing it would need an internal mirror or the binary in the repository.
 - **The pinned checksums have to be updated with the scheduler**: the version and the two sha256 values (amd64 `a53ae236...`, arm64 `02aa0cb2...`) sit in one `case` block in the same Dockerfile, so an upgrade is a deliberate edit. Nothing checks that the pin matches upstream beyond the build failing if it does not; the arm64 asset is pinned but has never been built or run, because only `linux/amd64` images are published (see the entry above).
+
+Conditions of `mapgen-failure-recovery`.
+
+- **A failing import is visible only in the log and the exit status**: the script now retries and recovers by itself, but in the scheduled mode nobody is told that it keeps failing - supercronic writes the pass output into the container log and moves on. An unattended deployment can fail for weeks without notice. A notification after a failed pass (a webhook, or metrics the operator can alert on) would close it; the pass staying due means the retry itself needs no attention.

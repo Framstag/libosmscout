@@ -283,6 +283,24 @@ jobs:
             osmscout-mapgen:test --check-config
           sudo rm -rf /tmp/mapgen-unwritable-work-ro
 
+      - name: Smoke test (recovery of failed runs)
+        run: |
+          # The check runs inside the image and prepares its own fixture in the
+          # writable work area: the import tool is stubbed, so a failing and a
+          # successful import can both be produced without source data or network.
+          # It is a script of its own (scripts/mapgen/recovery-check-test.sh) so
+          # that it can be run outside the image as well - what CI exercises is the
+          # same file, not a shell string assembled here. It is bash syntax, so it
+          # is started with bash rather than with the container's sh.
+          t=/tmp/mapgen-recovery
+          rm -rf "${t}"
+          mkdir -p "${t}/work"
+          sudo chown -R 1000:1000 "${t}"
+          docker run --rm --read-only \
+            -v "${t}/work":/work \
+            -v "${GITHUB_WORKSPACE}/scripts/mapgen/recovery-check-test.sh":/check/recovery-check-test.sh:ro \
+            --entrypoint bash osmscout-mapgen:test /check/recovery-check-test.sh
+
   publish:
     name: Publish images
     runs-on: ubuntu-24.04
