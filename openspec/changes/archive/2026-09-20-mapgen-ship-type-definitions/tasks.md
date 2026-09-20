@@ -3,7 +3,7 @@
 ## 1. The image contents
 
 - [x] 1.1 Install the whole type definition set in `scripts/mapgen/Dockerfile` (`stylesheets/*.ost` into the directory the type file is read from), replacing the single file copy (spec `mapgen-container`: the bundled type configuration is complete and loads). Verify: the built image contains `map.ost` and every module it references, and the type file is found by the tool at the path the image's `MAPGEN_TYPEFILE` points to
-- [ ] 1.2 Add a smoke check that loads the bundled type file inside the image and asserts that no module fails to load (spec `mapgen-container`: the bundled type file loads). Verify: on the runner the check passes, and it fails if a module is removed from the image or renamed in the repository
+- [x] 1.2 Add a smoke check that loads the bundled type file inside the image and asserts that no module fails to load (spec `mapgen-container`: the bundled type file loads). Verify: on the runner the check passes, and it fails if a module is removed from the image or renamed in the repository
 
 ## 2. Documentation
 
@@ -13,7 +13,7 @@
 ## 3. Verification
 
 - [x] 3.1 Validate the change artifacts (spec `mapgen-container`). Verify: `openspec validate --change mapgen-ship-type-definitions --strict` passes
-- [ ] 3.2 Verify the whole path on a runner: the image builds, the smoke check loads the bundled type file, and the existing checks stay green (spec `mapgen-container`: all three scenarios). Verify: a pull request run whose steps all conclude `success`
+- [x] 3.2 Verify the whole path on a runner: the image builds, the smoke check loads the bundled type file, and the existing checks stay green (spec `mapgen-container`: all three scenarios). Verify: a pull request run whose steps all conclude `success`
 
 ## Verification status
 
@@ -27,3 +27,9 @@ parses with all 18 step scripts passing `bash -n`, and `openspec validate --stri
 
 Open, and to be observed on a runner: the image builds with the whole set, the smoke check loads the bundled
 type file and finds every module it names, and the existing checks stay green (tasks 1.2, 3.2).
+
+Observed on the merge's runner run, `35467420850` (merge `0b89e2220`): the `verify` job passed every step,
+including `Smoke test (the bundled type configuration loads)`, the compose job passed, and the publish job pushed
+the release tags. The check loads the type file with the import tool and then derives the module names from that
+file and requires each of them to be present, so both a missing module and a renamed one fail the run. All six
+tasks are verified.
