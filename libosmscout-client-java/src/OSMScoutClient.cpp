@@ -769,6 +769,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getStyleSheetDirectory(JNIEn
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::getActiveStyleSheet()
+//
+// Reports the stylesheet that is actually active: the last one that loaded
+// successfully. A requested stylesheet that failed to load is not reported as
+// active — the previously active one stays in effect. Before any successful
+// load the configured (requested) stylesheet is reported, so the settings UI
+// keeps showing the persisted selection.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -779,7 +785,34 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getActiveStyleSheet(JNIEnv *
     return env->NewStringUTF("");
   }
 
+  if (data->dbThread != nullptr) {
+    const std::string active = data->dbThread->GetActiveStyleSheetFilename();
+    if (!active.empty()) {
+      return env->NewStringUTF(std::filesystem::path(active).filename().string().c_str());
+    }
+  }
+
   return env->NewStringUTF(data->settings->GetStyleSheetFile().c_str());
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::wasLastStyleLoadSuccessful()
+//
+// Whether the last stylesheet load attempt (initial load, style switch, style
+// flag change, basemap style, stylesheet refresh) succeeded. A failed attempt
+// keeps the previously active style and reports its parse errors through the
+// client's style error channel.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_wasLastStyleLoadSuccessful(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return JNI_FALSE;
+  }
+
+  return data->dbThread->WasLastStyleLoadSuccessful() ? JNI_TRUE : JNI_FALSE;
 }
 
 // --------------------------------------------------------------------------
@@ -830,7 +863,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
   }
 
   const std::string previousFile = data->settings->GetStyleSheetFile();
-  const size_t previousErrorCount = data->dbThread->GetStyleErrors().size();
 
   data->settings->SetStyleSheetFile(fileName);
   // Keep the currently enabled style flags (e.g. "daylight") applied to the
@@ -848,10 +880,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
     return JNI_FALSE;
   }
 
-  if (data->dbThread->GetStyleErrors().size() > previousErrorCount) {
-    // The stylesheet failed to parse: restore the previous style and surface
-    // the failure to the caller. The stored file may be relative to the
-    // stylesheet directory or an absolute path from earlier configuration.
+  if (!data->dbThread->WasLastStyleLoadSuccessful()) {
+    // The stylesheet was rejected (does not exist, fails to parse, or the load
+    // otherwise failed): the client kept the previously active style, so the
+    // persisted selection is restored to it and the failure is surfaced to the
+    // caller. The stored file may be relative to the stylesheet directory or an
+    // absolute path from earlier configuration.
     std::string previousAbsolute;
     if (previousFile.empty()) {
       previousAbsolute = dir + "/standard.oss";
@@ -1271,7 +1305,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
       // Helper lambda to load map data for one database
       auto loadDbData = [&](const osmscout::DBInstanceRef &db) {
+        // A database without a usable style configuration is never painted. The
+        // client installs the empty configuration for a database whose
+        // stylesheet failed to load, so this is a safety net, not a normal path.
         if (!db->GetStyleConfig()) {
+          osmscout::log.Warn() << "[JNI] render: skipping database without a style configuration "
+                               << db->path;
           return;
         }
 

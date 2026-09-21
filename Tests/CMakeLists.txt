@@ -1,6 +1,10 @@
 #---- FavoriteLocationService
 osmscout_test_project(NAME FavoriteLocationServiceTest SOURCES src/FavoriteLocationServiceTest.cpp TARGET OSMScout::Client)
 
+#---- Style load resilience
+osmscout_test_project(NAME StyleLoadResilienceTest SOURCES src/StyleLoadResilienceTest.cpp TARGET OSMScout::Client)
+set_tests_properties(StyleLoadResilienceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AccessParse
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
