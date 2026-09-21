@@ -2714,6 +2714,24 @@ static bool IsValidUtf8(const std::string &s) {
 // optional leading coordinate result into Java LocationEntry objects.
 // Shared by the string search (searchLocations) and the form-based address
 // search (searchLocationByForm); free-text hits are appended by the caller.
+//
+// Name of a per-attribute match quality as reported to Java. The app-side
+// ranker classifies results from these values instead of the collapsed
+// matchQuality string, which cannot distinguish "the queried attribute matched"
+// from "some attribute matched".
+static const char *MatchQualityName(osmscout::LocationSearchResult::MatchQuality quality)
+{
+  switch (quality) {
+    case osmscout::LocationSearchResult::match:
+      return "match";
+    case osmscout::LocationSearchResult::candidate:
+      return "candidate";
+    case osmscout::LocationSearchResult::none:
+    default:
+      return "none";
+  }
+}
+
 std::vector<jobject> SerializeStructuredEntries(
     JNIEnv *env, ClientData *data,
     const std::vector<ResultWithDb> &results,
@@ -2743,6 +2761,14 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID objectFileOffsetField = env->GetFieldID(entryCls, "objectFileOffset", "J");
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
+  jfieldID adminRegionMatchQualityField = env->GetFieldID(entryCls, "adminRegionMatchQuality", "Ljava/lang/String;");
+  jfieldID postalAreaMatchQualityField = env->GetFieldID(entryCls, "postalAreaMatchQuality", "Ljava/lang/String;");
+  jfieldID locationMatchQualityField = env->GetFieldID(entryCls, "locationMatchQuality", "Ljava/lang/String;");
+  jfieldID addressMatchQualityField = env->GetFieldID(entryCls, "addressMatchQuality", "Ljava/lang/String;");
+  jfieldID poiMatchQualityField = env->GetFieldID(entryCls, "poiMatchQuality", "Ljava/lang/String;");
+  jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
+  jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
+  jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
 
   // Resolve each result's object reference before building the Java array.
   // A stale or inconsistent search index can reference objects that cannot be
@@ -2895,6 +2921,17 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetDoubleField(jEntry, latField, coordLat);
     env->SetDoubleField(jEntry, lonField, coordLon);
     env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF("match"));
+    // A coordinate result is the query itself, not an entry that filled
+    // attributes: it reports "none" for every component so the app-side
+    // ranker classifies it from its type and not from a fabricated match.
+    env->SetObjectField(jEntry, adminRegionMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, locationMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, addressMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, poiMatchQualityField, env->NewStringUTF("none"));
+    env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(query.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("coordinate"));
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
     serializedEntries.push_back(jEntry);
@@ -2933,6 +2970,26 @@ std::vector<jobject> SerializeStructuredEntries(
       objectType = "place";
     } else if (entry.address) {
       objectType = "address";
+    }
+
+    // Name of the component that supplied the label. For a house-level entry
+    // the label is "street + house number", so the matched name is the street
+    // name — the app-side ranker compares the queried name against this value,
+    // never against the composite label.
+    std::string matchedName;
+    std::string matchedComponent;
+    if (entry.location) {
+      matchedName = entry.location->name;
+      matchedComponent = "location";
+    } else if (entry.poi) {
+      matchedName = entry.poi->name;
+      matchedComponent = "poi";
+    } else if (entry.adminRegion) {
+      matchedName = entry.adminRegion->name;
+      matchedComponent = "adminRegion";
+    } else if (entry.address) {
+      matchedName = entry.address->name;
+      matchedComponent = "address";
     }
 
     // match quality
@@ -2990,6 +3047,7 @@ std::vector<jobject> SerializeStructuredEntries(
         !IsValidUtf8(label) || !IsValidUtf8(type) || !IsValidUtf8(objectType) ||
         !IsValidUtf8(resolvedEntry.objectTypeName) || !IsValidUtf8(resolvedEntry.objectName) ||
         !IsValidUtf8(resolvedEntry.refType) || !IsValidUtf8(matchQuality) ||
+        !IsValidUtf8(matchedName) || !IsValidUtf8(matchedComponent) ||
         !IsValidUtf8(hierarchyPath)) {
       continue;
     }
@@ -3010,6 +3068,24 @@ std::vector<jobject> SerializeStructuredEntries(
     }
 
     env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF(matchQuality.c_str()));
+
+    // Per-attribute match quality plus the name the label was derived from.
+    // Absent components report "none" (the Entry defaults), so the app-side
+    // ranker can tell "carries the attribute and it matched" from "carries it
+    // and it did not" and from "does not carry it at all".
+    env->SetObjectField(jEntry, adminRegionMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.adminRegionMatchQuality)));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.postalAreaMatchQuality)));
+    env->SetObjectField(jEntry, locationMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.locationMatchQuality)));
+    env->SetObjectField(jEntry, addressMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.addressMatchQuality)));
+    env->SetObjectField(jEntry, poiMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.poiMatchQuality)));
+    env->SetBooleanField(jEntry, hasHouseNumberField, entry.address ? JNI_TRUE : JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(matchedName.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF(matchedComponent.c_str()));
 
     jobjectArray regionArray = env->NewObjectArray(
         static_cast<jsize>(regionParts.size()),
@@ -3421,6 +3497,22 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
   jfieldID regionField = env->GetFieldID(entryCls, "region", "[Ljava/lang/String;");
+  jfieldID adminRegionMatchQualityField = env->GetFieldID(entryCls, "adminRegionMatchQuality", "Ljava/lang/String;");
+  jfieldID postalAreaMatchQualityField = env->GetFieldID(entryCls, "postalAreaMatchQuality", "Ljava/lang/String;");
+  jfieldID locationMatchQualityField = env->GetFieldID(entryCls, "locationMatchQuality", "Ljava/lang/String;");
+  jfieldID addressMatchQualityField = env->GetFieldID(entryCls, "addressMatchQuality", "Ljava/lang/String;");
+  jfieldID poiMatchQualityField = env->GetFieldID(entryCls, "poiMatchQuality", "Ljava/lang/String;");
+  jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
+  jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
+  jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+
+  // A text-index hit has no component attribution: the query matched the whole
+  // indexed name (or a prefix of it), so the only honest signal is whether the
+  // name matches the query exactly. Match quality is therefore derived from a
+  // real comparison instead of being claimed as "match" for every hit.
+  osmscout::StringMatcherTransliterateFactory freeTextMatcherFactory;
+  osmscout::StringMatcherRef freeTextMatcher = freeTextMatcherFactory.CreateMatcher(query);
+
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
     // Garbage string data from a corrupt text index — omit the entry.
@@ -3437,7 +3529,21 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetDoubleField(jEntry, lonField, entry.lon);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(entry.objectTypeName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, entry.objectFileOffset);
-    env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF("match"));
+    bool exactNameMatch = freeTextMatcher != nullptr &&
+                          freeTextMatcher->Match(entry.label) == osmscout::StringMatcher::match;
+    env->SetObjectField(jEntry, matchQualityField,
+                        env->NewStringUTF(exactNameMatch ? "match" : "candidate"));
+    // No per-component attribution for a text-index hit: every component
+    // reports "none" so the app-side ranker can never classify such a hit as a
+    // perfect match, and the name the label came from is the label itself.
+    env->SetObjectField(jEntry, adminRegionMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, locationMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, addressMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, poiMatchQualityField, env->NewStringUTF("none"));
+    env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(entry.label.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("freeText"));
     if (!entry.refType.empty()) {
       env->SetObjectField(jEntry, refTypeField, env->NewStringUTF(entry.refType.c_str()));
     }
