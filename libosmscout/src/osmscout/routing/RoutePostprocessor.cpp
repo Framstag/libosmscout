@@ -2016,7 +2016,15 @@ namespace osmscout {
       std::transform_reduce(junctionExits.begin(), junctionExits.end(), size_t(lanes->GetLaneCount()), std::plus{},
                             [](const auto &exit) -> size_t { return exit.lanes.GetLaneCount(); });
 
-    if (junctionRightExits.empty()) {
+    if (junctionExits.empty()) {
+      // No real fork at this node at all (a "virtual junction" triggered only by a
+      // turn:lanes tag change or a lane count change along the same road, e.g. a lane
+      // gradually starting/ending ahead of a real interchange). There is nothing to
+      // consume from either side here; EvaluateLanesForRightTurn would otherwise
+      // wrongly collapse the range onto the trailing lane based on its tag alone, even
+      // though the route isn't actually turning. Leave the full incoming lane range
+      // allowed and let the route-direction-based refinement below narrow it instead.
+    } else if (junctionRightExits.empty()) {
       EvaluateLanesForRightTurn(laneTurns,
                                 lanes->GetLaneCount(),
                                 allowedLaneFrom,
@@ -2045,11 +2053,13 @@ namespace osmscout {
 
     Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
 
-    // For turn-change triggers (same lane count, different turns), refine the suggestion
-    // using lane turn annotations. This handles cases like [left, through, through;right]
-    // changing to [left, through, through] where exits may over-consume compound lanes
-    // and leave incompatible edge lanes.
-    if (prevLanes->GetLaneCount() == lanes->GetLaneCount()) {
+    // For turn-change triggers (same lane count, different turns) and for virtual
+    // junctions with no real exit at all (lane count possibly changing), refine the
+    // suggestion using lane turn annotations. This handles cases like
+    // [left, through, through;right] changing to [left, through, through] where exits
+    // may over-consume compound lanes and leave incompatible edge lanes, as well as
+    // lanes gradually starting/ending with no real fork at this node.
+    if (junctionExits.empty() || prevLanes->GetLaneCount() == lanes->GetLaneCount()) {
       constexpr uint32_t throughBit = 0b00001000;
       constexpr uint32_t leftBits   = 0b00000111;
       constexpr uint32_t rightBits  = 0b01110000;
@@ -2073,9 +2083,12 @@ namespace osmscout {
         }
       }
 
-      // Narrow edges whose turn is incompatible with the route direction.
-      // For through routes, only narrow from the left — slight road curves
-      // can make through lanes appear as slight_right in annotations.
+      // Narrow edges whose turn is incompatible with the route direction. This is
+      // based on lane turn tags, not on bearing/curve heuristics, so it is safe to
+      // apply on both sides: a lane whose turn bits don't overlap the route direction
+      // genuinely cannot be used to continue on the route (compound lanes like
+      // Through_SlightRight were already preserved above and still carry the through
+      // bit, so they are not affected here).
       bool routeIsRight = relativeBearing > Bearing::Degrees(40) && relativeBearing < Bearing::Degrees(180);
       bool routeIsLeft  = relativeBearing > Bearing::Degrees(180) && relativeBearing < Bearing::Degrees(320);
 
@@ -2091,14 +2104,12 @@ namespace osmscout {
           break;
         }
       }
-      if (routeIsLeft || routeIsRight) {
-        while (allowedLaneTo > allowedLaneFrom && allowedLaneTo < int(originalLaneTurns.size())) {
-          uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneTo]);
-          if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
-            allowedLaneTo--;
-          } else {
-            break;
-          }
+      while (allowedLaneTo > allowedLaneFrom && allowedLaneTo < int(originalLaneTurns.size())) {
+        uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneTo]);
+        if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
+          allowedLaneTo--;
+        } else {
+          break;
         }
       }
     }
