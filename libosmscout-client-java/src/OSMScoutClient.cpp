@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/async/Breaker.h>
 #include <osmscout/async/CancelableFuture.h>
@@ -57,11 +58,13 @@
 
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
+#include <osmscout/location/Location.h>
 
 #include <osmscout/feature/AccessFeature.h>
 #include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
 
@@ -73,6 +76,7 @@
 #endif
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
@@ -408,6 +412,15 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 // ClientData — opaque C++ side data attached to each OSMScoutClient
 // --------------------------------------------------------------------------
 
+// Admin region handle entry: the resolved region plus the database that
+// produced it. Region offsets (parent/children) are database-local, so the
+// owning database must be known to expand the search scope safely.
+struct AdminRegionEntry
+{
+  osmscout::DBInstanceRef db;
+  osmscout::AdminRegionRef region;
+};
+
 struct ClientData
 {
   osmscout::SettingsRef settings;                    //!< Application settings
@@ -442,7 +455,7 @@ struct ClientData
   // Admin region handles for scoped search (resolveAdminRegion/searchLocations)
   std::mutex adminRegionMutex;
   long nextAdminRegionHandle{1};
-  std::map<long, osmscout::AdminRegionRef> adminRegions;
+  std::map<long, AdminRegionEntry> adminRegions;
 };
 
 // Global singleton pointer (one active instance at a time, like OSMScoutQt)
@@ -2652,6 +2665,138 @@ struct ResultWithDb {
   osmscout::DBInstanceRef              db;
 };
 
+// Maximum admin region level for the search scope expansion (see
+// search_scope.h). Uses OSM admin_level semantics: 2=country, 4=state,
+// 6=county/district, 8=municipality, 10=suburb. The scope never widens into
+// regions coarser than this, keeping search data and result volume manageable.
+static constexpr uint8_t kMaxSearchRegionLevel = naviveylin::kMaxSearchRegionLevel;
+
+// Returns the level of an admin region: the OSM admin_level feature value when
+// the region object carries it, else the hierarchy depth normalized to the
+// admin_level scale (root=0, country=2, state=4, county=6, city=8, suburb=10).
+// Returns 0 when unknown.
+static uint8_t GetRegionLevel(const osmscout::DBInstanceRef &db,
+                              const osmscout::AdminRegionRef &region)
+{
+  if (!region) {
+    return 0;
+  }
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    return 0;
+  }
+
+  // admin_level feature from the region's object, when loadable
+  const osmscout::FeatureValueBuffer *buffer = nullptr;
+  osmscout::NodeRef node;
+  osmscout::AreaRef area;
+  osmscout::WayRef way;
+  if (region->object.GetType() == osmscout::RefType::refNode) {
+    if (database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
+      buffer = &node->GetFeatureValueBuffer();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refArea) {
+    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
+      buffer = &area->GetFeatureValueBuffer();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refWay) {
+    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
+      buffer = &way->GetFeatureValueBuffer();
+    }
+  }
+  if (buffer) {
+    size_t featureIdx = 0;
+    if (buffer->GetType()->GetFeature(osmscout::AdminLevelFeature::NAME, featureIdx) &&
+        buffer->HasFeature(featureIdx)) {
+      if (const auto *value =
+              dynamic_cast<osmscout::AdminLevelFeatureValue *>(buffer->GetValue(featureIdx));
+          value != nullptr && value->GetAdminLevel() != 0) {
+        return value->GetAdminLevel();
+      }
+    }
+  }
+
+  // Fallback: hierarchy depth normalized to the admin_level scale
+  // (root=0, country=2, state=4, county=6, city=8, suburb=10) so the cap
+  // comparison is uniform. The chain includes the region itself.
+  osmscout::LocationServiceRef locationService = db->GetLocationService();
+  if (locationService) {
+    std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
+    if (locationService->ResolveAdminRegionHierachie(region, chain)) {
+      return naviveylin::NormalizeDepthToAdminLevel(chain.size());
+    }
+  }
+
+  return 0;
+}
+
+// Collects the search scope for a resolved admin region: the highest ancestor
+// at or finer than the cap level (libosmscout's region search is recursive, so
+// one search scoped to that region covers it and ALL its subregions in a
+// single pass), else the region itself. Walking up to the cap implements
+// "one up one down": from a Stadtteil (Eving) the scope reaches the
+// Regierungsbezirk (Arnsberg), covering the city and its neighboring counties
+// (e.g. Bergkamen under Kreis Unna). When the region has no parent or every
+// ancestor is coarser than the cap, the scope is the region alone.
+static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
+                               const osmscout::AdminRegionRef &region,
+                               std::vector<osmscout::AdminRegionRef> &scope)
+{
+  scope.clear();
+  if (!region) {
+    return;
+  }
+  scope.push_back(region);
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    return;
+  }
+  osmscout::LocationServiceRef locationService = db->GetLocationService();
+  if (!locationService) {
+    return;
+  }
+
+  // Parent chain (includes the region itself); no parent -> no expansion.
+  std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
+  if (!locationService->ResolveAdminRegionHierachie(region, chain)) {
+    return;
+  }
+
+  // Walk up: keep climbing while the parent is at or finer than the cap.
+  osmscout::AdminRegionRef scopeRegion = region;
+  osmscout::FileOffset currentOffset = region->regionOffset;
+  while (true) {
+    const auto currentIt = chain.find(currentOffset);
+    if (currentIt == chain.end()) {
+      break;
+    }
+    const osmscout::AdminRegionRef &current = currentIt->second;
+    if (current->parentRegionOffset == 0) {
+      break; // root region
+    }
+    const auto parentIt = chain.find(current->parentRegionOffset);
+    if (parentIt == chain.end()) {
+      break;
+    }
+    const osmscout::AdminRegionRef &parent = parentIt->second;
+    const uint8_t parentLevel = GetRegionLevel(db, parent);
+    if (!naviveylin::ShouldExpandScope(parentLevel, kMaxSearchRegionLevel)) {
+      break; // parent coarser than the cap: stop here
+    }
+    scopeRegion = parent;
+    currentOffset = parent->regionOffset;
+  }
+
+  if (scopeRegion != region) {
+    // Scope = the highest fine ancestor; its recursive search covers all
+    // subregions down to the original region.
+    scope.clear();
+    scope.push_back(scopeRegion);
+  }
+}
+
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -3207,13 +3352,16 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #endif
   bool limitReached = false;
 
-  // Resolve the default admin region handle, if any
+  // Resolve the default admin region handle, if any. The database that
+  // resolved it travels with the handle: region offsets are database-local.
   osmscout::AdminRegionRef adminRegion;
+  osmscout::DBInstanceRef adminRegionDb;
   if (adminRegionHandle != 0) {
     std::scoped_lock lock(data->adminRegionMutex);
     auto it = data->adminRegions.find(static_cast<long>(adminRegionHandle));
     if (it != data->adminRegions.end()) {
-      adminRegion = it->second;
+      adminRegion = it->second.region;
+      adminRegionDb = it->second.db;
     }
   }
 
@@ -3251,19 +3399,6 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
           continue;
         }
 
-        osmscout::LocationStringSearchParameter param(query);
-        param.SetLimit(static_cast<size_t>(limit));
-        // Surplus query tokens (e.g. a postal code between the house number
-        // and the city) must not zero out the result set: partial matches add
-        // the best street/region candidate so addresses containing a postal
-        // code still resolve.
-        param.SetPartialMatch(true);
-        param.SetStringMatcherFactory(
-            std::make_shared<osmscout::StringMatcherTransliterateFactory>());
-        if (breaker) {
-          param.SetBreaker(breaker);
-        }
-
         // Resolve the default admin region: from a handle (NaviVeylin API) or
         // by name (upstream API); scope the search to it when available.
         osmscout::AdminRegionRef effectiveRegion = adminRegion;
@@ -3280,17 +3415,54 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
             effectiveRegion = regionResult.results.front().adminRegion;
           }
         }
-        if (effectiveRegion) {
-          param.SetDefaultAdminRegion(effectiveRegion);
+
+        // Build the search scope: for the database that resolved the handle,
+        // the highest fine ancestor (see ResolveSearchScope); for other
+        // databases, search unconstrained - the handle's region belongs to
+        // another database, and applying it here would read foreign offsets
+        // from this db's index (garbage positions). The name-based path
+        // (adminRegionDb null) resolves the region per database, so it is
+        // applied normally.
+        std::vector<osmscout::AdminRegionRef> scope;
+        if (effectiveRegion && db == adminRegionDb) {
+          ResolveSearchScope(db, effectiveRegion, scope);
+        } else if (effectiveRegion && !adminRegionDb) {
+          scope.push_back(effectiveRegion);
+        } else {
+          // Foreign region (belongs to another database) or no region at all:
+          // search unconstrained here.
+          scope.push_back(nullptr);
         }
 
-        osmscout::LocationSearchResult searchResult;
-        if (locationService->SearchForLocationByString(param, searchResult)) {
-          for (const auto &entry : searchResult.results) {
-            results.push_back(ResultWithDb{entry, db});
+        for (const auto &scopeRegion : scope) {
+          if (breaker && breaker->IsAborted()) {
+            break;
           }
-          if (searchResult.limitReached) {
-            limitReached = true;
+
+          osmscout::LocationStringSearchParameter param(query);
+          param.SetLimit(static_cast<size_t>(limit));
+          // Surplus query tokens (e.g. a postal code between the house number
+          // and the city) must not zero out the result set: partial matches add
+          // the best street/region candidate so addresses containing a postal
+          // code still resolve.
+          param.SetPartialMatch(true);
+          param.SetStringMatcherFactory(
+              std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+          if (breaker) {
+            param.SetBreaker(breaker);
+          }
+          if (scopeRegion) {
+            param.SetDefaultAdminRegion(scopeRegion);
+          }
+
+          osmscout::LocationSearchResult searchResult;
+          if (locationService->SearchForLocationByString(param, searchResult)) {
+            for (const auto &entry : searchResult.results) {
+              results.push_back(ResultWithDb{entry, db});
+            }
+            if (searchResult.limitReached) {
+              limitReached = true;
+            }
           }
         }
 
@@ -3477,6 +3649,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
   }
 
   osmscout::AdminRegionRef resolvedRegion;
+  osmscout::DBInstanceRef resolvedDb;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -3527,6 +3700,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
 
         if (best) {
           resolvedRegion = best;
+          resolvedDb = db;
           break;
         }
       }
@@ -3539,7 +3713,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
 
   std::scoped_lock lock(data->adminRegionMutex);
   const long handle = data->nextAdminRegionHandle++;
-  data->adminRegions[handle] = resolvedRegion;
+  data->adminRegions[handle] = AdminRegionEntry{resolvedDb, resolvedRegion};
   return static_cast<jlong>(handle);
 }
 
@@ -3570,7 +3744,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionName(JNIEnv *e
     std::scoped_lock lock(data->adminRegionMutex);
     auto it = data->adminRegions.find(static_cast<long>(handle));
     if (it != data->adminRegions.end()) {
-      region = it->second;
+      region = it->second.region;
     }
   }
 
@@ -3580,7 +3754,43 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionName(JNIEnv *e
   return env->NewStringUTF(region->name.c_str());
 }
 
-// --------------------------------------------------------------------------
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIEnv *env, jobject self,
+                                                                            jlong handle)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return nullptr;
+  }
+
+  osmscout::AdminRegionRef region;
+  osmscout::DBInstanceRef db;
+  {
+    std::scoped_lock lock(data->adminRegionMutex);
+    auto it = data->adminRegions.find(static_cast<long>(handle));
+    if (it != data->adminRegions.end()) {
+      region = it->second.region;
+      db = it->second.db;
+    }
+  }
+
+  if (!region) {
+    return nullptr;
+  }
+
+  // The scope region: the highest fine ancestor when the scope expands
+  // (mirrors the scope searchLocations uses), else the region itself.
+  std::vector<osmscout::AdminRegionRef> scope;
+  if (db) {
+    ResolveSearchScope(db, region, scope);
+  } else {
+    scope.push_back(region);
+  }
+  if (scope.empty() || !scope.front() || scope.front()->name.empty()) {
+    return nullptr;
+  }
+  return env->NewStringUTF(scope.front()->name.c_str());
+}
 // --------------------------------------------------------------------------
 // OSMScoutClient::cancelSearch()
 // --------------------------------------------------------------------------
