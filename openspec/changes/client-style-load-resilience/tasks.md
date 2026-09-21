@@ -145,9 +145,14 @@ independent, upstreamable patch on `master`.
 - [ ] 6.1 Check `guidelines/` and the client documentation for statements about stylesheet loading or the
       render configuration that the change invalidates, and update them if so. Verify: no guideline
       contradicts the implemented behaviour.
-- [ ] 6.2 Record the `**BREAKING**` assessment in the pull-request description: no API is removed or
+- [x] 6.2 Record the `**BREAKING**` assessment in the pull-request description: no API is removed or
       renamed; `DBInstance::LoadStyle` gains a defaulted parameter and `DBThread` gains two accessors.
-      Verify: the PR body names both signature changes explicitly.
-- [ ] 6.3 Open the pull request against `master` with the change's proposal, spec delta and design
+      Verify: the PR body names both signature changes explicitly. — Done: the PR body has a `BREAKING`
+      section stating none, and names both additive changes (`DBInstance::LoadStyle` defaulted
+      `fallback` parameter, `DBThread::GetActiveStyleSheetFilename()` / `WasLastStyleLoadSuccessful()`).
+- [x] 6.3 Open the pull request against `master` with the change's proposal, spec delta and design
       linked, and no unrelated file in the diff. Verify: `git diff master...client-style-load-resilience
-      --stat` lists only the files named in the proposal's Impact section.
+      --stat` lists only the files named in the proposal's Impact section. — Done: pushed the branch to
+      `origin` and opened **PR #1828** (`fix: keep the active style when a stylesheet fails to load`),
+      linking this change. `git diff master --name-only` lists exactly the nine source/build/test files of
+      the proposal's Impact section plus this change's five artifacts.
