@@ -308,6 +308,23 @@ public class OSMScoutClient {
     public native String getAdminRegionName(long handle);
 
     /**
+     * Get the name of the search scope region of a previously resolved admin
+     * region.
+     * <p>
+     * The scope widens from the resolved region to the highest ancestor that is
+     * still at or finer than a fixed admin level cap, because libosmscout's
+     * region search is recursive: one search scoped to that ancestor covers it
+     * and all of its subregions, so a city district scopes the search to the
+     * region containing it *and* its neighbours. When the region has no parent,
+     * or every ancestor is coarser than the cap, the scope is the region
+     * itself.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return scope region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionScopeName(long handle);
+
+    /**
      * Get a structured description of the most reasonable visible object
      * at the given geographic coordinate.
      * <p>
