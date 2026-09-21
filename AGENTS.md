@@ -150,6 +150,8 @@ GitHub Actions in `.github/workflows/`:
 
 Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
 
+Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, so the font-dependent tests do not measure whatever font the rolling MSYS2 package set happens to provide; both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`).
+
 ## Code Conventions
 
 ### Language & Standards
