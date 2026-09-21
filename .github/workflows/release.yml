@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version'
+        description: 'Release version (chronological, e.g. 2026.01.15.1); names the release and the distribution archives'
+        required: true
+      library_version:
+        description: 'Library version of this release (major.minor.patch, e.g. 1.2.0); must differ from the current one and from the release version'
         required: true
 
 env:
@@ -15,6 +18,8 @@ jobs:
   create_release:
     name: Create release
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -28,10 +33,60 @@ jobs:
       - name: Install meson and ninja via pip
         run:  "pip install meson ninja"
 
-      - name: Set version
+      - name: Verify the released versions
         run:  |
           VERSION=${{ github.event.inputs.version }}
-          sed -i "s/^ *version: *'[0-9a-z.-]*', *$/        version: '${VERSION}',/g" meson.build
+          LIBRARY_VERSION=${{ github.event.inputs.library_version }}
+
+          # The version changes travel in a pull request, because branch
+          # protection requires one and a workflow pushing with GITHUB_TOKEN
+          # cannot bypass it. This step therefore asserts instead of editing:
+          # the revision being released has to declare both versions, or the
+          # tag, the archives and the container images would disagree with each
+          # other. See Documentation/MapRepository.md, section 5.
+          if ! echo "${LIBRARY_VERSION}" | grep -qE '^[0-9]+[.][0-9]+[.][0-9]+$'; then
+            echo "library version '${LIBRARY_VERSION}' must have three numeric components (major.minor.patch)" >&2
+            exit 1
+          fi
+          if [ "${LIBRARY_VERSION}" = "${VERSION}" ]; then
+            echo "library version '${LIBRARY_VERSION}' must differ from the release version '${VERSION}'" >&2
+            exit 1
+          fi
+
+          declared_release_version=$(sed -nE "s/^ *version: *'([^']*)',.*/\1/p" meson.build | head -1)
+          if [ "${declared_release_version}" != "${VERSION}" ]; then
+            echo "this revision declares release version '${declared_release_version}', not '${VERSION}': set it in meson.build first" >&2
+            exit 1
+          fi
+
+          declared_cmake=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
+          declared_meson=$(sed -nE "s/^libraryVersion='([^']*)'.*/\1/p" meson.build)
+          if [ -z "${declared_cmake}" ] || [ -z "${declared_meson}" ]; then
+            echo "cannot read the library version from CMakeLists.txt or meson.build" >&2
+            exit 1
+          fi
+          if [ "${declared_cmake}" != "${declared_meson}" ]; then
+            echo "library version mismatch: CMakeLists.txt declares '${declared_cmake}', meson.build declares '${declared_meson}'" >&2
+            exit 1
+          fi
+          if [ "${declared_cmake}" != "${LIBRARY_VERSION}" ]; then
+            echo "this revision declares library version '${declared_cmake}', not '${LIBRARY_VERSION}': merge a version bump first" >&2
+            exit 1
+          fi
+
+          previous_tag=$(git tag --list 'v*' --sort=-creatordate | head -1 || true)
+          if [ -n "${previous_tag}" ]; then
+            previous_library_version=$(git show "${previous_tag}:CMakeLists.txt" | sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p')
+            if [ "${previous_library_version}" = "${LIBRARY_VERSION}" ]; then
+              echo "library version '${LIBRARY_VERSION}' is the one release ${previous_tag} already reports: bump it" >&2
+              exit 1
+            fi
+            echo "previous release ${previous_tag} reports library version ${previous_library_version}"
+          else
+            echo "no previous release tag found, skipping the consecutive-release check"
+          fi
+
+          echo "releasing ${VERSION}, library version ${LIBRARY_VERSION}"
 
       - name: Initialize meson project
         run:  meson setup dist --wrap-mode nofallback

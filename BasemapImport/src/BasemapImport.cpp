@@ -31,6 +31,7 @@
 
 #include <osmscout/io/File.h>
 
+#include <osmscoutimport/DbJson.h>
 #include <osmscoutimport/ShapeFileScanner.h>
 
 #include <osmscoutimport/WaterIndexProcessor.h>
@@ -344,6 +345,21 @@ static bool ImportCoastlines(const std::string& destinationDirectory,
     }
 
     writer.Close();
+
+    bool inventoryUpdated=false;
+
+    if (!osmscout::AddDbJsonInventoryEntry(destinationDirectory,
+                                          "water.idx",
+                                          inventoryUpdated)) {
+      progress.Error("Cannot add 'water.idx' to the file inventory in '"+
+                     osmscout::AppendFileToDir(destinationDirectory,"db.json")+"'");
+
+      return false;
+    }
+
+    if (!inventoryUpdated) {
+      progress.Info("No db.json in destination directory, 'water.idx' is not added to a file inventory");
+    }
   }
   catch (osmscout::IOException& e) {
     progress.Error(e.GetDescription());

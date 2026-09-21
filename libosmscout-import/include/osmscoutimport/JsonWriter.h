@@ -17,13 +17,15 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include <cstdint>
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include <osmscoutimport/ImportImportExport.h>
 
 namespace osmscout {
 
@@ -41,7 +43,7 @@ namespace osmscout {
    *   writer.Value("value");
    *   writer.EndObject();
    */
-  class JsonWriter
+  class OSMSCOUT_IMPORT_API JsonWriter
   {
   private:
     enum class Context : std::uint8_t {

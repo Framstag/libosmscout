@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdarg>
+#include <cstddef>
 #include <cmath>
 #include <condition_variable>
 #include <cstdint>
@@ -32,6 +33,7 @@
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/async/Breaker.h>
 #include <osmscout/async/CancelableFuture.h>
@@ -59,6 +61,7 @@
 
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
+#include <osmscout/location/Location.h>
 
 #include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/AccessFeature.h>
@@ -77,6 +80,7 @@
 #endif
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
@@ -431,7 +435,7 @@ struct ClientData
   osmscout::FavoriteStore favoriteStore;             //!< Favorite store; owns the service and serialises wholesale replacement
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
-  size_t tileDataCacheSize{0};                        //!< Tile data cache capacity (0 = library default)
+  std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   std::vector<std::filesystem::path> knownPaths;     //!< Known map paths
 
   // Routing state
@@ -998,7 +1002,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEn
   if (data == nullptr) {
     return;
   }
-  data->tileDataCacheSize = (cacheSize > 0) ? static_cast<size_t>(cacheSize) : 0;
+  data->tileDataCacheSize = (cacheSize > 0) ? static_cast<std::size_t>(cacheSize) : 0;
   osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
 }
 
@@ -1410,7 +1414,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
       // Configure the tile data cache capacity of every open database
       // before any data loads (idempotent; also covers databases that opened
-      // asynchronously since the last render — map scan, basemap reload).
+      // asynchronously since the last render - map scan, basemap reload).
       if (data->tileDataCacheSize > 0) {
         for (const auto &db : databases) {
           if (db && db->GetMapService()) {
@@ -2886,16 +2890,16 @@ struct ResultWithDb {
   osmscout::DBInstanceRef              db;
 };
 
-// Maximum admin region level for sibling expansion (see search_scope.h).
-// Uses OSM admin_level semantics: 2=country, 4=state, 6=county/district,
-// 8=municipality, 10=suburb. Expansion never crosses into scopes coarser
-// than this, keeping search data and result volume manageable.
+// Maximum admin region level for the search scope expansion (see
+// search_scope.h). Uses OSM admin_level semantics: 2=country, 4=state,
+// 6=county/district, 8=municipality, 10=suburb. The scope never widens into
+// regions coarser than this, keeping search data and result volume manageable.
 static constexpr uint8_t kMaxSearchRegionLevel = naviveylin::kMaxSearchRegionLevel;
 
-// Returns the level of an admin region: the OSM admin_level feature value
-// when the region object carries it, else the hierarchy depth normalized to
-// the admin_level scale (root=0, country=2, state=4, county=6, city=8,
-// suburb=10). Returns 0 when unknown.
+// Returns the level of an admin region: the OSM admin_level feature value when
+// the region object carries it, else the hierarchy depth normalized to the
+// admin_level scale (root=0, country=2, state=4, county=6, city=8, suburb=10).
+// Returns 0 when unknown.
 static uint8_t GetRegionLevel(const osmscout::DBInstanceRef &db,
                               const osmscout::AdminRegionRef &region)
 {
@@ -3009,7 +3013,7 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
                          << parent->name << "' (level " << static_cast<int>(parentLevel)
                          << ", cap " << static_cast<int>(kMaxSearchRegionLevel) << ")";
     if (!naviveylin::ShouldExpandScope(parentLevel, kMaxSearchRegionLevel)) {
-      break; // parent coarser than cap: stop here
+      break; // parent coarser than the cap: stop here
     }
     scopeRegion = parent;
     currentOffset = parent->regionOffset;
@@ -3551,7 +3555,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         param.SetLimit(static_cast<size_t>(limit));
         // A house number missing from the index must not zero out the whole
         // lookup: partial matches add the best street/region candidate so the
-        // caller can resolve to the street (fix-address-lookup-accuracy).
+        // caller can resolve to the street.
         param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
@@ -3654,9 +3658,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #endif
   bool limitReached = false;
 
-  // Resolve the default admin region handle, if any. The owning database is
-  // kept so sibling expansion can be restricted to it (region offsets are
-  // database-local).
+  // Resolve the default admin region handle, if any. The database that
+  // resolved it travels with the handle: region offsets are database-local.
   osmscout::AdminRegionRef adminRegion;
   osmscout::DBInstanceRef adminRegionDb;
   if (adminRegionHandle != 0) {
@@ -3678,20 +3681,12 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
       // Each source has its own candidate budget: the caller ranks the union of
       // structured and free-text entries and truncates to what it displays, so a
-      // full page of structured results must not delete the text-index
-      // candidates (spec: search-result-ranking — "Candidate set larger than
-      // displayed list"; search-free-text — free-text hits are not a tail that
-      // structured results can crowd out).
+      // full page of structured results must not crowd the text-index candidates
+      // out of the set (openspec/specs/search-free-text, "Free-text results
+      // merged with structured results").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
       const auto freeTextLimitReached = [&]() {
         return freeTextEntries.size() >= static_cast<size_t>(limit);
-      };
-#else
-      // No text index in this build (marisa not found): there are no free-text
-      // candidates to budget, so the only source this loop can exhaust is the
-      // structured one — the condition the pre-change helper used here.
-      const auto freeTextLimitReached = [&]() {
-        return results.size() >= static_cast<size_t>(limit);
       };
 #endif
 
@@ -3757,9 +3752,9 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
           osmscout::LocationStringSearchParameter param(query);
           param.SetLimit(static_cast<size_t>(limit));
           // Surplus query tokens (e.g. a postal code between the house number
-          // and the city) must not zero out the result set: partial matches
-          // add the best street/region candidate so addresses containing a
-          // postal code still resolve (fix-address-lookup-accuracy).
+          // and the city) must not zero out the result set: partial matches add
+          // the best street/region candidate so addresses containing a postal
+          // code still resolve.
           param.SetPartialMatch(true);
           param.SetStringMatcherFactory(
               std::make_shared<osmscout::StringMatcherTransliterateFactory>());
@@ -3819,9 +3814,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         }
 #endif
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+        // Only the free-text budget ends the walk over the databases: a full
+        // page of structured results must not stop the text-index candidates of
+        // the remaining databases from being collected.
         if (freeTextLimitReached()) {
           break;
         }
+#endif
       }
     }
   );

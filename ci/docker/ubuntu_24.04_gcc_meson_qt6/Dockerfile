@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
           locales \
           meson ninja-build g++ \
           catch2 \
+          nlohmann-json3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8

@@ -74,7 +74,9 @@ public class LocationEntry {
     /**
      * Name of the component that supplied {@link #label}: for a house-level
      * entry the street name (the label itself is street + house number), for a
-     * location/POI/region entry the entry's own name. Null when unknown.
+     * location/POI/region entry the entry's own name. For the coordinate result
+     * it is the query, for a free-text hit the indexed label itself. Null when
+     * unknown.
      */
     public String matchedName;
 
@@ -82,6 +84,11 @@ public class LocationEntry {
      * Which component supplied {@link #matchedName} and therefore which of the
      * per-attribute quality fields carries its match quality: one of
      * "adminRegion", "location", "poi", "address". Null when unknown.
+     * <p>
+     * Two further values occur outside the structured search and carry no
+     * attribute attribution: "coordinate" for the coordinate result appended to
+     * a structured search, and "freeText" for a hit of the text index. For both,
+     * every per-attribute quality is reported as "none".
      * <p>
      * Needed because the label and {@link #objectType} are derived from
      * different component precedences, so the quality field to consult cannot
