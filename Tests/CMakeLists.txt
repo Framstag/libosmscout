@@ -90,6 +90,9 @@ osmscout_test_project(NAME ReaderScannerPerformanceTest SOURCES src/ReaderScanne
 #---- MultiDBRouting
 osmscout_test_project(NAME MultiDBRoutingTest SOURCES src/MultiDBRoutingTest.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
+#---- NavigationAgent
+osmscout_test_project(NAME NavigationAgentTest SOURCES src/NavigationAgentTest.cpp)
+
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	osmscout_test_project(NAME ThreadedDatabaseTest SOURCES src/ThreadedDatabaseTest.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")

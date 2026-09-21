@@ -430,6 +430,16 @@ MultiDBRoutingTest = executable('MultiDBRoutingTest',
 
 test('Check routing', MultiDBRoutingTest, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
 
+NavigationAgentTest = executable('NavigationAgentTest',
+             'src/NavigationAgentTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check navigation agents', NavigationAgentTest)
+
 NumberSetPerformanceTest = executable('NumberSetPerformanceTest',
                                   'src/NumberSetPerformanceTest.cpp',
                                   include_directories: [osmscoutIncDir],
