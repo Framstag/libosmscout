@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdarg>
+#include <cstddef>
 #include <cmath>
 #include <condition_variable>
 #include <cstdint>
@@ -417,6 +418,7 @@ struct ClientData
   osmscout::FavoriteLocationService *favService;     //!< Favorite location service (owned)
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   std::vector<std::filesystem::path> knownPaths;     //!< Known map paths
 
   // Routing state
@@ -879,6 +881,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobje
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setNativeDataCacheSize(int cacheSize)
+//
+// Configures the capacity of libosmscout's per-database tile data caches
+// (regional databases and basemap). The value is stored and applied to every
+// open database's MapService before tile data is loaded for the next render,
+// so it also covers databases that open asynchronously after this call
+// (basemap reload, map scan). Idempotent; <= 0 keeps the library default.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEnv *env, jobject self, jint cacheSize)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+  data->tileDataCacheSize = (cacheSize > 0) ? static_cast<std::size_t>(cacheSize) : 0;
+  osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
+}
+
+// --------------------------------------------------------------------------
 
 // OSMScoutClient::close()
 // --------------------------------------------------------------------------
@@ -1274,6 +1297,26 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
         batch.emplace_back(std::move(mapData));
       };
+
+      // Configure the tile data cache capacity of every open database
+      // before any data loads (idempotent; also covers databases that opened
+      // asynchronously since the last render - map scan, basemap reload).
+      if (data->tileDataCacheSize > 0) {
+        for (const auto &db : databases) {
+          if (db && db->GetMapService()) {
+            db->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+          }
+        }
+        if (basemapDatabase && basemapDatabase->GetMapService()) {
+          basemapDatabase->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+        }
+        osmscout::log.Debug() << "[JNI] render: applied tile data cache size "
+                              << data->tileDataCacheSize
+                              << " to " << databases.size() << " db(s)"
+                              << (basemapDatabase && basemapDatabase->GetMapService()
+                                      ? " + basemap"
+                                      : "");
+      }
 
       // Load regular databases first
       for (const auto &db : databases) {

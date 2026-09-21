@@ -88,6 +88,20 @@ public class OSMScoutClient {
     public native void setStyleSheetFlag(String key, boolean value);
 
     /**
+     * Configures the capacity of the tile data caches that the map service of
+     * each database keeps (regional databases and basemap).
+     * <p>
+     * The value is applied to every open database before tile data is loaded
+     * for the next render, so it also covers a database that opens later (a map
+     * scan or a basemap reload). Idempotent; a non-positive value keeps the
+     * library default.
+     *
+     * @param cacheSize cache capacity, or a non-positive value for the library
+     *                  default
+     */
+    public native void setNativeDataCacheSize(int cacheSize);
+
+    /**
      * Returns the names of all available map styles.
      * <p>
      * Styles are derived from the top-level {@code *.oss} files in the
