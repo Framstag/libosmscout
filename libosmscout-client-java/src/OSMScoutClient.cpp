@@ -3223,10 +3223,9 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
       // Each source has its own candidate budget: the caller ranks the union of
       // structured and free-text entries and truncates to what it displays, so a
-      // full page of structured results must not delete the text-index
-      // candidates (spec: search-result-ranking — "Candidate set larger than
-      // displayed list"; search-free-text — free-text hits are not a tail that
-      // structured results can crowd out).
+      // full page of structured results must not crowd the text-index candidates
+      // out of the set (openspec/specs/search-free-text, "Free-text results
+      // merged with structured results").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
       const auto freeTextLimitReached = [&]() {
         return freeTextEntries.size() >= static_cast<size_t>(limit);
@@ -3324,9 +3323,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         }
 #endif
 
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+        // Only the free-text budget ends the walk over the databases: a full
+        // page of structured results must not stop the text-index candidates of
+        // the remaining databases from being collected.
         if (freeTextLimitReached()) {
           break;
         }
+#endif
       }
     }
   );
