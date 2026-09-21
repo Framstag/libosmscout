@@ -3102,6 +3102,10 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         param.SetLocationSearchString(location);
         param.SetAddressSearchString(address);
         param.SetLimit(static_cast<size_t>(limit));
+        // A house number missing from the index must not zero out the whole
+        // lookup: partial matches add the best street/region candidate so the
+        // caller can resolve to the street.
+        param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
 
@@ -3246,6 +3250,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
         osmscout::LocationStringSearchParameter param(query);
         param.SetLimit(static_cast<size_t>(limit));
+        // Surplus query tokens (e.g. a postal code between the house number
+        // and the city) must not zero out the result set: partial matches add
+        // the best street/region candidate so addresses containing a postal
+        // code still resolve.
+        param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
         if (breaker) {

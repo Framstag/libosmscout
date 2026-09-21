@@ -247,4 +247,26 @@ TEST_CASE("String search for city, location and address")
     REQUIRE(result.results.front().address->name=="1");
     REQUIRE(result.results.front().addressMatchQuality==osmscout::LocationSearchResult::match);
   }
+
+  /*
+   * A surplus postal-code token between the house number and the city used
+   * to zero out the result set (every token must be consumed). With partial
+   * match enabled the search falls back to the street-level candidate instead
+   * (fix-address-lookup-accuracy).
+   */
+  SECTION("Search for address with surplus postal token: 'Am Birkenbaum 1 44339 Dortmund' (partial fallback)")
+  {
+    osmscout::LocationStringSearchParameter parameter("Am Birkenbaum 1 44339 Dortmund");
+    parameter.SetPartialMatch(true);
+    osmscout::LocationSearchResult          result;
+
+    bool success=locationService->SearchForLocationByString(parameter,
+                                                            result);
+
+    REQUIRE(success);
+    REQUIRE_FALSE(result.limitReached);
+    REQUIRE_FALSE(result.results.empty());
+    REQUIRE(result.results.front().adminRegion->name=="Dortmund");
+    REQUIRE(result.results.front().location->name=="Am Birkenbaum");
+  }
 }
