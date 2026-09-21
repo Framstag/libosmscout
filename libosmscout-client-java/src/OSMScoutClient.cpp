@@ -3107,6 +3107,10 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         param.SetLocationSearchString(location);
         param.SetAddressSearchString(address);
         param.SetLimit(static_cast<size_t>(limit));
+        // A house number missing from the index must not zero out the whole
+        // lookup: partial matches add the best street/region candidate so the
+        // caller can resolve to the street.
+        param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
 
@@ -3226,13 +3230,16 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         breaker = g_currentBreaker;
       }
 
-      const auto limitReachedTotal = [&]() {
+      // Each source has its own candidate budget: the caller ranks the union of
+      // structured and free-text entries and truncates to what it displays, so a
+      // full page of structured results must not crowd the text-index candidates
+      // out of the set (openspec/specs/search-free-text, "Free-text results
+      // merged with structured results").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-        return results.size() + freeTextEntries.size() >= static_cast<size_t>(limit);
-#else
-        return results.size() >= static_cast<size_t>(limit);
-#endif
+      const auto freeTextLimitReached = [&]() {
+        return freeTextEntries.size() >= static_cast<size_t>(limit);
       };
+#endif
 
       for (const auto &db : databases) {
         if (breaker && breaker->IsAborted()) {
@@ -3251,6 +3258,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
         osmscout::LocationStringSearchParameter param(query);
         param.SetLimit(static_cast<size_t>(limit));
+        // Surplus query tokens (e.g. a postal code between the house number
+        // and the city) must not zero out the result set: partial matches add
+        // the best street/region candidate so addresses containing a postal
+        // code still resolve.
+        param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
         if (breaker) {
@@ -3305,11 +3317,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                             /*transliterate*/ true,
                             resultsTxt);
           for (const auto &e : resultsTxt) {
-            if (limitReachedTotal()) {
+            if (freeTextLimitReached()) {
               break;
             }
             for (const auto &fref : e.second) {
-              if (limitReachedTotal()) {
+              if (freeTextLimitReached()) {
                 break;
               }
               if (seenOffsets[db].count(fref.GetFileOffset()) != 0) {
@@ -3325,9 +3337,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         }
 #endif
 
-        if (limitReachedTotal()) {
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+        // Only the free-text budget ends the walk over the databases: a full
+        // page of structured results must not stop the text-index candidates of
+        // the remaining databases from being collected.
+        if (freeTextLimitReached()) {
           break;
         }
+#endif
       }
     }
   );
@@ -3362,23 +3379,21 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       freeTextEntries.end());
 #endif
 
-  // Truncate to limit: structured results first, free-text fills the rest.
+  // Cap each source at the requested candidate count: structured results first,
+  // free-text independently. The caller ranks the union and truncates to the
+  // entries it displays, so neither source can crowd the other out of the
+  // candidate set.
   // Note: freeTextEntries is only ever SHRUNK here — resize() with a larger
   // size would pad the vector with default-constructed (empty) entries that
   // get serialized as garbage results with (0,0) coordinates.
-  if (results.size() >= static_cast<size_t>(limit)) {
+  if (results.size() > static_cast<size_t>(limit)) {
     results.resize(static_cast<size_t>(limit));
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
-    freeTextEntries.clear();
-#endif
-  } else {
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
-    const size_t remaining = static_cast<size_t>(limit) - results.size();
-    if (freeTextEntries.size() > remaining) {
-      freeTextEntries.resize(remaining);
-    }
-#endif
   }
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+  if (freeTextEntries.size() > static_cast<size_t>(limit)) {
+    freeTextEntries.resize(static_cast<size_t>(limit));
+  }
+#endif
 
   // Serialize structured results (defensively resolved) plus the optional
   // coordinate result; free-text hits are appended below.
