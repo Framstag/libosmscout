@@ -54,6 +54,18 @@
 
 namespace {
 
+  /**
+   * The DPI the fixed viewport of this file is projected with and the lower DPI the test of the DPI
+   * dependence compares it with.
+   */
+  constexpr double referenceDpi=300.0;
+  constexpr double lowerDpi=96.0;
+
+  /**
+   * Highest magnification level the synthetic style sheets of the tests apply at.
+   */
+  constexpr size_t maxStyleLevel=25;
+
 // ---------------------------------------------------------------------------
 // Painter that records the prepared areas, i.e. what the backend sees during
 // the post-preprocessing callback
@@ -345,19 +357,28 @@ namespace {
 
   /**
    * Projection of a fixed viewport, set with the DPI first and the image dimensions second, so the
-   * viewport is 400x400 pixels at 300 DPI.
+   * viewport is 400x400 pixels at the given DPI.
    */
-  osmscout::MercatorProjection MakeProjection()
+  osmscout::MercatorProjection MakeProjectionWithDpi(double dpi)
   {
     osmscout::MercatorProjection projection;
 
     REQUIRE(projection.Set(osmscout::GeoCoord(50.001,8.001),
                            osmscout::Magnification(osmscout::Magnification::magClose),
-                           300,
+                           dpi,
                            400,
                            400));
 
     return projection;
+  }
+
+  /**
+   * Projection of the fixed viewport at the reference DPI, the DPI the tests of this file project
+   * with.
+   */
+  osmscout::MercatorProjection MakeProjection()
+  {
+    return MakeProjectionWithDpi(referenceDpi);
   }
 
   osmscout::MapParameter MakeParameter()
@@ -588,8 +609,8 @@ TEST_CASE("An area within the border tolerance is not rejected","[MapPainterArea
   double previousBound=0.0;
 
   for (double borderWidthMM : {0.1,100.0}) {
-    // The per-ring decision extends a ring by half of the raw style width
-    const double perRingTolerancePx=borderWidthMM*borderWidthToTolerance;
+    // The per-ring decision extends a ring by half of the style width converted to screen pixels
+    const double perRingTolerancePx=projection.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
 
     auto         styleConfig=MakeStyles(types,borderWidthMM,0,25);
 
@@ -605,8 +626,9 @@ TEST_CASE("An area within the border tolerance is not rejected","[MapPainterArea
     previousBound=bound;
 
     // And it is never smaller than the tolerance of the per-ring decision, whatever the DPI of the
-    // projection, because both are half of a border width of the same style sheet
-    REQUIRE(bound*borderWidthToTolerance>=perRingTolerancePx);
+    // projection, because both are half of a border width of the same style sheet converted with the
+    // same projection
+    REQUIRE(projection.ConvertWidthToPixel(bound*borderWidthToTolerance)>=perRingTolerancePx);
 
     /**
      * Prepare a frame with a single area whose left screen edge is at the given x position.
@@ -636,10 +658,84 @@ TEST_CASE("An area within the border tolerance is not rejected","[MapPainterArea
     // has to use at least the tolerance the per-ring decision can use, so this area must survive
     REQUIRE(preparedWithLeftEdgeAt(screenRight+perRingTolerancePx-10.0)==1);
 
+    // The tolerance is a converted screen length, not the raw millimetre number: for a wide border
+    // the converted value is far larger than the raw one, so an area that is beyond the raw number
+    // still has to survive (the millimetre-as-pixel behaviour rejects it)
+    const double rawTolerancePx=borderWidthMM*borderWidthToTolerance;
+
+    if (perRingTolerancePx>rawTolerancePx+1.0) {
+      REQUIRE(preparedWithLeftEdgeAt(screenRight+rawTolerancePx+1.0)==1);
+    }
+
     // Far outside any tolerance: nothing is prepared, which is what makes the assertion above a
     // statement about the early decision and not about a pipeline that prepares everything
     REQUIRE(preparedWithLeftEdgeAt(screenRight+(20.0*perRingTolerancePx))==0);
   }
+}
+
+TEST_CASE("The border tolerance of a stylesheet width follows the DPI of the projection",
+          "[MapPainterAreaVisibilityCull]")
+{
+  auto         types=MakeTypes();
+
+  const double borderWidthMM=10.0;
+
+  auto         styleConfig=MakeStyles(types,borderWidthMM,0,maxStyleLevel);
+
+  auto         projection96=MakeProjectionWithDpi(lowerDpi);
+  auto         projection300=MakeProjectionWithDpi(referenceDpi);
+
+  // The two projections describe the same viewport and the same pixel geometry; only the DPI differs
+  REQUIRE(projection96.GetWidth()==projection300.GetWidth());
+  REQUIRE(projection96.GetHeight()==projection300.GetHeight());
+
+  const double tolerancePx96=projection96.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+  const double tolerancePx300=projection300.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+
+  REQUIRE(tolerancePx300>tolerancePx96);
+
+  const double halfSizePx=60.0;
+
+  auto         parameter=MakeParameter();
+
+  const Extent extent=ExtentForPixels(projection300,halfSizePx);
+
+  // The area reaches into the view by just over the converted tolerance of the 96 DPI projection and
+  // well within the tolerated reach of the 300 DPI projection, so only the latter may keep it
+  const double reachPx=tolerancePx96+1.0;
+
+  REQUIRE(reachPx<tolerancePx300);
+
+  auto preparedAt=[&](const osmscout::MercatorProjection& projection) {
+                     auto         data=MakeData(styleConfig);
+
+                     const double screenRight=static_cast<double>(projection.GetWidth());
+                     const double screenMiddleX=screenRight/2.0;
+
+                     // The area center is half its width to the right of its left edge
+                     double centerLonOffset=DegreesLonForPixels(projection,
+                                                                screenRight+reachPx+halfSizePx-screenMiddleX);
+
+                     data.areas.push_back(MakeArea(types.styledAreaType,
+                                                   {projection.GetCenter().GetLat(),
+                                                    projection.GetCenter().GetLon()+centerLonOffset},
+                                                   extent));
+
+                     RecordingPainter painter;
+
+                     Render(painter,projection,parameter,data);
+
+                     return painter.Areas().size();
+                   };
+
+  INFO("tolerance at 96 DPI: " << tolerancePx96);
+  INFO("tolerance at 300 DPI: " << tolerancePx300);
+  INFO("the area reaches the view by: " << reachPx);
+
+  // The area lies outside the view, so its ring is prepared only if the converted border width of the
+  // style sheet reaches it - a raw millimetre number used as pixels reaches neither
+  REQUIRE(preparedAt(projection300)==1);
+  REQUIRE(preparedAt(projection96)==0);
 }
 
 // ---------------------------------------------------------------------------
