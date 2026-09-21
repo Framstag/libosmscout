@@ -17,7 +17,7 @@ independent, upstreamable patch on `master`.
 
 ## 2. Client configuration lifecycle (install on clean parse)
 
-- [ ] 2.1 Add the fallback configuration parameter to `DBInstance::LoadStyle`
+- [x] 2.1 Add the fallback configuration parameter to `DBInstance::LoadStyle`
       (`libosmscout-client/include/osmscoutclient/DBInstance.h`,
       `libosmscout-client/src/osmscoutclient/DBInstance.cpp`): the candidate configuration is adopted
       only when the parse reported no errors; on a rejected parse the previously installed
@@ -82,7 +82,7 @@ independent, upstreamable patch on `master`.
 
 ## 4. Tests
 
-- [ ] 4.1 Add `Tests/src/StyleLoadResilienceTest.cpp` covering: a rejected stylesheet keeps the
+- [x] 4.1 Add `Tests/src/StyleLoadResilienceTest.cpp` covering: a rejected stylesheet keeps the
       previously active configuration; a first failed load installs the fallback; valid → rejected →
       valid recovers; a batch with one fallback-configured and one healthy database paints without a
       fault. Use a stylesheet with a missing module plus a syntax error — not an invalid colour literal,
@@ -142,7 +142,7 @@ independent, upstreamable patch on `master`.
 
 ## 6. Documentation and pull request
 
-- [ ] 6.1 Check `guidelines/` and the client documentation for statements about stylesheet loading or the
+- [x] 6.1 Check `guidelines/` and the client documentation for statements about stylesheet loading or the
       render configuration that the change invalidates, and update them if so. Verify: no guideline
       contradicts the implemented behaviour.
 - [x] 6.2 Record the `**BREAKING**` assessment in the pull-request description: no API is removed or
