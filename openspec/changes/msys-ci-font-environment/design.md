@@ -61,7 +61,9 @@ Risk of the chosen option: it only works if fontconfig scans the directory it is
 
 ### D2: Put the font where fontconfig looks, and verify rather than assume
 
-**Chosen:** copy the file into `$MINGW_PREFIX/share/fonts/TTF` and refresh the font cache, then let the verification step (D4) prove that the family resolves to that file. If the verification fails on the first run, switch the test steps to a generated font configuration that names the bundled directory explicitly (and the Windows font directory) through the font configuration environment variable.
+**Chosen (as implemented):** register the repository's font directory with the packaged font configuration through a snippet in `${MINGW_PREFIX}/etc/fonts/conf.d/`, naming the directory as a native Windows path (`cygpath -m`), then refresh that directory's font cache. The packaged `fonts.conf` includes `conf.d`, so nothing is copied and no environment variable is needed, and the Windows font directories stay in place.
+
+**First attempt, and why it was replaced:** copy the bundled file into `$MINGW_PREFIX/share/fonts/TTF` and refresh that directory's cache. The first run of this change (MSYS on PR #1829, 19:34 UTC) had the verification step report `Liberation Sans resolves to: C:/Windows/fonts/arial.ttf`: the copy succeeded, but that fontconfig build indexes what its configuration names, so a directory the configuration does not list stays invisible however often it is cached. This is the fallback the alternatives below describe, not a different approach - the requirement, that the family resolves from repository content, is unchanged.
 
 Alternatives:
 
@@ -107,7 +109,7 @@ Risk: the package set keeps moving, so this class of drift can recur. Mitigation
 
 ## Risks / Trade-offs
 
-- **The family still does not resolve after provisioning** (fontconfig does not scan the prefix font directory) → the verification step fails on the first run with the resolved file named; mitigation is the D2 fallback configuration, which needs no spec or task change beyond the mechanism used.
+- **The family still does not resolve after provisioning** (fontconfig does not index the prefix font directory) → **materialised on the first run** as `C:/Windows/fonts/arial.ttf`; the verification step reported it after two minutes instead of after a build, and the D2 fallback closed it without a spec or task change.
 - **Provisioning does not fix the failure** because the real cause is a changed renderer metric rather than font resolution (cairo 1.18.4-4 → 1.18.6-1 is the other candidate) → the verification step separates "environment is broken" from "renderer changed": if the preflight passes and the tests still fail, the cause is in the renderer and the tests' expectations need their own change. The first run of this change answers that question.
 - **A later `pacman` invocation in the same job removes the copied file** → the copy happens after the setup step and the verification step immediately precedes the build; `--exclude-regex PerformanceTest` aside, no package operation runs afterwards.
 - **A restricted fallback configuration hides host fonts** → include the Windows font directory in it, so that the generic families still resolve; the fallback is only used if the prefix directory turns out not to be scanned.
@@ -120,5 +122,5 @@ Single workflow file, no state, no data, no API. Steps: apply the workflow chang
 
 ## Open Questions
 
-- Whether the prefix font directory is scanned by this fontconfig build — deliberately left to the verification step's first output, since either answer uses the same requirements and tasks.
+- Whether the prefix font directory is scanned by this fontconfig build - **answered at 2026-09-21 19:34 UTC: it is not.** With the bundled font copied to `$MINGW_PREFIX/share/fonts/TTF` and that directory cached, the verification step reported `Liberation Sans resolves to: C:/Windows/fonts/arial.ttf`; the mechanism was replaced as D2 describes, and the snippet's XML was checked against a local fontconfig before the next run.
 - Whether MSYS re-runs of the already-queued commits (started 18:59 UTC) still fail - **answered at 2026-09-21 19:22 UTC: they still fail.** Runs `35641955424` (19:12) and `35641974854` (19:14) of `client-style-load-resilience` reproduce the master failures exactly (see Context), on commits that do not touch the MSYS environment. The drift is therefore persistent, and provisioning plus verification is the response; the change is not contingent on a transient upstream state.
