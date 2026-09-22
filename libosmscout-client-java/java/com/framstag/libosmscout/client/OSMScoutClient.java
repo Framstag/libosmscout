@@ -35,6 +35,22 @@ public class OSMScoutClient {
     public native boolean openDatabase(String path);
 
     /**
+     * Open a whole list of map database directories as one operation.
+     * <p>
+     * Each {@code openDatabase} call closes and reopens every open database on
+     * the database thread, so registering K directories one by one costs K full
+     * database-set changes for one logical set. A caller that already has the
+     * list must hand it over here: one call, one set change, one publication to
+     * the database thread. Concurrent calls from several threads are safe.
+     *
+     * @param paths filesystem paths to the map database directories
+     * @return index-aligned with {@code paths}: true when that directory is part
+     *         of the registered set afterwards. An element that is null or
+     *         unreadable is false; a null or empty array returns an empty array.
+     */
+    public native boolean[] openDatabases(String[] paths);
+
+    /**
      * Close the database and release all native C++ resources.
      *
      * @return true if resources were released, false if not initialised

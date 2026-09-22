@@ -22,6 +22,16 @@ FavoriteStoreTest = executable('FavoriteStoreTest',
 
 test('Check FavoriteStore', FavoriteStoreTest)
 
+DatabaseOpenTest = executable('DatabaseOpenTest',
+             'src/DatabaseOpenTest.cpp',
+             include_directories: [testIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check database path registration', DatabaseOpenTest)
+
 StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
              'src/StyleLoadResilienceTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
