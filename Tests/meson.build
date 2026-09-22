@@ -525,7 +525,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
 
   if get_option('buildDemos')
     performanceTestDeps = deps
-    performanceTestIncludes = includes
+    performanceTestIncludes = includes + [testIncDir]
     performanceTestArgs = ['-fPIC']
 
     # The Cairo and Qt drivers resolve a font by family name: the test takes

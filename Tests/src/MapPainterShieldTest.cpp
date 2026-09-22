@@ -37,7 +37,7 @@
 
 #include <osmscoutmapcairo/MapPainterCairo.h>
 
-#include "TestFontSupport.h"
+#include <TestFontSupport.h>
 
 #ifndef TEXT_METRICS_FONT_PATH
 #define TEXT_METRICS_FONT_PATH "../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"

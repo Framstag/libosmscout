@@ -35,7 +35,7 @@
 
 #include <osmscoutmap/MapService.h>
 
-#include "TestFontSupport.h"
+#include <TestFontSupport.h>
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscoutmapcairo/MapPainterCairo.h>
