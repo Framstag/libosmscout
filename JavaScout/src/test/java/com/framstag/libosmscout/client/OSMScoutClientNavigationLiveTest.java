@@ -167,6 +167,28 @@ public class OSMScoutClientNavigationLiveTest {
         assertTrue(dx > 1e-7 || dy > 1e-7,
             "position estimate should move between fixes, first=" + first + " last=" + last);
 
+        // The position estimate carries the resolved way of the route (spec:
+        // current-road-info): the road info overlay needs the way's type to
+        // label the road, not only its name and ref.
+        assertNotNull(first.wayName, "way name should never be null");
+        assertNotNull(first.wayRef, "way ref should never be null");
+        assertNotNull(first.wayType, "way type should never be null");
+        assertNotNull(last.wayType, "way type should never be null");
+
+        NavigationPosition positionWithWayType = null;
+        for (NavigationPosition position : positions) {
+            if (position.wayType != null && !position.wayType.isEmpty()) {
+                positionWithWayType = position;
+                break;
+            }
+        }
+        assertNotNull(positionWithWayType,
+            "an on-route position should resolve the way type; " + positions.size()
+                + " positions, last way name='" + last.wayName + "' ref='" + last.wayRef
+                + "' type='" + last.wayType + "'");
+        assertTrue(positionWithWayType.wayType.matches("[a-z0-9_]+"),
+            "way type should be an OSM type name, got: " + positionWithWayType.wayType);
+
         // Verify that route instructions were delivered
         assertTrue(instructionLatch.await(10, TimeUnit.SECONDS),
             "navigation should report at least one next-route instruction");

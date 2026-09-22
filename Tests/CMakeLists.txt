@@ -1,6 +1,10 @@
 #---- FavoriteLocationService
 osmscout_test_project(NAME FavoriteLocationServiceTest SOURCES src/FavoriteLocationServiceTest.cpp TARGET OSMScout::Client)
 
+#---- Style load resilience
+osmscout_test_project(NAME StyleLoadResilienceTest SOURCES src/StyleLoadResilienceTest.cpp TARGET OSMScout::Client)
+set_tests_properties(StyleLoadResilienceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AccessParse
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
@@ -83,6 +87,9 @@ osmscout_test_project(NAME ReaderScannerPerformanceTest SOURCES src/ReaderScanne
 #---- MultiDBRouting
 osmscout_test_project(NAME MultiDBRoutingTest SOURCES src/MultiDBRoutingTest.cpp COMMAND 50.412 14.534 50.424 14.6013 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion")
 
+#---- NavigationAgent
+osmscout_test_project(NAME NavigationAgentTest SOURCES src/NavigationAgentTest.cpp)
+
 #---- ThreadedDatabase
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	osmscout_test_project(NAME ThreadedDatabaseTest SOURCES src/ThreadedDatabaseTest.cpp TARGET OSMScout::Map COMMAND --threads 100 --iterations 1000 "${CMAKE_CURRENT_SOURCE_DIR}/data/testregion" "${CMAKE_CURRENT_SOURCE_DIR}/../stylesheets/standard.oss")
@@ -146,12 +153,18 @@ set_tests_properties(HeaderCheckTest PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE
 if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME WaterIndexTest SOURCES src/WaterIndexTest.cpp TARGET OSMScout::Import)
 
-	osmscout_test_project(NAME JsonWriterTest SOURCES src/JsonWriterTest.cpp ../Import/src/JsonWriter.cpp INCLUDES ../Import/src)
+	osmscout_test_project(NAME JsonWriterTest SOURCES src/JsonWriterTest.cpp TARGET OSMScout::Import)
 
-	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp ../Import/src/JsonWriter.cpp ../Import/src/DbJsonWriter.cpp INCLUDES ../Import/src)
+	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
+
+	# The basemap step needs a GNU userland (md5sum, GNU coreutils); it reports
+	# itself as skipped where that is missing, so it is registered for Linux.
+	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+		add_test(NAME BasemapCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/basemap-check-test.sh)
+	endif()
 else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()
@@ -251,6 +264,20 @@ endif()
 if(${OSMSCOUT_BUILD_MAP})
 	osmscout_demo_project(NAME PerformanceTest SOURCES src/PerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 	target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
+
+	# The Cairo and Qt drivers resolve a font by family name, so the test takes the
+	# family of the font file it is started with (see Tests/include/TestFontSupport.h)
+	if(HAVE_LIB_FREETYPE)
+		target_link_libraries(PerformanceTest Freetype::Freetype)
+		target_include_directories(PerformanceTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
+		target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FREETYPE)
+
+		find_package(Fontconfig QUIET)
+		if(TARGET Fontconfig::Fontconfig)
+			target_link_libraries(PerformanceTest Fontconfig::Fontconfig)
+			target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FONTCONFIG)
+		endif()
+	endif()
 
 	set(PERFORMANCE_TEST_DRIVERS noop none)
 
@@ -412,6 +439,22 @@ endif()
 #---- MapPainterShieldTest
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME MapPainterShieldTest SOURCES src/MapPainterShieldTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+
+  # The test takes the family of the bundled font file and registers that file
+  # (see Tests/include/TestFontSupport.h), so that it measures the font the
+  # repository ships instead of whatever font the host provides
+  if(HAVE_LIB_FREETYPE)
+    target_link_libraries(MapPainterShieldTest Freetype::Freetype)
+    target_include_directories(MapPainterShieldTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
+    target_compile_definitions(MapPainterShieldTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
+
+    find_package(Fontconfig QUIET)
+    if(TARGET Fontconfig::Fontconfig)
+      # must stay plain: osmscout_test_project links via the plain signature
+      target_link_libraries(MapPainterShieldTest Fontconfig::Fontconfig)
+      target_compile_definitions(MapPainterShieldTest PRIVATE HAVE_LIB_FONTCONFIG)
+    endif()
+  endif()
 endif()
 
 #---- MapPainterShieldQtTest (Qt DLL loader issue under Windows CMake CI: SKIPTEST, like TextMetricsQtTest)
@@ -438,6 +481,34 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterAreaVisibilityCullTest SOURCES src/MapPainterAreaVisibilityCullTest.cpp TARGET OSMScout::Map)
 else()
   message("Skip MapPainterAreaVisibilityCull test, libosmscout-map is missing.")
+endif()
+
+#---- StyleConfigVisibilityBoundsTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME StyleConfigVisibilityBoundsTest SOURCES src/StyleConfigVisibilityBoundsTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip StyleConfigVisibilityBounds test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterWayCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterWayCullingTest SOURCES src/MapPainterWayCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterWayCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterPointObjectCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterPointObjectCullingTest SOURCES src/MapPainterPointObjectCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterPointObjectCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterLabelCullingTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterLabelCullingTest SOURCES src/MapPainterLabelCullingTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterLabelCulling test, libosmscout-map is missing.")
 endif()
 
 #---- TextMetricsTest

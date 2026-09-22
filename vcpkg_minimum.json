@@ -7,6 +7,7 @@
     "zlib",
     "libiconv",
     "libxml2",
+    "nlohmann-json",
     "protobuf"
   ]
 }

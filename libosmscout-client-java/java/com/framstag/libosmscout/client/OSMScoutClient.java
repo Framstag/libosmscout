@@ -59,10 +59,27 @@ public class OSMScoutClient {
     /**
      * Returns the currently active stylesheet file name.
      *
+     * A stylesheet that failed to load is never reported as active: the last
+     * stylesheet that loaded successfully is returned, and the configured
+     * stylesheet only while nothing has loaded yet.
+     *
      * @return file name (e.g. {@code "standard.oss"}), or {@code "standard.oss"}
      *         by default
      */
     public native String getActiveStyleSheet();
+
+    /**
+     * Whether the last stylesheet load attempt succeeded.
+     *
+     * Covers every load path — the initial load, {@link #loadStyleSheet(String)},
+     * {@link #setStyleSheetFlag(String, boolean)}, the basemap stylesheet and a
+     * stylesheet refresh. When it returns {@code false} the previously active
+     * style is still in effect and the parse errors are available through the
+     * client's style error channel.
+     *
+     * @return true when the last stylesheet load succeeded
+     */
+    public native boolean wasLastStyleLoadSuccessful();
 
     /**
      * Switches the active map style by name and redraws with it.
@@ -71,7 +88,8 @@ public class OSMScoutClient {
      * (e.g. {@code "cycle"}). The stylesheet is loaded on the native database
      * thread; this call blocks until the load has completed. When the load
      * fails (unknown name, unreadable or unparsable file) the previously
-     * active style is restored and {@code false} is returned.
+     * active style is restored and {@code false} is returned. A failed load is
+     * reported by {@link #wasLastStyleLoadSuccessful()}.
      *
      * @param name style name, or file name including {@code .oss}
      * @return true if the style was loaded, false on failure
@@ -86,6 +104,20 @@ public class OSMScoutClient {
      * @param value flag state
      */
     public native void setStyleSheetFlag(String key, boolean value);
+
+    /**
+     * Configures the capacity of the tile data caches that the map service of
+     * each database keeps (regional databases and basemap).
+     * <p>
+     * The value is applied to every open database before tile data is loaded
+     * for the next render, so it also covers a database that opens later (a map
+     * scan or a basemap reload). Idempotent; a non-positive value keeps the
+     * library default.
+     *
+     * @param cacheSize cache capacity, or a non-positive value for the library
+     *                  default
+     */
+    public native void setNativeDataCacheSize(int cacheSize);
 
     /**
      * Returns the names of all available map styles.
@@ -294,6 +326,23 @@ public class OSMScoutClient {
     public native String getAdminRegionName(long handle);
 
     /**
+     * Get the name of the search scope region of a previously resolved admin
+     * region.
+     * <p>
+     * The scope widens from the resolved region to the highest ancestor that is
+     * still at or finer than a fixed admin level cap, because libosmscout's
+     * region search is recursive: one search scoped to that ancestor covers it
+     * and all of its subregions, so a city district scopes the search to the
+     * region containing it *and* its neighbours. When the region has no parent,
+     * or every ancestor is coarser than the cap, the scope is the region
+     * itself.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return scope region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionScopeName(long handle);
+
+    /**
      * Get a structured description of the most reasonable visible object
      * at the given geographic coordinate.
      * <p>
@@ -340,6 +389,20 @@ public class OSMScoutClient {
      * @return ranked list of candidate descriptions, or empty list if no object found
      */
     public native List<ObjectDescription> getDescriptionCandidates(double lat, double lon, int magnification);
+
+    /**
+     * Bearing-aware road lookup: resolve the road the vehicle is actually
+     * driving on at the given coordinate, preferring ways whose direction
+     * at the nearest point matches the vehicle bearing over nearer ways
+     * with a mismatched direction (e.g. a side street).
+     *
+     * @param lat     latitude in degrees
+     * @param lon     longitude in degrees
+     * @param bearing vehicle bearing in degrees, or NaN when unknown
+     * @return the resolved road (name, ref, type, max speed), or null when
+     *         no way is found within the lookup radius
+     */
+    public native RoadInfo getRoadAt(double lat, double lon, double bearing);
 
     /**
      * Calculate a route between two coordinates asynchronously with a routing profile.

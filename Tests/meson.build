@@ -12,6 +12,17 @@ FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
 
 test('Check FavoriteLocationService', FavoriteLocationServiceTest)
 
+StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
+             'src/StyleLoadResilienceTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient, osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check style load resilience', StyleLoadResilienceTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -409,6 +420,16 @@ MultiDBRoutingTest = executable('MultiDBRoutingTest',
 
 test('Check routing', MultiDBRoutingTest, args : ['50.412', '14.534', '50.424', '14.6013', meson.current_source_dir() + '/data/testregion'])
 
+NavigationAgentTest = executable('NavigationAgentTest',
+             'src/NavigationAgentTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check navigation agents', NavigationAgentTest)
+
 NumberSetPerformanceTest = executable('NumberSetPerformanceTest',
                                   'src/NumberSetPerformanceTest.cpp',
                                   include_directories: [osmscoutIncDir],
@@ -514,11 +535,28 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   endif
 
   if get_option('buildDemos')
+    performanceTestDeps = deps
+    performanceTestIncludes = includes + [testIncDir]
+    performanceTestArgs = ['-fPIC']
+
+    # The Cairo and Qt drivers resolve a font by family name: the test takes
+    # the family of the font file it is started with (Tests/include/TestFontSupport.h)
+    if ftDep.found()
+      performanceTestDeps += ftDep
+      performanceTestIncludes += include_directories('../Demos/include')
+      performanceTestArgs += '-DHAVE_LIB_FREETYPE'
+
+      if fontconfigDep.found()
+        performanceTestDeps += fontconfigDep
+        performanceTestArgs += '-DHAVE_LIB_FONTCONFIG'
+      endif
+    endif
+
     PerformanceTest = executable('PerformanceTest',
                                  'src/PerformanceTest.cpp',
-                                 cpp_args: ['-fPIC'],
-                                 include_directories: includes,
-                                 dependencies: deps,
+                                 cpp_args: performanceTestArgs,
+                                 include_directories: performanceTestIncludes,
+                                 dependencies: performanceTestDeps,
                                  link_with: links,
                                  install: true)
 
@@ -738,6 +776,46 @@ MapPainterAreaVisibilityCullTest = executable('MapPainterAreaVisibilityCullTest'
 
 test('Check MapPainterAreaVisibilityCull compilation', MapPainterAreaVisibilityCullTest)
 
+StyleConfigVisibilityBoundsTest = executable('StyleConfigVisibilityBoundsTest',
+                               'src/StyleConfigVisibilityBoundsTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check StyleConfigVisibilityBounds compilation', StyleConfigVisibilityBoundsTest)
+
+MapPainterWayCullingTest = executable('MapPainterWayCullingTest',
+                               'src/MapPainterWayCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterWayCulling compilation', MapPainterWayCullingTest)
+
+MapPainterPointObjectCullingTest = executable('MapPainterPointObjectCullingTest',
+                               'src/MapPainterPointObjectCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterPointObjectCulling compilation', MapPainterPointObjectCullingTest)
+
+MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
+                               'src/MapPainterLabelCullingTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
+
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',
                            include_directories: [testIncDir, osmscoutIncDir],
@@ -843,32 +921,36 @@ if buildImport
   test('Check water index import code', WaterIndexTest)
 
   JsonWriterTest = executable('JsonWriterTest',
-               ['src/JsonWriterTest.cpp',
-                '../Import/src/JsonWriter.cpp'],
-               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               ['src/JsonWriterTest.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
                dependencies: [mathDep, openmpDep, catch2MainDep],
-               link_with: [osmscout],
+               link_with: [osmscout, osmscoutimport],
                install: true,
                install_dir: testInstallDir)
 
   test('Check JSON writer', JsonWriterTest)
 
   DbJsonWriterTest = executable('DbJsonWriterTest',
-               ['src/DbJsonWriterTest.cpp',
-                '../Import/src/JsonWriter.cpp',
-                '../Import/src/DbJsonWriter.cpp'],
-               include_directories: [testIncDir, osmscoutIncDir, '../Import/src'],
+               ['src/DbJsonWriterTest.cpp'],
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
                dependencies: [mathDep, openmpDep, catch2MainDep],
-               link_with: [osmscout],
+               link_with: [osmscout, osmscoutimport],
                install: true,
                install_dir: testInstallDir)
 
   test('Check db.json writer', DbJsonWriterTest)
 
   if host_machine.system() != 'windows'
-    # The contract script needs a POSIX shell, python3 and cygpath support;
-    # Windows (cmd/msvc) runners cannot execute it.
+    # The contract scripts need a POSIX shell, python3 and cygpath support;
+    # Windows (cmd/msvc) runners cannot execute them.
     test('Check client update check contract', find_program('../scripts/mapgen/client-check-test.sh'))
+  endif
+
+  if host_machine.system() == 'linux'
+    # The basemap step builds a GNU userland pipeline (md5sum, GNU coreutils);
+    # elsewhere the script reports itself as skipped. It runs in the image CI
+    # job as well, which is the environment the pipeline actually runs in.
+    test('Check basemap generation contract', find_program('../scripts/mapgen/basemap-check-test.sh'))
   endif
 endif
 
@@ -926,10 +1008,29 @@ if buildMapCairo
 
   test('Check MapPainterRoute compilation', MapPainterRouteTest)
 
+  mapPainterShieldTestIncludes = [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir]
+  mapPainterShieldTestDeps = [mathDep, openmpDep, catch2MainDep, pangocairoDep]
+  mapPainterShieldTestArgs = []
+
+  # The test takes the family of the bundled font file and registers that file
+  # (see Tests/include/TestFontSupport.h), so that it measures the font the
+  # repository ships instead of the font the host provides
+  if ftDep.found()
+    mapPainterShieldTestDeps += ftDep
+    mapPainterShieldTestIncludes += include_directories('../Demos/include')
+    mapPainterShieldTestArgs += ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+    if fontconfigDep.found()
+      mapPainterShieldTestDeps += fontconfigDep
+      mapPainterShieldTestArgs += '-DHAVE_LIB_FONTCONFIG'
+    endif
+  endif
+
   MapPainterShieldTest = executable('MapPainterShieldTest',
                'src/MapPainterShieldTest.cpp',
-               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
-               dependencies: [mathDep, openmpDep, catch2MainDep, pangocairoDep],
+               include_directories: mapPainterShieldTestIncludes,
+               dependencies: mapPainterShieldTestDeps,
+               cpp_args: mapPainterShieldTestArgs,
                link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
                install: true,
                install_dir: testInstallDir)

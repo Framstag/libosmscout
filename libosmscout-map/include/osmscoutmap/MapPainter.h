@@ -156,6 +156,16 @@ namespace osmscout {
       ColorFeatureValueReader      colorReader;        //!< Value reader for the 'color' feature
       //@}
 
+      /**
+       * Conservative visual reach of the styles of this database for the level of the
+       * current frame, used for the early rejection of objects that cannot be visible.
+       */
+      //@{
+      VisibilityBounds             visibilityBounds;       //!< Style reach of the level of the current frame
+      double                       wayReachPixel{0.0};     //!< Widest line reach a way of this database can draw [pixels]
+      double                       pointReachPixel{0.0};   //!< Widest icon and symbol extent a point object of this database can draw [pixels]
+      //@}
+
     public:
       explicit DatabaseCacheEntry(const TypeConfig &typeConfig,
                                   const StyleConfigRef &styleConfig,
@@ -339,6 +349,7 @@ namespace osmscout {
                      const Projection& projection,
                      const MapParameter& parameter,
                      bool basemap,
+                     double objectReachPixel,
                      const NodeRef& node);
 
     void PrepareNodes(size_t dbIndex,
@@ -421,7 +432,8 @@ namespace osmscout {
                            const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            const Vertex2D& screenPos,
-                           const ScreenBox& objectBox);
+                           const ScreenBox& objectBox,
+                           double objectReachPixel);
 
     bool DrawWayDecoration(const Projection& projection,
                            const MapParameter& parameter,
@@ -597,13 +609,56 @@ namespace osmscout {
        Useful global helper functions.
      */
     //@{
+    /**
+     * Visibility test for an area's bounding box: the box is transformed to the frame's screen
+     * space, enlarged by pixelOffset screen pixels and intersected with the screen box. A width
+     * that a style sheet declares is a length in millimetres and has to be converted with the
+     * frame's projection (Projection::ConvertWidthToPixel) before it is passed as the offset, the
+     * same way the backends convert it before drawing.
+     */
     bool IsVisibleArea(const Projection& projection,
                        const GeoBox& boundingBox,
                        double pixelOffset) const;
 
+    /**
+     * Visibility test for a way's bounding box, using the same screen offset in pixels as
+     * IsVisibleArea.
+     */
     bool IsVisibleWay(const Projection& projection,
                       const GeoBox& boundingBox,
                       double pixelOffset) const;
+
+    /**
+     * Conservative early decision for ways: returns true when a way of the given database can
+     * contribute a pixel to the current frame.
+     *
+     * The decision uses the widest line reach a way of the level can draw, so it returns
+     * false only for ways that no line style of the level could bring into the view; it is
+     * therefore safe to skip the whole preparation of a way it rejects. The additional pixel
+     * offset leaves room for geometry that is placed relative to the way, such as the label
+     * of a shield.
+     */
+    bool CanWayBeVisible(size_t dbIndex,
+                         const Projection& projection,
+                         const Way& way,
+                         double additionalOffsetPixel) const;
+
+    /**
+     * Conservative early decision for point objects: returns true when an object that is drawn
+     * at the given screen position with the given reach can contribute a pixel to the current
+     * frame. The reach is the distance the icon, the symbol and the labels of the object can
+     * extend beyond its position, so the decision returns false only for objects that provably
+     * cannot be visible.
+     */
+    bool IsPointVisible(const Projection& projection,
+                        const Vertex2D& screenPos,
+                        double reachPixel) const;
+
+    /**
+     * Updates the conservative style reach of all databases for the level of the given
+     * frame. Called once per frame, before the objects of the frame are prepared.
+     */
+    void UpdateVisibilityBounds(const Projection& projection);
 
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,

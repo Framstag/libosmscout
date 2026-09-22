@@ -46,6 +46,56 @@ public class LocationEntry {
     /** Ref type: "node", "way", "area", or null. */
     public String refType;
 
+    /**
+     * Match quality of the admin region component: "match", "candidate" or "none".
+     * <p>
+     * Note that the search scope (default admin region) is reported as
+     * "match" for every entry inside it, even when the query never named that
+     * region — callers must not treat this value as evidence that the query
+     * named the region.
+     */
+    public String adminRegionMatchQuality;
+
+    /** Match quality of the postal area component: "match", "candidate" or "none". */
+    public String postalAreaMatchQuality;
+
+    /** Match quality of the location (street/place name) component: "match", "candidate" or "none". */
+    public String locationMatchQuality;
+
+    /** Match quality of the house number component: "match", "candidate" or "none". */
+    public String addressMatchQuality;
+
+    /** Match quality of the POI component: "match", "candidate" or "none". */
+    public String poiMatchQuality;
+
+    /** True when the entry carries a house number. */
+    public boolean hasHouseNumber;
+
+    /**
+     * Name of the component that supplied {@link #label}: for a house-level
+     * entry the street name (the label itself is street + house number), for a
+     * location/POI/region entry the entry's own name. For the coordinate result
+     * it is the query, for a free-text hit the indexed label itself. Null when
+     * unknown.
+     */
+    public String matchedName;
+
+    /**
+     * Which component supplied {@link #matchedName} and therefore which of the
+     * per-attribute quality fields carries its match quality: one of
+     * "adminRegion", "location", "poi", "address". Null when unknown.
+     * <p>
+     * Two further values occur outside the structured search and carry no
+     * attribute attribution: "coordinate" for the coordinate result appended to
+     * a structured search, and "freeText" for a hit of the text index. For both,
+     * every per-attribute quality is reported as "none".
+     * <p>
+     * Needed because the label and {@link #objectType} are derived from
+     * different component precedences, so the quality field to consult cannot
+     * be inferred from either.
+     */
+    public String matchedComponent;
+
     /** Default constructor. */
     public LocationEntry() {
     }

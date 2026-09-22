@@ -2,8 +2,6 @@ set(OSMSCOUT_BUILD_IMPORT ON CACHE INTERNAL "" FORCE)
 
 set(SOURCE_FILES
     src/Import.cpp
-    src/JsonWriter.cpp
-    src/DbJsonWriter.cpp
 )
 
 add_executable(Import ${SOURCE_FILES} ${HEADER_FILES})
