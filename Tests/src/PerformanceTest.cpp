@@ -19,6 +19,7 @@
 
 #include <atomic>
 #include <cstdlib>
+#include <string>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -33,6 +34,8 @@
 #include <osmscout/projection/TileProjection.h>
 
 #include <osmscoutmap/MapService.h>
+
+#include "TestFontSupport.h"
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscoutmapcairo/MapPainterCairo.h>
@@ -748,6 +751,32 @@ PerformanceTestBackendRef PrepareBackend([[maybe_unused]] int argc,
   }
 }
 
+bool ResolveFontName(const Arguments& args,
+                     std::string& fontName)
+{
+  fontName=args.font;
+
+  // Only backends that resolve a font by family name need the family stored in
+  // the font file; the file based backends (Agg, OpenGL, GDI) load the file itself
+  if (args.driver!="cairo" && args.driver!="Qt") {
+    return true;
+  }
+
+  std::string error;
+  std::string resolved=osmscout::FontNameForFamilyBackend(args.font,
+                                                          error);
+
+  if (resolved.empty()) {
+    std::cerr << "ERROR: cannot read the font family from \"" << args.font
+              << "\": " << error << std::endl;
+    return false;
+  }
+
+  fontName=resolved;
+
+  return true;
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::CmdLineParser     argParser("PerformanceTest",
@@ -936,7 +965,14 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   std::list<LevelStats>         statistics;
 
-  drawParameter.SetFontName(args.font);
+  std::string fontName;
+
+  if (!ResolveFontName(args,
+                       fontName)) {
+    return 1;
+  }
+
+  drawParameter.SetFontName(fontName);
   drawParameter.SetIconPaths(args.icons);
   drawParameter.SetPatternPaths(args.icons); // for simplicity use same directories for lookup
   drawParameter.SetIconMode(osmscout::MapParameter::IconMode::Scalable);

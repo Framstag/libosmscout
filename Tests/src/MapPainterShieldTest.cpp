@@ -22,6 +22,8 @@
 
 #include <algorithm>
 #include <limits>
+#include <stdexcept>
+#include <string>
 
 #if defined(__WIN32__) || defined(WIN32) || (defined(__APPLE__) && __APPLE__)
   #include <cairo.h>
@@ -34,6 +36,12 @@
 #include <osmscoutmap/Styles.h>
 
 #include <osmscoutmapcairo/MapPainterCairo.h>
+
+#include "TestFontSupport.h"
+
+#ifndef TEXT_METRICS_FONT_PATH
+#define TEXT_METRICS_FONT_PATH "../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
+#endif
 
 namespace {
 
@@ -81,12 +89,41 @@ namespace {
     return projection;
   }
 
+  /**
+   * The font to measure with: the family stored in the font file the repository
+   * ships, made resolvable for the Pango/cairo stack (see
+   * Tests/src/TestFontSupport.h). Hardcoding a family name here made the test
+   * measure whatever font the host provides, so its glyph metrics moved with the
+   * host font set.
+   */
+  std::string TestFontName()
+  {
+    if (!osmscout::CanResolveFamilyFromFontFile()) {
+      // build without FreeType: keep the family this test used before
+      return "Liberation Sans";
+    }
+
+    std::string family;
+    std::string error;
+
+    if (!osmscout::FamilyFromFontFile(TEXT_METRICS_FONT_PATH,
+                                      family,
+                                      error)) {
+      throw std::runtime_error(std::string("Cannot read the test font \"") +
+                               TEXT_METRICS_FONT_PATH + "\": " + error);
+    }
+
+    osmscout::MakeFontFileResolvable(TEXT_METRICS_FONT_PATH);
+
+    return family;
+  }
+
   osmscout::MapParameter CreateParameter()
   {
     osmscout::MapParameter parameter;
 
     parameter.SetFontSize(10.0);
-    parameter.SetFontName("Liberation Sans");
+    parameter.SetFontName(TestFontName());
 
     return parameter;
   }

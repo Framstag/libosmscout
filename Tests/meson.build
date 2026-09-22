@@ -524,11 +524,28 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   endif
 
   if get_option('buildDemos')
+    performanceTestDeps = deps
+    performanceTestIncludes = includes
+    performanceTestArgs = ['-fPIC']
+
+    # The Cairo and Qt drivers resolve a font by family name: the test takes
+    # the family of the font file it is started with (Tests/src/TestFontSupport.h)
+    if ftDep.found()
+      performanceTestDeps += ftDep
+      performanceTestIncludes += include_directories('../Demos/include')
+      performanceTestArgs += '-DHAVE_LIB_FREETYPE'
+
+      if fontconfigDep.found()
+        performanceTestDeps += fontconfigDep
+        performanceTestArgs += '-DHAVE_LIB_FONTCONFIG'
+      endif
+    endif
+
     PerformanceTest = executable('PerformanceTest',
                                  'src/PerformanceTest.cpp',
-                                 cpp_args: ['-fPIC'],
-                                 include_directories: includes,
-                                 dependencies: deps,
+                                 cpp_args: performanceTestArgs,
+                                 include_directories: performanceTestIncludes,
+                                 dependencies: performanceTestDeps,
                                  link_with: links,
                                  install: true)
 
@@ -980,10 +997,29 @@ if buildMapCairo
 
   test('Check MapPainterRoute compilation', MapPainterRouteTest)
 
+  mapPainterShieldTestIncludes = [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir]
+  mapPainterShieldTestDeps = [mathDep, openmpDep, catch2MainDep, pangocairoDep]
+  mapPainterShieldTestArgs = []
+
+  # The test takes the family of the bundled font file and registers that file
+  # (see Tests/src/TestFontSupport.h), so that it measures the font the
+  # repository ships instead of the font the host provides
+  if ftDep.found()
+    mapPainterShieldTestDeps += ftDep
+    mapPainterShieldTestIncludes += include_directories('../Demos/include')
+    mapPainterShieldTestArgs += ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
+
+    if fontconfigDep.found()
+      mapPainterShieldTestDeps += fontconfigDep
+      mapPainterShieldTestArgs += '-DHAVE_LIB_FONTCONFIG'
+    endif
+  endif
+
   MapPainterShieldTest = executable('MapPainterShieldTest',
                'src/MapPainterShieldTest.cpp',
-               include_directories: [testIncDir, osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
-               dependencies: [mathDep, openmpDep, catch2MainDep, pangocairoDep],
+               include_directories: mapPainterShieldTestIncludes,
+               dependencies: mapPainterShieldTestDeps,
+               cpp_args: mapPainterShieldTestArgs,
                link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
                install: true,
                install_dir: testInstallDir)
