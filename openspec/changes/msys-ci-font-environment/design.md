@@ -27,6 +27,8 @@ So on the Cairo backend both shapes arrive as a font *family*: the shield test a
 
 **What actually changed between the last green and the first red run** (master push 16:27 green, 18:05 red, no repository change in between): fontconfig 2.18.3-1, freetype 2.14.3-1 and pango 1.58.2-1 identical; cairo 1.18.4-4 → 1.18.6-1 and the mingw-w64 crt/headers `14.0.0.r409` → `14.0.0.r420`. This is not conclusive about the cause, which is exactly why the change adds a verification step rather than assuming one.
 
+**Why provisioning the environment is not enough.** On Windows the Pango/cairo font map resolves families through its Win32 font collection and ignores fontconfig, unless the environment selects another backend: `pango_cairo_font_map_new()` in pango 1.58.2 (`pango/pangocairo-fontmap.c`) returns the Win32 font map first and only honours `PANGOCAIRO_BACKEND=fc`, and `pango_cairo_font_map_get_default()` goes through it. MSYS2 tracks the consequence as issue #4293 (fonts registered with fontconfig are ignored). The first run of this change shows it directly: the verification step reported `fonts visible: 255` with the new `conf.d` snippet loaded and `Liberation Sans resolves to: D:/a/.../libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf`, the job passed that step, and the shield test in the same job still logged `couldn't load font "Liberation Sans Not-Rotated 37.795px", falling back to "Sans ..."`. Locally the same test with the fontconfig backend is insensitive to the font configuration (it passes even with an empty font set and logs no warning), which is why the failure only appears on the Windows job.
+
 **Constraint.** MSYS2 ships no plain Liberation package: the only Liberation artefacts are nerd-patched Liberation *Mono* files under `mingw-w64-nerd-fonts`, a different family name. The repository already ships `libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf`, which every Ubuntu and macOS job obtains by installing `fonts-liberation`.
 
 ## Goals / Non-Goals
@@ -34,6 +36,7 @@ So on the Cairo backend both shapes arrive as a font *family*: the shield test a
 **Goals:**
 
 - The two MSYS jobs measure font-dependent tests against the font the repository ships, not against a font the runner image happens to provide.
+- The font-dependent tests themselves measure the repository font, so their results do not move with the host's font set on any platform, including Windows.
 - A broken font or locale environment fails in its own named step, before the build/test, and prints the font the family resolved to and the locale in effect.
 - Both MSYS test steps use one explicit locale value instead of relying on the environment.
 - All of it stays inside the existing job setup: repository content, no new secret, no new service, seconds of added run time.
@@ -43,7 +46,7 @@ So on the Cairo backend both shapes arrive as a font *family*: the shield test a
 - Changing the Cairo backend so that a font *file* path is loaded as a file. That is the underlying reason a host-font change can move these results, and it changes library behaviour — its own change (recorded in `TODO.md`).
 - Pinning MSYS2 package versions or the runner label; the rolling upgrade stays.
 - The other red CI signals seen in the same window: the flaky `Check MapDownloadService APIs` abort in the JavaScout `meson + maven` job, and the two 30 s meson test timeouts in the Sonar job.
-- Changing `MapPainterShieldTest`'s tolerance or the performance tests' font arguments.
+- Changing `MapPainterShieldTest`'s tolerance. (The font the tests measure is now in scope - see D6 - the tolerance itself is not.)
 
 ## Decisions
 
@@ -96,6 +99,23 @@ Alternatives:
 
 Risk: `en_US.utf8` must exist in the MSYS2 environment for the value to have the intended effect; the verification step prints the locale, and if the value is absent the meson job's long-standing green state shows it is at least not harmful.
 
+### D6: The font-dependent tests own their font
+
+**Chosen:** each test that measures text through Cairo/Pango resolves the family name from the repository font file, registers that file with the process's font configuration when font configuration is available, and selects the font-configuration Pango backend when one is available and the environment has not selected one. The Cairo runs of the performance test receive that family instead of the font file path; the AGG and OpenGL runs keep the path.
+
+Alternatives:
+
+- **Install the bundled font into the Windows font store from the MSYS job** (copy into the Windows font directory plus a registry entry) - keeps the tests measuring the platform's default backend and needs no test change, but needs elevated rights, is not portable to other CI runners, and still leaves the performance test passing a path to a family-based interface.
+- **Loosen the shield test's tolerance until a substituted font passes** - hides the substitution instead of removing it, and would weaken the property the test exists to check.
+- **Only set `PANGOCAIRO_BACKEND` in the workflow environment** - fixes the shield test's resolution on the MSYS jobs but leaves the same failure waiting for any other Windows consumer of these tests (the Visual Studio and MSYS `cmake` jobs, a developer machine), and does nothing for the performance test's path-as-family mismatch.
+- **Do nothing in the tests and accept MSYS being red** - rejected: it is the state that produced the confusion this change exists to remove.
+
+Risk: selecting the font-configuration backend in the test means the Windows runs no longer exercise the Win32 font map. That is deliberate - these tests assert on layout and glyph metrics of a specific font, not on the platform's font backend - and the alternative that keeps the backend (installing into the OS font store) is the first rejected option above.
+
+Risk: the environment variable has to be set before Pango creates the default font map, which is per thread and cached. Both tests set it while building their `MapParameter`, before any painter draws; if a later test in the same binary had already created the font map, its own font would still be registered with font configuration, and on Windows it would keep the Win32 backend.
+
+Risk: a build without font configuration or without the font-configuration backend must keep working. The behaviour of `pango_cairo_font_map_new()` with an unavailable backend is to return `NULL`, so the backend is only selected when the font configuration headers were available at compile time (`HAVE_LIB_FONTCONFIG`), and every added call is guarded by that macro.
+
 ### D5: Keep the rolling package upgrade
 
 **Chosen:** leave `update: true` (and `release: true`) as they are.
@@ -110,7 +130,7 @@ Risk: the package set keeps moving, so this class of drift can recur. Mitigation
 ## Risks / Trade-offs
 
 - **The family still does not resolve after provisioning** (fontconfig does not index the prefix font directory) → **materialised on the first run** as `C:/Windows/fonts/arial.ttf`; the verification step reported it after two minutes instead of after a build, and the D2 fallback closed it without a spec or task change.
-- **Provisioning does not fix the failure** because the real cause is a changed renderer metric rather than font resolution (cairo 1.18.4-4 → 1.18.6-1 is the other candidate) → the verification step separates "environment is broken" from "renderer changed": if the preflight passes and the tests still fail, the cause is in the renderer and the tests' expectations need their own change. The first run of this change answers that question.
+- **Provisioning does not fix the failure** because the real cause is a changed renderer metric rather than font resolution (cairo 1.18.4-4 → 1.18.6-1 is the other candidate) → **answered by the first run**: the verification step passed (`Liberation Sans resolves to: D:/a/.../LiberationSans-Regular.ttf`, `fonts visible: 255`) while the shield test kept measuring the fallback, so the cause is neither a broken environment nor a renderer metric but the font map Pango uses on Windows. D6 removes that dependence; if the tests still fail after D6, the renderer candidate is what remains and needs its own investigation.
 - **A later `pacman` invocation in the same job removes the copied file** → the copy happens after the setup step and the verification step immediately precedes the build; `--exclude-regex PerformanceTest` aside, no package operation runs afterwards.
 - **A restricted fallback configuration hides host fonts** → include the Windows font directory in it, so that the generic families still resolve; the fallback is only used if the prefix directory turns out not to be scanned.
 - **Added run time** → one `fc-cache` scoped to the added directory plus a two-second check, against a job that currently spends ~10 minutes compiling.
@@ -124,3 +144,4 @@ Single workflow file, no state, no data, no API. Steps: apply the workflow chang
 
 - Whether the prefix font directory is scanned by this fontconfig build - **answered at 2026-09-21 19:34 UTC: it is not.** With the bundled font copied to `$MINGW_PREFIX/share/fonts/TTF` and that directory cached, the verification step reported `Liberation Sans resolves to: C:/Windows/fonts/arial.ttf`; the mechanism was replaced as D2 describes, and the snippet's XML was checked against a local fontconfig before the next run.
 - Whether MSYS re-runs of the already-queued commits (started 18:59 UTC) still fail - **answered at 2026-09-21 19:22 UTC: they still fail.** Runs `35641955424` (19:12) and `35641974854` (19:14) of `client-style-load-resilience` reproduce the master failures exactly (see Context), on commits that do not touch the MSYS environment. The drift is therefore persistent, and provisioning plus verification is the response; the change is not contingent on a transient upstream state.
+- Whether provisioning the font in the job's font configuration fixes the font-dependent tests - **answered at 2026-09-21 19:51 UTC: it does not, on its own.** The verification step of run `35646147229` passed in both jobs while the shield test still fell back, because Pango uses its Win32 font map on Windows. D6 answers this on the test side.
