@@ -316,6 +316,16 @@ HighwayMilestoneFeatureTest = executable('HighwayMilestoneFeatureTest',
 
 test('Check HighwayMilestone feature parsing and labeling', HighwayMilestoneFeatureTest)
 
+LabelLayouterTest = executable('LabelLayouterTest',
+                               'src/LabelLayouterTest.cpp',
+                               include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                               dependencies: [mathDep, catch2MainDep],
+                               link_with: [osmscoutmap, osmscout],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check LabelLayouter code', LabelLayouterTest)
+
 LabelPathTest = executable('LabelPathTest',
                            'src/LabelPathTest.cpp',
                            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],

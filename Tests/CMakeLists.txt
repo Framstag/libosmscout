@@ -325,6 +325,13 @@ else()
 	message("Skip PerformanceTest test, libosmscout-map is missing.")
 endif()
 
+#---- LabelLayouterTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME LabelLayouterTest SOURCES src/LabelLayouterTest.cpp TARGET OSMScout::Map)
+else()
+	message("Skip LabelLayouterTest, libosmscout-map is missing.")
+endif()
+
 #---- LabelPathTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	osmscout_test_project(NAME LabelPathTest SOURCES src/LabelPathTest.cpp TARGET OSMScout::Map)

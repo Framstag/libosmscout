@@ -23,6 +23,8 @@
 #include <memory>
 #include <set>
 #include <array>
+#include <cmath>
+#include <limits>
 
 #include <osmscoutmap/MapImportExport.h>
 
@@ -694,7 +696,7 @@ constexpr bool debugLabelLayouter = false;
           LabelPriority(data.priority, instance.priority.basemap, instance.priority.ref),
           instance.priority);
         element.x = point.GetX() - data.iconWidth / 2;
-        if (offset<0){
+        if (std::isnan(offset)){
           element.y = point.GetY() - data.iconHeight / 2;
           offset = point.GetY() + data.iconHeight / 2;
         }
@@ -715,7 +717,7 @@ constexpr bool debugLabelLayouter = false;
                                              /*enable wrapping*/ true,
                                              /*contour label*/ false);
         element.x = point.GetX() - element.label->width / 2;
-        if (offset<0){
+        if (std::isnan(offset)){
           element.y = point.GetY() - element.label->height / 2;
           offset = point.GetY() + element.label->height / 2;
         }
@@ -741,7 +743,10 @@ constexpr bool debugLabelLayouter = false;
       instance.ref=ref;
       instance.basemap=basemap;
 
-      double offset=-1;
+      // NaN until the first element is placed. The offset then becomes a screen coordinate, which
+      // is negative for a point above the drawn area: with -1 as the marker, the elements after
+      // the first one were centred on the point again instead of being stacked below it.
+      double offset=std::numeric_limits<double>::quiet_NaN();
       ProcessLabel(projection,
                    parameter,
                    point,
@@ -765,7 +770,10 @@ constexpr bool debugLabelLayouter = false;
 
       instance.priority=LabelPriority(std::numeric_limits<size_t>::max(), basemap, ref);
 
-      double offset=-1;
+      // NaN until the first element is placed. The offset then becomes a screen coordinate, which
+      // is negative for a point above the drawn area: with -1 as the marker, the elements after
+      // the first one were centred on the point again instead of being stacked below it.
+      double offset=std::numeric_limits<double>::quiet_NaN();
       for (const auto& d : data) {
         ProcessLabel(projection,
                      parameter,
