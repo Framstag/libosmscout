@@ -41,12 +41,49 @@ jobs:
                     mingw-w64-x86_64-libpng
                     mingw-w64-x86_64-skia
                     mingw-w64-x86_64-directx-headers"
+      - name: Provide the font the font-dependent tests measure against
+        run: |
+          fontDir="$(cygpath -m "${PWD}/libosmscout-map-opengl/data/fonts")"
+          confDir="${MINGW_PREFIX}/etc/fonts/conf.d"
+          mkdir -p "${confDir}"
+          cat > "${confDir}/99-libosmscout-fonts.conf" <<EOF
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+          <fontconfig>
+            <dir>${fontDir}</dir>
+          </fontconfig>
+          EOF
+          fc-cache -f "${fontDir}"
+      - name: Verify the font and locale environment
+        run: |
+          echo "locale: LANG=${LANG-} LC_ALL=${LC_ALL-}"
+          if command -v locale >/dev/null 2>&1; then
+            locale
+          fi
+          if command -v fc-conflist >/dev/null 2>&1; then
+            echo "fontconfig configuration files:"
+            fc-conflist
+          fi
+          echo "fonts visible: $(fc-list | wc -l)"
+          echo "sans-serif resolves to: $(fc-match -f '%{file}' sans-serif)"
+          resolved="$(fc-match -f '%{file}' 'Liberation Sans')"
+          echo "Liberation Sans resolves to: ${resolved}"
+          case "${resolved}" in
+            *LiberationSans-Regular.ttf)
+              ;;
+            *)
+              echo "::error::the font family 'Liberation Sans' resolves to '${resolved}' instead of the repository font, so the font-dependent tests would measure a fallback font"
+              exit 1
+              ;;
+          esac
       - name: Configure build project
         run: DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST} cmake -B build -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: env "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-skia:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt:${MINGW_PREFIX}/bin" ctest -j 4 --output-on-failure --exclude-regex PerformanceTest
+        run: LC_ALL=C env "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-skia:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt:${MINGW_PREFIX}/bin" ctest -j 4 --output-on-failure --exclude-regex PerformanceTest
+        env:
+          LANG: en_US.utf8
         working-directory: build
 
   build_gcc_meson:
@@ -75,6 +112,41 @@ jobs:
                     mingw-w64-x86_64-libpng
                     mingw-w64-x86_64-skia
                     mingw-w64-x86_64-directx-headers"
+      - name: Provide the font the font-dependent tests measure against
+        run: |
+          fontDir="$(cygpath -m "${PWD}/libosmscout-map-opengl/data/fonts")"
+          confDir="${MINGW_PREFIX}/etc/fonts/conf.d"
+          mkdir -p "${confDir}"
+          cat > "${confDir}/99-libosmscout-fonts.conf" <<EOF
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+          <fontconfig>
+            <dir>${fontDir}</dir>
+          </fontconfig>
+          EOF
+          fc-cache -f "${fontDir}"
+      - name: Verify the font and locale environment
+        run: |
+          echo "locale: LANG=${LANG-} LC_ALL=${LC_ALL-}"
+          if command -v locale >/dev/null 2>&1; then
+            locale
+          fi
+          if command -v fc-conflist >/dev/null 2>&1; then
+            echo "fontconfig configuration files:"
+            fc-conflist
+          fi
+          echo "fonts visible: $(fc-list | wc -l)"
+          echo "sans-serif resolves to: $(fc-match -f '%{file}' sans-serif)"
+          resolved="$(fc-match -f '%{file}' 'Liberation Sans')"
+          echo "Liberation Sans resolves to: ${resolved}"
+          case "${resolved}" in
+            *LiberationSans-Regular.ttf)
+              ;;
+            *)
+              echo "::error::the font family 'Liberation Sans' resolves to '${resolved}' instead of the repository font, so the font-dependent tests would measure a fallback font"
+              exit 1
+              ;;
+          esac
       - name: Configure build project
         run: meson setup --buildtype debugoptimized --unity on debug
         env:
