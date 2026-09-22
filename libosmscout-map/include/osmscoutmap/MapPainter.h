@@ -609,10 +609,21 @@ namespace osmscout {
        Useful global helper functions.
      */
     //@{
+    /**
+     * Visibility test for an area's bounding box: the box is transformed to the frame's screen
+     * space, enlarged by pixelOffset screen pixels and intersected with the screen box. A width
+     * that a style sheet declares is a length in millimetres and has to be converted with the
+     * frame's projection (Projection::ConvertWidthToPixel) before it is passed as the offset, the
+     * same way the backends convert it before drawing.
+     */
     bool IsVisibleArea(const Projection& projection,
                        const GeoBox& boundingBox,
                        double pixelOffset) const;
 
+    /**
+     * Visibility test for a way's bounding box, using the same screen offset in pixels as
+     * IsVisibleArea.
+     */
     bool IsVisibleWay(const Projection& projection,
                       const GeoBox& boundingBox,
                       double pixelOffset) const;
