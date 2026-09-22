@@ -42,16 +42,16 @@ class PoiEntryTest {
     }
 
     @Test
-    void testOperatorOnlyEntry() {
+    void testOperatorWithoutBrand() {
         PoiEntry entry = new PoiEntry();
         entry.label = "";
         entry.operator = "Sparkasse";
-        entry.brand = null;
+        entry.brand = "";
         entry.objectType = "amenity_atm";
 
         assertEquals("", entry.label);
         assertEquals("Sparkasse", entry.operator);
-        assertNull(entry.brand);
+        assertEquals("", entry.brand);
         assertEquals("amenity_atm", entry.objectType);
     }
 

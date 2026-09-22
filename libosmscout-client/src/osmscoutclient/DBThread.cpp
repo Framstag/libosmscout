@@ -289,14 +289,13 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         if (typeConfig) {
           registerCustomPoiTypes(typeConfig);
           styleConfig=makeStyleConfig(typeConfig);
-          // A stylesheet that failed to load never leaves the database without a
-          // style configuration: rendering would otherwise run without one.
+          // A rejected stylesheet never leaves the database without a style
+          // configuration: rendering would otherwise run without one.
           if (!styleConfig) {
             styleConfig=emptyStyleConfig;
             lastStyleLoadSucceeded=false;
-            activeStyleSheetFilename.clear();
           }
-          else {
+          else if (activeStyleSheetFilename.empty()) {
             activeStyleSheetFilename=stylesheetFilename;
           }
         }
@@ -304,7 +303,6 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
           log.Warn() << "TypeConfig invalid!";
           styleConfig=emptyStyleConfig;
           lastStyleLoadSucceeded=false;
-          activeStyleSheetFilename.clear();
         }
       }
       else {

@@ -10,13 +10,13 @@ Read while preparing this design (`libosmscout-client/`, `libosmscout-client-jav
 
 | Fact | Where |
 |---|---|
-| A stylesheet that fails to parse is not installed: the candidate configuration is discarded and the database is left with no configuration | `DBInstance::LoadStyle` (`libosmscout-client/src/osmscoutclient/DBInstance.cpp:40-70`) |
+| A stylesheet that fails to parse is not installed: the candidate configuration is discarded and the database is left with no configuration | `DBInstance::LoadStyle` (`libosmscout-client/src/osmscoutclient/DBInstance.cpp:28-73`) |
 | The caller ignores that per-database result and only logs a warning | `DBThread::LoadStyleInternal` (`libosmscout-client/src/osmscoutclient/DBThread.cpp:440-473`) |
 | A safe, empty configuration is constructed for exactly this purpose and never installed | `DBThread.cpp:61`, `DBThread.cpp:447` |
-| `StyleConfig::Load` reports parser errors and fails when any occurred; the errors are readable afterwards | `libosmscout-map/src/osmscoutmap/StyleConfig.cpp:1785,1884` |
-| The render batch skips a database without a configuration, but the painting stage still runs for the batch | `libosmscout-client-java/src/OSMscoutClient.cpp:1310-1430` |
-| Only the explicit runtime switch compares the error state before/after and restores the previous stylesheet file | `OSMscoutClient.cpp:842-905` |
-| The basemap database has its own type configuration and its own stylesheet file, loaded through the same path | `DBThread.cpp:580-596` |
+| `StyleConfig::Load` reports parser errors and fails when any occurred; the errors are readable afterwards | `libosmscout-map/src/osmscoutmap/StyleConfig.cpp:1830` |
+| The render batch skips a database without a configuration, but the painting stage still runs for the batch | `libosmscout-client-java/src/OSMScoutClient.cpp:1273-1371` |
+| Only the explicit runtime switch compares the error state before/after and restores the previous stylesheet file | `OSMScoutClient.cpp:796-851` |
+| The basemap database has its own type configuration and its own stylesheet file, loaded through the same path | `DBThread.cpp:567-596` |
 
 Constraint: the client library stays platform-independent and backend-independent; the change is
 therefore in shared client code, not in a backend, and must not add work to a render call.

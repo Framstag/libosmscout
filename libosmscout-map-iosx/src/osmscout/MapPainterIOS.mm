@@ -330,8 +330,6 @@ namespace osmscout {
         if(glyphs.size() == 0){
             return;
         }
-        CTRunRef run = glyphs[0].glyph.run;
-        const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
         CGGlyph glyphToDraw[1];
         CGPoint glyphPositions[1];
 
@@ -343,9 +341,14 @@ namespace osmscout {
         CGContextSaveGState(cg);
         CGContextSetRGBFillColor(cg, r, g, b, a);
         CGContextSetRGBStrokeColor(cg, r, g, b, a);
-        int index = 0;
         for (const auto &glyph:glyphs) {
-            CTRunGetGlyphs(run, CFRangeMake(index, 1), glyphToDraw);
+            // Each glyph carries the run it belongs to and its index in it. The layouter is free
+            // to drop glyphs that fall outside the drawn area, so the position in this vector is
+            // not the position in the run: indexing by it drew the first n characters of the
+            // name instead of the ones that were kept.
+            CTRunRef run = glyph.glyph.run;
+            const CTFontRef font = (CTFontRef)CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+            CTRunGetGlyphs(run, CFRangeMake(glyph.glyph.index, 1), glyphToDraw);
             glyphPositions[0] = CGPointMake(0,0);
             CGContextSaveGState(cg);
             CGContextTranslateCTM(cg, glyph.position.GetX(), glyph.position.GetY());
@@ -353,7 +356,6 @@ namespace osmscout {
             CGContextScaleCTM(cg, 1.0, -1.0);
             CTFontDrawGlyphs(font, glyphToDraw, glyphPositions, 1, cg);
             CGContextRestoreGState(cg);
-            index++;
         }
         CGContextRestoreGState(cg);
 
@@ -554,7 +556,11 @@ namespace osmscout {
     void MapPainterIOS::BeforeDrawingCallback(const Projection& projection,
                                               const MapParameter& parameter,
                                               const std::vector<MapData>& /*data*/){
-        labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, CGBitmapContextGetWidth(cg), CGBitmapContextGetHeight(cg)));
+        // The layouter works in projection units, the same ones the glyph positions use.
+        // CGBitmapContextGetWidth() returns the backing store in pixels, which is scale times
+        // bigger on a retina context, and made the layouter believe the drawn area was scale
+        // times wider than it is. Every other painter uses the projection dimensions here.
+        labelLayouter.SetViewport(ScreenVectorRectangle(0, 0, projection.GetWidth(), projection.GetHeight()));
         labelLayouter.SetLayoutOverlap(projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap()));
     }
 

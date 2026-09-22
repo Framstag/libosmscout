@@ -104,7 +104,8 @@ public class OSMScoutClient {
      * (e.g. {@code "cycle"}). The stylesheet is loaded on the native database
      * thread; this call blocks until the load has completed. When the load
      * fails (unknown name, unreadable or unparsable file) the previously
-     * active style is restored and {@code false} is returned.
+     * active style is restored and {@code false} is returned. A failed load is
+     * reported by {@link #wasLastStyleLoadSuccessful()}.
      *
      * @param name style name, or file name including {@code .oss}
      * @return true if the style was loaded, false on failure

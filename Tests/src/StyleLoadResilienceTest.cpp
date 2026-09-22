@@ -26,6 +26,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <list>
@@ -109,7 +110,7 @@ struct TestDatabase
 };
 
 osmscout::StyleConfigRef LoadStyleSheet(const osmscout::TypeConfigRef &typeConfig,
-                                       const std::filesystem::path &file)
+                                        const std::filesystem::path &file)
 {
   osmscout::StyleConfigRef config=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
@@ -171,7 +172,7 @@ TEST_CASE("Successful load adopts the requested stylesheet")
   REQUIRE(instance->GetStyleConfig() != active);
 
   // Recovery: a valid stylesheet after a failed attempt is adopted.
-  REQUIRE(instance->LoadStyle(WriteUnparsableStyleSheet().string(), {}, errors, fallback) == false);
+  REQUIRE_FALSE(instance->LoadStyle(WriteUnparsableStyleSheet().string(), {}, errors, fallback));
   auto rejected=instance->GetStyleConfig();
   REQUIRE(rejected != nullptr);
   REQUIRE(instance->LoadStyle((stylesheetDir/"winter-sports.oss").string(), {}, errors, fallback));

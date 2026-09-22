@@ -1,44 +1,158 @@
 # Tasks
 
 Spec: `specs/client-java-style-switching/spec.md`. Design: `design.md` D1–D5.
+Origin: `naviveylin-local` (commit `9f99f7edf`) — this change re-creates that work as an
+independent, upstreamable patch on `master`.
 
-## 1. Install-on-clean-parse (client configuration lifecycle)
+## 1. Change artifacts and branch
 
-- [x] 1.1 Change the per-database style load so the candidate configuration is adopted only when the load reported no errors, and the previously installed configuration survives a failed attempt; the database is left without a configuration only when none was ever installed. Verify: a client test loading a malformed stylesheet keeps the previous configuration, and the previous configuration is the one the render uses. (spec: Client switches active style at runtime) — Done 2026-09-19: `DBInstance::LoadStyle` keeps `styleConfig` on a rejected parse and installs `fallback` only when nothing was ever installed (`libosmscout-client/src/osmscoutclient/DBInstance.cpp`); the JNI render batch never passes a database without a configuration (guard kept + warning in `OSMScoutClient.cpp`). Revert check: mutating `if (!styleConfig && fallback)` to `if (fallback)` makes "Rejected stylesheet keeps the previously active configuration" fail (previous configuration replaced by the fallback).
-- [x] 1.2 Report, as part of the load outcome, which stylesheet is active after the attempt (success, failure with a previous style, failure with no previous style). Verify: the outcome is filled on both branches and the header documents it. (design D4) — Done 2026-09-19: `DBThread::activeStyleSheetFilename` / `lastStyleLoadSucceeded` with `GetActiveStyleSheetFilename()` / `WasLastStyleLoadSuccessful()`; `DBInstance::LoadStyle` logs which case applied (kept previous / empty fallback / no fallback available).
-- [x] 1.3 Apply the same rule to the basemap database, whose dedicated stylesheet is loaded through the same path. Verify: a failing basemap stylesheet keeps the map rendering and reports the failure. (spec: Basemap stylesheet fails to load) — Done 2026-09-19: `LoadBasemap()` and `LoadStyleInternal()` install `emptyStyleConfig` for the basemap on a rejected stylesheet and mark the load as failed, so the map content still renders and the failure is reported.
-- [x] 1.4 Commit the change in the submodule on branch `naviveylin-local` with a minimal, upstreamable message; run `git ls-remote origin naviveylin-local` immediately before the push; verify the submodule working tree afterwards. Verify: the commit SHA is recorded here and in the consuming repository's gitlink bump task (NaviVeylin `fix-stylesheet-load-crash` task 1.2). — Done 2026-09-19: commit **`9f99f7edf`** "client: keep the active style when a stylesheet fails to load" (14 files: client sources/headers, JNI, Java API, both build systems' test registration, `Tests/src/StyleLoadResilienceTest.cpp`, this OpenSpec change). The peer session's two commits (`b9fbe0b52`, `b8ca7432f`) were already committed, so only this change's hunks were staged. `git ls-remote origin naviveylin-local` immediately before the push returned `c3b839f7e` (an ancestor of the local tip — fast-forward, no force rewrite); pushed `c3b839f7e..9f99f7edf`; remote and local tip both `9f99f7edf`, submodule working tree clean.
+- [x] 1.1 Create the branch `client-style-load-resilience` from current `master` and commit the four
+      artifacts of this change (proposal, spec delta, design, tasks). Verify: `openspec validate
+      client-style-load-resilience` passes. (spec: all three deltas) — Done: branch `client-style-load-resilience`
+      off `master` `c91dd4abc`; artifacts committed as `a33661fc8`; `openspec validate` reports valid.
+- [x] 1.2 Re-check every `file:line` in design.md's Context table against the branch's checkout and
+      correct the drifted ones. Verify: each referenced line still shows the quoted fact. — Done: all eight
+      references confirmed on the branch (`DBInstance.cpp:28`/`:73`, `DBThread.cpp:61`/`:440`/`:447`/`:567`/`:596`,
+      `StyleConfig.cpp:1830`, `OSMScoutClient.cpp:796`/`:851`/`:1273`/`:1371`); no drift, no edit needed.
 
-## 2. Always-usable configuration (safe fallback)
+## 2. Client configuration lifecycle (install on clean parse)
 
-- [x] 2.1 Install the existing safe configuration for a database that has never loaded a stylesheet successfully, so no database is ever without a configuration, and remove the now-unused construction of that configuration. Verify: no path exists in which a database reaches rendering without a configuration. (spec: A database always has a usable style configuration) — Done 2026-09-19: `emptyStyleConfig` is passed as the fallback by `LoadStyleInternal` and installed by `DBInstance::LoadStyle` (previously constructed and never used); the database-open path (`Initialize()`) and `LoadBasemap()` also install it instead of leaving `nullptr`. Test "First failed load installs the fallback configuration" pins it.
-- [x] 2.2 Keep the successfully loaded configuration when a *later* load fails (do not fall back to the safe configuration after a success). Verify: test asserting the recovered configuration is the previously loaded one, and that a later valid load replaces the safe configuration. (spec: Later load fails after a successful one; Recovery after a failed load) — Done 2026-09-19: tests "Rejected stylesheet keeps the previously active configuration" and "Successful load adopts the requested stylesheet" (valid → rejected → valid, asserting the configuration identity at each step).
+- [x] 2.1 Add the fallback configuration parameter to `DBInstance::LoadStyle`
+      (`libosmscout-client/include/osmscoutclient/DBInstance.h`,
+      `libosmscout-client/src/osmscoutclient/DBInstance.cpp`): the candidate configuration is adopted
+      only when the parse reported no errors; on a rejected parse the previously installed
+      configuration stays, and the fallback is installed only when nothing was ever installed.
+      Verify: compiling the client plus the test added in 4.1, which fails against the unpatched
+      `LoadStyle`. (spec: Client switches active style at runtime; A database always has a usable style
+      configuration) — Done: `DBInstance.h`/`DBInstance.cpp` adopt the candidate only on a clean parse,
+      keep the installed configuration on a rejection and install `fallback` only when none was ever
+      installed. `ninja -C build libosmscout_client.so` clean. Revert check recorded under 4.1.
+- [x] 2.2 Install the already constructed safe configuration (`emptyStyleConfig`) instead of leaving a
+      database without one, on every path that can fail to load — database open, `LoadStyleInternal`
+      and `LoadBasemap`. Verify: no code path in `DBThread.cpp` assigns a null style configuration
+      anymore. (spec: A database always has a usable style configuration) — Done: the database-open path
+      (`OnDatabaseListChanged`) and `LoadBasemap()` install `emptyStyleConfig` on a rejected load and on
+      an invalid type config; the `nullptr` assignments in `DBThread.cpp` are gone.
+- [x] 2.3 Report the load outcome per database and which stylesheet is active afterwards: add
+      `activeStyleSheetFilename` / `lastStyleLoadSucceeded` with
+      `GetActiveStyleSheetFilename()` / `WasLastStyleLoadSuccessful()` to
+      `libosmscout-client/include/osmscoutclient/DBThread.h` and
+      `libosmscout-client/src/osmscoutclient/DBThread.cpp`, documented. Verify: the accessors are filled
+      on both the success and the failure branch, and the header documents the contract. (design D4) —
+      Done: both members declared next to `stylesheetFilename` (so the ctor init order stays valid),
+      accessors are read-locked; `LoadStyleInternal` sets `lastStyleLoadSucceeded=succeeded &&
+      styleErrors.empty()` and stores `activeStyleSheetFilename=file` only on success. Deviation from
+      the origin patch, for D4: on a newly scanned database the active file name is kept when one is
+      already known, instead of being cleared (clearing would make `getActiveStyleSheet()` report the
+      configured file while another style is genuinely active).
+- [x] 2.4 Apply the basemap rule: a rejected basemap stylesheet keeps the map rendering and only drops
+      the basemap layer, and is reported as a failed load. Verify: review of `LoadBasemap()` shows no
+      path that leaves the basemap database without a configuration. (spec: Basemap stylesheet fails to
+      load) — Done: both the rejected-stylesheet and invalid-type-config branches of `LoadBasemap()`
+      install `emptyStyleConfig` and mark the load failed with a warning.
 
-## 3. Painting stage
+## 3. Java-facing reporting and render safety
 
-- [x] 3.1 Make the render path of the Java-facing client never use a configuration from a failed load, and never render a database without a usable configuration (a database on the safe configuration draws no content, other databases in the same render still draw). Verify: code review of the render path plus a test with one failing and one healthy database. (spec: Rendering never uses a style configuration from a failed load) — Done 2026-09-19: the render batch keeps the explicit `GetStyleConfig()` guard (now a documented safety net, logged) and the client guarantees a configuration per database; test "Painting a batch with a database on the fallback configuration completes" paints a rejected database and a healthy one in one batch.
-- [x] 3.2 Confirm the guard adds no cost to a render call: the decision is taken when a configuration is installed, not per frame. Verify: the render path shows no new allocation or lookup. — Done 2026-09-19: the install decision is in `LoadStyle`/`LoadStyleInternal` (load path only); the render path gained a log line on the abnormal path, no per-frame work.
+- [x] 3.1 Add the JNI entry point `wasLastStyleLoadSuccessful` and make `getActiveStyleSheet` report the
+      actually installed stylesheet (falling back to the configured one before any successful load) in
+      `libosmscout-client-java/src/OSMScoutClient.cpp`. Verify: both symbols are wired to the accessors
+      added in 2.3. (spec: Client switches active style at runtime; Session start with an unloadable
+      style) — Done: `getActiveStyleSheet` returns the file name of `GetActiveStyleSheetFilename()` when
+      set, else the configured file; `wasLastStyleLoadSuccessful` returns
+      `WasLastStyleLoadSuccessful()`. Java/JNI header regeneration and the native library build both
+      succeed, so the symbol signatures match.
+- [x] 3.2 Rework `loadStyleSheet` to decide on the new load-outcome flag instead of comparing the error
+      count before and after, and keep restoring the persisted selection on failure. Verify: the
+      explicit switch still returns `false` for an unknown style and for an unparsable stylesheet.
+      (spec: Switching to an unknown style fails; Switching to an unloadable stylesheet fails) — Done:
+      `previousErrorCount` removed; the failure branch is now `!WasLastStyleLoadSuccessful()`. The
+      unknown-name path still returns `false` before the load (`std::filesystem::exists` check), and the
+      unparsable path restores `previousFile` and returns `false`.
+- [x] 3.3 Keep the render batch from painting a database without a configuration and document the guard
+      as a safety net, not a normal path. Verify: review of the render path shows no per-frame lookup or
+      allocation added. (spec: Rendering never uses a style configuration from a failed load) — Done:
+      the existing `GetStyleConfig()` guard in `loadDbData` is kept and now logs which database was
+      skipped; no new lookup or allocation was added to the render path.
+- [x] 3.4 Declare `wasLastStyleLoadSuccessful()` and update the javadoc of `getActiveStyleSheet()` and
+      `loadStyleSheet()` in
+      `libosmscout-client-java/java/com/framstag/libosmscout/client/OSMScoutClient.java`. Verify: the
+      documented behaviour matches the tests of group 4. (spec: Client switches active style at runtime;
+      design D4) — Done: the declaration plus javadoc were added; `getActiveStyleSheet` documents that a
+      failed stylesheet is never reported as active and `loadStyleSheet` points at the new flag.
 
-## 4. Reporting to the caller
+## 4. Tests
 
-- [x] 4.1 Surface the load outcome and the active style of every load path through the Java-facing API (the explicit switch keeps its existing result semantics and gains the same information). Verify: the API is documented and used by a test for each path (switch, session start, style-flag change, basemap, refresh). (spec: Session start with an unloadable style; Style flag change with an unloadable stylesheet) — Done 2026-09-19: `wasLastStyleLoadSuccessful()` added (JNI + `OSMscoutClient.java`, documented); `getActiveStyleSheet()` now reports the actually installed stylesheet (file name of `DBThread::GetActiveStyleSheetFilename()`), falling back to the configured stylesheet before any successful load. `loadStyleSheet` returns false via the new flag instead of the previous error-count comparison (which could miss a failure when the error count did not grow).
-- [x] 4.2 Keep the existing error list as the diagnostic channel and check it is populated for every failure path. Verify: a test asserts a non-empty error list after a failed load on a non-switch path. (design D4) — Done 2026-09-19: `DBInstance::LoadStyle` fills `errors` from the rejected candidate on every path; `StyleLoadResilienceTest` asserts `errors` non-empty after a failed direct load (non-switch path), and `styleErrors` is cleared/re-filled per attempt in `LoadStyleInternal`.
-- [x] 4.3 Check the redraw notification rule still holds: a successful load notifies, a failed one does not. Verify: existing redraw tests pass unchanged. (spec: Client signals redraw need after switch) — Done 2026-09-19: `stylesheetFilenameChanged` emission is unchanged and still only comes from `LoadStyleInternal`; the Java-facing redraw decision is driven by the `loadStyleSheet` result, which keeps its semantics (false on failure). The observable app-side redraw tests live in the consuming repository (NaviVeylin `fix-stylesheet-load-crash` task 5.3); no client-side test exists for that signal (noted, not deferred work).
+- [x] 4.1 Add `Tests/src/StyleLoadResilienceTest.cpp` covering: a rejected stylesheet keeps the
+      previously active configuration; a first failed load installs the fallback; valid → rejected →
+      valid recovers; a batch with one fallback-configured and one healthy database paints without a
+      fault. Use a stylesheet with a missing module plus a syntax error — not an invalid colour literal,
+      which asserts in the colour helper instead of reporting a parse error. Verify: revert check — the
+      test fails against the unpatched client. (spec: A database always has a usable style
+      configuration; Rendering never uses a style configuration from a failed load) — Done:
+      `Tests/src/StyleLoadResilienceTest.cpp` with 4 cases: rejected keeps previous, first-load fallback
+      installs the fallback, valid → rejected → valid recovery, batch painting with a fallback-configured
+      database. `ctest -R StyleLoadResilienceTest` passed. Revert check performed: mutating
+      `if (!styleConfig && fallback)` to `if (fallback)` in `DBInstance::LoadStyle` makes "Rejected
+      stylesheet keeps the previously active configuration" fail at `GetStyleConfig() == active`
+      (1 failed / 35 assertions), and the mutation was reverted afterwards.
+- [x] 4.2 Register the new test in `Tests/CMakeLists.txt` (with
+      `TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}`) and `Tests/meson.build`. Add the entries to the
+      current `master` files — do not copy the older NaviVeylin versions of those two files, which drop
+      `BasemapCheckTest` and revert the `JsonWriterTest` linking. Verify: both files list exactly the
+      new test and nothing else changed. (spec: A database always has a usable style configuration) —
+      Done: `Tests/CMakeLists.txt` gains the test plus the `TESTS_TOP_DIR` property;
+      `Tests/meson.build` gains the executable and the `env:` test entry. `git diff` on both files shows
+      only those additions — `BasemapCheckTest` and the `JsonWriterTest`/`DbJsonWriterTest` registrations
+      are untouched.
+- [x] 4.3 Assert the diagnostic channel: the error list is populated after a failed load on a non-switch
+      path. Verify: the test of 4.1 asserts a non-empty error list for the direct load. (design D4) —
+      Done: "Rejected stylesheet keeps the previously active configuration" asserts
+      `errors.empty() == false` after a direct `DBInstance::LoadStyle` call.
+- [x] 4.4 Confirm no existing test relied on the old behaviour (database left without a configuration).
+      Verify: the full client test target is green in both build systems; any changed expectation is
+      explained in the task notes. (spec: Rendering never uses a style configuration from a failed load) —
+      Done: CMake `ctest -j4` 125/126 and Meson `meson test` 126/126. The single CMake failure is
+      `MapPainterAreaVisibilityCullTest`, which is pre-existing and unrelated: this change touches no file
+      under `libosmscout-map/` (`git diff master -- libosmscout-map` is empty), the failing assertion
+      expects a pixel-based border tolerance while `master` still computes millimetres — exactly what the
+      open PR #1825 (`fix-area-cull-pixel-tolerance`) corrects. That test's file and expectations were not
+      modified here.
 
-## 5. Tests
+## 5. Build and verification gates
 
-- [x] 5.1 Add client tests for the failure paths: failed include, invalid colour literal, first load of a session failing, later load failing after a success, recovery by a later valid load, basemap-only failure. Verify: the new tests fail against the unpatched client (revert check) and pass after it. (spec: A database always has a usable style configuration) — Done 2026-09-19: `Tests/src/StyleLoadResilienceTest.cpp` (4 cases: rejected keeps previous, first-load fallback, valid→rejected→valid recovery, batch painting with a fallback database). The malformed stylesheet uses a missing `MODULE` plus a syntax error — deliberately **not** an invalid colour literal, because an invalid hex asserts in `Color::GetHexValue` instead of reporting a parse error (that trigger stays covered by the consuming app's `StylesheetHexColorCaseTest`). Revert check performed (see 1.1). Basemap-only failure is covered by the code path rule in 1.3, not by a test (constructing a second basemap database in the host test harness was not attempted).
-- [x] 5.2 Verify a render performed while a database is on the safe configuration completes without a fault and draws no content for that database, and that other databases still draw. Verify: the test asserts the render result, not only that no exception was thrown. (spec: Render with a failed load; Other databases still render) — Done 2026-09-19: "Painting a batch with a database on the fallback configuration completes" asserts `MapPainterNoOp::DrawMap` returns true for a batch of [fallback-configured, healthy] map data. "Draws no content" is asserted structurally (the fallback has an empty type configuration, so no type can match) rather than by pixel inspection — a pixel-level check would need the Cairo painter and a second sandbox/backend dependency in this test target.
-- [x] 5.3 Confirm no existing test depended on the old failure behaviour (database left without a configuration). Verify: the full client test target is green, and any changed expectation is explained in the task notes. — Done 2026-09-19: every test linking `OSMScout::Client` is green in both build systems — meson `hostbuild`: `Check FavoriteLocationService`, `Check style load resilience`; CMake `/tmp/osmscout-cmake`: `FavoriteLocationServiceTest`, `StyleLoadResilienceTest`, `FileFormatVersionTest`, `MapDownloadServiceTest` (4/4 passed). No existing test expected a database to be left without a configuration; no expectation was changed.
+- [x] 5.1 Build the client library and the new test target in the CMake configuration and verify it
+      compiles without errors and without new warnings in the touched files. Verify: build log clean for
+      `DBInstance.cpp`, `DBThread.cpp`, `OSMScoutClient.cpp`, `StyleLoadResilienceTest.cpp`. — Done:
+      `ninja -C build libosmscout_client.so libosmscout_client_java.so StyleLoadResilienceTest` — no
+      warnings. The Java/JNI header regeneration step also ran, so the new native declaration matches the
+      generated header. Note: `clang-tidy` is not part of this repository's CI, and the local
+      `scripts/format-check.sh check` reports 791 of 890 tracked sources as unformatted **including
+      unmodified `master` files** (verified against `master:DBInstance.cpp` and `master:DBThread.h`), so it
+      is not a usable gate in this checkout; the new test file itself is reported clean.
+- [x] 5.2 Run the tests in the CMake configuration to completion and record the counts. Verify: the new
+      test and every test linking `OSMScout::Client` pass. — Done: `xvfb-run -a ctest -j4` → 125/126 passed,
+      21.8 s. `FavoriteLocationServiceTest` and `StyleLoadResilienceTest` both pass; the style-related tests
+      (`CheckStyleSheet-*`, `StyleConfigSymbolsTest`, `StyleConfigVisibilityBoundsTest`) pass. Only
+      `MapPainterAreaVisibilityCullTest` fails (pre-existing, see 4.4).
+- [x] 5.3 Configure and build the touched sources in the Meson configuration as well. Verify: the Meson
+      build compiles the client library and the new test, and existing Meson tests still pass. — Done:
+      `meson compile -C build-meson` built `libosmscout_client_java.so`, `StyleLoadResilienceTest` and the
+      rest (110 targets) with no errors; `meson test --timeout-multiplier 2 -C build-meson` → 126/126 OK.
+      `Check style load resilience` and `Check FavoriteLocationService` OK.
 
-## 6. Build and verification gates
+## 6. Documentation and pull request
 
-- [x] 6.1 Build the client test target in the primary build system and verify it compiles without errors or new warnings. Verify: build log clean for the touched files. — Done 2026-09-19: `ninja -C hostbuild` for `libosmscout_client.so`, `libosmscout_client_java.so` and `Tests/StyleLoadResilienceTest` — 0 warnings from the touched files (`OSMScoutClient.cpp`, `DBThread.cpp`, `DBInstance.cpp`, `StyleLoadResilienceTest.cpp`).
-- [x] 6.2 Run the client test target to completion and record the counts. Verify: all tests green, including the new failure tests. — Done 2026-09-19: `meson test -C hostbuild` → `Check style load resilience` OK (1.59 s) and 3/3 client-related tests OK; CMake `ctest` → 4/4 passed.
-- [x] 6.3 Verify the second build system still configures and builds the touched sources (structural changes must not break either). Verify: the alternative build compiles the client library. — Done 2026-09-19: `cmake -S . -B /tmp/osmscout-cmake -G Ninja -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF` configures, `cmake --build … --target StyleLoadResilienceTest FavoriteLocationServiceTest FileFormatVersionTest MapDownloadServiceTest` builds with 0 warnings.
-- [x] 6.4 If the Java-facing sources under `libosmscout-client-java/java/` change, keep the corresponding Android-side override in the consuming repository in sync — record the required follow-up explicitly. Verify: the follow-up is named in the task notes (the consuming repository owns that file). — Done 2026-09-19: `libosmscout-client-java/java/com/framstag/libosmscout/client/OSMScoutClient.java` gained `wasLastStyleLoadSuccessful()` and the updated `getActiveStyleSheet()` contract, so **NaviVeylin must add `public native boolean wasLastStyleLoadSuccessful();` to its override** `osmscout-client-java/src/main/java/com/framstag/libosmscout/client/OSMScoutClient.java` — already tracked as NaviVeylin `fix-stylesheet-load-crash` task 1.3.
-
-## 7. Documentation
-
-- [x] 7.1 Update the client/ Java documentation or notes that describe style switching so the failure guarantee (previous style kept, safe configuration on a first failure, failure reported) is documented where the API is described. Verify: the documented behaviour matches the tests. — Done 2026-09-19: `OSMscoutClient.java` javadoc for `getActiveStyleSheet()`, `loadStyleSheet()` and the new `wasLastStyleLoadSuccessful()`; C++ `DBInstance::LoadStyle` and the `DBThread` accessors document the same rule.
-- [x] 7.2 Check `guidelines/` in this repository for statements about stylesheet loading or rendering configuration that the change invalidates, and update them if so. Verify: no guideline contradicts the implemented behaviour. — Done 2026-09-19: `guidelines/` holds C++ code style and file-format-version docs only; neither describes stylesheet loading, so nothing contradicts the change and no update was needed.
+- [x] 6.1 Check `guidelines/` and the client documentation for statements about stylesheet loading or the
+      render configuration that the change invalidates, and update them if so. Verify: no guideline
+      contradicts the implemented behaviour.
+- [x] 6.2 Record the `**BREAKING**` assessment in the pull-request description: no API is removed or
+      renamed; `DBInstance::LoadStyle` gains a defaulted parameter and `DBThread` gains two accessors.
+      Verify: the PR body names both signature changes explicitly. — Done: the PR body has a `BREAKING`
+      section stating none, and names both additive changes (`DBInstance::LoadStyle` defaulted
+      `fallback` parameter, `DBThread::GetActiveStyleSheetFilename()` / `WasLastStyleLoadSuccessful()`).
+- [x] 6.3 Open the pull request against `master` with the change's proposal, spec delta and design
+      linked, and no unrelated file in the diff. Verify: `git diff master...client-style-load-resilience
+      --stat` lists only the files named in the proposal's Impact section. — Done: pushed the branch to
+      `origin` and opened **PR #1828** (`fix: keep the active style when a stylesheet fails to load`),
+      linking this change. `git diff master --name-only` lists exactly the nine source/build/test files of
+      the proposal's Impact section plus this change's five artifacts.

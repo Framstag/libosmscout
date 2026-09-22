@@ -155,8 +155,8 @@ public:
    * only when it parses without errors.
    *
    * A stylesheet that fails to load never becomes the active style: the
-   * configuration installed before the call stays in effect. `fallback` is used
-   * only when no configuration was ever installed for this database (a
+   * configuration installed before the call stays in effect. \ref fallback is
+   * used only when no configuration was ever installed for this database (a
    * configuration that draws nothing), so that rendering never runs without a
    * style configuration.
    *

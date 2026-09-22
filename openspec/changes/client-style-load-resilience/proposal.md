@@ -4,10 +4,10 @@
 
 A stylesheet that cannot be parsed currently leaves the affected database without a usable style
 configuration on every path except an explicit runtime switch, and the render pipeline then proceeds
-without one: an application using the client (NaviVeylin, Android/Cairo) died with
-`Fatal signal 11 (SIGSEGV)` inside the style lookup called from the map painter, preceded only by a
-warning that the stylesheet failed to load. A malformed bundled stylesheet is therefore a process
-crash for every user of the application, with no way for the application to react.
+without one: an application using the client died with `Fatal signal 11 (SIGSEGV)` inside the style
+lookup called from the map painter, preceded only by a warning that the stylesheet failed to load. A
+malformed bundled stylesheet is therefore a process crash for every user of the application, with no
+way for the application to react.
 
 The client already detects the failure and already owns a runtime switching contract that keeps the
 previous style on a failed switch; what is missing is that the same guarantee holds on every load
@@ -32,8 +32,7 @@ path, and that a total failure degrades instead of reaching the painter.
   notification) is extended, not replaced: a successful load behaves exactly as before.
 
 Not **BREAKING**: no API is removed or renamed, and no successful path changes behaviour; only the
-failure path stops faulting and starts being reported. The change is intended to be independently
-upstreamable.
+failure path stops faulting and starts being reported.
 
 ## Capabilities
 
@@ -55,20 +54,29 @@ generalized rather than duplicated.
 
 **Modules / files:**
 
-- `libosmscout-client/` — the style configuration lifecycle of a database: which configuration is
-  installed after a successful or failed load, and the per-database outcome of a load (headers next to
-  `DBInstance` / `DBThread` change with it).
-- `libosmscout-client-java/` — the Java-facing style load and render entry points, so the load outcome
-  and the active style are reported to the application and the render path never uses an absent or
-  rejected configuration. If the Java API surface gains a method, the corresponding Java source in
-  `libosmscout-client-java/java/` is updated there as well.
-- `Tests/` — the Catch2 client tests gain the failure paths (failed include, invalid colour literal,
-  first-load failure, recovery after a successful load).
+- `libosmscout-client/include/osmscoutclient/DBInstance.h` and `DBThread.h` — the per-database style
+  configuration lifecycle and the load outcome of a database.
+- `libosmscout-client/src/osmscoutclient/DBInstance.cpp` and `DBThread.cpp` — which configuration is
+  installed after a successful or failed load, on every load path.
+- `libosmscout-client-java/src/OSMScoutClient.cpp` — the Java-facing style load and render entry
+  points, so the load outcome and the active style are reported to the application and the render path
+  never paints a database without a configuration.
+- `libosmscout-client-java/java/com/framstag/libosmscout/client/OSMScoutClient.java` — the Java API
+  surface for the load outcome and the active style.
+- `Tests/src/StyleLoadResilienceTest.cpp` (new) plus the `Tests/CMakeLists.txt` and `Tests/meson.build`
+  registrations — the Catch2 client tests gain the failure paths (first-load failure, failure after a
+  success, recovery, batch painting with a database on the safe configuration).
 - No build-system, dependency, platform- or backend-specific change; the behaviour is in the
   platform-independent client, so every backend and both build systems are covered.
 
+**Origin:**
+
+- Extracted from the NaviVeylin fork of this repository (`naviveylin-local`), where the behaviour was
+  first implemented; the change contains nothing NaviVeylin-specific and is intended to be
+  independently upstreamable.
+
 **Consumers:**
 
-- NaviVeylin (Android) uses this client through its JNI bridge and gains the guarantee; the
+- A consuming Android application uses this client through its JNI bridge and gains the guarantee; the
   application-side reporting and message are a separate change in that repository, which depends on
-  this one being committed and its submodule pointer bumped.
+  this one being committed and its client revision updated.

@@ -1,0 +1,484 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90293160008588,
+      "lon": 14.59172811054981,
+      "name": "Benešovská",
+      "nodeIndex": 0,
+      "ref": "603",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.03894970533167084,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90327089952879,
+      "lon": 14.59159400009807,
+      "name": "Benešovská",
+      "nodeIndex": 1,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.07621799194448954,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.9035941057175,
+      "lon": 14.591457207437287,
+      "name": "Benešovská",
+      "nodeIndex": 2,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.12318492906903919,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90399643707272,
+      "lon": 14.591258723968707,
+      "name": "Ringhofferova",
+      "nodeIndex": 3,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.1521904137822116,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90423247146779,
+      "lon": 14.591087062590475,
+      "name": "Ringhofferova",
+      "nodeIndex": 4,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.17887018742627442,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90445107150413,
+      "lon": 14.59093417667549,
+      "name": "Ringhofferova",
+      "nodeIndex": 5,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.19765234341614016,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.904602616314605,
+      "lon": 14.590818841686996,
+      "name": "Ringhofferova",
+      "nodeIndex": 6,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.23254736857716501,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.904874860531635,
+      "lon": 14.590577442873837,
+      "name": "Ringhofferova",
+      "nodeIndex": 7,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.2643135287732768,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90512162376285,
+      "lon": 14.590354819523952,
+      "name": "Ringhofferova",
+      "nodeIndex": 8,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.3030352974175672,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.905435442219925,
+      "lon": 14.590121467337923,
+      "name": "Pražská",
+      "nodeIndex": 9,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.37489120222730943,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90600407053532,
+      "lon": 14.589646716338734,
+      "name": "Pražská",
+      "nodeIndex": 10,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.4944145514213242,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.906938820384,
+      "lon": 14.588825960374066,
+      "name": "Pražská",
+      "nodeIndex": 11,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.5999878129224451,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90777432849836,
+      "lon": 14.588128586024993,
+      "name": "Pražská",
+      "nodeIndex": 12,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.6383329051409131,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90807339480574,
+      "lon": 14.587863047330558,
+      "name": "Pražská",
+      "nodeIndex": 13,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.653374350764201,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.908187388689726,
+      "lon": 14.58775039455108,
+      "name": "Pražská",
+      "nodeIndex": 14,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.6721485935832641,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.908325522455016,
+      "lon": 14.587600190845137,
+      "name": "Pražská",
+      "nodeIndex": 15,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.6864212796190227,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90842610529381,
+      "lon": 14.587476809229514,
+      "name": "Pražská",
+      "nodeIndex": 16,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.727402049979796,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90869566730183,
+      "lon": 14.587087888919456,
+      "name": "Pražská",
+      "nodeIndex": 17,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.8007463504558545,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90915700725583,
+      "lon": 14.586358328061976,
+      "name": "Pražská",
+      "nodeIndex": 18,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.9412391946978846,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.91003543071474,
+      "lon": 14.584952850527714,
+      "name": "Pražská",
+      "nodeIndex": 19,
+      "ref": "107;603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.9632486639896796,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 49.91016954116648,
+      "lon": 14.584727544968786,
+      "name": "Jednosměrná",
+      "nodeIndex": 20,
+      "ref": "1071",
+      "turn": "Turn left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.996885723316214,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 49.909909366890105,
+      "lon": 14.58448882836467,
+      "name": "Jednosměrná",
+      "nodeIndex": 21,
+      "ref": "1071",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0059972875641339,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 49.90983292393261,
+      "lon": 14.584443230811075,
+      "name": "Jednosměrná",
+      "nodeIndex": 22,
+      "ref": "1071",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0479751327385016,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 49.90947216681744,
+      "lon": 14.584271569432843,
+      "name": "Jednosměrná",
+      "nodeIndex": 23,
+      "ref": "1071",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.2450407166820345,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 49.90777835181191,
+      "lon": 14.583466906722379,
+      "name": "Jednosměrná",
+      "nodeIndex": 24,
+      "ref": "1071",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.2595033234009507,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90765094688274,
+      "lon": 14.583426673586871,
+      "name": "K Větrovu",
+      "nodeIndex": 25,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.274675504461965,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90769252112278,
+      "lon": 14.583225507909248,
+      "name": "K Větrovu",
+      "nodeIndex": 26,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.2819035188046974,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90770324995893,
+      "lon": 14.583126266174958,
+      "name": "K Větrovu",
+      "nodeIndex": 27,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.28862201736568,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90768983891374,
+      "lon": 14.58303507106777,
+      "name": "K Větrovu",
+      "nodeIndex": 28,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.2921618779187949,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90767776897309,
+      "lon": 14.582989473514175,
+      "name": "K Větrovu",
+      "nodeIndex": 29,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.298894238437679,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.90764155915113,
+      "lon": 14.58291437166119,
+      "name": "K Větrovu",
+      "nodeIndex": 30,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 1.298894238437679,
+      "lat": 49.90764155915113,
+      "lon": 14.58291437166119,
+      "nodeIndex": 31
+    }
+  ],
+  "start": {
+    "lat": 49.90293160008588,
+    "lon": 14.59172811054981
+  },
+  "target": {
+    "lat": 49.907605349329145,
+    "lon": 14.582882185152783
+  },
+  "version": 1
+}

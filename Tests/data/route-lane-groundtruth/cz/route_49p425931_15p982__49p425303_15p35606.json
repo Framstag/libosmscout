@@ -1,0 +1,988 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42593156863697,
+      "lon": 15.0009822473003,
+      "name": "",
+      "nodeIndex": 0,
+      "ref": "19",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.1305742187568287,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42606031467065,
+      "lon": 15.002771280726563,
+      "name": "",
+      "nodeIndex": 1,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5364001180783264,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42646130492136,
+      "lon": 15.008331500055874,
+      "name": "",
+      "nodeIndex": 2,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5857609860158234,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42651226689304,
+      "lon": 15.009007416732658,
+      "name": "",
+      "nodeIndex": 3,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6445161079350877,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42658602764149,
+      "lon": 15.00980939723408,
+      "name": "",
+      "nodeIndex": 4,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6892864256399185,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42665174176284,
+      "lon": 15.010418258685007,
+      "name": "",
+      "nodeIndex": 5,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.732025380268968,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42672147919774,
+      "lon": 15.010997615836544,
+      "name": "",
+      "nodeIndex": 6,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.776520527091471,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42680194546881,
+      "lon": 15.011598430660342,
+      "name": "",
+      "nodeIndex": 7,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8216166946054597,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42689179947146,
+      "lon": 15.012204609902227,
+      "name": "",
+      "nodeIndex": 8,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9939288749241723,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42727535536346,
+      "lon": 15.014505945254172,
+      "name": "",
+      "nodeIndex": 9,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0455285165427721,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.427382643724854,
+      "lon": 15.015197955185158,
+      "name": "",
+      "nodeIndex": 10,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0819822271252029,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42744433453265,
+      "lon": 15.015691481647565,
+      "name": "",
+      "nodeIndex": 11,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.117992402719942,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42749261429529,
+      "lon": 15.016182325900957,
+      "name": "",
+      "nodeIndex": 12,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.1486862721791995,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42751943638564,
+      "lon": 15.016603432719421,
+      "name": "",
+      "nodeIndex": 13,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.1917810127900994,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42754491737145,
+      "lon": 15.017196200916146,
+      "name": "",
+      "nodeIndex": 14,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.222138272324405,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.427548940685,
+      "lon": 15.017614625525567,
+      "name": "",
+      "nodeIndex": 15,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2587296344899581,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.4275408940579,
+      "lon": 15.018118880824147,
+      "name": "",
+      "nodeIndex": 16,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2999162564845275,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42751138975851,
+      "lon": 15.018684826930496,
+      "name": "",
+      "nodeIndex": 17,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.3413412407398315,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42746176889136,
+      "lon": 15.019250773036845,
+      "name": "",
+      "nodeIndex": 18,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.3684222325810027,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through",
+          "right"
+        ],
+        "oneway": false
+      },
+      "lat": 49.42741885354681,
+      "lon": 15.019618235674642,
+      "name": "",
+      "nodeIndex": 19,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.3937422938175361,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through",
+          "right"
+        ],
+        "oneway": false
+      },
+      "lat": 49.427369232679666,
+      "lon": 15.019958876222063,
+      "name": "",
+      "nodeIndex": 20,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.4182557948041363,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42731424739446,
+      "lon": 15.020286105724324,
+      "name": "",
+      "nodeIndex": 21,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.4515213225232189,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42722975780987,
+      "lon": 15.020725988006035,
+      "name": "",
+      "nodeIndex": 22,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.489602809279726,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 49.42711308171684,
+      "lon": 15.021219514468442,
+      "name": "",
+      "nodeIndex": 23,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.5285026516510694,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 49.426972265742506,
+      "lon": 15.021710358721833,
+      "name": "",
+      "nodeIndex": 24,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.565522580096552,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "merge_to_left"
+        ],
+        "oneway": false
+      },
+      "lat": 49.42681937982752,
+      "lon": 15.022163652048732,
+      "name": "",
+      "nodeIndex": 25,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.5889395064205614,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "merge_to_left"
+        ],
+        "oneway": false
+      },
+      "lat": 49.42671343257064,
+      "lon": 15.022442601788356,
+      "name": "",
+      "nodeIndex": 26,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.6198319721244847,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "merge_to_left"
+        ],
+        "oneway": false
+      },
+      "lat": 49.426567252178245,
+      "lon": 15.022804700008066,
+      "name": "",
+      "nodeIndex": 27,
+      "ref": "19",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.6540600104290315,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42639559080001,
+      "lon": 15.023196302527168,
+      "name": "",
+      "nodeIndex": 28,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7241685780020652,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.426036174789346,
+      "lon": 15.023990236401488,
+      "name": "",
+      "nodeIndex": 29,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7607677124075531,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42586317230658,
+      "lon": 15.024419389847054,
+      "name": "",
+      "nodeIndex": 30,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7933069580254002,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42572369743678,
+      "lon": 15.0248136745752,
+      "name": "",
+      "nodeIndex": 31,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8239171356327062,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42560165692569,
+      "lon": 15.025191866049113,
+      "name": "",
+      "nodeIndex": 32,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8754959534230313,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425424631129374,
+      "lon": 15.02584900726265,
+      "name": "",
+      "nodeIndex": 33,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8995473261248679,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425354893694475,
+      "lon": 15.026162825719723,
+      "name": "",
+      "nodeIndex": 34,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9204055839760914,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42529722620023,
+      "lon": 15.026436411041288,
+      "name": "",
+      "nodeIndex": 35,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9529411822530773,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42522480655629,
+      "lon": 15.026870928904941,
+      "name": "",
+      "nodeIndex": 36,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9748393599083496,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42518323231624,
+      "lon": 15.027165971898768,
+      "name": "",
+      "nodeIndex": 37,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9983956427476512,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42514434028524,
+      "lon": 15.027485154773927,
+      "name": "",
+      "nodeIndex": 38,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.0163053666760202,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42512020040394,
+      "lon": 15.027729235796102,
+      "name": "",
+      "nodeIndex": 39,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.036102948721359,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42509874273165,
+      "lon": 15.028000138908624,
+      "name": "",
+      "nodeIndex": 40,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.056418931106736,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425082649477446,
+      "lon": 15.028279088648247,
+      "name": "",
+      "nodeIndex": 41,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.088956261276183,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42506789732775,
+      "lon": 15.028727017557088,
+      "name": "",
+      "nodeIndex": 42,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.105304248005589,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42506521511871,
+      "lon": 15.028952323116016,
+      "name": "",
+      "nodeIndex": 43,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.123211795829004,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42506923843226,
+      "lon": 15.029199086347205,
+      "name": "",
+      "nodeIndex": 44,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.144836112915154,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425078626163895,
+      "lon": 15.029496811550075,
+      "name": "",
+      "nodeIndex": 45,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.166303407641339,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42509337831359,
+      "lon": 15.02979185454393,
+      "name": "",
+      "nodeIndex": 46,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1850840619720615,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.4251108126723,
+      "lon": 15.030049346611264,
+      "name": "",
+      "nodeIndex": 47,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.2001921511026805,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42512824703104,
+      "lon": 15.030255876706946,
+      "name": "",
+      "nodeIndex": 48,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.291166192996101,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42527442742343,
+      "lon": 15.031489692863005,
+      "name": "",
+      "nodeIndex": 49,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.3192065513114617,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42531734276798,
+      "lon": 15.031870566545962,
+      "name": "",
+      "nodeIndex": 50,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.3457183690805716,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42534952927642,
+      "lon": 15.032232664765672,
+      "name": "",
+      "nodeIndex": 51,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.360194728997903,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42536294032158,
+      "lon": 15.032431148234252,
+      "name": "",
+      "nodeIndex": 52,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.379128343792346,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425376351366765,
+      "lon": 15.03269132251063,
+      "name": "",
+      "nodeIndex": 53,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.397052541516636,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42538439799387,
+      "lon": 15.032938085741819,
+      "name": "",
+      "nodeIndex": 54,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.427408203234112,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.425385739098374,
+      "lon": 15.033356510351268,
+      "name": "",
+      "nodeIndex": 55,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.455827434751339,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.42537903357578,
+      "lon": 15.03374811287037,
+      "name": "",
+      "nodeIndex": 56,
+      "ref": "19",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.455827434751339,
+      "lat": 49.42537903357578,
+      "lon": 15.03374811287037,
+      "nodeIndex": 57
+    }
+  ],
+  "start": {
+    "lat": 49.42593156863697,
+    "lon": 15.0009822473003
+  },
+  "target": {
+    "lat": 49.42530393172282,
+    "lon": 15.035606883731532
+  },
+  "version": 1
+}

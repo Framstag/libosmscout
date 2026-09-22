@@ -82,6 +82,7 @@
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
