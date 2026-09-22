@@ -78,6 +78,7 @@
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
@@ -769,6 +770,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getStyleSheetDirectory(JNIEn
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::getActiveStyleSheet()
+//
+// Reports the stylesheet that is actually active: the last one that loaded
+// successfully. A requested stylesheet that failed to load is not reported as
+// active — the previously active one stays in effect. Before any successful
+// load the configured (requested) stylesheet is reported, so the settings UI
+// keeps showing the persisted selection.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -779,7 +786,34 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getActiveStyleSheet(JNIEnv *
     return env->NewStringUTF("");
   }
 
+  if (data->dbThread != nullptr) {
+    const std::string active = data->dbThread->GetActiveStyleSheetFilename();
+    if (!active.empty()) {
+      return env->NewStringUTF(std::filesystem::path(active).filename().string().c_str());
+    }
+  }
+
   return env->NewStringUTF(data->settings->GetStyleSheetFile().c_str());
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::wasLastStyleLoadSuccessful()
+//
+// Whether the last stylesheet load attempt (initial load, style switch, style
+// flag change, basemap style, stylesheet refresh) succeeded. A failed attempt
+// keeps the previously active style and reports its parse errors through the
+// client's style error channel.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_wasLastStyleLoadSuccessful(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return JNI_FALSE;
+  }
+
+  return data->dbThread->WasLastStyleLoadSuccessful() ? JNI_TRUE : JNI_FALSE;
 }
 
 // --------------------------------------------------------------------------
@@ -830,7 +864,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
   }
 
   const std::string previousFile = data->settings->GetStyleSheetFile();
-  const size_t previousErrorCount = data->dbThread->GetStyleErrors().size();
 
   data->settings->SetStyleSheetFile(fileName);
   // Keep the currently enabled style flags (e.g. "daylight") applied to the
@@ -848,10 +881,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
     return JNI_FALSE;
   }
 
-  if (data->dbThread->GetStyleErrors().size() > previousErrorCount) {
-    // The stylesheet failed to parse: restore the previous style and surface
-    // the failure to the caller. The stored file may be relative to the
-    // stylesheet directory or an absolute path from earlier configuration.
+  if (!data->dbThread->WasLastStyleLoadSuccessful()) {
+    // The stylesheet was rejected (does not exist, fails to parse, or the load
+    // otherwise failed): the client kept the previously active style, so the
+    // persisted selection is restored to it and the failure is surfaced to the
+    // caller. The stored file may be relative to the stylesheet directory or an
+    // absolute path from earlier configuration.
     std::string previousAbsolute;
     if (previousFile.empty()) {
       previousAbsolute = dir + "/standard.oss";
@@ -1271,7 +1306,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
       // Helper lambda to load map data for one database
       auto loadDbData = [&](const osmscout::DBInstanceRef &db) {
+        // A database without a usable style configuration is never painted. The
+        // client installs the empty configuration for a database whose
+        // stylesheet failed to load, so this is a safety net, not a normal path.
         if (!db->GetStyleConfig()) {
+          osmscout::log.Warn() << "[JNI] render: skipping database without a style configuration "
+                               << db->path;
           return;
         }
 
@@ -7428,6 +7468,8 @@ namespace {
   // A single POI search result ready to be serialized into a Java PoiEntry.
   struct PoiEntry {
     std::string label;
+    std::string operatorName;
+    std::string brand;
     std::string objectType;
     double      lat{0.0};
     double      lon{0.0};
@@ -7436,6 +7478,7 @@ namespace {
 
   // Fill a PoiEntry from a node/way/area object. The label falls back from
   // the name feature to the operator and ref features (same as POILookupModule).
+  // The operator and the brand are filled independently of the label.
   template<class T>
   bool BuildPoiEntry(const T& obj, const osmscout::GeoCoord& center, PoiEntry& entry)
   {
@@ -7452,6 +7495,13 @@ namespace {
       entry.label = op->GetLabel(osmscout::Locale(), 0);
     } else if (const auto* ref = features.findValue<osmscout::RefFeatureValue>(); ref != nullptr) {
       entry.label = ref->GetLabel(osmscout::Locale(), 0);
+    }
+
+    if (const auto* op = features.findValue<osmscout::OperatorFeatureValue>(); op != nullptr) {
+      entry.operatorName = op->GetLabel(osmscout::Locale(), 0);
+    }
+    if (const auto* brand = features.findValue<osmscout::BrandFeatureValue>(); brand != nullptr) {
+      entry.brand = brand->GetLabel(osmscout::Locale(), 0);
     }
 
     osmscout::GeoCoord coord;
@@ -7630,6 +7680,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
     return nullptr;
   }
   jfieldID labelField = env->GetFieldID(entryCls, "label", "Ljava/lang/String;");
+  jfieldID operatorField = env->GetFieldID(entryCls, "operator", "Ljava/lang/String;");
+  jfieldID brandField = env->GetFieldID(entryCls, "brand", "Ljava/lang/String;");
   jfieldID objectTypeField = env->GetFieldID(entryCls, "objectType", "Ljava/lang/String;");
   jfieldID latField = env->GetFieldID(entryCls, "lat", "D");
   jfieldID lonField = env->GetFieldID(entryCls, "lon", "D");
@@ -7644,6 +7696,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
     const PoiEntry& entry = entries[static_cast<size_t>(i)];
     jobject jEntry = env->NewObject(entryCls, entryCtor);
     env->SetObjectField(jEntry, labelField, env->NewStringUTF(entry.label.c_str()));
+    env->SetObjectField(jEntry, operatorField, env->NewStringUTF(entry.operatorName.c_str()));
+    env->SetObjectField(jEntry, brandField, env->NewStringUTF(entry.brand.c_str()));
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
     env->SetDoubleField(jEntry, latField, entry.lat);
     env->SetDoubleField(jEntry, lonField, entry.lon);

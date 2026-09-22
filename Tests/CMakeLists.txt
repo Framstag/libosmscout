@@ -1,6 +1,10 @@
 #---- FavoriteLocationService
 osmscout_test_project(NAME FavoriteLocationServiceTest SOURCES src/FavoriteLocationServiceTest.cpp TARGET OSMScout::Client)
 
+#---- Style load resilience
+osmscout_test_project(NAME StyleLoadResilienceTest SOURCES src/StyleLoadResilienceTest.cpp TARGET OSMScout::Client)
+set_tests_properties(StyleLoadResilienceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AccessParse
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
@@ -261,6 +265,20 @@ if(${OSMSCOUT_BUILD_MAP})
 	osmscout_demo_project(NAME PerformanceTest SOURCES src/PerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 	target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
 
+	# The Cairo and Qt drivers resolve a font by family name, so the test takes the
+	# family of the font file it is started with (see Tests/include/TestFontSupport.h)
+	if(HAVE_LIB_FREETYPE)
+		target_link_libraries(PerformanceTest Freetype::Freetype)
+		target_include_directories(PerformanceTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
+		target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FREETYPE)
+
+		find_package(Fontconfig QUIET)
+		if(TARGET Fontconfig::Fontconfig)
+			target_link_libraries(PerformanceTest Fontconfig::Fontconfig)
+			target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FONTCONFIG)
+		endif()
+	endif()
+
 	set(PERFORMANCE_TEST_DRIVERS noop none)
 
 	if(${OSMSCOUT_BUILD_MAP_CAIRO})
@@ -421,6 +439,22 @@ endif()
 #---- MapPainterShieldTest
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME MapPainterShieldTest SOURCES src/MapPainterShieldTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+
+  # The test takes the family of the bundled font file and registers that file
+  # (see Tests/include/TestFontSupport.h), so that it measures the font the
+  # repository ships instead of whatever font the host provides
+  if(HAVE_LIB_FREETYPE)
+    target_link_libraries(MapPainterShieldTest Freetype::Freetype)
+    target_include_directories(MapPainterShieldTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
+    target_compile_definitions(MapPainterShieldTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
+
+    find_package(Fontconfig QUIET)
+    if(TARGET Fontconfig::Fontconfig)
+      # must stay plain: osmscout_test_project links via the plain signature
+      target_link_libraries(MapPainterShieldTest Fontconfig::Fontconfig)
+      target_compile_definitions(MapPainterShieldTest PRIVATE HAVE_LIB_FONTCONFIG)
+    endif()
+  endif()
 endif()
 
 #---- MapPainterShieldQtTest (Qt DLL loader issue under Windows CMake CI: SKIPTEST, like TextMetricsQtTest)
