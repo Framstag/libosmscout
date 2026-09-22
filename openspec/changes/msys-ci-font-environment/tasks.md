@@ -11,7 +11,7 @@ Spec: `specs/ci-build-fixes/spec.md` (delta to the `ci-build-fixes` capability).
 
 - [x] 2.1 Add a font-provisioning step to both jobs in `.github/workflows/build_and test_on_msys.yml`, after the MSYS2 setup and before the build, that makes the font family the tests name resolve from repository content. First attempt: copy the bundled file into the MSYS2 prefix font directory and refresh that directory's cache; the first CI run showed that fontconfig does not index that directory, so task 2.3 replaced the mechanism. Verify: the step appears in both jobs in the workflow diff and the workflow parses as YAML. (Spec: "MSYS jobs provide the font the font-dependent tests measure against", "MSYS font provisioning uses only repository content and the existing package setup".)
 - [x] 2.2 Add a verification step to both jobs, before the build, that prints the file the font family resolves to, the number of fonts visible, the resolution of the generic `sans-serif` family and the locale in effect, and that fails when the family does not resolve to the bundled font file. Verify: the step appears in both jobs, and for a deliberately wrong family name the step fails with the resolved file shown - exercised by a temporary local run of the same command sequence, or by reading the first CI run's output. (Spec: "MSYS jobs verify the font and locale environment before running tests".)
-- [ ] 2.3 Read the verification output of the first CI run on the branch and decide the mechanism: the run at 2026-09-21 19:34 UTC printed `Liberation Sans resolves to: C:/Windows/fonts/arial.ttf`, so the prefix copy is not indexed; the mechanism was replaced with the `design.md` - D2 fallback, a `conf.d` snippet (`$MINGW_PREFIX/etc/fonts/conf.d/99-libosmscout-fonts.conf`) naming the repository's font directory as a native path, plus `fc-cache -f` on it, and the snippet's XML was checked against a local fontconfig. Remaining: the verification step must pass in both jobs. Verify: the decision and the observed resolved file are recorded in `design.md` - D2 and Open Questions, and the verification step passes in both jobs. (Spec: "Named family resolves to the repository font".)
+- [x] 2.3 Read the verification output of the first CI run on the branch and decide the mechanism: the run at 2026-09-21 19:34 UTC printed `Liberation Sans resolves to: C:/Windows/fonts/arial.ttf`, so the prefix copy is not indexed; the mechanism was replaced with the `design.md` - D2 fallback, a `conf.d` snippet (`$MINGW_PREFIX/etc/fonts/conf.d/99-libosmscout-fonts.conf`) naming the repository's font directory as a native path, plus `fc-cache -f` on it, and the snippet's XML was checked against a local fontconfig. Remaining: the verification step must pass in both jobs. Verify: the decision and the observed resolved file are recorded in `design.md` - D2 and Open Questions, and the verification step passes in both jobs. (Spec: "Named family resolves to the repository font".)
 
 ## 3. Locale
 
@@ -19,11 +19,11 @@ Spec: `specs/ci-build-fixes/spec.md` (delta to the `ci-build-fixes` capability).
 
 ## 4. Build and test verification (run after group 6, which the font tests' outcome depends on)
 
-- [ ] 4.1 Confirm the workflow is valid and the cmake job still configures, builds and runs its test set: the `gcc and cmake` MSYS job on the branch completes green, or, if it fails, the failure is not in a font- or locale-dependent test. Verify: the run's conclusion and its test summary.
-- [ ] 4.2 Confirm the meson job's test set passes: the `gcc and meson` MSYS job on the branch reports `Fail: 0`, including `Check MapPainterShield compilation` and the `PerformanceTest-cairo-*` cases that fail today. Verify: the run's summary of failures.
+- [x] 4.1 Confirm the workflow is valid and the cmake job still configures, builds and runs its test set: the `gcc and cmake` MSYS job on the branch completes green, or, if it fails, the failure is not in a font- or locale-dependent test. Verify: the run's conclusion and its test summary.
+- [x] 4.2 Confirm the meson job's test set passes: the `gcc and meson` MSYS job on the branch reports `Fail: 0`, including `Check MapPainterShield compilation` and the `PerformanceTest-cairo-*` cases that fail today. Verify: the run's summary of failures.
 - [x] 4.3 Confirm the CMake and Meson build systems are unaffected: no source, `CMakeLists.txt` or `meson.build` file is modified, so both build systems compile as before. Verify: `git diff --name-only` lists exactly `.github/workflows/build_and test_on_msys.yml` (plus the change's own artifacts and documentation files).
 - [x] 4.4 Confirm no unit test is required for this change: the change contains no new or modified code, only workflow configuration, so no new Catch2 test is added; the existing suites are the verification (tasks 4.1 and 4.2). Verify: the diff contains no file under `Tests/`, `libosmscout*/` or `OSMScout*/`.
-- [ ] 4.5 Confirm no other workflow is affected: the Ubuntu, macOS, sanitizer, VS, Android, iOS and JavaScout jobs are unchanged and no longer need the local workaround. Verify: `git diff --stat` against the base revision shows a single workflow file, and one non-MSYS job of the branch is green for completeness (for example `cmake` on Ubuntu).
+- [x] 4.5 Confirm no other workflow is affected: the Ubuntu, macOS, sanitizer, VS, Android, iOS and JavaScout jobs are unchanged and no longer need the local workaround. Verify: `git diff --stat` against the base revision shows a single workflow file, and one non-MSYS job of the branch is green for completeness (for example `cmake` on Ubuntu).
 
 ## 5. Documentation and follow-ups
 
@@ -40,9 +40,26 @@ Implements `specs/font-dependent-test-fonts/spec.md`. Rationale and rejected alt
 - [x] 6.3 Change the Cairo path of `Tests/src/PerformanceTest.cpp` to resolve the `--font` file to a family name before setting it on the `MapParameter`, keeping the file path for the AGG and OpenGL drivers, and to report an unreadable font file instead of measuring another font. Verify: the Cairo runs print no `couldn't load font ... falling back to` line; the AGG and OpenGL runs still receive the path. (Spec: "A font file argument is resolved to a family name for family-based backends".)
 - [x] 6.4 Confirm the two tests no longer depend on a host-installed family: run them in a build with a font configuration that lists only the repository font directory and confirm the same metric assertions pass, and that the shield test's centring assertions hold. Verify: the commands and their results are recorded in this file. (Spec: "Measured font does not move with the host font set".)
 
-### Recorded verification of group 6
+### Recorded verification of the branch run (MSYS run `35690345636`, 2026-09-22 05:20 UTC)
 
-Local CMake build (`Release`, `build/`) and local Meson build (`build-meson/`), 2026-09-21:
+```
+gcc and cmake   Verify the font and locale environment: success
+                Run tests: 100% tests passed out of 77
+                66/77 MapPainterShieldTest ... Passed   (failed on master before)
+gcc and meson   Verify the font and locale environment: success
+                Run tests: Ok: 116, Fail: 0
+                58/116 PerformanceTest-cairo-standard.oss    OK
+                59/116 PerformanceTest-cairo-winter-sports.oss OK
+                64/116 PerformanceTest-cairo-cycle.oss        OK
+                108/116 Check MapPainterShield compilation    OK
+MSYS            both jobs success
+```
+
+Other workflows of the same push: Ubuntu 24.04, Visual Studio 2025, OS X, iOS, Ubuntu 24.04 for Qt on Android, JavaScout build and Sonar all **success**; Sanitize still running when this was recorded. This covers task 4.5 (a non-MSYS job is green; the Ubuntu workflow's `gcc and cmake` and `gcc and meson` jobs are among them) and confirms that the earlier `HeaderCheckTest` violation is gone everywhere.
+
+### Recorded verification of group 6 (local builds, 2026-09-21)
+
+Local CMake build (`Release`, `build/`) and local Meson build (`build-meson/`):
 
 ```
 cmake --build build --target MapPainterShieldTest PerformanceTest   -> links, no new warning
@@ -57,7 +74,7 @@ meson test -C build-meson 'Check MapPainterShield compilation' 'Check TextMetric
 ctest -R 'MapPainterShieldTest|TextMetricsCairoTest|TextMetricsReferenceTest|TextMetricsSVGTest' -> 100% passed
 ```
 
-Mechanism of `Tests/src/TestFontSupport.h` proven directly with a probe built against the same Pango/fontconfig in a font configuration that knows no fonts at all:
+Mechanism of `Tests/include/TestFontSupport.h` proven directly with a probe built against the same Pango/fontconfig in a font configuration that knows no fonts at all:
 
 ```
 FONTCONFIG_FILE=<empty font dir> probe <repo font> 'Liberation Sans'            -> RESULT font=NULL

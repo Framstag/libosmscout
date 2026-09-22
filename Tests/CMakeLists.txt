@@ -262,7 +262,7 @@ if(${OSMSCOUT_BUILD_MAP})
 	target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
 
 	# The Cairo and Qt drivers resolve a font by family name, so the test takes the
-	# family of the font file it is started with (see Tests/src/TestFontSupport.h)
+	# family of the font file it is started with (see Tests/include/TestFontSupport.h)
 	if(HAVE_LIB_FREETYPE)
 		target_link_libraries(PerformanceTest Freetype::Freetype)
 		target_include_directories(PerformanceTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
@@ -437,7 +437,7 @@ if(${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME MapPainterShieldTest SOURCES src/MapPainterShieldTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
 
   # The test takes the family of the bundled font file and registers that file
-  # (see Tests/src/TestFontSupport.h), so that it measures the font the
+  # (see Tests/include/TestFontSupport.h), so that it measures the font the
   # repository ships instead of whatever font the host provides
   if(HAVE_LIB_FREETYPE)
     target_link_libraries(MapPainterShieldTest Freetype::Freetype)

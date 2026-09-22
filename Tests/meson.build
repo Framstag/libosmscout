@@ -529,7 +529,7 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     performanceTestArgs = ['-fPIC']
 
     # The Cairo and Qt drivers resolve a font by family name: the test takes
-    # the family of the font file it is started with (Tests/src/TestFontSupport.h)
+    # the family of the font file it is started with (Tests/include/TestFontSupport.h)
     if ftDep.found()
       performanceTestDeps += ftDep
       performanceTestIncludes += include_directories('../Demos/include')
@@ -1002,7 +1002,7 @@ if buildMapCairo
   mapPainterShieldTestArgs = []
 
   # The test takes the family of the bundled font file and registers that file
-  # (see Tests/src/TestFontSupport.h), so that it measures the font the
+  # (see Tests/include/TestFontSupport.h), so that it measures the font the
   # repository ships instead of the font the host provides
   if ftDep.found()
     mapPainterShieldTestDeps += ftDep
