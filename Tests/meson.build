@@ -12,6 +12,17 @@ FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
 
 test('Check FavoriteLocationService', FavoriteLocationServiceTest)
 
+StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
+             'src/StyleLoadResilienceTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient, osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check style load resilience', StyleLoadResilienceTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

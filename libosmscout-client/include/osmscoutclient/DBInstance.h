@@ -150,9 +150,27 @@ public:
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-lastUsage);
   }
 
+  /**
+   * Loads the given stylesheet and adopts it as the active style configuration
+   * only when it parses without errors.
+   *
+   * A stylesheet that fails to load never becomes the active style: the
+   * configuration installed before the call stays in effect. \ref fallback is
+   * used only when no configuration was ever installed for this database (a
+   * configuration that draws nothing), so that rendering never runs without a
+   * style configuration.
+   *
+   * @param errors
+   *    The parse errors of the rejected stylesheet (may be empty when the
+   *    database is not open)
+   * @param fallback
+   *    Configuration to install when there is no previously installed one
+   * @return true when the stylesheet was adopted
+   */
   bool LoadStyle(const std::string &stylesheetFilename,
                  std::unordered_map<std::string,bool> stylesheetFlags,
-                 std::list<StyleError> &errors);
+                 std::list<StyleError> &errors,
+                 const osmscout::StyleConfigRef &fallback=nullptr);
 
   void Close();
 };
