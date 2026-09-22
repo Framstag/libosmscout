@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include <osmscout/util/String.h>
+#include <osmscout/util/StringMatcher.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -343,4 +344,97 @@ TEST_CASE("String replace")
   REQUIRE(osmscout::ReplaceString("abcabc", "a", "A")=="AbcAbc");
   REQUIRE(osmscout::ReplaceString("abcdef", "ef", "X")=="abcdX");
   REQUIRE(osmscout::ReplaceString("abcdef", "ab", "X")=="Xcdef");
+}
+
+/**
+ * Matching through the transliterating matcher must fold the sharp s (ß) in
+ * both directions: the transliteration table maps ß to "ss", and a query
+ * spelled "ss" (e.g. a contact address transliterated by the address book
+ * provider) must match an index name spelled "ß" and vice versa. Both sides
+ * are matched case-insensitively, so the transliterated forms are compared in
+ * a case-normalized way.
+ */
+TEST_CASE("Transliterated matcher folds the sharp s")
+{
+  osmscout::StringMatcherTransliterateFactory factory;
+
+  auto quality=[&](const std::string& pattern,const std::string& text) {
+    return factory.CreateMatcher(pattern)->Match(text);
+  };
+
+  // "ss" query against a sharp-s name (the address book provider spelling).
+  REQUIRE(quality("Erbstollenstrasse","Erbstollenstraße")==osmscout::StringMatcher::match);
+  // sharp-s query against a sharp-s name.
+  REQUIRE(quality("Erbstollenstraße","Erbstollenstraße")==osmscout::StringMatcher::match);
+  // sharp-s query against an ss-spelled name (transliterated map data).
+  REQUIRE(quality("Erbstollenstraße","Erbstollenstrasse")==osmscout::StringMatcher::match);
+  // Same folding at a word end and with a different surrounding word.
+  REQUIRE(quality("Aktienstrasse","Aktienstraße")==osmscout::StringMatcher::match);
+  REQUIRE(quality("Fismerstrasse","Fismerstraße")==osmscout::StringMatcher::match);
+  // Case-insensitive in both spellings.
+  REQUIRE(quality("ERBSTOLLENSTRASSE","Erbstollenstraße")==osmscout::StringMatcher::match);
+  REQUIRE(quality("erbstollenstraße","Erbstollenstrasse")==osmscout::StringMatcher::match);
+}
+
+/**
+ * Diacritic folding keeps working: a name typed without its diacritics matches
+ * the spelled-out index name.
+ */
+TEST_CASE("Transliterated matcher folds diacritics")
+{
+  osmscout::StringMatcherTransliterateFactory factory;
+
+  auto quality=[&](const std::string& pattern,const std::string& text) {
+    return factory.CreateMatcher(pattern)->Match(text);
+  };
+
+  REQUIRE(quality("Gunnemannshof","Günnemannshof")==osmscout::StringMatcher::match);
+  REQUIRE(quality("Gunnemannshof","GÜNNEMANNSHOF")==osmscout::StringMatcher::match);
+  REQUIRE(quality("Flozhohe","Flözhöhe")==osmscout::StringMatcher::match);
+  REQUIRE(quality("Duscherstrasse","Duscherstraße")==osmscout::StringMatcher::match);
+}
+
+/**
+ * The match quality classification must survive the case-normalized
+ * comparison: a name that only differs by the sharp-s spelling is a full
+ * match, a prefix or an inner substring stays a partial match, and an
+ * unrelated name stays a non-match.
+ */
+TEST_CASE("Transliterated matcher keeps match quality")
+{
+  osmscout::StringMatcherTransliterateFactory factory;
+
+  auto quality=[&](const std::string& pattern,const std::string& text) {
+    return factory.CreateMatcher(pattern)->Match(text);
+  };
+
+  // Names without any transliteration difference behave as before.
+  REQUIRE(quality("Erlenbruch","Erlenbruch")==osmscout::StringMatcher::match);
+  REQUIRE(quality("Erlen","Erlenbruch")==osmscout::StringMatcher::partialMatch);
+  REQUIRE(quality("Erlen","Erbstollenstraße")==osmscout::StringMatcher::noMatch);
+
+  // Prefix of a sharp-s name: partial match, not a full match.
+  REQUIRE(quality("Erbstollen","Erbstollenstraße")==osmscout::StringMatcher::partialMatch);
+  REQUIRE(quality("Erbstollens","Erbstollenstraße")==osmscout::StringMatcher::partialMatch);
+  // Inner substring of a sharp-s name: partial match.
+  REQUIRE(quality("straße","Erbstollenstraße")==osmscout::StringMatcher::partialMatch);
+  // Unrelated sharp-s name: no match.
+  REQUIRE(quality("Aktienstrasse","Erbstollenstraße")==osmscout::StringMatcher::noMatch);
+}
+
+/**
+ * Folding is opt-in through the factory: the plain case-insensitive matcher
+ * does not transliterate, which is why the search code asks for the
+ * transliterating factory.
+ */
+TEST_CASE("Case-insensitive matcher does not fold")
+{
+  osmscout::StringMatcherCIFactory factory;
+
+  auto quality=[&](const std::string& pattern,const std::string& text) {
+    return factory.CreateMatcher(pattern)->Match(text);
+  };
+
+  REQUIRE(quality("Erbstollenstrasse","Erbstollenstraße")==osmscout::StringMatcher::noMatch);
+  REQUIRE(quality("ERLENBRUCH","Erlenbruch")==osmscout::StringMatcher::match);
 }
