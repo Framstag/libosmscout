@@ -78,6 +78,7 @@
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
 #include <osmscout/feature/AdminLevelFeature.h>
+#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
@@ -7467,6 +7468,8 @@ namespace {
   // A single POI search result ready to be serialized into a Java PoiEntry.
   struct PoiEntry {
     std::string label;
+    std::string operatorName;
+    std::string brand;
     std::string objectType;
     double      lat{0.0};
     double      lon{0.0};
@@ -7475,6 +7478,7 @@ namespace {
 
   // Fill a PoiEntry from a node/way/area object. The label falls back from
   // the name feature to the operator and ref features (same as POILookupModule).
+  // The operator and the brand are filled independently of the label.
   template<class T>
   bool BuildPoiEntry(const T& obj, const osmscout::GeoCoord& center, PoiEntry& entry)
   {
@@ -7491,6 +7495,13 @@ namespace {
       entry.label = op->GetLabel(osmscout::Locale(), 0);
     } else if (const auto* ref = features.findValue<osmscout::RefFeatureValue>(); ref != nullptr) {
       entry.label = ref->GetLabel(osmscout::Locale(), 0);
+    }
+
+    if (const auto* op = features.findValue<osmscout::OperatorFeatureValue>(); op != nullptr) {
+      entry.operatorName = op->GetLabel(osmscout::Locale(), 0);
+    }
+    if (const auto* brand = features.findValue<osmscout::BrandFeatureValue>(); brand != nullptr) {
+      entry.brand = brand->GetLabel(osmscout::Locale(), 0);
     }
 
     osmscout::GeoCoord coord;
@@ -7669,6 +7680,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
     return nullptr;
   }
   jfieldID labelField = env->GetFieldID(entryCls, "label", "Ljava/lang/String;");
+  jfieldID operatorField = env->GetFieldID(entryCls, "operator", "Ljava/lang/String;");
+  jfieldID brandField = env->GetFieldID(entryCls, "brand", "Ljava/lang/String;");
   jfieldID objectTypeField = env->GetFieldID(entryCls, "objectType", "Ljava/lang/String;");
   jfieldID latField = env->GetFieldID(entryCls, "lat", "D");
   jfieldID lonField = env->GetFieldID(entryCls, "lon", "D");
@@ -7683,6 +7696,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
     const PoiEntry& entry = entries[static_cast<size_t>(i)];
     jobject jEntry = env->NewObject(entryCls, entryCtor);
     env->SetObjectField(jEntry, labelField, env->NewStringUTF(entry.label.c_str()));
+    env->SetObjectField(jEntry, operatorField, env->NewStringUTF(entry.operatorName.c_str()));
+    env->SetObjectField(jEntry, brandField, env->NewStringUTF(entry.brand.c_str()));
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
     env->SetDoubleField(jEntry, latField, entry.lat);
     env->SetDoubleField(jEntry, lonField, entry.lon);
