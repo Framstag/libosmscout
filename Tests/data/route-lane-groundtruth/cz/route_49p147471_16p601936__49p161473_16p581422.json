@@ -159,7 +159,7 @@
       "nodeIndex": 6,
       "ref": "52",
       "suggestedLanes": {
-        "from": 2,
+        "from": 0,
         "to": 2,
         "turn": "through"
       },
@@ -858,7 +858,7 @@
       "nodeIndex": 40,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -882,7 +882,7 @@
       "nodeIndex": 41,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -926,7 +926,7 @@
       "nodeIndex": 43,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

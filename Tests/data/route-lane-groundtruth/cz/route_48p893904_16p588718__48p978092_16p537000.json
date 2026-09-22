@@ -2494,7 +2494,7 @@
       "nodeIndex": 131,
       "ref": "D52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -2518,7 +2518,7 @@
       "nodeIndex": 132,
       "ref": "D52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -2542,7 +2542,7 @@
       "nodeIndex": 133,
       "ref": "D52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

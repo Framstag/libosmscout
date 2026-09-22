@@ -878,7 +878,7 @@
       "nodeIndex": 41,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -1203,9 +1203,9 @@
       "nodeIndex": 55,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1227,9 +1227,9 @@
       "nodeIndex": 56,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1251,9 +1251,9 @@
       "nodeIndex": 57,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1274,9 +1274,9 @@
       "nodeIndex": 58,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1297,9 +1297,9 @@
       "nodeIndex": 59,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1320,9 +1320,9 @@
       "nodeIndex": 60,
       "ref": "10;35",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "unknown"
+        "turn": "slight_right"
       },
       "turn": "Straight on",
       "type": "highway_trunk"
@@ -1958,7 +1958,7 @@
       "nodeIndex": 94,
       "ref": "10",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -1981,7 +1981,7 @@
       "nodeIndex": 95,
       "ref": "10",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

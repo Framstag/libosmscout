@@ -124,7 +124,7 @@
       "nodeIndex": 5,
       "ref": "52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -147,7 +147,7 @@
       "nodeIndex": 6,
       "ref": "52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -298,8 +298,8 @@
       "ref": "52",
       "suggestedLanes": {
         "from": 0,
-        "to": 1,
-        "turn": "slight_right"
+        "to": 0,
+        "turn": "through"
       },
       "turn": "Straight on",
       "type": "highway_primary"
@@ -387,7 +387,7 @@
       "nodeIndex": 18,
       "ref": "52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -410,7 +410,7 @@
       "nodeIndex": 19,
       "ref": "52",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

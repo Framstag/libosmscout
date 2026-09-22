@@ -535,7 +535,7 @@
       "nodeIndex": 29,
       "ref": "D3",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -559,7 +559,7 @@
       "nodeIndex": 30,
       "ref": "D3",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -583,7 +583,7 @@
       "nodeIndex": 31,
       "ref": "D3",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

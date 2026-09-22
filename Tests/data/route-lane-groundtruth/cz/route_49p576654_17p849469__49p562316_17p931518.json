@@ -208,7 +208,7 @@
       "nodeIndex": 13,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -228,7 +228,7 @@
       "nodeIndex": 14,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -248,7 +248,7 @@
       "nodeIndex": 15,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -268,7 +268,7 @@
       "nodeIndex": 16,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -288,7 +288,7 @@
       "nodeIndex": 17,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -308,7 +308,7 @@
       "nodeIndex": 18,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -328,7 +328,7 @@
       "nodeIndex": 19,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -348,7 +348,7 @@
       "nodeIndex": 20,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -467,9 +467,9 @@
       "nodeIndex": 26,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 2,
-        "to": 2,
-        "turn": "slight_right"
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -491,9 +491,9 @@
       "nodeIndex": 27,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 2,
-        "to": 2,
-        "turn": "slight_right"
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -515,9 +515,9 @@
       "nodeIndex": 28,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 2,
-        "to": 2,
-        "turn": "slight_right"
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -539,9 +539,9 @@
       "nodeIndex": 29,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 2,
-        "to": 2,
-        "turn": "slight_right"
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -563,9 +563,9 @@
       "nodeIndex": 30,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 2,
-        "to": 2,
-        "turn": "slight_right"
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -607,7 +607,7 @@
       "nodeIndex": 32,
       "ref": "D48",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

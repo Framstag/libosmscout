@@ -148,8 +148,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 2,
-        "turn": "slight_right"
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -172,8 +172,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 2,
-        "turn": "slight_right"
+        "to": 1,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"

@@ -1891,7 +1891,7 @@
       "nodeIndex": 93,
       "ref": "34",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -1914,7 +1914,7 @@
       "nodeIndex": 94,
       "ref": "34",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -1937,7 +1937,7 @@
       "nodeIndex": 95,
       "ref": "34",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -1960,7 +1960,7 @@
       "nodeIndex": 96,
       "ref": "34",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

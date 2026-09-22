@@ -389,7 +389,7 @@
       "nodeIndex": 20,
       "ref": "D4",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -413,7 +413,7 @@
       "nodeIndex": 21,
       "ref": "D4",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -437,7 +437,7 @@
       "nodeIndex": 22,
       "ref": "D4",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -461,7 +461,7 @@
       "nodeIndex": 23,
       "ref": "D4",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

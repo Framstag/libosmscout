@@ -319,7 +319,7 @@
       "nodeIndex": 16,
       "ref": "D8",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -343,7 +343,7 @@
       "nodeIndex": 17,
       "ref": "D8",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -367,7 +367,7 @@
       "nodeIndex": 18,
       "ref": "D8",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

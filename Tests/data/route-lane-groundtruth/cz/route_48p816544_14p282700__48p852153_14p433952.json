@@ -4497,7 +4497,7 @@
       "nodeIndex": 245,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4520,7 +4520,7 @@
       "nodeIndex": 246,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4543,7 +4543,7 @@
       "nodeIndex": 247,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4566,7 +4566,7 @@
       "nodeIndex": 248,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4589,7 +4589,7 @@
       "nodeIndex": 249,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4612,7 +4612,7 @@
       "nodeIndex": 250,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4635,7 +4635,7 @@
       "nodeIndex": 251,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4658,7 +4658,7 @@
       "nodeIndex": 252,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -4681,7 +4681,7 @@
       "nodeIndex": 253,
       "ref": "39",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

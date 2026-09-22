@@ -101,7 +101,7 @@
       "nodeIndex": 4,
       "ref": "D2",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -359,7 +359,7 @@
       "nodeIndex": 18,
       "ref": "D2",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },

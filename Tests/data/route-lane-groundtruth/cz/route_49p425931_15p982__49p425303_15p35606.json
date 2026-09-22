@@ -481,7 +481,7 @@
       "nodeIndex": 25,
       "ref": "19",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -504,7 +504,7 @@
       "nodeIndex": 26,
       "ref": "19",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },
@@ -527,7 +527,7 @@
       "nodeIndex": 27,
       "ref": "19",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 1,
         "turn": "unknown"
       },

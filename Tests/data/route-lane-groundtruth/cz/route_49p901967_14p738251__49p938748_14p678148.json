@@ -735,7 +735,7 @@
       "nodeIndex": 37,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -759,7 +759,7 @@
       "nodeIndex": 38,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 2,
         "turn": "unknown"
       },
@@ -1157,8 +1157,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1182,8 +1182,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1207,8 +1207,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1232,8 +1232,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1257,8 +1257,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1282,8 +1282,8 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 3,
-        "turn": "slight_right"
+        "to": 2,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_motorway"
@@ -1306,7 +1306,7 @@
       "nodeIndex": 63,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 3,
         "turn": "unknown"
       },
@@ -1331,7 +1331,7 @@
       "nodeIndex": 64,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 3,
         "turn": "unknown"
       },

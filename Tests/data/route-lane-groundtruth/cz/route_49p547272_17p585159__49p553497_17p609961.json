@@ -283,7 +283,7 @@
       "nodeIndex": 15,
       "ref": "D1",
       "suggestedLanes": {
-        "from": 1,
+        "from": 0,
         "to": 3,
         "turn": "unknown"
       },
