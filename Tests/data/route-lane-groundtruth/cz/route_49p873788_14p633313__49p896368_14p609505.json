@@ -1,0 +1,1279 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87378805781742,
+      "lon": 14.633313079426529,
+      "name": "",
+      "nodeIndex": 0,
+      "ref": "603",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.011241846164288902,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.873872547402016,
+      "lon": 14.633227248737427,
+      "name": "",
+      "nodeIndex": 1,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.023399764806374967,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87396106030019,
+      "lon": 14.633128007003137,
+      "name": "",
+      "nodeIndex": 2,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.03779796789960077,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87405225540735,
+      "lon": 14.632985849924268,
+      "name": "",
+      "nodeIndex": 3,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.07525541065293288,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87426414992112,
+      "lon": 14.632580836360006,
+      "name": "",
+      "nodeIndex": 4,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.10953593852093334,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87445190455355,
+      "lon": 14.632202644886092,
+      "name": "",
+      "nodeIndex": 5,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.14629184358095443,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.874649046917625,
+      "lon": 14.631792266903744,
+      "name": "",
+      "nodeIndex": 6,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.4296479238078514,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87619534042622,
+      "lon": 14.628659446751016,
+      "name": "",
+      "nodeIndex": 7,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.4389109706595909,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8762463023979,
+      "lon": 14.628557522807682,
+      "name": "",
+      "nodeIndex": 8,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.5322279200864635,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87674787548741,
+      "lon": 14.627516825702173,
+      "name": "",
+      "nodeIndex": 9,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.5890587105400568,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.877056329526425,
+      "lon": 14.626886506578956,
+      "name": "",
+      "nodeIndex": 10,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.6271301333166457,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.877297728339556,
+      "lon": 14.626510997314085,
+      "name": "",
+      "nodeIndex": 11,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.6942661201508484,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.877780525965846,
+      "lon": 14.625950415625795,
+      "name": "",
+      "nodeIndex": 12,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.793379118140864,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87852215676398,
+      "lon": 14.625185986050866,
+      "name": "",
+      "nodeIndex": 13,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.9116197914024124,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87940460353647,
+      "lon": 14.624268670560923,
+      "name": "",
+      "nodeIndex": 14,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.9409763472866204,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87962588578185,
+      "lon": 14.624046047211039,
+      "name": "",
+      "nodeIndex": 15,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 0.9654341187859026,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.87980693489169,
+      "lon": 14.623852928160517,
+      "name": "",
+      "nodeIndex": 16,
+      "ref": "603",
+      "turn": "Turn slightly right",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.027995922088693,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88034203559414,
+      "lon": 14.623584707257038,
+      "name": "",
+      "nodeIndex": 17,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.0704841447692186,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.880714862649995,
+      "lon": 14.623455961223357,
+      "name": "",
+      "nodeIndex": 18,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.125380617716458,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88119497806724,
+      "lon": 14.623278935427066,
+      "name": "",
+      "nodeIndex": 19,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.2095928033465668,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88192990334281,
+      "lon": 14.6229973034784,
+      "name": "",
+      "nodeIndex": 20,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.2610614190327434,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88237783225162,
+      "lon": 14.622817595473066,
+      "name": "",
+      "nodeIndex": 21,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.4009900527364438,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88362505945284,
+      "lon": 14.622562785614747,
+      "name": "",
+      "nodeIndex": 22,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.49081559800517,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88442569884975,
+      "lon": 14.622399170863616,
+      "name": "",
+      "nodeIndex": 23,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.73875676426308,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88663315688544,
+      "lon": 14.62191905544637,
+      "name": "",
+      "nodeIndex": 24,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.8346528735236005,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.887492804881134,
+      "lon": 14.621817131503065,
+      "name": "",
+      "nodeIndex": 25,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.8697076238402341,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.887807964442715,
+      "lon": 14.62181981371208,
+      "name": "",
+      "nodeIndex": 26,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.9073666817850927,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88814458167661,
+      "lon": 14.621876140101818,
+      "name": "",
+      "nodeIndex": 27,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.9516323533041091,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88853484309118,
+      "lon": 14.621996839508398,
+      "name": "",
+      "nodeIndex": 28,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.9737338307743473,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8887279621417,
+      "lon": 14.62206925915234,
+      "name": "",
+      "nodeIndex": 29,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 1.986161296319495,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88883525050309,
+      "lon": 14.62211753891495,
+      "name": "Benešovská",
+      "nodeIndex": 30,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.0914544435689484,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.889744519365905,
+      "lon": 14.622525234688254,
+      "name": "Benešovská",
+      "nodeIndex": 31,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.1083030163973784,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.88988801754928,
+      "lon": 14.62260033654124,
+      "name": "Benešovská",
+      "nodeIndex": 32,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.1658996385911906,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.890382885116196,
+      "lon": 14.622836370936312,
+      "name": "Benešovská",
+      "nodeIndex": 33,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.1694160348861256,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89041373052012,
+      "lon": 14.622847099772457,
+      "name": "Benešovská",
+      "nodeIndex": 34,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.2293709828252357,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89093273796837,
+      "lon": 14.623072405331385,
+      "name": "Benešovská",
+      "nodeIndex": 35,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.2679266282119657,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8912599674706,
+      "lon": 14.623249431127675,
+      "name": "Benešovská",
+      "nodeIndex": 36,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.284456204514312,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89140212454947,
+      "lon": 14.62331648635356,
+      "name": "Benešovská",
+      "nodeIndex": 37,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.3001137698904768,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89154159941927,
+      "lon": 14.623345990652922,
+      "name": "Benešovská",
+      "nodeIndex": 38,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.3212528989882553,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89173069515624,
+      "lon": 14.623375494952313,
+      "name": "Benešovská",
+      "nodeIndex": 39,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.343519692045478,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89193051972933,
+      "lon": 14.623356719489067,
+      "name": "Benešovská",
+      "nodeIndex": 40,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.363007763201162,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892103522212096,
+      "lon": 14.623313804144516,
+      "name": "Benešovská",
+      "nodeIndex": 41,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.3795945229176922,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89224567929094,
+      "lon": 14.623244066709617,
+      "name": "Benešovská",
+      "nodeIndex": 42,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.401403905221247,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89242404619176,
+      "lon": 14.62311800288498,
+      "name": "Benešovská",
+      "nodeIndex": 43,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.4207876421606263,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892574249897706,
+      "lon": 14.622981210224197,
+      "name": "Benešovská",
+      "nodeIndex": 44,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.4376679696530834,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8926976315133,
+      "lon": 14.622844417563414,
+      "name": "Benešovská",
+      "nodeIndex": 45,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.4524483493119837,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89279687324759,
+      "lon": 14.622707624902631,
+      "name": "Benešovská",
+      "nodeIndex": 46,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.464033927701228,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892863928473474,
+      "lon": 14.622584243287037,
+      "name": "Benešovská",
+      "nodeIndex": 47,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.4864062622008065,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89298194567101,
+      "lon": 14.62233211563776,
+      "name": "Benešovská",
+      "nodeIndex": 48,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.4991272934111426,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89303961316526,
+      "lon": 14.622179229722747,
+      "name": "Benešovská",
+      "nodeIndex": 49,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.510120204832663,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.893083869614344,
+      "lon": 14.622042437061992,
+      "name": "Benešovská",
+      "nodeIndex": 50,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.5224151137905895,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89312142054081,
+      "lon": 14.621881504519877,
+      "name": "Benešovská",
+      "nodeIndex": 51,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.5389478875771294,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8931589714673,
+      "lon": 14.621658881169992,
+      "name": "Benešovská",
+      "nodeIndex": 52,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.5601456454364766,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89318445245314,
+      "lon": 14.62136652038518,
+      "name": "Benešovská",
+      "nodeIndex": 53,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.5884830521758997,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.893179088035055,
+      "lon": 14.620972235657064,
+      "name": "Benešovská",
+      "nodeIndex": 54,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.616127036178271,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89313349048149,
+      "lon": 14.62059404418315,
+      "name": "Benešovská",
+      "nodeIndex": 55,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.644189159995027,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89305302421042,
+      "lon": 14.620223899336338,
+      "name": "Benešovská",
+      "nodeIndex": 56,
+      "ref": "603",
+      "turn": "Turn slightly left",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.692965185883994,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892842470801185,
+      "lon": 14.619628448930598,
+      "name": "Benešovská",
+      "nodeIndex": 57,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.715362589647663,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89275261679853,
+      "lon": 14.619349499190974,
+      "name": "Benešovská",
+      "nodeIndex": 58,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.742588050473269,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892665445004894,
+      "lon": 14.618995447598365,
+      "name": "Benešovská",
+      "nodeIndex": 59,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.7588885336211355,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89263728181001,
+      "lon": 14.618772824248452,
+      "name": "Benešovská",
+      "nodeIndex": 60,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.7741609698421783,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892626552973894,
+      "lon": 14.618560929734713,
+      "name": "Benešovská",
+      "nodeIndex": 61,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.782257044073577,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89262521186936,
+      "lon": 14.618448276955235,
+      "name": "Benešovská",
+      "nodeIndex": 62,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.789394326977601,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8926278940784,
+      "lon": 14.618349035220945,
+      "name": "Benešovská",
+      "nodeIndex": 63,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.7992642672281076,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8926359407055,
+      "lon": 14.61821224256019,
+      "name": "Benešovská",
+      "nodeIndex": 64,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.8080404471661375,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892648010646155,
+      "lon": 14.61809154315361,
+      "name": "Benešovská",
+      "nodeIndex": 65,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.817084964939614,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89266410390036,
+      "lon": 14.617968161538016,
+      "name": "Benešovská",
+      "nodeIndex": 66,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.8231501757250888,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.892673491631996,
+      "lon": 14.61788501305793,
+      "name": "Benešovská",
+      "nodeIndex": 67,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.8334189080918923,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89269360819975,
+      "lon": 14.617745538188103,
+      "name": "Benešovská",
+      "nodeIndex": 68,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.856069083181174,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89275529900755,
+      "lon": 14.61744513077619,
+      "name": "Benešovská",
+      "nodeIndex": 69,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.872546291193042,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89281967202439,
+      "lon": 14.617238600680508,
+      "name": "Benešovská",
+      "nodeIndex": 70,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.8875335410139087,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89288806835478,
+      "lon": 14.617058892675175,
+      "name": "Benešovská",
+      "nodeIndex": 71,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.9233170377785047,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89306777636011,
+      "lon": 14.616645832483812,
+      "name": "Benešovská",
+      "nodeIndex": 72,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 2.989111316846234,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89341109911658,
+      "lon": 14.615900178372101,
+      "name": "Benešovská",
+      "nodeIndex": 73,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.024516754189481,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89361092368969,
+      "lon": 14.61551662248013,
+      "name": "Benešovská",
+      "nodeIndex": 74,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.084145156046424,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.893963634177766,
+      "lon": 14.614891667774998,
+      "name": "Benešovská",
+      "nodeIndex": 75,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.09908854277988,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8940508059714,
+      "lon": 14.614733417441954,
+      "name": "Benešovská",
+      "nodeIndex": 76,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.1207512811672165,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89416748206443,
+      "lon": 14.614492018628795,
+      "name": "Benešovská",
+      "nodeIndex": 77,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.1911409488567775,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89453092138865,
+      "lon": 14.613690038127373,
+      "name": "Benešovská",
+      "nodeIndex": 78,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.2745410959258643,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89495471041616,
+      "lon": 14.612732489501923,
+      "name": "Benešovská",
+      "nodeIndex": 79,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.285956819601422,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.895012377910405,
+      "lon": 14.612601061259227,
+      "name": "Benešovská",
+      "nodeIndex": 80,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.3041750782406596,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.8951049141221,
+      "lon": 14.612391848954502,
+      "name": "Benešovská",
+      "nodeIndex": 81,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.43597187007282,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.895767419753724,
+      "lon": 14.610871036431718,
+      "name": "Benešovská",
+      "nodeIndex": 82,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.527960825120597,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.89623680633483,
+      "lon": 14.60981692828102,
+      "name": "Benešovská",
+      "nodeIndex": 83,
+      "ref": "603",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.527960825120597,
+      "lat": 49.89623680633483,
+      "lon": 14.60981692828102,
+      "nodeIndex": 84
+    }
+  ],
+  "start": {
+    "lat": 49.87378805781742,
+    "lon": 14.633313079426529
+  },
+  "target": {
+    "lat": 49.89636823457752,
+    "lon": 14.609505792032962
+  },
+  "version": 1
+}
