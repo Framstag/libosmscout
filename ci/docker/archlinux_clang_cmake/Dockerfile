@@ -2,7 +2,7 @@ FROM archlinux:base-20250727.0.390543
 
 RUN pacman --noconfirm --needed -Sy \
           git \
-          libxml2 protobuf \
+          libxml2 protobuf nlohmann-json \
           freetype2 \
           cairo pango \
           qt5-base qt5-declarative qt5-graphicaleffects qt5-location \

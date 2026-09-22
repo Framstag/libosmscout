@@ -88,6 +88,20 @@ public class OSMScoutClient {
     public native void setStyleSheetFlag(String key, boolean value);
 
     /**
+     * Configures the capacity of the tile data caches that the map service of
+     * each database keeps (regional databases and basemap).
+     * <p>
+     * The value is applied to every open database before tile data is loaded
+     * for the next render, so it also covers a database that opens later (a map
+     * scan or a basemap reload). Idempotent; a non-positive value keeps the
+     * library default.
+     *
+     * @param cacheSize cache capacity, or a non-positive value for the library
+     *                  default
+     */
+    public native void setNativeDataCacheSize(int cacheSize);
+
+    /**
      * Returns the names of all available map styles.
      * <p>
      * Styles are derived from the top-level {@code *.oss} files in the
@@ -294,6 +308,23 @@ public class OSMScoutClient {
     public native String getAdminRegionName(long handle);
 
     /**
+     * Get the name of the search scope region of a previously resolved admin
+     * region.
+     * <p>
+     * The scope widens from the resolved region to the highest ancestor that is
+     * still at or finer than a fixed admin level cap, because libosmscout's
+     * region search is recursive: one search scoped to that ancestor covers it
+     * and all of its subregions, so a city district scopes the search to the
+     * region containing it *and* its neighbours. When the region has no parent,
+     * or every ancestor is coarser than the cap, the scope is the region
+     * itself.
+     *
+     * @param handle handle returned by {@link #resolveAdminRegion(double, double)}
+     * @return scope region name, or null if the handle is unknown
+     */
+    public native String getAdminRegionScopeName(long handle);
+
+    /**
      * Get a structured description of the most reasonable visible object
      * at the given geographic coordinate.
      * <p>
@@ -340,6 +371,20 @@ public class OSMScoutClient {
      * @return ranked list of candidate descriptions, or empty list if no object found
      */
     public native List<ObjectDescription> getDescriptionCandidates(double lat, double lon, int magnification);
+
+    /**
+     * Bearing-aware road lookup: resolve the road the vehicle is actually
+     * driving on at the given coordinate, preferring ways whose direction
+     * at the nearest point matches the vehicle bearing over nearer ways
+     * with a mismatched direction (e.g. a side street).
+     *
+     * @param lat     latitude in degrees
+     * @param lon     longitude in degrees
+     * @param bearing vehicle bearing in degrees, or NaN when unknown
+     * @return the resolved road (name, ref, type, max speed), or null when
+     *         no way is found within the lookup radius
+     */
+    public native RoadInfo getRoadAt(double lat, double lon, double bearing);
 
     /**
      * Calculate a route between two coordinates asynchronously with a routing profile.

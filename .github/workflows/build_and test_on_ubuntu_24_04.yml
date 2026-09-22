@@ -31,7 +31,8 @@ jobs:
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
               catch2
-              libxml2-dev 
+              libxml2-dev
+              nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler liblzma-dev
               libpng-dev
               libagg-dev
@@ -77,6 +78,7 @@ jobs:
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
                libxml2-dev
+               nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
                libagg-dev
@@ -117,6 +119,7 @@ jobs:
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
                libxml2-dev
+               nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
                libagg-dev
@@ -177,6 +180,7 @@ jobs:
                catch2
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
+               nlohmann-json3-dev
                libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
                qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
@@ -204,6 +208,7 @@ jobs:
                catch2
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
+               nlohmann-json3-dev
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
                qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev"
       - name: Install libpiper

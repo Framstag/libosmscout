@@ -66,6 +66,13 @@ class LibosmscoutConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/2.15.3")
 
+        # --- Import library ---------------------------------------------------
+        # The import library reads and writes the db.json database metadata,
+        # so a JSON implementation is required whenever it is built. The same
+        # condition decides OSMSCOUT_BUILD_IMPORT in generate(), below.
+        if self.options.with_protobuf or self.options.with_xml2:
+            self.requires("nlohmann_json/3.12.0")
+
         # --- Komprimierte Trie (Marisa) --------------------------------------
         if self.options.with_marisa:
             self.requires("marisa/0.2.6")

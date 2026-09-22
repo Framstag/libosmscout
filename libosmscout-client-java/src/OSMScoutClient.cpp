@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdarg>
+#include <cstddef>
 #include <cmath>
 #include <condition_variable>
 #include <cstdint>
@@ -31,6 +32,7 @@
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <osmscout/async/Breaker.h>
 #include <osmscout/async/CancelableFuture.h>
@@ -53,10 +55,17 @@
 
 #include <osmscout/projection/MercatorProjection.h>
 
+#include <osmscout/util/Geometry.h>
+
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
+#include <osmscout/location/Location.h>
+
+#include <osmscout/feature/AccessFeature.h>
+#include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
 
@@ -68,6 +77,7 @@
 #endif
 #include <osmscout/feature/NameFeature.h>
 #include <osmscout/feature/LayerFeature.h>
+#include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
@@ -403,6 +413,15 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 // ClientData — opaque C++ side data attached to each OSMScoutClient
 // --------------------------------------------------------------------------
 
+// Admin region handle entry: the resolved region plus the database that
+// produced it. Region offsets (parent/children) are database-local, so the
+// owning database must be known to expand the search scope safely.
+struct AdminRegionEntry
+{
+  osmscout::DBInstanceRef db;
+  osmscout::AdminRegionRef region;
+};
+
 struct ClientData
 {
   osmscout::SettingsRef settings;                    //!< Application settings
@@ -412,6 +431,7 @@ struct ClientData
   osmscout::FavoriteLocationService *favService;     //!< Favorite location service (owned)
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   std::vector<std::filesystem::path> knownPaths;     //!< Known map paths
 
   // Routing state
@@ -437,7 +457,7 @@ struct ClientData
   // Admin region handles for scoped search (resolveAdminRegion/searchLocations)
   std::mutex adminRegionMutex;
   long nextAdminRegionHandle{1};
-  std::map<long, osmscout::AdminRegionRef> adminRegions;
+  std::map<long, AdminRegionEntry> adminRegions;
 };
 
 // Global singleton pointer (one active instance at a time, like OSMScoutQt)
@@ -874,6 +894,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobje
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setNativeDataCacheSize(int cacheSize)
+//
+// Configures the capacity of libosmscout's per-database tile data caches
+// (regional databases and basemap). The value is stored and applied to every
+// open database's MapService before tile data is loaded for the next render,
+// so it also covers databases that open asynchronously after this call
+// (basemap reload, map scan). Idempotent; <= 0 keeps the library default.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEnv *env, jobject self, jint cacheSize)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+  data->tileDataCacheSize = (cacheSize > 0) ? static_cast<std::size_t>(cacheSize) : 0;
+  osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
+}
+
+// --------------------------------------------------------------------------
 
 // OSMScoutClient::close()
 // --------------------------------------------------------------------------
@@ -1269,6 +1310,26 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
         batch.emplace_back(std::move(mapData));
       };
+
+      // Configure the tile data cache capacity of every open database
+      // before any data loads (idempotent; also covers databases that opened
+      // asynchronously since the last render - map scan, basemap reload).
+      if (data->tileDataCacheSize > 0) {
+        for (const auto &db : databases) {
+          if (db && db->GetMapService()) {
+            db->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+          }
+        }
+        if (basemapDatabase && basemapDatabase->GetMapService()) {
+          basemapDatabase->GetMapService()->SetCacheSize(data->tileDataCacheSize);
+        }
+        osmscout::log.Debug() << "[JNI] render: applied tile data cache size "
+                              << data->tileDataCacheSize
+                              << " to " << databases.size() << " db(s)"
+                              << (basemapDatabase && basemapDatabase->GetMapService()
+                                      ? " + basemap"
+                                      : "");
+      }
 
       // Load regular databases first
       for (const auto &db : databases) {
@@ -1724,7 +1785,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.positionClsGlobal = env->NewGlobalRef(positionCls);
     methods.positionCtor = env->GetMethodID(
         positionCls, "<init>",
-        "(Lcom/framstag/libosmscout/client/NavigationState;DDDD)V");
+        "(Lcom/framstag/libosmscout/client/NavigationState;DDDDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass stateCls = env->FindClass("com/framstag/libosmscout/client/NavigationState");
@@ -2445,17 +2506,46 @@ private:
       bearing = lastBearing->AsDegrees();
     }
 
+    // Resolved way from the route (or the nearest routable object off-route):
+    // expose its name, ref and type so the UI can show the street the vehicle
+    // is actually on without an area search (spec: current-road-info).
+    std::string wayName;
+    std::string wayRef;
+    std::string wayType;
+    const auto &position = positionMessage->position;
+    if (position.way && position.typeConfig) {
+      osmscout::NameFeatureValueReader nameReader(*position.typeConfig);
+      if (auto val = nameReader.GetValue(position.way->GetFeatureValueBuffer())) {
+        wayName = val->GetName();
+      }
+      osmscout::RefFeatureValueReader refReader(*position.typeConfig);
+      if (auto val = refReader.GetValue(position.way->GetFeatureValueBuffer())) {
+        wayRef = val->GetRef();
+      }
+      wayType = position.way->GetType()->GetName();
+    }
+
+    jstring wayNameJ = env->NewStringUTF(wayName.c_str());
+    jstring wayRefJ = env->NewStringUTF(wayRef.c_str());
+    jstring wayTypeJ = env->NewStringUTF(wayType.c_str());
+
     jobject positionObj = env->NewObject(
         static_cast<jclass>(methods.positionClsGlobal), methods.positionCtor,
         stateObj,
-        positionMessage->position.coord.GetLat(),
-        positionMessage->position.coord.GetLon(),
+        position.coord.GetLat(),
+        position.coord.GetLon(),
         bearing,
-        -1.0);
+        -1.0,
+        wayNameJ,
+        wayRefJ,
+        wayTypeJ);
 
     env->CallVoidMethod(listenerGlobal, methods.onPositionEstimate, positionObj);
     env->DeleteLocalRef(positionObj);
     env->DeleteLocalRef(stateObj);
+    env->DeleteLocalRef(wayNameJ);
+    env->DeleteLocalRef(wayRefJ);
+    env->DeleteLocalRef(wayTypeJ);
   }
 
   jobject CreateJavaRouteInstruction(JNIEnv *env, const JavaRouteInstruction &instr)
@@ -2623,6 +2713,138 @@ struct ResultWithDb {
   osmscout::DBInstanceRef              db;
 };
 
+// Maximum admin region level for the search scope expansion (see
+// search_scope.h). Uses OSM admin_level semantics: 2=country, 4=state,
+// 6=county/district, 8=municipality, 10=suburb. The scope never widens into
+// regions coarser than this, keeping search data and result volume manageable.
+static constexpr uint8_t kMaxSearchRegionLevel = naviveylin::kMaxSearchRegionLevel;
+
+// Returns the level of an admin region: the OSM admin_level feature value when
+// the region object carries it, else the hierarchy depth normalized to the
+// admin_level scale (root=0, country=2, state=4, county=6, city=8, suburb=10).
+// Returns 0 when unknown.
+static uint8_t GetRegionLevel(const osmscout::DBInstanceRef &db,
+                              const osmscout::AdminRegionRef &region)
+{
+  if (!region) {
+    return 0;
+  }
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    return 0;
+  }
+
+  // admin_level feature from the region's object, when loadable
+  const osmscout::FeatureValueBuffer *buffer = nullptr;
+  osmscout::NodeRef node;
+  osmscout::AreaRef area;
+  osmscout::WayRef way;
+  if (region->object.GetType() == osmscout::RefType::refNode) {
+    if (database->GetNodeByOffset(region->object.GetFileOffset(), node)) {
+      buffer = &node->GetFeatureValueBuffer();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refArea) {
+    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
+      buffer = &area->GetFeatureValueBuffer();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refWay) {
+    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
+      buffer = &way->GetFeatureValueBuffer();
+    }
+  }
+  if (buffer) {
+    size_t featureIdx = 0;
+    if (buffer->GetType()->GetFeature(osmscout::AdminLevelFeature::NAME, featureIdx) &&
+        buffer->HasFeature(featureIdx)) {
+      if (const auto *value =
+              dynamic_cast<osmscout::AdminLevelFeatureValue *>(buffer->GetValue(featureIdx));
+          value != nullptr && value->GetAdminLevel() != 0) {
+        return value->GetAdminLevel();
+      }
+    }
+  }
+
+  // Fallback: hierarchy depth normalized to the admin_level scale
+  // (root=0, country=2, state=4, county=6, city=8, suburb=10) so the cap
+  // comparison is uniform. The chain includes the region itself.
+  osmscout::LocationServiceRef locationService = db->GetLocationService();
+  if (locationService) {
+    std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
+    if (locationService->ResolveAdminRegionHierachie(region, chain)) {
+      return naviveylin::NormalizeDepthToAdminLevel(chain.size());
+    }
+  }
+
+  return 0;
+}
+
+// Collects the search scope for a resolved admin region: the highest ancestor
+// at or finer than the cap level (libosmscout's region search is recursive, so
+// one search scoped to that region covers it and ALL its subregions in a
+// single pass), else the region itself. Walking up to the cap implements
+// "one up one down": from a Stadtteil (Eving) the scope reaches the
+// Regierungsbezirk (Arnsberg), covering the city and its neighboring counties
+// (e.g. Bergkamen under Kreis Unna). When the region has no parent or every
+// ancestor is coarser than the cap, the scope is the region alone.
+static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
+                               const osmscout::AdminRegionRef &region,
+                               std::vector<osmscout::AdminRegionRef> &scope)
+{
+  scope.clear();
+  if (!region) {
+    return;
+  }
+  scope.push_back(region);
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    return;
+  }
+  osmscout::LocationServiceRef locationService = db->GetLocationService();
+  if (!locationService) {
+    return;
+  }
+
+  // Parent chain (includes the region itself); no parent -> no expansion.
+  std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
+  if (!locationService->ResolveAdminRegionHierachie(region, chain)) {
+    return;
+  }
+
+  // Walk up: keep climbing while the parent is at or finer than the cap.
+  osmscout::AdminRegionRef scopeRegion = region;
+  osmscout::FileOffset currentOffset = region->regionOffset;
+  while (true) {
+    const auto currentIt = chain.find(currentOffset);
+    if (currentIt == chain.end()) {
+      break;
+    }
+    const osmscout::AdminRegionRef &current = currentIt->second;
+    if (current->parentRegionOffset == 0) {
+      break; // root region
+    }
+    const auto parentIt = chain.find(current->parentRegionOffset);
+    if (parentIt == chain.end()) {
+      break;
+    }
+    const osmscout::AdminRegionRef &parent = parentIt->second;
+    const uint8_t parentLevel = GetRegionLevel(db, parent);
+    if (!naviveylin::ShouldExpandScope(parentLevel, kMaxSearchRegionLevel)) {
+      break; // parent coarser than the cap: stop here
+    }
+    scopeRegion = parent;
+    currentOffset = parent->regionOffset;
+  }
+
+  if (scopeRegion != region) {
+    // Scope = the highest fine ancestor; its recursive search covers all
+    // subregions down to the original region.
+    scope.clear();
+    scope.push_back(scopeRegion);
+  }
+}
+
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -2680,6 +2902,24 @@ static bool IsValidUtf8(const std::string &s) {
 // optional leading coordinate result into Java LocationEntry objects.
 // Shared by the string search (searchLocations) and the form-based address
 // search (searchLocationByForm); free-text hits are appended by the caller.
+//
+// Name of a per-attribute match quality as reported to Java. The app-side
+// ranker classifies results from these values instead of the collapsed
+// matchQuality string, which cannot distinguish "the queried attribute matched"
+// from "some attribute matched".
+static const char *MatchQualityName(osmscout::LocationSearchResult::MatchQuality quality)
+{
+  switch (quality) {
+    case osmscout::LocationSearchResult::match:
+      return "match";
+    case osmscout::LocationSearchResult::candidate:
+      return "candidate";
+    case osmscout::LocationSearchResult::none:
+    default:
+      return "none";
+  }
+}
+
 std::vector<jobject> SerializeStructuredEntries(
     JNIEnv *env, ClientData *data,
     const std::vector<ResultWithDb> &results,
@@ -2709,6 +2949,14 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID objectFileOffsetField = env->GetFieldID(entryCls, "objectFileOffset", "J");
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
+  jfieldID adminRegionMatchQualityField = env->GetFieldID(entryCls, "adminRegionMatchQuality", "Ljava/lang/String;");
+  jfieldID postalAreaMatchQualityField = env->GetFieldID(entryCls, "postalAreaMatchQuality", "Ljava/lang/String;");
+  jfieldID locationMatchQualityField = env->GetFieldID(entryCls, "locationMatchQuality", "Ljava/lang/String;");
+  jfieldID addressMatchQualityField = env->GetFieldID(entryCls, "addressMatchQuality", "Ljava/lang/String;");
+  jfieldID poiMatchQualityField = env->GetFieldID(entryCls, "poiMatchQuality", "Ljava/lang/String;");
+  jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
+  jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
+  jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
 
   // Resolve each result's object reference before building the Java array.
   // A stale or inconsistent search index can reference objects that cannot be
@@ -2861,6 +3109,17 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetDoubleField(jEntry, latField, coordLat);
     env->SetDoubleField(jEntry, lonField, coordLon);
     env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF("match"));
+    // A coordinate result is the query itself, not an entry that filled
+    // attributes: it reports "none" for every component so the app-side
+    // ranker classifies it from its type and not from a fabricated match.
+    env->SetObjectField(jEntry, adminRegionMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, locationMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, addressMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, poiMatchQualityField, env->NewStringUTF("none"));
+    env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(query.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("coordinate"));
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
     serializedEntries.push_back(jEntry);
@@ -2899,6 +3158,26 @@ std::vector<jobject> SerializeStructuredEntries(
       objectType = "place";
     } else if (entry.address) {
       objectType = "address";
+    }
+
+    // Name of the component that supplied the label. For a house-level entry
+    // the label is "street + house number", so the matched name is the street
+    // name — the app-side ranker compares the queried name against this value,
+    // never against the composite label.
+    std::string matchedName;
+    std::string matchedComponent;
+    if (entry.location) {
+      matchedName = entry.location->name;
+      matchedComponent = "location";
+    } else if (entry.poi) {
+      matchedName = entry.poi->name;
+      matchedComponent = "poi";
+    } else if (entry.adminRegion) {
+      matchedName = entry.adminRegion->name;
+      matchedComponent = "adminRegion";
+    } else if (entry.address) {
+      matchedName = entry.address->name;
+      matchedComponent = "address";
     }
 
     // match quality
@@ -2956,6 +3235,7 @@ std::vector<jobject> SerializeStructuredEntries(
         !IsValidUtf8(label) || !IsValidUtf8(type) || !IsValidUtf8(objectType) ||
         !IsValidUtf8(resolvedEntry.objectTypeName) || !IsValidUtf8(resolvedEntry.objectName) ||
         !IsValidUtf8(resolvedEntry.refType) || !IsValidUtf8(matchQuality) ||
+        !IsValidUtf8(matchedName) || !IsValidUtf8(matchedComponent) ||
         !IsValidUtf8(hierarchyPath)) {
       continue;
     }
@@ -2976,6 +3256,24 @@ std::vector<jobject> SerializeStructuredEntries(
     }
 
     env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF(matchQuality.c_str()));
+
+    // Per-attribute match quality plus the name the label was derived from.
+    // Absent components report "none" (the Entry defaults), so the app-side
+    // ranker can tell "carries the attribute and it matched" from "carries it
+    // and it did not" and from "does not carry it at all".
+    env->SetObjectField(jEntry, adminRegionMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.adminRegionMatchQuality)));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.postalAreaMatchQuality)));
+    env->SetObjectField(jEntry, locationMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.locationMatchQuality)));
+    env->SetObjectField(jEntry, addressMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.addressMatchQuality)));
+    env->SetObjectField(jEntry, poiMatchQualityField,
+                        env->NewStringUTF(MatchQualityName(entry.poiMatchQuality)));
+    env->SetBooleanField(jEntry, hasHouseNumberField, entry.address ? JNI_TRUE : JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(matchedName.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF(matchedComponent.c_str()));
 
     jobjectArray regionArray = env->NewObjectArray(
         static_cast<jsize>(regionParts.size()),
@@ -3073,6 +3371,10 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         param.SetLocationSearchString(location);
         param.SetAddressSearchString(address);
         param.SetLimit(static_cast<size_t>(limit));
+        // A house number missing from the index must not zero out the whole
+        // lookup: partial matches add the best street/region candidate so the
+        // caller can resolve to the street.
+        param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             std::make_shared<osmscout::StringMatcherTransliterateFactory>());
 
@@ -3174,13 +3476,16 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #endif
   bool limitReached = false;
 
-  // Resolve the default admin region handle, if any
+  // Resolve the default admin region handle, if any. The database that
+  // resolved it travels with the handle: region offsets are database-local.
   osmscout::AdminRegionRef adminRegion;
+  osmscout::DBInstanceRef adminRegionDb;
   if (adminRegionHandle != 0) {
     std::scoped_lock lock(data->adminRegionMutex);
     auto it = data->adminRegions.find(static_cast<long>(adminRegionHandle));
     if (it != data->adminRegions.end()) {
-      adminRegion = it->second;
+      adminRegion = it->second.region;
+      adminRegionDb = it->second.db;
     }
   }
 
@@ -3192,13 +3497,16 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         breaker = g_currentBreaker;
       }
 
-      const auto limitReachedTotal = [&]() {
+      // Each source has its own candidate budget: the caller ranks the union of
+      // structured and free-text entries and truncates to what it displays, so a
+      // full page of structured results must not crowd the text-index candidates
+      // out of the set (openspec/specs/search-free-text, "Free-text results
+      // merged with structured results").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-        return results.size() + freeTextEntries.size() >= static_cast<size_t>(limit);
-#else
-        return results.size() >= static_cast<size_t>(limit);
-#endif
+      const auto freeTextLimitReached = [&]() {
+        return freeTextEntries.size() >= static_cast<size_t>(limit);
       };
+#endif
 
       for (const auto &db : databases) {
         if (breaker && breaker->IsAborted()) {
@@ -3213,14 +3521,6 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         osmscout::LocationServiceRef locationService = db->GetLocationService();
         if (!locationService) {
           continue;
-        }
-
-        osmscout::LocationStringSearchParameter param(query);
-        param.SetLimit(static_cast<size_t>(limit));
-        param.SetStringMatcherFactory(
-            std::make_shared<osmscout::StringMatcherTransliterateFactory>());
-        if (breaker) {
-          param.SetBreaker(breaker);
         }
 
         // Resolve the default admin region: from a handle (NaviVeylin API) or
@@ -3239,17 +3539,54 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
             effectiveRegion = regionResult.results.front().adminRegion;
           }
         }
-        if (effectiveRegion) {
-          param.SetDefaultAdminRegion(effectiveRegion);
+
+        // Build the search scope: for the database that resolved the handle,
+        // the highest fine ancestor (see ResolveSearchScope); for other
+        // databases, search unconstrained - the handle's region belongs to
+        // another database, and applying it here would read foreign offsets
+        // from this db's index (garbage positions). The name-based path
+        // (adminRegionDb null) resolves the region per database, so it is
+        // applied normally.
+        std::vector<osmscout::AdminRegionRef> scope;
+        if (effectiveRegion && db == adminRegionDb) {
+          ResolveSearchScope(db, effectiveRegion, scope);
+        } else if (effectiveRegion && !adminRegionDb) {
+          scope.push_back(effectiveRegion);
+        } else {
+          // Foreign region (belongs to another database) or no region at all:
+          // search unconstrained here.
+          scope.push_back(nullptr);
         }
 
-        osmscout::LocationSearchResult searchResult;
-        if (locationService->SearchForLocationByString(param, searchResult)) {
-          for (const auto &entry : searchResult.results) {
-            results.push_back(ResultWithDb{entry, db});
+        for (const auto &scopeRegion : scope) {
+          if (breaker && breaker->IsAborted()) {
+            break;
           }
-          if (searchResult.limitReached) {
-            limitReached = true;
+
+          osmscout::LocationStringSearchParameter param(query);
+          param.SetLimit(static_cast<size_t>(limit));
+          // Surplus query tokens (e.g. a postal code between the house number
+          // and the city) must not zero out the result set: partial matches add
+          // the best street/region candidate so addresses containing a postal
+          // code still resolve.
+          param.SetPartialMatch(true);
+          param.SetStringMatcherFactory(
+              std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+          if (breaker) {
+            param.SetBreaker(breaker);
+          }
+          if (scopeRegion) {
+            param.SetDefaultAdminRegion(scopeRegion);
+          }
+
+          osmscout::LocationSearchResult searchResult;
+          if (locationService->SearchForLocationByString(param, searchResult)) {
+            for (const auto &entry : searchResult.results) {
+              results.push_back(ResultWithDb{entry, db});
+            }
+            if (searchResult.limitReached) {
+              limitReached = true;
+            }
           }
         }
 
@@ -3271,11 +3608,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                             /*transliterate*/ true,
                             resultsTxt);
           for (const auto &e : resultsTxt) {
-            if (limitReachedTotal()) {
+            if (freeTextLimitReached()) {
               break;
             }
             for (const auto &fref : e.second) {
-              if (limitReachedTotal()) {
+              if (freeTextLimitReached()) {
                 break;
               }
               if (seenOffsets[db].count(fref.GetFileOffset()) != 0) {
@@ -3291,9 +3628,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         }
 #endif
 
-        if (limitReachedTotal()) {
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+        // Only the free-text budget ends the walk over the databases: a full
+        // page of structured results must not stop the text-index candidates of
+        // the remaining databases from being collected.
+        if (freeTextLimitReached()) {
           break;
         }
+#endif
       }
     }
   );
@@ -3328,23 +3670,21 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       freeTextEntries.end());
 #endif
 
-  // Truncate to limit: structured results first, free-text fills the rest.
+  // Cap each source at the requested candidate count: structured results first,
+  // free-text independently. The caller ranks the union and truncates to the
+  // entries it displays, so neither source can crowd the other out of the
+  // candidate set.
   // Note: freeTextEntries is only ever SHRUNK here — resize() with a larger
   // size would pad the vector with default-constructed (empty) entries that
   // get serialized as garbage results with (0,0) coordinates.
-  if (results.size() >= static_cast<size_t>(limit)) {
+  if (results.size() > static_cast<size_t>(limit)) {
     results.resize(static_cast<size_t>(limit));
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
-    freeTextEntries.clear();
-#endif
-  } else {
-#ifdef OSMSCOUT_HAVE_LIB_MARISA
-    const size_t remaining = static_cast<size_t>(limit) - results.size();
-    if (freeTextEntries.size() > remaining) {
-      freeTextEntries.resize(remaining);
-    }
-#endif
   }
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+  if (freeTextEntries.size() > static_cast<size_t>(limit)) {
+    freeTextEntries.resize(static_cast<size_t>(limit));
+  }
+#endif
 
   // Serialize structured results (defensively resolved) plus the optional
   // coordinate result; free-text hits are appended below.
@@ -3372,6 +3712,22 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
   jfieldID regionField = env->GetFieldID(entryCls, "region", "[Ljava/lang/String;");
+  jfieldID adminRegionMatchQualityField = env->GetFieldID(entryCls, "adminRegionMatchQuality", "Ljava/lang/String;");
+  jfieldID postalAreaMatchQualityField = env->GetFieldID(entryCls, "postalAreaMatchQuality", "Ljava/lang/String;");
+  jfieldID locationMatchQualityField = env->GetFieldID(entryCls, "locationMatchQuality", "Ljava/lang/String;");
+  jfieldID addressMatchQualityField = env->GetFieldID(entryCls, "addressMatchQuality", "Ljava/lang/String;");
+  jfieldID poiMatchQualityField = env->GetFieldID(entryCls, "poiMatchQuality", "Ljava/lang/String;");
+  jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
+  jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
+  jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+
+  // A text-index hit has no component attribution: the query matched the whole
+  // indexed name (or a prefix of it), so the only honest signal is whether the
+  // name matches the query exactly. Match quality is therefore derived from a
+  // real comparison instead of being claimed as "match" for every hit.
+  osmscout::StringMatcherTransliterateFactory freeTextMatcherFactory;
+  osmscout::StringMatcherRef freeTextMatcher = freeTextMatcherFactory.CreateMatcher(query);
+
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
     // Garbage string data from a corrupt text index — omit the entry.
@@ -3388,7 +3744,21 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetDoubleField(jEntry, lonField, entry.lon);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(entry.objectTypeName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, entry.objectFileOffset);
-    env->SetObjectField(jEntry, matchQualityField, env->NewStringUTF("match"));
+    bool exactNameMatch = freeTextMatcher != nullptr &&
+                          freeTextMatcher->Match(entry.label) == osmscout::StringMatcher::match;
+    env->SetObjectField(jEntry, matchQualityField,
+                        env->NewStringUTF(exactNameMatch ? "match" : "candidate"));
+    // No per-component attribution for a text-index hit: every component
+    // reports "none" so the app-side ranker can never classify such a hit as a
+    // perfect match, and the name the label came from is the label itself.
+    env->SetObjectField(jEntry, adminRegionMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, postalAreaMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, locationMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, addressMatchQualityField, env->NewStringUTF("none"));
+    env->SetObjectField(jEntry, poiMatchQualityField, env->NewStringUTF("none"));
+    env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
+    env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(entry.label.c_str()));
+    env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("freeText"));
     if (!entry.refType.empty()) {
       env->SetObjectField(jEntry, refTypeField, env->NewStringUTF(entry.refType.c_str()));
     }
@@ -3433,6 +3803,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
   }
 
   osmscout::AdminRegionRef resolvedRegion;
+  osmscout::DBInstanceRef resolvedDb;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -3483,6 +3854,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
 
         if (best) {
           resolvedRegion = best;
+          resolvedDb = db;
           break;
         }
       }
@@ -3495,7 +3867,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
 
   std::scoped_lock lock(data->adminRegionMutex);
   const long handle = data->nextAdminRegionHandle++;
-  data->adminRegions[handle] = resolvedRegion;
+  data->adminRegions[handle] = AdminRegionEntry{resolvedDb, resolvedRegion};
   return static_cast<jlong>(handle);
 }
 
@@ -3526,7 +3898,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionName(JNIEnv *e
     std::scoped_lock lock(data->adminRegionMutex);
     auto it = data->adminRegions.find(static_cast<long>(handle));
     if (it != data->adminRegions.end()) {
-      region = it->second;
+      region = it->second.region;
     }
   }
 
@@ -3536,7 +3908,43 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionName(JNIEnv *e
   return env->NewStringUTF(region->name.c_str());
 }
 
-// --------------------------------------------------------------------------
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIEnv *env, jobject self,
+                                                                            jlong handle)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return nullptr;
+  }
+
+  osmscout::AdminRegionRef region;
+  osmscout::DBInstanceRef db;
+  {
+    std::scoped_lock lock(data->adminRegionMutex);
+    auto it = data->adminRegions.find(static_cast<long>(handle));
+    if (it != data->adminRegions.end()) {
+      region = it->second.region;
+      db = it->second.db;
+    }
+  }
+
+  if (!region) {
+    return nullptr;
+  }
+
+  // The scope region: the highest fine ancestor when the scope expands
+  // (mirrors the scope searchLocations uses), else the region itself.
+  std::vector<osmscout::AdminRegionRef> scope;
+  if (db) {
+    ResolveSearchScope(db, region, scope);
+  } else {
+    scope.push_back(region);
+  }
+  if (scope.empty() || !scope.front() || scope.front()->name.empty()) {
+    return nullptr;
+  }
+  return env->NewStringUTF(scope.front()->name.c_str());
+}
 // --------------------------------------------------------------------------
 // OSMScoutClient::cancelSearch()
 // --------------------------------------------------------------------------
@@ -3752,6 +4160,207 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getMaxSpeedAt(JNIEnv *env, j
   );
 
   return maxSpeed;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::getRoadAt(double lat, double lon, double bearing)
+// --------------------------------------------------------------------------
+// Bearing-aware road lookup for free-driving / off-route display (spec:
+// road-lookup-bearing). Loads ways in a radius around the coordinate, finds
+// the nearest point on each way and the way's direction there, and ranks by
+// (bearing match when a bearing is given, then distance) so the street the
+// vehicle is actually driving on wins over a nearer side street. Returns a
+// RoadInfo (name, ref, type, max speed) or null when no way is found.
+
+namespace {
+
+// Bearing (degrees, 0..360) of the segment from a to b (equirectangular).
+double SegmentBearingDeg(const osmscout::GeoCoord &a, const osmscout::GeoCoord &b)
+{
+  const double dLat = (b.GetLat() - a.GetLat()) * M_PI / 180.0;
+  const double dLon = (b.GetLon() - a.GetLon()) * M_PI / 180.0;
+  const double midLat = (a.GetLat() + b.GetLat()) / 2.0 * M_PI / 180.0;
+  const double x = dLon * std::cos(midLat);
+  double deg = std::atan2(x, dLat) * 180.0 / M_PI;
+  if (deg < 0.0) {
+    deg += 360.0;
+  }
+  return deg;
+}
+
+// Whether a way is a drivable road (the street a vehicle can be on). Uses the
+// way's access feature when present (car access bits), else falls back to the
+// type name: only highway_* types that are not explicitly non-drivable
+// (footways, paths, cycleways, steps, pedestrian zones, ...) qualify.
+bool IsDrivableWay(const osmscout::Way &way,
+                   const osmscout::AccessFeatureValueReader &accessReader)
+{
+  osmscout::AccessFeatureValue *accessValue = accessReader.GetValue(way.GetFeatureValueBuffer());
+  if (accessValue != nullptr) {
+    return accessValue->CanRouteCar();
+  }
+  const std::string typeName = way.GetType()->GetName();
+  if (typeName.rfind("highway_", 0) != 0) {
+    return false;
+  }
+  static const std::set<std::string> nonDrivable = {
+      "highway_footway", "highway_path", "highway_cycleway", "highway_steps",
+      "highway_pedestrian", "highway_bridleway", "highway_construction",
+      "highway_bus_stop", "highway_crossing", "highway_platform",
+      "highway_rest_area", "highway_services", "highway_street_lamp",
+      "highway_traffic_signals", "highway_escape", "highway_raceway",
+      "highway_proposed"};
+  return nonDrivable.find(typeName) == nonDrivable.end();
+}
+
+}  // namespace
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getRoadAt(JNIEnv *env, jobject self,
+                                                             jdouble lat, jdouble lon,
+                                                             jdouble bearing)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return nullptr;
+  }
+
+  struct RoadCandidate {
+    osmscout::WayRef way;
+    osmscout::TypeConfigRef typeConfig;
+    double distanceDeg;    // distance from coord to the nearest point on the way
+    double angleDiffDeg;   // |normalized(wayBearing - bearing)| in 0..180, NaN when bearing invalid
+  };
+
+  std::vector<RoadCandidate> candidates;
+  osmscout::GeoCoord coord(lat, lon);
+  const bool bearingValid = !std::isnan(bearing);
+  const double bearingNorm = bearingValid ? std::fmod(std::fmod(bearing, 360.0) + 360.0, 360.0) : 0.0;
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef> &databases) {
+      for (const auto &db : databases) {
+        if (IsBasemapDatabase(db)) {
+          continue;
+        }
+        osmscout::GeoBox dbBox = db->GetDBGeoBox();
+        if (!dbBox.Includes(coord)) {
+          continue;
+        }
+        auto database = db->GetDatabase();
+        if (!database) {
+          continue;
+        }
+        auto typeConfig = database->GetTypeConfig();
+        if (!typeConfig) {
+          continue;
+        }
+        osmscout::AccessFeatureValueReader accessReader(*typeConfig);
+        osmscout::TypeInfoSet wayTypes(typeConfig->GetWayTypes());
+        osmscout::Distance radius = osmscout::Distance::Of<osmscout::Meter>(50);
+        try {
+          auto wayResults = database->LoadWaysInRadius(coord, wayTypes, radius);
+          for (const auto &entry : wayResults.GetWayResults()) {
+            const auto &way = entry.GetWay();
+            if (!way || way->nodes.size() < 2) {
+              continue;
+            }
+            // Only drivable roads: the street the vehicle is actually on.
+            // Walls, railways, footways, etc. must never win the ranking.
+            if (!IsDrivableWay(*way, accessReader)) {
+              continue;
+            }
+            // Nearest point on the way + the direction of the segment there.
+            double bestDist = std::numeric_limits<double>::max();
+            double segBearingDeg = std::numeric_limits<double>::quiet_NaN();
+            for (size_t i = 1; i < way->nodes.size(); i++) {
+              osmscout::GeoCoord p{0, 0};
+              double d = osmscout::CalculateDistancePointToLineSegment(
+                  coord, way->nodes[i - 1].GetCoord(), way->nodes[i].GetCoord(), p);
+              if (d < bestDist) {
+                bestDist = d;
+                segBearingDeg = SegmentBearingDeg(way->nodes[i - 1].GetCoord(),
+                                                  way->nodes[i].GetCoord());
+              }
+            }
+            RoadCandidate c;
+            c.way = way;
+            c.typeConfig = typeConfig;
+            c.distanceDeg = bestDist;
+            if (bearingValid && !std::isnan(segBearingDeg)) {
+              double diff = std::fabs(segBearingDeg - bearingNorm);
+              if (diff > 180.0) {
+                diff = 360.0 - diff;
+              }
+              c.angleDiffDeg = diff;
+            } else {
+              c.angleDiffDeg = std::numeric_limits<double>::quiet_NaN();
+            }
+            candidates.push_back(std::move(c));
+          }
+        } catch (const std::exception &e) {
+          osmscout::log.Warn() << "[JNI] getRoadAt LoadWaysInRadius exception: " << e.what();
+        }
+      }
+    }
+  );
+
+  if (candidates.empty()) {
+    return nullptr;
+  }
+
+  // Rank: bearing match (<= 45 deg) first, then distance.
+  static const double BEARING_MATCH_DEG = 45.0;
+  auto isBetter = [&](const RoadCandidate &a, const RoadCandidate &b) {
+    const bool aMatch = bearingValid && !std::isnan(a.angleDiffDeg) &&
+                        a.angleDiffDeg <= BEARING_MATCH_DEG;
+    const bool bMatch = bearingValid && !std::isnan(b.angleDiffDeg) &&
+                        b.angleDiffDeg <= BEARING_MATCH_DEG;
+    if (aMatch != bMatch) {
+      return aMatch;
+    }
+    return a.distanceDeg < b.distanceDeg;
+  };
+  const RoadCandidate &best = *std::min_element(candidates.begin(), candidates.end(), isBetter);
+
+  // Read name, ref, max speed from the winning way.
+  std::string name;
+  std::string ref;
+  double maxSpeed = std::numeric_limits<double>::quiet_NaN();
+  osmscout::NameFeatureValueReader nameReader(*best.typeConfig);
+  if (auto val = nameReader.GetValue(best.way->GetFeatureValueBuffer())) {
+    name = val->GetName();
+  }
+  osmscout::RefFeatureValueReader refReader(*best.typeConfig);
+  if (auto val = refReader.GetValue(best.way->GetFeatureValueBuffer())) {
+    ref = val->GetRef();
+  }
+  size_t maxSpeedIdx;
+  if (best.way->GetType()->GetFeature(osmscout::MaxSpeedFeature::NAME, maxSpeedIdx) &&
+      best.way->GetFeatureValueBuffer().HasFeature(maxSpeedIdx)) {
+    auto *val = best.way->GetFeatureValueBuffer().GetValue(maxSpeedIdx);
+    if (val) {
+      maxSpeed = static_cast<osmscout::MaxSpeedFeatureValue *>(val)->GetMaxSpeed();
+    }
+  }
+
+  jclass roadInfoCls = env->FindClass("com/framstag/libosmscout/client/RoadInfo");
+  if (roadInfoCls == nullptr) {
+    return nullptr;
+  }
+  jmethodID roadInfoCtor = env->GetMethodID(roadInfoCls, "<init>",
+                                            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;D)V");
+  if (roadInfoCtor == nullptr) {
+    return nullptr;
+  }
+  jstring nameJ = env->NewStringUTF(name.c_str());
+  jstring refJ = env->NewStringUTF(ref.c_str());
+  jstring typeJ = env->NewStringUTF(best.way->GetType()->GetName().c_str());
+  jobject result = env->NewObject(roadInfoCls, roadInfoCtor, nameJ, refJ, typeJ, maxSpeed);
+  env->DeleteLocalRef(nameJ);
+  env->DeleteLocalRef(refJ);
+  env->DeleteLocalRef(typeJ);
+  return result;
 }
 
 // --------------------------------------------------------------------------

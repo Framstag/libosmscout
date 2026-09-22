@@ -71,9 +71,6 @@ public class MapDownloadController implements Initializable {
     private Label basemapInstalledLabel;
 
     @FXML
-    private ComboBox<BasemapManager.BasemapArchive> basemapVariantCombo;
-
-    @FXML
     private Button basemapActionBtn;
 
     private OSMScoutClient client;
@@ -144,22 +141,6 @@ public class MapDownloadController implements Initializable {
 
         java.nio.file.Path mapsDir = com.framstag.libosmscout.Config.getConfigDir().resolve("maps");
         basemapManager = new BasemapManager(provider, mapsDir);
-
-        // Set up variant combo
-        basemapVariantCombo.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
-            @Override
-            protected void updateItem(BasemapManager.BasemapArchive item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getLabel());
-            }
-        });
-        basemapVariantCombo.setButtonCell(new javafx.scene.control.ListCell<>() {
-            @Override
-            protected void updateItem(BasemapManager.BasemapArchive item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getLabel());
-            }
-        });
 
         updateBasemapStatus();
     }
@@ -468,26 +449,26 @@ public class MapDownloadController implements Initializable {
 
         new Thread(() -> {
             try {
-                List<BasemapManager.BasemapArchive> available = basemapManager.fetchAvailableBasemaps();
+                List<BasemapManager.BasemapVersion> available = basemapManager.fetchAvailableBasemaps();
                 Platform.runLater(() -> {
                     if (available.isEmpty()) {
-                        System.err.println("[MapDownloadController] No basemap archives found on server");
+                        System.err.println("[MapDownloadController] No basemap available on server");
                         basemapAvailableLabel.setText("None found");
                         basemapActionBtn.setDisable(false);
                         basemapActionBtn.setText("Retry");
                         return;
                     }
 
-                    System.err.println("[MapDownloadController] Found " + available.size() + " basemap archives");
-                    // Show available archives
+                    System.err.println("[MapDownloadController] Found " + available.size() + " basemap versions");
+                    // The server offers versions of the database; the newest one
+                    // this client can read is the one offered.
                     StringBuilder sb = new StringBuilder();
-                    for (BasemapManager.BasemapArchive a : available) {
+                    for (BasemapManager.BasemapVersion v : available) {
                         if (sb.length() > 0) sb.append(", ");
-                        sb.append(a.getFileName()).append(" (").append(a.getSizeHuman()).append(")");
+                        sb.append(v.getLabel());
+                        if (v.getChangedAt() != null) sb.append(" (").append(v.getChangedAt()).append(")");
                     }
                     basemapAvailableLabel.setText(sb.toString());
-
-                    showVariantSelection(available);
 
                     boolean installed = basemapManager.isBasemapInstalled();
                     System.err.println("[MapDownloadController] Basemap installed: " + installed);
@@ -518,35 +499,21 @@ public class MapDownloadController implements Initializable {
         }, "basemap-probe").start();
     }
 
-    private void showVariantSelection(List<BasemapManager.BasemapArchive> available) {
-        if (available.size() > 1) {
-            basemapVariantCombo.getItems().setAll(available);
-            basemapVariantCombo.getSelectionModel().select(0);
-            basemapVariantCombo.setVisible(true);
-        } else {
-            basemapVariantCombo.setVisible(false);
-        }
-    }
-
     @FXML
     private void onBasemapDownload() {
         if (basemapManager == null) return;
 
-        BasemapManager.BasemapArchive archive = basemapVariantCombo.getSelectionModel().getSelectedItem();
-        if (archive == null) {
-            System.err.println("[MapDownloadController] No archive selected in combo, fetching from server");
-            List<BasemapManager.BasemapArchive> available = basemapManager.fetchAvailableBasemaps();
-            if (available.isEmpty()) {
-                String msg = "No basemap archives available on server";
-                System.err.println("[MapDownloadController] " + msg);
-                showError(msg);
-                return;
-            }
-            archive = available.get(0);
+        // There is one basemap: the newest version this client can read.
+        BasemapManager.BasemapVersion version = basemapManager.getLatestBasemap();
+
+        if (version == null) {
+            String msg = "No basemap available on server";
+            System.err.println("[MapDownloadController] " + msg);
+            showError(msg);
+            return;
         }
 
-        System.err.println("[MapDownloadController] Starting basemap download: " + archive.getFileName()
-            + " (" + archive.getSizeHuman() + ")");
+        System.err.println("[MapDownloadController] Starting basemap download: " + version.getLabel());
         basemapActionBtn.setDisable(true);
         basemapActionBtn.setText("Downloading...");
 
@@ -555,7 +522,7 @@ public class MapDownloadController implements Initializable {
         dlEntry.setStatus("Starting");
         downloads.add(dlEntry);
 
-        String handle = basemapManager.downloadBasemap(archive, new MapDownloadListener() {
+        String handle = basemapManager.downloadBasemap(version, new MapDownloadListener() {
             private long lastUiUpdate;
 
             @Override

@@ -23,7 +23,7 @@
 #include <limits>
 #include <sstream>
 
-#include <JsonWriter.h>
+#include <osmscoutimport/JsonWriter.h>
 
 namespace {
 
