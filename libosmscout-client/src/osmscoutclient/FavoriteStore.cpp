@@ -30,8 +30,7 @@ bool FavoriteStore::ReplaceByPath(const std::string &filePath)
 {
   std::scoped_lock lock(mutex_);
 
-  delete service_;
-  service_ = new FavoriteLocationService(filePath);
+  service_ = std::make_unique<FavoriteLocationService>(filePath);
 
   return true;
 }
@@ -41,8 +40,7 @@ bool FavoriteStore::ReplaceAndSave(const std::string &filePath,
 {
   std::scoped_lock lock(mutex_);
 
-  delete service_;
-  service_ = new FavoriteLocationService(filePath);
+  service_ = std::make_unique<FavoriteLocationService>(filePath);
 
   // The constructor loads whatever the file held; the caller's snapshot is the
   // complete new content, so start from an empty store.
@@ -78,8 +76,7 @@ void FavoriteStore::Shutdown()
 {
   std::scoped_lock lock(mutex_);
 
-  delete service_;
-  service_ = nullptr;
+  service_.reset();
 }
 
 std::vector<FavLocationGroup> FavoriteStore::GetGroups() const
