@@ -1946,7 +1946,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -1975,6 +1975,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
 struct JavaRouteInstruction
 {
   double distanceTo{0.0};       // meters to next manoeuvre
+  double timeTo{0.0};           // seconds for this segment (per-step time)
   std::string turnType;         // "sharpLeft", "left", "straightOn", etc.
   std::string streetName;       // street to turn into
   std::string description;      // "Turn left into Hauptstrasse"
@@ -2122,6 +2123,8 @@ private:
     osmscout::Distance stopAfter; // < 0 = unlimited
     osmscout::GeoCoord coord;
     osmscout::Distance distance;
+    osmscout::Duration prevTime{osmscout::Duration::zero()};
+    osmscout::Duration time{osmscout::Duration::zero()};
     std::string currentStreet;
 
   public:
@@ -2131,8 +2134,18 @@ private:
 
     void BeforeNode(const osmscout::RouteDescription::Node &node) override
     {
+      prevTime = time;
+      time = node.GetTime();
       distance = node.GetDistance();
       coord = node.GetLocation();
+    }
+
+    // Per-step time in seconds: time at this node minus time at the previous
+    // node (same segment semantics as the "[1.2 km, 5 min]" description suffix).
+    double SegmentTimeSeconds() const
+    {
+      auto dt = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
+      return static_cast<double>(dt.count());
     }
 
     bool Continue() const override
@@ -2149,6 +2162,7 @@ private:
       currentStreet = NameOrRef(nameDesc);
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "start";
       instr.streetName = currentStreet;
       instr.description = startDesc ? startDesc->GetDescription() : "Start";
@@ -2160,6 +2174,7 @@ private:
     {
       JavaRouteInstruction instr;
       instr.distanceTo = 0.0;
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "targetReached";
       instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
       instr.shortDescription = "Arrive";
@@ -2183,6 +2198,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -2195,6 +2211,7 @@ private:
     {
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
@@ -2210,6 +2227,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "roundaboutLeave";
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
@@ -2225,6 +2243,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "motorwayEnter";
       instr.streetName = motorway;
       instr.description = "Enter " + (motorway.empty() ? "motorway" : motorway);
@@ -2244,6 +2263,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = MoveToTurnType(move);
       instr.streetName = toMotorway;
       instr.description = "Keep " + MoveToDescription(move) + " onto " + (toMotorway.empty() ? "motorway" : toMotorway);
@@ -2263,6 +2283,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
+      instr.timeTo = SegmentTimeSeconds();
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -2714,6 +2735,7 @@ private:
     jobject instrObj = env->NewObject(
         static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
         instr.distanceTo,
+        instr.timeTo,
         turnTypeObj,
         streetNameJ,
         descriptionJ,
