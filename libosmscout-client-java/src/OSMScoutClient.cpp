@@ -65,7 +65,6 @@
 #include <osmscout/location/LocationDescriptionService.h>
 #include <osmscout/location/Location.h>
 
-#include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/AccessFeature.h>
 #include <osmscout/FeatureReader.h>
 
@@ -85,7 +84,6 @@
 #include <osmscout/feature/AdminLevelFeature.h>
 #include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
-#include <osmscout/feature/BrandFeature.h>
 #include <osmscout/feature/OperatorFeature.h>
 #include <osmscout/feature/RefFeature.h>
 
