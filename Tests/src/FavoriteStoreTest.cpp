@@ -274,6 +274,36 @@ TEST_CASE("A store that was shut down reports no store and stays usable")
   std::filesystem::remove(tmp, ec);
 }
 
+TEST_CASE("A fresh store reports no store, and a failed write keeps the supplied content")
+{
+  // A store that never had a file set reports the no-store state
+  osmscout::FavoriteStore fresh;
+
+  CHECK_FALSE(fresh.HasStore());
+  CHECK(fresh.GetGroups().empty());
+  CHECK_FALSE(fresh.AddGroup("late"));
+
+  // A replacement that cannot be written reports the failure and keeps the
+  // caller's snapshot in memory: the store has no earlier generation of its own
+  // to restore, so the content the caller handed over is what it holds
+  std::filesystem::path missingDir = std::filesystem::temp_directory_path() / "fav_store_missing_dir_test";
+  std::error_code ec;
+  std::filesystem::remove_all(missingDir, ec);
+
+  auto groups = MakeGroups(2, 2, "u");
+
+  osmscout::FavoriteStore store;
+  CHECK_FALSE(store.ReplaceAndSave((missingDir / "favs.json").string(), groups));
+  REQUIRE(store.HasStore());
+
+  auto held = store.GetGroups();
+  REQUIRE(held.size()==2);
+  CHECK(held[0].name=="u0");
+  CHECK(held[0].favorites.size()==2);
+
+  std::filesystem::remove_all(missingDir, ec);
+}
+
 TEST_CASE("A replacement can replace an existing store with different content")
 {
   std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_store_resize_test.json";
