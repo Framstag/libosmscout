@@ -12,6 +12,12 @@ The obvious repair - ignore segments shorter than a couple of metres - deletes w
 walker at 3 to 5 km/h covers 0.8 to 1.4 m per fix, less than the jitter of a bad fix, so a distance floor
 turns into a speed floor in disguise and reports the walker as standing.
 
+The same computation has a second defect, which the tests written for the first one uncovered: the fallback
+only ran when a single interval between two fixes spanned at least a second, but the fix it compares against
+is updated for every fix, so that interval is always the gap between two consecutive fixes. A receiver that
+reports faster than once per second - 4 Hz is common - therefore produced no speed at all, for a moving
+vehicle as well as for a standing one.
+
 ## What Changes
 
 - The agent decides whether the vehicle is standing from the **net displacement** between the oldest and the
@@ -26,10 +32,12 @@ turns into a speed floor in disguise and reports the walker as standing.
 - The movement floor and the known limit of the decision are stated in the code: fix jitter above roughly
   1.5 m amplitude cannot be separated from a very slow walker, and a receiver that reports its own speed is
   still preferred, so the decision is not consulted then.
-- The tests that state this contract are added, together with the pre-existing issue they uncovered while
-  being written: the fallback never runs at fix rates above 1 Hz, because its "segment of at least a second"
-  guard is compared against the previous fix, which is updated for every fix. That issue is recorded and
-  intentionally not fixed here.
+- The tests that state this contract are added. They uncovered a second defect in the same computation,
+  which is fixed here as well: the fallback never ran at fix rates above 1 Hz, because its "segment of at
+  least a second" guard was compared against the previous fix, which is updated for every fix. A receiver
+  reporting faster than once per second therefore produced no speed at all - for a moving vehicle as well as
+  for a standing one. The minimum now applies to the accumulated history instead of to a single interval, so
+  the derived speed does not depend on how often the receiver reports.
 
 ## Capabilities
 
@@ -47,11 +55,11 @@ Affected files and modules:
 
 - `libosmscout/include/osmscout/navigation/SpeedAgent.h` — the agent keeps a window of recent fixes next to
   the segment history; the segment history's comment no longer claims a five-second bound.
-- `libosmscout/src/osmscout/navigation/SpeedAgent.cpp` — the standing gate, the reset points for the new
-  window and the unchanged speed computation behind it.
+- `libosmscout/src/osmscout/navigation/SpeedAgent.cpp` — the standing gate, the accumulated-history minimum
+  that decides when a derived speed is published, the reset points for the new window and the speed
+  computation behind both.
 - `Tests/src/SpeedAgentTest.cpp` — new test file driving the agent directly, without a database or a device.
 - `Tests/CMakeLists.txt`, `Tests/meson.build` — register the new test in both build systems.
-- `TODO.md` — records the pre-existing fallback issue found while writing the tests.
 
 No change to the GPS input message, the published message types, the navigation engine's agent list or any
 build flag, so no client of the agent has to change. No file format, type-config or database impact, and no

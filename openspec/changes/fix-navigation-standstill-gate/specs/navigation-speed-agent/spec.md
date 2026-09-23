@@ -37,15 +37,34 @@ instead of as a value.
 ### Requirement: Without a reported speed the agent derives the speed from position differences
 
 When a fix carries no speed reported by the receiver, the agent SHALL derive the speed from the distance and
-the time between recent fixes, and SHALL publish it only when that derived value is meaningful for a road
-vehicle; a derived value that is implausible SHALL be published as unknown instead. A gap between fixes large
+the time between recent fixes. It SHALL accumulate the history of those fixes and SHALL publish a speed only
+once that accumulated history covers a minimum amount of time, so that a receiver which reports faster than
+that minimum still produces a speed: the decision SHALL be about the accumulated history and SHALL NOT
+require a single interval between two fixes to span the minimum. The derived speed SHALL NOT depend on how
+often the receiver reports, so the same movement SHALL read the same at any fix rate. A derived value that is
+implausible for a road vehicle SHALL be published as unknown instead of as a value. A gap between fixes large
 enough to mean a lost signal SHALL reset the history rather than produce a speed from the position jump.
 
 #### Scenario: A derived speed is published while the vehicle moves
 
 - **GIVEN** fixes without a reported speed that follow a real movement
-- **WHEN** the fixes cover enough time to derive a speed
+- **WHEN** the accumulated history covers the minimum
 - **THEN** the agent SHALL publish a speed close to the vehicle's real speed
+
+#### Scenario: The derived speed is published at any fix rate
+
+- **GIVEN** the same movement sampled at a slow rate, at the rate of a typical receiver and at a rate well
+  above it
+- **WHEN** the fixes are processed
+- **THEN** each stream SHALL publish a speed close to the same real speed
+- **AND** no stream SHALL stay silent for the whole movement, which is what happens when the minimum is
+  demanded from a single interval between two fixes
+
+#### Scenario: A standing vehicle whose fixes jitter is reported as standing at a high fix rate
+
+- **GIVEN** a standing vehicle whose fixes jitter and arrive well above once per second
+- **WHEN** the accumulated history covers the decision's window
+- **THEN** the agent SHALL report the vehicle as standing, exactly as it does at a lower fix rate
 
 #### Scenario: An implausible derived speed is unknown
 
