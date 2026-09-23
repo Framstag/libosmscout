@@ -30,6 +30,7 @@
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <osmscout/lib/CoreFeatures.h>
@@ -41,6 +42,7 @@
 #include <osmscoutclient/DBThread.h>
 #include <osmscoutclient/MapManager.h>
 #include <osmscoutclient/FavoriteLocationService.h>
+#include <osmscoutclient/FavoriteStore.h>
 #include <osmscoutclient/Settings.h>
 
 #include <osmscout/db/Database.h>
@@ -430,7 +432,7 @@ struct ClientData
   osmscout::MapManagerRef mapManager;                //!< Map manager instance
   osmscout::DBThreadRef dbThread;                    //!< Database thread instance
   osmscout::DescriptionService descriptionService;   //!< Object description service
-  osmscout::FavoriteLocationService *favService;     //!< Favorite location service (owned)
+  osmscout::FavoriteStore favoriteStore;             //!< Favorite store; owns the service and serialises wholesale replacement
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
@@ -998,7 +1000,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_close(JNIEnv *env, jobject s
   }
 
   // Release C++ resources (shared_ptr destructors run here)
-  delete data->favService;
+  // A favourite call may still be in flight on another thread. Shutdown()
+  // destroys the service under the store's own mutex, so it cannot be deleted
+  // mid-call, and the store reports "no store" afterwards instead of handing
+  // out a dangling instance.
+  data->favoriteStore.Shutdown();
   delete data;
   activeClient = nullptr;
 
@@ -6527,9 +6533,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadFavoriteLocations(JNIEnv
     return JNI_FALSE;
   }
 
-  // Create or recreate the service with the given path
-  delete data->favService;
-  data->favService = new osmscout::FavoriteLocationService(pathCStr);
+  // The store replaces its service under its own mutex, so the delete + new it
+  // performs cannot run while another thread is inside a favourite call and no
+  // read can observe the store while it is being replaced.
+  data->favoriteStore.ReplaceByPath(pathCStr);
 
   env->ReleaseStringUTFChars(filePath, pathCStr);
   return JNI_TRUE;
@@ -6539,7 +6546,11 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_saveFavoriteLocations(JNIEnv *env, jobject self, jstring filePath, jobjectArray groupsArray)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  if (!data->favoriteStore.HasStore()) {
     return JNI_FALSE;
   }
 
@@ -6578,25 +6589,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_saveFavoriteLocations(JNIEnv
 
   jsize len = groupsArray ? env->GetArrayLength(groupsArray) : 0;
 
-  // Rebuild service with new data
-  delete data->favService;
-  auto *service = new osmscout::FavoriteLocationService(pathCStr);
-
-  // Clear groups loaded from file — we'll rebuild from Java array
-  service->ClearAll();
+  // Assemble the caller's snapshot into plain C++ groups first, then hand it to
+  // the store in one call. The store applies it as a single atomic replacement
+  // (rebuild + save under one lock), so a concurrent read can never observe a
+  // half-rebuilt store, and a concurrent favourite call can never run against a
+  // service instance that is being swapped out.
+  std::vector<osmscout::FavLocationGroup> groups;
+  groups.reserve(static_cast<size_t>(len));
 
   for (jsize i = 0; i < len; i++) {
     jobject groupObj = env->GetObjectArrayElement(groupsArray, i);
     if (groupObj == nullptr) continue;
 
+    osmscout::FavLocationGroup group;
+
     jstring groupNameJStr = (jstring)env->GetObjectField(groupObj, groupNameField);
     const char *groupNameCStr = env->GetStringUTFChars(groupNameJStr, nullptr);
-    std::string groupName(groupNameCStr);
+    group.name = groupNameCStr;
     env->ReleaseStringUTFChars(groupNameJStr, groupNameCStr);
 
-    service->AddGroup(groupName);
-
-    // Copy group attributes from Java to C++
+    // Copy group attributes from Java to C++. The store applies the ones the
+    // service can represent (currently "color") when it rebuilds.
     jobject groupAttrsObj = env->GetObjectField(groupObj, groupAttrsField);
     if (groupAttrsObj != nullptr) {
       jobject entrySet = env->CallObjectMethod(groupAttrsObj, entrySetMethod);
@@ -6607,9 +6620,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_saveFavoriteLocations(JNIEnv
         jstring valStr = (jstring)env->CallObjectMethod(entry, getValueMethod);
         const char *keyCStr = env->GetStringUTFChars(keyStr, nullptr);
         const char *valCStr = env->GetStringUTFChars(valStr, nullptr);
-        if (strcmp(keyCStr, "color") == 0) {
-          service->SetGroupColor(groupName, valCStr);
-        }
+        group.attributes[keyCStr] = valCStr;
         env->ReleaseStringUTFChars(keyStr, keyCStr);
         env->ReleaseStringUTFChars(valStr, valCStr);
         env->DeleteLocalRef(entry);
@@ -6658,18 +6669,18 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_saveFavoriteLocations(JNIEnv
           env->DeleteLocalRef(favAttrsObj);
         }
 
-        service->AddFavorite(groupName, fav);
+        group.favorites.push_back(fav);
 
         env->DeleteLocalRef(favObj);
       }
       env->DeleteLocalRef(favList);
     }
 
+    groups.push_back(std::move(group));
     env->DeleteLocalRef(groupObj);
   }
 
-  bool ok = service->Save();
-  data->favService = service;
+  bool ok = data->favoriteStore.ReplaceAndSave(pathCStr, groups);
 
   env->ReleaseStringUTFChars(filePath, pathCStr);
   return ok ? JNI_TRUE : JNI_FALSE;
@@ -6679,11 +6690,11 @@ extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_getFavoriteGroups(JNIEnv *env, jobject self)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr || !data->favoriteStore.HasStore()) {
     return nullptr;
   }
 
-  auto groups = data->favService->GetGroups();
+  auto groups = data->favoriteStore.GetGroups();
 
   jclass groupCls = env->FindClass("com/framstag/libosmscout/client/FavoriteLocationGroup");
   jobjectArray result = env->NewObjectArray((jsize)groups.size(), groupCls, nullptr);
@@ -6701,12 +6712,12 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_addGroup(JNIEnv *env, jobject self, jstring name)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *nameCStr = env->GetStringUTFChars(name, nullptr);
-  bool ok = data->favService->AddGroup(nameCStr);
+  bool ok = data->favoriteStore.AddGroup(nameCStr);
   env->ReleaseStringUTFChars(name, nameCStr);
 
   return ok ? JNI_TRUE : JNI_FALSE;
@@ -6716,12 +6727,12 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_deleteGroup(JNIEnv *env, jobject self, jstring name)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *nameCStr = env->GetStringUTFChars(name, nullptr);
-  bool ok = data->favService->DeleteGroup(nameCStr);
+  bool ok = data->favoriteStore.DeleteGroup(nameCStr);
   env->ReleaseStringUTFChars(name, nameCStr);
 
   return ok ? JNI_TRUE : JNI_FALSE;
@@ -6732,13 +6743,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renameGroup(JNIEnv *env, job
                                                                 jstring oldName, jstring newName)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *oldCStr = env->GetStringUTFChars(oldName, nullptr);
   const char *newCStr = env->GetStringUTFChars(newName, nullptr);
-  bool ok = data->favService->RenameGroup(oldCStr, newCStr);
+  bool ok = data->favoriteStore.RenameGroup(oldCStr, newCStr);
   env->ReleaseStringUTFChars(newName, newCStr);
   env->ReleaseStringUTFChars(oldName, oldCStr);
 
@@ -6751,7 +6762,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_addFavorite(JNIEnv *env, job
                                                                  jdouble lat, jdouble lon)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
@@ -6763,7 +6774,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_addFavorite(JNIEnv *env, job
   fav.lat = lat;
   fav.lon = lon;
 
-  bool ok = data->favService->AddFavorite(groupCStr, fav);
+  bool ok = data->favoriteStore.AddFavorite(groupCStr, fav);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(favName, favCStr);
@@ -6776,14 +6787,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_deleteFavorite(JNIEnv *env, 
                                                                     jstring groupName, jstring favName)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
   const char *favCStr = env->GetStringUTFChars(favName, nullptr);
 
-  bool ok = data->favService->DeleteFavorite(groupCStr, favCStr);
+  bool ok = data->favoriteStore.DeleteFavorite(groupCStr, favCStr);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(favName, favCStr);
@@ -6797,7 +6808,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renameFavorite(JNIEnv *env, 
                                                                     jstring newName)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
@@ -6805,7 +6816,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renameFavorite(JNIEnv *env, 
   const char *oldCStr = env->GetStringUTFChars(oldName, nullptr);
   const char *newCStr = env->GetStringUTFChars(newName, nullptr);
 
-  bool ok = data->favService->RenameFavorite(groupCStr, oldCStr, newCStr);
+  bool ok = data->favoriteStore.RenameFavorite(groupCStr, oldCStr, newCStr);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(oldName, oldCStr);
@@ -6820,7 +6831,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavorite(JNIEnv *env, jo
                                                                  jint newIndex)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
@@ -6831,7 +6842,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavorite(JNIEnv *env, jo
   // group are clamped by the service itself.
   size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
 
-  bool ok = data->favService->MoveFavorite(groupCStr, favCStr, targetIndex);
+  bool ok = data->favoriteStore.MoveFavorite(groupCStr, favCStr, targetIndex);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(favName, favCStr);
@@ -6845,14 +6856,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setStarred(JNIEnv *env, jobj
                                                                 jboolean starred)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
   const char *favCStr = env->GetStringUTFChars(favName, nullptr);
 
-  bool ok = data->favService->SetStarred(groupCStr, favCStr, starred == JNI_TRUE);
+  bool ok = data->favoriteStore.SetStarred(groupCStr, favCStr, starred == JNI_TRUE);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(favName, favCStr);
@@ -6865,14 +6876,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_isStarred(JNIEnv *env, jobje
                                                                jstring groupName, jstring favName)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
   const char *favCStr = env->GetStringUTFChars(favName, nullptr);
 
-  bool starred = data->favService->IsStarred(groupCStr, favCStr);
+  bool starred = data->favoriteStore.IsStarred(groupCStr, favCStr);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(favName, favCStr);
@@ -6885,14 +6896,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setGroupColor(JNIEnv *env, j
                                                                     jstring groupName, jstring color)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr) {
     return JNI_FALSE;
   }
 
   const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
   const char *colorCStr = env->GetStringUTFChars(color, nullptr);
 
-  bool ok = data->favService->SetGroupColor(groupCStr, colorCStr);
+  bool ok = data->favoriteStore.SetGroupColor(groupCStr, colorCStr);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
   env->ReleaseStringUTFChars(color, colorCStr);
@@ -6905,13 +6916,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getGroupColor(JNIEnv *env, j
                                                                    jstring groupName)
 {
   ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->favService == nullptr) {
+  if (data == nullptr || !data->favoriteStore.HasStore()) {
     return env->NewStringUTF("");
   }
 
   const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
 
-  std::string color = data->favService->GetGroupColor(groupCStr);
+  std::string color = data->favoriteStore.GetGroupColor(groupCStr);
 
   env->ReleaseStringUTFChars(groupName, groupCStr);
 
