@@ -137,6 +137,7 @@ namespace osmscout {
         std::vector<CTRunRef> run;
         CGFloat lineWidth;
         CGFloat lineHeight;
+        CGFloat firstBaseline{0}; //!< Distance from the top of the label to the baseline of its first line
     };
     using IOSGlyph = Glyph<IOSGlyphInRun>;
     using IOSLabel = Label<IOSGlyphInRun, IOSRunInLine>;

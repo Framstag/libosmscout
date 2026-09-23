@@ -405,6 +405,15 @@ namespace osmscout {
             }
             CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
             CGPathRelease(path);
+            CGFloat lineHeight = GetFontHeight(projection, parameter, fontSize);
+            // The image bounds of a run are relative to the origin of its own line, so the lines of
+            // a wrapped label used to overlap in the measure: a label of several lines was measured
+            // with the height of one, and drawn below its measured rectangle. Place each line at
+            // the baseline LayoutDrawLabel gives it, lineHeight below the previous one, and measure
+            // the lines where they are drawn. A single line keeps the measure it always had.
+            CGFloat firstBaseline = 0;
+            CGFloat bottom = 0;
+            std::vector<CGRect> lineBounds;
             CFArrayRef lines =  CTFrameGetLines(frame);
             for (int lineNumber = 0; lineNumber< CFArrayGetCount(lines); lineNumber++){
                 CTLineRef line = (CTLineRef)CFArrayGetValueAtIndex(lines, lineNumber);
@@ -413,18 +422,26 @@ namespace osmscout {
                 if(CFArrayGetCount(runArray) > 0){
                     CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, 0);
                     result->label.run.push_back(run);
-                    rect = CGRectUnion(rect, CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)));
+                    // In the text space of the line: y goes up, the baseline is at 0
+                    CGRect bounds = CGRectUnion(CGRectZero, CTRunGetImageBounds(run, cg, CFRangeMake(0, 0)));
+                    rect = CGRectUnion(rect, bounds);
+                    lineBounds.push_back(bounds);
+                    firstBaseline = std::max(firstBaseline, CGRectGetMaxY(bounds) - (lineBounds.size()-1) * lineHeight);
                 }
             }
+            for (size_t lineNumber = 0; lineNumber < lineBounds.size(); lineNumber++) {
+                bottom = std::max(bottom, firstBaseline + lineNumber * lineHeight - CGRectGetMinY(lineBounds[lineNumber]));
+            }
             result->label.lineWidth = rect.size.width;
-            result->label.lineHeight = GetFontHeight(projection, parameter, fontSize);
+            result->label.lineHeight = lineHeight;
+            result->label.firstBaseline = firstBaseline;
 
-            log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << rect.size.height;
+            log.Debug() << "Layout '"<<text<<"' width=" << rect.size.width <<" height=" << bottom;
 
             result->text = text;
             result->fontSize = fontSize;
             result->width = rect.size.width;
-            result->height = rect.size.height;
+            result->height = bottom;
         } else {
             log.Warn() << "CTFramesetterCreateFrame returned NULL";
         }
@@ -459,7 +476,7 @@ namespace osmscout {
             for(int index = 0; index < glyphCount; index++){
                 glyphPositions[index].x += coords.x;
                 lineWidth += glyphAdvances[index].width;
-                glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - (lineNumber+1) * lineHeight;
+                glyphPositions[index].y += CGBitmapContextGetHeight(cg) - coords.y - layout.firstBaseline - lineNumber * lineHeight;
             }
             CGFloat centerDelta = (width - lineWidth)/2;
             log.Debug() << "LayoutDrawLabel centerDelta=" << centerDelta;
@@ -529,7 +546,7 @@ namespace osmscout {
                                             labelRect.height + 10 - 4));
             CGContextDrawPath(cg, kCGPathStroke);
 
-            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y - layout.lineHeight/3), style->GetTextColor(), false);
+            LayoutDrawLabel(layout, CGPointMake(labelRect.x, labelRect.y), style->GetTextColor(), false);
 
             CGContextRestoreGState(cg);
 
