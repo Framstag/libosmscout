@@ -403,6 +403,45 @@ TEST_CASE("Move favorite within a group")
     std::filesystem::remove(tmp, ec);
 }
 
+TEST_CASE("Move favorite keeps the favorite's data")
+{
+    std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_move_keep_data_test.json";
+    std::error_code ec;
+    std::filesystem::remove(tmp, ec);
+
+    osmscout::FavoriteLocationService service(tmp.string());
+    service.AddGroup("Work");
+
+    osmscout::FavLocation fav;
+    fav.name = "A";
+    fav.lat = 51.5;
+    fav.lon = 7.25;
+    fav.attributes["custom"] = "value";
+
+    REQUIRE(service.AddFavorite("Work", fav));
+    AddNamedFavorite(service, "Work", "B");
+    REQUIRE(service.SetStarred("Work", "A", true));
+
+    REQUIRE(service.MoveFavorite("Work", "A", 1));
+    REQUIRE(FavoriteNames(service, "Work") == "B,A");
+
+    // The moved favorite keeps name, coordinates and attributes
+    auto favs = service.GetFavorites("Work");
+    REQUIRE(favs.size() == 2);
+    REQUIRE(favs[1].name == "A");
+    REQUIRE(favs[1].lat == 51.5);
+    REQUIRE(favs[1].lon == 7.25);
+    REQUIRE(favs[1].attributes["custom"] == "value");
+    REQUIRE(service.IsStarred("Work", "A"));
+
+    // The favorite that was not moved is intact as well
+    REQUIRE(favs[0].name == "B");
+    REQUIRE(favs[0].lat == 1.0);
+    REQUIRE(favs[0].lon == 2.0);
+
+    std::filesystem::remove(tmp, ec);
+}
+
 TEST_CASE("Favorite order is per group and stable across other operations")
 {
     std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_locations_order_test.json";

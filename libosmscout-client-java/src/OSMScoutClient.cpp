@@ -27,6 +27,7 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -7761,6 +7762,11 @@ namespace {
     double      distance{0.0};
   };
 
+  // Content-based identity of a POI: its object type and its position rounded
+  // to about one meter. Used to collapse the copies of one object that
+  // overlapping databases hold.
+  constexpr double poiIdentityFactor = 1e5;
+
   // Fill a PoiEntry from a node/way/area object. The label falls back from
   // the name feature to the operator and ref features (same as POILookupModule).
   // operatorName and brand are filled independently so the UI can show them
@@ -7801,6 +7807,75 @@ namespace {
     entry.lon = coord.GetLon();
     entry.distance = center.GetDistance(coord).AsMeter();
     return true;
+  }
+
+  // The databases whose area contains the search center first: the map the user
+  // is looking at dominates the merged result. Discovery order is kept inside
+  // each group, so the result does not depend on the order in which the
+  // databases were found on disk. Basemap databases are left out.
+  std::vector<osmscout::DBInstanceRef> OrderDatabasesBySearchCenter(
+      const std::list<osmscout::DBInstanceRef>& databases,
+      const osmscout::GeoCoord& center)
+  {
+    std::vector<osmscout::DBInstanceRef> ordered;
+    ordered.reserve(databases.size());
+    for (const auto& db : databases) {
+      // The basemap is a low-zoom background map; it is not searched.
+      if (IsBasemapDatabase(db)) {
+        continue;
+      }
+      if (db->GetDBGeoBox().Includes(center)) {
+        ordered.push_back(db);
+      }
+    }
+    for (const auto& db : databases) {
+      if (IsBasemapDatabase(db)) {
+        continue;
+      }
+      if (!db->GetDBGeoBox().Includes(center)) {
+        ordered.push_back(db);
+      }
+    }
+    return ordered;
+  }
+
+  // Overlapping databases hold the same objects: collapse the copies by object
+  // type and position rounded to about one meter, keeping the first occurrence
+  // (the copy of the database that contains the search center, thanks to the
+  // ordering above) and order the result nearest first. The remaining sort
+  // fields make the order total, so equal entries compare equal and the result
+  // does not depend on the order in which the databases were loaded.
+  void CollapseAndSortPoiEntries(std::vector<PoiEntry>& entries)
+  {
+    std::set<std::tuple<std::string, long, long>> seen;
+    std::vector<PoiEntry>                         deduplicated;
+    deduplicated.reserve(entries.size());
+    for (PoiEntry& entry : entries) {
+      auto key = std::make_tuple(entry.objectType,
+                                 static_cast<long>(std::llround(entry.lat * poiIdentityFactor)),
+                                 static_cast<long>(std::llround(entry.lon * poiIdentityFactor)));
+      if (seen.insert(std::move(key)).second) {
+        deduplicated.push_back(std::move(entry));
+      }
+    }
+    entries.swap(deduplicated);
+
+    std::sort(entries.begin(), entries.end(),
+              [](const PoiEntry& a, const PoiEntry& b) {
+                if (a.distance != b.distance) {
+                  return a.distance < b.distance;
+                }
+                if (a.label != b.label) {
+                  return a.label < b.label;
+                }
+                if (a.objectType != b.objectType) {
+                  return a.objectType < b.objectType;
+                }
+                if (a.lat != b.lat) {
+                  return a.lat < b.lat;
+                }
+                return a.lon < b.lon;
+              });
   }
 }
 
@@ -7868,30 +7943,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
         breaker = g_currentBreaker;
       }
 
-      // Databases are loaded in filesystem scan order — arbitrary and
-      // non-deterministic. Search the databases whose bounding box contains
-      // the search center first, so the map the user is looking at dominates
-      // the results; relative order inside each group is preserved (stable).
-      std::vector<osmscout::DBInstanceRef> orderedDatabases;
-      orderedDatabases.reserve(databases.size());
-      for (const auto& db : databases) {
-        // The basemap is a low-zoom background map; it is not searched.
-        if (IsBasemapDatabase(db)) {
-          continue;
-        }
-        if (db->GetDBGeoBox().Includes(center)) {
-          orderedDatabases.push_back(db);
-        }
-      }
-      for (const auto& db : databases) {
-        // The basemap is a low-zoom background map; it is not searched.
-        if (IsBasemapDatabase(db)) {
-          continue;
-        }
-        if (!db->GetDBGeoBox().Includes(center)) {
-          orderedDatabases.push_back(db);
-        }
-      }
+      // Search every non-basemap database, the one containing the search center
+      // first.
+      std::vector<osmscout::DBInstanceRef> orderedDatabases =
+        OrderDatabasesBySearchCenter(databases, center);
 
       for (const auto& db : orderedDatabases) {
         if (breaker && breaker->IsAborted()) {
@@ -7968,36 +8023,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
           }
         }
 
+        // Every database contributes: a database that alone reached the limit
+        // must not hide the hits of the remaining ones. The limit is applied
+        // to the merged list below.
       }
     });
 
-  // Overlapping databases (e.g. a state extract and a regional extract) can
-  // contain the same OSM object under identical coordinates. Round the
-  // coordinates to 1e-5 degrees (~1 m) and keep the first occurrence — thanks
-  // to the bbox pre-sort above, that is the copy from the database containing
-  // the search center.
-  {
-    std::set<std::pair<long, long>> seenKeys;
-    std::vector<PoiEntry> deduped;
-    deduped.reserve(entries.size());
-    for (PoiEntry& entry : entries) {
-      const long latKey = static_cast<long>(std::llround(entry.lat * 1e5));
-      const long lonKey = static_cast<long>(std::llround(entry.lon * 1e5));
-      if (seenKeys.insert(std::make_pair(latKey, lonKey)).second) {
-        deduped.push_back(std::move(entry));
-      }
-    }
-    entries.swap(deduped);
-  }
-
-  // Nearest first; label ascending as a deterministic tie-break.
-  std::sort(entries.begin(), entries.end(),
-            [](const PoiEntry& a, const PoiEntry& b) {
-              if (a.distance != b.distance) {
-                return a.distance < b.distance;
-              }
-              return a.label < b.label;
-            });
+  CollapseAndSortPoiEntries(entries);
 
   if (entries.size() > static_cast<size_t>(limit)) {
     entries.resize(static_cast<size_t>(limit));
