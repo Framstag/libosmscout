@@ -23,6 +23,7 @@
 #include <osmscoutclient/ClientImportExport.h>
 #include <osmscoutclient/FavoriteLocationService.h>
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -65,6 +66,11 @@ public:
    * Replace the store with a new service backed by the given file.
    * The file is created if it does not exist and loaded if it does.
    *
+   * The replaced content is discarded, even when the file cannot be read: the
+   * service constructor does not report a load failure, so this operation
+   * reports "a store is installed", not "the file was read". Use HasStore()
+   * followed by a read operation to see what the store holds.
+   *
    * @param filePath  path to the JSON file for persistence
    * @return true
    */
@@ -77,6 +83,10 @@ public:
    * observe the store while it is being rebuilt. Group attributes are applied
    * through the service (currently the "color" attribute); favorite attributes
    * are stored with the favorite.
+   *
+   * When the content cannot be written, the operation reports false and the
+   * store keeps the supplied content: the previous content is not restored, so
+   * a caller that wants to keep it has to supply it again.
    *
    * @param filePath  path to the JSON file for persistence
    * @param groups    the complete new content of the store
@@ -136,7 +146,12 @@ public:
 
 private:
   mutable std::mutex mutex_;
-  FavoriteLocationService *service_{nullptr};
+
+  /**
+   * The owned service instance. Every access happens under mutex_, which is why
+   * the lock order is always store-then-service and can never be the reverse.
+   */
+  std::unique_ptr<FavoriteLocationService> service_;
 };
 
 }
