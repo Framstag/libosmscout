@@ -43,6 +43,7 @@
 #include <osmscoutclient/MapManager.h>
 #include <osmscoutclient/FavoriteLocationService.h>
 #include <osmscoutclient/FavoriteStore.h>
+#include <osmscoutclient/DatabasePathRegistry.h>
 #include <osmscoutclient/Settings.h>
 
 #include <osmscout/db/Database.h>
@@ -436,7 +437,7 @@ struct ClientData
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
-  std::vector<std::filesystem::path> knownPaths;     //!< Known map paths
+  osmscout::DatabasePathRegistry knownPaths;          //!< Registered map database paths, guarded by the registry's own mutex
 
   // Routing state
   std::shared_ptr<std::thread> routingThread;        //!< Background routing thread
@@ -602,7 +603,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   // Paths explicitly opened via openDatabase() are tracked separately.
   // Lookup directories (including the default download maps parent) are
   // scanned recursively by MapManager; don't treat the parent as a database.
-  clientData->knownPaths = {};
+  clientData->knownPaths.Clear();
 
   // Initialise DBThread (triggers initial database scan)
   clientData->dbThread->Initialize();
@@ -659,15 +660,104 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
   // Add to known paths if not already present. All opened maps stay loaded:
   // libosmscout renders whichever database(s) cover the current viewport, so
   // multiple maps can be used simultaneously without switching (fix-download).
-  auto it = std::find(data->knownPaths.begin(), data->knownPaths.end(), fsPath);
-  if (it == data->knownPaths.end()) {
-    data->knownPaths.push_back(fsPath);
-  }
+  // The registry serialises concurrent openers: the path list is no longer
+  // mutated while another thread (or the database thread) reads it.
+  data->knownPaths.Register(fsPath);
 
-  // Trigger DBThread to process the updated path list
-  data->dbThread->OnDatabaseListChanged(data->knownPaths);
+  // Trigger DBThread to process the updated path list. The snapshot is a value
+  // copy taken under the registry's own lock, so the database thread never
+  // copies a list another opener is reallocating, and the registry lock is
+  // released before this call - it has no lock-order relation to the database
+  // latch.
+  data->dbThread->OnDatabaseListChanged(data->knownPaths.Snapshot());
 
   return JNI_TRUE;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::openDatabases(String[] paths)
+//
+// Registers a whole list of map database directories as ONE operation: one
+// snapshot, one OnDatabaseListChanged. Every single openDatabase() call closes
+// and reopens every open database on the database thread, so registering K
+// directories one by one costs K full set changes (and K render-lock waits)
+// for one logical set. A caller that has a list must hand it over here.
+//
+// Returns an index-aligned boolean[]: true when that input directory is part of
+// the registered set afterwards. An element that is null or cannot be read as a
+// string is reported false and is not registered; a null array or an empty
+// array returns an empty array. A client that is not usable (no database
+// thread) reports every requested directory as false instead of faulting.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jbooleanArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabases(JNIEnv *env, jobject self, jobjectArray pathsJStr)
+{
+  if (pathsJStr == nullptr) {
+    return env->NewBooleanArray(0);
+  }
+
+  const jsize count = env->GetArrayLength(pathsJStr);
+
+  std::vector<std::filesystem::path> paths;
+  std::vector<jsize> inputIndex;
+
+  paths.reserve(static_cast<size_t>(count));
+  inputIndex.reserve(static_cast<size_t>(count));
+
+  for (jsize i=0; i<count; i++) {
+    auto pathJStr = static_cast<jstring>(env->GetObjectArrayElement(pathsJStr, i));
+
+    if (pathJStr == nullptr) {
+      continue;
+    }
+
+    const char *pathCStr = env->GetStringUTFChars(pathJStr, nullptr);
+
+    if (pathCStr != nullptr) {
+      paths.emplace_back(pathCStr);
+      inputIndex.push_back(i);
+
+      env->ReleaseStringUTFChars(pathJStr, pathCStr);
+    }
+
+    env->DeleteLocalRef(pathJStr);
+  }
+
+  // Not registered unless the registration below reports it.
+  std::vector<jboolean> registered(static_cast<size_t>(count), JNI_FALSE);
+
+  ClientData *data = getClientData(env, self);
+
+  if (data != nullptr && data->dbThread != nullptr && !paths.empty()) {
+    auto registration = data->knownPaths.RegisterAll(paths);
+
+    for (size_t k=0; k<paths.size(); k++) {
+      registered[static_cast<size_t>(inputIndex[k])] =
+        registration.registered[k] ? JNI_TRUE : JNI_FALSE;
+    }
+
+    osmscout::log.Debug() << "[JNI] openDatabases: registered " << registration.added
+                          << " new of " << paths.size()
+                          << " requested, set size " << registration.paths.size();
+
+    // One set change for the whole list.
+    data->dbThread->OnDatabaseListChanged(registration.paths);
+  }
+  else if (data == nullptr || data->dbThread == nullptr) {
+    osmscout::log.Warn() << "[JNI] openDatabases: client is not usable, "
+                         << paths.size() << " directories not registered";
+  }
+
+  jbooleanArray result = env->NewBooleanArray(count);
+
+  if (result == nullptr) {
+    return nullptr;
+  }
+
+  env->SetBooleanArrayRegion(result, 0, count, registered.data());
+
+  return result;
 }
 
 // --------------------------------------------------------------------------

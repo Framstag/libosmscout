@@ -4,6 +4,9 @@ osmscout_test_project(NAME FavoriteLocationServiceTest SOURCES src/FavoriteLocat
 #---- FavoriteStore
 osmscout_test_project(NAME FavoriteStoreTest SOURCES src/FavoriteStoreTest.cpp TARGET OSMScout::Client)
 
+#---- DatabasePathRegistry
+osmscout_test_project(NAME DatabaseOpenTest SOURCES src/DatabaseOpenTest.cpp TARGET OSMScout::Client)
+
 #---- Style load resilience
 osmscout_test_project(NAME StyleLoadResilienceTest SOURCES src/StyleLoadResilienceTest.cpp TARGET OSMScout::Client)
 set_tests_properties(StyleLoadResilienceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
