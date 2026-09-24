@@ -310,6 +310,46 @@ bool FavoriteLocationService::RenameFavorite(const std::string &groupName,
   return true;
 }
 
+bool FavoriteLocationService::MoveFavorite(const std::string &groupName,
+                                           const std::string &favName,
+                                           size_t newIndex)
+{
+  std::unique_lock lock(mutex_);
+
+  auto git = groups_.find(groupName);
+  if (git == groups_.end()) {
+    return false;
+  }
+
+  auto &favs = git->second.favorites;
+
+  auto favIt = favs.end();
+  for (auto it = favs.begin(); it != favs.end(); ++it) {
+    if (it->name == favName) {
+      favIt = it;
+      break;
+    }
+  }
+
+  if (favIt == favs.end()) {
+    return false;
+  }
+
+  // Take the favorite out, then insert it at the (clamped) target index.
+  // Moving a favorite to the position it already occupies is a no-op that
+  // still reports success.
+  FavLocation fav = std::move(*favIt);
+  favs.erase(favIt);
+
+  if (newIndex > favs.size()) {
+    newIndex = favs.size();
+  }
+
+  favs.insert(favs.begin() + static_cast<std::vector<FavLocation>::difference_type>(newIndex),
+              std::move(fav));
+  return true;
+}
+
 bool FavoriteLocationService::SetStarred(const std::string &groupName,
                                           const std::string &favName,
                                           bool starred)

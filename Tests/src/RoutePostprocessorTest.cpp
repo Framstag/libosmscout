@@ -1084,6 +1084,101 @@ TEST_CASE("Describe complex city junction: Průmyslová, Černokostecká")
   }
 }
 
+TEST_CASE("Propagate turn lane suggestion backward across preceding junctions")
+{
+  using namespace osmscout;
+  // Regression test for route-lanes/senohrabska: the route travels straight through
+  // several junctions and finally turns left. None of the preceding junctions offers
+  // an exit to the left, so the left-turn lane suggestion has to be propagated back to
+  // the early approach nodes (not only to the node right before the turn).
+  //
+  // Layout (north is up, east is right, longitude increases eastwards). The route
+  // starts at A in the east and travels west to C, then turns left (heading south)
+  // towards D. Every side road branches off to the right of the route (there is no
+  // exit to the left), so the left-turn lane suggestion must reach back to A.
+  //
+  //                                 Bnorth   (side exit, north = right of the westbound route)
+  //                                   |
+  //         Cwest ------- C --------- B --------- A
+  //                       |
+  //                       D                  (left-turn target, south of C)
+  MockDatabaseBuilder databaseBuilder;
+  const GeoCoord A(50.00000, 14.01000);
+  const GeoCoord B(50.00000, 14.00800);
+  const GeoCoord C(50.00000, 14.00600);
+  const GeoCoord D(49.99400, 14.00600);
+  const GeoCoord Bnorth(50.00600, 14.00800);
+  const GeoCoord Cwest(50.00000, 14.00400);
+  // Approach segment A->B with three lanes, the rightmost dedicated to the side exit at B.
+  ObjectFileRef wayABRef = databaseBuilder.AddHighway(
+    {A, B},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through, LaneTurn::Right}, {});
+      access->SetAccess(AccessFeatureValue::onewayForward | AccessFeatureValue::carForward);
+      name->SetName("Main");
+    });
+  // Approach segment B->C, lane count drops to two (this triggers a separate junction
+  // evaluation at B that would otherwise cut off backward propagation).
+  ObjectFileRef wayBCRef = databaseBuilder.AddHighway(
+    {B, C},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::Left, LaneTurn::Through}, {});
+      access->SetAccess(AccessFeatureValue::onewayForward | AccessFeatureValue::carForward);
+      name->SetName("Main");
+    });
+  // Left-turn target C->D.
+  ObjectFileRef wayCDRef = databaseBuilder.AddHighway(
+    {C, D},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      lanes->SetTurnLanes({LaneTurn::None, LaneTurn::None}, {});
+      access->SetAccess(AccessFeatureValue::onewayForward | AccessFeatureValue::carForward);
+      name->SetName("Left");
+    });
+  // Side exit to the right (north) at B.
+  ObjectFileRef sideBRef = databaseBuilder.AddHighway(
+    {B, Bnorth},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(1, 0);
+      access->SetAccess(AccessFeatureValue::carForward | AccessFeatureValue::carBackward);
+      name->SetName("Side");
+    });
+  // Straight continuation (west) at C, which the route does NOT take.
+  ObjectFileRef straightCRef = databaseBuilder.AddHighway(
+    {C, Cwest},
+    [](AccessFeatureValue *access, LanesFeatureValue *lanes, NameFeatureValue *name) {
+      lanes->SetLanes(2, 0);
+      access->SetAccess(AccessFeatureValue::carForward | AccessFeatureValue::carBackward);
+      name->SetName("Straight");
+    });
+  MockContext context(databaseBuilder.Build());
+  {
+    RouteDescription description;
+    description.AddNode(0, 0, {wayABRef}, wayABRef, 1);
+    description.AddNode(0, 0, {wayABRef, wayBCRef, sideBRef}, wayBCRef, 1);
+    description.AddNode(0, 0, {wayBCRef, wayCDRef, straightCRef}, wayCDRef, 1);
+    description.AddNode(0, 1, {wayCDRef}, ObjectFileRef(), 0);
+    Postprocess(description, context);
+    auto nodeIt = description.Nodes().begin();
+    // Node at A (the earliest approach node) should already suggest the left lane,
+    // propagated backward from the left-turn junction at C.
+    auto suggestedA = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
+    REQUIRE(suggestedA);
+    REQUIRE(suggestedA->GetTurn() == LaneTurn::Left);
+    REQUIRE(suggestedA->GetFrom() == 0);
+    REQUIRE(suggestedA->GetTo() == 0);
+    // Node at B should also suggest the left lane.
+    ++nodeIt;
+    auto suggestedB = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
+    REQUIRE(suggestedB);
+    REQUIRE(suggestedB->GetTurn() == LaneTurn::Left);
+    REQUIRE(suggestedB->GetFrom() == 0);
+    REQUIRE(suggestedB->GetTo() == 0);
+  }
+}
+
 TEST_CASE("Describe complex city junction: Na Strži, Na Pankráci")
 {
   using namespace osmscout;
@@ -1345,4 +1440,108 @@ TEST_CASE("Describe A3/A4 highway near Zurich")
     REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
   }
 
+}
+
+TEST_CASE("Suggest through lanes at a virtual junction with a slight_right-only lane")
+{
+  using namespace osmscout;
+
+  // Regression test for a lane-count-unchanged "virtual junction" (a turn:lanes tag
+  // transition with no real fork road) on the D1 motorway near Olomouc:
+  // https://www.openstreetmap.org/#map=18/49.33121/17.46397
+  //
+  // Incoming lanes: [Through, Through;SlightRight, SlightRight]
+  // Outgoing lanes: [Through, Through, SlightRight]
+  //
+  // The route continues straight ahead (through), so the suggestion must exclude the
+  // rightmost, SlightRight-only lane and report "Through" rather than "SlightRight".
+  MockDatabaseBuilder databaseBuilder;
+
+  ObjectFileRef wayInRef=databaseBuilder.AddMotorway(
+    {GeoCoord(49.331208, 17.463969), GeoCoord(49.331742, 17.465326)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::Through_SlightRight, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("D1");
+    });
+
+  ObjectFileRef wayOutRef=databaseBuilder.AddMotorway(
+    {GeoCoord(49.331742, 17.465326), GeoCoord(49.332014, 17.466021)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::Through, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("D1");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  RouteDescription description;
+  description.AddNode(0, 0, {wayInRef}, wayInRef, 1);
+  description.AddNode(0, 0, {wayInRef, wayOutRef}, wayOutRef, 1);
+  description.AddNode(0, 1, {wayOutRef}, ObjectFileRef(), 0);
+
+  Postprocess(description, context);
+
+  auto nodeIt = description.Nodes().begin();
+  auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
+  REQUIRE(suggestedLanes);
+  // must not include the SlightRight-only lane (index 2)
+  REQUIRE(suggestedLanes->GetFrom() == 0);
+  REQUIRE(suggestedLanes->GetTo() == 1);
+  REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
+}
+
+TEST_CASE("Suggest through lanes at a virtual junction where a new lane appears")
+{
+  using namespace osmscout;
+
+  // Regression test for a lane-count-INCREASE "virtual junction" (a new lane starts,
+  // but there is no real fork road there yet) on the D1 motorway near Olomouc:
+  // https://www.openstreetmap.org/#map=18/49.33174/17.46533
+  //
+  // Incoming lanes: [Through, Through, SlightRight]
+  // Outgoing lanes: [Through, Through, SlightRight, SlightRight]
+  //
+  // The route continues straight ahead (through). Since there is no real junction exit
+  // here, the incoming lane count changing (2 -> 4 via this and a following segment)
+  // must not by itself cause the suggestion to collapse onto the trailing,
+  // SlightRight-only lane.
+  MockDatabaseBuilder databaseBuilder;
+
+  ObjectFileRef wayInRef=databaseBuilder.AddMotorway(
+    {GeoCoord(49.331742, 17.465326), GeoCoord(49.332014, 17.466021)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(3, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::Through, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("D1");
+    });
+
+  ObjectFileRef wayOutRef=databaseBuilder.AddMotorway(
+    {GeoCoord(49.332014, 17.466021), GeoCoord(49.333090, 17.468767)},
+    [](AccessFeatureValue* access, LanesFeatureValue* lanes, NameFeatureValue* name){
+      lanes->SetLanes(4, 0);
+      lanes->SetTurnLanes({LaneTurn::Through, LaneTurn::Through, LaneTurn::SlightRight, LaneTurn::SlightRight}, {});
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("D1");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  RouteDescription description;
+  description.AddNode(0, 0, {wayInRef}, wayInRef, 1);
+  description.AddNode(0, 0, {wayInRef, wayOutRef}, wayOutRef, 1);
+  description.AddNode(0, 1, {wayOutRef}, ObjectFileRef(), 0);
+
+  Postprocess(description, context);
+
+  auto nodeIt = description.Nodes().begin();
+  auto suggestedLanes = nodeIt->GetDescription<RouteDescription::SuggestedLaneDescription>();
+  REQUIRE(suggestedLanes);
+  // must not collapse onto the trailing SlightRight-only lane (index 2)
+  REQUIRE(suggestedLanes->GetFrom() == 0);
+  REQUIRE(suggestedLanes->GetTo() == 1);
+  REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 }

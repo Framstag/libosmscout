@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y \
           git make libtool pkg-config \
-          libxml2-dev libprotobuf-dev protobuf-compiler \
+          libxml2-dev libprotobuf-dev protobuf-compiler nlohmann-json3-dev \
           libagg-dev \
           libfreetype6-dev \
           libcairo2-dev \

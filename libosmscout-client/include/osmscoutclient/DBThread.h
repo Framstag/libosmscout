@@ -156,6 +156,18 @@ private:
   StyleConfigRef                     emptyStyleConfig;
 
   std::string                        stylesheetFilename;
+  /**
+   * File name of the stylesheet that is actually installed (empty until a
+   * stylesheet was loaded successfully). Differs from \ref stylesheetFilename
+   * while a failed load is being reported: the requested style is not the
+   * active one.
+   */
+  std::string                        activeStyleSheetFilename;
+  /**
+   * Result of the last stylesheet load attempt (initial load, style switch,
+   * style flag change, basemap style, stylesheet refresh).
+   */
+  bool                               lastStyleLoadSucceeded;
   std::string                        iconDirectory;
   std::unordered_map<std::string,bool>
                                      stylesheetFlags;
@@ -247,6 +259,28 @@ public:
   std::string GetStylesheetFilename() const
   {
     return stylesheetFilename;
+  }
+
+  /**
+   * File name of the stylesheet that is actually active (the last one that
+   * loaded successfully), empty when none ever loaded.
+   */
+  std::string GetActiveStyleSheetFilename() const
+  {
+    ReadLock locker(latch);
+    return activeStyleSheetFilename;
+  }
+
+  /**
+   * Whether the last stylesheet load attempt (initial load, style switch, style
+   * flag change, basemap style, stylesheet refresh) succeeded. A failed load
+   * keeps the previously active style and is reported through this flag and
+   * \ref GetStyleErrors.
+   */
+  bool WasLastStyleLoadSuccessful() const
+  {
+    ReadLock locker(latch);
+    return lastStyleLoadSucceeded;
   }
 
   const std::list<StyleError> &GetStyleErrors() const

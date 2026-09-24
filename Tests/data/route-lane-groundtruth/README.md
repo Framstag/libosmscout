@@ -36,3 +36,55 @@ DB=path-to-country-db
     Tests/data/route-lane-groundtruth/cz \
     "./groundtruth-check"
 ```
+
+## Problem: long routes are fragile against map updates
+
+`LaneEvaluation compare` matches old and new route nodes by their position
+(index) in the route. A long, real-world route can easily contain thousands
+of nodes. When the underlying map data is updated, the router may pick a
+slightly different path, or the same path with a different number of route
+description nodes, anywhere along the route - even far away from the
+junction that actually matters. That single change shifts the indices of
+everything after it, which desynchronizes the comparison and produces
+unrelated, spurious diffs for junctions that never actually changed.
+
+The practical effect: after re-importing the map, a long ground truth route
+tends to "break" as a whole, even though only one or two junctions in it are
+actually affected. This makes the dataset unnecessarily fragile and painful
+to maintain.
+
+The mitigation is to keep each ground truth file short and focused on a
+single routing decision: a short segment is far less likely to have its
+path or node count change on a map update than a route spanning dozens of
+kilometers and dozens of junctions.
+
+## Splitting long routes into short segments
+
+`Tests/scripts/split-route-segments.py` splits an existing ground truth
+route (or a directory of them) into short segments, each covering a window
+around one or more "interesting" junctions - nodes where a lane suggestion
+was computed (`suggestedLanes`) or where a real turn instruction is present
+(`turn` other than `"Straight on"`). Windows from nearby junctions are
+merged, and stretches of the route with no interesting junction at all are
+dropped.
+
+It only slices the existing node data (no database or `LaneEvaluation`
+binary needed):
+
+```bash
+./Tests/scripts/split-route-segments.py \
+    --segment-km 2.0 \
+    Tests/data/route-lane-groundtruth/cz \
+    "./route-lanes/split"
+```
+
+`--segment-km` (default `2.0`) is the target full segment length, i.e.
+roughly +/-1km around each junction. Nearby junctions can still produce a
+noticeably longer merged segment; the script prints a warning whenever a
+segment ends up more than 2x `--segment-km`, so those cases are easy to spot
+and revisit (e.g. with a smaller `--segment-km`).
+
+Review the generated segments, then verify they reproduce against your
+database using the `recompute-routes.sh` + `LaneEvaluation compare` workflow
+above before replacing the long route(s) in `Tests/data/route-lane-groundtruth/cz`
+with the accepted short segments.

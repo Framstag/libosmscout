@@ -23,6 +23,12 @@ Create a directory `world` in your maps directory.
 
 ## Calling the basemap importer
 
+The map repository pipeline does this automatically: `scripts/mapgen/mapgen-basemap.sh`
+imports the pre-filtered planet export with `stylesheets/basemap.ost`, generates the
+water index from the coastline shapefile with this tool, and places the result in the
+served repository as a version-keyed slot. Use the procedure below for a one-off run
+outside the pipeline.
+
 Call he basemap importer:
 
 ```bash

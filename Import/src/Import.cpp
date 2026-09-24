@@ -39,7 +39,7 @@
 
 #include <osmscoutimport/Import.h>
 
-#include "DbJsonWriter.h"
+#include <osmscoutimport/DbJson.h>
 
 #ifndef OSMSCOUT_IMPORT_VERSION
 #define OSMSCOUT_IMPORT_VERSION "unknown"
@@ -92,6 +92,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << "Import -h -d -s <start step> -e <end step> [*.osm|*.pbf]..." << std::endl;
   std::cout << " -h|--help                            show this help and exit" << std::endl;
   std::cout << " --data-version                       print output data version and exit" << std::endl;
+  std::cout << " --tool-version                       print import tool version and exit" << std::endl;
   std::cout << " -d                                   show debug output during import" << std::endl;
   std::cout << " -s <number>                          set starting processing step" << std::endl;
   std::cout << " -e <number>                          set final processing step" << std::endl;
@@ -557,6 +558,10 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[i],"--data-version")==0) {
       std::cout << std::to_string(osmscout::FILE_FORMAT_VERSION) << std::endl;
+      return 0;
+    }
+    else if (strcmp(argv[i],"--tool-version")==0) {
+      std::cout << OSMSCOUT_IMPORT_VERSION << std::endl;
       return 0;
     }
     else if (strcmp(argv[i],"-s")==0) {
