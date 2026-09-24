@@ -19,21 +19,31 @@
 | `src/OSMScoutClient.cpp` | **C++ JNI implementation** — 4172 lines, single translation unit |
 | `src/meson.build` | Meson build for native shared library |
 | `java/meson.build` | Meson build for Java JAR + JNI header generation |
-| `meson.build` | Root build file (delegates to java/ and src/) |
+| `meson.build` | Root Meson build file (delegates to java/ and src/) |
+| `CMakeLists.txt` | CMake build for the native library, the Java classes and the JAR |
 | `include/osmscoutclientjava/ClientJavaImportExport.h` | DLL export/import macros for Windows/Unix |
 
 ## Build Systems
 
-### Meson (only — no CMake support)
+### CMake (root project)
 
-The native library and Java JAR are both built via Meson from the parent project:
+The native library and Java JAR are built from the repository root when JNI and a JDK are found:
 
 ```bash
-meson setup build -DOSMSCOUT_BUILD_CLIENT_JAVA=ON
-meson compile -C build
+cmake -B build -DOSMSCOUT_BUILD_CLIENT_JAVA=ON
+cmake --build build --target osmscout_client_java java_jar
 ```
 
-`buildJava` is set to `true` when Java (JNI) dependencies are found.
+`OSMSCOUT_BUILD_CLIENT_JAVA` defaults to ON when `JNI_FOUND` and `Java_JAVAC_EXECUTABLE`; CMake fails with a clear message when the option is on but JNI is missing. The JAR is written to `build/libosmscout-client-java/libosmscoutclientjava.jar`.
+
+### Meson
+
+```bash
+meson setup build-meson -DOSMSCOUT_BUILD_CLIENT_JAVA=ON
+meson compile -C build-meson
+```
+
+`buildJava` is set to `true` when Java (JNI) dependencies are found; the JAR is written to `build-meson/libosmscout-client-java/java/libosmscoutclientjava.jar`.
 
 ### What gets built
 
@@ -49,7 +59,7 @@ cd libosmscout-client-java
 mvn package
 ```
 
-Native `.so`/`.dylib`/`.dll` must be built separately via Meson and placed on `java.library.path` at runtime.
+Native `.so`/`.dylib`/`.dll` must be built separately via CMake or Meson and placed on `java.library.path` at runtime.
 
 ## Dependencies
 
@@ -171,13 +181,13 @@ getDescription(       →     DescriptionService
 
 | Type | Language | Description |
 |------|----------|-------------|
-| `OSMScoutClient` | Java | Main client. 20 native methods: render, search, route, navigate, favorites, GPX, description, projection. |
-| `OSMScoutClientBuilder` | Java | Fluent builder. Icon dir, map dirs, DPI, units, stylesheets, custom POI types. |
+| `OSMScoutClient` | Java | Main client. 47 native methods: render, search, route, navigate, favorites, GPX, description, projection, style switching, basemap configuration. |
+| `OSMScoutClientBuilder` | Java | Fluent builder. Icon dir, map dirs, DPI, units, stylesheets, custom POI types, basemap directory, basemap stylesheet. |
 | `NavigationController` | Java | Live navigation session handle. `processLocation()`, `stop()`. |
 | `NavigationListener` | Java | 11 default-method callbacks for navigation events. |
 | `RouteEntry` | Java | Route result: geometry arrays, distance, duration, descriptions, routeHandle. |
 | `RouteCallback` | Java | 4 callbacks: `onProgress`, `onSuccess`, `onError`, `onCancel`. |
-| `RouteInstruction` | Java | Turn-by-turn: distanceTo, turnType, streetName, description, nextNext*. |
+| `RouteInstruction` | Java | Turn-by-turn: distanceTo (distance from the route start in the instruction list, remaining distance for the next instruction), turnType, streetName, description, nextNext*. |
 | `LocationEntry` | Java | Search result: label, type, objectType, lat, lon, region, objectFileOffset. |
 | `ObjectDescription` / `DescriptionEntry` | Java | Structured object info from `getDescription()`. |
 | `TrackPoint` | Java | GPX track point: lat, lon, timestamp. |
@@ -198,13 +208,15 @@ getDescription(       →     DescriptionService
 - `ClientData` accessed via `getClientData(env, obj)` helper
 - JNI callbacks use cached method IDs from `NavigationListenerMethods` / `RouteCallbackMethods` structs
 - Synthetic POI types (`_route_start`, `_route_end`, `_favorite`, `_search_selected`, `_track`) registered at build time via `withCustomPoiType()`
+- Basemap configuration: `withBasemapLookupDirectory(dir)` and `withBasemapStyleSheet(name)` on the builder set the basemap database and the stylesheet it renders with (a plain stylesheet name, with or without `.oss`, resolved against the stylesheets directory; an unusable name leaves the basemap on the active map style). `setBasemapLookupDirectory(dir)` changes the directory on a running client and reloads the basemap asynchronously — an empty value unloads it, and the outcome is observable through the rendered map and `wasLastStyleLoadSuccessful()`.
 - Route calculation supports object references from search results for precise node resolution
+- Instruction distances: the remaining distance of the next route instruction is derived from the position's progress along its current route segment (the fraction of `routeNode -> routeNode+1` the snapped fix lies at). `RouteInstructionAgent` offers that progress to the instruction builder when the builder accepts it and keeps calling the coordinate-based form otherwise; the bridge falls back to the straight-line distance from the segment start when a position reports no progress, and never reports a negative distance. The arrival instruction carries the distance of the destination node from the route start, like every other instruction of the list.
 - Navigation engine runs on dedicated background thread, messages dispatched to Java via `CallVoidMethod`
 - GPX import gated by `buildGpx` — returns empty array when disabled
 - Render pipeline: Cairo BGRx surface → manual conversion to ARGB `int[]` → Java
 
 ### Pitfalls
-- **No CMake support** — native lib built only via Meson. `OSMSCOUT_BUILD_CLIENT_JAVA` is a Meson option, not CMake.
+- **Two build systems** — the native library and JAR are built by CMake (root project, `OSMSCOUT_BUILD_CLIENT_JAVA`) or by Meson (`buildJava`). JavaScout consumes the JAR through Maven, so a freshly built JAR has to be installed into the local Maven repository (`mvn install:install-file -Dfile=<build>/libosmscout-client-java/libosmscoutclientjava.jar ...`); a stale JAR there makes the native and Java sides disagree.
 - **Single translation unit** — all JNI code in one 4172-line `.cpp` file. Be careful with merge conflicts.
 - **JNI callback thread safety** — callbacks invoked from native thread; Java consumer must marshal to UI thread
 - **JNI global references** — must be released to avoid leaks; `JavaNavigationController` destructor handles cleanup

@@ -25,6 +25,33 @@
 
 namespace osmscout {
 
+  namespace {
+    // Stationary gate of the position-difference fallback.
+    //
+    // While the vehicle is standing still, the GPS fix jitters around the true position, so
+    // every pair of consecutive fixes differs by about the jitter amplitude. The fallback sums
+    // those differences, and the sum grows with the number of fixes: jitter of 1 m per 1 s fix
+    // keeps reading as 3.6 km/h however long the vehicle stands still.
+    //
+    // Jitter does not travel - it stays inside its own radius - while real movement accumulates.
+    // The gate therefore compares the *net* displacement between the oldest and the newest fix
+    // of a window long enough to separate the two: a walker at 3 km/h covers 4.2 m in 5 s, while
+    // fix jitter of up to 1 m amplitude stays inside 2 m. Because the floor is a displacement per
+    // window and not a distance per fix, the decision does not depend on the fix rate.
+    // Known limit: jitter above about 1.5 m amplitude is indistinguishable from a very slow
+    // walker, which is why the receiver's own speed, when it reports one, is still preferred.
+    const Timestamp::duration stationaryWindow{std::chrono::seconds(5)};
+    const Timestamp::duration stationaryMinHistory{std::chrono::seconds(4)};
+    constexpr double          stationaryFloorMeters{3.0};
+
+    // Minimum amount of accumulated fix history the position-difference fallback needs before it
+    // publishes a speed. The guard belongs to the accumulated window, not to a single segment: a
+    // receiver that reports faster than once per second produces segments well below a second, and
+    // comparing such a segment against the previous fix - which is updated for *every* fix - would
+    // mean the fallback never runs at all on that stream.
+    const Timestamp::duration fallbackMinWindow{std::chrono::seconds(1)};
+  }
+
 CurrentSpeedMessage::CurrentSpeedMessage(const Timestamp& timestamp,
                                          double speed):
   NavigationMessage(timestamp),
@@ -66,48 +93,63 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
       // does not linger on old movement segments.
       if (gpsUpdateMsg->currentSpeed < 0.5) {
         segmentFifo.clear();
+        recentFixes.clear();
       }
     } else {
-      // Fallback: compute speed from position differences
-      if (lastPosition &&
-          (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
+      // Fallback: compute speed from position differences. Every accepted fix contributes a
+      // segment; how much history has to accumulate before a speed is published is decided by the
+      // window below, so the fallback does not depend on the receiver's fix rate.
+      if (lastPosition){
 
         // GPS gap > 10s means signal was lost (tunnel, dropout).
         // Reset FIFO to avoid computing bogus speed from the position jump.
         auto gap = gpsUpdateMsg->timestamp - lastPosition.time;
         if (gap > seconds(10)) {
           segmentFifo.clear();
+          recentFixes.clear();
         }
 
-        // Standstill guard: GPS position jitter while the vehicle is stationary
-        // (typically 0.5-2 m per 1 s segment) must not be reported as speed.
-        // Segments below the displacement floor contribute zero distance, so
-        // drift-derived speed collapses to 0; real movement >= 2 m/s still
-        // computes normally (spec: gps-speed-priority).
-        Distance segmentDistance = GetEllipsoidalDistance(lastPosition.coord, gpsUpdateMsg->currentPosition);
-        if (segmentDistance.AsMeter() < 2.0) {
-          segmentDistance = Distance::Zero();
+        recentFixes.push_back({gpsUpdateMsg->currentPosition, gpsUpdateMsg->timestamp});
+        while (recentFixes.size() > 1 &&
+               gpsUpdateMsg->timestamp - recentFixes.front().time > stationaryWindow) {
+          recentFixes.pop_front();
         }
-        segmentFifo.push_back({segmentDistance, gpsUpdateMsg->timestamp-lastPosition.time});
-        Timestamp::duration fifoDuration{Timestamp::duration::zero()};
-        Distance fifoDistance;
-        for (const auto &s:segmentFifo){
-          fifoDuration+=s.duration;
-          fifoDistance+=s.distance;
-        }
-        auto sec=duration_cast<duration<double>>(fifoDuration);
-        if (sec.count()>0){
-          double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
-          // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
-          if (speed > 200.0) {
-            speed = -1.0;
+
+        auto historyDuration = gpsUpdateMsg->timestamp - recentFixes.front().time;
+        auto netDisplacement = GetEllipsoidalDistance(recentFixes.front().coord,
+                                                      gpsUpdateMsg->currentPosition);
+
+        if (historyDuration >= stationaryMinHistory &&
+            netDisplacement < Meters(stationaryFloorMeters)) {
+          // The fixes only jitter around their own position: the segment distances must not be
+          // turned into a speed.
+          segmentFifo.clear();
+          result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp, 0.0));
+        } else {
+          segmentFifo.push_back({GetEllipsoidalDistance(lastPosition.coord,gpsUpdateMsg->currentPosition),
+                                 gpsUpdateMsg->timestamp-lastPosition.time});
+          Timestamp::duration fifoDuration{Timestamp::duration::zero()};
+          Distance fifoDistance;
+          for (const auto &s:segmentFifo){
+            fifoDuration+=s.duration;
+            fifoDistance+=s.distance;
           }
-          result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
-        }
-        // pop fifo
-        while (!segmentFifo.empty() && fifoDuration>seconds(3)){
-          fifoDuration-=segmentFifo.front().duration;
-          segmentFifo.pop_front();
+          auto sec=duration_cast<duration<double>>(fifoDuration);
+          // Publish once the accumulated window covers the minimum - at a fix rate above 1 Hz no
+          // single segment does.
+          if (fifoDuration >= fallbackMinWindow){
+            double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
+            // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
+            if (speed > 200.0) {
+              speed = -1.0;
+            }
+            result.push_back(std::make_shared<CurrentSpeedMessage>(gpsUpdateMsg->timestamp,speed));
+          }
+          // pop fifo
+          while (!segmentFifo.empty() && fifoDuration>seconds(3)){
+            fifoDuration-=segmentFifo.front().duration;
+            segmentFifo.pop_front();
+          }
         }
       }
     }

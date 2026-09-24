@@ -493,6 +493,46 @@ static void setClientData(JNIEnv *env, jobject obj, ClientData *data)
 }
 
 // --------------------------------------------------------------------------
+// Style sheet name resolution
+// --------------------------------------------------------------------------
+
+/**
+ * Resolves a style name against a stylesheet directory into an absolute
+ * stylesheet path. The name is a stylesheet file name, with or without the
+ * ".oss" extension. Returns an empty string when the name is empty, path-like
+ * (contains '/' or '\\'), "." / "..", or when no matching stylesheet exists.
+ */
+// NOLINTBEGIN(misc-use-anonymous-namespace,bugprone-easily-swappable-parameters) the local
+// helper convention of this translation unit; the parameters are the stylesheet directory and
+// the style name, in that order.
+static std::string ResolveStyleSheetPath(const std::string &styleSheetDirectory,
+                                         const std::string &name)
+{
+  // Reject empty or path-like names (no traversal, no directories).
+  if (name.empty() ||
+      name.find('/') != std::string::npos ||
+      name.find('\\') != std::string::npos ||
+      name == "." || name == "..") {
+    return "";
+  }
+
+  // Accept both "cycle" and "cycle.oss" as input.
+  std::string styleName = name;
+  if (styleName.size() > 4 && styleName.compare(styleName.size() - 4, 4, ".oss") == 0) {
+    styleName = styleName.substr(0, styleName.size() - 4);
+  }
+
+  const std::string absoluteFile = styleSheetDirectory + "/" + styleName + ".oss";
+
+  if (!std::filesystem::exists(absoluteFile)) {
+    return "";
+  }
+
+  return absoluteFile;
+}
+// NOLINTEND(misc-use-anonymous-namespace,bugprone-easily-swappable-parameters)
+
+// --------------------------------------------------------------------------
 // OSMScoutClientBuilder::build()
 // --------------------------------------------------------------------------
 
@@ -538,7 +578,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   std::string basemapDir(basemapCStr);
   std::string iconDir(iconCStr);
   std::string units(unitsCStr);
-  std::string styleDir = styleDirCStr ? styleDirCStr : "";
 
   if (basemapJStr) env->ReleaseStringUTFChars(basemapJStr, basemapCStr);
   if (iconJStr) env->ReleaseStringUTFChars(iconJStr, iconCStr);
@@ -589,32 +628,23 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
     env->ReleaseStringUTFChars(styleDirJStr, styleDirCStr);
   }
 
-  // Resolve the basemap stylesheet (name without ".oss") against the
-  // stylesheet directory. Same validation as loadStyleSheet: reject empty,
-  // path-like, or "."/".." names. When unset or unresolvable, DBThread falls
-  // back to the main style for the basemap.
+  clientData->settings = std::make_shared<osmscout::Settings>(storage, dpi, units);
+
+  // Resolve the basemap stylesheet (if one was named) against the same
+  // stylesheets directory as the map styles, so an unset builder directory
+  // falls back to the settings default in the same way the map style does.
+  // An unusable name counts as not named: the basemap then renders with the
+  // active map style.
   std::string basemapStyleFilename;
-  if (basemapStyleJStr) {
+  if (basemapStyleJStr != nullptr) {
     const char *basemapStyleCStr = env->GetStringUTFChars(basemapStyleJStr, nullptr);
-    if (basemapStyleCStr) {
-      std::string name(basemapStyleCStr);
+    if (basemapStyleCStr != nullptr) {
+      basemapStyleFilename = ResolveStyleSheetPath(
+        clientData->settings->GetStyleSheetDirectory(), std::string(basemapStyleCStr));
       env->ReleaseStringUTFChars(basemapStyleJStr, basemapStyleCStr);
-      if (!name.empty() &&
-          name.find('/') == std::string::npos &&
-          name.find('\\') == std::string::npos &&
-          name != "." && name != "..") {
-        if (name.size() > 4 && name.compare(name.size() - 4, 4, ".oss") == 0) {
-          name = name.substr(0, name.size() - 4);
-        }
-        if (!styleDir.empty()) {
-          basemapStyleFilename = styleDir + "/" + name + ".oss";
-        }
-      }
     }
     env->DeleteLocalRef(basemapStyleJStr);
   }
-
-  clientData->settings = std::make_shared<osmscout::Settings>(storage, dpi, units);
 
   // MapManager
   clientData->mapManager = std::make_shared<osmscout::MapManager>(mapLookupPaths);
@@ -807,31 +837,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_reloadBasemap(JNIEnv *env, j
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::setBasemapLookupDirectory(String directory)
-// --------------------------------------------------------------------------
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_setBasemapLookupDirectory(JNIEnv *env, jobject self, jstring directoryJStr)
-{
-  ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->dbThread == nullptr) {
-    return;
-  }
-
-  const char *directoryCStr = env->GetStringUTFChars(directoryJStr, nullptr);
-  if (directoryCStr == nullptr) {
-    return;
-  }
-  std::string directory(directoryCStr);
-  env->ReleaseStringUTFChars(directoryJStr, directoryCStr);
-
-  // Update the basemap lookup directory at runtime and reload the basemap,
-  // so a basemap downloaded or removed while the app runs takes effect
-  // without a restart. An empty string unloads any installed basemap.
-  data->dbThread->SetBasemapLookupDirectory(directory);
-}
-
-// --------------------------------------------------------------------------
 // OSMScoutClient::getDatabaseBoundingBox(String path)
 // --------------------------------------------------------------------------
 
@@ -898,6 +903,35 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setStyleSheetFlag(JNIEnv *en
   // Reloads the style sheet with the flag on the DB thread; subsequent
   // renders use the new variant.
   data->dbThread->SetStyleFlag(key, value == JNI_TRUE);
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setBasemapLookupDirectory(String directory)
+//
+// Replaces the basemap lookup directory at runtime and reloads the basemap on
+// the DB thread, so a basemap downloaded or removed while the application runs
+// takes effect without a restart. An empty string unloads any installed
+// basemap. The reload is asynchronous, so this call returns without waiting
+// for it.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setBasemapLookupDirectory(JNIEnv *env, jobject self, jstring directoryJStr)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return;
+  }
+
+  const char *directoryCStr = env->GetStringUTFChars(directoryJStr, nullptr);
+  if (directoryCStr == nullptr) {
+    return;
+  }
+
+  std::string directory(directoryCStr);
+  env->ReleaseStringUTFChars(directoryJStr, directoryCStr);
+
+  data->dbThread->SetBasemapLookupDirectory(directory);
 }
 
 // --------------------------------------------------------------------------
@@ -989,26 +1023,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
   std::string name(nameCStr);
   env->ReleaseStringUTFChars(nameJStr, nameCStr);
 
-  // Reject empty or path-like names (no traversal, no directories).
-  if (name.empty() ||
-      name.find('/') != std::string::npos ||
-      name.find('\\') != std::string::npos ||
-      name == "." || name == "..") {
-    return JNI_FALSE;
-  }
-
-  // Accept both "cycle" and "cycle.oss" as input.
-  if (name.size() > 4 && name.compare(name.size() - 4, 4, ".oss") == 0) {
-    name = name.substr(0, name.size() - 4);
-  }
-
   const std::string dir = data->settings->GetStyleSheetDirectory();
-  const std::string fileName = name + ".oss";
-  const std::string absoluteFile = dir + "/" + fileName;
+  const std::string absoluteFile = ResolveStyleSheetPath(dir, name);
 
-  if (!std::filesystem::exists(absoluteFile)) {
+  if (absoluteFile.empty()) {
     return JNI_FALSE;
   }
+
+  const std::string fileName = std::filesystem::path(absoluteFile).filename().string();
 
   const std::string previousFile = data->settings->GetStyleSheetFile();
 
@@ -2074,36 +2096,6 @@ public:
   JavaRouteInstruction GenerateNextRouteInstruction(
       osmscout::RouteDescription::NodeIterator previous,
       osmscout::RouteDescription::NodeIterator last,
-      const osmscout::GeoCoord &coord) const
-  {
-    // 3-arg overload matching upstream's RouteInstructionAgent call style.
-    // Approximate the PositionAgent's abscissa (fraction of the segment
-    // routeNode -> routeNode+1) from the coordinate: straight-line distance
-    // ratio, gated so the fix lies within the segment span, clamped to
-    // [0,1]. Falls back to abscissa 0 (straight-line travelled) otherwise.
-    if (previous == last) {
-      return JavaRouteInstruction{};
-    }
-    double abscissa = 0.0;
-    auto nextNode = previous;
-    ++nextNode;
-    if (nextNode != last) {
-      double segmentLen = osmscout::GetEllipsoidalDistance(
-          previous->GetLocation(), nextNode->GetLocation()).AsMeter();
-      double d1 = osmscout::GetEllipsoidalDistance(
-          previous->GetLocation(), coord).AsMeter();
-      double d2 = osmscout::GetEllipsoidalDistance(
-          nextNode->GetLocation(), coord).AsMeter();
-      if (segmentLen > 0.0 && d1 <= segmentLen && d2 <= segmentLen) {
-        abscissa = std::clamp(1.0 - d2 / segmentLen, 0.0, 1.0);
-      }
-    }
-    return GenerateNextRouteInstruction(previous, last, coord, abscissa);
-  }
-
-  JavaRouteInstruction GenerateNextRouteInstruction(
-      osmscout::RouteDescription::NodeIterator previous,
-      osmscout::RouteDescription::NodeIterator last,
       const osmscout::GeoCoord &coord,
       double abscissa) const
   {
@@ -2140,24 +2132,20 @@ public:
     ++it;
     bool hasNextNext = (it != collected.end());
 
-    // Convert absolute distances to remaining distances. Preferred progress
-    // term: along-route movement inside the current segment from the
-    // PositionAgent's abscissa (fraction of segment routeNode -> routeNode+1).
-    // A straight-line distance from the segment-start node overestimates on
-    // curves and with cross-track GPS error; once the route node lags behind
-    // the moving vehicle the subtraction turns negative and the clamp below
-    // pins the distance to 0 m for an upcoming maneuver.
+    // Convert absolute distances to remaining distances. The travelled part is
+    // taken from the position's progress along its current route segment: the
+    // straight-line distance from the segment start understates the travelled
+    // distance on a segment that folds back and overstates it with cross-track
+    // GPS error, which both distort the distance to the next manoeuvre. A
+    // position that reports no progress (an unsnapped fix) keeps that estimate.
     double travelled = osmscout::GetEllipsoidalDistance(coord, previous->GetLocation()).AsMeter();
     auto nextNode = previous;
     ++nextNode;
     if (abscissa > 0.0 && nextNode != last) {
-      double segmentLen = osmscout::GetEllipsoidalDistance(
-          previous->GetLocation(), nextNode->GetLocation()).AsMeter();
-      if (segmentLen > 0.0) {
-        travelled = segmentLen * abscissa;
-        if (travelled > segmentLen) {
-          travelled = segmentLen; // clamp floating-point overrun
-        }
+      double segmentLength = osmscout::GetEllipsoidalDistance(previous->GetLocation(),
+                                                             nextNode->GetLocation()).AsMeter();
+      if (segmentLength > 0.0) {
+        travelled = std::min(segmentLength * abscissa, segmentLength);
       }
     }
     double raw = nextAbs - nodeDist - travelled;
@@ -2276,11 +2264,12 @@ private:
     void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
     {
       JavaRouteInstruction instr;
-      // Real (absolute, route-relative) distance of the destination node, like
-      // every other instruction. Previously hardcoded 0.0 which made the
-      // "arrive" instruction indistinguishable from "at the route start" —
-      // GenerateNextRouteInstruction then skipped it and returned an empty
-      // instruction after the last maneuver instead of "Arrive - X m".
+      // The distance of this instruction's own node from the route start, like
+      // every other instruction in the list (see OnStart and OnTurn). Reporting 0
+      // here made the arrival indistinguishable from the route start: the search
+      // for the next instruction walks forward while an instruction's distance is
+      // behind the current node, so the arrival was skipped and a client got an
+      // empty instruction after the last manoeuvre instead of "Arrive - X m".
       instr.distanceTo = distance.AsMeter();
       instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "targetReached";
@@ -3073,7 +3062,7 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
     return;
   }
 
-  // Parent chain (includes the region itself); no parent → no expansion.
+  // Parent chain (includes the region itself); no parent -> no expansion.
   std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
   if (!locationService->ResolveAdminRegionHierachie(region, chain)) {
     osmscout::log.Info() << "ResolveSearchScope: parent chain resolution failed for '"
@@ -3814,7 +3803,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
         // Build the search scope: for the database that resolved the handle,
         // the highest fine ancestor (see ResolveSearchScope); for other
-        // databases, search unconstrained — the handle's region belongs to
+        // databases, search unconstrained - the handle's region belongs to
         // another database, and applying it here would read foreign offsets
         // from this db's index (garbage positions). The name-based path
         // (adminRegionDb null) resolves the region per database, so it is
