@@ -493,6 +493,46 @@ static void setClientData(JNIEnv *env, jobject obj, ClientData *data)
 }
 
 // --------------------------------------------------------------------------
+// Style sheet name resolution
+// --------------------------------------------------------------------------
+
+/**
+ * Resolves a style name against a stylesheet directory into an absolute
+ * stylesheet path. The name is a stylesheet file name, with or without the
+ * ".oss" extension. Returns an empty string when the name is empty, path-like
+ * (contains '/' or '\\'), "." / "..", or when no matching stylesheet exists.
+ */
+// NOLINTBEGIN(misc-use-anonymous-namespace,bugprone-easily-swappable-parameters) the local
+// helper convention of this translation unit; the parameters are the stylesheet directory and
+// the style name, in that order.
+static std::string ResolveStyleSheetPath(const std::string &styleSheetDirectory,
+                                         const std::string &name)
+{
+  // Reject empty or path-like names (no traversal, no directories).
+  if (name.empty() ||
+      name.find('/') != std::string::npos ||
+      name.find('\\') != std::string::npos ||
+      name == "." || name == "..") {
+    return "";
+  }
+
+  // Accept both "cycle" and "cycle.oss" as input.
+  std::string styleName = name;
+  if (styleName.size() > 4 && styleName.compare(styleName.size() - 4, 4, ".oss") == 0) {
+    styleName = styleName.substr(0, styleName.size() - 4);
+  }
+
+  const std::string absoluteFile = styleSheetDirectory + "/" + styleName + ".oss";
+
+  if (!std::filesystem::exists(absoluteFile)) {
+    return "";
+  }
+
+  return absoluteFile;
+}
+// NOLINTEND(misc-use-anonymous-namespace,bugprone-easily-swappable-parameters)
+
+// --------------------------------------------------------------------------
 // OSMScoutClientBuilder::build()
 // --------------------------------------------------------------------------
 
@@ -516,6 +556,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   jfieldID fontSizeField = env->GetFieldID(builderCls, "fontSizeMm", "D");
   jfieldID unitsField = env->GetFieldID(builderCls, "units", "Ljava/lang/String;");
   jfieldID styleDirField = env->GetFieldID(builderCls, "stylesheetDirectory", "Ljava/lang/String;");
+  jfieldID basemapStyleField = env->GetFieldID(builderCls, "basemapStyleSheet", "Ljava/lang/String;");
   jfieldID customPoiField = env->GetFieldID(builderCls, "customPoiTypes", "[Ljava/lang/String;");
   jfieldID mapsDirField = env->GetFieldID(builderCls, "mapsDirectory", "Ljava/lang/String;");
 
@@ -526,6 +567,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   jdouble fontSizeMm = env->GetDoubleField(self, fontSizeField);
   jstring unitsJStr = (jstring)env->GetObjectField(self, unitsField);
   jstring styleDirJStr = (jstring)env->GetObjectField(self, styleDirField);
+  jstring basemapStyleJStr = (jstring)env->GetObjectField(self, basemapStyleField);
   jobjectArray customPoiArray = (jobjectArray)env->GetObjectField(self, customPoiField);
 
   const char *basemapCStr = basemapJStr ? env->GetStringUTFChars(basemapJStr, nullptr) : "";
@@ -588,6 +630,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
 
   clientData->settings = std::make_shared<osmscout::Settings>(storage, dpi, units);
 
+  // Resolve the basemap stylesheet (if one was named) against the same
+  // stylesheets directory as the map styles, so an unset builder directory
+  // falls back to the settings default in the same way the map style does.
+  // An unusable name counts as not named: the basemap then renders with the
+  // active map style.
+  std::string basemapStyleFilename;
+  if (basemapStyleJStr != nullptr) {
+    const char *basemapStyleCStr = env->GetStringUTFChars(basemapStyleJStr, nullptr);
+    if (basemapStyleCStr != nullptr) {
+      basemapStyleFilename = ResolveStyleSheetPath(
+        clientData->settings->GetStyleSheetDirectory(), std::string(basemapStyleCStr));
+      env->ReleaseStringUTFChars(basemapStyleJStr, basemapStyleCStr);
+    }
+    env->DeleteLocalRef(basemapStyleJStr);
+  }
+
   // MapManager
   clientData->mapManager = std::make_shared<osmscout::MapManager>(mapLookupPaths);
 
@@ -597,7 +655,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
     iconDir,
     clientData->settings,
     clientData->mapManager,
-    customPoiTypes
+    customPoiTypes,
+    basemapStyleFilename
   );
 
   // Paths explicitly opened via openDatabase() are tracked separately.
@@ -847,6 +906,35 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setStyleSheetFlag(JNIEnv *en
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setBasemapLookupDirectory(String directory)
+//
+// Replaces the basemap lookup directory at runtime and reloads the basemap on
+// the DB thread, so a basemap downloaded or removed while the application runs
+// takes effect without a restart. An empty string unloads any installed
+// basemap. The reload is asynchronous, so this call returns without waiting
+// for it.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setBasemapLookupDirectory(JNIEnv *env, jobject self, jstring directoryJStr)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return;
+  }
+
+  const char *directoryCStr = env->GetStringUTFChars(directoryJStr, nullptr);
+  if (directoryCStr == nullptr) {
+    return;
+  }
+
+  std::string directory(directoryCStr);
+  env->ReleaseStringUTFChars(directoryJStr, directoryCStr);
+
+  data->dbThread->SetBasemapLookupDirectory(directory);
+}
+
+// --------------------------------------------------------------------------
 // OSMScoutClient::getStyleSheetDirectory()
 // --------------------------------------------------------------------------
 
@@ -935,26 +1023,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
   std::string name(nameCStr);
   env->ReleaseStringUTFChars(nameJStr, nameCStr);
 
-  // Reject empty or path-like names (no traversal, no directories).
-  if (name.empty() ||
-      name.find('/') != std::string::npos ||
-      name.find('\\') != std::string::npos ||
-      name == "." || name == "..") {
-    return JNI_FALSE;
-  }
-
-  // Accept both "cycle" and "cycle.oss" as input.
-  if (name.size() > 4 && name.compare(name.size() - 4, 4, ".oss") == 0) {
-    name = name.substr(0, name.size() - 4);
-  }
-
   const std::string dir = data->settings->GetStyleSheetDirectory();
-  const std::string fileName = name + ".oss";
-  const std::string absoluteFile = dir + "/" + fileName;
+  const std::string absoluteFile = ResolveStyleSheetPath(dir, name);
 
-  if (!std::filesystem::exists(absoluteFile)) {
+  if (absoluteFile.empty()) {
     return JNI_FALSE;
   }
+
+  const std::string fileName = std::filesystem::path(absoluteFile).filename().string();
 
   const std::string previousFile = data->settings->GetStyleSheetFile();
 

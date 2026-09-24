@@ -122,6 +122,23 @@ public class OSMScoutClient {
     public native void setStyleSheetFlag(String key, boolean value);
 
     /**
+     * Sets the directory the basemap database is loaded from, replacing the one
+     * configured through
+     * {@link OSMScoutClientBuilder#withBasemapLookupDirectory(String)}.
+     * <p>
+     * An empty directory unloads the basemap. The basemap is reloaded on the
+     * native database thread, so a basemap downloaded or removed while the
+     * application runs takes effect without a restart; this call returns
+     * without waiting for that reload to finish. Whether a basemap is drawn
+     * afterwards is observable from {@link #render(int, int, double, double,
+     * double, int)} and from {@link #wasLastStyleLoadSuccessful()}.
+     *
+     * @param directory path to the basemap OSMScout data, or an empty value to
+     *                  unload the basemap
+     */
+    public native void setBasemapLookupDirectory(String directory);
+
+    /**
      * Configures the capacity of the tile data caches that the map service of
      * each database keeps (regional databases and basemap).
      * <p>
