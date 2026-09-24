@@ -10,7 +10,8 @@ Facts that shape the approach (verified on `master` @ 791d39743):
 - `stylesheets/standard.oss` and `stylesheets/winter-sports.oss` include it (`MODULE "include/route"`); `stylesheets/cycle.oss` does not: it declares its own `COLOR routeColor = #ae00ff88;` and its own single `[TYPE _route] WAY` rule, so the cycle style has no casing and a different colour.
 - Presentation variants are already an established construct: `IF daylight { ... } ELSE { ... }` appears in the `FLAG`, `CONST` and `STYLE` sections of `standard.oss`, `cycle.oss` and `basemap-render.oss`, and the grammar also supports `ELIF`. Every style sheet that includes the route module declares `FLAG daylight = true;`.
 - Flag precedence: `Parser::FLAGDEF` only calls `AddFlag` when `!config.HasFlag(name)`, so a client that sets the flag before loading (the `daylight` toggle of the navigation clients) overrides the style sheet's default, and the module's `IF daylight` is then evaluated against the client's value.
-- Route styles are resolved by `StyleConfig::GetRouteLineStyles(buffer, projection, lineStyles)`, which returns the matching styles in definition order (unless a style carries a non-base offset, in which case they are sorted by slot). The route outline rule is defined before the fill rule, so the painter receives casing first and fill second, which is the order the route rendering requirement describes.
+- The active route is drawn as a **poi way** of type `_route` (the JNI pushes it into `MapData::poiWays`), so its paint is a *way* line style resolved by `StyleConfig::GetWayLineStyles`. `GetRouteLineStyles` is fed by the separate `ROUTE { }` blocks that style OSM route relations and resolves nothing for `_route`.
+- The order in which `GetWayLineStyles` returns the styles is **unspecified**: `PostprocessWays` groups the way line styles by slot in a `std::unordered_map` (`SortInConditionalsBySlot`) and fills the lookup tables in that container's iteration order, which differs between standard libraries and builds (observed: `[outline, fill]` with libstdc++, `[fill, outline]` with libc++). Consumers do not depend on it for the paint order - `MapPainter` gives every stroke a `wayPriority` (the style's priority) and stable-sorts the way data after preprocessing, and the main slot of a way is the one whose *slot is empty*, not the first one. The `ROUTE { }` branch in `MapPainter` does take `lineStyles.front()` as its primary style for offset decisions, which is a latent platform-dependent choice for route relations, unrelated to this change.
 - `WAY#outline` sets the line style's slot to `outline`; both route styles have a display width (`2.2mm` casing, `1.5mm` fill).
 - Verification available today: `OSTAndOSSTest --warning-as-error` parses each of the seven style sheets (the `CheckStyleSheet-*.oss` tests), which proves a style sheet is *valid* but says nothing about what it resolves to. `StyleConfigSymbolsTest` shows the pattern for loading a real style sheet in a test, and `Color::FromHexString` plus `Color::operator==` make resolved colours assertable. A projection can be built with `MercatorProjection::Set(coord, Magnification(magClose), width, height)`.
 
@@ -101,9 +102,14 @@ Load(standard.oss)              --> FLAG daylight = true   (skipped: flag exists
                                       [TYPE _route] WAY#outline { color: @routeCasingColor; 2.2mm; priority 99 }
                                       [TYPE _route] WAY         { color: @routeColor;        1.5mm; priority 100 }
 
-GetRouteLineStyles(buffer, projection, styles)
-   -> definition order: [outline (casing), fill]
-   -> the test asserts: slot "outline" + casing colour + 2.2mm, then fill colour + 1.5mm
+GetWayLineStyles(buffer, projection, styles)
+   -> the styles of both slots, in an unspecified order (the slots are grouped in an
+      unordered_map), so the test finds the casing by its slot and asserts the
+      priority relation instead of a position
+   -> the painter gives every stroke its priority and stable sorts the way data, and
+      the main slot of a way is the one whose slot is empty
+   -> the test asserts: one style with slot "outline" (casing colour, 2.2mm, the lower
+      priority) and one without a slot (fill colour, 1.5mm)
 ```
 
 ## Risks / Trade-offs
@@ -113,6 +119,7 @@ GetRouteLineStyles(buffer, projection, styles)
 - [`IF daylight` in the module is evaluated against the flags of the style sheet that includes it; loading the module on its own has no declared flag] → Mitigation: all three consumers declare `FLAG daylight = true;`, the test resolves each consumer's sheet rather than the module, and the clients' flag override takes precedence by `Parser::FLAGDEF`'s `HasFlag` check.
 - [The dark presentation keeps the current red, so the change is visible only in the daylight presentation and in the cycle style] → Trade-off accepted and deliberate: the red already contrasts with the darkened map, and changing it would be an unrelated restyle.
 - [The style sheets are data that no renderer test covers in CI, so a future edit could change the paint and only the new test would notice] → Mitigation: the test asserts the values per presentation and per style sheet, and it is registered in both build systems, so it runs wherever the map library is built.
+- [The order in which the resolved way line styles come back is unspecified, because `SortInConditionalsBySlot` groups them in a `std::unordered_map`; the first CI run of this change failed on macOS and under the memory sanitizer because the test pinned the position of the casing while the order flipped between standard libraries] → Mitigation: the test identifies the casing by its slot, asserts the priority relation that actually decides the paint order, and the failure direction was reproduced locally by iterating the slot groups in reverse. The nondeterminism is a property of `libosmscout-map` and is not changed here; the only order-sensitive consumer is the `ROUTE { }` branch of `MapPainter` (`lineStyles.front()` as its primary style), which this change does not touch.
 - [Colour literals in style sheets are asserted to be lowercase by the OSS colour parser, which fails on other spellings] → Mitigation: the added literals are lowercase, and the parse is covered by the existing `CheckStyleSheet-*.oss` tests.
 
 ## Migration Plan

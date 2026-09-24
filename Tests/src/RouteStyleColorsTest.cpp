@@ -43,6 +43,11 @@
  * The tests resolve the styles of the real style sheets, so they need the style sheet files but
  * neither a database nor a renderer: a style sheet that parses with a wrong colour would still
  * pass the CheckStyleSheet tests, and this is the check that pins the values.
+ *
+ * The order in which the resolved styles come back is not part of the contract - the painter
+ * orders the strokes of a way by their priority (WayData::wayPriority, stable sorted after
+ * preprocessing), so the tests identify the casing by its slot and assert the priority relation
+ * rather than a position in the vector.
  */
 
 namespace {
@@ -82,6 +87,13 @@ namespace {
   constexpr std::array<const char*, 3> ROUTE_STYLE_SHEETS = {"standard.oss",
                                                              "winter-sports.oss",
                                                              "cycle.oss"};
+
+  /** The two strokes the shared module defines for the route. */
+  struct RoutePaint
+  {
+    LineStyleRef casing;
+    LineStyleRef fill;
+  };
 
   std::string GetEnv(const char* name,
                      const std::string& fallback)
@@ -190,6 +202,36 @@ namespace {
     return styles;
   }
 
+  /** The style of the given slot, or nullptr when no style of the paint has it. */
+  LineStyleRef FindStyleBySlot(const std::vector<LineStyleRef>& styles,
+                               const std::string& slot)
+  {
+    for (const auto& style : styles) {
+      if (style->GetSlot() == slot) {
+        return style;
+      }
+    }
+
+    return nullptr;
+  }
+
+  /**
+   * The casing (slot "outline") and the fill (no slot) of the resolved route paint. With the two
+   * styles a shared route module defines, finding both means exactly one of each carries a slot.
+   */
+  RoutePaint FindRoutePaint(const std::vector<LineStyleRef>& styles)
+  {
+    RoutePaint paint;
+
+    paint.casing = FindStyleBySlot(styles, "outline");
+    paint.fill = FindStyleBySlot(styles, "");
+
+    REQUIRE(paint.casing != nullptr);
+    REQUIRE(paint.fill != nullptr);
+
+    return paint;
+  }
+
   /** One style sheet's route paint, so the test case over all of them stays a plain loop. */
   void CheckSharedRoutePaint(const osmscout::TypeConfigRef& typeConfig,
                              const std::string& styleSheet)
@@ -199,9 +241,11 @@ namespace {
     INFO("style sheet: " << styleSheet);
 
     REQUIRE(styles.size() == 2);
-    REQUIRE(styles.at(0)->GetSlot() == "outline");
-    REQUIRE(styles.at(0)->GetLineColor() == RouteCasingDaylight());
-    REQUIRE(styles.at(1)->GetLineColor() == RouteFillDaylight());
+
+    RoutePaint paint = FindRoutePaint(styles);
+
+    REQUIRE(paint.casing->GetLineColor() == RouteCasingDaylight());
+    REQUIRE(paint.fill->GetLineColor() == RouteFillDaylight());
   }
 }
 
@@ -215,16 +259,15 @@ TEST_CASE("Route line styles follow the presentation flag")
 
     REQUIRE(styles.size() == 2);
 
-    // The outline is defined before the fill, so the painter receives the casing first.
-    const LineStyleRef & casing = styles.at(0);
-    const LineStyleRef & fill = styles.at(1);
+    RoutePaint paint = FindRoutePaint(styles);
 
-    REQUIRE(casing->GetSlot() == "outline");
-    REQUIRE(casing->GetLineColor() == RouteCasingDaylight());
-    REQUIRE(fill->GetLineColor() == RouteFillDaylight());
+    REQUIRE(paint.casing->GetLineColor() == RouteCasingDaylight());
+    REQUIRE(paint.fill->GetLineColor() == RouteFillDaylight());
 
-    // The casing is the wider stroke, so it borders the fill on both sides.
-    REQUIRE(casing->GetDisplayWidth() > fill->GetDisplayWidth());
+    // The casing is the wider stroke and is painted below the fill: the painter orders the
+    // strokes of a way by their priority.
+    REQUIRE(paint.casing->GetDisplayWidth() > paint.fill->GetDisplayWidth());
+    REQUIRE(paint.casing->GetPriority() < paint.fill->GetPriority());
   }
 
   SECTION("dark presentation")
@@ -232,13 +275,15 @@ TEST_CASE("Route line styles follow the presentation flag")
     std::vector<LineStyleRef> styles = ResolveRouteStyles(typeConfig, "standard.oss", false);
 
     REQUIRE(styles.size() == 2);
-    REQUIRE(styles.at(0)->GetSlot() == "outline");
-    REQUIRE(styles.at(0)->GetLineColor() == RouteCasingDark());
-    REQUIRE(styles.at(1)->GetLineColor() == RouteFillDark());
+
+    RoutePaint paint = FindRoutePaint(styles);
+
+    REQUIRE(paint.casing->GetLineColor() == RouteCasingDark());
+    REQUIRE(paint.fill->GetLineColor() == RouteFillDark());
 
     // The two presentations are different paints, so a flag change is visible.
-    REQUIRE(styles.at(0)->GetLineColor() != RouteCasingDaylight());
-    REQUIRE(styles.at(1)->GetLineColor() != RouteFillDaylight());
+    REQUIRE(paint.casing->GetLineColor() != RouteCasingDaylight());
+    REQUIRE(paint.fill->GetLineColor() != RouteFillDaylight());
   }
 }
 
