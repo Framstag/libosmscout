@@ -55,12 +55,44 @@ private:
   RouteDescriptionRef prevRoute;
   std::list<RouteInstruction> instructions;
 
+  /**
+   * Asks the builder for the instruction that follows the current position.
+   *
+   * The position carries how far the snapped fix has progressed along its
+   * current route segment (fraction of routeNode -> routeNode+1). A builder that
+   * accepts that value gets it, so it can compute true along-route progress
+   * instead of re-deriving it from the raw coordinate. A builder that implements
+   * only the coordinate-based call is used exactly as before.
+   */
+  static RouteInstruction GenerateNextInstruction(
+      RouteInstructionBuilder &builder,
+      const RouteDescription::NodeIterator &routeNode,
+      const RouteDescription::NodeIterator &last,
+      const PositionAgent::Position &position);
+
 public:
   RouteInstructionAgent();
 
   std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 
 };
+
+template <typename RouteInstruction, typename RouteInstructionBuilder>
+RouteInstruction RouteInstructionAgent<RouteInstruction, RouteInstructionBuilder>::GenerateNextInstruction(
+    RouteInstructionBuilder &builder,
+    const RouteDescription::NodeIterator &routeNode,
+    const RouteDescription::NodeIterator &last,
+    const PositionAgent::Position &position)
+{
+  if constexpr (requires {
+                  builder.GenerateNextRouteInstruction(routeNode, last, position.coord, position.abscissa);
+                }) {
+    return builder.GenerateNextRouteInstruction(routeNode, last, position.coord, position.abscissa);
+  }
+  else {
+    return builder.GenerateNextRouteInstruction(routeNode, last, position.coord);
+  }
+}
 
 template <typename RouteInstruction, typename RouteInstructionBuilder>
 RouteInstructionAgent<RouteInstruction, RouteInstructionBuilder>::RouteInstructionAgent() = default;
@@ -91,9 +123,10 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     // Emit first next-route instruction immediately on route change,
     // regardless of position state (handles cold-start GPS where
     // position may be OffRoute initially)
-    RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
-                                                                            positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord);
+    RouteInstruction nextInstruction = GenerateNextInstruction(builder,
+                                                               positionMessage->position.routeNode,
+                                                               positionMessage->route->Nodes().end(),
+                                                               positionMessage->position);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
@@ -120,9 +153,10 @@ std::list<NavigationMessageRef> RouteInstructionAgent<RouteInstruction, RouteIns
     }
 
     // next route instruction
-    RouteInstruction nextInstruction = builder.GenerateNextRouteInstruction(positionMessage->position.routeNode,
-                                                                            positionMessage->route->Nodes().end(),
-                                                                            positionMessage->position.coord);
+    RouteInstruction nextInstruction = GenerateNextInstruction(builder,
+                                                               positionMessage->position.routeNode,
+                                                               positionMessage->route->Nodes().end(),
+                                                               positionMessage->position);
     result.push_back(std::make_shared<NextRouteInstructionsMessage<RouteInstruction>>(now,nextInstruction));
   }
 
