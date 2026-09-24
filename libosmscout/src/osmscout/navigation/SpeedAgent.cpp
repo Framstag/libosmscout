@@ -43,6 +43,13 @@ namespace osmscout {
     const Timestamp::duration stationaryWindow{std::chrono::seconds(5)};
     const Timestamp::duration stationaryMinHistory{std::chrono::seconds(4)};
     constexpr double          stationaryFloorMeters{3.0};
+
+    // Minimum amount of accumulated fix history the position-difference fallback needs before it
+    // publishes a speed. The guard belongs to the accumulated window, not to a single segment: a
+    // receiver that reports faster than once per second produces segments well below a second, and
+    // comparing such a segment against the previous fix - which is updated for *every* fix - would
+    // mean the fallback never runs at all on that stream.
+    const Timestamp::duration fallbackMinWindow{std::chrono::seconds(1)};
   }
 
 CurrentSpeedMessage::CurrentSpeedMessage(const Timestamp& timestamp,
@@ -89,9 +96,10 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
         recentFixes.clear();
       }
     } else {
-      // Fallback: compute speed from position differences
-      if (lastPosition &&
-          (gpsUpdateMsg->timestamp-lastPosition.time) >= seconds(1)){
+      // Fallback: compute speed from position differences. Every accepted fix contributes a
+      // segment; how much history has to accumulate before a speed is published is decided by the
+      // window below, so the fallback does not depend on the receiver's fix rate.
+      if (lastPosition){
 
         // GPS gap > 10s means signal was lost (tunnel, dropout).
         // Reset FIFO to avoid computing bogus speed from the position jump.
@@ -127,7 +135,9 @@ std::list<NavigationMessageRef> SpeedAgent::Process(const NavigationMessageRef &
             fifoDistance+=s.distance;
           }
           auto sec=duration_cast<duration<double>>(fifoDuration);
-          if (sec.count()>0){
+          // Publish once the accumulated window covers the minimum - at a fix rate above 1 Hz no
+          // single segment does.
+          if (fifoDuration >= fallbackMinWindow){
             double speed=(fifoDistance.AsMeter()/sec.count())*3.6;
             // Sanity cap: reject speeds > 200 km/h (GPS glitch / tunnel exit jump)
             if (speed > 200.0) {

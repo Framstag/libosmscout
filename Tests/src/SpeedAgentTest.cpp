@@ -137,9 +137,9 @@ namespace {
   }
 
   /**
-   * The last speed the agent published. The fallback only runs on a segment of at least one
-   * second, so at fix rates above 1 Hz it publishes on every such segment and stays quiet in
-   * between.
+   * The last speed the agent published. The fallback publishes once the accumulated window covers a
+   * second, so the first fixes of a session may publish nothing yet; a case that asserts the
+   * magnitude of a movement reads the last published value instead of a particular fix.
    */
   double LastPublished(const std::vector<double>& speeds)
   {
@@ -200,6 +200,22 @@ TEST_CASE("Speed agent reports walking speed")
     REQUIRE(LastPublished(speeds) == Catch::Approx(4.0).margin(0.4));
   }
 
+  // The fallback needs a window of history, not a single segment of a second: a receiver that
+  // reports faster than once per second must still produce a speed.
+  SECTION("4 km/h at 4 Hz")
+  {
+    const auto speeds = Drive(4.0, 4.0, false, 40);
+
+    REQUIRE(LastPublished(speeds) == Catch::Approx(4.0).margin(0.4));
+  }
+
+  SECTION("4 km/h at 10 Hz")
+  {
+    const auto speeds = Drive(4.0, 10.0, false, 100);
+
+    REQUIRE(LastPublished(speeds) == Catch::Approx(4.0).margin(0.4));
+  }
+
   // Walking on top of jitter is still movement: it must not collapse to a standing vehicle.
   // The reported magnitude is inflated by the jitter, because the fallback sums the segment
   // distances - that is a property of the fallback and not of the stationary gate.
@@ -209,6 +225,32 @@ TEST_CASE("Speed agent reports walking speed")
 
     REQUIRE(LastPublished(speeds) > 1.5);
     REQUIRE(LastPublished(speeds) < 12.0);
+  }
+}
+
+TEST_CASE("Speed agent reports the same speed whatever the fix rate")
+{
+  // The reported speed must not depend on how often the receiver reports: the fallback accumulates
+  // a window of segments and derives the speed from it, so the same movement reads the same at a
+  // slow rate, at the rate of a typical receiver and at a rate far above it.
+  SECTION("4 km/h at 1, 4 and 10 Hz")
+  {
+    const double slow = LastPublished(Drive(4.0, 1.0, false, 15));
+    const double mid = LastPublished(Drive(4.0, 4.0, false, 40));
+    const double fast = LastPublished(Drive(4.0, 10.0, false, 100));
+
+    REQUIRE(slow == Catch::Approx(4.0).margin(0.4));
+    REQUIRE(mid == Catch::Approx(slow).margin(0.4));
+    REQUIRE(fast == Catch::Approx(slow).margin(0.4));
+  }
+
+  // A standing vehicle whose fixes jitter must be reported as standing at any rate as well, once
+  // the gate has its window of history.
+  SECTION("A standing vehicle with 1 m jitter at 4 Hz")
+  {
+    const auto speeds = Drive(0.0, 4.0, true, 60);
+
+    REQUIRE(LastPublished(speeds) == Catch::Approx(0.0));
   }
 }
 

@@ -18,9 +18,12 @@
 - [x] 2.5 Cover the receiver's precedence: a speed reported by the receiver is published unchanged, an implausible reported speed becomes unknown, and a reported standstill keeps the fallback quiet afterwards. Verify: the reported value reaches the listener without the gate being consulted.
 - [x] 2.6 Register the new test in `Tests/CMakeLists.txt` and `Tests/meson.build`. Verify: both build systems build and run it.
 
-## 3. Record the pre-existing issue the tests uncovered (spec: navigation-speed-agent)
+## 3. Fix-rate independence (spec: navigation-speed-agent)
 
-- [x] 3.1 Record in `TODO.md` that the fallback never runs at fix rates above 1 Hz, because its "segment of at least a second" guard is compared against the previous fix, which is updated for every fix: no speed is published at 4 Hz for a moving or a standing vehicle. Verify: the entry states the measurement, the cause and the shape of a fix, and states that it is not part of this change.
+- [x] 3.1 Make the minimum history apply to the accumulated window: append every accepted fix's segment to the history and publish a derived speed once the accumulated history covers a second, instead of requiring a single interval between two fixes to span a second. Verify: the fallback runs for every accepted fix, and the published value no longer depends on how often the receiver reports.
+- [x] 3.2 Remove the per-fix time condition and name the new minimum where it is used, with the reason: a receiver that reports faster than once per second produces segments well below the minimum, and the fix the old condition measured against is updated for every fix, so the condition could never hold there. Verify: no condition on the interval since the previous fix remains in the fallback.
+- [x] 3.3 Cover the fix-rate contract in the test: the same walking movement at 1 Hz, 4 Hz and 10 Hz publishes the same speed, and a standing vehicle whose fixes jitter at 4 Hz reports standing once the gate's window is covered. Verify: with the per-fix condition put back, the 4 Hz and 10 Hz cases fail because nothing is published at all.
+- [x] 3.4 Update the test helper's documentation, which explained the old condition, and the test file's reference to the capability it states. Verify: no comment in the test still claims that a segment of at least one second is needed.
 
 ## 4. Build and regression verification (spec: navigation-speed-agent)
 
@@ -40,7 +43,9 @@
 ## 6. Verification evidence
 
 - [x] 6.1 CMake: `ninja SpeedAgentTest` compiles without errors and without compiler warnings from the touched files.
-- [x] 6.2 CMake: `SpeedAgentTest` passes 4 cases / 21 assertions, and the full suite passes 91/91 with `--exclude-regex "PerformanceTest"` under `xvfb-run` with `QT_QPA_PLATFORM=offscreen`.
+- [x] 6.2 CMake: `SpeedAgentTest` passes 5 cases / 27 assertions, and the full suite passes 91/91 with `--exclude-regex "PerformanceTest"` under `xvfb-run` with `QT_QPA_PLATFORM=offscreen`.
 - [x] 6.3 Meson: `meson compile SpeedAgentTest` builds without errors and `meson test "Check speed agent"` passes.
 - [x] 6.4 `openspec validate "fix-navigation-standstill-gate" --strict` reports the change as valid.
-- [x] 6.5 The diff against master is the speed agent, its new test, the two test build files and the `TODO.md` entry: six files, no unrelated region.
+- [x] 6.5 The diff against master is the speed agent, its new test and the two test build files: five files, no unrelated region, and no `TODO.md` entry (the issue the tests uncovered is fixed here rather than recorded).
+- [x] 6.6 Revert-check of the fix-rate fix: with the per-fix time condition put back, the 4 Hz and 10 Hz cases fail (`nan == Approx(4.0)`, nothing published) - 2 cases, 4 assertions; with the fix all 27 assertions pass.
+- [x] 6.7 Revert-check of the standstill gate: with the displacement floor set to zero (gate disabled), three cases fail with a jitter-derived speed (for example `6.63 == Approx(0.0)`); with the gate all 27 assertions pass.

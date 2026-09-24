@@ -23,14 +23,14 @@ See `proposal.md` - Why. The relevant current state:
 
 - Report a standing vehicle as standing, whatever the receiver's fix rate and jitter, without turning the
   decision into a speed floor that deletes walking.
+- Make the derived speed independent of how often the receiver reports, so a receiver that reports faster
+  than the minimum interval still produces a speed.
 - Leave every other reported speed exactly as it was, so curves, stops and slow movement keep their
   magnitude and clients see one behaviour change only.
-- Make the decision and its known limit visible in the code and assertable in tests.
+- Make the decisions and their known limits visible in the code and assertable in tests.
 
 **Non-Goals:**
 
-- Fixing the fallback's own guard, which keeps it from running at fix rates above 1 Hz (recorded in `TODO.md`
-  and prepared as the next change).
 - Changing the fallback's magnitude computation from a sum of segment distances to a displacement: distance
   travelled and displacement differ on curves, and a displacement-based magnitude would cut corners.
 - Filtering or smoothing the position fixes themselves, which is the `PositionAgent`'s domain.
@@ -104,6 +104,23 @@ Alternatives:
 Chosen because the decision needs two positions and their times, which a small separate list provides
 directly; the segment history keeps its own purpose and trimming.
 
+**D7 - The minimum history before a derived speed is published applies to the accumulated window, not to a
+single interval between two fixes.**
+The fallback appends every accepted fix's segment to the history and publishes a speed once the accumulated
+history covers a second.
+Alternatives:
+- *Compare the interval since the previous fix against a second* (the state before this change): the previous
+  fix is updated for every accepted fix, so that interval is always the gap between two consecutive fixes and
+  the condition can never hold at a fix rate above 1 Hz - the fallback does not run at all there.
+- *Keep a separate accumulator of distance and time and clear it once it has been read*: the history is
+  already exactly such an accumulator (`segmentFifo` plus the running sums), so a second one would have to be
+  kept in step with it.
+- *Compare against the oldest fix of the gate's window*: that window is five seconds, longer than the minimum
+  a speed needs, so reusing it would delay the first report of a moving vehicle by up to five seconds, and
+  the segment history is trimmed by its own three-second rule.
+Chosen because the existing history already carries the distance and the duration of the accumulated window,
+and the minimum then reads as what it means: "enough history to derive a speed from".
+
 ## Sequence diagram
 
 ```
@@ -125,8 +142,11 @@ GPS update (no receiver speed)
 |        | yes: clear segmentFifo                                |
 |        |      publish CurrentSpeedMessage(0 km/h)               |
 |        |                                                       |
-|        + no : sum segmentFifo (as before)                      |
-|               publish CurrentSpeedMessage(summed km/h)          |
+|        + no : segmentFifo.push(segment)                        |
+|               sum the history                                  |
+|               accumulated window >= 1 s ?                      |
+|                  yes: publish CurrentSpeedMessage(summed km/h)  |
+|                  no : stay silent                               |
 |               pop while summed duration > 3 s                  |
 +---------------------------------------------------------------+
         |
@@ -144,14 +164,23 @@ GPS update (no receiver speed)
   the first published speeds of a session come from the plain fallback, so the behaviour is explicit.
 - *A real slow walker is now reported as standing* (movement below the floor) → the alternative (per-segment
   floor) reported a walker as standing in every case, so this is strictly narrower; the boundary is tested.
-- *The fallback still does not run at fix rates above 1 Hz* → the gate is inert on such a stream, and the
-  agent publishes no speed at all there when the receiver reports none; recorded in `TODO.md` and prepared as
-  the next change, and the test helper documents why it reads "the last published speed".
+- *The fallback's per-fix condition*: it compared the interval to the previous fix against a second, which at
+  a rate above 1 Hz can never hold; removing it and moving the minimum to the accumulated history is the
+  whole fix, and the test that covers a 4 Hz and a 10 Hz movement fails without it (verified by putting the
+  condition back): the derived speed was absent on such a stream, not merely imprecise.
 - *The window is trimmed by timestamps, not by a fix count* → a receiver with irregular intervals gets a
   time-based window, which is what the decision wants; a burst of fixes inside one second simply does not
   move the oldest fix out of the window earlier.
 - *Behaviour visible to users*: a parked vehicle now reports 0 km/h instead of 1 to 4 km/h, and a very slow
   walker reports 0 - intended, and stated in the capability spec.
+- *A receiver that reports faster than once per second gets its first derived speed after a little over a
+  second of accumulated history, not after its first fix* → that is the minimum a speed needs; before it the
+  agent stays silent instead of deriving a value from too little history, which is the same behaviour a 1 Hz
+  receiver has always had.
+- *The segment history now accumulates the many short segments of a fast receiver* → it is trimmed by three
+  seconds of duration, so the number of segments it holds grows with the fix rate while the window it
+  represents does not; the trimming rule is unchanged, and a receiver reporting in the tens of Hz is far
+  outside what the engine has to handle.
 - *Divergence from the downstream branch*: the superseded two-metre-floor variant is not carried, and the
   extracted implementation is kept as reviewed.
 
