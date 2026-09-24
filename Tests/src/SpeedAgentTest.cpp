@@ -35,7 +35,7 @@
 #include <osmscout/util/Time.h>
 
 /*
- * Tests for the speed agent's position-difference fallback (spec javascout-navigation).
+ * Tests for the speed agent's position-difference fallback (spec navigation-speed-agent).
  *
  * The fallback has to separate a standing vehicle whose fix jitters from a vehicle that
  * really moves, and it must not swallow the speed of a walker: walking is 3 to 5 km/h, which
@@ -210,6 +210,18 @@ TEST_CASE("Speed agent reports walking speed")
     REQUIRE(LastPublished(speeds) > 1.5);
     REQUIRE(LastPublished(speeds) < 12.0);
   }
+}
+
+TEST_CASE("The stationary gate has a floor: movement below it is reported as standing")
+{
+  // The gate compares the net displacement per window against a floor meant to sit above fix
+  // jitter, so movement that accumulates less displacement than that floor over the window is
+  // indistinguishable from a standing receiver. At 1 Hz, 2 km/h covers about 2.8 m in the five
+  // second window, which is below the floor - the limit is deliberate and documented at the gate.
+  const auto speeds = Drive(2.0, 1.0, false, 15);
+
+  REQUIRE(speeds.size() == 15);
+  REQUIRE(LastPublished(speeds) == Catch::Approx(0.0));
 }
 
 TEST_CASE("Speed agent prefers the speed reported by the receiver")
