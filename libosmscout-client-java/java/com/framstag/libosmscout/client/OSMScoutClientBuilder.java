@@ -24,6 +24,8 @@ public class OSMScoutClientBuilder {
     private String units;
     /** Directory containing .oss stylesheet files. */
     private String stylesheetDirectory;
+    /** Stylesheet the basemap renders with, file name with or without ".oss". */
+    private String basemapStyleSheet;
     /** Synthetic POI types to register in the type config at runtime. */
     private String[] customPoiTypes;
     /** Default directory for downloaded maps. */
@@ -108,6 +110,31 @@ public class OSMScoutClientBuilder {
      */
     public OSMScoutClientBuilder withStyleSheetDirectory(String stylesheetDirectory) {
         this.stylesheetDirectory = stylesheetDirectory;
+        return this;
+    }
+
+    /**
+     * Set the stylesheet the basemap renders with.
+     *
+     * <p>The name is a stylesheet file name, with or without the {@code .oss}
+     * extension (e.g. {@code "basemap-render"} or {@code "basemap-render.oss"}),
+     * resolved against the configured stylesheets directory. A basemap has its
+     * own type definitions, so its own stylesheet avoids the main style's
+     * unknown-type warnings. The active map style is not changed.
+     *
+     * <p>When the name is empty, contains a path separator, is {@code "."} or
+     * {@code ".."}, or names no stylesheet in the stylesheets directory, the
+     * selection counts as not set and the basemap renders with the active map
+     * style. A basemap stylesheet that is found but cannot be parsed drops the
+     * basemap layer and is reported by
+     * {@link OSMScoutClient#wasLastStyleLoadSuccessful()}.
+     *
+     * @param basemapStyleSheet stylesheet name for the basemap, or {@code null}
+     *                          to use the active map style
+     * @return this builder for chaining
+     */
+    public OSMScoutClientBuilder withBasemapStyleSheet(String basemapStyleSheet) {
+        this.basemapStyleSheet = basemapStyleSheet;
         return this;
     }
 
