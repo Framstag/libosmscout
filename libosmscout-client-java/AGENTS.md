@@ -177,7 +177,7 @@ getDescription(       →     DescriptionService
 | `NavigationListener` | Java | 11 default-method callbacks for navigation events. |
 | `RouteEntry` | Java | Route result: geometry arrays, distance, duration, descriptions, routeHandle. |
 | `RouteCallback` | Java | 4 callbacks: `onProgress`, `onSuccess`, `onError`, `onCancel`. |
-| `RouteInstruction` | Java | Turn-by-turn: distanceTo, turnType, streetName, description, nextNext*. |
+| `RouteInstruction` | Java | Turn-by-turn: distanceTo (distance from the route start in the instruction list, remaining distance for the next instruction), turnType, streetName, description, nextNext*. |
 | `LocationEntry` | Java | Search result: label, type, objectType, lat, lon, region, objectFileOffset. |
 | `ObjectDescription` / `DescriptionEntry` | Java | Structured object info from `getDescription()`. |
 | `TrackPoint` | Java | GPX track point: lat, lon, timestamp. |
@@ -199,6 +199,7 @@ getDescription(       →     DescriptionService
 - JNI callbacks use cached method IDs from `NavigationListenerMethods` / `RouteCallbackMethods` structs
 - Synthetic POI types (`_route_start`, `_route_end`, `_favorite`, `_search_selected`, `_track`) registered at build time via `withCustomPoiType()`
 - Route calculation supports object references from search results for precise node resolution
+- Instruction distances: the remaining distance of the next route instruction is derived from the position's progress along its current route segment (the fraction of `routeNode -> routeNode+1` the snapped fix lies at). `RouteInstructionAgent` offers that progress to the instruction builder when the builder accepts it and keeps calling the coordinate-based form otherwise; the bridge falls back to the straight-line distance from the segment start when a position reports no progress, and never reports a negative distance. The arrival instruction carries the distance of the destination node from the route start, like every other instruction of the list.
 - Navigation engine runs on dedicated background thread, messages dispatched to Java via `CallVoidMethod`
 - GPX import gated by `buildGpx` — returns empty array when disabled
 - Render pipeline: Cairo BGRx surface → manual conversion to ARGB `int[]` → Java
