@@ -68,6 +68,14 @@ namespace {
   constexpr osmscout::DatabaseId DATABASE_ID = 1;
   constexpr osmscout::FileOffset WAY_OFFSET = 1;
 
+  // Progress values as the position agent reports them: the fraction of the current route
+  // segment the snapped position lies at, so a builder can be checked against a named value.
+  constexpr double QUARTER_SEGMENT = 0.25;
+  constexpr double HALF_SEGMENT = 0.5;
+
+  /** The distance a builder without the progress argument reports for the next instruction. */
+  constexpr double COORD_ONLY_DISTANCE = 50.0;
+
   Timestamp At(uint64_t seconds)
   {
     return Timestamp(std::chrono::seconds(seconds));
@@ -200,13 +208,15 @@ namespace {
                                            const osmscout::RouteDescriptionRef& route,
                                            osmscout::PositionAgent::PositionState state,
                                            const GeoCoord& coord,
-                                           const osmscout::RouteDescription::NodeIterator& routeNode)
+                                           const osmscout::RouteDescription::NodeIterator& routeNode,
+                                           double progress=0.0)
   {
     osmscout::PositionAgent::Position position;
 
     position.state = state;
     position.coord = coord;
     position.routeNode = routeNode;
+    position.abscissa = progress;
 
     return std::make_shared<osmscout::PositionAgent::PositionMessage>(timestamp, route, position);
   }
@@ -232,6 +242,7 @@ namespace {
   class TestInstructionBuilder
   {
   public:
+
     std::list<TestInstruction> GenerateRouteInstructions(
       const osmscout::RouteDescription::NodeIterator& /*first*/,
       const osmscout::RouteDescription::NodeIterator& /*last*/) const
@@ -245,7 +256,7 @@ namespace {
       const osmscout::RouteDescription::NodeIterator& /*last*/,
       const GeoCoord& /*coord*/) const
     {
-      return TestInstruction{50.0};
+      return TestInstruction{COORD_ONLY_DISTANCE};
     }
   };
 
@@ -261,6 +272,48 @@ namespace {
     }
 
     return count;
+  }
+
+  /**
+   * A builder that consumes the position's progress along its current route segment, as a
+   * builder that derives remaining distances from along-route progress does. It reports the
+   * progress it was given as the instruction's distance, so a test can read it back from the
+   * published message.
+   */
+  class ProgressAwareInstructionBuilder
+  {
+  public:
+
+    std::list<TestInstruction> GenerateRouteInstructions(
+      const osmscout::RouteDescription::NodeIterator& /*first*/,
+      const osmscout::RouteDescription::NodeIterator& /*last*/) const
+    {
+      return {TestInstruction{100.0}};
+    }
+
+    TestInstruction GenerateNextRouteInstruction(
+      const osmscout::RouteDescription::NodeIterator& /*previous*/,
+      const osmscout::RouteDescription::NodeIterator& /*last*/,
+      const GeoCoord& /*coord*/,
+      double progress) const
+    {
+      return TestInstruction{progress};
+    }
+  };
+
+  /** The distance of the next instruction in the messages, or -1 when there is none. */
+  double NextInstructionDistance(const std::list<NavigationMessageRef>& messages)
+  {
+    for (const auto& message : messages) {
+      auto * next = dynamic_cast<osmscout::NextRouteInstructionsMessage<TestInstruction>*>(
+        message.get());
+
+      if (next != nullptr) {
+        return next->nextRouteInstruction.distance;
+      }
+    }
+
+    return -1.0;
   }
 }
 
@@ -404,4 +457,58 @@ TEST_CASE("Route instruction agent publishes the next instruction without an on-
                                        routeStart));
 
   REQUIRE(uninitialised.empty());
+}
+
+TEST_CASE("Route instruction agent offers the position's progress to a progress-aware builder")
+{
+  Fixture                                                                           fixture = MakeFixture();
+  osmscout::RouteInstructionAgent<TestInstruction, ProgressAwareInstructionBuilder> agent;
+
+  const osmscout::RouteDescription::NodeIterator                                    routeStart =
+    fixture.route->Nodes().begin();
+  const GeoCoord                                                                    coord = OnRoute(NODE_0_LON,
+                                                                                                    NODE_1_LON,
+                                                                                                    0.5);
+
+  // A quarter of the segment, as the position agent reports it for a fix a quarter of the
+  // way from the route node to the node after it.
+  auto quarter = agent.Process(MakePositionMessage(fixture.t0,
+                                                   fixture.route,
+                                                   osmscout::PositionAgent::PositionState::OnRoute,
+                                                   coord,
+                                                   routeStart,
+                                                   QUARTER_SEGMENT));
+
+  REQUIRE(NextInstructionDistance(quarter) == Catch::Approx(QUARTER_SEGMENT));
+
+  // Further progress on the same segment reaches the builder as a larger value.
+  auto half = agent.Process(MakePositionMessage(fixture.t0 + std::chrono::seconds(1),
+                                                fixture.route,
+                                                osmscout::PositionAgent::PositionState::OnRoute,
+                                                coord,
+                                                routeStart,
+                                                HALF_SEGMENT));
+
+  REQUIRE(NextInstructionDistance(half) == Catch::Approx(HALF_SEGMENT));
+}
+
+TEST_CASE("Route instruction agent still uses a builder without the progress argument")
+{
+  Fixture                                                                  fixture = MakeFixture();
+  osmscout::RouteInstructionAgent<TestInstruction, TestInstructionBuilder> agent;
+
+  const osmscout::RouteDescription::NodeIterator                           routeStart = fixture.route->Nodes().begin();
+  const GeoCoord                                                           coord = OnRoute(NODE_0_LON, NODE_1_LON, 0.5);
+
+  // The position reports progress, but this builder only implements the coordinate-based
+  // call: it must still be used, and its own instruction must be published.
+  auto messages = agent.Process(MakePositionMessage(fixture.t0,
+                                                    fixture.route,
+                                                    osmscout::PositionAgent::PositionState::OnRoute,
+                                                    coord,
+                                                    routeStart,
+                                                    HALF_SEGMENT));
+
+  REQUIRE(CountNextInstructions(messages) == 2);
+  REQUIRE(NextInstructionDistance(messages) == Catch::Approx(COORD_ONLY_DISTANCE));
 }

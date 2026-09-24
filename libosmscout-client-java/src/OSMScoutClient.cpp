@@ -2096,7 +2096,8 @@ public:
   JavaRouteInstruction GenerateNextRouteInstruction(
       osmscout::RouteDescription::NodeIterator previous,
       osmscout::RouteDescription::NodeIterator last,
-      const osmscout::GeoCoord &coord) const
+      const osmscout::GeoCoord &coord,
+      double abscissa) const
   {
     if (previous == last) {
       return JavaRouteInstruction{};
@@ -2131,8 +2132,22 @@ public:
     ++it;
     bool hasNextNext = (it != collected.end());
 
-    // Convert absolute distances to remaining distances
+    // Convert absolute distances to remaining distances. The travelled part is
+    // taken from the position's progress along its current route segment: the
+    // straight-line distance from the segment start understates the travelled
+    // distance on a segment that folds back and overstates it with cross-track
+    // GPS error, which both distort the distance to the next manoeuvre. A
+    // position that reports no progress (an unsnapped fix) keeps that estimate.
     double travelled = osmscout::GetEllipsoidalDistance(coord, previous->GetLocation()).AsMeter();
+    auto nextNode = previous;
+    ++nextNode;
+    if (abscissa > 0.0 && nextNode != last) {
+      double segmentLength = osmscout::GetEllipsoidalDistance(previous->GetLocation(),
+                                                             nextNode->GetLocation()).AsMeter();
+      if (segmentLength > 0.0) {
+        travelled = std::min(segmentLength * abscissa, segmentLength);
+      }
+    }
     double raw = nextAbs - nodeDist - travelled;
     next.distanceTo = (raw > 0.0) ? raw : 0.0;
 
@@ -2249,7 +2264,13 @@ private:
     void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
     {
       JavaRouteInstruction instr;
-      instr.distanceTo = 0.0;
+      // The distance of this instruction's own node from the route start, like
+      // every other instruction in the list (see OnStart and OnTurn). Reporting 0
+      // here made the arrival indistinguishable from the route start: the search
+      // for the next instruction walks forward while an instruction's distance is
+      // behind the current node, so the arrival was skipped and a client got an
+      // empty instruction after the last manoeuvre instead of "Arrive - X m".
+      instr.distanceTo = distance.AsMeter();
       instr.timeTo = SegmentTimeSeconds();
       instr.turnType = "targetReached";
       instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
