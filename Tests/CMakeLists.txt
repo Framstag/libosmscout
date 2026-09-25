@@ -416,6 +416,14 @@ else()
   message("Skip StyleConfigSymbols test, libosmscout-map is missing.")
 endif()
 
+#---- RouteStyleColors
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME RouteStyleColorsTest SOURCES src/RouteStyleColorsTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(RouteStyleColorsTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip RouteStyleColors test, libosmscout-map is missing.")
+endif()
+
 #---- MercatorProjection
 osmscout_test_project(NAME MercatorProjectionTest SOURCES src/MercatorProjectionTest.cpp)
 
