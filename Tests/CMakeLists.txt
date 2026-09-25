@@ -224,6 +224,9 @@ endif()
 #---- StringUtils
 osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 
+#---- SearchScope
+osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
