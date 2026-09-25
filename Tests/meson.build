@@ -738,6 +738,15 @@ StringUtilsTest = executable('StringUtilsTest',
 
 test('Check string utils', StringUtilsTest)
 
+SearchScopeTest = executable('SearchScopeTest',
+             'src/SearchScopeTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check search scope', SearchScopeTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
