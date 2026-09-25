@@ -25,6 +25,24 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+/*
+ * Sanitizer runtimes provide their own operator new/delete, which collide with
+ * the counter's definitions at link time (MemorySanitizer's libclang_rt.msan_cxx
+ * does), so the counter is compiled out there - the same guard the other
+ * allocation-counting tests use.
+ */
+#if defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
+#define STRINGMATCHER_HAVE_ALLOCATION_COUNTER 0
+#elif defined(__has_feature)
+#if __has_feature(memory_sanitizer) || __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
+#define STRINGMATCHER_HAVE_ALLOCATION_COUNTER 0
+#else
+#define STRINGMATCHER_HAVE_ALLOCATION_COUNTER 1
+#endif
+#else
+#define STRINGMATCHER_HAVE_ALLOCATION_COUNTER 1
+#endif
+
 namespace {
 
   /*
@@ -33,7 +51,17 @@ namespace {
    * count is comparative (same candidate text, same pattern length) because the
    * transliterating base matcher allocates for its case-folded copies in both
    * paths.
+   *
+   * The counter replaces the global operator new/delete, so it only observes the
+   * allocations of the test executable itself. Where the library is built as a
+   * shared library and its runtime owns the allocation operators (the MinGW DLL
+   * build; the PE/COFF format binds imports to the runtime that provided them,
+   * while ELF and Mach-O let the executable's definition win), the matcher
+   * allocates through that runtime and the counter stays at zero - which the cost
+   * test below reports as "not measurable" and skips, instead of reading it as
+   * "the matcher does not allocate at all".
    */
+
   bool          counting=false;
   unsigned long allocations=0;
 
@@ -52,6 +80,8 @@ namespace {
     return allocations;
   }
 }
+
+#if STRINGMATCHER_HAVE_ALLOCATION_COUNTER
 
 void* operator new(std::size_t size)
 {
@@ -112,6 +142,8 @@ void operator delete[](void* memory,
 {
   std::free(memory);
 }
+
+#endif
 
 //
 // Word matching across separators
@@ -272,10 +304,28 @@ TEST_CASE("A substring hit does not split the candidate into words")
   osmscout::StringMatcherTransliterateToken fastPath("Hilpert-Theater");
   osmscout::StringMatcherTransliterateToken wordPath("Hilpert Theater");
 
+#if STRINGMATCHER_HAVE_ALLOCATION_COUNTER
   size_t fastPathAllocations=CountAllocations(fastPath,
                                               candidate);
   size_t wordPathAllocations=CountAllocations(wordPath,
                                               candidate);
 
+  if (fastPathAllocations==0 && wordPathAllocations==0) {
+    // Both paths allocate for the case-folded copies, so a zero count for both
+    // means the counter is blind here (the library allocates through its own
+    // runtime), not that the matcher is free of allocations.
+    SKIP("the allocation counter cannot observe the matcher's allocations in this build (shared library with its own allocation runtime, e.g. the MinGW DLL build), so the cost claim is not measurable here");
+  }
+
   REQUIRE(fastPathAllocations<wordPathAllocations);
+#else
+  // The sanitizer runtime owns the allocation operators, so only the matcher's
+  // own assertions run here; the cost claim cannot be measured.
+  CountAllocations(fastPath,
+                   candidate);
+  CountAllocations(wordPath,
+                   candidate);
+
+  SKIP("the allocation counter is compiled out in sanitizer builds, whose runtime provides the allocation operators");
+#endif
 }

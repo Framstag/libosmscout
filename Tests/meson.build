@@ -738,6 +738,16 @@ StringUtilsTest = executable('StringUtilsTest',
 
 test('Check string utils', StringUtilsTest)
 
+StringMatcherTest = executable('StringMatcherTest',
+             'src/StringMatcherTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check string matcher', StringMatcherTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
