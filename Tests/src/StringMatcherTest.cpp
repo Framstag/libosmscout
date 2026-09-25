@@ -17,101 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cstdlib>
-#include <new>
 #include <string>
 
 #include <osmscout/util/StringMatcher.h>
 
 #include <catch2/catch_test_macros.hpp>
-
-namespace {
-
-  /*
-   * Allocation counter, used to pin the cost claim of the word matching: a
-   * substring hit must not pay for splitting the candidate into words. The
-   * count is comparative (same candidate text, same pattern length) because the
-   * transliterating base matcher allocates for its case-folded copies in both
-   * paths.
-   */
-  bool          counting=false;
-  unsigned long allocations=0;
-
-  size_t CountAllocations(const osmscout::StringMatcher& matcher,
-                          const std::string& text)
-  {
-    allocations=0;
-    counting=true;
-
-    osmscout::StringMatcher::Result result=matcher.Match(text);
-
-    counting=false;
-
-    REQUIRE(result!=osmscout::StringMatcher::noMatch);
-
-    return allocations;
-  }
-}
-
-void* operator new(std::size_t size)
-{
-  if (counting) {
-    allocations++;
-  }
-
-  if (size==0) {
-    size=1;
-  }
-
-  void* memory=std::malloc(size);
-
-  if (memory==nullptr) {
-    throw std::bad_alloc();
-  }
-
-  return memory;
-}
-
-void operator delete(void* memory) noexcept
-{
-  std::free(memory);
-}
-
-void operator delete(void* memory,
-                     std::size_t /*size*/) noexcept
-{
-  std::free(memory);
-}
-
-void* operator new[](std::size_t size)
-{
-  if (counting) {
-    allocations++;
-  }
-
-  if (size==0) {
-    size=1;
-  }
-
-  void* memory=std::malloc(size);
-
-  if (memory==nullptr) {
-    throw std::bad_alloc();
-  }
-
-  return memory;
-}
-
-void operator delete[](void* memory) noexcept
-{
-  std::free(memory);
-}
-
-void operator delete[](void* memory,
-                       std::size_t /*size*/) noexcept
-{
-  std::free(memory);
-}
 
 //
 // Word matching across separators
@@ -220,6 +130,13 @@ TEST_CASE("Unrelated text does not match")
 
 TEST_CASE("Substring matching is unchanged")
 {
+  /*
+   * The first section is the discriminating one: the word matching alone would
+   * report a non-match, because the candidate's second word is "Birkenbaum"
+   * where the pattern's is "Birken", and the candidate offers no other word run.
+   * The result can therefore only come from the transliterating substring match,
+   * which pins that the substring decision is taken first and returned unchanged.
+   */
   SECTION("Word prefix of the candidate")
   {
     osmscout::StringMatcherTransliterateToken matcher("Am Birken");
@@ -249,10 +166,6 @@ TEST_CASE("Substring matching is unchanged")
   }
 }
 
-//
-// Cost: the word matching only runs when the substring match misses
-//
-
 TEST_CASE("A single-word pattern keeps the substring decision")
 {
   // The word matching declines patterns of one word, so this result can only
@@ -263,19 +176,14 @@ TEST_CASE("A single-word pattern keeps the substring decision")
   REQUIRE(matcher.Match("Test-Theater")==osmscout::StringMatcher::partialMatch);
 }
 
-TEST_CASE("A substring hit does not split the candidate into words")
-{
-  // Long enough that the case-folded copies use the heap, so the comparison
-  // measures the matcher's own work and not small-string-buffer effects.
-  const std::string candidate="Heinz-Hilpert-Theater an der Kurt-Schumacher-Strasse in Luenen";
-
-  osmscout::StringMatcherTransliterateToken fastPath("Hilpert-Theater");
-  osmscout::StringMatcherTransliterateToken wordPath("Hilpert Theater");
-
-  size_t fastPathAllocations=CountAllocations(fastPath,
-                                              candidate);
-  size_t wordPathAllocations=CountAllocations(wordPath,
-                                              candidate);
-
-  REQUIRE(fastPathAllocations<wordPathAllocations);
-}
+/*
+ * The evaluation order is pinned by the cases above: "Substring matching is
+ * unchanged" and "A single-word pattern keeps the substring decision" both
+ * assert a result the word matching alone cannot produce, so a matcher that
+ * consulted the words first would fail them. That the word matching does not
+ * even run after a substring hit - the fast path's cost claim - is deliberately
+ * not asserted: observing single allocations needs the global allocation
+ * functions of this test binary replaced, and that neither links against the
+ * memory sanitizer runtime nor is observed at all on MinGW, where the counter
+ * stayed at zero for both paths.
+ */

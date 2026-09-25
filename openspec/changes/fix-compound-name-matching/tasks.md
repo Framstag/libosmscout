@@ -36,9 +36,17 @@ Spec references: `location-search-api` — requirement `Location search API on O
   `Tests/meson.build` — and verify it is built and run by each
   (spec: location-search-api — boundary, quality and preservation scenarios).
 
-- [x] 2.4 Verify the fast-path assertion fails when the substring step is skipped for single-word
-  patterns (mutation check) and restore; verify the suite passes again
+- [x] 2.4 Verify the evaluation order is pinned behaviourally: let a substring hit continue into the
+  word matching (mutation check) and verify `StringMatcherTest` fails, then restore and verify the
+  suite passes again
   (spec: location-search-api — substring and prefix results unchanged).
+
+- [x] 2.5 Give the sections that exercise the word-aware matcher a shared setup — one `SearchForString()`
+  helper that takes an optional matcher factory and one `WordMatchingMatcher()` helper — so no two
+  sections repeat the parameter construction and their assertions
+  (spec: location-search-api — hyphen-joined name found by words spelled apart; verify: the new
+  sections are a call, their expectations and nothing else, and the sections that share an outcome
+  are asserted once instead of per spelling).
 
 ## 3. Search path
 
@@ -94,14 +102,28 @@ Spec references: `location-search-api` — requirement `Location search API on O
 
 - Host verification: CMake Release build with the Java client enabled (`OSMSCOUT_BUILD_CLIENT_JAVA=ON`)
   and the Meson build both complete without errors. `ctest -j 4` reports 134 of 134 tests passing,
-  `StringMatcherTest` included. No warning is reported for `StringMatcher.cpp`, `StringMatcher.h`,
-  `OSMScoutClient.cpp` or the Java client translation unit in either build; the warnings both builds
-  do report come from pre-existing code (`libosmscout-client-qt`, generated Qt moc files, and the
-  Doxygen configuration) and are untouched by this change.
+  `StringMatcherTest` included, and `meson test -C build-meson` reports the same. No warning is
+  reported for `StringMatcher.cpp`, `StringMatcher.h`, `OSMScoutClient.cpp` or the Java client
+  translation unit in either build; the warnings both builds do report come from pre-existing code
+  (`libosmscout-client-qt`, generated Qt moc files, and the Doxygen configuration) and are untouched
+  by this change.
 - Mutation check (task 2.4): replacing the word-match verdict with a non-match makes both
   `StringMatcherTest` and `LocationLookupTest` fail, so the new tests pin the added rule and not just
-  the pre-existing substring behavior. The change was reverted and the suite passes again.
-
+  the pre-existing substring behavior. Letting a substring hit continue into the word matching
+  instead — the evaluation order the fast path claims — also makes `StringMatcherTest` fail, so the
+  order is pinned by results and not by a measurement. Both changes were reverted and the suite
+  passes again.
+- The fast path's cost claim (a substring hit does not pay for splitting the candidate into words)
+  is not asserted. It was first pinned with a test-local `operator new`/`delete` counter, which had
+  to go: replacing the global allocation functions fails to link against the memory sanitizer runtime
+  (six `multiple definition` errors against `libclang_rt.msan_cxx`), and on MinGW the counter stayed
+  at zero for both paths, so the assertion compared `0 < 0`. Both findings came from continuous
+  integration, were reproduced locally for the sanitizer case, and are recorded in the design's risk
+  table. Pinning the cost would need an allocation hook in the library, not a test-local replacement.
+- Test duplication: the search-level sections that were added first repeated an eight-line parameter
+  construction each, and two of them asserted the same outcome for two spellings, which the quality
+  gate reports as new duplicated code. They now go through the shared helpers of task 2.5, and the
+  two spellings of the POI query are one section looping over both.
 - The change ships as one branch off `origin/master` (`fix-compound-name-matching`) containing the
   matcher, the four search-path sites, the test data, the tests and these artifacts. It is the first
   selectively extracted part of the `naviveylin-local` branch (PR #1773); the test-only refactor of

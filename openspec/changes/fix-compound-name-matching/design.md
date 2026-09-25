@@ -39,6 +39,10 @@ narrow (no reordering, no gaps, no word-internal splitting); the candidate quali
 entries below exact matches in every consumer's ranking. Periods are deliberately not separators,
 so dot-spelled names do not start matching in this change.
 
+The "unchanged" half of that rationale is asserted: the cases below include inputs the word matching
+alone cannot match, so a matcher that consulted the words first would fail them. The
+"allocation-free" half is not asserted — see the risks.
+
 ### D3 — Every name comparison on the search path uses the same rule
 
 The query-string search, the admin-region resolution and the form-based address search are all
@@ -68,10 +72,14 @@ for the index, on a region qualifier that narrows the candidate set).
 
 - Unit tests for the matcher: separator variants on either side, transliteration and sharp-s across
   the separator, reordered/interrupted runs, full versus partial coverage, unchanged substring
-  cases, and the fast path taken for single-word patterns.
+  cases, and the fast path taken for single-word patterns. Two of the substring cases are
+  discriminating: the word matching alone would report a non-match for them, so they pin the
+  evaluation order without measuring anything.
 - Search-level tests against the committed test data (`Tests/LocationTest.olt`): a hyphen-joined
   location (already present as `August-Warkner-Platz`) and a hyphen-joined POI, queried as words
-  spelled apart, through the string search and the form search.
+  spelled apart, through the string search and the form search. The sections that exercise the
+  word-aware matcher run through one `SearchForString()` helper and one `WordMatchingMatcher()`
+  helper, so a section states its query and its expectations and nothing else.
 - The four comparison sites in `libosmscout-client-java/src/OSMScoutClient.cpp` are checked by
   inspection: no search parameter and no match-quality classification still builds the previous
   factory (grep for the previous factory type returns no hit). These sites cannot be covered by a
@@ -90,3 +98,4 @@ for the index, on a region qualifier that narrows the candidate set).
 | upstream merge conflicts | additive class plus factory, no behavioral edit to existing matchers, single-purpose commit |
 | recall via the text index unchanged | documented as out of scope (D4); the query-time paths return such an object as a candidate, which is what the user sees |
 | match quality changes for a text-index hit | only upward, only for a query that matches the whole stored name modulo separators; membership is untouched |
+| the fast path's cost is claimed but not asserted | Observing it means replacing the global allocation functions of the test binary. That replacement fails to link against the memory sanitizer runtime, which defines the same six operators (`multiple definition of operator delete[]` against `libclang_rt.msan_cxx`), and on MinGW the counter stays at zero for both paths, so the comparison asserted `0 < 0`. The assertion was therefore dropped: the matcher's own comment states the order, the design states the cost, and the ordering is pinned behaviourally instead. Re-adding it would need an allocation hook the library offers, not a test-local `operator new`. |
