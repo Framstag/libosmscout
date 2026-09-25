@@ -100,8 +100,8 @@ TEST_CASE("StyleConfig enumerates patterns of a stylesheet", "[StyleConfig]")
     file << "OSS" << std::endl;
     file << "  STYLE" << std::endl;
     file << "    [MAG close-] {" << std::endl;
-    file << "      [TYPE landuse_apiary] AREA { color: #dce8c8; pattern: \"landuse_apiary\"; patternMinMag: detail; }" << std::endl;
-    file << "      [TYPE landuse_forestry] AREA { color: #aed1a0; pattern: \"landuse_forest\"; patternMinMag: cityOver; }" << std::endl;
+    file << "      [TYPE landuse_cemetery] AREA { color: #dce8c8; pattern: \"landuse_cemetery\"; patternMinMag: detail; }" << std::endl;
+    file << "      [TYPE leisure_garden] AREA { color: #aed1a0; pattern: \"leisure_garden\"; patternMinMag: cityOver; }" << std::endl;
     file << "    }" << std::endl;
     file << "END" << std::endl;
   }
@@ -113,8 +113,8 @@ TEST_CASE("StyleConfig enumerates patterns of a stylesheet", "[StyleConfig]")
   std::vector<std::string> names=styleConfig.GetPatternNames();
 
   REQUIRE(names.size()==2);
-  REQUIRE(names==std::vector<std::string>({"landuse_apiary",
-                                           "landuse_forest"}));
+  REQUIRE(names==std::vector<std::string>({"landuse_cemetery",
+                                           "leisure_garden"}));
 }
 
 TEST_CASE("StyleConfig returns empty pattern list for stylesheet without patterns", "[StyleConfig]")
