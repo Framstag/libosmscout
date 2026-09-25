@@ -15,21 +15,23 @@ namespace {
   class TestTextLayouter
   {
   public:
-    // Every text is laid out as a 40 x 20 label
-    std::shared_ptr<TestLabelType> Layout(const Projection& /*projection*/,
-                                          const MapParameter& /*parameter*/,
+    // A single line, sized from the font size like a painter would: the label layouter checks
+    // that every element stays inside the reach it derives from the text and the font size
+    std::shared_ptr<TestLabelType> Layout(const Projection& projection,
+                                          const MapParameter& parameter,
                                           const std::string& text,
                                           double fontSize,
                                           double /*objectWidth*/,
                                           bool /*enableWrapping*/,
                                           bool /*contourLabel*/)
     {
-      auto label=std::make_shared<TestLabelType>();
+      auto   label=std::make_shared<TestLabelType>();
+      double fontSizePixel=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
       label->text=text;
       label->fontSize=fontSize;
-      label->width=40;
-      label->height=20;
+      label->width=static_cast<double>(text.size())*fontSizePixel*0.6;
+      label->height=fontSizePixel*1.2;
 
       return label;
     }
@@ -37,7 +39,7 @@ namespace {
 
   using TestLayouter = LabelLayouter<TestGlyph, TestLabel, TestTextLayouter>;
 
-  // A 14 x 14 icon followed by a 40 x 20 text
+  // A 14 x 14 icon followed by a text
   std::vector<LabelData> IconAndText()
   {
     LabelData icon;
@@ -50,6 +52,7 @@ namespace {
 
     text.type=LabelData::Text;
     text.text="Label";
+    text.fontSize=1.0;
 
     return {icon, text};
   }
@@ -60,6 +63,8 @@ namespace {
     MapParameter       parameter;
     TestTextLayouter   textLayouter;
     TestLayouter       layouter(&textLayouter);
+
+    projection.Set(GeoCoord(0.0, 0.0), Magnification(MagnificationLevel(17)), 96.0, 512, 512);
 
     layouter.RegisterLabel(projection, parameter, false, ObjectFileRef(), point, IconAndText());
 
