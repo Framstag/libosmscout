@@ -6,14 +6,15 @@
 
 The `_route` type is registered at runtime in `TypeConfig::Initialize`; `_route_start` and `_route_end` are registered at runtime by the clients (JNI `withCustomPoiType`, Qt `AddCustomPoiType`). Rendering styles for all three SHALL be defined in `stylesheets/include/route.oss`.
 
-The route paint SHALL follow the presentation the style sheet is loaded with, and SHALL define a daylight and a dark variant of the fill colour and of the casing colour in that module. The daylight fill SHALL differ from the road colours of the style sheets it is drawn over, and the daylight casing SHALL stay visible on the lightest road fill the style sheets use.
+The route paint SHALL follow the presentation the style sheet is loaded with, and SHALL define a daylight and a dark variant of the fill colour and of the casing colour in that module. The daylight fill SHALL differ from the road colours of the style sheets it is drawn over, and the daylight casing SHALL stay visible on the lightest road fill the style sheets use. The daylight pair SHALL keep a black way label that is drawn directly on the route centre readable: the casing SHALL be opaque and wider than the fill, so the composited centre the label sits on does not take the colour of the road underneath.
 
 #### Scenario: Route polyline has visible style
 
 - **GIVEN** a style sheet loaded with the daylight presentation
 - **WHEN** a route is rendered
-- **THEN** the `_route` WAY styles from `route.oss` are applied as a cased line: an opaque violet fill over a dark violet casing
+- **THEN** the `_route` WAY styles from `route.oss` are applied as a cased line: a translucent violet fill over an opaque, wider violet casing
 - **AND** the cased line is visible on top of red primary roads
+- **AND** the composited centre of the cased line keeps its contrast against a black way label drawn on it
 
 #### Scenario: Route polyline is distinguishable in the dark presentation
 
