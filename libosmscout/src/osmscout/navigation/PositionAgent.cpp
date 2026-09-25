@@ -255,14 +255,22 @@ namespace osmscout {
       if (found && foundNode!=route->Nodes().end()) {
         position.state=OnRoute;
         position.routeNode=foundNode;
+        position.abscissa=foundAbscissa;
         position.coord=coord;
         position.databaseId=foundNode->GetDatabaseId();
         position.typeConfig=routableObjects->GetTypeConfig(foundNode->GetDatabaseId());
         position.way=routableObjects->GetWay(foundNode->GetDatabaseId(), foundNode->GetPathObject());
         position.area=routableObjects->GetArea(foundNode->GetDatabaseId(), foundNode->GetPathObject());
       }else{
-        position=findNearest(gps.position, routableObjects);
-        position.routeNode=route->Nodes().begin(); // reset route position
+        Position nearest=findNearest(gps.position, routableObjects);
+        // Keep the last route node (position relative to the route) when the
+        // forward snap search fails — e.g. at the route's final node or during
+        // a transient >20 m offset. Resetting to the route start warped the
+        // engine's position state and desynced step-distance math (stuck "0 m").
+        // The OffRoute state set by findNearest still triggers the reroute flow.
+        nearest.abscissa=0.0;
+        nearest.routeNode=position.routeNode;
+        position=nearest;
       }
     } else {
       // gps signal with LowAccuracy or Outdated

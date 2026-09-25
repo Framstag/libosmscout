@@ -1,7 +1,11 @@
-#include <iostream>
 #include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <osmscout/util/String.h>
+#include <osmscout/util/StringMatcher.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -343,4 +347,108 @@ TEST_CASE("String replace")
   REQUIRE(osmscout::ReplaceString("abcabc", "a", "A")=="AbcAbc");
   REQUIRE(osmscout::ReplaceString("abcdef", "ef", "X")=="abcdX");
   REQUIRE(osmscout::ReplaceString("abcdef", "ab", "X")=="Xcdef");
+}
+
+/**
+ * Matching through the transliterating matcher must fold the sharp s (ß) in
+ * both directions: the transliteration table maps ß to "ss", and a query
+ * spelled "ss" (e.g. a contact address transliterated by the address book
+ * provider) must match an index name spelled "ß" and vice versa. Both sides are
+ * matched case-insensitively, so the transliterated forms are compared in a
+ * case-normalized way.
+ *
+ * The same case also covers diacritic folding, the match-quality
+ * classification (a spelling-only difference is a full match, a prefix or an
+ * inner substring stays partial, an unrelated name stays a non-match) and that
+ * folding is opt-in through the factory.
+ *
+ * All of it is ONE table-driven case: the expectations live in a single table
+ * and are asserted in a single loop. Repeating the matcher boilerplate per
+ * aspect — which the older cases above do — is what the duplicate-code metric
+ * counts as new duplicated code.
+ */
+namespace {
+  struct MatchExpectation
+  {
+    const char*                 pattern;
+    const char*                 text;
+    bool                        transliterate;
+    osmscout::StringMatcher::Result expected;
+
+    /**
+     * The row is constructed from its four values, so a row reads as one line
+     * per expectation and the table stays a plain list of expectations. The
+     * parameters are positional by design: a row is read as "pattern, text,
+     * factory, expected quality" in that order.
+     */
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters, readability-identifier-length) positional row fields
+    MatchExpectation(const char* pattern,
+                     const char* text,
+                     bool transliterate,
+                     osmscout::StringMatcher::Result expected)
+    : pattern(pattern),
+      text(text),
+      transliterate(transliterate),
+      expected(expected)
+    {
+      // no code
+    }
+  };
+
+  /**
+   * Assert the match quality of every table entry, using the matcher the entry
+   * asks for.
+   */
+  void RequireMatchQuality(const std::vector<MatchExpectation>& cases)
+  {
+    osmscout::StringMatcherTransliterateFactory transliterateFactory;
+    osmscout::StringMatcherCIFactory            caseInsensitiveFactory;
+
+    for (const auto& c : cases) {
+      osmscout::StringMatcher::Result result=(c.transliterate
+        ? transliterateFactory.CreateMatcher(c.pattern)->Match(c.text)
+        : caseInsensitiveFactory.CreateMatcher(c.pattern)->Match(c.text));
+
+      REQUIRE(result==c.expected);
+    }
+  }
+}
+
+TEST_CASE("String matcher: transliteration, diacritics and match quality")
+{
+  const std::vector<MatchExpectation> cases={
+    // Sharp s: "ss" query against a sharp-s name (the address book spelling).
+    {"Erbstollenstrasse","Erbstollenstraße",true,osmscout::StringMatcher::match},
+    // sharp-s query against a sharp-s name.
+    {"Erbstollenstraße","Erbstollenstraße",true,osmscout::StringMatcher::match},
+    // sharp-s query against an ss-spelled name (transliterated map data).
+    {"Erbstollenstraße","Erbstollenstrasse",true,osmscout::StringMatcher::match},
+    // Same folding at a word end and with a different surrounding word.
+    {"Aktienstrasse","Aktienstraße",true,osmscout::StringMatcher::match},
+    {"Fismerstrasse","Fismerstraße",true,osmscout::StringMatcher::match},
+    // Case-insensitive in both spellings.
+    {"ERBSTOLLENSTRASSE","Erbstollenstraße",true,osmscout::StringMatcher::match},
+    {"erbstollenstraße","Erbstollenstrasse",true,osmscout::StringMatcher::match},
+    // Diacritics keep folding: a name typed without them matches the spelled one.
+    {"Gunnemannshof","Günnemannshof",true,osmscout::StringMatcher::match},
+    {"Gunnemannshof","GÜNNEMANNSHOF",true,osmscout::StringMatcher::match},
+    {"Flozhohe","Flözhöhe",true,osmscout::StringMatcher::match},
+    {"Duscherstrasse","Duscherstraße",true,osmscout::StringMatcher::match},
+    // Names without any transliteration difference behave as before.
+    {"Erlenbruch","Erlenbruch",true,osmscout::StringMatcher::match},
+    {"Erlen","Erlenbruch",true,osmscout::StringMatcher::partialMatch},
+    {"Erlen","Erbstollenstraße",true,osmscout::StringMatcher::noMatch},
+    // Prefix of a sharp-s name: partial match, not a full match.
+    {"Erbstollen","Erbstollenstraße",true,osmscout::StringMatcher::partialMatch},
+    {"Erbstollens","Erbstollenstraße",true,osmscout::StringMatcher::partialMatch},
+    // Inner substring of a sharp-s name: partial match.
+    {"straße","Erbstollenstraße",true,osmscout::StringMatcher::partialMatch},
+    // Unrelated sharp-s name: no match.
+    {"Aktienstrasse","Erbstollenstraße",true,osmscout::StringMatcher::noMatch},
+    // Folding is opt-in: the plain case-insensitive matcher does not transliterate.
+    {"Erbstollenstrasse","Erbstollenstraße",false,osmscout::StringMatcher::noMatch},
+    {"ERLENBRUCH","Erlenbruch",false,osmscout::StringMatcher::match}
+  };
+
+  RequireMatchQuality(cases);
 }

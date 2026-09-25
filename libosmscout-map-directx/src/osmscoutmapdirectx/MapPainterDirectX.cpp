@@ -1131,6 +1131,13 @@ namespace osmscout
 
     m_pRenderTarget = renderTarget;
 
+    // DirectWrite measures with the text format resolved from the font name and the font size
+    // scaled by the projection, so that state is the measurement environment of the layouter
+    m_LabelLayouter.SetMeasurementEnvironment(BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                          parameter.GetFontSize(),
+                                                                          projection.GetDPI(),
+                                                                          projection.GetMagnification().GetLevel()));
+
     IDWriteRenderingParams* renderingParams;
     HRESULT hr = m_pWriteFactory->CreateRenderingParams(&renderingParams);
     if (FAILED(hr))

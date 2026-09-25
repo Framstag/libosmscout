@@ -1,7 +1,29 @@
 OSS
 
 CONST
-  COLOR routeColor           = #ff000088;
+  // Active route colours, per presentation (the flag the clients push, and the default of
+  // every style sheet that includes this module).
+  // Daylight: a translucent violet fill over an OPAQUE, wider, magenta-leaning violet casing.
+  // The casing is opaque AND wider than the fill (2.2mm vs 1.5mm) on purpose: it covers the whole
+  // fill footprint, so the composited centre is "fill over casing" and does NOT depend on the road
+  // underneath. Way labels are drawn after way fills and carry no halo, so a black street label
+  // reads at 5.14:1 on that centre, where the opaque violet it replaced gave it only 2.56:1. A
+  // translucent fill over a *dark* casing would darken the centre instead and re-break the label.
+  // No road class fill of these style sheets uses a violet hue (the only violet hues in the road
+  // styles are the bus stop marker and the bus symbol, both small point markers), and the casing
+  // sits on the magenta side of the purple ramp, darker than the composited centre, so the rim
+  // still reads as a border and stays visible on white residential roads.
+  // Dark presentation: the previous red fill with a white casing, which already contrasts with the
+  // darkened map.
+  // NOTE: hex literals must be lowercase - Color::FromHexString only accepts 0-9a-f.
+  IF daylight {
+    COLOR routeColor          = #ba68c8d9; // violet, 85 percent alpha
+    COLOR routeCasingColor    = #6a1b9a;
+  }
+  ELSE {
+    COLOR routeColor          = #ff000088;
+    COLOR routeCasingColor    = #ffffff;
+  }
   COLOR routeStartColor      = #00aa00;
   COLOR routeEndColor        = #ff0000;
   COLOR favoriteMarkerColor  = #ff8800;
@@ -35,9 +57,11 @@ SYMBOL search_marker
 
 STYLE
   [MAG world-] {
-    // Active route: white casing + red fill so it is visible on any road color,
-    // including red primary roads. The outline is drawn first (lower priority).
-    [TYPE _route] WAY#outline { color: #ffffff; displayWidth: 2.2mm; width: 8m; priority: 99; }
+    // Active route: a wide casing stroke under the fill so the route is bordered on both
+    // sides and visible on any road color, including red primary roads. The outline is drawn
+    // first (lower priority). Colors come from the presentation branch in CONST above
+    // (daylight violet, dark presentation red + white).
+    [TYPE _route] WAY#outline { color: @routeCasingColor; displayWidth: 2.2mm; width: 8m; priority: 99; }
     [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100; }
 
     // Imported GPX track. Rendered as a thinner blue polyline so it is

@@ -457,6 +457,18 @@ namespace osmscout {
                    RouteDescription& description) override;
 
     private:
+      /** Result of evaluating one (logical) junction. Records the lane suggestion that was
+       * assigned to the approach nodes together with the information required to propagate
+       * turn suggestions further backward across preceding junctions.
+       */
+      struct JunctionLaneEval {
+        std::vector<RouteDescription::Node*>          approachNodes; //!< nodes that received the suggestion
+        RouteDescription::SuggestedLaneDescriptionRef suggestion;    //!< suggestion assigned to approachNodes
+        Distance                                      distance;      //!< distance of the junction from route start
+        size_t                                        leftExits=0;   //!< number of exits to the left
+        size_t                                        rightExits=0;  //!< number of exits to the right
+      };
+
       RouteDescription::LaneDescriptionRef GetLaneDescription(const RouteDescription::Node &node) const;
 
       /** Evaluate suggested lanes on nodes from "backBuffer", followed by junction node(s).
@@ -468,11 +480,23 @@ namespace osmscout {
        * @param junctionNodes one or more consecutive junction nodes forming a logical junction
        * @param lastNode the node after the last junction node (provides outgoing way info)
        * @param backBuffer buffer of traveled nodes before the junction, recent node at back
+       * @param evals output list of junction evaluations, appended in route order
        */
       void EvaluateLaneSuggestion(const PostprocessorContext& context,
                                   const std::vector<RouteDescription::Node*> &junctionNodes,
                                   const RouteDescription::Node &lastNode,
-                                  const std::list<RouteDescription::Node*> &backBuffer) const;
+                                  const std::list<RouteDescription::Node*> &backBuffer,
+                                  std::vector<JunctionLaneEval> &evals) const;
+
+      /** Propagate directional (left/right) turn lane suggestions from the junction where the
+       * turn happens backward across preceding junctions. The suggestion continues as long as
+       * none of the preceding junctions offer an exit in the same direction (which would mean
+       * the relevant lane diverges from the route there) and the look-ahead distance limit is
+       * not exceeded. This makes the route stay in the correct lane well ahead of the turn.
+       *
+       * @param evals junction evaluations in route order, as collected by EvaluateLaneSuggestion
+       */
+      void PropagateTurnSuggestionsBackward(std::vector<JunctionLaneEval> &evals) const;
 
     private:
       Distance distanceBefore;

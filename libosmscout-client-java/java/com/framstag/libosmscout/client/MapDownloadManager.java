@@ -13,6 +13,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class MapDownloadManager {
 
+    /**
+     * The database format version this client can read. One place decides it:
+     * the map listing request and the basemap probe both use this value.
+     */
+    public static final int DATABASE_FORMAT_VERSION = 27;
+
     /** Reference to the OSMScoutClient that owns this manager. */
     private final OSMScoutClient client;
     /** List of currently active downloads. */
@@ -36,10 +42,10 @@ public class MapDownloadManager {
      */
     public List<AvailableMapEntry> fetchAvailableMaps(MapProvider provider) {
         try {
-            // Build URL with FILE_FORMAT_VERSION (27)
+            // Build URL with the supported database format version
             String urlStr = provider.getListUri()
-                .replace("%1", "27")
-                .replace("%2", "27")
+                .replace("%1", String.valueOf(DATABASE_FORMAT_VERSION))
+                .replace("%2", String.valueOf(DATABASE_FORMAT_VERSION))
                 .replace("%3", "en");
 
             java.net.URI uri = java.net.URI.create(urlStr);

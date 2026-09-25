@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+
+  "_comment": [
+    "Basemap configuration of the mapgen pass. Required: a pass without this file, and without imports.json and the region index, does not run.",
+    "refresh: how often the pass may check the basemap inputs, in days.",
+    "coastlinesRefresh: how often a newer coastline copy from the source may actually be adopted, in days. Must not be shorter than refresh. The upstream coastline data is regenerated about daily, so this is what keeps the basemap from being rebuilt every time it is checked.",
+    "history: how many basemap versions the server keeps. 0 keeps all of them.",
+    "extract: the pre-filtered planet export - an OSM extract containing natural=coastline and the boundary/place features of stylesheets/basemap.ost - read from the configuration area. Its content decides whether a new basemap is produced.",
+    "coastlines: world coastline data. Without this section the location the image carries is used. sha256 is optional and is enforced when present; it is for operators who mirror the archive themselves, since the upstream source publishes no checksum.",
+    "importOptions: optional tuning passed on to the import tools. waterIndexMinMag, waterIndexMaxMag, lowZoomOptMaxMag, areaNodeGridMag, maxAdminLevel, langOrder, altLangOrder and strictAreas go to the import tool; minIndexLevel, maxIndexLevel and maxWaterDistance go to the water index tool. The values shown are the ones stylesheets/basemap.ost recommends for a world basemap."
+  ],
+
+  "refresh": 7,
+
+  "coastlinesRefresh": 90,
+
+  "history": 2,
+
+  "extract": "/config/planet_extract.osm.pbf",
+
+  "coastlines": {
+    "url": "https://osmdata.openstreetmap.de/download/coastlines-split-4326.zip"
+  },
+
+  "importOptions": {
+    "waterIndexMinMag": 6,
+    "waterIndexMaxMag": 6,
+    "lowZoomOptMaxMag": 6,
+    "areaNodeGridMag": 6,
+    "langOrder": "en,#",
+    "minIndexLevel": 4,
+    "maxIndexLevel": 10,
+    "maxWaterDistance": 2048
+  }
+}

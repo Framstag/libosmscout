@@ -17,25 +17,69 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <algorithm>
+
 #include <osmscoutmap/LabelLayouterHelper.h>
 
+#include <string>
+
 namespace osmscout {
+  std::string BuildMeasurementEnvironment(const std::string& fontName,
+                                          double fontSize,
+                                          double dpi,
+                                          size_t magnification)
+  {
+    // Assembled without a stream so that the per-frame environment costs a single allocation
+    std::string environment;
+
+    environment.reserve(128);
+
+    environment+="font=";
+    environment+=fontName;
+    environment+=";fontSize=";
+    environment+=std::to_string(fontSize);
+    environment+=";dpi=";
+    environment+=std::to_string(dpi);
+    environment+=";magnification=";
+    environment+=std::to_string(magnification);
+
+    return environment;
+  }
+
   ScreenRectMask::ScreenRectMask(size_t screenWidth,
                                  const ScreenPixelRectangle &rect)
+  {
+    Reset(screenWidth,
+          rect);
+  }
+
+  void ScreenRectMask::Reset(size_t screenWidth,
+                             const ScreenPixelRectangle &rect)
   {
     constexpr size_t   bitsPerCell=64u;
     constexpr uint64_t allBitsSet=~0;
 
-    size_t rowLength=screenWidth / bitsPerCell +1;
+    size_t             rowLength=screenWidth / bitsPerCell +1;
 
     if (screenWidth % bitsPerCell!=0u) {
       rowLength++;
     }
 
+    if (rowLength!=bitmask.size()) {
+      bitmask.assign(rowLength,0);
+    }
+    else {
+      std::fill(bitmask.begin(),
+                bitmask.end(),
+                0);
+    }
+
+    // The early returns below leave an empty mask, so the state has to start empty
+    cellFrom=0;
+    cellTo=0;
+
     rowFrom=rect.y;
     rowTo=rect.y+rect.height-1;
-
-    bitmask.resize(rowLength);
 
     // Rectangle is to the right of the screen
     if (rect.x>(int)screenWidth) {
@@ -124,6 +168,28 @@ namespace osmscout {
     bitmask.resize(height*rowLength);
   }
 
+  void ScreenMask::Reset(size_t width, size_t height)
+  {
+    size_t bitsPerCell=64u;
+
+    size_t newRowLength=width / bitsPerCell;
+
+    if (width % bitsPerCell!=0) {
+      newRowLength++;
+    }
+
+    if (newRowLength!=rowLength ||
+        height!=this->height) {
+      rowLength=newRowLength;
+      this->height=height;
+      bitmask.resize(height*rowLength);
+    }
+
+    std::fill(bitmask.begin(),
+              bitmask.end(),
+              0);
+  }
+
   void ScreenMask::AddMask(const ScreenRectMask& mask)
   {
     for (int r=std::max(0,mask.GetFirstRow()); r<=std::min((int)height-1, mask.GetLastRow()); r++) {
@@ -154,5 +220,66 @@ namespace osmscout {
     }
 
     return false;
+  }
+
+  /*
+   * Conservative factors of the label extent bound: a glyph advance is assumed to be at most
+   * maxLabelAdvanceFactor times the font size (an em box is 1.0 times the font size), and a
+   * line of a wrapped label is assumed to be at most maxLabelLineHeightFactor times the font
+   * size high.
+   */
+  constexpr double maxLabelAdvanceFactor=1.5;
+  constexpr double maxLabelLineHeightFactor=1.5;
+
+  size_t CountLabelWords(const std::string_view& text)
+  {
+    size_t words=0;
+    bool   inWord=false;
+
+    for (char c : text) {
+      bool space=c==' ' || c=='\t' || c=='\n' || c=='\r';
+
+      if (!space && !inWord) {
+        words++;
+      }
+
+      inWord=!space;
+    }
+
+    return words;
+  }
+
+  double GetLabelExtentBound(size_t characterCount,
+                             size_t wordCount,
+                             double fontSizePixel)
+  {
+    if (characterCount==0 || fontSizePixel<=0.0) {
+      return 0.0;
+    }
+
+    // Wrapping inserts a line break at a word boundary, so a label carries at most one line
+    // more than it has words. Both sides bound the label rectangle, the larger one bounds the
+    // extent, the half of it is the distance an anchor may lie outside the viewport.
+    double widthBound=static_cast<double>(characterCount)*fontSizePixel*maxLabelAdvanceFactor;
+    double heightBound=static_cast<double>(wordCount+1)*fontSizePixel*maxLabelLineHeightFactor;
+
+    return std::max(widthBound,heightBound)/2.0;
+  }
+
+  double GetMaxLabelPaddingPixel(const Projection& projection,
+                                 const MapParameter& parameter)
+  {
+    return std::max({projection.ConvertWidthToPixel(parameter.GetIconPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetContourLabelPadding()),
+                     projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())});
+  }
+
+  double GetLabelLayoutMarginPixel(const Projection& projection,
+                                   const MapParameter& parameter)
+  {
+    return projection.ConvertWidthToPixel(parameter.GetLabelLayouterOverlap())+
+           GetMaxLabelPaddingPixel(projection,parameter);
   }
 }

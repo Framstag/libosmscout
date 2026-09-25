@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install gcc compiler and Co
-        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config
+        run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config nlohmann-json3-dev
 
       - name: Install meson and ninja via pip
         run:  "pip install meson ninja"

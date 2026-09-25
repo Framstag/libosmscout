@@ -1854,7 +1854,8 @@ namespace osmscout {
   void RoutePostprocessor::SuggestedLanesPostprocessor::EvaluateLaneSuggestion(const PostprocessorContext& postprocessor,
                                                                                const std::vector<RouteDescription::Node*> &junctionNodes,
                                                                                const RouteDescription::Node &lastNode,
-                                                                               const std::list<RouteDescription::Node*> &backBuffer) const
+                                                                               const std::list<RouteDescription::Node*> &backBuffer,
+                                                                               std::vector<JunctionLaneEval> &evals) const
   {
     assert(!junctionNodes.empty());
     const RouteDescription::Node &firstJunctionNode = *junctionNodes.front();
@@ -2015,7 +2016,15 @@ namespace osmscout {
       std::transform_reduce(junctionExits.begin(), junctionExits.end(), size_t(lanes->GetLaneCount()), std::plus{},
                             [](const auto &exit) -> size_t { return exit.lanes.GetLaneCount(); });
 
-    if (junctionRightExits.empty()) {
+    if (junctionExits.empty()) {
+      // No real fork at this node at all (a "virtual junction" triggered only by a
+      // turn:lanes tag change or a lane count change along the same road, e.g. a lane
+      // gradually starting/ending ahead of a real interchange). There is nothing to
+      // consume from either side here; EvaluateLanesForRightTurn would otherwise
+      // wrongly collapse the range onto the trailing lane based on its tag alone, even
+      // though the route isn't actually turning. Leave the full incoming lane range
+      // allowed and let the route-direction-based refinement below narrow it instead.
+    } else if (junctionRightExits.empty()) {
       EvaluateLanesForRightTurn(laneTurns,
                                 lanes->GetLaneCount(),
                                 allowedLaneFrom,
@@ -2044,11 +2053,13 @@ namespace osmscout {
 
     Bearing relativeBearing = nextNodeBearing - (prevNodeBearing + Bearing::Radians(M_PI)); // relative to straight direction
 
-    // For turn-change triggers (same lane count, different turns), refine the suggestion
-    // using lane turn annotations. This handles cases like [left, through, through;right]
-    // changing to [left, through, through] where exits may over-consume compound lanes
-    // and leave incompatible edge lanes.
-    if (prevLanes->GetLaneCount() == lanes->GetLaneCount()) {
+    // For turn-change triggers (same lane count, different turns) and for virtual
+    // junctions with no real exit at all (lane count possibly changing), refine the
+    // suggestion using lane turn annotations. This handles cases like
+    // [left, through, through;right] changing to [left, through, through] where exits
+    // may over-consume compound lanes and leave incompatible edge lanes, as well as
+    // lanes gradually starting/ending with no real fork at this node.
+    if (junctionExits.empty() || prevLanes->GetLaneCount() == lanes->GetLaneCount()) {
       constexpr uint32_t throughBit = 0b00001000;
       constexpr uint32_t leftBits   = 0b00000111;
       constexpr uint32_t rightBits  = 0b01110000;
@@ -2072,9 +2083,12 @@ namespace osmscout {
         }
       }
 
-      // Narrow edges whose turn is incompatible with the route direction.
-      // For through routes, only narrow from the left — slight road curves
-      // can make through lanes appear as slight_right in annotations.
+      // Narrow edges whose turn is incompatible with the route direction. This is
+      // based on lane turn tags, not on bearing/curve heuristics, so it is safe to
+      // apply on both sides: a lane whose turn bits don't overlap the route direction
+      // genuinely cannot be used to continue on the route (compound lanes like
+      // Through_SlightRight were already preserved above and still carry the through
+      // bit, so they are not affected here).
       bool routeIsRight = relativeBearing > Bearing::Degrees(40) && relativeBearing < Bearing::Degrees(180);
       bool routeIsLeft  = relativeBearing > Bearing::Degrees(180) && relativeBearing < Bearing::Degrees(320);
 
@@ -2090,14 +2104,12 @@ namespace osmscout {
           break;
         }
       }
-      if (routeIsLeft || routeIsRight) {
-        while (allowedLaneTo > allowedLaneFrom && allowedLaneTo < int(originalLaneTurns.size())) {
-          uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneTo]);
-          if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
-            allowedLaneTo--;
-          } else {
-            break;
-          }
+      while (allowedLaneTo > allowedLaneFrom && allowedLaneTo < int(originalLaneTurns.size())) {
+        uint32_t turnBits = TurnToBits(originalLaneTurns[allowedLaneTo]);
+        if (turnBits != 0 && (turnBits & routeDirectionBits) == 0) {
+          allowedLaneTo--;
+        } else {
+          break;
         }
       }
     }
@@ -2133,7 +2145,13 @@ namespace osmscout {
       }
     }
 
+
     auto suggested = std::make_shared<RouteDescription::SuggestedLaneDescription>(allowedLaneFrom, allowedLaneTo, suggestedTurn);
+    JunctionLaneEval evalRecord;
+    evalRecord.leftExits = junctionLeftExits.size();
+    evalRecord.rightExits = junctionRightExits.size();
+    evalRecord.suggestion = suggested;
+    evalRecord.distance = firstJunctionNode.GetDistance();
     for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
       auto* nodePtr = *it;
       auto nodeLanes = GetLaneDescription(*nodePtr);
@@ -2141,6 +2159,7 @@ namespace osmscout {
         break;
       }
       nodePtr->AddDescription(suggested);
+      evalRecord.approachNodes.push_back(nodePtr);
     }
     // Also write suggestion to grouped junction nodes that have the same lane config
     // as the approach. These nodes were removed from backBuffer during grouping but
@@ -2149,6 +2168,71 @@ namespace osmscout {
       auto nodeLanes = GetLaneDescription(*jNode);
       if (nodeLanes && *prevLanes == *nodeLanes) {
         jNode->AddDescription(suggested);
+        evalRecord.approachNodes.push_back(jNode);
+      }
+    }
+    evals.push_back(std::move(evalRecord));
+  }
+
+  void RoutePostprocessor::SuggestedLanesPostprocessor::PropagateTurnSuggestionsBackward(std::vector<JunctionLaneEval> &evals) const
+  {
+    auto isLeftTurn = [](LaneTurn t) {
+      return t==LaneTurn::Left || t==LaneTurn::SlightLeft || t==LaneTurn::SharpLeft;
+    };
+    auto isRightTurn = [](LaneTurn t) {
+      return t==LaneTurn::Right || t==LaneTurn::SlightRight || t==LaneTurn::SharpRight;
+    };
+    for (size_t i=0; i<evals.size(); ++i) {
+      const JunctionLaneEval &turnEval = evals[i];
+      if (!turnEval.suggestion) {
+        continue;
+      }
+      LaneTurn turn = turnEval.suggestion->GetTurn();
+      bool left = isLeftTurn(turn);
+      bool right = isRightTurn(turn);
+      if (!left && !right) {
+        continue; // only directional turns are propagated backward
+      }
+      // width of the suggested lane band (0 == single lane)
+      uint8_t width = turnEval.suggestion->GetTo() - turnEval.suggestion->GetFrom();
+      // Walk backward across preceding junctions. The turn lane stays valid as long as no
+      // preceding junction offers an exit in the same direction (there the relevant lane
+      // would diverge from the route).
+      for (int k=int(i)-1; k>=0; --k) {
+        JunctionLaneEval &prev = evals[k];
+        if (left && prev.leftExits>0) {
+          break;
+        }
+        if (right && prev.rightExits>0) {
+          break;
+        }
+        if (turnEval.distance - prev.distance > distanceBefore) {
+          break; // do not suggest the turn lane too far ahead
+        }
+        for (auto* nodePtr : prev.approachNodes) {
+          auto existing = nodePtr->GetDescription<RouteDescription::SuggestedLaneDescription>();
+          // do not override an already resolved directional suggestion
+          if (existing && existing->GetTurn()!=LaneTurn::Unknown) {
+            continue;
+          }
+          auto lanes = GetLaneDescription(*nodePtr);
+          if (!lanes || lanes->GetLaneCount()<=1) {
+            continue; // lane suggestion is only meaningful when there is a choice of lanes
+          }
+          uint8_t laneCount = lanes->GetLaneCount();
+          uint8_t w = std::min<uint8_t>(width, laneCount-1);
+          uint8_t from;
+          uint8_t to;
+          if (left) {
+            from = 0;
+            to = w;
+          } else {
+            to = laneCount-1;
+            from = laneCount-1-w;
+          }
+          nodePtr->AddDescription(
+            std::make_shared<RouteDescription::SuggestedLaneDescription>(from, to, turn));
+        }
       }
     }
   }
@@ -2163,6 +2247,8 @@ namespace osmscout {
   {
     // buffer of traveled nodes, recent node at back
     std::list<RouteDescription::Node*> backBuffer;
+    // junction evaluations in route order, used to propagate turn suggestions backward
+    std::vector<JunctionLaneEval> evals;
     for (auto& node : description.Nodes()) {
 
       while (!backBuffer.empty() &&
@@ -2228,7 +2314,7 @@ namespace osmscout {
           }
 
           if (!backBuffer.empty()) {
-            EvaluateLaneSuggestion(postprocessor, junctionNodes, node, backBuffer);
+            EvaluateLaneSuggestion(postprocessor, junctionNodes, node, backBuffer, evals);
           }
 
           backBuffer.clear();
@@ -2239,6 +2325,10 @@ namespace osmscout {
 
       backBuffer.push_back(&node);
     }
+
+    // Propagate directional turn lane suggestions backward across preceding junctions.
+    PropagateTurnSuggestionsBackward(evals);
+
     return true;
   }
 

@@ -3,6 +3,8 @@ set(HEADER_FILES
   include/osmscoutclient/json/json_fwd.hpp
   include/osmscoutclient/AvailableMapEntry.h
   include/osmscoutclient/FavoriteLocationService.h
+  include/osmscoutclient/FavoriteStore.h
+  include/osmscoutclient/DatabasePathRegistry.h
   include/osmscoutclient/AdminRegionInfo.h
   include/osmscoutclient/DBInstance.h
   include/osmscoutclient/DBJob.h
@@ -26,6 +28,8 @@ set(SOURCE_FILES
   src/osmscoutclient/DBJob.cpp
   src/osmscoutclient/DBThread.cpp
   src/osmscoutclient/FavoriteLocationService.cpp
+  src/osmscoutclient/FavoriteStore.cpp
+  src/osmscoutclient/DatabasePathRegistry.cpp
   src/osmscoutclient/MapDirectory.cpp
   src/osmscoutclient/MapDownloadService.cpp
   src/osmscoutclient/MapManager.cpp
