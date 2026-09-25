@@ -209,6 +209,24 @@ void MapWidget::redraw()
     update();
 }
 
+/** temporary diagnostics helper: programmatic pan to reproduce label flicker */
+void MapWidget::debugPan(double dLon)
+{
+    if (view==nullptr || !view->IsValid()) {
+        return;
+    }
+    osmscout::GeoCoord center(view->center);
+    center.Set(center.GetLat(), center.GetLon()+dLon);
+    setupInputHandler(new InputHandler(MapView(center,
+                                               view->angle,
+                                               view->magnification,
+                                               view->mapDpi)));
+    changeView(MapView(center,
+                       view->angle,
+                       view->magnification,
+                       view->mapDpi));
+}
+
 void MapWidget::changeView(const MapView &updated)
 {
     //qDebug() << "viewChanged: " << QString::fromStdString(updated.center.GetDisplayText()) << "   level: " << updated.magnification.GetLevel();
