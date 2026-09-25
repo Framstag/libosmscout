@@ -539,6 +539,13 @@ else()
   message("Skip MapPainterLabelCulling test, libosmscout-map is missing.")
 endif()
 
+#---- MapPainterLabelReuseTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterLabelReuseTest SOURCES src/MapPainterLabelReuseTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterLabelReuse test, libosmscout-map is missing.")
+endif()
+
 #---- TextMetricsTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME TextMetricsTest SOURCES src/TextMetricsTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)

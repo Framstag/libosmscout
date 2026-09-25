@@ -48,13 +48,19 @@ constexpr bool debugGroundTiles = false;
    */
   constexpr double maxWidthFeatureWidth=255.0;
 
-  static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
-                                          double gridSizeHoriz,
-                                          double gridSizeVert)
+  /**
+   * Return the points at which a way crosses the corners of a grid of the given size, in
+   * ascending order and without duplicates, into a reused buffer. The set semantics of the
+   * previous implementation are preserved: the caller receives one entry per grid crossing.
+   */
+  static void GetGridPoints(const std::vector<Point>& nodes,
+                            double gridSizeHoriz,
+                            double gridSizeVert,
+                            std::vector<GeoCoord>& intersections)
   {
     assert(nodes.size()>=2);
 
-    std::set<GeoCoord> intersections;
+    intersections.clear();
 
     for (size_t i=0; i<nodes.size()-1; ++i) {
       size_t cellXStart=(size_t)((nodes[i].GetLon()+180.0)/gridSizeHoriz);
@@ -77,7 +83,7 @@ constexpr bool debugGroundTiles = false;
                                   GeoCoord(lower,xCoord),
                                   GeoCoord(upper,xCoord),
                                   intersection)) {
-            intersections.insert(intersection);
+            intersections.push_back(intersection);
           }
         }
       }
@@ -96,13 +102,18 @@ constexpr bool debugGroundTiles = false;
                                   GeoCoord(yCoord,lower),
                                   GeoCoord(yCoord,upper),
                                   intersection)) {
-            intersections.insert(intersection);
+            intersections.push_back(intersection);
           }
         }
       }
     }
 
-    return intersections;
+    // One entry per crossing, in ascending order (the order the previous std::set iteration gave)
+    std::sort(intersections.begin(),
+              intersections.end());
+    intersections.erase(std::unique(intersections.begin(),
+                                    intersections.end()),
+                        intersections.end());
   }
 
   /**
@@ -399,11 +410,12 @@ constexpr bool debugGroundTiles = false;
                                          const std::vector<Point>& nodes)
   {
     LabelStyleRef      labelStyle=style->GetShieldStyle();
-    std::set<GeoCoord> gridPoints=GetGridPoints(nodes,
-                                                shieldGridSizeHoriz,
-                                                shieldGridSizeVert);
+    GetGridPoints(nodes,
+                  shieldGridSizeHoriz,
+                  shieldGridSizeVert,
+                  shieldGridPoints);
 
-    if (gridPoints.empty()) {
+    if (shieldGridPoints.empty()) {
       return;
     }
 
@@ -417,7 +429,7 @@ constexpr bool debugGroundTiles = false;
 
     std::vector<LabelData> labelData= {labelBox};
 
-    for (const auto& gridPoint : gridPoints) {
+    for (const auto& gridPoint : shieldGridPoints) {
       Vertex2D pixel;
 
       projection.GeoToPixel(gridPoint,
@@ -463,7 +475,7 @@ constexpr bool debugGroundTiles = false;
                                      const ScreenBox& objectBox,
                                      double objectReachPixel)
   {
-    std::vector<LabelData> labelLayoutData;
+    labelLayoutData.clear();
 
     if (iconStyle) {
       if (!iconStyle->GetIconName().empty() &&
@@ -737,7 +749,9 @@ constexpr bool debugGroundTiles = false;
     }
 
     // TODO: use coordBuffer for label path
-    LabelPath labelPath;
+    LabelPath &labelPath=contourLabelPath;
+
+    labelPath.Clear();
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
       labelPath.AddPoint(
@@ -1115,7 +1129,9 @@ constexpr bool debugGroundTiles = false;
     labelData.contourLabelSpace=contourLabelSpace;
 
     // TODO: use coordBuffer for label path
-    LabelPath labelPath;
+    LabelPath &labelPath=contourLabelPath;
+
+    labelPath.Clear();
 
     for (size_t j=range.GetStart(); j<=range.GetEnd(); ++j) {
       labelPath.AddPoint(range.Get(j));

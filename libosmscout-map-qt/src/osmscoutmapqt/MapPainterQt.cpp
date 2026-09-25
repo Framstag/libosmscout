@@ -1081,6 +1081,21 @@ namespace osmscout {
 
     this->painter=painter;
 
+    // Qt measures with the font metrics of the painter device, so the state of the device is
+    // part of the measurement environment of the label layouter
+    std::string measurementEnvironment=BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                   parameter.GetFontSize(),
+                                                                   projection.GetDPI(),
+                                                                   projection.GetMagnification().GetLevel());
+
+    if (painter!=nullptr && painter->device()!=nullptr) {
+      measurementEnvironment+=";deviceDpi="+std::to_string(painter->device()->logicalDpiX())+","+
+                              std::to_string(painter->device()->logicalDpiY())+
+                               ";devicePixelRatio="+std::to_string(painter->device()->devicePixelRatioF());
+    }
+
+    labelLayouter.SetMeasurementEnvironment(measurementEnvironment);
+
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
 
